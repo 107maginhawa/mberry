@@ -1,37 +1,44 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { CreateCourseBody } from '@/generated/openapi/validators';
+import { CourseRepository } from './repos/training.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * createCourse
- * 
+ *
  * Path: POST /association/training/courses
  * OperationId: createCourse
  */
 export async function createCourse(
   ctx: ValidatedContext<CreateCourseBody, never, never>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('createCourse', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new CourseRepository(db, logger);
+
+  const course = await repo.createOne({
+    tenantId,
+    organizationId: (body as any).organizationId || ctx.get('orgId') || tenantId,
+    title: (body as any).title,
+    description: (body as any).description,
+    creditAmount: (body as any).creditAmount,
+    status: 'draft',
+  });
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'course',
+    resourceId: course.id,
+    description: 'Course created',
+  });
+
+  return ctx.json(course, 201);
 }

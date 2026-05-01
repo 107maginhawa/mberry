@@ -1,37 +1,38 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { SearchTrainingEnrollmentsQuery } from '@/generated/openapi/validators';
+import { TrainingEnrollmentRepository } from './repos/training.repo';
 
 /**
  * searchTrainingEnrollments
- * 
+ *
  * Path: GET /association/training/enrollments
  * OperationId: searchTrainingEnrollments
  */
 export async function searchTrainingEnrollments(
   ctx: ValidatedContext<never, SearchTrainingEnrollmentsQuery, never>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  
-  // Extract validated query parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('searchTrainingEnrollments', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new TrainingEnrollmentRepository(db, logger);
+
+  const limit = Number((query as any)?.limit) || 20;
+  const offset = Number((query as any)?.offset) || 0;
+
+  const filters: any = { tenantId };
+  if ((query as any)?.trainingId) filters.trainingId = (query as any).trainingId;
+  if ((query as any)?.personId) filters.personId = (query as any).personId;
+  if ((query as any)?.status) filters.status = (query as any).status;
+
+  const results = await repo.findMany(filters, { pagination: { limit, offset } });
+  const totalCount = await repo.count(filters);
+
+  return ctx.json({ data: results, totalCount, limit, offset }, 200);
 }

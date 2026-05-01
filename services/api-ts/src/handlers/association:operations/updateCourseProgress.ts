@@ -1,38 +1,53 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCourseProgressBody, UpdateCourseProgressParams } from '@/generated/openapi/validators';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { CourseEnrollmentRepository } from './repos/training.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updateCourseProgress
- * 
+ *
  * Path: POST /association/training/courses/enrollments/{enrollmentId}/progress
  * OperationId: updateCourseProgress
  */
 export async function updateCourseProgress(
   ctx: ValidatedContext<UpdateCourseProgressBody, never, UpdateCourseProgressParams>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('updateCourseProgress', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new CourseEnrollmentRepository(db, logger);
+
+  const enrollment = await repo.findOneById((params as any).enrollmentId);
+  if (!enrollment) throw new NotFoundError('Course enrollment not found');
+
+  if (enrollment.status !== 'enrolled') {
+    throw new BusinessLogicError('Progress can only be updated for enrolled enrollments', 'INVALID_STATUS');
+  }
+
+  const progress = (body as any).progress;
+  const updates: any = { progress };
+
+  // Auto-complete when progress reaches 100%
+  if (progress >= 100) {
+    updates.completedAt = new Date();
+    updates.status = 'completed';
+    updates.progress = 100;
+  }
+
+  const updated = await repo.updateOneById(enrollment.id, updates);
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'course-enrollment',
+    resourceId: updated.id,
+    description: `Course progress updated to ${updates.progress}%`,
+  });
+
+  return ctx.json(updated, 200);
 }

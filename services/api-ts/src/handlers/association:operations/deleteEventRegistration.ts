@@ -1,37 +1,38 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { DeleteEventRegistrationParams } from '@/generated/openapi/validators';
+import { NotFoundError } from '@/core/errors';
+import { EventRegistrationRepository } from './repos/events.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * deleteEventRegistration
- * 
+ *
  * Path: DELETE /association/events/registrations/{registrationId}
  * OperationId: deleteEventRegistration
  */
 export async function deleteEventRegistration(
   ctx: ValidatedContext<never, never, DeleteEventRegistrationParams>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('deleteEventRegistration', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new EventRegistrationRepository(db, logger);
+
+  const existing = await repo.findOneById((params as any).registrationId);
+  if (!existing) throw new NotFoundError('Event registration not found');
+
+  await repo.deleteOneById((params as any).registrationId, user.id);
+
+  await auditAction(ctx, {
+    action: 'delete',
+    resourceType: 'event-registration',
+    resourceId: (params as any).registrationId,
+    description: 'Event registration deleted',
+  });
+
+  return ctx.json({ success: true }, 200);
 }

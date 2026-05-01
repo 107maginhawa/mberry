@@ -1,38 +1,39 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCourseEnrollmentBody, UpdateCourseEnrollmentParams } from '@/generated/openapi/validators';
+import { NotFoundError } from '@/core/errors';
+import { CourseEnrollmentRepository } from './repos/training.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updateCourseEnrollment
- * 
+ *
  * Path: PATCH /association/training/courses/enrollments/{enrollmentId}
  * OperationId: updateCourseEnrollment
  */
 export async function updateCourseEnrollment(
   ctx: ValidatedContext<UpdateCourseEnrollmentBody, never, UpdateCourseEnrollmentParams>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('updateCourseEnrollment', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new CourseEnrollmentRepository(db, logger);
+
+  const existing = await repo.findOneById((params as any).enrollmentId);
+  if (!existing) throw new NotFoundError('Course enrollment not found');
+
+  const updated = await repo.updateOneById((params as any).enrollmentId, body as any);
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'course-enrollment',
+    resourceId: updated.id,
+    description: 'Course enrollment updated',
+  });
+
+  return ctx.json(updated, 200);
 }

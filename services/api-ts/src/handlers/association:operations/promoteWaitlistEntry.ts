@@ -1,37 +1,54 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { PromoteWaitlistEntryParams } from '@/generated/openapi/validators';
+import { NotFoundError } from '@/core/errors';
+import { WaitlistEntryRepository, EventRegistrationRepository } from './repos/events.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * promoteWaitlistEntry
- * 
+ *
  * Path: POST /association/events/{eventId}/waitlist/{entryId}/promote
  * OperationId: promoteWaitlistEntry
+ *
+ * Moves a waitlisted person to confirmed by creating a registration.
  */
 export async function promoteWaitlistEntry(
   ctx: ValidatedContext<never, never, PromoteWaitlistEntryParams>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('promoteWaitlistEntry', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+
+  const waitlistRepo = new WaitlistEntryRepository(db, logger);
+  const regRepo = new EventRegistrationRepository(db, logger);
+
+  const entry = await waitlistRepo.findOneById((params as any).entryId);
+  if (!entry) throw new NotFoundError('Waitlist entry not found');
+
+  // Mark waitlist entry as promoted
+  await waitlistRepo.updateOneById(entry.id, { promotedAt: new Date() } as any);
+
+  // Create confirmed registration
+  const registration = await regRepo.createOne({
+    tenantId,
+    eventId: entry.eventId,
+    personId: entry.personId,
+    status: 'confirmed',
+  });
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'waitlist-entry',
+    resourceId: entry.id,
+    description: 'Waitlist entry promoted to confirmed registration',
+  });
+
+  return ctx.json(registration, 201);
 }

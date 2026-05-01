@@ -1,37 +1,28 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { GetCourseEnrollmentParams } from '@/generated/openapi/validators';
+import { NotFoundError } from '@/core/errors';
+import { CourseEnrollmentRepository } from './repos/training.repo';
 
 /**
  * getCourseEnrollment
- * 
+ *
  * Path: GET /association/training/courses/enrollments/{enrollmentId}
  * OperationId: getCourseEnrollment
  */
 export async function getCourseEnrollment(
   ctx: ValidatedContext<never, never, GetCourseEnrollmentParams>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('getCourseEnrollment', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new CourseEnrollmentRepository(db, logger);
+
+  const enrollment = await repo.findOneById((params as any).enrollmentId);
+  if (!enrollment) throw new NotFoundError('Course enrollment not found');
+
+  return ctx.json(enrollment, 200);
 }

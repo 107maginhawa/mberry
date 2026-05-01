@@ -1,38 +1,46 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdateEventBody, UpdateEventParams } from '@/generated/openapi/validators';
+import { NotFoundError } from '@/core/errors';
+import { EventRepository } from './repos/events.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updateEvent
- * 
+ *
  * Path: PATCH /association/events/{eventId}
  * OperationId: updateEvent
  */
 export async function updateEvent(
   ctx: ValidatedContext<UpdateEventBody, never, UpdateEventParams>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('updateEvent', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new EventRepository(db, logger);
+
+  const existing = await repo.findOneById((params as any).eventId);
+  if (!existing) throw new NotFoundError('Event not found');
+
+  const updates: any = { ...body };
+  if (updates.startDate) updates.startDate = new Date(updates.startDate);
+  if (updates.endDate) updates.endDate = new Date(updates.endDate);
+
+  const updated = await repo.updateOneById((params as any).eventId, updates);
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'event',
+    resourceId: updated.id,
+    description: 'Event updated',
+  });
+
+  return ctx.json(updated, 200);
 }
