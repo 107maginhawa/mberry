@@ -1,41 +1,56 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { ListProfessionalLicensesQuery } from '@/generated/openapi/validators';
+import { ProfessionalLicenseRepository } from './repos/credits.repo';
 
 /**
  * listProfessionalLicenses
- * 
+ *
  * Path: GET /association/member/licenses
  * OperationId: listProfessionalLicenses
  */
 export async function listProfessionalLicenses(
   ctx: ValidatedContext<never, ListProfessionalLicensesQuery, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  // Extract validated query parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('listProfessionalLicenses', 'Wave 3');
+  const offset = Number(query.offset) || 0;
+  const limit = Math.min(Number(query.limit) || 20, 100);
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new ProfessionalLicenseRepository(db, logger);
+
+  const result = await repo.findManyWithPagination(
+    {
+      tenantId,
+      personId: query.personId,
+      licenseType: query.licenseType,
+      status: query.status,
+      jurisdiction: query.jurisdiction,
+    },
+    { pagination: { offset, limit } },
+  );
+
+  const totalPages = Math.ceil(result.totalCount / limit);
+  const currentPage = Math.floor(offset / limit) + 1;
+
+  return ctx.json({
+    data: result.data,
+    pagination: {
+      offset,
+      limit,
+      count: result.data.length,
+      totalCount: result.totalCount,
+      totalPages,
+      currentPage,
+      hasNextPage: currentPage < totalPages,
+      hasPreviousPage: currentPage > 1,
+    },
+  }, 200);
 }

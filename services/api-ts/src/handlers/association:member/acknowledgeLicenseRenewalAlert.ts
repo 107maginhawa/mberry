@@ -1,47 +1,47 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { NotFoundError, ConflictError } from '@/core/errors';
 import type { AcknowledgeLicenseRenewalAlertParams } from '@/generated/openapi/validators';
+import { LicenseRenewalAlertRepository } from './repos/credits.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * acknowledgeLicenseRenewalAlert
- * 
+ *
  * Path: POST /association/member/license-renewal-alerts/{alertId}/acknowledge
  * OperationId: acknowledgeLicenseRenewalAlert
  */
 export async function acknowledgeLicenseRenewalAlert(
   ctx: ValidatedContext<never, never, AcknowledgeLicenseRenewalAlertParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  const { alertId } = ctx.req.valid('param');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new LicenseRenewalAlertRepository(db, logger);
+
+  const existing = await repo.findOneById(alertId);
+  if (!existing) throw new NotFoundError('LicenseRenewalAlert');
+
+  if (existing.status === 'acknowledged') {
+    throw new ConflictError('Alert already acknowledged');
   }
-  // Note: This endpoint requires ownership validation for 'association:member:owner'
-  // Check that the authenticated user owns the requested resource
-  // Example:
-  // if (session.user.role === 'patient' && params.patientId !== session.user.id) {
-  //   throw new ForbiddenError('You can only access your own resources');
-  // }
-  
-  // Extract validated parameters
-  const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('acknowledgeLicenseRenewalAlert', 'Wave 3');
+
+  const updated = await repo.updateOneById(alertId, {
+    status: 'acknowledged',
+  } as any);
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'license-renewal-alert',
+    resourceId: alertId,
+    description: 'License renewal alert acknowledged',
+  });
+
+  return ctx.json(updated, 200);
 }
