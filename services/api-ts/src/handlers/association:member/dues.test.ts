@@ -137,3 +137,70 @@ describe('Aging Buckets', () => {
     }
   });
 });
+
+// -- Payment Processing Tests --
+
+describe('recordManualPayment', () => {
+  test('requires auth', async () => {
+    const { recordManualPayment } = await import('./recordManualPayment');
+    const ctx = makeCtx({ user: null });
+    const response = await recordManualPayment(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  test('requires tenantId', async () => {
+    const { recordManualPayment } = await import('./recordManualPayment');
+    const ctx = makeCtx({ user: { id: 'u1' }, tenantId: null });
+    const response = await recordManualPayment(ctx);
+    expect(response.status).toBe(403);
+  });
+});
+
+describe('handlePaymentWebhook', () => {
+  test('returns 400 for invalid signature', async () => {
+    const { handlePaymentWebhook } = await import('./handlePaymentWebhook');
+    const ctx = makeCtx({
+      user: null, // No auth needed for webhooks
+    });
+    // Override req to support text() and header()
+    ctx.req = {
+      ...ctx.req,
+      text: async () => '{"data":{}}',
+      header: (name: string) => name === 'paymongo-signature' ? 'invalid' : null,
+    };
+    // Need env vars for this test
+    const originalSecret = process.env['PAYMONGO_SECRET_KEY'];
+    const originalWebhook = process.env['PAYMONGO_WEBHOOK_SECRET'];
+    process.env['PAYMONGO_SECRET_KEY'] = 'sk_test';
+    process.env['PAYMONGO_WEBHOOK_SECRET'] = 'whsec_test';
+
+    const response = await handlePaymentWebhook(ctx);
+    expect(response.status).toBe(400);
+
+    // Restore
+    if (originalSecret) process.env['PAYMONGO_SECRET_KEY'] = originalSecret;
+    else delete process.env['PAYMONGO_SECRET_KEY'];
+    if (originalWebhook) process.env['PAYMONGO_WEBHOOK_SECRET'] = originalWebhook;
+    else delete process.env['PAYMONGO_WEBHOOK_SECRET'];
+  });
+
+  test('returns 503 when gateway not configured', async () => {
+    const { handlePaymentWebhook } = await import('./handlePaymentWebhook');
+    const ctx = makeCtx({ user: null });
+    ctx.req = {
+      ...ctx.req,
+      text: async () => '{}',
+      header: () => '',
+    };
+    const orig1 = process.env['PAYMONGO_SECRET_KEY'];
+    const orig2 = process.env['PAYMONGO_WEBHOOK_SECRET'];
+    delete process.env['PAYMONGO_SECRET_KEY'];
+    delete process.env['PAYMONGO_WEBHOOK_SECRET'];
+
+    const response = await handlePaymentWebhook(ctx);
+    expect(response.status).toBe(503);
+
+    if (orig1) process.env['PAYMONGO_SECRET_KEY'] = orig1;
+    if (orig2) process.env['PAYMONGO_WEBHOOK_SECRET'] = orig2;
+  });
+});
