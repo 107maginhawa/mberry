@@ -1,41 +1,33 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { GetMessageParams } from '@/generated/openapi/validators';
+import { NotFoundError } from '@/core/errors';
+import { MessageRepository } from './repos/communication.repo';
 
 /**
  * getMessage
- * 
+ *
  * Path: GET /association/messages/{messageId}
  * OperationId: getMessage
  */
 export async function getMessage(
   ctx: ValidatedContext<never, never, GetMessageParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('getMessage', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MessageRepository(db, logger);
+
+  const message = await repo.findById(params.messageId);
+  if (!message || message.tenantId !== tenantId) {
+    throw new NotFoundError('Message not found');
+  }
+
+  return ctx.json(message, 200);
 }

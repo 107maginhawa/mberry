@@ -1,42 +1,59 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { ScheduleMessageBody, ScheduleMessageParams } from '@/generated/openapi/validators';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { MessageRepository } from './repos/communication.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * scheduleMessage
- * 
+ *
  * Path: POST /association/messages/{messageId}/schedule
  * OperationId: scheduleMessage
+ *
+ * Sets scheduledAt from body and transitions status to 'scheduled'.
  */
 export async function scheduleMessage(
   ctx: ValidatedContext<ScheduleMessageBody, never, ScheduleMessageParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('scheduleMessage', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MessageRepository(db, logger);
+
+  const existing = await repo.findById(params.messageId);
+  if (!existing || existing.tenantId !== tenantId) {
+    throw new NotFoundError('Message not found');
+  }
+
+  if (existing.status !== 'draft') {
+    throw new BusinessLogicError(
+      `Cannot schedule a message with status "${existing.status}". Only draft messages can be scheduled.`,
+      'MESSAGE_CANNOT_SCHEDULE'
+    );
+  }
+
+  const scheduledAt = new Date(body.scheduledAt as unknown as string);
+
+  const updated = await repo.update(params.messageId, {
+    scheduledAt,
+    status: 'scheduled',
+    updatedBy: user.id,
+  });
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'message',
+    resourceId: params.messageId,
+    description: `Message scheduled for ${scheduledAt.toISOString()}`,
+  });
+
+  return ctx.json(updated, 200);
 }

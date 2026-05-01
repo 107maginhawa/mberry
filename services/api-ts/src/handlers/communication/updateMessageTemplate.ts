@@ -1,42 +1,47 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdateMessageTemplateBody, UpdateMessageTemplateParams } from '@/generated/openapi/validators';
+import { NotFoundError } from '@/core/errors';
+import { MessageTemplateRepository } from './repos/communication.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updateMessageTemplate
- * 
+ *
  * Path: PATCH /association/message-templates/{templateId}
  * OperationId: updateMessageTemplate
  */
 export async function updateMessageTemplate(
   ctx: ValidatedContext<UpdateMessageTemplateBody, never, UpdateMessageTemplateParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('updateMessageTemplate', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MessageTemplateRepository(db, logger);
+
+  const existing = await repo.findById(params.templateId);
+  if (!existing || existing.tenantId !== tenantId) {
+    throw new NotFoundError('Message template not found');
+  }
+
+  const updated = await repo.update(params.templateId, {
+    ...body,
+    updatedBy: user.id,
+  });
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'message-template',
+    resourceId: params.templateId,
+    description: `Message template "${existing.name}" updated`,
+  });
+
+  return ctx.json(updated, 200);
 }

@@ -1,41 +1,39 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { SearchMessagesQuery } from '@/generated/openapi/validators';
+import { MessageRepository } from './repos/communication.repo';
 
 /**
  * searchMessages
- * 
+ *
  * Path: GET /association/messages
  * OperationId: searchMessages
  */
 export async function searchMessages(
   ctx: ValidatedContext<never, SearchMessagesQuery, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  // Extract validated query parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('searchMessages', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MessageRepository(db, logger);
+
+  const limit = query.limit ?? query.pageSize ?? 20;
+  const offset = query.offset ?? (query.page ? (query.page - 1) * limit : 0);
+
+  const items = await repo.search(tenantId, {
+    channel: query.channel,
+    senderId: query.senderId,
+    status: query.status,
+    scheduledAfter: query.scheduledAfter ? new Date(query.scheduledAfter as unknown as string) : undefined,
+    limit,
+    offset,
+  });
+
+  return ctx.json({ items, total: items.length, offset, limit }, 200);
 }

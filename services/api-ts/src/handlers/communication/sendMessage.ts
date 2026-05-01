@@ -1,41 +1,63 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { SendMessageParams } from '@/generated/openapi/validators';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { MessageRepository } from './repos/communication.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * sendMessage
- * 
+ *
  * Path: POST /association/messages/{messageId}/send
  * OperationId: sendMessage
+ *
+ * Transitions message to 'sending', sets sentAt, then marks as 'sent'.
  */
 export async function sendMessage(
   ctx: ValidatedContext<never, never, SendMessageParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('sendMessage', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MessageRepository(db, logger);
+
+  const existing = await repo.findById(params.messageId);
+  if (!existing || existing.tenantId !== tenantId) {
+    throw new NotFoundError('Message not found');
+  }
+
+  if (existing.status !== 'draft' && existing.status !== 'scheduled') {
+    throw new BusinessLogicError(
+      `Cannot send a message with status "${existing.status}". Only draft or scheduled messages can be sent.`,
+      'MESSAGE_CANNOT_SEND'
+    );
+  }
+
+  // Transition to 'sending'
+  await repo.update(params.messageId, {
+    status: 'sending',
+    updatedBy: user.id,
+  });
+
+  // Mark as 'sent' with sentAt timestamp
+  const updated = await repo.update(params.messageId, {
+    status: 'sent',
+    sentAt: new Date(),
+    updatedBy: user.id,
+  });
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'message',
+    resourceId: params.messageId,
+    description: 'Message sent',
+  });
+
+  return ctx.json(updated, 200);
 }

@@ -1,41 +1,45 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { CreateSubscriptionTopicBody } from '@/generated/openapi/validators';
+import { SubscriptionTopicRepository } from './repos/communication.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * createSubscriptionTopic
- * 
+ *
  * Path: POST /association/subscription-topics
  * OperationId: createSubscriptionTopic
  */
 export async function createSubscriptionTopic(
   ctx: ValidatedContext<CreateSubscriptionTopicBody, never, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('createSubscriptionTopic', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new SubscriptionTopicRepository(db, logger);
+
+  const topic = await repo.create({
+    tenantId,
+    name: body.name,
+    description: body.description ?? null,
+    channel: body.channel,
+    category: body.category,
+    defaultEnabled: body.defaultEnabled,
+    createdBy: user.id,
+  });
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'subscription-topic',
+    resourceId: topic.id,
+    description: `Subscription topic "${body.name}" created`,
+  });
+
+  return ctx.json(topic, 201);
 }

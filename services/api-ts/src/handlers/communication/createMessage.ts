@@ -1,41 +1,63 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { CreateMessageBody } from '@/generated/openapi/validators';
+import type { MessageRecipient } from './repos/communication.schema';
+import { MessageRepository } from './repos/communication.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * createMessage
- * 
+ *
  * Path: POST /association/messages
  * OperationId: createMessage
+ *
+ * BR-28 deduplication: skips recipients who already received the same
+ * channel message today (does not fail the whole message).
  */
 export async function createMessage(
   ctx: ValidatedContext<CreateMessageBody, never, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('createMessage', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MessageRepository(db, logger);
+
+  // BR-28: deduplicate recipients who already received same channel today
+  const dedupedRecipients: MessageRecipient[] = [];
+  for (const personId of body.recipientPersonIds) {
+    const dup = await repo.findDuplicateSentToday(tenantId, body.channel, personId);
+    if (dup) {
+      logger?.info({ personId, channel: body.channel }, 'BR-28: skipping duplicate recipient');
+      continue;
+    }
+    dedupedRecipients.push({ personId, deliveryStatus: 'pending' });
+  }
+
+  const message = await repo.create({
+    tenantId,
+    templateId: body.templateId ?? null,
+    channel: body.channel,
+    senderId: body.senderId,
+    recipients: dedupedRecipients,
+    subject: body.subject ?? null,
+    body: body.body,
+    scheduledAt: body.scheduledAt ? new Date(body.scheduledAt as unknown as string) : null,
+    status: body.scheduledAt ? 'scheduled' : 'draft',
+    createdBy: user.id,
+  });
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'message',
+    resourceId: message.id,
+    description: `Message created (${dedupedRecipients.length} recipients, ${body.recipientPersonIds.length - dedupedRecipients.length} deduplicated)`,
+  });
+
+  return ctx.json(message, 201);
 }

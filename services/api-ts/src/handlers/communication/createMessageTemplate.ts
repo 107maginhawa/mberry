@@ -1,41 +1,48 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { CreateMessageTemplateBody } from '@/generated/openapi/validators';
+import { MessageTemplateRepository } from './repos/communication.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * createMessageTemplate
- * 
+ *
  * Path: POST /association/message-templates
  * OperationId: createMessageTemplate
  */
 export async function createMessageTemplate(
   ctx: ValidatedContext<CreateMessageTemplateBody, never, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('createMessageTemplate', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MessageTemplateRepository(db, logger);
+
+  const template = await repo.create({
+    tenantId,
+    name: body.name,
+    channel: body.channel,
+    subject: body.subject ?? null,
+    body: body.body,
+    mergeFields: body.mergeFields,
+    category: body.category,
+    isTransactional: body.isTransactional,
+    status: 'draft',
+    createdBy: user.id,
+  });
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'message-template',
+    resourceId: template.id,
+    description: `Message template "${body.name}" created`,
+  });
+
+  return ctx.json(template, 201);
 }

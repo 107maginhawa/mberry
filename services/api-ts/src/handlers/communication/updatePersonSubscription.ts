@@ -1,48 +1,47 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdatePersonSubscriptionBody, UpdatePersonSubscriptionParams } from '@/generated/openapi/validators';
+import { NotFoundError } from '@/core/errors';
+import { PersonSubscriptionRepository } from './repos/communication.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updatePersonSubscription
- * 
+ *
  * Path: PATCH /association/person-subscriptions/{subscriptionId}
  * OperationId: updatePersonSubscription
  */
 export async function updatePersonSubscription(
   ctx: ValidatedContext<UpdatePersonSubscriptionBody, never, UpdatePersonSubscriptionParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  // Note: This endpoint requires ownership validation for 'member:owner'
-  // Check that the authenticated user owns the requested resource
-  // Example:
-  // if (session.user.role === 'patient' && params.patientId !== session.user.id) {
-  //   throw new ForbiddenError('You can only access your own resources');
-  // }
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('updatePersonSubscription', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new PersonSubscriptionRepository(db, logger);
+
+  const existing = await repo.findById(params.subscriptionId);
+  if (!existing || existing.tenantId !== tenantId) {
+    throw new NotFoundError('Person subscription not found');
+  }
+
+  const updated = await repo.update(params.subscriptionId, {
+    enabled: body.enabled,
+    updatedBy: user.id,
+  });
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'person-subscription',
+    resourceId: params.subscriptionId,
+    description: `Person subscription updated (enabled=${body.enabled})`,
+  });
+
+  return ctx.json(updated, 200);
 }
