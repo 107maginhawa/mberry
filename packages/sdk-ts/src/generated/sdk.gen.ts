@@ -2,8 +2,8 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import { cancelBookingResponseTransformer, cancelEmailQueueItemResponseTransformer, captureInvoicePaymentResponseTransformer, completeFileUploadResponseTransformer, confirmBookingResponseTransformer, createBookingEventResponseTransformer, createBookingResponseTransformer, createChatRoomResponseTransformer, createEmailTemplateResponseTransformer, createInvoiceResponseTransformer, createMerchantAccountResponseTransformer, createPersonResponseTransformer, createReviewResponseTransformer, createScheduleExceptionResponseTransformer, finalizeInvoiceResponseTransformer, getBookingEventResponseTransformer, getBookingResponseTransformer, getChatMessagesResponseTransformer, getChatRoomResponseTransformer, getEmailQueueItemResponseTransformer, getEmailTemplateResponseTransformer, getFileDownloadResponseTransformer, getFileResponseTransformer, getInvoiceResponseTransformer, getMerchantAccountResponseTransformer, getMerchantDashboardResponseTransformer, getNotificationResponseTransformer, getPersonResponseTransformer, getReviewResponseTransformer, getScheduleExceptionResponseTransformer, getTimeSlotResponseTransformer, joinVideoCallResponseTransformer, listAuditLogsResponseTransformer, listBookingEventsResponseTransformer, listBookingsResponseTransformer, listChatRoomsResponseTransformer, listEmailQueueItemsResponseTransformer, listEmailTemplatesResponseTransformer, listEventSlotsResponseTransformer, listFilesResponseTransformer, listInvoicesResponseTransformer, listNotificationsResponseTransformer, listPersonsResponseTransformer, listReviewsResponseTransformer, listScheduleExceptionsResponseTransformer, markInvoiceUncollectibleResponseTransformer, markNoShowBookingResponseTransformer, markNotificationAsReadResponseTransformer, rejectBookingResponseTransformer, retryEmailQueueItemResponseTransformer, sendChatMessageResponseTransformer, testEmailTemplateResponseTransformer, updateBookingEventResponseTransformer, updateEmailTemplateResponseTransformer, updateInvoiceResponseTransformer, updatePersonResponseTransformer, updateVideoCallParticipantResponseTransformer, uploadFileResponseTransformer, voidInvoiceResponseTransformer } from './transformers.gen';
-import type { CancelBookingData, CancelBookingErrors, CancelBookingResponses, CancelEmailQueueItemData, CancelEmailQueueItemErrors, CancelEmailQueueItemResponses, CaptureInvoicePaymentData, CaptureInvoicePaymentErrors, CaptureInvoicePaymentResponses, CompleteFileUploadData, CompleteFileUploadErrors, CompleteFileUploadResponses, ConfirmBookingData, ConfirmBookingErrors, ConfirmBookingResponses, CreateBookingData, CreateBookingErrors, CreateBookingEventData, CreateBookingEventErrors, CreateBookingEventResponses, CreateBookingResponses, CreateChatRoomData, CreateChatRoomErrors, CreateChatRoomResponses, CreateEmailTemplateData, CreateEmailTemplateErrors, CreateEmailTemplateResponses, CreateInvoiceData, CreateInvoiceErrors, CreateInvoiceResponses, CreateMerchantAccountData, CreateMerchantAccountErrors, CreateMerchantAccountResponses, CreatePersonData, CreatePersonErrors, CreatePersonResponses, CreateReviewData, CreateReviewErrors, CreateReviewResponses, CreateScheduleExceptionData, CreateScheduleExceptionErrors, CreateScheduleExceptionResponses, DeleteBookingEventData, DeleteBookingEventErrors, DeleteBookingEventResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteInvoiceData, DeleteInvoiceErrors, DeleteInvoiceResponses, DeleteReviewData, DeleteReviewErrors, DeleteReviewResponses, DeleteScheduleExceptionData, DeleteScheduleExceptionErrors, DeleteScheduleExceptionResponses, EndVideoCallData, EndVideoCallErrors, EndVideoCallResponses, FinalizeInvoiceData, FinalizeInvoiceErrors, FinalizeInvoiceResponses, GetBookingData, GetBookingErrors, GetBookingEventData, GetBookingEventErrors, GetBookingEventResponses, GetBookingResponses, GetChatMessagesData, GetChatMessagesErrors, GetChatMessagesResponses, GetChatRoomData, GetChatRoomErrors, GetChatRoomResponses, GetEmailQueueItemData, GetEmailQueueItemErrors, GetEmailQueueItemResponses, GetEmailTemplateData, GetEmailTemplateErrors, GetEmailTemplateResponses, GetFileData, GetFileDownloadData, GetFileDownloadErrors, GetFileDownloadResponses, GetFileErrors, GetFileResponses, GetIceServersData, GetIceServersErrors, GetIceServersResponses, GetInvoiceData, GetInvoiceErrors, GetInvoiceResponses, GetMerchantAccountData, GetMerchantAccountErrors, GetMerchantAccountResponses, GetMerchantDashboardData, GetMerchantDashboardErrors, GetMerchantDashboardResponses, GetNotificationData, GetNotificationErrors, GetNotificationResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetReviewData, GetReviewErrors, GetReviewResponses, GetScheduleExceptionData, GetScheduleExceptionErrors, GetScheduleExceptionResponses, GetTimeSlotData, GetTimeSlotErrors, GetTimeSlotResponses, HandleStripeWebhookData, HandleStripeWebhookErrors, HandleStripeWebhookResponses, JoinVideoCallData, JoinVideoCallErrors, JoinVideoCallResponses, LeaveVideoCallData, LeaveVideoCallErrors, LeaveVideoCallResponses, ListAuditLogsData, ListAuditLogsErrors, ListAuditLogsResponses, ListBookingEventsData, ListBookingEventsErrors, ListBookingEventsResponses, ListBookingsData, ListBookingsErrors, ListBookingsResponses, ListChatRoomsData, ListChatRoomsErrors, ListChatRoomsResponses, ListEmailQueueItemsData, ListEmailQueueItemsErrors, ListEmailQueueItemsResponses, ListEmailTemplatesData, ListEmailTemplatesErrors, ListEmailTemplatesResponses, ListEventSlotsData, ListEventSlotsErrors, ListEventSlotsResponses, ListFilesData, ListFilesErrors, ListFilesResponses, ListInvoicesData, ListInvoicesErrors, ListInvoicesResponses, ListNotificationsData, ListNotificationsErrors, ListNotificationsResponses, ListPersonsData, ListPersonsErrors, ListPersonsResponses, ListReviewsData, ListReviewsErrors, ListReviewsResponses, ListScheduleExceptionsData, ListScheduleExceptionsErrors, ListScheduleExceptionsResponses, MarkAllNotificationsAsReadData, MarkAllNotificationsAsReadErrors, MarkAllNotificationsAsReadResponses, MarkInvoiceUncollectibleData, MarkInvoiceUncollectibleErrors, MarkInvoiceUncollectibleResponses, MarkNoShowBookingData, MarkNoShowBookingErrors, MarkNoShowBookingResponses, MarkNotificationAsReadData, MarkNotificationAsReadErrors, MarkNotificationAsReadResponses, OnboardMerchantAccountData, OnboardMerchantAccountErrors, OnboardMerchantAccountResponses, PayInvoiceData, PayInvoiceErrors, PayInvoiceResponses, RefundInvoicePaymentData, RefundInvoicePaymentErrors, RefundInvoicePaymentResponses, RejectBookingData, RejectBookingErrors, RejectBookingResponses, RetryEmailQueueItemData, RetryEmailQueueItemErrors, RetryEmailQueueItemResponses, SendChatMessageData, SendChatMessageErrors, SendChatMessageResponses, TestEmailTemplateData, TestEmailTemplateErrors, TestEmailTemplateResponses, UpdateBookingEventData, UpdateBookingEventErrors, UpdateBookingEventResponses, UpdateEmailTemplateData, UpdateEmailTemplateErrors, UpdateEmailTemplateResponses, UpdateInvoiceData, UpdateInvoiceErrors, UpdateInvoiceResponses, UpdatePersonData, UpdatePersonErrors, UpdatePersonResponses, UpdateVideoCallParticipantData, UpdateVideoCallParticipantErrors, UpdateVideoCallParticipantResponses, UploadFileData, UploadFileErrors, UploadFileResponses, VoidInvoiceData, VoidInvoiceErrors, VoidInvoiceResponses } from './types.gen';
+import { acknowledgeLicenseRenewalAlertResponseTransformer, allocateSeatResponseTransformer, approveMembershipApplicationResponseTransformer, approveTransferBySourceResponseTransformer, approveTransferByTargetResponseTransformer, archiveDocumentResponseTransformer, bulkUpdatePersonSubscriptionsResponseTransformer, cancelBookingResponseTransformer, cancelEmailQueueItemResponseTransformer, cancelEventRegistrationResponseTransformer, cancelEventResponseTransformer, cancelMessageResponseTransformer, captureInvoicePaymentResponseTransformer, completeAffiliationTransferResponseTransformer, completeFileUploadResponseTransformer, completeTrainingEnrollmentResponseTransformer, confirmBookingResponseTransformer, createAffiliationTransferResponseTransformer, createBookingEventResponseTransformer, createBookingResponseTransformer, createChapterAffiliationResponseTransformer, createChatRoomResponseTransformer, createCheckInResponseTransformer, createCourseEnrollmentResponseTransformer, createCourseResponseTransformer, createCredentialTemplateResponseTransformer, createDirectoryProfileResponseTransformer, createDocumentResponseTransformer, createDocumentTagResponseTransformer, createDuesConfigResponseTransformer, createDuesInvoiceResponseTransformer, createDunningTemplateResponseTransformer, createEmailTemplateResponseTransformer, createEventRegistrationResponseTransformer, createEventResponseTransformer, createInstitutionalMembershipResponseTransformer, createInvoiceResponseTransformer, createMembershipApplicationResponseTransformer, createMembershipTierResponseTransformer, createMerchantAccountResponseTransformer, createMessageResponseTransformer, createMessageTemplateResponseTransformer, createPersonResponseTransformer, createProfessionalLicenseResponseTransformer, createQuizAttemptResponseTransformer, createReviewResponseTransformer, createRoyaltySplitResponseTransformer, createScheduleExceptionResponseTransformer, createSubscriptionTopicResponseTransformer, createTrainingEnrollmentResponseTransformer, denyAffiliationTransferResponseTransformer, denyMembershipApplicationResponseTransformer, finalizeInvoiceResponseTransformer, generateDuesInvoicesForOrgResponseTransformer, getAffiliationTransferResponseTransformer, getAgingBucketResponseTransformer, getBookingEventResponseTransformer, getBookingResponseTransformer, getChapterAffiliationResponseTransformer, getChatMessagesResponseTransformer, getChatRoomResponseTransformer, getCourseEnrollmentResponseTransformer, getCourseResponseTransformer, getCredentialTemplateResponseTransformer, getDigitalCredentialResponseTransformer, getDirectoryProfileResponseTransformer, getDocumentAccessLogResponseTransformer, getDocumentResponseTransformer, getDocumentTagResponseTransformer, getDocumentVersionResponseTransformer, getDuesConfigResponseTransformer, getDuesInvoiceResponseTransformer, getDunningTemplateResponseTransformer, getEmailQueueItemResponseTransformer, getEmailTemplateResponseTransformer, getEventRegistrationResponseTransformer, getEventResponseTransformer, getFileDownloadResponseTransformer, getFileResponseTransformer, getInstitutionalMembershipResponseTransformer, getInvoiceResponseTransformer, getMembershipApplicationResponseTransformer, getMembershipTierResponseTransformer, getMerchantAccountResponseTransformer, getMerchantDashboardResponseTransformer, getMessageResponseTransformer, getMessageTemplateResponseTransformer, getNotificationResponseTransformer, getPersonResponseTransformer, getProfessionalLicenseResponseTransformer, getReviewResponseTransformer, getRoyaltySplitResponseTransformer, getScheduleExceptionResponseTransformer, getSubscriptionTopicResponseTransformer, getTimeSlotResponseTransformer, getTrainingEnrollmentResponseTransformer, issueDigitalCredentialResponseTransformer, joinVideoCallResponseTransformer, listAffiliationTransfersResponseTransformer, listAuditLogsResponseTransformer, listBookingEventsResponseTransformer, listBookingsResponseTransformer, listChapterAffiliationsResponseTransformer, listChatRoomsResponseTransformer, listCredentialTemplatesResponseTransformer, listDigitalCredentialsResponseTransformer, listDirectoryProfilesResponseTransformer, listDocumentTagsResponseTransformer, listDocumentVersionsResponseTransformer, listDuesConfigsResponseTransformer, listDuesInvoicesResponseTransformer, listDunningEventsResponseTransformer, listDunningTemplatesResponseTransformer, listEmailQueueItemsResponseTransformer, listEmailTemplatesResponseTransformer, listEventSlotsResponseTransformer, listFilesResponseTransformer, listInstitutionalMembershipsResponseTransformer, listInvoicesResponseTransformer, listLicenseRenewalAlertsResponseTransformer, listMembershipApplicationsResponseTransformer, listMembershipTiersResponseTransformer, listNotificationsResponseTransformer, listPersonsResponseTransformer, listPersonSubscriptionsResponseTransformer, listProfessionalLicensesResponseTransformer, listReviewsResponseTransformer, listRoyaltySplitsResponseTransformer, listScheduleExceptionsResponseTransformer, listSeatAllocationsResponseTransformer, listWaitlistEntriesResponseTransformer, markDuesInvoicePaidResponseTransformer, markInvoiceUncollectibleResponseTransformer, markNoShowBookingResponseTransformer, markNotificationAsReadResponseTransformer, promoteWaitlistEntryResponseTransformer, publishEventResponseTransformer, recalculateAgingBucketResponseTransformer, refundEventRegistrationResponseTransformer, rejectBookingResponseTransformer, retryEmailQueueItemResponseTransformer, revokeDigitalCredentialResponseTransformer, revokeSeatResponseTransformer, scheduleMessageResponseTransformer, searchCheckInsResponseTransformer, searchCourseEnrollmentsResponseTransformer, searchCoursesResponseTransformer, searchDirectoryResponseTransformer, searchDocumentsResponseTransformer, searchEventRegistrationsResponseTransformer, searchEventsResponseTransformer, searchMessagesResponseTransformer, searchMessageTemplatesResponseTransformer, searchQuizAttemptsResponseTransformer, searchTrainingEnrollmentsResponseTransformer, sendChatMessageResponseTransformer, sendMessageResponseTransformer, setPrimaryChapterAffiliationResponseTransformer, testEmailTemplateResponseTransformer, updateBookingEventResponseTransformer, updateChapterAffiliationResponseTransformer, updateCourseEnrollmentResponseTransformer, updateCourseProgressResponseTransformer, updateCourseResponseTransformer, updateCredentialTemplateResponseTransformer, updateDigitalCredentialResponseTransformer, updateDirectoryProfileResponseTransformer, updateDocumentResponseTransformer, updateDocumentTagResponseTransformer, updateDuesConfigResponseTransformer, updateDuesInvoiceResponseTransformer, updateDunningTemplateResponseTransformer, updateEmailTemplateResponseTransformer, updateEventRegistrationResponseTransformer, updateEventResponseTransformer, updateInstitutionalMembershipResponseTransformer, updateInvoiceResponseTransformer, updateMembershipApplicationResponseTransformer, updateMembershipTierResponseTransformer, updateMessageResponseTransformer, updateMessageTemplateResponseTransformer, updatePersonResponseTransformer, updatePersonSubscriptionResponseTransformer, updateProfessionalLicenseResponseTransformer, updateRoyaltySplitResponseTransformer, updateSubscriptionTopicResponseTransformer, updateTrainingEnrollmentResponseTransformer, updateVideoCallParticipantResponseTransformer, uploadFileResponseTransformer, uploadNewDocumentVersionResponseTransformer, verifyCredentialPublicResponseTransformer, verifyDigitalCredentialAuthenticatedResponseTransformer, voidInvoiceResponseTransformer } from './transformers.gen';
+import type { AcknowledgeLicenseRenewalAlertData, AcknowledgeLicenseRenewalAlertErrors, AcknowledgeLicenseRenewalAlertResponses, AllocateSeatData, AllocateSeatErrors, AllocateSeatResponses, ApproveMembershipApplicationData, ApproveMembershipApplicationErrors, ApproveMembershipApplicationResponses, ApproveTransferBySourceData, ApproveTransferBySourceErrors, ApproveTransferBySourceResponses, ApproveTransferByTargetData, ApproveTransferByTargetErrors, ApproveTransferByTargetResponses, ArchiveDocumentData, ArchiveDocumentErrors, ArchiveDocumentResponses, BulkUpdatePersonSubscriptionsData, BulkUpdatePersonSubscriptionsErrors, BulkUpdatePersonSubscriptionsResponses, CancelBookingData, CancelBookingErrors, CancelBookingResponses, CancelEmailQueueItemData, CancelEmailQueueItemErrors, CancelEmailQueueItemResponses, CancelEventData, CancelEventErrors, CancelEventRegistrationData, CancelEventRegistrationErrors, CancelEventRegistrationResponses, CancelEventResponses, CancelMessageData, CancelMessageErrors, CancelMessageResponses, CaptureInvoicePaymentData, CaptureInvoicePaymentErrors, CaptureInvoicePaymentResponses, CompleteAffiliationTransferData, CompleteAffiliationTransferErrors, CompleteAffiliationTransferResponses, CompleteFileUploadData, CompleteFileUploadErrors, CompleteFileUploadResponses, CompleteTrainingEnrollmentData, CompleteTrainingEnrollmentErrors, CompleteTrainingEnrollmentResponses, ConfirmBookingData, ConfirmBookingErrors, ConfirmBookingResponses, CreateAffiliationTransferData, CreateAffiliationTransferErrors, CreateAffiliationTransferResponses, CreateBookingData, CreateBookingErrors, CreateBookingEventData, CreateBookingEventErrors, CreateBookingEventResponses, CreateBookingResponses, CreateChapterAffiliationData, CreateChapterAffiliationErrors, CreateChapterAffiliationResponses, CreateChatRoomData, CreateChatRoomErrors, CreateChatRoomResponses, CreateCheckInData, CreateCheckInErrors, CreateCheckInResponses, CreateCourseData, CreateCourseEnrollmentData, CreateCourseEnrollmentErrors, CreateCourseEnrollmentResponses, CreateCourseErrors, CreateCourseResponses, CreateCredentialTemplateData, CreateCredentialTemplateErrors, CreateCredentialTemplateResponses, CreateDirectoryProfileData, CreateDirectoryProfileErrors, CreateDirectoryProfileResponses, CreateDocumentData, CreateDocumentErrors, CreateDocumentResponses, CreateDocumentTagData, CreateDocumentTagErrors, CreateDocumentTagResponses, CreateDuesConfigData, CreateDuesConfigErrors, CreateDuesConfigResponses, CreateDuesInvoiceData, CreateDuesInvoiceErrors, CreateDuesInvoiceResponses, CreateDunningTemplateData, CreateDunningTemplateErrors, CreateDunningTemplateResponses, CreateEmailTemplateData, CreateEmailTemplateErrors, CreateEmailTemplateResponses, CreateEventData, CreateEventErrors, CreateEventRegistrationData, CreateEventRegistrationErrors, CreateEventRegistrationResponses, CreateEventResponses, CreateInstitutionalMembershipData, CreateInstitutionalMembershipErrors, CreateInstitutionalMembershipResponses, CreateInvoiceData, CreateInvoiceErrors, CreateInvoiceResponses, CreateMembershipApplicationData, CreateMembershipApplicationErrors, CreateMembershipApplicationResponses, CreateMembershipData, CreateMembershipErrors, CreateMembershipResponses, CreateMembershipTierData, CreateMembershipTierErrors, CreateMembershipTierResponses, CreateMerchantAccountData, CreateMerchantAccountErrors, CreateMerchantAccountResponses, CreateMessageData, CreateMessageErrors, CreateMessageResponses, CreateMessageTemplateData, CreateMessageTemplateErrors, CreateMessageTemplateResponses, CreatePersonData, CreatePersonErrors, CreatePersonResponses, CreateProfessionalLicenseData, CreateProfessionalLicenseErrors, CreateProfessionalLicenseResponses, CreateQuizAttemptData, CreateQuizAttemptErrors, CreateQuizAttemptResponses, CreateReviewData, CreateReviewErrors, CreateReviewResponses, CreateRoyaltySplitData, CreateRoyaltySplitErrors, CreateRoyaltySplitResponses, CreateScheduleExceptionData, CreateScheduleExceptionErrors, CreateScheduleExceptionResponses, CreateSubscriptionTopicData, CreateSubscriptionTopicErrors, CreateSubscriptionTopicResponses, CreateTrainingData, CreateTrainingEnrollmentData, CreateTrainingEnrollmentErrors, CreateTrainingEnrollmentResponses, CreateTrainingErrors, CreateTrainingResponses, DeleteBookingEventData, DeleteBookingEventErrors, DeleteBookingEventResponses, DeleteChapterAffiliationData, DeleteChapterAffiliationErrors, DeleteChapterAffiliationResponses, DeleteCourseData, DeleteCourseEnrollmentData, DeleteCourseEnrollmentErrors, DeleteCourseEnrollmentResponses, DeleteCourseErrors, DeleteCourseResponses, DeleteCredentialTemplateData, DeleteCredentialTemplateErrors, DeleteCredentialTemplateResponses, DeleteDigitalCredentialData, DeleteDigitalCredentialErrors, DeleteDigitalCredentialResponses, DeleteDirectoryProfileData, DeleteDirectoryProfileErrors, DeleteDirectoryProfileResponses, DeleteDocumentData, DeleteDocumentErrors, DeleteDocumentResponses, DeleteDocumentTagData, DeleteDocumentTagErrors, DeleteDocumentTagResponses, DeleteDuesConfigData, DeleteDuesConfigErrors, DeleteDuesConfigResponses, DeleteDuesInvoiceData, DeleteDuesInvoiceErrors, DeleteDuesInvoiceResponses, DeleteDunningTemplateData, DeleteDunningTemplateErrors, DeleteDunningTemplateResponses, DeleteEventData, DeleteEventErrors, DeleteEventRegistrationData, DeleteEventRegistrationErrors, DeleteEventRegistrationResponses, DeleteEventResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteInstitutionalMembershipData, DeleteInstitutionalMembershipErrors, DeleteInstitutionalMembershipResponses, DeleteInvoiceData, DeleteInvoiceErrors, DeleteInvoiceResponses, DeleteMembershipApplicationData, DeleteMembershipApplicationErrors, DeleteMembershipApplicationResponses, DeleteMembershipData, DeleteMembershipErrors, DeleteMembershipResponses, DeleteMembershipTierData, DeleteMembershipTierErrors, DeleteMembershipTierResponses, DeleteMessageData, DeleteMessageErrors, DeleteMessageResponses, DeleteMessageTemplateData, DeleteMessageTemplateErrors, DeleteMessageTemplateResponses, DeleteProfessionalLicenseData, DeleteProfessionalLicenseErrors, DeleteProfessionalLicenseResponses, DeleteReviewData, DeleteReviewErrors, DeleteReviewResponses, DeleteRoyaltySplitData, DeleteRoyaltySplitErrors, DeleteRoyaltySplitResponses, DeleteScheduleExceptionData, DeleteScheduleExceptionErrors, DeleteScheduleExceptionResponses, DeleteSubscriptionTopicData, DeleteSubscriptionTopicErrors, DeleteSubscriptionTopicResponses, DeleteTrainingData, DeleteTrainingEnrollmentData, DeleteTrainingEnrollmentErrors, DeleteTrainingEnrollmentResponses, DeleteTrainingErrors, DeleteTrainingResponses, DenyAffiliationTransferData, DenyAffiliationTransferErrors, DenyAffiliationTransferResponses, DenyMembershipApplicationData, DenyMembershipApplicationErrors, DenyMembershipApplicationResponses, EndVideoCallData, EndVideoCallErrors, EndVideoCallResponses, FinalizeInvoiceData, FinalizeInvoiceErrors, FinalizeInvoiceResponses, GenerateDuesInvoicesForOrgData, GenerateDuesInvoicesForOrgErrors, GenerateDuesInvoicesForOrgResponses, GetAffiliationTransferData, GetAffiliationTransferErrors, GetAffiliationTransferResponses, GetAgingBucketData, GetAgingBucketErrors, GetAgingBucketResponses, GetBookingData, GetBookingErrors, GetBookingEventData, GetBookingEventErrors, GetBookingEventResponses, GetBookingResponses, GetChapterAffiliationData, GetChapterAffiliationErrors, GetChapterAffiliationResponses, GetChatMessagesData, GetChatMessagesErrors, GetChatMessagesResponses, GetChatRoomData, GetChatRoomErrors, GetChatRoomResponses, GetCourseData, GetCourseEnrollmentData, GetCourseEnrollmentErrors, GetCourseEnrollmentResponses, GetCourseErrors, GetCourseResponses, GetCredentialTemplateData, GetCredentialTemplateErrors, GetCredentialTemplateResponses, GetDigitalCredentialData, GetDigitalCredentialErrors, GetDigitalCredentialResponses, GetDirectoryProfileData, GetDirectoryProfileErrors, GetDirectoryProfileResponses, GetDocumentAccessLogData, GetDocumentAccessLogErrors, GetDocumentAccessLogResponses, GetDocumentData, GetDocumentErrors, GetDocumentResponses, GetDocumentTagData, GetDocumentTagErrors, GetDocumentTagResponses, GetDocumentVersionData, GetDocumentVersionErrors, GetDocumentVersionResponses, GetDuesConfigData, GetDuesConfigErrors, GetDuesConfigResponses, GetDuesInvoiceData, GetDuesInvoiceErrors, GetDuesInvoiceResponses, GetDunningTemplateData, GetDunningTemplateErrors, GetDunningTemplateResponses, GetEmailQueueItemData, GetEmailQueueItemErrors, GetEmailQueueItemResponses, GetEmailTemplateData, GetEmailTemplateErrors, GetEmailTemplateResponses, GetEventData, GetEventErrors, GetEventRegistrationData, GetEventRegistrationErrors, GetEventRegistrationResponses, GetEventResponses, GetFileData, GetFileDownloadData, GetFileDownloadErrors, GetFileDownloadResponses, GetFileErrors, GetFileResponses, GetIceServersData, GetIceServersErrors, GetIceServersResponses, GetInstitutionalMembershipData, GetInstitutionalMembershipErrors, GetInstitutionalMembershipResponses, GetInvoiceData, GetInvoiceErrors, GetInvoiceResponses, GetMembershipApplicationData, GetMembershipApplicationErrors, GetMembershipApplicationResponses, GetMembershipData, GetMembershipErrors, GetMembershipResponses, GetMembershipTierData, GetMembershipTierErrors, GetMembershipTierResponses, GetMerchantAccountData, GetMerchantAccountErrors, GetMerchantAccountResponses, GetMerchantDashboardData, GetMerchantDashboardErrors, GetMerchantDashboardResponses, GetMessageData, GetMessageErrors, GetMessageResponses, GetMessageTemplateData, GetMessageTemplateErrors, GetMessageTemplateResponses, GetNotificationData, GetNotificationErrors, GetNotificationResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetProfessionalLicenseData, GetProfessionalLicenseErrors, GetProfessionalLicenseResponses, GetPublicDirectoryProfileData, GetPublicDirectoryProfileErrors, GetPublicDirectoryProfileResponses, GetReviewData, GetReviewErrors, GetReviewResponses, GetRoyaltySplitData, GetRoyaltySplitErrors, GetRoyaltySplitResponses, GetScheduleExceptionData, GetScheduleExceptionErrors, GetScheduleExceptionResponses, GetSubscriptionTopicData, GetSubscriptionTopicErrors, GetSubscriptionTopicResponses, GetTimeSlotData, GetTimeSlotErrors, GetTimeSlotResponses, GetTrainingData, GetTrainingEnrollmentData, GetTrainingEnrollmentErrors, GetTrainingEnrollmentResponses, GetTrainingErrors, GetTrainingResponses, HandleStripeWebhookData, HandleStripeWebhookErrors, HandleStripeWebhookResponses, IssueDigitalCredentialData, IssueDigitalCredentialErrors, IssueDigitalCredentialResponses, JoinVideoCallData, JoinVideoCallErrors, JoinVideoCallResponses, LeaveVideoCallData, LeaveVideoCallErrors, LeaveVideoCallResponses, ListAffiliationTransfersData, ListAffiliationTransfersErrors, ListAffiliationTransfersResponses, ListAuditLogsData, ListAuditLogsErrors, ListAuditLogsResponses, ListBookingEventsData, ListBookingEventsErrors, ListBookingEventsResponses, ListBookingsData, ListBookingsErrors, ListBookingsResponses, ListChapterAffiliationsData, ListChapterAffiliationsErrors, ListChapterAffiliationsResponses, ListChatRoomsData, ListChatRoomsErrors, ListChatRoomsResponses, ListCredentialTemplatesData, ListCredentialTemplatesErrors, ListCredentialTemplatesResponses, ListDigitalCredentialsData, ListDigitalCredentialsErrors, ListDigitalCredentialsResponses, ListDirectoryProfilesData, ListDirectoryProfilesErrors, ListDirectoryProfilesResponses, ListDocumentTagsData, ListDocumentTagsErrors, ListDocumentTagsResponses, ListDocumentVersionsData, ListDocumentVersionsErrors, ListDocumentVersionsResponses, ListDuesConfigsData, ListDuesConfigsErrors, ListDuesConfigsResponses, ListDuesInvoicesData, ListDuesInvoicesErrors, ListDuesInvoicesResponses, ListDunningEventsData, ListDunningEventsErrors, ListDunningEventsResponses, ListDunningTemplatesData, ListDunningTemplatesErrors, ListDunningTemplatesResponses, ListEmailQueueItemsData, ListEmailQueueItemsErrors, ListEmailQueueItemsResponses, ListEmailTemplatesData, ListEmailTemplatesErrors, ListEmailTemplatesResponses, ListEventSlotsData, ListEventSlotsErrors, ListEventSlotsResponses, ListFilesData, ListFilesErrors, ListFilesResponses, ListInstitutionalMembershipsData, ListInstitutionalMembershipsErrors, ListInstitutionalMembershipsResponses, ListInvoicesData, ListInvoicesErrors, ListInvoicesResponses, ListLicenseRenewalAlertsData, ListLicenseRenewalAlertsErrors, ListLicenseRenewalAlertsResponses, ListMembershipApplicationsData, ListMembershipApplicationsErrors, ListMembershipApplicationsResponses, ListMembershipsData, ListMembershipsErrors, ListMembershipsResponses, ListMembershipTiersData, ListMembershipTiersErrors, ListMembershipTiersResponses, ListNotificationsData, ListNotificationsErrors, ListNotificationsResponses, ListPersonsData, ListPersonsErrors, ListPersonsResponses, ListPersonSubscriptionsData, ListPersonSubscriptionsErrors, ListPersonSubscriptionsResponses, ListProfessionalLicensesData, ListProfessionalLicensesErrors, ListProfessionalLicensesResponses, ListReviewsData, ListReviewsErrors, ListReviewsResponses, ListRoyaltySplitsData, ListRoyaltySplitsErrors, ListRoyaltySplitsResponses, ListScheduleExceptionsData, ListScheduleExceptionsErrors, ListScheduleExceptionsResponses, ListSeatAllocationsData, ListSeatAllocationsErrors, ListSeatAllocationsResponses, ListWaitlistEntriesData, ListWaitlistEntriesErrors, ListWaitlistEntriesResponses, MarkAllNotificationsAsReadData, MarkAllNotificationsAsReadErrors, MarkAllNotificationsAsReadResponses, MarkDuesInvoicePaidData, MarkDuesInvoicePaidErrors, MarkDuesInvoicePaidResponses, MarkInvoiceUncollectibleData, MarkInvoiceUncollectibleErrors, MarkInvoiceUncollectibleResponses, MarkNoShowBookingData, MarkNoShowBookingErrors, MarkNoShowBookingResponses, MarkNotificationAsReadData, MarkNotificationAsReadErrors, MarkNotificationAsReadResponses, OnboardMerchantAccountData, OnboardMerchantAccountErrors, OnboardMerchantAccountResponses, PayInvoiceData, PayInvoiceErrors, PayInvoiceResponses, PreviewMessageTemplateData, PreviewMessageTemplateErrors, PreviewMessageTemplateResponses, PromoteWaitlistEntryData, PromoteWaitlistEntryErrors, PromoteWaitlistEntryResponses, PublishEventData, PublishEventErrors, PublishEventResponses, PublishTrainingData, PublishTrainingErrors, PublishTrainingResponses, RecalculateAgingBucketData, RecalculateAgingBucketErrors, RecalculateAgingBucketResponses, RefundEventRegistrationData, RefundEventRegistrationErrors, RefundEventRegistrationResponses, RefundInvoicePaymentData, RefundInvoicePaymentErrors, RefundInvoicePaymentResponses, ReinstateMembershipData, ReinstateMembershipErrors, ReinstateMembershipResponses, RejectBookingData, RejectBookingErrors, RejectBookingResponses, RenewMembershipData, RenewMembershipErrors, RenewMembershipResponses, RetryEmailQueueItemData, RetryEmailQueueItemErrors, RetryEmailQueueItemResponses, RevokeDigitalCredentialData, RevokeDigitalCredentialErrors, RevokeDigitalCredentialResponses, RevokeSeatData, RevokeSeatErrors, RevokeSeatResponses, RunDunningData, RunDunningErrors, RunDunningResponses, ScheduleMessageData, ScheduleMessageErrors, ScheduleMessageResponses, SearchCheckInsData, SearchCheckInsErrors, SearchCheckInsResponses, SearchCourseEnrollmentsData, SearchCourseEnrollmentsErrors, SearchCourseEnrollmentsResponses, SearchCoursesData, SearchCoursesErrors, SearchCoursesResponses, SearchDirectoryData, SearchDirectoryErrors, SearchDirectoryResponses, SearchDocumentsData, SearchDocumentsErrors, SearchDocumentsResponses, SearchEventRegistrationsData, SearchEventRegistrationsErrors, SearchEventRegistrationsResponses, SearchEventsData, SearchEventsErrors, SearchEventsResponses, SearchMessagesData, SearchMessagesErrors, SearchMessagesResponses, SearchMessageTemplatesData, SearchMessageTemplatesErrors, SearchMessageTemplatesResponses, SearchQuizAttemptsData, SearchQuizAttemptsErrors, SearchQuizAttemptsResponses, SearchTrainingEnrollmentsData, SearchTrainingEnrollmentsErrors, SearchTrainingEnrollmentsResponses, SearchTrainingsData, SearchTrainingsErrors, SearchTrainingsResponses, SendChatMessageData, SendChatMessageErrors, SendChatMessageResponses, SendMessageData, SendMessageErrors, SendMessageResponses, SetPrimaryChapterAffiliationData, SetPrimaryChapterAffiliationErrors, SetPrimaryChapterAffiliationResponses, TerminateMembershipData, TerminateMembershipErrors, TerminateMembershipResponses, TestEmailTemplateData, TestEmailTemplateErrors, TestEmailTemplateResponses, UpdateBookingEventData, UpdateBookingEventErrors, UpdateBookingEventResponses, UpdateChapterAffiliationData, UpdateChapterAffiliationErrors, UpdateChapterAffiliationResponses, UpdateCourseData, UpdateCourseEnrollmentData, UpdateCourseEnrollmentErrors, UpdateCourseEnrollmentResponses, UpdateCourseErrors, UpdateCourseProgressData, UpdateCourseProgressErrors, UpdateCourseProgressResponses, UpdateCourseResponses, UpdateCredentialTemplateData, UpdateCredentialTemplateErrors, UpdateCredentialTemplateResponses, UpdateDigitalCredentialData, UpdateDigitalCredentialErrors, UpdateDigitalCredentialResponses, UpdateDirectoryProfileData, UpdateDirectoryProfileErrors, UpdateDirectoryProfileResponses, UpdateDocumentData, UpdateDocumentErrors, UpdateDocumentResponses, UpdateDocumentTagData, UpdateDocumentTagErrors, UpdateDocumentTagResponses, UpdateDuesConfigData, UpdateDuesConfigErrors, UpdateDuesConfigResponses, UpdateDuesInvoiceData, UpdateDuesInvoiceErrors, UpdateDuesInvoiceResponses, UpdateDunningTemplateData, UpdateDunningTemplateErrors, UpdateDunningTemplateResponses, UpdateEmailTemplateData, UpdateEmailTemplateErrors, UpdateEmailTemplateResponses, UpdateEventData, UpdateEventErrors, UpdateEventRegistrationData, UpdateEventRegistrationErrors, UpdateEventRegistrationResponses, UpdateEventResponses, UpdateInstitutionalMembershipData, UpdateInstitutionalMembershipErrors, UpdateInstitutionalMembershipResponses, UpdateInvoiceData, UpdateInvoiceErrors, UpdateInvoiceResponses, UpdateMembershipApplicationData, UpdateMembershipApplicationErrors, UpdateMembershipApplicationResponses, UpdateMembershipData, UpdateMembershipErrors, UpdateMembershipResponses, UpdateMembershipTierData, UpdateMembershipTierErrors, UpdateMembershipTierResponses, UpdateMessageData, UpdateMessageErrors, UpdateMessageResponses, UpdateMessageTemplateData, UpdateMessageTemplateErrors, UpdateMessageTemplateResponses, UpdatePersonData, UpdatePersonErrors, UpdatePersonResponses, UpdatePersonSubscriptionData, UpdatePersonSubscriptionErrors, UpdatePersonSubscriptionResponses, UpdateProfessionalLicenseData, UpdateProfessionalLicenseErrors, UpdateProfessionalLicenseResponses, UpdateRoyaltySplitData, UpdateRoyaltySplitErrors, UpdateRoyaltySplitResponses, UpdateSubscriptionTopicData, UpdateSubscriptionTopicErrors, UpdateSubscriptionTopicResponses, UpdateTrainingData, UpdateTrainingEnrollmentData, UpdateTrainingEnrollmentErrors, UpdateTrainingEnrollmentResponses, UpdateTrainingErrors, UpdateTrainingResponses, UpdateVideoCallParticipantData, UpdateVideoCallParticipantErrors, UpdateVideoCallParticipantResponses, UploadFileData, UploadFileErrors, UploadFileResponses, UploadNewDocumentVersionData, UploadNewDocumentVersionErrors, UploadNewDocumentVersionResponses, VerifyCredentialPublicData, VerifyCredentialPublicErrors, VerifyCredentialPublicResponses, VerifyDigitalCredentialAuthenticatedData, VerifyDigitalCredentialAuthenticatedErrors, VerifyDigitalCredentialAuthenticatedResponses, VoidInvoiceData, VoidInvoiceErrors, VoidInvoiceResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -18,6 +18,1906 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: Record<string, unknown>;
 };
+
+/**
+ * List all document tags for the tenant. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const listDocumentTags = <ThrowOnError extends boolean = false>(options?: Options<ListDocumentTagsData, ThrowOnError>) => (options?.client ?? client).get<ListDocumentTagsResponses, ListDocumentTagsErrors, ThrowOnError>({
+    responseTransformer: listDocumentTagsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/document-tags',
+    ...options
+});
+
+/**
+ * Create a document tag. Requires role: 'admin', 'coordinator'
+ */
+export const createDocumentTag = <ThrowOnError extends boolean = false>(options: Options<CreateDocumentTagData, ThrowOnError>) => (options.client ?? client).post<CreateDocumentTagResponses, CreateDocumentTagErrors, ThrowOnError>({
+    responseTransformer: createDocumentTagResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/document-tags',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a document tag. Requires role: 'admin'
+ */
+export const deleteDocumentTag = <ThrowOnError extends boolean = false>(options: Options<DeleteDocumentTagData, ThrowOnError>) => (options.client ?? client).delete<DeleteDocumentTagResponses, DeleteDocumentTagErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/document-tags/{tagId}',
+    ...options
+});
+
+/**
+ * Get a document tag by ID. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const getDocumentTag = <ThrowOnError extends boolean = false>(options: Options<GetDocumentTagData, ThrowOnError>) => (options.client ?? client).get<GetDocumentTagResponses, GetDocumentTagErrors, ThrowOnError>({
+    responseTransformer: getDocumentTagResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/document-tags/{tagId}',
+    ...options
+});
+
+/**
+ * Update a document tag. Requires role: 'admin', 'coordinator'
+ */
+export const updateDocumentTag = <ThrowOnError extends boolean = false>(options: Options<UpdateDocumentTagData, ThrowOnError>) => (options.client ?? client).patch<UpdateDocumentTagResponses, UpdateDocumentTagErrors, ThrowOnError>({
+    responseTransformer: updateDocumentTagResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/document-tags/{tagId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search and list documents. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const searchDocuments = <ThrowOnError extends boolean = false>(options?: Options<SearchDocumentsData, ThrowOnError>) => (options?.client ?? client).get<SearchDocumentsResponses, SearchDocumentsErrors, ThrowOnError>({
+    responseTransformer: searchDocumentsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents',
+    ...options
+});
+
+/**
+ * Create a document record after the file has been uploaded to object storage. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const createDocument = <ThrowOnError extends boolean = false>(options: Options<CreateDocumentData, ThrowOnError>) => (options.client ?? client).post<CreateDocumentResponses, CreateDocumentErrors, ThrowOnError>({
+    responseTransformer: createDocumentResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a document and all its versions. Requires role: 'admin', 'member:owner'
+ */
+export const deleteDocument = <ThrowOnError extends boolean = false>(options: Options<DeleteDocumentData, ThrowOnError>) => (options.client ?? client).delete<DeleteDocumentResponses, DeleteDocumentErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents/{documentId}',
+    ...options
+});
+
+/**
+ * Get a document by ID. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const getDocument = <ThrowOnError extends boolean = false>(options: Options<GetDocumentData, ThrowOnError>) => (options.client ?? client).get<GetDocumentResponses, GetDocumentErrors, ThrowOnError>({
+    responseTransformer: getDocumentResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents/{documentId}',
+    ...options
+});
+
+/**
+ * Update document metadata. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const updateDocument = <ThrowOnError extends boolean = false>(options: Options<UpdateDocumentData, ThrowOnError>) => (options.client ?? client).patch<UpdateDocumentResponses, UpdateDocumentErrors, ThrowOnError>({
+    responseTransformer: updateDocumentResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents/{documentId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Retrieve the access log for a document. Requires role: 'admin', 'coordinator'
+ */
+export const getDocumentAccessLog = <ThrowOnError extends boolean = false>(options: Options<GetDocumentAccessLogData, ThrowOnError>) => (options.client ?? client).get<GetDocumentAccessLogResponses, GetDocumentAccessLogErrors, ThrowOnError>({
+    responseTransformer: getDocumentAccessLogResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents/{documentId}/access-log',
+    ...options
+});
+
+/**
+ * Archive a document (soft-delete; retains record for audit purposes). Requires role: 'admin', 'coordinator'
+ */
+export const archiveDocument = <ThrowOnError extends boolean = false>(options: Options<ArchiveDocumentData, ThrowOnError>) => (options.client ?? client).post<ArchiveDocumentResponses, ArchiveDocumentErrors, ThrowOnError>({
+    responseTransformer: archiveDocumentResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents/{documentId}/archive',
+    ...options
+});
+
+/**
+ * List all versions of a document. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const listDocumentVersions = <ThrowOnError extends boolean = false>(options: Options<ListDocumentVersionsData, ThrowOnError>) => (options.client ?? client).get<ListDocumentVersionsResponses, ListDocumentVersionsErrors, ThrowOnError>({
+    responseTransformer: listDocumentVersionsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents/{documentId}/versions',
+    ...options
+});
+
+/**
+ * Upload a new version of an existing document. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const uploadNewDocumentVersion = <ThrowOnError extends boolean = false>(options: Options<UploadNewDocumentVersionData, ThrowOnError>) => (options.client ?? client).post<UploadNewDocumentVersionResponses, UploadNewDocumentVersionErrors, ThrowOnError>({
+    responseTransformer: uploadNewDocumentVersionResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents/{documentId}/versions',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get a specific version of a document. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const getDocumentVersion = <ThrowOnError extends boolean = false>(options: Options<GetDocumentVersionData, ThrowOnError>) => (options.client ?? client).get<GetDocumentVersionResponses, GetDocumentVersionErrors, ThrowOnError>({
+    responseTransformer: getDocumentVersionResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/documents/{documentId}/versions/{versionId}',
+    ...options
+});
+
+/**
+ * Search and list events with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchEvents = <ThrowOnError extends boolean = false>(options?: Options<SearchEventsData, ThrowOnError>) => (options?.client ?? client).get<SearchEventsResponses, SearchEventsErrors, ThrowOnError>({
+    responseTransformer: searchEventsResponseTransformer,
+    url: '/association/events',
+    ...options
+});
+
+/**
+ * Create a new event. Requires role: 'association:admin', 'association:staff'
+ */
+export const createEvent = <ThrowOnError extends boolean = false>(options: Options<CreateEventData, ThrowOnError>) => (options.client ?? client).post<CreateEventResponses, CreateEventErrors, ThrowOnError>({
+    responseTransformer: createEventResponseTransformer,
+    url: '/association/events',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search check-in records with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchCheckIns = <ThrowOnError extends boolean = false>(options?: Options<SearchCheckInsData, ThrowOnError>) => (options?.client ?? client).get<SearchCheckInsResponses, SearchCheckInsErrors, ThrowOnError>({
+    responseTransformer: searchCheckInsResponseTransformer,
+    url: '/association/events/checkins',
+    ...options
+});
+
+/**
+ * Record an attendee check-in. Idempotent on registrationId — subsequent calls return the existing record. Requires role: 'association:admin', 'association:staff'
+ */
+export const createCheckIn = <ThrowOnError extends boolean = false>(options: Options<CreateCheckInData, ThrowOnError>) => (options.client ?? client).post<CreateCheckInResponses, CreateCheckInErrors, ThrowOnError>({
+    responseTransformer: createCheckInResponseTransformer,
+    url: '/association/events/checkins',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search registrations with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchEventRegistrations = <ThrowOnError extends boolean = false>(options?: Options<SearchEventRegistrationsData, ThrowOnError>) => (options?.client ?? client).get<SearchEventRegistrationsResponses, SearchEventRegistrationsErrors, ThrowOnError>({
+    responseTransformer: searchEventRegistrationsResponseTransformer,
+    url: '/association/events/registrations',
+    ...options
+});
+
+/**
+ * Register a person for an event. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const createEventRegistration = <ThrowOnError extends boolean = false>(options: Options<CreateEventRegistrationData, ThrowOnError>) => (options.client ?? client).post<CreateEventRegistrationResponses, CreateEventRegistrationErrors, ThrowOnError>({
+    responseTransformer: createEventRegistrationResponseTransformer,
+    url: '/association/events/registrations',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a registration record. Requires role: 'association:admin'
+ */
+export const deleteEventRegistration = <ThrowOnError extends boolean = false>(options: Options<DeleteEventRegistrationData, ThrowOnError>) => (options.client ?? client).delete<DeleteEventRegistrationResponses, DeleteEventRegistrationErrors, ThrowOnError>({ url: '/association/events/registrations/{registrationId}', ...options });
+
+/**
+ * Get a registration by ID. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const getEventRegistration = <ThrowOnError extends boolean = false>(options: Options<GetEventRegistrationData, ThrowOnError>) => (options.client ?? client).get<GetEventRegistrationResponses, GetEventRegistrationErrors, ThrowOnError>({
+    responseTransformer: getEventRegistrationResponseTransformer,
+    url: '/association/events/registrations/{registrationId}',
+    ...options
+});
+
+/**
+ * Update a registration. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateEventRegistration = <ThrowOnError extends boolean = false>(options: Options<UpdateEventRegistrationData, ThrowOnError>) => (options.client ?? client).patch<UpdateEventRegistrationResponses, UpdateEventRegistrationErrors, ThrowOnError>({
+    responseTransformer: updateEventRegistrationResponseTransformer,
+    url: '/association/events/registrations/{registrationId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cancel a registration optionally triggering a refund workflow. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const cancelEventRegistration = <ThrowOnError extends boolean = false>(options: Options<CancelEventRegistrationData, ThrowOnError>) => (options.client ?? client).post<CancelEventRegistrationResponses, CancelEventRegistrationErrors, ThrowOnError>({
+    responseTransformer: cancelEventRegistrationResponseTransformer,
+    url: '/association/events/registrations/{registrationId}/cancel',
+    ...options
+});
+
+/**
+ * Initiate a refund for a cancelled registration. Requires role: 'association:admin', 'association:staff'
+ */
+export const refundEventRegistration = <ThrowOnError extends boolean = false>(options: Options<RefundEventRegistrationData, ThrowOnError>) => (options.client ?? client).post<RefundEventRegistrationResponses, RefundEventRegistrationErrors, ThrowOnError>({
+    responseTransformer: refundEventRegistrationResponseTransformer,
+    url: '/association/events/registrations/{registrationId}/refund',
+    ...options
+});
+
+/**
+ * Delete an event. Requires role: 'association:admin'
+ */
+export const deleteEvent = <ThrowOnError extends boolean = false>(options: Options<DeleteEventData, ThrowOnError>) => (options.client ?? client).delete<DeleteEventResponses, DeleteEventErrors, ThrowOnError>({ url: '/association/events/{eventId}', ...options });
+
+/**
+ * Get an event by ID. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const getEvent = <ThrowOnError extends boolean = false>(options: Options<GetEventData, ThrowOnError>) => (options.client ?? client).get<GetEventResponses, GetEventErrors, ThrowOnError>({
+    responseTransformer: getEventResponseTransformer,
+    url: '/association/events/{eventId}',
+    ...options
+});
+
+/**
+ * Update an existing event. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateEvent = <ThrowOnError extends boolean = false>(options: Options<UpdateEventData, ThrowOnError>) => (options.client ?? client).patch<UpdateEventResponses, UpdateEventErrors, ThrowOnError>({
+    responseTransformer: updateEventResponseTransformer,
+    url: '/association/events/{eventId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cancel an event and notify registered attendees. Requires role: 'association:admin', 'association:staff'
+ */
+export const cancelEvent = <ThrowOnError extends boolean = false>(options: Options<CancelEventData, ThrowOnError>) => (options.client ?? client).post<CancelEventResponses, CancelEventErrors, ThrowOnError>({
+    responseTransformer: cancelEventResponseTransformer,
+    url: '/association/events/{eventId}/cancel',
+    ...options
+});
+
+/**
+ * Publish a draft event making it visible to members. Requires role: 'association:admin', 'association:staff'
+ */
+export const publishEvent = <ThrowOnError extends boolean = false>(options: Options<PublishEventData, ThrowOnError>) => (options.client ?? client).post<PublishEventResponses, PublishEventErrors, ThrowOnError>({
+    responseTransformer: publishEventResponseTransformer,
+    url: '/association/events/{eventId}/publish',
+    ...options
+});
+
+/**
+ * List waitlist entries for an event. Requires role: 'association:admin', 'association:staff'
+ */
+export const listWaitlistEntries = <ThrowOnError extends boolean = false>(options: Options<ListWaitlistEntriesData, ThrowOnError>) => (options.client ?? client).get<ListWaitlistEntriesResponses, ListWaitlistEntriesErrors, ThrowOnError>({
+    responseTransformer: listWaitlistEntriesResponseTransformer,
+    url: '/association/events/{eventId}/waitlist',
+    ...options
+});
+
+/**
+ * Promote the next waitlist entry to a confirmed registration. Requires role: 'association:admin', 'association:staff'
+ */
+export const promoteWaitlistEntry = <ThrowOnError extends boolean = false>(options: Options<PromoteWaitlistEntryData, ThrowOnError>) => (options.client ?? client).post<PromoteWaitlistEntryResponses, PromoteWaitlistEntryErrors, ThrowOnError>({
+    responseTransformer: promoteWaitlistEntryResponseTransformer,
+    url: '/association/events/{eventId}/waitlist/{entryId}/promote',
+    ...options
+});
+
+/**
+ * List affiliation transfers with optional filters. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const listAffiliationTransfers = <ThrowOnError extends boolean = false>(options?: Options<ListAffiliationTransfersData, ThrowOnError>) => (options?.client ?? client).get<ListAffiliationTransfersResponses, ListAffiliationTransfersErrors, ThrowOnError>({
+    responseTransformer: listAffiliationTransfersResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/affiliation-transfers',
+    ...options
+});
+
+/**
+ * Submit a new affiliation transfer request. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const createAffiliationTransfer = <ThrowOnError extends boolean = false>(options: Options<CreateAffiliationTransferData, ThrowOnError>) => (options.client ?? client).post<CreateAffiliationTransferResponses, CreateAffiliationTransferErrors, ThrowOnError>({
+    responseTransformer: createAffiliationTransferResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/affiliation-transfers',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get an affiliation transfer by ID. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const getAffiliationTransfer = <ThrowOnError extends boolean = false>(options: Options<GetAffiliationTransferData, ThrowOnError>) => (options.client ?? client).get<GetAffiliationTransferResponses, GetAffiliationTransferErrors, ThrowOnError>({
+    responseTransformer: getAffiliationTransferResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/affiliation-transfers/{transferId}',
+    ...options
+});
+
+/**
+ * Source chapter approves the outgoing transfer. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const approveTransferBySource = <ThrowOnError extends boolean = false>(options: Options<ApproveTransferBySourceData, ThrowOnError>) => (options.client ?? client).post<ApproveTransferBySourceResponses, ApproveTransferBySourceErrors, ThrowOnError>({
+    responseTransformer: approveTransferBySourceResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/affiliation-transfers/{transferId}/approve-source',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Target chapter approves the incoming transfer. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const approveTransferByTarget = <ThrowOnError extends boolean = false>(options: Options<ApproveTransferByTargetData, ThrowOnError>) => (options.client ?? client).post<ApproveTransferByTargetResponses, ApproveTransferByTargetErrors, ThrowOnError>({
+    responseTransformer: approveTransferByTargetResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/affiliation-transfers/{transferId}/approve-target',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Complete an approved transfer, updating affiliation records. Requires role: 'association:admin'
+ */
+export const completeAffiliationTransfer = <ThrowOnError extends boolean = false>(options: Options<CompleteAffiliationTransferData, ThrowOnError>) => (options.client ?? client).post<CompleteAffiliationTransferResponses, CompleteAffiliationTransferErrors, ThrowOnError>({
+    responseTransformer: completeAffiliationTransferResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/affiliation-transfers/{transferId}/complete',
+    ...options
+});
+
+/**
+ * Deny a transfer request. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const denyAffiliationTransfer = <ThrowOnError extends boolean = false>(options: Options<DenyAffiliationTransferData, ThrowOnError>) => (options.client ?? client).post<DenyAffiliationTransferResponses, DenyAffiliationTransferErrors, ThrowOnError>({
+    responseTransformer: denyAffiliationTransferResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/affiliation-transfers/{transferId}/deny',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get the most recent aging bucket snapshot for an organization. Requires role: 'association:admin'
+ */
+export const getAgingBucket = <ThrowOnError extends boolean = false>(options: Options<GetAgingBucketData, ThrowOnError>) => (options.client ?? client).get<GetAgingBucketResponses, GetAgingBucketErrors, ThrowOnError>({
+    responseTransformer: getAgingBucketResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/aging-buckets/{organizationId}',
+    ...options
+});
+
+/**
+ * Recalculate the aging bucket for an organization as of today. Requires role: 'association:admin'
+ */
+export const recalculateAgingBucket = <ThrowOnError extends boolean = false>(options: Options<RecalculateAgingBucketData, ThrowOnError>) => (options.client ?? client).post<RecalculateAgingBucketResponses, RecalculateAgingBucketErrors, ThrowOnError>({
+    responseTransformer: recalculateAgingBucketResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/aging-buckets/{organizationId}/recalculate',
+    ...options
+});
+
+/**
+ * List membership applications with optional filters. Requires role: 'association:admin'
+ */
+export const listMembershipApplications = <ThrowOnError extends boolean = false>(options?: Options<ListMembershipApplicationsData, ThrowOnError>) => (options?.client ?? client).get<ListMembershipApplicationsResponses, ListMembershipApplicationsErrors, ThrowOnError>({
+    responseTransformer: listMembershipApplicationsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/applications',
+    ...options
+});
+
+/**
+ * Submit a new membership application. Requires role: 'user'
+ */
+export const createMembershipApplication = <ThrowOnError extends boolean = false>(options: Options<CreateMembershipApplicationData, ThrowOnError>) => (options.client ?? client).post<CreateMembershipApplicationResponses, CreateMembershipApplicationErrors, ThrowOnError>({
+    responseTransformer: createMembershipApplicationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/applications',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a membership application. Requires role: 'association:admin'
+ */
+export const deleteMembershipApplication = <ThrowOnError extends boolean = false>(options: Options<DeleteMembershipApplicationData, ThrowOnError>) => (options.client ?? client).delete<DeleteMembershipApplicationResponses, DeleteMembershipApplicationErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/applications/{applicationId}',
+    ...options
+});
+
+/**
+ * Get a membership application by ID. Requires role: 'association:admin', 'user:owner'
+ */
+export const getMembershipApplication = <ThrowOnError extends boolean = false>(options: Options<GetMembershipApplicationData, ThrowOnError>) => (options.client ?? client).get<GetMembershipApplicationResponses, GetMembershipApplicationErrors, ThrowOnError>({
+    responseTransformer: getMembershipApplicationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/applications/{applicationId}',
+    ...options
+});
+
+/**
+ * Update a membership application. Requires role: 'association:admin'
+ */
+export const updateMembershipApplication = <ThrowOnError extends boolean = false>(options: Options<UpdateMembershipApplicationData, ThrowOnError>) => (options.client ?? client).patch<UpdateMembershipApplicationResponses, UpdateMembershipApplicationErrors, ThrowOnError>({
+    responseTransformer: updateMembershipApplicationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/applications/{applicationId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Approve a membership application and create a membership. Requires role: 'association:admin'
+ */
+export const approveMembershipApplication = <ThrowOnError extends boolean = false>(options: Options<ApproveMembershipApplicationData, ThrowOnError>) => (options.client ?? client).post<ApproveMembershipApplicationResponses, ApproveMembershipApplicationErrors, ThrowOnError>({
+    responseTransformer: approveMembershipApplicationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/applications/{applicationId}/approve',
+    ...options
+});
+
+/**
+ * Deny a membership application with a reason. Requires role: 'association:admin'
+ */
+export const denyMembershipApplication = <ThrowOnError extends boolean = false>(options: Options<DenyMembershipApplicationData, ThrowOnError>) => (options.client ?? client).post<DenyMembershipApplicationResponses, DenyMembershipApplicationErrors, ThrowOnError>({
+    responseTransformer: denyMembershipApplicationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/applications/{applicationId}/deny',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List chapter affiliations with optional filters. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const listChapterAffiliations = <ThrowOnError extends boolean = false>(options?: Options<ListChapterAffiliationsData, ThrowOnError>) => (options?.client ?? client).get<ListChapterAffiliationsResponses, ListChapterAffiliationsErrors, ThrowOnError>({
+    responseTransformer: listChapterAffiliationsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/chapter-affiliations',
+    ...options
+});
+
+/**
+ * Create a new chapter affiliation. Requires role: 'association:admin'
+ */
+export const createChapterAffiliation = <ThrowOnError extends boolean = false>(options: Options<CreateChapterAffiliationData, ThrowOnError>) => (options.client ?? client).post<CreateChapterAffiliationResponses, CreateChapterAffiliationErrors, ThrowOnError>({
+    responseTransformer: createChapterAffiliationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/chapter-affiliations',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a chapter affiliation record. Requires role: 'association:admin'
+ */
+export const deleteChapterAffiliation = <ThrowOnError extends boolean = false>(options: Options<DeleteChapterAffiliationData, ThrowOnError>) => (options.client ?? client).delete<DeleteChapterAffiliationResponses, DeleteChapterAffiliationErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/chapter-affiliations/{affiliationId}',
+    ...options
+});
+
+/**
+ * Get a chapter affiliation by ID. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const getChapterAffiliation = <ThrowOnError extends boolean = false>(options: Options<GetChapterAffiliationData, ThrowOnError>) => (options.client ?? client).get<GetChapterAffiliationResponses, GetChapterAffiliationErrors, ThrowOnError>({
+    responseTransformer: getChapterAffiliationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/chapter-affiliations/{affiliationId}',
+    ...options
+});
+
+/**
+ * Update a chapter affiliation record. Requires role: 'association:admin'
+ */
+export const updateChapterAffiliation = <ThrowOnError extends boolean = false>(options: Options<UpdateChapterAffiliationData, ThrowOnError>) => (options.client ?? client).patch<UpdateChapterAffiliationResponses, UpdateChapterAffiliationErrors, ThrowOnError>({
+    responseTransformer: updateChapterAffiliationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/chapter-affiliations/{affiliationId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Set the specified affiliation as the member's primary chapter. Requires role: 'association:admin'
+ */
+export const setPrimaryChapterAffiliation = <ThrowOnError extends boolean = false>(options: Options<SetPrimaryChapterAffiliationData, ThrowOnError>) => (options.client ?? client).post<SetPrimaryChapterAffiliationResponses, SetPrimaryChapterAffiliationErrors, ThrowOnError>({
+    responseTransformer: setPrimaryChapterAffiliationResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/chapter-affiliations/{affiliationId}/set-primary',
+    ...options
+});
+
+/**
+ * List credential templates. Requires role: 'association:admin'
+ */
+export const listCredentialTemplates = <ThrowOnError extends boolean = false>(options?: Options<ListCredentialTemplatesData, ThrowOnError>) => (options?.client ?? client).get<ListCredentialTemplatesResponses, ListCredentialTemplatesErrors, ThrowOnError>({
+    responseTransformer: listCredentialTemplatesResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credential-templates',
+    ...options
+});
+
+/**
+ * Create a new credential template. Requires role: 'association:admin'
+ */
+export const createCredentialTemplate = <ThrowOnError extends boolean = false>(options: Options<CreateCredentialTemplateData, ThrowOnError>) => (options.client ?? client).post<CreateCredentialTemplateResponses, CreateCredentialTemplateErrors, ThrowOnError>({
+    responseTransformer: createCredentialTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credential-templates',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a credential template. Requires role: 'association:admin'
+ */
+export const deleteCredentialTemplate = <ThrowOnError extends boolean = false>(options: Options<DeleteCredentialTemplateData, ThrowOnError>) => (options.client ?? client).delete<DeleteCredentialTemplateResponses, DeleteCredentialTemplateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credential-templates/{templateId}',
+    ...options
+});
+
+/**
+ * Get a credential template by ID. Requires role: 'association:admin'
+ */
+export const getCredentialTemplate = <ThrowOnError extends boolean = false>(options: Options<GetCredentialTemplateData, ThrowOnError>) => (options.client ?? client).get<GetCredentialTemplateResponses, GetCredentialTemplateErrors, ThrowOnError>({
+    responseTransformer: getCredentialTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credential-templates/{templateId}',
+    ...options
+});
+
+/**
+ * Update a credential template. Requires role: 'association:admin'
+ */
+export const updateCredentialTemplate = <ThrowOnError extends boolean = false>(options: Options<UpdateCredentialTemplateData, ThrowOnError>) => (options.client ?? client).patch<UpdateCredentialTemplateResponses, UpdateCredentialTemplateErrors, ThrowOnError>({
+    responseTransformer: updateCredentialTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credential-templates/{templateId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List digital credentials with optional filters. Requires role: 'association:admin'
+ */
+export const listDigitalCredentials = <ThrowOnError extends boolean = false>(options?: Options<ListDigitalCredentialsData, ThrowOnError>) => (options?.client ?? client).get<ListDigitalCredentialsResponses, ListDigitalCredentialsErrors, ThrowOnError>({
+    responseTransformer: listDigitalCredentialsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credentials',
+    ...options
+});
+
+/**
+ * Issue a new digital credential to a member. Requires role: 'association:admin'
+ */
+export const issueDigitalCredential = <ThrowOnError extends boolean = false>(options: Options<IssueDigitalCredentialData, ThrowOnError>) => (options.client ?? client).post<IssueDigitalCredentialResponses, IssueDigitalCredentialErrors, ThrowOnError>({
+    responseTransformer: issueDigitalCredentialResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credentials/issue',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Verify a credential by number or QR token. This endpoint is publicly accessible and records the verification event.
+ */
+export const verifyCredentialPublic = <ThrowOnError extends boolean = false>(options: Options<VerifyCredentialPublicData, ThrowOnError>) => (options.client ?? client).post<VerifyCredentialPublicResponses, VerifyCredentialPublicErrors, ThrowOnError>({
+    responseTransformer: verifyCredentialPublicResponseTransformer,
+    url: '/association/member/credentials/public-verify',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Verify a credential by number or QR token and record the verification attempt. Requires role: 'association:admin', 'association:member'
+ */
+export const verifyDigitalCredentialAuthenticated = <ThrowOnError extends boolean = false>(options: Options<VerifyDigitalCredentialAuthenticatedData, ThrowOnError>) => (options.client ?? client).post<VerifyDigitalCredentialAuthenticatedResponses, VerifyDigitalCredentialAuthenticatedErrors, ThrowOnError>({
+    responseTransformer: verifyDigitalCredentialAuthenticatedResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credentials/verify',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a digital credential record. Requires role: 'association:admin'
+ */
+export const deleteDigitalCredential = <ThrowOnError extends boolean = false>(options: Options<DeleteDigitalCredentialData, ThrowOnError>) => (options.client ?? client).delete<DeleteDigitalCredentialResponses, DeleteDigitalCredentialErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credentials/{credentialId}',
+    ...options
+});
+
+/**
+ * Get a digital credential by ID. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const getDigitalCredential = <ThrowOnError extends boolean = false>(options: Options<GetDigitalCredentialData, ThrowOnError>) => (options.client ?? client).get<GetDigitalCredentialResponses, GetDigitalCredentialErrors, ThrowOnError>({
+    responseTransformer: getDigitalCredentialResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credentials/{credentialId}',
+    ...options
+});
+
+/**
+ * Update a digital credential record. Requires role: 'association:admin'
+ */
+export const updateDigitalCredential = <ThrowOnError extends boolean = false>(options: Options<UpdateDigitalCredentialData, ThrowOnError>) => (options.client ?? client).patch<UpdateDigitalCredentialResponses, UpdateDigitalCredentialErrors, ThrowOnError>({
+    responseTransformer: updateDigitalCredentialResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credentials/{credentialId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Revoke a digital credential. Requires role: 'association:admin'
+ */
+export const revokeDigitalCredential = <ThrowOnError extends boolean = false>(options: Options<RevokeDigitalCredentialData, ThrowOnError>) => (options.client ?? client).post<RevokeDigitalCredentialResponses, RevokeDigitalCredentialErrors, ThrowOnError>({
+    responseTransformer: revokeDigitalCredentialResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/credentials/{credentialId}/revoke',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List directory profiles (admin view with all visibility levels). Requires role: 'association:admin'
+ */
+export const listDirectoryProfiles = <ThrowOnError extends boolean = false>(options?: Options<ListDirectoryProfilesData, ThrowOnError>) => (options?.client ?? client).get<ListDirectoryProfilesResponses, ListDirectoryProfilesErrors, ThrowOnError>({
+    responseTransformer: listDirectoryProfilesResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/directory/profiles',
+    ...options
+});
+
+/**
+ * Create a directory profile for a member. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const createDirectoryProfile = <ThrowOnError extends boolean = false>(options: Options<CreateDirectoryProfileData, ThrowOnError>) => (options.client ?? client).post<CreateDirectoryProfileResponses, CreateDirectoryProfileErrors, ThrowOnError>({
+    responseTransformer: createDirectoryProfileResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/directory/profiles',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a directory profile. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const deleteDirectoryProfile = <ThrowOnError extends boolean = false>(options: Options<DeleteDirectoryProfileData, ThrowOnError>) => (options.client ?? client).delete<DeleteDirectoryProfileResponses, DeleteDirectoryProfileErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/directory/profiles/{profileId}',
+    ...options
+});
+
+/**
+ * Get a directory profile by ID. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const getDirectoryProfile = <ThrowOnError extends boolean = false>(options: Options<GetDirectoryProfileData, ThrowOnError>) => (options.client ?? client).get<GetDirectoryProfileResponses, GetDirectoryProfileErrors, ThrowOnError>({
+    responseTransformer: getDirectoryProfileResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/directory/profiles/{profileId}',
+    ...options
+});
+
+/**
+ * Update a directory profile. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const updateDirectoryProfile = <ThrowOnError extends boolean = false>(options: Options<UpdateDirectoryProfileData, ThrowOnError>) => (options.client ?? client).patch<UpdateDirectoryProfileResponses, UpdateDirectoryProfileErrors, ThrowOnError>({
+    responseTransformer: updateDirectoryProfileResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/directory/profiles/{profileId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search the member directory with full-text and optional geo-spatial filters. Requires role: 'association:member', 'association:admin'
+ */
+export const searchDirectory = <ThrowOnError extends boolean = false>(options?: Options<SearchDirectoryData, ThrowOnError>) => (options?.client ?? client).get<SearchDirectoryResponses, SearchDirectoryErrors, ThrowOnError>({
+    responseTransformer: searchDirectoryResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/directory/search',
+    ...options
+});
+
+/**
+ * Get the public-facing profile of a member by their person ID. No authentication required for public profiles.
+ */
+export const getPublicDirectoryProfile = <ThrowOnError extends boolean = false>(options: Options<GetPublicDirectoryProfileData, ThrowOnError>) => (options.client ?? client).get<GetPublicDirectoryProfileResponses, GetPublicDirectoryProfileErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/directory/search/{personId}/public',
+    ...options
+});
+
+/**
+ * List dues configurations. Requires role: 'association:admin'
+ */
+export const listDuesConfigs = <ThrowOnError extends boolean = false>(options?: Options<ListDuesConfigsData, ThrowOnError>) => (options?.client ?? client).get<ListDuesConfigsResponses, ListDuesConfigsErrors, ThrowOnError>({
+    responseTransformer: listDuesConfigsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-configs',
+    ...options
+});
+
+/**
+ * Create a new dues configuration. Requires role: 'association:admin'
+ */
+export const createDuesConfig = <ThrowOnError extends boolean = false>(options: Options<CreateDuesConfigData, ThrowOnError>) => (options.client ?? client).post<CreateDuesConfigResponses, CreateDuesConfigErrors, ThrowOnError>({
+    responseTransformer: createDuesConfigResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-configs',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a dues configuration. Requires role: 'association:admin'
+ */
+export const deleteDuesConfig = <ThrowOnError extends boolean = false>(options: Options<DeleteDuesConfigData, ThrowOnError>) => (options.client ?? client).delete<DeleteDuesConfigResponses, DeleteDuesConfigErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-configs/{duesConfigId}',
+    ...options
+});
+
+/**
+ * Get a dues configuration by ID. Requires role: 'association:admin'
+ */
+export const getDuesConfig = <ThrowOnError extends boolean = false>(options: Options<GetDuesConfigData, ThrowOnError>) => (options.client ?? client).get<GetDuesConfigResponses, GetDuesConfigErrors, ThrowOnError>({
+    responseTransformer: getDuesConfigResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-configs/{duesConfigId}',
+    ...options
+});
+
+/**
+ * Update a dues configuration. Requires role: 'association:admin'
+ */
+export const updateDuesConfig = <ThrowOnError extends boolean = false>(options: Options<UpdateDuesConfigData, ThrowOnError>) => (options.client ?? client).patch<UpdateDuesConfigResponses, UpdateDuesConfigErrors, ThrowOnError>({
+    responseTransformer: updateDuesConfigResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-configs/{duesConfigId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List dues invoices with optional filters. Requires role: 'association:admin'
+ */
+export const listDuesInvoices = <ThrowOnError extends boolean = false>(options?: Options<ListDuesInvoicesData, ThrowOnError>) => (options?.client ?? client).get<ListDuesInvoicesResponses, ListDuesInvoicesErrors, ThrowOnError>({
+    responseTransformer: listDuesInvoicesResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-invoices',
+    ...options
+});
+
+/**
+ * Create a dues invoice manually. Requires role: 'association:admin'
+ */
+export const createDuesInvoice = <ThrowOnError extends boolean = false>(options: Options<CreateDuesInvoiceData, ThrowOnError>) => (options.client ?? client).post<CreateDuesInvoiceResponses, CreateDuesInvoiceErrors, ThrowOnError>({
+    responseTransformer: createDuesInvoiceResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-invoices',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Generate dues invoices in bulk for all eligible members in an organization. Requires role: 'association:admin'
+ */
+export const generateDuesInvoicesForOrg = <ThrowOnError extends boolean = false>(options: Options<GenerateDuesInvoicesForOrgData, ThrowOnError>) => (options.client ?? client).post<GenerateDuesInvoicesForOrgResponses, GenerateDuesInvoicesForOrgErrors, ThrowOnError>({
+    responseTransformer: generateDuesInvoicesForOrgResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-invoices/generate',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a dues invoice. Requires role: 'association:admin'
+ */
+export const deleteDuesInvoice = <ThrowOnError extends boolean = false>(options: Options<DeleteDuesInvoiceData, ThrowOnError>) => (options.client ?? client).delete<DeleteDuesInvoiceResponses, DeleteDuesInvoiceErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-invoices/{invoiceId}',
+    ...options
+});
+
+/**
+ * Get a dues invoice by ID. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const getDuesInvoice = <ThrowOnError extends boolean = false>(options: Options<GetDuesInvoiceData, ThrowOnError>) => (options.client ?? client).get<GetDuesInvoiceResponses, GetDuesInvoiceErrors, ThrowOnError>({
+    responseTransformer: getDuesInvoiceResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-invoices/{invoiceId}',
+    ...options
+});
+
+/**
+ * Update a dues invoice. Requires role: 'association:admin'
+ */
+export const updateDuesInvoice = <ThrowOnError extends boolean = false>(options: Options<UpdateDuesInvoiceData, ThrowOnError>) => (options.client ?? client).patch<UpdateDuesInvoiceResponses, UpdateDuesInvoiceErrors, ThrowOnError>({
+    responseTransformer: updateDuesInvoiceResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-invoices/{invoiceId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Mark a dues invoice as paid. Requires role: 'association:admin'
+ */
+export const markDuesInvoicePaid = <ThrowOnError extends boolean = false>(options: Options<MarkDuesInvoicePaidData, ThrowOnError>) => (options.client ?? client).post<MarkDuesInvoicePaidResponses, MarkDuesInvoicePaidErrors, ThrowOnError>({
+    responseTransformer: markDuesInvoicePaidResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dues-invoices/{invoiceId}/mark-paid',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search dunning events sent to members. Requires role: 'association:admin'
+ */
+export const listDunningEvents = <ThrowOnError extends boolean = false>(options?: Options<ListDunningEventsData, ThrowOnError>) => (options?.client ?? client).get<ListDunningEventsResponses, ListDunningEventsErrors, ThrowOnError>({
+    responseTransformer: listDunningEventsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dunning/events',
+    ...options
+});
+
+/**
+ * Execute a dunning run for an organization, sending stage-appropriate communications. Requires role: 'association:admin'
+ */
+export const runDunning = <ThrowOnError extends boolean = false>(options: Options<RunDunningData, ThrowOnError>) => (options.client ?? client).post<RunDunningResponses, RunDunningErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dunning/run',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List dunning templates. Requires role: 'association:admin'
+ */
+export const listDunningTemplates = <ThrowOnError extends boolean = false>(options?: Options<ListDunningTemplatesData, ThrowOnError>) => (options?.client ?? client).get<ListDunningTemplatesResponses, ListDunningTemplatesErrors, ThrowOnError>({
+    responseTransformer: listDunningTemplatesResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dunning/templates',
+    ...options
+});
+
+/**
+ * Create a new dunning template. Requires role: 'association:admin'
+ */
+export const createDunningTemplate = <ThrowOnError extends boolean = false>(options: Options<CreateDunningTemplateData, ThrowOnError>) => (options.client ?? client).post<CreateDunningTemplateResponses, CreateDunningTemplateErrors, ThrowOnError>({
+    responseTransformer: createDunningTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dunning/templates',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a dunning template. Requires role: 'association:admin'
+ */
+export const deleteDunningTemplate = <ThrowOnError extends boolean = false>(options: Options<DeleteDunningTemplateData, ThrowOnError>) => (options.client ?? client).delete<DeleteDunningTemplateResponses, DeleteDunningTemplateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dunning/templates/{templateId}',
+    ...options
+});
+
+/**
+ * Get a dunning template by ID. Requires role: 'association:admin'
+ */
+export const getDunningTemplate = <ThrowOnError extends boolean = false>(options: Options<GetDunningTemplateData, ThrowOnError>) => (options.client ?? client).get<GetDunningTemplateResponses, GetDunningTemplateErrors, ThrowOnError>({
+    responseTransformer: getDunningTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dunning/templates/{templateId}',
+    ...options
+});
+
+/**
+ * Update a dunning template. Requires role: 'association:admin'
+ */
+export const updateDunningTemplate = <ThrowOnError extends boolean = false>(options: Options<UpdateDunningTemplateData, ThrowOnError>) => (options.client ?? client).patch<UpdateDunningTemplateResponses, UpdateDunningTemplateErrors, ThrowOnError>({
+    responseTransformer: updateDunningTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/dunning/templates/{templateId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List institutional memberships. Requires role: 'association:admin'
+ */
+export const listInstitutionalMemberships = <ThrowOnError extends boolean = false>(options?: Options<ListInstitutionalMembershipsData, ThrowOnError>) => (options?.client ?? client).get<ListInstitutionalMembershipsResponses, ListInstitutionalMembershipsErrors, ThrowOnError>({
+    responseTransformer: listInstitutionalMembershipsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/institutional-memberships',
+    ...options
+});
+
+/**
+ * Create a new institutional membership. Requires role: 'association:admin'
+ */
+export const createInstitutionalMembership = <ThrowOnError extends boolean = false>(options: Options<CreateInstitutionalMembershipData, ThrowOnError>) => (options.client ?? client).post<CreateInstitutionalMembershipResponses, CreateInstitutionalMembershipErrors, ThrowOnError>({
+    responseTransformer: createInstitutionalMembershipResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/institutional-memberships',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete an institutional membership. Requires role: 'association:admin'
+ */
+export const deleteInstitutionalMembership = <ThrowOnError extends boolean = false>(options: Options<DeleteInstitutionalMembershipData, ThrowOnError>) => (options.client ?? client).delete<DeleteInstitutionalMembershipResponses, DeleteInstitutionalMembershipErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}',
+    ...options
+});
+
+/**
+ * Get an institutional membership by ID. Requires role: 'association:admin', 'institution:owner'
+ */
+export const getInstitutionalMembership = <ThrowOnError extends boolean = false>(options: Options<GetInstitutionalMembershipData, ThrowOnError>) => (options.client ?? client).get<GetInstitutionalMembershipResponses, GetInstitutionalMembershipErrors, ThrowOnError>({
+    responseTransformer: getInstitutionalMembershipResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}',
+    ...options
+});
+
+/**
+ * Update an institutional membership. Requires role: 'association:admin'
+ */
+export const updateInstitutionalMembership = <ThrowOnError extends boolean = false>(options: Options<UpdateInstitutionalMembershipData, ThrowOnError>) => (options.client ?? client).patch<UpdateInstitutionalMembershipResponses, UpdateInstitutionalMembershipErrors, ThrowOnError>({
+    responseTransformer: updateInstitutionalMembershipResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List seat allocations for an institutional membership. Requires role: 'association:admin', 'institution:admin'
+ */
+export const listSeatAllocations = <ThrowOnError extends boolean = false>(options: Options<ListSeatAllocationsData, ThrowOnError>) => (options.client ?? client).get<ListSeatAllocationsResponses, ListSeatAllocationsErrors, ThrowOnError>({
+    responseTransformer: listSeatAllocationsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}/seats',
+    ...options
+});
+
+/**
+ * Allocate a seat to an individual within an institutional membership. Requires role: 'association:admin', 'institution:admin'
+ */
+export const allocateSeat = <ThrowOnError extends boolean = false>(options: Options<AllocateSeatData, ThrowOnError>) => (options.client ?? client).post<AllocateSeatResponses, AllocateSeatErrors, ThrowOnError>({
+    responseTransformer: allocateSeatResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}/seats',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Revoke a seat allocation. Requires role: 'association:admin', 'institution:admin'
+ */
+export const revokeSeat = <ThrowOnError extends boolean = false>(options: Options<RevokeSeatData, ThrowOnError>) => (options.client ?? client).post<RevokeSeatResponses, RevokeSeatErrors, ThrowOnError>({
+    responseTransformer: revokeSeatResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}/seats/{seatAllocationId}/revoke',
+    ...options
+});
+
+/**
+ * List license renewal alerts with optional filters. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const listLicenseRenewalAlerts = <ThrowOnError extends boolean = false>(options?: Options<ListLicenseRenewalAlertsData, ThrowOnError>) => (options?.client ?? client).get<ListLicenseRenewalAlertsResponses, ListLicenseRenewalAlertsErrors, ThrowOnError>({
+    responseTransformer: listLicenseRenewalAlertsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/license-renewal-alerts',
+    ...options
+});
+
+/**
+ * Acknowledge a license renewal alert. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const acknowledgeLicenseRenewalAlert = <ThrowOnError extends boolean = false>(options: Options<AcknowledgeLicenseRenewalAlertData, ThrowOnError>) => (options.client ?? client).post<AcknowledgeLicenseRenewalAlertResponses, AcknowledgeLicenseRenewalAlertErrors, ThrowOnError>({
+    responseTransformer: acknowledgeLicenseRenewalAlertResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/license-renewal-alerts/{alertId}/acknowledge',
+    ...options
+});
+
+/**
+ * List professional licenses with optional filters. Requires role: 'association:admin'
+ */
+export const listProfessionalLicenses = <ThrowOnError extends boolean = false>(options?: Options<ListProfessionalLicensesData, ThrowOnError>) => (options?.client ?? client).get<ListProfessionalLicensesResponses, ListProfessionalLicensesErrors, ThrowOnError>({
+    responseTransformer: listProfessionalLicensesResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/licenses',
+    ...options
+});
+
+/**
+ * Create a professional license record. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const createProfessionalLicense = <ThrowOnError extends boolean = false>(options: Options<CreateProfessionalLicenseData, ThrowOnError>) => (options.client ?? client).post<CreateProfessionalLicenseResponses, CreateProfessionalLicenseErrors, ThrowOnError>({
+    responseTransformer: createProfessionalLicenseResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/licenses',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a professional license record. Requires role: 'association:admin'
+ */
+export const deleteProfessionalLicense = <ThrowOnError extends boolean = false>(options: Options<DeleteProfessionalLicenseData, ThrowOnError>) => (options.client ?? client).delete<DeleteProfessionalLicenseResponses, DeleteProfessionalLicenseErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/licenses/{licenseId}',
+    ...options
+});
+
+/**
+ * Get a professional license by ID. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const getProfessionalLicense = <ThrowOnError extends boolean = false>(options: Options<GetProfessionalLicenseData, ThrowOnError>) => (options.client ?? client).get<GetProfessionalLicenseResponses, GetProfessionalLicenseErrors, ThrowOnError>({
+    responseTransformer: getProfessionalLicenseResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/licenses/{licenseId}',
+    ...options
+});
+
+/**
+ * Update a professional license record. Requires role: 'association:admin'
+ */
+export const updateProfessionalLicense = <ThrowOnError extends boolean = false>(options: Options<UpdateProfessionalLicenseData, ThrowOnError>) => (options.client ?? client).patch<UpdateProfessionalLicenseResponses, UpdateProfessionalLicenseErrors, ThrowOnError>({
+    responseTransformer: updateProfessionalLicenseResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/licenses/{licenseId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List memberships with optional filters. Requires role: 'association:admin'
+ */
+export const listMemberships = <ThrowOnError extends boolean = false>(options?: Options<ListMembershipsData, ThrowOnError>) => (options?.client ?? client).get<ListMembershipsResponses, ListMembershipsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/memberships',
+    ...options
+});
+
+/**
+ * Create a new membership. Requires role: 'association:admin'
+ */
+export const createMembership = <ThrowOnError extends boolean = false>(options: Options<CreateMembershipData, ThrowOnError>) => (options.client ?? client).post<CreateMembershipResponses, CreateMembershipErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/memberships',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a membership record. Requires role: 'association:admin'
+ */
+export const deleteMembership = <ThrowOnError extends boolean = false>(options: Options<DeleteMembershipData, ThrowOnError>) => (options.client ?? client).delete<DeleteMembershipResponses, DeleteMembershipErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/memberships/{membershipId}',
+    ...options
+});
+
+/**
+ * Get a membership by ID. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const getMembership = <ThrowOnError extends boolean = false>(options: Options<GetMembershipData, ThrowOnError>) => (options.client ?? client).get<GetMembershipResponses, GetMembershipErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/memberships/{membershipId}',
+    ...options
+});
+
+/**
+ * Update a membership record. Requires role: 'association:admin'
+ */
+export const updateMembership = <ThrowOnError extends boolean = false>(options: Options<UpdateMembershipData, ThrowOnError>) => (options.client ?? client).patch<UpdateMembershipResponses, UpdateMembershipErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/memberships/{membershipId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reinstate a suspended or lapsed membership. Requires role: 'association:admin'
+ */
+export const reinstateMembership = <ThrowOnError extends boolean = false>(options: Options<ReinstateMembershipData, ThrowOnError>) => (options.client ?? client).post<ReinstateMembershipResponses, ReinstateMembershipErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/memberships/{membershipId}/reinstate',
+    ...options
+});
+
+/**
+ * Renew a membership by extending its dues expiry date. Requires role: 'association:admin'
+ */
+export const renewMembership = <ThrowOnError extends boolean = false>(options: Options<RenewMembershipData, ThrowOnError>) => (options.client ?? client).post<RenewMembershipResponses, RenewMembershipErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/memberships/{membershipId}/renew',
+    ...options
+});
+
+/**
+ * Terminate a membership permanently. Requires role: 'association:admin'
+ */
+export const terminateMembership = <ThrowOnError extends boolean = false>(options: Options<TerminateMembershipData, ThrowOnError>) => (options.client ?? client).post<TerminateMembershipResponses, TerminateMembershipErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/memberships/{membershipId}/terminate',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List royalty splits with optional filters. Requires role: 'association:admin'
+ */
+export const listRoyaltySplits = <ThrowOnError extends boolean = false>(options?: Options<ListRoyaltySplitsData, ThrowOnError>) => (options?.client ?? client).get<ListRoyaltySplitsResponses, ListRoyaltySplitsErrors, ThrowOnError>({
+    responseTransformer: listRoyaltySplitsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/royalty-splits',
+    ...options
+});
+
+/**
+ * Create a new royalty split configuration. Requires role: 'association:admin'
+ */
+export const createRoyaltySplit = <ThrowOnError extends boolean = false>(options: Options<CreateRoyaltySplitData, ThrowOnError>) => (options.client ?? client).post<CreateRoyaltySplitResponses, CreateRoyaltySplitErrors, ThrowOnError>({
+    responseTransformer: createRoyaltySplitResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/royalty-splits',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a royalty split configuration. Requires role: 'association:admin'
+ */
+export const deleteRoyaltySplit = <ThrowOnError extends boolean = false>(options: Options<DeleteRoyaltySplitData, ThrowOnError>) => (options.client ?? client).delete<DeleteRoyaltySplitResponses, DeleteRoyaltySplitErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/royalty-splits/{royaltySplitId}',
+    ...options
+});
+
+/**
+ * Get a royalty split by ID. Requires role: 'association:admin'
+ */
+export const getRoyaltySplit = <ThrowOnError extends boolean = false>(options: Options<GetRoyaltySplitData, ThrowOnError>) => (options.client ?? client).get<GetRoyaltySplitResponses, GetRoyaltySplitErrors, ThrowOnError>({
+    responseTransformer: getRoyaltySplitResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/royalty-splits/{royaltySplitId}',
+    ...options
+});
+
+/**
+ * Update a royalty split configuration. Requires role: 'association:admin'
+ */
+export const updateRoyaltySplit = <ThrowOnError extends boolean = false>(options: Options<UpdateRoyaltySplitData, ThrowOnError>) => (options.client ?? client).patch<UpdateRoyaltySplitResponses, UpdateRoyaltySplitErrors, ThrowOnError>({
+    responseTransformer: updateRoyaltySplitResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/royalty-splits/{royaltySplitId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List all membership tiers. Requires role: 'association:member', 'association:admin'
+ */
+export const listMembershipTiers = <ThrowOnError extends boolean = false>(options?: Options<ListMembershipTiersData, ThrowOnError>) => (options?.client ?? client).get<ListMembershipTiersResponses, ListMembershipTiersErrors, ThrowOnError>({
+    responseTransformer: listMembershipTiersResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/tiers',
+    ...options
+});
+
+/**
+ * Create a new membership tier. Requires role: 'association:admin'
+ */
+export const createMembershipTier = <ThrowOnError extends boolean = false>(options: Options<CreateMembershipTierData, ThrowOnError>) => (options.client ?? client).post<CreateMembershipTierResponses, CreateMembershipTierErrors, ThrowOnError>({
+    responseTransformer: createMembershipTierResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/tiers',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a membership tier. Requires role: 'association:admin'
+ */
+export const deleteMembershipTier = <ThrowOnError extends boolean = false>(options: Options<DeleteMembershipTierData, ThrowOnError>) => (options.client ?? client).delete<DeleteMembershipTierResponses, DeleteMembershipTierErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/tiers/{tierId}',
+    ...options
+});
+
+/**
+ * Get a membership tier by ID. Requires role: 'association:member', 'association:admin'
+ */
+export const getMembershipTier = <ThrowOnError extends boolean = false>(options: Options<GetMembershipTierData, ThrowOnError>) => (options.client ?? client).get<GetMembershipTierResponses, GetMembershipTierErrors, ThrowOnError>({
+    responseTransformer: getMembershipTierResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/tiers/{tierId}',
+    ...options
+});
+
+/**
+ * Update a membership tier. Requires role: 'association:admin'
+ */
+export const updateMembershipTier = <ThrowOnError extends boolean = false>(options: Options<UpdateMembershipTierData, ThrowOnError>) => (options.client ?? client).patch<UpdateMembershipTierResponses, UpdateMembershipTierErrors, ThrowOnError>({
+    responseTransformer: updateMembershipTierResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/member/tiers/{tierId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search and list message templates. Requires role: 'admin', 'coordinator'
+ */
+export const searchMessageTemplates = <ThrowOnError extends boolean = false>(options?: Options<SearchMessageTemplatesData, ThrowOnError>) => (options?.client ?? client).get<SearchMessageTemplatesResponses, SearchMessageTemplatesErrors, ThrowOnError>({
+    responseTransformer: searchMessageTemplatesResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/message-templates',
+    ...options
+});
+
+/**
+ * Create a message template. Requires role: 'admin', 'coordinator'
+ */
+export const createMessageTemplate = <ThrowOnError extends boolean = false>(options: Options<CreateMessageTemplateData, ThrowOnError>) => (options.client ?? client).post<CreateMessageTemplateResponses, CreateMessageTemplateErrors, ThrowOnError>({
+    responseTransformer: createMessageTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/message-templates',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a message template. Requires role: 'admin'
+ */
+export const deleteMessageTemplate = <ThrowOnError extends boolean = false>(options: Options<DeleteMessageTemplateData, ThrowOnError>) => (options.client ?? client).delete<DeleteMessageTemplateResponses, DeleteMessageTemplateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/message-templates/{templateId}',
+    ...options
+});
+
+/**
+ * Get a message template by ID. Requires role: 'admin', 'coordinator'
+ */
+export const getMessageTemplate = <ThrowOnError extends boolean = false>(options: Options<GetMessageTemplateData, ThrowOnError>) => (options.client ?? client).get<GetMessageTemplateResponses, GetMessageTemplateErrors, ThrowOnError>({
+    responseTransformer: getMessageTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/message-templates/{templateId}',
+    ...options
+});
+
+/**
+ * Update a message template. Requires role: 'admin', 'coordinator'
+ */
+export const updateMessageTemplate = <ThrowOnError extends boolean = false>(options: Options<UpdateMessageTemplateData, ThrowOnError>) => (options.client ?? client).patch<UpdateMessageTemplateResponses, UpdateMessageTemplateErrors, ThrowOnError>({
+    responseTransformer: updateMessageTemplateResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/message-templates/{templateId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Preview a rendered template with sample merge data. Requires role: 'admin', 'coordinator'
+ */
+export const previewMessageTemplate = <ThrowOnError extends boolean = false>(options: Options<PreviewMessageTemplateData, ThrowOnError>) => (options.client ?? client).post<PreviewMessageTemplateResponses, PreviewMessageTemplateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/message-templates/{templateId}/preview',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search and list messages. Requires role: 'admin', 'coordinator'
+ */
+export const searchMessages = <ThrowOnError extends boolean = false>(options?: Options<SearchMessagesData, ThrowOnError>) => (options?.client ?? client).get<SearchMessagesResponses, SearchMessagesErrors, ThrowOnError>({
+    responseTransformer: searchMessagesResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/messages',
+    ...options
+});
+
+/**
+ * Compose a new message. Requires role: 'admin', 'coordinator'
+ */
+export const createMessage = <ThrowOnError extends boolean = false>(options: Options<CreateMessageData, ThrowOnError>) => (options.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
+    responseTransformer: createMessageResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/messages',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a draft message. Requires role: 'admin'
+ */
+export const deleteMessage = <ThrowOnError extends boolean = false>(options: Options<DeleteMessageData, ThrowOnError>) => (options.client ?? client).delete<DeleteMessageResponses, DeleteMessageErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/messages/{messageId}',
+    ...options
+});
+
+/**
+ * Get a message by ID. Requires role: 'admin', 'coordinator'
+ */
+export const getMessage = <ThrowOnError extends boolean = false>(options: Options<GetMessageData, ThrowOnError>) => (options.client ?? client).get<GetMessageResponses, GetMessageErrors, ThrowOnError>({
+    responseTransformer: getMessageResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/messages/{messageId}',
+    ...options
+});
+
+/**
+ * Update a draft message. Requires role: 'admin', 'coordinator'
+ */
+export const updateMessage = <ThrowOnError extends boolean = false>(options: Options<UpdateMessageData, ThrowOnError>) => (options.client ?? client).patch<UpdateMessageResponses, UpdateMessageErrors, ThrowOnError>({
+    responseTransformer: updateMessageResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/messages/{messageId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cancel a scheduled message. Requires role: 'admin', 'coordinator'
+ */
+export const cancelMessage = <ThrowOnError extends boolean = false>(options: Options<CancelMessageData, ThrowOnError>) => (options.client ?? client).post<CancelMessageResponses, CancelMessageErrors, ThrowOnError>({
+    responseTransformer: cancelMessageResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/messages/{messageId}/cancel',
+    ...options
+});
+
+/**
+ * Schedule a message to be sent at a future time. Requires role: 'admin', 'coordinator'
+ */
+export const scheduleMessage = <ThrowOnError extends boolean = false>(options: Options<ScheduleMessageData, ThrowOnError>) => (options.client ?? client).post<ScheduleMessageResponses, ScheduleMessageErrors, ThrowOnError>({
+    responseTransformer: scheduleMessageResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/messages/{messageId}/schedule',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Send a draft message immediately. Requires role: 'admin', 'coordinator'
+ */
+export const sendMessage = <ThrowOnError extends boolean = false>(options: Options<SendMessageData, ThrowOnError>) => (options.client ?? client).post<SendMessageResponses, SendMessageErrors, ThrowOnError>({
+    responseTransformer: sendMessageResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/messages/{messageId}/send',
+    ...options
+});
+
+/**
+ * List a person's subscription preferences. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const listPersonSubscriptions = <ThrowOnError extends boolean = false>(options: Options<ListPersonSubscriptionsData, ThrowOnError>) => (options.client ?? client).get<ListPersonSubscriptionsResponses, ListPersonSubscriptionsErrors, ThrowOnError>({
+    responseTransformer: listPersonSubscriptionsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/person-subscriptions',
+    ...options
+});
+
+/**
+ * Bulk-update multiple subscription preferences for a person. Requires role: 'admin', 'member:owner'
+ */
+export const bulkUpdatePersonSubscriptions = <ThrowOnError extends boolean = false>(options: Options<BulkUpdatePersonSubscriptionsData, ThrowOnError>) => (options.client ?? client).post<BulkUpdatePersonSubscriptionsResponses, BulkUpdatePersonSubscriptionsErrors, ThrowOnError>({
+    responseTransformer: bulkUpdatePersonSubscriptionsResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/person-subscriptions/bulk-update',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Update a single subscription preference. Requires role: 'admin', 'member:owner'
+ */
+export const updatePersonSubscription = <ThrowOnError extends boolean = false>(options: Options<UpdatePersonSubscriptionData, ThrowOnError>) => (options.client ?? client).patch<UpdatePersonSubscriptionResponses, UpdatePersonSubscriptionErrors, ThrowOnError>({
+    responseTransformer: updatePersonSubscriptionResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/person-subscriptions/{subscriptionId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Create a subscription topic. Requires role: 'admin'
+ */
+export const createSubscriptionTopic = <ThrowOnError extends boolean = false>(options: Options<CreateSubscriptionTopicData, ThrowOnError>) => (options.client ?? client).post<CreateSubscriptionTopicResponses, CreateSubscriptionTopicErrors, ThrowOnError>({
+    responseTransformer: createSubscriptionTopicResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/subscription-topics',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a subscription topic. Requires role: 'admin'
+ */
+export const deleteSubscriptionTopic = <ThrowOnError extends boolean = false>(options: Options<DeleteSubscriptionTopicData, ThrowOnError>) => (options.client ?? client).delete<DeleteSubscriptionTopicResponses, DeleteSubscriptionTopicErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/subscription-topics/{topicId}',
+    ...options
+});
+
+/**
+ * Get a subscription topic by ID. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const getSubscriptionTopic = <ThrowOnError extends boolean = false>(options: Options<GetSubscriptionTopicData, ThrowOnError>) => (options.client ?? client).get<GetSubscriptionTopicResponses, GetSubscriptionTopicErrors, ThrowOnError>({
+    responseTransformer: getSubscriptionTopicResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/subscription-topics/{topicId}',
+    ...options
+});
+
+/**
+ * Update a subscription topic. Requires role: 'admin'
+ */
+export const updateSubscriptionTopic = <ThrowOnError extends boolean = false>(options: Options<UpdateSubscriptionTopicData, ThrowOnError>) => (options.client ?? client).patch<UpdateSubscriptionTopicResponses, UpdateSubscriptionTopicErrors, ThrowOnError>({
+    responseTransformer: updateSubscriptionTopicResponseTransformer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/association/subscription-topics/{topicId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search training sessions with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchTrainings = <ThrowOnError extends boolean = false>(options?: Options<SearchTrainingsData, ThrowOnError>) => (options?.client ?? client).get<SearchTrainingsResponses, SearchTrainingsErrors, ThrowOnError>({ url: '/association/training', ...options });
+
+/**
+ * Create a new training session. Requires role: 'association:admin', 'association:staff'
+ */
+export const createTraining = <ThrowOnError extends boolean = false>(options: Options<CreateTrainingData, ThrowOnError>) => (options.client ?? client).post<CreateTrainingResponses, CreateTrainingErrors, ThrowOnError>({
+    url: '/association/training',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search courses with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchCourses = <ThrowOnError extends boolean = false>(options?: Options<SearchCoursesData, ThrowOnError>) => (options?.client ?? client).get<SearchCoursesResponses, SearchCoursesErrors, ThrowOnError>({
+    responseTransformer: searchCoursesResponseTransformer,
+    url: '/association/training/courses',
+    ...options
+});
+
+/**
+ * Create a new online course. Requires role: 'association:admin', 'association:staff'
+ */
+export const createCourse = <ThrowOnError extends boolean = false>(options: Options<CreateCourseData, ThrowOnError>) => (options.client ?? client).post<CreateCourseResponses, CreateCourseErrors, ThrowOnError>({
+    responseTransformer: createCourseResponseTransformer,
+    url: '/association/training/courses',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search course enrollments with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchCourseEnrollments = <ThrowOnError extends boolean = false>(options?: Options<SearchCourseEnrollmentsData, ThrowOnError>) => (options?.client ?? client).get<SearchCourseEnrollmentsResponses, SearchCourseEnrollmentsErrors, ThrowOnError>({
+    responseTransformer: searchCourseEnrollmentsResponseTransformer,
+    url: '/association/training/courses/enrollments',
+    ...options
+});
+
+/**
+ * Enroll a person in an online course. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const createCourseEnrollment = <ThrowOnError extends boolean = false>(options: Options<CreateCourseEnrollmentData, ThrowOnError>) => (options.client ?? client).post<CreateCourseEnrollmentResponses, CreateCourseEnrollmentErrors, ThrowOnError>({
+    responseTransformer: createCourseEnrollmentResponseTransformer,
+    url: '/association/training/courses/enrollments',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a course enrollment. Requires role: 'association:admin'
+ */
+export const deleteCourseEnrollment = <ThrowOnError extends boolean = false>(options: Options<DeleteCourseEnrollmentData, ThrowOnError>) => (options.client ?? client).delete<DeleteCourseEnrollmentResponses, DeleteCourseEnrollmentErrors, ThrowOnError>({ url: '/association/training/courses/enrollments/{enrollmentId}', ...options });
+
+/**
+ * Get a course enrollment by ID. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const getCourseEnrollment = <ThrowOnError extends boolean = false>(options: Options<GetCourseEnrollmentData, ThrowOnError>) => (options.client ?? client).get<GetCourseEnrollmentResponses, GetCourseEnrollmentErrors, ThrowOnError>({
+    responseTransformer: getCourseEnrollmentResponseTransformer,
+    url: '/association/training/courses/enrollments/{enrollmentId}',
+    ...options
+});
+
+/**
+ * Update a course enrollment record. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateCourseEnrollment = <ThrowOnError extends boolean = false>(options: Options<UpdateCourseEnrollmentData, ThrowOnError>) => (options.client ?? client).patch<UpdateCourseEnrollmentResponses, UpdateCourseEnrollmentErrors, ThrowOnError>({
+    responseTransformer: updateCourseEnrollmentResponseTransformer,
+    url: '/association/training/courses/enrollments/{enrollmentId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Update learner progress on an enrolled course. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const updateCourseProgress = <ThrowOnError extends boolean = false>(options: Options<UpdateCourseProgressData, ThrowOnError>) => (options.client ?? client).post<UpdateCourseProgressResponses, UpdateCourseProgressErrors, ThrowOnError>({
+    responseTransformer: updateCourseProgressResponseTransformer,
+    url: '/association/training/courses/enrollments/{enrollmentId}/progress',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search quiz attempts with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const searchQuizAttempts = <ThrowOnError extends boolean = false>(options?: Options<SearchQuizAttemptsData, ThrowOnError>) => (options?.client ?? client).get<SearchQuizAttemptsResponses, SearchQuizAttemptsErrors, ThrowOnError>({
+    responseTransformer: searchQuizAttemptsResponseTransformer,
+    url: '/association/training/courses/quiz-attempts',
+    ...options
+});
+
+/**
+ * Submit a new quiz attempt for a course module. Requires role: 'association:member:owner'
+ */
+export const createQuizAttempt = <ThrowOnError extends boolean = false>(options: Options<CreateQuizAttemptData, ThrowOnError>) => (options.client ?? client).post<CreateQuizAttemptResponses, CreateQuizAttemptErrors, ThrowOnError>({
+    responseTransformer: createQuizAttemptResponseTransformer,
+    url: '/association/training/courses/quiz-attempts',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a course. Requires role: 'association:admin'
+ */
+export const deleteCourse = <ThrowOnError extends boolean = false>(options: Options<DeleteCourseData, ThrowOnError>) => (options.client ?? client).delete<DeleteCourseResponses, DeleteCourseErrors, ThrowOnError>({ url: '/association/training/courses/{courseId}', ...options });
+
+/**
+ * Get a course by ID. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const getCourse = <ThrowOnError extends boolean = false>(options: Options<GetCourseData, ThrowOnError>) => (options.client ?? client).get<GetCourseResponses, GetCourseErrors, ThrowOnError>({
+    responseTransformer: getCourseResponseTransformer,
+    url: '/association/training/courses/{courseId}',
+    ...options
+});
+
+/**
+ * Update a course. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateCourse = <ThrowOnError extends boolean = false>(options: Options<UpdateCourseData, ThrowOnError>) => (options.client ?? client).patch<UpdateCourseResponses, UpdateCourseErrors, ThrowOnError>({
+    responseTransformer: updateCourseResponseTransformer,
+    url: '/association/training/courses/{courseId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search training enrollments with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchTrainingEnrollments = <ThrowOnError extends boolean = false>(options?: Options<SearchTrainingEnrollmentsData, ThrowOnError>) => (options?.client ?? client).get<SearchTrainingEnrollmentsResponses, SearchTrainingEnrollmentsErrors, ThrowOnError>({
+    responseTransformer: searchTrainingEnrollmentsResponseTransformer,
+    url: '/association/training/enrollments',
+    ...options
+});
+
+/**
+ * Enroll a person in a training session. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const createTrainingEnrollment = <ThrowOnError extends boolean = false>(options: Options<CreateTrainingEnrollmentData, ThrowOnError>) => (options.client ?? client).post<CreateTrainingEnrollmentResponses, CreateTrainingEnrollmentErrors, ThrowOnError>({
+    responseTransformer: createTrainingEnrollmentResponseTransformer,
+    url: '/association/training/enrollments',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a training enrollment. Requires role: 'association:admin'
+ */
+export const deleteTrainingEnrollment = <ThrowOnError extends boolean = false>(options: Options<DeleteTrainingEnrollmentData, ThrowOnError>) => (options.client ?? client).delete<DeleteTrainingEnrollmentResponses, DeleteTrainingEnrollmentErrors, ThrowOnError>({ url: '/association/training/enrollments/{enrollmentId}', ...options });
+
+/**
+ * Get a training enrollment by ID. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const getTrainingEnrollment = <ThrowOnError extends boolean = false>(options: Options<GetTrainingEnrollmentData, ThrowOnError>) => (options.client ?? client).get<GetTrainingEnrollmentResponses, GetTrainingEnrollmentErrors, ThrowOnError>({
+    responseTransformer: getTrainingEnrollmentResponseTransformer,
+    url: '/association/training/enrollments/{enrollmentId}',
+    ...options
+});
+
+/**
+ * Update a training enrollment record. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateTrainingEnrollment = <ThrowOnError extends boolean = false>(options: Options<UpdateTrainingEnrollmentData, ThrowOnError>) => (options.client ?? client).patch<UpdateTrainingEnrollmentResponses, UpdateTrainingEnrollmentErrors, ThrowOnError>({
+    responseTransformer: updateTrainingEnrollmentResponseTransformer,
+    url: '/association/training/enrollments/{enrollmentId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Mark a training enrollment as completed and optionally award CE credit. Requires role: 'association:admin', 'association:staff'
+ */
+export const completeTrainingEnrollment = <ThrowOnError extends boolean = false>(options: Options<CompleteTrainingEnrollmentData, ThrowOnError>) => (options.client ?? client).post<CompleteTrainingEnrollmentResponses, CompleteTrainingEnrollmentErrors, ThrowOnError>({
+    responseTransformer: completeTrainingEnrollmentResponseTransformer,
+    url: '/association/training/enrollments/{enrollmentId}/complete',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a training session. Requires role: 'association:admin'
+ */
+export const deleteTraining = <ThrowOnError extends boolean = false>(options: Options<DeleteTrainingData, ThrowOnError>) => (options.client ?? client).delete<DeleteTrainingResponses, DeleteTrainingErrors, ThrowOnError>({ url: '/association/training/{trainingId}', ...options });
+
+/**
+ * Get a training session by ID. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const getTraining = <ThrowOnError extends boolean = false>(options: Options<GetTrainingData, ThrowOnError>) => (options.client ?? client).get<GetTrainingResponses, GetTrainingErrors, ThrowOnError>({ url: '/association/training/{trainingId}', ...options });
+
+/**
+ * Update an existing training session. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateTraining = <ThrowOnError extends boolean = false>(options: Options<UpdateTrainingData, ThrowOnError>) => (options.client ?? client).patch<UpdateTrainingResponses, UpdateTrainingErrors, ThrowOnError>({
+    url: '/association/training/{trainingId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Publish a training session making it visible for registration. Requires role: 'association:admin', 'association:staff'
+ */
+export const publishTraining = <ThrowOnError extends boolean = false>(options: Options<PublishTrainingData, ThrowOnError>) => (options.client ?? client).post<PublishTrainingResponses, PublishTrainingErrors, ThrowOnError>({ url: '/association/training/{trainingId}/publish', ...options });
 
 /**
  * List audit logs with filtering and pagination. Requires role: 'admin', 'support'

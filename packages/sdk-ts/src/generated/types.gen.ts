@@ -5,6 +5,607 @@ export type ClientOptions = {
 };
 
 /**
+ * An AI agent task dispatched for asynchronous model processing
+ */
+export type AiAgentTask = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this task belongs to
+     */
+    tenantId: string;
+    /**
+     * Type of AI operation to perform
+     */
+    agentType: 'summarize' | 'classify' | 'recommend' | 'extract' | 'translate' | 'generate';
+    /**
+     * Input payload for the model (structure depends on agentType)
+     */
+    input: {
+        [key: string]: unknown;
+    };
+    /**
+     * Model output (available when status is completed or humanReviewRequired)
+     */
+    output?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Current task status
+     */
+    status: 'queued' | 'running' | 'completed' | 'failed' | 'human_review_required';
+    /**
+     * Model confidence score (0.0 to 1.0) — populated after completion
+     */
+    confidence?: number;
+    /**
+     * Name of the AI model used (e.g., 'claude-3-opus')
+     */
+    modelName?: string;
+    /**
+     * Version of the AI model used
+     */
+    modelVersion?: string;
+    /**
+     * UTC timestamp when model processing started
+     */
+    startedAt?: Date;
+    /**
+     * UTC timestamp when model processing completed
+     */
+    completedAt?: Date;
+    /**
+     * Identifier of the reviewer who actioned this task
+     */
+    reviewedBy?: string;
+    /**
+     * Outcome of human review (null until reviewed)
+     */
+    reviewOutcome?: 'approve' | 'modify' | 'reject';
+};
+
+/**
+ * Status of an AI agent task
+ */
+export type AiAgentTaskStatus = 'queued' | 'running' | 'completed' | 'failed' | 'human_review_required';
+
+/**
+ * An AI agent task dispatched for asynchronous model processing
+ */
+export type AiAgentTaskUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this task belongs to
+     */
+    tenantId?: string;
+    /**
+     * Type of AI operation to perform
+     */
+    agentType?: 'summarize' | 'classify' | 'recommend' | 'extract' | 'translate' | 'generate';
+    /**
+     * Input payload for the model (structure depends on agentType)
+     */
+    input?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Model output (available when status is completed or humanReviewRequired)
+     */
+    output?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Current task status
+     */
+    status?: 'queued' | 'running' | 'completed' | 'failed' | 'human_review_required';
+    /**
+     * Model confidence score (0.0 to 1.0) — populated after completion
+     */
+    confidence?: number;
+    /**
+     * Name of the AI model used (e.g., 'claude-3-opus')
+     */
+    modelName?: string;
+    /**
+     * Version of the AI model used
+     */
+    modelVersion?: string;
+    /**
+     * UTC timestamp when model processing started
+     */
+    startedAt?: Date;
+    /**
+     * UTC timestamp when model processing completed
+     */
+    completedAt?: Date;
+    /**
+     * Identifier of the reviewer who actioned this task
+     */
+    reviewedBy?: string;
+    /**
+     * Outcome of human review (null until reviewed)
+     */
+    reviewOutcome?: 'approve' | 'modify' | 'reject';
+};
+
+/**
+ * Type of operation an AI agent performs
+ */
+export type AiAgentType = 'summarize' | 'classify' | 'recommend' | 'extract' | 'translate' | 'generate';
+
+/**
+ * Status of a submitted conference abstract
+ */
+export type AbstractStatus = 'submitted' | 'under_review' | 'accepted' | 'rejected' | 'withdrawn' | 'presentation_scheduled';
+
+/**
+ * A paper or presentation abstract submitted for conference review
+ */
+export type AbstractSubmission = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this submission belongs to
+     */
+    tenantId: string;
+    /**
+     * Target conference
+     */
+    conferenceId: string;
+    /**
+     * Primary author (person identifier)
+     */
+    authorId: string;
+    /**
+     * Submission title
+     */
+    title: string;
+    /**
+     * Full abstract text
+     */
+    abstract: string;
+    /**
+     * Subject or topic category
+     */
+    category?: string;
+    /**
+     * Search and classification keywords
+     */
+    keywords?: Array<string>;
+    /**
+     * List of co-author names or identifiers
+     */
+    coAuthors?: Array<string>;
+    /**
+     * Current review status
+     */
+    status: 'submitted' | 'under_review' | 'accepted' | 'rejected' | 'withdrawn' | 'presentation_scheduled';
+    /**
+     * UTC timestamp of submission
+     */
+    submittedAt: Date;
+    /**
+     * Aggregate reviewer score (0-10 scale)
+     */
+    reviewScore?: number;
+    /**
+     * Consolidated reviewer feedback
+     */
+    reviewerComments?: string;
+};
+
+/**
+ * A paper or presentation abstract submitted for conference review
+ */
+export type AbstractSubmissionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this submission belongs to
+     */
+    tenantId?: string;
+    /**
+     * Target conference
+     */
+    conferenceId?: string;
+    /**
+     * Primary author (person identifier)
+     */
+    authorId?: string;
+    /**
+     * Submission title
+     */
+    title?: string;
+    /**
+     * Full abstract text
+     */
+    abstract?: string;
+    /**
+     * Subject or topic category
+     */
+    category?: string;
+    /**
+     * Search and classification keywords
+     */
+    keywords?: Array<string>;
+    /**
+     * List of co-author names or identifiers
+     */
+    coAuthors?: Array<string>;
+    /**
+     * Current review status
+     */
+    status?: 'submitted' | 'under_review' | 'accepted' | 'rejected' | 'withdrawn' | 'presentation_scheduled';
+    /**
+     * UTC timestamp of submission
+     */
+    submittedAt?: Date;
+    /**
+     * Aggregate reviewer score (0-10 scale)
+     */
+    reviewScore?: number;
+    /**
+     * Consolidated reviewer feedback
+     */
+    reviewerComments?: string;
+};
+
+/**
+ * Accreditation status of a CE provider organization
+ */
+export type AccreditationStatus = 'applied' | 'approved' | 'probation' | 'suspended' | 'revoked' | 'expired';
+
+/**
+ * An organization accredited to deliver continuing education activities
+ */
+export type AccreditedProvider = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the provider organization
+     */
+    organizationId: string;
+    /**
+     * Display name of the provider organization
+     */
+    organizationName: string;
+    /**
+     * Type of accreditation granted (e.g. 'Approved Provider', 'Co-sponsor')
+     */
+    accreditationType: string;
+    /**
+     * IDs or codes of activity categories this provider is approved to offer
+     */
+    approvedActivities: Array<string>;
+    /**
+     * Current accreditation status
+     */
+    status: 'applied' | 'approved' | 'probation' | 'suspended' | 'revoked' | 'expired';
+    /**
+     * Date on which accreditation was granted
+     */
+    approvedDate?: Date;
+    /**
+     * Date on which accreditation expires
+     */
+    expirationDate?: Date;
+    /**
+     * Maximum number of CE credits a member may claim per activity from this provider
+     */
+    maxCreditsPerActivity?: number;
+};
+
+/**
+ * An organization accredited to deliver continuing education activities
+ */
+export type AccreditedProviderUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the provider organization
+     */
+    organizationId?: string;
+    /**
+     * Display name of the provider organization
+     */
+    organizationName?: string;
+    /**
+     * Type of accreditation granted (e.g. 'Approved Provider', 'Co-sponsor')
+     */
+    accreditationType?: string;
+    /**
+     * IDs or codes of activity categories this provider is approved to offer
+     */
+    approvedActivities?: Array<string>;
+    /**
+     * Current accreditation status
+     */
+    status?: 'applied' | 'approved' | 'probation' | 'suspended' | 'revoked' | 'expired';
+    /**
+     * Date on which accreditation was granted
+     */
+    approvedDate?: Date;
+    /**
+     * Date on which accreditation expires
+     */
+    expirationDate?: Date;
+    /**
+     * Maximum number of CE credits a member may claim per activity from this provider
+     */
+    maxCreditsPerActivity?: number;
+};
+
+/**
+ * An action alert sent to members to mobilize advocacy responses
+ */
+export type ActionAlert = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the legislative issue this alert relates to
+     */
+    issueId: string;
+    /**
+     * Title of the action alert
+     */
+    title: string;
+    /**
+     * The specific action members are being asked to take
+     */
+    callToAction: string;
+    /**
+     * Description of the intended audience segment for targeting
+     */
+    targetAudience?: string;
+    /**
+     * Timestamp when the alert was sent to members
+     */
+    sentAt?: Date;
+    /**
+     * Number of member responses received
+     */
+    responsesCount?: number;
+    /**
+     * Current status of the action alert
+     */
+    status: 'draft' | 'active' | 'closed';
+};
+
+/**
+ * Status of an action alert
+ */
+export type ActionAlertStatus = 'draft' | 'active' | 'closed';
+
+/**
+ * An action alert sent to members to mobilize advocacy responses
+ */
+export type ActionAlertUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the legislative issue this alert relates to
+     */
+    issueId?: string;
+    /**
+     * Title of the action alert
+     */
+    title?: string;
+    /**
+     * The specific action members are being asked to take
+     */
+    callToAction?: string;
+    /**
+     * Description of the intended audience segment for targeting
+     */
+    targetAudience?: string;
+    /**
+     * Timestamp when the alert was sent to members
+     */
+    sentAt?: Date;
+    /**
+     * Number of member responses received
+     */
+    responsesCount?: number;
+    /**
+     * Current status of the action alert
+     */
+    status?: 'draft' | 'active' | 'closed';
+};
+
+/**
  * Physical mailing address
  */
 export type Address = {
@@ -54,7 +655,7 @@ export type Address = {
 /**
  * Physical mailing address for updates - all fields optional, null clears field
  */
-export type AddressUpdate = {
+export type AddressPatchInput = {
     /**
      * Street address line 1
      */
@@ -96,6 +697,4965 @@ export type AddressUpdate = {
          */
         accuracy?: number;
     } | null;
+};
+
+/**
+ * Physical mailing address
+ */
+export type AddressUpdate = {
+    /**
+     * Street address line 1
+     */
+    street1?: string;
+    /**
+     * Street address line 2
+     */
+    street2?: string;
+    /**
+     * City name
+     */
+    city?: string;
+    /**
+     * State or province
+     */
+    state?: string;
+    /**
+     * Postal or ZIP code
+     */
+    postalCode?: string;
+    /**
+     * Country code
+     */
+    country?: string;
+    /**
+     * Address coordinates
+     */
+    coordinates?: {
+        /**
+         * Latitude in decimal degrees
+         */
+        latitude?: number;
+        /**
+         * Longitude in decimal degrees
+         */
+        longitude?: number;
+        /**
+         * Accuracy in meters
+         */
+        accuracy?: number;
+    };
+};
+
+/**
+ * Lifecycle status of a chapter affiliation record
+ */
+export type AffiliationStatus = 'active' | 'transferred' | 'withdrawn';
+
+/**
+ * Request to transfer a member's primary chapter affiliation from one chapter to another
+ */
+export type AffiliationTransfer = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the member requesting the transfer
+     */
+    personId: string;
+    /**
+     * ID of the chapter the member is leaving
+     */
+    fromChapterId: string;
+    /**
+     * ID of the chapter the member is joining
+     */
+    toChapterId: string;
+    /**
+     * Timestamp when the transfer was requested
+     */
+    requestedAt: Date;
+    /**
+     * ID of the person who initiated the request (may differ from personId for admin-initiated transfers)
+     */
+    requestedBy: string;
+    /**
+     * ID of the source chapter officer who approved the outgoing transfer
+     */
+    approvedBySource?: string;
+    /**
+     * ID of the target chapter officer who approved the incoming transfer
+     */
+    approvedByTarget?: string;
+    /**
+     * Current status of the transfer workflow
+     */
+    status: 'requested' | 'pendingSourceApproval' | 'pendingTargetApproval' | 'approved' | 'denied' | 'completed' | 'cancelled';
+    /**
+     * Timestamp when the transfer was fully completed
+     */
+    completedAt?: Date;
+};
+
+/**
+ * Request to create an affiliation transfer
+ */
+export type AffiliationTransferCreateRequest = {
+    personId: string;
+    fromChapterId: string;
+    toChapterId: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type AffiliationTransferListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AffiliationTransfer>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Request to transfer a member's primary chapter affiliation from one chapter to another
+ */
+export type AffiliationTransferUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the member requesting the transfer
+     */
+    personId?: string;
+    /**
+     * ID of the chapter the member is leaving
+     */
+    fromChapterId?: string;
+    /**
+     * ID of the chapter the member is joining
+     */
+    toChapterId?: string;
+    /**
+     * Timestamp when the transfer was requested
+     */
+    requestedAt?: Date;
+    /**
+     * ID of the person who initiated the request (may differ from personId for admin-initiated transfers)
+     */
+    requestedBy?: string;
+    /**
+     * ID of the source chapter officer who approved the outgoing transfer
+     */
+    approvedBySource?: string;
+    /**
+     * ID of the target chapter officer who approved the incoming transfer
+     */
+    approvedByTarget?: string;
+    /**
+     * Current status of the transfer workflow
+     */
+    status?: 'requested' | 'pendingSourceApproval' | 'pendingTargetApproval' | 'approved' | 'denied' | 'completed' | 'cancelled';
+    /**
+     * Timestamp when the transfer was fully completed
+     */
+    completedAt?: Date;
+};
+
+/**
+ * Accounts-receivable aging snapshot for an organization as of a specific date
+ */
+export type AgingBucket = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * Date on which this aging snapshot was calculated
+     */
+    asOfDate: Date;
+    /**
+     * Total outstanding balance for invoices not yet past due
+     */
+    current: bigint;
+    /**
+     * Total outstanding balance for invoices 1–30 days past due
+     */
+    thirtyDay: bigint;
+    /**
+     * Total outstanding balance for invoices 31–60 days past due
+     */
+    sixtyDay: bigint;
+    /**
+     * Total outstanding balance for invoices 61–90 days past due
+     */
+    ninetyDay: bigint;
+    /**
+     * Total outstanding balance for invoices more than 90 days past due
+     */
+    overNinety: bigint;
+    /**
+     * Sum of all outstanding balances across all aging buckets
+     */
+    totalOutstanding: bigint;
+};
+
+/**
+ * Accounts-receivable aging snapshot for an organization as of a specific date
+ */
+export type AgingBucketUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * Date on which this aging snapshot was calculated
+     */
+    asOfDate?: Date;
+    /**
+     * Total outstanding balance for invoices not yet past due
+     */
+    current?: bigint;
+    /**
+     * Total outstanding balance for invoices 1–30 days past due
+     */
+    thirtyDay?: bigint;
+    /**
+     * Total outstanding balance for invoices 31–60 days past due
+     */
+    sixtyDay?: bigint;
+    /**
+     * Total outstanding balance for invoices 61–90 days past due
+     */
+    ninetyDay?: bigint;
+    /**
+     * Total outstanding balance for invoices more than 90 days past due
+     */
+    overNinety?: bigint;
+    /**
+     * Sum of all outstanding balances across all aging buckets
+     */
+    totalOutstanding?: bigint;
+};
+
+/**
+ * Status of a membership application
+ */
+export type ApplicationStatus = 'submitted' | 'underReview' | 'approved' | 'denied' | 'waitlisted';
+
+/**
+ * An article within a publication issue
+ */
+export type Article = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this article belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent issue
+     */
+    issueId: string;
+    /**
+     * Article title
+     */
+    title: string;
+    /**
+     * Author person identifiers (ordered)
+     */
+    authorIds: Array<string>;
+    /**
+     * Structured abstract summarizing the article
+     */
+    abstract?: string;
+    /**
+     * Full article content (may be stored as rich text or HTML)
+     */
+    content?: string;
+    /**
+     * Search and classification keywords
+     */
+    keywords?: Array<string>;
+    /**
+     * Digital Object Identifier
+     */
+    doi?: string;
+    /**
+     * Access control level for this article
+     */
+    accessLevel: 'open_access' | 'member_only' | 'subscriber' | 'pay_per_view';
+    /**
+     * Current article status
+     */
+    status: 'submitted' | 'peer_review' | 'accepted' | 'published' | 'retracted';
+};
+
+/**
+ * Access control level for an article
+ */
+export type ArticleAccessLevel = 'open_access' | 'member_only' | 'subscriber' | 'pay_per_view';
+
+/**
+ * Lifecycle status of an article
+ */
+export type ArticleStatus = 'submitted' | 'peer_review' | 'accepted' | 'published' | 'retracted';
+
+/**
+ * An article within a publication issue
+ */
+export type ArticleUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this article belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent issue
+     */
+    issueId?: string;
+    /**
+     * Article title
+     */
+    title?: string;
+    /**
+     * Author person identifiers (ordered)
+     */
+    authorIds?: Array<string>;
+    /**
+     * Structured abstract summarizing the article
+     */
+    abstract?: string;
+    /**
+     * Full article content (may be stored as rich text or HTML)
+     */
+    content?: string;
+    /**
+     * Search and classification keywords
+     */
+    keywords?: Array<string>;
+    /**
+     * Digital Object Identifier
+     */
+    doi?: string;
+    /**
+     * Access control level for this article
+     */
+    accessLevel?: 'open_access' | 'member_only' | 'subscriber' | 'pay_per_view';
+    /**
+     * Current article status
+     */
+    status?: 'submitted' | 'peer_review' | 'accepted' | 'published' | 'retracted';
+};
+
+/**
+ * Base entity for association domain models; extends BaseEntity with multi-tenant isolation.
+ */
+export type AssociationCoreAssociationBaseEntity = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+};
+
+/**
+ * Base entity for association domain models; extends BaseEntity with multi-tenant isolation.
+ */
+export type AssociationCoreAssociationBaseEntityUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+};
+
+/**
+ * An invoice issued to a person or organisation for amounts owed.
+ */
+export type AssociationCoreBillingInvoice = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Human-readable, auto-generated invoice number (e.g. 'INV-2025-00042').
+     */
+    number: string;
+    /**
+     * Person this invoice was issued to (optional; use organizationId for org billing).
+     */
+    personId?: string;
+    /**
+     * Organisation this invoice was issued to (optional).
+     */
+    organizationId?: string;
+    /**
+     * Current lifecycle status.
+     */
+    status: 'draft' | 'sent' | 'paid' | 'partiallyPaid' | 'overdue' | 'void' | 'cancelled';
+    /**
+     * Date the invoice was issued.
+     */
+    issueDate: Date;
+    /**
+     * Date by which full payment is due.
+     */
+    dueDate: Date;
+    /**
+     * Ordered list of line items.
+     */
+    lineItems: Array<AssociationCoreBillingInvoiceLineItem>;
+    /**
+     * Sum of all line-item amounts before tax.
+     */
+    subtotal: bigint;
+    /**
+     * Total tax amount across all taxable lines.
+     */
+    taxAmount: bigint;
+    /**
+     * Total amount due (subtotal + taxAmount).
+     */
+    totalAmount: bigint;
+    /**
+     * Amount paid to date.
+     */
+    paidAmount: bigint;
+    /**
+     * Remaining balance (totalAmount – paidAmount).
+     */
+    balanceDue: bigint;
+    /**
+     * ISO 4217 currency code.
+     */
+    currency: string;
+    /**
+     * Internal or customer-facing notes.
+     */
+    notes?: string;
+};
+
+/**
+ * A single line item on an invoice.
+ */
+export type AssociationCoreBillingInvoiceLineItem = {
+    /**
+     * Human-readable description for this line.
+     */
+    description: string;
+    /**
+     * Fee item this line was generated from (optional).
+     */
+    feeItemId?: string;
+    /**
+     * Number of units.
+     */
+    quantity: number;
+    /**
+     * Price per unit.
+     */
+    unitPrice: bigint;
+    /**
+     * Line total (quantity × unitPrice before tax).
+     */
+    amount: bigint;
+    /**
+     * Tax rate applied to this line (decimal fraction, e.g. 0.12 for 12%). Omit if non-taxable.
+     */
+    taxRate?: number;
+};
+
+/**
+ * Lifecycle status of an invoice.
+ */
+export type AssociationCoreBillingInvoiceStatus = 'draft' | 'sent' | 'paid' | 'partiallyPaid' | 'overdue' | 'void' | 'cancelled';
+
+/**
+ * An invoice issued to a person or organisation for amounts owed.
+ */
+export type AssociationCoreBillingInvoiceUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Human-readable, auto-generated invoice number (e.g. 'INV-2025-00042').
+     */
+    number?: string;
+    /**
+     * Person this invoice was issued to (optional; use organizationId for org billing).
+     */
+    personId?: string;
+    /**
+     * Organisation this invoice was issued to (optional).
+     */
+    organizationId?: string;
+    /**
+     * Current lifecycle status.
+     */
+    status?: 'draft' | 'sent' | 'paid' | 'partiallyPaid' | 'overdue' | 'void' | 'cancelled';
+    /**
+     * Date the invoice was issued.
+     */
+    issueDate?: Date;
+    /**
+     * Date by which full payment is due.
+     */
+    dueDate?: Date;
+    /**
+     * Ordered list of line items.
+     */
+    lineItems?: Array<AssociationCoreBillingInvoiceLineItem>;
+    /**
+     * Sum of all line-item amounts before tax.
+     */
+    subtotal?: bigint;
+    /**
+     * Total tax amount across all taxable lines.
+     */
+    taxAmount?: bigint;
+    /**
+     * Total amount due (subtotal + taxAmount).
+     */
+    totalAmount?: bigint;
+    /**
+     * Amount paid to date.
+     */
+    paidAmount?: bigint;
+    /**
+     * Remaining balance (totalAmount – paidAmount).
+     */
+    balanceDue?: bigint;
+    /**
+     * ISO 4217 currency code.
+     */
+    currency?: string;
+    /**
+     * Internal or customer-facing notes.
+     */
+    notes?: string;
+};
+
+/**
+ * A payment applied against an invoice or made ad-hoc.
+ */
+export type AssociationCoreBillingPayment = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Invoice this payment is applied to (optional for unallocated payments).
+     */
+    invoiceId?: string;
+    /**
+     * Person who made the payment.
+     */
+    personId?: string;
+    /**
+     * Amount paid.
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code.
+     */
+    currency: string;
+    /**
+     * Payment method used.
+     */
+    method: 'creditCard' | 'bankTransfer' | 'check' | 'cash' | 'paypal' | 'gcash' | 'maya' | 'other';
+    /**
+     * External reference or transaction number from the payment processor.
+     */
+    referenceNumber?: string;
+    /**
+     * Timestamp at which the payment was made.
+     */
+    paidAt: Date;
+    /**
+     * Processing status.
+     */
+    status: 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled';
+};
+
+/**
+ * Payment method used to settle an invoice.
+ */
+export type AssociationCoreBillingPaymentMethod = 'creditCard' | 'bankTransfer' | 'check' | 'cash' | 'paypal' | 'gcash' | 'maya' | 'other';
+
+/**
+ * Processing status of a payment.
+ */
+export type AssociationCoreBillingPaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled';
+
+/**
+ * A payment applied against an invoice or made ad-hoc.
+ */
+export type AssociationCoreBillingPaymentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Invoice this payment is applied to (optional for unallocated payments).
+     */
+    invoiceId?: string;
+    /**
+     * Person who made the payment.
+     */
+    personId?: string;
+    /**
+     * Amount paid.
+     */
+    amount?: bigint;
+    /**
+     * ISO 4217 currency code.
+     */
+    currency?: string;
+    /**
+     * Payment method used.
+     */
+    method?: 'creditCard' | 'bankTransfer' | 'check' | 'cash' | 'paypal' | 'gcash' | 'maya' | 'other';
+    /**
+     * External reference or transaction number from the payment processor.
+     */
+    referenceNumber?: string;
+    /**
+     * Timestamp at which the payment was made.
+     */
+    paidAt?: Date;
+    /**
+     * Processing status.
+     */
+    status?: 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled';
+};
+
+/**
+ * A single period entry in a revenue recognition schedule.
+ */
+export type AssociationCoreBillingRecognitionEntry = {
+    /**
+     * Accounting period label (e.g. '2025-01', '2025-Q1').
+     */
+    period: string;
+    /**
+     * Amount to be recognised in this period.
+     */
+    amount: bigint;
+    /**
+     * Whether the recognition journal entry for this period has been posted.
+     */
+    recognized: boolean;
+    /**
+     * Timestamp at which the recognition was posted.
+     */
+    recognizedAt?: Date;
+};
+
+/**
+ * How revenue recognised for an invoice is spread across periods.
+ */
+export type AssociationCoreBillingRecognitionMethod = 'immediate' | 'straightLine' | 'milestone';
+
+/**
+ * A refund issued against a completed payment.
+ */
+export type AssociationCoreBillingRefund = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Original payment being refunded.
+     */
+    paymentId: string;
+    /**
+     * Amount to refund (must not exceed original payment amount).
+     */
+    amount: bigint;
+    /**
+     * Business reason for the refund.
+     */
+    reason: string;
+    /**
+     * Timestamp at which the refund was processed.
+     */
+    processedAt?: Date;
+    /**
+     * Current status.
+     */
+    status: 'pending' | 'processed' | 'failed';
+};
+
+/**
+ * Processing status of a refund.
+ */
+export type AssociationCoreBillingRefundStatus = 'pending' | 'processed' | 'failed';
+
+/**
+ * A refund issued against a completed payment.
+ */
+export type AssociationCoreBillingRefundUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Original payment being refunded.
+     */
+    paymentId?: string;
+    /**
+     * Amount to refund (must not exceed original payment amount).
+     */
+    amount?: bigint;
+    /**
+     * Business reason for the refund.
+     */
+    reason?: string;
+    /**
+     * Timestamp at which the refund was processed.
+     */
+    processedAt?: Date;
+    /**
+     * Current status.
+     */
+    status?: 'pending' | 'processed' | 'failed';
+};
+
+/**
+ * A revenue recognition schedule attached to an invoice.
+ */
+export type AssociationCoreBillingRevenueSchedule = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Invoice whose revenue is being recognised.
+     */
+    invoiceId: string;
+    /**
+     * Method used to allocate revenue across periods.
+     */
+    recognitionMethod: 'immediate' | 'straightLine' | 'milestone';
+    /**
+     * Ordered list of period entries.
+     */
+    entries: Array<AssociationCoreBillingRecognitionEntry>;
+};
+
+/**
+ * A revenue recognition schedule attached to an invoice.
+ */
+export type AssociationCoreBillingRevenueScheduleUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Invoice whose revenue is being recognised.
+     */
+    invoiceId?: string;
+    /**
+     * Method used to allocate revenue across periods.
+     */
+    recognitionMethod?: 'immediate' | 'straightLine' | 'milestone';
+    /**
+     * Ordered list of period entries.
+     */
+    entries?: Array<AssociationCoreBillingRecognitionEntry>;
+};
+
+/**
+ * Supported outbound communication channels.
+ */
+export type AssociationCoreCommunicationChannel = 'email' | 'sms' | 'push' | 'inApp';
+
+/**
+ * Delivery status of a message for a single recipient.
+ */
+export type AssociationCoreCommunicationDeliveryStatus = 'pending' | 'delivered' | 'bounced' | 'opened' | 'clicked' | 'unsubscribed' | 'failed';
+
+/**
+ * A composed message ready to be dispatched to one or more recipients.
+ */
+export type AssociationCoreCommunicationMessage = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Template this message was composed from (optional; may be ad-hoc).
+     */
+    templateId?: string;
+    /**
+     * Channel through which the message will be sent.
+     */
+    channel: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Person or system identity that is sending the message.
+     */
+    senderId: string;
+    /**
+     * List of intended recipients with per-person delivery tracking.
+     */
+    recipients: Array<AssociationCoreCommunicationMessageRecipient>;
+    /**
+     * Subject line (required for email channel).
+     */
+    subject?: string;
+    /**
+     * Rendered message body (merge fields already substituted).
+     */
+    body: string;
+    /**
+     * Future timestamp at which the message should be sent.
+     */
+    scheduledAt?: Date;
+    /**
+     * Timestamp at which dispatch began.
+     */
+    sentAt?: Date;
+    /**
+     * Current lifecycle status.
+     */
+    status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed' | 'cancelled';
+};
+
+/**
+ * Request body to compose a message.
+ */
+export type AssociationCoreCommunicationMessageCreateRequest = {
+    /**
+     * Template to base the message on (optional).
+     */
+    templateId?: string;
+    /**
+     * Channel.
+     */
+    channel: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Sender identity.
+     */
+    senderId: string;
+    /**
+     * Recipient person IDs.
+     */
+    recipientPersonIds: Array<string>;
+    /**
+     * Subject line (required for email).
+     */
+    subject?: string;
+    /**
+     * Message body.
+     */
+    body: string;
+    /**
+     * Schedule the message to send at this future time (omit to send immediately).
+     */
+    scheduledAt?: Date;
+};
+
+/**
+ * Request body to compose a message.
+ */
+export type AssociationCoreCommunicationMessageCreateRequestUpdate = {
+    /**
+     * Template to base the message on (optional).
+     */
+    templateId?: string;
+    /**
+     * Channel.
+     */
+    channel?: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Sender identity.
+     */
+    senderId?: string;
+    /**
+     * Recipient person IDs.
+     */
+    recipientPersonIds?: Array<string>;
+    /**
+     * Subject line (required for email).
+     */
+    subject?: string;
+    /**
+     * Message body.
+     */
+    body?: string;
+    /**
+     * Schedule the message to send at this future time (omit to send immediately).
+     */
+    scheduledAt?: Date;
+};
+
+/**
+ * Delivery tracking for a single recipient of a message.
+ */
+export type AssociationCoreCommunicationMessageRecipient = {
+    /**
+     * Person this recipient record refers to.
+     */
+    personId: string;
+    /**
+     * Current delivery status for this recipient.
+     */
+    deliveryStatus: 'pending' | 'delivered' | 'bounced' | 'opened' | 'clicked' | 'unsubscribed' | 'failed';
+    /**
+     * Timestamp at which the message was delivered to this recipient.
+     */
+    deliveredAt?: Date;
+};
+
+/**
+ * Lifecycle status of a composed message.
+ */
+export type AssociationCoreCommunicationMessageStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed' | 'cancelled';
+
+/**
+ * A reusable message template with merge-field placeholders.
+ */
+export type AssociationCoreCommunicationMessageTemplate = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Internal name used to identify the template.
+     */
+    name: string;
+    /**
+     * Channel this template is designed for.
+     */
+    channel: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Subject line (required for email; optional for other channels).
+     */
+    subject?: string;
+    /**
+     * Template body; may contain Handlebars-style merge fields (e.g. {{firstName}}).
+     */
+    body: string;
+    /**
+     * List of merge field names expected to be provided at send time.
+     */
+    mergeFields: Array<string>;
+    /**
+     * Category grouping (e.g. 'membership', 'events', 'billing').
+     */
+    category: string;
+    /**
+     * Whether this is a system-triggered transactional message (vs. a marketing broadcast).
+     */
+    isTransactional: boolean;
+    /**
+     * Lifecycle status.
+     */
+    status: 'draft' | 'active' | 'archived';
+};
+
+/**
+ * Request body to create a message template.
+ */
+export type AssociationCoreCommunicationMessageTemplateCreateRequest = {
+    /**
+     * Internal name.
+     */
+    name: string;
+    /**
+     * Target channel.
+     */
+    channel: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Subject line (optional).
+     */
+    subject?: string;
+    /**
+     * Template body.
+     */
+    body: string;
+    /**
+     * Expected merge fields.
+     */
+    mergeFields: Array<string>;
+    /**
+     * Category.
+     */
+    category: string;
+    /**
+     * Is transactional flag.
+     */
+    isTransactional: boolean;
+};
+
+/**
+ * Request body to preview a template with sample merge data.
+ */
+export type AssociationCoreCommunicationMessageTemplatePreviewRequest = {
+    /**
+     * Sample merge-field values keyed by field name.
+     */
+    mergeData: {
+        [key: string]: string;
+    };
+};
+
+/**
+ * Response containing the rendered preview.
+ */
+export type AssociationCoreCommunicationMessageTemplatePreviewResponse = {
+    /**
+     * Rendered subject line (after merge substitution).
+     */
+    subject?: string;
+    /**
+     * Rendered message body (after merge substitution).
+     */
+    body: string;
+};
+
+/**
+ * A reusable message template with merge-field placeholders.
+ */
+export type AssociationCoreCommunicationMessageTemplateUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Internal name used to identify the template.
+     */
+    name?: string;
+    /**
+     * Channel this template is designed for.
+     */
+    channel?: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Subject line (required for email; optional for other channels).
+     */
+    subject?: string;
+    /**
+     * Template body; may contain Handlebars-style merge fields (e.g. {{firstName}}).
+     */
+    body?: string;
+    /**
+     * List of merge field names expected to be provided at send time.
+     */
+    mergeFields?: Array<string>;
+    /**
+     * Category grouping (e.g. 'membership', 'events', 'billing').
+     */
+    category?: string;
+    /**
+     * Whether this is a system-triggered transactional message (vs. a marketing broadcast).
+     */
+    isTransactional?: boolean;
+    /**
+     * Lifecycle status.
+     */
+    status?: 'draft' | 'active' | 'archived';
+};
+
+/**
+ * Partial update for a message template.
+ */
+export type AssociationCoreCommunicationMessageTemplateUpdateRequest = {
+    /**
+     * Internal name.
+     */
+    name?: string;
+    /**
+     * Subject line — pass null to clear.
+     */
+    subject?: string | null;
+    /**
+     * Template body.
+     */
+    body?: string;
+    /**
+     * Merge field list — replaces existing list.
+     */
+    mergeFields?: Array<string>;
+    /**
+     * Category.
+     */
+    category?: string;
+    /**
+     * Status.
+     */
+    status?: 'draft' | 'active' | 'archived';
+};
+
+/**
+ * A composed message ready to be dispatched to one or more recipients.
+ */
+export type AssociationCoreCommunicationMessageUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Template this message was composed from (optional; may be ad-hoc).
+     */
+    templateId?: string;
+    /**
+     * Channel through which the message will be sent.
+     */
+    channel?: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Person or system identity that is sending the message.
+     */
+    senderId?: string;
+    /**
+     * List of intended recipients with per-person delivery tracking.
+     */
+    recipients?: Array<AssociationCoreCommunicationMessageRecipient>;
+    /**
+     * Subject line (required for email channel).
+     */
+    subject?: string;
+    /**
+     * Rendered message body (merge fields already substituted).
+     */
+    body?: string;
+    /**
+     * Future timestamp at which the message should be sent.
+     */
+    scheduledAt?: Date;
+    /**
+     * Timestamp at which dispatch began.
+     */
+    sentAt?: Date;
+    /**
+     * Current lifecycle status.
+     */
+    status?: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed' | 'cancelled';
+};
+
+/**
+ * A person's subscription preference for a specific topic.
+ */
+export type AssociationCoreCommunicationPersonSubscription = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Person this preference belongs to.
+     */
+    personId: string;
+    /**
+     * Topic this preference refers to.
+     */
+    topicId: string;
+    /**
+     * Whether the person wants to receive messages on this topic.
+     */
+    enabled: boolean;
+};
+
+/**
+ * Request body to bulk-update a person's subscriptions.
+ */
+export type AssociationCoreCommunicationPersonSubscriptionBulkUpdateRequest = {
+    /**
+     * List of subscription changes to apply.
+     */
+    updates: Array<PersonSubscriptionBulkUpdateItem>;
+};
+
+/**
+ * A person's subscription preference for a specific topic.
+ */
+export type AssociationCoreCommunicationPersonSubscriptionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Person this preference belongs to.
+     */
+    personId?: string;
+    /**
+     * Topic this preference refers to.
+     */
+    topicId?: string;
+    /**
+     * Whether the person wants to receive messages on this topic.
+     */
+    enabled?: boolean;
+};
+
+/**
+ * A topic that persons can subscribe or unsubscribe from.
+ */
+export type AssociationCoreCommunicationSubscriptionTopic = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Display name of the topic.
+     */
+    name: string;
+    /**
+     * Optional description shown to members on the preferences page.
+     */
+    description?: string;
+    /**
+     * Channel this topic applies to.
+     */
+    channel: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Grouping category (e.g. 'chapter-news', 'events', 'billing-alerts').
+     */
+    category: string;
+    /**
+     * Whether new members are subscribed to this topic by default.
+     */
+    defaultEnabled: boolean;
+};
+
+/**
+ * Request body to create a subscription topic.
+ */
+export type AssociationCoreCommunicationSubscriptionTopicCreateRequest = {
+    /**
+     * Display name.
+     */
+    name: string;
+    /**
+     * Description (optional).
+     */
+    description?: string;
+    /**
+     * Channel.
+     */
+    channel: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Category.
+     */
+    category: string;
+    /**
+     * Default enabled flag.
+     */
+    defaultEnabled: boolean;
+};
+
+/**
+ * Request body to create a subscription topic.
+ */
+export type AssociationCoreCommunicationSubscriptionTopicCreateRequestUpdate = {
+    /**
+     * Display name.
+     */
+    name?: string;
+    /**
+     * Description (optional).
+     */
+    description?: string;
+    /**
+     * Channel.
+     */
+    channel?: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Category.
+     */
+    category?: string;
+    /**
+     * Default enabled flag.
+     */
+    defaultEnabled?: boolean;
+};
+
+/**
+ * A topic that persons can subscribe or unsubscribe from.
+ */
+export type AssociationCoreCommunicationSubscriptionTopicUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Display name of the topic.
+     */
+    name?: string;
+    /**
+     * Optional description shown to members on the preferences page.
+     */
+    description?: string;
+    /**
+     * Channel this topic applies to.
+     */
+    channel?: 'email' | 'sms' | 'push' | 'inApp';
+    /**
+     * Grouping category (e.g. 'chapter-news', 'events', 'billing-alerts').
+     */
+    category?: string;
+    /**
+     * Whether new members are subscribed to this topic by default.
+     */
+    defaultEnabled?: boolean;
+};
+
+/**
+ * Lifecycle status of a message template.
+ */
+export type AssociationCoreCommunicationTemplateStatus = 'draft' | 'active' | 'archived';
+
+/**
+ * Category of consent being captured.
+ */
+export type AssociationCoreConsentConsentCategory = 'termsOfService' | 'privacyPolicy' | 'marketingCommunications' | 'dataSharing' | 'thirdPartyAccess' | 'photographRelease' | 'codeOfConduct';
+
+/**
+ * The person's decision on a consent request.
+ */
+export type AssociationCoreConsentConsentDecision = 'accepted' | 'declined' | 'withdrawn';
+
+/**
+ * An auditable record of a person's consent decision for a specific template version.
+ */
+export type AssociationCoreConsentConsentRecord = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Person who made the decision.
+     */
+    personId: string;
+    /**
+     * Consent template the decision relates to.
+     */
+    templateId: string;
+    /**
+     * Exact version of the template at the time of the decision (immutable).
+     */
+    templateVersion: string;
+    /**
+     * The person's decision.
+     */
+    decision: 'accepted' | 'declined' | 'withdrawn';
+    /**
+     * Timestamp at which the decision was recorded.
+     */
+    recordedAt: Date;
+    /**
+     * IP address from which the decision was submitted (for legal proof of consent).
+     */
+    ipAddress?: string;
+    /**
+     * Device / user-agent string at the time of consent (for legal proof).
+     */
+    deviceInfo?: string;
+    /**
+     * Timestamp at which a previously accepted consent was withdrawn.
+     */
+    withdrawnAt?: Date;
+    /**
+     * Reason provided by the member when withdrawing consent.
+     */
+    withdrawnReason?: string;
+};
+
+/**
+ * An auditable record of a person's consent decision for a specific template version.
+ */
+export type AssociationCoreConsentConsentRecordUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Person who made the decision.
+     */
+    personId?: string;
+    /**
+     * Consent template the decision relates to.
+     */
+    templateId?: string;
+    /**
+     * Exact version of the template at the time of the decision (immutable).
+     */
+    templateVersion?: string;
+    /**
+     * The person's decision.
+     */
+    decision?: 'accepted' | 'declined' | 'withdrawn';
+    /**
+     * Timestamp at which the decision was recorded.
+     */
+    recordedAt?: Date;
+    /**
+     * IP address from which the decision was submitted (for legal proof of consent).
+     */
+    ipAddress?: string;
+    /**
+     * Device / user-agent string at the time of consent (for legal proof).
+     */
+    deviceInfo?: string;
+    /**
+     * Timestamp at which a previously accepted consent was withdrawn.
+     */
+    withdrawnAt?: Date;
+    /**
+     * Reason provided by the member when withdrawing consent.
+     */
+    withdrawnReason?: string;
+};
+
+/**
+ * A versioned legal template presented to members for their consent decision.
+ */
+export type AssociationCoreConsentConsentTemplate = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Display title shown to the member (e.g. 'Terms of Service — v3.2').
+     */
+    title: string;
+    /**
+     * Full legal body text of the consent document.
+     */
+    body: string;
+    /**
+     * Semantic version of this template (e.g. '3.2', '2024-10').
+     */
+    templateVersion: string;
+    /**
+     * Category of consent this template represents.
+     */
+    category: 'termsOfService' | 'privacyPolicy' | 'marketingCommunications' | 'dataSharing' | 'thirdPartyAccess' | 'photographRelease' | 'codeOfConduct';
+    /**
+     * Lifecycle status.
+     */
+    status: 'draft' | 'published' | 'superseded';
+    /**
+     * Timestamp at which this template was published and made live.
+     */
+    publishedAt?: Date;
+    /**
+     * ID of the newer template that supersedes this one (if any).
+     */
+    supersededBy?: string;
+};
+
+/**
+ * Lifecycle status of a consent template.
+ */
+export type AssociationCoreConsentConsentTemplateStatus = 'draft' | 'published' | 'superseded';
+
+/**
+ * A versioned legal template presented to members for their consent decision.
+ */
+export type AssociationCoreConsentConsentTemplateUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Display title shown to the member (e.g. 'Terms of Service — v3.2').
+     */
+    title?: string;
+    /**
+     * Full legal body text of the consent document.
+     */
+    body?: string;
+    /**
+     * Semantic version of this template (e.g. '3.2', '2024-10').
+     */
+    templateVersion?: string;
+    /**
+     * Category of consent this template represents.
+     */
+    category?: 'termsOfService' | 'privacyPolicy' | 'marketingCommunications' | 'dataSharing' | 'thirdPartyAccess' | 'photographRelease' | 'codeOfConduct';
+    /**
+     * Lifecycle status.
+     */
+    status?: 'draft' | 'published' | 'superseded';
+    /**
+     * Timestamp at which this template was published and made live.
+     */
+    publishedAt?: Date;
+    /**
+     * ID of the newer template that supersedes this one (if any).
+     */
+    supersededBy?: string;
+};
+
+/**
+ * A formal request by a member to have their personal data erased (GDPR right to erasure).
+ */
+export type AssociationCoreConsentDataDeletionRequest = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Person requesting erasure of their data.
+     */
+    personId: string;
+    /**
+     * Timestamp at which the request was submitted.
+     */
+    requestedAt: Date;
+    /**
+     * Optional reason provided by the member.
+     */
+    reason?: string;
+    /**
+     * Current processing status.
+     */
+    status: 'received' | 'verifying' | 'processing' | 'completed' | 'denied';
+    /**
+     * Timestamp at which the erasure was fully completed.
+     */
+    completedAt?: Date;
+    /**
+     * Explanation provided when the request was denied.
+     */
+    deniedReason?: string;
+};
+
+/**
+ * A formal request by a member to have their personal data erased (GDPR right to erasure).
+ */
+export type AssociationCoreConsentDataDeletionRequestUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Person requesting erasure of their data.
+     */
+    personId?: string;
+    /**
+     * Timestamp at which the request was submitted.
+     */
+    requestedAt?: Date;
+    /**
+     * Optional reason provided by the member.
+     */
+    reason?: string;
+    /**
+     * Current processing status.
+     */
+    status?: 'received' | 'verifying' | 'processing' | 'completed' | 'denied';
+    /**
+     * Timestamp at which the erasure was fully completed.
+     */
+    completedAt?: Date;
+    /**
+     * Explanation provided when the request was denied.
+     */
+    deniedReason?: string;
+};
+
+/**
+ * Processing status of a data deletion request.
+ */
+export type AssociationCoreConsentDeletionStatus = 'received' | 'verifying' | 'processing' | 'completed' | 'denied';
+
+/**
+ * A document stored on behalf of a person or organisational entity.
+ */
+export type AssociationCoreDocumentsDocument = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Display title of the document.
+     */
+    title: string;
+    /**
+     * Original file name uploaded by the user.
+     */
+    fileName: string;
+    /**
+     * MIME type of the stored file (e.g. 'application/pdf', 'image/png').
+     */
+    mimeType: string;
+    /**
+     * Size of the current version in bytes.
+     */
+    size: bigint;
+    /**
+     * Opaque key used to retrieve the file from the object store.
+     */
+    storageKey: string;
+    /**
+     * ID of the person or organisation that owns this document.
+     */
+    ownerId: string;
+    /**
+     * Discriminator for the owner type (e.g. 'person', 'organization', 'chapter').
+     */
+    ownerType: string;
+    /**
+     * Who may access this document.
+     */
+    accessLevel: 'public' | 'tenantOnly' | 'unitOnly' | 'restricted' | 'privileged';
+    /**
+     * Optional category grouping (e.g. 'minutes', 'policy', 'certificate').
+     */
+    category?: string;
+    /**
+     * Searchable tags attached to this document.
+     */
+    tags?: Array<string>;
+    /**
+     * ID of the currently active document version.
+     */
+    currentVersionId?: string;
+};
+
+/**
+ * Who may access a document.
+ */
+export type AssociationCoreDocumentsDocumentAccessLevel = 'public' | 'tenantOnly' | 'unitOnly' | 'restricted' | 'privileged';
+
+/**
+ * A single entry in the document access log.
+ */
+export type AssociationCoreDocumentsDocumentAccessLogEntry = {
+    /**
+     * Person who accessed the document.
+     */
+    accessedBy: string;
+    /**
+     * Timestamp of the access.
+     */
+    accessedAt: Date;
+    /**
+     * Type of access (e.g. 'view', 'download', 'share').
+     */
+    action: string;
+    /**
+     * IP address of the accessor (if available).
+     */
+    ipAddress?: string;
+};
+
+/**
+ * Request body to create a document metadata record (file upload handled separately).
+ */
+export type AssociationCoreDocumentsDocumentCreateRequest = {
+    /**
+     * Display title.
+     */
+    title: string;
+    /**
+     * Original file name.
+     */
+    fileName: string;
+    /**
+     * MIME type.
+     */
+    mimeType: string;
+    /**
+     * File size in bytes.
+     */
+    size: bigint;
+    /**
+     * Object-store key returned by the upload endpoint.
+     */
+    storageKey: string;
+    /**
+     * Owner ID.
+     */
+    ownerId: string;
+    /**
+     * Owner type discriminator.
+     */
+    ownerType: string;
+    /**
+     * Access level.
+     */
+    accessLevel: 'public' | 'tenantOnly' | 'unitOnly' | 'restricted' | 'privileged';
+    /**
+     * Category (optional).
+     */
+    category?: string;
+    /**
+     * Initial tags (optional).
+     */
+    tags?: Array<string>;
+};
+
+/**
+ * Request body to upload a new version of an existing document.
+ */
+export type AssociationCoreDocumentsDocumentNewVersionRequest = {
+    /**
+     * Original file name for the new version.
+     */
+    fileName: string;
+    /**
+     * File size in bytes.
+     */
+    size: bigint;
+    /**
+     * Object-store key returned by the upload endpoint.
+     */
+    storageKey: string;
+    /**
+     * Optional change notes.
+     */
+    changeNotes?: string;
+};
+
+/**
+ * A reusable label that can be attached to documents for filtering.
+ */
+export type AssociationCoreDocumentsDocumentTag = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Unique tag name within the tenant.
+     */
+    name: string;
+    /**
+     * Display color for the tag in the UI (hex code, e.g. '#3B82F6').
+     */
+    color?: string;
+};
+
+/**
+ * Request body to create a document tag.
+ */
+export type AssociationCoreDocumentsDocumentTagCreateRequest = {
+    /**
+     * Tag name.
+     */
+    name: string;
+    /**
+     * Display color (optional).
+     */
+    color?: string;
+};
+
+/**
+ * A reusable label that can be attached to documents for filtering.
+ */
+export type AssociationCoreDocumentsDocumentTagUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Unique tag name within the tenant.
+     */
+    name?: string;
+    /**
+     * Display color for the tag in the UI (hex code, e.g. '#3B82F6').
+     */
+    color?: string;
+};
+
+/**
+ * Partial update for a document tag.
+ */
+export type AssociationCoreDocumentsDocumentTagUpdateRequest = {
+    /**
+     * Tag name.
+     */
+    name?: string;
+    /**
+     * Display color — pass null to remove the color.
+     */
+    color?: string | null;
+};
+
+/**
+ * A document stored on behalf of a person or organisational entity.
+ */
+export type AssociationCoreDocumentsDocumentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Display title of the document.
+     */
+    title?: string;
+    /**
+     * Original file name uploaded by the user.
+     */
+    fileName?: string;
+    /**
+     * MIME type of the stored file (e.g. 'application/pdf', 'image/png').
+     */
+    mimeType?: string;
+    /**
+     * Size of the current version in bytes.
+     */
+    size?: bigint;
+    /**
+     * Opaque key used to retrieve the file from the object store.
+     */
+    storageKey?: string;
+    /**
+     * ID of the person or organisation that owns this document.
+     */
+    ownerId?: string;
+    /**
+     * Discriminator for the owner type (e.g. 'person', 'organization', 'chapter').
+     */
+    ownerType?: string;
+    /**
+     * Who may access this document.
+     */
+    accessLevel?: 'public' | 'tenantOnly' | 'unitOnly' | 'restricted' | 'privileged';
+    /**
+     * Optional category grouping (e.g. 'minutes', 'policy', 'certificate').
+     */
+    category?: string;
+    /**
+     * Searchable tags attached to this document.
+     */
+    tags?: Array<string>;
+    /**
+     * ID of the currently active document version.
+     */
+    currentVersionId?: string;
+};
+
+/**
+ * Partial update for document metadata.
+ */
+export type AssociationCoreDocumentsDocumentUpdateRequest = {
+    /**
+     * Display title.
+     */
+    title?: string;
+    /**
+     * Access level.
+     */
+    accessLevel?: 'public' | 'tenantOnly' | 'unitOnly' | 'restricted' | 'privileged';
+    /**
+     * Category — pass null to clear.
+     */
+    category?: string | null;
+    /**
+     * Tag list — replaces existing tags. Pass empty array to remove all tags.
+     */
+    tags?: Array<string>;
+};
+
+/**
+ * An immutable snapshot of a document at a specific point in time.
+ */
+export type AssociationCoreDocumentsDocumentVersion = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Document this version belongs to.
+     */
+    documentId: string;
+    /**
+     * Sequential version number (1-based).
+     */
+    versionNumber: number;
+    /**
+     * File name at the time this version was uploaded.
+     */
+    fileName: string;
+    /**
+     * Storage key for this specific version's bytes.
+     */
+    storageKey: string;
+    /**
+     * Size of this version in bytes.
+     */
+    size: bigint;
+    /**
+     * Person who uploaded this version.
+     */
+    uploadedBy: string;
+    /**
+     * Timestamp at which this version was created.
+     */
+    uploadedAt: Date;
+    /**
+     * Optional change notes describing what was updated.
+     */
+    changeNotes?: string;
+};
+
+/**
+ * An immutable snapshot of a document at a specific point in time.
+ */
+export type AssociationCoreDocumentsDocumentVersionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Document this version belongs to.
+     */
+    documentId?: string;
+    /**
+     * Sequential version number (1-based).
+     */
+    versionNumber?: number;
+    /**
+     * File name at the time this version was uploaded.
+     */
+    fileName?: string;
+    /**
+     * Storage key for this specific version's bytes.
+     */
+    storageKey?: string;
+    /**
+     * Size of this version in bytes.
+     */
+    size?: bigint;
+    /**
+     * Person who uploaded this version.
+     */
+    uploadedBy?: string;
+    /**
+     * Timestamp at which this version was created.
+     */
+    uploadedAt?: Date;
+    /**
+     * Optional change notes describing what was updated.
+     */
+    changeNotes?: string;
+};
+
+/**
+ * Engagement bucket derived from the computed score.
+ */
+export type AssociationCoreEngagementEngagementBucket = 'highly_engaged' | 'engaged' | 'at_risk' | 'disengaged' | 'dormant';
+
+/**
+ * Computed engagement score for a person at a point in time.
+ */
+export type AssociationCoreEngagementEngagementScore = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Person the score applies to.
+     */
+    personId: string;
+    /**
+     * Overall engagement score (0–100 scale).
+     */
+    score: number;
+    /**
+     * Qualitative bucket derived from the numeric score.
+     */
+    bucket: 'highly_engaged' | 'engaged' | 'at_risk' | 'disengaged' | 'dormant';
+    /**
+     * Timestamp at which this score was calculated.
+     */
+    calculatedAt: Date;
+    /**
+     * Breakdown of score components (e.g. loginScore, eventScore, donationScore).
+     */
+    components?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Computed engagement score for a person at a point in time.
+ */
+export type AssociationCoreEngagementEngagementScoreUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Person the score applies to.
+     */
+    personId?: string;
+    /**
+     * Overall engagement score (0–100 scale).
+     */
+    score?: number;
+    /**
+     * Qualitative bucket derived from the numeric score.
+     */
+    bucket?: 'highly_engaged' | 'engaged' | 'at_risk' | 'disengaged' | 'dormant';
+    /**
+     * Timestamp at which this score was calculated.
+     */
+    calculatedAt?: Date;
+    /**
+     * Breakdown of score components (e.g. loginScore, eventScore, donationScore).
+     */
+    components?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * A single discrete interaction event for a person.
+ */
+export type AssociationCoreEngagementInteractionEvent = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Person this event belongs to.
+     */
+    personId: string;
+    /**
+     * Type of interaction that occurred.
+     */
+    eventType: 'login' | 'pageView' | 'emailOpen' | 'eventAttend' | 'formSubmit' | 'donationMade' | 'volunteerAction';
+    /**
+     * System or channel that produced the event (e.g. 'portal', 'mobile-app', 'email-platform').
+     */
+    source: string;
+    /**
+     * Arbitrary additional data captured at event time.
+     */
+    metadata?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Wall-clock time at which the interaction occurred.
+     */
+    occurredAt: Date;
+};
+
+/**
+ * Discrete types of interaction events tracked by the system.
+ */
+export type AssociationCoreEngagementInteractionEventType = 'login' | 'pageView' | 'emailOpen' | 'eventAttend' | 'formSubmit' | 'donationMade' | 'volunteerAction';
+
+/**
+ * A single discrete interaction event for a person.
+ */
+export type AssociationCoreEngagementInteractionEventUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Person this event belongs to.
+     */
+    personId?: string;
+    /**
+     * Type of interaction that occurred.
+     */
+    eventType?: 'login' | 'pageView' | 'emailOpen' | 'eventAttend' | 'formSubmit' | 'donationMade' | 'volunteerAction';
+    /**
+     * System or channel that produced the event (e.g. 'portal', 'mobile-app', 'email-platform').
+     */
+    source?: string;
+    /**
+     * Arbitrary additional data captured at event time.
+     */
+    metadata?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Wall-clock time at which the interaction occurred.
+     */
+    occurredAt?: Date;
+};
+
+/**
+ * Mechanism used for a promotional discount.
+ */
+export type AssociationCoreFeeScheduleDiscountType = 'percentage' | 'fixedAmount';
+
+/**
+ * An individual fee line item within a fee schedule.
+ */
+export type AssociationCoreFeeScheduleFeeItem = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Parent fee schedule.
+     */
+    feeScheduleId: string;
+    /**
+     * Unique billing code for the fee (e.g. 'DUES-FULL', 'EVENT-CONF-2025').
+     */
+    code: string;
+    /**
+     * Display name shown on invoices.
+     */
+    name: string;
+    /**
+     * Optional longer description for the member portal.
+     */
+    description?: string;
+    /**
+     * Base price before any tier discounts.
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code.
+     */
+    currency: string;
+    /**
+     * Whether this fee item is subject to applicable taxes.
+     */
+    taxable: boolean;
+    /**
+     * Optional grouping category (e.g. 'membership', 'event', 'publication').
+     */
+    category?: string;
+};
+
+/**
+ * An individual fee line item within a fee schedule.
+ */
+export type AssociationCoreFeeScheduleFeeItemUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Parent fee schedule.
+     */
+    feeScheduleId?: string;
+    /**
+     * Unique billing code for the fee (e.g. 'DUES-FULL', 'EVENT-CONF-2025').
+     */
+    code?: string;
+    /**
+     * Display name shown on invoices.
+     */
+    name?: string;
+    /**
+     * Optional longer description for the member portal.
+     */
+    description?: string;
+    /**
+     * Base price before any tier discounts.
+     */
+    amount?: bigint;
+    /**
+     * ISO 4217 currency code.
+     */
+    currency?: string;
+    /**
+     * Whether this fee item is subject to applicable taxes.
+     */
+    taxable?: boolean;
+    /**
+     * Optional grouping category (e.g. 'membership', 'event', 'publication').
+     */
+    category?: string;
+};
+
+/**
+ * A versioned catalogue of fees effective for a specified date range.
+ */
+export type AssociationCoreFeeScheduleFeeSchedule = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Human-readable name (e.g. 'FY 2025 Standard Dues Schedule').
+     */
+    name: string;
+    /**
+     * Organisation this schedule applies to; omit for association-wide schedules.
+     */
+    organizationId?: string;
+    /**
+     * Date from which this schedule is used for new billing.
+     */
+    effectiveDate: Date;
+    /**
+     * Date after which this schedule is superseded. Omit for open-ended schedules.
+     */
+    expiryDate?: Date;
+    /**
+     * Lifecycle status.
+     */
+    status: 'draft' | 'active' | 'retired';
+};
+
+/**
+ * Lifecycle status of a fee schedule.
+ */
+export type AssociationCoreFeeScheduleFeeScheduleStatus = 'draft' | 'active' | 'retired';
+
+/**
+ * A versioned catalogue of fees effective for a specified date range.
+ */
+export type AssociationCoreFeeScheduleFeeScheduleUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Human-readable name (e.g. 'FY 2025 Standard Dues Schedule').
+     */
+    name?: string;
+    /**
+     * Organisation this schedule applies to; omit for association-wide schedules.
+     */
+    organizationId?: string;
+    /**
+     * Date from which this schedule is used for new billing.
+     */
+    effectiveDate?: Date;
+    /**
+     * Date after which this schedule is superseded. Omit for open-ended schedules.
+     */
+    expiryDate?: Date;
+    /**
+     * Lifecycle status.
+     */
+    status?: 'draft' | 'active' | 'retired';
+};
+
+/**
+ * A pricing tier that qualifies a subset of members for a discounted price on a fee item.
+ */
+export type AssociationCoreFeeSchedulePricingTier = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Fee item this tier modifies.
+     */
+    feeItemId: string;
+    /**
+     * Descriptive tier name (e.g. 'Student Rate', 'Early-Bird', 'Senior').
+     */
+    tierName: string;
+    /**
+     * Human-readable description of the qualification criteria for this tier.
+     */
+    qualificationCriteria: string;
+    /**
+     * Percentage discount applied to the base price (0–100). Mutually exclusive with discountAmount.
+     */
+    discountPercent?: number;
+    /**
+     * Fixed monetary discount applied to the base price. Mutually exclusive with discountPercent.
+     */
+    discountAmount?: bigint;
+    /**
+     * Evaluation order when multiple tiers could apply (lower value = higher priority).
+     */
+    priority: number;
+};
+
+/**
+ * A pricing tier that qualifies a subset of members for a discounted price on a fee item.
+ */
+export type AssociationCoreFeeSchedulePricingTierUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Fee item this tier modifies.
+     */
+    feeItemId?: string;
+    /**
+     * Descriptive tier name (e.g. 'Student Rate', 'Early-Bird', 'Senior').
+     */
+    tierName?: string;
+    /**
+     * Human-readable description of the qualification criteria for this tier.
+     */
+    qualificationCriteria?: string;
+    /**
+     * Percentage discount applied to the base price (0–100). Mutually exclusive with discountAmount.
+     */
+    discountPercent?: number;
+    /**
+     * Fixed monetary discount applied to the base price. Mutually exclusive with discountPercent.
+     */
+    discountAmount?: bigint;
+    /**
+     * Evaluation order when multiple tiers could apply (lower value = higher priority).
+     */
+    priority?: number;
+};
+
+/**
+ * Operational status of a promotional code.
+ */
+export type AssociationCoreFeeSchedulePromoStatus = 'active' | 'expired' | 'depleted' | 'revoked';
+
+/**
+ * A promotional code that can be redeemed at checkout for a discount.
+ */
+export type AssociationCoreFeeSchedulePromotionalCode = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Case-insensitive redemption code entered by the payer.
+     */
+    code: string;
+    /**
+     * Optional description shown to the payer during redemption.
+     */
+    description?: string;
+    /**
+     * How the discount value is interpreted.
+     */
+    discountType: 'percentage' | 'fixedAmount';
+    /**
+     * Magnitude of the discount (percentage points or fixed amount depending on discountType).
+     */
+    discountValue: bigint;
+    /**
+     * First date the code can be redeemed.
+     */
+    validFrom: Date;
+    /**
+     * Last date the code can be redeemed.
+     */
+    validTo: Date;
+    /**
+     * Maximum number of times the code can be redeemed across all payers. Omit for unlimited.
+     */
+    maxUses?: number;
+    /**
+     * Number of times the code has been successfully redeemed to date.
+     */
+    currentUses: number;
+    /**
+     * Current status of the code.
+     */
+    status: 'active' | 'expired' | 'depleted' | 'revoked';
+    /**
+     * List of fee item IDs this code applies to. Omit to allow redemption against any item.
+     */
+    applicableFeeItems?: Array<string>;
+};
+
+/**
+ * A promotional code that can be redeemed at checkout for a discount.
+ */
+export type AssociationCoreFeeSchedulePromotionalCodeUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Case-insensitive redemption code entered by the payer.
+     */
+    code?: string;
+    /**
+     * Optional description shown to the payer during redemption.
+     */
+    description?: string;
+    /**
+     * How the discount value is interpreted.
+     */
+    discountType?: 'percentage' | 'fixedAmount';
+    /**
+     * Magnitude of the discount (percentage points or fixed amount depending on discountType).
+     */
+    discountValue?: bigint;
+    /**
+     * First date the code can be redeemed.
+     */
+    validFrom?: Date;
+    /**
+     * Last date the code can be redeemed.
+     */
+    validTo?: Date;
+    /**
+     * Maximum number of times the code can be redeemed across all payers. Omit for unlimited.
+     */
+    maxUses?: number;
+    /**
+     * Number of times the code has been successfully redeemed to date.
+     */
+    currentUses?: number;
+    /**
+     * Current status of the code.
+     */
+    status?: 'active' | 'expired' | 'depleted' | 'revoked';
+    /**
+     * List of fee item IDs this code applies to. Omit to allow redemption against any item.
+     */
+    applicableFeeItems?: Array<string>;
+};
+
+/**
+ * A bulk data export job.
+ */
+export type AssociationCoreReportingExportJob = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Human-readable job name.
+     */
+    name: string;
+    /**
+     * Type of data being exported (e.g. 'members', 'invoices', 'events').
+     */
+    type: string;
+    /**
+     * Output file format.
+     */
+    format: 'pdf' | 'csv' | 'xlsx' | 'json';
+    /**
+     * Filters applied to scope the export data set.
+     */
+    filters?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Current processing status.
+     */
+    status: 'queued' | 'generating' | 'completed' | 'expired';
+    /**
+     * Signed URL from which the export file can be downloaded.
+     */
+    outputUrl?: string;
+    /**
+     * Timestamp after which the download URL will expire.
+     */
+    expiresAt?: Date;
+    /**
+     * Person who requested this export.
+     */
+    requestedBy: string;
+};
+
+/**
+ * A bulk data export job.
+ */
+export type AssociationCoreReportingExportJobUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Human-readable job name.
+     */
+    name?: string;
+    /**
+     * Type of data being exported (e.g. 'members', 'invoices', 'events').
+     */
+    type?: string;
+    /**
+     * Output file format.
+     */
+    format?: 'pdf' | 'csv' | 'xlsx' | 'json';
+    /**
+     * Filters applied to scope the export data set.
+     */
+    filters?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Current processing status.
+     */
+    status?: 'queued' | 'generating' | 'completed' | 'expired';
+    /**
+     * Signed URL from which the export file can be downloaded.
+     */
+    outputUrl?: string;
+    /**
+     * Timestamp after which the download URL will expire.
+     */
+    expiresAt?: Date;
+    /**
+     * Person who requested this export.
+     */
+    requestedBy?: string;
+};
+
+/**
+ * Lifecycle status of an export job.
+ */
+export type AssociationCoreReportingExportStatus = 'queued' | 'generating' | 'completed' | 'expired';
+
+/**
+ * Source file format for an import job.
+ */
+export type AssociationCoreReportingImportFormat = 'csv' | 'json' | 'xlsx' | 'vcard';
+
+/**
+ * A bulk data import job.
+ */
+export type AssociationCoreReportingImportJob = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Human-readable job name.
+     */
+    name: string;
+    /**
+     * Type of entity being imported.
+     */
+    type: 'members' | 'organizations' | 'dues' | 'credits' | 'events';
+    /**
+     * Source file format.
+     */
+    sourceFormat: 'csv' | 'json' | 'xlsx' | 'vcard';
+    /**
+     * Current processing status.
+     */
+    status: 'created' | 'validating' | 'validated' | 'importing' | 'completed' | 'failed';
+    /**
+     * Total number of records found in the source file.
+     */
+    totalRecords?: bigint;
+    /**
+     * Number of records successfully processed.
+     */
+    processedRecords?: bigint;
+    /**
+     * Number of records that failed validation or import.
+     */
+    failedRecords?: bigint;
+    /**
+     * Object-store key of the uploaded source file.
+     */
+    uploadedFile?: string;
+    /**
+     * When true, the import runs in validation-only mode without writing data.
+     */
+    dryRun: boolean;
+};
+
+/**
+ * Lifecycle status of an import job.
+ */
+export type AssociationCoreReportingImportJobStatus = 'created' | 'validating' | 'validated' | 'importing' | 'completed' | 'failed';
+
+/**
+ * A bulk data import job.
+ */
+export type AssociationCoreReportingImportJobUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Human-readable job name.
+     */
+    name?: string;
+    /**
+     * Type of entity being imported.
+     */
+    type?: 'members' | 'organizations' | 'dues' | 'credits' | 'events';
+    /**
+     * Source file format.
+     */
+    sourceFormat?: 'csv' | 'json' | 'xlsx' | 'vcard';
+    /**
+     * Current processing status.
+     */
+    status?: 'created' | 'validating' | 'validated' | 'importing' | 'completed' | 'failed';
+    /**
+     * Total number of records found in the source file.
+     */
+    totalRecords?: bigint;
+    /**
+     * Number of records successfully processed.
+     */
+    processedRecords?: bigint;
+    /**
+     * Number of records that failed validation or import.
+     */
+    failedRecords?: bigint;
+    /**
+     * Object-store key of the uploaded source file.
+     */
+    uploadedFile?: string;
+    /**
+     * When true, the import runs in validation-only mode without writing data.
+     */
+    dryRun?: boolean;
+};
+
+/**
+ * Type of entities being imported.
+ */
+export type AssociationCoreReportingImportType = 'members' | 'organizations' | 'dues' | 'credits' | 'events';
+
+/**
+ * A saved report definition that can be run on demand or on a schedule.
+ */
+export type AssociationCoreReportingReport = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Human-readable name of the report.
+     */
+    name: string;
+    /**
+     * Optional longer description of what the report covers.
+     */
+    description?: string;
+    /**
+     * Domain category.
+     */
+    category: 'membership' | 'financial' | 'events' | 'credits' | 'governance' | 'engagement' | 'custom';
+    /**
+     * Identifier of the underlying data source or query module.
+     */
+    dataSource: string;
+    /**
+     * Configurable parameters accepted at run time.
+     */
+    parameters?: Array<AssociationCoreReportingReportParameter>;
+    /**
+     * Automated run schedule (omit for on-demand-only reports).
+     */
+    schedule?: {
+        /**
+         * Recurrence frequency of the scheduled run.
+         */
+        frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+        /**
+         * Email addresses (or person IDs) that receive the output file.
+         */
+        recipients: Array<string>;
+        /**
+         * Output file format for scheduled deliveries.
+         */
+        format: 'pdf' | 'csv' | 'xlsx' | 'json';
+    };
+    /**
+     * Lifecycle status.
+     */
+    status: 'draft' | 'active' | 'retired';
+};
+
+/**
+ * High-level domain category of a report.
+ */
+export type AssociationCoreReportingReportCategory = 'membership' | 'financial' | 'events' | 'credits' | 'governance' | 'engagement' | 'custom';
+
+/**
+ * Output format for a report or export job.
+ */
+export type AssociationCoreReportingReportFormat = 'pdf' | 'csv' | 'xlsx' | 'json';
+
+/**
+ * A configurable parameter accepted by a report at run time.
+ */
+export type AssociationCoreReportingReportParameter = {
+    /**
+     * Parameter name (used as the key in the run-time parameters map).
+     */
+    name: string;
+    /**
+     * Data type of the parameter value (e.g. 'string', 'date', 'integer', 'boolean').
+     */
+    type: string;
+    /**
+     * Whether the parameter must be supplied for every run.
+     */
+    required: boolean;
+    /**
+     * Default value applied when the parameter is omitted (string-encoded).
+     */
+    defaultValue?: string;
+};
+
+/**
+ * A single execution of a report definition.
+ */
+export type AssociationCoreReportingReportRun = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Report definition that was executed.
+     */
+    reportId: string;
+    /**
+     * Run-time parameter values supplied for this execution.
+     */
+    parameters?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Current processing status.
+     */
+    status: 'queued' | 'running' | 'completed' | 'failed';
+    /**
+     * Timestamp at which processing began.
+     */
+    startedAt?: Date;
+    /**
+     * Timestamp at which processing completed (success or failure).
+     */
+    completedAt?: Date;
+    /**
+     * Signed URL from which the output file can be downloaded.
+     */
+    outputUrl?: string;
+    /**
+     * Person who triggered this run.
+     */
+    requestedBy: string;
+};
+
+/**
+ * A single execution of a report definition.
+ */
+export type AssociationCoreReportingReportRunUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Report definition that was executed.
+     */
+    reportId?: string;
+    /**
+     * Run-time parameter values supplied for this execution.
+     */
+    parameters?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Current processing status.
+     */
+    status?: 'queued' | 'running' | 'completed' | 'failed';
+    /**
+     * Timestamp at which processing began.
+     */
+    startedAt?: Date;
+    /**
+     * Timestamp at which processing completed (success or failure).
+     */
+    completedAt?: Date;
+    /**
+     * Signed URL from which the output file can be downloaded.
+     */
+    outputUrl?: string;
+    /**
+     * Person who triggered this run.
+     */
+    requestedBy?: string;
+};
+
+/**
+ * Automated schedule controlling when a report is run and distributed.
+ */
+export type AssociationCoreReportingReportSchedule = {
+    /**
+     * Recurrence frequency of the scheduled run.
+     */
+    frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+    /**
+     * Email addresses (or person IDs) that receive the output file.
+     */
+    recipients: Array<string>;
+    /**
+     * Output file format for scheduled deliveries.
+     */
+    format: 'pdf' | 'csv' | 'xlsx' | 'json';
+};
+
+/**
+ * Automated schedule controlling when a report is run and distributed.
+ */
+export type AssociationCoreReportingReportScheduleUpdate = {
+    /**
+     * Recurrence frequency of the scheduled run.
+     */
+    frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+    /**
+     * Email addresses (or person IDs) that receive the output file.
+     */
+    recipients?: Array<string>;
+    /**
+     * Output file format for scheduled deliveries.
+     */
+    format?: 'pdf' | 'csv' | 'xlsx' | 'json';
+};
+
+/**
+ * Lifecycle status of a report definition.
+ */
+export type AssociationCoreReportingReportStatus = 'draft' | 'active' | 'retired';
+
+/**
+ * A saved report definition that can be run on demand or on a schedule.
+ */
+export type AssociationCoreReportingReportUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Human-readable name of the report.
+     */
+    name?: string;
+    /**
+     * Optional longer description of what the report covers.
+     */
+    description?: string;
+    /**
+     * Domain category.
+     */
+    category?: 'membership' | 'financial' | 'events' | 'credits' | 'governance' | 'engagement' | 'custom';
+    /**
+     * Identifier of the underlying data source or query module.
+     */
+    dataSource?: string;
+    /**
+     * Configurable parameters accepted at run time.
+     */
+    parameters?: Array<AssociationCoreReportingReportParameter>;
+    /**
+     * Automated run schedule (omit for on-demand-only reports).
+     */
+    schedule?: {
+        /**
+         * Recurrence frequency of the scheduled run.
+         */
+        frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+        /**
+         * Email addresses (or person IDs) that receive the output file.
+         */
+        recipients?: Array<string>;
+        /**
+         * Output file format for scheduled deliveries.
+         */
+        format?: 'pdf' | 'csv' | 'xlsx' | 'json';
+    };
+    /**
+     * Lifecycle status.
+     */
+    status?: 'draft' | 'active' | 'retired';
+};
+
+/**
+ * Lifecycle status of a single report run.
+ */
+export type AssociationCoreReportingRunStatus = 'queued' | 'running' | 'completed' | 'failed';
+
+/**
+ * A schedule container that owns slots and blocks.
+ */
+export type AssociationCoreSchedulingSchedule = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Human-readable display name for this schedule.
+     */
+    name: string;
+    /**
+     * ID of the owning person or organisation (polymorphic).
+     */
+    owner: string;
+    /**
+     * Type of schedule.
+     */
+    type: 'personal' | 'resource' | 'room' | 'shared';
+    /**
+     * IANA timezone that governs how local times are interpreted for this schedule.
+     */
+    timezone: string;
+};
+
+/**
+ * A date-range block that marks a schedule as unavailable for an extended period.
+ */
+export type AssociationCoreSchedulingScheduleBlock = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Schedule this block applies to.
+     */
+    scheduleId: string;
+    /**
+     * First date of the block (inclusive).
+     */
+    startDate: Date;
+    /**
+     * Last date of the block (inclusive).
+     */
+    endDate: Date;
+    /**
+     * Reason for the block (e.g. 'Annual conference', 'Public holiday').
+     */
+    reason: string;
+    /**
+     * Whether the block spans entire calendar days with no time-of-day consideration.
+     */
+    allDay: boolean;
+};
+
+/**
+ * A date-range block that marks a schedule as unavailable for an extended period.
+ */
+export type AssociationCoreSchedulingScheduleBlockUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Schedule this block applies to.
+     */
+    scheduleId?: string;
+    /**
+     * First date of the block (inclusive).
+     */
+    startDate?: Date;
+    /**
+     * Last date of the block (inclusive).
+     */
+    endDate?: Date;
+    /**
+     * Reason for the block (e.g. 'Annual conference', 'Public holiday').
+     */
+    reason?: string;
+    /**
+     * Whether the block spans entire calendar days with no time-of-day consideration.
+     */
+    allDay?: boolean;
+};
+
+/**
+ * Purpose or ownership type of a schedule.
+ */
+export type AssociationCoreSchedulingScheduleType = 'personal' | 'resource' | 'room' | 'shared';
+
+/**
+ * A schedule container that owns slots and blocks.
+ */
+export type AssociationCoreSchedulingScheduleUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Human-readable display name for this schedule.
+     */
+    name?: string;
+    /**
+     * ID of the owning person or organisation (polymorphic).
+     */
+    owner?: string;
+    /**
+     * Type of schedule.
+     */
+    type?: 'personal' | 'resource' | 'room' | 'shared';
+    /**
+     * IANA timezone that governs how local times are interpreted for this schedule.
+     */
+    timezone?: string;
+};
+
+/**
+ * A single bookable or occupied time slot within a schedule.
+ */
+export type AssociationCoreSchedulingSlot = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Schedule this slot belongs to.
+     */
+    scheduleId: string;
+    /**
+     * UTC start time of the slot.
+     */
+    startTime: Date;
+    /**
+     * UTC end time of the slot.
+     */
+    endTime: Date;
+    /**
+     * Availability status.
+     */
+    status: 'free' | 'busy' | 'tentative' | 'blocked';
+    /**
+     * Optional human-readable label (e.g. 'Board Meeting Prep').
+     */
+    label?: string;
+};
+
+/**
+ * Availability status of a time slot.
+ */
+export type AssociationCoreSchedulingSlotStatus = 'free' | 'busy' | 'tentative' | 'blocked';
+
+/**
+ * A single bookable or occupied time slot within a schedule.
+ */
+export type AssociationCoreSchedulingSlotUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Schedule this slot belongs to.
+     */
+    scheduleId?: string;
+    /**
+     * UTC start time of the slot.
+     */
+    startTime?: Date;
+    /**
+     * UTC end time of the slot.
+     */
+    endTime?: Date;
+    /**
+     * Availability status.
+     */
+    status?: 'free' | 'busy' | 'tentative' | 'blocked';
+    /**
+     * Optional human-readable label (e.g. 'Board Meeting Prep').
+     */
+    label?: string;
+};
+
+/**
+ * Nature of the employment relationship.
+ */
+export type AssociationCoreStaffEmploymentType = 'fullTime' | 'partTime' | 'contract' | 'volunteer';
+
+/**
+ * Status of an outstanding staff invitation.
+ */
+export type AssociationCoreStaffInvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
+
+/**
+ * A pending invitation for a new staff member.
+ */
+export type AssociationCoreStaffStaffInvitation = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Email address the invitation was sent to.
+     */
+    email: string;
+    /**
+     * Role that will be assigned upon acceptance.
+     */
+    role: 'admin' | 'coordinator' | 'accountant' | 'executive' | 'support' | 'custom';
+    /**
+     * Staff member ID of the person who sent this invitation.
+     */
+    invitedBy: string;
+    /**
+     * Secure one-time token embedded in the invitation link.
+     */
+    token: string;
+    /**
+     * Timestamp after which the token is no longer valid.
+     */
+    expiresAt: Date;
+    /**
+     * Current status of the invitation.
+     */
+    status: 'pending' | 'accepted' | 'expired' | 'revoked';
+};
+
+/**
+ * A pending invitation for a new staff member.
+ */
+export type AssociationCoreStaffStaffInvitationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Email address the invitation was sent to.
+     */
+    email?: string;
+    /**
+     * Role that will be assigned upon acceptance.
+     */
+    role?: 'admin' | 'coordinator' | 'accountant' | 'executive' | 'support' | 'custom';
+    /**
+     * Staff member ID of the person who sent this invitation.
+     */
+    invitedBy?: string;
+    /**
+     * Secure one-time token embedded in the invitation link.
+     */
+    token?: string;
+    /**
+     * Timestamp after which the token is no longer valid.
+     */
+    expiresAt?: Date;
+    /**
+     * Current status of the invitation.
+     */
+    status?: 'pending' | 'accepted' | 'expired' | 'revoked';
+};
+
+/**
+ * A staff member attached to the association's operational team.
+ */
+export type AssociationCoreStaffStaffMember = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId: string;
+    /**
+     * Person record this staff member maps to.
+     */
+    personId: string;
+    /**
+     * Organisation this staff member primarily belongs to (HQ or chapter).
+     */
+    organizationId: string;
+    /**
+     * Functional role governing access permissions.
+     */
+    role: 'admin' | 'coordinator' | 'accountant' | 'executive' | 'support' | 'custom';
+    /**
+     * Job title as it appears on communications and the staff directory.
+     */
+    title?: string;
+    /**
+     * Nature of the employment relationship.
+     */
+    employmentType: 'fullTime' | 'partTime' | 'contract' | 'volunteer';
+    /**
+     * Date on which the staff member started (or will start) in this role.
+     */
+    startDate: Date;
+    /**
+     * Date on which the staff member's tenure ends. Omit for indefinite employment.
+     */
+    endDate?: Date;
+    /**
+     * Current lifecycle status.
+     */
+    status: 'invited' | 'active' | 'onLeave' | 'terminated';
+    /**
+     * One-time token included in the invitation email, valid until invitationExpiresAt.
+     */
+    invitationToken?: string;
+    /**
+     * Expiry timestamp of the invitation token.
+     */
+    invitationExpiresAt?: Date;
+};
+
+/**
+ * A staff member attached to the association's operational team.
+ */
+export type AssociationCoreStaffStaffMemberUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant (association) this record belongs to.
+     */
+    tenantId?: string;
+    /**
+     * Person record this staff member maps to.
+     */
+    personId?: string;
+    /**
+     * Organisation this staff member primarily belongs to (HQ or chapter).
+     */
+    organizationId?: string;
+    /**
+     * Functional role governing access permissions.
+     */
+    role?: 'admin' | 'coordinator' | 'accountant' | 'executive' | 'support' | 'custom';
+    /**
+     * Job title as it appears on communications and the staff directory.
+     */
+    title?: string;
+    /**
+     * Nature of the employment relationship.
+     */
+    employmentType?: 'fullTime' | 'partTime' | 'contract' | 'volunteer';
+    /**
+     * Date on which the staff member started (or will start) in this role.
+     */
+    startDate?: Date;
+    /**
+     * Date on which the staff member's tenure ends. Omit for indefinite employment.
+     */
+    endDate?: Date;
+    /**
+     * Current lifecycle status.
+     */
+    status?: 'invited' | 'active' | 'onLeave' | 'terminated';
+    /**
+     * One-time token included in the invitation email, valid until invitationExpiresAt.
+     */
+    invitationToken?: string;
+    /**
+     * Expiry timestamp of the invitation token.
+     */
+    invitationExpiresAt?: Date;
+};
+
+/**
+ * Functional role of a staff member within the association.
+ */
+export type AssociationCoreStaffStaffRole = 'admin' | 'coordinator' | 'accountant' | 'executive' | 'support' | 'custom';
+
+/**
+ * Lifecycle status of a staff member record.
+ */
+export type AssociationCoreStaffStaffStatus = 'invited' | 'active' | 'onLeave' | 'terminated';
+
+/**
+ * Status of a COI attestation
+ */
+export type AttestationStatus = 'submitted' | 'reviewed' | 'cleared' | 'flagged';
+
+/**
+ * A dynamic audience segment for targeting campaigns
+ */
+export type AudienceSegment = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this segment belongs to
+     */
+    tenantId: string;
+    /**
+     * Segment display name
+     */
+    name: string;
+    /**
+     * Ordered list of rules that define segment membership
+     */
+    rules: Array<SegmentRule>;
+    /**
+     * Estimated number of matching members (refreshed on demand)
+     */
+    estimatedSize?: number;
+    /**
+     * UTC timestamp when the estimated size was last calculated
+     */
+    lastCalculatedAt?: Date;
+};
+
+/**
+ * A dynamic audience segment for targeting campaigns
+ */
+export type AudienceSegmentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this segment belongs to
+     */
+    tenantId?: string;
+    /**
+     * Segment display name
+     */
+    name?: string;
+    /**
+     * Ordered list of rules that define segment membership
+     */
+    rules?: Array<SegmentRule>;
+    /**
+     * Estimated number of matching members (refreshed on demand)
+     */
+    estimatedSize?: number;
+    /**
+     * UTC timestamp when the estimated size was last calculated
+     */
+    lastCalculatedAt?: Date;
 };
 
 /**
@@ -207,6 +5767,161 @@ export type AuditLogEntry = {
      * Retention lifecycle status
      */
     retentionStatus: 'active' | 'archived' | 'pending-purge';
+    /**
+     * Date when log was archived
+     */
+    archivedAt?: Date;
+    /**
+     * Person who archived the log
+     */
+    archivedBy?: string;
+    /**
+     * Scheduled purge date based on retention policy
+     */
+    purgeAfter?: Date;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type AuditLogEntryListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AuditLogEntry>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * System audit log entry
+ */
+export type AuditLogEntryUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Event type
+     */
+    eventType?: 'authentication' | 'data-access' | 'data-modification' | 'system-config' | 'security' | 'compliance';
+    /**
+     * Event category
+     */
+    category?: 'regulatory' | 'security' | 'privacy' | 'administrative' | 'domain' | 'financial';
+    /**
+     * User who performed the action
+     */
+    user?: string;
+    /**
+     * User type
+     */
+    userType?: 'client' | 'service_provider' | 'admin' | 'system';
+    /**
+     * Affected resource type
+     */
+    resourceType?: string;
+    /**
+     * Affected resource ID
+     */
+    resource?: string;
+    /**
+     * Action performed
+     */
+    action?: 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout';
+    /**
+     * Event outcome
+     */
+    outcome?: 'success' | 'failure' | 'partial' | 'denied';
+    /**
+     * Event description
+     */
+    description?: string;
+    /**
+     * Event details
+     */
+    details?: {
+        [key: string]: unknown;
+    };
+    /**
+     * IP address
+     */
+    ipAddress?: string;
+    /**
+     * User agent
+     */
+    userAgent?: string;
+    /**
+     * Session identifier
+     */
+    session?: string;
+    /**
+     * Request identifier
+     */
+    request?: string;
+    /**
+     * Integrity hash for tamper detection
+     */
+    integrityHash?: string;
+    /**
+     * Retention lifecycle status
+     */
+    retentionStatus?: 'active' | 'archived' | 'pending-purge';
     /**
      * Date when log was archived
      */
@@ -340,6 +6055,877 @@ export type AuthorizationError = {
 };
 
 /**
+ * A single action executed when a rule's conditions are met
+ */
+export type AutoAction = {
+    /**
+     * Built-in action type to execute
+     */
+    type: 'create_task' | 'send_notification' | 'send_email' | 'update_field' | 'call_webhook' | 'add_to_queue' | 'award_credit';
+    /**
+     * Action-specific configuration parameters
+     */
+    configuration: {
+        [key: string]: unknown;
+    };
+    /**
+     * Number of minutes to wait before executing this action (0 = immediate)
+     */
+    delayMinutes?: number;
+};
+
+/**
+ * Built-in action types available to automation rules
+ */
+export type AutoActionType = 'create_task' | 'send_notification' | 'send_email' | 'update_field' | 'call_webhook' | 'add_to_queue' | 'award_credit';
+
+/**
+ * A single condition evaluated before an automation action fires
+ */
+export type AutoCondition = {
+    /**
+     * Data field path to evaluate (e.g., 'membership.status', 'person.state')
+     */
+    field: string;
+    /**
+     * Comparison operator (e.g., 'eq', 'neq', 'gt', 'lt', 'contains', 'in', 'isNull')
+     */
+    operator: string;
+    /**
+     * Comparison value serialised as a string
+     */
+    value: string;
+};
+
+/**
+ * A record of a single automation rule execution
+ */
+export type AutomationExecution = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this execution belongs to
+     */
+    tenantId: string;
+    /**
+     * Automation rule that was executed
+     */
+    ruleId: string;
+    /**
+     * Identifier of the event that triggered this execution
+     */
+    triggerEventId: string;
+    /**
+     * Execution outcome status
+     */
+    status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+    /**
+     * UTC timestamp when execution started
+     */
+    startedAt: Date;
+    /**
+     * UTC timestamp when execution finished
+     */
+    completedAt?: Date;
+    /**
+     * Number of actions that were executed
+     */
+    actionsExecuted: number;
+    /**
+     * Depth within a chain of triggered executions (0 = directly triggered)
+     */
+    chainDepth: number;
+    /**
+     * Error message if the execution failed
+     */
+    error?: string;
+};
+
+/**
+ * Execution status of an automation rule run
+ */
+export type AutomationExecutionStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+
+/**
+ * A record of a single automation rule execution
+ */
+export type AutomationExecutionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this execution belongs to
+     */
+    tenantId?: string;
+    /**
+     * Automation rule that was executed
+     */
+    ruleId?: string;
+    /**
+     * Identifier of the event that triggered this execution
+     */
+    triggerEventId?: string;
+    /**
+     * Execution outcome status
+     */
+    status?: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+    /**
+     * UTC timestamp when execution started
+     */
+    startedAt?: Date;
+    /**
+     * UTC timestamp when execution finished
+     */
+    completedAt?: Date;
+    /**
+     * Number of actions that were executed
+     */
+    actionsExecuted?: number;
+    /**
+     * Depth within a chain of triggered executions (0 = directly triggered)
+     */
+    chainDepth?: number;
+    /**
+     * Error message if the execution failed
+     */
+    error?: string;
+};
+
+/**
+ * An event-driven automation rule that evaluates conditions and executes actions
+ */
+export type AutomationRule = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this rule belongs to
+     */
+    tenantId: string;
+    /**
+     * Human-readable rule name
+     */
+    name: string;
+    /**
+     * Event topic name that triggers this rule (e.g., 'member.created')
+     */
+    triggerEvent: string;
+    /**
+     * Conditions that must all be true for actions to fire
+     */
+    conditions: Array<AutoCondition>;
+    /**
+     * Ordered list of actions to execute when conditions pass
+     */
+    actions: Array<AutoAction>;
+    /**
+     * Whether this rule is active and will fire on matching events
+     */
+    enabled: boolean;
+    /**
+     * Execution priority — lower number = higher priority (1 = highest)
+     */
+    priority: number;
+    /**
+     * Maximum number of chained rule executions allowed before breaking the cycle (default 3)
+     */
+    maxChainDepth: number;
+    /**
+     * Person or system identifier that created this rule
+     */
+    ruleCreatedBy: string;
+};
+
+/**
+ * An event-driven automation rule that evaluates conditions and executes actions
+ */
+export type AutomationRuleUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this rule belongs to
+     */
+    tenantId?: string;
+    /**
+     * Human-readable rule name
+     */
+    name?: string;
+    /**
+     * Event topic name that triggers this rule (e.g., 'member.created')
+     */
+    triggerEvent?: string;
+    /**
+     * Conditions that must all be true for actions to fire
+     */
+    conditions?: Array<AutoCondition>;
+    /**
+     * Ordered list of actions to execute when conditions pass
+     */
+    actions?: Array<AutoAction>;
+    /**
+     * Whether this rule is active and will fire on matching events
+     */
+    enabled?: boolean;
+    /**
+     * Execution priority — lower number = higher priority (1 = highest)
+     */
+    priority?: number;
+    /**
+     * Maximum number of chained rule executions allowed before breaking the cycle (default 3)
+     */
+    maxChainDepth?: number;
+    /**
+     * Person or system identifier that created this rule
+     */
+    ruleCreatedBy?: string;
+};
+
+/**
+ * Cadence of an award program
+ */
+export type AwardCycle = 'annual' | 'biennial';
+
+/**
+ * A nomination submitted for an award program
+ */
+export type AwardNomination = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the award program
+     */
+    programId: string;
+    /**
+     * ID of the nominated person
+     */
+    nomineeId: string;
+    /**
+     * ID of the person or entity submitting the nomination
+     */
+    nominatedBy: string;
+    /**
+     * Timestamp when the nomination was submitted
+     */
+    nominatedAt: Date;
+    /**
+     * Supporting statement accompanying the nomination
+     */
+    supportingStatement?: string;
+    /**
+     * Current review status of the nomination
+     */
+    status: 'submitted' | 'underReview' | 'shortlisted' | 'selected' | 'notSelected' | 'withdrawn';
+};
+
+/**
+ * A nomination submitted for an award program
+ */
+export type AwardNominationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the award program
+     */
+    programId?: string;
+    /**
+     * ID of the nominated person
+     */
+    nomineeId?: string;
+    /**
+     * ID of the person or entity submitting the nomination
+     */
+    nominatedBy?: string;
+    /**
+     * Timestamp when the nomination was submitted
+     */
+    nominatedAt?: Date;
+    /**
+     * Supporting statement accompanying the nomination
+     */
+    supportingStatement?: string;
+    /**
+     * Current review status of the nomination
+     */
+    status?: 'submitted' | 'underReview' | 'shortlisted' | 'selected' | 'notSelected' | 'withdrawn';
+};
+
+/**
+ * An award, scholarship, fellowship, or grant program offered by the association
+ */
+export type AwardProgram = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Display name of the program
+     */
+    name: string;
+    /**
+     * Type of award program
+     */
+    type: 'award' | 'scholarship' | 'fellowship' | 'grant';
+    /**
+     * Description of the program and its purpose
+     */
+    description?: string;
+    /**
+     * Eligibility criteria for nominees or applicants
+     */
+    eligibilityCriteria?: string;
+    /**
+     * Whether nominations must be submitted by a third party
+     */
+    nominationRequired: boolean;
+    /**
+     * Whether applicants must submit a formal application
+     */
+    applicationRequired: boolean;
+    /**
+     * Maximum number of recipients per cycle (null = unlimited)
+     */
+    maxRecipients?: number;
+    /**
+     * Monetary value of the award, scholarship, or grant (null = non-monetary)
+     */
+    prizeAmount?: bigint;
+    /**
+     * ISO 4217 currency code for the prize amount
+     */
+    currency?: string;
+    /**
+     * How often the program awards recipients
+     */
+    cycle: 'annual' | 'biennial';
+    /**
+     * Lifecycle status of the program
+     */
+    status: 'active' | 'suspended' | 'retired';
+};
+
+/**
+ * Lifecycle status of an award program
+ */
+export type AwardProgramStatus = 'active' | 'suspended' | 'retired';
+
+/**
+ * Type of award program
+ */
+export type AwardProgramType = 'award' | 'scholarship' | 'fellowship' | 'grant';
+
+/**
+ * An award, scholarship, fellowship, or grant program offered by the association
+ */
+export type AwardProgramUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Display name of the program
+     */
+    name?: string;
+    /**
+     * Type of award program
+     */
+    type?: 'award' | 'scholarship' | 'fellowship' | 'grant';
+    /**
+     * Description of the program and its purpose
+     */
+    description?: string;
+    /**
+     * Eligibility criteria for nominees or applicants
+     */
+    eligibilityCriteria?: string;
+    /**
+     * Whether nominations must be submitted by a third party
+     */
+    nominationRequired?: boolean;
+    /**
+     * Whether applicants must submit a formal application
+     */
+    applicationRequired?: boolean;
+    /**
+     * Maximum number of recipients per cycle (null = unlimited)
+     */
+    maxRecipients?: number;
+    /**
+     * Monetary value of the award, scholarship, or grant (null = non-monetary)
+     */
+    prizeAmount?: bigint;
+    /**
+     * ISO 4217 currency code for the prize amount
+     */
+    currency?: string;
+    /**
+     * How often the program awards recipients
+     */
+    cycle?: 'annual' | 'biennial';
+    /**
+     * Lifecycle status of the program
+     */
+    status?: 'active' | 'suspended' | 'retired';
+};
+
+/**
+ * A recipient record for an award program cycle
+ */
+export type AwardRecipient = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the award program
+     */
+    programId: string;
+    /**
+     * ID of the nomination that led to this recipient record (null for direct selection)
+     */
+    nominationId?: string;
+    /**
+     * ID of the recipient person
+     */
+    personId: string;
+    /**
+     * Calendar year in which the award was given
+     */
+    awardYear: number;
+    /**
+     * Citation or rationale text for the award
+     */
+    citation?: string;
+    /**
+     * Timestamp of the award presentation
+     */
+    presentedAt?: Date;
+    /**
+     * ID of the person who presented the award
+     */
+    presentedBy?: string;
+    /**
+     * Amount disbursed to the recipient (may differ from prizeAmount due to proration)
+     */
+    disbursementAmount?: bigint;
+    /**
+     * Current status of the prize disbursement
+     */
+    disbursementStatus?: 'pending' | 'processed' | 'completed';
+};
+
+/**
+ * A recipient record for an award program cycle
+ */
+export type AwardRecipientUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the award program
+     */
+    programId?: string;
+    /**
+     * ID of the nomination that led to this recipient record (null for direct selection)
+     */
+    nominationId?: string;
+    /**
+     * ID of the recipient person
+     */
+    personId?: string;
+    /**
+     * Calendar year in which the award was given
+     */
+    awardYear?: number;
+    /**
+     * Citation or rationale text for the award
+     */
+    citation?: string;
+    /**
+     * Timestamp of the award presentation
+     */
+    presentedAt?: Date;
+    /**
+     * ID of the person who presented the award
+     */
+    presentedBy?: string;
+    /**
+     * Amount disbursed to the recipient (may differ from prizeAmount due to proration)
+     */
+    disbursementAmount?: bigint;
+    /**
+     * Current status of the prize disbursement
+     */
+    disbursementStatus?: 'pending' | 'processed' | 'completed';
+};
+
+/**
+ * A single ballot cast by a voter in an election
+ */
+export type Ballot = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the election this ballot was cast in
+     */
+    electionId: string;
+    /**
+     * ID of the member who cast the ballot
+     */
+    voterId: string;
+    /**
+     * ID of the position being voted on
+     */
+    positionId: string;
+    /**
+     * ID of the candidate selected
+     */
+    candidateId: string;
+    /**
+     * Timestamp when the ballot was cast
+     */
+    castAt: Date;
+    /**
+     * Whether this ballot was cast by a proxy voter
+     */
+    isProxy: boolean;
+    /**
+     * ID of the member on whose behalf the proxy voted
+     */
+    proxyFor?: string;
+    /**
+     * Hash used to verify ballot integrity without revealing voter identity
+     */
+    verificationHash?: string;
+};
+
+/**
+ * A single ballot cast by a voter in an election
+ */
+export type BallotUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the election this ballot was cast in
+     */
+    electionId?: string;
+    /**
+     * ID of the member who cast the ballot
+     */
+    voterId?: string;
+    /**
+     * ID of the position being voted on
+     */
+    positionId?: string;
+    /**
+     * ID of the candidate selected
+     */
+    candidateId?: string;
+    /**
+     * Timestamp when the ballot was cast
+     */
+    castAt?: Date;
+    /**
+     * Whether this ballot was cast by a proxy voter
+     */
+    isProxy?: boolean;
+    /**
+     * ID of the member on whose behalf the proxy voted
+     */
+    proxyFor?: string;
+    /**
+     * Hash used to verify ballot integrity without revealing voter identity
+     */
+    verificationHash?: string;
+};
+
+/**
  * Base entity with audit fields
  */
 export type BaseEntity = {
@@ -367,6 +6953,418 @@ export type BaseEntity = {
      * User who last updated the entity
      */
     updatedBy?: string;
+};
+
+/**
+ * Base entity with audit fields
+ */
+export type BaseEntityUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+};
+
+/**
+ * A member discount or benefit offer from a partner
+ */
+export type BenefitOffer = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this offer belongs to
+     */
+    tenantId: string;
+    /**
+     * Partner providing this offer
+     */
+    partnerId: string;
+    /**
+     * Offer headline title
+     */
+    title: string;
+    /**
+     * Full offer description and terms
+     */
+    description: string;
+    /**
+     * Type of discount provided
+     */
+    discountType: 'percentage' | 'fixed_amount' | 'free_item' | 'special_rate';
+    /**
+     * Numeric discount value (interpretation depends on discountType)
+     */
+    discountValue?: bigint;
+    /**
+     * UTC date the offer becomes valid
+     */
+    validFrom: Date;
+    /**
+     * UTC date the offer expires; null means no expiry
+     */
+    validTo?: Date;
+    /**
+     * Human-readable eligibility rule description
+     */
+    eligibilityRule?: string;
+    /**
+     * Redemption code members use to claim the offer
+     */
+    redemptionCode?: string;
+    /**
+     * Current offer status
+     */
+    status: 'active' | 'expired' | 'suspended';
+};
+
+/**
+ * Status of a benefit offer
+ */
+export type BenefitOfferStatus = 'active' | 'expired' | 'suspended';
+
+/**
+ * A member discount or benefit offer from a partner
+ */
+export type BenefitOfferUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this offer belongs to
+     */
+    tenantId?: string;
+    /**
+     * Partner providing this offer
+     */
+    partnerId?: string;
+    /**
+     * Offer headline title
+     */
+    title?: string;
+    /**
+     * Full offer description and terms
+     */
+    description?: string;
+    /**
+     * Type of discount provided
+     */
+    discountType?: 'percentage' | 'fixed_amount' | 'free_item' | 'special_rate';
+    /**
+     * Numeric discount value (interpretation depends on discountType)
+     */
+    discountValue?: bigint;
+    /**
+     * UTC date the offer becomes valid
+     */
+    validFrom?: Date;
+    /**
+     * UTC date the offer expires; null means no expiry
+     */
+    validTo?: Date;
+    /**
+     * Human-readable eligibility rule description
+     */
+    eligibilityRule?: string;
+    /**
+     * Redemption code members use to claim the offer
+     */
+    redemptionCode?: string;
+    /**
+     * Current offer status
+     */
+    status?: 'active' | 'expired' | 'suspended';
+};
+
+/**
+ * An organization that provides member benefit offers
+ */
+export type BenefitPartner = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this partner belongs to
+     */
+    tenantId: string;
+    /**
+     * Partner organization display name
+     */
+    name: string;
+    /**
+     * Short description of the partner and their offering
+     */
+    description?: string;
+    /**
+     * Business category (e.g., 'Insurance', 'Software', 'Travel')
+     */
+    category: string;
+    /**
+     * Primary contact email address
+     */
+    contactEmail?: string;
+    /**
+     * Partner website URL
+     */
+    website?: string;
+    /**
+     * URL of the partner logo image
+     */
+    logoUrl?: string;
+    /**
+     * Current partner status
+     */
+    status: 'active' | 'suspended' | 'expired';
+};
+
+/**
+ * Status of a benefit partner record
+ */
+export type BenefitPartnerStatus = 'active' | 'suspended' | 'expired';
+
+/**
+ * An organization that provides member benefit offers
+ */
+export type BenefitPartnerUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this partner belongs to
+     */
+    tenantId?: string;
+    /**
+     * Partner organization display name
+     */
+    name?: string;
+    /**
+     * Short description of the partner and their offering
+     */
+    description?: string;
+    /**
+     * Business category (e.g., 'Insurance', 'Software', 'Travel')
+     */
+    category?: string;
+    /**
+     * Primary contact email address
+     */
+    contactEmail?: string;
+    /**
+     * Partner website URL
+     */
+    website?: string;
+    /**
+     * URL of the partner logo image
+     */
+    logoUrl?: string;
+    /**
+     * Current partner status
+     */
+    status?: 'active' | 'suspended' | 'expired';
+};
+
+/**
+ * A record of a member redeeming a benefit offer
+ */
+export type BenefitRedemption = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this redemption belongs to
+     */
+    tenantId: string;
+    /**
+     * Offer that was redeemed
+     */
+    offerId: string;
+    /**
+     * Member who redeemed the offer
+     */
+    personId: string;
+    /**
+     * UTC timestamp of redemption
+     */
+    redeemedAt: Date;
+    /**
+     * Monetary value realised from this redemption
+     */
+    value?: bigint;
+};
+
+/**
+ * A record of a member redeeming a benefit offer
+ */
+export type BenefitRedemptionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this redemption belongs to
+     */
+    tenantId?: string;
+    /**
+     * Offer that was redeemed
+     */
+    offerId?: string;
+    /**
+     * Member who redeemed the offer
+     */
+    personId?: string;
+    /**
+     * UTC timestamp of redemption
+     */
+    redeemedAt?: Date;
+    /**
+     * Monetary value realised from this redemption
+     */
+    value?: bigint;
 };
 
 /**
@@ -403,6 +7401,275 @@ export type BillingConfigUpdate = {
      * Free cancellation threshold in minutes before event
      */
     cancellationThresholdMinutes?: number;
+};
+
+/**
+ * A board-level meeting of the association's governing body
+ */
+export type BoardMeeting = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the organization whose board is meeting
+     */
+    organizationId: string;
+    /**
+     * Date and time the board meeting is scheduled
+     */
+    scheduledDate: Date;
+    /**
+     * Type of board meeting
+     */
+    type: 'regular' | 'special' | 'annual' | 'emergency';
+    /**
+     * Meeting agenda
+     */
+    agenda?: string;
+    /**
+     * Current status of the meeting
+     */
+    status: 'scheduled' | 'inProgress' | 'completed' | 'cancelled';
+    /**
+     * Whether quorum was present when the meeting was called to order
+     */
+    quorumPresent?: boolean;
+};
+
+/**
+ * Type of board meeting
+ */
+export type BoardMeetingType = 'regular' | 'special' | 'annual' | 'emergency';
+
+/**
+ * A board-level meeting of the association's governing body
+ */
+export type BoardMeetingUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the organization whose board is meeting
+     */
+    organizationId?: string;
+    /**
+     * Date and time the board meeting is scheduled
+     */
+    scheduledDate?: Date;
+    /**
+     * Type of board meeting
+     */
+    type?: 'regular' | 'special' | 'annual' | 'emergency';
+    /**
+     * Meeting agenda
+     */
+    agenda?: string;
+    /**
+     * Current status of the meeting
+     */
+    status?: 'scheduled' | 'inProgress' | 'completed' | 'cancelled';
+    /**
+     * Whether quorum was present when the meeting was called to order
+     */
+    quorumPresent?: boolean;
+};
+
+/**
+ * A formal resolution adopted (or considered) by the board
+ */
+export type BoardResolution = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the board meeting at which this resolution was presented
+     */
+    boardMeetingId: string;
+    /**
+     * Sequential resolution number within the organization
+     */
+    resolutionNumber: string;
+    /**
+     * Short title of the resolution
+     */
+    title: string;
+    /**
+     * Full text of the resolution
+     */
+    text: string;
+    /**
+     * ID of the board member who proposed the resolution
+     */
+    proposedBy: string;
+    /**
+     * Current status of the resolution
+     */
+    status: 'proposed' | 'discussed' | 'adopted' | 'rejected' | 'tabled';
+    /**
+     * Timestamp when the vote was taken
+     */
+    votedAt?: Date;
+    /**
+     * Number of votes in favour
+     */
+    votesFor?: number;
+    /**
+     * Number of votes against
+     */
+    votesAgainst?: number;
+    /**
+     * Number of abstentions
+     */
+    abstentions?: number;
+};
+
+/**
+ * A formal resolution adopted (or considered) by the board
+ */
+export type BoardResolutionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the board meeting at which this resolution was presented
+     */
+    boardMeetingId?: string;
+    /**
+     * Sequential resolution number within the organization
+     */
+    resolutionNumber?: string;
+    /**
+     * Short title of the resolution
+     */
+    title?: string;
+    /**
+     * Full text of the resolution
+     */
+    text?: string;
+    /**
+     * ID of the board member who proposed the resolution
+     */
+    proposedBy?: string;
+    /**
+     * Current status of the resolution
+     */
+    status?: 'proposed' | 'discussed' | 'adopted' | 'rejected' | 'tabled';
+    /**
+     * Timestamp when the vote was taken
+     */
+    votedAt?: Date;
+    /**
+     * Number of votes in favour
+     */
+    votesFor?: number;
+    /**
+     * Number of votes against
+     */
+    votesAgainst?: number;
+    /**
+     * Number of abstentions
+     */
+    abstentions?: number;
 };
 
 /**
@@ -601,7 +7868,7 @@ export type BookingEvent = {
     /**
      * Optional context for domain associations
      */
-    context?: string;
+    context?: string | null;
     /**
      * Event title
      */
@@ -609,7 +7876,7 @@ export type BookingEvent = {
     /**
      * Event description
      */
-    description?: string;
+    description?: string | null;
     /**
      * Searchable keywords for discovery (e.g., 'therapy', 'massage', 'counseling')
      */
@@ -642,7 +7909,7 @@ export type BookingEvent = {
          * Form fields configuration
          */
         fields?: Array<FormFieldConfig>;
-    };
+    } | null;
     /**
      * Optional billing configuration
      */
@@ -659,7 +7926,7 @@ export type BookingEvent = {
          * Free cancellation threshold in minutes before event
          */
         cancellationThresholdMinutes: number;
-    };
+    } | null;
     /**
      * Event status
      */
@@ -671,7 +7938,7 @@ export type BookingEvent = {
     /**
      * Schedule effective to date and time (optional)
      */
-    effectiveTo?: Date;
+    effectiveTo?: Date | null;
     /**
      * Daily configurations mapped by day name (sun, mon, tue, wed, thu, fri, sat)
      */
@@ -767,9 +8034,170 @@ export type BookingEventCreateRequest = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type BookingEventListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<BookingEvent>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Booking event status
  */
 export type BookingEventStatus = 'draft' | 'active' | 'paused' | 'archived';
+
+/**
+ * Booking event with configurable availability schedule
+ */
+export type BookingEventUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Event owner (host person ID, e.g. coach, advisor, instructor) (expandable)
+     */
+    owner?: string | PersonUpdate;
+    /**
+     * Optional context for domain associations
+     */
+    context?: string | null;
+    /**
+     * Event title
+     */
+    title?: string;
+    /**
+     * Event description
+     */
+    description?: string | null;
+    /**
+     * Searchable keywords for discovery (e.g., 'therapy', 'massage', 'counseling')
+     */
+    keywords?: Array<string>;
+    /**
+     * Category tags for filtering (e.g., 'wellness', 'mental-health', 'fitness')
+     */
+    tags?: Array<string>;
+    /**
+     * Event timezone
+     */
+    timezone?: string;
+    /**
+     * Available location types for this event
+     */
+    locationTypes?: Array<LocationType>;
+    /**
+     * Maximum days in advance clients can book
+     */
+    maxBookingDays?: number;
+    /**
+     * Minimum minutes advance notice required
+     */
+    minBookingMinutes?: number;
+    /**
+     * Optional form configuration
+     */
+    formConfig?: {
+        /**
+         * Form fields configuration
+         */
+        fields?: Array<FormFieldConfig>;
+    } | null;
+    /**
+     * Optional billing configuration
+     */
+    billingConfig?: {
+        /**
+         * Price for the event in cents
+         */
+        price?: number;
+        /**
+         * Currency code (e.g., 'CAD', 'USD')
+         */
+        currency?: string;
+        /**
+         * Free cancellation threshold in minutes before event
+         */
+        cancellationThresholdMinutes?: number;
+    } | null;
+    /**
+     * Event status
+     */
+    status?: 'draft' | 'active' | 'paused' | 'archived';
+    /**
+     * Schedule effective from date and time
+     */
+    effectiveFrom?: Date;
+    /**
+     * Schedule effective to date and time (optional)
+     */
+    effectiveTo?: Date | null;
+    /**
+     * Daily configurations mapped by day name (sun, mon, tue, wed, thu, fri, sat)
+     */
+    dailyConfigs?: {
+        [key: string]: DailyConfigUpdate;
+    };
+};
 
 /**
  * Update booking event request
@@ -850,9 +8278,397 @@ export type BookingEventUpdateRequest = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type BookingListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Booking>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Booking status throughout lifecycle
  */
 export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'completed' | 'no_show_client' | 'no_show_host';
+
+/**
+ * Confirmed booking instance between a client and a host
+ */
+export type BookingUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Client user ID (person.id) (expandable)
+     */
+    client?: string | PersonUpdate;
+    /**
+     * Host user ID (person.id) (expandable)
+     */
+    host?: string | PersonUpdate;
+    /**
+     * Time slot (expandable)
+     */
+    slot?: string | TimeSlotUpdate;
+    /**
+     * Selected location type
+     */
+    locationType?: 'video' | 'phone' | 'in-person';
+    /**
+     * Booking reason
+     */
+    reason?: string;
+    /**
+     * Booking status
+     */
+    status?: 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'completed' | 'no_show_client' | 'no_show_host';
+    /**
+     * When booking was created (UTC)
+     */
+    bookedAt?: Date;
+    /**
+     * When host confirmed (UTC)
+     */
+    confirmationTimestamp?: Date;
+    /**
+     * Scheduled booking date/time (UTC)
+     */
+    scheduledAt?: Date;
+    /**
+     * Booking duration in minutes
+     */
+    durationMinutes?: number;
+    /**
+     * Cancellation reason if cancelled
+     */
+    cancellationReason?: string;
+    /**
+     * Who cancelled the booking
+     */
+    cancelledBy?: string;
+    /**
+     * When cancelled (UTC)
+     */
+    cancelledAt?: Date;
+    /**
+     * Who marked no-show
+     */
+    noShowMarkedBy?: string;
+    /**
+     * When no-show was marked (UTC)
+     */
+    noShowMarkedAt?: Date;
+    /**
+     * Client's booking form responses
+     */
+    formResponses?: {
+        /**
+         * Form field responses
+         */
+        data?: {
+            [key: string]: unknown;
+        };
+        /**
+         * Submission metadata (system-generated)
+         */
+        metadata?: {
+            /**
+             * When the form was submitted
+             */
+            submittedAt?: Date;
+            /**
+             * Time taken to complete the form in seconds
+             */
+            completionTimeSeconds?: number;
+            /**
+             * Client IP address
+             */
+            ipAddress?: string;
+        };
+    };
+    /**
+     * Reference to billing invoice if payment required
+     */
+    invoice?: string;
+};
+
+/**
+ * A member's bookmark on a knowledge resource
+ */
+export type Bookmark = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * UTC timestamp when the bookmark was created
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this bookmark belongs to
+     */
+    tenantId: string;
+    /**
+     * Bookmarked resource
+     */
+    resourceId: string;
+    /**
+     * Member who created the bookmark
+     */
+    personId: string;
+};
+
+/**
+ * A member's bookmark on a knowledge resource
+ */
+export type BookmarkUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * UTC timestamp when the bookmark was created
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this bookmark belongs to
+     */
+    tenantId?: string;
+    /**
+     * Bookmarked resource
+     */
+    resourceId?: string;
+    /**
+     * Member who created the bookmark
+     */
+    personId?: string;
+};
+
+/**
+ * A conflict-of-interest attestation submitted by a member
+ */
+export type CoiAttestation = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the member submitting the attestation
+     */
+    personId: string;
+    /**
+     * ID of the attestation cycle this submission belongs to (if the association uses defined cycles)
+     */
+    attestationCycleId?: string;
+    /**
+     * List of conflict-of-interest disclosures included in this attestation
+     */
+    disclosures: Array<CoiDisclosure>;
+    /**
+     * Timestamp when the attestation was submitted
+     */
+    attestedAt: Date;
+    /**
+     * Review status of this attestation
+     */
+    status: 'submitted' | 'reviewed' | 'cleared' | 'flagged';
+};
+
+/**
+ * A conflict-of-interest attestation submitted by a member
+ */
+export type CoiAttestationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the member submitting the attestation
+     */
+    personId?: string;
+    /**
+     * ID of the attestation cycle this submission belongs to (if the association uses defined cycles)
+     */
+    attestationCycleId?: string;
+    /**
+     * List of conflict-of-interest disclosures included in this attestation
+     */
+    disclosures?: Array<CoiDisclosure>;
+    /**
+     * Timestamp when the attestation was submitted
+     */
+    attestedAt?: Date;
+    /**
+     * Review status of this attestation
+     */
+    status?: 'submitted' | 'reviewed' | 'cleared' | 'flagged';
+};
+
+/**
+ * A single conflict-of-interest disclosure within an attestation
+ */
+export type CoiDisclosure = {
+    /**
+     * Category of the disclosed relationship
+     */
+    category: 'financial' | 'board' | 'vendor' | 'employment' | 'family' | 'other';
+    /**
+     * Description of the potential conflict
+     */
+    description: string;
+    /**
+     * Name of the organization or individual involved
+     */
+    entityName: string;
+    /**
+     * Plan to manage or mitigate the conflict
+     */
+    mitigationPlan?: string;
+};
+
+/**
+ * Category of a conflict-of-interest disclosure
+ */
+export type CoiDisclosureCategory = 'financial' | 'board' | 'vendor' | 'employment' | 'family' | 'other';
 
 /**
  * Video call participant
@@ -885,6 +8701,372 @@ export type CallParticipant = {
 };
 
 /**
+ * A fundraising or membership-drive campaign
+ */
+export type Campaign = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Display name of the campaign
+     */
+    name: string;
+    /**
+     * Type of campaign
+     */
+    type: 'fundraising' | 'membershipDrive' | 'eventPromotion' | 'advocacy' | 'awareness';
+    /**
+     * Monetary fundraising goal (null for non-monetary campaigns)
+     */
+    goal?: bigint;
+    /**
+     * Amount raised to date (updated by the donation processing pipeline)
+     */
+    raised?: bigint;
+    /**
+     * Date on which the campaign starts
+     */
+    startDate: Date;
+    /**
+     * Date on which the campaign ends (null for open-ended campaigns)
+     */
+    endDate?: Date;
+    /**
+     * Current status of the campaign
+     */
+    status: 'draft' | 'active' | 'paused' | 'completed';
+    /**
+     * Description of the intended audience segment for targeting
+     */
+    targetAudience?: string;
+};
+
+/**
+ * An individual message send record within a campaign
+ */
+export type CampaignSendRecord = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this send record belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent campaign
+     */
+    campaignId: string;
+    /**
+     * Sequence step number this record corresponds to
+     */
+    sequenceStep: number;
+    /**
+     * Recipient person identifier
+     */
+    recipientId: string;
+    /**
+     * UTC timestamp when the message was sent
+     */
+    sentAt: Date;
+    /**
+     * Current delivery status
+     */
+    deliveryStatus: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'unsubscribed';
+};
+
+/**
+ * An individual message send record within a campaign
+ */
+export type CampaignSendRecordUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this send record belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent campaign
+     */
+    campaignId?: string;
+    /**
+     * Sequence step number this record corresponds to
+     */
+    sequenceStep?: number;
+    /**
+     * Recipient person identifier
+     */
+    recipientId?: string;
+    /**
+     * UTC timestamp when the message was sent
+     */
+    sentAt?: Date;
+    /**
+     * Current delivery status
+     */
+    deliveryStatus?: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'unsubscribed';
+};
+
+/**
+ * A single step within a campaign sequence (drip programme)
+ */
+export type CampaignSequence = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this sequence step belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent campaign
+     */
+    campaignId: string;
+    /**
+     * Ordinal step number within the sequence (1-based)
+     */
+    stepNumber: number;
+    /**
+     * Delivery channel for this step
+     */
+    channel: 'email' | 'sms';
+    /**
+     * Message template identifier to use for this step
+     */
+    templateId: string;
+    /**
+     * Number of days to wait after the previous step before sending
+     */
+    delayDays: number;
+    /**
+     * Optional condition expression that must be true to send this step
+     */
+    condition?: string;
+};
+
+/**
+ * A single step within a campaign sequence (drip programme)
+ */
+export type CampaignSequenceUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this sequence step belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent campaign
+     */
+    campaignId?: string;
+    /**
+     * Ordinal step number within the sequence (1-based)
+     */
+    stepNumber?: number;
+    /**
+     * Delivery channel for this step
+     */
+    channel?: 'email' | 'sms';
+    /**
+     * Message template identifier to use for this step
+     */
+    templateId?: string;
+    /**
+     * Number of days to wait after the previous step before sending
+     */
+    delayDays?: number;
+    /**
+     * Optional condition expression that must be true to send this step
+     */
+    condition?: string;
+};
+
+/**
+ * Lifecycle status of a campaign
+ */
+export type CampaignStatus = 'draft' | 'active' | 'paused' | 'completed';
+
+/**
+ * Marketing campaign channel type
+ */
+export type CampaignType = 'email' | 'sms' | 'multi_channel';
+
+/**
+ * A fundraising or membership-drive campaign
+ */
+export type CampaignUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Display name of the campaign
+     */
+    name?: string;
+    /**
+     * Type of campaign
+     */
+    type?: 'fundraising' | 'membershipDrive' | 'eventPromotion' | 'advocacy' | 'awareness';
+    /**
+     * Monetary fundraising goal (null for non-monetary campaigns)
+     */
+    goal?: bigint;
+    /**
+     * Amount raised to date (updated by the donation processing pipeline)
+     */
+    raised?: bigint;
+    /**
+     * Date on which the campaign starts
+     */
+    startDate?: Date;
+    /**
+     * Date on which the campaign ends (null for open-ended campaigns)
+     */
+    endDate?: Date;
+    /**
+     * Current status of the campaign
+     */
+    status?: 'draft' | 'active' | 'paused' | 'completed';
+    /**
+     * Description of the intended audience segment for targeting
+     */
+    targetAudience?: string;
+};
+
+/**
  * Request to cancel a pending email
  */
 export type CancelEmailRequest = {
@@ -895,9 +9077,604 @@ export type CancelEmailRequest = {
 };
 
 /**
+ * A candidate nominated for a position in an election
+ */
+export type Candidate = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the election this candidacy belongs to
+     */
+    electionId: string;
+    /**
+     * ID of the position the candidate is seeking
+     */
+    positionId: string;
+    /**
+     * ID of the person standing as candidate
+     */
+    personId: string;
+    /**
+     * ID of the person or group that nominated this candidate
+     */
+    nominatedBy: string;
+    /**
+     * Timestamp of nomination
+     */
+    nominatedAt: Date;
+    /**
+     * Current status of this candidacy
+     */
+    status: 'nominated' | 'accepted' | 'declined' | 'withdrawn' | 'elected' | 'notElected';
+    /**
+     * Candidate biography
+     */
+    bio?: string;
+    /**
+     * Candidate's platform statement
+     */
+    platform?: string;
+};
+
+/**
+ * Status of a nomination/candidacy
+ */
+export type CandidateStatus = 'nominated' | 'accepted' | 'declined' | 'withdrawn' | 'elected' | 'notElected';
+
+/**
+ * A candidate nominated for a position in an election
+ */
+export type CandidateUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the election this candidacy belongs to
+     */
+    electionId?: string;
+    /**
+     * ID of the position the candidate is seeking
+     */
+    positionId?: string;
+    /**
+     * ID of the person standing as candidate
+     */
+    personId?: string;
+    /**
+     * ID of the person or group that nominated this candidate
+     */
+    nominatedBy?: string;
+    /**
+     * Timestamp of nomination
+     */
+    nominatedAt?: Date;
+    /**
+     * Current status of this candidacy
+     */
+    status?: 'nominated' | 'accepted' | 'declined' | 'withdrawn' | 'elected' | 'notElected';
+    /**
+     * Candidate biography
+     */
+    bio?: string;
+    /**
+     * Candidate's platform statement
+     */
+    platform?: string;
+};
+
+/**
  * Payment capture method
  */
 export type CaptureMethod = 'automatic' | 'manual';
+
+/**
+ * Lifecycle status of a certification program
+ */
+export type CertProgramStatus = 'active' | 'suspended' | 'retired';
+
+/**
+ * A single requirement within a certification program
+ */
+export type CertRequirement = {
+    /**
+     * Category of the requirement
+     */
+    type: 'exam' | 'training' | 'experience' | 'attestation';
+    /**
+     * Description of what must be completed or demonstrated
+     */
+    description: string;
+    /**
+     * Whether this requirement is mandatory (false = elective)
+     */
+    required: boolean;
+};
+
+/**
+ * Type of requirement within a certification program
+ */
+export type CertRequirementType = 'exam' | 'training' | 'experience' | 'attestation';
+
+/**
+ * A member's enrollment record in a certification program
+ */
+export type CertificationEnrollment = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the enrolled member
+     */
+    personId: string;
+    /**
+     * ID of the certification program
+     */
+    programId: string;
+    /**
+     * Timestamp when the member enrolled
+     */
+    enrolledAt: Date;
+    /**
+     * Current status of the enrollment
+     */
+    status: 'enrolled' | 'inProgress' | 'examScheduled' | 'passed' | 'failed' | 'certified' | 'expired' | 'revoked';
+    /**
+     * Timestamp when the certification was awarded
+     */
+    certifiedAt?: Date;
+    /**
+     * Official certificate number issued to the member
+     */
+    certificationNumber?: string;
+    /**
+     * Date on which the issued certification expires
+     */
+    expiresAt?: Date;
+};
+
+/**
+ * A member's enrollment record in a certification program
+ */
+export type CertificationEnrollmentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the enrolled member
+     */
+    personId?: string;
+    /**
+     * ID of the certification program
+     */
+    programId?: string;
+    /**
+     * Timestamp when the member enrolled
+     */
+    enrolledAt?: Date;
+    /**
+     * Current status of the enrollment
+     */
+    status?: 'enrolled' | 'inProgress' | 'examScheduled' | 'passed' | 'failed' | 'certified' | 'expired' | 'revoked';
+    /**
+     * Timestamp when the certification was awarded
+     */
+    certifiedAt?: Date;
+    /**
+     * Official certificate number issued to the member
+     */
+    certificationNumber?: string;
+    /**
+     * Date on which the issued certification expires
+     */
+    expiresAt?: Date;
+};
+
+/**
+ * A professional certification program offered by the association
+ */
+export type CertificationProgram = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Display name of the certification program
+     */
+    name: string;
+    /**
+     * Short alphanumeric code used in certificates and reporting
+     */
+    code: string;
+    /**
+     * Description of the program's purpose and scope
+     */
+    description?: string;
+    /**
+     * List of requirements that candidates must satisfy to obtain certification
+     */
+    requirements: Array<CertRequirement>;
+    /**
+     * Duration (in months) for which the certification is valid before recertification is required
+     */
+    validityPeriod: number;
+    /**
+     * Whether holders must complete a recertification process before expiry
+     */
+    recertificationRequired: boolean;
+    /**
+     * Lifecycle status of the program
+     */
+    status: 'active' | 'suspended' | 'retired';
+};
+
+/**
+ * A professional certification program offered by the association
+ */
+export type CertificationProgramUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Display name of the certification program
+     */
+    name?: string;
+    /**
+     * Short alphanumeric code used in certificates and reporting
+     */
+    code?: string;
+    /**
+     * Description of the program's purpose and scope
+     */
+    description?: string;
+    /**
+     * List of requirements that candidates must satisfy to obtain certification
+     */
+    requirements?: Array<CertRequirement>;
+    /**
+     * Duration (in months) for which the certification is valid before recertification is required
+     */
+    validityPeriod?: number;
+    /**
+     * Whether holders must complete a recertification process before expiry
+     */
+    recertificationRequired?: boolean;
+    /**
+     * Lifecycle status of the program
+     */
+    status?: 'active' | 'suspended' | 'retired';
+};
+
+/**
+ * Affiliation between a person and a chapter within the association
+ */
+export type ChapterAffiliation = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the affiliated member
+     */
+    personId: string;
+    /**
+     * ID of the chapter the member is affiliated with
+     */
+    chapterId: string;
+    /**
+     * Whether this is the member's primary (home) chapter
+     */
+    isPrimary: boolean;
+    /**
+     * Timestamp when the affiliation began
+     */
+    affiliatedAt: Date;
+    /**
+     * ID of the chapter the member transferred from, if applicable
+     */
+    transferredFrom?: string;
+    /**
+     * Current status of this affiliation
+     */
+    status: 'active' | 'transferred' | 'withdrawn';
+};
+
+/**
+ * Request to create a chapter affiliation
+ */
+export type ChapterAffiliationCreateRequest = {
+    personId: string;
+    chapterId: string;
+    isPrimary: boolean;
+    affiliatedAt: Date;
+    transferredFrom?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type ChapterAffiliationListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<ChapterAffiliation>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Affiliation between a person and a chapter within the association
+ */
+export type ChapterAffiliationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the affiliated member
+     */
+    personId?: string;
+    /**
+     * ID of the chapter the member is affiliated with
+     */
+    chapterId?: string;
+    /**
+     * Whether this is the member's primary (home) chapter
+     */
+    isPrimary?: boolean;
+    /**
+     * Timestamp when the affiliation began
+     */
+    affiliatedAt?: Date;
+    /**
+     * ID of the chapter the member transferred from, if applicable
+     */
+    transferredFrom?: string;
+    /**
+     * Current status of this affiliation
+     */
+    status?: 'active' | 'transferred' | 'withdrawn';
+};
+
+/**
+ * Request to update a chapter affiliation
+ */
+export type ChapterAffiliationUpdateRequest = {
+    isPrimary?: boolean;
+    status?: AffiliationStatus;
+};
 
 /**
  * Immutable chat message with optional video call data
@@ -991,6 +9768,144 @@ export type ChatMessage = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type ChatMessageListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<ChatMessage>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Immutable chat message with optional video call data
+ */
+export type ChatMessageUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Chat room reference
+     */
+    chatRoom?: string;
+    /**
+     * Message sender (client or host)
+     */
+    sender?: string;
+    /**
+     * Message timestamp
+     */
+    timestamp?: Date;
+    /**
+     * Message type determines content structure
+     */
+    messageType?: 'text' | 'system' | 'video_call';
+    /**
+     * Text content for text and system messages
+     */
+    message?: string;
+    /**
+     * Video call data for video call messages
+     */
+    videoCallData?: {
+        /**
+         * Current video call status
+         */
+        status?: 'starting' | 'active' | 'ended' | 'cancelled';
+        /**
+         * WebRTC room URL for active calls
+         */
+        roomUrl?: string;
+        /**
+         * Authentication token for WebRTC room access
+         */
+        token?: string;
+        /**
+         * Call start timestamp
+         */
+        startedAt?: Date;
+        /**
+         * Person who started the call
+         */
+        startedBy?: string;
+        /**
+         * Call end timestamp
+         */
+        endedAt?: Date;
+        /**
+         * Person who ended the call
+         */
+        endedBy?: string;
+        /**
+         * Call duration in minutes (calculated when call ends)
+         */
+        durationMinutes?: number;
+        /**
+         * Call participants list
+         */
+        participants?: Array<CallParticipant>;
+    };
+};
+
+/**
  * Communication room with admin-controlled video calls
  */
 export type ChatRoom = {
@@ -1049,9 +9964,881 @@ export type ChatRoom = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type ChatRoomListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<ChatRoom>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Chat room status
  */
 export type ChatRoomStatus = 'active' | 'archived';
+
+/**
+ * Communication room with admin-controlled video calls
+ */
+export type ChatRoomUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Room participants (e.g., [client, host])
+     */
+    participants?: Array<Uuid>;
+    /**
+     * Room administrators who can control video calls (typically includes the host)
+     */
+    admins?: Array<Uuid>;
+    /**
+     * Optional context ID for contextual associations (e.g., booking ID, billing session ID)
+     */
+    context?: string;
+    /**
+     * Room status
+     */
+    status?: 'active' | 'archived';
+    /**
+     * Last message timestamp for sorting and activity tracking
+     */
+    lastMessageAt?: Date;
+    /**
+     * Total message count for efficient pagination
+     */
+    messageCount?: number;
+    /**
+     * Efficiency reference to active video call message (null if no active call)
+     */
+    activeVideoCallMessage?: string;
+};
+
+/**
+ * An attendance check-in record for an event registrant
+ */
+export type CheckIn = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this check-in belongs to
+     */
+    tenantId: string;
+    /**
+     * Event at which the check-in occurred
+     */
+    eventId: string;
+    /**
+     * Registration record being checked in
+     */
+    registrationId: string;
+    /**
+     * Person who checked in
+     */
+    personId: string;
+    /**
+     * UTC timestamp of the check-in action
+     */
+    checkedInAt: Date;
+    /**
+     * Method used to perform the check-in
+     */
+    method: 'qr_code' | 'manual' | 'badge';
+    /**
+     * Staff member or system that performed the check-in
+     */
+    checkedInBy?: string;
+};
+
+/**
+ * Request body for creating a check-in record
+ */
+export type CheckInCreateRequest = {
+    /**
+     * Event at which the check-in occurs
+     */
+    eventId: string;
+    /**
+     * Registration record being checked in
+     */
+    registrationId: string;
+    /**
+     * Person checking in
+     */
+    personId: string;
+    /**
+     * Check-in method
+     */
+    method: 'qr_code' | 'manual' | 'badge';
+    /**
+     * Staff member performing the check-in
+     */
+    checkedInBy?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type CheckInListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<CheckIn>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Method used to check in an attendee
+ */
+export type CheckInMethod = 'qr_code' | 'manual' | 'badge';
+
+/**
+ * An attendance check-in record for an event registrant
+ */
+export type CheckInUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this check-in belongs to
+     */
+    tenantId?: string;
+    /**
+     * Event at which the check-in occurred
+     */
+    eventId?: string;
+    /**
+     * Registration record being checked in
+     */
+    registrationId?: string;
+    /**
+     * Person who checked in
+     */
+    personId?: string;
+    /**
+     * UTC timestamp of the check-in action
+     */
+    checkedInAt?: Date;
+    /**
+     * Method used to perform the check-in
+     */
+    method?: 'qr_code' | 'manual' | 'badge';
+    /**
+     * Staff member or system that performed the check-in
+     */
+    checkedInBy?: string;
+};
+
+/**
+ * A standing or ad-hoc committee of the association
+ */
+export type Committee = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Display name of the committee
+     */
+    name: string;
+    /**
+     * ID of the organization this committee belongs to
+     */
+    organizationId: string;
+    /**
+     * Type of committee
+     */
+    type: 'standing' | 'adhoc' | 'taskForce';
+    /**
+     * ID of the current chair
+     */
+    chairId?: string;
+    /**
+     * Statement of the committee's mandate
+     */
+    purpose?: string;
+    /**
+     * Maximum number of seats on the committee
+     */
+    maxMembers?: number;
+    /**
+     * Lifecycle status of the committee
+     */
+    status: 'active' | 'suspended' | 'dissolved';
+};
+
+/**
+ * A scheduled or completed committee meeting
+ */
+export type CommitteeMeeting = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the committee holding the meeting
+     */
+    committeeId: string;
+    /**
+     * Date and time the meeting is scheduled
+     */
+    scheduledDate: Date;
+    /**
+     * Physical or virtual location of the meeting
+     */
+    location?: string;
+    /**
+     * Meeting agenda
+     */
+    agenda?: string;
+    /**
+     * Current status of the meeting
+     */
+    status: 'scheduled' | 'inProgress' | 'completed' | 'cancelled';
+};
+
+/**
+ * A scheduled or completed committee meeting
+ */
+export type CommitteeMeetingUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the committee holding the meeting
+     */
+    committeeId?: string;
+    /**
+     * Date and time the meeting is scheduled
+     */
+    scheduledDate?: Date;
+    /**
+     * Physical or virtual location of the meeting
+     */
+    location?: string;
+    /**
+     * Meeting agenda
+     */
+    agenda?: string;
+    /**
+     * Current status of the meeting
+     */
+    status?: 'scheduled' | 'inProgress' | 'completed' | 'cancelled';
+};
+
+/**
+ * A seat held by a person on a committee
+ */
+export type CommitteeSeat = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the committee
+     */
+    committeeId: string;
+    /**
+     * ID of the person holding the seat
+     */
+    personId: string;
+    /**
+     * Role of this person on the committee
+     */
+    role: 'chair' | 'viceChair' | 'member' | 'secretary';
+    /**
+     * Timestamp when the person joined the committee
+     */
+    joinedAt: Date;
+    /**
+     * Timestamp when the person left the committee
+     */
+    leftAt?: Date;
+    /**
+     * Current status of the seat
+     */
+    status: 'active' | 'resigned' | 'removed';
+};
+
+/**
+ * Role of a person on a committee
+ */
+export type CommitteeSeatRole = 'chair' | 'viceChair' | 'member' | 'secretary';
+
+/**
+ * Status of a committee seat
+ */
+export type CommitteeSeatStatus = 'active' | 'resigned' | 'removed';
+
+/**
+ * A seat held by a person on a committee
+ */
+export type CommitteeSeatUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the committee
+     */
+    committeeId?: string;
+    /**
+     * ID of the person holding the seat
+     */
+    personId?: string;
+    /**
+     * Role of this person on the committee
+     */
+    role?: 'chair' | 'viceChair' | 'member' | 'secretary';
+    /**
+     * Timestamp when the person joined the committee
+     */
+    joinedAt?: Date;
+    /**
+     * Timestamp when the person left the committee
+     */
+    leftAt?: Date;
+    /**
+     * Current status of the seat
+     */
+    status?: 'active' | 'resigned' | 'removed';
+};
+
+/**
+ * Lifecycle status of a committee
+ */
+export type CommitteeStatus = 'active' | 'suspended' | 'dissolved';
+
+/**
+ * Type of committee
+ */
+export type CommitteeType = 'standing' | 'adhoc' | 'taskForce';
+
+/**
+ * A standing or ad-hoc committee of the association
+ */
+export type CommitteeUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Display name of the committee
+     */
+    name?: string;
+    /**
+     * ID of the organization this committee belongs to
+     */
+    organizationId?: string;
+    /**
+     * Type of committee
+     */
+    type?: 'standing' | 'adhoc' | 'taskForce';
+    /**
+     * ID of the current chair
+     */
+    chairId?: string;
+    /**
+     * Statement of the committee's mandate
+     */
+    purpose?: string;
+    /**
+     * Maximum number of seats on the committee
+     */
+    maxMembers?: number;
+    /**
+     * Lifecycle status of the committee
+     */
+    status?: 'active' | 'suspended' | 'dissolved';
+};
+
+/**
+ * Category of an ethics complaint
+ */
+export type ComplaintCategory = 'professionalMisconduct' | 'codeViolation' | 'financialImpropriety' | 'conflictOfInterest' | 'discrimination' | 'harassment' | 'other';
+
+/**
+ * Lifecycle status of an ethics complaint
+ */
+export type ComplaintStatus = 'filed' | 'preliminaryReview' | 'investigation' | 'hearing' | 'decision' | 'appeal' | 'closed';
+
+/**
+ * An association conference or multi-day event
+ */
+export type Conference = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this conference belongs to
+     */
+    tenantId: string;
+    /**
+     * Conference display title
+     */
+    title: string;
+    /**
+     * Owning organization
+     */
+    organizationId: string;
+    /**
+     * UTC date the conference starts
+     */
+    startDate: Date;
+    /**
+     * UTC date the conference ends
+     */
+    endDate: Date;
+    /**
+     * Venue name or address
+     */
+    venue?: string;
+    /**
+     * Host city
+     */
+    city?: string;
+    /**
+     * ISO 3166-1 alpha-2 country code
+     */
+    country?: string;
+    /**
+     * Full description and overview
+     */
+    description?: string;
+    /**
+     * Program tracks for organizing sessions
+     */
+    tracks: Array<ConferenceTrack>;
+    /**
+     * Current lifecycle status
+     */
+    status: 'planning' | 'announced' | 'registration_open' | 'in_progress' | 'completed';
+    /**
+     * Standard registration fee
+     */
+    registrationFee?: bigint;
+    /**
+     * Early-bird registration fee
+     */
+    earlyBirdFee?: bigint;
+    /**
+     * Maximum number of attendees
+     */
+    capacity?: number;
+};
+
+/**
+ * Lifecycle status of a conference
+ */
+export type ConferenceStatus = 'planning' | 'announced' | 'registration_open' | 'in_progress' | 'completed';
+
+/**
+ * A named program track within a conference
+ */
+export type ConferenceTrack = {
+    /**
+     * Track display name
+     */
+    name: string;
+    /**
+     * Track description and focus area
+     */
+    description?: string;
+    /**
+     * Color used for visual differentiation in the schedule (hex or named color)
+     */
+    color?: string;
+};
+
+/**
+ * An association conference or multi-day event
+ */
+export type ConferenceUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this conference belongs to
+     */
+    tenantId?: string;
+    /**
+     * Conference display title
+     */
+    title?: string;
+    /**
+     * Owning organization
+     */
+    organizationId?: string;
+    /**
+     * UTC date the conference starts
+     */
+    startDate?: Date;
+    /**
+     * UTC date the conference ends
+     */
+    endDate?: Date;
+    /**
+     * Venue name or address
+     */
+    venue?: string;
+    /**
+     * Host city
+     */
+    city?: string;
+    /**
+     * ISO 3166-1 alpha-2 country code
+     */
+    country?: string;
+    /**
+     * Full description and overview
+     */
+    description?: string;
+    /**
+     * Program tracks for organizing sessions
+     */
+    tracks?: Array<ConferenceTrack>;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'planning' | 'announced' | 'registration_open' | 'in_progress' | 'completed';
+    /**
+     * Standard registration fee
+     */
+    registrationFee?: bigint;
+    /**
+     * Early-bird registration fee
+     */
+    earlyBirdFee?: bigint;
+    /**
+     * Maximum number of attendees
+     */
+    capacity?: number;
+};
 
 /**
  * Resource conflict error
@@ -1116,6 +10903,250 @@ export type ConflictError = {
 };
 
 /**
+ * An external system connector configuration
+ */
+export type Connector = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this connector belongs to
+     */
+    tenantId: string;
+    /**
+     * Human-readable connector name
+     */
+    name: string;
+    /**
+     * Category of external system
+     */
+    type: 'payment_gateway' | 'sms' | 'email' | 'storage' | 'crm' | 'lms' | 'video_conference' | 'social_media' | 'custom';
+    /**
+     * Current operational status
+     */
+    status: 'configured' | 'testing' | 'active' | 'degraded' | 'disabled';
+    /**
+     * Base endpoint URL for the external system
+     */
+    endpoint?: string;
+    /**
+     * Authentication method used to communicate with the external system
+     */
+    authMethod: 'api_key' | 'oauth2' | 'basic' | 'certificate' | 'none';
+    /**
+     * UTC timestamp of the most recent health check
+     */
+    lastHealthCheck?: Date;
+    /**
+     * Result of the most recent health check
+     */
+    healthStatus?: 'healthy' | 'degraded' | 'unreachable';
+};
+
+/**
+ * Authentication method used by a connector
+ */
+export type ConnectorAuthMethod = 'api_key' | 'oauth2' | 'basic' | 'certificate' | 'none';
+
+/**
+ * A credential record for a connector (secrets are never returned in responses)
+ */
+export type ConnectorCredential = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this credential belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent connector
+     */
+    connectorId: string;
+    /**
+     * Credential type or purpose (e.g., 'clientSecret', 'apiKey', 'privateKey')
+     */
+    credentialType: string;
+    /**
+     * UTC timestamp when the credential expires
+     */
+    expiresAt?: Date;
+    /**
+     * UTC timestamp when the credential was last rotated
+     */
+    rotatedAt?: Date;
+};
+
+/**
+ * A credential record for a connector (secrets are never returned in responses)
+ */
+export type ConnectorCredentialUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this credential belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent connector
+     */
+    connectorId?: string;
+    /**
+     * Credential type or purpose (e.g., 'clientSecret', 'apiKey', 'privateKey')
+     */
+    credentialType?: string;
+    /**
+     * UTC timestamp when the credential expires
+     */
+    expiresAt?: Date;
+    /**
+     * UTC timestamp when the credential was last rotated
+     */
+    rotatedAt?: Date;
+};
+
+/**
+ * Health status returned by the connector's health check
+ */
+export type ConnectorHealthStatus = 'healthy' | 'degraded' | 'unreachable';
+
+/**
+ * Operational status of a connector
+ */
+export type ConnectorStatus = 'configured' | 'testing' | 'active' | 'degraded' | 'disabled';
+
+/**
+ * Type category of an external connector
+ */
+export type ConnectorType = 'payment_gateway' | 'sms' | 'email' | 'storage' | 'crm' | 'lms' | 'video_conference' | 'social_media' | 'custom';
+
+/**
+ * An external system connector configuration
+ */
+export type ConnectorUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this connector belongs to
+     */
+    tenantId?: string;
+    /**
+     * Human-readable connector name
+     */
+    name?: string;
+    /**
+     * Category of external system
+     */
+    type?: 'payment_gateway' | 'sms' | 'email' | 'storage' | 'crm' | 'lms' | 'video_conference' | 'social_media' | 'custom';
+    /**
+     * Current operational status
+     */
+    status?: 'configured' | 'testing' | 'active' | 'degraded' | 'disabled';
+    /**
+     * Base endpoint URL for the external system
+     */
+    endpoint?: string;
+    /**
+     * Authentication method used to communicate with the external system
+     */
+    authMethod?: 'api_key' | 'oauth2' | 'basic' | 'certificate' | 'none';
+    /**
+     * UTC timestamp of the most recent health check
+     */
+    lastHealthCheck?: Date;
+    /**
+     * Result of the most recent health check
+     */
+    healthStatus?: 'healthy' | 'degraded' | 'unreachable';
+};
+
+/**
  * Contact details
  */
 export type ContactInfo = {
@@ -1133,6 +11164,440 @@ export type ContactInfo = {
  * Two-letter uppercase country code (ISO 3166-1 alpha-2)
  */
 export type CountryCode = string;
+
+/**
+ * A self-paced online course composed of ordered modules
+ */
+export type Course = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this course belongs to
+     */
+    tenantId: string;
+    /**
+     * Course display title
+     */
+    title: string;
+    /**
+     * Course overview and learning objectives
+     */
+    description?: string;
+    /**
+     * Ordered list of course modules
+     */
+    modules: Array<CourseModule>;
+    /**
+     * Total estimated time to complete in hours
+     */
+    estimatedHours?: number;
+    /**
+     * CE credits awarded upon course completion
+     */
+    creditAmount?: number;
+    /**
+     * Current lifecycle status
+     */
+    status: 'draft' | 'published' | 'retired';
+    /**
+     * Author name or identifier
+     */
+    author?: string;
+};
+
+/**
+ * Request body for creating an online course
+ */
+export type CourseCreateRequest = {
+    /**
+     * Course display title
+     */
+    title: string;
+    /**
+     * Course overview
+     */
+    description?: string;
+    /**
+     * Ordered list of course modules
+     */
+    modules: Array<CourseModule>;
+    /**
+     * Estimated hours to complete
+     */
+    estimatedHours?: number;
+    /**
+     * CE credits awarded on completion
+     */
+    creditAmount?: number;
+    /**
+     * Author name or identifier
+     */
+    author?: string;
+};
+
+/**
+ * A learner's enrollment and progress record for an online course
+ */
+export type CourseEnrollment = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this enrollment belongs to
+     */
+    tenantId: string;
+    /**
+     * Course enrolled in
+     */
+    courseId: string;
+    /**
+     * Enrolled person
+     */
+    personId: string;
+    /**
+     * UTC timestamp when enrollment was created
+     */
+    enrolledAt: Date;
+    /**
+     * Completion percentage from 0 to 100
+     */
+    progress: number;
+    /**
+     * Number of modules the learner has completed
+     */
+    completedModules: number;
+    /**
+     * Total number of modules in the course at enrollment time
+     */
+    totalModules: number;
+    /**
+     * UTC timestamp when all required modules were completed
+     */
+    completedAt?: Date;
+    /**
+     * Current enrollment status
+     */
+    status: 'enrolled' | 'in_progress' | 'completed' | 'dropped';
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type CourseEnrollmentListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<CourseEnrollment>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Enrollment status for an online course
+ */
+export type CourseEnrollmentStatus = 'enrolled' | 'in_progress' | 'completed' | 'dropped';
+
+/**
+ * A learner's enrollment and progress record for an online course
+ */
+export type CourseEnrollmentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this enrollment belongs to
+     */
+    tenantId?: string;
+    /**
+     * Course enrolled in
+     */
+    courseId?: string;
+    /**
+     * Enrolled person
+     */
+    personId?: string;
+    /**
+     * UTC timestamp when enrollment was created
+     */
+    enrolledAt?: Date;
+    /**
+     * Completion percentage from 0 to 100
+     */
+    progress?: number;
+    /**
+     * Number of modules the learner has completed
+     */
+    completedModules?: number;
+    /**
+     * Total number of modules in the course at enrollment time
+     */
+    totalModules?: number;
+    /**
+     * UTC timestamp when all required modules were completed
+     */
+    completedAt?: Date;
+    /**
+     * Current enrollment status
+     */
+    status?: 'enrolled' | 'in_progress' | 'completed' | 'dropped';
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type CourseListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Course>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A single module within an online course
+ */
+export type CourseModule = {
+    /**
+     * Module display title
+     */
+    title: string;
+    /**
+     * Optional module content or instructions
+     */
+    content?: string;
+    /**
+     * Display order within the course (0-based)
+     */
+    order: number;
+    /**
+     * Content format of this module
+     */
+    type: 'video' | 'reading' | 'quiz' | 'assignment';
+    /**
+     * Estimated time to complete in minutes
+     */
+    durationMinutes?: number;
+    /**
+     * Whether completion of this module is required to finish the course
+     */
+    required: boolean;
+};
+
+/**
+ * Request body for updating a course progress record
+ */
+export type CourseProgressUpdateRequest = {
+    /**
+     * Updated completion percentage (0-100)
+     */
+    progress: number;
+    /**
+     * Updated count of completed modules
+     */
+    completedModules: number;
+};
+
+/**
+ * Lifecycle status of an online course
+ */
+export type CourseStatus = 'draft' | 'published' | 'retired';
+
+/**
+ * A self-paced online course composed of ordered modules
+ */
+export type CourseUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this course belongs to
+     */
+    tenantId?: string;
+    /**
+     * Course display title
+     */
+    title?: string;
+    /**
+     * Course overview and learning objectives
+     */
+    description?: string;
+    /**
+     * Ordered list of course modules
+     */
+    modules?: Array<CourseModule>;
+    /**
+     * Total estimated time to complete in hours
+     */
+    estimatedHours?: number;
+    /**
+     * CE credits awarded upon course completion
+     */
+    creditAmount?: number;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'draft' | 'published' | 'retired';
+    /**
+     * Author name or identifier
+     */
+    author?: string;
+};
 
 /**
  * Create chat room request
@@ -1329,6 +11794,587 @@ export type CreateTemplateRequest = {
 };
 
 /**
+ * Lifecycle status of a digital credential
+ */
+export type CredentialStatus = 'active' | 'suspended' | 'revoked' | 'expired';
+
+/**
+ * A reusable design template for generating digital credentials
+ */
+export type CredentialTemplate = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Display name of the template
+     */
+    name: string;
+    /**
+     * Type of credential this template produces
+     */
+    type: 'memberCard' | 'certificate' | 'badge' | 'license';
+    /**
+     * JSON or HTML design specification for the credential layout
+     */
+    design?: string;
+    /**
+     * Duration (in months) for which credentials issued from this template remain valid; null means no expiry
+     */
+    validityPeriod?: number;
+    /**
+     * Lifecycle status of this template
+     */
+    status: 'active' | 'retired';
+};
+
+/**
+ * Request to create a credential template
+ */
+export type CredentialTemplateCreateRequest = {
+    name: string;
+    type: CredentialType;
+    design?: string;
+    validityPeriod?: number;
+    status: CredentialTemplateStatus;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type CredentialTemplateListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<CredentialTemplate>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Lifecycle status of a credential template
+ */
+export type CredentialTemplateStatus = 'active' | 'retired';
+
+/**
+ * A reusable design template for generating digital credentials
+ */
+export type CredentialTemplateUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Display name of the template
+     */
+    name?: string;
+    /**
+     * Type of credential this template produces
+     */
+    type?: 'memberCard' | 'certificate' | 'badge' | 'license';
+    /**
+     * JSON or HTML design specification for the credential layout
+     */
+    design?: string;
+    /**
+     * Duration (in months) for which credentials issued from this template remain valid; null means no expiry
+     */
+    validityPeriod?: number;
+    /**
+     * Lifecycle status of this template
+     */
+    status?: 'active' | 'retired';
+};
+
+/**
+ * Request to update a credential template
+ */
+export type CredentialTemplateUpdateRequest = {
+    name?: string;
+    design?: string | null;
+    validityPeriod?: number | null;
+    status?: TemplateStatus;
+};
+
+/**
+ * Type of credential artifact
+ */
+export type CredentialType = 'memberCard' | 'certificate' | 'badge' | 'license';
+
+/**
+ * A log entry recording a credential verification attempt
+ */
+export type CredentialVerificationLog = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the credential that was verified
+     */
+    credentialId: string;
+    /**
+     * Timestamp when the verification was performed
+     */
+    verifiedAt: Date;
+    /**
+     * IP address of the verifier (anonymised for GDPR compliance where required)
+     */
+    verifierIp?: string;
+    /**
+     * Result of the verification attempt
+     */
+    result: 'valid' | 'expired' | 'revoked' | 'notFound';
+};
+
+/**
+ * A log entry recording a credential verification attempt
+ */
+export type CredentialVerificationLogUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the credential that was verified
+     */
+    credentialId?: string;
+    /**
+     * Timestamp when the verification was performed
+     */
+    verifiedAt?: Date;
+    /**
+     * IP address of the verifier (anonymised for GDPR compliance where required)
+     */
+    verifierIp?: string;
+    /**
+     * Result of the verification attempt
+     */
+    result?: 'valid' | 'expired' | 'revoked' | 'notFound';
+};
+
+/**
+ * Category of activity for which CE credit is awarded
+ */
+export type CreditActivityType = 'event' | 'training' | 'conference' | 'selfStudy' | 'publication' | 'teaching' | 'other';
+
+/**
+ * A continuing education credit cycle defining the period and credit requirements for a member
+ */
+export type CreditCycle = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the member this cycle belongs to
+     */
+    personId: string;
+    /**
+     * First day of the credit cycle
+     */
+    startDate: Date;
+    /**
+     * Last day of the credit cycle
+     */
+    endDate: Date;
+    /**
+     * Total CE credits required to complete this cycle
+     */
+    requiredCredits: number;
+    /**
+     * CE credits earned so far in this cycle
+     */
+    earnedCredits: number;
+    /**
+     * Credits carried over from a prior cycle (if policy allows)
+     */
+    carryOverCredits?: number;
+    /**
+     * Current status of this credit cycle
+     */
+    status: 'active' | 'completed' | 'deficient' | 'grace';
+};
+
+/**
+ * A continuing education credit cycle defining the period and credit requirements for a member
+ */
+export type CreditCycleUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the member this cycle belongs to
+     */
+    personId?: string;
+    /**
+     * First day of the credit cycle
+     */
+    startDate?: Date;
+    /**
+     * Last day of the credit cycle
+     */
+    endDate?: Date;
+    /**
+     * Total CE credits required to complete this cycle
+     */
+    requiredCredits?: number;
+    /**
+     * CE credits earned so far in this cycle
+     */
+    earnedCredits?: number;
+    /**
+     * Credits carried over from a prior cycle (if policy allows)
+     */
+    carryOverCredits?: number;
+    /**
+     * Current status of this credit cycle
+     */
+    status?: 'active' | 'completed' | 'deficient' | 'grace';
+};
+
+/**
+ * A single CE credit entry awarded to a member for a specific activity
+ */
+export type CreditEntry = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the member receiving the credit
+     */
+    personId: string;
+    /**
+     * ID of the credit cycle this entry applies to
+     */
+    cycleId: string;
+    /**
+     * Category of activity for which credit is awarded
+     */
+    activityType: 'event' | 'training' | 'conference' | 'selfStudy' | 'publication' | 'teaching' | 'other';
+    /**
+     * ID of the specific activity record (event, course, publication, etc.) if available
+     */
+    activityId?: string;
+    /**
+     * Human-readable name of the activity
+     */
+    activityName: string;
+    /**
+     * Number of CE credits awarded for this activity
+     */
+    credits: number;
+    /**
+     * How the credit was recorded
+     */
+    provenance: 'auto' | 'manual';
+    /**
+     * Date on which the activity was completed and credit earned
+     */
+    earnedDate: Date;
+    /**
+     * ID of the staff member or system that awarded the credits
+     */
+    awardedBy?: string;
+    /**
+     * Timestamp when the credit entry was verified by association staff
+     */
+    verifiedAt?: Date;
+    /**
+     * Subcategory used for reporting (e.g. ethics, clinical, leadership)
+     */
+    category?: string;
+};
+
+/**
+ * A single CE credit entry awarded to a member for a specific activity
+ */
+export type CreditEntryUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the member receiving the credit
+     */
+    personId?: string;
+    /**
+     * ID of the credit cycle this entry applies to
+     */
+    cycleId?: string;
+    /**
+     * Category of activity for which credit is awarded
+     */
+    activityType?: 'event' | 'training' | 'conference' | 'selfStudy' | 'publication' | 'teaching' | 'other';
+    /**
+     * ID of the specific activity record (event, course, publication, etc.) if available
+     */
+    activityId?: string;
+    /**
+     * Human-readable name of the activity
+     */
+    activityName?: string;
+    /**
+     * Number of CE credits awarded for this activity
+     */
+    credits?: number;
+    /**
+     * How the credit was recorded
+     */
+    provenance?: 'auto' | 'manual';
+    /**
+     * Date on which the activity was completed and credit earned
+     */
+    earnedDate?: Date;
+    /**
+     * ID of the staff member or system that awarded the credits
+     */
+    awardedBy?: string;
+    /**
+     * Timestamp when the credit entry was verified by association staff
+     */
+    verifiedAt?: Date;
+    /**
+     * Subcategory used for reporting (e.g. ethics, clinical, leadership)
+     */
+    category?: string;
+};
+
+/**
+ * Source of a CE credit entry
+ */
+export type CreditProvenance = 'auto' | 'manual';
+
+/**
  * Monetary amount in cents to avoid floating point precision issues
  */
 export type CurrencyAmount = number;
@@ -1337,6 +12383,11 @@ export type CurrencyAmount = number;
  * Three-letter ISO 4217 currency code
  */
 export type CurrencyCode = string;
+
+/**
+ * Status of a member's continuing education credit cycle
+ */
+export type CycleStatus = 'active' | 'completed' | 'deficient' | 'grace';
 
 /**
  * Daily configuration within a weekly schedule
@@ -1378,6 +12429,2134 @@ export type DashboardResponse = {
      * When the dashboard link expires
      */
     expiresAt: Date;
+};
+
+/**
+ * A digital credential issued to a specific member
+ */
+export type DigitalCredential = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the person this credential was issued to
+     */
+    personId: string;
+    /**
+     * ID of the template used to generate this credential
+     */
+    templateId: string;
+    /**
+     * ID of the membership this credential is associated with (if applicable)
+     */
+    membershipId?: string;
+    /**
+     * Human-readable or machine-readable credential identifier
+     */
+    credentialNumber: string;
+    /**
+     * Timestamp when the credential was issued
+     */
+    issuedAt: Date;
+    /**
+     * Timestamp after which the credential is no longer valid
+     */
+    expiresAt?: Date;
+    /**
+     * Current lifecycle status of the credential
+     */
+    status: 'active' | 'suspended' | 'revoked' | 'expired';
+    /**
+     * Base64-encoded or JSON payload embedded in the credential's QR code
+     */
+    qrPayload?: string;
+    /**
+     * HMAC key used for server-side verification of the QR payload (never exposed to clients)
+     */
+    hmacKey?: string;
+    /**
+     * URL of the generated PDF credential document
+     */
+    pdfUrl?: string;
+    /**
+     * Public URL for online verification of this credential
+     */
+    verificationUrl?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DigitalCredentialListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DigitalCredential>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A digital credential issued to a specific member
+ */
+export type DigitalCredentialUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the person this credential was issued to
+     */
+    personId?: string;
+    /**
+     * ID of the template used to generate this credential
+     */
+    templateId?: string;
+    /**
+     * ID of the membership this credential is associated with (if applicable)
+     */
+    membershipId?: string;
+    /**
+     * Human-readable or machine-readable credential identifier
+     */
+    credentialNumber?: string;
+    /**
+     * Timestamp when the credential was issued
+     */
+    issuedAt?: Date;
+    /**
+     * Timestamp after which the credential is no longer valid
+     */
+    expiresAt?: Date;
+    /**
+     * Current lifecycle status of the credential
+     */
+    status?: 'active' | 'suspended' | 'revoked' | 'expired';
+    /**
+     * Base64-encoded or JSON payload embedded in the credential's QR code
+     */
+    qrPayload?: string;
+    /**
+     * HMAC key used for server-side verification of the QR payload (never exposed to clients)
+     */
+    hmacKey?: string;
+    /**
+     * URL of the generated PDF credential document
+     */
+    pdfUrl?: string;
+    /**
+     * Public URL for online verification of this credential
+     */
+    verificationUrl?: string;
+};
+
+/**
+ * A member's curated public-facing profile in the association directory
+ */
+export type DirectoryProfile = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the person this profile belongs to
+     */
+    personId: string;
+    /**
+     * Name as it should appear in the directory
+     */
+    displayName: string;
+    /**
+     * Professional title shown in the directory
+     */
+    title?: string;
+    /**
+     * Employer or organization shown in the directory
+     */
+    organization?: string;
+    /**
+     * Area of professional specialty
+     */
+    specialty?: string;
+    /**
+     * City, state, or region used as a location label
+     */
+    location?: string;
+    /**
+     * URL of the member's directory photo
+     */
+    photoUrl?: string;
+    /**
+     * Short biography displayed on the directory profile
+     */
+    bio?: string;
+    /**
+     * Email address shown in the directory (may differ from account email)
+     */
+    contactEmail?: string;
+    /**
+     * Phone number shown in the directory
+     */
+    contactPhone?: string;
+    /**
+     * Personal or professional website URL
+     */
+    website?: string;
+    /**
+     * Map of social network names to profile URLs (e.g. { "linkedin": "https://..." })
+     */
+    socialLinks?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Controls who can view this profile in the directory
+     */
+    visibility: 'public' | 'memberOnly' | 'hidden';
+    /**
+     * Timestamp when the profile was first published to the directory
+     */
+    publishedAt?: Date;
+    /**
+     * Timestamp of the most recent profile update
+     */
+    lastUpdatedAt: Date;
+};
+
+/**
+ * Request to create a directory profile
+ */
+export type DirectoryProfileCreateRequest = {
+    personId: string;
+    displayName: string;
+    title?: string;
+    organization?: string;
+    specialty?: string;
+    location?: string;
+    photoUrl?: string;
+    bio?: string;
+    contactEmail?: string;
+    contactPhone?: string;
+    website?: string;
+    socialLinks?: {
+        [key: string]: unknown;
+    };
+    visibility: DirectoryVisibility;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DirectoryProfileListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DirectoryProfile>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A member's curated public-facing profile in the association directory
+ */
+export type DirectoryProfileUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the person this profile belongs to
+     */
+    personId?: string;
+    /**
+     * Name as it should appear in the directory
+     */
+    displayName?: string;
+    /**
+     * Professional title shown in the directory
+     */
+    title?: string;
+    /**
+     * Employer or organization shown in the directory
+     */
+    organization?: string;
+    /**
+     * Area of professional specialty
+     */
+    specialty?: string;
+    /**
+     * City, state, or region used as a location label
+     */
+    location?: string;
+    /**
+     * URL of the member's directory photo
+     */
+    photoUrl?: string;
+    /**
+     * Short biography displayed on the directory profile
+     */
+    bio?: string;
+    /**
+     * Email address shown in the directory (may differ from account email)
+     */
+    contactEmail?: string;
+    /**
+     * Phone number shown in the directory
+     */
+    contactPhone?: string;
+    /**
+     * Personal or professional website URL
+     */
+    website?: string;
+    /**
+     * Map of social network names to profile URLs (e.g. { "linkedin": "https://..." })
+     */
+    socialLinks?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Controls who can view this profile in the directory
+     */
+    visibility?: 'public' | 'memberOnly' | 'hidden';
+    /**
+     * Timestamp when the profile was first published to the directory
+     */
+    publishedAt?: Date;
+    /**
+     * Timestamp of the most recent profile update
+     */
+    lastUpdatedAt?: Date;
+};
+
+/**
+ * Request to update a directory profile
+ */
+export type DirectoryProfileUpdateRequest = {
+    displayName?: string;
+    title?: string | null;
+    organization?: string | null;
+    specialty?: string | null;
+    location?: string | null;
+    photoUrl?: string | null;
+    bio?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+    website?: string | null;
+    socialLinks?: {
+        [key: string]: unknown;
+    } | null;
+    visibility?: DirectoryVisibility;
+};
+
+/**
+ * Optimized search index entry for a member directory profile
+ */
+export type DirectorySearchIndex = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the person this index entry represents
+     */
+    personId: string;
+    /**
+     * Concatenated searchable text derived from the directory profile fields
+     */
+    searchableText: string;
+    /**
+     * Tags used for faceted filtering (e.g. specialty tags, chapter names)
+     */
+    tags: Array<string>;
+    /**
+     * Geographic coordinates enabling proximity-based search
+     */
+    geoLocation?: {
+        /**
+         * Latitude in decimal degrees
+         */
+        latitude: number;
+        /**
+         * Longitude in decimal degrees
+         */
+        longitude: number;
+        /**
+         * Accuracy in meters
+         */
+        accuracy?: number;
+    };
+    /**
+     * Whether the profile has been verified by association staff
+     */
+    verified: boolean;
+};
+
+/**
+ * Optimized search index entry for a member directory profile
+ */
+export type DirectorySearchIndexUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the person this index entry represents
+     */
+    personId?: string;
+    /**
+     * Concatenated searchable text derived from the directory profile fields
+     */
+    searchableText?: string;
+    /**
+     * Tags used for faceted filtering (e.g. specialty tags, chapter names)
+     */
+    tags?: Array<string>;
+    /**
+     * Geographic coordinates enabling proximity-based search
+     */
+    geoLocation?: {
+        /**
+         * Latitude in decimal degrees
+         */
+        latitude?: number;
+        /**
+         * Longitude in decimal degrees
+         */
+        longitude?: number;
+        /**
+         * Accuracy in meters
+         */
+        accuracy?: number;
+    };
+    /**
+     * Whether the profile has been verified by association staff
+     */
+    verified?: boolean;
+};
+
+/**
+ * Visibility level of a member directory profile
+ */
+export type DirectoryVisibility = 'public' | 'memberOnly' | 'hidden';
+
+/**
+ * Status of an award disbursement
+ */
+export type DisbursementStatus = 'pending' | 'processed' | 'completed';
+
+/**
+ * A disciplinary action imposed on a member following an ethics review
+ */
+export type DisciplinaryAction = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the complaint that led to this action
+     */
+    complaintId: string;
+    /**
+     * Type of action imposed
+     */
+    actionType: 'warning' | 'reprimand' | 'fine' | 'suspension' | 'expulsion' | 'probation' | 'mandatoryTraining' | 'none';
+    /**
+     * Description of the action and its terms
+     */
+    description: string;
+    /**
+     * Date on which the action takes effect
+     */
+    effectiveDate: Date;
+    /**
+     * Date on which the action ends (null for permanent actions)
+     */
+    endDate?: Date;
+    /**
+     * ID of the officer or body that imposed the action
+     */
+    imposedBy: string;
+    /**
+     * Current status of the disciplinary action
+     */
+    status: 'imposed' | 'active' | 'completed' | 'appealed' | 'overturned';
+};
+
+/**
+ * Status of a disciplinary action
+ */
+export type DisciplinaryActionStatus = 'imposed' | 'active' | 'completed' | 'appealed' | 'overturned';
+
+/**
+ * Type of disciplinary action imposed on a member
+ */
+export type DisciplinaryActionType = 'warning' | 'reprimand' | 'fine' | 'suspension' | 'expulsion' | 'probation' | 'mandatoryTraining' | 'none';
+
+/**
+ * A disciplinary action imposed on a member following an ethics review
+ */
+export type DisciplinaryActionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the complaint that led to this action
+     */
+    complaintId?: string;
+    /**
+     * Type of action imposed
+     */
+    actionType?: 'warning' | 'reprimand' | 'fine' | 'suspension' | 'expulsion' | 'probation' | 'mandatoryTraining' | 'none';
+    /**
+     * Description of the action and its terms
+     */
+    description?: string;
+    /**
+     * Date on which the action takes effect
+     */
+    effectiveDate?: Date;
+    /**
+     * Date on which the action ends (null for permanent actions)
+     */
+    endDate?: Date;
+    /**
+     * ID of the officer or body that imposed the action
+     */
+    imposedBy?: string;
+    /**
+     * Current status of the disciplinary action
+     */
+    status?: 'imposed' | 'active' | 'completed' | 'appealed' | 'overturned';
+};
+
+/**
+ * Type of discount provided by a benefit offer
+ */
+export type DiscountType = 'percentage' | 'fixed_amount' | 'free_item' | 'special_rate';
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DocumentAccessLogEntryListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AssociationCoreDocumentsDocumentAccessLogEntry>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DocumentListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AssociationCoreDocumentsDocument>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DocumentTagListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AssociationCoreDocumentsDocumentTag>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DocumentVersionListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AssociationCoreDocumentsDocumentVersion>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A monetary or in-kind donation made to the association
+ */
+export type Donation = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the donor (person or organization)
+     */
+    donorId: string;
+    /**
+     * Whether the donor is an individual or an organization
+     */
+    donorType: 'individual' | 'organization';
+    /**
+     * ID of the campaign this donation is credited to (null for unrestricted donations)
+     */
+    campaignId?: string;
+    /**
+     * Donation amount
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency: string;
+    /**
+     * Date on which the donation was made
+     */
+    donationDate: Date;
+    /**
+     * Type of donation
+     */
+    type: 'oneTime' | 'recurring' | 'pledge' | 'inKind';
+    /**
+     * ID of the payment transaction record
+     */
+    paymentId?: string;
+    /**
+     * Whether this donation qualifies for a tax deduction under applicable law
+     */
+    taxDeductible: boolean;
+    /**
+     * Tax receipt number issued for this donation
+     */
+    receiptNumber?: string;
+    /**
+     * Whether the donor has requested anonymity in public acknowledgements
+     */
+    anonymous: boolean;
+};
+
+/**
+ * Type of donation
+ */
+export type DonationType = 'oneTime' | 'recurring' | 'pledge' | 'inKind';
+
+/**
+ * A monetary or in-kind donation made to the association
+ */
+export type DonationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the donor (person or organization)
+     */
+    donorId?: string;
+    /**
+     * Whether the donor is an individual or an organization
+     */
+    donorType?: 'individual' | 'organization';
+    /**
+     * ID of the campaign this donation is credited to (null for unrestricted donations)
+     */
+    campaignId?: string;
+    /**
+     * Donation amount
+     */
+    amount?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Date on which the donation was made
+     */
+    donationDate?: Date;
+    /**
+     * Type of donation
+     */
+    type?: 'oneTime' | 'recurring' | 'pledge' | 'inKind';
+    /**
+     * ID of the payment transaction record
+     */
+    paymentId?: string;
+    /**
+     * Whether this donation qualifies for a tax deduction under applicable law
+     */
+    taxDeductible?: boolean;
+    /**
+     * Tax receipt number issued for this donation
+     */
+    receiptNumber?: string;
+    /**
+     * Whether the donor has requested anonymity in public acknowledgements
+     */
+    anonymous?: boolean;
+};
+
+/**
+ * Whether the donor is an individual or an organization
+ */
+export type DonorType = 'individual' | 'organization';
+
+/**
+ * Dues configuration defining amounts and fund allocations for a tier within an organization
+ */
+export type DuesConfig = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the association organization this configuration applies to
+     */
+    organizationId: string;
+    /**
+     * ID of the membership tier this configuration applies to
+     */
+    tierId: string;
+    /**
+     * Annual dues amount in the specified currency
+     */
+    annualAmount: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency: string;
+    /**
+     * Number of days after the due date before membership lapses
+     */
+    gracePeriodDays: number;
+    /**
+     * Fund allocation rules — percentages must sum to 100
+     */
+    fundAllocations: Array<FundAllocation>;
+    /**
+     * Date from which this configuration takes effect
+     */
+    effectiveDate: Date;
+    /**
+     * Lifecycle status of this configuration
+     */
+    status: 'active' | 'retired';
+};
+
+/**
+ * Request to create a dues configuration
+ */
+export type DuesConfigCreateRequest = {
+    organizationId: string;
+    tierId: string;
+    annualAmount: bigint;
+    currency: string;
+    gracePeriodDays: number;
+    fundAllocations: Array<FundAllocation>;
+    effectiveDate: Date;
+    status: DuesConfigStatus;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DuesConfigListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DuesConfig>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Status of a dues configuration record
+ */
+export type DuesConfigStatus = 'active' | 'retired';
+
+/**
+ * Dues configuration defining amounts and fund allocations for a tier within an organization
+ */
+export type DuesConfigUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the association organization this configuration applies to
+     */
+    organizationId?: string;
+    /**
+     * ID of the membership tier this configuration applies to
+     */
+    tierId?: string;
+    /**
+     * Annual dues amount in the specified currency
+     */
+    annualAmount?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Number of days after the due date before membership lapses
+     */
+    gracePeriodDays?: number;
+    /**
+     * Fund allocation rules — percentages must sum to 100
+     */
+    fundAllocations?: Array<FundAllocation>;
+    /**
+     * Date from which this configuration takes effect
+     */
+    effectiveDate?: Date;
+    /**
+     * Lifecycle status of this configuration
+     */
+    status?: 'active' | 'retired';
+};
+
+/**
+ * Request to update a dues configuration
+ */
+export type DuesConfigUpdateRequest = {
+    annualAmount?: bigint;
+    gracePeriodDays?: number;
+    fundAllocations?: Array<FundAllocation>;
+    effectiveDate?: Date;
+    status?: DuesConfigStatus;
+};
+
+/**
+ * Dues invoice issued to a member for a renewal period
+ */
+export type DuesInvoice = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the membership this invoice was generated for
+     */
+    membershipId: string;
+    /**
+     * ID of the member person
+     */
+    personId: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * Human-readable invoice number
+     */
+    invoiceNumber: string;
+    /**
+     * Start of the period covered by this invoice
+     */
+    periodStart: Date;
+    /**
+     * End of the period covered by this invoice
+     */
+    periodEnd: Date;
+    /**
+     * Total invoiced amount
+     */
+    totalAmount: bigint;
+    /**
+     * Breakdown of the total amount by fund
+     */
+    fundAllocations: Array<DuesInvoiceAllocation>;
+    /**
+     * Current payment status of this invoice
+     */
+    status: 'generated' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'writtenOff';
+    /**
+     * Timestamp when the invoice was generated
+     */
+    generatedAt: Date;
+    /**
+     * Timestamp when the invoice was sent to the member
+     */
+    sentAt?: Date;
+    /**
+     * Timestamp when payment was received
+     */
+    paidAt?: Date;
+    /**
+     * ID of the payment transaction that settled this invoice
+     */
+    paymentId?: string;
+};
+
+/**
+ * Computed allocation of a specific invoice's revenue to a named fund
+ */
+export type DuesInvoiceAllocation = {
+    /**
+     * Name of the fund receiving the allocation
+     */
+    fundName: string;
+    /**
+     * Exact monetary amount allocated to this fund for this invoice
+     */
+    amount: bigint;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DuesInvoiceListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DuesInvoice>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Lifecycle status of a dues invoice
+ */
+export type DuesInvoiceStatus = 'generated' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'writtenOff';
+
+/**
+ * Dues invoice issued to a member for a renewal period
+ */
+export type DuesInvoiceUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the membership this invoice was generated for
+     */
+    membershipId?: string;
+    /**
+     * ID of the member person
+     */
+    personId?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * Human-readable invoice number
+     */
+    invoiceNumber?: string;
+    /**
+     * Start of the period covered by this invoice
+     */
+    periodStart?: Date;
+    /**
+     * End of the period covered by this invoice
+     */
+    periodEnd?: Date;
+    /**
+     * Total invoiced amount
+     */
+    totalAmount?: bigint;
+    /**
+     * Breakdown of the total amount by fund
+     */
+    fundAllocations?: Array<DuesInvoiceAllocation>;
+    /**
+     * Current payment status of this invoice
+     */
+    status?: 'generated' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'writtenOff';
+    /**
+     * Timestamp when the invoice was generated
+     */
+    generatedAt?: Date;
+    /**
+     * Timestamp when the invoice was sent to the member
+     */
+    sentAt?: Date;
+    /**
+     * Timestamp when payment was received
+     */
+    paidAt?: Date;
+    /**
+     * ID of the payment transaction that settled this invoice
+     */
+    paymentId?: string;
+};
+
+/**
+ * Channel through which a dunning communication is delivered
+ */
+export type DunningChannel = 'email' | 'sms' | 'letter';
+
+/**
+ * Record of a dunning communication sent to a member
+ */
+export type DunningEvent = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the membership this dunning event targets
+     */
+    membershipId: string;
+    /**
+     * ID of the member person
+     */
+    personId: string;
+    /**
+     * ID of the dunning template used
+     */
+    templateId: string;
+    /**
+     * Collection stage at which this event was sent
+     */
+    stage: number;
+    /**
+     * Timestamp when the dunning communication was dispatched
+     */
+    sentAt: Date;
+    /**
+     * Channel through which the communication was sent
+     */
+    channel: 'email' | 'sms' | 'letter';
+    /**
+     * Delivery status reported by the downstream channel provider
+     */
+    deliveryStatus?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DunningEventListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DunningEvent>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Record of a dunning communication sent to a member
+ */
+export type DunningEventUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the membership this dunning event targets
+     */
+    membershipId?: string;
+    /**
+     * ID of the member person
+     */
+    personId?: string;
+    /**
+     * ID of the dunning template used
+     */
+    templateId?: string;
+    /**
+     * Collection stage at which this event was sent
+     */
+    stage?: number;
+    /**
+     * Timestamp when the dunning communication was dispatched
+     */
+    sentAt?: Date;
+    /**
+     * Channel through which the communication was sent
+     */
+    channel?: 'email' | 'sms' | 'letter';
+    /**
+     * Delivery status reported by the downstream channel provider
+     */
+    deliveryStatus?: string;
+};
+
+/**
+ * Result summary of a dunning run
+ */
+export type DunningRunResult = {
+    /**
+     * Number of members evaluated
+     */
+    evaluated: number;
+    /**
+     * Number of dunning events sent (or would be sent in dry-run)
+     */
+    sent: number;
+    /**
+     * Whether this was a dry run
+     */
+    dryRun: boolean;
+};
+
+/**
+ * Template used to generate dunning communications at a specific collection stage
+ */
+export type DunningTemplate = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Display name of this template
+     */
+    name: string;
+    /**
+     * Collection stage (1 = earliest reminder, 5 = final notice)
+     */
+    stage: number;
+    /**
+     * Number of days after the due date when this stage is triggered
+     */
+    daysAfterDue: number;
+    /**
+     * Communication channel for this template
+     */
+    channel: 'email' | 'sms' | 'letter';
+    /**
+     * Subject line for email channel communications
+     */
+    subject?: string;
+    /**
+     * Body content of the dunning communication (supports template variables)
+     */
+    body: string;
+    /**
+     * Whether this template is active in dunning runs
+     */
+    status: 'active' | 'inactive';
+};
+
+/**
+ * Request to create a dunning template
+ */
+export type DunningTemplateCreateRequest = {
+    name: string;
+    stage: number;
+    daysAfterDue: number;
+    channel: DunningChannel;
+    subject?: string;
+    body: string;
+    status: DunningTemplateStatus;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DunningTemplateListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DunningTemplate>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Status of a dunning template
+ */
+export type DunningTemplateStatus = 'active' | 'inactive';
+
+/**
+ * Template used to generate dunning communications at a specific collection stage
+ */
+export type DunningTemplateUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Display name of this template
+     */
+    name?: string;
+    /**
+     * Collection stage (1 = earliest reminder, 5 = final notice)
+     */
+    stage?: number;
+    /**
+     * Number of days after the due date when this stage is triggered
+     */
+    daysAfterDue?: number;
+    /**
+     * Communication channel for this template
+     */
+    channel?: 'email' | 'sms' | 'letter';
+    /**
+     * Subject line for email channel communications
+     */
+    subject?: string;
+    /**
+     * Body content of the dunning communication (supports template variables)
+     */
+    body?: string;
+    /**
+     * Whether this template is active in dunning runs
+     */
+    status?: 'active' | 'inactive';
+};
+
+/**
+ * Request to update a dunning template
+ */
+export type DunningTemplateUpdateRequest = {
+    name?: string;
+    daysAfterDue?: number;
+    channel?: DunningChannel;
+    subject?: string | null;
+    body?: string;
+    status?: DunningTemplateStatus;
+};
+
+/**
+ * An election event for one or more positions
+ */
+export type Election = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the organization running the election
+     */
+    organizationId: string;
+    /**
+     * Display title of the election
+     */
+    title: string;
+    /**
+     * Type of election
+     */
+    electionType: 'general' | 'special' | 'byElection';
+    /**
+     * IDs of positions open in this election
+     */
+    positions: Array<string>;
+    /**
+     * Start of the nomination period
+     */
+    nominationStart: Date;
+    /**
+     * End of the nomination period
+     */
+    nominationEnd: Date;
+    /**
+     * Start of the voting period
+     */
+    votingStart: Date;
+    /**
+     * End of the voting period
+     */
+    votingEnd: Date;
+    /**
+     * Current status of the election
+     */
+    status: 'draft' | 'nominationOpen' | 'nominationClosed' | 'votingOpen' | 'votingClosed' | 'certified' | 'cancelled';
+    /**
+     * Minimum number of votes required for the election results to be valid
+     */
+    quorumRequired?: number;
+    /**
+     * Whether quorum was met when voting closed
+     */
+    quorumMet?: boolean;
+};
+
+/**
+ * Lifecycle status of an election
+ */
+export type ElectionStatus = 'draft' | 'nominationOpen' | 'nominationClosed' | 'votingOpen' | 'votingClosed' | 'certified' | 'cancelled';
+
+/**
+ * Type of election
+ */
+export type ElectionType = 'general' | 'special' | 'byElection';
+
+/**
+ * An election event for one or more positions
+ */
+export type ElectionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the organization running the election
+     */
+    organizationId?: string;
+    /**
+     * Display title of the election
+     */
+    title?: string;
+    /**
+     * Type of election
+     */
+    electionType?: 'general' | 'special' | 'byElection';
+    /**
+     * IDs of positions open in this election
+     */
+    positions?: Array<string>;
+    /**
+     * Start of the nomination period
+     */
+    nominationStart?: Date;
+    /**
+     * End of the nomination period
+     */
+    nominationEnd?: Date;
+    /**
+     * Start of the voting period
+     */
+    votingStart?: Date;
+    /**
+     * End of the voting period
+     */
+    votingEnd?: Date;
+    /**
+     * Current status of the election
+     */
+    status?: 'draft' | 'nominationOpen' | 'nominationClosed' | 'votingOpen' | 'votingClosed' | 'certified' | 'cancelled';
+    /**
+     * Minimum number of votes required for the election results to be valid
+     */
+    quorumRequired?: number;
+    /**
+     * Whether quorum was met when voting closed
+     */
+    quorumMet?: boolean;
 };
 
 /**
@@ -1501,6 +14680,163 @@ export type EmailQueueItem = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type EmailQueueItemListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<EmailQueueItem>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Queued email for asynchronous processing
+ */
+export type EmailQueueItemUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Direct template ID reference (use either template or templateTags)
+     */
+    template?: string;
+    /**
+     * Template tags for dynamic resolution (use either template or templateTags)
+     */
+    templateTags?: Array<string>;
+    /**
+     * Recipient email address
+     */
+    recipientEmail?: string;
+    /**
+     * Recipient name for personalization
+     */
+    recipientName?: string;
+    /**
+     * Template variables for rendering
+     */
+    variables?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Metadata for tracking, reference, and rendered content (stores resolvedTemplateId, renderedSubject, renderedHtml, renderedText, templateVersion)
+     */
+    metadata?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Processing status
+     */
+    status?: 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled';
+    /**
+     * Processing priority (1-10, lower is higher priority)
+     */
+    priority?: number;
+    /**
+     * Scheduled send time (null for immediate)
+     */
+    scheduledAt?: Date;
+    /**
+     * Number of send attempts
+     */
+    attempts?: number;
+    /**
+     * Last attempt timestamp
+     */
+    lastAttemptAt?: Date;
+    /**
+     * Next retry timestamp
+     */
+    nextRetryAt?: Date;
+    /**
+     * Last error message if failed
+     */
+    lastError?: string;
+    /**
+     * Timestamp when email was sent
+     */
+    sentAt?: Date;
+    /**
+     * Email provider used
+     */
+    provider?: 'smtp' | 'postmark';
+    /**
+     * Provider's message ID for tracking
+     */
+    providerMessageId?: string;
+    /**
+     * Cancellation timestamp
+     */
+    cancelledAt?: Date;
+    /**
+     * User who cancelled the email
+     */
+    cancelledBy?: string;
+    /**
+     * Cancellation reason
+     */
+    cancellationReason?: string;
+};
+
+/**
  * Email processing status in queue
  */
 export type EmailQueueStatus = 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled';
@@ -1584,6 +14920,136 @@ export type EmailTemplate = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type EmailTemplateListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<EmailTemplate>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Email template with variable support
+ */
+export type EmailTemplateUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Template version number
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Optional tags for categorization and search
+     */
+    tags?: Array<string>;
+    /**
+     * Human-readable template name
+     */
+    name?: string;
+    /**
+     * Template description for admin reference
+     */
+    description?: string;
+    /**
+     * Email subject line template (supports Handlebars)
+     */
+    subject?: string;
+    /**
+     * HTML body template (supports Handlebars)
+     */
+    bodyHtml?: string;
+    /**
+     * Plain text body template (supports Handlebars)
+     */
+    bodyText?: string;
+    /**
+     * Variable definitions for this template
+     */
+    variables?: Array<TemplateVariable>;
+    /**
+     * Override default sender name
+     */
+    fromName?: string;
+    /**
+     * Override default sender email
+     */
+    fromEmail?: string;
+    /**
+     * Reply-to email address
+     */
+    replyToEmail?: string;
+    /**
+     * Reply-to name
+     */
+    replyToName?: string;
+    /**
+     * Template status
+     */
+    status?: 'draft' | 'active' | 'archived';
+};
+
+/**
+ * Status of a member's enrollment in a certification program
+ */
+export type EnrollmentStatus = 'enrolled' | 'inProgress' | 'examScheduled' | 'passed' | 'failed' | 'certified' | 'expired' | 'revoked';
+
+/**
  * Standard error response structure
  */
 export type ErrorDetail = {
@@ -1626,6 +15092,1122 @@ export type ErrorDetail = {
      */
     helpUrl?: string;
 };
+
+/**
+ * An ethics complaint filed against a member
+ */
+export type EthicsComplaint = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the complainant (null for anonymous complaints where policy allows)
+     */
+    complainantId?: string;
+    /**
+     * ID of the member against whom the complaint is filed
+     */
+    respondentId: string;
+    /**
+     * Category of the alleged ethics violation
+     */
+    category: 'professionalMisconduct' | 'codeViolation' | 'financialImpropriety' | 'conflictOfInterest' | 'discrimination' | 'harassment' | 'other';
+    /**
+     * Detailed description of the alleged violation
+     */
+    description: string;
+    /**
+     * Timestamp when the complaint was formally filed
+     */
+    filedAt: Date;
+    /**
+     * Current status of the complaint
+     */
+    status: 'filed' | 'preliminaryReview' | 'investigation' | 'hearing' | 'decision' | 'appeal' | 'closed';
+    /**
+     * ID of the staff member assigned to review this complaint
+     */
+    assignedTo?: string;
+    /**
+     * Whether this complaint record is treated as confidential
+     */
+    confidential: boolean;
+};
+
+/**
+ * An ethics complaint filed against a member
+ */
+export type EthicsComplaintUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the complainant (null for anonymous complaints where policy allows)
+     */
+    complainantId?: string;
+    /**
+     * ID of the member against whom the complaint is filed
+     */
+    respondentId?: string;
+    /**
+     * Category of the alleged ethics violation
+     */
+    category?: 'professionalMisconduct' | 'codeViolation' | 'financialImpropriety' | 'conflictOfInterest' | 'discrimination' | 'harassment' | 'other';
+    /**
+     * Detailed description of the alleged violation
+     */
+    description?: string;
+    /**
+     * Timestamp when the complaint was formally filed
+     */
+    filedAt?: Date;
+    /**
+     * Current status of the complaint
+     */
+    status?: 'filed' | 'preliminaryReview' | 'investigation' | 'hearing' | 'decision' | 'appeal' | 'closed';
+    /**
+     * ID of the staff member assigned to review this complaint
+     */
+    assignedTo?: string;
+    /**
+     * Whether this complaint record is treated as confidential
+     */
+    confidential?: boolean;
+};
+
+/**
+ * Association event with scheduling and registration metadata
+ */
+export type Event = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this event belongs to
+     */
+    tenantId: string;
+    /**
+     * Display title of the event
+     */
+    title: string;
+    /**
+     * Owning organization identifier
+     */
+    organizationId: string;
+    /**
+     * Category of the event
+     */
+    eventType: 'assembly' | 'seminar' | 'social' | 'networking' | 'fundraiser' | 'governance' | 'custom';
+    /**
+     * UTC date and time the event starts
+     */
+    startDate: Date;
+    /**
+     * UTC date and time the event ends
+     */
+    endDate: Date;
+    /**
+     * Physical venue or address
+     */
+    location?: string;
+    /**
+     * URL for virtual or hybrid attendance
+     */
+    virtualUrl?: string;
+    /**
+     * Maximum number of attendees; null means unlimited
+     */
+    capacity?: number;
+    /**
+     * Number of confirmed registrations
+     */
+    registeredCount: number;
+    /**
+     * Number of entries on the waitlist
+     */
+    waitlistCount: number;
+    /**
+     * Detailed description or agenda
+     */
+    description?: string;
+    /**
+     * Standard registration fee in the stated currency
+     */
+    registrationFee?: bigint;
+    /**
+     * ISO 4217 currency code for all monetary amounts on this event
+     */
+    currency?: string;
+    /**
+     * Deadline to receive the early-bird fee discount
+     */
+    earlyBirdDeadline?: Date;
+    /**
+     * Discounted fee available before the early-bird deadline
+     */
+    earlyBirdFee?: bigint;
+    /**
+     * Current lifecycle status of the event
+     */
+    status: 'draft' | 'published' | 'registration_open' | 'registration_closed' | 'in_progress' | 'completed' | 'cancelled';
+    /**
+     * Whether attendance awards continuing education credits
+     */
+    creditBearing: boolean;
+    /**
+     * Number of CE credits awarded for attendance
+     */
+    creditAmount?: number;
+};
+
+/**
+ * Request body for creating a new event
+ */
+export type EventCreateRequest = {
+    /**
+     * Display title
+     */
+    title: string;
+    /**
+     * Owning organization
+     */
+    organizationId: string;
+    /**
+     * Event category
+     */
+    eventType: 'assembly' | 'seminar' | 'social' | 'networking' | 'fundraiser' | 'governance' | 'custom';
+    /**
+     * Start date and time
+     */
+    startDate: Date;
+    /**
+     * End date and time
+     */
+    endDate: Date;
+    /**
+     * Physical location
+     */
+    location?: string;
+    /**
+     * Virtual attendance URL
+     */
+    virtualUrl?: string;
+    /**
+     * Maximum capacity
+     */
+    capacity?: number;
+    /**
+     * Detailed description
+     */
+    description?: string;
+    /**
+     * Standard registration fee
+     */
+    registrationFee?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Early-bird deadline
+     */
+    earlyBirdDeadline?: Date;
+    /**
+     * Early-bird fee
+     */
+    earlyBirdFee?: bigint;
+    /**
+     * Whether attendance awards CE credits
+     */
+    creditBearing: boolean;
+    /**
+     * CE credit amount
+     */
+    creditAmount?: number;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type EventListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Event>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * An individual person's registration for a specific event
+ */
+export type EventRegistration = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this registration belongs to
+     */
+    tenantId: string;
+    /**
+     * Event being registered for
+     */
+    eventId: string;
+    /**
+     * Registrant person identifier
+     */
+    personId: string;
+    /**
+     * UTC timestamp when the registration was created
+     */
+    registeredAt: Date;
+    /**
+     * Optional ticket tier or category
+     */
+    ticketType?: string;
+    /**
+     * Amount paid at the time of registration
+     */
+    amountPaid?: bigint;
+    /**
+     * Reference to the corresponding payment transaction
+     */
+    paymentId?: string;
+    /**
+     * Current status of this registration
+     */
+    status: 'registered' | 'waitlisted' | 'confirmed' | 'checked_in' | 'cancelled' | 'no_show' | 'refunded';
+};
+
+/**
+ * Request body for creating an event registration
+ */
+export type EventRegistrationCreateRequest = {
+    /**
+     * Event to register for
+     */
+    eventId: string;
+    /**
+     * Person being registered
+     */
+    personId: string;
+    /**
+     * Ticket tier or category
+     */
+    ticketType?: string;
+    /**
+     * Amount paid
+     */
+    amountPaid?: bigint;
+    /**
+     * Payment transaction reference
+     */
+    paymentId?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type EventRegistrationListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<EventRegistration>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * An individual person's registration for a specific event
+ */
+export type EventRegistrationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this registration belongs to
+     */
+    tenantId?: string;
+    /**
+     * Event being registered for
+     */
+    eventId?: string;
+    /**
+     * Registrant person identifier
+     */
+    personId?: string;
+    /**
+     * UTC timestamp when the registration was created
+     */
+    registeredAt?: Date;
+    /**
+     * Optional ticket tier or category
+     */
+    ticketType?: string;
+    /**
+     * Amount paid at the time of registration
+     */
+    amountPaid?: bigint;
+    /**
+     * Reference to the corresponding payment transaction
+     */
+    paymentId?: string;
+    /**
+     * Current status of this registration
+     */
+    status?: 'registered' | 'waitlisted' | 'confirmed' | 'checked_in' | 'cancelled' | 'no_show' | 'refunded';
+};
+
+/**
+ * Lifecycle status of an association event
+ */
+export type EventStatus = 'draft' | 'published' | 'registration_open' | 'registration_closed' | 'in_progress' | 'completed' | 'cancelled';
+
+/**
+ * A registered event topic that subscriptions can listen to
+ */
+export type EventTopic = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this topic belongs to
+     */
+    tenantId: string;
+    /**
+     * Unique topic name (e.g., 'member.created', 'event.published')
+     */
+    name: string;
+    /**
+     * Human-readable description of when this event fires
+     */
+    description?: string;
+    /**
+     * Classification category (e.g., 'member', 'event', 'billing')
+     */
+    category: string;
+    /**
+     * JSON Schema definition of the payload structure
+     */
+    payloadSchema?: string;
+    /**
+     * Whether this topic is currently available for new subscriptions
+     */
+    active: boolean;
+};
+
+/**
+ * A registered event topic that subscriptions can listen to
+ */
+export type EventTopicUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this topic belongs to
+     */
+    tenantId?: string;
+    /**
+     * Unique topic name (e.g., 'member.created', 'event.published')
+     */
+    name?: string;
+    /**
+     * Human-readable description of when this event fires
+     */
+    description?: string;
+    /**
+     * Classification category (e.g., 'member', 'event', 'billing')
+     */
+    category?: string;
+    /**
+     * JSON Schema definition of the payload structure
+     */
+    payloadSchema?: string;
+    /**
+     * Whether this topic is currently available for new subscriptions
+     */
+    active?: boolean;
+};
+
+/**
+ * Type category of an association event
+ */
+export type EventType = 'assembly' | 'seminar' | 'social' | 'networking' | 'fundraiser' | 'governance' | 'custom';
+
+/**
+ * Association event with scheduling and registration metadata
+ */
+export type EventUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this event belongs to
+     */
+    tenantId?: string;
+    /**
+     * Display title of the event
+     */
+    title?: string;
+    /**
+     * Owning organization identifier
+     */
+    organizationId?: string;
+    /**
+     * Category of the event
+     */
+    eventType?: 'assembly' | 'seminar' | 'social' | 'networking' | 'fundraiser' | 'governance' | 'custom';
+    /**
+     * UTC date and time the event starts
+     */
+    startDate?: Date;
+    /**
+     * UTC date and time the event ends
+     */
+    endDate?: Date;
+    /**
+     * Physical venue or address
+     */
+    location?: string;
+    /**
+     * URL for virtual or hybrid attendance
+     */
+    virtualUrl?: string;
+    /**
+     * Maximum number of attendees; null means unlimited
+     */
+    capacity?: number;
+    /**
+     * Number of confirmed registrations
+     */
+    registeredCount?: number;
+    /**
+     * Number of entries on the waitlist
+     */
+    waitlistCount?: number;
+    /**
+     * Detailed description or agenda
+     */
+    description?: string;
+    /**
+     * Standard registration fee in the stated currency
+     */
+    registrationFee?: bigint;
+    /**
+     * ISO 4217 currency code for all monetary amounts on this event
+     */
+    currency?: string;
+    /**
+     * Deadline to receive the early-bird fee discount
+     */
+    earlyBirdDeadline?: Date;
+    /**
+     * Discounted fee available before the early-bird deadline
+     */
+    earlyBirdFee?: bigint;
+    /**
+     * Current lifecycle status of the event
+     */
+    status?: 'draft' | 'published' | 'registration_open' | 'registration_closed' | 'in_progress' | 'completed' | 'cancelled';
+    /**
+     * Whether attendance awards continuing education credits
+     */
+    creditBearing?: boolean;
+    /**
+     * Number of CE credits awarded for attendance
+     */
+    creditAmount?: number;
+};
+
+/**
+ * Request body for updating an existing event
+ */
+export type EventUpdateRequest = {
+    /**
+     * Display title
+     */
+    title?: string;
+    /**
+     * Event category
+     */
+    eventType?: 'assembly' | 'seminar' | 'social' | 'networking' | 'fundraiser' | 'governance' | 'custom';
+    /**
+     * Start date and time
+     */
+    startDate?: Date;
+    /**
+     * End date and time
+     */
+    endDate?: Date;
+    /**
+     * Physical location
+     */
+    location?: string | null;
+    /**
+     * Virtual attendance URL
+     */
+    virtualUrl?: string | null;
+    /**
+     * Maximum capacity
+     */
+    capacity?: number | null;
+    /**
+     * Detailed description
+     */
+    description?: string | null;
+    /**
+     * Standard registration fee
+     */
+    registrationFee?: bigint | null;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string | null;
+    /**
+     * Early-bird deadline
+     */
+    earlyBirdDeadline?: Date | null;
+    /**
+     * Early-bird fee
+     */
+    earlyBirdFee?: bigint | null;
+    /**
+     * Whether attendance awards CE credits
+     */
+    creditBearing?: boolean;
+    /**
+     * CE credit amount
+     */
+    creditAmount?: number | null;
+};
+
+/**
+ * The result of a certification examination attempt
+ */
+export type ExamResult = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the enrollment this exam result belongs to
+     */
+    enrollmentId: string;
+    /**
+     * ID of the candidate
+     */
+    personId: string;
+    /**
+     * Date on which the examination was taken
+     */
+    examDate: Date;
+    /**
+     * Raw score achieved (null if score is pass/fail only)
+     */
+    score?: number;
+    /**
+     * Minimum score required to pass (null if score is pass/fail only)
+     */
+    passingScore?: number;
+    /**
+     * Whether the candidate passed this attempt
+     */
+    passed: boolean;
+    /**
+     * Cumulative number of attempts for this enrollment
+     */
+    attempts: number;
+};
+
+/**
+ * The result of a certification examination attempt
+ */
+export type ExamResultUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the enrollment this exam result belongs to
+     */
+    enrollmentId?: string;
+    /**
+     * ID of the candidate
+     */
+    personId?: string;
+    /**
+     * Date on which the examination was taken
+     */
+    examDate?: Date;
+    /**
+     * Raw score achieved (null if score is pass/fail only)
+     */
+    score?: number;
+    /**
+     * Minimum score required to pass (null if score is pass/fail only)
+     */
+    passingScore?: number;
+    /**
+     * Whether the candidate passed this attempt
+     */
+    passed?: boolean;
+    /**
+     * Cumulative number of attempts for this enrollment
+     */
+    attempts?: number;
+};
+
+/**
+ * An exhibitor or sponsor profile for a conference
+ */
+export type ExhibitorProfile = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this exhibitor record belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent conference
+     */
+    conferenceId: string;
+    /**
+     * Exhibiting organization name
+     */
+    organizationName: string;
+    /**
+     * Primary contact person name
+     */
+    contactPerson: string;
+    /**
+     * Primary contact email address
+     */
+    contactEmail: string;
+    /**
+     * Requested or assigned booth size (e.g., 10x10, 10x20)
+     */
+    boothSize?: string;
+    /**
+     * Assigned booth number or identifier on the floor plan
+     */
+    boothNumber?: string;
+    /**
+     * Sponsorship tier (e.g., Platinum, Gold, Silver)
+     */
+    sponsorshipLevel?: string;
+    /**
+     * Total sponsorship or booth fee amount
+     */
+    amount?: bigint;
+    /**
+     * Current application status
+     */
+    status: 'applied' | 'approved' | 'confirmed' | 'cancelled';
+    /**
+     * Special setup requirements or notes
+     */
+    specialRequirements?: string;
+};
+
+/**
+ * An exhibitor or sponsor profile for a conference
+ */
+export type ExhibitorProfileUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this exhibitor record belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent conference
+     */
+    conferenceId?: string;
+    /**
+     * Exhibiting organization name
+     */
+    organizationName?: string;
+    /**
+     * Primary contact person name
+     */
+    contactPerson?: string;
+    /**
+     * Primary contact email address
+     */
+    contactEmail?: string;
+    /**
+     * Requested or assigned booth size (e.g., 10x10, 10x20)
+     */
+    boothSize?: string;
+    /**
+     * Assigned booth number or identifier on the floor plan
+     */
+    boothNumber?: string;
+    /**
+     * Sponsorship tier (e.g., Platinum, Gold, Silver)
+     */
+    sponsorshipLevel?: string;
+    /**
+     * Total sponsorship or booth fee amount
+     */
+    amount?: bigint;
+    /**
+     * Current application status
+     */
+    status?: 'applied' | 'approved' | 'confirmed' | 'cancelled';
+    /**
+     * Special setup requirements or notes
+     */
+    specialRequirements?: string;
+};
+
+/**
+ * Status of an exhibitor application
+ */
+export type ExhibitorStatus = 'applied' | 'approved' | 'confirmed' | 'cancelled';
+
+/**
+ * Fax number with optional extensions and pause characters
+ */
+export type FaxNumber = string;
 
 /**
  * Individual field validation error
@@ -1720,6 +16302,20 @@ export type FileDownloadResponse = {
          */
         uploadedAt: Date;
     };
+};
+
+/**
+ * File reference for updates - can be null to clear
+ */
+export type FilePatchInput = {
+    /**
+     * Reference to stored file ID - can be null to clear
+     */
+    file?: string | null;
+    /**
+     * Direct URL to file
+     */
+    url?: string;
 };
 
 /**
@@ -1941,9 +16537,79 @@ export type FormResponses = {
 };
 
 /**
+ * Complete form responses with metadata
+ */
+export type FormResponsesUpdate = {
+    /**
+     * Form field responses
+     */
+    data?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Submission metadata (system-generated)
+     */
+    metadata?: {
+        /**
+         * When the form was submitted
+         */
+        submittedAt?: Date;
+        /**
+         * Time taken to complete the form in seconds
+         */
+        completionTimeSeconds?: number;
+        /**
+         * Client IP address
+         */
+        ipAddress?: string;
+    };
+};
+
+/**
+ * Allocation of dues revenue to a named fund
+ */
+export type FundAllocation = {
+    /**
+     * Name of the fund receiving the allocation
+     */
+    fundName: string;
+    /**
+     * Percentage of the dues amount allocated to this fund (0–100)
+     */
+    percentage: number;
+    /**
+     * When true, this fund absorbs rounding differences to ensure allocations sum to the total
+     */
+    isLast: boolean;
+};
+
+/**
+ * Type of fundraising campaign
+ */
+export type FundraisingCampaignType = 'fundraising' | 'membershipDrive' | 'eventPromotion' | 'advocacy' | 'awareness';
+
+/**
  * Gender identity
  */
 export type Gender = 'male' | 'female' | 'non-binary' | 'other' | 'prefer-not-to-say';
+
+/**
+ * Request to generate dues invoices for all eligible members in an organization
+ */
+export type GenerateInvoicesRequest = {
+    /**
+     * ID of the organization for which to generate invoices
+     */
+    organizationId: string;
+    /**
+     * Renewal period start date
+     */
+    periodStart: Date;
+    /**
+     * Renewal period end date
+     */
+    periodEnd: Date;
+};
 
 /**
  * GPS coordinates
@@ -1982,6 +16648,400 @@ export type GeoCoordinatesUpdate = {
 };
 
 /**
+ * Whether the grant applicant is an individual or an organization
+ */
+export type GrantApplicantType = 'individual' | 'organization';
+
+/**
+ * A grant application submitted to an award program
+ */
+export type GrantApplication = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the grant program this application is for
+     */
+    programId: string;
+    /**
+     * ID of the person or organization submitting the application
+     */
+    applicantId: string;
+    /**
+     * Whether the applicant is an individual or an organization
+     */
+    applicantType: 'individual' | 'organization';
+    /**
+     * Title of the proposed project or grant purpose
+     */
+    title: string;
+    /**
+     * Short abstract describing the proposed project
+     */
+    abstract: string;
+    /**
+     * Total proposed budget for the project
+     */
+    proposedBudget: bigint;
+    /**
+     * Current status of the grant application
+     */
+    status: 'draft' | 'submitted' | 'underReview' | 'approved' | 'denied' | 'funded' | 'completed' | 'withdrawn';
+    /**
+     * Timestamp when the application was formally submitted
+     */
+    submittedAt?: Date;
+    /**
+     * Aggregate review score assigned by reviewers
+     */
+    reviewScore?: number;
+    /**
+     * Actual amount awarded (may differ from proposed budget)
+     */
+    awardedAmount?: bigint;
+};
+
+/**
+ * A grant application submitted to an award program
+ */
+export type GrantApplicationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the grant program this application is for
+     */
+    programId?: string;
+    /**
+     * ID of the person or organization submitting the application
+     */
+    applicantId?: string;
+    /**
+     * Whether the applicant is an individual or an organization
+     */
+    applicantType?: 'individual' | 'organization';
+    /**
+     * Title of the proposed project or grant purpose
+     */
+    title?: string;
+    /**
+     * Short abstract describing the proposed project
+     */
+    abstract?: string;
+    /**
+     * Total proposed budget for the project
+     */
+    proposedBudget?: bigint;
+    /**
+     * Current status of the grant application
+     */
+    status?: 'draft' | 'submitted' | 'underReview' | 'approved' | 'denied' | 'funded' | 'completed' | 'withdrawn';
+    /**
+     * Timestamp when the application was formally submitted
+     */
+    submittedAt?: Date;
+    /**
+     * Aggregate review score assigned by reviewers
+     */
+    reviewScore?: number;
+    /**
+     * Actual amount awarded (may differ from proposed budget)
+     */
+    awardedAmount?: bigint;
+};
+
+/**
+ * A progress report submitted by a grant recipient
+ */
+export type GrantProgressReport = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the grant application this report corresponds to
+     */
+    grantApplicationId: string;
+    /**
+     * Human-readable label for the reporting period (e.g. 'Q1 2026')
+     */
+    reportingPeriod: string;
+    /**
+     * Narrative description of progress made during the reporting period
+     */
+    narrative: string;
+    /**
+     * Total expenditures during the reporting period
+     */
+    expenditures: bigint;
+    /**
+     * Milestones achieved during the reporting period
+     */
+    milestones?: Array<string>;
+    /**
+     * Current status of this progress report
+     */
+    status: 'submitted' | 'reviewed' | 'accepted' | 'revisionsRequested';
+};
+
+/**
+ * A progress report submitted by a grant recipient
+ */
+export type GrantProgressReportUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the grant application this report corresponds to
+     */
+    grantApplicationId?: string;
+    /**
+     * Human-readable label for the reporting period (e.g. 'Q1 2026')
+     */
+    reportingPeriod?: string;
+    /**
+     * Narrative description of progress made during the reporting period
+     */
+    narrative?: string;
+    /**
+     * Total expenditures during the reporting period
+     */
+    expenditures?: bigint;
+    /**
+     * Milestones achieved during the reporting period
+     */
+    milestones?: Array<string>;
+    /**
+     * Current status of this progress report
+     */
+    status?: 'submitted' | 'reviewed' | 'accepted' | 'revisionsRequested';
+};
+
+/**
+ * Lifecycle status of a grant application
+ */
+export type GrantStatus = 'draft' | 'submitted' | 'underReview' | 'approved' | 'denied' | 'funded' | 'completed' | 'withdrawn';
+
+/**
+ * A human review gate created when an AI task requires manual approval
+ */
+export type HumanReviewGate = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this gate belongs to
+     */
+    tenantId: string;
+    /**
+     * AI agent task requiring review
+     */
+    agentTaskId: string;
+    /**
+     * Reason why human review was flagged for this task
+     */
+    reason: string;
+    /**
+     * Person who reviewed this gate
+     */
+    reviewedBy?: string;
+    /**
+     * UTC timestamp when the review was completed
+     */
+    reviewedAt?: Date;
+    /**
+     * Review decision
+     */
+    decision?: 'approve' | 'modify' | 'reject';
+    /**
+     * Modifications made by the reviewer to the AI output (populated when decision is 'modify')
+     */
+    modifications?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * A human review gate created when an AI task requires manual approval
+ */
+export type HumanReviewGateUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this gate belongs to
+     */
+    tenantId?: string;
+    /**
+     * AI agent task requiring review
+     */
+    agentTaskId?: string;
+    /**
+     * Reason why human review was flagged for this task
+     */
+    reason?: string;
+    /**
+     * Person who reviewed this gate
+     */
+    reviewedBy?: string;
+    /**
+     * UTC timestamp when the review was completed
+     */
+    reviewedAt?: Date;
+    /**
+     * Review decision
+     */
+    decision?: 'approve' | 'modify' | 'reject';
+    /**
+     * Modifications made by the reviewer to the AI output (populated when decision is 'modify')
+     */
+    modifications?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * ICE server configuration
  */
 export type IceServer = {
@@ -2007,6 +17067,229 @@ export type IceServersResponse = {
      * List of ICE servers (STUN/TURN) for WebRTC peer connections
      */
     iceServers: Array<IceServer>;
+};
+
+/**
+ * Institutional (organizational) membership granting seat allocations to individuals
+ */
+export type InstitutionalMembership = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the member institution
+     */
+    organizationId: string;
+    /**
+     * ID of the parent association organization
+     */
+    parentOrganizationId: string;
+    /**
+     * ID of the membership tier purchased by the institution
+     */
+    tierId: string;
+    /**
+     * Total number of individual seats included in this membership
+     */
+    totalSeats: number;
+    /**
+     * Number of seats currently allocated to individuals
+     */
+    usedSeats: number;
+    /**
+     * ID of the primary contact person at the institution
+     */
+    primaryContactId: string;
+    /**
+     * ID of the billing contact person at the institution
+     */
+    billingContactId?: string;
+    /**
+     * Date on which institutional membership benefits began
+     */
+    startDate: Date;
+    /**
+     * Date on which the current dues period expires
+     */
+    duesExpiryDate: Date;
+    /**
+     * Lifecycle status of this institutional membership
+     */
+    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+};
+
+/**
+ * Request to create an institutional membership
+ */
+export type InstitutionalMembershipCreateRequest = {
+    organizationId: string;
+    parentOrganizationId: string;
+    tierId: string;
+    totalSeats: number;
+    primaryContactId: string;
+    billingContactId?: string;
+    startDate: Date;
+    duesExpiryDate: Date;
+};
+
+/**
+ * Request to create an institutional membership
+ */
+export type InstitutionalMembershipCreateRequestUpdate = {
+    organizationId?: string;
+    parentOrganizationId?: string;
+    tierId?: string;
+    totalSeats?: number;
+    primaryContactId?: string;
+    billingContactId?: string;
+    startDate?: Date;
+    duesExpiryDate?: Date;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type InstitutionalMembershipListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<InstitutionalMembership>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Institutional (organizational) membership granting seat allocations to individuals
+ */
+export type InstitutionalMembershipUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the member institution
+     */
+    organizationId?: string;
+    /**
+     * ID of the parent association organization
+     */
+    parentOrganizationId?: string;
+    /**
+     * ID of the membership tier purchased by the institution
+     */
+    tierId?: string;
+    /**
+     * Total number of individual seats included in this membership
+     */
+    totalSeats?: number;
+    /**
+     * Number of seats currently allocated to individuals
+     */
+    usedSeats?: number;
+    /**
+     * ID of the primary contact person at the institution
+     */
+    primaryContactId?: string;
+    /**
+     * ID of the billing contact person at the institution
+     */
+    billingContactId?: string;
+    /**
+     * Date on which institutional membership benefits began
+     */
+    startDate?: Date;
+    /**
+     * Date on which the current dues period expires
+     */
+    duesExpiryDate?: Date;
+    /**
+     * Lifecycle status of this institutional membership
+     */
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
 };
 
 /**
@@ -2214,9 +17497,479 @@ export type InvoiceLineItem = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type InvoiceListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Invoice>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Invoice lifecycle status
  */
 export type InvoiceStatus = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+
+/**
+ * Invoice for billing and payments
+ */
+export type InvoiceUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Auto-generated invoice number
+     */
+    invoiceNumber?: string;
+    /**
+     * Customer (person who pays) (expandable)
+     */
+    customer?: string | PersonUpdate;
+    /**
+     * Merchant (person who receives payment) (expandable)
+     */
+    merchant?: string | PersonUpdate;
+    /**
+     * Optional merchant account for payment processing (expandable)
+     */
+    merchantAccount?: string | MerchantAccountUpdate;
+    /**
+     * Unique context for idempotency (e.g., 'booking:123')
+     */
+    context?: string;
+    /**
+     * Invoice status
+     */
+    status?: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+    /**
+     * Subtotal amount in cents
+     */
+    subtotal?: number;
+    /**
+     * Tax amount in cents
+     */
+    tax?: number;
+    /**
+     * Total amount to charge in cents
+     */
+    total?: number;
+    /**
+     * Currency code
+     */
+    currency?: string;
+    /**
+     * Payment capture method
+     */
+    paymentCaptureMethod?: 'automatic' | 'manual';
+    /**
+     * Date when invoice was issued
+     */
+    issuedAt?: Date;
+    /**
+     * Payment due date
+     */
+    paymentDueAt?: Date;
+    /**
+     * Line items
+     */
+    lineItems?: Array<InvoiceLineItem>;
+    /**
+     * Payment status
+     */
+    paymentStatus?: 'pending' | 'requires_capture' | 'processing' | 'succeeded' | 'failed' | 'canceled';
+    /**
+     * Timestamp when paid
+     */
+    paidAt?: Date;
+    /**
+     * Person who processed the payment
+     */
+    paidBy?: string;
+    /**
+     * Timestamp when voided
+     */
+    voidedAt?: Date;
+    /**
+     * Person who voided the invoice
+     */
+    voidedBy?: string;
+    /**
+     * Void threshold in minutes for charge protection
+     */
+    voidThresholdMinutes?: number;
+    /**
+     * Timestamp when payment was authorized
+     */
+    authorizedAt?: Date;
+    /**
+     * Person who authorized the payment
+     */
+    authorizedBy?: string;
+    /**
+     * Metadata (includes Stripe IDs, etc.)
+     */
+    metadata?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Request to issue a digital credential to a member
+ */
+export type IssueCredentialRequest = {
+    personId: string;
+    templateId: string;
+    membershipId?: string;
+    credentialNumber: string;
+};
+
+/**
+ * Request to issue a digital credential to a member
+ */
+export type IssueCredentialRequestUpdate = {
+    personId?: string;
+    templateId?: string;
+    membershipId?: string;
+    credentialNumber?: string;
+};
+
+/**
+ * A member's application for a job posting
+ */
+export type JobApplication = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this application belongs to
+     */
+    tenantId: string;
+    /**
+     * Job posting being applied for
+     */
+    postingId: string;
+    /**
+     * Applicant person identifier
+     */
+    personId: string;
+    /**
+     * Storage reference for the uploaded resume
+     */
+    resumeRef?: string;
+    /**
+     * Cover letter text
+     */
+    coverLetter?: string;
+    /**
+     * UTC timestamp of application submission
+     */
+    appliedAt: Date;
+    /**
+     * Current application status
+     */
+    status: 'applied' | 'screening' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn';
+};
+
+/**
+ * Status of a job application
+ */
+export type JobApplicationStatus = 'applied' | 'screening' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn';
+
+/**
+ * A member's application for a job posting
+ */
+export type JobApplicationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this application belongs to
+     */
+    tenantId?: string;
+    /**
+     * Job posting being applied for
+     */
+    postingId?: string;
+    /**
+     * Applicant person identifier
+     */
+    personId?: string;
+    /**
+     * Storage reference for the uploaded resume
+     */
+    resumeRef?: string;
+    /**
+     * Cover letter text
+     */
+    coverLetter?: string;
+    /**
+     * UTC timestamp of application submission
+     */
+    appliedAt?: Date;
+    /**
+     * Current application status
+     */
+    status?: 'applied' | 'screening' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn';
+};
+
+/**
+ * A job posting on the association member job board
+ */
+export type JobPosting = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this posting belongs to
+     */
+    tenantId: string;
+    /**
+     * Position title
+     */
+    title: string;
+    /**
+     * Hiring organization name
+     */
+    organizationName: string;
+    /**
+     * Work location (city/state or Remote)
+     */
+    location?: string;
+    /**
+     * Employment type
+     */
+    type: 'full_time' | 'part_time' | 'contract' | 'fellowship' | 'internship';
+    /**
+     * Salary range or compensation description
+     */
+    salary?: string;
+    /**
+     * Full job description
+     */
+    description: string;
+    /**
+     * Required qualifications and experience
+     */
+    requirements?: Array<string>;
+    /**
+     * UTC timestamp when the posting went live
+     */
+    postedAt: Date;
+    /**
+     * UTC timestamp after which the posting expires
+     */
+    expiresAt?: Date;
+    /**
+     * Current posting status
+     */
+    status: 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+};
+
+/**
+ * Status of a job posting
+ */
+export type JobPostingStatus = 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+
+/**
+ * Employment type for a job posting
+ */
+export type JobPostingType = 'full_time' | 'part_time' | 'contract' | 'fellowship' | 'internship';
+
+/**
+ * A job posting on the association member job board
+ */
+export type JobPostingUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this posting belongs to
+     */
+    tenantId?: string;
+    /**
+     * Position title
+     */
+    title?: string;
+    /**
+     * Hiring organization name
+     */
+    organizationName?: string;
+    /**
+     * Work location (city/state or Remote)
+     */
+    location?: string;
+    /**
+     * Employment type
+     */
+    type?: 'full_time' | 'part_time' | 'contract' | 'fellowship' | 'internship';
+    /**
+     * Salary range or compensation description
+     */
+    salary?: string;
+    /**
+     * Full job description
+     */
+    description?: string;
+    /**
+     * Required qualifications and experience
+     */
+    requirements?: Array<string>;
+    /**
+     * UTC timestamp when the posting went live
+     */
+    postedAt?: Date;
+    /**
+     * UTC timestamp after which the posting expires
+     */
+    expiresAt?: Date;
+    /**
+     * Current posting status
+     */
+    status?: 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+};
 
 /**
  * Join video call request
@@ -2260,9 +18013,457 @@ export type LeaveVideoCallResponse = {
 };
 
 /**
+ * A legislative or policy issue being tracked by the association's advocacy program
+ */
+export type LegislativeIssue = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Title of the legislative issue or bill
+     */
+    title: string;
+    /**
+     * Description of the issue and the association's position
+     */
+    description: string;
+    /**
+     * Current tracking status of the issue
+     */
+    status: 'active' | 'monitoring' | 'resolved' | 'archived';
+    /**
+     * Jurisdiction (e.g. federal, state name, province) where the issue applies
+     */
+    jurisdiction?: string;
+    /**
+     * Date on which the issue was first identified
+     */
+    issueDate: Date;
+    /**
+     * Date on which the issue was resolved
+     */
+    resolvedDate?: Date;
+};
+
+/**
+ * Status of a legislative issue being tracked
+ */
+export type LegislativeIssueStatus = 'active' | 'monitoring' | 'resolved' | 'archived';
+
+/**
+ * A legislative or policy issue being tracked by the association's advocacy program
+ */
+export type LegislativeIssueUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Title of the legislative issue or bill
+     */
+    title?: string;
+    /**
+     * Description of the issue and the association's position
+     */
+    description?: string;
+    /**
+     * Current tracking status of the issue
+     */
+    status?: 'active' | 'monitoring' | 'resolved' | 'archived';
+    /**
+     * Jurisdiction (e.g. federal, state name, province) where the issue applies
+     */
+    jurisdiction?: string;
+    /**
+     * Date on which the issue was first identified
+     */
+    issueDate?: Date;
+    /**
+     * Date on which the issue was resolved
+     */
+    resolvedDate?: Date;
+};
+
+/**
+ * An alert notifying a member that one of their licenses is approaching expiry
+ */
+export type LicenseRenewalAlert = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the professional license triggering this alert
+     */
+    licenseId: string;
+    /**
+     * ID of the member receiving the alert
+     */
+    personId: string;
+    /**
+     * Date on which this alert is scheduled to be sent
+     */
+    alertDate: Date;
+    /**
+     * Number of days remaining until license expiry at the time of the alert
+     */
+    daysUntilExpiry: number;
+    /**
+     * Current status of this alert
+     */
+    status: 'pending' | 'sent' | 'acknowledged' | 'dismissed';
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type LicenseRenewalAlertListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<LicenseRenewalAlert>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * An alert notifying a member that one of their licenses is approaching expiry
+ */
+export type LicenseRenewalAlertUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the professional license triggering this alert
+     */
+    licenseId?: string;
+    /**
+     * ID of the member receiving the alert
+     */
+    personId?: string;
+    /**
+     * Date on which this alert is scheduled to be sent
+     */
+    alertDate?: Date;
+    /**
+     * Number of days remaining until license expiry at the time of the alert
+     */
+    daysUntilExpiry?: number;
+    /**
+     * Current status of this alert
+     */
+    status?: 'pending' | 'sent' | 'acknowledged' | 'dismissed';
+};
+
+/**
+ * Lifecycle status of a professional license
+ */
+export type LicenseStatus = 'active' | 'expired' | 'suspended' | 'revoked' | 'pending';
+
+/**
  * Location types for bookings
  */
 export type LocationType = 'video' | 'phone' | 'in-person';
+
+/**
+ * Request to mark a dues invoice as paid
+ */
+export type MarkInvoicePaidRequest = {
+    /**
+     * ID of the payment transaction
+     */
+    paymentId: string;
+    /**
+     * Timestamp when payment was received
+     */
+    paidAt: Date;
+};
+
+/**
+ * A marketing campaign definition
+ */
+export type MarketingCampaign = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this campaign belongs to
+     */
+    tenantId: string;
+    /**
+     * Campaign display name
+     */
+    name: string;
+    /**
+     * Campaign channel type
+     */
+    type: 'email' | 'sms' | 'multi_channel';
+    /**
+     * Campaign objective or goal description
+     */
+    goal?: string;
+    /**
+     * Identifier of the audience segment this campaign targets
+     */
+    audienceSegmentId?: string;
+    /**
+     * Current lifecycle status
+     */
+    status: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed';
+    /**
+     * Scheduled or actual campaign start date
+     */
+    startDate?: Date;
+    /**
+     * Scheduled or actual campaign end date
+     */
+    endDate?: Date;
+    /**
+     * Total number of messages sent so far
+     */
+    sentCount?: number;
+    /**
+     * Message open rate (0.0 to 1.0)
+     */
+    openRate?: number;
+    /**
+     * Message click-through rate (0.0 to 1.0)
+     */
+    clickRate?: number;
+};
+
+/**
+ * Lifecycle status of a marketing campaign
+ */
+export type MarketingCampaignStatus = 'draft' | 'scheduled' | 'active' | 'paused' | 'completed';
+
+/**
+ * A marketing campaign definition
+ */
+export type MarketingCampaignUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this campaign belongs to
+     */
+    tenantId?: string;
+    /**
+     * Campaign display name
+     */
+    name?: string;
+    /**
+     * Campaign channel type
+     */
+    type?: 'email' | 'sms' | 'multi_channel';
+    /**
+     * Campaign objective or goal description
+     */
+    goal?: string;
+    /**
+     * Identifier of the audience segment this campaign targets
+     */
+    audienceSegmentId?: string;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed';
+    /**
+     * Scheduled or actual campaign start date
+     */
+    startDate?: Date;
+    /**
+     * Scheduled or actual campaign end date
+     */
+    endDate?: Date;
+    /**
+     * Total number of messages sent so far
+     */
+    sentCount?: number;
+    /**
+     * Message open rate (0.0 to 1.0)
+     */
+    openRate?: number;
+    /**
+     * Message click-through rate (0.0 to 1.0)
+     */
+    clickRate?: number;
+};
 
 /**
  * File reference supporting both stored files and external URLs
@@ -2279,17 +18480,1142 @@ export type MaybeStoredFile = {
 };
 
 /**
- * File reference for updates - can be null to clear
+ * File reference supporting both stored files and external URLs
  */
 export type MaybeStoredFileUpdate = {
     /**
-     * Reference to stored file ID - can be null to clear
+     * Reference to stored file ID
      */
-    file?: string | null;
+    file?: string;
     /**
      * Direct URL to file
      */
     url?: string;
+};
+
+/**
+ * Approved minutes documenting what occurred at a committee meeting
+ */
+export type MeetingMinutes = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the meeting these minutes document
+     */
+    meetingId: string;
+    /**
+     * Full content of the meeting minutes
+     */
+    content: string;
+    /**
+     * ID of the person who prepared the minutes
+     */
+    preparedBy: string;
+    /**
+     * ID of the person who formally approved the minutes
+     */
+    approvedBy?: string;
+    /**
+     * Timestamp of formal approval
+     */
+    approvedAt?: Date;
+    /**
+     * Approval status of the minutes
+     */
+    status: 'draft' | 'submitted' | 'approved';
+};
+
+/**
+ * Approved minutes documenting what occurred at a committee meeting
+ */
+export type MeetingMinutesUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the meeting these minutes document
+     */
+    meetingId?: string;
+    /**
+     * Full content of the meeting minutes
+     */
+    content?: string;
+    /**
+     * ID of the person who prepared the minutes
+     */
+    preparedBy?: string;
+    /**
+     * ID of the person who formally approved the minutes
+     */
+    approvedBy?: string;
+    /**
+     * Timestamp of formal approval
+     */
+    approvedAt?: Date;
+    /**
+     * Approval status of the minutes
+     */
+    status?: 'draft' | 'submitted' | 'approved';
+};
+
+/**
+ * Status of a committee or board meeting
+ */
+export type MeetingStatus = 'scheduled' | 'inProgress' | 'completed' | 'cancelled';
+
+/**
+ * Individual membership record linking a person to an organization and tier
+ */
+export type Membership = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the person holding this membership
+     */
+    personId: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * ID of the membership tier
+     */
+    tierId: string;
+    /**
+     * Optional membership category
+     */
+    categoryId?: string;
+    /**
+     * Human-readable member number assigned to this membership
+     */
+    memberNumber?: string;
+    /**
+     * Date on which membership benefits began
+     */
+    startDate: Date;
+    /**
+     * Date on which current dues period expires
+     */
+    duesExpiryDate: Date;
+    /**
+     * Number of days after duesExpiryDate before membership lapses
+     */
+    gracePeriodDays: number;
+    /**
+     * Computed lifecycle status stored for query performance
+     */
+    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    /**
+     * Timestamp when the person first joined the association
+     */
+    joinedAt: Date;
+    /**
+     * Timestamp of termination, if applicable
+     */
+    terminatedAt?: Date;
+    /**
+     * Reason provided for termination
+     */
+    terminationReason?: string;
+    /**
+     * Internal note about this membership
+     */
+    note?: string;
+};
+
+/**
+ * Application submitted by a prospective member
+ */
+export type MembershipApplication = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the person submitting the application
+     */
+    personId: string;
+    /**
+     * ID of the association organization being applied to
+     */
+    organizationId: string;
+    /**
+     * ID of the requested membership tier
+     */
+    tierId: string;
+    /**
+     * Date the application was submitted
+     */
+    applicationDate: Date;
+    /**
+     * Current review status of the application
+     */
+    status: 'submitted' | 'underReview' | 'approved' | 'denied' | 'waitlisted';
+    /**
+     * ID of the staff member who reviewed the application
+     */
+    reviewedBy?: string;
+    /**
+     * Timestamp of the review decision
+     */
+    reviewedAt?: Date;
+    /**
+     * Reason provided when an application is denied
+     */
+    denialReason?: string;
+};
+
+/**
+ * Request to create a membership application
+ */
+export type MembershipApplicationCreateRequest = {
+    personId: string;
+    organizationId: string;
+    tierId: string;
+    applicationDate: Date;
+};
+
+/**
+ * Request to create a membership application
+ */
+export type MembershipApplicationCreateRequestUpdate = {
+    personId?: string;
+    organizationId?: string;
+    tierId?: string;
+    applicationDate?: Date;
+};
+
+/**
+ * Request to deny a membership application
+ */
+export type MembershipApplicationDenyRequest = {
+    /**
+     * Reason for denying the application
+     */
+    denialReason: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type MembershipApplicationListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<MembershipApplication>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Application submitted by a prospective member
+ */
+export type MembershipApplicationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the person submitting the application
+     */
+    personId?: string;
+    /**
+     * ID of the association organization being applied to
+     */
+    organizationId?: string;
+    /**
+     * ID of the requested membership tier
+     */
+    tierId?: string;
+    /**
+     * Date the application was submitted
+     */
+    applicationDate?: Date;
+    /**
+     * Current review status of the application
+     */
+    status?: 'submitted' | 'underReview' | 'approved' | 'denied' | 'waitlisted';
+    /**
+     * ID of the staff member who reviewed the application
+     */
+    reviewedBy?: string;
+    /**
+     * Timestamp of the review decision
+     */
+    reviewedAt?: Date;
+    /**
+     * Reason provided when an application is denied
+     */
+    denialReason?: string;
+};
+
+/**
+ * Membership category grouping tiers for reporting and eligibility
+ */
+export type MembershipCategory = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Display name of the category
+     */
+    name: string;
+    /**
+     * Description of the category and its intended use
+     */
+    description?: string;
+    /**
+     * IDs of the tiers that belong to this category
+     */
+    applicableTiers: Array<string>;
+};
+
+/**
+ * Membership category grouping tiers for reporting and eligibility
+ */
+export type MembershipCategoryUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Display name of the category
+     */
+    name?: string;
+    /**
+     * Description of the category and its intended use
+     */
+    description?: string;
+    /**
+     * IDs of the tiers that belong to this category
+     */
+    applicableTiers?: Array<string>;
+};
+
+/**
+ * Request to create a new membership
+ */
+export type MembershipCreateRequest = {
+    personId: string;
+    organizationId: string;
+    tierId: string;
+    categoryId?: string;
+    memberNumber?: string;
+    startDate: Date;
+    duesExpiryDate: Date;
+    gracePeriodDays?: number;
+    note?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type MembershipListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<unknown>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Lifecycle status of a membership record. Computed from duesExpiryDate and stored for query performance.
+ */
+export type MembershipStatus = 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+
+/**
+ * Request to terminate a membership
+ */
+export type MembershipTerminateRequest = {
+    /**
+     * Reason for terminating the membership
+     */
+    terminationReason: string;
+};
+
+/**
+ * Membership tier defining fee structure and benefits
+ */
+export type MembershipTier = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Display name of the tier
+     */
+    name: string;
+    /**
+     * Unique code used in integrations and reporting
+     */
+    code: string;
+    /**
+     * Human-readable description of the tier
+     */
+    description?: string;
+    /**
+     * Annual dues amount in the specified currency
+     */
+    annualFee: bigint;
+    /**
+     * ISO 4217 currency code for the annual fee
+     */
+    currency: string;
+    /**
+     * List of benefits available to members in this tier
+     */
+    benefits?: Array<string>;
+    /**
+     * Maximum number of members permitted at this tier (null = unlimited)
+     */
+    maxMembers?: number;
+    /**
+     * Lifecycle status of this tier
+     */
+    status: 'active' | 'retired';
+};
+
+/**
+ * Request to create a new membership tier
+ */
+export type MembershipTierCreateRequest = {
+    name: string;
+    code: string;
+    description?: string;
+    annualFee: bigint;
+    currency: string;
+    benefits?: Array<string>;
+    maxMembers?: number;
+    status: TierStatus;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type MembershipTierListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<MembershipTier>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Membership tier defining fee structure and benefits
+ */
+export type MembershipTierUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Display name of the tier
+     */
+    name?: string;
+    /**
+     * Unique code used in integrations and reporting
+     */
+    code?: string;
+    /**
+     * Human-readable description of the tier
+     */
+    description?: string;
+    /**
+     * Annual dues amount in the specified currency
+     */
+    annualFee?: bigint;
+    /**
+     * ISO 4217 currency code for the annual fee
+     */
+    currency?: string;
+    /**
+     * List of benefits available to members in this tier
+     */
+    benefits?: Array<string>;
+    /**
+     * Maximum number of members permitted at this tier (null = unlimited)
+     */
+    maxMembers?: number;
+    /**
+     * Lifecycle status of this tier
+     */
+    status?: 'active' | 'retired';
+};
+
+/**
+ * Request to update an existing membership tier
+ */
+export type MembershipTierUpdateRequest = {
+    name?: string;
+    description?: string | null;
+    annualFee?: bigint;
+    benefits?: Array<string> | null;
+    maxMembers?: number | null;
+    status?: TierStatus;
+};
+
+/**
+ * Individual membership record linking a person to an organization and tier
+ */
+export type MembershipUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the person holding this membership
+     */
+    personId?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * ID of the membership tier
+     */
+    tierId?: string;
+    /**
+     * Optional membership category
+     */
+    categoryId?: string;
+    /**
+     * Human-readable member number assigned to this membership
+     */
+    memberNumber?: string;
+    /**
+     * Date on which membership benefits began
+     */
+    startDate?: Date;
+    /**
+     * Date on which current dues period expires
+     */
+    duesExpiryDate?: Date;
+    /**
+     * Number of days after duesExpiryDate before membership lapses
+     */
+    gracePeriodDays?: number;
+    /**
+     * Computed lifecycle status stored for query performance
+     */
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    /**
+     * Timestamp when the person first joined the association
+     */
+    joinedAt?: Date;
+    /**
+     * Timestamp of termination, if applicable
+     */
+    terminatedAt?: Date;
+    /**
+     * Reason provided for termination
+     */
+    terminationReason?: string;
+    /**
+     * Internal note about this membership
+     */
+    note?: string;
+};
+
+/**
+ * Request to update an existing membership
+ */
+export type MembershipUpdateRequest = {
+    tierId?: string;
+    categoryId?: string | null;
+    memberNumber?: string | null;
+    duesExpiryDate?: Date;
+    gracePeriodDays?: number;
+    note?: string | null;
+};
+
+/**
+ * A matched mentor-mentee pair within a programme
+ */
+export type MentorshipPair = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this pair belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent mentorship programme
+     */
+    programId: string;
+    /**
+     * Mentor person identifier
+     */
+    mentorId: string;
+    /**
+     * Mentee person identifier
+     */
+    menteeId: string;
+    /**
+     * UTC timestamp when the match was made
+     */
+    matchedAt: Date;
+    /**
+     * Current pair status
+     */
+    status: 'proposed' | 'active' | 'completed' | 'dissolved';
+    /**
+     * Agreed mentorship goals
+     */
+    goals?: Array<string>;
+    /**
+     * Agreed meeting frequency (e.g., bi-weekly)
+     */
+    meetingFrequency?: string;
+};
+
+/**
+ * A matched mentor-mentee pair within a programme
+ */
+export type MentorshipPairUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this pair belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent mentorship programme
+     */
+    programId?: string;
+    /**
+     * Mentor person identifier
+     */
+    mentorId?: string;
+    /**
+     * Mentee person identifier
+     */
+    menteeId?: string;
+    /**
+     * UTC timestamp when the match was made
+     */
+    matchedAt?: Date;
+    /**
+     * Current pair status
+     */
+    status?: 'proposed' | 'active' | 'completed' | 'dissolved';
+    /**
+     * Agreed mentorship goals
+     */
+    goals?: Array<string>;
+    /**
+     * Agreed meeting frequency (e.g., bi-weekly)
+     */
+    meetingFrequency?: string;
+};
+
+/**
+ * A structured mentorship programme definition
+ */
+export type MentorshipProgram = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this programme belongs to
+     */
+    tenantId: string;
+    /**
+     * Programme display name
+     */
+    name: string;
+    /**
+     * Owning organization
+     */
+    organizationId: string;
+    /**
+     * Programme description and goals
+     */
+    description?: string;
+    /**
+     * Programme duration in months
+     */
+    duration: number;
+    /**
+     * Current programme status
+     */
+    status: 'enrolling' | 'active' | 'completed' | 'suspended';
+};
+
+/**
+ * Status of a mentorship programme
+ */
+export type MentorshipProgramStatus = 'enrolling' | 'active' | 'completed' | 'suspended';
+
+/**
+ * A structured mentorship programme definition
+ */
+export type MentorshipProgramUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this programme belongs to
+     */
+    tenantId?: string;
+    /**
+     * Programme display name
+     */
+    name?: string;
+    /**
+     * Owning organization
+     */
+    organizationId?: string;
+    /**
+     * Programme description and goals
+     */
+    description?: string;
+    /**
+     * Programme duration in months
+     */
+    duration?: number;
+    /**
+     * Current programme status
+     */
+    status?: 'enrolling' | 'active' | 'completed' | 'suspended';
 };
 
 /**
@@ -2337,9 +19663,275 @@ export type MerchantAccount = {
 };
 
 /**
+ * Merchant account for payment processing
+ */
+export type MerchantAccountUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Person who owns this merchant account (expandable)
+     */
+    person?: string | PersonUpdate;
+    /**
+     * Whether account is active
+     */
+    active?: boolean;
+    /**
+     * Metadata (includes Stripe account ID, onboardingComplete, etc.)
+     */
+    metadata?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type MessageListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AssociationCoreCommunicationMessage>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type MessageTemplateListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AssociationCoreCommunicationMessageTemplate>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Message type enumeration
  */
 export type MessageType = 'text' | 'system' | 'video_call';
+
+/**
+ * Status of meeting minutes
+ */
+export type MinutesStatus = 'draft' | 'submitted' | 'approved';
+
+/**
+ * Type of content within a course module
+ */
+export type ModuleType = 'video' | 'reading' | 'quiz' | 'assignment';
+
+/**
+ * A motion introduced during a committee meeting
+ */
+export type Motion = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the meeting in which the motion was introduced
+     */
+    meetingId: string;
+    /**
+     * ID of the person who moved the motion
+     */
+    movedBy: string;
+    /**
+     * ID of the person who seconded the motion
+     */
+    secondedBy?: string;
+    /**
+     * Full text of the motion
+     */
+    text: string;
+    /**
+     * Current status of the motion
+     */
+    status: 'introduced' | 'seconded' | 'tabled' | 'votedOn' | 'passed' | 'failed' | 'withdrawn';
+};
+
+/**
+ * Status of a motion introduced in a committee meeting
+ */
+export type MotionStatus = 'introduced' | 'seconded' | 'tabled' | 'votedOn' | 'passed' | 'failed' | 'withdrawn';
+
+/**
+ * A motion introduced during a committee meeting
+ */
+export type MotionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the meeting in which the motion was introduced
+     */
+    meetingId?: string;
+    /**
+     * ID of the person who moved the motion
+     */
+    movedBy?: string;
+    /**
+     * ID of the person who seconded the motion
+     */
+    secondedBy?: string;
+    /**
+     * Full text of the motion
+     */
+    text?: string;
+    /**
+     * Current status of the motion
+     */
+    status?: 'introduced' | 'seconded' | 'tabled' | 'votedOn' | 'passed' | 'failed' | 'withdrawn';
+};
+
+/**
+ * Status of an award nomination
+ */
+export type NominationStatus = 'submitted' | 'underReview' | 'shortlisted' | 'selected' | 'notSelected' | 'withdrawn';
 
 /**
  * Resource not found error
@@ -2491,6 +20083,53 @@ export type Notification = {
 export type NotificationChannel = 'email' | 'push' | 'in-app';
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type NotificationListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Notification>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Notification delivery status
  */
 export type NotificationStatus = 'queued' | 'sent' | 'delivered' | 'read' | 'failed' | 'expired' | 'unread';
@@ -2501,41 +20140,223 @@ export type NotificationStatus = 'queued' | 'sent' | 'delivered' | 'read' | 'fai
 export type NotificationType = 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message';
 
 /**
- * Offset pagination navigation information
+ * System notification
  */
-export type OffsetPaginationMeta = {
+export type NotificationUpdate = {
     /**
-     * Current offset
+     * Unique identifier
      */
-    offset: number;
+    id?: string;
     /**
-     * Items per page
+     * Entity version for optimistic locking
      */
-    limit: number;
+    version?: number;
     /**
-     * Number of items in current page
+     * Creation timestamp
      */
-    count: number;
+    createdAt?: Date;
     /**
-     * Total number of items
+     * User who created the entity
      */
-    totalCount: number;
+    createdBy?: string;
     /**
-     * Total number of pages
+     * Last update timestamp
      */
-    totalPages: number;
+    updatedAt?: Date;
     /**
-     * Current page number (1-based)
+     * User who last updated the entity
      */
-    currentPage: number;
+    updatedBy?: string;
     /**
-     * Whether there are more pages
+     * Recipient person ID
      */
-    hasNextPage: boolean;
+    recipient?: string;
     /**
-     * Whether there are previous pages
+     * Notification type
      */
-    hasPreviousPage: boolean;
+    type?: 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message';
+    /**
+     * Notification channel
+     */
+    channel?: 'email' | 'push' | 'in-app';
+    /**
+     * Notification title
+     */
+    title?: string;
+    /**
+     * Notification message
+     */
+    message?: string;
+    /**
+     * Scheduled send time
+     */
+    scheduledAt?: Date;
+    /**
+     * Related entity type
+     */
+    relatedEntityType?: string;
+    /**
+     * Related entity reference
+     */
+    relatedEntity?: string;
+    /**
+     * Notification status
+     */
+    status?: 'queued' | 'sent' | 'delivered' | 'read' | 'failed' | 'expired' | 'unread';
+    /**
+     * Sent timestamp
+     */
+    sentAt?: Date;
+    /**
+     * Delivered timestamp
+     */
+    deliveredAt?: Date;
+    /**
+     * Read timestamp
+     */
+    readAt?: Date;
+    /**
+     * Additional metadata
+     */
+    metadata?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Consent validation status
+     */
+    consentValidated?: boolean;
+};
+
+/**
+ * A term served by a person in an elected or appointed position
+ */
+export type OfficerTerm = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the position held
+     */
+    positionId: string;
+    /**
+     * ID of the officer
+     */
+    personId: string;
+    /**
+     * ID of the organization
+     */
+    organizationId: string;
+    /**
+     * First day of the term
+     */
+    startDate: Date;
+    /**
+     * Last day of the term
+     */
+    endDate: Date;
+    /**
+     * Current status of the term
+     */
+    status: 'upcoming' | 'active' | 'completed' | 'resigned' | 'removed';
+    /**
+     * ID of the person or body that appointed this officer
+     */
+    appointedBy?: string;
+    /**
+     * Timestamp of formal inauguration or swearing-in
+     */
+    inauguratedAt?: Date;
+};
+
+/**
+ * A term served by a person in an elected or appointed position
+ */
+export type OfficerTermUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the position held
+     */
+    positionId?: string;
+    /**
+     * ID of the officer
+     */
+    personId?: string;
+    /**
+     * ID of the organization
+     */
+    organizationId?: string;
+    /**
+     * First day of the term
+     */
+    startDate?: Date;
+    /**
+     * Last day of the term
+     */
+    endDate?: Date;
+    /**
+     * Current status of the term
+     */
+    status?: 'upcoming' | 'active' | 'completed' | 'resigned' | 'removed';
+    /**
+     * ID of the person or body that appointed this officer
+     */
+    appointedBy?: string;
+    /**
+     * Timestamp of formal inauguration or swearing-in
+     */
+    inauguratedAt?: Date;
 };
 
 /**
@@ -2565,6 +20386,297 @@ export type OnboardingResponse = {
      */
     metadata?: {
         [key: string]: unknown;
+    };
+};
+
+/**
+ * A political action committee contribution record
+ */
+export type PacContribution = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the contributor (person or organization)
+     */
+    contributorId: string;
+    /**
+     * Contribution amount
+     */
+    amount: bigint;
+    /**
+     * Date on which the contribution was made
+     */
+    contributionDate: Date;
+    /**
+     * Contributor's employer name (required for regulatory reporting)
+     */
+    employerName?: string;
+    /**
+     * Contributor's occupation (required for regulatory reporting)
+     */
+    occupation?: string;
+    /**
+     * Current regulatory status of this contribution record
+     */
+    status: 'received' | 'acknowledged' | 'reported';
+    /**
+     * Reporting period label for regulatory filing (e.g. 'Q1 2026')
+     */
+    reportingPeriod?: string;
+};
+
+/**
+ * Status of a PAC contribution record
+ */
+export type PacContributionStatus = 'received' | 'acknowledged' | 'reported';
+
+/**
+ * A political action committee contribution record
+ */
+export type PacContributionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the contributor (person or organization)
+     */
+    contributorId?: string;
+    /**
+     * Contribution amount
+     */
+    amount?: bigint;
+    /**
+     * Date on which the contribution was made
+     */
+    contributionDate?: Date;
+    /**
+     * Contributor's employer name (required for regulatory reporting)
+     */
+    employerName?: string;
+    /**
+     * Contributor's occupation (required for regulatory reporting)
+     */
+    occupation?: string;
+    /**
+     * Current regulatory status of this contribution record
+     */
+    status?: 'received' | 'acknowledged' | 'reported';
+    /**
+     * Reporting period label for regulatory filing (e.g. 'Q1 2026')
+     */
+    reportingPeriod?: string;
+};
+
+/**
+ * Status of a mentor-mentee pair
+ */
+export type PairStatus = 'proposed' | 'active' | 'completed' | 'dissolved';
+
+/**
+ * Status of a peer review panel
+ */
+export type PanelStatus = 'formed' | 'deliberating' | 'decided';
+
+/**
+ * Patient profile with medical and administrative information
+ */
+export type Patient = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Reference to person record ID or expanded person object (expandable)
+     */
+    person: Uuid | Person;
+    /**
+     * Primary care provider information
+     */
+    primaryProvider?: {
+        /**
+         * Provider name
+         */
+        name: string;
+        /**
+         * Provider specialty
+         */
+        specialty?: string;
+        /**
+         * Provider contact phone
+         */
+        phone?: string;
+        /**
+         * Provider fax number
+         */
+        fax?: string;
+    };
+    /**
+     * Primary pharmacy information
+     */
+    primaryPharmacy?: {
+        /**
+         * Pharmacy name
+         */
+        name: string;
+        /**
+         * Pharmacy address
+         */
+        address?: string;
+        /**
+         * Pharmacy contact phone
+         */
+        phone?: string;
+        /**
+         * Pharmacy fax number
+         */
+        fax?: string;
+    };
+};
+
+/**
+ * Patient profile with medical and administrative information
+ */
+export type PatientUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Reference to person record ID or expanded person object (expandable)
+     */
+    person?: Uuid | PersonUpdate;
+    /**
+     * Primary care provider information
+     */
+    primaryProvider?: {
+        /**
+         * Provider name
+         */
+        name?: string;
+        /**
+         * Provider specialty
+         */
+        specialty?: string;
+        /**
+         * Provider contact phone
+         */
+        phone?: string;
+        /**
+         * Provider fax number
+         */
+        fax?: string;
+    };
+    /**
+     * Primary pharmacy information
+     */
+    primaryPharmacy?: {
+        /**
+         * Pharmacy name
+         */
+        name?: string;
+        /**
+         * Pharmacy address
+         */
+        address?: string;
+        /**
+         * Pharmacy contact phone
+         */
+        phone?: string;
+        /**
+         * Pharmacy fax number
+         */
+        fax?: string;
     };
 };
 
@@ -2604,6 +20716,114 @@ export type PaymentResponse = {
  * Payment processing status
  */
 export type PaymentStatus = 'pending' | 'requires_capture' | 'processing' | 'succeeded' | 'failed' | 'canceled';
+
+/**
+ * A peer review panel convened to deliberate on an ethics complaint
+ */
+export type PeerReviewPanel = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the complaint this panel is reviewing
+     */
+    complaintId: string;
+    /**
+     * IDs of the panel members
+     */
+    panelMembers: Array<string>;
+    /**
+     * ID of the panel chair
+     */
+    chairId: string;
+    /**
+     * Scheduled date when the panel will convene
+     */
+    conveneDate?: Date;
+    /**
+     * Current status of the panel
+     */
+    status: 'formed' | 'deliberating' | 'decided';
+};
+
+/**
+ * A peer review panel convened to deliberate on an ethics complaint
+ */
+export type PeerReviewPanelUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the complaint this panel is reviewing
+     */
+    complaintId?: string;
+    /**
+     * IDs of the panel members
+     */
+    panelMembers?: Array<string>;
+    /**
+     * ID of the panel chair
+     */
+    chairId?: string;
+    /**
+     * Scheduled date when the panel will convene
+     */
+    conveneDate?: Date;
+    /**
+     * Current status of the panel
+     */
+    status?: 'formed' | 'deliberating' | 'decided';
+};
 
 /**
  * Person demographic and contact information
@@ -2733,6 +20953,22 @@ export type Person = {
      * Person's timezone
      */
     timezone?: string;
+    /**
+     * Professional license number (e.g. PRC license)
+     */
+    licenseNumber?: string;
+    /**
+     * Professional specialization or field of practice
+     */
+    specialization?: string;
+    /**
+     * PRC (Professional Regulation Commission) ID
+     */
+    prcId?: string;
+    /**
+     * Preferred language for communications
+     */
+    preferredLanguage?: string;
 };
 
 /**
@@ -2839,6 +21075,276 @@ export type PersonCreateRequest = {
      * Person's timezone
      */
     timezone?: string;
+    /**
+     * Professional license number (e.g. PRC license)
+     */
+    licenseNumber?: string;
+    /**
+     * Professional specialization or field of practice
+     */
+    specialization?: string;
+    /**
+     * PRC (Professional Regulation Commission) ID
+     */
+    prcId?: string;
+    /**
+     * Preferred language for communications
+     */
+    preferredLanguage?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type PersonListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Person>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A single subscription update for a bulk-update operation.
+ */
+export type PersonSubscriptionBulkUpdateItem = {
+    /**
+     * Topic ID to update.
+     */
+    topicId: string;
+    /**
+     * New enabled state.
+     */
+    enabled: boolean;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type PersonSubscriptionListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<AssociationCoreCommunicationPersonSubscription>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Person demographic and contact information
+ */
+export type PersonUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * First name
+     */
+    firstName?: string;
+    /**
+     * Last name
+     */
+    lastName?: string;
+    /**
+     * Middle name
+     */
+    middleName?: string;
+    /**
+     * Date of birth
+     */
+    dateOfBirth?: Date;
+    /**
+     * Gender
+     */
+    gender?: 'male' | 'female' | 'non-binary' | 'other' | 'prefer-not-to-say';
+    /**
+     * Primary address
+     */
+    primaryAddress?: {
+        /**
+         * Street address line 1
+         */
+        street1?: string;
+        /**
+         * Street address line 2
+         */
+        street2?: string;
+        /**
+         * City name
+         */
+        city?: string;
+        /**
+         * State or province
+         */
+        state?: string;
+        /**
+         * Postal or ZIP code
+         */
+        postalCode?: string;
+        /**
+         * Country code
+         */
+        country?: string;
+        /**
+         * Address coordinates
+         */
+        coordinates?: {
+            /**
+             * Latitude in decimal degrees
+             */
+            latitude?: number;
+            /**
+             * Longitude in decimal degrees
+             */
+            longitude?: number;
+            /**
+             * Accuracy in meters
+             */
+            accuracy?: number;
+        };
+    };
+    /**
+     * Contact information
+     */
+    contactInfo?: {
+        /**
+         * Primary email address
+         */
+        email?: string;
+        /**
+         * Primary phone number
+         */
+        phone?: string;
+    };
+    /**
+     * Avatar image
+     */
+    avatar?: {
+        /**
+         * Reference to stored file ID
+         */
+        file?: string;
+        /**
+         * Direct URL to file
+         */
+        url?: string;
+    };
+    /**
+     * Languages spoken by the person
+     */
+    languagesSpoken?: Array<LanguageCode>;
+    /**
+     * Person's timezone
+     */
+    timezone?: string;
+    /**
+     * Professional license number (e.g. PRC license)
+     */
+    licenseNumber?: string;
+    /**
+     * Professional specialization or field of practice
+     */
+    specialization?: string;
+    /**
+     * PRC (Professional Regulation Commission) ID
+     */
+    prcId?: string;
+    /**
+     * Preferred language for communications
+     */
+    preferredLanguage?: string;
 };
 
 /**
@@ -2945,12 +21451,1773 @@ export type PersonUpdateRequest = {
      * Person's timezone - can be null to clear
      */
     timezone?: string | null;
+    /**
+     * Professional license number - can be null to clear
+     */
+    licenseNumber?: string | null;
+    /**
+     * Professional specialization - can be null to clear
+     */
+    specialization?: string | null;
+    /**
+     * PRC ID - can be null to clear
+     */
+    prcId?: string | null;
+    /**
+     * Preferred language - can be null to clear
+     */
+    preferredLanguage?: string | null;
+};
+
+/**
+ * Pharmacy information for patient reference
+ */
+export type PharmacyInfo = {
+    /**
+     * Pharmacy name
+     */
+    name: string;
+    /**
+     * Pharmacy address
+     */
+    address?: string;
+    /**
+     * Pharmacy contact phone
+     */
+    phone?: string;
+    /**
+     * Pharmacy fax number
+     */
+    fax?: string;
+};
+
+/**
+ * Pharmacy information for patient reference
+ */
+export type PharmacyInfoUpdate = {
+    /**
+     * Pharmacy name
+     */
+    name?: string;
+    /**
+     * Pharmacy address
+     */
+    address?: string;
+    /**
+     * Pharmacy contact phone
+     */
+    phone?: string;
+    /**
+     * Pharmacy fax number
+     */
+    fax?: string;
 };
 
 /**
  * Phone number in E.164 international format
  */
 export type PhoneNumber = string;
+
+/**
+ * A pledge by a donor to make one or more future donations
+ */
+export type Pledge = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the pledging donor
+     */
+    donorId: string;
+    /**
+     * ID of the campaign this pledge supports
+     */
+    campaignId?: string;
+    /**
+     * Total committed pledge amount
+     */
+    totalAmount: bigint;
+    /**
+     * Amount of the pledge already paid
+     */
+    paidAmount: bigint;
+    /**
+     * Frequency of pledge installments
+     */
+    frequency: 'monthly' | 'quarterly' | 'annual' | 'oneTime';
+    /**
+     * Date on which the pledge period begins
+     */
+    startDate: Date;
+    /**
+     * Date on which the pledge period ends (null for open-ended pledges)
+     */
+    endDate?: Date;
+    /**
+     * Current status of the pledge
+     */
+    status: 'active' | 'completed' | 'defaulted' | 'cancelled';
+};
+
+/**
+ * Frequency of pledge installments
+ */
+export type PledgeFrequency = 'monthly' | 'quarterly' | 'annual' | 'oneTime';
+
+/**
+ * Lifecycle status of a pledge
+ */
+export type PledgeStatus = 'active' | 'completed' | 'defaulted' | 'cancelled';
+
+/**
+ * A pledge by a donor to make one or more future donations
+ */
+export type PledgeUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the pledging donor
+     */
+    donorId?: string;
+    /**
+     * ID of the campaign this pledge supports
+     */
+    campaignId?: string;
+    /**
+     * Total committed pledge amount
+     */
+    totalAmount?: bigint;
+    /**
+     * Amount of the pledge already paid
+     */
+    paidAmount?: bigint;
+    /**
+     * Frequency of pledge installments
+     */
+    frequency?: 'monthly' | 'quarterly' | 'annual' | 'oneTime';
+    /**
+     * Date on which the pledge period begins
+     */
+    startDate?: Date;
+    /**
+     * Date on which the pledge period ends (null for open-ended pledges)
+     */
+    endDate?: Date;
+    /**
+     * Current status of the pledge
+     */
+    status?: 'active' | 'completed' | 'defaulted' | 'cancelled';
+};
+
+/**
+ * An inbox item linking a portal user to a system or direct message
+ */
+export type PortalInbox = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this inbox item belongs to
+     */
+    tenantId: string;
+    /**
+     * Portal user who owns this inbox item
+     */
+    userId: string;
+    /**
+     * Referenced message identifier (from the notifications or messaging system)
+     */
+    messageId: string;
+    /**
+     * Whether the message has been read
+     */
+    read: boolean;
+    /**
+     * UTC timestamp when the message was marked as read
+     */
+    readAt?: Date;
+    /**
+     * Whether the message has been archived
+     */
+    archived: boolean;
+};
+
+/**
+ * An inbox item linking a portal user to a system or direct message
+ */
+export type PortalInboxUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this inbox item belongs to
+     */
+    tenantId?: string;
+    /**
+     * Portal user who owns this inbox item
+     */
+    userId?: string;
+    /**
+     * Referenced message identifier (from the notifications or messaging system)
+     */
+    messageId?: string;
+    /**
+     * Whether the message has been read
+     */
+    read?: boolean;
+    /**
+     * UTC timestamp when the message was marked as read
+     */
+    readAt?: Date;
+    /**
+     * Whether the message has been archived
+     */
+    archived?: boolean;
+};
+
+/**
+ * A member's self-service portal account
+ */
+export type PortalUser = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this portal user belongs to
+     */
+    tenantId: string;
+    /**
+     * Linked person record
+     */
+    personId: string;
+    /**
+     * Portal login email address
+     */
+    email: string;
+    /**
+     * Current portal account status
+     */
+    status: 'pending' | 'active' | 'locked' | 'deactivated';
+    /**
+     * UTC timestamp when the portal account was created
+     */
+    registeredAt: Date;
+    /**
+     * UTC timestamp of the most recent successful login
+     */
+    lastLoginAt?: Date;
+    /**
+     * Whether multi-factor authentication is enabled
+     */
+    mfaEnabled: boolean;
+    /**
+     * UTC timestamp when the member accepted the current terms of service
+     */
+    termsAcceptedAt?: Date;
+};
+
+/**
+ * Status of a member portal user account
+ */
+export type PortalUserStatus = 'pending' | 'active' | 'locked' | 'deactivated';
+
+/**
+ * A member's self-service portal account
+ */
+export type PortalUserUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this portal user belongs to
+     */
+    tenantId?: string;
+    /**
+     * Linked person record
+     */
+    personId?: string;
+    /**
+     * Portal login email address
+     */
+    email?: string;
+    /**
+     * Current portal account status
+     */
+    status?: 'pending' | 'active' | 'locked' | 'deactivated';
+    /**
+     * UTC timestamp when the portal account was created
+     */
+    registeredAt?: Date;
+    /**
+     * UTC timestamp of the most recent successful login
+     */
+    lastLoginAt?: Date;
+    /**
+     * Whether multi-factor authentication is enabled
+     */
+    mfaEnabled?: boolean;
+    /**
+     * UTC timestamp when the member accepted the current terms of service
+     */
+    termsAcceptedAt?: Date;
+};
+
+/**
+ * An elected or appointed position within the association hierarchy
+ */
+export type Position = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Official title of the position
+     */
+    title: string;
+    /**
+     * ID of the organization this position belongs to
+     */
+    organizationId: string;
+    /**
+     * Organizational level of this position
+     */
+    level: 'national' | 'regional' | 'chapter';
+    /**
+     * Duration of one term in months
+     */
+    termLengthMonths: number;
+    /**
+     * Maximum number of consecutive terms allowed (null = unlimited)
+     */
+    maxConsecutiveTerms?: number;
+    /**
+     * Description of the position's purpose
+     */
+    description?: string;
+    /**
+     * List of responsibilities associated with this position
+     */
+    responsibilities?: Array<string>;
+    /**
+     * Lifecycle status of the position
+     */
+    status: 'active' | 'vacant' | 'retired';
+};
+
+/**
+ * Organizational level at which a position exists
+ */
+export type PositionLevel = 'national' | 'regional' | 'chapter';
+
+/**
+ * Lifecycle status of a position
+ */
+export type PositionStatus = 'active' | 'vacant' | 'retired';
+
+/**
+ * An elected or appointed position within the association hierarchy
+ */
+export type PositionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Official title of the position
+     */
+    title?: string;
+    /**
+     * ID of the organization this position belongs to
+     */
+    organizationId?: string;
+    /**
+     * Organizational level of this position
+     */
+    level?: 'national' | 'regional' | 'chapter';
+    /**
+     * Duration of one term in months
+     */
+    termLengthMonths?: number;
+    /**
+     * Maximum number of consecutive terms allowed (null = unlimited)
+     */
+    maxConsecutiveTerms?: number;
+    /**
+     * Description of the position's purpose
+     */
+    description?: string;
+    /**
+     * List of responsibilities associated with this position
+     */
+    responsibilities?: Array<string>;
+    /**
+     * Lifecycle status of the position
+     */
+    status?: 'active' | 'vacant' | 'retired';
+};
+
+/**
+ * A professional license held by a member and tracked by the association
+ */
+export type ProfessionalLicense = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the person holding the license
+     */
+    personId: string;
+    /**
+     * Category or type of professional license (e.g. RN, CPA, PE)
+     */
+    licenseType: string;
+    /**
+     * Official license number assigned by the issuing authority
+     */
+    licenseNumber: string;
+    /**
+     * Name of the authority that issued the license
+     */
+    issuingAuthority: string;
+    /**
+     * State, province, or country jurisdiction under which the license is valid
+     */
+    jurisdiction: string;
+    /**
+     * Date on which the license was originally issued
+     */
+    issuedDate: Date;
+    /**
+     * Date on which the license expires and must be renewed
+     */
+    expirationDate: Date;
+    /**
+     * Current lifecycle status of the license
+     */
+    status: 'active' | 'expired' | 'suspended' | 'revoked' | 'pending';
+    /**
+     * Reference to the stored license document file
+     */
+    documentRef?: string;
+    /**
+     * Timestamp when the license details were last verified by association staff
+     */
+    verifiedAt?: Date;
+    /**
+     * ID of the staff member who last verified the license
+     */
+    verifiedBy?: string;
+};
+
+/**
+ * Request to create a professional license record
+ */
+export type ProfessionalLicenseCreateRequest = {
+    personId: string;
+    licenseType: string;
+    licenseNumber: string;
+    issuingAuthority: string;
+    jurisdiction: string;
+    issuedDate: Date;
+    expirationDate: Date;
+    status: LicenseStatus;
+    documentRef?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type ProfessionalLicenseListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<ProfessionalLicense>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A professional license held by a member and tracked by the association
+ */
+export type ProfessionalLicenseUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the person holding the license
+     */
+    personId?: string;
+    /**
+     * Category or type of professional license (e.g. RN, CPA, PE)
+     */
+    licenseType?: string;
+    /**
+     * Official license number assigned by the issuing authority
+     */
+    licenseNumber?: string;
+    /**
+     * Name of the authority that issued the license
+     */
+    issuingAuthority?: string;
+    /**
+     * State, province, or country jurisdiction under which the license is valid
+     */
+    jurisdiction?: string;
+    /**
+     * Date on which the license was originally issued
+     */
+    issuedDate?: Date;
+    /**
+     * Date on which the license expires and must be renewed
+     */
+    expirationDate?: Date;
+    /**
+     * Current lifecycle status of the license
+     */
+    status?: 'active' | 'expired' | 'suspended' | 'revoked' | 'pending';
+    /**
+     * Reference to the stored license document file
+     */
+    documentRef?: string;
+    /**
+     * Timestamp when the license details were last verified by association staff
+     */
+    verifiedAt?: Date;
+    /**
+     * ID of the staff member who last verified the license
+     */
+    verifiedBy?: string;
+};
+
+/**
+ * Request to update a professional license record
+ */
+export type ProfessionalLicenseUpdateRequest = {
+    licenseType?: string;
+    licenseNumber?: string;
+    issuingAuthority?: string;
+    jurisdiction?: string;
+    issuedDate?: Date;
+    expirationDate?: Date;
+    status?: LicenseStatus;
+    documentRef?: string | null;
+};
+
+/**
+ * Status of a grant progress report
+ */
+export type ProgressReportStatus = 'submitted' | 'reviewed' | 'accepted' | 'revisionsRequested';
+
+/**
+ * A prospective member being tracked in the CRM
+ */
+export type Prospect = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * Full name of the prospect
+     */
+    name: string;
+    /**
+     * Prospect's email address
+     */
+    email?: string;
+    /**
+     * Prospect's phone number
+     */
+    phone?: string;
+    /**
+     * Channel through which the prospect was acquired
+     */
+    source: 'referral' | 'website' | 'event' | 'marketing' | 'purchased';
+    /**
+     * Current engagement status of the prospect
+     */
+    status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+    /**
+     * ID of the staff member assigned to this prospect
+     */
+    assignedTo?: string;
+    /**
+     * Internal notes about the prospect
+     */
+    notes?: string;
+    /**
+     * ID of the membership record created when this prospect converted
+     */
+    convertedToMembershipId?: string;
+};
+
+/**
+ * A CRM activity recorded against a prospect
+ */
+export type ProspectActivity = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the prospect this activity is associated with
+     */
+    prospectId: string;
+    /**
+     * Type of activity
+     */
+    activityType: 'call' | 'email' | 'meeting' | 'event' | 'note';
+    /**
+     * Description of the activity and its outcome
+     */
+    description: string;
+    /**
+     * ID of the staff member who performed the activity
+     */
+    performedBy: string;
+    /**
+     * Timestamp when the activity took place
+     */
+    performedAt: Date;
+};
+
+/**
+ * Type of CRM activity recorded against a prospect
+ */
+export type ProspectActivityType = 'call' | 'email' | 'meeting' | 'event' | 'note';
+
+/**
+ * A CRM activity recorded against a prospect
+ */
+export type ProspectActivityUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the prospect this activity is associated with
+     */
+    prospectId?: string;
+    /**
+     * Type of activity
+     */
+    activityType?: 'call' | 'email' | 'meeting' | 'event' | 'note';
+    /**
+     * Description of the activity and its outcome
+     */
+    description?: string;
+    /**
+     * ID of the staff member who performed the activity
+     */
+    performedBy?: string;
+    /**
+     * Timestamp when the activity took place
+     */
+    performedAt?: Date;
+};
+
+/**
+ * Source through which a prospect was acquired
+ */
+export type ProspectSource = 'referral' | 'website' | 'event' | 'marketing' | 'purchased';
+
+/**
+ * Lifecycle status of a prospect
+ */
+export type ProspectStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+
+/**
+ * A prospective member being tracked in the CRM
+ */
+export type ProspectUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * Full name of the prospect
+     */
+    name?: string;
+    /**
+     * Prospect's email address
+     */
+    email?: string;
+    /**
+     * Prospect's phone number
+     */
+    phone?: string;
+    /**
+     * Channel through which the prospect was acquired
+     */
+    source?: 'referral' | 'website' | 'event' | 'marketing' | 'purchased';
+    /**
+     * Current engagement status of the prospect
+     */
+    status?: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+    /**
+     * ID of the staff member assigned to this prospect
+     */
+    assignedTo?: string;
+    /**
+     * Internal notes about the prospect
+     */
+    notes?: string;
+    /**
+     * ID of the membership record created when this prospect converted
+     */
+    convertedToMembershipId?: string;
+};
+
+/**
+ * Healthcare provider profile with professional credentials and practice information
+ */
+export type Provider = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Reference to person record ID or expanded person object (expandable)
+     */
+    person: Uuid | Person;
+    /**
+     * Provider type
+     */
+    providerType: 'pharmacist' | 'other';
+    /**
+     * Years of experience
+     */
+    yearsOfExperience?: number;
+    /**
+     * Professional biography
+     */
+    biography?: string;
+    /**
+     * Minor ailments specialties
+     */
+    minorAilmentsSpecialties?: Array<string>;
+    /**
+     * Minor ailment practice locations
+     */
+    minorAilmentsPracticeLocations?: Array<string>;
+};
+
+/**
+ * Provider information for patient reference
+ */
+export type ProviderInfo = {
+    /**
+     * Provider name
+     */
+    name: string;
+    /**
+     * Provider specialty
+     */
+    specialty?: string;
+    /**
+     * Provider contact phone
+     */
+    phone?: string;
+    /**
+     * Provider fax number
+     */
+    fax?: string;
+};
+
+/**
+ * Provider information for patient reference
+ */
+export type ProviderInfoUpdate = {
+    /**
+     * Provider name
+     */
+    name?: string;
+    /**
+     * Provider specialty
+     */
+    specialty?: string;
+    /**
+     * Provider contact phone
+     */
+    phone?: string;
+    /**
+     * Provider fax number
+     */
+    fax?: string;
+};
+
+/**
+ * Type of healthcare provider
+ */
+export type ProviderType = 'pharmacist' | 'other';
+
+/**
+ * Healthcare provider profile with professional credentials and practice information
+ */
+export type ProviderUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Reference to person record ID or expanded person object (expandable)
+     */
+    person?: Uuid | PersonUpdate;
+    /**
+     * Provider type
+     */
+    providerType?: 'pharmacist' | 'other';
+    /**
+     * Years of experience
+     */
+    yearsOfExperience?: number;
+    /**
+     * Professional biography
+     */
+    biography?: string;
+    /**
+     * Minor ailments specialties
+     */
+    minorAilmentsSpecialties?: Array<string>;
+    /**
+     * Minor ailment practice locations
+     */
+    minorAilmentsPracticeLocations?: Array<string>;
+};
+
+/**
+ * A public directory profile view with reduced fields
+ */
+export type PublicDirectoryProfile = {
+    /**
+     * Person ID
+     */
+    personId: string;
+    /**
+     * Display name
+     */
+    displayName: string;
+    /**
+     * Professional title
+     */
+    title?: string;
+    /**
+     * Organization
+     */
+    organization?: string;
+    /**
+     * Specialty
+     */
+    specialty?: string;
+    /**
+     * Location label
+     */
+    location?: string;
+    /**
+     * Photo URL
+     */
+    photoUrl?: string;
+    /**
+     * Short biography
+     */
+    bio?: string;
+    /**
+     * Contact email
+     */
+    contactEmail?: string;
+    /**
+     * Website URL
+     */
+    website?: string;
+    /**
+     * Social links
+     */
+    socialLinks?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Whether the profile has been verified
+     */
+    verified: boolean;
+};
+
+/**
+ * An association publication (journal, newsletter, magazine, etc.)
+ */
+export type Publication = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this publication belongs to
+     */
+    tenantId: string;
+    /**
+     * Publication display title
+     */
+    title: string;
+    /**
+     * Publication type category
+     */
+    type: 'journal' | 'newsletter' | 'magazine' | 'white_paper' | 'report';
+    /**
+     * Brief description of scope and purpose
+     */
+    description?: string;
+    /**
+     * Publishing frequency
+     */
+    frequency?: 'monthly' | 'quarterly' | 'annual';
+    /**
+     * Person responsible for editorial oversight
+     */
+    editorId?: string;
+    /**
+     * Current lifecycle status
+     */
+    status: 'active' | 'suspended' | 'retired';
+};
+
+/**
+ * Publication frequency
+ */
+export type PublicationFrequency = 'monthly' | 'quarterly' | 'annual';
+
+/**
+ * A single issue within a publication
+ */
+export type PublicationIssue = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this issue belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent publication
+     */
+    publicationId: string;
+    /**
+     * Issue number (e.g., 'Vol. 12 No. 3', '2024-Q1')
+     */
+    issueNumber: string;
+    /**
+     * Issue display title
+     */
+    title: string;
+    /**
+     * Planned or actual publication date
+     */
+    publishDate: Date;
+    /**
+     * Current issue status
+     */
+    status: 'draft' | 'in_review' | 'published' | 'retracted';
+    /**
+     * URL of the cover image
+     */
+    coverImageUrl?: string;
+    /**
+     * Formatted table of contents text
+     */
+    tableOfContents?: string;
+};
+
+/**
+ * Lifecycle status of a publication issue
+ */
+export type PublicationIssueStatus = 'draft' | 'in_review' | 'published' | 'retracted';
+
+/**
+ * A single issue within a publication
+ */
+export type PublicationIssueUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this issue belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent publication
+     */
+    publicationId?: string;
+    /**
+     * Issue number (e.g., 'Vol. 12 No. 3', '2024-Q1')
+     */
+    issueNumber?: string;
+    /**
+     * Issue display title
+     */
+    title?: string;
+    /**
+     * Planned or actual publication date
+     */
+    publishDate?: Date;
+    /**
+     * Current issue status
+     */
+    status?: 'draft' | 'in_review' | 'published' | 'retracted';
+    /**
+     * URL of the cover image
+     */
+    coverImageUrl?: string;
+    /**
+     * Formatted table of contents text
+     */
+    tableOfContents?: string;
+};
+
+/**
+ * Lifecycle status of a publication
+ */
+export type PublicationStatus = 'active' | 'suspended' | 'retired';
+
+/**
+ * Publication type category
+ */
+export type PublicationType = 'journal' | 'newsletter' | 'magazine' | 'white_paper' | 'report';
+
+/**
+ * An association publication (journal, newsletter, magazine, etc.)
+ */
+export type PublicationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this publication belongs to
+     */
+    tenantId?: string;
+    /**
+     * Publication display title
+     */
+    title?: string;
+    /**
+     * Publication type category
+     */
+    type?: 'journal' | 'newsletter' | 'magazine' | 'white_paper' | 'report';
+    /**
+     * Brief description of scope and purpose
+     */
+    description?: string;
+    /**
+     * Publishing frequency
+     */
+    frequency?: 'monthly' | 'quarterly' | 'annual';
+    /**
+     * Person responsible for editorial oversight
+     */
+    editorId?: string;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'active' | 'suspended' | 'retired';
+};
+
+/**
+ * A quiz attempt record for a specific module within a course
+ */
+export type QuizAttempt = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this attempt belongs to
+     */
+    tenantId: string;
+    /**
+     * Course containing the quiz module
+     */
+    courseId: string;
+    /**
+     * Zero-based index of the module within the course
+     */
+    moduleIndex: number;
+    /**
+     * Person who attempted the quiz
+     */
+    personId: string;
+    /**
+     * Sequential attempt number for this person on this module (1 = first)
+     */
+    attemptNumber: number;
+    /**
+     * Raw score achieved (e.g., 85.5 for 85.5%)
+     */
+    score: number;
+    /**
+     * Minimum score required to pass
+     */
+    passingScore: number;
+    /**
+     * Whether the attempt score met or exceeded the passing threshold
+     */
+    passed: boolean;
+    /**
+     * UTC timestamp when the attempt was submitted
+     */
+    attemptedAt: Date;
+    /**
+     * Map of question identifiers to submitted answer values
+     */
+    answers?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Request body for submitting a quiz attempt
+ */
+export type QuizAttemptCreateRequest = {
+    /**
+     * Course containing the module
+     */
+    courseId: string;
+    /**
+     * Zero-based module index
+     */
+    moduleIndex: number;
+    /**
+     * Person submitting the attempt
+     */
+    personId: string;
+    /**
+     * Map of question IDs to submitted answers
+     */
+    answers: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type QuizAttemptListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<QuizAttempt>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A quiz attempt record for a specific module within a course
+ */
+export type QuizAttemptUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this attempt belongs to
+     */
+    tenantId?: string;
+    /**
+     * Course containing the quiz module
+     */
+    courseId?: string;
+    /**
+     * Zero-based index of the module within the course
+     */
+    moduleIndex?: number;
+    /**
+     * Person who attempted the quiz
+     */
+    personId?: string;
+    /**
+     * Sequential attempt number for this person on this module (1 = first)
+     */
+    attemptNumber?: number;
+    /**
+     * Raw score achieved (e.g., 85.5 for 85.5%)
+     */
+    score?: number;
+    /**
+     * Minimum score required to pass
+     */
+    passingScore?: number;
+    /**
+     * Whether the attempt score met or exceeded the passing threshold
+     */
+    passed?: boolean;
+    /**
+     * UTC timestamp when the attempt was submitted
+     */
+    attemptedAt?: Date;
+    /**
+     * Map of question identifiers to submitted answer values
+     */
+    answers?: {
+        [key: string]: unknown;
+    };
+};
 
 /**
  * Rate limit exceeded error
@@ -3051,6 +23318,40 @@ export type RecurrencePattern = {
 };
 
 /**
+ * Recurrence pattern for schedule exceptions
+ */
+export type RecurrencePatternUpdate = {
+    /**
+     * Recurrence type
+     */
+    type?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    /**
+     * Interval between recurrences
+     */
+    interval?: number;
+    /**
+     * Days of week for weekly recurrence (0=Sunday, 6=Saturday)
+     */
+    daysOfWeek?: Array<number>;
+    /**
+     * Day of month for monthly recurrence
+     */
+    dayOfMonth?: number;
+    /**
+     * Month of year for yearly recurrence (1-12)
+     */
+    monthOfYear?: number;
+    /**
+     * End date for recurrence
+     */
+    endDate?: Date;
+    /**
+     * Maximum number of occurrences
+     */
+    maxOccurrences?: number;
+};
+
+/**
  * Recurrence type for schedule exceptions
  */
 export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -3089,6 +23390,329 @@ export type RefundResponse = {
     metadata?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * Status of an individual event registration
+ */
+export type RegistrationStatus = 'registered' | 'waitlisted' | 'confirmed' | 'checked_in' | 'cancelled' | 'no_show' | 'refunded';
+
+/**
+ * Status of a license renewal alert
+ */
+export type RenewalAlertStatus = 'pending' | 'sent' | 'acknowledged' | 'dismissed';
+
+/**
+ * A single renewal period within a membership lifecycle
+ */
+export type RenewalCycle = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the membership this cycle belongs to
+     */
+    membershipId: string;
+    /**
+     * Start of the renewal period
+     */
+    periodStart: Date;
+    /**
+     * End of the renewal period
+     */
+    periodEnd: Date;
+    /**
+     * ID of the dues invoice generated for this cycle
+     */
+    invoiceId?: string;
+    /**
+     * Date on which dues were paid
+     */
+    paidDate?: Date;
+    /**
+     * Status of this renewal cycle
+     */
+    status: 'pending' | 'invoiced' | 'paid' | 'overdue' | 'lapsed';
+};
+
+/**
+ * A single renewal period within a membership lifecycle
+ */
+export type RenewalCycleUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the membership this cycle belongs to
+     */
+    membershipId?: string;
+    /**
+     * Start of the renewal period
+     */
+    periodStart?: Date;
+    /**
+     * End of the renewal period
+     */
+    periodEnd?: Date;
+    /**
+     * ID of the dues invoice generated for this cycle
+     */
+    invoiceId?: string;
+    /**
+     * Date on which dues were paid
+     */
+    paidDate?: Date;
+    /**
+     * Status of this renewal cycle
+     */
+    status?: 'pending' | 'invoiced' | 'paid' | 'overdue' | 'lapsed';
+};
+
+/**
+ * Status of a renewal cycle
+ */
+export type RenewalStatus = 'pending' | 'invoiced' | 'paid' | 'overdue' | 'lapsed';
+
+/**
+ * Status of a board resolution
+ */
+export type ResolutionStatus = 'proposed' | 'discussed' | 'adopted' | 'rejected' | 'tabled';
+
+/**
+ * A knowledge resource in the association library
+ */
+export type Resource = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this resource belongs to
+     */
+    tenantId: string;
+    /**
+     * Resource title
+     */
+    title: string;
+    /**
+     * Resource type category
+     */
+    type: 'article' | 'video' | 'template' | 'toolkit' | 'guideline' | 'webinar' | 'podcast';
+    /**
+     * Short description or summary
+     */
+    description?: string;
+    /**
+     * Inline content body (for articles, guidelines)
+     */
+    content?: string;
+    /**
+     * Storage system reference for downloadable files
+     */
+    fileRef?: string;
+    /**
+     * Classification category
+     */
+    category: string;
+    /**
+     * Search tags
+     */
+    tags?: Array<string>;
+    /**
+     * Author name or identifier
+     */
+    author?: string;
+    /**
+     * UTC timestamp when the resource was published
+     */
+    publishedAt?: Date;
+    /**
+     * Access control level
+     */
+    accessLevel: 'public' | 'member_only' | 'premium';
+    /**
+     * Total view count
+     */
+    viewCount: number;
+    /**
+     * Total download count
+     */
+    downloadCount: number;
+    /**
+     * Current resource status
+     */
+    status: 'draft' | 'published' | 'archived';
+};
+
+/**
+ * Access control level for a resource
+ */
+export type ResourceAccessLevel = 'public' | 'member_only' | 'premium';
+
+/**
+ * Lifecycle status of a knowledge resource
+ */
+export type ResourceStatus = 'draft' | 'published' | 'archived';
+
+/**
+ * Resource type category
+ */
+export type ResourceType = 'article' | 'video' | 'template' | 'toolkit' | 'guideline' | 'webinar' | 'podcast';
+
+/**
+ * A knowledge resource in the association library
+ */
+export type ResourceUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this resource belongs to
+     */
+    tenantId?: string;
+    /**
+     * Resource title
+     */
+    title?: string;
+    /**
+     * Resource type category
+     */
+    type?: 'article' | 'video' | 'template' | 'toolkit' | 'guideline' | 'webinar' | 'podcast';
+    /**
+     * Short description or summary
+     */
+    description?: string;
+    /**
+     * Inline content body (for articles, guidelines)
+     */
+    content?: string;
+    /**
+     * Storage system reference for downloadable files
+     */
+    fileRef?: string;
+    /**
+     * Classification category
+     */
+    category?: string;
+    /**
+     * Search tags
+     */
+    tags?: Array<string>;
+    /**
+     * Author name or identifier
+     */
+    author?: string;
+    /**
+     * UTC timestamp when the resource was published
+     */
+    publishedAt?: Date;
+    /**
+     * Access control level
+     */
+    accessLevel?: 'public' | 'member_only' | 'premium';
+    /**
+     * Total view count
+     */
+    viewCount?: number;
+    /**
+     * Total download count
+     */
+    downloadCount?: number;
+    /**
+     * Current resource status
+     */
+    status?: 'draft' | 'published' | 'archived';
 };
 
 /**
@@ -3143,6 +23767,582 @@ export type Review = {
      * Optional comment/feedback
      */
     comment?: string;
+};
+
+/**
+ * Decision outcome of a human review gate
+ */
+export type ReviewDecision = 'approve' | 'modify' | 'reject';
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type ReviewListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Review>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Review with NPS score and optional feedback
+ */
+export type ReviewUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Flexible context reference (booking, session, order, etc.)
+     */
+    context?: string;
+    /**
+     * Person who submits the review
+     */
+    reviewer?: string;
+    /**
+     * Application-defined review type (e.g., 'host', 'platform', 'product')
+     */
+    reviewType?: string;
+    /**
+     * Optional person being reviewed (null for non-person reviews like 'platform')
+     */
+    reviewedEntity?: string;
+    /**
+     * NPS score (0-10)
+     */
+    npsScore?: number;
+    /**
+     * Optional comment/feedback
+     */
+    comment?: string;
+};
+
+/**
+ * Request to revoke a digital credential
+ */
+export type RevokeCredentialRequest = {
+    /**
+     * Reason for revoking the credential
+     */
+    reason: string;
+};
+
+/**
+ * Royalty split configuration defining how dues revenue is divided between the national organization and a chapter
+ */
+export type RoyaltySplit = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the membership this split applies to
+     */
+    membershipId: string;
+    /**
+     * ID of the national organization receiving its share
+     */
+    nationalOrgId: string;
+    /**
+     * ID of the chapter receiving its share
+     */
+    chapterId: string;
+    /**
+     * Percentage of dues revenue retained by the national organization (0–100)
+     */
+    splitPercentNational: number;
+    /**
+     * Percentage of dues revenue distributed to the chapter (0–100); must complement splitPercentNational to total 100
+     */
+    splitPercentChapter: number;
+    /**
+     * Date from which this split configuration takes effect
+     */
+    effectiveDate: Date;
+};
+
+/**
+ * Request to create or update a royalty split
+ */
+export type RoyaltySplitCreateRequest = {
+    membershipId: string;
+    nationalOrgId: string;
+    chapterId: string;
+    splitPercentNational: number;
+    splitPercentChapter: number;
+    effectiveDate: Date;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type RoyaltySplitListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<RoyaltySplit>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Royalty split configuration defining how dues revenue is divided between the national organization and a chapter
+ */
+export type RoyaltySplitUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the membership this split applies to
+     */
+    membershipId?: string;
+    /**
+     * ID of the national organization receiving its share
+     */
+    nationalOrgId?: string;
+    /**
+     * ID of the chapter receiving its share
+     */
+    chapterId?: string;
+    /**
+     * Percentage of dues revenue retained by the national organization (0–100)
+     */
+    splitPercentNational?: number;
+    /**
+     * Percentage of dues revenue distributed to the chapter (0–100); must complement splitPercentNational to total 100
+     */
+    splitPercentChapter?: number;
+    /**
+     * Date from which this split configuration takes effect
+     */
+    effectiveDate?: Date;
+};
+
+/**
+ * Request to update a royalty split
+ */
+export type RoyaltySplitUpdateRequest = {
+    splitPercentNational?: number;
+    splitPercentChapter?: number;
+    effectiveDate?: Date;
+};
+
+/**
+ * Conjunction operator for combining segment rules
+ */
+export type RuleConjunction = 'and' | 'or';
+
+/**
+ * Request to execute a dunning run for an organization
+ */
+export type RunDunningRequest = {
+    /**
+     * ID of the organization for which to run dunning
+     */
+    organizationId: string;
+    /**
+     * Dry-run mode — evaluate which members would be contacted but do not send
+     */
+    dryRun?: boolean;
+};
+
+/**
+ * Member role within a SIG
+ */
+export type SigMemberRole = 'member' | 'chair' | 'vice_chair' | 'secretary';
+
+/**
+ * A person's membership record within a SIG
+ */
+export type SigMembership = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this membership belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent SIG
+     */
+    sigId: string;
+    /**
+     * Member person identifier
+     */
+    personId: string;
+    /**
+     * UTC timestamp when the person joined the SIG
+     */
+    joinedAt: Date;
+    /**
+     * Member's role within the SIG
+     */
+    role: 'member' | 'chair' | 'vice_chair' | 'secretary';
+    /**
+     * Current membership status
+     */
+    status: 'active' | 'resigned' | 'removed';
+};
+
+/**
+ * Status of a SIG membership
+ */
+export type SigMembershipStatus = 'active' | 'resigned' | 'removed';
+
+/**
+ * A person's membership record within a SIG
+ */
+export type SigMembershipUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this membership belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent SIG
+     */
+    sigId?: string;
+    /**
+     * Member person identifier
+     */
+    personId?: string;
+    /**
+     * UTC timestamp when the person joined the SIG
+     */
+    joinedAt?: Date;
+    /**
+     * Member's role within the SIG
+     */
+    role?: 'member' | 'chair' | 'vice_chair' | 'secretary';
+    /**
+     * Current membership status
+     */
+    status?: 'active' | 'resigned' | 'removed';
+};
+
+/**
+ * Status of a Special Interest Group
+ */
+export type SigStatus = 'proposed' | 'active' | 'dormant' | 'dissolved';
+
+/**
+ * Free-text query string. Null bytes ( ) are not permitted.
+ */
+export type SafeQueryString = string;
+
+/**
+ * A public or internal record of a sanction imposed on a member
+ */
+export type SanctionRecord = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the sanctioned member
+     */
+    personId: string;
+    /**
+     * ID of the disciplinary action this sanction derives from
+     */
+    actionId: string;
+    /**
+     * Type label for the sanction as it appears in the public register
+     */
+    sanctionType: string;
+    /**
+     * Whether this sanction is visible in the public sanctions register
+     */
+    publiclyVisible: boolean;
+    /**
+     * Date on which the sanction begins
+     */
+    startDate: Date;
+    /**
+     * Date on which the sanction ends (null for permanent sanctions)
+     */
+    endDate?: Date;
+    /**
+     * Current status of the sanction record
+     */
+    status: 'active' | 'expired' | 'overturned';
+};
+
+/**
+ * Status of a sanction record
+ */
+export type SanctionRecordStatus = 'active' | 'expired' | 'overturned';
+
+/**
+ * A public or internal record of a sanction imposed on a member
+ */
+export type SanctionRecordUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the sanctioned member
+     */
+    personId?: string;
+    /**
+     * ID of the disciplinary action this sanction derives from
+     */
+    actionId?: string;
+    /**
+     * Type label for the sanction as it appears in the public register
+     */
+    sanctionType?: string;
+    /**
+     * Whether this sanction is visible in the public sanctions register
+     */
+    publiclyVisible?: boolean;
+    /**
+     * Date on which the sanction begins
+     */
+    startDate?: Date;
+    /**
+     * Date on which the sanction ends (null for permanent sanctions)
+     */
+    endDate?: Date;
+    /**
+     * Current status of the sanction record
+     */
+    status?: 'active' | 'expired' | 'overturned';
 };
 
 /**
@@ -3300,6 +24500,353 @@ export type ScheduleExceptionCreateRequest = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type ScheduleExceptionListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<ScheduleException>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Event-specific blocked time periods
+ */
+export type ScheduleExceptionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Booking event
+     */
+    event?: string;
+    /**
+     * Exception owner (inherited from event)
+     */
+    owner?: string;
+    /**
+     * Optional context (inherited from event)
+     */
+    context?: string;
+    /**
+     * Exception timezone (can differ from event timezone)
+     */
+    timezone?: string;
+    /**
+     * Block start date/time (UTC)
+     */
+    startDatetime?: Date;
+    /**
+     * Block end date/time (UTC)
+     */
+    endDatetime?: Date;
+    /**
+     * Reason for blocking
+     */
+    reason?: string;
+    /**
+     * Whether this exception repeats
+     */
+    recurring?: boolean;
+    /**
+     * Recurrence pattern if recurring
+     */
+    recurrencePattern?: {
+        /**
+         * Recurrence type
+         */
+        type?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+        /**
+         * Interval between recurrences
+         */
+        interval?: number;
+        /**
+         * Days of week for weekly recurrence (0=Sunday, 6=Saturday)
+         */
+        daysOfWeek?: Array<number>;
+        /**
+         * Day of month for monthly recurrence
+         */
+        dayOfMonth?: number;
+        /**
+         * Month of year for yearly recurrence (1-12)
+         */
+        monthOfYear?: number;
+        /**
+         * End date for recurrence
+         */
+        endDate?: Date;
+        /**
+         * Maximum number of occurrences
+         */
+        maxOccurrences?: number;
+    };
+};
+
+/**
+ * Allocation of one institutional membership seat to an individual
+ */
+export type SeatAllocation = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the institutional membership from which this seat is drawn
+     */
+    institutionalMembershipId: string;
+    /**
+     * ID of the person receiving the seat
+     */
+    personId: string;
+    /**
+     * ID of the staff member who performed the allocation
+     */
+    allocatedBy: string;
+    /**
+     * Timestamp when the seat was allocated
+     */
+    allocatedAt: Date;
+    /**
+     * Timestamp when the seat was revoked, if applicable
+     */
+    revokedAt?: Date;
+    /**
+     * Current status of this seat allocation
+     */
+    status: 'active' | 'revoked';
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type SeatAllocationListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<SeatAllocation>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Request to allocate a seat within an institutional membership
+ */
+export type SeatAllocationRequest = {
+    /**
+     * ID of the person to receive the seat
+     */
+    personId: string;
+};
+
+/**
+ * Allocation of one institutional membership seat to an individual
+ */
+export type SeatAllocationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the institutional membership from which this seat is drawn
+     */
+    institutionalMembershipId?: string;
+    /**
+     * ID of the person receiving the seat
+     */
+    personId?: string;
+    /**
+     * ID of the staff member who performed the allocation
+     */
+    allocatedBy?: string;
+    /**
+     * Timestamp when the seat was allocated
+     */
+    allocatedAt?: Date;
+    /**
+     * Timestamp when the seat was revoked, if applicable
+     */
+    revokedAt?: Date;
+    /**
+     * Current status of this seat allocation
+     */
+    status?: 'active' | 'revoked';
+};
+
+/**
+ * Status of an individual seat within an institutional membership
+ */
+export type SeatStatus = 'active' | 'revoked';
+
+/**
+ * A single rule within an audience segment definition
+ */
+export type SegmentRule = {
+    /**
+     * Member data field to evaluate (e.g., 'membershipType', 'state')
+     */
+    field: string;
+    /**
+     * Comparison operator (e.g., 'eq', 'neq', 'gt', 'contains', 'in')
+     */
+    operator: string;
+    /**
+     * Value to compare against (serialised as string)
+     */
+    value: string;
+    /**
+     * Logical conjunction to combine this rule with the previous one
+     */
+    conjunction: 'and' | 'or';
+};
+
+/**
+ * Delivery status for a campaign send record
+ */
+export type SendDeliveryStatus = 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'unsubscribed';
+
+/**
  * Send text message request
  */
 export type SendTextMessageRequest = {
@@ -3314,9 +24861,452 @@ export type SendTextMessageRequest = {
 };
 
 /**
+ * Channel used for a campaign sequence step
+ */
+export type SequenceChannel = 'email' | 'sms';
+
+/**
+ * A scheduled session within a conference program
+ */
+export type Session = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this session belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent conference
+     */
+    conferenceId: string;
+    /**
+     * Program track name this session belongs to
+     */
+    track?: string;
+    /**
+     * Session display title
+     */
+    title: string;
+    /**
+     * Session abstract or description
+     */
+    description?: string;
+    /**
+     * List of speaker identifiers presenting this session
+     */
+    speakers: Array<string>;
+    /**
+     * UTC start time of the session
+     */
+    startTime: Date;
+    /**
+     * UTC end time of the session
+     */
+    endTime: Date;
+    /**
+     * Room or hall assignment
+     */
+    room?: string;
+    /**
+     * Maximum attendee capacity for this session
+     */
+    capacity?: number;
+    /**
+     * CE credits awarded for attending this session
+     */
+    creditAmount?: number;
+    /**
+     * Current session status
+     */
+    status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+};
+
+/**
+ * Lifecycle status of a session within a conference
+ */
+export type SessionStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+
+/**
+ * A scheduled session within a conference program
+ */
+export type SessionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this session belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent conference
+     */
+    conferenceId?: string;
+    /**
+     * Program track name this session belongs to
+     */
+    track?: string;
+    /**
+     * Session display title
+     */
+    title?: string;
+    /**
+     * Session abstract or description
+     */
+    description?: string;
+    /**
+     * List of speaker identifiers presenting this session
+     */
+    speakers?: Array<string>;
+    /**
+     * UTC start time of the session
+     */
+    startTime?: Date;
+    /**
+     * UTC end time of the session
+     */
+    endTime?: Date;
+    /**
+     * Room or hall assignment
+     */
+    room?: string;
+    /**
+     * Maximum attendee capacity for this session
+     */
+    capacity?: number;
+    /**
+     * CE credits awarded for attending this session
+     */
+    creditAmount?: number;
+    /**
+     * Current session status
+     */
+    status?: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+};
+
+/**
  * Time slot availability status
  */
 export type SlotStatus = 'available' | 'booked' | 'blocked';
+
+/**
+ * A confirmed or invited speaker at a conference
+ */
+export type Speaker = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this speaker record belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent conference
+     */
+    conferenceId: string;
+    /**
+     * Person record for this speaker
+     */
+    personId: string;
+    /**
+     * Speaker biography
+     */
+    bio: string;
+    /**
+     * URL of the speaker headshot
+     */
+    photoUrl?: string;
+    /**
+     * Company or institution affiliation
+     */
+    company?: string;
+    /**
+     * Speaker's professional title
+     */
+    title?: string;
+    /**
+     * Current speaker participation status
+     */
+    status: 'invited' | 'confirmed' | 'declined' | 'cancelled';
+    /**
+     * Agreed honorarium payment amount
+     */
+    honorariumAmount?: bigint;
+    /**
+     * Agreed travel reimbursement amount
+     */
+    travelReimbursement?: bigint;
+    /**
+     * Whether the speaker has submitted IRS Form W-9
+     */
+    w9Submitted?: boolean;
+};
+
+/**
+ * Status of a conference speaker invitation
+ */
+export type SpeakerStatus = 'invited' | 'confirmed' | 'declined' | 'cancelled';
+
+/**
+ * A confirmed or invited speaker at a conference
+ */
+export type SpeakerUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this speaker record belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent conference
+     */
+    conferenceId?: string;
+    /**
+     * Person record for this speaker
+     */
+    personId?: string;
+    /**
+     * Speaker biography
+     */
+    bio?: string;
+    /**
+     * URL of the speaker headshot
+     */
+    photoUrl?: string;
+    /**
+     * Company or institution affiliation
+     */
+    company?: string;
+    /**
+     * Speaker's professional title
+     */
+    title?: string;
+    /**
+     * Current speaker participation status
+     */
+    status?: 'invited' | 'confirmed' | 'declined' | 'cancelled';
+    /**
+     * Agreed honorarium payment amount
+     */
+    honorariumAmount?: bigint;
+    /**
+     * Agreed travel reimbursement amount
+     */
+    travelReimbursement?: bigint;
+    /**
+     * Whether the speaker has submitted IRS Form W-9
+     */
+    w9Submitted?: boolean;
+};
+
+/**
+ * A member-driven Special Interest Group
+ */
+export type SpecialInterestGroup = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this SIG belongs to
+     */
+    tenantId: string;
+    /**
+     * SIG display name
+     */
+    name: string;
+    /**
+     * Parent organization
+     */
+    organizationId: string;
+    /**
+     * SIG purpose and focus area
+     */
+    description?: string;
+    /**
+     * Current SIG chair person identifier
+     */
+    chairId?: string;
+    /**
+     * Maximum membership cap
+     */
+    maxMembers?: number;
+    /**
+     * Current active member count
+     */
+    memberCount: number;
+    /**
+     * Current SIG status
+     */
+    status: 'proposed' | 'active' | 'dormant' | 'dissolved';
+};
+
+/**
+ * A member-driven Special Interest Group
+ */
+export type SpecialInterestGroupUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this SIG belongs to
+     */
+    tenantId?: string;
+    /**
+     * SIG display name
+     */
+    name?: string;
+    /**
+     * Parent organization
+     */
+    organizationId?: string;
+    /**
+     * SIG purpose and focus area
+     */
+    description?: string;
+    /**
+     * Current SIG chair person identifier
+     */
+    chairId?: string;
+    /**
+     * Maximum membership cap
+     */
+    maxMembers?: number;
+    /**
+     * Current active member count
+     */
+    memberCount?: number;
+    /**
+     * Current SIG status
+     */
+    status?: 'proposed' | 'active' | 'dormant' | 'dissolved';
+};
 
 /**
  * Video call initialization data
@@ -3410,6 +25400,349 @@ export type StoredFile = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type StoredFileListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<StoredFile>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Basic file storage model
+ */
+export type StoredFileUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Original filename
+     */
+    filename?: string;
+    /**
+     * MIME type
+     */
+    mimeType?: string;
+    /**
+     * File size in bytes
+     */
+    size?: bigint;
+    /**
+     * File status
+     */
+    status?: 'uploading' | 'processing' | 'available' | 'failed';
+    /**
+     * File owner user ID
+     */
+    owner?: string;
+    /**
+     * Upload timestamp
+     */
+    uploadedAt?: Date;
+};
+
+/**
+ * ISO 8601 UTC timestamp with millisecond precision and Z suffix (e.g. 2026-04-30T14:25:31.000Z)
+ */
+export type StrictUtcDateTime = Date;
+
+/**
+ * A contact suppressed from receiving marketing communications
+ */
+export type SuppressionList = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this suppression entry belongs to
+     */
+    tenantId: string;
+    /**
+     * Suppressed email address
+     */
+    email?: string;
+    /**
+     * Suppressed phone number (E.164 format)
+     */
+    phone?: string;
+    /**
+     * Reason for suppression
+     */
+    reason: 'unsubscribed' | 'bounced' | 'complaint' | 'manual';
+    /**
+     * UTC timestamp when the entry was added
+     */
+    addedAt: Date;
+    /**
+     * Identifier of the person or system that added the entry
+     */
+    addedBy?: string;
+};
+
+/**
+ * A contact suppressed from receiving marketing communications
+ */
+export type SuppressionListUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this suppression entry belongs to
+     */
+    tenantId?: string;
+    /**
+     * Suppressed email address
+     */
+    email?: string;
+    /**
+     * Suppressed phone number (E.164 format)
+     */
+    phone?: string;
+    /**
+     * Reason for suppression
+     */
+    reason?: 'unsubscribed' | 'bounced' | 'complaint' | 'manual';
+    /**
+     * UTC timestamp when the entry was added
+     */
+    addedAt?: Date;
+    /**
+     * Identifier of the person or system that added the entry
+     */
+    addedBy?: string;
+};
+
+/**
+ * Reason a contact was added to the suppression list
+ */
+export type SuppressionReason = 'unsubscribed' | 'bounced' | 'complaint' | 'manual';
+
+/**
+ * A tax receipt issued to a donor for one or more donations
+ */
+export type TaxReceipt = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId: string;
+    /**
+     * ID of the donation this receipt covers (null for consolidated annual receipts)
+     */
+    donationId?: string;
+    /**
+     * ID of the donor
+     */
+    donorId: string;
+    /**
+     * Unique receipt number
+     */
+    receiptNumber: string;
+    /**
+     * Fiscal year to which this receipt applies
+     */
+    fiscalYear: number;
+    /**
+     * Total receiptable amount
+     */
+    amount: bigint;
+    /**
+     * Timestamp when the receipt was issued
+     */
+    issuedAt: Date;
+    /**
+     * ID of the staff member who issued the receipt
+     */
+    issuedBy: string;
+};
+
+/**
+ * A tax receipt issued to a donor for one or more donations
+ */
+export type TaxReceiptUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant identifier for multi-tenancy isolation
+     */
+    tenantId?: string;
+    /**
+     * ID of the donation this receipt covers (null for consolidated annual receipts)
+     */
+    donationId?: string;
+    /**
+     * ID of the donor
+     */
+    donorId?: string;
+    /**
+     * Unique receipt number
+     */
+    receiptNumber?: string;
+    /**
+     * Fiscal year to which this receipt applies
+     */
+    fiscalYear?: number;
+    /**
+     * Total receiptable amount
+     */
+    amount?: bigint;
+    /**
+     * Timestamp when the receipt was issued
+     */
+    issuedAt?: Date;
+    /**
+     * ID of the staff member who issued the receipt
+     */
+    issuedBy?: string;
+};
+
+/**
  * Template lifecycle status
  */
 export type TemplateStatus = 'draft' | 'active' | 'archived';
@@ -3463,6 +25796,11 @@ export type TemplateVariable = {
      */
     options?: Array<string>;
 };
+
+/**
+ * Status of an officer term
+ */
+export type TermStatus = 'upcoming' | 'active' | 'completed' | 'resigned' | 'removed';
 
 /**
  * Request to test an email template
@@ -3600,6 +25938,11 @@ export type TestTemplateResult = {
 };
 
 /**
+ * Tier eligibility status
+ */
+export type TierStatus = 'active' | 'retired';
+
+/**
  * Time block representing a work period within a day
  */
 export type TimeBlock = {
@@ -3701,9 +26044,676 @@ export type TimeSlot = {
 };
 
 /**
+ * Individual bookable time slots generated from booking events
+ */
+export type TimeSlotUpdate = {
+    /**
+     * Unique slot identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Slot owner (inherited from event)
+     */
+    owner?: string;
+    /**
+     * Source booking event (expandable)
+     */
+    event?: string | BookingEventUpdate;
+    /**
+     * Optional context (inherited from event)
+     */
+    context?: string;
+    /**
+     * Slot start time (UTC)
+     */
+    startTime?: Date;
+    /**
+     * Slot end time (UTC)
+     */
+    endTime?: Date;
+    /**
+     * Available location types for this slot
+     */
+    locationTypes?: Array<LocationType>;
+    /**
+     * Slot availability status
+     */
+    status?: 'available' | 'booked' | 'blocked';
+    /**
+     * Optional billing configuration for this specific slot (overrides event billingConfig)
+     */
+    billingConfig?: {
+        /**
+         * Price for the event in cents
+         */
+        price?: number;
+        /**
+         * Currency code (e.g., 'CAD', 'USD')
+         */
+        currency?: string;
+        /**
+         * Free cancellation threshold in minutes before event
+         */
+        cancellationThresholdMinutes?: number;
+    };
+    /**
+     * Linked booking if booked
+     */
+    booking?: string;
+};
+
+/**
  * IANA timezone identifier (Area/Location format)
  */
 export type TimezoneId = string;
+
+/**
+ * An instructor-led training event with CE credit tracking
+ */
+export type Training = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this training belongs to
+     */
+    tenantId: string;
+    /**
+     * Display title
+     */
+    title: string;
+    /**
+     * Owning organization
+     */
+    organizationId: string;
+    /**
+     * Delivery format
+     */
+    type: 'seminar' | 'workshop' | 'webinar' | 'self_paced' | 'hands_on';
+    /**
+     * UTC start date and time
+     */
+    startDate: Date;
+    /**
+     * UTC end date and time; null for self-paced with no fixed end
+     */
+    endDate?: Date;
+    /**
+     * Physical venue or address
+     */
+    location?: string;
+    /**
+     * URL for virtual or hybrid attendance
+     */
+    virtualUrl?: string;
+    /**
+     * Maximum number of enrollees
+     */
+    capacity?: number;
+    /**
+     * CE credits awarded upon completion
+     */
+    creditAmount: number;
+    /**
+     * CE credit category or domain
+     */
+    creditCategory?: string;
+    /**
+     * Identifier of the accreditation body that approved this training
+     */
+    accreditedProviderId?: string;
+    /**
+     * Lead instructor name or identifier
+     */
+    instructor?: string;
+    /**
+     * Full description and learning objectives
+     */
+    description?: string;
+    /**
+     * Current lifecycle status
+     */
+    status: 'draft' | 'published' | 'registration_open' | 'in_progress' | 'completed' | 'cancelled';
+    /**
+     * Registration fee
+     */
+    registrationFee?: bigint;
+};
+
+/**
+ * Request body for creating a training session
+ */
+export type TrainingCreateRequest = {
+    /**
+     * Display title
+     */
+    title: string;
+    /**
+     * Owning organization
+     */
+    organizationId: string;
+    /**
+     * Delivery format
+     */
+    type: 'seminar' | 'workshop' | 'webinar' | 'self_paced' | 'hands_on';
+    /**
+     * UTC start date and time
+     */
+    startDate: Date;
+    /**
+     * UTC end date and time
+     */
+    endDate?: Date;
+    /**
+     * Physical venue or address
+     */
+    location?: string;
+    /**
+     * Virtual attendance URL
+     */
+    virtualUrl?: string;
+    /**
+     * Maximum enrollment capacity
+     */
+    capacity?: number;
+    /**
+     * CE credits awarded
+     */
+    creditAmount: number;
+    /**
+     * CE credit category
+     */
+    creditCategory?: string;
+    /**
+     * Accreditation provider identifier
+     */
+    accreditedProviderId?: string;
+    /**
+     * Lead instructor
+     */
+    instructor?: string;
+    /**
+     * Full description
+     */
+    description?: string;
+    /**
+     * Registration fee
+     */
+    registrationFee?: bigint;
+};
+
+/**
+ * Enrollment of a person in an instructor-led training session
+ */
+export type TrainingEnrollment = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this enrollment belongs to
+     */
+    tenantId: string;
+    /**
+     * Training session enrolled in
+     */
+    trainingId: string;
+    /**
+     * Enrolled person
+     */
+    personId: string;
+    /**
+     * UTC timestamp of enrollment
+     */
+    enrolledAt: Date;
+    /**
+     * Current enrollment status
+     */
+    status: 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
+    /**
+     * UTC timestamp when the learner completed the training
+     */
+    completedAt?: Date;
+    /**
+     * Whether CE credit has been awarded for this enrollment
+     */
+    creditAwarded: boolean;
+    /**
+     * Reference to the CE credit ledger entry if credit was awarded
+     */
+    creditEntryId?: string;
+};
+
+/**
+ * Request body for marking a training enrollment as completed
+ */
+export type TrainingEnrollmentCompleteRequest = {
+    /**
+     * UTC timestamp of completion
+     */
+    completedAt: Date;
+    /**
+     * Whether to immediately award CE credit
+     */
+    awardCredit: boolean;
+};
+
+/**
+ * Request body for enrolling in a training session
+ */
+export type TrainingEnrollmentCreateRequest = {
+    /**
+     * Training to enroll in
+     */
+    trainingId: string;
+    /**
+     * Person to enroll
+     */
+    personId: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type TrainingEnrollmentListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<TrainingEnrollment>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Enrollment status for a training session
+ */
+export type TrainingEnrollmentStatus = 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
+
+/**
+ * Enrollment of a person in an instructor-led training session
+ */
+export type TrainingEnrollmentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this enrollment belongs to
+     */
+    tenantId?: string;
+    /**
+     * Training session enrolled in
+     */
+    trainingId?: string;
+    /**
+     * Enrolled person
+     */
+    personId?: string;
+    /**
+     * UTC timestamp of enrollment
+     */
+    enrolledAt?: Date;
+    /**
+     * Current enrollment status
+     */
+    status?: 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
+    /**
+     * UTC timestamp when the learner completed the training
+     */
+    completedAt?: Date;
+    /**
+     * Whether CE credit has been awarded for this enrollment
+     */
+    creditAwarded?: boolean;
+    /**
+     * Reference to the CE credit ledger entry if credit was awarded
+     */
+    creditEntryId?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type TrainingListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<unknown>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Lifecycle status of a training offering
+ */
+export type TrainingStatus = 'draft' | 'published' | 'registration_open' | 'in_progress' | 'completed' | 'cancelled';
+
+/**
+ * Delivery format of an instructor-led training session
+ */
+export type TrainingType = 'seminar' | 'workshop' | 'webinar' | 'self_paced' | 'hands_on';
+
+/**
+ * An instructor-led training event with CE credit tracking
+ */
+export type TrainingUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this training belongs to
+     */
+    tenantId?: string;
+    /**
+     * Display title
+     */
+    title?: string;
+    /**
+     * Owning organization
+     */
+    organizationId?: string;
+    /**
+     * Delivery format
+     */
+    type?: 'seminar' | 'workshop' | 'webinar' | 'self_paced' | 'hands_on';
+    /**
+     * UTC start date and time
+     */
+    startDate?: Date;
+    /**
+     * UTC end date and time; null for self-paced with no fixed end
+     */
+    endDate?: Date;
+    /**
+     * Physical venue or address
+     */
+    location?: string;
+    /**
+     * URL for virtual or hybrid attendance
+     */
+    virtualUrl?: string;
+    /**
+     * Maximum number of enrollees
+     */
+    capacity?: number;
+    /**
+     * CE credits awarded upon completion
+     */
+    creditAmount?: number;
+    /**
+     * CE credit category or domain
+     */
+    creditCategory?: string;
+    /**
+     * Identifier of the accreditation body that approved this training
+     */
+    accreditedProviderId?: string;
+    /**
+     * Lead instructor name or identifier
+     */
+    instructor?: string;
+    /**
+     * Full description and learning objectives
+     */
+    description?: string;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'draft' | 'published' | 'registration_open' | 'in_progress' | 'completed' | 'cancelled';
+    /**
+     * Registration fee
+     */
+    registrationFee?: bigint;
+};
+
+/**
+ * Request body for updating a training session
+ */
+export type TrainingUpdateRequest = {
+    /**
+     * Display title
+     */
+    title?: string;
+    /**
+     * Delivery format
+     */
+    type?: 'seminar' | 'workshop' | 'webinar' | 'self_paced' | 'hands_on';
+    /**
+     * UTC start date and time
+     */
+    startDate?: Date;
+    /**
+     * UTC end date and time
+     */
+    endDate?: Date | null;
+    /**
+     * Physical venue or address
+     */
+    location?: string | null;
+    /**
+     * Virtual attendance URL
+     */
+    virtualUrl?: string | null;
+    /**
+     * Maximum enrollment capacity
+     */
+    capacity?: number | null;
+    /**
+     * CE credits awarded
+     */
+    creditAmount?: number;
+    /**
+     * CE credit category
+     */
+    creditCategory?: string | null;
+    /**
+     * Accreditation provider identifier
+     */
+    accreditedProviderId?: string | null;
+    /**
+     * Lead instructor
+     */
+    instructor?: string | null;
+    /**
+     * Full description
+     */
+    description?: string | null;
+    /**
+     * Registration fee
+     */
+    registrationFee?: bigint | null;
+};
+
+/**
+ * Request to approve or deny a transfer at a specific chapter
+ */
+export type TransferDecisionRequest = {
+    /**
+     * ID of the officer making the decision
+     */
+    officerId: string;
+    /**
+     * Optional reason for the decision
+     */
+    reason?: string;
+};
+
+/**
+ * Status of an inter-chapter affiliation transfer request
+ */
+export type TransferStatus = 'requested' | 'pendingSourceApproval' | 'pendingTargetApproval' | 'approved' | 'denied' | 'completed' | 'cancelled';
 
 /**
  * Universally unique identifier
@@ -3869,6 +26879,112 @@ export type ValidationError = {
 export type VariableType = 'string' | 'number' | 'boolean' | 'date' | 'datetime' | 'url' | 'email' | 'array';
 
 /**
+ * Result of a credential verification attempt
+ */
+export type VerificationResult = 'valid' | 'expired' | 'revoked' | 'notFound';
+
+/**
+ * Request to verify a digital credential
+ */
+export type VerifyCredentialRequest = {
+    /**
+     * Credential number or QR payload to verify
+     */
+    token: string;
+};
+
+/**
+ * Result of a credential verification request
+ */
+export type VerifyCredentialResult = {
+    /**
+     * Outcome of the verification
+     */
+    result: 'valid' | 'expired' | 'revoked' | 'notFound';
+    /**
+     * Credential details if valid
+     */
+    credential?: {
+        /**
+         * Unique identifier
+         */
+        id: string;
+        /**
+         * Entity version for optimistic locking
+         */
+        version: number;
+        /**
+         * Creation timestamp
+         */
+        createdAt: Date;
+        /**
+         * User who created the entity
+         */
+        createdBy?: string;
+        /**
+         * Last update timestamp
+         */
+        updatedAt: Date;
+        /**
+         * User who last updated the entity
+         */
+        updatedBy?: string;
+        /**
+         * Tenant identifier for multi-tenancy isolation
+         */
+        tenantId: string;
+        /**
+         * ID of the person this credential was issued to
+         */
+        personId: string;
+        /**
+         * ID of the template used to generate this credential
+         */
+        templateId: string;
+        /**
+         * ID of the membership this credential is associated with (if applicable)
+         */
+        membershipId?: string;
+        /**
+         * Human-readable or machine-readable credential identifier
+         */
+        credentialNumber: string;
+        /**
+         * Timestamp when the credential was issued
+         */
+        issuedAt: Date;
+        /**
+         * Timestamp after which the credential is no longer valid
+         */
+        expiresAt?: Date;
+        /**
+         * Current lifecycle status of the credential
+         */
+        status: 'active' | 'suspended' | 'revoked' | 'expired';
+        /**
+         * Base64-encoded or JSON payload embedded in the credential's QR code
+         */
+        qrPayload?: string;
+        /**
+         * HMAC key used for server-side verification of the QR payload (never exposed to clients)
+         */
+        hmacKey?: string;
+        /**
+         * URL of the generated PDF credential document
+         */
+        pdfUrl?: string;
+        /**
+         * Public URL for online verification of this credential
+         */
+        verificationUrl?: string;
+    };
+    /**
+     * Human-readable explanation of the result
+     */
+    message: string;
+};
+
+/**
  * Video call session data embedded in messages
  */
 export type VideoCallData = {
@@ -3908,6 +27024,48 @@ export type VideoCallData = {
      * Call participants list
      */
     participants: Array<CallParticipant>;
+};
+
+/**
+ * Video call session data embedded in messages
+ */
+export type VideoCallDataUpdate = {
+    /**
+     * Current video call status
+     */
+    status?: 'starting' | 'active' | 'ended' | 'cancelled';
+    /**
+     * WebRTC room URL for active calls
+     */
+    roomUrl?: string;
+    /**
+     * Authentication token for WebRTC room access
+     */
+    token?: string;
+    /**
+     * Call start timestamp
+     */
+    startedAt?: Date;
+    /**
+     * Person who started the call
+     */
+    startedBy?: string;
+    /**
+     * Call end timestamp
+     */
+    endedAt?: Date;
+    /**
+     * Person who ended the call
+     */
+    endedBy?: string;
+    /**
+     * Call duration in minutes (calculated when call ends)
+     */
+    durationMinutes?: number;
+    /**
+     * Call participants list
+     */
+    participants?: Array<CallParticipant>;
 };
 
 /**
@@ -3952,6 +27110,1013 @@ export type VideoCallJoinResponse = {
 export type VideoCallStatus = 'starting' | 'active' | 'ended' | 'cancelled';
 
 /**
+ * Status of an individual volunteer application
+ */
+export type VolApplicationStatus = 'applied' | 'accepted' | 'declined' | 'withdrawn' | 'completed';
+
+/**
+ * A volunteer's application for an opportunity
+ */
+export type VolunteerApplication = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this application belongs to
+     */
+    tenantId: string;
+    /**
+     * Opportunity being applied for
+     */
+    opportunityId: string;
+    /**
+     * Applicant person identifier
+     */
+    personId: string;
+    /**
+     * UTC timestamp of application submission
+     */
+    appliedAt: Date;
+    /**
+     * Applicant's motivation statement
+     */
+    motivation?: string;
+    /**
+     * Relevant skills the applicant brings
+     */
+    skills?: Array<string>;
+    /**
+     * Current application status
+     */
+    status: 'applied' | 'accepted' | 'declined' | 'withdrawn' | 'completed';
+};
+
+/**
+ * A volunteer's application for an opportunity
+ */
+export type VolunteerApplicationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this application belongs to
+     */
+    tenantId?: string;
+    /**
+     * Opportunity being applied for
+     */
+    opportunityId?: string;
+    /**
+     * Applicant person identifier
+     */
+    personId?: string;
+    /**
+     * UTC timestamp of application submission
+     */
+    appliedAt?: Date;
+    /**
+     * Applicant's motivation statement
+     */
+    motivation?: string;
+    /**
+     * Relevant skills the applicant brings
+     */
+    skills?: Array<string>;
+    /**
+     * Current application status
+     */
+    status?: 'applied' | 'accepted' | 'declined' | 'withdrawn' | 'completed';
+};
+
+/**
+ * A log entry recording volunteer hours worked
+ */
+export type VolunteerHours = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this hours record belongs to
+     */
+    tenantId: string;
+    /**
+     * Person who volunteered
+     */
+    personId: string;
+    /**
+     * Opportunity the hours are attributed to
+     */
+    opportunityId?: string;
+    /**
+     * Date the volunteer work was performed
+     */
+    date: Date;
+    /**
+     * Number of hours worked
+     */
+    hours: number;
+    /**
+     * Description of activities performed
+     */
+    description?: string;
+    /**
+     * Identifier of the person who approved the hours
+     */
+    approvedBy?: string;
+    /**
+     * Approval status of this hours log entry
+     */
+    status: 'logged' | 'approved' | 'rejected';
+};
+
+/**
+ * Status of a volunteer hours log entry
+ */
+export type VolunteerHoursStatus = 'logged' | 'approved' | 'rejected';
+
+/**
+ * A log entry recording volunteer hours worked
+ */
+export type VolunteerHoursUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this hours record belongs to
+     */
+    tenantId?: string;
+    /**
+     * Person who volunteered
+     */
+    personId?: string;
+    /**
+     * Opportunity the hours are attributed to
+     */
+    opportunityId?: string;
+    /**
+     * Date the volunteer work was performed
+     */
+    date?: Date;
+    /**
+     * Number of hours worked
+     */
+    hours?: number;
+    /**
+     * Description of activities performed
+     */
+    description?: string;
+    /**
+     * Identifier of the person who approved the hours
+     */
+    approvedBy?: string;
+    /**
+     * Approval status of this hours log entry
+     */
+    status?: 'logged' | 'approved' | 'rejected';
+};
+
+/**
+ * A volunteer opportunity posted by an organization
+ */
+export type VolunteerOpportunity = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this opportunity belongs to
+     */
+    tenantId: string;
+    /**
+     * Opportunity title
+     */
+    title: string;
+    /**
+     * Owning organization
+     */
+    organizationId: string;
+    /**
+     * Full description of the volunteer role
+     */
+    description: string;
+    /**
+     * Skills or qualifications desired
+     */
+    skillsRequired?: Array<string>;
+    /**
+     * Time commitment description (e.g., 4 hours/week)
+     */
+    commitment: string;
+    /**
+     * Physical location or 'Remote'
+     */
+    location?: string;
+    /**
+     * UTC date the opportunity becomes available
+     */
+    startDate?: Date;
+    /**
+     * UTC date the opportunity ends or closes
+     */
+    endDate?: Date;
+    /**
+     * Total volunteer spots available
+     */
+    spotsAvailable?: number;
+    /**
+     * Number of spots currently filled
+     */
+    spotsFilled: number;
+    /**
+     * Current posting status
+     */
+    status: 'open' | 'filled' | 'closed' | 'cancelled';
+};
+
+/**
+ * Status of a volunteer opportunity posting
+ */
+export type VolunteerOpportunityStatus = 'open' | 'filled' | 'closed' | 'cancelled';
+
+/**
+ * A volunteer opportunity posted by an organization
+ */
+export type VolunteerOpportunityUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this opportunity belongs to
+     */
+    tenantId?: string;
+    /**
+     * Opportunity title
+     */
+    title?: string;
+    /**
+     * Owning organization
+     */
+    organizationId?: string;
+    /**
+     * Full description of the volunteer role
+     */
+    description?: string;
+    /**
+     * Skills or qualifications desired
+     */
+    skillsRequired?: Array<string>;
+    /**
+     * Time commitment description (e.g., 4 hours/week)
+     */
+    commitment?: string;
+    /**
+     * Physical location or 'Remote'
+     */
+    location?: string;
+    /**
+     * UTC date the opportunity becomes available
+     */
+    startDate?: Date;
+    /**
+     * UTC date the opportunity ends or closes
+     */
+    endDate?: Date;
+    /**
+     * Total volunteer spots available
+     */
+    spotsAvailable?: number;
+    /**
+     * Number of spots currently filled
+     */
+    spotsFilled?: number;
+    /**
+     * Current posting status
+     */
+    status?: 'open' | 'filled' | 'closed' | 'cancelled';
+};
+
+/**
+ * A position held on an event waitlist
+ */
+export type WaitlistEntry = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this waitlist entry belongs to
+     */
+    tenantId: string;
+    /**
+     * Event this entry is waiting for
+     */
+    eventId: string;
+    /**
+     * Person waiting for a spot
+     */
+    personId: string;
+    /**
+     * Ordinal position in the waitlist queue (1 = next in line)
+     */
+    position: number;
+    /**
+     * UTC timestamp when the person was added to the waitlist
+     */
+    addedAt: Date;
+    /**
+     * UTC timestamp when the person was promoted off the waitlist
+     */
+    promotedAt?: Date;
+    /**
+     * Current status of this waitlist entry
+     */
+    status: 'waiting' | 'promoted' | 'confirmed' | 'expired' | 'cancelled';
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type WaitlistEntryListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<WaitlistEntry>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Status of a waitlist entry
+ */
+export type WaitlistEntryStatus = 'waiting' | 'promoted' | 'confirmed' | 'expired' | 'cancelled';
+
+/**
+ * A position held on an event waitlist
+ */
+export type WaitlistEntryUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this waitlist entry belongs to
+     */
+    tenantId?: string;
+    /**
+     * Event this entry is waiting for
+     */
+    eventId?: string;
+    /**
+     * Person waiting for a spot
+     */
+    personId?: string;
+    /**
+     * Ordinal position in the waitlist queue (1 = next in line)
+     */
+    position?: number;
+    /**
+     * UTC timestamp when the person was added to the waitlist
+     */
+    addedAt?: Date;
+    /**
+     * UTC timestamp when the person was promoted off the waitlist
+     */
+    promotedAt?: Date;
+    /**
+     * Current status of this waitlist entry
+     */
+    status?: 'waiting' | 'promoted' | 'confirmed' | 'expired' | 'cancelled';
+};
+
+/**
+ * A record of a single webhook payload delivery attempt
+ */
+export type WebhookDelivery = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this delivery belongs to
+     */
+    tenantId: string;
+    /**
+     * Parent subscription
+     */
+    subscriptionId: string;
+    /**
+     * Event topic name that triggered this delivery
+     */
+    eventType: string;
+    /**
+     * Full event payload that was (or will be) sent
+     */
+    payload: {
+        [key: string]: unknown;
+    };
+    /**
+     * UTC timestamp when the delivery was attempted
+     */
+    deliveredAt: Date;
+    /**
+     * HTTP response status code received from the target
+     */
+    responseCode?: number;
+    /**
+     * Round-trip time in milliseconds
+     */
+    responseTime?: number;
+    /**
+     * Current delivery status
+     */
+    status: 'delivered' | 'failed' | 'retrying';
+    /**
+     * Number of delivery attempts so far
+     */
+    retryCount: number;
+    /**
+     * UTC timestamp of the next scheduled retry attempt
+     */
+    nextRetryAt?: Date;
+};
+
+/**
+ * Status of an individual webhook delivery attempt
+ */
+export type WebhookDeliveryStatus = 'delivered' | 'failed' | 'retrying';
+
+/**
+ * A record of a single webhook payload delivery attempt
+ */
+export type WebhookDeliveryUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this delivery belongs to
+     */
+    tenantId?: string;
+    /**
+     * Parent subscription
+     */
+    subscriptionId?: string;
+    /**
+     * Event topic name that triggered this delivery
+     */
+    eventType?: string;
+    /**
+     * Full event payload that was (or will be) sent
+     */
+    payload?: {
+        [key: string]: unknown;
+    };
+    /**
+     * UTC timestamp when the delivery was attempted
+     */
+    deliveredAt?: Date;
+    /**
+     * HTTP response status code received from the target
+     */
+    responseCode?: number;
+    /**
+     * Round-trip time in milliseconds
+     */
+    responseTime?: number;
+    /**
+     * Current delivery status
+     */
+    status?: 'delivered' | 'failed' | 'retrying';
+    /**
+     * Number of delivery attempts so far
+     */
+    retryCount?: number;
+    /**
+     * UTC timestamp of the next scheduled retry attempt
+     */
+    nextRetryAt?: Date;
+};
+
+/**
+ * Status of a webhook subscription
+ */
+export type WebhookStatus = 'active' | 'paused' | 'disabled' | 'error';
+
+/**
+ * An outbound webhook subscription that receives event notifications
+ */
+export type WebhookSubscription = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this subscription belongs to
+     */
+    tenantId: string;
+    /**
+     * Human-readable subscription name
+     */
+    name: string;
+    /**
+     * HTTPS endpoint that receives webhook payloads
+     */
+    targetUrl: string;
+    /**
+     * List of event topic names this subscription listens to
+     */
+    events: Array<string>;
+    /**
+     * HMAC signing secret used to authenticate webhook payloads.
+     * Write-only — never returned in API responses.
+     */
+    secret?: string;
+    /**
+     * Current subscription status
+     */
+    status: 'active' | 'paused' | 'disabled' | 'error';
+    /**
+     * Number of consecutive delivery failures
+     */
+    failureCount: number;
+    /**
+     * UTC timestamp of the most recent delivery attempt
+     */
+    lastDeliveryAt?: Date;
+    /**
+     * HTTP status code or error description from the last delivery
+     */
+    lastDeliveryStatus?: string;
+};
+
+/**
+ * An outbound webhook subscription that receives event notifications
+ */
+export type WebhookSubscriptionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Tenant this subscription belongs to
+     */
+    tenantId?: string;
+    /**
+     * Human-readable subscription name
+     */
+    name?: string;
+    /**
+     * HTTPS endpoint that receives webhook payloads
+     */
+    targetUrl?: string;
+    /**
+     * List of event topic names this subscription listens to
+     */
+    events?: Array<string>;
+    /**
+     * HMAC signing secret used to authenticate webhook payloads.
+     * Write-only — never returned in API responses.
+     */
+    secret?: string;
+    /**
+     * Current subscription status
+     */
+    status?: 'active' | 'paused' | 'disabled' | 'error';
+    /**
+     * Number of consecutive delivery failures
+     */
+    failureCount?: number;
+    /**
+     * UTC timestamp of the most recent delivery attempt
+     */
+    lastDeliveryAt?: Date;
+    /**
+     * HTTP status code or error description from the last delivery
+     */
+    lastDeliveryStatus?: string;
+};
+
+/**
+ * Filter by channel.
+ */
+export type AssociationCoreCommunicationMessageSearchParamsChannel = AssociationCoreCommunicationChannel;
+
+/**
+ * Messages scheduled on or after this timestamp.
+ */
+export type AssociationCoreCommunicationMessageSearchParamsScheduledAfter = Date;
+
+/**
+ * Filter by sender ID.
+ */
+export type AssociationCoreCommunicationMessageSearchParamsSenderId = string;
+
+/**
+ * Filter by status.
+ */
+export type AssociationCoreCommunicationMessageSearchParamsStatus = AssociationCoreCommunicationMessageStatus;
+
+/**
+ * Filter by category.
+ */
+export type AssociationCoreCommunicationMessageTemplateSearchParamsCategory = string;
+
+/**
+ * Filter by channel.
+ */
+export type AssociationCoreCommunicationMessageTemplateSearchParamsChannel = AssociationCoreCommunicationChannel;
+
+/**
+ * Only return transactional (or non-transactional) templates.
+ */
+export type AssociationCoreCommunicationMessageTemplateSearchParamsIsTransactional = boolean;
+
+/**
+ * Filter by status.
+ */
+export type AssociationCoreCommunicationMessageTemplateSearchParamsStatus = AssociationCoreCommunicationTemplateStatus;
+
+/**
+ * Filter by access level.
+ */
+export type AssociationCoreDocumentsDocumentSearchParamsAccessLevel = AssociationCoreDocumentsDocumentAccessLevel;
+
+/**
+ * Filter by category.
+ */
+export type AssociationCoreDocumentsDocumentSearchParamsCategory = string;
+
+/**
+ * Filter by owner ID.
+ */
+export type AssociationCoreDocumentsDocumentSearchParamsOwnerId = string;
+
+/**
+ * Filter by owner type.
+ */
+export type AssociationCoreDocumentsDocumentSearchParamsOwnerType = string;
+
+/**
+ * Filter by tag name.
+ */
+export type AssociationCoreDocumentsDocumentSearchParamsTag = string;
+
+/**
+ * Filter by event
+ */
+export type CheckInSearchParamsEventId = string;
+
+/**
+ * Filter by check-in method
+ */
+export type CheckInSearchParamsMethod = CheckInMethod;
+
+/**
+ * Filter by person
+ */
+export type CheckInSearchParamsPersonId = string;
+
+/**
+ * Latitude for proximity search
+ */
+export type DirectorySearchParamsLat = number;
+
+/**
+ * Longitude for proximity search
+ */
+export type DirectorySearchParamsLng = number;
+
+/**
+ * Location label filter
+ */
+export type DirectorySearchParamsLocation = string;
+
+/**
+ * Radius in kilometres for proximity search (requires lat + lng)
+ */
+export type DirectorySearchParamsRadiusKm = number;
+
+/**
+ * Specialty filter
+ */
+export type DirectorySearchParamsSpecialty = string;
+
+/**
+ * Tag filter (comma-separated values)
+ */
+export type DirectorySearchParamsTags = string;
+
+/**
+ * Filter by verified status
+ */
+export type DirectorySearchParamsVerified = boolean;
+
+/**
+ * Filter by event type
+ */
+export type EventSearchParamsEventType = EventType;
+
+/**
+ * Filter by owning organization
+ */
+export type EventSearchParamsOrganizationId = string;
+
+/**
+ * Filter events starting on or after this date
+ */
+export type EventSearchParamsStartDateFrom = Date;
+
+/**
+ * Filter events starting on or before this date
+ */
+export type EventSearchParamsStartDateTo = Date;
+
+/**
+ * Filter by lifecycle status
+ */
+export type EventSearchParamsStatus = EventStatus;
+
+/**
  * Comma-separated list of related entities to expand (e.g., 'customer,merchant')
  */
 export type ExpandParams = string;
@@ -3977,47 +28142,89 @@ export type OffsetPaginationParamsPage = number;
 export type OffsetPaginationParamsPageSize = number;
 
 /**
+ * Filter by course
+ */
+export type QuizAttemptSearchParamsCourseId = string;
+
+/**
+ * Filter to only passed attempts
+ */
+export type QuizAttemptSearchParamsPassed = boolean;
+
+/**
+ * Filter by person
+ */
+export type QuizAttemptSearchParamsPersonId = string;
+
+/**
+ * Filter by event
+ */
+export type RegistrationSearchParamsEventId = string;
+
+/**
+ * Filter by person
+ */
+export type RegistrationSearchParamsPersonId = string;
+
+/**
+ * Filter by registration status
+ */
+export type RegistrationSearchParamsStatus = RegistrationStatus;
+
+/**
  * Search query string
  */
-export type SearchFilterParams = string;
+export type SearchFilterParams = SafeQueryString;
 
 /**
  * Sort specifications (comma-separated field:direction pairs)
  */
-export type SortingParams = string;
+export type SortingParams = SafeQueryString;
 
-export type ListAuditLogsData = {
+/**
+ * Filter by person
+ */
+export type TrainingEnrollmentSearchParamsPersonId = string;
+
+/**
+ * Filter by enrollment status
+ */
+export type TrainingEnrollmentSearchParamsStatus = TrainingEnrollmentStatus;
+
+/**
+ * Filter by training session
+ */
+export type TrainingEnrollmentSearchParamsTrainingId = string;
+
+/**
+ * Filter by owning organization
+ */
+export type TrainingSearchParamsOrganizationId = string;
+
+/**
+ * Filter by start date lower bound
+ */
+export type TrainingSearchParamsStartDateFrom = Date;
+
+/**
+ * Filter by start date upper bound
+ */
+export type TrainingSearchParamsStartDateTo = Date;
+
+/**
+ * Filter by status
+ */
+export type TrainingSearchParamsStatus = TrainingStatus;
+
+/**
+ * Filter by delivery format
+ */
+export type TrainingSearchParamsType = TrainingType;
+
+export type ListDocumentTagsData = {
     body?: never;
     path?: never;
     query?: {
-        /**
-         * Filter by resource type (e.g., 'booking', 'client', 'service_provider')
-         */
-        resourceType?: string;
-        /**
-         * Filter by specific resource UUID
-         */
-        resource?: Uuid;
-        /**
-         * Filter by user UUID who performed the action
-         */
-        user?: Uuid;
-        /**
-         * Filter by action type (create, read, update, delete, login, logout)
-         */
-        action?: AuditAction;
-        /**
-         * Start date for filtering audit logs (inclusive)
-         */
-        startDate?: Date;
-        /**
-         * End date for filtering audit logs (inclusive)
-         */
-        endDate?: Date;
-        /**
-         * Order by field (e.g., 'desc(created_at)', 'asc(created_at)')
-         */
-        orderBy?: string;
         /**
          * Number of items to skip
          */
@@ -4037,11 +28244,7044 @@ export type ListAuditLogsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
+    };
+    url: '/association/document-tags';
+};
+
+export type ListDocumentTagsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDocumentTagsError = ListDocumentTagsErrors[keyof ListDocumentTagsErrors];
+
+export type ListDocumentTagsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DocumentTagListResponse;
+};
+
+export type ListDocumentTagsResponse = ListDocumentTagsResponses[keyof ListDocumentTagsResponses];
+
+export type CreateDocumentTagData = {
+    body: AssociationCoreDocumentsDocumentTagCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/document-tags';
+};
+
+export type CreateDocumentTagErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateDocumentTagError = CreateDocumentTagErrors[keyof CreateDocumentTagErrors];
+
+export type CreateDocumentTagResponses = {
+    /**
+     * Resource created response
+     */
+    201: AssociationCoreDocumentsDocumentTag;
+};
+
+export type CreateDocumentTagResponse = CreateDocumentTagResponses[keyof CreateDocumentTagResponses];
+
+export type DeleteDocumentTagData = {
+    body?: never;
+    path: {
+        tagId: string;
+    };
+    query?: never;
+    url: '/association/document-tags/{tagId}';
+};
+
+export type DeleteDocumentTagErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteDocumentTagError = DeleteDocumentTagErrors[keyof DeleteDocumentTagErrors];
+
+export type DeleteDocumentTagResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteDocumentTagResponse = DeleteDocumentTagResponses[keyof DeleteDocumentTagResponses];
+
+export type GetDocumentTagData = {
+    body?: never;
+    path: {
+        tagId: string;
+    };
+    query?: never;
+    url: '/association/document-tags/{tagId}';
+};
+
+export type GetDocumentTagErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDocumentTagError = GetDocumentTagErrors[keyof GetDocumentTagErrors];
+
+export type GetDocumentTagResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreDocumentsDocumentTag;
+};
+
+export type GetDocumentTagResponse = GetDocumentTagResponses[keyof GetDocumentTagResponses];
+
+export type UpdateDocumentTagData = {
+    body: AssociationCoreDocumentsDocumentTagUpdateRequest;
+    path: {
+        tagId: string;
+    };
+    query?: never;
+    url: '/association/document-tags/{tagId}';
+};
+
+export type UpdateDocumentTagErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateDocumentTagError = UpdateDocumentTagErrors[keyof UpdateDocumentTagErrors];
+
+export type UpdateDocumentTagResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreDocumentsDocumentTag;
+};
+
+export type UpdateDocumentTagResponse = UpdateDocumentTagResponses[keyof UpdateDocumentTagResponses];
+
+export type SearchDocumentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Filter by owner ID.
+         */
+        ownerId?: string;
+        /**
+         * Filter by owner type.
+         */
+        ownerType?: string;
+        /**
+         * Filter by access level.
+         */
+        accessLevel?: AssociationCoreDocumentsDocumentAccessLevel;
+        /**
+         * Filter by category.
+         */
+        category?: string;
+        /**
+         * Filter by tag name.
+         */
+        tag?: string;
+    };
+    url: '/association/documents';
+};
+
+export type SearchDocumentsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchDocumentsError = SearchDocumentsErrors[keyof SearchDocumentsErrors];
+
+export type SearchDocumentsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DocumentListResponse;
+};
+
+export type SearchDocumentsResponse = SearchDocumentsResponses[keyof SearchDocumentsResponses];
+
+export type CreateDocumentData = {
+    body: AssociationCoreDocumentsDocumentCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/documents';
+};
+
+export type CreateDocumentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateDocumentError = CreateDocumentErrors[keyof CreateDocumentErrors];
+
+export type CreateDocumentResponses = {
+    /**
+     * Resource created response
+     */
+    201: AssociationCoreDocumentsDocument;
+};
+
+export type CreateDocumentResponse = CreateDocumentResponses[keyof CreateDocumentResponses];
+
+export type DeleteDocumentData = {
+    body?: never;
+    path: {
+        documentId: string;
+    };
+    query?: never;
+    url: '/association/documents/{documentId}';
+};
+
+export type DeleteDocumentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteDocumentError = DeleteDocumentErrors[keyof DeleteDocumentErrors];
+
+export type DeleteDocumentResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteDocumentResponse = DeleteDocumentResponses[keyof DeleteDocumentResponses];
+
+export type GetDocumentData = {
+    body?: never;
+    path: {
+        documentId: string;
+    };
+    query?: never;
+    url: '/association/documents/{documentId}';
+};
+
+export type GetDocumentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDocumentError = GetDocumentErrors[keyof GetDocumentErrors];
+
+export type GetDocumentResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreDocumentsDocument;
+};
+
+export type GetDocumentResponse = GetDocumentResponses[keyof GetDocumentResponses];
+
+export type UpdateDocumentData = {
+    body: AssociationCoreDocumentsDocumentUpdateRequest;
+    path: {
+        documentId: string;
+    };
+    query?: never;
+    url: '/association/documents/{documentId}';
+};
+
+export type UpdateDocumentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateDocumentError = UpdateDocumentErrors[keyof UpdateDocumentErrors];
+
+export type UpdateDocumentResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreDocumentsDocument;
+};
+
+export type UpdateDocumentResponse = UpdateDocumentResponses[keyof UpdateDocumentResponses];
+
+export type GetDocumentAccessLogData = {
+    body?: never;
+    path: {
+        documentId: string;
+    };
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+    };
+    url: '/association/documents/{documentId}/access-log';
+};
+
+export type GetDocumentAccessLogErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDocumentAccessLogError = GetDocumentAccessLogErrors[keyof GetDocumentAccessLogErrors];
+
+export type GetDocumentAccessLogResponses = {
+    /**
+     * Success response with data
+     */
+    200: DocumentAccessLogEntryListResponse;
+};
+
+export type GetDocumentAccessLogResponse = GetDocumentAccessLogResponses[keyof GetDocumentAccessLogResponses];
+
+export type ArchiveDocumentData = {
+    body?: never;
+    path: {
+        documentId: string;
+    };
+    query?: never;
+    url: '/association/documents/{documentId}/archive';
+};
+
+export type ArchiveDocumentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ArchiveDocumentError = ArchiveDocumentErrors[keyof ArchiveDocumentErrors];
+
+export type ArchiveDocumentResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreDocumentsDocument;
+};
+
+export type ArchiveDocumentResponse = ArchiveDocumentResponses[keyof ArchiveDocumentResponses];
+
+export type ListDocumentVersionsData = {
+    body?: never;
+    path: {
+        documentId: string;
+    };
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+    };
+    url: '/association/documents/{documentId}/versions';
+};
+
+export type ListDocumentVersionsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ListDocumentVersionsError = ListDocumentVersionsErrors[keyof ListDocumentVersionsErrors];
+
+export type ListDocumentVersionsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DocumentVersionListResponse;
+};
+
+export type ListDocumentVersionsResponse = ListDocumentVersionsResponses[keyof ListDocumentVersionsResponses];
+
+export type UploadNewDocumentVersionData = {
+    body: AssociationCoreDocumentsDocumentNewVersionRequest;
+    path: {
+        documentId: string;
+    };
+    query?: never;
+    url: '/association/documents/{documentId}/versions';
+};
+
+export type UploadNewDocumentVersionErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UploadNewDocumentVersionError = UploadNewDocumentVersionErrors[keyof UploadNewDocumentVersionErrors];
+
+export type UploadNewDocumentVersionResponses = {
+    /**
+     * Resource created response
+     */
+    201: AssociationCoreDocumentsDocumentVersion;
+};
+
+export type UploadNewDocumentVersionResponse = UploadNewDocumentVersionResponses[keyof UploadNewDocumentVersionResponses];
+
+export type GetDocumentVersionData = {
+    body?: never;
+    path: {
+        documentId: string;
+        versionId: string;
+    };
+    query?: never;
+    url: '/association/documents/{documentId}/versions/{versionId}';
+};
+
+export type GetDocumentVersionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDocumentVersionError = GetDocumentVersionErrors[keyof GetDocumentVersionErrors];
+
+export type GetDocumentVersionResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreDocumentsDocumentVersion;
+};
+
+export type GetDocumentVersionResponse = GetDocumentVersionResponses[keyof GetDocumentVersionResponses];
+
+export type SearchEventsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
+        /**
+         * Filter by owning organization
+         */
+        organizationId?: string;
+        /**
+         * Filter by event type
+         */
+        eventType?: EventType;
+        /**
+         * Filter by lifecycle status
+         */
+        status?: EventStatus;
+        /**
+         * Filter events starting on or after this date
+         */
+        startDateFrom?: Date;
+        /**
+         * Filter events starting on or before this date
+         */
+        startDateTo?: Date;
+    };
+    url: '/association/events';
+};
+
+export type SearchEventsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchEventsError = SearchEventsErrors[keyof SearchEventsErrors];
+
+export type SearchEventsResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventListResponse;
+};
+
+export type SearchEventsResponse = SearchEventsResponses[keyof SearchEventsResponses];
+
+export type CreateEventData = {
+    body: EventCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/events';
+};
+
+export type CreateEventErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateEventError = CreateEventErrors[keyof CreateEventErrors];
+
+export type CreateEventResponses = {
+    /**
+     * Resource created response
+     */
+    201: Event;
+};
+
+export type CreateEventResponse = CreateEventResponses[keyof CreateEventResponses];
+
+export type SearchCheckInsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        /**
+         * Filter by event
+         */
+        eventId?: string;
+        /**
+         * Filter by person
+         */
+        personId?: string;
+        /**
+         * Filter by check-in method
+         */
+        method?: CheckInMethod;
+    };
+    url: '/association/events/checkins';
+};
+
+export type SearchCheckInsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchCheckInsError = SearchCheckInsErrors[keyof SearchCheckInsErrors];
+
+export type SearchCheckInsResponses = {
+    /**
+     * Success response with data
+     */
+    200: CheckInListResponse;
+};
+
+export type SearchCheckInsResponse = SearchCheckInsResponses[keyof SearchCheckInsResponses];
+
+export type CreateCheckInData = {
+    body: CheckInCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/events/checkins';
+};
+
+export type CreateCheckInErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateCheckInError = CreateCheckInErrors[keyof CreateCheckInErrors];
+
+export type CreateCheckInResponses = {
+    /**
+     * Resource created response
+     */
+    201: CheckIn;
+};
+
+export type CreateCheckInResponse = CreateCheckInResponses[keyof CreateCheckInResponses];
+
+export type SearchEventRegistrationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        /**
+         * Filter by event
+         */
+        eventId?: string;
+        /**
+         * Filter by person
+         */
+        personId?: string;
+        /**
+         * Filter by registration status
+         */
+        status?: RegistrationStatus;
+    };
+    url: '/association/events/registrations';
+};
+
+export type SearchEventRegistrationsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchEventRegistrationsError = SearchEventRegistrationsErrors[keyof SearchEventRegistrationsErrors];
+
+export type SearchEventRegistrationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventRegistrationListResponse;
+};
+
+export type SearchEventRegistrationsResponse = SearchEventRegistrationsResponses[keyof SearchEventRegistrationsResponses];
+
+export type CreateEventRegistrationData = {
+    body: EventRegistrationCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/events/registrations';
+};
+
+export type CreateEventRegistrationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateEventRegistrationError = CreateEventRegistrationErrors[keyof CreateEventRegistrationErrors];
+
+export type CreateEventRegistrationResponses = {
+    /**
+     * Resource created response
+     */
+    201: EventRegistration;
+};
+
+export type CreateEventRegistrationResponse = CreateEventRegistrationResponses[keyof CreateEventRegistrationResponses];
+
+export type DeleteEventRegistrationData = {
+    body?: never;
+    path: {
+        registrationId: string;
+    };
+    query?: never;
+    url: '/association/events/registrations/{registrationId}';
+};
+
+export type DeleteEventRegistrationErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteEventRegistrationError = DeleteEventRegistrationErrors[keyof DeleteEventRegistrationErrors];
+
+export type DeleteEventRegistrationResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteEventRegistrationResponse = DeleteEventRegistrationResponses[keyof DeleteEventRegistrationResponses];
+
+export type GetEventRegistrationData = {
+    body?: never;
+    path: {
+        registrationId: string;
+    };
+    query?: never;
+    url: '/association/events/registrations/{registrationId}';
+};
+
+export type GetEventRegistrationErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetEventRegistrationError = GetEventRegistrationErrors[keyof GetEventRegistrationErrors];
+
+export type GetEventRegistrationResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventRegistration;
+};
+
+export type GetEventRegistrationResponse = GetEventRegistrationResponses[keyof GetEventRegistrationResponses];
+
+export type UpdateEventRegistrationData = {
+    body: {
+        [key: string]: unknown;
+    };
+    path: {
+        registrationId: string;
+    };
+    query?: never;
+    url: '/association/events/registrations/{registrationId}';
+};
+
+export type UpdateEventRegistrationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateEventRegistrationError = UpdateEventRegistrationErrors[keyof UpdateEventRegistrationErrors];
+
+export type UpdateEventRegistrationResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventRegistration;
+};
+
+export type UpdateEventRegistrationResponse = UpdateEventRegistrationResponses[keyof UpdateEventRegistrationResponses];
+
+export type CancelEventRegistrationData = {
+    body?: never;
+    path: {
+        registrationId: string;
+    };
+    query?: never;
+    url: '/association/events/registrations/{registrationId}/cancel';
+};
+
+export type CancelEventRegistrationErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CancelEventRegistrationError = CancelEventRegistrationErrors[keyof CancelEventRegistrationErrors];
+
+export type CancelEventRegistrationResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventRegistration;
+};
+
+export type CancelEventRegistrationResponse = CancelEventRegistrationResponses[keyof CancelEventRegistrationResponses];
+
+export type RefundEventRegistrationData = {
+    body?: never;
+    path: {
+        registrationId: string;
+    };
+    query?: never;
+    url: '/association/events/registrations/{registrationId}/refund';
+};
+
+export type RefundEventRegistrationErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RefundEventRegistrationError = RefundEventRegistrationErrors[keyof RefundEventRegistrationErrors];
+
+export type RefundEventRegistrationResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventRegistration;
+};
+
+export type RefundEventRegistrationResponse = RefundEventRegistrationResponses[keyof RefundEventRegistrationResponses];
+
+export type DeleteEventData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/events/{eventId}';
+};
+
+export type DeleteEventErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteEventError = DeleteEventErrors[keyof DeleteEventErrors];
+
+export type DeleteEventResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteEventResponse = DeleteEventResponses[keyof DeleteEventResponses];
+
+export type GetEventData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/events/{eventId}';
+};
+
+export type GetEventErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetEventError = GetEventErrors[keyof GetEventErrors];
+
+export type GetEventResponses = {
+    /**
+     * Success response with data
+     */
+    200: Event;
+};
+
+export type GetEventResponse = GetEventResponses[keyof GetEventResponses];
+
+export type UpdateEventData = {
+    body: EventUpdateRequest;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/events/{eventId}';
+};
+
+export type UpdateEventErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateEventError = UpdateEventErrors[keyof UpdateEventErrors];
+
+export type UpdateEventResponses = {
+    /**
+     * Success response with data
+     */
+    200: Event;
+};
+
+export type UpdateEventResponse = UpdateEventResponses[keyof UpdateEventResponses];
+
+export type CancelEventData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/events/{eventId}/cancel';
+};
+
+export type CancelEventErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CancelEventError = CancelEventErrors[keyof CancelEventErrors];
+
+export type CancelEventResponses = {
+    /**
+     * Success response with data
+     */
+    200: Event;
+};
+
+export type CancelEventResponse = CancelEventResponses[keyof CancelEventResponses];
+
+export type PublishEventData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/events/{eventId}/publish';
+};
+
+export type PublishEventErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type PublishEventError = PublishEventErrors[keyof PublishEventErrors];
+
+export type PublishEventResponses = {
+    /**
+     * Success response with data
+     */
+    200: Event;
+};
+
+export type PublishEventResponse = PublishEventResponses[keyof PublishEventResponses];
+
+export type ListWaitlistEntriesData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/events/{eventId}/waitlist';
+};
+
+export type ListWaitlistEntriesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ListWaitlistEntriesError = ListWaitlistEntriesErrors[keyof ListWaitlistEntriesErrors];
+
+export type ListWaitlistEntriesResponses = {
+    /**
+     * Success response with data
+     */
+    200: WaitlistEntryListResponse;
+};
+
+export type ListWaitlistEntriesResponse = ListWaitlistEntriesResponses[keyof ListWaitlistEntriesResponses];
+
+export type PromoteWaitlistEntryData = {
+    body?: never;
+    path: {
+        eventId: string;
+        entryId: string;
+    };
+    query?: never;
+    url: '/association/events/{eventId}/waitlist/{entryId}/promote';
+};
+
+export type PromoteWaitlistEntryErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type PromoteWaitlistEntryError = PromoteWaitlistEntryErrors[keyof PromoteWaitlistEntryErrors];
+
+export type PromoteWaitlistEntryResponses = {
+    /**
+     * Success response with data
+     */
+    200: WaitlistEntry;
+};
+
+export type PromoteWaitlistEntryResponse = PromoteWaitlistEntryResponses[keyof PromoteWaitlistEntryResponses];
+
+export type ListAffiliationTransfersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        personId?: string;
+        fromChapterId?: string;
+        toChapterId?: string;
+        status?: TransferStatus;
+    };
+    url: '/association/member/affiliation-transfers';
+};
+
+export type ListAffiliationTransfersErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListAffiliationTransfersError = ListAffiliationTransfersErrors[keyof ListAffiliationTransfersErrors];
+
+export type ListAffiliationTransfersResponses = {
+    /**
+     * Success response with data
+     */
+    200: AffiliationTransferListResponse;
+};
+
+export type ListAffiliationTransfersResponse = ListAffiliationTransfersResponses[keyof ListAffiliationTransfersResponses];
+
+export type CreateAffiliationTransferData = {
+    body: AffiliationTransferCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/affiliation-transfers';
+};
+
+export type CreateAffiliationTransferErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateAffiliationTransferError = CreateAffiliationTransferErrors[keyof CreateAffiliationTransferErrors];
+
+export type CreateAffiliationTransferResponses = {
+    /**
+     * Resource created response
+     */
+    201: AffiliationTransfer;
+};
+
+export type CreateAffiliationTransferResponse = CreateAffiliationTransferResponses[keyof CreateAffiliationTransferResponses];
+
+export type GetAffiliationTransferData = {
+    body?: never;
+    path: {
+        transferId: string;
+    };
+    query?: never;
+    url: '/association/member/affiliation-transfers/{transferId}';
+};
+
+export type GetAffiliationTransferErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetAffiliationTransferError = GetAffiliationTransferErrors[keyof GetAffiliationTransferErrors];
+
+export type GetAffiliationTransferResponses = {
+    /**
+     * Success response with data
+     */
+    200: AffiliationTransfer;
+};
+
+export type GetAffiliationTransferResponse = GetAffiliationTransferResponses[keyof GetAffiliationTransferResponses];
+
+export type ApproveTransferBySourceData = {
+    body: TransferDecisionRequest;
+    path: {
+        transferId: string;
+    };
+    query?: never;
+    url: '/association/member/affiliation-transfers/{transferId}/approve-source';
+};
+
+export type ApproveTransferBySourceErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type ApproveTransferBySourceError = ApproveTransferBySourceErrors[keyof ApproveTransferBySourceErrors];
+
+export type ApproveTransferBySourceResponses = {
+    /**
+     * Success response with data
+     */
+    200: AffiliationTransfer;
+};
+
+export type ApproveTransferBySourceResponse = ApproveTransferBySourceResponses[keyof ApproveTransferBySourceResponses];
+
+export type ApproveTransferByTargetData = {
+    body: TransferDecisionRequest;
+    path: {
+        transferId: string;
+    };
+    query?: never;
+    url: '/association/member/affiliation-transfers/{transferId}/approve-target';
+};
+
+export type ApproveTransferByTargetErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type ApproveTransferByTargetError = ApproveTransferByTargetErrors[keyof ApproveTransferByTargetErrors];
+
+export type ApproveTransferByTargetResponses = {
+    /**
+     * Success response with data
+     */
+    200: AffiliationTransfer;
+};
+
+export type ApproveTransferByTargetResponse = ApproveTransferByTargetResponses[keyof ApproveTransferByTargetResponses];
+
+export type CompleteAffiliationTransferData = {
+    body?: never;
+    path: {
+        transferId: string;
+    };
+    query?: never;
+    url: '/association/member/affiliation-transfers/{transferId}/complete';
+};
+
+export type CompleteAffiliationTransferErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CompleteAffiliationTransferError = CompleteAffiliationTransferErrors[keyof CompleteAffiliationTransferErrors];
+
+export type CompleteAffiliationTransferResponses = {
+    /**
+     * Success response with data
+     */
+    200: AffiliationTransfer;
+};
+
+export type CompleteAffiliationTransferResponse = CompleteAffiliationTransferResponses[keyof CompleteAffiliationTransferResponses];
+
+export type DenyAffiliationTransferData = {
+    body: TransferDecisionRequest;
+    path: {
+        transferId: string;
+    };
+    query?: never;
+    url: '/association/member/affiliation-transfers/{transferId}/deny';
+};
+
+export type DenyAffiliationTransferErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DenyAffiliationTransferError = DenyAffiliationTransferErrors[keyof DenyAffiliationTransferErrors];
+
+export type DenyAffiliationTransferResponses = {
+    /**
+     * Success response with data
+     */
+    200: AffiliationTransfer;
+};
+
+export type DenyAffiliationTransferResponse = DenyAffiliationTransferResponses[keyof DenyAffiliationTransferResponses];
+
+export type GetAgingBucketData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/aging-buckets/{organizationId}';
+};
+
+export type GetAgingBucketErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetAgingBucketError = GetAgingBucketErrors[keyof GetAgingBucketErrors];
+
+export type GetAgingBucketResponses = {
+    /**
+     * Success response with data
+     */
+    200: AgingBucket;
+};
+
+export type GetAgingBucketResponse = GetAgingBucketResponses[keyof GetAgingBucketResponses];
+
+export type RecalculateAgingBucketData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/aging-buckets/{organizationId}/recalculate';
+};
+
+export type RecalculateAgingBucketErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type RecalculateAgingBucketError = RecalculateAgingBucketErrors[keyof RecalculateAgingBucketErrors];
+
+export type RecalculateAgingBucketResponses = {
+    /**
+     * Success response with data
+     */
+    200: AgingBucket;
+};
+
+export type RecalculateAgingBucketResponse = RecalculateAgingBucketResponses[keyof RecalculateAgingBucketResponses];
+
+export type ListMembershipApplicationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        status?: ApplicationStatus;
+    };
+    url: '/association/member/applications';
+};
+
+export type ListMembershipApplicationsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListMembershipApplicationsError = ListMembershipApplicationsErrors[keyof ListMembershipApplicationsErrors];
+
+export type ListMembershipApplicationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipApplicationListResponse;
+};
+
+export type ListMembershipApplicationsResponse = ListMembershipApplicationsResponses[keyof ListMembershipApplicationsResponses];
+
+export type CreateMembershipApplicationData = {
+    body: MembershipApplicationCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/applications';
+};
+
+export type CreateMembershipApplicationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateMembershipApplicationError = CreateMembershipApplicationErrors[keyof CreateMembershipApplicationErrors];
+
+export type CreateMembershipApplicationResponses = {
+    /**
+     * Resource created response
+     */
+    201: MembershipApplication;
+};
+
+export type CreateMembershipApplicationResponse = CreateMembershipApplicationResponses[keyof CreateMembershipApplicationResponses];
+
+export type DeleteMembershipApplicationData = {
+    body?: never;
+    path: {
+        applicationId: string;
+    };
+    query?: never;
+    url: '/association/member/applications/{applicationId}';
+};
+
+export type DeleteMembershipApplicationErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteMembershipApplicationError = DeleteMembershipApplicationErrors[keyof DeleteMembershipApplicationErrors];
+
+export type DeleteMembershipApplicationResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteMembershipApplicationResponse = DeleteMembershipApplicationResponses[keyof DeleteMembershipApplicationResponses];
+
+export type GetMembershipApplicationData = {
+    body?: never;
+    path: {
+        applicationId: string;
+    };
+    query?: never;
+    url: '/association/member/applications/{applicationId}';
+};
+
+export type GetMembershipApplicationErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetMembershipApplicationError = GetMembershipApplicationErrors[keyof GetMembershipApplicationErrors];
+
+export type GetMembershipApplicationResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipApplication;
+};
+
+export type GetMembershipApplicationResponse = GetMembershipApplicationResponses[keyof GetMembershipApplicationResponses];
+
+export type UpdateMembershipApplicationData = {
+    body: MembershipApplicationCreateRequestUpdate;
+    path: {
+        applicationId: string;
+    };
+    query?: never;
+    url: '/association/member/applications/{applicationId}';
+};
+
+export type UpdateMembershipApplicationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateMembershipApplicationError = UpdateMembershipApplicationErrors[keyof UpdateMembershipApplicationErrors];
+
+export type UpdateMembershipApplicationResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipApplication;
+};
+
+export type UpdateMembershipApplicationResponse = UpdateMembershipApplicationResponses[keyof UpdateMembershipApplicationResponses];
+
+export type ApproveMembershipApplicationData = {
+    body?: never;
+    path: {
+        applicationId: string;
+    };
+    query?: never;
+    url: '/association/member/applications/{applicationId}/approve';
+};
+
+export type ApproveMembershipApplicationErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type ApproveMembershipApplicationError = ApproveMembershipApplicationErrors[keyof ApproveMembershipApplicationErrors];
+
+export type ApproveMembershipApplicationResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipApplication;
+};
+
+export type ApproveMembershipApplicationResponse = ApproveMembershipApplicationResponses[keyof ApproveMembershipApplicationResponses];
+
+export type DenyMembershipApplicationData = {
+    body: MembershipApplicationDenyRequest;
+    path: {
+        applicationId: string;
+    };
+    query?: never;
+    url: '/association/member/applications/{applicationId}/deny';
+};
+
+export type DenyMembershipApplicationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DenyMembershipApplicationError = DenyMembershipApplicationErrors[keyof DenyMembershipApplicationErrors];
+
+export type DenyMembershipApplicationResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipApplication;
+};
+
+export type DenyMembershipApplicationResponse = DenyMembershipApplicationResponses[keyof DenyMembershipApplicationResponses];
+
+export type ListChapterAffiliationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        personId?: string;
+        chapterId?: string;
+        status?: AffiliationStatus;
+    };
+    url: '/association/member/chapter-affiliations';
+};
+
+export type ListChapterAffiliationsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListChapterAffiliationsError = ListChapterAffiliationsErrors[keyof ListChapterAffiliationsErrors];
+
+export type ListChapterAffiliationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: ChapterAffiliationListResponse;
+};
+
+export type ListChapterAffiliationsResponse = ListChapterAffiliationsResponses[keyof ListChapterAffiliationsResponses];
+
+export type CreateChapterAffiliationData = {
+    body: ChapterAffiliationCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/chapter-affiliations';
+};
+
+export type CreateChapterAffiliationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateChapterAffiliationError = CreateChapterAffiliationErrors[keyof CreateChapterAffiliationErrors];
+
+export type CreateChapterAffiliationResponses = {
+    /**
+     * Resource created response
+     */
+    201: ChapterAffiliation;
+};
+
+export type CreateChapterAffiliationResponse = CreateChapterAffiliationResponses[keyof CreateChapterAffiliationResponses];
+
+export type DeleteChapterAffiliationData = {
+    body?: never;
+    path: {
+        affiliationId: string;
+    };
+    query?: never;
+    url: '/association/member/chapter-affiliations/{affiliationId}';
+};
+
+export type DeleteChapterAffiliationErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteChapterAffiliationError = DeleteChapterAffiliationErrors[keyof DeleteChapterAffiliationErrors];
+
+export type DeleteChapterAffiliationResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteChapterAffiliationResponse = DeleteChapterAffiliationResponses[keyof DeleteChapterAffiliationResponses];
+
+export type GetChapterAffiliationData = {
+    body?: never;
+    path: {
+        affiliationId: string;
+    };
+    query?: never;
+    url: '/association/member/chapter-affiliations/{affiliationId}';
+};
+
+export type GetChapterAffiliationErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetChapterAffiliationError = GetChapterAffiliationErrors[keyof GetChapterAffiliationErrors];
+
+export type GetChapterAffiliationResponses = {
+    /**
+     * Success response with data
+     */
+    200: ChapterAffiliation;
+};
+
+export type GetChapterAffiliationResponse = GetChapterAffiliationResponses[keyof GetChapterAffiliationResponses];
+
+export type UpdateChapterAffiliationData = {
+    body: ChapterAffiliationUpdateRequest;
+    path: {
+        affiliationId: string;
+    };
+    query?: never;
+    url: '/association/member/chapter-affiliations/{affiliationId}';
+};
+
+export type UpdateChapterAffiliationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateChapterAffiliationError = UpdateChapterAffiliationErrors[keyof UpdateChapterAffiliationErrors];
+
+export type UpdateChapterAffiliationResponses = {
+    /**
+     * Success response with data
+     */
+    200: ChapterAffiliation;
+};
+
+export type UpdateChapterAffiliationResponse = UpdateChapterAffiliationResponses[keyof UpdateChapterAffiliationResponses];
+
+export type SetPrimaryChapterAffiliationData = {
+    body?: never;
+    path: {
+        affiliationId: string;
+    };
+    query?: never;
+    url: '/association/member/chapter-affiliations/{affiliationId}/set-primary';
+};
+
+export type SetPrimaryChapterAffiliationErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type SetPrimaryChapterAffiliationError = SetPrimaryChapterAffiliationErrors[keyof SetPrimaryChapterAffiliationErrors];
+
+export type SetPrimaryChapterAffiliationResponses = {
+    /**
+     * Success response with data
+     */
+    200: ChapterAffiliation;
+};
+
+export type SetPrimaryChapterAffiliationResponse = SetPrimaryChapterAffiliationResponses[keyof SetPrimaryChapterAffiliationResponses];
+
+export type ListCredentialTemplatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        type?: CredentialType;
+        status?: TemplateStatus;
+    };
+    url: '/association/member/credential-templates';
+};
+
+export type ListCredentialTemplatesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListCredentialTemplatesError = ListCredentialTemplatesErrors[keyof ListCredentialTemplatesErrors];
+
+export type ListCredentialTemplatesResponses = {
+    /**
+     * Success response with data
+     */
+    200: CredentialTemplateListResponse;
+};
+
+export type ListCredentialTemplatesResponse = ListCredentialTemplatesResponses[keyof ListCredentialTemplatesResponses];
+
+export type CreateCredentialTemplateData = {
+    body: CredentialTemplateCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/credential-templates';
+};
+
+export type CreateCredentialTemplateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateCredentialTemplateError = CreateCredentialTemplateErrors[keyof CreateCredentialTemplateErrors];
+
+export type CreateCredentialTemplateResponses = {
+    /**
+     * Resource created response
+     */
+    201: CredentialTemplate;
+};
+
+export type CreateCredentialTemplateResponse = CreateCredentialTemplateResponses[keyof CreateCredentialTemplateResponses];
+
+export type DeleteCredentialTemplateData = {
+    body?: never;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/member/credential-templates/{templateId}';
+};
+
+export type DeleteCredentialTemplateErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteCredentialTemplateError = DeleteCredentialTemplateErrors[keyof DeleteCredentialTemplateErrors];
+
+export type DeleteCredentialTemplateResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteCredentialTemplateResponse = DeleteCredentialTemplateResponses[keyof DeleteCredentialTemplateResponses];
+
+export type GetCredentialTemplateData = {
+    body?: never;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/member/credential-templates/{templateId}';
+};
+
+export type GetCredentialTemplateErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetCredentialTemplateError = GetCredentialTemplateErrors[keyof GetCredentialTemplateErrors];
+
+export type GetCredentialTemplateResponses = {
+    /**
+     * Success response with data
+     */
+    200: CredentialTemplate;
+};
+
+export type GetCredentialTemplateResponse = GetCredentialTemplateResponses[keyof GetCredentialTemplateResponses];
+
+export type UpdateCredentialTemplateData = {
+    body: CredentialTemplateUpdateRequest;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/member/credential-templates/{templateId}';
+};
+
+export type UpdateCredentialTemplateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateCredentialTemplateError = UpdateCredentialTemplateErrors[keyof UpdateCredentialTemplateErrors];
+
+export type UpdateCredentialTemplateResponses = {
+    /**
+     * Success response with data
+     */
+    200: CredentialTemplate;
+};
+
+export type UpdateCredentialTemplateResponse = UpdateCredentialTemplateResponses[keyof UpdateCredentialTemplateResponses];
+
+export type ListDigitalCredentialsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        personId?: string;
+        templateId?: string;
+        status?: CredentialStatus;
+    };
+    url: '/association/member/credentials';
+};
+
+export type ListDigitalCredentialsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDigitalCredentialsError = ListDigitalCredentialsErrors[keyof ListDigitalCredentialsErrors];
+
+export type ListDigitalCredentialsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DigitalCredentialListResponse;
+};
+
+export type ListDigitalCredentialsResponse = ListDigitalCredentialsResponses[keyof ListDigitalCredentialsResponses];
+
+export type IssueDigitalCredentialData = {
+    body: IssueCredentialRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/credentials/issue';
+};
+
+export type IssueDigitalCredentialErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type IssueDigitalCredentialError = IssueDigitalCredentialErrors[keyof IssueDigitalCredentialErrors];
+
+export type IssueDigitalCredentialResponses = {
+    /**
+     * Resource created response
+     */
+    201: DigitalCredential;
+};
+
+export type IssueDigitalCredentialResponse = IssueDigitalCredentialResponses[keyof IssueDigitalCredentialResponses];
+
+export type VerifyCredentialPublicData = {
+    body: VerifyCredentialRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/credentials/public-verify';
+};
+
+export type VerifyCredentialPublicErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+};
+
+export type VerifyCredentialPublicError = VerifyCredentialPublicErrors[keyof VerifyCredentialPublicErrors];
+
+export type VerifyCredentialPublicResponses = {
+    /**
+     * Success response with data
+     */
+    200: VerifyCredentialResult;
+};
+
+export type VerifyCredentialPublicResponse = VerifyCredentialPublicResponses[keyof VerifyCredentialPublicResponses];
+
+export type VerifyDigitalCredentialAuthenticatedData = {
+    body: VerifyCredentialRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/credentials/verify';
+};
+
+export type VerifyDigitalCredentialAuthenticatedErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type VerifyDigitalCredentialAuthenticatedError = VerifyDigitalCredentialAuthenticatedErrors[keyof VerifyDigitalCredentialAuthenticatedErrors];
+
+export type VerifyDigitalCredentialAuthenticatedResponses = {
+    /**
+     * Success response with data
+     */
+    200: VerifyCredentialResult;
+};
+
+export type VerifyDigitalCredentialAuthenticatedResponse = VerifyDigitalCredentialAuthenticatedResponses[keyof VerifyDigitalCredentialAuthenticatedResponses];
+
+export type DeleteDigitalCredentialData = {
+    body?: never;
+    path: {
+        credentialId: string;
+    };
+    query?: never;
+    url: '/association/member/credentials/{credentialId}';
+};
+
+export type DeleteDigitalCredentialErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteDigitalCredentialError = DeleteDigitalCredentialErrors[keyof DeleteDigitalCredentialErrors];
+
+export type DeleteDigitalCredentialResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteDigitalCredentialResponse = DeleteDigitalCredentialResponses[keyof DeleteDigitalCredentialResponses];
+
+export type GetDigitalCredentialData = {
+    body?: never;
+    path: {
+        credentialId: string;
+    };
+    query?: never;
+    url: '/association/member/credentials/{credentialId}';
+};
+
+export type GetDigitalCredentialErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDigitalCredentialError = GetDigitalCredentialErrors[keyof GetDigitalCredentialErrors];
+
+export type GetDigitalCredentialResponses = {
+    /**
+     * Success response with data
+     */
+    200: DigitalCredential;
+};
+
+export type GetDigitalCredentialResponse = GetDigitalCredentialResponses[keyof GetDigitalCredentialResponses];
+
+export type UpdateDigitalCredentialData = {
+    body: IssueCredentialRequestUpdate;
+    path: {
+        credentialId: string;
+    };
+    query?: never;
+    url: '/association/member/credentials/{credentialId}';
+};
+
+export type UpdateDigitalCredentialErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateDigitalCredentialError = UpdateDigitalCredentialErrors[keyof UpdateDigitalCredentialErrors];
+
+export type UpdateDigitalCredentialResponses = {
+    /**
+     * Success response with data
+     */
+    200: DigitalCredential;
+};
+
+export type UpdateDigitalCredentialResponse = UpdateDigitalCredentialResponses[keyof UpdateDigitalCredentialResponses];
+
+export type RevokeDigitalCredentialData = {
+    body: RevokeCredentialRequest;
+    path: {
+        credentialId: string;
+    };
+    query?: never;
+    url: '/association/member/credentials/{credentialId}/revoke';
+};
+
+export type RevokeDigitalCredentialErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RevokeDigitalCredentialError = RevokeDigitalCredentialErrors[keyof RevokeDigitalCredentialErrors];
+
+export type RevokeDigitalCredentialResponses = {
+    /**
+     * Success response with data
+     */
+    200: DigitalCredential;
+};
+
+export type RevokeDigitalCredentialResponse = RevokeDigitalCredentialResponses[keyof RevokeDigitalCredentialResponses];
+
+export type ListDirectoryProfilesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        visibility?: DirectoryVisibility;
+    };
+    url: '/association/member/directory/profiles';
+};
+
+export type ListDirectoryProfilesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDirectoryProfilesError = ListDirectoryProfilesErrors[keyof ListDirectoryProfilesErrors];
+
+export type ListDirectoryProfilesResponses = {
+    /**
+     * Success response with data
+     */
+    200: DirectoryProfileListResponse;
+};
+
+export type ListDirectoryProfilesResponse = ListDirectoryProfilesResponses[keyof ListDirectoryProfilesResponses];
+
+export type CreateDirectoryProfileData = {
+    body: DirectoryProfileCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/directory/profiles';
+};
+
+export type CreateDirectoryProfileErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateDirectoryProfileError = CreateDirectoryProfileErrors[keyof CreateDirectoryProfileErrors];
+
+export type CreateDirectoryProfileResponses = {
+    /**
+     * Resource created response
+     */
+    201: DirectoryProfile;
+};
+
+export type CreateDirectoryProfileResponse = CreateDirectoryProfileResponses[keyof CreateDirectoryProfileResponses];
+
+export type DeleteDirectoryProfileData = {
+    body?: never;
+    path: {
+        profileId: string;
+    };
+    query?: never;
+    url: '/association/member/directory/profiles/{profileId}';
+};
+
+export type DeleteDirectoryProfileErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteDirectoryProfileError = DeleteDirectoryProfileErrors[keyof DeleteDirectoryProfileErrors];
+
+export type DeleteDirectoryProfileResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteDirectoryProfileResponse = DeleteDirectoryProfileResponses[keyof DeleteDirectoryProfileResponses];
+
+export type GetDirectoryProfileData = {
+    body?: never;
+    path: {
+        profileId: string;
+    };
+    query?: never;
+    url: '/association/member/directory/profiles/{profileId}';
+};
+
+export type GetDirectoryProfileErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDirectoryProfileError = GetDirectoryProfileErrors[keyof GetDirectoryProfileErrors];
+
+export type GetDirectoryProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: DirectoryProfile;
+};
+
+export type GetDirectoryProfileResponse = GetDirectoryProfileResponses[keyof GetDirectoryProfileResponses];
+
+export type UpdateDirectoryProfileData = {
+    body: DirectoryProfileUpdateRequest;
+    path: {
+        profileId: string;
+    };
+    query?: never;
+    url: '/association/member/directory/profiles/{profileId}';
+};
+
+export type UpdateDirectoryProfileErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateDirectoryProfileError = UpdateDirectoryProfileErrors[keyof UpdateDirectoryProfileErrors];
+
+export type UpdateDirectoryProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: DirectoryProfile;
+};
+
+export type UpdateDirectoryProfileResponse = UpdateDirectoryProfileResponses[keyof UpdateDirectoryProfileResponses];
+
+export type SearchDirectoryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        /**
+         * Specialty filter
+         */
+        specialty?: string;
+        /**
+         * Location label filter
+         */
+        location?: string;
+        /**
+         * Tag filter (comma-separated values)
+         */
+        tags?: string;
+        /**
+         * Latitude for proximity search
+         */
+        lat?: number;
+        /**
+         * Longitude for proximity search
+         */
+        lng?: number;
+        /**
+         * Radius in kilometres for proximity search (requires lat + lng)
+         */
+        radiusKm?: number;
+        /**
+         * Filter by verified status
+         */
+        verified?: boolean;
+    };
+    url: '/association/member/directory/search';
+};
+
+export type SearchDirectoryErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchDirectoryError = SearchDirectoryErrors[keyof SearchDirectoryErrors];
+
+export type SearchDirectoryResponses = {
+    /**
+     * Success response with data
+     */
+    200: DirectoryProfileListResponse;
+};
+
+export type SearchDirectoryResponse = SearchDirectoryResponses[keyof SearchDirectoryResponses];
+
+export type GetPublicDirectoryProfileData = {
+    body?: never;
+    path: {
+        personId: string;
+    };
+    query?: never;
+    url: '/association/member/directory/search/{personId}/public';
+};
+
+export type GetPublicDirectoryProfileErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetPublicDirectoryProfileError = GetPublicDirectoryProfileErrors[keyof GetPublicDirectoryProfileErrors];
+
+export type GetPublicDirectoryProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: PublicDirectoryProfile;
+};
+
+export type GetPublicDirectoryProfileResponse = GetPublicDirectoryProfileResponses[keyof GetPublicDirectoryProfileResponses];
+
+export type ListDuesConfigsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        tierId?: string;
+    };
+    url: '/association/member/dues-configs';
+};
+
+export type ListDuesConfigsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDuesConfigsError = ListDuesConfigsErrors[keyof ListDuesConfigsErrors];
+
+export type ListDuesConfigsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesConfigListResponse;
+};
+
+export type ListDuesConfigsResponse = ListDuesConfigsResponses[keyof ListDuesConfigsResponses];
+
+export type CreateDuesConfigData = {
+    body: DuesConfigCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/dues-configs';
+};
+
+export type CreateDuesConfigErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateDuesConfigError = CreateDuesConfigErrors[keyof CreateDuesConfigErrors];
+
+export type CreateDuesConfigResponses = {
+    /**
+     * Resource created response
+     */
+    201: DuesConfig;
+};
+
+export type CreateDuesConfigResponse = CreateDuesConfigResponses[keyof CreateDuesConfigResponses];
+
+export type DeleteDuesConfigData = {
+    body?: never;
+    path: {
+        duesConfigId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-configs/{duesConfigId}';
+};
+
+export type DeleteDuesConfigErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteDuesConfigError = DeleteDuesConfigErrors[keyof DeleteDuesConfigErrors];
+
+export type DeleteDuesConfigResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteDuesConfigResponse = DeleteDuesConfigResponses[keyof DeleteDuesConfigResponses];
+
+export type GetDuesConfigData = {
+    body?: never;
+    path: {
+        duesConfigId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-configs/{duesConfigId}';
+};
+
+export type GetDuesConfigErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDuesConfigError = GetDuesConfigErrors[keyof GetDuesConfigErrors];
+
+export type GetDuesConfigResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesConfig;
+};
+
+export type GetDuesConfigResponse = GetDuesConfigResponses[keyof GetDuesConfigResponses];
+
+export type UpdateDuesConfigData = {
+    body: DuesConfigUpdateRequest;
+    path: {
+        duesConfigId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-configs/{duesConfigId}';
+};
+
+export type UpdateDuesConfigErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateDuesConfigError = UpdateDuesConfigErrors[keyof UpdateDuesConfigErrors];
+
+export type UpdateDuesConfigResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesConfig;
+};
+
+export type UpdateDuesConfigResponse = UpdateDuesConfigResponses[keyof UpdateDuesConfigResponses];
+
+export type ListDuesInvoicesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        membershipId?: string;
+        status?: DuesInvoiceStatus;
+    };
+    url: '/association/member/dues-invoices';
+};
+
+export type ListDuesInvoicesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDuesInvoicesError = ListDuesInvoicesErrors[keyof ListDuesInvoicesErrors];
+
+export type ListDuesInvoicesResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesInvoiceListResponse;
+};
+
+export type ListDuesInvoicesResponse = ListDuesInvoicesResponses[keyof ListDuesInvoicesResponses];
+
+export type CreateDuesInvoiceData = {
+    body: DuesInvoice;
+    path?: never;
+    query?: never;
+    url: '/association/member/dues-invoices';
+};
+
+export type CreateDuesInvoiceErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateDuesInvoiceError = CreateDuesInvoiceErrors[keyof CreateDuesInvoiceErrors];
+
+export type CreateDuesInvoiceResponses = {
+    /**
+     * Resource created response
+     */
+    201: DuesInvoice;
+};
+
+export type CreateDuesInvoiceResponse = CreateDuesInvoiceResponses[keyof CreateDuesInvoiceResponses];
+
+export type GenerateDuesInvoicesForOrgData = {
+    body: GenerateInvoicesRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/dues-invoices/generate';
+};
+
+export type GenerateDuesInvoicesForOrgErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GenerateDuesInvoicesForOrgError = GenerateDuesInvoicesForOrgErrors[keyof GenerateDuesInvoicesForOrgErrors];
+
+export type GenerateDuesInvoicesForOrgResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesInvoiceListResponse;
+};
+
+export type GenerateDuesInvoicesForOrgResponse = GenerateDuesInvoicesForOrgResponses[keyof GenerateDuesInvoicesForOrgResponses];
+
+export type DeleteDuesInvoiceData = {
+    body?: never;
+    path: {
+        invoiceId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-invoices/{invoiceId}';
+};
+
+export type DeleteDuesInvoiceErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteDuesInvoiceError = DeleteDuesInvoiceErrors[keyof DeleteDuesInvoiceErrors];
+
+export type DeleteDuesInvoiceResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteDuesInvoiceResponse = DeleteDuesInvoiceResponses[keyof DeleteDuesInvoiceResponses];
+
+export type GetDuesInvoiceData = {
+    body?: never;
+    path: {
+        invoiceId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-invoices/{invoiceId}';
+};
+
+export type GetDuesInvoiceErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDuesInvoiceError = GetDuesInvoiceErrors[keyof GetDuesInvoiceErrors];
+
+export type GetDuesInvoiceResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesInvoice;
+};
+
+export type GetDuesInvoiceResponse = GetDuesInvoiceResponses[keyof GetDuesInvoiceResponses];
+
+export type UpdateDuesInvoiceData = {
+    body: DuesInvoiceUpdate;
+    path: {
+        invoiceId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-invoices/{invoiceId}';
+};
+
+export type UpdateDuesInvoiceErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateDuesInvoiceError = UpdateDuesInvoiceErrors[keyof UpdateDuesInvoiceErrors];
+
+export type UpdateDuesInvoiceResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesInvoice;
+};
+
+export type UpdateDuesInvoiceResponse = UpdateDuesInvoiceResponses[keyof UpdateDuesInvoiceResponses];
+
+export type MarkDuesInvoicePaidData = {
+    body: MarkInvoicePaidRequest;
+    path: {
+        invoiceId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-invoices/{invoiceId}/mark-paid';
+};
+
+export type MarkDuesInvoicePaidErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type MarkDuesInvoicePaidError = MarkDuesInvoicePaidErrors[keyof MarkDuesInvoicePaidErrors];
+
+export type MarkDuesInvoicePaidResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesInvoice;
+};
+
+export type MarkDuesInvoicePaidResponse = MarkDuesInvoicePaidResponses[keyof MarkDuesInvoicePaidResponses];
+
+export type ListDunningEventsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        membershipId?: string;
+        stage?: number;
+    };
+    url: '/association/member/dunning/events';
+};
+
+export type ListDunningEventsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDunningEventsError = ListDunningEventsErrors[keyof ListDunningEventsErrors];
+
+export type ListDunningEventsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DunningEventListResponse;
+};
+
+export type ListDunningEventsResponse = ListDunningEventsResponses[keyof ListDunningEventsResponses];
+
+export type RunDunningData = {
+    body: RunDunningRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/dunning/run';
+};
+
+export type RunDunningErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type RunDunningError = RunDunningErrors[keyof RunDunningErrors];
+
+export type RunDunningResponses = {
+    /**
+     * Success response with data
+     */
+    200: DunningRunResult;
+};
+
+export type RunDunningResponse = RunDunningResponses[keyof RunDunningResponses];
+
+export type ListDunningTemplatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        stage?: number;
+    };
+    url: '/association/member/dunning/templates';
+};
+
+export type ListDunningTemplatesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDunningTemplatesError = ListDunningTemplatesErrors[keyof ListDunningTemplatesErrors];
+
+export type ListDunningTemplatesResponses = {
+    /**
+     * Success response with data
+     */
+    200: DunningTemplateListResponse;
+};
+
+export type ListDunningTemplatesResponse = ListDunningTemplatesResponses[keyof ListDunningTemplatesResponses];
+
+export type CreateDunningTemplateData = {
+    body: DunningTemplateCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/dunning/templates';
+};
+
+export type CreateDunningTemplateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateDunningTemplateError = CreateDunningTemplateErrors[keyof CreateDunningTemplateErrors];
+
+export type CreateDunningTemplateResponses = {
+    /**
+     * Resource created response
+     */
+    201: DunningTemplate;
+};
+
+export type CreateDunningTemplateResponse = CreateDunningTemplateResponses[keyof CreateDunningTemplateResponses];
+
+export type DeleteDunningTemplateData = {
+    body?: never;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/member/dunning/templates/{templateId}';
+};
+
+export type DeleteDunningTemplateErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteDunningTemplateError = DeleteDunningTemplateErrors[keyof DeleteDunningTemplateErrors];
+
+export type DeleteDunningTemplateResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteDunningTemplateResponse = DeleteDunningTemplateResponses[keyof DeleteDunningTemplateResponses];
+
+export type GetDunningTemplateData = {
+    body?: never;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/member/dunning/templates/{templateId}';
+};
+
+export type GetDunningTemplateErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDunningTemplateError = GetDunningTemplateErrors[keyof GetDunningTemplateErrors];
+
+export type GetDunningTemplateResponses = {
+    /**
+     * Success response with data
+     */
+    200: DunningTemplate;
+};
+
+export type GetDunningTemplateResponse = GetDunningTemplateResponses[keyof GetDunningTemplateResponses];
+
+export type UpdateDunningTemplateData = {
+    body: DunningTemplateUpdateRequest;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/member/dunning/templates/{templateId}';
+};
+
+export type UpdateDunningTemplateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateDunningTemplateError = UpdateDunningTemplateErrors[keyof UpdateDunningTemplateErrors];
+
+export type UpdateDunningTemplateResponses = {
+    /**
+     * Success response with data
+     */
+    200: DunningTemplate;
+};
+
+export type UpdateDunningTemplateResponse = UpdateDunningTemplateResponses[keyof UpdateDunningTemplateResponses];
+
+export type ListInstitutionalMembershipsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        status?: MembershipStatus;
+    };
+    url: '/association/member/institutional-memberships';
+};
+
+export type ListInstitutionalMembershipsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListInstitutionalMembershipsError = ListInstitutionalMembershipsErrors[keyof ListInstitutionalMembershipsErrors];
+
+export type ListInstitutionalMembershipsResponses = {
+    /**
+     * Success response with data
+     */
+    200: InstitutionalMembershipListResponse;
+};
+
+export type ListInstitutionalMembershipsResponse = ListInstitutionalMembershipsResponses[keyof ListInstitutionalMembershipsResponses];
+
+export type CreateInstitutionalMembershipData = {
+    body: InstitutionalMembershipCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/institutional-memberships';
+};
+
+export type CreateInstitutionalMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateInstitutionalMembershipError = CreateInstitutionalMembershipErrors[keyof CreateInstitutionalMembershipErrors];
+
+export type CreateInstitutionalMembershipResponses = {
+    /**
+     * Resource created response
+     */
+    201: InstitutionalMembership;
+};
+
+export type CreateInstitutionalMembershipResponse = CreateInstitutionalMembershipResponses[keyof CreateInstitutionalMembershipResponses];
+
+export type DeleteInstitutionalMembershipData = {
+    body?: never;
+    path: {
+        institutionalMembershipId: string;
+    };
+    query?: never;
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}';
+};
+
+export type DeleteInstitutionalMembershipErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteInstitutionalMembershipError = DeleteInstitutionalMembershipErrors[keyof DeleteInstitutionalMembershipErrors];
+
+export type DeleteInstitutionalMembershipResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteInstitutionalMembershipResponse = DeleteInstitutionalMembershipResponses[keyof DeleteInstitutionalMembershipResponses];
+
+export type GetInstitutionalMembershipData = {
+    body?: never;
+    path: {
+        institutionalMembershipId: string;
+    };
+    query?: never;
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}';
+};
+
+export type GetInstitutionalMembershipErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetInstitutionalMembershipError = GetInstitutionalMembershipErrors[keyof GetInstitutionalMembershipErrors];
+
+export type GetInstitutionalMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: InstitutionalMembership;
+};
+
+export type GetInstitutionalMembershipResponse = GetInstitutionalMembershipResponses[keyof GetInstitutionalMembershipResponses];
+
+export type UpdateInstitutionalMembershipData = {
+    body: InstitutionalMembershipCreateRequestUpdate;
+    path: {
+        institutionalMembershipId: string;
+    };
+    query?: never;
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}';
+};
+
+export type UpdateInstitutionalMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateInstitutionalMembershipError = UpdateInstitutionalMembershipErrors[keyof UpdateInstitutionalMembershipErrors];
+
+export type UpdateInstitutionalMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: InstitutionalMembership;
+};
+
+export type UpdateInstitutionalMembershipResponse = UpdateInstitutionalMembershipResponses[keyof UpdateInstitutionalMembershipResponses];
+
+export type ListSeatAllocationsData = {
+    body?: never;
+    path: {
+        institutionalMembershipId: string;
+    };
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        status?: SeatStatus;
+    };
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}/seats';
+};
+
+export type ListSeatAllocationsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListSeatAllocationsError = ListSeatAllocationsErrors[keyof ListSeatAllocationsErrors];
+
+export type ListSeatAllocationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: SeatAllocationListResponse;
+};
+
+export type ListSeatAllocationsResponse = ListSeatAllocationsResponses[keyof ListSeatAllocationsResponses];
+
+export type AllocateSeatData = {
+    body: SeatAllocationRequest;
+    path: {
+        institutionalMembershipId: string;
+    };
+    query?: never;
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}/seats';
+};
+
+export type AllocateSeatErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type AllocateSeatError = AllocateSeatErrors[keyof AllocateSeatErrors];
+
+export type AllocateSeatResponses = {
+    /**
+     * Resource created response
+     */
+    201: SeatAllocation;
+};
+
+export type AllocateSeatResponse = AllocateSeatResponses[keyof AllocateSeatResponses];
+
+export type RevokeSeatData = {
+    body?: never;
+    path: {
+        institutionalMembershipId: string;
+        seatAllocationId: string;
+    };
+    query?: never;
+    url: '/association/member/institutional-memberships/{institutionalMembershipId}/seats/{seatAllocationId}/revoke';
+};
+
+export type RevokeSeatErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RevokeSeatError = RevokeSeatErrors[keyof RevokeSeatErrors];
+
+export type RevokeSeatResponses = {
+    /**
+     * Success response with data
+     */
+    200: SeatAllocation;
+};
+
+export type RevokeSeatResponse = RevokeSeatResponses[keyof RevokeSeatResponses];
+
+export type ListLicenseRenewalAlertsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        personId?: string;
+        licenseId?: string;
+        status?: RenewalAlertStatus;
+    };
+    url: '/association/member/license-renewal-alerts';
+};
+
+export type ListLicenseRenewalAlertsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListLicenseRenewalAlertsError = ListLicenseRenewalAlertsErrors[keyof ListLicenseRenewalAlertsErrors];
+
+export type ListLicenseRenewalAlertsResponses = {
+    /**
+     * Success response with data
+     */
+    200: LicenseRenewalAlertListResponse;
+};
+
+export type ListLicenseRenewalAlertsResponse = ListLicenseRenewalAlertsResponses[keyof ListLicenseRenewalAlertsResponses];
+
+export type AcknowledgeLicenseRenewalAlertData = {
+    body?: never;
+    path: {
+        alertId: string;
+    };
+    query?: never;
+    url: '/association/member/license-renewal-alerts/{alertId}/acknowledge';
+};
+
+export type AcknowledgeLicenseRenewalAlertErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type AcknowledgeLicenseRenewalAlertError = AcknowledgeLicenseRenewalAlertErrors[keyof AcknowledgeLicenseRenewalAlertErrors];
+
+export type AcknowledgeLicenseRenewalAlertResponses = {
+    /**
+     * Success response with data
+     */
+    200: LicenseRenewalAlert;
+};
+
+export type AcknowledgeLicenseRenewalAlertResponse = AcknowledgeLicenseRenewalAlertResponses[keyof AcknowledgeLicenseRenewalAlertResponses];
+
+export type ListProfessionalLicensesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        personId?: string;
+        licenseType?: string;
+        status?: LicenseStatus;
+        jurisdiction?: string;
+    };
+    url: '/association/member/licenses';
+};
+
+export type ListProfessionalLicensesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListProfessionalLicensesError = ListProfessionalLicensesErrors[keyof ListProfessionalLicensesErrors];
+
+export type ListProfessionalLicensesResponses = {
+    /**
+     * Success response with data
+     */
+    200: ProfessionalLicenseListResponse;
+};
+
+export type ListProfessionalLicensesResponse = ListProfessionalLicensesResponses[keyof ListProfessionalLicensesResponses];
+
+export type CreateProfessionalLicenseData = {
+    body: ProfessionalLicenseCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/licenses';
+};
+
+export type CreateProfessionalLicenseErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateProfessionalLicenseError = CreateProfessionalLicenseErrors[keyof CreateProfessionalLicenseErrors];
+
+export type CreateProfessionalLicenseResponses = {
+    /**
+     * Resource created response
+     */
+    201: ProfessionalLicense;
+};
+
+export type CreateProfessionalLicenseResponse = CreateProfessionalLicenseResponses[keyof CreateProfessionalLicenseResponses];
+
+export type DeleteProfessionalLicenseData = {
+    body?: never;
+    path: {
+        licenseId: string;
+    };
+    query?: never;
+    url: '/association/member/licenses/{licenseId}';
+};
+
+export type DeleteProfessionalLicenseErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteProfessionalLicenseError = DeleteProfessionalLicenseErrors[keyof DeleteProfessionalLicenseErrors];
+
+export type DeleteProfessionalLicenseResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteProfessionalLicenseResponse = DeleteProfessionalLicenseResponses[keyof DeleteProfessionalLicenseResponses];
+
+export type GetProfessionalLicenseData = {
+    body?: never;
+    path: {
+        licenseId: string;
+    };
+    query?: never;
+    url: '/association/member/licenses/{licenseId}';
+};
+
+export type GetProfessionalLicenseErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetProfessionalLicenseError = GetProfessionalLicenseErrors[keyof GetProfessionalLicenseErrors];
+
+export type GetProfessionalLicenseResponses = {
+    /**
+     * Success response with data
+     */
+    200: ProfessionalLicense;
+};
+
+export type GetProfessionalLicenseResponse = GetProfessionalLicenseResponses[keyof GetProfessionalLicenseResponses];
+
+export type UpdateProfessionalLicenseData = {
+    body: ProfessionalLicenseUpdateRequest;
+    path: {
+        licenseId: string;
+    };
+    query?: never;
+    url: '/association/member/licenses/{licenseId}';
+};
+
+export type UpdateProfessionalLicenseErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateProfessionalLicenseError = UpdateProfessionalLicenseErrors[keyof UpdateProfessionalLicenseErrors];
+
+export type UpdateProfessionalLicenseResponses = {
+    /**
+     * Success response with data
+     */
+    200: ProfessionalLicense;
+};
+
+export type UpdateProfessionalLicenseResponse = UpdateProfessionalLicenseResponses[keyof UpdateProfessionalLicenseResponses];
+
+export type ListMembershipsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        tierId?: string;
+        status?: MembershipStatus;
+    };
+    url: '/association/member/memberships';
+};
+
+export type ListMembershipsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListMembershipsError = ListMembershipsErrors[keyof ListMembershipsErrors];
+
+export type ListMembershipsResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipListResponse;
+};
+
+export type ListMembershipsResponse = ListMembershipsResponses[keyof ListMembershipsResponses];
+
+export type CreateMembershipData = {
+    body: MembershipCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/memberships';
+};
+
+export type CreateMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateMembershipError = CreateMembershipErrors[keyof CreateMembershipErrors];
+
+export type CreateMembershipResponses = {
+    /**
+     * Resource created response
+     */
+    201: unknown;
+};
+
+export type DeleteMembershipData = {
+    body?: never;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}';
+};
+
+export type DeleteMembershipErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteMembershipError = DeleteMembershipErrors[keyof DeleteMembershipErrors];
+
+export type DeleteMembershipResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteMembershipResponse = DeleteMembershipResponses[keyof DeleteMembershipResponses];
+
+export type GetMembershipData = {
+    body?: never;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}';
+};
+
+export type GetMembershipErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetMembershipError = GetMembershipErrors[keyof GetMembershipErrors];
+
+export type GetMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type UpdateMembershipData = {
+    body: MembershipUpdateRequest;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}';
+};
+
+export type UpdateMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateMembershipError = UpdateMembershipErrors[keyof UpdateMembershipErrors];
+
+export type UpdateMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type ReinstateMembershipData = {
+    body?: never;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}/reinstate';
+};
+
+export type ReinstateMembershipErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type ReinstateMembershipError = ReinstateMembershipErrors[keyof ReinstateMembershipErrors];
+
+export type ReinstateMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type RenewMembershipData = {
+    body?: never;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}/renew';
+};
+
+export type RenewMembershipErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RenewMembershipError = RenewMembershipErrors[keyof RenewMembershipErrors];
+
+export type RenewMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type TerminateMembershipData = {
+    body: MembershipTerminateRequest;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}/terminate';
+};
+
+export type TerminateMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type TerminateMembershipError = TerminateMembershipErrors[keyof TerminateMembershipErrors];
+
+export type TerminateMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type ListRoyaltySplitsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        membershipId?: string;
+        chapterId?: string;
+    };
+    url: '/association/member/royalty-splits';
+};
+
+export type ListRoyaltySplitsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListRoyaltySplitsError = ListRoyaltySplitsErrors[keyof ListRoyaltySplitsErrors];
+
+export type ListRoyaltySplitsResponses = {
+    /**
+     * Success response with data
+     */
+    200: RoyaltySplitListResponse;
+};
+
+export type ListRoyaltySplitsResponse = ListRoyaltySplitsResponses[keyof ListRoyaltySplitsResponses];
+
+export type CreateRoyaltySplitData = {
+    body: RoyaltySplitCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/royalty-splits';
+};
+
+export type CreateRoyaltySplitErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateRoyaltySplitError = CreateRoyaltySplitErrors[keyof CreateRoyaltySplitErrors];
+
+export type CreateRoyaltySplitResponses = {
+    /**
+     * Resource created response
+     */
+    201: RoyaltySplit;
+};
+
+export type CreateRoyaltySplitResponse = CreateRoyaltySplitResponses[keyof CreateRoyaltySplitResponses];
+
+export type DeleteRoyaltySplitData = {
+    body?: never;
+    path: {
+        royaltySplitId: string;
+    };
+    query?: never;
+    url: '/association/member/royalty-splits/{royaltySplitId}';
+};
+
+export type DeleteRoyaltySplitErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteRoyaltySplitError = DeleteRoyaltySplitErrors[keyof DeleteRoyaltySplitErrors];
+
+export type DeleteRoyaltySplitResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteRoyaltySplitResponse = DeleteRoyaltySplitResponses[keyof DeleteRoyaltySplitResponses];
+
+export type GetRoyaltySplitData = {
+    body?: never;
+    path: {
+        royaltySplitId: string;
+    };
+    query?: never;
+    url: '/association/member/royalty-splits/{royaltySplitId}';
+};
+
+export type GetRoyaltySplitErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetRoyaltySplitError = GetRoyaltySplitErrors[keyof GetRoyaltySplitErrors];
+
+export type GetRoyaltySplitResponses = {
+    /**
+     * Success response with data
+     */
+    200: RoyaltySplit;
+};
+
+export type GetRoyaltySplitResponse = GetRoyaltySplitResponses[keyof GetRoyaltySplitResponses];
+
+export type UpdateRoyaltySplitData = {
+    body: RoyaltySplitUpdateRequest;
+    path: {
+        royaltySplitId: string;
+    };
+    query?: never;
+    url: '/association/member/royalty-splits/{royaltySplitId}';
+};
+
+export type UpdateRoyaltySplitErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateRoyaltySplitError = UpdateRoyaltySplitErrors[keyof UpdateRoyaltySplitErrors];
+
+export type UpdateRoyaltySplitResponses = {
+    /**
+     * Success response with data
+     */
+    200: RoyaltySplit;
+};
+
+export type UpdateRoyaltySplitResponse = UpdateRoyaltySplitResponses[keyof UpdateRoyaltySplitResponses];
+
+export type ListMembershipTiersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/member/tiers';
+};
+
+export type ListMembershipTiersErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListMembershipTiersError = ListMembershipTiersErrors[keyof ListMembershipTiersErrors];
+
+export type ListMembershipTiersResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipTierListResponse;
+};
+
+export type ListMembershipTiersResponse = ListMembershipTiersResponses[keyof ListMembershipTiersResponses];
+
+export type CreateMembershipTierData = {
+    body: MembershipTierCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/tiers';
+};
+
+export type CreateMembershipTierErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateMembershipTierError = CreateMembershipTierErrors[keyof CreateMembershipTierErrors];
+
+export type CreateMembershipTierResponses = {
+    /**
+     * Resource created response
+     */
+    201: MembershipTier;
+};
+
+export type CreateMembershipTierResponse = CreateMembershipTierResponses[keyof CreateMembershipTierResponses];
+
+export type DeleteMembershipTierData = {
+    body?: never;
+    path: {
+        tierId: string;
+    };
+    query?: never;
+    url: '/association/member/tiers/{tierId}';
+};
+
+export type DeleteMembershipTierErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteMembershipTierError = DeleteMembershipTierErrors[keyof DeleteMembershipTierErrors];
+
+export type DeleteMembershipTierResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteMembershipTierResponse = DeleteMembershipTierResponses[keyof DeleteMembershipTierResponses];
+
+export type GetMembershipTierData = {
+    body?: never;
+    path: {
+        tierId: string;
+    };
+    query?: never;
+    url: '/association/member/tiers/{tierId}';
+};
+
+export type GetMembershipTierErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetMembershipTierError = GetMembershipTierErrors[keyof GetMembershipTierErrors];
+
+export type GetMembershipTierResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipTier;
+};
+
+export type GetMembershipTierResponse = GetMembershipTierResponses[keyof GetMembershipTierResponses];
+
+export type UpdateMembershipTierData = {
+    body: MembershipTierUpdateRequest;
+    path: {
+        tierId: string;
+    };
+    query?: never;
+    url: '/association/member/tiers/{tierId}';
+};
+
+export type UpdateMembershipTierErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateMembershipTierError = UpdateMembershipTierErrors[keyof UpdateMembershipTierErrors];
+
+export type UpdateMembershipTierResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipTier;
+};
+
+export type UpdateMembershipTierResponse = UpdateMembershipTierResponses[keyof UpdateMembershipTierResponses];
+
+export type SearchMessageTemplatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Filter by channel.
+         */
+        channel?: AssociationCoreCommunicationChannel;
+        /**
+         * Filter by category.
+         */
+        category?: string;
+        /**
+         * Filter by status.
+         */
+        status?: AssociationCoreCommunicationTemplateStatus;
+        /**
+         * Only return transactional (or non-transactional) templates.
+         */
+        isTransactional?: boolean;
+    };
+    url: '/association/message-templates';
+};
+
+export type SearchMessageTemplatesErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchMessageTemplatesError = SearchMessageTemplatesErrors[keyof SearchMessageTemplatesErrors];
+
+export type SearchMessageTemplatesResponses = {
+    /**
+     * Success response with data
+     */
+    200: MessageTemplateListResponse;
+};
+
+export type SearchMessageTemplatesResponse = SearchMessageTemplatesResponses[keyof SearchMessageTemplatesResponses];
+
+export type CreateMessageTemplateData = {
+    body: AssociationCoreCommunicationMessageTemplateCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/message-templates';
+};
+
+export type CreateMessageTemplateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateMessageTemplateError = CreateMessageTemplateErrors[keyof CreateMessageTemplateErrors];
+
+export type CreateMessageTemplateResponses = {
+    /**
+     * Resource created response
+     */
+    201: AssociationCoreCommunicationMessageTemplate;
+};
+
+export type CreateMessageTemplateResponse = CreateMessageTemplateResponses[keyof CreateMessageTemplateResponses];
+
+export type DeleteMessageTemplateData = {
+    body?: never;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/message-templates/{templateId}';
+};
+
+export type DeleteMessageTemplateErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteMessageTemplateError = DeleteMessageTemplateErrors[keyof DeleteMessageTemplateErrors];
+
+export type DeleteMessageTemplateResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteMessageTemplateResponse = DeleteMessageTemplateResponses[keyof DeleteMessageTemplateResponses];
+
+export type GetMessageTemplateData = {
+    body?: never;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/message-templates/{templateId}';
+};
+
+export type GetMessageTemplateErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetMessageTemplateError = GetMessageTemplateErrors[keyof GetMessageTemplateErrors];
+
+export type GetMessageTemplateResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationMessageTemplate;
+};
+
+export type GetMessageTemplateResponse = GetMessageTemplateResponses[keyof GetMessageTemplateResponses];
+
+export type UpdateMessageTemplateData = {
+    body: AssociationCoreCommunicationMessageTemplateUpdateRequest;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/message-templates/{templateId}';
+};
+
+export type UpdateMessageTemplateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateMessageTemplateError = UpdateMessageTemplateErrors[keyof UpdateMessageTemplateErrors];
+
+export type UpdateMessageTemplateResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationMessageTemplate;
+};
+
+export type UpdateMessageTemplateResponse = UpdateMessageTemplateResponses[keyof UpdateMessageTemplateResponses];
+
+export type PreviewMessageTemplateData = {
+    body: AssociationCoreCommunicationMessageTemplatePreviewRequest;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/association/message-templates/{templateId}/preview';
+};
+
+export type PreviewMessageTemplateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type PreviewMessageTemplateError = PreviewMessageTemplateErrors[keyof PreviewMessageTemplateErrors];
+
+export type PreviewMessageTemplateResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationMessageTemplatePreviewResponse;
+};
+
+export type PreviewMessageTemplateResponse = PreviewMessageTemplateResponses[keyof PreviewMessageTemplateResponses];
+
+export type SearchMessagesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Filter by channel.
+         */
+        channel?: AssociationCoreCommunicationChannel;
+        /**
+         * Filter by sender ID.
+         */
+        senderId?: string;
+        /**
+         * Filter by status.
+         */
+        status?: AssociationCoreCommunicationMessageStatus;
+        /**
+         * Messages scheduled on or after this timestamp.
+         */
+        scheduledAfter?: Date;
+    };
+    url: '/association/messages';
+};
+
+export type SearchMessagesErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchMessagesError = SearchMessagesErrors[keyof SearchMessagesErrors];
+
+export type SearchMessagesResponses = {
+    /**
+     * Success response with data
+     */
+    200: MessageListResponse;
+};
+
+export type SearchMessagesResponse = SearchMessagesResponses[keyof SearchMessagesResponses];
+
+export type CreateMessageData = {
+    body: AssociationCoreCommunicationMessageCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/messages';
+};
+
+export type CreateMessageErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateMessageError = CreateMessageErrors[keyof CreateMessageErrors];
+
+export type CreateMessageResponses = {
+    /**
+     * Resource created response
+     */
+    201: AssociationCoreCommunicationMessage;
+};
+
+export type CreateMessageResponse = CreateMessageResponses[keyof CreateMessageResponses];
+
+export type DeleteMessageData = {
+    body?: never;
+    path: {
+        messageId: string;
+    };
+    query?: never;
+    url: '/association/messages/{messageId}';
+};
+
+export type DeleteMessageErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteMessageError = DeleteMessageErrors[keyof DeleteMessageErrors];
+
+export type DeleteMessageResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteMessageResponse = DeleteMessageResponses[keyof DeleteMessageResponses];
+
+export type GetMessageData = {
+    body?: never;
+    path: {
+        messageId: string;
+    };
+    query?: never;
+    url: '/association/messages/{messageId}';
+};
+
+export type GetMessageErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetMessageError = GetMessageErrors[keyof GetMessageErrors];
+
+export type GetMessageResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationMessage;
+};
+
+export type GetMessageResponse = GetMessageResponses[keyof GetMessageResponses];
+
+export type UpdateMessageData = {
+    body: AssociationCoreCommunicationMessageCreateRequestUpdate;
+    path: {
+        messageId: string;
+    };
+    query?: never;
+    url: '/association/messages/{messageId}';
+};
+
+export type UpdateMessageErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateMessageError = UpdateMessageErrors[keyof UpdateMessageErrors];
+
+export type UpdateMessageResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationMessage;
+};
+
+export type UpdateMessageResponse = UpdateMessageResponses[keyof UpdateMessageResponses];
+
+export type CancelMessageData = {
+    body?: never;
+    path: {
+        messageId: string;
+    };
+    query?: never;
+    url: '/association/messages/{messageId}/cancel';
+};
+
+export type CancelMessageErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CancelMessageError = CancelMessageErrors[keyof CancelMessageErrors];
+
+export type CancelMessageResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationMessage;
+};
+
+export type CancelMessageResponse = CancelMessageResponses[keyof CancelMessageResponses];
+
+export type ScheduleMessageData = {
+    body: {
+        scheduledAt: Date;
+    };
+    path: {
+        messageId: string;
+    };
+    query?: never;
+    url: '/association/messages/{messageId}/schedule';
+};
+
+export type ScheduleMessageErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ScheduleMessageError = ScheduleMessageErrors[keyof ScheduleMessageErrors];
+
+export type ScheduleMessageResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationMessage;
+};
+
+export type ScheduleMessageResponse = ScheduleMessageResponses[keyof ScheduleMessageResponses];
+
+export type SendMessageData = {
+    body?: never;
+    path: {
+        messageId: string;
+    };
+    query?: never;
+    url: '/association/messages/{messageId}/send';
+};
+
+export type SendMessageErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type SendMessageError = SendMessageErrors[keyof SendMessageErrors];
+
+export type SendMessageResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationMessage;
+};
+
+export type SendMessageResponse = SendMessageResponses[keyof SendMessageResponses];
+
+export type ListPersonSubscriptionsData = {
+    body?: never;
+    path?: never;
+    query: {
+        personId: string;
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+    };
+    url: '/association/person-subscriptions';
+};
+
+export type ListPersonSubscriptionsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListPersonSubscriptionsError = ListPersonSubscriptionsErrors[keyof ListPersonSubscriptionsErrors];
+
+export type ListPersonSubscriptionsResponses = {
+    /**
+     * Success response with data
+     */
+    200: PersonSubscriptionListResponse;
+};
+
+export type ListPersonSubscriptionsResponse = ListPersonSubscriptionsResponses[keyof ListPersonSubscriptionsResponses];
+
+export type BulkUpdatePersonSubscriptionsData = {
+    body: AssociationCoreCommunicationPersonSubscriptionBulkUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/person-subscriptions/bulk-update';
+};
+
+export type BulkUpdatePersonSubscriptionsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type BulkUpdatePersonSubscriptionsError = BulkUpdatePersonSubscriptionsErrors[keyof BulkUpdatePersonSubscriptionsErrors];
+
+export type BulkUpdatePersonSubscriptionsResponses = {
+    /**
+     * Success response with data
+     */
+    200: Array<AssociationCoreCommunicationPersonSubscription>;
+};
+
+export type BulkUpdatePersonSubscriptionsResponse = BulkUpdatePersonSubscriptionsResponses[keyof BulkUpdatePersonSubscriptionsResponses];
+
+export type UpdatePersonSubscriptionData = {
+    body: {
+        enabled?: boolean;
+    };
+    path: {
+        subscriptionId: string;
+    };
+    query?: never;
+    url: '/association/person-subscriptions/{subscriptionId}';
+};
+
+export type UpdatePersonSubscriptionErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdatePersonSubscriptionError = UpdatePersonSubscriptionErrors[keyof UpdatePersonSubscriptionErrors];
+
+export type UpdatePersonSubscriptionResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationPersonSubscription;
+};
+
+export type UpdatePersonSubscriptionResponse = UpdatePersonSubscriptionResponses[keyof UpdatePersonSubscriptionResponses];
+
+export type CreateSubscriptionTopicData = {
+    body: AssociationCoreCommunicationSubscriptionTopicCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/subscription-topics';
+};
+
+export type CreateSubscriptionTopicErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateSubscriptionTopicError = CreateSubscriptionTopicErrors[keyof CreateSubscriptionTopicErrors];
+
+export type CreateSubscriptionTopicResponses = {
+    /**
+     * Resource created response
+     */
+    201: AssociationCoreCommunicationSubscriptionTopic;
+};
+
+export type CreateSubscriptionTopicResponse = CreateSubscriptionTopicResponses[keyof CreateSubscriptionTopicResponses];
+
+export type DeleteSubscriptionTopicData = {
+    body?: never;
+    path: {
+        topicId: string;
+    };
+    query?: never;
+    url: '/association/subscription-topics/{topicId}';
+};
+
+export type DeleteSubscriptionTopicErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteSubscriptionTopicError = DeleteSubscriptionTopicErrors[keyof DeleteSubscriptionTopicErrors];
+
+export type DeleteSubscriptionTopicResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteSubscriptionTopicResponse = DeleteSubscriptionTopicResponses[keyof DeleteSubscriptionTopicResponses];
+
+export type GetSubscriptionTopicData = {
+    body?: never;
+    path: {
+        topicId: string;
+    };
+    query?: never;
+    url: '/association/subscription-topics/{topicId}';
+};
+
+export type GetSubscriptionTopicErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetSubscriptionTopicError = GetSubscriptionTopicErrors[keyof GetSubscriptionTopicErrors];
+
+export type GetSubscriptionTopicResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationSubscriptionTopic;
+};
+
+export type GetSubscriptionTopicResponse = GetSubscriptionTopicResponses[keyof GetSubscriptionTopicResponses];
+
+export type UpdateSubscriptionTopicData = {
+    body: AssociationCoreCommunicationSubscriptionTopicCreateRequestUpdate;
+    path: {
+        topicId: string;
+    };
+    query?: never;
+    url: '/association/subscription-topics/{topicId}';
+};
+
+export type UpdateSubscriptionTopicErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateSubscriptionTopicError = UpdateSubscriptionTopicErrors[keyof UpdateSubscriptionTopicErrors];
+
+export type UpdateSubscriptionTopicResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationSubscriptionTopic;
+};
+
+export type UpdateSubscriptionTopicResponse = UpdateSubscriptionTopicResponses[keyof UpdateSubscriptionTopicResponses];
+
+export type SearchTrainingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        /**
+         * Filter by owning organization
+         */
+        organizationId?: string;
+        /**
+         * Filter by delivery format
+         */
+        type?: TrainingType;
+        /**
+         * Filter by status
+         */
+        status?: TrainingStatus;
+        /**
+         * Filter by start date lower bound
+         */
+        startDateFrom?: Date;
+        /**
+         * Filter by start date upper bound
+         */
+        startDateTo?: Date;
+    };
+    url: '/association/training';
+};
+
+export type SearchTrainingsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchTrainingsError = SearchTrainingsErrors[keyof SearchTrainingsErrors];
+
+export type SearchTrainingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingListResponse;
+};
+
+export type SearchTrainingsResponse = SearchTrainingsResponses[keyof SearchTrainingsResponses];
+
+export type CreateTrainingData = {
+    body: TrainingCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/training';
+};
+
+export type CreateTrainingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateTrainingError = CreateTrainingErrors[keyof CreateTrainingErrors];
+
+export type CreateTrainingResponses = {
+    /**
+     * Resource created response
+     */
+    201: unknown;
+};
+
+export type SearchCoursesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/training/courses';
+};
+
+export type SearchCoursesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchCoursesError = SearchCoursesErrors[keyof SearchCoursesErrors];
+
+export type SearchCoursesResponses = {
+    /**
+     * Success response with data
+     */
+    200: CourseListResponse;
+};
+
+export type SearchCoursesResponse = SearchCoursesResponses[keyof SearchCoursesResponses];
+
+export type CreateCourseData = {
+    body: CourseCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/training/courses';
+};
+
+export type CreateCourseErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateCourseError = CreateCourseErrors[keyof CreateCourseErrors];
+
+export type CreateCourseResponses = {
+    /**
+     * Resource created response
+     */
+    201: Course;
+};
+
+export type CreateCourseResponse = CreateCourseResponses[keyof CreateCourseResponses];
+
+export type SearchCourseEnrollmentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/training/courses/enrollments';
+};
+
+export type SearchCourseEnrollmentsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchCourseEnrollmentsError = SearchCourseEnrollmentsErrors[keyof SearchCourseEnrollmentsErrors];
+
+export type SearchCourseEnrollmentsResponses = {
+    /**
+     * Success response with data
+     */
+    200: CourseEnrollmentListResponse;
+};
+
+export type SearchCourseEnrollmentsResponse = SearchCourseEnrollmentsResponses[keyof SearchCourseEnrollmentsResponses];
+
+export type CreateCourseEnrollmentData = {
+    body: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/association/training/courses/enrollments';
+};
+
+export type CreateCourseEnrollmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateCourseEnrollmentError = CreateCourseEnrollmentErrors[keyof CreateCourseEnrollmentErrors];
+
+export type CreateCourseEnrollmentResponses = {
+    /**
+     * Resource created response
+     */
+    201: CourseEnrollment;
+};
+
+export type CreateCourseEnrollmentResponse = CreateCourseEnrollmentResponses[keyof CreateCourseEnrollmentResponses];
+
+export type DeleteCourseEnrollmentData = {
+    body?: never;
+    path: {
+        enrollmentId: string;
+    };
+    query?: never;
+    url: '/association/training/courses/enrollments/{enrollmentId}';
+};
+
+export type DeleteCourseEnrollmentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteCourseEnrollmentError = DeleteCourseEnrollmentErrors[keyof DeleteCourseEnrollmentErrors];
+
+export type DeleteCourseEnrollmentResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteCourseEnrollmentResponse = DeleteCourseEnrollmentResponses[keyof DeleteCourseEnrollmentResponses];
+
+export type GetCourseEnrollmentData = {
+    body?: never;
+    path: {
+        enrollmentId: string;
+    };
+    query?: never;
+    url: '/association/training/courses/enrollments/{enrollmentId}';
+};
+
+export type GetCourseEnrollmentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetCourseEnrollmentError = GetCourseEnrollmentErrors[keyof GetCourseEnrollmentErrors];
+
+export type GetCourseEnrollmentResponses = {
+    /**
+     * Success response with data
+     */
+    200: CourseEnrollment;
+};
+
+export type GetCourseEnrollmentResponse = GetCourseEnrollmentResponses[keyof GetCourseEnrollmentResponses];
+
+export type UpdateCourseEnrollmentData = {
+    body: {
+        [key: string]: unknown;
+    };
+    path: {
+        enrollmentId: string;
+    };
+    query?: never;
+    url: '/association/training/courses/enrollments/{enrollmentId}';
+};
+
+export type UpdateCourseEnrollmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateCourseEnrollmentError = UpdateCourseEnrollmentErrors[keyof UpdateCourseEnrollmentErrors];
+
+export type UpdateCourseEnrollmentResponses = {
+    /**
+     * Success response with data
+     */
+    200: CourseEnrollment;
+};
+
+export type UpdateCourseEnrollmentResponse = UpdateCourseEnrollmentResponses[keyof UpdateCourseEnrollmentResponses];
+
+export type UpdateCourseProgressData = {
+    body: CourseProgressUpdateRequest;
+    path: {
+        enrollmentId: string;
+    };
+    query?: never;
+    url: '/association/training/courses/enrollments/{enrollmentId}/progress';
+};
+
+export type UpdateCourseProgressErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateCourseProgressError = UpdateCourseProgressErrors[keyof UpdateCourseProgressErrors];
+
+export type UpdateCourseProgressResponses = {
+    /**
+     * Success response with data
+     */
+    200: CourseEnrollment;
+};
+
+export type UpdateCourseProgressResponse = UpdateCourseProgressResponses[keyof UpdateCourseProgressResponses];
+
+export type SearchQuizAttemptsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        /**
+         * Filter by course
+         */
+        courseId?: string;
+        /**
+         * Filter by person
+         */
+        personId?: string;
+        /**
+         * Filter to only passed attempts
+         */
+        passed?: boolean;
+    };
+    url: '/association/training/courses/quiz-attempts';
+};
+
+export type SearchQuizAttemptsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchQuizAttemptsError = SearchQuizAttemptsErrors[keyof SearchQuizAttemptsErrors];
+
+export type SearchQuizAttemptsResponses = {
+    /**
+     * Success response with data
+     */
+    200: QuizAttemptListResponse;
+};
+
+export type SearchQuizAttemptsResponse = SearchQuizAttemptsResponses[keyof SearchQuizAttemptsResponses];
+
+export type CreateQuizAttemptData = {
+    body: QuizAttemptCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/training/courses/quiz-attempts';
+};
+
+export type CreateQuizAttemptErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateQuizAttemptError = CreateQuizAttemptErrors[keyof CreateQuizAttemptErrors];
+
+export type CreateQuizAttemptResponses = {
+    /**
+     * Resource created response
+     */
+    201: QuizAttempt;
+};
+
+export type CreateQuizAttemptResponse = CreateQuizAttemptResponses[keyof CreateQuizAttemptResponses];
+
+export type DeleteCourseData = {
+    body?: never;
+    path: {
+        courseId: string;
+    };
+    query?: never;
+    url: '/association/training/courses/{courseId}';
+};
+
+export type DeleteCourseErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteCourseError = DeleteCourseErrors[keyof DeleteCourseErrors];
+
+export type DeleteCourseResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteCourseResponse = DeleteCourseResponses[keyof DeleteCourseResponses];
+
+export type GetCourseData = {
+    body?: never;
+    path: {
+        courseId: string;
+    };
+    query?: never;
+    url: '/association/training/courses/{courseId}';
+};
+
+export type GetCourseErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetCourseError = GetCourseErrors[keyof GetCourseErrors];
+
+export type GetCourseResponses = {
+    /**
+     * Success response with data
+     */
+    200: Course;
+};
+
+export type GetCourseResponse = GetCourseResponses[keyof GetCourseResponses];
+
+export type UpdateCourseData = {
+    body: {
+        [key: string]: unknown;
+    };
+    path: {
+        courseId: string;
+    };
+    query?: never;
+    url: '/association/training/courses/{courseId}';
+};
+
+export type UpdateCourseErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateCourseError = UpdateCourseErrors[keyof UpdateCourseErrors];
+
+export type UpdateCourseResponses = {
+    /**
+     * Success response with data
+     */
+    200: Course;
+};
+
+export type UpdateCourseResponse = UpdateCourseResponses[keyof UpdateCourseResponses];
+
+export type SearchTrainingEnrollmentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        /**
+         * Filter by training session
+         */
+        trainingId?: string;
+        /**
+         * Filter by person
+         */
+        personId?: string;
+        /**
+         * Filter by enrollment status
+         */
+        status?: TrainingEnrollmentStatus;
+    };
+    url: '/association/training/enrollments';
+};
+
+export type SearchTrainingEnrollmentsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SearchTrainingEnrollmentsError = SearchTrainingEnrollmentsErrors[keyof SearchTrainingEnrollmentsErrors];
+
+export type SearchTrainingEnrollmentsResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingEnrollmentListResponse;
+};
+
+export type SearchTrainingEnrollmentsResponse = SearchTrainingEnrollmentsResponses[keyof SearchTrainingEnrollmentsResponses];
+
+export type CreateTrainingEnrollmentData = {
+    body: TrainingEnrollmentCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/training/enrollments';
+};
+
+export type CreateTrainingEnrollmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateTrainingEnrollmentError = CreateTrainingEnrollmentErrors[keyof CreateTrainingEnrollmentErrors];
+
+export type CreateTrainingEnrollmentResponses = {
+    /**
+     * Resource created response
+     */
+    201: TrainingEnrollment;
+};
+
+export type CreateTrainingEnrollmentResponse = CreateTrainingEnrollmentResponses[keyof CreateTrainingEnrollmentResponses];
+
+export type DeleteTrainingEnrollmentData = {
+    body?: never;
+    path: {
+        enrollmentId: string;
+    };
+    query?: never;
+    url: '/association/training/enrollments/{enrollmentId}';
+};
+
+export type DeleteTrainingEnrollmentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteTrainingEnrollmentError = DeleteTrainingEnrollmentErrors[keyof DeleteTrainingEnrollmentErrors];
+
+export type DeleteTrainingEnrollmentResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteTrainingEnrollmentResponse = DeleteTrainingEnrollmentResponses[keyof DeleteTrainingEnrollmentResponses];
+
+export type GetTrainingEnrollmentData = {
+    body?: never;
+    path: {
+        enrollmentId: string;
+    };
+    query?: never;
+    url: '/association/training/enrollments/{enrollmentId}';
+};
+
+export type GetTrainingEnrollmentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetTrainingEnrollmentError = GetTrainingEnrollmentErrors[keyof GetTrainingEnrollmentErrors];
+
+export type GetTrainingEnrollmentResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingEnrollment;
+};
+
+export type GetTrainingEnrollmentResponse = GetTrainingEnrollmentResponses[keyof GetTrainingEnrollmentResponses];
+
+export type UpdateTrainingEnrollmentData = {
+    body: {
+        [key: string]: unknown;
+    };
+    path: {
+        enrollmentId: string;
+    };
+    query?: never;
+    url: '/association/training/enrollments/{enrollmentId}';
+};
+
+export type UpdateTrainingEnrollmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateTrainingEnrollmentError = UpdateTrainingEnrollmentErrors[keyof UpdateTrainingEnrollmentErrors];
+
+export type UpdateTrainingEnrollmentResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingEnrollment;
+};
+
+export type UpdateTrainingEnrollmentResponse = UpdateTrainingEnrollmentResponses[keyof UpdateTrainingEnrollmentResponses];
+
+export type CompleteTrainingEnrollmentData = {
+    body: TrainingEnrollmentCompleteRequest;
+    path: {
+        enrollmentId: string;
+    };
+    query?: never;
+    url: '/association/training/enrollments/{enrollmentId}/complete';
+};
+
+export type CompleteTrainingEnrollmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CompleteTrainingEnrollmentError = CompleteTrainingEnrollmentErrors[keyof CompleteTrainingEnrollmentErrors];
+
+export type CompleteTrainingEnrollmentResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingEnrollment;
+};
+
+export type CompleteTrainingEnrollmentResponse = CompleteTrainingEnrollmentResponses[keyof CompleteTrainingEnrollmentResponses];
+
+export type DeleteTrainingData = {
+    body?: never;
+    path: {
+        trainingId: string;
+    };
+    query?: never;
+    url: '/association/training/{trainingId}';
+};
+
+export type DeleteTrainingErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteTrainingError = DeleteTrainingErrors[keyof DeleteTrainingErrors];
+
+export type DeleteTrainingResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteTrainingResponse = DeleteTrainingResponses[keyof DeleteTrainingResponses];
+
+export type GetTrainingData = {
+    body?: never;
+    path: {
+        trainingId: string;
+    };
+    query?: never;
+    url: '/association/training/{trainingId}';
+};
+
+export type GetTrainingErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetTrainingError = GetTrainingErrors[keyof GetTrainingErrors];
+
+export type GetTrainingResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type UpdateTrainingData = {
+    body: TrainingUpdateRequest;
+    path: {
+        trainingId: string;
+    };
+    query?: never;
+    url: '/association/training/{trainingId}';
+};
+
+export type UpdateTrainingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateTrainingError = UpdateTrainingErrors[keyof UpdateTrainingErrors];
+
+export type UpdateTrainingResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type PublishTrainingData = {
+    body?: never;
+    path: {
+        trainingId: string;
+    };
+    query?: never;
+    url: '/association/training/{trainingId}/publish';
+};
+
+export type PublishTrainingErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type PublishTrainingError = PublishTrainingErrors[keyof PublishTrainingErrors];
+
+export type PublishTrainingResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type ListAuditLogsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by resource type (e.g., 'booking', 'client', 'service_provider')
+         */
+        resourceType?: SafeQueryString;
+        /**
+         * Filter by specific resource UUID
+         */
+        resource?: Uuid;
+        /**
+         * Filter by user UUID who performed the action
+         */
+        user?: Uuid;
+        /**
+         * Filter by action type (create, read, update, delete, login, logout)
+         */
+        action?: AuditAction;
+        /**
+         * Start date for filtering audit logs (inclusive)
+         */
+        startDate?: StrictUtcDateTime;
+        /**
+         * End date for filtering audit logs (inclusive)
+         */
+        endDate?: StrictUtcDateTime;
+        /**
+         * Order by field (e.g., 'desc(created_at)', 'asc(created_at)')
+         */
+        orderBy?: SafeQueryString;
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
     };
     url: '/audit/logs';
 };
@@ -4061,51 +35301,9 @@ export type ListAuditLogsError = ListAuditLogsErrors[keyof ListAuditLogsErrors];
 
 export type ListAuditLogsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<AuditLogEntry>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: AuditLogEntryListResponse;
 };
 
 export type ListAuditLogsResponse = ListAuditLogsResponses[keyof ListAuditLogsResponses];
@@ -4117,7 +35315,7 @@ export type ListInvoicesData = {
         customer?: Uuid;
         merchant?: Uuid;
         status?: InvoiceStatus;
-        context?: string;
+        context?: SafeQueryString;
         /**
          * Number of items to skip
          */
@@ -4137,11 +35335,11 @@ export type ListInvoicesData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/billing/invoices';
 };
@@ -4157,51 +35355,9 @@ export type ListInvoicesError = ListInvoicesErrors[keyof ListInvoicesErrors];
 
 export type ListInvoicesResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<Invoice>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: InvoiceListResponse;
 };
 
 export type ListInvoicesResponse = ListInvoicesResponses[keyof ListInvoicesResponses];
@@ -4749,11 +35905,11 @@ export type ListBookingsData = {
         /**
          * Start date for filtering bookings (inclusive)
          */
-        startDate?: Date;
+        startDate?: StrictUtcDateTime;
         /**
          * End date for filtering bookings (inclusive)
          */
-        endDate?: Date;
+        endDate?: StrictUtcDateTime;
         /**
          * Comma-separated list of related entities to expand (e.g., 'customer,merchant')
          */
@@ -4777,11 +35933,11 @@ export type ListBookingsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/booking/bookings';
 };
@@ -4801,51 +35957,9 @@ export type ListBookingsError = ListBookingsErrors[keyof ListBookingsErrors];
 
 export type ListBookingsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<Booking>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: BookingListResponse;
 };
 
 export type ListBookingsResponse = ListBookingsResponses[keyof ListBookingsResponses];
@@ -5074,7 +36188,7 @@ export type ListBookingEventsData = {
         /**
          * Filter by context
          */
-        context?: string;
+        context?: SafeQueryString;
         /**
          * Filter by location type
          */
@@ -5086,11 +36200,11 @@ export type ListBookingEventsData = {
         /**
          * Filter by availability start time (UTC, ISO 8601 format)
          */
-        availableFrom?: Date;
+        availableFrom?: StrictUtcDateTime;
         /**
          * Filter by availability end time (UTC, ISO 8601 format)
          */
-        availableTo?: Date;
+        availableTo?: StrictUtcDateTime;
         /**
          * Filter by tags. Supports OR filtering (comma-separated: 'tag1,tag2') or AND filtering (repeated parameter: ?tags=tag1&tags=tag2)
          */
@@ -5118,11 +36232,11 @@ export type ListBookingEventsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/booking/events';
 };
@@ -5138,51 +36252,9 @@ export type ListBookingEventsError = ListBookingEventsErrors[keyof ListBookingEv
 
 export type ListBookingEventsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<BookingEvent>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: BookingEventListResponse;
 };
 
 export type ListBookingEventsResponse = ListBookingEventsResponses[keyof ListBookingEventsResponses];
@@ -5271,6 +36343,14 @@ export type GetBookingEventData = {
 
 export type GetBookingEventErrors = {
     /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
      * Resource not found response
      */
     404: NotFoundError;
@@ -5351,11 +36431,11 @@ export type ListScheduleExceptionsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/booking/events/{event}/exceptions';
 };
@@ -5379,51 +36459,9 @@ export type ListScheduleExceptionsError = ListScheduleExceptionsErrors[keyof Lis
 
 export type ListScheduleExceptionsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<ScheduleException>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: ScheduleExceptionListResponse;
 };
 
 export type ListScheduleExceptionsResponse = ListScheduleExceptionsResponses[keyof ListScheduleExceptionsResponses];
@@ -5541,14 +36579,18 @@ export type ListEventSlotsData = {
         event: Uuid;
     };
     query?: {
-        startTime?: Date;
-        endTime?: Date;
+        startTime?: StrictUtcDateTime;
+        endTime?: StrictUtcDateTime;
         status?: SlotStatus;
     };
     url: '/booking/events/{event}/slots';
 };
 
 export type ListEventSlotsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
     /**
      * Resource not found response
      */
@@ -5581,6 +36623,10 @@ export type GetTimeSlotData = {
 };
 
 export type GetTimeSlotErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
     /**
      * Resource not found response
      */
@@ -5637,11 +36683,11 @@ export type ListChatRoomsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/comms/chat-rooms';
 };
@@ -5657,51 +36703,9 @@ export type ListChatRoomsError = ListChatRoomsErrors[keyof ListChatRoomsErrors];
 
 export type ListChatRoomsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<ChatRoom>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: ChatRoomListResponse;
 };
 
 export type ListChatRoomsResponse = ListChatRoomsResponses[keyof ListChatRoomsResponses];
@@ -5758,6 +36762,10 @@ export type GetChatRoomData = {
 
 export type GetChatRoomErrors = {
     /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
      * Forbidden access response
      */
     403: AuthorizationError;
@@ -5807,16 +36815,20 @@ export type GetChatMessagesData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/comms/chat-rooms/{room}/messages';
 };
 
 export type GetChatMessagesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
     /**
      * Forbidden access response
      */
@@ -5831,51 +36843,9 @@ export type GetChatMessagesError = GetChatMessagesErrors[keyof GetChatMessagesEr
 
 export type GetChatMessagesResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<ChatMessage>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: ChatMessageListResponse;
 };
 
 export type GetChatMessagesResponse = GetChatMessagesResponses[keyof GetChatMessagesResponses];
@@ -5894,6 +36864,10 @@ export type SendChatMessageErrors = {
      * Validation error response
      */
     400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
     /**
      * Forbidden access response
      */
@@ -5926,6 +36900,10 @@ export type EndVideoCallData = {
 
 export type EndVideoCallErrors = {
     /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
      * Forbidden access response
      */
     403: AuthorizationError;
@@ -5956,6 +36934,10 @@ export type JoinVideoCallData = {
 };
 
 export type JoinVideoCallErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
     /**
      * Forbidden access response
      */
@@ -5992,6 +36974,10 @@ export type LeaveVideoCallData = {
 
 export type LeaveVideoCallErrors = {
     /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
      * Forbidden access response
      */
     403: AuthorizationError;
@@ -6022,6 +37008,10 @@ export type UpdateVideoCallParticipantData = {
 };
 
 export type UpdateVideoCallParticipantErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
     /**
      * Forbidden access response
      */
@@ -6083,11 +37073,11 @@ export type ListEmailQueueItemsData = {
         /**
          * Start date for filtering queue items (inclusive)
          */
-        dateFrom?: Date;
+        dateFrom?: StrictUtcDateTime;
         /**
          * End date for filtering queue items (inclusive)
          */
-        dateTo?: Date;
+        dateTo?: StrictUtcDateTime;
         /**
          * Filter by priority level (1-10, lower is higher priority)
          */
@@ -6115,11 +37105,11 @@ export type ListEmailQueueItemsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/email/queue';
 };
@@ -6139,51 +37129,9 @@ export type ListEmailQueueItemsError = ListEmailQueueItemsErrors[keyof ListEmail
 
 export type ListEmailQueueItemsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<EmailQueueItem>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: EmailQueueItemListResponse;
 };
 
 export type ListEmailQueueItemsResponse = ListEmailQueueItemsResponses[keyof ListEmailQueueItemsResponses];
@@ -6332,11 +37280,11 @@ export type ListEmailTemplatesData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/email/templates';
 };
@@ -6356,51 +37304,9 @@ export type ListEmailTemplatesError = ListEmailTemplatesErrors[keyof ListEmailTe
 
 export type ListEmailTemplatesResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<EmailTemplate>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: EmailTemplateListResponse;
 };
 
 export type ListEmailTemplatesResponse = ListEmailTemplatesResponses[keyof ListEmailTemplatesResponses];
@@ -6574,11 +37480,11 @@ export type ListNotificationsData = {
         /**
          * Start date for filtering notifications (inclusive)
          */
-        startDate?: Date;
+        startDate?: StrictUtcDateTime;
         /**
          * End date for filtering notifications (inclusive)
          */
-        endDate?: Date;
+        endDate?: StrictUtcDateTime;
         /**
          * Number of items to skip
          */
@@ -6598,11 +37504,11 @@ export type ListNotificationsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/notifs';
 };
@@ -6626,51 +37532,9 @@ export type ListNotificationsError = ListNotificationsErrors[keyof ListNotificat
 
 export type ListNotificationsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<Notification>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: NotificationListResponse;
 };
 
 export type ListNotificationsResponse = ListNotificationsResponses[keyof ListNotificationsResponses];
@@ -6807,11 +37671,11 @@ export type ListPersonsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/persons';
 };
@@ -6831,51 +37695,9 @@ export type ListPersonsError = ListPersonsErrors[keyof ListPersonsErrors];
 
 export type ListPersonsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<Person>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: PersonListResponse;
 };
 
 export type ListPersonsResponse = ListPersonsResponses[keyof ListPersonsResponses];
@@ -6931,6 +37753,10 @@ export type GetPersonData = {
 
 export type GetPersonErrors = {
     /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
      * Forbidden access response
      */
     403: AuthorizationError;
@@ -6965,6 +37791,10 @@ export type UpdatePersonErrors = {
      * Validation error response
      */
     400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
     /**
      * Forbidden access response
      */
@@ -7001,7 +37831,7 @@ export type ListReviewsData = {
         /**
          * Filter by review type
          */
-        reviewType?: string;
+        reviewType?: SafeQueryString;
         /**
          * Filter by reviewed entity person ID
          */
@@ -7025,11 +37855,11 @@ export type ListReviewsData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/reviews/';
 };
@@ -7049,51 +37879,9 @@ export type ListReviewsError = ListReviewsErrors[keyof ListReviewsErrors];
 
 export type ListReviewsResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<Review>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: ReviewListResponse;
 };
 
 export type ListReviewsResponse = ListReviewsResponses[keyof ListReviewsResponses];
@@ -7236,11 +38024,11 @@ export type ListFilesData = {
         /**
          * Search query string
          */
-        q?: string;
+        q?: SafeQueryString;
         /**
          * Sort specifications (comma-separated field:direction pairs)
          */
-        sort?: string;
+        sort?: SafeQueryString;
     };
     url: '/storage/files';
 };
@@ -7256,51 +38044,9 @@ export type ListFilesError = ListFilesErrors[keyof ListFilesErrors];
 
 export type ListFilesResponses = {
     /**
-     * Offset-based paginated response with page navigation
+     * Success response with data
      */
-    200: {
-        /**
-         * Response data items
-         */
-        data: Array<StoredFile>;
-        /**
-         * Pagination metadata
-         */
-        pagination: {
-            /**
-             * Current offset
-             */
-            offset: number;
-            /**
-             * Items per page
-             */
-            limit: number;
-            /**
-             * Number of items in current page
-             */
-            count: number;
-            /**
-             * Total number of items
-             */
-            totalCount: number;
-            /**
-             * Total number of pages
-             */
-            totalPages: number;
-            /**
-             * Current page number (1-based)
-             */
-            currentPage: number;
-            /**
-             * Whether there are more pages
-             */
-            hasNextPage: boolean;
-            /**
-             * Whether there are previous pages
-             */
-            hasPreviousPage: boolean;
-        };
-    };
+    200: StoredFileListResponse;
 };
 
 export type ListFilesResponse = ListFilesResponses[keyof ListFilesResponses];

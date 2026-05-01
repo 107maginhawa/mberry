@@ -8,6 +8,1216 @@ import { validationErrorHandler } from '@/middleware/validation';
 import { createExpandMiddleware } from '@/middleware/expand';
 
 export function registerRoutes(app: Hono<{ Variables: Variables }>) {
+  // createDocumentTag
+  app.post('/association/document-tags',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('json', validators.CreateDocumentTagBody, validationErrorHandler),
+    registry.createDocumentTag as unknown as Handler
+  );
+
+  // listDocumentTags
+  app.get('/association/document-tags',
+    authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    zValidator('query', validators.ListDocumentTagsQuery, validationErrorHandler),
+    registry.listDocumentTags as unknown as Handler
+  );
+
+  // getDocumentTag
+  app.get('/association/document-tags/:tagId',
+    authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    zValidator('param', validators.GetDocumentTagParams, validationErrorHandler),
+    registry.getDocumentTag as unknown as Handler
+  );
+
+  // updateDocumentTag
+  app.patch('/association/document-tags/:tagId',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.UpdateDocumentTagParams, validationErrorHandler),
+    zValidator('json', validators.UpdateDocumentTagBody, validationErrorHandler),
+    registry.updateDocumentTag as unknown as Handler
+  );
+
+  // deleteDocumentTag
+  app.delete('/association/document-tags/:tagId',
+    authMiddleware({ roles: ["admin"] }),
+    zValidator('param', validators.DeleteDocumentTagParams, validationErrorHandler),
+    registry.deleteDocumentTag as unknown as Handler
+  );
+
+  // createDocument
+  app.post('/association/documents',
+    authMiddleware({ roles: ["admin", "coordinator", "member:owner"] }),
+    zValidator('json', validators.CreateDocumentBody, validationErrorHandler),
+    registry.createDocument as unknown as Handler
+  );
+
+  // searchDocuments
+  app.get('/association/documents',
+    authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    zValidator('query', validators.SearchDocumentsQuery, validationErrorHandler),
+    registry.searchDocuments as unknown as Handler
+  );
+
+  // getDocument
+  app.get('/association/documents/:documentId',
+    authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    zValidator('param', validators.GetDocumentParams, validationErrorHandler),
+    registry.getDocument as unknown as Handler
+  );
+
+  // updateDocument
+  app.patch('/association/documents/:documentId',
+    authMiddleware({ roles: ["admin", "coordinator", "member:owner"] }),
+    zValidator('param', validators.UpdateDocumentParams, validationErrorHandler),
+    zValidator('json', validators.UpdateDocumentBody, validationErrorHandler),
+    registry.updateDocument as unknown as Handler
+  );
+
+  // deleteDocument
+  app.delete('/association/documents/:documentId',
+    authMiddleware({ roles: ["admin", "member:owner"] }),
+    zValidator('param', validators.DeleteDocumentParams, validationErrorHandler),
+    registry.deleteDocument as unknown as Handler
+  );
+
+  // getDocumentAccessLog
+  app.get('/association/documents/:documentId/access-log',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.GetDocumentAccessLogParams, validationErrorHandler),
+    zValidator('query', validators.GetDocumentAccessLogQuery, validationErrorHandler),
+    registry.getDocumentAccessLog as unknown as Handler
+  );
+
+  // archiveDocument
+  app.post('/association/documents/:documentId/archive',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.ArchiveDocumentParams, validationErrorHandler),
+    registry.archiveDocument as unknown as Handler
+  );
+
+  // uploadNewDocumentVersion
+  app.post('/association/documents/:documentId/versions',
+    authMiddleware({ roles: ["admin", "coordinator", "member:owner"] }),
+    zValidator('param', validators.UploadNewDocumentVersionParams, validationErrorHandler),
+    zValidator('json', validators.UploadNewDocumentVersionBody, validationErrorHandler),
+    registry.uploadNewDocumentVersion as unknown as Handler
+  );
+
+  // listDocumentVersions
+  app.get('/association/documents/:documentId/versions',
+    authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    zValidator('param', validators.ListDocumentVersionsParams, validationErrorHandler),
+    zValidator('query', validators.ListDocumentVersionsQuery, validationErrorHandler),
+    registry.listDocumentVersions as unknown as Handler
+  );
+
+  // getDocumentVersion
+  app.get('/association/documents/:documentId/versions/:versionId',
+    authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    zValidator('param', validators.GetDocumentVersionParams, validationErrorHandler),
+    registry.getDocumentVersion as unknown as Handler
+  );
+
+  // createEvent
+  app.post('/association/events',
+    zValidator('json', validators.CreateEventBody, validationErrorHandler),
+    registry.createEvent as unknown as Handler
+  );
+
+  // searchEvents
+  app.get('/association/events',
+    zValidator('query', validators.SearchEventsQuery, validationErrorHandler),
+    registry.searchEvents as unknown as Handler
+  );
+
+  // createCheckIn
+  app.post('/association/events/checkins',
+    zValidator('json', validators.CreateCheckInBody, validationErrorHandler),
+    registry.createCheckIn as unknown as Handler
+  );
+
+  // searchCheckIns
+  app.get('/association/events/checkins',
+    zValidator('query', validators.SearchCheckInsQuery, validationErrorHandler),
+    registry.searchCheckIns as unknown as Handler
+  );
+
+  // createEventRegistration
+  app.post('/association/events/registrations',
+    zValidator('json', validators.CreateEventRegistrationBody, validationErrorHandler),
+    registry.createEventRegistration as unknown as Handler
+  );
+
+  // searchEventRegistrations
+  app.get('/association/events/registrations',
+    zValidator('query', validators.SearchEventRegistrationsQuery, validationErrorHandler),
+    registry.searchEventRegistrations as unknown as Handler
+  );
+
+  // getEventRegistration
+  app.get('/association/events/registrations/:registrationId',
+    zValidator('param', validators.GetEventRegistrationParams, validationErrorHandler),
+    registry.getEventRegistration as unknown as Handler
+  );
+
+  // updateEventRegistration
+  app.patch('/association/events/registrations/:registrationId',
+    zValidator('param', validators.UpdateEventRegistrationParams, validationErrorHandler),
+    zValidator('json', validators.UpdateEventRegistrationBody, validationErrorHandler),
+    registry.updateEventRegistration as unknown as Handler
+  );
+
+  // deleteEventRegistration
+  app.delete('/association/events/registrations/:registrationId',
+    zValidator('param', validators.DeleteEventRegistrationParams, validationErrorHandler),
+    registry.deleteEventRegistration as unknown as Handler
+  );
+
+  // cancelEventRegistration
+  app.post('/association/events/registrations/:registrationId/cancel',
+    zValidator('param', validators.CancelEventRegistrationParams, validationErrorHandler),
+    registry.cancelEventRegistration as unknown as Handler
+  );
+
+  // refundEventRegistration
+  app.post('/association/events/registrations/:registrationId/refund',
+    zValidator('param', validators.RefundEventRegistrationParams, validationErrorHandler),
+    registry.refundEventRegistration as unknown as Handler
+  );
+
+  // getEvent
+  app.get('/association/events/:eventId',
+    zValidator('param', validators.GetEventParams, validationErrorHandler),
+    registry.getEvent as unknown as Handler
+  );
+
+  // updateEvent
+  app.patch('/association/events/:eventId',
+    zValidator('param', validators.UpdateEventParams, validationErrorHandler),
+    zValidator('json', validators.UpdateEventBody, validationErrorHandler),
+    registry.updateEvent as unknown as Handler
+  );
+
+  // deleteEvent
+  app.delete('/association/events/:eventId',
+    zValidator('param', validators.DeleteEventParams, validationErrorHandler),
+    registry.deleteEvent as unknown as Handler
+  );
+
+  // cancelEvent
+  app.post('/association/events/:eventId/cancel',
+    zValidator('param', validators.CancelEventParams, validationErrorHandler),
+    registry.cancelEvent as unknown as Handler
+  );
+
+  // publishEvent
+  app.post('/association/events/:eventId/publish',
+    zValidator('param', validators.PublishEventParams, validationErrorHandler),
+    registry.publishEvent as unknown as Handler
+  );
+
+  // listWaitlistEntries
+  app.get('/association/events/:eventId/waitlist',
+    zValidator('param', validators.ListWaitlistEntriesParams, validationErrorHandler),
+    zValidator('query', validators.ListWaitlistEntriesQuery, validationErrorHandler),
+    registry.listWaitlistEntries as unknown as Handler
+  );
+
+  // promoteWaitlistEntry
+  app.post('/association/events/:eventId/waitlist/:entryId/promote',
+    zValidator('param', validators.PromoteWaitlistEntryParams, validationErrorHandler),
+    registry.promoteWaitlistEntry as unknown as Handler
+  );
+
+  // createAffiliationTransfer
+  app.post('/association/member/affiliation-transfers',
+    authMiddleware({ roles: ["association:member:owner", "association:admin"] }),
+    zValidator('json', validators.CreateAffiliationTransferBody, validationErrorHandler),
+    registry.createAffiliationTransfer as unknown as Handler
+  );
+
+  // listAffiliationTransfers
+  app.get('/association/member/affiliation-transfers',
+    authMiddleware({ roles: ["association:admin", "chapter:officer"] }),
+    zValidator('query', validators.ListAffiliationTransfersQuery, validationErrorHandler),
+    registry.listAffiliationTransfers as unknown as Handler
+  );
+
+  // getAffiliationTransfer
+  app.get('/association/member/affiliation-transfers/:transferId',
+    authMiddleware({ roles: ["association:admin", "chapter:officer"] }),
+    zValidator('param', validators.GetAffiliationTransferParams, validationErrorHandler),
+    registry.getAffiliationTransfer as unknown as Handler
+  );
+
+  // approveTransferBySource
+  app.post('/association/member/affiliation-transfers/:transferId/approve-source',
+    authMiddleware({ roles: ["association:admin", "chapter:officer"] }),
+    zValidator('param', validators.ApproveTransferBySourceParams, validationErrorHandler),
+    zValidator('json', validators.ApproveTransferBySourceBody, validationErrorHandler),
+    registry.approveTransferBySource as unknown as Handler
+  );
+
+  // approveTransferByTarget
+  app.post('/association/member/affiliation-transfers/:transferId/approve-target',
+    authMiddleware({ roles: ["association:admin", "chapter:officer"] }),
+    zValidator('param', validators.ApproveTransferByTargetParams, validationErrorHandler),
+    zValidator('json', validators.ApproveTransferByTargetBody, validationErrorHandler),
+    registry.approveTransferByTarget as unknown as Handler
+  );
+
+  // completeAffiliationTransfer
+  app.post('/association/member/affiliation-transfers/:transferId/complete',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.CompleteAffiliationTransferParams, validationErrorHandler),
+    registry.completeAffiliationTransfer as unknown as Handler
+  );
+
+  // denyAffiliationTransfer
+  app.post('/association/member/affiliation-transfers/:transferId/deny',
+    authMiddleware({ roles: ["association:admin", "chapter:officer"] }),
+    zValidator('param', validators.DenyAffiliationTransferParams, validationErrorHandler),
+    zValidator('json', validators.DenyAffiliationTransferBody, validationErrorHandler),
+    registry.denyAffiliationTransfer as unknown as Handler
+  );
+
+  // getAgingBucket
+  app.get('/association/member/aging-buckets/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetAgingBucketParams, validationErrorHandler),
+    registry.getAgingBucket as unknown as Handler
+  );
+
+  // recalculateAgingBucket
+  app.post('/association/member/aging-buckets/:organizationId/recalculate',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.RecalculateAgingBucketParams, validationErrorHandler),
+    registry.recalculateAgingBucket as unknown as Handler
+  );
+
+  // createMembershipApplication
+  app.post('/association/member/applications',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.CreateMembershipApplicationBody, validationErrorHandler),
+    registry.createMembershipApplication as unknown as Handler
+  );
+
+  // listMembershipApplications
+  app.get('/association/member/applications',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListMembershipApplicationsQuery, validationErrorHandler),
+    registry.listMembershipApplications as unknown as Handler
+  );
+
+  // getMembershipApplication
+  app.get('/association/member/applications/:applicationId',
+    authMiddleware({ roles: ["association:admin", "user:owner"] }),
+    zValidator('param', validators.GetMembershipApplicationParams, validationErrorHandler),
+    registry.getMembershipApplication as unknown as Handler
+  );
+
+  // updateMembershipApplication
+  app.patch('/association/member/applications/:applicationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateMembershipApplicationParams, validationErrorHandler),
+    zValidator('json', validators.UpdateMembershipApplicationBody, validationErrorHandler),
+    registry.updateMembershipApplication as unknown as Handler
+  );
+
+  // deleteMembershipApplication
+  app.delete('/association/member/applications/:applicationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteMembershipApplicationParams, validationErrorHandler),
+    registry.deleteMembershipApplication as unknown as Handler
+  );
+
+  // approveMembershipApplication
+  app.post('/association/member/applications/:applicationId/approve',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.ApproveMembershipApplicationParams, validationErrorHandler),
+    registry.approveMembershipApplication as unknown as Handler
+  );
+
+  // denyMembershipApplication
+  app.post('/association/member/applications/:applicationId/deny',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DenyMembershipApplicationParams, validationErrorHandler),
+    zValidator('json', validators.DenyMembershipApplicationBody, validationErrorHandler),
+    registry.denyMembershipApplication as unknown as Handler
+  );
+
+  // createChapterAffiliation
+  app.post('/association/member/chapter-affiliations',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateChapterAffiliationBody, validationErrorHandler),
+    registry.createChapterAffiliation as unknown as Handler
+  );
+
+  // listChapterAffiliations
+  app.get('/association/member/chapter-affiliations',
+    authMiddleware({ roles: ["association:admin", "chapter:officer"] }),
+    zValidator('query', validators.ListChapterAffiliationsQuery, validationErrorHandler),
+    registry.listChapterAffiliations as unknown as Handler
+  );
+
+  // getChapterAffiliation
+  app.get('/association/member/chapter-affiliations/:affiliationId',
+    authMiddleware({ roles: ["association:admin", "association:member:owner"] }),
+    zValidator('param', validators.GetChapterAffiliationParams, validationErrorHandler),
+    registry.getChapterAffiliation as unknown as Handler
+  );
+
+  // updateChapterAffiliation
+  app.patch('/association/member/chapter-affiliations/:affiliationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateChapterAffiliationParams, validationErrorHandler),
+    zValidator('json', validators.UpdateChapterAffiliationBody, validationErrorHandler),
+    registry.updateChapterAffiliation as unknown as Handler
+  );
+
+  // deleteChapterAffiliation
+  app.delete('/association/member/chapter-affiliations/:affiliationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteChapterAffiliationParams, validationErrorHandler),
+    registry.deleteChapterAffiliation as unknown as Handler
+  );
+
+  // setPrimaryChapterAffiliation
+  app.post('/association/member/chapter-affiliations/:affiliationId/set-primary',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.SetPrimaryChapterAffiliationParams, validationErrorHandler),
+    registry.setPrimaryChapterAffiliation as unknown as Handler
+  );
+
+  // createCredentialTemplate
+  app.post('/association/member/credential-templates',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateCredentialTemplateBody, validationErrorHandler),
+    registry.createCredentialTemplate as unknown as Handler
+  );
+
+  // listCredentialTemplates
+  app.get('/association/member/credential-templates',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListCredentialTemplatesQuery, validationErrorHandler),
+    registry.listCredentialTemplates as unknown as Handler
+  );
+
+  // getCredentialTemplate
+  app.get('/association/member/credential-templates/:templateId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetCredentialTemplateParams, validationErrorHandler),
+    registry.getCredentialTemplate as unknown as Handler
+  );
+
+  // updateCredentialTemplate
+  app.patch('/association/member/credential-templates/:templateId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateCredentialTemplateParams, validationErrorHandler),
+    zValidator('json', validators.UpdateCredentialTemplateBody, validationErrorHandler),
+    registry.updateCredentialTemplate as unknown as Handler
+  );
+
+  // deleteCredentialTemplate
+  app.delete('/association/member/credential-templates/:templateId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteCredentialTemplateParams, validationErrorHandler),
+    registry.deleteCredentialTemplate as unknown as Handler
+  );
+
+  // listDigitalCredentials
+  app.get('/association/member/credentials',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListDigitalCredentialsQuery, validationErrorHandler),
+    registry.listDigitalCredentials as unknown as Handler
+  );
+
+  // issueDigitalCredential
+  app.post('/association/member/credentials/issue',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.IssueDigitalCredentialBody, validationErrorHandler),
+    registry.issueDigitalCredential as unknown as Handler
+  );
+
+  // verifyCredentialPublic
+  app.post('/association/member/credentials/public-verify',
+    authMiddleware(),
+    zValidator('json', validators.VerifyCredentialPublicBody, validationErrorHandler),
+    registry.verifyCredentialPublic as unknown as Handler
+  );
+
+  // verifyDigitalCredentialAuthenticated
+  app.post('/association/member/credentials/verify',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('json', validators.VerifyDigitalCredentialAuthenticatedBody, validationErrorHandler),
+    registry.verifyDigitalCredentialAuthenticated as unknown as Handler
+  );
+
+  // getDigitalCredential
+  app.get('/association/member/credentials/:credentialId',
+    authMiddleware({ roles: ["association:admin", "association:member:owner"] }),
+    zValidator('param', validators.GetDigitalCredentialParams, validationErrorHandler),
+    registry.getDigitalCredential as unknown as Handler
+  );
+
+  // updateDigitalCredential
+  app.patch('/association/member/credentials/:credentialId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateDigitalCredentialParams, validationErrorHandler),
+    zValidator('json', validators.UpdateDigitalCredentialBody, validationErrorHandler),
+    registry.updateDigitalCredential as unknown as Handler
+  );
+
+  // deleteDigitalCredential
+  app.delete('/association/member/credentials/:credentialId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteDigitalCredentialParams, validationErrorHandler),
+    registry.deleteDigitalCredential as unknown as Handler
+  );
+
+  // revokeDigitalCredential
+  app.post('/association/member/credentials/:credentialId/revoke',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.RevokeDigitalCredentialParams, validationErrorHandler),
+    zValidator('json', validators.RevokeDigitalCredentialBody, validationErrorHandler),
+    registry.revokeDigitalCredential as unknown as Handler
+  );
+
+  // createDirectoryProfile
+  app.post('/association/member/directory/profiles',
+    authMiddleware({ roles: ["association:member:owner", "association:admin"] }),
+    zValidator('json', validators.CreateDirectoryProfileBody, validationErrorHandler),
+    registry.createDirectoryProfile as unknown as Handler
+  );
+
+  // listDirectoryProfiles
+  app.get('/association/member/directory/profiles',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListDirectoryProfilesQuery, validationErrorHandler),
+    registry.listDirectoryProfiles as unknown as Handler
+  );
+
+  // getDirectoryProfile
+  app.get('/association/member/directory/profiles/:profileId',
+    authMiddleware({ roles: ["association:member:owner", "association:admin"] }),
+    zValidator('param', validators.GetDirectoryProfileParams, validationErrorHandler),
+    registry.getDirectoryProfile as unknown as Handler
+  );
+
+  // updateDirectoryProfile
+  app.patch('/association/member/directory/profiles/:profileId',
+    authMiddleware({ roles: ["association:member:owner", "association:admin"] }),
+    zValidator('param', validators.UpdateDirectoryProfileParams, validationErrorHandler),
+    zValidator('json', validators.UpdateDirectoryProfileBody, validationErrorHandler),
+    registry.updateDirectoryProfile as unknown as Handler
+  );
+
+  // deleteDirectoryProfile
+  app.delete('/association/member/directory/profiles/:profileId',
+    authMiddleware({ roles: ["association:member:owner", "association:admin"] }),
+    zValidator('param', validators.DeleteDirectoryProfileParams, validationErrorHandler),
+    registry.deleteDirectoryProfile as unknown as Handler
+  );
+
+  // searchDirectory
+  app.get('/association/member/directory/search',
+    authMiddleware({ roles: ["association:member", "association:admin"] }),
+    zValidator('query', validators.SearchDirectoryQuery, validationErrorHandler),
+    registry.searchDirectory as unknown as Handler
+  );
+
+  // getPublicDirectoryProfile
+  app.get('/association/member/directory/search/:personId/public',
+    authMiddleware({ required: false }),
+    zValidator('param', validators.GetPublicDirectoryProfileParams, validationErrorHandler),
+    registry.getPublicDirectoryProfile as unknown as Handler
+  );
+
+  // createDuesConfig
+  app.post('/association/member/dues-configs',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateDuesConfigBody, validationErrorHandler),
+    registry.createDuesConfig as unknown as Handler
+  );
+
+  // listDuesConfigs
+  app.get('/association/member/dues-configs',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListDuesConfigsQuery, validationErrorHandler),
+    registry.listDuesConfigs as unknown as Handler
+  );
+
+  // getDuesConfig
+  app.get('/association/member/dues-configs/:duesConfigId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetDuesConfigParams, validationErrorHandler),
+    registry.getDuesConfig as unknown as Handler
+  );
+
+  // updateDuesConfig
+  app.patch('/association/member/dues-configs/:duesConfigId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateDuesConfigParams, validationErrorHandler),
+    zValidator('json', validators.UpdateDuesConfigBody, validationErrorHandler),
+    registry.updateDuesConfig as unknown as Handler
+  );
+
+  // deleteDuesConfig
+  app.delete('/association/member/dues-configs/:duesConfigId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteDuesConfigParams, validationErrorHandler),
+    registry.deleteDuesConfig as unknown as Handler
+  );
+
+  // createDuesInvoice
+  app.post('/association/member/dues-invoices',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateDuesInvoiceBody, validationErrorHandler),
+    registry.createDuesInvoice as unknown as Handler
+  );
+
+  // listDuesInvoices
+  app.get('/association/member/dues-invoices',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListDuesInvoicesQuery, validationErrorHandler),
+    registry.listDuesInvoices as unknown as Handler
+  );
+
+  // generateDuesInvoicesForOrg
+  app.post('/association/member/dues-invoices/generate',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.GenerateDuesInvoicesForOrgBody, validationErrorHandler),
+    registry.generateDuesInvoicesForOrg as unknown as Handler
+  );
+
+  // getDuesInvoice
+  app.get('/association/member/dues-invoices/:invoiceId',
+    authMiddleware({ roles: ["association:admin", "association:member:owner"] }),
+    zValidator('param', validators.GetDuesInvoiceParams, validationErrorHandler),
+    registry.getDuesInvoice as unknown as Handler
+  );
+
+  // updateDuesInvoice
+  app.patch('/association/member/dues-invoices/:invoiceId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateDuesInvoiceParams, validationErrorHandler),
+    zValidator('json', validators.UpdateDuesInvoiceBody, validationErrorHandler),
+    registry.updateDuesInvoice as unknown as Handler
+  );
+
+  // deleteDuesInvoice
+  app.delete('/association/member/dues-invoices/:invoiceId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteDuesInvoiceParams, validationErrorHandler),
+    registry.deleteDuesInvoice as unknown as Handler
+  );
+
+  // markDuesInvoicePaid
+  app.post('/association/member/dues-invoices/:invoiceId/mark-paid',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.MarkDuesInvoicePaidParams, validationErrorHandler),
+    zValidator('json', validators.MarkDuesInvoicePaidBody, validationErrorHandler),
+    registry.markDuesInvoicePaid as unknown as Handler
+  );
+
+  // listDunningEvents
+  app.get('/association/member/dunning/events',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListDunningEventsQuery, validationErrorHandler),
+    registry.listDunningEvents as unknown as Handler
+  );
+
+  // runDunning
+  app.post('/association/member/dunning/run',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.RunDunningBody, validationErrorHandler),
+    registry.runDunning as unknown as Handler
+  );
+
+  // createDunningTemplate
+  app.post('/association/member/dunning/templates',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateDunningTemplateBody, validationErrorHandler),
+    registry.createDunningTemplate as unknown as Handler
+  );
+
+  // listDunningTemplates
+  app.get('/association/member/dunning/templates',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListDunningTemplatesQuery, validationErrorHandler),
+    registry.listDunningTemplates as unknown as Handler
+  );
+
+  // getDunningTemplate
+  app.get('/association/member/dunning/templates/:templateId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetDunningTemplateParams, validationErrorHandler),
+    registry.getDunningTemplate as unknown as Handler
+  );
+
+  // updateDunningTemplate
+  app.patch('/association/member/dunning/templates/:templateId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateDunningTemplateParams, validationErrorHandler),
+    zValidator('json', validators.UpdateDunningTemplateBody, validationErrorHandler),
+    registry.updateDunningTemplate as unknown as Handler
+  );
+
+  // deleteDunningTemplate
+  app.delete('/association/member/dunning/templates/:templateId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteDunningTemplateParams, validationErrorHandler),
+    registry.deleteDunningTemplate as unknown as Handler
+  );
+
+  // createInstitutionalMembership
+  app.post('/association/member/institutional-memberships',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateInstitutionalMembershipBody, validationErrorHandler),
+    registry.createInstitutionalMembership as unknown as Handler
+  );
+
+  // listInstitutionalMemberships
+  app.get('/association/member/institutional-memberships',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListInstitutionalMembershipsQuery, validationErrorHandler),
+    registry.listInstitutionalMemberships as unknown as Handler
+  );
+
+  // getInstitutionalMembership
+  app.get('/association/member/institutional-memberships/:institutionalMembershipId',
+    authMiddleware({ roles: ["association:admin", "institution:owner"] }),
+    zValidator('param', validators.GetInstitutionalMembershipParams, validationErrorHandler),
+    registry.getInstitutionalMembership as unknown as Handler
+  );
+
+  // updateInstitutionalMembership
+  app.patch('/association/member/institutional-memberships/:institutionalMembershipId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateInstitutionalMembershipParams, validationErrorHandler),
+    zValidator('json', validators.UpdateInstitutionalMembershipBody, validationErrorHandler),
+    registry.updateInstitutionalMembership as unknown as Handler
+  );
+
+  // deleteInstitutionalMembership
+  app.delete('/association/member/institutional-memberships/:institutionalMembershipId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteInstitutionalMembershipParams, validationErrorHandler),
+    registry.deleteInstitutionalMembership as unknown as Handler
+  );
+
+  // allocateSeat
+  app.post('/association/member/institutional-memberships/:institutionalMembershipId/seats',
+    authMiddleware({ roles: ["association:admin", "institution:admin"] }),
+    zValidator('param', validators.AllocateSeatParams, validationErrorHandler),
+    zValidator('json', validators.AllocateSeatBody, validationErrorHandler),
+    registry.allocateSeat as unknown as Handler
+  );
+
+  // listSeatAllocations
+  app.get('/association/member/institutional-memberships/:institutionalMembershipId/seats',
+    authMiddleware({ roles: ["association:admin", "institution:admin"] }),
+    zValidator('param', validators.ListSeatAllocationsParams, validationErrorHandler),
+    zValidator('query', validators.ListSeatAllocationsQuery, validationErrorHandler),
+    registry.listSeatAllocations as unknown as Handler
+  );
+
+  // revokeSeat
+  app.post('/association/member/institutional-memberships/:institutionalMembershipId/seats/:seatAllocationId/revoke',
+    authMiddleware({ roles: ["association:admin", "institution:admin"] }),
+    zValidator('param', validators.RevokeSeatParams, validationErrorHandler),
+    registry.revokeSeat as unknown as Handler
+  );
+
+  // listLicenseRenewalAlerts
+  app.get('/association/member/license-renewal-alerts',
+    authMiddleware({ roles: ["association:admin", "association:member:owner"] }),
+    zValidator('query', validators.ListLicenseRenewalAlertsQuery, validationErrorHandler),
+    registry.listLicenseRenewalAlerts as unknown as Handler
+  );
+
+  // acknowledgeLicenseRenewalAlert
+  app.post('/association/member/license-renewal-alerts/:alertId/acknowledge',
+    authMiddleware({ roles: ["association:admin", "association:member:owner"] }),
+    zValidator('param', validators.AcknowledgeLicenseRenewalAlertParams, validationErrorHandler),
+    registry.acknowledgeLicenseRenewalAlert as unknown as Handler
+  );
+
+  // createProfessionalLicense
+  app.post('/association/member/licenses',
+    authMiddleware({ roles: ["association:admin", "association:member:owner"] }),
+    zValidator('json', validators.CreateProfessionalLicenseBody, validationErrorHandler),
+    registry.createProfessionalLicense as unknown as Handler
+  );
+
+  // listProfessionalLicenses
+  app.get('/association/member/licenses',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListProfessionalLicensesQuery, validationErrorHandler),
+    registry.listProfessionalLicenses as unknown as Handler
+  );
+
+  // getProfessionalLicense
+  app.get('/association/member/licenses/:licenseId',
+    authMiddleware({ roles: ["association:admin", "association:member:owner"] }),
+    zValidator('param', validators.GetProfessionalLicenseParams, validationErrorHandler),
+    registry.getProfessionalLicense as unknown as Handler
+  );
+
+  // updateProfessionalLicense
+  app.patch('/association/member/licenses/:licenseId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateProfessionalLicenseParams, validationErrorHandler),
+    zValidator('json', validators.UpdateProfessionalLicenseBody, validationErrorHandler),
+    registry.updateProfessionalLicense as unknown as Handler
+  );
+
+  // deleteProfessionalLicense
+  app.delete('/association/member/licenses/:licenseId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteProfessionalLicenseParams, validationErrorHandler),
+    registry.deleteProfessionalLicense as unknown as Handler
+  );
+
+  // createMembership
+  app.post('/association/member/memberships',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateMembershipBody, validationErrorHandler),
+    registry.createMembership as unknown as Handler
+  );
+
+  // listMemberships
+  app.get('/association/member/memberships',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListMembershipsQuery, validationErrorHandler),
+    registry.listMemberships as unknown as Handler
+  );
+
+  // getMembership
+  app.get('/association/member/memberships/:membershipId',
+    authMiddleware({ roles: ["association:member:owner", "association:admin"] }),
+    zValidator('param', validators.GetMembershipParams, validationErrorHandler),
+    registry.getMembership as unknown as Handler
+  );
+
+  // updateMembership
+  app.patch('/association/member/memberships/:membershipId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateMembershipParams, validationErrorHandler),
+    zValidator('json', validators.UpdateMembershipBody, validationErrorHandler),
+    registry.updateMembership as unknown as Handler
+  );
+
+  // deleteMembership
+  app.delete('/association/member/memberships/:membershipId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteMembershipParams, validationErrorHandler),
+    registry.deleteMembership as unknown as Handler
+  );
+
+  // reinstateMembership
+  app.post('/association/member/memberships/:membershipId/reinstate',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.ReinstateMembershipParams, validationErrorHandler),
+    registry.reinstateMembership as unknown as Handler
+  );
+
+  // renewMembership
+  app.post('/association/member/memberships/:membershipId/renew',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.RenewMembershipParams, validationErrorHandler),
+    registry.renewMembership as unknown as Handler
+  );
+
+  // terminateMembership
+  app.post('/association/member/memberships/:membershipId/terminate',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.TerminateMembershipParams, validationErrorHandler),
+    zValidator('json', validators.TerminateMembershipBody, validationErrorHandler),
+    registry.terminateMembership as unknown as Handler
+  );
+
+  // createRoyaltySplit
+  app.post('/association/member/royalty-splits',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateRoyaltySplitBody, validationErrorHandler),
+    registry.createRoyaltySplit as unknown as Handler
+  );
+
+  // listRoyaltySplits
+  app.get('/association/member/royalty-splits',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListRoyaltySplitsQuery, validationErrorHandler),
+    registry.listRoyaltySplits as unknown as Handler
+  );
+
+  // getRoyaltySplit
+  app.get('/association/member/royalty-splits/:royaltySplitId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetRoyaltySplitParams, validationErrorHandler),
+    registry.getRoyaltySplit as unknown as Handler
+  );
+
+  // updateRoyaltySplit
+  app.patch('/association/member/royalty-splits/:royaltySplitId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateRoyaltySplitParams, validationErrorHandler),
+    zValidator('json', validators.UpdateRoyaltySplitBody, validationErrorHandler),
+    registry.updateRoyaltySplit as unknown as Handler
+  );
+
+  // deleteRoyaltySplit
+  app.delete('/association/member/royalty-splits/:royaltySplitId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteRoyaltySplitParams, validationErrorHandler),
+    registry.deleteRoyaltySplit as unknown as Handler
+  );
+
+  // createMembershipTier
+  app.post('/association/member/tiers',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateMembershipTierBody, validationErrorHandler),
+    registry.createMembershipTier as unknown as Handler
+  );
+
+  // listMembershipTiers
+  app.get('/association/member/tiers',
+    authMiddleware({ roles: ["association:member", "association:admin"] }),
+    zValidator('query', validators.ListMembershipTiersQuery, validationErrorHandler),
+    registry.listMembershipTiers as unknown as Handler
+  );
+
+  // getMembershipTier
+  app.get('/association/member/tiers/:tierId',
+    authMiddleware({ roles: ["association:member", "association:admin"] }),
+    zValidator('param', validators.GetMembershipTierParams, validationErrorHandler),
+    registry.getMembershipTier as unknown as Handler
+  );
+
+  // updateMembershipTier
+  app.patch('/association/member/tiers/:tierId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateMembershipTierParams, validationErrorHandler),
+    zValidator('json', validators.UpdateMembershipTierBody, validationErrorHandler),
+    registry.updateMembershipTier as unknown as Handler
+  );
+
+  // deleteMembershipTier
+  app.delete('/association/member/tiers/:tierId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteMembershipTierParams, validationErrorHandler),
+    registry.deleteMembershipTier as unknown as Handler
+  );
+
+  // createMessageTemplate
+  app.post('/association/message-templates',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('json', validators.CreateMessageTemplateBody, validationErrorHandler),
+    registry.createMessageTemplate as unknown as Handler
+  );
+
+  // searchMessageTemplates
+  app.get('/association/message-templates',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('query', validators.SearchMessageTemplatesQuery, validationErrorHandler),
+    registry.searchMessageTemplates as unknown as Handler
+  );
+
+  // getMessageTemplate
+  app.get('/association/message-templates/:templateId',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.GetMessageTemplateParams, validationErrorHandler),
+    registry.getMessageTemplate as unknown as Handler
+  );
+
+  // updateMessageTemplate
+  app.patch('/association/message-templates/:templateId',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.UpdateMessageTemplateParams, validationErrorHandler),
+    zValidator('json', validators.UpdateMessageTemplateBody, validationErrorHandler),
+    registry.updateMessageTemplate as unknown as Handler
+  );
+
+  // deleteMessageTemplate
+  app.delete('/association/message-templates/:templateId',
+    authMiddleware({ roles: ["admin"] }),
+    zValidator('param', validators.DeleteMessageTemplateParams, validationErrorHandler),
+    registry.deleteMessageTemplate as unknown as Handler
+  );
+
+  // previewMessageTemplate
+  app.post('/association/message-templates/:templateId/preview',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.PreviewMessageTemplateParams, validationErrorHandler),
+    zValidator('json', validators.PreviewMessageTemplateBody, validationErrorHandler),
+    registry.previewMessageTemplate as unknown as Handler
+  );
+
+  // createMessage
+  app.post('/association/messages',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('json', validators.CreateMessageBody, validationErrorHandler),
+    registry.createMessage as unknown as Handler
+  );
+
+  // searchMessages
+  app.get('/association/messages',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('query', validators.SearchMessagesQuery, validationErrorHandler),
+    registry.searchMessages as unknown as Handler
+  );
+
+  // getMessage
+  app.get('/association/messages/:messageId',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.GetMessageParams, validationErrorHandler),
+    registry.getMessage as unknown as Handler
+  );
+
+  // updateMessage
+  app.patch('/association/messages/:messageId',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.UpdateMessageParams, validationErrorHandler),
+    zValidator('json', validators.UpdateMessageBody, validationErrorHandler),
+    registry.updateMessage as unknown as Handler
+  );
+
+  // deleteMessage
+  app.delete('/association/messages/:messageId',
+    authMiddleware({ roles: ["admin"] }),
+    zValidator('param', validators.DeleteMessageParams, validationErrorHandler),
+    registry.deleteMessage as unknown as Handler
+  );
+
+  // cancelMessage
+  app.post('/association/messages/:messageId/cancel',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.CancelMessageParams, validationErrorHandler),
+    registry.cancelMessage as unknown as Handler
+  );
+
+  // scheduleMessage
+  app.post('/association/messages/:messageId/schedule',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.ScheduleMessageParams, validationErrorHandler),
+    zValidator('json', validators.ScheduleMessageBody, validationErrorHandler),
+    registry.scheduleMessage as unknown as Handler
+  );
+
+  // sendMessage
+  app.post('/association/messages/:messageId/send',
+    authMiddleware({ roles: ["admin", "coordinator"] }),
+    zValidator('param', validators.SendMessageParams, validationErrorHandler),
+    registry.sendMessage as unknown as Handler
+  );
+
+  // listPersonSubscriptions
+  app.get('/association/person-subscriptions',
+    authMiddleware({ roles: ["admin", "coordinator", "member:owner"] }),
+    zValidator('query', validators.ListPersonSubscriptionsQuery, validationErrorHandler),
+    registry.listPersonSubscriptions as unknown as Handler
+  );
+
+  // bulkUpdatePersonSubscriptions
+  app.post('/association/person-subscriptions/bulk-update',
+    authMiddleware({ roles: ["admin", "member:owner"] }),
+    zValidator('json', validators.BulkUpdatePersonSubscriptionsBody, validationErrorHandler),
+    registry.bulkUpdatePersonSubscriptions as unknown as Handler
+  );
+
+  // updatePersonSubscription
+  app.patch('/association/person-subscriptions/:subscriptionId',
+    authMiddleware({ roles: ["admin", "member:owner"] }),
+    zValidator('param', validators.UpdatePersonSubscriptionParams, validationErrorHandler),
+    zValidator('json', validators.UpdatePersonSubscriptionBody, validationErrorHandler),
+    registry.updatePersonSubscription as unknown as Handler
+  );
+
+  // createSubscriptionTopic
+  app.post('/association/subscription-topics',
+    authMiddleware({ roles: ["admin"] }),
+    zValidator('json', validators.CreateSubscriptionTopicBody, validationErrorHandler),
+    registry.createSubscriptionTopic as unknown as Handler
+  );
+
+  // getSubscriptionTopic
+  app.get('/association/subscription-topics/:topicId',
+    authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    zValidator('param', validators.GetSubscriptionTopicParams, validationErrorHandler),
+    registry.getSubscriptionTopic as unknown as Handler
+  );
+
+  // updateSubscriptionTopic
+  app.patch('/association/subscription-topics/:topicId',
+    authMiddleware({ roles: ["admin"] }),
+    zValidator('param', validators.UpdateSubscriptionTopicParams, validationErrorHandler),
+    zValidator('json', validators.UpdateSubscriptionTopicBody, validationErrorHandler),
+    registry.updateSubscriptionTopic as unknown as Handler
+  );
+
+  // deleteSubscriptionTopic
+  app.delete('/association/subscription-topics/:topicId',
+    authMiddleware({ roles: ["admin"] }),
+    zValidator('param', validators.DeleteSubscriptionTopicParams, validationErrorHandler),
+    registry.deleteSubscriptionTopic as unknown as Handler
+  );
+
+  // createTraining
+  app.post('/association/training',
+    zValidator('json', validators.CreateTrainingBody, validationErrorHandler),
+    registry.createTraining as unknown as Handler
+  );
+
+  // searchTrainings
+  app.get('/association/training',
+    zValidator('query', validators.SearchTrainingsQuery, validationErrorHandler),
+    registry.searchTrainings as unknown as Handler
+  );
+
+  // createCourse
+  app.post('/association/training/courses',
+    zValidator('json', validators.CreateCourseBody, validationErrorHandler),
+    registry.createCourse as unknown as Handler
+  );
+
+  // searchCourses
+  app.get('/association/training/courses',
+    zValidator('query', validators.SearchCoursesQuery, validationErrorHandler),
+    registry.searchCourses as unknown as Handler
+  );
+
+  // createCourseEnrollment
+  app.post('/association/training/courses/enrollments',
+    zValidator('json', validators.CreateCourseEnrollmentBody, validationErrorHandler),
+    registry.createCourseEnrollment as unknown as Handler
+  );
+
+  // searchCourseEnrollments
+  app.get('/association/training/courses/enrollments',
+    zValidator('query', validators.SearchCourseEnrollmentsQuery, validationErrorHandler),
+    registry.searchCourseEnrollments as unknown as Handler
+  );
+
+  // getCourseEnrollment
+  app.get('/association/training/courses/enrollments/:enrollmentId',
+    zValidator('param', validators.GetCourseEnrollmentParams, validationErrorHandler),
+    registry.getCourseEnrollment as unknown as Handler
+  );
+
+  // updateCourseEnrollment
+  app.patch('/association/training/courses/enrollments/:enrollmentId',
+    zValidator('param', validators.UpdateCourseEnrollmentParams, validationErrorHandler),
+    zValidator('json', validators.UpdateCourseEnrollmentBody, validationErrorHandler),
+    registry.updateCourseEnrollment as unknown as Handler
+  );
+
+  // deleteCourseEnrollment
+  app.delete('/association/training/courses/enrollments/:enrollmentId',
+    zValidator('param', validators.DeleteCourseEnrollmentParams, validationErrorHandler),
+    registry.deleteCourseEnrollment as unknown as Handler
+  );
+
+  // updateCourseProgress
+  app.post('/association/training/courses/enrollments/:enrollmentId/progress',
+    zValidator('param', validators.UpdateCourseProgressParams, validationErrorHandler),
+    zValidator('json', validators.UpdateCourseProgressBody, validationErrorHandler),
+    registry.updateCourseProgress as unknown as Handler
+  );
+
+  // createQuizAttempt
+  app.post('/association/training/courses/quiz-attempts',
+    zValidator('json', validators.CreateQuizAttemptBody, validationErrorHandler),
+    registry.createQuizAttempt as unknown as Handler
+  );
+
+  // searchQuizAttempts
+  app.get('/association/training/courses/quiz-attempts',
+    zValidator('query', validators.SearchQuizAttemptsQuery, validationErrorHandler),
+    registry.searchQuizAttempts as unknown as Handler
+  );
+
+  // getCourse
+  app.get('/association/training/courses/:courseId',
+    zValidator('param', validators.GetCourseParams, validationErrorHandler),
+    registry.getCourse as unknown as Handler
+  );
+
+  // updateCourse
+  app.patch('/association/training/courses/:courseId',
+    zValidator('param', validators.UpdateCourseParams, validationErrorHandler),
+    zValidator('json', validators.UpdateCourseBody, validationErrorHandler),
+    registry.updateCourse as unknown as Handler
+  );
+
+  // deleteCourse
+  app.delete('/association/training/courses/:courseId',
+    zValidator('param', validators.DeleteCourseParams, validationErrorHandler),
+    registry.deleteCourse as unknown as Handler
+  );
+
+  // createTrainingEnrollment
+  app.post('/association/training/enrollments',
+    zValidator('json', validators.CreateTrainingEnrollmentBody, validationErrorHandler),
+    registry.createTrainingEnrollment as unknown as Handler
+  );
+
+  // searchTrainingEnrollments
+  app.get('/association/training/enrollments',
+    zValidator('query', validators.SearchTrainingEnrollmentsQuery, validationErrorHandler),
+    registry.searchTrainingEnrollments as unknown as Handler
+  );
+
+  // getTrainingEnrollment
+  app.get('/association/training/enrollments/:enrollmentId',
+    zValidator('param', validators.GetTrainingEnrollmentParams, validationErrorHandler),
+    registry.getTrainingEnrollment as unknown as Handler
+  );
+
+  // updateTrainingEnrollment
+  app.patch('/association/training/enrollments/:enrollmentId',
+    zValidator('param', validators.UpdateTrainingEnrollmentParams, validationErrorHandler),
+    zValidator('json', validators.UpdateTrainingEnrollmentBody, validationErrorHandler),
+    registry.updateTrainingEnrollment as unknown as Handler
+  );
+
+  // deleteTrainingEnrollment
+  app.delete('/association/training/enrollments/:enrollmentId',
+    zValidator('param', validators.DeleteTrainingEnrollmentParams, validationErrorHandler),
+    registry.deleteTrainingEnrollment as unknown as Handler
+  );
+
+  // completeTrainingEnrollment
+  app.post('/association/training/enrollments/:enrollmentId/complete',
+    zValidator('param', validators.CompleteTrainingEnrollmentParams, validationErrorHandler),
+    zValidator('json', validators.CompleteTrainingEnrollmentBody, validationErrorHandler),
+    registry.completeTrainingEnrollment as unknown as Handler
+  );
+
+  // getTraining
+  app.get('/association/training/:trainingId',
+    zValidator('param', validators.GetTrainingParams, validationErrorHandler),
+    registry.getTraining as unknown as Handler
+  );
+
+  // updateTraining
+  app.patch('/association/training/:trainingId',
+    zValidator('param', validators.UpdateTrainingParams, validationErrorHandler),
+    zValidator('json', validators.UpdateTrainingBody, validationErrorHandler),
+    registry.updateTraining as unknown as Handler
+  );
+
+  // deleteTraining
+  app.delete('/association/training/:trainingId',
+    zValidator('param', validators.DeleteTrainingParams, validationErrorHandler),
+    registry.deleteTraining as unknown as Handler
+  );
+
+  // publishTraining
+  app.post('/association/training/:trainingId/publish',
+    zValidator('param', validators.PublishTrainingParams, validationErrorHandler),
+    registry.publishTraining as unknown as Handler
+  );
+
   // listAuditLogs
   app.get('/audit/logs',
     authMiddleware({ roles: ["admin", "support"] }),

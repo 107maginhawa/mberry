@@ -3,8 +3,8 @@
 import { type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { cancelBooking, cancelEmailQueueItem, captureInvoicePayment, completeFileUpload, confirmBooking, createBooking, createBookingEvent, createChatRoom, createEmailTemplate, createInvoice, createMerchantAccount, createPerson, createReview, createScheduleException, deleteBookingEvent, deleteFile, deleteInvoice, deleteReview, deleteScheduleException, endVideoCall, finalizeInvoice, getBooking, getBookingEvent, getChatMessages, getChatRoom, getEmailQueueItem, getEmailTemplate, getFile, getFileDownload, getIceServers, getInvoice, getMerchantAccount, getMerchantDashboard, getNotification, getPerson, getReview, getScheduleException, getTimeSlot, handleStripeWebhook, joinVideoCall, leaveVideoCall, listAuditLogs, listBookingEvents, listBookings, listChatRooms, listEmailQueueItems, listEmailTemplates, listEventSlots, listFiles, listInvoices, listNotifications, listPersons, listReviews, listScheduleExceptions, markAllNotificationsAsRead, markInvoiceUncollectible, markNoShowBooking, markNotificationAsRead, onboardMerchantAccount, type Options, payInvoice, refundInvoicePayment, rejectBooking, retryEmailQueueItem, sendChatMessage, testEmailTemplate, updateBookingEvent, updateEmailTemplate, updateInvoice, updatePerson, updateVideoCallParticipant, uploadFile, voidInvoice } from '../sdk.gen';
-import type { CancelBookingData, CancelBookingError, CancelBookingResponse, CancelEmailQueueItemData, CancelEmailQueueItemError, CancelEmailQueueItemResponse, CaptureInvoicePaymentData, CaptureInvoicePaymentError, CaptureInvoicePaymentResponse, CompleteFileUploadData, CompleteFileUploadError, CompleteFileUploadResponse, ConfirmBookingData, ConfirmBookingError, ConfirmBookingResponse, CreateBookingData, CreateBookingError, CreateBookingEventData, CreateBookingEventError, CreateBookingEventResponse, CreateBookingResponse, CreateChatRoomData, CreateChatRoomError, CreateChatRoomResponse, CreateEmailTemplateData, CreateEmailTemplateError, CreateEmailTemplateResponse, CreateInvoiceData, CreateInvoiceError, CreateInvoiceResponse, CreateMerchantAccountData, CreateMerchantAccountError, CreateMerchantAccountResponse, CreatePersonData, CreatePersonError, CreatePersonResponse, CreateReviewData, CreateReviewError, CreateReviewResponse, CreateScheduleExceptionData, CreateScheduleExceptionError, CreateScheduleExceptionResponse, DeleteBookingEventData, DeleteBookingEventError, DeleteBookingEventResponse, DeleteFileData, DeleteFileError, DeleteFileResponse, DeleteInvoiceData, DeleteInvoiceError, DeleteInvoiceResponse, DeleteReviewData, DeleteReviewError, DeleteReviewResponse, DeleteScheduleExceptionData, DeleteScheduleExceptionError, DeleteScheduleExceptionResponse, EndVideoCallData, EndVideoCallError, EndVideoCallResponse, FinalizeInvoiceData, FinalizeInvoiceError, FinalizeInvoiceResponse, GetBookingData, GetBookingError, GetBookingEventData, GetBookingEventError, GetBookingEventResponse, GetBookingResponse, GetChatMessagesData, GetChatMessagesError, GetChatMessagesResponse, GetChatRoomData, GetChatRoomError, GetChatRoomResponse, GetEmailQueueItemData, GetEmailQueueItemError, GetEmailQueueItemResponse, GetEmailTemplateData, GetEmailTemplateError, GetEmailTemplateResponse, GetFileData, GetFileDownloadData, GetFileDownloadError, GetFileDownloadResponse, GetFileError, GetFileResponse, GetIceServersData, GetIceServersError, GetIceServersResponse, GetInvoiceData, GetInvoiceError, GetInvoiceResponse, GetMerchantAccountData, GetMerchantAccountError, GetMerchantAccountResponse, GetMerchantDashboardData, GetMerchantDashboardError, GetMerchantDashboardResponse, GetNotificationData, GetNotificationError, GetNotificationResponse, GetPersonData, GetPersonError, GetPersonResponse, GetReviewData, GetReviewError, GetReviewResponse, GetScheduleExceptionData, GetScheduleExceptionError, GetScheduleExceptionResponse, GetTimeSlotData, GetTimeSlotError, GetTimeSlotResponse, HandleStripeWebhookData, HandleStripeWebhookError, JoinVideoCallData, JoinVideoCallError, JoinVideoCallResponse, LeaveVideoCallData, LeaveVideoCallError, LeaveVideoCallResponse2, ListAuditLogsData, ListAuditLogsError, ListAuditLogsResponse, ListBookingEventsData, ListBookingEventsError, ListBookingEventsResponse, ListBookingsData, ListBookingsError, ListBookingsResponse, ListChatRoomsData, ListChatRoomsError, ListChatRoomsResponse, ListEmailQueueItemsData, ListEmailQueueItemsError, ListEmailQueueItemsResponse, ListEmailTemplatesData, ListEmailTemplatesError, ListEmailTemplatesResponse, ListEventSlotsData, ListEventSlotsError, ListEventSlotsResponse, ListFilesData, ListFilesError, ListFilesResponse, ListInvoicesData, ListInvoicesError, ListInvoicesResponse, ListNotificationsData, ListNotificationsError, ListNotificationsResponse, ListPersonsData, ListPersonsError, ListPersonsResponse, ListReviewsData, ListReviewsError, ListReviewsResponse, ListScheduleExceptionsData, ListScheduleExceptionsError, ListScheduleExceptionsResponse, MarkAllNotificationsAsReadData, MarkAllNotificationsAsReadError, MarkAllNotificationsAsReadResponse, MarkInvoiceUncollectibleData, MarkInvoiceUncollectibleError, MarkInvoiceUncollectibleResponse, MarkNoShowBookingData, MarkNoShowBookingError, MarkNoShowBookingResponse, MarkNotificationAsReadData, MarkNotificationAsReadError, MarkNotificationAsReadResponse, OnboardMerchantAccountData, OnboardMerchantAccountError, OnboardMerchantAccountResponse, PayInvoiceData, PayInvoiceError, PayInvoiceResponse, RefundInvoicePaymentData, RefundInvoicePaymentError, RefundInvoicePaymentResponse, RejectBookingData, RejectBookingError, RejectBookingResponse, RetryEmailQueueItemData, RetryEmailQueueItemError, RetryEmailQueueItemResponse, SendChatMessageData, SendChatMessageError, SendChatMessageResponse, TestEmailTemplateData, TestEmailTemplateError, TestEmailTemplateResponse, UpdateBookingEventData, UpdateBookingEventError, UpdateBookingEventResponse, UpdateEmailTemplateData, UpdateEmailTemplateError, UpdateEmailTemplateResponse, UpdateInvoiceData, UpdateInvoiceError, UpdateInvoiceResponse, UpdatePersonData, UpdatePersonError, UpdatePersonResponse, UpdateVideoCallParticipantData, UpdateVideoCallParticipantError, UpdateVideoCallParticipantResponse, UploadFileData, UploadFileError, UploadFileResponse, VoidInvoiceData, VoidInvoiceError, VoidInvoiceResponse } from '../types.gen';
+import { acknowledgeLicenseRenewalAlert, allocateSeat, approveMembershipApplication, approveTransferBySource, approveTransferByTarget, archiveDocument, bulkUpdatePersonSubscriptions, cancelBooking, cancelEmailQueueItem, cancelEvent, cancelEventRegistration, cancelMessage, captureInvoicePayment, completeAffiliationTransfer, completeFileUpload, completeTrainingEnrollment, confirmBooking, createAffiliationTransfer, createBooking, createBookingEvent, createChapterAffiliation, createChatRoom, createCheckIn, createCourse, createCourseEnrollment, createCredentialTemplate, createDirectoryProfile, createDocument, createDocumentTag, createDuesConfig, createDuesInvoice, createDunningTemplate, createEmailTemplate, createEvent, createEventRegistration, createInstitutionalMembership, createInvoice, createMembership, createMembershipApplication, createMembershipTier, createMerchantAccount, createMessage, createMessageTemplate, createPerson, createProfessionalLicense, createQuizAttempt, createReview, createRoyaltySplit, createScheduleException, createSubscriptionTopic, createTraining, createTrainingEnrollment, deleteBookingEvent, deleteChapterAffiliation, deleteCourse, deleteCourseEnrollment, deleteCredentialTemplate, deleteDigitalCredential, deleteDirectoryProfile, deleteDocument, deleteDocumentTag, deleteDuesConfig, deleteDuesInvoice, deleteDunningTemplate, deleteEvent, deleteEventRegistration, deleteFile, deleteInstitutionalMembership, deleteInvoice, deleteMembership, deleteMembershipApplication, deleteMembershipTier, deleteMessage, deleteMessageTemplate, deleteProfessionalLicense, deleteReview, deleteRoyaltySplit, deleteScheduleException, deleteSubscriptionTopic, deleteTraining, deleteTrainingEnrollment, denyAffiliationTransfer, denyMembershipApplication, endVideoCall, finalizeInvoice, generateDuesInvoicesForOrg, getAffiliationTransfer, getAgingBucket, getBooking, getBookingEvent, getChapterAffiliation, getChatMessages, getChatRoom, getCourse, getCourseEnrollment, getCredentialTemplate, getDigitalCredential, getDirectoryProfile, getDocument, getDocumentAccessLog, getDocumentTag, getDocumentVersion, getDuesConfig, getDuesInvoice, getDunningTemplate, getEmailQueueItem, getEmailTemplate, getEvent, getEventRegistration, getFile, getFileDownload, getIceServers, getInstitutionalMembership, getInvoice, getMembership, getMembershipApplication, getMembershipTier, getMerchantAccount, getMerchantDashboard, getMessage, getMessageTemplate, getNotification, getPerson, getProfessionalLicense, getPublicDirectoryProfile, getReview, getRoyaltySplit, getScheduleException, getSubscriptionTopic, getTimeSlot, getTraining, getTrainingEnrollment, handleStripeWebhook, issueDigitalCredential, joinVideoCall, leaveVideoCall, listAffiliationTransfers, listAuditLogs, listBookingEvents, listBookings, listChapterAffiliations, listChatRooms, listCredentialTemplates, listDigitalCredentials, listDirectoryProfiles, listDocumentTags, listDocumentVersions, listDuesConfigs, listDuesInvoices, listDunningEvents, listDunningTemplates, listEmailQueueItems, listEmailTemplates, listEventSlots, listFiles, listInstitutionalMemberships, listInvoices, listLicenseRenewalAlerts, listMembershipApplications, listMemberships, listMembershipTiers, listNotifications, listPersons, listPersonSubscriptions, listProfessionalLicenses, listReviews, listRoyaltySplits, listScheduleExceptions, listSeatAllocations, listWaitlistEntries, markAllNotificationsAsRead, markDuesInvoicePaid, markInvoiceUncollectible, markNoShowBooking, markNotificationAsRead, onboardMerchantAccount, type Options, payInvoice, previewMessageTemplate, promoteWaitlistEntry, publishEvent, publishTraining, recalculateAgingBucket, refundEventRegistration, refundInvoicePayment, reinstateMembership, rejectBooking, renewMembership, retryEmailQueueItem, revokeDigitalCredential, revokeSeat, runDunning, scheduleMessage, searchCheckIns, searchCourseEnrollments, searchCourses, searchDirectory, searchDocuments, searchEventRegistrations, searchEvents, searchMessages, searchMessageTemplates, searchQuizAttempts, searchTrainingEnrollments, searchTrainings, sendChatMessage, sendMessage, setPrimaryChapterAffiliation, terminateMembership, testEmailTemplate, updateBookingEvent, updateChapterAffiliation, updateCourse, updateCourseEnrollment, updateCourseProgress, updateCredentialTemplate, updateDigitalCredential, updateDirectoryProfile, updateDocument, updateDocumentTag, updateDuesConfig, updateDuesInvoice, updateDunningTemplate, updateEmailTemplate, updateEvent, updateEventRegistration, updateInstitutionalMembership, updateInvoice, updateMembership, updateMembershipApplication, updateMembershipTier, updateMessage, updateMessageTemplate, updatePerson, updatePersonSubscription, updateProfessionalLicense, updateRoyaltySplit, updateSubscriptionTopic, updateTraining, updateTrainingEnrollment, updateVideoCallParticipant, uploadFile, uploadNewDocumentVersion, verifyCredentialPublic, verifyDigitalCredentialAuthenticated, voidInvoice } from '../sdk.gen';
+import type { AcknowledgeLicenseRenewalAlertData, AcknowledgeLicenseRenewalAlertError, AcknowledgeLicenseRenewalAlertResponse, AllocateSeatData, AllocateSeatError, AllocateSeatResponse, ApproveMembershipApplicationData, ApproveMembershipApplicationError, ApproveMembershipApplicationResponse, ApproveTransferBySourceData, ApproveTransferBySourceError, ApproveTransferBySourceResponse, ApproveTransferByTargetData, ApproveTransferByTargetError, ApproveTransferByTargetResponse, ArchiveDocumentData, ArchiveDocumentError, ArchiveDocumentResponse, BulkUpdatePersonSubscriptionsData, BulkUpdatePersonSubscriptionsError, BulkUpdatePersonSubscriptionsResponse, CancelBookingData, CancelBookingError, CancelBookingResponse, CancelEmailQueueItemData, CancelEmailQueueItemError, CancelEmailQueueItemResponse, CancelEventData, CancelEventError, CancelEventRegistrationData, CancelEventRegistrationError, CancelEventRegistrationResponse, CancelEventResponse, CancelMessageData, CancelMessageError, CancelMessageResponse, CaptureInvoicePaymentData, CaptureInvoicePaymentError, CaptureInvoicePaymentResponse, CompleteAffiliationTransferData, CompleteAffiliationTransferError, CompleteAffiliationTransferResponse, CompleteFileUploadData, CompleteFileUploadError, CompleteFileUploadResponse, CompleteTrainingEnrollmentData, CompleteTrainingEnrollmentError, CompleteTrainingEnrollmentResponse, ConfirmBookingData, ConfirmBookingError, ConfirmBookingResponse, CreateAffiliationTransferData, CreateAffiliationTransferError, CreateAffiliationTransferResponse, CreateBookingData, CreateBookingError, CreateBookingEventData, CreateBookingEventError, CreateBookingEventResponse, CreateBookingResponse, CreateChapterAffiliationData, CreateChapterAffiliationError, CreateChapterAffiliationResponse, CreateChatRoomData, CreateChatRoomError, CreateChatRoomResponse, CreateCheckInData, CreateCheckInError, CreateCheckInResponse, CreateCourseData, CreateCourseEnrollmentData, CreateCourseEnrollmentError, CreateCourseEnrollmentResponse, CreateCourseError, CreateCourseResponse, CreateCredentialTemplateData, CreateCredentialTemplateError, CreateCredentialTemplateResponse, CreateDirectoryProfileData, CreateDirectoryProfileError, CreateDirectoryProfileResponse, CreateDocumentData, CreateDocumentError, CreateDocumentResponse, CreateDocumentTagData, CreateDocumentTagError, CreateDocumentTagResponse, CreateDuesConfigData, CreateDuesConfigError, CreateDuesConfigResponse, CreateDuesInvoiceData, CreateDuesInvoiceError, CreateDuesInvoiceResponse, CreateDunningTemplateData, CreateDunningTemplateError, CreateDunningTemplateResponse, CreateEmailTemplateData, CreateEmailTemplateError, CreateEmailTemplateResponse, CreateEventData, CreateEventError, CreateEventRegistrationData, CreateEventRegistrationError, CreateEventRegistrationResponse, CreateEventResponse, CreateInstitutionalMembershipData, CreateInstitutionalMembershipError, CreateInstitutionalMembershipResponse, CreateInvoiceData, CreateInvoiceError, CreateInvoiceResponse, CreateMembershipApplicationData, CreateMembershipApplicationError, CreateMembershipApplicationResponse, CreateMembershipData, CreateMembershipError, CreateMembershipTierData, CreateMembershipTierError, CreateMembershipTierResponse, CreateMerchantAccountData, CreateMerchantAccountError, CreateMerchantAccountResponse, CreateMessageData, CreateMessageError, CreateMessageResponse, CreateMessageTemplateData, CreateMessageTemplateError, CreateMessageTemplateResponse, CreatePersonData, CreatePersonError, CreatePersonResponse, CreateProfessionalLicenseData, CreateProfessionalLicenseError, CreateProfessionalLicenseResponse, CreateQuizAttemptData, CreateQuizAttemptError, CreateQuizAttemptResponse, CreateReviewData, CreateReviewError, CreateReviewResponse, CreateRoyaltySplitData, CreateRoyaltySplitError, CreateRoyaltySplitResponse, CreateScheduleExceptionData, CreateScheduleExceptionError, CreateScheduleExceptionResponse, CreateSubscriptionTopicData, CreateSubscriptionTopicError, CreateSubscriptionTopicResponse, CreateTrainingData, CreateTrainingEnrollmentData, CreateTrainingEnrollmentError, CreateTrainingEnrollmentResponse, CreateTrainingError, DeleteBookingEventData, DeleteBookingEventError, DeleteBookingEventResponse, DeleteChapterAffiliationData, DeleteChapterAffiliationError, DeleteChapterAffiliationResponse, DeleteCourseData, DeleteCourseEnrollmentData, DeleteCourseEnrollmentError, DeleteCourseEnrollmentResponse, DeleteCourseError, DeleteCourseResponse, DeleteCredentialTemplateData, DeleteCredentialTemplateError, DeleteCredentialTemplateResponse, DeleteDigitalCredentialData, DeleteDigitalCredentialError, DeleteDigitalCredentialResponse, DeleteDirectoryProfileData, DeleteDirectoryProfileError, DeleteDirectoryProfileResponse, DeleteDocumentData, DeleteDocumentError, DeleteDocumentResponse, DeleteDocumentTagData, DeleteDocumentTagError, DeleteDocumentTagResponse, DeleteDuesConfigData, DeleteDuesConfigError, DeleteDuesConfigResponse, DeleteDuesInvoiceData, DeleteDuesInvoiceError, DeleteDuesInvoiceResponse, DeleteDunningTemplateData, DeleteDunningTemplateError, DeleteDunningTemplateResponse, DeleteEventData, DeleteEventError, DeleteEventRegistrationData, DeleteEventRegistrationError, DeleteEventRegistrationResponse, DeleteEventResponse, DeleteFileData, DeleteFileError, DeleteFileResponse, DeleteInstitutionalMembershipData, DeleteInstitutionalMembershipError, DeleteInstitutionalMembershipResponse, DeleteInvoiceData, DeleteInvoiceError, DeleteInvoiceResponse, DeleteMembershipApplicationData, DeleteMembershipApplicationError, DeleteMembershipApplicationResponse, DeleteMembershipData, DeleteMembershipError, DeleteMembershipResponse, DeleteMembershipTierData, DeleteMembershipTierError, DeleteMembershipTierResponse, DeleteMessageData, DeleteMessageError, DeleteMessageResponse, DeleteMessageTemplateData, DeleteMessageTemplateError, DeleteMessageTemplateResponse, DeleteProfessionalLicenseData, DeleteProfessionalLicenseError, DeleteProfessionalLicenseResponse, DeleteReviewData, DeleteReviewError, DeleteReviewResponse, DeleteRoyaltySplitData, DeleteRoyaltySplitError, DeleteRoyaltySplitResponse, DeleteScheduleExceptionData, DeleteScheduleExceptionError, DeleteScheduleExceptionResponse, DeleteSubscriptionTopicData, DeleteSubscriptionTopicError, DeleteSubscriptionTopicResponse, DeleteTrainingData, DeleteTrainingEnrollmentData, DeleteTrainingEnrollmentError, DeleteTrainingEnrollmentResponse, DeleteTrainingError, DeleteTrainingResponse, DenyAffiliationTransferData, DenyAffiliationTransferError, DenyAffiliationTransferResponse, DenyMembershipApplicationData, DenyMembershipApplicationError, DenyMembershipApplicationResponse, EndVideoCallData, EndVideoCallError, EndVideoCallResponse, FinalizeInvoiceData, FinalizeInvoiceError, FinalizeInvoiceResponse, GenerateDuesInvoicesForOrgData, GenerateDuesInvoicesForOrgError, GenerateDuesInvoicesForOrgResponse, GetAffiliationTransferData, GetAffiliationTransferError, GetAffiliationTransferResponse, GetAgingBucketData, GetAgingBucketError, GetAgingBucketResponse, GetBookingData, GetBookingError, GetBookingEventData, GetBookingEventError, GetBookingEventResponse, GetBookingResponse, GetChapterAffiliationData, GetChapterAffiliationError, GetChapterAffiliationResponse, GetChatMessagesData, GetChatMessagesError, GetChatMessagesResponse, GetChatRoomData, GetChatRoomError, GetChatRoomResponse, GetCourseData, GetCourseEnrollmentData, GetCourseEnrollmentError, GetCourseEnrollmentResponse, GetCourseError, GetCourseResponse, GetCredentialTemplateData, GetCredentialTemplateError, GetCredentialTemplateResponse, GetDigitalCredentialData, GetDigitalCredentialError, GetDigitalCredentialResponse, GetDirectoryProfileData, GetDirectoryProfileError, GetDirectoryProfileResponse, GetDocumentAccessLogData, GetDocumentAccessLogError, GetDocumentAccessLogResponse, GetDocumentData, GetDocumentError, GetDocumentResponse, GetDocumentTagData, GetDocumentTagError, GetDocumentTagResponse, GetDocumentVersionData, GetDocumentVersionError, GetDocumentVersionResponse, GetDuesConfigData, GetDuesConfigError, GetDuesConfigResponse, GetDuesInvoiceData, GetDuesInvoiceError, GetDuesInvoiceResponse, GetDunningTemplateData, GetDunningTemplateError, GetDunningTemplateResponse, GetEmailQueueItemData, GetEmailQueueItemError, GetEmailQueueItemResponse, GetEmailTemplateData, GetEmailTemplateError, GetEmailTemplateResponse, GetEventData, GetEventError, GetEventRegistrationData, GetEventRegistrationError, GetEventRegistrationResponse, GetEventResponse, GetFileData, GetFileDownloadData, GetFileDownloadError, GetFileDownloadResponse, GetFileError, GetFileResponse, GetIceServersData, GetIceServersError, GetIceServersResponse, GetInstitutionalMembershipData, GetInstitutionalMembershipError, GetInstitutionalMembershipResponse, GetInvoiceData, GetInvoiceError, GetInvoiceResponse, GetMembershipApplicationData, GetMembershipApplicationError, GetMembershipApplicationResponse, GetMembershipData, GetMembershipError, GetMembershipTierData, GetMembershipTierError, GetMembershipTierResponse, GetMerchantAccountData, GetMerchantAccountError, GetMerchantAccountResponse, GetMerchantDashboardData, GetMerchantDashboardError, GetMerchantDashboardResponse, GetMessageData, GetMessageError, GetMessageResponse, GetMessageTemplateData, GetMessageTemplateError, GetMessageTemplateResponse, GetNotificationData, GetNotificationError, GetNotificationResponse, GetPersonData, GetPersonError, GetPersonResponse, GetProfessionalLicenseData, GetProfessionalLicenseError, GetProfessionalLicenseResponse, GetPublicDirectoryProfileData, GetPublicDirectoryProfileError, GetPublicDirectoryProfileResponse, GetReviewData, GetReviewError, GetReviewResponse, GetRoyaltySplitData, GetRoyaltySplitError, GetRoyaltySplitResponse, GetScheduleExceptionData, GetScheduleExceptionError, GetScheduleExceptionResponse, GetSubscriptionTopicData, GetSubscriptionTopicError, GetSubscriptionTopicResponse, GetTimeSlotData, GetTimeSlotError, GetTimeSlotResponse, GetTrainingData, GetTrainingEnrollmentData, GetTrainingEnrollmentError, GetTrainingEnrollmentResponse, GetTrainingError, HandleStripeWebhookData, HandleStripeWebhookError, IssueDigitalCredentialData, IssueDigitalCredentialError, IssueDigitalCredentialResponse, JoinVideoCallData, JoinVideoCallError, JoinVideoCallResponse, LeaveVideoCallData, LeaveVideoCallError, LeaveVideoCallResponse2, ListAffiliationTransfersData, ListAffiliationTransfersError, ListAffiliationTransfersResponse, ListAuditLogsData, ListAuditLogsError, ListAuditLogsResponse, ListBookingEventsData, ListBookingEventsError, ListBookingEventsResponse, ListBookingsData, ListBookingsError, ListBookingsResponse, ListChapterAffiliationsData, ListChapterAffiliationsError, ListChapterAffiliationsResponse, ListChatRoomsData, ListChatRoomsError, ListChatRoomsResponse, ListCredentialTemplatesData, ListCredentialTemplatesError, ListCredentialTemplatesResponse, ListDigitalCredentialsData, ListDigitalCredentialsError, ListDigitalCredentialsResponse, ListDirectoryProfilesData, ListDirectoryProfilesError, ListDirectoryProfilesResponse, ListDocumentTagsData, ListDocumentTagsError, ListDocumentTagsResponse, ListDocumentVersionsData, ListDocumentVersionsError, ListDocumentVersionsResponse, ListDuesConfigsData, ListDuesConfigsError, ListDuesConfigsResponse, ListDuesInvoicesData, ListDuesInvoicesError, ListDuesInvoicesResponse, ListDunningEventsData, ListDunningEventsError, ListDunningEventsResponse, ListDunningTemplatesData, ListDunningTemplatesError, ListDunningTemplatesResponse, ListEmailQueueItemsData, ListEmailQueueItemsError, ListEmailQueueItemsResponse, ListEmailTemplatesData, ListEmailTemplatesError, ListEmailTemplatesResponse, ListEventSlotsData, ListEventSlotsError, ListEventSlotsResponse, ListFilesData, ListFilesError, ListFilesResponse, ListInstitutionalMembershipsData, ListInstitutionalMembershipsError, ListInstitutionalMembershipsResponse, ListInvoicesData, ListInvoicesError, ListInvoicesResponse, ListLicenseRenewalAlertsData, ListLicenseRenewalAlertsError, ListLicenseRenewalAlertsResponse, ListMembershipApplicationsData, ListMembershipApplicationsError, ListMembershipApplicationsResponse, ListMembershipsData, ListMembershipsError, ListMembershipsResponse, ListMembershipTiersData, ListMembershipTiersError, ListMembershipTiersResponse, ListNotificationsData, ListNotificationsError, ListNotificationsResponse, ListPersonsData, ListPersonsError, ListPersonsResponse, ListPersonSubscriptionsData, ListPersonSubscriptionsError, ListPersonSubscriptionsResponse, ListProfessionalLicensesData, ListProfessionalLicensesError, ListProfessionalLicensesResponse, ListReviewsData, ListReviewsError, ListReviewsResponse, ListRoyaltySplitsData, ListRoyaltySplitsError, ListRoyaltySplitsResponse, ListScheduleExceptionsData, ListScheduleExceptionsError, ListScheduleExceptionsResponse, ListSeatAllocationsData, ListSeatAllocationsError, ListSeatAllocationsResponse, ListWaitlistEntriesData, ListWaitlistEntriesError, ListWaitlistEntriesResponse, MarkAllNotificationsAsReadData, MarkAllNotificationsAsReadError, MarkAllNotificationsAsReadResponse, MarkDuesInvoicePaidData, MarkDuesInvoicePaidError, MarkDuesInvoicePaidResponse, MarkInvoiceUncollectibleData, MarkInvoiceUncollectibleError, MarkInvoiceUncollectibleResponse, MarkNoShowBookingData, MarkNoShowBookingError, MarkNoShowBookingResponse, MarkNotificationAsReadData, MarkNotificationAsReadError, MarkNotificationAsReadResponse, OnboardMerchantAccountData, OnboardMerchantAccountError, OnboardMerchantAccountResponse, PayInvoiceData, PayInvoiceError, PayInvoiceResponse, PreviewMessageTemplateData, PreviewMessageTemplateError, PreviewMessageTemplateResponse, PromoteWaitlistEntryData, PromoteWaitlistEntryError, PromoteWaitlistEntryResponse, PublishEventData, PublishEventError, PublishEventResponse, PublishTrainingData, PublishTrainingError, RecalculateAgingBucketData, RecalculateAgingBucketError, RecalculateAgingBucketResponse, RefundEventRegistrationData, RefundEventRegistrationError, RefundEventRegistrationResponse, RefundInvoicePaymentData, RefundInvoicePaymentError, RefundInvoicePaymentResponse, ReinstateMembershipData, ReinstateMembershipError, RejectBookingData, RejectBookingError, RejectBookingResponse, RenewMembershipData, RenewMembershipError, RetryEmailQueueItemData, RetryEmailQueueItemError, RetryEmailQueueItemResponse, RevokeDigitalCredentialData, RevokeDigitalCredentialError, RevokeDigitalCredentialResponse, RevokeSeatData, RevokeSeatError, RevokeSeatResponse, RunDunningData, RunDunningError, RunDunningResponse, ScheduleMessageData, ScheduleMessageError, ScheduleMessageResponse, SearchCheckInsData, SearchCheckInsError, SearchCheckInsResponse, SearchCourseEnrollmentsData, SearchCourseEnrollmentsError, SearchCourseEnrollmentsResponse, SearchCoursesData, SearchCoursesError, SearchCoursesResponse, SearchDirectoryData, SearchDirectoryError, SearchDirectoryResponse, SearchDocumentsData, SearchDocumentsError, SearchDocumentsResponse, SearchEventRegistrationsData, SearchEventRegistrationsError, SearchEventRegistrationsResponse, SearchEventsData, SearchEventsError, SearchEventsResponse, SearchMessagesData, SearchMessagesError, SearchMessagesResponse, SearchMessageTemplatesData, SearchMessageTemplatesError, SearchMessageTemplatesResponse, SearchQuizAttemptsData, SearchQuizAttemptsError, SearchQuizAttemptsResponse, SearchTrainingEnrollmentsData, SearchTrainingEnrollmentsError, SearchTrainingEnrollmentsResponse, SearchTrainingsData, SearchTrainingsError, SearchTrainingsResponse, SendChatMessageData, SendChatMessageError, SendChatMessageResponse, SendMessageData, SendMessageError, SendMessageResponse, SetPrimaryChapterAffiliationData, SetPrimaryChapterAffiliationError, SetPrimaryChapterAffiliationResponse, TerminateMembershipData, TerminateMembershipError, TestEmailTemplateData, TestEmailTemplateError, TestEmailTemplateResponse, UpdateBookingEventData, UpdateBookingEventError, UpdateBookingEventResponse, UpdateChapterAffiliationData, UpdateChapterAffiliationError, UpdateChapterAffiliationResponse, UpdateCourseData, UpdateCourseEnrollmentData, UpdateCourseEnrollmentError, UpdateCourseEnrollmentResponse, UpdateCourseError, UpdateCourseProgressData, UpdateCourseProgressError, UpdateCourseProgressResponse, UpdateCourseResponse, UpdateCredentialTemplateData, UpdateCredentialTemplateError, UpdateCredentialTemplateResponse, UpdateDigitalCredentialData, UpdateDigitalCredentialError, UpdateDigitalCredentialResponse, UpdateDirectoryProfileData, UpdateDirectoryProfileError, UpdateDirectoryProfileResponse, UpdateDocumentData, UpdateDocumentError, UpdateDocumentResponse, UpdateDocumentTagData, UpdateDocumentTagError, UpdateDocumentTagResponse, UpdateDuesConfigData, UpdateDuesConfigError, UpdateDuesConfigResponse, UpdateDuesInvoiceData, UpdateDuesInvoiceError, UpdateDuesInvoiceResponse, UpdateDunningTemplateData, UpdateDunningTemplateError, UpdateDunningTemplateResponse, UpdateEmailTemplateData, UpdateEmailTemplateError, UpdateEmailTemplateResponse, UpdateEventData, UpdateEventError, UpdateEventRegistrationData, UpdateEventRegistrationError, UpdateEventRegistrationResponse, UpdateEventResponse, UpdateInstitutionalMembershipData, UpdateInstitutionalMembershipError, UpdateInstitutionalMembershipResponse, UpdateInvoiceData, UpdateInvoiceError, UpdateInvoiceResponse, UpdateMembershipApplicationData, UpdateMembershipApplicationError, UpdateMembershipApplicationResponse, UpdateMembershipData, UpdateMembershipError, UpdateMembershipTierData, UpdateMembershipTierError, UpdateMembershipTierResponse, UpdateMessageData, UpdateMessageError, UpdateMessageResponse, UpdateMessageTemplateData, UpdateMessageTemplateError, UpdateMessageTemplateResponse, UpdatePersonData, UpdatePersonError, UpdatePersonResponse, UpdatePersonSubscriptionData, UpdatePersonSubscriptionError, UpdatePersonSubscriptionResponse, UpdateProfessionalLicenseData, UpdateProfessionalLicenseError, UpdateProfessionalLicenseResponse, UpdateRoyaltySplitData, UpdateRoyaltySplitError, UpdateRoyaltySplitResponse, UpdateSubscriptionTopicData, UpdateSubscriptionTopicError, UpdateSubscriptionTopicResponse, UpdateTrainingData, UpdateTrainingEnrollmentData, UpdateTrainingEnrollmentError, UpdateTrainingEnrollmentResponse, UpdateTrainingError, UpdateVideoCallParticipantData, UpdateVideoCallParticipantError, UpdateVideoCallParticipantResponse, UploadFileData, UploadFileError, UploadFileResponse, UploadNewDocumentVersionData, UploadNewDocumentVersionError, UploadNewDocumentVersionResponse, VerifyCredentialPublicData, VerifyCredentialPublicError, VerifyCredentialPublicResponse, VerifyDigitalCredentialAuthenticatedData, VerifyDigitalCredentialAuthenticatedError, VerifyDigitalCredentialAuthenticatedResponse, VoidInvoiceData, VoidInvoiceError, VoidInvoiceResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -39,14 +39,14 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
     return [params];
 };
 
-export const listAuditLogsQueryKey = (options?: Options<ListAuditLogsData>) => createQueryKey('listAuditLogs', options);
+export const listDocumentTagsQueryKey = (options?: Options<ListDocumentTagsData>) => createQueryKey('listDocumentTags', options);
 
 /**
- * List audit logs with filtering and pagination. Requires role: 'admin', 'support'
+ * List all document tags for the tenant. Requires role: 'admin', 'coordinator', 'member'
  */
-export const listAuditLogsOptions = (options?: Options<ListAuditLogsData>) => queryOptions<ListAuditLogsResponse, ListAuditLogsError, ListAuditLogsResponse, ReturnType<typeof listAuditLogsQueryKey>>({
+export const listDocumentTagsOptions = (options?: Options<ListDocumentTagsData>) => queryOptions<ListDocumentTagsResponse, ListDocumentTagsError, ListDocumentTagsResponse, ReturnType<typeof listDocumentTagsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await listAuditLogs({
+        const { data } = await listDocumentTags({
             ...options,
             ...queryKey[0],
             signal,
@@ -54,7 +54,7 @@ export const listAuditLogsOptions = (options?: Options<ListAuditLogsData>) => qu
         });
         return data;
     },
-    queryKey: listAuditLogsQueryKey(options)
+    queryKey: listDocumentTagsQueryKey(options)
 });
 
 const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<Options>, page: K) => {
@@ -85,6 +85,3927 @@ const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'hea
     }
     return params as unknown as typeof page;
 };
+
+export const listDocumentTagsInfiniteQueryKey = (options?: Options<ListDocumentTagsData>): QueryKey<Options<ListDocumentTagsData>> => createQueryKey('listDocumentTags', options, true);
+
+/**
+ * List all document tags for the tenant. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const listDocumentTagsInfiniteOptions = (options?: Options<ListDocumentTagsData>) => infiniteQueryOptions<ListDocumentTagsResponse, ListDocumentTagsError, InfiniteData<ListDocumentTagsResponse>, QueryKey<Options<ListDocumentTagsData>>, number | Pick<QueryKey<Options<ListDocumentTagsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListDocumentTagsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listDocumentTags({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDocumentTagsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a document tag. Requires role: 'admin', 'coordinator'
+ */
+export const createDocumentTagMutation = (options?: Partial<Options<CreateDocumentTagData>>): UseMutationOptions<CreateDocumentTagResponse, CreateDocumentTagError, Options<CreateDocumentTagData>> => {
+    const mutationOptions: UseMutationOptions<CreateDocumentTagResponse, CreateDocumentTagError, Options<CreateDocumentTagData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createDocumentTag({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a document tag. Requires role: 'admin'
+ */
+export const deleteDocumentTagMutation = (options?: Partial<Options<DeleteDocumentTagData>>): UseMutationOptions<DeleteDocumentTagResponse, DeleteDocumentTagError, Options<DeleteDocumentTagData>> => {
+    const mutationOptions: UseMutationOptions<DeleteDocumentTagResponse, DeleteDocumentTagError, Options<DeleteDocumentTagData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteDocumentTag({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDocumentTagQueryKey = (options: Options<GetDocumentTagData>) => createQueryKey('getDocumentTag', options);
+
+/**
+ * Get a document tag by ID. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const getDocumentTagOptions = (options: Options<GetDocumentTagData>) => queryOptions<GetDocumentTagResponse, GetDocumentTagError, GetDocumentTagResponse, ReturnType<typeof getDocumentTagQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDocumentTag({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDocumentTagQueryKey(options)
+});
+
+/**
+ * Update a document tag. Requires role: 'admin', 'coordinator'
+ */
+export const updateDocumentTagMutation = (options?: Partial<Options<UpdateDocumentTagData>>): UseMutationOptions<UpdateDocumentTagResponse, UpdateDocumentTagError, Options<UpdateDocumentTagData>> => {
+    const mutationOptions: UseMutationOptions<UpdateDocumentTagResponse, UpdateDocumentTagError, Options<UpdateDocumentTagData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateDocumentTag({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchDocumentsQueryKey = (options?: Options<SearchDocumentsData>) => createQueryKey('searchDocuments', options);
+
+/**
+ * Search and list documents. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const searchDocumentsOptions = (options?: Options<SearchDocumentsData>) => queryOptions<SearchDocumentsResponse, SearchDocumentsError, SearchDocumentsResponse, ReturnType<typeof searchDocumentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchDocuments({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchDocumentsQueryKey(options)
+});
+
+export const searchDocumentsInfiniteQueryKey = (options?: Options<SearchDocumentsData>): QueryKey<Options<SearchDocumentsData>> => createQueryKey('searchDocuments', options, true);
+
+/**
+ * Search and list documents. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const searchDocumentsInfiniteOptions = (options?: Options<SearchDocumentsData>) => infiniteQueryOptions<SearchDocumentsResponse, SearchDocumentsError, InfiniteData<SearchDocumentsResponse>, QueryKey<Options<SearchDocumentsData>>, number | Pick<QueryKey<Options<SearchDocumentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchDocumentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchDocuments({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchDocumentsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a document record after the file has been uploaded to object storage. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const createDocumentMutation = (options?: Partial<Options<CreateDocumentData>>): UseMutationOptions<CreateDocumentResponse, CreateDocumentError, Options<CreateDocumentData>> => {
+    const mutationOptions: UseMutationOptions<CreateDocumentResponse, CreateDocumentError, Options<CreateDocumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createDocument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a document and all its versions. Requires role: 'admin', 'member:owner'
+ */
+export const deleteDocumentMutation = (options?: Partial<Options<DeleteDocumentData>>): UseMutationOptions<DeleteDocumentResponse, DeleteDocumentError, Options<DeleteDocumentData>> => {
+    const mutationOptions: UseMutationOptions<DeleteDocumentResponse, DeleteDocumentError, Options<DeleteDocumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteDocument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDocumentQueryKey = (options: Options<GetDocumentData>) => createQueryKey('getDocument', options);
+
+/**
+ * Get a document by ID. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const getDocumentOptions = (options: Options<GetDocumentData>) => queryOptions<GetDocumentResponse, GetDocumentError, GetDocumentResponse, ReturnType<typeof getDocumentQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDocument({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDocumentQueryKey(options)
+});
+
+/**
+ * Update document metadata. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const updateDocumentMutation = (options?: Partial<Options<UpdateDocumentData>>): UseMutationOptions<UpdateDocumentResponse, UpdateDocumentError, Options<UpdateDocumentData>> => {
+    const mutationOptions: UseMutationOptions<UpdateDocumentResponse, UpdateDocumentError, Options<UpdateDocumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateDocument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDocumentAccessLogQueryKey = (options: Options<GetDocumentAccessLogData>) => createQueryKey('getDocumentAccessLog', options);
+
+/**
+ * Retrieve the access log for a document. Requires role: 'admin', 'coordinator'
+ */
+export const getDocumentAccessLogOptions = (options: Options<GetDocumentAccessLogData>) => queryOptions<GetDocumentAccessLogResponse, GetDocumentAccessLogError, GetDocumentAccessLogResponse, ReturnType<typeof getDocumentAccessLogQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDocumentAccessLog({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDocumentAccessLogQueryKey(options)
+});
+
+export const getDocumentAccessLogInfiniteQueryKey = (options: Options<GetDocumentAccessLogData>): QueryKey<Options<GetDocumentAccessLogData>> => createQueryKey('getDocumentAccessLog', options, true);
+
+/**
+ * Retrieve the access log for a document. Requires role: 'admin', 'coordinator'
+ */
+export const getDocumentAccessLogInfiniteOptions = (options: Options<GetDocumentAccessLogData>) => infiniteQueryOptions<GetDocumentAccessLogResponse, GetDocumentAccessLogError, InfiniteData<GetDocumentAccessLogResponse>, QueryKey<Options<GetDocumentAccessLogData>>, number | Pick<QueryKey<Options<GetDocumentAccessLogData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<GetDocumentAccessLogData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await getDocumentAccessLog({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDocumentAccessLogInfiniteQueryKey(options)
+});
+
+/**
+ * Archive a document (soft-delete; retains record for audit purposes). Requires role: 'admin', 'coordinator'
+ */
+export const archiveDocumentMutation = (options?: Partial<Options<ArchiveDocumentData>>): UseMutationOptions<ArchiveDocumentResponse, ArchiveDocumentError, Options<ArchiveDocumentData>> => {
+    const mutationOptions: UseMutationOptions<ArchiveDocumentResponse, ArchiveDocumentError, Options<ArchiveDocumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await archiveDocument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listDocumentVersionsQueryKey = (options: Options<ListDocumentVersionsData>) => createQueryKey('listDocumentVersions', options);
+
+/**
+ * List all versions of a document. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const listDocumentVersionsOptions = (options: Options<ListDocumentVersionsData>) => queryOptions<ListDocumentVersionsResponse, ListDocumentVersionsError, ListDocumentVersionsResponse, ReturnType<typeof listDocumentVersionsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listDocumentVersions({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDocumentVersionsQueryKey(options)
+});
+
+export const listDocumentVersionsInfiniteQueryKey = (options: Options<ListDocumentVersionsData>): QueryKey<Options<ListDocumentVersionsData>> => createQueryKey('listDocumentVersions', options, true);
+
+/**
+ * List all versions of a document. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const listDocumentVersionsInfiniteOptions = (options: Options<ListDocumentVersionsData>) => infiniteQueryOptions<ListDocumentVersionsResponse, ListDocumentVersionsError, InfiniteData<ListDocumentVersionsResponse>, QueryKey<Options<ListDocumentVersionsData>>, number | Pick<QueryKey<Options<ListDocumentVersionsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListDocumentVersionsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listDocumentVersions({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDocumentVersionsInfiniteQueryKey(options)
+});
+
+/**
+ * Upload a new version of an existing document. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const uploadNewDocumentVersionMutation = (options?: Partial<Options<UploadNewDocumentVersionData>>): UseMutationOptions<UploadNewDocumentVersionResponse, UploadNewDocumentVersionError, Options<UploadNewDocumentVersionData>> => {
+    const mutationOptions: UseMutationOptions<UploadNewDocumentVersionResponse, UploadNewDocumentVersionError, Options<UploadNewDocumentVersionData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await uploadNewDocumentVersion({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDocumentVersionQueryKey = (options: Options<GetDocumentVersionData>) => createQueryKey('getDocumentVersion', options);
+
+/**
+ * Get a specific version of a document. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const getDocumentVersionOptions = (options: Options<GetDocumentVersionData>) => queryOptions<GetDocumentVersionResponse, GetDocumentVersionError, GetDocumentVersionResponse, ReturnType<typeof getDocumentVersionQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDocumentVersion({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDocumentVersionQueryKey(options)
+});
+
+export const searchEventsQueryKey = (options?: Options<SearchEventsData>) => createQueryKey('searchEvents', options);
+
+/**
+ * Search and list events with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchEventsOptions = (options?: Options<SearchEventsData>) => queryOptions<SearchEventsResponse, SearchEventsError, SearchEventsResponse, ReturnType<typeof searchEventsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchEvents({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchEventsQueryKey(options)
+});
+
+export const searchEventsInfiniteQueryKey = (options?: Options<SearchEventsData>): QueryKey<Options<SearchEventsData>> => createQueryKey('searchEvents', options, true);
+
+/**
+ * Search and list events with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchEventsInfiniteOptions = (options?: Options<SearchEventsData>) => infiniteQueryOptions<SearchEventsResponse, SearchEventsError, InfiniteData<SearchEventsResponse>, QueryKey<Options<SearchEventsData>>, number | Pick<QueryKey<Options<SearchEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchEvents({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchEventsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new event. Requires role: 'association:admin', 'association:staff'
+ */
+export const createEventMutation = (options?: Partial<Options<CreateEventData>>): UseMutationOptions<CreateEventResponse, CreateEventError, Options<CreateEventData>> => {
+    const mutationOptions: UseMutationOptions<CreateEventResponse, CreateEventError, Options<CreateEventData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createEvent({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchCheckInsQueryKey = (options?: Options<SearchCheckInsData>) => createQueryKey('searchCheckIns', options);
+
+/**
+ * Search check-in records with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchCheckInsOptions = (options?: Options<SearchCheckInsData>) => queryOptions<SearchCheckInsResponse, SearchCheckInsError, SearchCheckInsResponse, ReturnType<typeof searchCheckInsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchCheckIns({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchCheckInsQueryKey(options)
+});
+
+export const searchCheckInsInfiniteQueryKey = (options?: Options<SearchCheckInsData>): QueryKey<Options<SearchCheckInsData>> => createQueryKey('searchCheckIns', options, true);
+
+/**
+ * Search check-in records with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchCheckInsInfiniteOptions = (options?: Options<SearchCheckInsData>) => infiniteQueryOptions<SearchCheckInsResponse, SearchCheckInsError, InfiniteData<SearchCheckInsResponse>, QueryKey<Options<SearchCheckInsData>>, number | Pick<QueryKey<Options<SearchCheckInsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchCheckInsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchCheckIns({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchCheckInsInfiniteQueryKey(options)
+});
+
+/**
+ * Record an attendee check-in. Idempotent on registrationId — subsequent calls return the existing record. Requires role: 'association:admin', 'association:staff'
+ */
+export const createCheckInMutation = (options?: Partial<Options<CreateCheckInData>>): UseMutationOptions<CreateCheckInResponse, CreateCheckInError, Options<CreateCheckInData>> => {
+    const mutationOptions: UseMutationOptions<CreateCheckInResponse, CreateCheckInError, Options<CreateCheckInData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createCheckIn({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchEventRegistrationsQueryKey = (options?: Options<SearchEventRegistrationsData>) => createQueryKey('searchEventRegistrations', options);
+
+/**
+ * Search registrations with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchEventRegistrationsOptions = (options?: Options<SearchEventRegistrationsData>) => queryOptions<SearchEventRegistrationsResponse, SearchEventRegistrationsError, SearchEventRegistrationsResponse, ReturnType<typeof searchEventRegistrationsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchEventRegistrations({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchEventRegistrationsQueryKey(options)
+});
+
+export const searchEventRegistrationsInfiniteQueryKey = (options?: Options<SearchEventRegistrationsData>): QueryKey<Options<SearchEventRegistrationsData>> => createQueryKey('searchEventRegistrations', options, true);
+
+/**
+ * Search registrations with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchEventRegistrationsInfiniteOptions = (options?: Options<SearchEventRegistrationsData>) => infiniteQueryOptions<SearchEventRegistrationsResponse, SearchEventRegistrationsError, InfiniteData<SearchEventRegistrationsResponse>, QueryKey<Options<SearchEventRegistrationsData>>, number | Pick<QueryKey<Options<SearchEventRegistrationsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchEventRegistrationsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchEventRegistrations({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchEventRegistrationsInfiniteQueryKey(options)
+});
+
+/**
+ * Register a person for an event. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const createEventRegistrationMutation = (options?: Partial<Options<CreateEventRegistrationData>>): UseMutationOptions<CreateEventRegistrationResponse, CreateEventRegistrationError, Options<CreateEventRegistrationData>> => {
+    const mutationOptions: UseMutationOptions<CreateEventRegistrationResponse, CreateEventRegistrationError, Options<CreateEventRegistrationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createEventRegistration({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a registration record. Requires role: 'association:admin'
+ */
+export const deleteEventRegistrationMutation = (options?: Partial<Options<DeleteEventRegistrationData>>): UseMutationOptions<DeleteEventRegistrationResponse, DeleteEventRegistrationError, Options<DeleteEventRegistrationData>> => {
+    const mutationOptions: UseMutationOptions<DeleteEventRegistrationResponse, DeleteEventRegistrationError, Options<DeleteEventRegistrationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteEventRegistration({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getEventRegistrationQueryKey = (options: Options<GetEventRegistrationData>) => createQueryKey('getEventRegistration', options);
+
+/**
+ * Get a registration by ID. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const getEventRegistrationOptions = (options: Options<GetEventRegistrationData>) => queryOptions<GetEventRegistrationResponse, GetEventRegistrationError, GetEventRegistrationResponse, ReturnType<typeof getEventRegistrationQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getEventRegistration({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getEventRegistrationQueryKey(options)
+});
+
+/**
+ * Update a registration. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateEventRegistrationMutation = (options?: Partial<Options<UpdateEventRegistrationData>>): UseMutationOptions<UpdateEventRegistrationResponse, UpdateEventRegistrationError, Options<UpdateEventRegistrationData>> => {
+    const mutationOptions: UseMutationOptions<UpdateEventRegistrationResponse, UpdateEventRegistrationError, Options<UpdateEventRegistrationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateEventRegistration({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cancel a registration optionally triggering a refund workflow. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const cancelEventRegistrationMutation = (options?: Partial<Options<CancelEventRegistrationData>>): UseMutationOptions<CancelEventRegistrationResponse, CancelEventRegistrationError, Options<CancelEventRegistrationData>> => {
+    const mutationOptions: UseMutationOptions<CancelEventRegistrationResponse, CancelEventRegistrationError, Options<CancelEventRegistrationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await cancelEventRegistration({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Initiate a refund for a cancelled registration. Requires role: 'association:admin', 'association:staff'
+ */
+export const refundEventRegistrationMutation = (options?: Partial<Options<RefundEventRegistrationData>>): UseMutationOptions<RefundEventRegistrationResponse, RefundEventRegistrationError, Options<RefundEventRegistrationData>> => {
+    const mutationOptions: UseMutationOptions<RefundEventRegistrationResponse, RefundEventRegistrationError, Options<RefundEventRegistrationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await refundEventRegistration({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete an event. Requires role: 'association:admin'
+ */
+export const deleteEventMutation = (options?: Partial<Options<DeleteEventData>>): UseMutationOptions<DeleteEventResponse, DeleteEventError, Options<DeleteEventData>> => {
+    const mutationOptions: UseMutationOptions<DeleteEventResponse, DeleteEventError, Options<DeleteEventData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteEvent({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getEventQueryKey = (options: Options<GetEventData>) => createQueryKey('getEvent', options);
+
+/**
+ * Get an event by ID. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const getEventOptions = (options: Options<GetEventData>) => queryOptions<GetEventResponse, GetEventError, GetEventResponse, ReturnType<typeof getEventQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getEvent({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getEventQueryKey(options)
+});
+
+/**
+ * Update an existing event. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateEventMutation = (options?: Partial<Options<UpdateEventData>>): UseMutationOptions<UpdateEventResponse, UpdateEventError, Options<UpdateEventData>> => {
+    const mutationOptions: UseMutationOptions<UpdateEventResponse, UpdateEventError, Options<UpdateEventData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateEvent({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cancel an event and notify registered attendees. Requires role: 'association:admin', 'association:staff'
+ */
+export const cancelEventMutation = (options?: Partial<Options<CancelEventData>>): UseMutationOptions<CancelEventResponse, CancelEventError, Options<CancelEventData>> => {
+    const mutationOptions: UseMutationOptions<CancelEventResponse, CancelEventError, Options<CancelEventData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await cancelEvent({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Publish a draft event making it visible to members. Requires role: 'association:admin', 'association:staff'
+ */
+export const publishEventMutation = (options?: Partial<Options<PublishEventData>>): UseMutationOptions<PublishEventResponse, PublishEventError, Options<PublishEventData>> => {
+    const mutationOptions: UseMutationOptions<PublishEventResponse, PublishEventError, Options<PublishEventData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await publishEvent({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listWaitlistEntriesQueryKey = (options: Options<ListWaitlistEntriesData>) => createQueryKey('listWaitlistEntries', options);
+
+/**
+ * List waitlist entries for an event. Requires role: 'association:admin', 'association:staff'
+ */
+export const listWaitlistEntriesOptions = (options: Options<ListWaitlistEntriesData>) => queryOptions<ListWaitlistEntriesResponse, ListWaitlistEntriesError, ListWaitlistEntriesResponse, ReturnType<typeof listWaitlistEntriesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listWaitlistEntries({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listWaitlistEntriesQueryKey(options)
+});
+
+export const listWaitlistEntriesInfiniteQueryKey = (options: Options<ListWaitlistEntriesData>): QueryKey<Options<ListWaitlistEntriesData>> => createQueryKey('listWaitlistEntries', options, true);
+
+/**
+ * List waitlist entries for an event. Requires role: 'association:admin', 'association:staff'
+ */
+export const listWaitlistEntriesInfiniteOptions = (options: Options<ListWaitlistEntriesData>) => infiniteQueryOptions<ListWaitlistEntriesResponse, ListWaitlistEntriesError, InfiniteData<ListWaitlistEntriesResponse>, QueryKey<Options<ListWaitlistEntriesData>>, number | Pick<QueryKey<Options<ListWaitlistEntriesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListWaitlistEntriesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listWaitlistEntries({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listWaitlistEntriesInfiniteQueryKey(options)
+});
+
+/**
+ * Promote the next waitlist entry to a confirmed registration. Requires role: 'association:admin', 'association:staff'
+ */
+export const promoteWaitlistEntryMutation = (options?: Partial<Options<PromoteWaitlistEntryData>>): UseMutationOptions<PromoteWaitlistEntryResponse, PromoteWaitlistEntryError, Options<PromoteWaitlistEntryData>> => {
+    const mutationOptions: UseMutationOptions<PromoteWaitlistEntryResponse, PromoteWaitlistEntryError, Options<PromoteWaitlistEntryData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await promoteWaitlistEntry({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listAffiliationTransfersQueryKey = (options?: Options<ListAffiliationTransfersData>) => createQueryKey('listAffiliationTransfers', options);
+
+/**
+ * List affiliation transfers with optional filters. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const listAffiliationTransfersOptions = (options?: Options<ListAffiliationTransfersData>) => queryOptions<ListAffiliationTransfersResponse, ListAffiliationTransfersError, ListAffiliationTransfersResponse, ReturnType<typeof listAffiliationTransfersQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listAffiliationTransfers({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listAffiliationTransfersQueryKey(options)
+});
+
+export const listAffiliationTransfersInfiniteQueryKey = (options?: Options<ListAffiliationTransfersData>): QueryKey<Options<ListAffiliationTransfersData>> => createQueryKey('listAffiliationTransfers', options, true);
+
+/**
+ * List affiliation transfers with optional filters. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const listAffiliationTransfersInfiniteOptions = (options?: Options<ListAffiliationTransfersData>) => infiniteQueryOptions<ListAffiliationTransfersResponse, ListAffiliationTransfersError, InfiniteData<ListAffiliationTransfersResponse>, QueryKey<Options<ListAffiliationTransfersData>>, number | Pick<QueryKey<Options<ListAffiliationTransfersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListAffiliationTransfersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listAffiliationTransfers({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listAffiliationTransfersInfiniteQueryKey(options)
+});
+
+/**
+ * Submit a new affiliation transfer request. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const createAffiliationTransferMutation = (options?: Partial<Options<CreateAffiliationTransferData>>): UseMutationOptions<CreateAffiliationTransferResponse, CreateAffiliationTransferError, Options<CreateAffiliationTransferData>> => {
+    const mutationOptions: UseMutationOptions<CreateAffiliationTransferResponse, CreateAffiliationTransferError, Options<CreateAffiliationTransferData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createAffiliationTransfer({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getAffiliationTransferQueryKey = (options: Options<GetAffiliationTransferData>) => createQueryKey('getAffiliationTransfer', options);
+
+/**
+ * Get an affiliation transfer by ID. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const getAffiliationTransferOptions = (options: Options<GetAffiliationTransferData>) => queryOptions<GetAffiliationTransferResponse, GetAffiliationTransferError, GetAffiliationTransferResponse, ReturnType<typeof getAffiliationTransferQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getAffiliationTransfer({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getAffiliationTransferQueryKey(options)
+});
+
+/**
+ * Source chapter approves the outgoing transfer. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const approveTransferBySourceMutation = (options?: Partial<Options<ApproveTransferBySourceData>>): UseMutationOptions<ApproveTransferBySourceResponse, ApproveTransferBySourceError, Options<ApproveTransferBySourceData>> => {
+    const mutationOptions: UseMutationOptions<ApproveTransferBySourceResponse, ApproveTransferBySourceError, Options<ApproveTransferBySourceData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await approveTransferBySource({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Target chapter approves the incoming transfer. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const approveTransferByTargetMutation = (options?: Partial<Options<ApproveTransferByTargetData>>): UseMutationOptions<ApproveTransferByTargetResponse, ApproveTransferByTargetError, Options<ApproveTransferByTargetData>> => {
+    const mutationOptions: UseMutationOptions<ApproveTransferByTargetResponse, ApproveTransferByTargetError, Options<ApproveTransferByTargetData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await approveTransferByTarget({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Complete an approved transfer, updating affiliation records. Requires role: 'association:admin'
+ */
+export const completeAffiliationTransferMutation = (options?: Partial<Options<CompleteAffiliationTransferData>>): UseMutationOptions<CompleteAffiliationTransferResponse, CompleteAffiliationTransferError, Options<CompleteAffiliationTransferData>> => {
+    const mutationOptions: UseMutationOptions<CompleteAffiliationTransferResponse, CompleteAffiliationTransferError, Options<CompleteAffiliationTransferData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await completeAffiliationTransfer({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Deny a transfer request. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const denyAffiliationTransferMutation = (options?: Partial<Options<DenyAffiliationTransferData>>): UseMutationOptions<DenyAffiliationTransferResponse, DenyAffiliationTransferError, Options<DenyAffiliationTransferData>> => {
+    const mutationOptions: UseMutationOptions<DenyAffiliationTransferResponse, DenyAffiliationTransferError, Options<DenyAffiliationTransferData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await denyAffiliationTransfer({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getAgingBucketQueryKey = (options: Options<GetAgingBucketData>) => createQueryKey('getAgingBucket', options);
+
+/**
+ * Get the most recent aging bucket snapshot for an organization. Requires role: 'association:admin'
+ */
+export const getAgingBucketOptions = (options: Options<GetAgingBucketData>) => queryOptions<GetAgingBucketResponse, GetAgingBucketError, GetAgingBucketResponse, ReturnType<typeof getAgingBucketQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getAgingBucket({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getAgingBucketQueryKey(options)
+});
+
+/**
+ * Recalculate the aging bucket for an organization as of today. Requires role: 'association:admin'
+ */
+export const recalculateAgingBucketMutation = (options?: Partial<Options<RecalculateAgingBucketData>>): UseMutationOptions<RecalculateAgingBucketResponse, RecalculateAgingBucketError, Options<RecalculateAgingBucketData>> => {
+    const mutationOptions: UseMutationOptions<RecalculateAgingBucketResponse, RecalculateAgingBucketError, Options<RecalculateAgingBucketData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await recalculateAgingBucket({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listMembershipApplicationsQueryKey = (options?: Options<ListMembershipApplicationsData>) => createQueryKey('listMembershipApplications', options);
+
+/**
+ * List membership applications with optional filters. Requires role: 'association:admin'
+ */
+export const listMembershipApplicationsOptions = (options?: Options<ListMembershipApplicationsData>) => queryOptions<ListMembershipApplicationsResponse, ListMembershipApplicationsError, ListMembershipApplicationsResponse, ReturnType<typeof listMembershipApplicationsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMembershipApplications({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMembershipApplicationsQueryKey(options)
+});
+
+export const listMembershipApplicationsInfiniteQueryKey = (options?: Options<ListMembershipApplicationsData>): QueryKey<Options<ListMembershipApplicationsData>> => createQueryKey('listMembershipApplications', options, true);
+
+/**
+ * List membership applications with optional filters. Requires role: 'association:admin'
+ */
+export const listMembershipApplicationsInfiniteOptions = (options?: Options<ListMembershipApplicationsData>) => infiniteQueryOptions<ListMembershipApplicationsResponse, ListMembershipApplicationsError, InfiniteData<ListMembershipApplicationsResponse>, QueryKey<Options<ListMembershipApplicationsData>>, number | Pick<QueryKey<Options<ListMembershipApplicationsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListMembershipApplicationsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listMembershipApplications({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMembershipApplicationsInfiniteQueryKey(options)
+});
+
+/**
+ * Submit a new membership application. Requires role: 'user'
+ */
+export const createMembershipApplicationMutation = (options?: Partial<Options<CreateMembershipApplicationData>>): UseMutationOptions<CreateMembershipApplicationResponse, CreateMembershipApplicationError, Options<CreateMembershipApplicationData>> => {
+    const mutationOptions: UseMutationOptions<CreateMembershipApplicationResponse, CreateMembershipApplicationError, Options<CreateMembershipApplicationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createMembershipApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a membership application. Requires role: 'association:admin'
+ */
+export const deleteMembershipApplicationMutation = (options?: Partial<Options<DeleteMembershipApplicationData>>): UseMutationOptions<DeleteMembershipApplicationResponse, DeleteMembershipApplicationError, Options<DeleteMembershipApplicationData>> => {
+    const mutationOptions: UseMutationOptions<DeleteMembershipApplicationResponse, DeleteMembershipApplicationError, Options<DeleteMembershipApplicationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteMembershipApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMembershipApplicationQueryKey = (options: Options<GetMembershipApplicationData>) => createQueryKey('getMembershipApplication', options);
+
+/**
+ * Get a membership application by ID. Requires role: 'association:admin', 'user:owner'
+ */
+export const getMembershipApplicationOptions = (options: Options<GetMembershipApplicationData>) => queryOptions<GetMembershipApplicationResponse, GetMembershipApplicationError, GetMembershipApplicationResponse, ReturnType<typeof getMembershipApplicationQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMembershipApplication({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMembershipApplicationQueryKey(options)
+});
+
+/**
+ * Update a membership application. Requires role: 'association:admin'
+ */
+export const updateMembershipApplicationMutation = (options?: Partial<Options<UpdateMembershipApplicationData>>): UseMutationOptions<UpdateMembershipApplicationResponse, UpdateMembershipApplicationError, Options<UpdateMembershipApplicationData>> => {
+    const mutationOptions: UseMutationOptions<UpdateMembershipApplicationResponse, UpdateMembershipApplicationError, Options<UpdateMembershipApplicationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateMembershipApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Approve a membership application and create a membership. Requires role: 'association:admin'
+ */
+export const approveMembershipApplicationMutation = (options?: Partial<Options<ApproveMembershipApplicationData>>): UseMutationOptions<ApproveMembershipApplicationResponse, ApproveMembershipApplicationError, Options<ApproveMembershipApplicationData>> => {
+    const mutationOptions: UseMutationOptions<ApproveMembershipApplicationResponse, ApproveMembershipApplicationError, Options<ApproveMembershipApplicationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await approveMembershipApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Deny a membership application with a reason. Requires role: 'association:admin'
+ */
+export const denyMembershipApplicationMutation = (options?: Partial<Options<DenyMembershipApplicationData>>): UseMutationOptions<DenyMembershipApplicationResponse, DenyMembershipApplicationError, Options<DenyMembershipApplicationData>> => {
+    const mutationOptions: UseMutationOptions<DenyMembershipApplicationResponse, DenyMembershipApplicationError, Options<DenyMembershipApplicationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await denyMembershipApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listChapterAffiliationsQueryKey = (options?: Options<ListChapterAffiliationsData>) => createQueryKey('listChapterAffiliations', options);
+
+/**
+ * List chapter affiliations with optional filters. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const listChapterAffiliationsOptions = (options?: Options<ListChapterAffiliationsData>) => queryOptions<ListChapterAffiliationsResponse, ListChapterAffiliationsError, ListChapterAffiliationsResponse, ReturnType<typeof listChapterAffiliationsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listChapterAffiliations({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listChapterAffiliationsQueryKey(options)
+});
+
+export const listChapterAffiliationsInfiniteQueryKey = (options?: Options<ListChapterAffiliationsData>): QueryKey<Options<ListChapterAffiliationsData>> => createQueryKey('listChapterAffiliations', options, true);
+
+/**
+ * List chapter affiliations with optional filters. Requires role: 'association:admin', 'chapter:officer'
+ */
+export const listChapterAffiliationsInfiniteOptions = (options?: Options<ListChapterAffiliationsData>) => infiniteQueryOptions<ListChapterAffiliationsResponse, ListChapterAffiliationsError, InfiniteData<ListChapterAffiliationsResponse>, QueryKey<Options<ListChapterAffiliationsData>>, number | Pick<QueryKey<Options<ListChapterAffiliationsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListChapterAffiliationsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listChapterAffiliations({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listChapterAffiliationsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new chapter affiliation. Requires role: 'association:admin'
+ */
+export const createChapterAffiliationMutation = (options?: Partial<Options<CreateChapterAffiliationData>>): UseMutationOptions<CreateChapterAffiliationResponse, CreateChapterAffiliationError, Options<CreateChapterAffiliationData>> => {
+    const mutationOptions: UseMutationOptions<CreateChapterAffiliationResponse, CreateChapterAffiliationError, Options<CreateChapterAffiliationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createChapterAffiliation({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a chapter affiliation record. Requires role: 'association:admin'
+ */
+export const deleteChapterAffiliationMutation = (options?: Partial<Options<DeleteChapterAffiliationData>>): UseMutationOptions<DeleteChapterAffiliationResponse, DeleteChapterAffiliationError, Options<DeleteChapterAffiliationData>> => {
+    const mutationOptions: UseMutationOptions<DeleteChapterAffiliationResponse, DeleteChapterAffiliationError, Options<DeleteChapterAffiliationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteChapterAffiliation({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getChapterAffiliationQueryKey = (options: Options<GetChapterAffiliationData>) => createQueryKey('getChapterAffiliation', options);
+
+/**
+ * Get a chapter affiliation by ID. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const getChapterAffiliationOptions = (options: Options<GetChapterAffiliationData>) => queryOptions<GetChapterAffiliationResponse, GetChapterAffiliationError, GetChapterAffiliationResponse, ReturnType<typeof getChapterAffiliationQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getChapterAffiliation({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getChapterAffiliationQueryKey(options)
+});
+
+/**
+ * Update a chapter affiliation record. Requires role: 'association:admin'
+ */
+export const updateChapterAffiliationMutation = (options?: Partial<Options<UpdateChapterAffiliationData>>): UseMutationOptions<UpdateChapterAffiliationResponse, UpdateChapterAffiliationError, Options<UpdateChapterAffiliationData>> => {
+    const mutationOptions: UseMutationOptions<UpdateChapterAffiliationResponse, UpdateChapterAffiliationError, Options<UpdateChapterAffiliationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateChapterAffiliation({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Set the specified affiliation as the member's primary chapter. Requires role: 'association:admin'
+ */
+export const setPrimaryChapterAffiliationMutation = (options?: Partial<Options<SetPrimaryChapterAffiliationData>>): UseMutationOptions<SetPrimaryChapterAffiliationResponse, SetPrimaryChapterAffiliationError, Options<SetPrimaryChapterAffiliationData>> => {
+    const mutationOptions: UseMutationOptions<SetPrimaryChapterAffiliationResponse, SetPrimaryChapterAffiliationError, Options<SetPrimaryChapterAffiliationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setPrimaryChapterAffiliation({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listCredentialTemplatesQueryKey = (options?: Options<ListCredentialTemplatesData>) => createQueryKey('listCredentialTemplates', options);
+
+/**
+ * List credential templates. Requires role: 'association:admin'
+ */
+export const listCredentialTemplatesOptions = (options?: Options<ListCredentialTemplatesData>) => queryOptions<ListCredentialTemplatesResponse, ListCredentialTemplatesError, ListCredentialTemplatesResponse, ReturnType<typeof listCredentialTemplatesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listCredentialTemplates({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCredentialTemplatesQueryKey(options)
+});
+
+export const listCredentialTemplatesInfiniteQueryKey = (options?: Options<ListCredentialTemplatesData>): QueryKey<Options<ListCredentialTemplatesData>> => createQueryKey('listCredentialTemplates', options, true);
+
+/**
+ * List credential templates. Requires role: 'association:admin'
+ */
+export const listCredentialTemplatesInfiniteOptions = (options?: Options<ListCredentialTemplatesData>) => infiniteQueryOptions<ListCredentialTemplatesResponse, ListCredentialTemplatesError, InfiniteData<ListCredentialTemplatesResponse>, QueryKey<Options<ListCredentialTemplatesData>>, number | Pick<QueryKey<Options<ListCredentialTemplatesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListCredentialTemplatesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listCredentialTemplates({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCredentialTemplatesInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new credential template. Requires role: 'association:admin'
+ */
+export const createCredentialTemplateMutation = (options?: Partial<Options<CreateCredentialTemplateData>>): UseMutationOptions<CreateCredentialTemplateResponse, CreateCredentialTemplateError, Options<CreateCredentialTemplateData>> => {
+    const mutationOptions: UseMutationOptions<CreateCredentialTemplateResponse, CreateCredentialTemplateError, Options<CreateCredentialTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createCredentialTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a credential template. Requires role: 'association:admin'
+ */
+export const deleteCredentialTemplateMutation = (options?: Partial<Options<DeleteCredentialTemplateData>>): UseMutationOptions<DeleteCredentialTemplateResponse, DeleteCredentialTemplateError, Options<DeleteCredentialTemplateData>> => {
+    const mutationOptions: UseMutationOptions<DeleteCredentialTemplateResponse, DeleteCredentialTemplateError, Options<DeleteCredentialTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteCredentialTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getCredentialTemplateQueryKey = (options: Options<GetCredentialTemplateData>) => createQueryKey('getCredentialTemplate', options);
+
+/**
+ * Get a credential template by ID. Requires role: 'association:admin'
+ */
+export const getCredentialTemplateOptions = (options: Options<GetCredentialTemplateData>) => queryOptions<GetCredentialTemplateResponse, GetCredentialTemplateError, GetCredentialTemplateResponse, ReturnType<typeof getCredentialTemplateQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getCredentialTemplate({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getCredentialTemplateQueryKey(options)
+});
+
+/**
+ * Update a credential template. Requires role: 'association:admin'
+ */
+export const updateCredentialTemplateMutation = (options?: Partial<Options<UpdateCredentialTemplateData>>): UseMutationOptions<UpdateCredentialTemplateResponse, UpdateCredentialTemplateError, Options<UpdateCredentialTemplateData>> => {
+    const mutationOptions: UseMutationOptions<UpdateCredentialTemplateResponse, UpdateCredentialTemplateError, Options<UpdateCredentialTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateCredentialTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listDigitalCredentialsQueryKey = (options?: Options<ListDigitalCredentialsData>) => createQueryKey('listDigitalCredentials', options);
+
+/**
+ * List digital credentials with optional filters. Requires role: 'association:admin'
+ */
+export const listDigitalCredentialsOptions = (options?: Options<ListDigitalCredentialsData>) => queryOptions<ListDigitalCredentialsResponse, ListDigitalCredentialsError, ListDigitalCredentialsResponse, ReturnType<typeof listDigitalCredentialsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listDigitalCredentials({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDigitalCredentialsQueryKey(options)
+});
+
+export const listDigitalCredentialsInfiniteQueryKey = (options?: Options<ListDigitalCredentialsData>): QueryKey<Options<ListDigitalCredentialsData>> => createQueryKey('listDigitalCredentials', options, true);
+
+/**
+ * List digital credentials with optional filters. Requires role: 'association:admin'
+ */
+export const listDigitalCredentialsInfiniteOptions = (options?: Options<ListDigitalCredentialsData>) => infiniteQueryOptions<ListDigitalCredentialsResponse, ListDigitalCredentialsError, InfiniteData<ListDigitalCredentialsResponse>, QueryKey<Options<ListDigitalCredentialsData>>, number | Pick<QueryKey<Options<ListDigitalCredentialsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListDigitalCredentialsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listDigitalCredentials({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDigitalCredentialsInfiniteQueryKey(options)
+});
+
+/**
+ * Issue a new digital credential to a member. Requires role: 'association:admin'
+ */
+export const issueDigitalCredentialMutation = (options?: Partial<Options<IssueDigitalCredentialData>>): UseMutationOptions<IssueDigitalCredentialResponse, IssueDigitalCredentialError, Options<IssueDigitalCredentialData>> => {
+    const mutationOptions: UseMutationOptions<IssueDigitalCredentialResponse, IssueDigitalCredentialError, Options<IssueDigitalCredentialData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await issueDigitalCredential({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Verify a credential by number or QR token. This endpoint is publicly accessible and records the verification event.
+ */
+export const verifyCredentialPublicMutation = (options?: Partial<Options<VerifyCredentialPublicData>>): UseMutationOptions<VerifyCredentialPublicResponse, VerifyCredentialPublicError, Options<VerifyCredentialPublicData>> => {
+    const mutationOptions: UseMutationOptions<VerifyCredentialPublicResponse, VerifyCredentialPublicError, Options<VerifyCredentialPublicData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await verifyCredentialPublic({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Verify a credential by number or QR token and record the verification attempt. Requires role: 'association:admin', 'association:member'
+ */
+export const verifyDigitalCredentialAuthenticatedMutation = (options?: Partial<Options<VerifyDigitalCredentialAuthenticatedData>>): UseMutationOptions<VerifyDigitalCredentialAuthenticatedResponse, VerifyDigitalCredentialAuthenticatedError, Options<VerifyDigitalCredentialAuthenticatedData>> => {
+    const mutationOptions: UseMutationOptions<VerifyDigitalCredentialAuthenticatedResponse, VerifyDigitalCredentialAuthenticatedError, Options<VerifyDigitalCredentialAuthenticatedData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await verifyDigitalCredentialAuthenticated({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a digital credential record. Requires role: 'association:admin'
+ */
+export const deleteDigitalCredentialMutation = (options?: Partial<Options<DeleteDigitalCredentialData>>): UseMutationOptions<DeleteDigitalCredentialResponse, DeleteDigitalCredentialError, Options<DeleteDigitalCredentialData>> => {
+    const mutationOptions: UseMutationOptions<DeleteDigitalCredentialResponse, DeleteDigitalCredentialError, Options<DeleteDigitalCredentialData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteDigitalCredential({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDigitalCredentialQueryKey = (options: Options<GetDigitalCredentialData>) => createQueryKey('getDigitalCredential', options);
+
+/**
+ * Get a digital credential by ID. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const getDigitalCredentialOptions = (options: Options<GetDigitalCredentialData>) => queryOptions<GetDigitalCredentialResponse, GetDigitalCredentialError, GetDigitalCredentialResponse, ReturnType<typeof getDigitalCredentialQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDigitalCredential({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDigitalCredentialQueryKey(options)
+});
+
+/**
+ * Update a digital credential record. Requires role: 'association:admin'
+ */
+export const updateDigitalCredentialMutation = (options?: Partial<Options<UpdateDigitalCredentialData>>): UseMutationOptions<UpdateDigitalCredentialResponse, UpdateDigitalCredentialError, Options<UpdateDigitalCredentialData>> => {
+    const mutationOptions: UseMutationOptions<UpdateDigitalCredentialResponse, UpdateDigitalCredentialError, Options<UpdateDigitalCredentialData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateDigitalCredential({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Revoke a digital credential. Requires role: 'association:admin'
+ */
+export const revokeDigitalCredentialMutation = (options?: Partial<Options<RevokeDigitalCredentialData>>): UseMutationOptions<RevokeDigitalCredentialResponse, RevokeDigitalCredentialError, Options<RevokeDigitalCredentialData>> => {
+    const mutationOptions: UseMutationOptions<RevokeDigitalCredentialResponse, RevokeDigitalCredentialError, Options<RevokeDigitalCredentialData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await revokeDigitalCredential({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listDirectoryProfilesQueryKey = (options?: Options<ListDirectoryProfilesData>) => createQueryKey('listDirectoryProfiles', options);
+
+/**
+ * List directory profiles (admin view with all visibility levels). Requires role: 'association:admin'
+ */
+export const listDirectoryProfilesOptions = (options?: Options<ListDirectoryProfilesData>) => queryOptions<ListDirectoryProfilesResponse, ListDirectoryProfilesError, ListDirectoryProfilesResponse, ReturnType<typeof listDirectoryProfilesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listDirectoryProfiles({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDirectoryProfilesQueryKey(options)
+});
+
+export const listDirectoryProfilesInfiniteQueryKey = (options?: Options<ListDirectoryProfilesData>): QueryKey<Options<ListDirectoryProfilesData>> => createQueryKey('listDirectoryProfiles', options, true);
+
+/**
+ * List directory profiles (admin view with all visibility levels). Requires role: 'association:admin'
+ */
+export const listDirectoryProfilesInfiniteOptions = (options?: Options<ListDirectoryProfilesData>) => infiniteQueryOptions<ListDirectoryProfilesResponse, ListDirectoryProfilesError, InfiniteData<ListDirectoryProfilesResponse>, QueryKey<Options<ListDirectoryProfilesData>>, number | Pick<QueryKey<Options<ListDirectoryProfilesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListDirectoryProfilesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listDirectoryProfiles({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDirectoryProfilesInfiniteQueryKey(options)
+});
+
+/**
+ * Create a directory profile for a member. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const createDirectoryProfileMutation = (options?: Partial<Options<CreateDirectoryProfileData>>): UseMutationOptions<CreateDirectoryProfileResponse, CreateDirectoryProfileError, Options<CreateDirectoryProfileData>> => {
+    const mutationOptions: UseMutationOptions<CreateDirectoryProfileResponse, CreateDirectoryProfileError, Options<CreateDirectoryProfileData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createDirectoryProfile({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a directory profile. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const deleteDirectoryProfileMutation = (options?: Partial<Options<DeleteDirectoryProfileData>>): UseMutationOptions<DeleteDirectoryProfileResponse, DeleteDirectoryProfileError, Options<DeleteDirectoryProfileData>> => {
+    const mutationOptions: UseMutationOptions<DeleteDirectoryProfileResponse, DeleteDirectoryProfileError, Options<DeleteDirectoryProfileData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteDirectoryProfile({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDirectoryProfileQueryKey = (options: Options<GetDirectoryProfileData>) => createQueryKey('getDirectoryProfile', options);
+
+/**
+ * Get a directory profile by ID. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const getDirectoryProfileOptions = (options: Options<GetDirectoryProfileData>) => queryOptions<GetDirectoryProfileResponse, GetDirectoryProfileError, GetDirectoryProfileResponse, ReturnType<typeof getDirectoryProfileQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDirectoryProfile({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDirectoryProfileQueryKey(options)
+});
+
+/**
+ * Update a directory profile. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const updateDirectoryProfileMutation = (options?: Partial<Options<UpdateDirectoryProfileData>>): UseMutationOptions<UpdateDirectoryProfileResponse, UpdateDirectoryProfileError, Options<UpdateDirectoryProfileData>> => {
+    const mutationOptions: UseMutationOptions<UpdateDirectoryProfileResponse, UpdateDirectoryProfileError, Options<UpdateDirectoryProfileData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateDirectoryProfile({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchDirectoryQueryKey = (options?: Options<SearchDirectoryData>) => createQueryKey('searchDirectory', options);
+
+/**
+ * Search the member directory with full-text and optional geo-spatial filters. Requires role: 'association:member', 'association:admin'
+ */
+export const searchDirectoryOptions = (options?: Options<SearchDirectoryData>) => queryOptions<SearchDirectoryResponse, SearchDirectoryError, SearchDirectoryResponse, ReturnType<typeof searchDirectoryQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchDirectory({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchDirectoryQueryKey(options)
+});
+
+export const searchDirectoryInfiniteQueryKey = (options?: Options<SearchDirectoryData>): QueryKey<Options<SearchDirectoryData>> => createQueryKey('searchDirectory', options, true);
+
+/**
+ * Search the member directory with full-text and optional geo-spatial filters. Requires role: 'association:member', 'association:admin'
+ */
+export const searchDirectoryInfiniteOptions = (options?: Options<SearchDirectoryData>) => infiniteQueryOptions<SearchDirectoryResponse, SearchDirectoryError, InfiniteData<SearchDirectoryResponse>, QueryKey<Options<SearchDirectoryData>>, number | Pick<QueryKey<Options<SearchDirectoryData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchDirectoryData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchDirectory({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchDirectoryInfiniteQueryKey(options)
+});
+
+export const getPublicDirectoryProfileQueryKey = (options: Options<GetPublicDirectoryProfileData>) => createQueryKey('getPublicDirectoryProfile', options);
+
+/**
+ * Get the public-facing profile of a member by their person ID. No authentication required for public profiles.
+ */
+export const getPublicDirectoryProfileOptions = (options: Options<GetPublicDirectoryProfileData>) => queryOptions<GetPublicDirectoryProfileResponse, GetPublicDirectoryProfileError, GetPublicDirectoryProfileResponse, ReturnType<typeof getPublicDirectoryProfileQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getPublicDirectoryProfile({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getPublicDirectoryProfileQueryKey(options)
+});
+
+export const listDuesConfigsQueryKey = (options?: Options<ListDuesConfigsData>) => createQueryKey('listDuesConfigs', options);
+
+/**
+ * List dues configurations. Requires role: 'association:admin'
+ */
+export const listDuesConfigsOptions = (options?: Options<ListDuesConfigsData>) => queryOptions<ListDuesConfigsResponse, ListDuesConfigsError, ListDuesConfigsResponse, ReturnType<typeof listDuesConfigsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listDuesConfigs({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDuesConfigsQueryKey(options)
+});
+
+export const listDuesConfigsInfiniteQueryKey = (options?: Options<ListDuesConfigsData>): QueryKey<Options<ListDuesConfigsData>> => createQueryKey('listDuesConfigs', options, true);
+
+/**
+ * List dues configurations. Requires role: 'association:admin'
+ */
+export const listDuesConfigsInfiniteOptions = (options?: Options<ListDuesConfigsData>) => infiniteQueryOptions<ListDuesConfigsResponse, ListDuesConfigsError, InfiniteData<ListDuesConfigsResponse>, QueryKey<Options<ListDuesConfigsData>>, number | Pick<QueryKey<Options<ListDuesConfigsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListDuesConfigsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listDuesConfigs({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDuesConfigsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new dues configuration. Requires role: 'association:admin'
+ */
+export const createDuesConfigMutation = (options?: Partial<Options<CreateDuesConfigData>>): UseMutationOptions<CreateDuesConfigResponse, CreateDuesConfigError, Options<CreateDuesConfigData>> => {
+    const mutationOptions: UseMutationOptions<CreateDuesConfigResponse, CreateDuesConfigError, Options<CreateDuesConfigData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createDuesConfig({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a dues configuration. Requires role: 'association:admin'
+ */
+export const deleteDuesConfigMutation = (options?: Partial<Options<DeleteDuesConfigData>>): UseMutationOptions<DeleteDuesConfigResponse, DeleteDuesConfigError, Options<DeleteDuesConfigData>> => {
+    const mutationOptions: UseMutationOptions<DeleteDuesConfigResponse, DeleteDuesConfigError, Options<DeleteDuesConfigData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteDuesConfig({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDuesConfigQueryKey = (options: Options<GetDuesConfigData>) => createQueryKey('getDuesConfig', options);
+
+/**
+ * Get a dues configuration by ID. Requires role: 'association:admin'
+ */
+export const getDuesConfigOptions = (options: Options<GetDuesConfigData>) => queryOptions<GetDuesConfigResponse, GetDuesConfigError, GetDuesConfigResponse, ReturnType<typeof getDuesConfigQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDuesConfig({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDuesConfigQueryKey(options)
+});
+
+/**
+ * Update a dues configuration. Requires role: 'association:admin'
+ */
+export const updateDuesConfigMutation = (options?: Partial<Options<UpdateDuesConfigData>>): UseMutationOptions<UpdateDuesConfigResponse, UpdateDuesConfigError, Options<UpdateDuesConfigData>> => {
+    const mutationOptions: UseMutationOptions<UpdateDuesConfigResponse, UpdateDuesConfigError, Options<UpdateDuesConfigData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateDuesConfig({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listDuesInvoicesQueryKey = (options?: Options<ListDuesInvoicesData>) => createQueryKey('listDuesInvoices', options);
+
+/**
+ * List dues invoices with optional filters. Requires role: 'association:admin'
+ */
+export const listDuesInvoicesOptions = (options?: Options<ListDuesInvoicesData>) => queryOptions<ListDuesInvoicesResponse, ListDuesInvoicesError, ListDuesInvoicesResponse, ReturnType<typeof listDuesInvoicesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listDuesInvoices({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDuesInvoicesQueryKey(options)
+});
+
+export const listDuesInvoicesInfiniteQueryKey = (options?: Options<ListDuesInvoicesData>): QueryKey<Options<ListDuesInvoicesData>> => createQueryKey('listDuesInvoices', options, true);
+
+/**
+ * List dues invoices with optional filters. Requires role: 'association:admin'
+ */
+export const listDuesInvoicesInfiniteOptions = (options?: Options<ListDuesInvoicesData>) => infiniteQueryOptions<ListDuesInvoicesResponse, ListDuesInvoicesError, InfiniteData<ListDuesInvoicesResponse>, QueryKey<Options<ListDuesInvoicesData>>, number | Pick<QueryKey<Options<ListDuesInvoicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListDuesInvoicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listDuesInvoices({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDuesInvoicesInfiniteQueryKey(options)
+});
+
+/**
+ * Create a dues invoice manually. Requires role: 'association:admin'
+ */
+export const createDuesInvoiceMutation = (options?: Partial<Options<CreateDuesInvoiceData>>): UseMutationOptions<CreateDuesInvoiceResponse, CreateDuesInvoiceError, Options<CreateDuesInvoiceData>> => {
+    const mutationOptions: UseMutationOptions<CreateDuesInvoiceResponse, CreateDuesInvoiceError, Options<CreateDuesInvoiceData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createDuesInvoice({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Generate dues invoices in bulk for all eligible members in an organization. Requires role: 'association:admin'
+ */
+export const generateDuesInvoicesForOrgMutation = (options?: Partial<Options<GenerateDuesInvoicesForOrgData>>): UseMutationOptions<GenerateDuesInvoicesForOrgResponse, GenerateDuesInvoicesForOrgError, Options<GenerateDuesInvoicesForOrgData>> => {
+    const mutationOptions: UseMutationOptions<GenerateDuesInvoicesForOrgResponse, GenerateDuesInvoicesForOrgError, Options<GenerateDuesInvoicesForOrgData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await generateDuesInvoicesForOrg({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a dues invoice. Requires role: 'association:admin'
+ */
+export const deleteDuesInvoiceMutation = (options?: Partial<Options<DeleteDuesInvoiceData>>): UseMutationOptions<DeleteDuesInvoiceResponse, DeleteDuesInvoiceError, Options<DeleteDuesInvoiceData>> => {
+    const mutationOptions: UseMutationOptions<DeleteDuesInvoiceResponse, DeleteDuesInvoiceError, Options<DeleteDuesInvoiceData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteDuesInvoice({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDuesInvoiceQueryKey = (options: Options<GetDuesInvoiceData>) => createQueryKey('getDuesInvoice', options);
+
+/**
+ * Get a dues invoice by ID. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const getDuesInvoiceOptions = (options: Options<GetDuesInvoiceData>) => queryOptions<GetDuesInvoiceResponse, GetDuesInvoiceError, GetDuesInvoiceResponse, ReturnType<typeof getDuesInvoiceQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDuesInvoice({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDuesInvoiceQueryKey(options)
+});
+
+/**
+ * Update a dues invoice. Requires role: 'association:admin'
+ */
+export const updateDuesInvoiceMutation = (options?: Partial<Options<UpdateDuesInvoiceData>>): UseMutationOptions<UpdateDuesInvoiceResponse, UpdateDuesInvoiceError, Options<UpdateDuesInvoiceData>> => {
+    const mutationOptions: UseMutationOptions<UpdateDuesInvoiceResponse, UpdateDuesInvoiceError, Options<UpdateDuesInvoiceData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateDuesInvoice({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Mark a dues invoice as paid. Requires role: 'association:admin'
+ */
+export const markDuesInvoicePaidMutation = (options?: Partial<Options<MarkDuesInvoicePaidData>>): UseMutationOptions<MarkDuesInvoicePaidResponse, MarkDuesInvoicePaidError, Options<MarkDuesInvoicePaidData>> => {
+    const mutationOptions: UseMutationOptions<MarkDuesInvoicePaidResponse, MarkDuesInvoicePaidError, Options<MarkDuesInvoicePaidData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await markDuesInvoicePaid({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listDunningEventsQueryKey = (options?: Options<ListDunningEventsData>) => createQueryKey('listDunningEvents', options);
+
+/**
+ * Search dunning events sent to members. Requires role: 'association:admin'
+ */
+export const listDunningEventsOptions = (options?: Options<ListDunningEventsData>) => queryOptions<ListDunningEventsResponse, ListDunningEventsError, ListDunningEventsResponse, ReturnType<typeof listDunningEventsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listDunningEvents({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDunningEventsQueryKey(options)
+});
+
+export const listDunningEventsInfiniteQueryKey = (options?: Options<ListDunningEventsData>): QueryKey<Options<ListDunningEventsData>> => createQueryKey('listDunningEvents', options, true);
+
+/**
+ * Search dunning events sent to members. Requires role: 'association:admin'
+ */
+export const listDunningEventsInfiniteOptions = (options?: Options<ListDunningEventsData>) => infiniteQueryOptions<ListDunningEventsResponse, ListDunningEventsError, InfiniteData<ListDunningEventsResponse>, QueryKey<Options<ListDunningEventsData>>, number | Pick<QueryKey<Options<ListDunningEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListDunningEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listDunningEvents({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDunningEventsInfiniteQueryKey(options)
+});
+
+/**
+ * Execute a dunning run for an organization, sending stage-appropriate communications. Requires role: 'association:admin'
+ */
+export const runDunningMutation = (options?: Partial<Options<RunDunningData>>): UseMutationOptions<RunDunningResponse, RunDunningError, Options<RunDunningData>> => {
+    const mutationOptions: UseMutationOptions<RunDunningResponse, RunDunningError, Options<RunDunningData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await runDunning({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listDunningTemplatesQueryKey = (options?: Options<ListDunningTemplatesData>) => createQueryKey('listDunningTemplates', options);
+
+/**
+ * List dunning templates. Requires role: 'association:admin'
+ */
+export const listDunningTemplatesOptions = (options?: Options<ListDunningTemplatesData>) => queryOptions<ListDunningTemplatesResponse, ListDunningTemplatesError, ListDunningTemplatesResponse, ReturnType<typeof listDunningTemplatesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listDunningTemplates({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDunningTemplatesQueryKey(options)
+});
+
+export const listDunningTemplatesInfiniteQueryKey = (options?: Options<ListDunningTemplatesData>): QueryKey<Options<ListDunningTemplatesData>> => createQueryKey('listDunningTemplates', options, true);
+
+/**
+ * List dunning templates. Requires role: 'association:admin'
+ */
+export const listDunningTemplatesInfiniteOptions = (options?: Options<ListDunningTemplatesData>) => infiniteQueryOptions<ListDunningTemplatesResponse, ListDunningTemplatesError, InfiniteData<ListDunningTemplatesResponse>, QueryKey<Options<ListDunningTemplatesData>>, number | Pick<QueryKey<Options<ListDunningTemplatesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListDunningTemplatesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listDunningTemplates({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listDunningTemplatesInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new dunning template. Requires role: 'association:admin'
+ */
+export const createDunningTemplateMutation = (options?: Partial<Options<CreateDunningTemplateData>>): UseMutationOptions<CreateDunningTemplateResponse, CreateDunningTemplateError, Options<CreateDunningTemplateData>> => {
+    const mutationOptions: UseMutationOptions<CreateDunningTemplateResponse, CreateDunningTemplateError, Options<CreateDunningTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createDunningTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a dunning template. Requires role: 'association:admin'
+ */
+export const deleteDunningTemplateMutation = (options?: Partial<Options<DeleteDunningTemplateData>>): UseMutationOptions<DeleteDunningTemplateResponse, DeleteDunningTemplateError, Options<DeleteDunningTemplateData>> => {
+    const mutationOptions: UseMutationOptions<DeleteDunningTemplateResponse, DeleteDunningTemplateError, Options<DeleteDunningTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteDunningTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDunningTemplateQueryKey = (options: Options<GetDunningTemplateData>) => createQueryKey('getDunningTemplate', options);
+
+/**
+ * Get a dunning template by ID. Requires role: 'association:admin'
+ */
+export const getDunningTemplateOptions = (options: Options<GetDunningTemplateData>) => queryOptions<GetDunningTemplateResponse, GetDunningTemplateError, GetDunningTemplateResponse, ReturnType<typeof getDunningTemplateQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDunningTemplate({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDunningTemplateQueryKey(options)
+});
+
+/**
+ * Update a dunning template. Requires role: 'association:admin'
+ */
+export const updateDunningTemplateMutation = (options?: Partial<Options<UpdateDunningTemplateData>>): UseMutationOptions<UpdateDunningTemplateResponse, UpdateDunningTemplateError, Options<UpdateDunningTemplateData>> => {
+    const mutationOptions: UseMutationOptions<UpdateDunningTemplateResponse, UpdateDunningTemplateError, Options<UpdateDunningTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateDunningTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listInstitutionalMembershipsQueryKey = (options?: Options<ListInstitutionalMembershipsData>) => createQueryKey('listInstitutionalMemberships', options);
+
+/**
+ * List institutional memberships. Requires role: 'association:admin'
+ */
+export const listInstitutionalMembershipsOptions = (options?: Options<ListInstitutionalMembershipsData>) => queryOptions<ListInstitutionalMembershipsResponse, ListInstitutionalMembershipsError, ListInstitutionalMembershipsResponse, ReturnType<typeof listInstitutionalMembershipsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listInstitutionalMemberships({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listInstitutionalMembershipsQueryKey(options)
+});
+
+export const listInstitutionalMembershipsInfiniteQueryKey = (options?: Options<ListInstitutionalMembershipsData>): QueryKey<Options<ListInstitutionalMembershipsData>> => createQueryKey('listInstitutionalMemberships', options, true);
+
+/**
+ * List institutional memberships. Requires role: 'association:admin'
+ */
+export const listInstitutionalMembershipsInfiniteOptions = (options?: Options<ListInstitutionalMembershipsData>) => infiniteQueryOptions<ListInstitutionalMembershipsResponse, ListInstitutionalMembershipsError, InfiniteData<ListInstitutionalMembershipsResponse>, QueryKey<Options<ListInstitutionalMembershipsData>>, number | Pick<QueryKey<Options<ListInstitutionalMembershipsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListInstitutionalMembershipsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listInstitutionalMemberships({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listInstitutionalMembershipsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new institutional membership. Requires role: 'association:admin'
+ */
+export const createInstitutionalMembershipMutation = (options?: Partial<Options<CreateInstitutionalMembershipData>>): UseMutationOptions<CreateInstitutionalMembershipResponse, CreateInstitutionalMembershipError, Options<CreateInstitutionalMembershipData>> => {
+    const mutationOptions: UseMutationOptions<CreateInstitutionalMembershipResponse, CreateInstitutionalMembershipError, Options<CreateInstitutionalMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createInstitutionalMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete an institutional membership. Requires role: 'association:admin'
+ */
+export const deleteInstitutionalMembershipMutation = (options?: Partial<Options<DeleteInstitutionalMembershipData>>): UseMutationOptions<DeleteInstitutionalMembershipResponse, DeleteInstitutionalMembershipError, Options<DeleteInstitutionalMembershipData>> => {
+    const mutationOptions: UseMutationOptions<DeleteInstitutionalMembershipResponse, DeleteInstitutionalMembershipError, Options<DeleteInstitutionalMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteInstitutionalMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getInstitutionalMembershipQueryKey = (options: Options<GetInstitutionalMembershipData>) => createQueryKey('getInstitutionalMembership', options);
+
+/**
+ * Get an institutional membership by ID. Requires role: 'association:admin', 'institution:owner'
+ */
+export const getInstitutionalMembershipOptions = (options: Options<GetInstitutionalMembershipData>) => queryOptions<GetInstitutionalMembershipResponse, GetInstitutionalMembershipError, GetInstitutionalMembershipResponse, ReturnType<typeof getInstitutionalMembershipQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getInstitutionalMembership({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getInstitutionalMembershipQueryKey(options)
+});
+
+/**
+ * Update an institutional membership. Requires role: 'association:admin'
+ */
+export const updateInstitutionalMembershipMutation = (options?: Partial<Options<UpdateInstitutionalMembershipData>>): UseMutationOptions<UpdateInstitutionalMembershipResponse, UpdateInstitutionalMembershipError, Options<UpdateInstitutionalMembershipData>> => {
+    const mutationOptions: UseMutationOptions<UpdateInstitutionalMembershipResponse, UpdateInstitutionalMembershipError, Options<UpdateInstitutionalMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateInstitutionalMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listSeatAllocationsQueryKey = (options: Options<ListSeatAllocationsData>) => createQueryKey('listSeatAllocations', options);
+
+/**
+ * List seat allocations for an institutional membership. Requires role: 'association:admin', 'institution:admin'
+ */
+export const listSeatAllocationsOptions = (options: Options<ListSeatAllocationsData>) => queryOptions<ListSeatAllocationsResponse, ListSeatAllocationsError, ListSeatAllocationsResponse, ReturnType<typeof listSeatAllocationsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listSeatAllocations({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listSeatAllocationsQueryKey(options)
+});
+
+export const listSeatAllocationsInfiniteQueryKey = (options: Options<ListSeatAllocationsData>): QueryKey<Options<ListSeatAllocationsData>> => createQueryKey('listSeatAllocations', options, true);
+
+/**
+ * List seat allocations for an institutional membership. Requires role: 'association:admin', 'institution:admin'
+ */
+export const listSeatAllocationsInfiniteOptions = (options: Options<ListSeatAllocationsData>) => infiniteQueryOptions<ListSeatAllocationsResponse, ListSeatAllocationsError, InfiniteData<ListSeatAllocationsResponse>, QueryKey<Options<ListSeatAllocationsData>>, number | Pick<QueryKey<Options<ListSeatAllocationsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListSeatAllocationsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listSeatAllocations({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listSeatAllocationsInfiniteQueryKey(options)
+});
+
+/**
+ * Allocate a seat to an individual within an institutional membership. Requires role: 'association:admin', 'institution:admin'
+ */
+export const allocateSeatMutation = (options?: Partial<Options<AllocateSeatData>>): UseMutationOptions<AllocateSeatResponse, AllocateSeatError, Options<AllocateSeatData>> => {
+    const mutationOptions: UseMutationOptions<AllocateSeatResponse, AllocateSeatError, Options<AllocateSeatData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await allocateSeat({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Revoke a seat allocation. Requires role: 'association:admin', 'institution:admin'
+ */
+export const revokeSeatMutation = (options?: Partial<Options<RevokeSeatData>>): UseMutationOptions<RevokeSeatResponse, RevokeSeatError, Options<RevokeSeatData>> => {
+    const mutationOptions: UseMutationOptions<RevokeSeatResponse, RevokeSeatError, Options<RevokeSeatData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await revokeSeat({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listLicenseRenewalAlertsQueryKey = (options?: Options<ListLicenseRenewalAlertsData>) => createQueryKey('listLicenseRenewalAlerts', options);
+
+/**
+ * List license renewal alerts with optional filters. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const listLicenseRenewalAlertsOptions = (options?: Options<ListLicenseRenewalAlertsData>) => queryOptions<ListLicenseRenewalAlertsResponse, ListLicenseRenewalAlertsError, ListLicenseRenewalAlertsResponse, ReturnType<typeof listLicenseRenewalAlertsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listLicenseRenewalAlerts({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listLicenseRenewalAlertsQueryKey(options)
+});
+
+export const listLicenseRenewalAlertsInfiniteQueryKey = (options?: Options<ListLicenseRenewalAlertsData>): QueryKey<Options<ListLicenseRenewalAlertsData>> => createQueryKey('listLicenseRenewalAlerts', options, true);
+
+/**
+ * List license renewal alerts with optional filters. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const listLicenseRenewalAlertsInfiniteOptions = (options?: Options<ListLicenseRenewalAlertsData>) => infiniteQueryOptions<ListLicenseRenewalAlertsResponse, ListLicenseRenewalAlertsError, InfiniteData<ListLicenseRenewalAlertsResponse>, QueryKey<Options<ListLicenseRenewalAlertsData>>, number | Pick<QueryKey<Options<ListLicenseRenewalAlertsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListLicenseRenewalAlertsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listLicenseRenewalAlerts({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listLicenseRenewalAlertsInfiniteQueryKey(options)
+});
+
+/**
+ * Acknowledge a license renewal alert. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const acknowledgeLicenseRenewalAlertMutation = (options?: Partial<Options<AcknowledgeLicenseRenewalAlertData>>): UseMutationOptions<AcknowledgeLicenseRenewalAlertResponse, AcknowledgeLicenseRenewalAlertError, Options<AcknowledgeLicenseRenewalAlertData>> => {
+    const mutationOptions: UseMutationOptions<AcknowledgeLicenseRenewalAlertResponse, AcknowledgeLicenseRenewalAlertError, Options<AcknowledgeLicenseRenewalAlertData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await acknowledgeLicenseRenewalAlert({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listProfessionalLicensesQueryKey = (options?: Options<ListProfessionalLicensesData>) => createQueryKey('listProfessionalLicenses', options);
+
+/**
+ * List professional licenses with optional filters. Requires role: 'association:admin'
+ */
+export const listProfessionalLicensesOptions = (options?: Options<ListProfessionalLicensesData>) => queryOptions<ListProfessionalLicensesResponse, ListProfessionalLicensesError, ListProfessionalLicensesResponse, ReturnType<typeof listProfessionalLicensesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listProfessionalLicenses({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listProfessionalLicensesQueryKey(options)
+});
+
+export const listProfessionalLicensesInfiniteQueryKey = (options?: Options<ListProfessionalLicensesData>): QueryKey<Options<ListProfessionalLicensesData>> => createQueryKey('listProfessionalLicenses', options, true);
+
+/**
+ * List professional licenses with optional filters. Requires role: 'association:admin'
+ */
+export const listProfessionalLicensesInfiniteOptions = (options?: Options<ListProfessionalLicensesData>) => infiniteQueryOptions<ListProfessionalLicensesResponse, ListProfessionalLicensesError, InfiniteData<ListProfessionalLicensesResponse>, QueryKey<Options<ListProfessionalLicensesData>>, number | Pick<QueryKey<Options<ListProfessionalLicensesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListProfessionalLicensesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listProfessionalLicenses({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listProfessionalLicensesInfiniteQueryKey(options)
+});
+
+/**
+ * Create a professional license record. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const createProfessionalLicenseMutation = (options?: Partial<Options<CreateProfessionalLicenseData>>): UseMutationOptions<CreateProfessionalLicenseResponse, CreateProfessionalLicenseError, Options<CreateProfessionalLicenseData>> => {
+    const mutationOptions: UseMutationOptions<CreateProfessionalLicenseResponse, CreateProfessionalLicenseError, Options<CreateProfessionalLicenseData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createProfessionalLicense({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a professional license record. Requires role: 'association:admin'
+ */
+export const deleteProfessionalLicenseMutation = (options?: Partial<Options<DeleteProfessionalLicenseData>>): UseMutationOptions<DeleteProfessionalLicenseResponse, DeleteProfessionalLicenseError, Options<DeleteProfessionalLicenseData>> => {
+    const mutationOptions: UseMutationOptions<DeleteProfessionalLicenseResponse, DeleteProfessionalLicenseError, Options<DeleteProfessionalLicenseData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteProfessionalLicense({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getProfessionalLicenseQueryKey = (options: Options<GetProfessionalLicenseData>) => createQueryKey('getProfessionalLicense', options);
+
+/**
+ * Get a professional license by ID. Requires role: 'association:admin', 'association:member:owner'
+ */
+export const getProfessionalLicenseOptions = (options: Options<GetProfessionalLicenseData>) => queryOptions<GetProfessionalLicenseResponse, GetProfessionalLicenseError, GetProfessionalLicenseResponse, ReturnType<typeof getProfessionalLicenseQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getProfessionalLicense({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getProfessionalLicenseQueryKey(options)
+});
+
+/**
+ * Update a professional license record. Requires role: 'association:admin'
+ */
+export const updateProfessionalLicenseMutation = (options?: Partial<Options<UpdateProfessionalLicenseData>>): UseMutationOptions<UpdateProfessionalLicenseResponse, UpdateProfessionalLicenseError, Options<UpdateProfessionalLicenseData>> => {
+    const mutationOptions: UseMutationOptions<UpdateProfessionalLicenseResponse, UpdateProfessionalLicenseError, Options<UpdateProfessionalLicenseData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateProfessionalLicense({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listMembershipsQueryKey = (options?: Options<ListMembershipsData>) => createQueryKey('listMemberships', options);
+
+/**
+ * List memberships with optional filters. Requires role: 'association:admin'
+ */
+export const listMembershipsOptions = (options?: Options<ListMembershipsData>) => queryOptions<ListMembershipsResponse, ListMembershipsError, ListMembershipsResponse, ReturnType<typeof listMembershipsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMemberships({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMembershipsQueryKey(options)
+});
+
+export const listMembershipsInfiniteQueryKey = (options?: Options<ListMembershipsData>): QueryKey<Options<ListMembershipsData>> => createQueryKey('listMemberships', options, true);
+
+/**
+ * List memberships with optional filters. Requires role: 'association:admin'
+ */
+export const listMembershipsInfiniteOptions = (options?: Options<ListMembershipsData>) => infiniteQueryOptions<ListMembershipsResponse, ListMembershipsError, InfiniteData<ListMembershipsResponse>, QueryKey<Options<ListMembershipsData>>, number | Pick<QueryKey<Options<ListMembershipsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListMembershipsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listMemberships({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMembershipsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new membership. Requires role: 'association:admin'
+ */
+export const createMembershipMutation = (options?: Partial<Options<CreateMembershipData>>): UseMutationOptions<unknown, CreateMembershipError, Options<CreateMembershipData>> => {
+    const mutationOptions: UseMutationOptions<unknown, CreateMembershipError, Options<CreateMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a membership record. Requires role: 'association:admin'
+ */
+export const deleteMembershipMutation = (options?: Partial<Options<DeleteMembershipData>>): UseMutationOptions<DeleteMembershipResponse, DeleteMembershipError, Options<DeleteMembershipData>> => {
+    const mutationOptions: UseMutationOptions<DeleteMembershipResponse, DeleteMembershipError, Options<DeleteMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMembershipQueryKey = (options: Options<GetMembershipData>) => createQueryKey('getMembership', options);
+
+/**
+ * Get a membership by ID. Requires role: 'association:member:owner', 'association:admin'
+ */
+export const getMembershipOptions = (options: Options<GetMembershipData>) => queryOptions<unknown, GetMembershipError, unknown, ReturnType<typeof getMembershipQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMembership({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMembershipQueryKey(options)
+});
+
+/**
+ * Update a membership record. Requires role: 'association:admin'
+ */
+export const updateMembershipMutation = (options?: Partial<Options<UpdateMembershipData>>): UseMutationOptions<unknown, UpdateMembershipError, Options<UpdateMembershipData>> => {
+    const mutationOptions: UseMutationOptions<unknown, UpdateMembershipError, Options<UpdateMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Reinstate a suspended or lapsed membership. Requires role: 'association:admin'
+ */
+export const reinstateMembershipMutation = (options?: Partial<Options<ReinstateMembershipData>>): UseMutationOptions<unknown, ReinstateMembershipError, Options<ReinstateMembershipData>> => {
+    const mutationOptions: UseMutationOptions<unknown, ReinstateMembershipError, Options<ReinstateMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await reinstateMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Renew a membership by extending its dues expiry date. Requires role: 'association:admin'
+ */
+export const renewMembershipMutation = (options?: Partial<Options<RenewMembershipData>>): UseMutationOptions<unknown, RenewMembershipError, Options<RenewMembershipData>> => {
+    const mutationOptions: UseMutationOptions<unknown, RenewMembershipError, Options<RenewMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await renewMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Terminate a membership permanently. Requires role: 'association:admin'
+ */
+export const terminateMembershipMutation = (options?: Partial<Options<TerminateMembershipData>>): UseMutationOptions<unknown, TerminateMembershipError, Options<TerminateMembershipData>> => {
+    const mutationOptions: UseMutationOptions<unknown, TerminateMembershipError, Options<TerminateMembershipData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await terminateMembership({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listRoyaltySplitsQueryKey = (options?: Options<ListRoyaltySplitsData>) => createQueryKey('listRoyaltySplits', options);
+
+/**
+ * List royalty splits with optional filters. Requires role: 'association:admin'
+ */
+export const listRoyaltySplitsOptions = (options?: Options<ListRoyaltySplitsData>) => queryOptions<ListRoyaltySplitsResponse, ListRoyaltySplitsError, ListRoyaltySplitsResponse, ReturnType<typeof listRoyaltySplitsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listRoyaltySplits({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listRoyaltySplitsQueryKey(options)
+});
+
+export const listRoyaltySplitsInfiniteQueryKey = (options?: Options<ListRoyaltySplitsData>): QueryKey<Options<ListRoyaltySplitsData>> => createQueryKey('listRoyaltySplits', options, true);
+
+/**
+ * List royalty splits with optional filters. Requires role: 'association:admin'
+ */
+export const listRoyaltySplitsInfiniteOptions = (options?: Options<ListRoyaltySplitsData>) => infiniteQueryOptions<ListRoyaltySplitsResponse, ListRoyaltySplitsError, InfiniteData<ListRoyaltySplitsResponse>, QueryKey<Options<ListRoyaltySplitsData>>, number | Pick<QueryKey<Options<ListRoyaltySplitsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListRoyaltySplitsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listRoyaltySplits({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listRoyaltySplitsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new royalty split configuration. Requires role: 'association:admin'
+ */
+export const createRoyaltySplitMutation = (options?: Partial<Options<CreateRoyaltySplitData>>): UseMutationOptions<CreateRoyaltySplitResponse, CreateRoyaltySplitError, Options<CreateRoyaltySplitData>> => {
+    const mutationOptions: UseMutationOptions<CreateRoyaltySplitResponse, CreateRoyaltySplitError, Options<CreateRoyaltySplitData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createRoyaltySplit({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a royalty split configuration. Requires role: 'association:admin'
+ */
+export const deleteRoyaltySplitMutation = (options?: Partial<Options<DeleteRoyaltySplitData>>): UseMutationOptions<DeleteRoyaltySplitResponse, DeleteRoyaltySplitError, Options<DeleteRoyaltySplitData>> => {
+    const mutationOptions: UseMutationOptions<DeleteRoyaltySplitResponse, DeleteRoyaltySplitError, Options<DeleteRoyaltySplitData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteRoyaltySplit({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getRoyaltySplitQueryKey = (options: Options<GetRoyaltySplitData>) => createQueryKey('getRoyaltySplit', options);
+
+/**
+ * Get a royalty split by ID. Requires role: 'association:admin'
+ */
+export const getRoyaltySplitOptions = (options: Options<GetRoyaltySplitData>) => queryOptions<GetRoyaltySplitResponse, GetRoyaltySplitError, GetRoyaltySplitResponse, ReturnType<typeof getRoyaltySplitQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getRoyaltySplit({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getRoyaltySplitQueryKey(options)
+});
+
+/**
+ * Update a royalty split configuration. Requires role: 'association:admin'
+ */
+export const updateRoyaltySplitMutation = (options?: Partial<Options<UpdateRoyaltySplitData>>): UseMutationOptions<UpdateRoyaltySplitResponse, UpdateRoyaltySplitError, Options<UpdateRoyaltySplitData>> => {
+    const mutationOptions: UseMutationOptions<UpdateRoyaltySplitResponse, UpdateRoyaltySplitError, Options<UpdateRoyaltySplitData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateRoyaltySplit({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listMembershipTiersQueryKey = (options?: Options<ListMembershipTiersData>) => createQueryKey('listMembershipTiers', options);
+
+/**
+ * List all membership tiers. Requires role: 'association:member', 'association:admin'
+ */
+export const listMembershipTiersOptions = (options?: Options<ListMembershipTiersData>) => queryOptions<ListMembershipTiersResponse, ListMembershipTiersError, ListMembershipTiersResponse, ReturnType<typeof listMembershipTiersQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMembershipTiers({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMembershipTiersQueryKey(options)
+});
+
+export const listMembershipTiersInfiniteQueryKey = (options?: Options<ListMembershipTiersData>): QueryKey<Options<ListMembershipTiersData>> => createQueryKey('listMembershipTiers', options, true);
+
+/**
+ * List all membership tiers. Requires role: 'association:member', 'association:admin'
+ */
+export const listMembershipTiersInfiniteOptions = (options?: Options<ListMembershipTiersData>) => infiniteQueryOptions<ListMembershipTiersResponse, ListMembershipTiersError, InfiniteData<ListMembershipTiersResponse>, QueryKey<Options<ListMembershipTiersData>>, number | Pick<QueryKey<Options<ListMembershipTiersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListMembershipTiersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listMembershipTiers({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMembershipTiersInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new membership tier. Requires role: 'association:admin'
+ */
+export const createMembershipTierMutation = (options?: Partial<Options<CreateMembershipTierData>>): UseMutationOptions<CreateMembershipTierResponse, CreateMembershipTierError, Options<CreateMembershipTierData>> => {
+    const mutationOptions: UseMutationOptions<CreateMembershipTierResponse, CreateMembershipTierError, Options<CreateMembershipTierData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createMembershipTier({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a membership tier. Requires role: 'association:admin'
+ */
+export const deleteMembershipTierMutation = (options?: Partial<Options<DeleteMembershipTierData>>): UseMutationOptions<DeleteMembershipTierResponse, DeleteMembershipTierError, Options<DeleteMembershipTierData>> => {
+    const mutationOptions: UseMutationOptions<DeleteMembershipTierResponse, DeleteMembershipTierError, Options<DeleteMembershipTierData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteMembershipTier({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMembershipTierQueryKey = (options: Options<GetMembershipTierData>) => createQueryKey('getMembershipTier', options);
+
+/**
+ * Get a membership tier by ID. Requires role: 'association:member', 'association:admin'
+ */
+export const getMembershipTierOptions = (options: Options<GetMembershipTierData>) => queryOptions<GetMembershipTierResponse, GetMembershipTierError, GetMembershipTierResponse, ReturnType<typeof getMembershipTierQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMembershipTier({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMembershipTierQueryKey(options)
+});
+
+/**
+ * Update a membership tier. Requires role: 'association:admin'
+ */
+export const updateMembershipTierMutation = (options?: Partial<Options<UpdateMembershipTierData>>): UseMutationOptions<UpdateMembershipTierResponse, UpdateMembershipTierError, Options<UpdateMembershipTierData>> => {
+    const mutationOptions: UseMutationOptions<UpdateMembershipTierResponse, UpdateMembershipTierError, Options<UpdateMembershipTierData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateMembershipTier({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchMessageTemplatesQueryKey = (options?: Options<SearchMessageTemplatesData>) => createQueryKey('searchMessageTemplates', options);
+
+/**
+ * Search and list message templates. Requires role: 'admin', 'coordinator'
+ */
+export const searchMessageTemplatesOptions = (options?: Options<SearchMessageTemplatesData>) => queryOptions<SearchMessageTemplatesResponse, SearchMessageTemplatesError, SearchMessageTemplatesResponse, ReturnType<typeof searchMessageTemplatesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchMessageTemplates({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchMessageTemplatesQueryKey(options)
+});
+
+export const searchMessageTemplatesInfiniteQueryKey = (options?: Options<SearchMessageTemplatesData>): QueryKey<Options<SearchMessageTemplatesData>> => createQueryKey('searchMessageTemplates', options, true);
+
+/**
+ * Search and list message templates. Requires role: 'admin', 'coordinator'
+ */
+export const searchMessageTemplatesInfiniteOptions = (options?: Options<SearchMessageTemplatesData>) => infiniteQueryOptions<SearchMessageTemplatesResponse, SearchMessageTemplatesError, InfiniteData<SearchMessageTemplatesResponse>, QueryKey<Options<SearchMessageTemplatesData>>, number | Pick<QueryKey<Options<SearchMessageTemplatesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchMessageTemplatesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchMessageTemplates({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchMessageTemplatesInfiniteQueryKey(options)
+});
+
+/**
+ * Create a message template. Requires role: 'admin', 'coordinator'
+ */
+export const createMessageTemplateMutation = (options?: Partial<Options<CreateMessageTemplateData>>): UseMutationOptions<CreateMessageTemplateResponse, CreateMessageTemplateError, Options<CreateMessageTemplateData>> => {
+    const mutationOptions: UseMutationOptions<CreateMessageTemplateResponse, CreateMessageTemplateError, Options<CreateMessageTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createMessageTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a message template. Requires role: 'admin'
+ */
+export const deleteMessageTemplateMutation = (options?: Partial<Options<DeleteMessageTemplateData>>): UseMutationOptions<DeleteMessageTemplateResponse, DeleteMessageTemplateError, Options<DeleteMessageTemplateData>> => {
+    const mutationOptions: UseMutationOptions<DeleteMessageTemplateResponse, DeleteMessageTemplateError, Options<DeleteMessageTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteMessageTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMessageTemplateQueryKey = (options: Options<GetMessageTemplateData>) => createQueryKey('getMessageTemplate', options);
+
+/**
+ * Get a message template by ID. Requires role: 'admin', 'coordinator'
+ */
+export const getMessageTemplateOptions = (options: Options<GetMessageTemplateData>) => queryOptions<GetMessageTemplateResponse, GetMessageTemplateError, GetMessageTemplateResponse, ReturnType<typeof getMessageTemplateQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMessageTemplate({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMessageTemplateQueryKey(options)
+});
+
+/**
+ * Update a message template. Requires role: 'admin', 'coordinator'
+ */
+export const updateMessageTemplateMutation = (options?: Partial<Options<UpdateMessageTemplateData>>): UseMutationOptions<UpdateMessageTemplateResponse, UpdateMessageTemplateError, Options<UpdateMessageTemplateData>> => {
+    const mutationOptions: UseMutationOptions<UpdateMessageTemplateResponse, UpdateMessageTemplateError, Options<UpdateMessageTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateMessageTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Preview a rendered template with sample merge data. Requires role: 'admin', 'coordinator'
+ */
+export const previewMessageTemplateMutation = (options?: Partial<Options<PreviewMessageTemplateData>>): UseMutationOptions<PreviewMessageTemplateResponse, PreviewMessageTemplateError, Options<PreviewMessageTemplateData>> => {
+    const mutationOptions: UseMutationOptions<PreviewMessageTemplateResponse, PreviewMessageTemplateError, Options<PreviewMessageTemplateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await previewMessageTemplate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchMessagesQueryKey = (options?: Options<SearchMessagesData>) => createQueryKey('searchMessages', options);
+
+/**
+ * Search and list messages. Requires role: 'admin', 'coordinator'
+ */
+export const searchMessagesOptions = (options?: Options<SearchMessagesData>) => queryOptions<SearchMessagesResponse, SearchMessagesError, SearchMessagesResponse, ReturnType<typeof searchMessagesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchMessages({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchMessagesQueryKey(options)
+});
+
+export const searchMessagesInfiniteQueryKey = (options?: Options<SearchMessagesData>): QueryKey<Options<SearchMessagesData>> => createQueryKey('searchMessages', options, true);
+
+/**
+ * Search and list messages. Requires role: 'admin', 'coordinator'
+ */
+export const searchMessagesInfiniteOptions = (options?: Options<SearchMessagesData>) => infiniteQueryOptions<SearchMessagesResponse, SearchMessagesError, InfiniteData<SearchMessagesResponse>, QueryKey<Options<SearchMessagesData>>, number | Pick<QueryKey<Options<SearchMessagesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchMessagesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchMessages({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchMessagesInfiniteQueryKey(options)
+});
+
+/**
+ * Compose a new message. Requires role: 'admin', 'coordinator'
+ */
+export const createMessageMutation = (options?: Partial<Options<CreateMessageData>>): UseMutationOptions<CreateMessageResponse, CreateMessageError, Options<CreateMessageData>> => {
+    const mutationOptions: UseMutationOptions<CreateMessageResponse, CreateMessageError, Options<CreateMessageData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createMessage({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a draft message. Requires role: 'admin'
+ */
+export const deleteMessageMutation = (options?: Partial<Options<DeleteMessageData>>): UseMutationOptions<DeleteMessageResponse, DeleteMessageError, Options<DeleteMessageData>> => {
+    const mutationOptions: UseMutationOptions<DeleteMessageResponse, DeleteMessageError, Options<DeleteMessageData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteMessage({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMessageQueryKey = (options: Options<GetMessageData>) => createQueryKey('getMessage', options);
+
+/**
+ * Get a message by ID. Requires role: 'admin', 'coordinator'
+ */
+export const getMessageOptions = (options: Options<GetMessageData>) => queryOptions<GetMessageResponse, GetMessageError, GetMessageResponse, ReturnType<typeof getMessageQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMessage({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMessageQueryKey(options)
+});
+
+/**
+ * Update a draft message. Requires role: 'admin', 'coordinator'
+ */
+export const updateMessageMutation = (options?: Partial<Options<UpdateMessageData>>): UseMutationOptions<UpdateMessageResponse, UpdateMessageError, Options<UpdateMessageData>> => {
+    const mutationOptions: UseMutationOptions<UpdateMessageResponse, UpdateMessageError, Options<UpdateMessageData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateMessage({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cancel a scheduled message. Requires role: 'admin', 'coordinator'
+ */
+export const cancelMessageMutation = (options?: Partial<Options<CancelMessageData>>): UseMutationOptions<CancelMessageResponse, CancelMessageError, Options<CancelMessageData>> => {
+    const mutationOptions: UseMutationOptions<CancelMessageResponse, CancelMessageError, Options<CancelMessageData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await cancelMessage({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Schedule a message to be sent at a future time. Requires role: 'admin', 'coordinator'
+ */
+export const scheduleMessageMutation = (options?: Partial<Options<ScheduleMessageData>>): UseMutationOptions<ScheduleMessageResponse, ScheduleMessageError, Options<ScheduleMessageData>> => {
+    const mutationOptions: UseMutationOptions<ScheduleMessageResponse, ScheduleMessageError, Options<ScheduleMessageData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await scheduleMessage({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Send a draft message immediately. Requires role: 'admin', 'coordinator'
+ */
+export const sendMessageMutation = (options?: Partial<Options<SendMessageData>>): UseMutationOptions<SendMessageResponse, SendMessageError, Options<SendMessageData>> => {
+    const mutationOptions: UseMutationOptions<SendMessageResponse, SendMessageError, Options<SendMessageData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await sendMessage({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listPersonSubscriptionsQueryKey = (options: Options<ListPersonSubscriptionsData>) => createQueryKey('listPersonSubscriptions', options);
+
+/**
+ * List a person's subscription preferences. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const listPersonSubscriptionsOptions = (options: Options<ListPersonSubscriptionsData>) => queryOptions<ListPersonSubscriptionsResponse, ListPersonSubscriptionsError, ListPersonSubscriptionsResponse, ReturnType<typeof listPersonSubscriptionsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listPersonSubscriptions({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listPersonSubscriptionsQueryKey(options)
+});
+
+export const listPersonSubscriptionsInfiniteQueryKey = (options: Options<ListPersonSubscriptionsData>): QueryKey<Options<ListPersonSubscriptionsData>> => createQueryKey('listPersonSubscriptions', options, true);
+
+/**
+ * List a person's subscription preferences. Requires role: 'admin', 'coordinator', 'member:owner'
+ */
+export const listPersonSubscriptionsInfiniteOptions = (options: Options<ListPersonSubscriptionsData>) => infiniteQueryOptions<ListPersonSubscriptionsResponse, ListPersonSubscriptionsError, InfiniteData<ListPersonSubscriptionsResponse>, QueryKey<Options<ListPersonSubscriptionsData>>, number | Pick<QueryKey<Options<ListPersonSubscriptionsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListPersonSubscriptionsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listPersonSubscriptions({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listPersonSubscriptionsInfiniteQueryKey(options)
+});
+
+/**
+ * Bulk-update multiple subscription preferences for a person. Requires role: 'admin', 'member:owner'
+ */
+export const bulkUpdatePersonSubscriptionsMutation = (options?: Partial<Options<BulkUpdatePersonSubscriptionsData>>): UseMutationOptions<BulkUpdatePersonSubscriptionsResponse, BulkUpdatePersonSubscriptionsError, Options<BulkUpdatePersonSubscriptionsData>> => {
+    const mutationOptions: UseMutationOptions<BulkUpdatePersonSubscriptionsResponse, BulkUpdatePersonSubscriptionsError, Options<BulkUpdatePersonSubscriptionsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await bulkUpdatePersonSubscriptions({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Update a single subscription preference. Requires role: 'admin', 'member:owner'
+ */
+export const updatePersonSubscriptionMutation = (options?: Partial<Options<UpdatePersonSubscriptionData>>): UseMutationOptions<UpdatePersonSubscriptionResponse, UpdatePersonSubscriptionError, Options<UpdatePersonSubscriptionData>> => {
+    const mutationOptions: UseMutationOptions<UpdatePersonSubscriptionResponse, UpdatePersonSubscriptionError, Options<UpdatePersonSubscriptionData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updatePersonSubscription({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Create a subscription topic. Requires role: 'admin'
+ */
+export const createSubscriptionTopicMutation = (options?: Partial<Options<CreateSubscriptionTopicData>>): UseMutationOptions<CreateSubscriptionTopicResponse, CreateSubscriptionTopicError, Options<CreateSubscriptionTopicData>> => {
+    const mutationOptions: UseMutationOptions<CreateSubscriptionTopicResponse, CreateSubscriptionTopicError, Options<CreateSubscriptionTopicData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createSubscriptionTopic({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a subscription topic. Requires role: 'admin'
+ */
+export const deleteSubscriptionTopicMutation = (options?: Partial<Options<DeleteSubscriptionTopicData>>): UseMutationOptions<DeleteSubscriptionTopicResponse, DeleteSubscriptionTopicError, Options<DeleteSubscriptionTopicData>> => {
+    const mutationOptions: UseMutationOptions<DeleteSubscriptionTopicResponse, DeleteSubscriptionTopicError, Options<DeleteSubscriptionTopicData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteSubscriptionTopic({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getSubscriptionTopicQueryKey = (options: Options<GetSubscriptionTopicData>) => createQueryKey('getSubscriptionTopic', options);
+
+/**
+ * Get a subscription topic by ID. Requires role: 'admin', 'coordinator', 'member'
+ */
+export const getSubscriptionTopicOptions = (options: Options<GetSubscriptionTopicData>) => queryOptions<GetSubscriptionTopicResponse, GetSubscriptionTopicError, GetSubscriptionTopicResponse, ReturnType<typeof getSubscriptionTopicQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getSubscriptionTopic({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getSubscriptionTopicQueryKey(options)
+});
+
+/**
+ * Update a subscription topic. Requires role: 'admin'
+ */
+export const updateSubscriptionTopicMutation = (options?: Partial<Options<UpdateSubscriptionTopicData>>): UseMutationOptions<UpdateSubscriptionTopicResponse, UpdateSubscriptionTopicError, Options<UpdateSubscriptionTopicData>> => {
+    const mutationOptions: UseMutationOptions<UpdateSubscriptionTopicResponse, UpdateSubscriptionTopicError, Options<UpdateSubscriptionTopicData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateSubscriptionTopic({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchTrainingsQueryKey = (options?: Options<SearchTrainingsData>) => createQueryKey('searchTrainings', options);
+
+/**
+ * Search training sessions with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchTrainingsOptions = (options?: Options<SearchTrainingsData>) => queryOptions<SearchTrainingsResponse, SearchTrainingsError, SearchTrainingsResponse, ReturnType<typeof searchTrainingsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchTrainings({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchTrainingsQueryKey(options)
+});
+
+export const searchTrainingsInfiniteQueryKey = (options?: Options<SearchTrainingsData>): QueryKey<Options<SearchTrainingsData>> => createQueryKey('searchTrainings', options, true);
+
+/**
+ * Search training sessions with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchTrainingsInfiniteOptions = (options?: Options<SearchTrainingsData>) => infiniteQueryOptions<SearchTrainingsResponse, SearchTrainingsError, InfiniteData<SearchTrainingsResponse>, QueryKey<Options<SearchTrainingsData>>, number | Pick<QueryKey<Options<SearchTrainingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchTrainingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchTrainings({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchTrainingsInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new training session. Requires role: 'association:admin', 'association:staff'
+ */
+export const createTrainingMutation = (options?: Partial<Options<CreateTrainingData>>): UseMutationOptions<unknown, CreateTrainingError, Options<CreateTrainingData>> => {
+    const mutationOptions: UseMutationOptions<unknown, CreateTrainingError, Options<CreateTrainingData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createTraining({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchCoursesQueryKey = (options?: Options<SearchCoursesData>) => createQueryKey('searchCourses', options);
+
+/**
+ * Search courses with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchCoursesOptions = (options?: Options<SearchCoursesData>) => queryOptions<SearchCoursesResponse, SearchCoursesError, SearchCoursesResponse, ReturnType<typeof searchCoursesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchCourses({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchCoursesQueryKey(options)
+});
+
+export const searchCoursesInfiniteQueryKey = (options?: Options<SearchCoursesData>): QueryKey<Options<SearchCoursesData>> => createQueryKey('searchCourses', options, true);
+
+/**
+ * Search courses with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const searchCoursesInfiniteOptions = (options?: Options<SearchCoursesData>) => infiniteQueryOptions<SearchCoursesResponse, SearchCoursesError, InfiniteData<SearchCoursesResponse>, QueryKey<Options<SearchCoursesData>>, number | Pick<QueryKey<Options<SearchCoursesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchCoursesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchCourses({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchCoursesInfiniteQueryKey(options)
+});
+
+/**
+ * Create a new online course. Requires role: 'association:admin', 'association:staff'
+ */
+export const createCourseMutation = (options?: Partial<Options<CreateCourseData>>): UseMutationOptions<CreateCourseResponse, CreateCourseError, Options<CreateCourseData>> => {
+    const mutationOptions: UseMutationOptions<CreateCourseResponse, CreateCourseError, Options<CreateCourseData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createCourse({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchCourseEnrollmentsQueryKey = (options?: Options<SearchCourseEnrollmentsData>) => createQueryKey('searchCourseEnrollments', options);
+
+/**
+ * Search course enrollments with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchCourseEnrollmentsOptions = (options?: Options<SearchCourseEnrollmentsData>) => queryOptions<SearchCourseEnrollmentsResponse, SearchCourseEnrollmentsError, SearchCourseEnrollmentsResponse, ReturnType<typeof searchCourseEnrollmentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchCourseEnrollments({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchCourseEnrollmentsQueryKey(options)
+});
+
+export const searchCourseEnrollmentsInfiniteQueryKey = (options?: Options<SearchCourseEnrollmentsData>): QueryKey<Options<SearchCourseEnrollmentsData>> => createQueryKey('searchCourseEnrollments', options, true);
+
+/**
+ * Search course enrollments with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchCourseEnrollmentsInfiniteOptions = (options?: Options<SearchCourseEnrollmentsData>) => infiniteQueryOptions<SearchCourseEnrollmentsResponse, SearchCourseEnrollmentsError, InfiniteData<SearchCourseEnrollmentsResponse>, QueryKey<Options<SearchCourseEnrollmentsData>>, number | Pick<QueryKey<Options<SearchCourseEnrollmentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchCourseEnrollmentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchCourseEnrollments({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchCourseEnrollmentsInfiniteQueryKey(options)
+});
+
+/**
+ * Enroll a person in an online course. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const createCourseEnrollmentMutation = (options?: Partial<Options<CreateCourseEnrollmentData>>): UseMutationOptions<CreateCourseEnrollmentResponse, CreateCourseEnrollmentError, Options<CreateCourseEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<CreateCourseEnrollmentResponse, CreateCourseEnrollmentError, Options<CreateCourseEnrollmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createCourseEnrollment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a course enrollment. Requires role: 'association:admin'
+ */
+export const deleteCourseEnrollmentMutation = (options?: Partial<Options<DeleteCourseEnrollmentData>>): UseMutationOptions<DeleteCourseEnrollmentResponse, DeleteCourseEnrollmentError, Options<DeleteCourseEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<DeleteCourseEnrollmentResponse, DeleteCourseEnrollmentError, Options<DeleteCourseEnrollmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteCourseEnrollment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getCourseEnrollmentQueryKey = (options: Options<GetCourseEnrollmentData>) => createQueryKey('getCourseEnrollment', options);
+
+/**
+ * Get a course enrollment by ID. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const getCourseEnrollmentOptions = (options: Options<GetCourseEnrollmentData>) => queryOptions<GetCourseEnrollmentResponse, GetCourseEnrollmentError, GetCourseEnrollmentResponse, ReturnType<typeof getCourseEnrollmentQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getCourseEnrollment({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getCourseEnrollmentQueryKey(options)
+});
+
+/**
+ * Update a course enrollment record. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateCourseEnrollmentMutation = (options?: Partial<Options<UpdateCourseEnrollmentData>>): UseMutationOptions<UpdateCourseEnrollmentResponse, UpdateCourseEnrollmentError, Options<UpdateCourseEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<UpdateCourseEnrollmentResponse, UpdateCourseEnrollmentError, Options<UpdateCourseEnrollmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateCourseEnrollment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Update learner progress on an enrolled course. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const updateCourseProgressMutation = (options?: Partial<Options<UpdateCourseProgressData>>): UseMutationOptions<UpdateCourseProgressResponse, UpdateCourseProgressError, Options<UpdateCourseProgressData>> => {
+    const mutationOptions: UseMutationOptions<UpdateCourseProgressResponse, UpdateCourseProgressError, Options<UpdateCourseProgressData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateCourseProgress({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchQuizAttemptsQueryKey = (options?: Options<SearchQuizAttemptsData>) => createQueryKey('searchQuizAttempts', options);
+
+/**
+ * Search quiz attempts with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const searchQuizAttemptsOptions = (options?: Options<SearchQuizAttemptsData>) => queryOptions<SearchQuizAttemptsResponse, SearchQuizAttemptsError, SearchQuizAttemptsResponse, ReturnType<typeof searchQuizAttemptsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchQuizAttempts({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchQuizAttemptsQueryKey(options)
+});
+
+export const searchQuizAttemptsInfiniteQueryKey = (options?: Options<SearchQuizAttemptsData>): QueryKey<Options<SearchQuizAttemptsData>> => createQueryKey('searchQuizAttempts', options, true);
+
+/**
+ * Search quiz attempts with filtering and pagination. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const searchQuizAttemptsInfiniteOptions = (options?: Options<SearchQuizAttemptsData>) => infiniteQueryOptions<SearchQuizAttemptsResponse, SearchQuizAttemptsError, InfiniteData<SearchQuizAttemptsResponse>, QueryKey<Options<SearchQuizAttemptsData>>, number | Pick<QueryKey<Options<SearchQuizAttemptsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchQuizAttemptsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchQuizAttempts({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchQuizAttemptsInfiniteQueryKey(options)
+});
+
+/**
+ * Submit a new quiz attempt for a course module. Requires role: 'association:member:owner'
+ */
+export const createQuizAttemptMutation = (options?: Partial<Options<CreateQuizAttemptData>>): UseMutationOptions<CreateQuizAttemptResponse, CreateQuizAttemptError, Options<CreateQuizAttemptData>> => {
+    const mutationOptions: UseMutationOptions<CreateQuizAttemptResponse, CreateQuizAttemptError, Options<CreateQuizAttemptData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createQuizAttempt({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a course. Requires role: 'association:admin'
+ */
+export const deleteCourseMutation = (options?: Partial<Options<DeleteCourseData>>): UseMutationOptions<DeleteCourseResponse, DeleteCourseError, Options<DeleteCourseData>> => {
+    const mutationOptions: UseMutationOptions<DeleteCourseResponse, DeleteCourseError, Options<DeleteCourseData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteCourse({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getCourseQueryKey = (options: Options<GetCourseData>) => createQueryKey('getCourse', options);
+
+/**
+ * Get a course by ID. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const getCourseOptions = (options: Options<GetCourseData>) => queryOptions<GetCourseResponse, GetCourseError, GetCourseResponse, ReturnType<typeof getCourseQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getCourse({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getCourseQueryKey(options)
+});
+
+/**
+ * Update a course. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateCourseMutation = (options?: Partial<Options<UpdateCourseData>>): UseMutationOptions<UpdateCourseResponse, UpdateCourseError, Options<UpdateCourseData>> => {
+    const mutationOptions: UseMutationOptions<UpdateCourseResponse, UpdateCourseError, Options<UpdateCourseData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateCourse({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchTrainingEnrollmentsQueryKey = (options?: Options<SearchTrainingEnrollmentsData>) => createQueryKey('searchTrainingEnrollments', options);
+
+/**
+ * Search training enrollments with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchTrainingEnrollmentsOptions = (options?: Options<SearchTrainingEnrollmentsData>) => queryOptions<SearchTrainingEnrollmentsResponse, SearchTrainingEnrollmentsError, SearchTrainingEnrollmentsResponse, ReturnType<typeof searchTrainingEnrollmentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchTrainingEnrollments({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchTrainingEnrollmentsQueryKey(options)
+});
+
+export const searchTrainingEnrollmentsInfiniteQueryKey = (options?: Options<SearchTrainingEnrollmentsData>): QueryKey<Options<SearchTrainingEnrollmentsData>> => createQueryKey('searchTrainingEnrollments', options, true);
+
+/**
+ * Search training enrollments with filtering and pagination. Requires role: 'association:admin', 'association:staff'
+ */
+export const searchTrainingEnrollmentsInfiniteOptions = (options?: Options<SearchTrainingEnrollmentsData>) => infiniteQueryOptions<SearchTrainingEnrollmentsResponse, SearchTrainingEnrollmentsError, InfiniteData<SearchTrainingEnrollmentsResponse>, QueryKey<Options<SearchTrainingEnrollmentsData>>, number | Pick<QueryKey<Options<SearchTrainingEnrollmentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<SearchTrainingEnrollmentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await searchTrainingEnrollments({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchTrainingEnrollmentsInfiniteQueryKey(options)
+});
+
+/**
+ * Enroll a person in a training session. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const createTrainingEnrollmentMutation = (options?: Partial<Options<CreateTrainingEnrollmentData>>): UseMutationOptions<CreateTrainingEnrollmentResponse, CreateTrainingEnrollmentError, Options<CreateTrainingEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<CreateTrainingEnrollmentResponse, CreateTrainingEnrollmentError, Options<CreateTrainingEnrollmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createTrainingEnrollment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a training enrollment. Requires role: 'association:admin'
+ */
+export const deleteTrainingEnrollmentMutation = (options?: Partial<Options<DeleteTrainingEnrollmentData>>): UseMutationOptions<DeleteTrainingEnrollmentResponse, DeleteTrainingEnrollmentError, Options<DeleteTrainingEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<DeleteTrainingEnrollmentResponse, DeleteTrainingEnrollmentError, Options<DeleteTrainingEnrollmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteTrainingEnrollment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getTrainingEnrollmentQueryKey = (options: Options<GetTrainingEnrollmentData>) => createQueryKey('getTrainingEnrollment', options);
+
+/**
+ * Get a training enrollment by ID. Requires role: 'association:admin', 'association:staff', 'association:member:owner'
+ */
+export const getTrainingEnrollmentOptions = (options: Options<GetTrainingEnrollmentData>) => queryOptions<GetTrainingEnrollmentResponse, GetTrainingEnrollmentError, GetTrainingEnrollmentResponse, ReturnType<typeof getTrainingEnrollmentQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getTrainingEnrollment({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getTrainingEnrollmentQueryKey(options)
+});
+
+/**
+ * Update a training enrollment record. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateTrainingEnrollmentMutation = (options?: Partial<Options<UpdateTrainingEnrollmentData>>): UseMutationOptions<UpdateTrainingEnrollmentResponse, UpdateTrainingEnrollmentError, Options<UpdateTrainingEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<UpdateTrainingEnrollmentResponse, UpdateTrainingEnrollmentError, Options<UpdateTrainingEnrollmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateTrainingEnrollment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Mark a training enrollment as completed and optionally award CE credit. Requires role: 'association:admin', 'association:staff'
+ */
+export const completeTrainingEnrollmentMutation = (options?: Partial<Options<CompleteTrainingEnrollmentData>>): UseMutationOptions<CompleteTrainingEnrollmentResponse, CompleteTrainingEnrollmentError, Options<CompleteTrainingEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<CompleteTrainingEnrollmentResponse, CompleteTrainingEnrollmentError, Options<CompleteTrainingEnrollmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await completeTrainingEnrollment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete a training session. Requires role: 'association:admin'
+ */
+export const deleteTrainingMutation = (options?: Partial<Options<DeleteTrainingData>>): UseMutationOptions<DeleteTrainingResponse, DeleteTrainingError, Options<DeleteTrainingData>> => {
+    const mutationOptions: UseMutationOptions<DeleteTrainingResponse, DeleteTrainingError, Options<DeleteTrainingData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteTraining({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getTrainingQueryKey = (options: Options<GetTrainingData>) => createQueryKey('getTraining', options);
+
+/**
+ * Get a training session by ID. Requires role: 'association:admin', 'association:staff', 'association:member'
+ */
+export const getTrainingOptions = (options: Options<GetTrainingData>) => queryOptions<unknown, GetTrainingError, unknown, ReturnType<typeof getTrainingQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getTraining({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getTrainingQueryKey(options)
+});
+
+/**
+ * Update an existing training session. Requires role: 'association:admin', 'association:staff'
+ */
+export const updateTrainingMutation = (options?: Partial<Options<UpdateTrainingData>>): UseMutationOptions<unknown, UpdateTrainingError, Options<UpdateTrainingData>> => {
+    const mutationOptions: UseMutationOptions<unknown, UpdateTrainingError, Options<UpdateTrainingData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateTraining({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Publish a training session making it visible for registration. Requires role: 'association:admin', 'association:staff'
+ */
+export const publishTrainingMutation = (options?: Partial<Options<PublishTrainingData>>): UseMutationOptions<unknown, PublishTrainingError, Options<PublishTrainingData>> => {
+    const mutationOptions: UseMutationOptions<unknown, PublishTrainingError, Options<PublishTrainingData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await publishTraining({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listAuditLogsQueryKey = (options?: Options<ListAuditLogsData>) => createQueryKey('listAuditLogs', options);
+
+/**
+ * List audit logs with filtering and pagination. Requires role: 'admin', 'support'
+ */
+export const listAuditLogsOptions = (options?: Options<ListAuditLogsData>) => queryOptions<ListAuditLogsResponse, ListAuditLogsError, ListAuditLogsResponse, ReturnType<typeof listAuditLogsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listAuditLogs({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listAuditLogsQueryKey(options)
+});
 
 export const listAuditLogsInfiniteQueryKey = (options?: Options<ListAuditLogsData>): QueryKey<Options<ListAuditLogsData>> => createQueryKey('listAuditLogs', options, true);
 
