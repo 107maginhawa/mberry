@@ -1,0 +1,13 @@
+mod transport_test;
+mod sync_test;
+mod persistent_sync_test;
+mod schema_integration_test;
+mod watcher_sqlite_test;
+mod watcher_postgres_test;
+mod auth_integration_test;
+mod ws_sync_test;
+mod health_api_test;
+mod pg_applier_bool_test;
+mod scope_filter_diag_test;
+mod scope_filter_staging_test;
+mod priority_ordering_test;
