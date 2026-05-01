@@ -57,6 +57,20 @@
       "when": 1777637289538,
       "tag": "0007_useful_mephistopheles",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1777640242477,
+      "tag": "0008_sudden_wolfpack",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1777640280068,
+      "tag": "0009_faithful_la_nuit",
+      "breakpoints": true
     }
   ]
 }
