@@ -2,8 +2,11 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import {
   LayoutDashboard,
+  Building2,
+  Building,
   Users,
-  Settings,
+  UserCog,
+  ToggleLeft,
   ShieldCheck,
 } from 'lucide-react'
 import '@/styles/globals.css'
@@ -14,9 +17,12 @@ export const Route = createRootRoute({
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/', label: 'Users', icon: Users },
-  { to: '/', label: 'Permissions', icon: ShieldCheck },
-  { to: '/', label: 'Settings', icon: Settings },
+  { to: '/associations', label: 'Associations', icon: Building2 },
+  { to: '/organizations', label: 'Organizations', icon: Building },
+  { to: '/members', label: 'Members', icon: Users },
+  { to: '/operators', label: 'Operators', icon: ShieldCheck },
+  { to: '/impersonate', label: 'Impersonate', icon: UserCog },
+  { to: '/feature-flags', label: 'Feature Flags', icon: ToggleLeft },
 ]
 
 function RootComponent() {

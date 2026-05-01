@@ -10,37 +10,223 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OrganizationsIndexRouteImport } from './routes/organizations/index'
+import { Route as OperatorsIndexRouteImport } from './routes/operators/index'
+import { Route as MembersIndexRouteImport } from './routes/members/index'
+import { Route as ImpersonateIndexRouteImport } from './routes/impersonate/index'
+import { Route as FeatureFlagsIndexRouteImport } from './routes/feature-flags/index'
+import { Route as AssociationsIndexRouteImport } from './routes/associations/index'
+import { Route as OrganizationsOrganizationIdRouteImport } from './routes/organizations/$organizationId'
+import { Route as AssociationsAssociationIdRouteImport } from './routes/associations/$associationId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrganizationsIndexRoute = OrganizationsIndexRouteImport.update({
+  id: '/organizations/',
+  path: '/organizations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OperatorsIndexRoute = OperatorsIndexRouteImport.update({
+  id: '/operators/',
+  path: '/operators/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembersIndexRoute = MembersIndexRouteImport.update({
+  id: '/members/',
+  path: '/members/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpersonateIndexRoute = ImpersonateIndexRouteImport.update({
+  id: '/impersonate/',
+  path: '/impersonate/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeatureFlagsIndexRoute = FeatureFlagsIndexRouteImport.update({
+  id: '/feature-flags/',
+  path: '/feature-flags/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssociationsIndexRoute = AssociationsIndexRouteImport.update({
+  id: '/associations/',
+  path: '/associations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganizationsOrganizationIdRoute =
+  OrganizationsOrganizationIdRouteImport.update({
+    id: '/organizations/$organizationId',
+    path: '/organizations/$organizationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AssociationsAssociationIdRoute =
+  AssociationsAssociationIdRouteImport.update({
+    id: '/associations/$associationId',
+    path: '/associations/$associationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
+  '/associations/': typeof AssociationsIndexRoute
+  '/feature-flags/': typeof FeatureFlagsIndexRoute
+  '/impersonate/': typeof ImpersonateIndexRoute
+  '/members/': typeof MembersIndexRoute
+  '/operators/': typeof OperatorsIndexRoute
+  '/organizations/': typeof OrganizationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
+  '/associations': typeof AssociationsIndexRoute
+  '/feature-flags': typeof FeatureFlagsIndexRoute
+  '/impersonate': typeof ImpersonateIndexRoute
+  '/members': typeof MembersIndexRoute
+  '/operators': typeof OperatorsIndexRoute
+  '/organizations': typeof OrganizationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
+  '/associations/': typeof AssociationsIndexRoute
+  '/feature-flags/': typeof FeatureFlagsIndexRoute
+  '/impersonate/': typeof ImpersonateIndexRoute
+  '/members/': typeof MembersIndexRoute
+  '/operators/': typeof OperatorsIndexRoute
+  '/organizations/': typeof OrganizationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/associations/$associationId'
+    | '/organizations/$organizationId'
+    | '/associations/'
+    | '/feature-flags/'
+    | '/impersonate/'
+    | '/members/'
+    | '/operators/'
+    | '/organizations/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/associations/$associationId'
+    | '/organizations/$organizationId'
+    | '/associations'
+    | '/feature-flags'
+    | '/impersonate'
+    | '/members'
+    | '/operators'
+    | '/organizations'
+  id:
+    | '__root__'
+    | '/'
+    | '/associations/$associationId'
+    | '/organizations/$organizationId'
+    | '/associations/'
+    | '/feature-flags/'
+    | '/impersonate/'
+    | '/members/'
+    | '/operators/'
+    | '/organizations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssociationsAssociationIdRoute: typeof AssociationsAssociationIdRoute
+  OrganizationsOrganizationIdRoute: typeof OrganizationsOrganizationIdRoute
+  AssociationsIndexRoute: typeof AssociationsIndexRoute
+  FeatureFlagsIndexRoute: typeof FeatureFlagsIndexRoute
+  ImpersonateIndexRoute: typeof ImpersonateIndexRoute
+  MembersIndexRoute: typeof MembersIndexRoute
+  OperatorsIndexRoute: typeof OperatorsIndexRoute
+  OrganizationsIndexRoute: typeof OrganizationsIndexRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organizations/': {
+      id: '/organizations/'
+      path: '/organizations'
+      fullPath: '/organizations/'
+      preLoaderRoute: typeof OrganizationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/operators/': {
+      id: '/operators/'
+      path: '/operators'
+      fullPath: '/operators/'
+      preLoaderRoute: typeof OperatorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/members/': {
+      id: '/members/'
+      path: '/members'
+      fullPath: '/members/'
+      preLoaderRoute: typeof MembersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impersonate/': {
+      id: '/impersonate/'
+      path: '/impersonate'
+      fullPath: '/impersonate/'
+      preLoaderRoute: typeof ImpersonateIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feature-flags/': {
+      id: '/feature-flags/'
+      path: '/feature-flags'
+      fullPath: '/feature-flags/'
+      preLoaderRoute: typeof FeatureFlagsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/associations/': {
+      id: '/associations/'
+      path: '/associations'
+      fullPath: '/associations/'
+      preLoaderRoute: typeof AssociationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organizations/$organizationId': {
+      id: '/organizations/$organizationId'
+      path: '/organizations/$organizationId'
+      fullPath: '/organizations/$organizationId'
+      preLoaderRoute: typeof OrganizationsOrganizationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/associations/$associationId': {
+      id: '/associations/$associationId'
+      path: '/associations/$associationId'
+      fullPath: '/associations/$associationId'
+      preLoaderRoute: typeof AssociationsAssociationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssociationsAssociationIdRoute: AssociationsAssociationIdRoute,
+  OrganizationsOrganizationIdRoute: OrganizationsOrganizationIdRoute,
+  AssociationsIndexRoute: AssociationsIndexRoute,
+  FeatureFlagsIndexRoute: FeatureFlagsIndexRoute,
+  ImpersonateIndexRoute: ImpersonateIndexRoute,
+  MembersIndexRoute: MembersIndexRoute,
+  OperatorsIndexRoute: OperatorsIndexRoute,
+  OrganizationsIndexRoute: OrganizationsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
