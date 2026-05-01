@@ -1,40 +1,72 @@
 /**
- * Invite token validation utilities.
- *
- * Token format: `invite.{base64-payload}.{signature}`
- * Payload: { orgId, orgName, role, expiresAt }
- *
- * Server validates HMAC signature. Client only checks format + expiry.
+ * Invite token validation — delegates to server.
+ * Raw token is opaque (HMAC-signed). Only the server can validate it.
  */
 
-export function isValidTokenFormat(token: string): boolean {
-  if (!token || token.length < 3) return false;
-  return true;
-}
+import { client } from '@monobase/sdk-ts/client'
 
-export function isTokenExpired(expiresAtMs: number): boolean {
-  return Date.now() > expiresAtMs;
-}
-
-export interface InvitePayload {
+export interface InviteValidation {
+  valid: boolean;
+  email: string;
   orgId: string;
-  orgName: string;
-  role: string;
-  expiresAt: number;
+  type: 'claim' | 'invite';
+  metadata?: {
+    name?: string;
+    licenseNumber?: string;
+    membershipCategoryId?: string;
+    membershipTierId?: string;
+  };
+  expiresAt: string;
 }
 
-export function parseInviteToken(token: string): InvitePayload | null {
-  if (!isValidTokenFormat(token)) return null;
+export interface InviteError {
+  error: string;
+  code?: 'ALREADY_CLAIMED' | 'REVOKED' | 'EXPIRED';
+  orgId?: string;
+}
 
+/**
+ * Validate a token against the server.
+ * Returns validation result or error info.
+ */
+export async function validateInviteToken(token: string): Promise<
+  { ok: true; data: InviteValidation } | { ok: false; error: InviteError; status: number }
+> {
   try {
-    const parts = token.split('.');
-    if (parts.length < 2) return null;
+    const response = await fetch(`/api/invite/${encodeURIComponent(token)}/validate`);
+    const body = await response.json();
 
-    const payload = JSON.parse(atob(parts[1]!));
-    if (!payload.orgId || !payload.orgName) return null;
-
-    return payload as InvitePayload;
+    if (response.ok) {
+      return { ok: true, data: body as InviteValidation };
+    }
+    return { ok: false, error: body as InviteError, status: response.status };
   } catch {
-    return null;
+    return {
+      ok: false,
+      error: { error: 'Network error. Please check your connection.' },
+      status: 0,
+    };
+  }
+}
+
+/**
+ * Claim an invite token (requires authentication).
+ */
+export async function claimInviteToken(token: string): Promise<
+  { ok: true; data: { claimed: boolean; orgId: string } } | { ok: false; error: string }
+> {
+  try {
+    const response = await fetch(`/api/invite/${encodeURIComponent(token)}/claim`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    const body = await response.json();
+
+    if (response.ok) {
+      return { ok: true, data: body };
+    }
+    return { ok: false, error: body.error || 'Failed to claim invitation' };
+  } catch {
+    return { ok: false, error: 'Network error. Please check your connection.' };
   }
 }

@@ -33,6 +33,7 @@ export function makeCtx(overrides: Record<string, any> = {}) {
         if (target === 'query') return queryValues;
         return {};
       },
+      param: (key: string) => paramValues[key] || '',
       header: () => null,
     },
     json: (body: any, status: number) => ({ status, body }) as any as Response,

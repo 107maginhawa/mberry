@@ -78,6 +78,9 @@ export function PersonalInfoForm({
       dateOfBirth: defaultValues?.dateOfBirth || undefined,
       gender: defaultValues?.gender || '',
       avatar: defaultValues?.avatar,
+      licenseNumber: defaultValues?.licenseNumber || '',
+      specialization: defaultValues?.specialization || '',
+      prcId: defaultValues?.prcId || '',
     },
   })
 
@@ -93,6 +96,9 @@ export function PersonalInfoForm({
         dateOfBirth: defaultValues.dateOfBirth,
         gender: defaultValues.gender || '',
         avatar: defaultValues.avatar,
+        licenseNumber: defaultValues.licenseNumber || '',
+        specialization: defaultValues.specialization || '',
+        prcId: defaultValues.prcId || '',
       })
       // Reset removal state when new data loads
       setIsAvatarRemoved(false)
@@ -384,6 +390,51 @@ export function PersonalInfoForm({
                     <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Professional Information */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <FormField
+            control={form.control}
+            name="licenseNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>License Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. 0012345" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="specialization"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Specialization</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. General Dentistry" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="prcId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>PRC ID</FormLabel>
+                <FormControl>
+                  <Input placeholder="PRC identification number" {...field} value={field.value || ''} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

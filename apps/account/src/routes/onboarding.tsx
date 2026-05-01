@@ -228,7 +228,7 @@ function OnboardingPage() {
           <div className="flex justify-center mb-4">
             <Logo variant="horizontal" size="xl" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Welcome to Monobase</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Welcome to Memberry</h1>
           <p className="text-gray-600 mt-2">Let's set up your profile</p>
         </div>
 
