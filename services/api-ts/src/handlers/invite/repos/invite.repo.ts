@@ -80,7 +80,7 @@ export class InviteRepository {
         metadata: {
           resendCount,
           lastResentAt: new Date().toISOString(),
-        } as any,
+        } satisfies import('./invite.schema').InviteMetadata,
         updatedAt: new Date(),
       })
       .where(eq(invitationTokens.id, id))
@@ -91,7 +91,7 @@ export class InviteRepository {
   async listByOrg(orgId: string, status?: string): Promise<InvitationToken[]> {
     const conditions = [eq(invitationTokens.orgId, orgId)];
     if (status) {
-      conditions.push(eq(invitationTokens.status, status as any));
+      conditions.push(eq(invitationTokens.status, status as typeof invitationTokens.status.enumValues[number]));
     }
     return this.db
       .select()

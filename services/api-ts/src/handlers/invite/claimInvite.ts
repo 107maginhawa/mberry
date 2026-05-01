@@ -56,8 +56,8 @@ export async function claimInvite(
     description: `Invitation claimed by user ${user.id} for org ${invite.orgId}`,
   });
 
-  // TODO: Create membership record for the user in the org
-  // This will be wired up when M05 Membership handlers are complete
+  // DEFERRED(M05): Create membership record for the user in the org.
+  // Blocked on M05 Membership module — will wire createMembership() here.
 
   return ctx.json({
     claimed: true,
