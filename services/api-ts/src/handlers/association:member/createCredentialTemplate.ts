@@ -1,41 +1,45 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { CreateCredentialTemplateBody } from '@/generated/openapi/validators';
+import { UnauthorizedError } from '@/core/errors';
+import { CredentialTemplateRepository } from './repos/credentials.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * createCredentialTemplate
- * 
+ *
  * Path: POST /association/member/credential-templates
  * OperationId: createCredentialTemplate
  */
 export async function createCredentialTemplate(
   ctx: ValidatedContext<CreateCredentialTemplateBody, never, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('createCredentialTemplate', 'Wave 3');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new CredentialTemplateRepository(db, logger);
+
+  const template = await repo.createOne({
+    tenantId,
+    name: body.name,
+    type: body.type,
+    design: body.design ?? null,
+    validityPeriod: body.validityPeriod ?? null,
+    status: body.status ?? 'active',
+  });
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'credential-template',
+    resourceId: template.id,
+    description: `Credential template "${body.name}" created`,
+  });
+
+  return ctx.json(template, 201);
 }

@@ -75,6 +75,75 @@ export const licenseRenewalAlerts = pgTable('license_renewal_alert', {
 ]);
 
 // ---------------------------------------------------------------------------
+// Credential Template & Digital Credential enumerations
+// ---------------------------------------------------------------------------
+
+export const credentialTypeEnum = pgEnum('credential_type', [
+  'memberCard',
+  'certificate',
+  'badge',
+  'license',
+]);
+
+export const credentialTemplateStatusEnum = pgEnum('credential_template_status', [
+  'active',
+  'retired',
+]);
+
+export const credentialStatusEnum = pgEnum('credential_status', [
+  'active',
+  'suspended',
+  'revoked',
+  'expired',
+]);
+
+// ---------------------------------------------------------------------------
+// Credential Templates
+// ---------------------------------------------------------------------------
+
+export const credentialTemplates = pgTable('credential_template', {
+  ...baseEntityFields,
+  tenantId: uuid('tenant_id').notNull(),
+  name: varchar('name', { length: 100 }).notNull(),
+  type: credentialTypeEnum('type').notNull(),
+  design: varchar('design', { length: 50000 }),
+  validityPeriod: integer('validity_period'), // days
+  status: credentialTemplateStatusEnum('status').notNull().default('active'),
+}, (table) => [
+  index('idx_cred_template_tenant').on(table.tenantId),
+  index('idx_cred_template_type').on(table.type),
+  index('idx_cred_template_status').on(table.status),
+]);
+
+// ---------------------------------------------------------------------------
+// Digital Credentials
+// ---------------------------------------------------------------------------
+
+export const digitalCredentials = pgTable('digital_credential', {
+  ...baseEntityFields,
+  tenantId: uuid('tenant_id').notNull(),
+  personId: uuid('person_id').notNull(),
+  templateId: uuid('template_id').notNull(),
+  membershipId: uuid('membership_id'),
+  credentialNumber: varchar('credential_number', { length: 100 }).notNull(),
+  issuedAt: timestamp('issued_at').notNull().defaultNow(),
+  expiresAt: timestamp('expires_at'),
+  status: credentialStatusEnum('credential_dc_status').notNull().default('active'),
+  qrPayload: varchar('qr_payload', { length: 4096 }),
+  hmacKey: varchar('hmac_key', { length: 256 }),
+  pdfUrl: varchar('pdf_url', { length: 2048 }),
+  verificationUrl: varchar('verification_url', { length: 2048 }),
+  revokedAt: timestamp('revoked_at'),
+  revocationReason: varchar('revocation_reason', { length: 500 }),
+}, (table) => [
+  index('idx_dc_tenant').on(table.tenantId),
+  index('idx_dc_person').on(table.personId),
+  index('idx_dc_template').on(table.templateId),
+  index('idx_dc_status').on(table.status),
+  index('idx_dc_credential_number').on(table.credentialNumber),
+]);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -83,3 +152,9 @@ export type NewProfessionalLicense = typeof professionalLicenses.$inferInsert;
 
 export type LicenseRenewalAlert = typeof licenseRenewalAlerts.$inferSelect;
 export type NewLicenseRenewalAlert = typeof licenseRenewalAlerts.$inferInsert;
+
+export type CredentialTemplate = typeof credentialTemplates.$inferSelect;
+export type NewCredentialTemplate = typeof credentialTemplates.$inferInsert;
+
+export type DigitalCredential = typeof digitalCredentials.$inferSelect;
+export type NewDigitalCredential = typeof digitalCredentials.$inferInsert;

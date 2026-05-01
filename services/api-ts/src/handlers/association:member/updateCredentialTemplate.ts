@@ -1,42 +1,38 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCredentialTemplateBody, UpdateCredentialTemplateParams } from '@/generated/openapi/validators';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { CredentialTemplateRepository } from './repos/credentials.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updateCredentialTemplate
- * 
+ *
  * Path: PATCH /association/member/credential-templates/{templateId}
  * OperationId: updateCredentialTemplate
  */
 export async function updateCredentialTemplate(
   ctx: ValidatedContext<UpdateCredentialTemplateBody, never, UpdateCredentialTemplateParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
-  const params = ctx.req.valid('param');
-  
-  // Extract validated request body
+  if (!session) throw new UnauthorizedError();
+
+  const { templateId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('updateCredentialTemplate', 'Wave 3');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new CredentialTemplateRepository(db, ctx.get('logger'));
+
+  const existing = await repo.findOneById(templateId);
+  if (!existing) throw new NotFoundError('Credential template');
+
+  const updated = await repo.updateOneById(templateId, body as any);
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'credential-template',
+    resourceId: templateId,
+    description: 'Credential template updated',
+  });
+
+  return ctx.json(updated, 200);
 }

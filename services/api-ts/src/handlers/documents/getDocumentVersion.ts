@@ -1,41 +1,29 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { GetDocumentVersionParams } from '@/generated/openapi/validators';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { DocumentVersionRepository } from './repos/documents.repo';
 
 /**
  * getDocumentVersion
- * 
+ *
  * Path: GET /association/documents/{documentId}/versions/{versionId}
  * OperationId: getDocumentVersion
  */
 export async function getDocumentVersion(
   ctx: ValidatedContext<never, never, GetDocumentVersionParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('getDocumentVersion', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new DocumentVersionRepository(db, ctx.get('logger'));
+
+  const version = await repo.findOneById((params as any).versionId);
+  if (!version || version.documentId !== (params as any).documentId) {
+    throw new NotFoundError('Document version');
+  }
+
+  return ctx.json(version, 200);
 }

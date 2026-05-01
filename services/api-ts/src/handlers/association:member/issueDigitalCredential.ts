@@ -1,41 +1,77 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { IssueDigitalCredentialBody } from '@/generated/openapi/validators';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { CredentialTemplateRepository, DigitalCredentialRepository } from './repos/credentials.repo';
+import { createCredentialToken } from './utils/credential-token';
+import { auditAction } from '@/utils/audit';
 
 /**
  * issueDigitalCredential
- * 
+ *
  * Path: POST /association/member/credentials/issue
  * OperationId: issueDigitalCredential
+ *
+ * Creates a digital credential from a template, generates an HMAC verification token.
  */
 export async function issueDigitalCredential(
   ctx: ValidatedContext<IssueDigitalCredentialBody, never, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('issueDigitalCredential', 'Wave 3');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+
+  // Verify template exists
+  const templateRepo = new CredentialTemplateRepository(db, logger);
+  const template = await templateRepo.findOneById(body.templateId);
+  if (!template) throw new NotFoundError('Credential template');
+
+  // Calculate expiration from template validity period
+  let expiresAt: Date | null = null;
+  if (template.validityPeriod) {
+    expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + template.validityPeriod);
+  }
+
+  const credentialRepo = new DigitalCredentialRepository(db, logger);
+
+  // Create the credential first to get the ID
+  const credential = await credentialRepo.createOne({
+    tenantId,
+    personId: body.personId,
+    templateId: body.templateId,
+    membershipId: body.membershipId ?? null,
+    credentialNumber: body.credentialNumber,
+    issuedAt: new Date(),
+    expiresAt,
+    status: 'active',
+  });
+
+  // Generate HMAC verification token
+  const secret = process.env['CREDENTIAL_VERIFY_SECRET'] || 'dev-credential-verify-secret';
+  const token = createCredentialToken(credential.id, tenantId, secret);
+
+  // Update credential with qrPayload and verificationUrl
+  const baseUrl = process.env['PUBLIC_URL'] || 'http://localhost:7213';
+  const verificationUrl = `${baseUrl}/association/member/credentials/public-verify`;
+
+  const updated = await credentialRepo.updateOneById(credential.id, {
+    qrPayload: token,
+    verificationUrl,
+  } as any);
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'digital-credential',
+    resourceId: credential.id,
+    description: `Digital credential "${body.credentialNumber}" issued for person ${body.personId}`,
+  });
+
+  return ctx.json(updated, 201);
 }

@@ -1,41 +1,42 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { CreateDocumentTagBody } from '@/generated/openapi/validators';
+import { UnauthorizedError } from '@/core/errors';
+import { DocumentTagRepository } from './repos/documents.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * createDocumentTag
- * 
+ *
  * Path: POST /association/document-tags
  * OperationId: createDocumentTag
  */
 export async function createDocumentTag(
   ctx: ValidatedContext<CreateDocumentTagBody, never, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('createDocumentTag', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new DocumentTagRepository(db, logger);
+
+  const tag = await repo.createOne({
+    tenantId,
+    name: body.name,
+    color: body.color ?? null,
+  });
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'document-tag',
+    resourceId: tag.id,
+    description: `Document tag "${body.name}" created`,
+  });
+
+  return ctx.json(tag, 201);
 }

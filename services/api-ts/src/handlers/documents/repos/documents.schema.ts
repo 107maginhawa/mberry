@@ -27,27 +27,32 @@ export const documentStatusEnum = pgEnum('document_status', [
 export const documents = pgTable('document', {
   ...baseEntityFields,
   tenantId: uuid('tenant_id').notNull(),
-  organizationId: uuid('organization_id').notNull(),
   title: varchar('title', { length: 300 }).notNull(),
-  description: text('description'),
+  fileName: varchar('file_name', { length: 300 }).notNull(),
+  mimeType: varchar('mime_type', { length: 100 }).notNull(),
+  size: bigint('size', { mode: 'number' }).notNull().default(0),
+  storageKey: varchar('storage_key', { length: 500 }).notNull(),
+  ownerId: uuid('owner_id').notNull(),
+  ownerType: varchar('owner_type', { length: 100 }).notNull(),
+  accessLevel: varchar('access_level', { length: 50 }).notNull().default('tenantOnly'),
   category: varchar('category', { length: 100 }),
   status: documentStatusEnum('document_status').notNull().default('draft'),
   currentVersionId: uuid('current_version_id'),
   tags: jsonb('tags').$type<string[]>().default([]),
 }, (table) => [
   index('idx_doc_tenant').on(table.tenantId),
-  index('idx_doc_org').on(table.organizationId),
+  index('idx_doc_owner').on(table.ownerId),
   index('idx_doc_status').on(table.status),
 ]);
 
 export const documentVersions = pgTable('document_version', {
   ...baseEntityFields,
+  tenantId: uuid('tenant_id').notNull(),
   documentId: uuid('document_id').notNull(),
   versionNumber: integer('version_number').notNull(),
-  fileId: uuid('file_id').notNull(),
   fileName: varchar('file_name', { length: 300 }).notNull(),
   fileSize: bigint('file_size', { mode: 'number' }),
-  mimeType: varchar('mime_type', { length: 100 }),
+  storageKey: varchar('storage_key', { length: 500 }).notNull(),
   uploadedBy: uuid('uploaded_by').notNull(),
   changeNote: text('change_note'),
 }, (table) => [

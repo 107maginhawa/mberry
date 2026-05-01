@@ -1,42 +1,49 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { RevokeDigitalCredentialBody, RevokeDigitalCredentialParams } from '@/generated/openapi/validators';
+import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { DigitalCredentialRepository } from './repos/credentials.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * revokeDigitalCredential
- * 
+ *
  * Path: POST /association/member/credentials/{credentialId}/revoke
  * OperationId: revokeDigitalCredential
+ *
+ * Sets the credential status to 'revoked'. Revocation persists through verification.
  */
 export async function revokeDigitalCredential(
   ctx: ValidatedContext<RevokeDigitalCredentialBody, never, RevokeDigitalCredentialParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
-  const params = ctx.req.valid('param');
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const { credentialId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('revokeDigitalCredential', 'Wave 3');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new DigitalCredentialRepository(db, logger);
+
+  const existing = await repo.findOneById(credentialId);
+  if (!existing) throw new NotFoundError('Digital credential');
+
+  if (existing.status === 'revoked') {
+    throw new BusinessLogicError('Credential is already revoked', 'ALREADY_REVOKED');
+  }
+
+  const updated = await repo.updateOneById(credentialId, {
+    status: 'revoked',
+    revokedAt: new Date(),
+    revocationReason: body.reason,
+  } as any);
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'digital-credential',
+    resourceId: credentialId,
+    description: `Digital credential revoked: ${body.reason}`,
+  });
+
+  return ctx.json(updated, 200);
 }

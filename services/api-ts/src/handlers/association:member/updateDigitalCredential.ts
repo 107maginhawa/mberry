@@ -1,42 +1,38 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDigitalCredentialBody, UpdateDigitalCredentialParams } from '@/generated/openapi/validators';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { DigitalCredentialRepository } from './repos/credentials.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updateDigitalCredential
- * 
+ *
  * Path: PATCH /association/member/credentials/{credentialId}
  * OperationId: updateDigitalCredential
  */
 export async function updateDigitalCredential(
   ctx: ValidatedContext<UpdateDigitalCredentialBody, never, UpdateDigitalCredentialParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
-  const params = ctx.req.valid('param');
-  
-  // Extract validated request body
+  if (!session) throw new UnauthorizedError();
+
+  const { credentialId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('updateDigitalCredential', 'Wave 3');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new DigitalCredentialRepository(db, ctx.get('logger'));
+
+  const existing = await repo.findOneById(credentialId);
+  if (!existing) throw new NotFoundError('Digital credential');
+
+  const updated = await repo.updateOneById(credentialId, body as any);
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'digital-credential',
+    resourceId: credentialId,
+    description: 'Digital credential updated',
+  });
+
+  return ctx.json(updated, 200);
 }

@@ -1,41 +1,37 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { DeleteDocumentTagParams } from '@/generated/openapi/validators';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { DocumentTagRepository } from './repos/documents.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * deleteDocumentTag
- * 
+ *
  * Path: DELETE /association/document-tags/{tagId}
  * OperationId: deleteDocumentTag
  */
 export async function deleteDocumentTag(
   ctx: ValidatedContext<never, never, DeleteDocumentTagParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
-  const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('deleteDocumentTag', 'Wave 2');
+  if (!session) throw new UnauthorizedError();
+
+  const { tagId } = ctx.req.valid('param');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new DocumentTagRepository(db, ctx.get('logger'));
+
+  const existing = await repo.findOneById(tagId);
+  if (!existing) throw new NotFoundError('Document tag');
+
+  await repo.deleteOneById(tagId);
+
+  await auditAction(ctx, {
+    action: 'delete',
+    resourceType: 'document-tag',
+    resourceId: tagId,
+    description: 'Document tag deleted',
+  });
+
+  return ctx.body(null, 204);
 }

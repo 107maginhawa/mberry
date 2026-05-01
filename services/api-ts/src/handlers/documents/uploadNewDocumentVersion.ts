@@ -1,48 +1,62 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UploadNewDocumentVersionBody, UploadNewDocumentVersionParams } from '@/generated/openapi/validators';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { DocumentRepository, DocumentVersionRepository } from './repos/documents.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * uploadNewDocumentVersion
- * 
+ *
  * Path: POST /association/documents/{documentId}/versions
  * OperationId: uploadNewDocumentVersion
+ *
+ * Increments version number and links to document.
  */
 export async function uploadNewDocumentVersion(
   ctx: ValidatedContext<UploadNewDocumentVersionBody, never, UploadNewDocumentVersionParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  // Note: This endpoint requires ownership validation for 'member:owner'
-  // Check that the authenticated user owns the requested resource
-  // Example:
-  // if (session.user.role === 'patient' && params.patientId !== session.user.id) {
-  //   throw new ForbiddenError('You can only access your own resources');
-  // }
-  
-  // Extract validated parameters
-  const params = ctx.req.valid('param');
-  
-  // Extract validated request body
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const tenantId = ctx.get('tenantId');
+  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  const { documentId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('uploadNewDocumentVersion', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+
+  const docRepo = new DocumentRepository(db, logger);
+  const versionRepo = new DocumentVersionRepository(db, logger);
+
+  const document = await docRepo.findOneById(documentId);
+  if (!document) throw new NotFoundError('Document');
+
+  // Get next version number
+  const latestVersion = await versionRepo.getLatestVersionNumber(documentId);
+  const nextVersion = latestVersion + 1;
+
+  const version = await versionRepo.createOne({
+    tenantId,
+    documentId,
+    versionNumber: nextVersion,
+    fileName: body.fileName,
+    fileSize: body.size,
+    storageKey: body.storageKey,
+    uploadedBy: user.id,
+    changeNote: body.changeNotes ?? null,
+  });
+
+  // Update document's currentVersionId
+  await docRepo.updateOneById(documentId, { currentVersionId: version.id } as any);
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'document-version',
+    resourceId: version.id,
+    description: `Document version ${nextVersion} uploaded for document ${documentId}`,
+  });
+
+  return ctx.json(version, 201);
 }

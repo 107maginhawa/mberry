@@ -1,41 +1,54 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { ListDigitalCredentialsQuery } from '@/generated/openapi/validators';
+import { UnauthorizedError } from '@/core/errors';
+import { DigitalCredentialRepository } from './repos/credentials.repo';
 
 /**
  * listDigitalCredentials
- * 
+ *
  * Path: GET /association/member/credentials
  * OperationId: listDigitalCredentials
  */
 export async function listDigitalCredentials(
   ctx: ValidatedContext<never, ListDigitalCredentialsQuery, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  // Extract validated query parameters
+  if (!session) throw new UnauthorizedError();
+
+  const tenantId = ctx.get('tenantId');
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('listDigitalCredentials', 'Wave 3');
+  const offset = Number(query.offset ?? 0);
+  const limit = Number(query.limit ?? 20);
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new DigitalCredentialRepository(db, ctx.get('logger'));
+
+  const result = await repo.findManyWithPagination(
+    {
+      tenantId,
+      personId: query.personId,
+      templateId: query.templateId,
+      status: query.status,
+      q: query.q,
+    },
+    { pagination: { offset, limit } },
+  );
+
+  const totalPages = Math.ceil(result.totalCount / limit);
+  const currentPage = Math.floor(offset / limit) + 1;
+
+  return ctx.json({
+    data: result.data,
+    pagination: {
+      offset,
+      limit,
+      count: result.data.length,
+      totalCount: result.totalCount,
+      totalPages,
+      currentPage,
+      hasNextPage: currentPage < totalPages,
+      hasPreviousPage: currentPage > 1,
+    },
+  }, 200);
 }
