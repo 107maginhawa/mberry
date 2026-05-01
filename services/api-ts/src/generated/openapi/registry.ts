@@ -3,6 +3,25 @@
  * This file is regenerated on each run
  */
 
+import { inviteAdmin } from '../../handlers/platformadmin/inviteAdmin';
+import { listAdmins } from '../../handlers/platformadmin/listAdmins';
+import { updateAdmin } from '../../handlers/platformadmin/updateAdmin';
+import { revokeAdmin } from '../../handlers/platformadmin/revokeAdmin';
+import { createAssociation } from '../../handlers/platformadmin/createAssociation';
+import { listAssociations } from '../../handlers/platformadmin/listAssociations';
+import { getAssociation } from '../../handlers/platformadmin/getAssociation';
+import { updateAssociation } from '../../handlers/platformadmin/updateAssociation';
+import { deleteAssociation } from '../../handlers/platformadmin/deleteAssociation';
+import { setFeatureFlag } from '../../handlers/platformadmin/setFeatureFlag';
+import { listFeatureFlags } from '../../handlers/platformadmin/listFeatureFlags';
+import { deleteFeatureFlag } from '../../handlers/platformadmin/deleteFeatureFlag';
+import { startImpersonation } from '../../handlers/platformadmin/startImpersonation';
+import { endImpersonation } from '../../handlers/platformadmin/endImpersonation';
+import { createOrganization } from '../../handlers/platformadmin/createOrganization';
+import { listOrganizations } from '../../handlers/platformadmin/listOrganizations';
+import { getOrganization } from '../../handlers/platformadmin/getOrganization';
+import { updateOrganization } from '../../handlers/platformadmin/updateOrganization';
+import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
 import { createDocumentTag } from '../../handlers/documents/createDocumentTag';
 import { listDocumentTags } from '../../handlers/documents/listDocumentTags';
 import { getDocumentTag } from '../../handlers/documents/getDocumentTag';
@@ -260,6 +279,27 @@ import { completeFileUpload } from '../../handlers/storage/completeFileUpload';
 import { getFileDownload } from '../../handlers/storage/getFileDownload';
 
 export const registry = {
+  // Platformadmin handlers
+  inviteAdmin,
+  listAdmins,
+  updateAdmin,
+  revokeAdmin,
+  createAssociation,
+  listAssociations,
+  getAssociation,
+  updateAssociation,
+  deleteAssociation,
+  setFeatureFlag,
+  listFeatureFlags,
+  deleteFeatureFlag,
+  startImpersonation,
+  endImpersonation,
+  createOrganization,
+  listOrganizations,
+  getOrganization,
+  updateOrganization,
+  transitionOrgStatus,
+
   // Documents handlers
   createDocumentTag,
   listDocumentTags,

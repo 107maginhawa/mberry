@@ -1632,6 +1632,35 @@ export const AssociationCoreStaffStaffRoleSchema = z.enum(["admin", "coordinator
 
 export const AssociationCoreStaffStaffStatusSchema = z.enum(["invited", "active", "onLeave", "terminated"]);
 
+export const PlatformAdminModuleAssociationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  country: z.string(),
+  currency: z.string(),
+  locale: z.string(),
+  licenseFormatRegex: z.string().optional(),
+  creditCyclePeriod: z.number().int().optional(),
+  requiredCreditsPerCycle: z.number().int().optional(),
+  carryoverEnabled: z.boolean().optional(),
+  status: z.string(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const AssociationListResponseSchema = z.object({
+  data: z.array(PlatformAdminModuleAssociationSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
 export const AttestationStatusSchema = z.enum(["submitted", "reviewed", "cleared", "flagged"]);
 
 export const SegmentRuleSchema = z.object({
@@ -6136,6 +6165,39 @@ export const OnboardingResponseSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional()
 });
 
+export const PlatformAdminModuleOrgTypeSchema = z.enum(["chapter", "society", "national", "clinic"]);
+
+export const PlatformAdminModuleOrgLifecycleStatusSchema = z.enum(["trial", "active", "suspended", "cancelled"]);
+
+export const PlatformAdminModuleOrganizationSchema = z.object({
+  id: z.string(),
+  associationId: z.string(),
+  name: z.string(),
+  orgType: PlatformAdminModuleOrgTypeSchema,
+  region: z.string().optional(),
+  contactEmail: z.string().optional(),
+  status: PlatformAdminModuleOrgLifecycleStatusSchema,
+  trialStartDate: z.string().datetime().transform((str) => new Date(str)).optional(),
+  trialEndDate: z.string().datetime().transform((str) => new Date(str)).optional(),
+  featureFlags: z.record(z.string(), z.unknown()).optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const OrganizationListResponseSchema = z.object({
+  data: z.array(PlatformAdminModuleOrganizationSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
 export const PACContributionSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -6375,6 +6437,101 @@ export const PharmacyInfoUpdateSchema = z.object({
 });
 
 export const PhoneNumberSchema = z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" });
+
+export const PlatformAdminModuleAdminRoleSchema = z.enum(["super", "support", "analyst"]);
+
+export const PlatformAdminModuleAssociationRequestSchema = z.object({
+  name: z.string(),
+  country: z.string(),
+  currency: z.string(),
+  locale: z.string().optional(),
+  licenseFormatRegex: z.string().optional(),
+  creditCyclePeriod: z.number().int().optional(),
+  requiredCreditsPerCycle: z.number().int().optional(),
+  carryoverEnabled: z.boolean().optional()
+});
+
+export const PlatformAdminModuleAssociationRequestUpdateSchema = z.object({
+  name: z.string().optional(),
+  country: z.string().optional(),
+  currency: z.string().optional(),
+  locale: z.string().optional(),
+  licenseFormatRegex: z.string().optional(),
+  creditCyclePeriod: z.number().int().optional(),
+  requiredCreditsPerCycle: z.number().int().optional(),
+  carryoverEnabled: z.boolean().optional()
+});
+
+export const PlatformAdminModuleFeatureFlagConfigSchema = z.object({
+  id: z.string(),
+  targetType: z.string(),
+  targetId: z.string(),
+  moduleName: z.string(),
+  enabled: z.boolean(),
+  isOverride: z.boolean(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string()
+});
+
+export const PlatformAdminModuleFeatureFlagRequestSchema = z.object({
+  targetType: z.string(),
+  targetId: z.string(),
+  moduleName: z.string(),
+  enabled: z.boolean()
+});
+
+export const PlatformAdminModuleImpersonationSessionSchema = z.object({
+  id: z.string(),
+  adminId: z.string(),
+  targetUserId: z.string(),
+  targetOrgId: z.string().optional(),
+  sessionToken: z.string(),
+  startedAt: z.string().datetime().transform((str) => new Date(str)),
+  expiresAt: z.string().datetime().transform((str) => new Date(str)),
+  endedAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const PlatformAdminModuleOrganizationRequestSchema = z.object({
+  associationId: z.string(),
+  name: z.string(),
+  orgType: PlatformAdminModuleOrgTypeSchema,
+  region: z.string().optional(),
+  contactEmail: z.string().optional(),
+  initialOfficerEmail: z.string().optional(),
+  trialDurationDays: z.number().int().optional()
+});
+
+export const PlatformAdminModuleOrganizationRequestUpdateSchema = z.object({
+  associationId: z.string().optional(),
+  name: z.string().optional(),
+  orgType: PlatformAdminModuleOrgTypeSchema.optional(),
+  region: z.string().optional(),
+  contactEmail: z.string().optional(),
+  initialOfficerEmail: z.string().optional(),
+  trialDurationDays: z.number().int().optional()
+});
+
+export const PlatformAdminModulePlatformAdminSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  email: z.string(),
+  name: z.string(),
+  role: PlatformAdminModuleAdminRoleSchema,
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const PlatformAdminModulePlatformAdminRequestSchema = z.object({
+  email: z.string(),
+  name: z.string(),
+  role: PlatformAdminModuleAdminRoleSchema
+});
+
+export const PlatformAdminModulePlatformAdminRequestUpdateSchema = z.object({
+  email: z.string().optional(),
+  name: z.string().optional(),
+  role: PlatformAdminModuleAdminRoleSchema.optional()
+});
 
 export const PledgeSchema = z.object({
   id: z.string().uuid(),
@@ -8192,6 +8349,154 @@ export const WebhookSubscriptionUpdateSchema = z.object({
   lastDeliveryAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   lastDeliveryStatus: z.string().optional()
 });
+
+export const InviteAdminBody = PlatformAdminModulePlatformAdminRequestSchema;
+export type InviteAdminBody = z.infer<typeof InviteAdminBody>;
+
+export const InviteAdminResponse = PlatformAdminModulePlatformAdminSchema;
+
+export const ListAdminsResponse = z.array(PlatformAdminModulePlatformAdminSchema);
+
+export const UpdateAdminParams = z.object({
+  adminId: z.string(),
+});
+export type UpdateAdminParams = z.infer<typeof UpdateAdminParams>;
+
+export const UpdateAdminBody = PlatformAdminModulePlatformAdminRequestUpdateSchema;
+export type UpdateAdminBody = z.infer<typeof UpdateAdminBody>;
+
+export const UpdateAdminResponse = PlatformAdminModulePlatformAdminSchema;
+
+export const RevokeAdminParams = z.object({
+  adminId: z.string(),
+});
+export type RevokeAdminParams = z.infer<typeof RevokeAdminParams>;
+
+export const RevokeAdminResponse = z.void();
+
+export const CreateAssociationBody = PlatformAdminModuleAssociationRequestSchema;
+export type CreateAssociationBody = z.infer<typeof CreateAssociationBody>;
+
+export const CreateAssociationResponse = PlatformAdminModuleAssociationSchema;
+
+export const ListAssociationsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListAssociationsQuery = z.infer<typeof ListAssociationsQuery>;
+
+export const ListAssociationsResponse = AssociationListResponseSchema;
+
+export const GetAssociationParams = z.object({
+  associationId: z.string(),
+});
+export type GetAssociationParams = z.infer<typeof GetAssociationParams>;
+
+export const GetAssociationResponse = PlatformAdminModuleAssociationSchema;
+
+export const UpdateAssociationParams = z.object({
+  associationId: z.string(),
+});
+export type UpdateAssociationParams = z.infer<typeof UpdateAssociationParams>;
+
+export const UpdateAssociationBody = PlatformAdminModuleAssociationRequestUpdateSchema;
+export type UpdateAssociationBody = z.infer<typeof UpdateAssociationBody>;
+
+export const UpdateAssociationResponse = PlatformAdminModuleAssociationSchema;
+
+export const DeleteAssociationParams = z.object({
+  associationId: z.string(),
+});
+export type DeleteAssociationParams = z.infer<typeof DeleteAssociationParams>;
+
+export const DeleteAssociationResponse = z.void();
+
+export const SetFeatureFlagBody = PlatformAdminModuleFeatureFlagRequestSchema;
+export type SetFeatureFlagBody = z.infer<typeof SetFeatureFlagBody>;
+
+export const SetFeatureFlagResponse = PlatformAdminModuleFeatureFlagConfigSchema;
+
+export const ListFeatureFlagsQuery = z.object({
+  targetType: z.string().optional(),
+  targetId: z.string().optional(),
+});
+export type ListFeatureFlagsQuery = z.infer<typeof ListFeatureFlagsQuery>;
+
+export const ListFeatureFlagsResponse = z.array(PlatformAdminModuleFeatureFlagConfigSchema);
+
+export const DeleteFeatureFlagParams = z.object({
+  flagId: z.string(),
+});
+export type DeleteFeatureFlagParams = z.infer<typeof DeleteFeatureFlagParams>;
+
+export const DeleteFeatureFlagResponse = z.void();
+
+export const StartImpersonationBody = z.object({
+  targetUserId: z.string(),
+  targetOrgId: z.string().optional()
+});
+export type StartImpersonationBody = z.infer<typeof StartImpersonationBody>;
+
+export const StartImpersonationResponse = PlatformAdminModuleImpersonationSessionSchema;
+
+export const EndImpersonationParams = z.object({
+  sessionId: z.string(),
+});
+export type EndImpersonationParams = z.infer<typeof EndImpersonationParams>;
+
+export const EndImpersonationResponse = PlatformAdminModuleImpersonationSessionSchema;
+
+export const CreateOrganizationBody = PlatformAdminModuleOrganizationRequestSchema;
+export type CreateOrganizationBody = z.infer<typeof CreateOrganizationBody>;
+
+export const CreateOrganizationResponse = PlatformAdminModuleOrganizationSchema;
+
+export const ListOrganizationsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  associationId: z.string().optional(),
+  status: PlatformAdminModuleOrgLifecycleStatusSchema.optional(),
+});
+export type ListOrganizationsQuery = z.infer<typeof ListOrganizationsQuery>;
+
+export const ListOrganizationsResponse = OrganizationListResponseSchema;
+
+export const GetOrganizationParams = z.object({
+  organizationId: z.string(),
+});
+export type GetOrganizationParams = z.infer<typeof GetOrganizationParams>;
+
+export const GetOrganizationResponse = PlatformAdminModuleOrganizationSchema;
+
+export const UpdateOrganizationParams = z.object({
+  organizationId: z.string(),
+});
+export type UpdateOrganizationParams = z.infer<typeof UpdateOrganizationParams>;
+
+export const UpdateOrganizationBody = PlatformAdminModuleOrganizationRequestUpdateSchema;
+export type UpdateOrganizationBody = z.infer<typeof UpdateOrganizationBody>;
+
+export const UpdateOrganizationResponse = PlatformAdminModuleOrganizationSchema;
+
+export const TransitionOrgStatusParams = z.object({
+  organizationId: z.string(),
+});
+export type TransitionOrgStatusParams = z.infer<typeof TransitionOrgStatusParams>;
+
+export const TransitionOrgStatusBody = z.object({
+  status: PlatformAdminModuleOrgLifecycleStatusSchema
+});
+export type TransitionOrgStatusBody = z.infer<typeof TransitionOrgStatusBody>;
+
+export const TransitionOrgStatusResponse = PlatformAdminModuleOrganizationSchema;
 
 export const CreateDocumentTagBody = AssociationCoreDocumentsDocumentTagCreateRequestSchema;
 export type CreateDocumentTagBody = z.infer<typeof CreateDocumentTagBody>;

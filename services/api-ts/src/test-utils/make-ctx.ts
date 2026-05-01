@@ -37,5 +37,6 @@ export function makeCtx(overrides: Record<string, any> = {}) {
       header: () => null,
     },
     json: (body: any, status: number) => ({ status, body }) as any as Response,
+    body: (body: any, status: number) => ({ status, body }) as any as Response,
   } as any;
 }

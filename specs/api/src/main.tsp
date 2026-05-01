@@ -23,6 +23,9 @@ import "./modules/reviews.tsp";
 import "./modules/patient.tsp";
 import "./modules/provider.tsp";
 
+// Platform administration
+import "./modules/platform-admin.tsp";
+
 // Association management specs
 import "./association/core/primitives.tsp";
 import "./association/core/engagement.tsp";
@@ -114,6 +117,9 @@ using TypeSpec.OpenAPI;
 })
 @tagMetadata("Documents", #{
   description: "Association document management. Handles document lifecycle (create, update, archive), version tracking, access logging, and tag-based organization for association files, policies, and shared resources."
+})
+@tagMetadata("PlatformAdmin", #{
+  description: "Platform administration endpoints for Memberry ops team. Association provisioning, org lifecycle management, feature flags, user impersonation, and admin team management. Desktop-only, internal tooling."
 })
 namespace MonobaseAPI {
 
@@ -379,6 +385,30 @@ namespace MonobaseAPI {
   @tag("Association:Operations")
   @route("/association/training")
   interface AssocQuizAttemptManagement extends Association.Operations.Training.QuizAttemptManagement {}
+
+  // =========================================================================
+  // Platform Administration (M03)
+  // =========================================================================
+
+  @tag("PlatformAdmin")
+  @route("/admin/associations")
+  interface PlatformAssociationManagement extends PlatformAdminModule.AssociationManagement {}
+
+  @tag("PlatformAdmin")
+  @route("/admin/organizations")
+  interface PlatformOrganizationManagement extends PlatformAdminModule.OrganizationManagement {}
+
+  @tag("PlatformAdmin")
+  @route("/admin/feature-flags")
+  interface PlatformFeatureFlagManagement extends PlatformAdminModule.FeatureFlagManagement {}
+
+  @tag("PlatformAdmin")
+  @route("/admin/impersonate")
+  interface PlatformImpersonationManagement extends PlatformAdminModule.ImpersonationManagement {}
+
+  @tag("PlatformAdmin")
+  @route("/admin/admins")
+  interface PlatformAdminManagement extends PlatformAdminModule.AdminManagement {}
 
 }
 
