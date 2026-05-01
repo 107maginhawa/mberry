@@ -160,7 +160,10 @@ function OnboardingPage() {
       },
       languagesSpoken: [detectLanguage()],
       timezone: detectTimezone(),
-    }
+      licenseNumber: personal.licenseNumber || undefined,
+      specialization: personal.specialization || undefined,
+      prcId: personal.prcId || undefined,
+    } as PersonCreateRequest
 
     createPerson.mutate({ body: personData }, {
       onSuccess: async () => {
@@ -185,7 +188,7 @@ function OnboardingPage() {
     }
 
     const personal = formData.personal as PersonalInfo
-    const personData: PersonCreateRequest = {
+    const personData = {
       firstName: personal.firstName,
       lastName: personal.lastName,
       middleName: personal.middleName || undefined,
@@ -196,7 +199,10 @@ function OnboardingPage() {
       },
       languagesSpoken: [detectLanguage()],
       timezone: detectTimezone(),
-    }
+      licenseNumber: personal.licenseNumber || undefined,
+      specialization: personal.specialization || undefined,
+      prcId: personal.prcId || undefined,
+    } as PersonCreateRequest
 
     createPerson.mutate({ body: personData }, {
       onSuccess: async () => {

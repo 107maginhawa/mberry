@@ -39,7 +39,7 @@ workspace.
   Note: `@monobase/api-spec` (consumed by SDK + apps for generated OpenAPI types) lives at `specs/api/`, not under `packages/`.
 - `scripts/run-contract-tests.ts` - Runs the Hurl contract suite against `$API_URL`
 - `.github/workflows/contract.yml` - CI: boots the impl, runs Hurl + Schemathesis
-- `.claude/skills/` - 16 Claude Code skills for end-to-end development workflow (commit, db-migrate, debug, dev-api, dev-app, develop, frontend-module, handler, prd, pre-commit, shadcn, test-api, test-contract, test-e2e, typecheck, typespec). Surface as `/skill-name` in Claude Code sessions.
+- `.claude/skills/` - 17 Claude Code skills for end-to-end development workflow (commit, db-migrate, debug, dev-api, dev-app, develop, frontend-module, handler, module-review, prd, pre-commit, shadcn, test-api, test-contract, test-e2e, typecheck, typespec). Surface as `/skill-name` in Claude Code sessions.
 
 ## Business Domain Modules
 
@@ -147,7 +147,7 @@ notificationRepo.createNotificationForModule({
 ```
 
 ### Module Structure Pattern
-Backend handlers follow: **Router → Validators → Service → Handlers**
+Backend handlers follow: **Router → Validators → Handlers → Repositories**
 
 Each handler directory contains:
 - Handler files (CRUD operations)

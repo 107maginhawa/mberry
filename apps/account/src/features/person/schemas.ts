@@ -18,6 +18,9 @@ export const personalInfoSchema = z.object({
     file: z.string().optional(),
     url: z.string(),
   }).optional().nullable(),
+  licenseNumber: z.string().max(50, 'License number must be less than 50 characters').optional().or(z.literal('')),
+  specialization: z.string().max(100, 'Specialization must be less than 100 characters').optional().or(z.literal('')),
+  prcId: z.string().max(50, 'PRC ID must be less than 50 characters').optional().or(z.literal('')),
 })
 
 // Address Schema - matches API's primaryAddress structure
