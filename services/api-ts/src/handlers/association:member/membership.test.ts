@@ -179,3 +179,56 @@ describe('Membership Application Workflow', () => {
     expect(diffDays).toBeLessThanOrEqual(366);
   });
 });
+
+// -- Membership Category Tests --
+
+describe('membershipCategory handlers', () => {
+  test('createMembershipCategory requires auth', async () => {
+    const { createMembershipCategory } = await import('./createMembershipCategory');
+    const ctx = makeCtx({ user: null });
+    const response = await createMembershipCategory(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  test('createMembershipCategory requires tenantId', async () => {
+    const { createMembershipCategory } = await import('./createMembershipCategory');
+    const ctx = makeCtx({ user: { id: 'u1' }, tenantId: null });
+    const response = await createMembershipCategory(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('listMembershipCategories requires auth', async () => {
+    const { listMembershipCategories } = await import('./listMembershipCategories');
+    const ctx = makeCtx({ user: null });
+    const response = await listMembershipCategories(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  test('listMembershipCategories requires tenantId', async () => {
+    const { listMembershipCategories } = await import('./listMembershipCategories');
+    const ctx = makeCtx({ user: { id: 'u1' }, tenantId: null });
+    const response = await listMembershipCategories(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('getMembershipCategory requires auth', async () => {
+    const { getMembershipCategory } = await import('./getMembershipCategory');
+    const ctx = makeCtx({ user: null });
+    const response = await getMembershipCategory(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  test('deleteMembershipCategory requires auth', async () => {
+    const { deleteMembershipCategory } = await import('./deleteMembershipCategory');
+    const ctx = makeCtx({ user: null });
+    const response = await deleteMembershipCategory(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  test('updateMembershipCategory requires auth', async () => {
+    const { updateMembershipCategory } = await import('./updateMembershipCategory');
+    const ctx = makeCtx({ user: null });
+    const response = await updateMembershipCategory(ctx);
+    expect(response.status).toBe(401);
+  });
+});
