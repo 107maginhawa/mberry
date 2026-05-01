@@ -253,6 +253,18 @@ namespace MonobaseAPI {
   interface AssocRoyaltySplitManagement extends Association.Member.Chapters.RoyaltySplitManagement {}
 
   // =========================================================================
+  // Association Domain — Governance (Positions & Officer Terms — Wave 1)
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/positions")
+  interface AssocPositionManagement extends Association.Member.Governance.PositionManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/officer-terms")
+  interface AssocOfficerTermManagement extends Association.Member.Governance.OfficerTermManagement {}
+
+  // =========================================================================
   // Association Domain — Directory
   // =========================================================================
 

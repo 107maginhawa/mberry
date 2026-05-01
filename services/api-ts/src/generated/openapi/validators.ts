@@ -6076,6 +6076,38 @@ export const OfficerTermSchema = z.object({
   inauguratedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
+export const OfficerTermListResponseSchema = z.object({
+  data: z.array(OfficerTermSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const OfficerTermRequestSchema = z.object({
+  positionId: z.string(),
+  personId: z.string(),
+  organizationId: z.string(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  appointedBy: z.string().optional()
+});
+
+export const OfficerTermRequestUpdateSchema = z.object({
+  positionId: z.string().optional(),
+  personId: z.string().optional(),
+  organizationId: z.string().optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  appointedBy: z.string().optional()
+});
+
 export const OfficerTermUpdateSchema = z.object({
   id: z.string().uuid().optional(),
   version: z.number().int().optional(),
@@ -6470,7 +6502,43 @@ export const PositionSchema = z.object({
 
 export const PositionLevelSchema = z.enum(["national", "regional", "chapter"]);
 
+export const PositionListResponseSchema = z.object({
+  data: z.array(PositionSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
 export const PositionStatusSchema = z.enum(["active", "vacant", "retired"]);
+
+export const PositionRequestSchema = z.object({
+  title: z.string(),
+  organizationId: z.string(),
+  level: PositionLevelSchema,
+  termLengthMonths: z.number().int(),
+  maxConsecutiveTerms: z.number().int().optional(),
+  description: z.string().optional(),
+  responsibilities: z.array(z.string()).optional(),
+  status: PositionStatusSchema
+});
+
+export const PositionRequestUpdateSchema = z.object({
+  title: z.string().optional(),
+  organizationId: z.string().optional(),
+  level: PositionLevelSchema.optional(),
+  termLengthMonths: z.number().int().optional(),
+  maxConsecutiveTerms: z.number().int().optional(),
+  description: z.string().optional(),
+  responsibilities: z.array(z.string()).optional(),
+  status: PositionStatusSchema.optional()
+});
 
 export const PositionUpdateSchema = z.object({
   id: z.string().uuid().optional(),
@@ -9169,6 +9237,93 @@ export const TerminateMembershipBody = MembershipTerminateRequestSchema;
 export type TerminateMembershipBody = z.infer<typeof TerminateMembershipBody>;
 
 export const TerminateMembershipResponse = z.unknown();
+
+export const CreateOfficerTermBody = OfficerTermRequestSchema;
+export type CreateOfficerTermBody = z.infer<typeof CreateOfficerTermBody>;
+
+export const CreateOfficerTermResponse = OfficerTermSchema;
+
+export const ListOfficerTermsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  organizationId: z.string().optional(),
+  personId: z.string().optional(),
+  status: TermStatusSchema.optional(),
+});
+export type ListOfficerTermsQuery = z.infer<typeof ListOfficerTermsQuery>;
+
+export const ListOfficerTermsResponse = OfficerTermListResponseSchema;
+
+export const GetOfficerTermParams = z.object({
+  termId: z.string(),
+});
+export type GetOfficerTermParams = z.infer<typeof GetOfficerTermParams>;
+
+export const GetOfficerTermResponse = OfficerTermSchema;
+
+export const UpdateOfficerTermParams = z.object({
+  termId: z.string(),
+});
+export type UpdateOfficerTermParams = z.infer<typeof UpdateOfficerTermParams>;
+
+export const UpdateOfficerTermBody = OfficerTermRequestUpdateSchema;
+export type UpdateOfficerTermBody = z.infer<typeof UpdateOfficerTermBody>;
+
+export const UpdateOfficerTermResponse = OfficerTermSchema;
+
+export const DeleteOfficerTermParams = z.object({
+  termId: z.string(),
+});
+export type DeleteOfficerTermParams = z.infer<typeof DeleteOfficerTermParams>;
+
+export const DeleteOfficerTermResponse = z.void();
+
+export const CreatePositionBody = PositionRequestSchema;
+export type CreatePositionBody = z.infer<typeof CreatePositionBody>;
+
+export const CreatePositionResponse = PositionSchema;
+
+export const ListPositionsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  organizationId: z.string().optional(),
+  level: PositionLevelSchema.optional(),
+});
+export type ListPositionsQuery = z.infer<typeof ListPositionsQuery>;
+
+export const ListPositionsResponse = PositionListResponseSchema;
+
+export const GetPositionParams = z.object({
+  positionId: z.string(),
+});
+export type GetPositionParams = z.infer<typeof GetPositionParams>;
+
+export const GetPositionResponse = PositionSchema;
+
+export const UpdatePositionParams = z.object({
+  positionId: z.string(),
+});
+export type UpdatePositionParams = z.infer<typeof UpdatePositionParams>;
+
+export const UpdatePositionBody = PositionRequestUpdateSchema;
+export type UpdatePositionBody = z.infer<typeof UpdatePositionBody>;
+
+export const UpdatePositionResponse = PositionSchema;
+
+export const DeletePositionParams = z.object({
+  positionId: z.string(),
+});
+export type DeletePositionParams = z.infer<typeof DeletePositionParams>;
+
+export const DeletePositionResponse = z.void();
 
 export const CreateRoyaltySplitBody = RoyaltySplitCreateRequestSchema;
 export type CreateRoyaltySplitBody = z.infer<typeof CreateRoyaltySplitBody>;

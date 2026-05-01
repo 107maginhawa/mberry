@@ -145,6 +145,16 @@ import { deleteMembership } from '../../handlers/association:member/deleteMember
 import { reinstateMembership } from '../../handlers/association:member/reinstateMembership';
 import { renewMembership } from '../../handlers/association:member/renewMembership';
 import { terminateMembership } from '../../handlers/association:member/terminateMembership';
+import { createOfficerTerm } from '../../handlers/association:member/createOfficerTerm';
+import { listOfficerTerms } from '../../handlers/association:member/listOfficerTerms';
+import { getOfficerTerm } from '../../handlers/association:member/getOfficerTerm';
+import { updateOfficerTerm } from '../../handlers/association:member/updateOfficerTerm';
+import { deleteOfficerTerm } from '../../handlers/association:member/deleteOfficerTerm';
+import { createPosition } from '../../handlers/association:member/createPosition';
+import { listPositions } from '../../handlers/association:member/listPositions';
+import { getPosition } from '../../handlers/association:member/getPosition';
+import { updatePosition } from '../../handlers/association:member/updatePosition';
+import { deletePosition } from '../../handlers/association:member/deletePosition';
 import { createRoyaltySplit } from '../../handlers/association:member/createRoyaltySplit';
 import { listRoyaltySplits } from '../../handlers/association:member/listRoyaltySplits';
 import { getRoyaltySplit } from '../../handlers/association:member/getRoyaltySplit';
@@ -397,6 +407,16 @@ export const registry = {
   reinstateMembership,
   renewMembership,
   terminateMembership,
+  createOfficerTerm,
+  listOfficerTerms,
+  getOfficerTerm,
+  updateOfficerTerm,
+  deleteOfficerTerm,
+  createPosition,
+  listPositions,
+  getPosition,
+  updatePosition,
+  deletePosition,
   createRoyaltySplit,
   listRoyaltySplits,
   getRoyaltySplit,

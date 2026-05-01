@@ -837,6 +837,78 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.terminateMembership as unknown as Handler
   );
 
+  // createOfficerTerm
+  app.post('/association/member/officer-terms',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateOfficerTermBody, validationErrorHandler),
+    registry.createOfficerTerm as unknown as Handler
+  );
+
+  // listOfficerTerms
+  app.get('/association/member/officer-terms',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('query', validators.ListOfficerTermsQuery, validationErrorHandler),
+    registry.listOfficerTerms as unknown as Handler
+  );
+
+  // getOfficerTerm
+  app.get('/association/member/officer-terms/:termId',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('param', validators.GetOfficerTermParams, validationErrorHandler),
+    registry.getOfficerTerm as unknown as Handler
+  );
+
+  // updateOfficerTerm
+  app.patch('/association/member/officer-terms/:termId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateOfficerTermParams, validationErrorHandler),
+    zValidator('json', validators.UpdateOfficerTermBody, validationErrorHandler),
+    registry.updateOfficerTerm as unknown as Handler
+  );
+
+  // deleteOfficerTerm
+  app.delete('/association/member/officer-terms/:termId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteOfficerTermParams, validationErrorHandler),
+    registry.deleteOfficerTerm as unknown as Handler
+  );
+
+  // createPosition
+  app.post('/association/member/positions',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreatePositionBody, validationErrorHandler),
+    registry.createPosition as unknown as Handler
+  );
+
+  // listPositions
+  app.get('/association/member/positions',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('query', validators.ListPositionsQuery, validationErrorHandler),
+    registry.listPositions as unknown as Handler
+  );
+
+  // getPosition
+  app.get('/association/member/positions/:positionId',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('param', validators.GetPositionParams, validationErrorHandler),
+    registry.getPosition as unknown as Handler
+  );
+
+  // updatePosition
+  app.patch('/association/member/positions/:positionId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdatePositionParams, validationErrorHandler),
+    zValidator('json', validators.UpdatePositionBody, validationErrorHandler),
+    registry.updatePosition as unknown as Handler
+  );
+
+  // deletePosition
+  app.delete('/association/member/positions/:positionId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeletePositionParams, validationErrorHandler),
+    registry.deletePosition as unknown as Handler
+  );
+
   // createRoyaltySplit
   app.post('/association/member/royalty-splits',
     authMiddleware({ roles: ["association:admin"] }),
