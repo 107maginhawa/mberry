@@ -252,8 +252,6 @@ model DocumentSearchParams {
 // Interfaces
 // ---------------------------------------------------------------------------
 
-@route("/association/documents")
-@tag("Documents")
 namespace DocumentManagement {
   interface DocumentManagement {
     @doc("Create a document record after the file has been uploaded to object storage.")
@@ -365,8 +363,6 @@ namespace DocumentManagement {
   }
 }
 
-@route("/association/documents/{documentId}/versions")
-@tag("Documents")
 namespace DocumentVersionManagement {
   interface DocumentVersionManagement {
     @doc("List all versions of a document.")
@@ -398,8 +394,6 @@ namespace DocumentVersionManagement {
   }
 }
 
-@route("/association/document-tags")
-@tag("Documents")
 namespace DocumentTagManagement {
   interface DocumentTagManagement {
     @doc("Create a document tag.")

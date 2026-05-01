@@ -25,6 +25,7 @@ model MaybeStoredFile {
 /**
  * File reference for updates (with nullable fields)
  */
+@friendlyName("FilePatchInput")
 @doc("File reference for updates - can be null to clear")
 model MaybeStoredFileUpdate {
   @doc("Reference to stored file ID - can be null to clear")

@@ -174,7 +174,7 @@ model AwardProgram extends BaseEntity {
 
   @doc("Monetary value of the award, scholarship, or grant (null = non-monetary)")
   @minValue(0)
-  prizeAmount?: float64;
+  prizeAmount?: int64;
 
   @doc("ISO 4217 currency code for the prize amount")
   @minLength(3)
@@ -243,7 +243,7 @@ model AwardRecipient extends BaseEntity {
 
   @doc("Amount disbursed to the recipient (may differ from prizeAmount due to proration)")
   @minValue(0)
-  disbursementAmount?: float64;
+  disbursementAmount?: int64;
 
   @doc("Current status of the prize disbursement")
   disbursementStatus?: DisbursementStatus;
@@ -275,7 +275,7 @@ model GrantApplication extends BaseEntity {
 
   @doc("Total proposed budget for the project")
   @minValue(0)
-  proposedBudget: float64;
+  proposedBudget: int64;
 
   @doc("Current status of the grant application")
   status: GrantStatus;
@@ -290,7 +290,7 @@ model GrantApplication extends BaseEntity {
 
   @doc("Actual amount awarded (may differ from proposed budget)")
   @minValue(0)
-  awardedAmount?: float64;
+  awardedAmount?: int64;
 }
 
 @doc("A progress report submitted by a grant recipient")
@@ -313,7 +313,7 @@ model GrantProgressReport extends BaseEntity {
 
   @doc("Total expenditures during the reporting period")
   @minValue(0)
-  expenditures: float64;
+  expenditures: int64;
 
   @doc("Milestones achieved during the reporting period")
   milestones?: string[];
@@ -335,7 +335,7 @@ model AwardProgramRequest {
   nominationRequired: boolean;
   applicationRequired: boolean;
   maxRecipients?: int32;
-  prizeAmount?: float64;
+  prizeAmount?: int64;
   currency?: string;
   cycle: AwardCycle;
   status: AwardProgramStatus;
@@ -382,14 +382,14 @@ model AwardRecipientRequest {
   citation?: string;
   presentedAt?: utcDateTime;
   presentedBy?: string;
-  disbursementAmount?: float64;
+  disbursementAmount?: int64;
 }
 
 @doc("Request to trigger prize disbursement for a recipient")
 model DisburseRequest {
   @doc("Amount to disburse")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("Reference to the payment transaction or cheque number")
   @maxLength(100)
@@ -403,14 +403,14 @@ model GrantApplicationCreateRequest {
   applicantType: GrantApplicantType;
   title: string;
   abstract: string;
-  proposedBudget: float64;
+  proposedBudget: int64;
 }
 
 @doc("Request to approve a grant application with awarded amount")
 model GrantApproveRequest {
   @doc("Amount awarded to the applicant")
   @minValue(0)
-  awardedAmount: float64;
+  awardedAmount: int64;
 
   @doc("Notes from the review committee")
   @maxLength(3000)
@@ -436,7 +436,7 @@ model GrantProgressReportRequest {
   grantApplicationId: string;
   reportingPeriod: string;
   narrative: string;
-  expenditures: float64;
+  expenditures: int64;
   milestones?: string[];
 }
 

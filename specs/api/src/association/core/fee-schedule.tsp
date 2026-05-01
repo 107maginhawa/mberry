@@ -96,7 +96,7 @@ model FeeItem extends AssociationBaseEntity {
   description?: string;
 
   @doc("Base price before any tier discounts.")
-  amount: float64;
+  amount: int64;
 
   @doc("ISO 4217 currency code.")
   @minLength(3)
@@ -128,7 +128,7 @@ model PricingTier extends AssociationBaseEntity {
 
   @doc("Fixed monetary discount applied to the base price. Mutually exclusive with discountPercent.")
   @minValue(0)
-  discountAmount?: float64;
+  discountAmount?: int64;
 
   @doc("Evaluation order when multiple tiers could apply (lower value = higher priority).")
   @minValue(1)
@@ -148,7 +148,7 @@ model PromotionalCode extends AssociationBaseEntity {
 
   @doc("Magnitude of the discount (percentage points or fixed amount depending on discountType).")
   @minValue(0)
-  discountValue: float64;
+  discountValue: int64;
 
   @doc("First date the code can be redeemed.")
   validFrom: plainDate;
@@ -220,7 +220,7 @@ model FeeItemCreateRequest {
   description?: string;
 
   @doc("Base price.")
-  amount: float64;
+  amount: int64;
 
   @doc("ISO 4217 currency code.")
   @minLength(3)
@@ -243,7 +243,7 @@ model FeeItemUpdateRequest {
   description?: string | null;
 
   @doc("Base price.")
-  amount?: float64;
+  amount?: int64;
 
   @doc("Taxable flag.")
   taxable?: boolean;
@@ -270,7 +270,7 @@ model PricingTierCreateRequest {
 
   @doc("Fixed monetary discount.")
   @minValue(0)
-  discountAmount?: float64;
+  discountAmount?: int64;
 
   @doc("Priority.")
   @minValue(1)
@@ -290,7 +290,7 @@ model PromotionalCodeCreateRequest {
 
   @doc("Discount value.")
   @minValue(0)
-  discountValue: float64;
+  discountValue: int64;
 
   @doc("Valid from date.")
   validFrom: plainDate;

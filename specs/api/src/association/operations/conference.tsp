@@ -169,11 +169,11 @@ model Conference extends BaseEntity {
 
   @doc("Standard registration fee")
   @minValue(0)
-  registrationFee?: float64;
+  registrationFee?: int64;
 
   @doc("Early-bird registration fee")
   @minValue(0)
-  earlyBirdFee?: float64;
+  earlyBirdFee?: int64;
 
   @doc("Maximum number of attendees")
   @minValue(1)
@@ -255,11 +255,11 @@ model Speaker extends BaseEntity {
 
   @doc("Agreed honorarium payment amount")
   @minValue(0)
-  honorariumAmount?: float64;
+  honorariumAmount?: int64;
 
   @doc("Agreed travel reimbursement amount")
   @minValue(0)
-  travelReimbursement?: float64;
+  travelReimbursement?: int64;
 
   @doc("Whether the speaker has submitted IRS Form W-9")
   w9Submitted?: boolean;
@@ -344,7 +344,7 @@ model ExhibitorProfile extends BaseEntity {
 
   @doc("Total sponsorship or booth fee amount")
   @minValue(0)
-  amount?: float64;
+  amount?: int64;
 
   @doc("Current application status")
   status: ExhibitorStatus;
@@ -391,11 +391,11 @@ model ConferenceCreateRequest {
 
   @doc("Standard registration fee")
   @minValue(0)
-  registrationFee?: float64;
+  registrationFee?: int64;
 
   @doc("Early-bird fee")
   @minValue(0)
-  earlyBirdFee?: float64;
+  earlyBirdFee?: int64;
 
   @doc("Maximum capacity")
   @minValue(1)
@@ -495,11 +495,11 @@ model SpeakerCreateRequest {
 
   @doc("Honorarium amount")
   @minValue(0)
-  honorariumAmount?: float64;
+  honorariumAmount?: int64;
 
   @doc("Travel reimbursement amount")
   @minValue(0)
-  travelReimbursement?: float64;
+  travelReimbursement?: int64;
 }
 
 @doc("Request body for submitting an abstract")
@@ -581,7 +581,7 @@ model ExhibitorCreateRequest {
 
   @doc("Amount")
   @minValue(0)
-  amount?: float64;
+  amount?: int64;
 
   @doc("Special requirements")
   specialRequirements?: string;

@@ -202,8 +202,6 @@ model RoyaltySplitUpdateRequest {
 // Interfaces
 // ---------------------------------------------------------------------------
 
-@route("/association/member/chapter-affiliations")
-@tag("Association:Member")
 namespace Association.Member.Chapters {
   @doc("CRUD, search, and primary-chapter management for chapter affiliations")
   interface ChapterAffiliationManagement {
@@ -289,7 +287,6 @@ namespace Association.Member.Chapters {
   }
 
   @doc("Create, search, approve, deny, and complete inter-chapter affiliation transfers")
-  @route("/association/member/affiliation-transfers")
   interface AffiliationTransferManagement {
     @doc("Submit a new affiliation transfer request.")
     @operationId("createAffiliationTransfer")
@@ -392,7 +389,6 @@ namespace Association.Member.Chapters {
   }
 
   @doc("CRUD and search for dues royalty splits between national and chapter")
-  @route("/association/member/royalty-splits")
   interface RoyaltySplitManagement {
     @doc("Create a new royalty split configuration.")
     @operationId("createRoyaltySplit")

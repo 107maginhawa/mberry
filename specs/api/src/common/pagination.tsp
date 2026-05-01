@@ -133,43 +133,38 @@ model CursorPaginationMeta {
 /**
  * Offset-based paginated response
  */
+@friendlyName("{name}ListResponse", T)
 @doc("Offset-based paginated response with page navigation")
 model OffsetPaginatedResponse<T> {
   @doc("Response data items")
   data: T[];
 
   @doc("Pagination metadata")
-  pagination: OffsetPaginationMeta;
-}
+  pagination: {
+    @doc("Current offset")
+    offset: int32;
 
-/**
- * Offset pagination metadata
- */
-@doc("Offset pagination navigation information")
-model OffsetPaginationMeta {
-  @doc("Current offset")
-  offset: int32;
+    @doc("Items per page")
+    limit: int32;
 
-  @doc("Items per page")
-  limit: int32;
+    @doc("Number of items in current page")
+    count: int32;
 
-  @doc("Number of items in current page")
-  count: int32;
+    @doc("Total number of items")
+    totalCount: int32;
 
-  @doc("Total number of items")
-  totalCount: int32;
+    @doc("Total number of pages")
+    totalPages: int32;
 
-  @doc("Total number of pages")
-  totalPages: int32;
+    @doc("Current page number (1-based)")
+    currentPage: int32;
 
-  @doc("Current page number (1-based)")
-  currentPage: int32;
+    @doc("Whether there are more pages")
+    hasNextPage: boolean;
 
-  @doc("Whether there are more pages")
-  hasNextPage: boolean;
-
-  @doc("Whether there are previous pages")
-  hasPreviousPage: boolean;
+    @doc("Whether there are previous pages")
+    hasPreviousPage: boolean;
+  };
 }
 
 /**

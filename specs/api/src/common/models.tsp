@@ -235,6 +235,7 @@ model Address {
 /**
  * Physical address for updates (with nullable fields)
  */
+@friendlyName("AddressPatchInput")
 @doc("Physical mailing address for updates - all fields optional, null clears field")
 model AddressUpdate {
   @doc("Street address line 1")

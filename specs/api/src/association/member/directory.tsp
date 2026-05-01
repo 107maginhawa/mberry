@@ -233,8 +233,6 @@ model PublicDirectoryProfile {
 // Interfaces
 // ---------------------------------------------------------------------------
 
-@route("/association/member/directory/profiles")
-@tag("Association:Member")
 namespace Association.Member.Directory {
   @doc("CRUD and search for member directory profiles")
   interface DirectoryProfileManagement {
@@ -304,7 +302,6 @@ namespace Association.Member.Directory {
   }
 
   @doc("Member directory search service for full-text and geo-spatial lookups")
-  @route("/association/member/directory/search")
   interface DirectorySearchService {
     @doc("Search the member directory with full-text and optional geo-spatial filters.")
     @operationId("searchDirectory")

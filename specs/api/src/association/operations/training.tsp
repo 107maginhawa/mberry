@@ -208,7 +208,7 @@ model Training extends BaseEntity {
 
   @doc("Registration fee")
   @minValue(0)
-  registrationFee?: float64;
+  registrationFee?: int64;
 }
 
 @doc("Enrollment of a person in an instructor-led training session")
@@ -392,7 +392,7 @@ model TrainingCreateRequest {
 
   @doc("Registration fee")
   @minValue(0)
-  registrationFee?: float64;
+  registrationFee?: int64;
 }
 
 @doc("Request body for updating a training session")
@@ -439,7 +439,7 @@ model TrainingUpdateRequest {
 
   @doc("Registration fee")
   @minValue(0)
-  registrationFee?: float64 | null;
+  registrationFee?: int64 | null;
 }
 
 @doc("Query parameters for training search")
@@ -576,8 +576,6 @@ model QuizAttemptSearchParams {
 // Interfaces
 // ---------------------------------------------------------------------------
 
-@route("/association/training")
-@tag("Association:Operations")
 namespace Association.Operations.Training {
 
   /**

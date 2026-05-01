@@ -100,7 +100,7 @@ model DuesInvoiceAllocation {
 
   @doc("Exact monetary amount allocated to this fund for this invoice")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,7 +120,7 @@ model DuesConfig extends BaseEntity {
 
   @doc("Annual dues amount in the specified currency")
   @minValue(0)
-  annualAmount: float64;
+  annualAmount: int64;
 
   @doc("ISO 4217 currency code")
   @minLength(3)
@@ -168,7 +168,7 @@ model DuesInvoice extends BaseEntity {
 
   @doc("Total invoiced amount")
   @minValue(0)
-  totalAmount: float64;
+  totalAmount: int64;
 
   @doc("Breakdown of the total amount by fund")
   fundAllocations: DuesInvoiceAllocation[];
@@ -202,27 +202,27 @@ model AgingBucket extends BaseEntity {
 
   @doc("Total outstanding balance for invoices not yet past due")
   @minValue(0)
-  current: float64;
+  current: int64;
 
   @doc("Total outstanding balance for invoices 1–30 days past due")
   @minValue(0)
-  thirtyDay: float64;
+  thirtyDay: int64;
 
   @doc("Total outstanding balance for invoices 31–60 days past due")
   @minValue(0)
-  sixtyDay: float64;
+  sixtyDay: int64;
 
   @doc("Total outstanding balance for invoices 61–90 days past due")
   @minValue(0)
-  ninetyDay: float64;
+  ninetyDay: int64;
 
   @doc("Total outstanding balance for invoices more than 90 days past due")
   @minValue(0)
-  overNinety: float64;
+  overNinety: int64;
 
   @doc("Sum of all outstanding balances across all aging buckets")
   @minValue(0)
-  totalOutstanding: float64;
+  totalOutstanding: int64;
 }
 
 @doc("Template used to generate dunning communications at a specific collection stage")
@@ -297,7 +297,7 @@ model DunningEvent extends BaseEntity {
 model DuesConfigCreateRequest {
   organizationId: string;
   tierId: string;
-  annualAmount: float64;
+  annualAmount: int64;
   currency: string;
   gracePeriodDays: int32;
   fundAllocations: FundAllocation[];
@@ -307,7 +307,7 @@ model DuesConfigCreateRequest {
 
 @doc("Request to update a dues configuration")
 model DuesConfigUpdateRequest {
-  annualAmount?: float64;
+  annualAmount?: int64;
   gracePeriodDays?: int32;
   fundAllocations?: FundAllocation[];
   effectiveDate?: plainDate;
@@ -381,8 +381,6 @@ model DunningRunResult {
 // Interfaces
 // ---------------------------------------------------------------------------
 
-@route("/association/member/dues-configs")
-@tag("Association:Member")
 namespace Association.Member.Dues {
   @doc("CRUD and search for dues configurations")
   interface DuesConfigManagement {
@@ -454,7 +452,6 @@ namespace Association.Member.Dues {
   }
 
   @doc("CRUD, search, and payment lifecycle for dues invoices")
-  @route("/association/member/dues-invoices")
   interface DuesInvoiceManagement {
     @doc("Create a dues invoice manually.")
     @operationId("createDuesInvoice")
@@ -552,7 +549,6 @@ namespace Association.Member.Dues {
   }
 
   @doc("Retrieve and recalculate AR aging buckets")
-  @route("/association/member/aging-buckets")
   interface AgingBucketService {
     @doc("Get the most recent aging bucket snapshot for an organization.")
     @operationId("getAgingBucket")
@@ -581,7 +577,6 @@ namespace Association.Member.Dues {
   }
 
   @doc("CRUD, search, and execution of dunning templates and runs")
-  @route("/association/member/dunning")
   interface DunningManagement {
     @doc("Create a new dunning template.")
     @operationId("createDunningTemplate")

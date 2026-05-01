@@ -103,6 +103,18 @@ using TypeSpec.OpenAPI;
 @tagMetadata("Reviews", #{
   description: "Flexible NPS review system for feedback collection. Enables users to submit Net Promoter Score (0-10) reviews with optional comments for any context (appointments, sessions, orders). Supports application-defined review types and optional reviewed entities for maximum flexibility. Features immutable reviews, role-based access control, and duplicate prevention."
 })
+@tagMetadata("Association:Member", #{
+  description: "Association member management domain. Covers membership tiers, individual and institutional memberships, applications, dues configuration, invoicing, dunning, chapter affiliations, transfers, royalty splits, member directory profiles, digital credentials, professional licenses, and renewal alerts."
+})
+@tagMetadata("Association:Operations", #{
+  description: "Association operations domain. Covers event lifecycle management, registrations, waitlists, check-ins, instructor-led training sessions, enrollments, online courses, course enrollments, and quiz attempts."
+})
+@tagMetadata("Communication", #{
+  description: "Association communication system. Manages message templates with variable substitution, message composition and delivery (send, schedule, cancel), subscription topics for opt-in/opt-out, and per-person subscription preferences with bulk update support."
+})
+@tagMetadata("Documents", #{
+  description: "Association document management. Handles document lifecycle (create, update, archive), version tracking, access logging, and tag-based organization for association files, policies, and shared resources."
+})
 namespace MonobaseAPI {
 
   // Note: Identity/Auth endpoints are handled by Better-Auth
@@ -175,6 +187,186 @@ namespace MonobaseAPI {
   @tag("Reviews")
   @route("/reviews")
   interface ReviewsManagement extends ReviewsModule.ReviewsManagement {}
+
+  // =========================================================================
+  // Association Domain — Membership (test: one interface)
+  // =========================================================================
+
+  // =========================================================================
+  // Association Domain — Membership
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/tiers")
+  interface AssocMembershipTierManagement extends Association.Member.Membership.MembershipTierManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/memberships")
+  interface AssocMembershipManagement extends Association.Member.Membership.MembershipManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/applications")
+  interface AssocMembershipApplicationManagement extends Association.Member.Membership.MembershipApplicationManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/institutional-memberships")
+  interface AssocInstitutionalMembershipManagement extends Association.Member.Membership.InstitutionalMembershipManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/institutional-memberships/{institutionalMembershipId}/seats")
+  interface AssocSeatAllocationManagement extends Association.Member.Membership.SeatAllocationManagement {}
+
+  // =========================================================================
+  // Association Domain — Dues
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/dues-configs")
+  interface AssocDuesConfigManagement extends Association.Member.Dues.DuesConfigManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/dues-invoices")
+  interface AssocDuesInvoiceManagement extends Association.Member.Dues.DuesInvoiceManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/aging-buckets")
+  interface AssocAgingBucketService extends Association.Member.Dues.AgingBucketService {}
+
+  @tag("Association:Member")
+  @route("/association/member/dunning")
+  interface AssocDunningManagement extends Association.Member.Dues.DunningManagement {}
+
+  // =========================================================================
+  // Association Domain — Chapters
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/chapter-affiliations")
+  interface AssocChapterAffiliationManagement extends Association.Member.Chapters.ChapterAffiliationManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/affiliation-transfers")
+  interface AssocAffiliationTransferManagement extends Association.Member.Chapters.AffiliationTransferManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/royalty-splits")
+  interface AssocRoyaltySplitManagement extends Association.Member.Chapters.RoyaltySplitManagement {}
+
+  // =========================================================================
+  // Association Domain — Directory
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/directory/profiles")
+  interface AssocDirectoryProfileManagement extends Association.Member.Directory.DirectoryProfileManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/directory/search")
+  interface AssocDirectorySearchService extends Association.Member.Directory.DirectorySearchService {}
+
+  // =========================================================================
+  // Association Domain — Credentials
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/credential-templates")
+  interface AssocCredentialTemplateManagement extends Association.Member.Credentials.CredentialTemplateManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/credentials")
+  interface AssocDigitalCredentialManagement extends Association.Member.Credentials.DigitalCredentialManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/credentials/public-verify")
+  interface AssocCredentialVerificationService extends Association.Member.Credentials.CredentialVerificationService {}
+
+  @tag("Association:Member")
+  @route("/association/member/licenses")
+  interface AssocProfessionalLicenseManagement extends Association.Member.Credentials.ProfessionalLicenseManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/license-renewal-alerts")
+  interface AssocLicenseRenewalAlertService extends Association.Member.Credentials.LicenseRenewalAlertService {}
+
+  // =========================================================================
+  // Association Domain — Communication
+  // =========================================================================
+
+  @tag("Communication")
+  @route("/association/message-templates")
+  interface AssocMessageTemplateManagement extends Association.Core.Communication.MessageTemplateManagement.MessageTemplateManagement {}
+
+  @tag("Communication")
+  @route("/association/messages")
+  interface AssocMessageManagement extends Association.Core.Communication.MessageManagement.MessageManagement {}
+
+  @tag("Communication")
+  @route("/association/subscription-topics")
+  interface AssocSubscriptionTopicManagement extends Association.Core.Communication.SubscriptionTopicManagement.SubscriptionTopicManagement {}
+
+  @tag("Communication")
+  @route("/association/person-subscriptions")
+  interface AssocPersonSubscriptionManagement extends Association.Core.Communication.PersonSubscriptionManagement.PersonSubscriptionManagement {}
+
+  // =========================================================================
+  // Association Domain — Documents
+  // =========================================================================
+
+  @tag("Documents")
+  @route("/association/documents")
+  interface AssocDocumentManagement extends Association.Core.Documents.DocumentManagement.DocumentManagement {}
+
+  @tag("Documents")
+  @route("/association/documents/{documentId}/versions")
+  interface AssocDocumentVersionManagement extends Association.Core.Documents.DocumentVersionManagement.DocumentVersionManagement {}
+
+  @tag("Documents")
+  @route("/association/document-tags")
+  interface AssocDocumentTagManagement extends Association.Core.Documents.DocumentTagManagement.DocumentTagManagement {}
+
+  // =========================================================================
+  // Association Domain — Events
+  // =========================================================================
+
+  @tag("Association:Operations")
+  @route("/association/events")
+  interface AssocEventManagement extends Association.Operations.Events.EventManagement {}
+
+  @tag("Association:Operations")
+  @route("/association/events")
+  interface AssocEventRegistrationManagement extends Association.Operations.Events.EventRegistrationManagement {}
+
+  @tag("Association:Operations")
+  @route("/association/events")
+  interface AssocWaitlistManagement extends Association.Operations.Events.WaitlistManagement {}
+
+  @tag("Association:Operations")
+  @route("/association/events")
+  interface AssocCheckInManagement extends Association.Operations.Events.CheckInManagement {}
+
+  // =========================================================================
+  // Association Domain — Training
+  // =========================================================================
+
+  @tag("Association:Operations")
+  @route("/association/training")
+  interface AssocTrainingManagement extends Association.Operations.Training.TrainingManagement {}
+
+  @tag("Association:Operations")
+  @route("/association/training")
+  interface AssocTrainingEnrollmentManagement extends Association.Operations.Training.TrainingEnrollmentManagement {}
+
+  @tag("Association:Operations")
+  @route("/association/training")
+  interface AssocCourseManagement extends Association.Operations.Training.CourseManagement {}
+
+  @tag("Association:Operations")
+  @route("/association/training")
+  interface AssocCourseEnrollmentManagement extends Association.Operations.Training.CourseEnrollmentManagement {}
+
+  @tag("Association:Operations")
+  @route("/association/training")
+  interface AssocQuizAttemptManagement extends Association.Operations.Training.QuizAttemptManagement {}
 
 }
 

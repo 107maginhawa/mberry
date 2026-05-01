@@ -165,7 +165,7 @@ model BenefitOffer extends BaseEntity {
 
   @doc("Numeric discount value (interpretation depends on discountType)")
   @minValue(0)
-  discountValue?: float64;
+  discountValue?: int64;
 
   @doc("UTC date the offer becomes valid")
   validFrom: utcDateTime;
@@ -200,7 +200,7 @@ model BenefitRedemption extends BaseEntity {
 
   @doc("Monetary value realised from this redemption")
   @minValue(0)
-  value?: float64;
+  value?: int64;
 }
 
 @doc("A knowledge resource in the association library")
@@ -331,7 +331,7 @@ model BenefitOfferCreateRequest {
 
   @doc("Discount value")
   @minValue(0)
-  discountValue?: float64;
+  discountValue?: int64;
 
   @doc("Offer valid from")
   validFrom: utcDateTime;
@@ -373,7 +373,7 @@ model BenefitRedemptionCreateRequest {
 
   @doc("Realised value of this redemption")
   @minValue(0)
-  value?: float64;
+  value?: int64;
 }
 
 @doc("Query parameters for redemption search")

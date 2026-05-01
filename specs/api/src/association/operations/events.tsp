@@ -172,7 +172,7 @@ model Event extends BaseEntity {
 
   @doc("Standard registration fee in the stated currency")
   @minValue(0)
-  registrationFee?: float64;
+  registrationFee?: int64;
 
   @doc("ISO 4217 currency code for all monetary amounts on this event")
   @maxLength(3)
@@ -183,7 +183,7 @@ model Event extends BaseEntity {
 
   @doc("Discounted fee available before the early-bird deadline")
   @minValue(0)
-  earlyBirdFee?: float64;
+  earlyBirdFee?: int64;
 
   @doc("Current lifecycle status of the event")
   status: EventStatus;
@@ -216,7 +216,7 @@ model EventRegistration extends BaseEntity {
 
   @doc("Amount paid at the time of registration")
   @minValue(0)
-  amountPaid?: float64;
+  amountPaid?: int64;
 
   @doc("Reference to the corresponding payment transaction")
   paymentId?: string;
@@ -312,7 +312,7 @@ model EventCreateRequest {
 
   @doc("Standard registration fee")
   @minValue(0)
-  registrationFee?: float64;
+  registrationFee?: int64;
 
   @doc("ISO 4217 currency code")
   @maxLength(3)
@@ -323,7 +323,7 @@ model EventCreateRequest {
 
   @doc("Early-bird fee")
   @minValue(0)
-  earlyBirdFee?: float64;
+  earlyBirdFee?: int64;
 
   @doc("Whether attendance awards CE credits")
   creditBearing: boolean;
@@ -364,7 +364,7 @@ model EventUpdateRequest {
 
   @doc("Standard registration fee")
   @minValue(0)
-  registrationFee?: float64 | null;
+  registrationFee?: int64 | null;
 
   @doc("ISO 4217 currency code")
   @maxLength(3)
@@ -375,7 +375,7 @@ model EventUpdateRequest {
 
   @doc("Early-bird fee")
   @minValue(0)
-  earlyBirdFee?: float64 | null;
+  earlyBirdFee?: int64 | null;
 
   @doc("Whether attendance awards CE credits")
   creditBearing?: boolean;
@@ -423,7 +423,7 @@ model EventRegistrationCreateRequest {
 
   @doc("Amount paid")
   @minValue(0)
-  amountPaid?: float64;
+  amountPaid?: int64;
 
   @doc("Payment transaction reference")
   paymentId?: string;
@@ -485,8 +485,6 @@ model CheckInSearchParams {
 // Interfaces
 // ---------------------------------------------------------------------------
 
-@route("/association/events")
-@tag("Association:Operations")
 namespace Association.Operations.Events {
 
   /**

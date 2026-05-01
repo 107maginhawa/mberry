@@ -357,8 +357,6 @@ model ProfessionalLicenseUpdateRequest {
 // Interfaces
 // ---------------------------------------------------------------------------
 
-@route("/association/member/credential-templates")
-@tag("Association:Member")
 namespace Association.Member.Credentials {
   @doc("CRUD for credential design templates")
   interface CredentialTemplateManagement {
@@ -429,7 +427,6 @@ namespace Association.Member.Credentials {
   }
 
   @doc("CRUD, search, issuance, revocation, and verification of digital credentials")
-  @route("/association/member/credentials")
   interface DigitalCredentialManagement {
     @doc("Issue a new digital credential to a member.")
     @operationId("issueDigitalCredential")
@@ -529,7 +526,6 @@ namespace Association.Member.Credentials {
   }
 
   @doc("Public credential verification endpoint — no authentication required")
-  @route("/association/member/credentials/public-verify")
   interface CredentialVerificationService {
     @doc("Verify a credential by number or QR token. This endpoint is publicly accessible and records the verification event.")
     @operationId("verifyCredentialPublic")
@@ -543,7 +539,6 @@ namespace Association.Member.Credentials {
   }
 
   @doc("CRUD and search for professional license records")
-  @route("/association/member/licenses")
   interface ProfessionalLicenseManagement {
     @doc("Create a professional license record.")
     @operationId("createProfessionalLicense")
@@ -614,7 +609,6 @@ namespace Association.Member.Credentials {
   }
 
   @doc("Search and acknowledge license renewal alerts")
-  @route("/association/member/license-renewal-alerts")
   interface LicenseRenewalAlertService {
     @doc("List license renewal alerts with optional filters.")
     @operationId("listLicenseRenewalAlerts")

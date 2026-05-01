@@ -305,6 +305,7 @@ model SubscriptionTopicCreateRequest {
   defaultEnabled: boolean;
 }
 
+@friendlyName("PersonSubscriptionBulkUpdateItem")
 @doc("A single subscription update for a bulk-update operation.")
 model PersonSubscriptionUpdate {
   @doc("Topic ID to update.")
@@ -367,8 +368,6 @@ model MessageSearchParams {
 // Interfaces
 // ---------------------------------------------------------------------------
 
-@route("/association/message-templates")
-@tag("Communication")
 namespace MessageTemplateManagement {
   interface MessageTemplateManagement {
     @doc("Create a message template.")
@@ -453,8 +452,6 @@ namespace MessageTemplateManagement {
   }
 }
 
-@route("/association/messages")
-@tag("Communication")
 namespace MessageManagement {
   interface MessageManagement {
     @doc("Compose a new message.")
@@ -567,8 +564,6 @@ namespace MessageManagement {
   }
 }
 
-@route("/association/subscription-topics")
-@tag("Communication")
 namespace SubscriptionTopicManagement {
   interface SubscriptionTopicManagement {
     @doc("Create a subscription topic.")
@@ -626,8 +621,6 @@ namespace SubscriptionTopicManagement {
   }
 }
 
-@route("/association/person-subscriptions")
-@tag("Communication")
 namespace PersonSubscriptionManagement {
   interface PersonSubscriptionManagement {
     @doc("List a person's subscription preferences.")

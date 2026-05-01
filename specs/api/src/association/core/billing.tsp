@@ -134,11 +134,11 @@ model InvoiceLineItem {
 
   @doc("Price per unit.")
   @minValue(0)
-  unitPrice: float64;
+  unitPrice: int64;
 
   @doc("Line total (quantity × unitPrice before tax).")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("Tax rate applied to this line (decimal fraction, e.g. 0.12 for 12%). Omit if non-taxable.")
   @minValue(0)
@@ -153,7 +153,7 @@ model RecognitionEntry {
 
   @doc("Amount to be recognised in this period.")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("Whether the recognition journal entry for this period has been posted.")
   recognized: boolean;
@@ -191,23 +191,23 @@ model Invoice extends AssociationBaseEntity {
 
   @doc("Sum of all line-item amounts before tax.")
   @minValue(0)
-  subtotal: float64;
+  subtotal: int64;
 
   @doc("Total tax amount across all taxable lines.")
   @minValue(0)
-  taxAmount: float64;
+  taxAmount: int64;
 
   @doc("Total amount due (subtotal + taxAmount).")
   @minValue(0)
-  totalAmount: float64;
+  totalAmount: int64;
 
   @doc("Amount paid to date.")
   @minValue(0)
-  paidAmount: float64;
+  paidAmount: int64;
 
   @doc("Remaining balance (totalAmount – paidAmount).")
   @minValue(0)
-  balanceDue: float64;
+  balanceDue: int64;
 
   @doc("ISO 4217 currency code.")
   @minLength(3)
@@ -228,7 +228,7 @@ model Payment extends AssociationBaseEntity {
 
   @doc("Amount paid.")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("ISO 4217 currency code.")
   @minLength(3)
@@ -255,7 +255,7 @@ model Refund extends AssociationBaseEntity {
 
   @doc("Amount to refund (must not exceed original payment amount).")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("Business reason for the refund.")
   reason: string;
@@ -331,7 +331,7 @@ model PaymentCreateRequest {
 
   @doc("Amount paid.")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("ISO 4217 currency code.")
   @minLength(3)
@@ -355,7 +355,7 @@ model RefundCreateRequest {
 
   @doc("Amount to refund.")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("Reason for the refund.")
   reason: string;

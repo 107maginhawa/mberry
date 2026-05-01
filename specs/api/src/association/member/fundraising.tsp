@@ -268,11 +268,11 @@ model Campaign extends BaseEntity {
 
   @doc("Monetary fundraising goal (null for non-monetary campaigns)")
   @minValue(0)
-  goal?: float64;
+  goal?: int64;
 
   @doc("Amount raised to date (updated by the donation processing pipeline)")
   @minValue(0)
-  raised?: float64;
+  raised?: int64;
 
   @doc("Date on which the campaign starts")
   startDate: plainDate;
@@ -304,7 +304,7 @@ model Donation extends BaseEntity {
 
   @doc("Donation amount")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("ISO 4217 currency code")
   @minLength(3)
@@ -344,11 +344,11 @@ model Pledge extends BaseEntity {
 
   @doc("Total committed pledge amount")
   @minValue(0)
-  totalAmount: float64;
+  totalAmount: int64;
 
   @doc("Amount of the pledge already paid")
   @minValue(0)
-  paidAmount: float64;
+  paidAmount: int64;
 
   @doc("Frequency of pledge installments")
   frequency: PledgeFrequency;
@@ -385,7 +385,7 @@ model TaxReceipt extends BaseEntity {
 
   @doc("Total receiptable amount")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("Timestamp when the receipt was issued")
   issuedAt: utcDateTime;
@@ -466,7 +466,7 @@ model PACContribution extends BaseEntity {
 
   @doc("Contribution amount")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("Date on which the contribution was made")
   contributionDate: plainDate;
@@ -537,7 +537,7 @@ model ProspectActivityCreateRequest {
 model CampaignRequest {
   name: string;
   type: FundraisingCampaignType;
-  goal?: float64;
+  goal?: int64;
   startDate: plainDate;
   endDate?: plainDate;
   status: CampaignStatus;
@@ -549,7 +549,7 @@ model DonationCreateRequest {
   donorId: string;
   donorType: DonorType;
   campaignId?: string;
-  amount: float64;
+  amount: int64;
   currency: string;
   donationDate: plainDate;
   type: DonationType;
@@ -569,7 +569,7 @@ model IssueReceiptRequest {
 model PledgeCreateRequest {
   donorId: string;
   campaignId?: string;
-  totalAmount: float64;
+  totalAmount: int64;
   frequency: PledgeFrequency;
   startDate: plainDate;
   endDate?: plainDate;
@@ -579,7 +579,7 @@ model PledgeCreateRequest {
 model RecordPledgePaymentRequest {
   @doc("Amount paid in this installment")
   @minValue(0)
-  amount: float64;
+  amount: int64;
 
   @doc("ID of the payment transaction")
   paymentId: string;
@@ -594,7 +594,7 @@ model TaxReceiptCreateRequest {
   donorId: string;
   receiptNumber: string;
   fiscalYear: int32;
-  amount: float64;
+  amount: int64;
   issuedAt: utcDateTime;
   issuedBy: string;
 }
@@ -627,7 +627,7 @@ model SendActionAlertRequest {
 @doc("Request to create a PAC contribution record")
 model PACContributionCreateRequest {
   contributorId: string;
-  amount: float64;
+  amount: int64;
   contributionDate: plainDate;
   employerName?: string;
   occupation?: string;

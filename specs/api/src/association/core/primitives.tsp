@@ -125,8 +125,8 @@ model PersonPreference {
 
 @doc("A monetary amount with an explicit ISO 4217 currency code.")
 model MoneyAmount {
-  @doc("Numeric value of the amount (decimal).")
-  value: float64;
+  @doc("Amount in minor currency units (cents/centavos). PHP 100.50 = 10050.")
+  value: int64;
 
   @doc("ISO 4217 three-letter currency code (e.g. 'USD', 'EUR', 'PHP').")
   @minLength(3)

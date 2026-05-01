@@ -128,7 +128,7 @@ model MembershipTier extends BaseEntity {
 
   @doc("Annual dues amount in the specified currency")
   @minValue(0)
-  annualFee: float64;
+  annualFee: int64;
 
   @doc("ISO 4217 currency code for the annual fee")
   @minLength(3)
@@ -339,7 +339,7 @@ model MembershipTierCreateRequest {
   name: string;
   code: string;
   description?: string;
-  annualFee: float64;
+  annualFee: int64;
   currency: string;
   benefits?: string[];
   maxMembers?: int32;
@@ -350,7 +350,7 @@ model MembershipTierCreateRequest {
 model MembershipTierUpdateRequest {
   name?: string;
   description?: string | null;
-  annualFee?: float64;
+  annualFee?: int64;
   benefits?: string[] | null;
   maxMembers?: int32 | null;
   status?: TierStatus;
@@ -496,7 +496,6 @@ namespace Association.Member.Membership {
   }
 
   @doc("CRUD, search, and lifecycle operations for individual memberships")
-  @route("/association/member/memberships")
   interface MembershipManagement {
     @doc("Create a new membership.")
     @operationId("createMembership")
@@ -608,7 +607,6 @@ namespace Association.Member.Membership {
   }
 
   @doc("CRUD, search, and review workflow for membership applications")
-  @route("/association/member/applications")
   interface MembershipApplicationManagement {
     @doc("Submit a new membership application.")
     @operationId("createMembershipApplication")
@@ -704,7 +702,6 @@ namespace Association.Member.Membership {
   }
 
   @doc("CRUD and search for institutional memberships")
-  @route("/association/member/institutional-memberships")
   interface InstitutionalMembershipManagement {
     @doc("Create a new institutional membership.")
     @operationId("createInstitutionalMembership")
@@ -774,7 +771,6 @@ namespace Association.Member.Membership {
   }
 
   @doc("Seat allocation management within institutional memberships")
-  @route("/association/member/institutional-memberships/{institutionalMembershipId}/seats")
   interface SeatAllocationManagement {
     @doc("Allocate a seat to an individual within an institutional membership.")
     @operationId("allocateSeat")

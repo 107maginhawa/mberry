@@ -61,6 +61,21 @@ model Person extends BaseEntity {
 
   @doc("Person's timezone")
   timezone?: TimezoneId;
+
+  @doc("Professional license number (e.g. PRC license)")
+  @maxLength(50)
+  licenseNumber?: string;
+
+  @doc("Professional specialization or field of practice")
+  @maxLength(100)
+  specialization?: string;
+
+  @doc("PRC (Professional Regulation Commission) ID")
+  @maxLength(50)
+  prcId?: string;
+
+  @doc("Preferred language for communications")
+  preferredLanguage?: LanguageCode;
 }
 
 /**
@@ -196,6 +211,21 @@ model PersonCreateRequest {
 
   @doc("Person's timezone")
   timezone?: TimezoneId;
+
+  @doc("Professional license number (e.g. PRC license)")
+  @maxLength(50)
+  licenseNumber?: string;
+
+  @doc("Professional specialization or field of practice")
+  @maxLength(100)
+  specialization?: string;
+
+  @doc("PRC (Professional Regulation Commission) ID")
+  @maxLength(50)
+  prcId?: string;
+
+  @doc("Preferred language for communications")
+  preferredLanguage?: LanguageCode;
 }
 
 /**
@@ -237,7 +267,21 @@ model PersonUpdateRequest {
 
   @doc("Person's timezone - can be null to clear")
   timezone?: TimezoneId | null;
-}
 
+  @doc("Professional license number - can be null to clear")
+  @maxLength(50)
+  licenseNumber?: string | null;
+
+  @doc("Professional specialization - can be null to clear")
+  @maxLength(100)
+  specialization?: string | null;
+
+  @doc("PRC ID - can be null to clear")
+  @maxLength(50)
+  prcId?: string | null;
+
+  @doc("Preferred language - can be null to clear")
+  preferredLanguage?: LanguageCode | null;
+}
 
 
