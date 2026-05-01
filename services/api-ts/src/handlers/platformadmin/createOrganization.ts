@@ -1,9 +1,10 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateOrganizationBody } from '@/generated/openapi/validators';
-import { ConflictError, NotFoundError } from '@/core/errors';
+import { ConflictError, NotFoundError, ValidationError } from '@/core/errors';
 import { OrganizationRepository, AssociationRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
+import { generateSlug, ensureUniqueSlug } from './utils/slug';
 
 /**
  * createOrganization
@@ -35,6 +36,13 @@ export async function createOrganization(
     throw new ConflictError('Organization with this name already exists in this association');
   }
 
+  // Generate unique slug from org name
+  const baseSlug = generateSlug(body.name);
+  if (!baseSlug) {
+    throw new ValidationError('Organization name must contain at least one alphanumeric character');
+  }
+  const slug = await ensureUniqueSlug(baseSlug, orgRepo);
+
   // Set trial dates if trialDurationDays provided
   const now = new Date();
   const trialStartDate = body.trialDurationDays ? now : undefined;
@@ -45,6 +53,7 @@ export async function createOrganization(
   const org = await orgRepo.create({
     associationId: body.associationId,
     name: body.name,
+    slug,
     orgType: body.orgType,
     region: body.region ?? null,
     contactEmail: body.contactEmail ?? null,

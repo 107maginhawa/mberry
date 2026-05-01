@@ -1,9 +1,44 @@
 /**
- * Invite token validation — delegates to server.
- * Raw token is opaque (HMAC-signed). Only the server can validate it.
+ * Invite token validation — delegates to server for full validation.
+ * Client-side utilities below handle format checks and preview parsing
+ * without a server round-trip (UX: show invite details before claiming).
  */
 
 import { client } from '@monobase/sdk-ts/client'
+
+// ---------------------------------------------------------------------------
+// Client-side utilities (no server call needed)
+// ---------------------------------------------------------------------------
+
+/** Check if a token string has valid format (base64url, min length 8). */
+export function isValidTokenFormat(token: string): boolean {
+  if (!token || token.length < 8) return false;
+  return /^[A-Za-z0-9_\-=.]+$/.test(token);
+}
+
+/** Check if a timestamp (ms) is in the past. */
+export function isTokenExpired(timestampMs: number): boolean {
+  return timestampMs < Date.now();
+}
+
+/** Parse the preview payload from an invite token (format: invite.<base64json>.sig). */
+export function parseInviteToken(token: string): { orgId: string; orgName: string; role: string; expiresAt: number } | null {
+  if (!token || token.length < 8) return null;
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+  try {
+    const json = atob(parts[1]!);
+    const data = JSON.parse(json);
+    if (!data.orgId) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Server-delegated validation
+// ---------------------------------------------------------------------------
 
 export interface InviteValidation {
   valid: boolean;

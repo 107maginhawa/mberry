@@ -9,7 +9,10 @@
  */
 
 import { createMiddleware } from 'hono/factory';
+import { eq, and, inArray } from 'drizzle-orm';
 import type { Variables } from '@/types/app';
+import { memberships } from '@/handlers/association:member/repos/membership.schema';
+import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.schema';
 
 /**
  * Creates org-context middleware.
@@ -41,19 +44,63 @@ export function orgContextMiddleware() {
       );
     }
 
-    // TODO: Query membership table to verify user belongs to this org
-    // For now, set the context values. Full implementation comes in Wave 1
-    // when the membership handler/repo are built.
-    //
-    // const db = ctx.get('database');
-    // const membership = await db.query.membership.findFirst({
-    //   where: and(eq(membership.personId, user.id), eq(membership.orgId, orgId))
-    // });
-    // if (!membership) return ctx.json({ error: 'Not a member of this organization' }, 403);
+    const db = ctx.get('database');
+
+    // Check if user is a platform admin — bypass membership check
+    const [admin] = await db
+      .select({ id: platformAdmins.id })
+      .from(platformAdmins)
+      .where(eq(platformAdmins.userId, user.id))
+      .limit(1);
+
+    if (admin) {
+      ctx.set('orgId', orgId);
+      ctx.set('tenantId', orgId);
+      ctx.set('orgMembership', {
+        membershipId: 'platform-admin',
+        personId: user.id,
+        orgId,
+        role: 'admin',
+        status: 'active',
+      });
+      await next();
+      return;
+    }
+
+    // Query membership table to verify user belongs to this org
+    const [membership] = await db
+      .select({
+        id: memberships.id,
+        personId: memberships.personId,
+        orgId: memberships.orgId,
+        status: memberships.status,
+      })
+      .from(memberships)
+      .where(
+        and(
+          eq(memberships.personId, user.id),
+          eq(memberships.orgId, orgId),
+          inArray(memberships.status, ['active', 'gracePeriod']),
+        )
+      )
+      .limit(1);
+
+    if (!membership) {
+      return ctx.json(
+        { error: 'Not a member of this organization' },
+        403
+      );
+    }
 
     ctx.set('orgId', orgId);
-    ctx.set('tenantId', orgId); // tenantId = orgId for association context
-    // ctx.set('orgMembership', membership); // Enabled in Wave 1
+    ctx.set('tenantId', orgId);
+    ctx.set('orgMembership', {
+      membershipId: membership.id,
+      personId: membership.personId,
+      orgId: membership.orgId,
+      role: 'member', // role granularity comes from governance module
+      status: membership.status,
+    });
 
     await next();
   });

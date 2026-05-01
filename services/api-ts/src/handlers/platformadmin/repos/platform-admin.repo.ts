@@ -77,6 +77,13 @@ export class OrganizationRepository {
     return this.db.select().from(organizations);
   }
 
+  async findBySlug(slug: string): Promise<Organization | undefined> {
+    const [row] = await this.db.select().from(organizations)
+      .where(eq(organizations.slug, slug))
+      .limit(1);
+    return row;
+  }
+
   async update(id: string, data: Partial<Organization>): Promise<Organization | undefined> {
     const [row] = await this.db.update(organizations).set({ ...data, updatedAt: new Date() }).where(eq(organizations.id, id)).returning();
     return row;
@@ -141,6 +148,11 @@ export class PlatformAdminRepository {
 
   async findByEmail(email: string): Promise<PlatformAdmin | undefined> {
     const [row] = await this.db.select().from(platformAdmins).where(eq(platformAdmins.email, email.toLowerCase())).limit(1);
+    return row;
+  }
+
+  async findByUserId(userId: string): Promise<PlatformAdmin | undefined> {
+    const [row] = await this.db.select().from(platformAdmins).where(eq(platformAdmins.userId, userId)).limit(1);
     return row;
   }
 

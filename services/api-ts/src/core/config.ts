@@ -142,6 +142,8 @@ export function parseConfig(): Config {
       rateLimitWindow: parseIntValue(process.env['AUTH_RATE_LIMIT_WINDOW'], 60), // 1 minute
       rateLimitMax: parseIntValue(process.env['AUTH_RATE_LIMIT_MAX'], 10), // 10 attempts
       adminEmails: parseList(process.env['AUTH_ADMIN_EMAILS'], []),
+      cookieSameSite: (process.env['AUTH_COOKIE_SAMESITE'] as 'strict' | 'lax' | 'none') || undefined,
+      secureCookies: process.env['AUTH_COOKIE_SECURE'] !== undefined ? parseBool(process.env['AUTH_COOKIE_SECURE'], false) : undefined,
       socialProviders: {
         google: process.env['GOOGLE_CLIENT_ID'] && process.env['GOOGLE_CLIENT_SECRET'] ? {
           clientId: process.env['GOOGLE_CLIENT_ID'],

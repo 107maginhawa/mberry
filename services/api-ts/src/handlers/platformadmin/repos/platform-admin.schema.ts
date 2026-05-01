@@ -66,6 +66,7 @@ export const organizations = pgTable('organization', {
   ...baseEntityFields,
   associationId: uuid('association_id').notNull(),
   name: varchar('name', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 100 }),
   orgType: orgTypeEnum('org_type').notNull(),
   region: varchar('region', { length: 100 }),
   contactEmail: varchar('contact_email', { length: 255 }),
@@ -77,6 +78,7 @@ export const organizations = pgTable('organization', {
   index('idx_org_association').on(table.associationId),
   index('idx_org_status').on(table.status),
   uniqueIndex('idx_org_name_association').on(table.name, table.associationId),
+  uniqueIndex('idx_org_slug').on(table.slug),
 ]);
 
 export const featureFlags = pgTable('feature_flag', {

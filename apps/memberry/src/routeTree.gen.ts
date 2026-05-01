@@ -9,42 +9,68 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as MySettingsRouteImport } from './routes/my/settings'
-import { Route as MyProfileRouteImport } from './routes/my/profile'
-import { Route as MyPaymentsRouteImport } from './routes/my/payments'
-import { Route as MyOrganizationsRouteImport } from './routes/my/organizations'
+import { Route as VerifyTokenRouteImport } from './routes/verify/$token'
+import { Route as PayTokenRouteImport } from './routes/pay/$token'
+import { Route as OrgSlugRouteImport } from './routes/org/$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite/$token'
-import { Route as OrgOrgIdMembersRouteImport } from './routes/org/$orgId/members'
-import { Route as OrgOrgIdOfficerRosterRouteImport } from './routes/org/$orgId/officer/roster'
-import { Route as OrgOrgIdOfficerPaymentsRouteImport } from './routes/org/$orgId/officer/payments'
-import { Route as OrgOrgIdOfficerApplicationsRouteImport } from './routes/org/$orgId/officer/applications'
-import { Route as OrgOrgIdOfficerSettingsDuesRouteImport } from './routes/org/$orgId/officer/settings/dues'
-import { Route as OrgOrgIdOfficerSettingsChaptersRouteImport } from './routes/org/$orgId/officer/settings/chapters'
+import { Route as AuthAuthViewRouteImport } from './routes/auth/$authView'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedMyTrainingRouteImport } from './routes/_authenticated/my/training'
+import { Route as AuthenticatedMySettingsRouteImport } from './routes/_authenticated/my/settings'
+import { Route as AuthenticatedMyProfileRouteImport } from './routes/_authenticated/my/profile'
+import { Route as AuthenticatedMyPaymentsRouteImport } from './routes/_authenticated/my/payments'
+import { Route as AuthenticatedMyOrganizationsRouteImport } from './routes/_authenticated/my/organizations'
+import { Route as AuthenticatedMyNotificationsRouteImport } from './routes/_authenticated/my/notifications'
+import { Route as AuthenticatedMyIdCardRouteImport } from './routes/_authenticated/my/id-card'
+import { Route as AuthenticatedMyEventsRouteImport } from './routes/_authenticated/my/events'
+import { Route as AuthenticatedMyCreditsIndexRouteImport } from './routes/_authenticated/my/credits/index'
+import { Route as AuthenticatedMyCertificatesIndexRouteImport } from './routes/_authenticated/my/certificates/index'
+import { Route as AuthenticatedOrgOrgIdMembersRouteImport } from './routes/_authenticated/org/$orgId/members'
+import { Route as AuthenticatedMyCreditsLogRouteImport } from './routes/_authenticated/my/credits/log'
+import { Route as AuthenticatedMyCertificatesCertificateIdRouteImport } from './routes/_authenticated/my/certificates/$certificateId'
+import { Route as AuthenticatedOrgOrgIdTrainingIndexRouteImport } from './routes/_authenticated/org/$orgId/training/index'
+import { Route as AuthenticatedOrgOrgIdEventsIndexRouteImport } from './routes/_authenticated/org/$orgId/events/index'
+import { Route as AuthenticatedOrgOrgIdOfficerRosterRouteImport } from './routes/_authenticated/org/$orgId/officer/roster'
+import { Route as AuthenticatedOrgOrgIdOfficerPaymentsRouteImport } from './routes/_authenticated/org/$orgId/officer/payments'
+import { Route as AuthenticatedOrgOrgIdOfficerCommunicationsRouteImport } from './routes/_authenticated/org/$orgId/officer/communications'
+import { Route as AuthenticatedOrgOrgIdOfficerApplicationsRouteImport } from './routes/_authenticated/org/$orgId/officer/applications'
+import { Route as AuthenticatedOrgOrgIdOfficerTrainingIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/training/index'
+import { Route as AuthenticatedOrgOrgIdOfficerEventsIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/events/index'
+import { Route as AuthenticatedOrgOrgIdOfficerSettingsDuesRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/dues'
+import { Route as AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/chapters'
+import { Route as AuthenticatedOrgOrgIdOfficerReportsCreditsRouteImport } from './routes/_authenticated/org/$orgId/officer/reports/credits'
+import { Route as AuthenticatedOrgOrgIdOfficerEventsEventIdRouteImport } from './routes/_authenticated/org/$orgId/officer/events/$eventId'
 
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MySettingsRoute = MySettingsRouteImport.update({
-  id: '/my/settings',
-  path: '/my/settings',
+const VerifyTokenRoute = VerifyTokenRouteImport.update({
+  id: '/verify/$token',
+  path: '/verify/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MyProfileRoute = MyProfileRouteImport.update({
-  id: '/my/profile',
-  path: '/my/profile',
+const PayTokenRoute = PayTokenRouteImport.update({
+  id: '/pay/$token',
+  path: '/pay/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MyPaymentsRoute = MyPaymentsRouteImport.update({
-  id: '/my/payments',
-  path: '/my/payments',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyOrganizationsRoute = MyOrganizationsRouteImport.update({
-  id: '/my/organizations',
-  path: '/my/organizations',
+const OrgSlugRoute = OrgSlugRouteImport.update({
+  id: '/org/$slug',
+  path: '/org/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
@@ -52,145 +78,404 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
   path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrgOrgIdMembersRoute = OrgOrgIdMembersRouteImport.update({
-  id: '/org/$orgId/members',
-  path: '/org/$orgId/members',
+const AuthAuthViewRoute = AuthAuthViewRouteImport.update({
+  id: '/auth/$authView',
+  path: '/auth/$authView',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrgOrgIdOfficerRosterRoute = OrgOrgIdOfficerRosterRouteImport.update({
-  id: '/org/$orgId/officer/roster',
-  path: '/org/$orgId/officer/roster',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const OrgOrgIdOfficerPaymentsRoute = OrgOrgIdOfficerPaymentsRouteImport.update({
-  id: '/org/$orgId/officer/payments',
-  path: '/org/$orgId/officer/payments',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedMyTrainingRoute = AuthenticatedMyTrainingRouteImport.update({
+  id: '/my/training',
+  path: '/my/training',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const OrgOrgIdOfficerApplicationsRoute =
-  OrgOrgIdOfficerApplicationsRouteImport.update({
+const AuthenticatedMySettingsRoute = AuthenticatedMySettingsRouteImport.update({
+  id: '/my/settings',
+  path: '/my/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMyProfileRoute = AuthenticatedMyProfileRouteImport.update({
+  id: '/my/profile',
+  path: '/my/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMyPaymentsRoute = AuthenticatedMyPaymentsRouteImport.update({
+  id: '/my/payments',
+  path: '/my/payments',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMyOrganizationsRoute =
+  AuthenticatedMyOrganizationsRouteImport.update({
+    id: '/my/organizations',
+    path: '/my/organizations',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMyNotificationsRoute =
+  AuthenticatedMyNotificationsRouteImport.update({
+    id: '/my/notifications',
+    path: '/my/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMyIdCardRoute = AuthenticatedMyIdCardRouteImport.update({
+  id: '/my/id-card',
+  path: '/my/id-card',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMyEventsRoute = AuthenticatedMyEventsRouteImport.update({
+  id: '/my/events',
+  path: '/my/events',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMyCreditsIndexRoute =
+  AuthenticatedMyCreditsIndexRouteImport.update({
+    id: '/my/credits/',
+    path: '/my/credits/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMyCertificatesIndexRoute =
+  AuthenticatedMyCertificatesIndexRouteImport.update({
+    id: '/my/certificates/',
+    path: '/my/certificates/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdMembersRoute =
+  AuthenticatedOrgOrgIdMembersRouteImport.update({
+    id: '/org/$orgId/members',
+    path: '/org/$orgId/members',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMyCreditsLogRoute =
+  AuthenticatedMyCreditsLogRouteImport.update({
+    id: '/my/credits/log',
+    path: '/my/credits/log',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMyCertificatesCertificateIdRoute =
+  AuthenticatedMyCertificatesCertificateIdRouteImport.update({
+    id: '/my/certificates/$certificateId',
+    path: '/my/certificates/$certificateId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdTrainingIndexRoute =
+  AuthenticatedOrgOrgIdTrainingIndexRouteImport.update({
+    id: '/org/$orgId/training/',
+    path: '/org/$orgId/training/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdEventsIndexRoute =
+  AuthenticatedOrgOrgIdEventsIndexRouteImport.update({
+    id: '/org/$orgId/events/',
+    path: '/org/$orgId/events/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerRosterRoute =
+  AuthenticatedOrgOrgIdOfficerRosterRouteImport.update({
+    id: '/org/$orgId/officer/roster',
+    path: '/org/$orgId/officer/roster',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerPaymentsRoute =
+  AuthenticatedOrgOrgIdOfficerPaymentsRouteImport.update({
+    id: '/org/$orgId/officer/payments',
+    path: '/org/$orgId/officer/payments',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerCommunicationsRoute =
+  AuthenticatedOrgOrgIdOfficerCommunicationsRouteImport.update({
+    id: '/org/$orgId/officer/communications',
+    path: '/org/$orgId/officer/communications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerApplicationsRoute =
+  AuthenticatedOrgOrgIdOfficerApplicationsRouteImport.update({
     id: '/org/$orgId/officer/applications',
     path: '/org/$orgId/officer/applications',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const OrgOrgIdOfficerSettingsDuesRoute =
-  OrgOrgIdOfficerSettingsDuesRouteImport.update({
+const AuthenticatedOrgOrgIdOfficerTrainingIndexRoute =
+  AuthenticatedOrgOrgIdOfficerTrainingIndexRouteImport.update({
+    id: '/org/$orgId/officer/training/',
+    path: '/org/$orgId/officer/training/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerEventsIndexRoute =
+  AuthenticatedOrgOrgIdOfficerEventsIndexRouteImport.update({
+    id: '/org/$orgId/officer/events/',
+    path: '/org/$orgId/officer/events/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerSettingsDuesRoute =
+  AuthenticatedOrgOrgIdOfficerSettingsDuesRouteImport.update({
     id: '/org/$orgId/officer/settings/dues',
     path: '/org/$orgId/officer/settings/dues',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const OrgOrgIdOfficerSettingsChaptersRoute =
-  OrgOrgIdOfficerSettingsChaptersRouteImport.update({
+const AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute =
+  AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport.update({
     id: '/org/$orgId/officer/settings/chapters',
     path: '/org/$orgId/officer/settings/chapters',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerReportsCreditsRoute =
+  AuthenticatedOrgOrgIdOfficerReportsCreditsRouteImport.update({
+    id: '/org/$orgId/officer/reports/credits',
+    path: '/org/$orgId/officer/reports/credits',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerEventsEventIdRoute =
+  AuthenticatedOrgOrgIdOfficerEventsEventIdRouteImport.update({
+    id: '/org/$orgId/officer/events/$eventId',
+    path: '/org/$orgId/officer/events/$eventId',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/auth/$authView': typeof AuthAuthViewRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/my/organizations': typeof MyOrganizationsRoute
-  '/my/payments': typeof MyPaymentsRoute
-  '/my/profile': typeof MyProfileRoute
-  '/my/settings': typeof MySettingsRoute
-  '/org/$orgId/members': typeof OrgOrgIdMembersRoute
-  '/org/$orgId/officer/applications': typeof OrgOrgIdOfficerApplicationsRoute
-  '/org/$orgId/officer/payments': typeof OrgOrgIdOfficerPaymentsRoute
-  '/org/$orgId/officer/roster': typeof OrgOrgIdOfficerRosterRoute
-  '/org/$orgId/officer/settings/chapters': typeof OrgOrgIdOfficerSettingsChaptersRoute
-  '/org/$orgId/officer/settings/dues': typeof OrgOrgIdOfficerSettingsDuesRoute
+  '/org/$slug': typeof OrgSlugRoute
+  '/pay/$token': typeof PayTokenRoute
+  '/verify/$token': typeof VerifyTokenRoute
+  '/my/events': typeof AuthenticatedMyEventsRoute
+  '/my/id-card': typeof AuthenticatedMyIdCardRoute
+  '/my/notifications': typeof AuthenticatedMyNotificationsRoute
+  '/my/organizations': typeof AuthenticatedMyOrganizationsRoute
+  '/my/payments': typeof AuthenticatedMyPaymentsRoute
+  '/my/profile': typeof AuthenticatedMyProfileRoute
+  '/my/settings': typeof AuthenticatedMySettingsRoute
+  '/my/training': typeof AuthenticatedMyTrainingRoute
+  '/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
+  '/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
+  '/my/certificates': typeof AuthenticatedMyCertificatesIndexRoute
+  '/my/credits': typeof AuthenticatedMyCreditsIndexRoute
+  '/org/$orgId/officer/applications': typeof AuthenticatedOrgOrgIdOfficerApplicationsRoute
+  '/org/$orgId/officer/communications': typeof AuthenticatedOrgOrgIdOfficerCommunicationsRoute
+  '/org/$orgId/officer/payments': typeof AuthenticatedOrgOrgIdOfficerPaymentsRoute
+  '/org/$orgId/officer/roster': typeof AuthenticatedOrgOrgIdOfficerRosterRoute
+  '/org/$orgId/events': typeof AuthenticatedOrgOrgIdEventsIndexRoute
+  '/org/$orgId/training': typeof AuthenticatedOrgOrgIdTrainingIndexRoute
+  '/org/$orgId/officer/events/$eventId': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRoute
+  '/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
+  '/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
+  '/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
+  '/org/$orgId/officer/events': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
+  '/org/$orgId/officer/training': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/auth/$authView': typeof AuthAuthViewRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/my/organizations': typeof MyOrganizationsRoute
-  '/my/payments': typeof MyPaymentsRoute
-  '/my/profile': typeof MyProfileRoute
-  '/my/settings': typeof MySettingsRoute
-  '/org/$orgId/members': typeof OrgOrgIdMembersRoute
-  '/org/$orgId/officer/applications': typeof OrgOrgIdOfficerApplicationsRoute
-  '/org/$orgId/officer/payments': typeof OrgOrgIdOfficerPaymentsRoute
-  '/org/$orgId/officer/roster': typeof OrgOrgIdOfficerRosterRoute
-  '/org/$orgId/officer/settings/chapters': typeof OrgOrgIdOfficerSettingsChaptersRoute
-  '/org/$orgId/officer/settings/dues': typeof OrgOrgIdOfficerSettingsDuesRoute
+  '/org/$slug': typeof OrgSlugRoute
+  '/pay/$token': typeof PayTokenRoute
+  '/verify/$token': typeof VerifyTokenRoute
+  '/my/events': typeof AuthenticatedMyEventsRoute
+  '/my/id-card': typeof AuthenticatedMyIdCardRoute
+  '/my/notifications': typeof AuthenticatedMyNotificationsRoute
+  '/my/organizations': typeof AuthenticatedMyOrganizationsRoute
+  '/my/payments': typeof AuthenticatedMyPaymentsRoute
+  '/my/profile': typeof AuthenticatedMyProfileRoute
+  '/my/settings': typeof AuthenticatedMySettingsRoute
+  '/my/training': typeof AuthenticatedMyTrainingRoute
+  '/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
+  '/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
+  '/my/certificates': typeof AuthenticatedMyCertificatesIndexRoute
+  '/my/credits': typeof AuthenticatedMyCreditsIndexRoute
+  '/org/$orgId/officer/applications': typeof AuthenticatedOrgOrgIdOfficerApplicationsRoute
+  '/org/$orgId/officer/communications': typeof AuthenticatedOrgOrgIdOfficerCommunicationsRoute
+  '/org/$orgId/officer/payments': typeof AuthenticatedOrgOrgIdOfficerPaymentsRoute
+  '/org/$orgId/officer/roster': typeof AuthenticatedOrgOrgIdOfficerRosterRoute
+  '/org/$orgId/events': typeof AuthenticatedOrgOrgIdEventsIndexRoute
+  '/org/$orgId/training': typeof AuthenticatedOrgOrgIdTrainingIndexRoute
+  '/org/$orgId/officer/events/$eventId': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRoute
+  '/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
+  '/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
+  '/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
+  '/org/$orgId/officer/events': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
+  '/org/$orgId/officer/training': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/auth/$authView': typeof AuthAuthViewRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/my/organizations': typeof MyOrganizationsRoute
-  '/my/payments': typeof MyPaymentsRoute
-  '/my/profile': typeof MyProfileRoute
-  '/my/settings': typeof MySettingsRoute
-  '/org/$orgId/members': typeof OrgOrgIdMembersRoute
-  '/org/$orgId/officer/applications': typeof OrgOrgIdOfficerApplicationsRoute
-  '/org/$orgId/officer/payments': typeof OrgOrgIdOfficerPaymentsRoute
-  '/org/$orgId/officer/roster': typeof OrgOrgIdOfficerRosterRoute
-  '/org/$orgId/officer/settings/chapters': typeof OrgOrgIdOfficerSettingsChaptersRoute
-  '/org/$orgId/officer/settings/dues': typeof OrgOrgIdOfficerSettingsDuesRoute
+  '/org/$slug': typeof OrgSlugRoute
+  '/pay/$token': typeof PayTokenRoute
+  '/verify/$token': typeof VerifyTokenRoute
+  '/_authenticated/my/events': typeof AuthenticatedMyEventsRoute
+  '/_authenticated/my/id-card': typeof AuthenticatedMyIdCardRoute
+  '/_authenticated/my/notifications': typeof AuthenticatedMyNotificationsRoute
+  '/_authenticated/my/organizations': typeof AuthenticatedMyOrganizationsRoute
+  '/_authenticated/my/payments': typeof AuthenticatedMyPaymentsRoute
+  '/_authenticated/my/profile': typeof AuthenticatedMyProfileRoute
+  '/_authenticated/my/settings': typeof AuthenticatedMySettingsRoute
+  '/_authenticated/my/training': typeof AuthenticatedMyTrainingRoute
+  '/_authenticated/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
+  '/_authenticated/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/_authenticated/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
+  '/_authenticated/my/certificates/': typeof AuthenticatedMyCertificatesIndexRoute
+  '/_authenticated/my/credits/': typeof AuthenticatedMyCreditsIndexRoute
+  '/_authenticated/org/$orgId/officer/applications': typeof AuthenticatedOrgOrgIdOfficerApplicationsRoute
+  '/_authenticated/org/$orgId/officer/communications': typeof AuthenticatedOrgOrgIdOfficerCommunicationsRoute
+  '/_authenticated/org/$orgId/officer/payments': typeof AuthenticatedOrgOrgIdOfficerPaymentsRoute
+  '/_authenticated/org/$orgId/officer/roster': typeof AuthenticatedOrgOrgIdOfficerRosterRoute
+  '/_authenticated/org/$orgId/events/': typeof AuthenticatedOrgOrgIdEventsIndexRoute
+  '/_authenticated/org/$orgId/training/': typeof AuthenticatedOrgOrgIdTrainingIndexRoute
+  '/_authenticated/org/$orgId/officer/events/$eventId': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRoute
+  '/_authenticated/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
+  '/_authenticated/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
+  '/_authenticated/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
+  '/_authenticated/org/$orgId/officer/events/': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
+  '/_authenticated/org/$orgId/officer/training/': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/onboarding'
+    | '/dashboard'
+    | '/auth/$authView'
     | '/invite/$token'
+    | '/org/$slug'
+    | '/pay/$token'
+    | '/verify/$token'
+    | '/my/events'
+    | '/my/id-card'
+    | '/my/notifications'
     | '/my/organizations'
     | '/my/payments'
     | '/my/profile'
     | '/my/settings'
+    | '/my/training'
+    | '/my/certificates/$certificateId'
+    | '/my/credits/log'
     | '/org/$orgId/members'
+    | '/my/certificates'
+    | '/my/credits'
     | '/org/$orgId/officer/applications'
+    | '/org/$orgId/officer/communications'
     | '/org/$orgId/officer/payments'
     | '/org/$orgId/officer/roster'
+    | '/org/$orgId/events'
+    | '/org/$orgId/training'
+    | '/org/$orgId/officer/events/$eventId'
+    | '/org/$orgId/officer/reports/credits'
     | '/org/$orgId/officer/settings/chapters'
     | '/org/$orgId/officer/settings/dues'
+    | '/org/$orgId/officer/events'
+    | '/org/$orgId/officer/training'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/onboarding'
+    | '/dashboard'
+    | '/auth/$authView'
     | '/invite/$token'
+    | '/org/$slug'
+    | '/pay/$token'
+    | '/verify/$token'
+    | '/my/events'
+    | '/my/id-card'
+    | '/my/notifications'
     | '/my/organizations'
     | '/my/payments'
     | '/my/profile'
     | '/my/settings'
+    | '/my/training'
+    | '/my/certificates/$certificateId'
+    | '/my/credits/log'
     | '/org/$orgId/members'
+    | '/my/certificates'
+    | '/my/credits'
     | '/org/$orgId/officer/applications'
+    | '/org/$orgId/officer/communications'
     | '/org/$orgId/officer/payments'
     | '/org/$orgId/officer/roster'
+    | '/org/$orgId/events'
+    | '/org/$orgId/training'
+    | '/org/$orgId/officer/events/$eventId'
+    | '/org/$orgId/officer/reports/credits'
     | '/org/$orgId/officer/settings/chapters'
     | '/org/$orgId/officer/settings/dues'
+    | '/org/$orgId/officer/events'
+    | '/org/$orgId/officer/training'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
+    | '/onboarding'
+    | '/_authenticated/dashboard'
+    | '/auth/$authView'
     | '/invite/$token'
-    | '/my/organizations'
-    | '/my/payments'
-    | '/my/profile'
-    | '/my/settings'
-    | '/org/$orgId/members'
-    | '/org/$orgId/officer/applications'
-    | '/org/$orgId/officer/payments'
-    | '/org/$orgId/officer/roster'
-    | '/org/$orgId/officer/settings/chapters'
-    | '/org/$orgId/officer/settings/dues'
+    | '/org/$slug'
+    | '/pay/$token'
+    | '/verify/$token'
+    | '/_authenticated/my/events'
+    | '/_authenticated/my/id-card'
+    | '/_authenticated/my/notifications'
+    | '/_authenticated/my/organizations'
+    | '/_authenticated/my/payments'
+    | '/_authenticated/my/profile'
+    | '/_authenticated/my/settings'
+    | '/_authenticated/my/training'
+    | '/_authenticated/my/certificates/$certificateId'
+    | '/_authenticated/my/credits/log'
+    | '/_authenticated/org/$orgId/members'
+    | '/_authenticated/my/certificates/'
+    | '/_authenticated/my/credits/'
+    | '/_authenticated/org/$orgId/officer/applications'
+    | '/_authenticated/org/$orgId/officer/communications'
+    | '/_authenticated/org/$orgId/officer/payments'
+    | '/_authenticated/org/$orgId/officer/roster'
+    | '/_authenticated/org/$orgId/events/'
+    | '/_authenticated/org/$orgId/training/'
+    | '/_authenticated/org/$orgId/officer/events/$eventId'
+    | '/_authenticated/org/$orgId/officer/reports/credits'
+    | '/_authenticated/org/$orgId/officer/settings/chapters'
+    | '/_authenticated/org/$orgId/officer/settings/dues'
+    | '/_authenticated/org/$orgId/officer/events/'
+    | '/_authenticated/org/$orgId/officer/training/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
+  AuthAuthViewRoute: typeof AuthAuthViewRoute
   InviteTokenRoute: typeof InviteTokenRoute
-  MyOrganizationsRoute: typeof MyOrganizationsRoute
-  MyPaymentsRoute: typeof MyPaymentsRoute
-  MyProfileRoute: typeof MyProfileRoute
-  MySettingsRoute: typeof MySettingsRoute
-  OrgOrgIdMembersRoute: typeof OrgOrgIdMembersRoute
-  OrgOrgIdOfficerApplicationsRoute: typeof OrgOrgIdOfficerApplicationsRoute
-  OrgOrgIdOfficerPaymentsRoute: typeof OrgOrgIdOfficerPaymentsRoute
-  OrgOrgIdOfficerRosterRoute: typeof OrgOrgIdOfficerRosterRoute
-  OrgOrgIdOfficerSettingsChaptersRoute: typeof OrgOrgIdOfficerSettingsChaptersRoute
-  OrgOrgIdOfficerSettingsDuesRoute: typeof OrgOrgIdOfficerSettingsDuesRoute
+  OrgSlugRoute: typeof OrgSlugRoute
+  PayTokenRoute: typeof PayTokenRoute
+  VerifyTokenRoute: typeof VerifyTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -198,32 +483,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/my/settings': {
-      id: '/my/settings'
-      path: '/my/settings'
-      fullPath: '/my/settings'
-      preLoaderRoute: typeof MySettingsRouteImport
+    '/verify/$token': {
+      id: '/verify/$token'
+      path: '/verify/$token'
+      fullPath: '/verify/$token'
+      preLoaderRoute: typeof VerifyTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/my/profile': {
-      id: '/my/profile'
-      path: '/my/profile'
-      fullPath: '/my/profile'
-      preLoaderRoute: typeof MyProfileRouteImport
+    '/pay/$token': {
+      id: '/pay/$token'
+      path: '/pay/$token'
+      fullPath: '/pay/$token'
+      preLoaderRoute: typeof PayTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/my/payments': {
-      id: '/my/payments'
-      path: '/my/payments'
-      fullPath: '/my/payments'
-      preLoaderRoute: typeof MyPaymentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/my/organizations': {
-      id: '/my/organizations'
-      path: '/my/organizations'
-      fullPath: '/my/organizations'
-      preLoaderRoute: typeof MyOrganizationsRouteImport
+    '/org/$slug': {
+      id: '/org/$slug'
+      path: '/org/$slug'
+      fullPath: '/org/$slug'
+      preLoaderRoute: typeof OrgSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invite/$token': {
@@ -233,64 +511,281 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/org/$orgId/members': {
-      id: '/org/$orgId/members'
+    '/auth/$authView': {
+      id: '/auth/$authView'
+      path: '/auth/$authView'
+      fullPath: '/auth/$authView'
+      preLoaderRoute: typeof AuthAuthViewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/training': {
+      id: '/_authenticated/my/training'
+      path: '/my/training'
+      fullPath: '/my/training'
+      preLoaderRoute: typeof AuthenticatedMyTrainingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/settings': {
+      id: '/_authenticated/my/settings'
+      path: '/my/settings'
+      fullPath: '/my/settings'
+      preLoaderRoute: typeof AuthenticatedMySettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/profile': {
+      id: '/_authenticated/my/profile'
+      path: '/my/profile'
+      fullPath: '/my/profile'
+      preLoaderRoute: typeof AuthenticatedMyProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/payments': {
+      id: '/_authenticated/my/payments'
+      path: '/my/payments'
+      fullPath: '/my/payments'
+      preLoaderRoute: typeof AuthenticatedMyPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/organizations': {
+      id: '/_authenticated/my/organizations'
+      path: '/my/organizations'
+      fullPath: '/my/organizations'
+      preLoaderRoute: typeof AuthenticatedMyOrganizationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/notifications': {
+      id: '/_authenticated/my/notifications'
+      path: '/my/notifications'
+      fullPath: '/my/notifications'
+      preLoaderRoute: typeof AuthenticatedMyNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/id-card': {
+      id: '/_authenticated/my/id-card'
+      path: '/my/id-card'
+      fullPath: '/my/id-card'
+      preLoaderRoute: typeof AuthenticatedMyIdCardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/events': {
+      id: '/_authenticated/my/events'
+      path: '/my/events'
+      fullPath: '/my/events'
+      preLoaderRoute: typeof AuthenticatedMyEventsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/credits/': {
+      id: '/_authenticated/my/credits/'
+      path: '/my/credits'
+      fullPath: '/my/credits'
+      preLoaderRoute: typeof AuthenticatedMyCreditsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/certificates/': {
+      id: '/_authenticated/my/certificates/'
+      path: '/my/certificates'
+      fullPath: '/my/certificates'
+      preLoaderRoute: typeof AuthenticatedMyCertificatesIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/members': {
+      id: '/_authenticated/org/$orgId/members'
       path: '/org/$orgId/members'
       fullPath: '/org/$orgId/members'
-      preLoaderRoute: typeof OrgOrgIdMembersRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdMembersRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/org/$orgId/officer/roster': {
-      id: '/org/$orgId/officer/roster'
+    '/_authenticated/my/credits/log': {
+      id: '/_authenticated/my/credits/log'
+      path: '/my/credits/log'
+      fullPath: '/my/credits/log'
+      preLoaderRoute: typeof AuthenticatedMyCreditsLogRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my/certificates/$certificateId': {
+      id: '/_authenticated/my/certificates/$certificateId'
+      path: '/my/certificates/$certificateId'
+      fullPath: '/my/certificates/$certificateId'
+      preLoaderRoute: typeof AuthenticatedMyCertificatesCertificateIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/training/': {
+      id: '/_authenticated/org/$orgId/training/'
+      path: '/org/$orgId/training'
+      fullPath: '/org/$orgId/training'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdTrainingIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/events/': {
+      id: '/_authenticated/org/$orgId/events/'
+      path: '/org/$orgId/events'
+      fullPath: '/org/$orgId/events'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdEventsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/officer/roster': {
+      id: '/_authenticated/org/$orgId/officer/roster'
       path: '/org/$orgId/officer/roster'
       fullPath: '/org/$orgId/officer/roster'
-      preLoaderRoute: typeof OrgOrgIdOfficerRosterRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerRosterRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/org/$orgId/officer/payments': {
-      id: '/org/$orgId/officer/payments'
+    '/_authenticated/org/$orgId/officer/payments': {
+      id: '/_authenticated/org/$orgId/officer/payments'
       path: '/org/$orgId/officer/payments'
       fullPath: '/org/$orgId/officer/payments'
-      preLoaderRoute: typeof OrgOrgIdOfficerPaymentsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/org/$orgId/officer/applications': {
-      id: '/org/$orgId/officer/applications'
+    '/_authenticated/org/$orgId/officer/communications': {
+      id: '/_authenticated/org/$orgId/officer/communications'
+      path: '/org/$orgId/officer/communications'
+      fullPath: '/org/$orgId/officer/communications'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/officer/applications': {
+      id: '/_authenticated/org/$orgId/officer/applications'
       path: '/org/$orgId/officer/applications'
       fullPath: '/org/$orgId/officer/applications'
-      preLoaderRoute: typeof OrgOrgIdOfficerApplicationsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerApplicationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/org/$orgId/officer/settings/dues': {
-      id: '/org/$orgId/officer/settings/dues'
+    '/_authenticated/org/$orgId/officer/training/': {
+      id: '/_authenticated/org/$orgId/officer/training/'
+      path: '/org/$orgId/officer/training'
+      fullPath: '/org/$orgId/officer/training'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/officer/events/': {
+      id: '/_authenticated/org/$orgId/officer/events/'
+      path: '/org/$orgId/officer/events'
+      fullPath: '/org/$orgId/officer/events'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerEventsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/officer/settings/dues': {
+      id: '/_authenticated/org/$orgId/officer/settings/dues'
       path: '/org/$orgId/officer/settings/dues'
       fullPath: '/org/$orgId/officer/settings/dues'
-      preLoaderRoute: typeof OrgOrgIdOfficerSettingsDuesRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/org/$orgId/officer/settings/chapters': {
-      id: '/org/$orgId/officer/settings/chapters'
+    '/_authenticated/org/$orgId/officer/settings/chapters': {
+      id: '/_authenticated/org/$orgId/officer/settings/chapters'
       path: '/org/$orgId/officer/settings/chapters'
       fullPath: '/org/$orgId/officer/settings/chapters'
-      preLoaderRoute: typeof OrgOrgIdOfficerSettingsChaptersRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/officer/reports/credits': {
+      id: '/_authenticated/org/$orgId/officer/reports/credits'
+      path: '/org/$orgId/officer/reports/credits'
+      fullPath: '/org/$orgId/officer/reports/credits'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/officer/events/$eventId': {
+      id: '/_authenticated/org/$orgId/officer/events/$eventId'
+      path: '/org/$orgId/officer/events/$eventId'
+      fullPath: '/org/$orgId/officer/events/$eventId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMyEventsRoute: typeof AuthenticatedMyEventsRoute
+  AuthenticatedMyIdCardRoute: typeof AuthenticatedMyIdCardRoute
+  AuthenticatedMyNotificationsRoute: typeof AuthenticatedMyNotificationsRoute
+  AuthenticatedMyOrganizationsRoute: typeof AuthenticatedMyOrganizationsRoute
+  AuthenticatedMyPaymentsRoute: typeof AuthenticatedMyPaymentsRoute
+  AuthenticatedMyProfileRoute: typeof AuthenticatedMyProfileRoute
+  AuthenticatedMySettingsRoute: typeof AuthenticatedMySettingsRoute
+  AuthenticatedMyTrainingRoute: typeof AuthenticatedMyTrainingRoute
+  AuthenticatedMyCertificatesCertificateIdRoute: typeof AuthenticatedMyCertificatesCertificateIdRoute
+  AuthenticatedMyCreditsLogRoute: typeof AuthenticatedMyCreditsLogRoute
+  AuthenticatedOrgOrgIdMembersRoute: typeof AuthenticatedOrgOrgIdMembersRoute
+  AuthenticatedMyCertificatesIndexRoute: typeof AuthenticatedMyCertificatesIndexRoute
+  AuthenticatedMyCreditsIndexRoute: typeof AuthenticatedMyCreditsIndexRoute
+  AuthenticatedOrgOrgIdOfficerApplicationsRoute: typeof AuthenticatedOrgOrgIdOfficerApplicationsRoute
+  AuthenticatedOrgOrgIdOfficerCommunicationsRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsRoute
+  AuthenticatedOrgOrgIdOfficerPaymentsRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsRoute
+  AuthenticatedOrgOrgIdOfficerRosterRoute: typeof AuthenticatedOrgOrgIdOfficerRosterRoute
+  AuthenticatedOrgOrgIdEventsIndexRoute: typeof AuthenticatedOrgOrgIdEventsIndexRoute
+  AuthenticatedOrgOrgIdTrainingIndexRoute: typeof AuthenticatedOrgOrgIdTrainingIndexRoute
+  AuthenticatedOrgOrgIdOfficerEventsEventIdRoute: typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRoute
+  AuthenticatedOrgOrgIdOfficerReportsCreditsRoute: typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
+  AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
+  AuthenticatedOrgOrgIdOfficerSettingsDuesRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
+  AuthenticatedOrgOrgIdOfficerEventsIndexRoute: typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
+  AuthenticatedOrgOrgIdOfficerTrainingIndexRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMyEventsRoute: AuthenticatedMyEventsRoute,
+  AuthenticatedMyIdCardRoute: AuthenticatedMyIdCardRoute,
+  AuthenticatedMyNotificationsRoute: AuthenticatedMyNotificationsRoute,
+  AuthenticatedMyOrganizationsRoute: AuthenticatedMyOrganizationsRoute,
+  AuthenticatedMyPaymentsRoute: AuthenticatedMyPaymentsRoute,
+  AuthenticatedMyProfileRoute: AuthenticatedMyProfileRoute,
+  AuthenticatedMySettingsRoute: AuthenticatedMySettingsRoute,
+  AuthenticatedMyTrainingRoute: AuthenticatedMyTrainingRoute,
+  AuthenticatedMyCertificatesCertificateIdRoute:
+    AuthenticatedMyCertificatesCertificateIdRoute,
+  AuthenticatedMyCreditsLogRoute: AuthenticatedMyCreditsLogRoute,
+  AuthenticatedOrgOrgIdMembersRoute: AuthenticatedOrgOrgIdMembersRoute,
+  AuthenticatedMyCertificatesIndexRoute: AuthenticatedMyCertificatesIndexRoute,
+  AuthenticatedMyCreditsIndexRoute: AuthenticatedMyCreditsIndexRoute,
+  AuthenticatedOrgOrgIdOfficerApplicationsRoute:
+    AuthenticatedOrgOrgIdOfficerApplicationsRoute,
+  AuthenticatedOrgOrgIdOfficerCommunicationsRoute:
+    AuthenticatedOrgOrgIdOfficerCommunicationsRoute,
+  AuthenticatedOrgOrgIdOfficerPaymentsRoute:
+    AuthenticatedOrgOrgIdOfficerPaymentsRoute,
+  AuthenticatedOrgOrgIdOfficerRosterRoute:
+    AuthenticatedOrgOrgIdOfficerRosterRoute,
+  AuthenticatedOrgOrgIdEventsIndexRoute: AuthenticatedOrgOrgIdEventsIndexRoute,
+  AuthenticatedOrgOrgIdTrainingIndexRoute:
+    AuthenticatedOrgOrgIdTrainingIndexRoute,
+  AuthenticatedOrgOrgIdOfficerEventsEventIdRoute:
+    AuthenticatedOrgOrgIdOfficerEventsEventIdRoute,
+  AuthenticatedOrgOrgIdOfficerReportsCreditsRoute:
+    AuthenticatedOrgOrgIdOfficerReportsCreditsRoute,
+  AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute:
+    AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute,
+  AuthenticatedOrgOrgIdOfficerSettingsDuesRoute:
+    AuthenticatedOrgOrgIdOfficerSettingsDuesRoute,
+  AuthenticatedOrgOrgIdOfficerEventsIndexRoute:
+    AuthenticatedOrgOrgIdOfficerEventsIndexRoute,
+  AuthenticatedOrgOrgIdOfficerTrainingIndexRoute:
+    AuthenticatedOrgOrgIdOfficerTrainingIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
+  AuthAuthViewRoute: AuthAuthViewRoute,
   InviteTokenRoute: InviteTokenRoute,
-  MyOrganizationsRoute: MyOrganizationsRoute,
-  MyPaymentsRoute: MyPaymentsRoute,
-  MyProfileRoute: MyProfileRoute,
-  MySettingsRoute: MySettingsRoute,
-  OrgOrgIdMembersRoute: OrgOrgIdMembersRoute,
-  OrgOrgIdOfficerApplicationsRoute: OrgOrgIdOfficerApplicationsRoute,
-  OrgOrgIdOfficerPaymentsRoute: OrgOrgIdOfficerPaymentsRoute,
-  OrgOrgIdOfficerRosterRoute: OrgOrgIdOfficerRosterRoute,
-  OrgOrgIdOfficerSettingsChaptersRoute: OrgOrgIdOfficerSettingsChaptersRoute,
-  OrgOrgIdOfficerSettingsDuesRoute: OrgOrgIdOfficerSettingsDuesRoute,
+  OrgSlugRoute: OrgSlugRoute,
+  PayTokenRoute: PayTokenRoute,
+  VerifyTokenRoute: VerifyTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

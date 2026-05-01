@@ -1,16 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import type { RouterContext } from '@/router'
 
 export const Route = createFileRoute('/')({
-  component: DashboardPage,
+  beforeLoad: ({ context }: { context: RouterContext }) => {
+    if (context.auth.user) {
+      throw redirect({ to: '/dashboard' as any })
+    }
+    // Guest → go to sign-in
+    throw redirect({
+      to: '/auth/$authView',
+      params: { authView: 'sign-in' },
+    })
+  },
+  component: () => null, // Never renders — always redirects
 })
-
-function DashboardPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-2">Memberry Dashboard</h1>
-      <p className="text-muted-foreground">
-        Healthcare Association Management System
-      </p>
-    </div>
-  )
-}

@@ -76,7 +76,11 @@ export async function updatePerson(
   if (body.avatar !== undefined) updateData.avatar = body.avatar;
   if (body.languagesSpoken !== undefined) updateData.languagesSpoken = body.languagesSpoken;
   if (body.timezone !== undefined) updateData.timezone = body.timezone;
-  
+  if ((body as any).licenseNumber !== undefined) updateData.licenseNumber = (body as any).licenseNumber;
+  if ((body as any).specialization !== undefined) updateData.specialization = (body as any).specialization;
+  if ((body as any).prcId !== undefined) updateData.prcId = (body as any).prcId;
+  if ((body as any).preferredLanguage !== undefined) updateData.preferredLanguage = (body as any).preferredLanguage;
+
   // Update person record
   const updatedPerson = await repo.updateOneById(personId, updateData);
 

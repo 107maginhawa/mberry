@@ -35,6 +35,8 @@ export function makeCtx(overrides: Record<string, any> = {}) {
       },
       param: (key: string) => paramValues[key] || '',
       header: () => null,
+      json: () => Promise.resolve(jsonBody),
+      query: (key: string) => queryValues[key] || null,
     },
     json: (body: any, status: number) => ({ status, body }) as any as Response,
     body: (body: any, status: number) => ({ status, body }) as any as Response,

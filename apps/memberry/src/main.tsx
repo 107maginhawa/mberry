@@ -1,36 +1,45 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { RouterProvider } from '@tanstack/react-router'
+import { ApiProvider } from '@monobase/sdk-ts/react/provider'
 import { createRoot } from 'react-dom/client'
-import { routeTree } from './routeTree.gen'
+import { toast } from 'sonner'
+import { useSession } from '@monobase/sdk-ts/react/hooks/use-auth'
+import { createRouter } from './router'
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60, // 1 minute
-      retry: 2,
-    },
-  },
-})
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7213'
+const router = createRouter()
 
-const router = createRouter({
-  routeTree,
-  scrollRestoration: true,
-  context: {
-    queryClient,
-  },
-})
+/**
+ * InnerApp — loads session before rendering the router.
+ * Person data is fetched per-page (profile page handles its own query).
+ * Guards only need user/session — not person.
+ */
+function InnerApp() {
+  const { data: session, isPending: sessionPending } = useSession()
 
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router
+  if (sessionPending) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-[#554B68] border-t-transparent rounded-full" />
+      </div>
+    )
   }
+
+  const context = {
+    auth: {
+      session: session?.session || null,
+      user: session?.user || null,
+      person: null, // Fetched per-page, not in bootstrap
+    },
+  }
+
+  return <RouterProvider router={router} context={context} />
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <ApiProvider apiBaseUrl={API_BASE_URL} notifier={toast}>
+      <InnerApp />
+    </ApiProvider>
   )
 }
 

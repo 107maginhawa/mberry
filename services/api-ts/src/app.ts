@@ -41,6 +41,7 @@ import healthOpenapi from '@/core/health.openapi.json';
 import { createRequestId, createRequestLogger } from '@/middleware/request';
 import { createDependencyInjection } from '@/middleware/dependency';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
+import { authMiddleware } from '@/middleware/auth';
 
 
 /**
@@ -90,6 +91,36 @@ export function createApp(config: Config): App {
 
   // Register health check endpoints
   registerHealthRoutes(app as App);
+
+  // Public endpoints (no auth required)
+  app.get('/public/org/:slug', async (ctx) => {
+    const { getOrganizationBySlug } = await import('@/handlers/platformadmin/getOrganizationBySlug');
+    return getOrganizationBySlug(ctx as any);
+  });
+
+  // Custom membership endpoint (auth required)
+  app.get('/persons/me/memberships', authMiddleware(), async (ctx) => {
+    const { getMyMemberships } = await import('@/handlers/association:member/getMyMemberships');
+    return getMyMemberships(ctx as any);
+  });
+
+  // Custom person endpoints (privacy + notification preferences, auth required)
+  app.get('/persons/me/privacy', authMiddleware(), async (ctx) => {
+    const { getPrivacySettings } = await import('@/handlers/person/getPrivacySettings');
+    return getPrivacySettings(ctx as any);
+  });
+  app.patch('/persons/me/privacy', authMiddleware(), async (ctx) => {
+    const { updatePrivacySettings } = await import('@/handlers/person/updatePrivacySettings');
+    return updatePrivacySettings(ctx as any);
+  });
+  app.get('/persons/me/notification-preferences', authMiddleware(), async (ctx) => {
+    const { getNotificationPreferences } = await import('@/handlers/person/getNotificationPreferences');
+    return getNotificationPreferences(ctx as any);
+  });
+  app.patch('/persons/me/notification-preferences', authMiddleware(), async (ctx) => {
+    const { updateNotificationPreferences } = await import('@/handlers/person/updateNotificationPreferences');
+    return updateNotificationPreferences(ctx as any);
+  });
 
   // Register auth routes
   registerAuthRoutes(app as App);
