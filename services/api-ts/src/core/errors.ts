@@ -52,6 +52,12 @@ export class ConflictError extends AppError {
   }
 }
 
+export class DeferredScopeError extends AppError {
+  constructor(handlerName: string, wave: string = 'Wave 2') {
+    super(`${handlerName} is planned for ${wave}`, 'DEFERRED_SCOPE', 501);
+  }
+}
+
 export class RateLimitError extends AppError {
   constructor(message: string = 'Rate limit exceeded', details?: { retryAfter?: number }) {
     super(message, 'RATE_LIMIT', 429, details);

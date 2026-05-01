@@ -1,0 +1,39 @@
+import type { ValidatedContext } from '@/types/app';
+import { UnauthorizedError } from '@/core/errors';
+import type { RecalculateAgingBucketParams } from '@/generated/openapi/validators';
+import { auditAction } from '@/utils/audit';
+
+/**
+ * recalculateAgingBucket
+ *
+ * Path: POST /association/member/aging-buckets/{organizationId}/recalculate
+ * OperationId: recalculateAgingBucket
+ */
+export async function recalculateAgingBucket(
+  ctx: ValidatedContext<never, never, RecalculateAgingBucketParams>
+): Promise<Response> {
+  const session = ctx.get('session');
+  if (!session) throw new UnauthorizedError();
+
+  const { organizationId } = ctx.req.valid('param');
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'aging-bucket',
+    resourceId: organizationId,
+    description: 'Aging bucket recalculated',
+  });
+
+  // Placeholder — full recalculation from overdue invoices not yet implemented
+  // TODO: Query overdue invoices, bucket by age, upsert aging snapshot
+  return ctx.json({
+    organizationId,
+    asOfDate: new Date().toISOString().split('T')[0],
+    current: 0,
+    thirtyDay: 0,
+    sixtyDay: 0,
+    ninetyDay: 0,
+    overNinety: 0,
+    totalOutstanding: 0,
+  }, 200);
+}

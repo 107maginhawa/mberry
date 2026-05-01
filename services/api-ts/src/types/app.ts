@@ -42,6 +42,11 @@ export type Variables = {
   user?: User;
   session?: Session;
 
+  // Association org context (set by org-context middleware on /association/* routes)
+  orgId?: string;
+  orgMembership?: OrgMembership;
+  tenantId?: string;
+
   // Internal service authentication
   internalServiceToken?: string;
   isInternalExpand?: boolean;
@@ -82,6 +87,17 @@ export type ValidatedContext<
     valid(target: 'param'): TParam;
   };
 };
+
+/**
+ * Org membership context for association routes
+ */
+export interface OrgMembership {
+  membershipId: string;
+  personId: string;
+  orgId: string;
+  role: string;
+  status: string;
+}
 
 /**
  * Legacy type alias for backward compatibility

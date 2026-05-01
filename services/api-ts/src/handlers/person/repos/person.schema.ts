@@ -33,6 +33,10 @@ export const persons = pgTable('person', {
   avatar: jsonb('avatar').$type<MaybeStoredFile>(), // Avatar image
   languagesSpoken: jsonb('languages_spoken').$type<string[]>(), // Array of language codes
   timezone: varchar('timezone', { length: 50 }), // IANA timezone identifier
+  licenseNumber: varchar('license_number', { length: 50 }),
+  specialization: varchar('specialization', { length: 100 }),
+  prcId: varchar('prc_id', { length: 50 }),
+  preferredLanguage: varchar('preferred_language', { length: 10 }),
 }, (table) => ({
   // Indexes for search operations
   nameIdx: index('persons_name_idx').on(table.firstName, table.lastName),
@@ -104,6 +108,10 @@ export interface PersonCreateRequest {
   avatar?: MaybeStoredFile;
   languagesSpoken?: string[];
   timezone?: string;
+  licenseNumber?: string;
+  specialization?: string;
+  prcId?: string;
+  preferredLanguage?: string;
 }
 
 // Update request - matches TypeSpec PersonUpdateRequest
@@ -118,5 +126,9 @@ export interface PersonUpdateRequest {
   avatar?: MaybeStoredFileUpdate | null; // Use MaybeStoredFileUpdate for updates, null to clear
   languagesSpoken?: string[] | null; // Can be null to clear
   timezone?: string | null; // Can be null to clear
+  licenseNumber?: string | null;
+  specialization?: string | null;
+  prcId?: string | null;
+  preferredLanguage?: string | null;
 }
 

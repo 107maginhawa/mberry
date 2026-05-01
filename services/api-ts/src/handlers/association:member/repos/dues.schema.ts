@@ -1,0 +1,117 @@
+/**
+ * Database schema for dues module — matches TypeSpec API definition
+ * Covers dues configuration, invoice generation, and AR aging buckets
+ * Uses Drizzle ORM with PostgreSQL
+ */
+
+import { pgTable, varchar, timestamp, date, jsonb, pgEnum, index, bigint, integer } from 'drizzle-orm/pg-core';
+import { baseEntityFields } from '@/core/database.schema';
+
+// ---------------------------------------------------------------------------
+// Enumerations
+// ---------------------------------------------------------------------------
+
+export const duesConfigStatusEnum = pgEnum('dues_config_status', [
+  'active',
+  'retired',
+]);
+
+export const duesInvoiceStatusEnum = pgEnum('dues_invoice_status', [
+  'generated',
+  'sent',
+  'paid',
+  'overdue',
+  'cancelled',
+  'writtenOff',
+]);
+
+// ---------------------------------------------------------------------------
+// Value Types (JSONB shapes)
+// ---------------------------------------------------------------------------
+
+/** Fund allocation rule — percentages must sum to 100 across all allocations */
+export interface FundAllocation {
+  fundName: string;
+  percentage: number;
+  isLast: boolean;
+}
+
+/** Computed allocation of a specific invoice's revenue to a named fund */
+export interface DuesInvoiceAllocation {
+  fundName: string;
+  amount: number; // cents
+}
+
+// ---------------------------------------------------------------------------
+// Tables
+// ---------------------------------------------------------------------------
+
+/** Dues configuration defining amounts and fund allocations for a tier within an organization */
+export const duesConfigs = pgTable('dues_config', {
+  ...baseEntityFields,
+
+  tenantId: varchar('tenant_id', { length: 255 }).notNull(),
+  organizationId: varchar('organization_id', { length: 255 }).notNull(),
+  tierId: varchar('tier_id', { length: 255 }).notNull(),
+  annualAmount: bigint('annual_amount', { mode: 'number' }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull(),
+  gracePeriodDays: integer('grace_period_days').default(30).notNull(),
+  fundAllocations: jsonb('fund_allocations').$type<FundAllocation[]>().notNull(),
+  effectiveDate: date('effective_date').notNull(),
+  status: duesConfigStatusEnum('status').default('active').notNull(),
+}, (table) => ({
+  tenantOrgIdx: index('dues_config_tenant_org_idx').on(table.tenantId, table.organizationId),
+}));
+
+/** Dues invoice issued to a member for a renewal period */
+export const duesInvoices = pgTable('dues_invoice', {
+  ...baseEntityFields,
+
+  tenantId: varchar('tenant_id', { length: 255 }).notNull(),
+  membershipId: varchar('membership_id', { length: 255 }).notNull(),
+  personId: varchar('person_id', { length: 255 }).notNull(),
+  organizationId: varchar('organization_id', { length: 255 }).notNull(),
+  invoiceNumber: varchar('invoice_number', { length: 50 }).notNull(),
+  periodStart: date('period_start').notNull(),
+  periodEnd: date('period_end').notNull(),
+  totalAmount: bigint('total_amount', { mode: 'number' }).notNull(),
+  fundAllocations: jsonb('fund_allocations').$type<DuesInvoiceAllocation[]>().notNull(),
+  status: duesInvoiceStatusEnum('status').default('generated').notNull(),
+  generatedAt: timestamp('generated_at').defaultNow().notNull(),
+  sentAt: timestamp('sent_at'),
+  paidAt: timestamp('paid_at'),
+  paymentId: varchar('payment_id', { length: 255 }),
+}, (table) => ({
+  tenantOrgStatusIdx: index('dues_invoice_tenant_org_status_idx').on(table.tenantId, table.organizationId, table.status),
+  tenantMembershipIdx: index('dues_invoice_tenant_membership_idx').on(table.tenantId, table.membershipId),
+}));
+
+/** Accounts-receivable aging snapshot for an organization as of a specific date */
+export const agingBuckets = pgTable('aging_bucket', {
+  ...baseEntityFields,
+
+  tenantId: varchar('tenant_id', { length: 255 }).notNull(),
+  organizationId: varchar('organization_id', { length: 255 }).notNull(),
+  asOfDate: date('as_of_date').notNull(),
+  current: bigint('current', { mode: 'number' }).default(0).notNull(),
+  thirtyDay: bigint('thirty_day', { mode: 'number' }).default(0).notNull(),
+  sixtyDay: bigint('sixty_day', { mode: 'number' }).default(0).notNull(),
+  ninetyDay: bigint('ninety_day', { mode: 'number' }).default(0).notNull(),
+  overNinety: bigint('over_ninety', { mode: 'number' }).default(0).notNull(),
+  totalOutstanding: bigint('total_outstanding', { mode: 'number' }).default(0).notNull(),
+}, (table) => ({
+  tenantOrgIdx: index('aging_bucket_tenant_org_idx').on(table.tenantId, table.organizationId),
+}));
+
+// ---------------------------------------------------------------------------
+// Type Exports
+// ---------------------------------------------------------------------------
+
+export type DuesConfig = typeof duesConfigs.$inferSelect;
+export type NewDuesConfig = typeof duesConfigs.$inferInsert;
+
+export type DuesInvoice = typeof duesInvoices.$inferSelect;
+export type NewDuesInvoice = typeof duesInvoices.$inferInsert;
+
+export type AgingBucket = typeof agingBuckets.$inferSelect;
+export type NewAgingBucket = typeof agingBuckets.$inferInsert;
