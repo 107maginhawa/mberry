@@ -90,6 +90,17 @@ export class TrainingRepository {
     return result!;
   }
 
+  async getAttendanceStats(trainingId: string) {
+    const [stats] = await this.db
+      .select({
+        completed: sql<number>`count(CASE WHEN ${trainingEnrollments.status} = 'completed' THEN 1 END)::int`,
+        total: sql<number>`count(*)::int`,
+      })
+      .from(trainingEnrollments)
+      .where(eq(trainingEnrollments.trainingId, trainingId));
+    return stats;
+  }
+
   async getEnrollmentCount(trainingId: string): Promise<number> {
     const [result] = await this.db
       .select({ count: sql<number>`count(*)::int` })

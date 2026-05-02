@@ -14,6 +14,10 @@ import {
 } from '../../association:member/repos/membership.schema';
 import { persons } from '../../person/repos/person.schema';
 
+// NOTE: tenantId and orgId are set to the same value (the org's ID).
+// In a multi-association setup, tenantId would be the association ID
+// and orgId would be the chapter ID. This simplification works for
+// single-association deployments (current Memberry setup).
 export class MembershipRepository {
   constructor(private db: DatabaseInstance) {}
 
@@ -133,17 +137,35 @@ export class MembershipRepository {
   }
 
   async upsertCategory(data: NewMembershipCategory): Promise<MembershipCategory> {
-    const [result] = await this.db
-      .insert(membershipCategories)
-      .values(data)
-      .onConflictDoUpdate({
-        target: [membershipCategories.tenantId, membershipCategories.name],
-        set: {
+    // No unique constraint exists on (tenantId, name), so we use check-then-update
+    // instead of onConflictDoUpdate to avoid a runtime constraint error.
+    const [existing] = await this.db
+      .select()
+      .from(membershipCategories)
+      .where(
+        and(
+          eq(membershipCategories.tenantId, data.tenantId),
+          eq(membershipCategories.name, data.name),
+        ),
+      )
+      .limit(1);
+
+    if (existing) {
+      const [result] = await this.db
+        .update(membershipCategories)
+        .set({
           description: data.description,
           applicableTiers: data.applicableTiers,
           updatedAt: new Date(),
-        },
-      })
+        })
+        .where(eq(membershipCategories.id, existing.id))
+        .returning();
+      return result!;
+    }
+
+    const [result] = await this.db
+      .insert(membershipCategories)
+      .values(data)
       .returning();
     return result!;
   }

@@ -12,6 +12,9 @@ export async function updateEvent(ctx: Context): Promise<Response> {
 
   const existing = await repo.get(id);
   if (!existing) throw new NotFoundError('Event not found');
+  // TODO(org-scoping): routes under /events/:id have no orgId param. Auth middleware
+  // restricts access by session, but cross-org data leakage is possible if IDs are
+  // guessed. Add orgId to the route and pass it to repo.get() once route is updated.
 
   // Map old field names to new schema columns; omit fields not in schema
   const {
