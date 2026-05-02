@@ -11,7 +11,7 @@ import { eq } from 'drizzle-orm';
 import { Pool } from 'pg';
 
 // Import schemas
-import { duesConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues.schema';
+import { duesConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues.types';
 import { membershipCategories } from './handlers/membership/repos/membership.types';
 import { events, eventRegistrations } from './handlers/events/repos/events.types';
 import { trainings, trainingEnrollments, trainingAttendance } from './handlers/training/repos/training.types';
