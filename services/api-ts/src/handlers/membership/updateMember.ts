@@ -14,10 +14,7 @@ export async function updateMember(ctx: Context): Promise<Response> {
   const existing = await repo.getMember(orgId, memberId);
   if (!existing) throw new NotFoundError('Member not found');
 
-  // Map status values: 'grace' -> 'gracePeriod', 'pending' -> 'pendingPayment'
-  let status = body.status ?? existing.membership.status;
-  if (status === 'grace') status = 'gracePeriod';
-  if (status === 'pending') status = 'pendingPayment';
+  const status = body.status ?? existing.membership.status;
 
   const updated = await repo.updateMember(existing.membership.id, {
     categoryId: body.categoryId ?? existing.membership.categoryId,
