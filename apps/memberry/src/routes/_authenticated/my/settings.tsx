@@ -1,5 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect, useCallback } from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageHeader } from '@/components/patterns/page-header'
 
 export const Route = createFileRoute('/_authenticated/my/settings')({
   component: MySettingsPage,
@@ -22,11 +24,59 @@ const PRIVACY_FIELDS = [
 
 function MySettingsPage() {
   return (
-    <div className="p-6 space-y-8 max-w-2xl">
-      <h1 className="text-2xl font-bold">Settings</h1>
-      <NotificationPreferencesSection />
-      <PrivacySection />
-      <AccountSection />
+    <div className="max-w-[600px]">
+      <PageHeader title="Settings" subtitle="Manage your account preferences" />
+      <Tabs defaultValue="general">
+        <TabsList className="mb-6">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="privacy">Privacy</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+        </TabsList>
+        <TabsContent value="general">
+          <GeneralSection />
+        </TabsContent>
+        <TabsContent value="privacy">
+          <PrivacySection />
+        </TabsContent>
+        <TabsContent value="security">
+          <AccountSection />
+        </TabsContent>
+        <TabsContent value="notifications">
+          <NotificationPreferencesSection />
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+function GeneralSection() {
+  return (
+    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+      <div>
+        <h2 className="text-[16px] font-semibold font-display">General</h2>
+        <p className="text-[14px] text-[var(--color-muted)] mt-1">Basic account settings</p>
+      </div>
+      <Link
+        to="/my/profile"
+        className="flex items-center justify-between rounded-[8px] border border-[var(--color-border-light)] p-4 hover:shadow-soft transition-shadow"
+      >
+        <div>
+          <p className="text-[14px] font-semibold">Edit Profile</p>
+          <p className="text-[13px] text-[var(--color-muted)]">Update your name, specialization, and contact info</p>
+        </div>
+        <span className="text-[var(--color-muted)]">&rarr;</span>
+      </Link>
+
+      <div className="border-t border-[var(--color-border-light)] pt-4 mt-4">
+        <h3 className="text-[14px] font-semibold text-[var(--color-error)]">Danger Zone</h3>
+        <p className="text-[13px] text-[var(--color-muted)] mt-1">
+          Account deletion is permanent. Your data will be anonymized after a 30-day grace period.
+        </p>
+        <button className="mt-3 px-4 py-[7px] rounded-[8px] bg-[var(--color-error)] text-white text-[13px] font-semibold hover:opacity-90 transition-colors duration-150">
+          Delete Account
+        </button>
+      </div>
     </div>
   )
 }
@@ -64,23 +114,23 @@ function NotificationPreferencesSection() {
     }
   }, [])
 
-  if (loading) return <div className="text-sm text-muted-foreground">Loading preferences...</div>
+  if (loading) return <div className="text-[14px] text-[var(--color-muted)]">Loading preferences...</div>
 
   return (
-    <div className="border rounded-lg p-6 space-y-4">
+    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
       <div>
-        <h2 className="font-medium text-lg">Notification Preferences</h2>
-        <p className="text-sm text-muted-foreground">In-app notifications are always on. High-priority items always push.</p>
+        <h2 className="text-[16px] font-semibold font-display">Notification Preferences</h2>
+        <p className="text-[14px] text-[var(--color-muted)] mt-1">In-app notifications are always on. High-priority items always push.</p>
       </div>
 
       <div className="space-y-3">
         {NOTIFICATION_CATEGORIES.map(cat => {
           const pref = prefs.find(p => p.category === cat.key) || { pushEnabled: true, emailEnabled: false }
           return (
-            <div key={cat.key} className="flex items-center justify-between py-2 border-b last:border-0">
+            <div key={cat.key} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
               <div>
-                <div className="text-sm font-medium">{cat.label}</div>
-                <div className="text-xs text-muted-foreground">{cat.desc}</div>
+                <div className="text-[14px] font-semibold">{cat.label}</div>
+                <div className="text-[13px] text-[var(--color-muted)]">{cat.desc}</div>
               </div>
               <div className="flex gap-4">
                 <ToggleSwitch
@@ -157,9 +207,9 @@ function PrivacySection() {
 
   if (allSettings.length === 0) {
     return (
-      <div className="border rounded-lg p-6 space-y-4">
-        <h2 className="font-medium text-lg">Privacy</h2>
-        <p className="text-sm text-muted-foreground">
+      <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+        <h2 className="text-[16px] font-semibold font-display">Privacy</h2>
+        <p className="text-[14px] text-[var(--color-muted)]">
           Join an organization to configure privacy settings.
         </p>
       </div>
@@ -167,10 +217,10 @@ function PrivacySection() {
   }
 
   return (
-    <div className="border rounded-lg p-6 space-y-4">
+    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
       <div>
-        <h2 className="font-medium text-lg">Privacy</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-[16px] font-semibold font-display">Privacy</h2>
+        <p className="text-[14px] text-[var(--color-muted)] mt-1">
           Control your profile visibility in the member directory.
           Officers always see your name and license number.
         </p>
@@ -180,7 +230,7 @@ function PrivacySection() {
         <select
           value={selectedOrgIndex}
           onChange={(e) => setSelectedOrgIndex(Number(e.target.value))}
-          className="w-full border rounded-md px-3 py-2 text-sm"
+          className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-[14px]"
         >
           {allSettings.map((s, i) => (
             <option key={s.orgId} value={i}>
@@ -192,10 +242,10 @@ function PrivacySection() {
 
       <div className="space-y-3">
         {PRIVACY_FIELDS.map(f => (
-          <div key={f.key} className="flex items-center justify-between py-2 border-b last:border-0">
+          <div key={f.key} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
             <div>
-              <div className="text-sm font-medium">{f.label}</div>
-              <div className="text-xs text-muted-foreground">{f.desc}</div>
+              <div className="text-[14px] font-semibold">{f.label}</div>
+              <div className="text-[13px] text-[var(--color-muted)]">{f.desc}</div>
             </div>
             <ToggleSwitch
               label="Visible"
@@ -211,16 +261,16 @@ function PrivacySection() {
 
 function AccountSection() {
   return (
-    <div className="border rounded-lg p-6 space-y-4">
+    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
       <div>
-        <h2 className="font-medium text-lg">Account</h2>
-        <p className="text-sm text-muted-foreground">
-          Manage your password, email, and security settings in the account portal.
+        <h2 className="text-[16px] font-semibold font-display">Security</h2>
+        <p className="text-[14px] text-[var(--color-muted)] mt-1">
+          Manage your password, email, and security settings.
         </p>
       </div>
       <a
         href="/auth/settings"
-        className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
+        className="inline-flex items-center rounded-[8px] border-[1.5px] border-[var(--color-border)] px-[22px] py-[10px] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
       >
         Open Account Settings
       </a>
@@ -239,14 +289,14 @@ function ToggleSwitch({
 }) {
   return (
     <label className="flex items-center gap-2 cursor-pointer select-none">
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-[13px] text-[var(--color-muted)]">{label}</span>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${
-          checked ? 'bg-[#554B68]' : 'bg-gray-200'
+          checked ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'
         }`}
       >
         <span
