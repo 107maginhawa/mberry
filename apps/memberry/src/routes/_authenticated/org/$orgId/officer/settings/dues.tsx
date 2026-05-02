@@ -11,7 +11,7 @@ function DuesSettingsPage() {
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Dues Configuration</h1>
-      <DuesConfigForm orgId={orgId} tenantId={orgId} />
+      <DuesConfigForm orgId={orgId} />
     </div>
   )
 }

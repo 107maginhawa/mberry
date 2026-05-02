@@ -1,188 +1,190 @@
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  createDuesConfigMutation,
-  listDuesConfigsQueryKey,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
-import { parseCentsInput, validateFundAllocations } from '../lib/money'
+import { useState, useEffect } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
+import { parseCentsInput } from '../lib/money'
 
 interface DuesConfigFormProps {
   orgId: string
-  tenantId: string
-  onSuccess?: () => void
 }
 
-interface FundAllocation {
-  fundName: string
-  percentage: number
+interface ReminderRow {
+  daysOffset: number
+  enabled: boolean
+  channelInapp: boolean
+  channelPush: boolean
+  channelEmail: boolean
+  isCustom: boolean
 }
 
-export function DuesConfigForm({ orgId, tenantId, onSuccess }: DuesConfigFormProps) {
+const DEFAULT_REMINDERS: ReminderRow[] = [
+  { daysOffset: -60, enabled: true, channelInapp: true, channelPush: true, channelEmail: true, isCustom: false },
+  { daysOffset: -30, enabled: true, channelInapp: true, channelPush: true, channelEmail: true, isCustom: false },
+  { daysOffset: -7, enabled: true, channelInapp: true, channelPush: true, channelEmail: true, isCustom: false },
+  { daysOffset: 0, enabled: true, channelInapp: true, channelPush: true, channelEmail: false, isCustom: false },
+  { daysOffset: 7, enabled: true, channelInapp: true, channelPush: false, channelEmail: true, isCustom: false },
+  { daysOffset: 30, enabled: true, channelInapp: true, channelPush: false, channelEmail: true, isCustom: false },
+]
+
+export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
+  const { toast } = useToast()
   const queryClient = useQueryClient()
-  const [tierId, setTierId] = useState('')
-  const [annualAmount, setAnnualAmount] = useState('')
-  const [currency, setCurrency] = useState('PHP')
-  const [gracePeriodDays, setGracePeriodDays] = useState('30')
-  const [allocations, setAllocations] = useState<FundAllocation[]>([
-    { fundName: '', percentage: 100 },
-  ])
-  const [error, setError] = useState<string | null>(null)
 
-  const createMutation = useMutation({
-    ...createDuesConfigMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: listDuesConfigsQueryKey() })
-      onSuccess?.()
+  const [defaultAmount, setDefaultAmount] = useState('')
+  const [currency, setCurrency] = useState('PHP')
+  const [billingFrequency, setBillingFrequency] = useState<'annual' | 'quarterly'>('annual')
+  const [dueDateMonth, setDueDateMonth] = useState('1')
+  const [dueDateDay, setDueDateDay] = useState('1')
+  const [gracePeriodDays, setGracePeriodDays] = useState('30')
+  const [reminders, setReminders] = useState<ReminderRow[]>(DEFAULT_REMINDERS)
+  const [hasChanges, setHasChanges] = useState(false)
+
+  const { data: config, isLoading } = useQuery({
+    queryKey: ['dues-config', orgId],
+    queryFn: async () => {
+      const res = await fetch(`/api/dues/config/${orgId}`)
+      const json = await res.json()
+      return json.data
     },
   })
 
-  const addAllocation = () => {
-    setAllocations([...allocations, { fundName: '', percentage: 0 }])
-  }
-
-  const removeAllocation = (index: number) => {
-    setAllocations(allocations.filter((_, i) => i !== index))
-  }
-
-  const updateAllocation = (index: number, field: keyof FundAllocation, value: string | number) => {
-    const updated = [...allocations]
-    updated[index] = { ...updated[index]!, [field]: field === 'percentage' ? Number(value) : value }
-    setAllocations(updated)
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-
-    const validation = validateFundAllocations(allocations)
-    if (!validation.valid) {
-      setError(`Fund allocations must sum to 100% (currently ${validation.sum}%)`)
-      return
+  useEffect(() => {
+    if (config) {
+      setDefaultAmount((config.defaultAmount / 100).toFixed(2))
+      setCurrency(config.currency)
+      setBillingFrequency(config.billingFrequency)
+      setDueDateMonth(String(config.dueDateMonth ?? 1))
+      setDueDateDay(String(config.dueDateDay))
+      setGracePeriodDays(String(config.gracePeriodDays))
+      if (config.reminderSchedules?.length > 0) {
+        setReminders(config.reminderSchedules)
+      }
     }
+  }, [config])
 
-    const amountCents = parseCentsInput(annualAmount)
-    if (amountCents <= 0) {
-      setError('Annual amount must be greater than 0')
-      return
-    }
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/dues/config/${orgId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          defaultAmount: parseCentsInput(defaultAmount),
+          currency,
+          billingFrequency,
+          dueDateMonth: billingFrequency === 'annual' ? parseInt(dueDateMonth) : null,
+          dueDateDay: parseInt(dueDateDay),
+          gracePeriodDays: parseInt(gracePeriodDays),
+          reminderSchedules: reminders,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dues-config', orgId] })
+      toast({ title: 'Dues configuration updated', description: 'Applies to future billing cycles.' })
+      setHasChanges(false)
+    },
+    onError: () => {
+      toast({ title: 'Failed to save', description: 'Please try again.', variant: 'destructive' })
+    },
+  })
 
-    createMutation.mutate({
-      body: {
-        organizationId: orgId,
-        tierId,
-        annualAmount: amountCents,
-        currency,
-        gracePeriodDays: Number(gracePeriodDays),
-        fundAllocations: allocations.map((a, i) => ({
-          ...a,
-          isLast: i === allocations.length - 1,
-        })),
-        effectiveDate: new Date().toISOString().split('T')[0],
-        status: 'active',
-      },
-      headers: { 'x-org-id': tenantId },
-    } as any)
+  const handleChange = () => setHasChanges(true)
+
+  if (isLoading) {
+    return <div className="space-y-4"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></div>
   }
+
+  const gracePeriodError = parseInt(gracePeriodDays) < 0 || parseInt(gracePeriodDays) > 365
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
-      {error && (
-        <div className="p-3 text-sm text-red-800 bg-red-50 rounded-md">{error}</div>
+    <div className="space-y-8 max-w-2xl">
+      {!config && (
+        <p className="text-sm text-muted-foreground">Set up your dues structure to start collecting membership dues.</p>
       )}
 
-      <div>
-        <label className="block text-sm font-medium mb-1">Tier ID</label>
-        <input
-          type="text"
-          value={tierId}
-          onChange={(e) => setTierId(e.target.value)}
-          required
-          className="w-full px-3 py-2 border rounded-md text-sm"
-          placeholder="Select membership tier"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Annual Amount</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={annualAmount}
-            onChange={(e) => setAnnualAmount(e.target.value)}
-            required
-            className="w-full px-3 py-2 border rounded-md text-sm"
-            placeholder="0.00"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Currency</label>
-          <select
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
-            className="w-full px-3 py-2 border rounded-md text-sm"
-          >
-            <option value="PHP">PHP</option>
-            <option value="USD">USD</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1">Grace Period (days)</label>
-        <input
-          type="number"
-          min="0"
-          max="90"
-          value={gracePeriodDays}
-          onChange={(e) => setGracePeriodDays(e.target.value)}
-          className="w-full px-3 py-2 border rounded-md text-sm"
-        />
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium">Fund Allocations</label>
-          <button type="button" onClick={addAllocation} className="text-xs text-primary hover:underline">
-            + Add Fund
-          </button>
-        </div>
-        {allocations.map((alloc, i) => (
-          <div key={i} className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={alloc.fundName}
-              onChange={(e) => updateAllocation(i, 'fundName', e.target.value)}
-              placeholder="Fund name"
-              required
-              className="flex-1 px-3 py-2 border rounded-md text-sm"
-            />
-            <input
-              type="number"
-              min="0"
-              max="100"
-              value={alloc.percentage}
-              onChange={(e) => updateAllocation(i, 'percentage', e.target.value)}
-              className="w-20 px-3 py-2 border rounded-md text-sm"
-            />
-            <span className="self-center text-sm text-muted-foreground">%</span>
-            {allocations.length > 1 && (
-              <button type="button" onClick={() => removeAllocation(i)} className="text-xs text-red-500">
-                Remove
-              </button>
-            )}
+      <section className="space-y-4">
+        <h3 className="text-lg font-semibold">Default Dues</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Default Amount</Label>
+            <Input type="number" step="0.01" min="0" value={defaultAmount} onChange={(e) => { setDefaultAmount(e.target.value); handleChange() }} placeholder="0.00" />
           </div>
-        ))}
-      </div>
+          <div>
+            <Label>Currency</Label>
+            <Select value={currency} onValueChange={(v) => { setCurrency(v); handleChange() }}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PHP">PHP</SelectItem>
+                <SelectItem value="USD">USD</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Billing Frequency</Label>
+            <Select value={billingFrequency} onValueChange={(v) => { setBillingFrequency(v as any); handleChange() }}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="annual">Annual</SelectItem>
+                <SelectItem value="quarterly">Quarterly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Due Date</Label>
+            <div className="flex gap-2">
+              {billingFrequency === 'annual' && (
+                <Select value={dueDateMonth} onValueChange={(v) => { setDueDateMonth(v); handleChange() }}>
+                  <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <SelectItem key={i + 1} value={String(i + 1)}>
+                        {new Date(2000, i).toLocaleString('default', { month: 'short' })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Input type="number" min="1" max="31" value={dueDateDay} onChange={(e) => { setDueDateDay(e.target.value); handleChange() }} className="w-20" />
+            </div>
+          </div>
+        </div>
+        <div>
+          <Label>Grace Period (days)</Label>
+          <Input type="number" min="0" max="365" value={gracePeriodDays} onChange={(e) => { setGracePeriodDays(e.target.value); handleChange() }} className="w-32" />
+          {gracePeriodError && <p className="text-xs text-destructive mt-1">Grace period must be 0–365 days.</p>}
+          <p className="text-xs text-muted-foreground mt-1">Members have this many days after due date before status changes to Lapsed.</p>
+        </div>
+      </section>
 
-      <button
-        type="submit"
-        disabled={createMutation.isPending}
-        className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50"
-      >
-        {createMutation.isPending ? 'Creating...' : 'Create Dues Config'}
-      </button>
-    </form>
+      <section className="space-y-4">
+        <h3 className="text-lg font-semibold">Reminder Schedule</h3>
+        <div className="space-y-2">
+          {reminders.map((r, i) => (
+            <div key={i} className="flex items-center gap-3 text-sm">
+              <Switch checked={r.enabled} onCheckedChange={(checked) => { const updated = [...reminders]; updated[i] = { ...updated[i]!, enabled: checked }; setReminders(updated); handleChange() }} />
+              <span className="w-40">{r.daysOffset < 0 ? `${Math.abs(r.daysOffset)} days before` : r.daysOffset === 0 ? 'Day of expiry' : `${r.daysOffset} days after`}</span>
+              <label className="flex items-center gap-1"><input type="checkbox" checked={r.channelPush} onChange={(e) => { const updated = [...reminders]; updated[i] = { ...updated[i]!, channelPush: e.target.checked }; setReminders(updated); handleChange() }} className="rounded" />Push</label>
+              <label className="flex items-center gap-1"><input type="checkbox" checked={r.channelEmail} onChange={(e) => { const updated = [...reminders]; updated[i] = { ...updated[i]!, channelEmail: e.target.checked }; setReminders(updated); handleChange() }} className="rounded" />Email</label>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="flex gap-3">
+        <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || gracePeriodError || !defaultAmount}>
+          {saveMutation.isPending ? 'Saving...' : 'Save'}
+        </Button>
+        {hasChanges && <span className="text-xs text-muted-foreground self-center">Unsaved changes</span>}
+      </div>
+    </div>
   )
 }
