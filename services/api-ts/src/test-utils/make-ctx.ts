@@ -41,7 +41,7 @@ export function makeMember(overrides: Partial<TestUser> = {}): TestUser {
 // ─── Context Factory ─────────────────────────────────────
 
 export function makeCtx(overrides: Record<string, any> = {}) {
-  const user = overrides.user !== undefined ? overrides.user : { id: 'user-1', role: 'user' };
+  const user = overrides['user'] !== undefined ? overrides['user'] : { id: 'user-1', role: 'user' };
   const vars: Record<string, any> = {
     user,
     session: user ? { id: 'session-1', userId: user.id, user } : null,
