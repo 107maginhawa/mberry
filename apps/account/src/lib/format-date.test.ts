@@ -61,6 +61,16 @@ describe('formatDate utility', () => {
     expect(result).toBe('10/5/23')
   })
 
+  test('returns empty string for null', () => {
+    const result = formatDate(null)
+    expect(result).toBe('')
+  })
+
+  test('returns empty string for undefined', () => {
+    const result = formatDate(undefined)
+    expect(result).toBe('')
+  })
+
   test('handles invalid dates', () => {
     const result = formatDate('invalid-date')
     expect(result).toBe('Invalid date')
@@ -122,6 +132,16 @@ describe('formatRelativeDate utility', () => {
     const result = formatRelativeDate(date, { style: 'short', addSuffix: false })
     expect(result).toMatch(/\d+h/)
     expect(result).not.toContain('ago')
+  })
+
+  test('returns empty string for null', () => {
+    const result = formatRelativeDate(null)
+    expect(result).toBe('')
+  })
+
+  test('returns empty string for undefined', () => {
+    const result = formatRelativeDate(undefined)
+    expect(result).toBe('')
   })
 
   test('handles invalid dates', () => {

@@ -34,6 +34,20 @@ Hand-written extras live alongside the generated code:
 - `@monobase/sdk-ts/utils/patch` — `buildPatch(current, update, { nullable: [...] })` typed PATCH builder
 - `@monobase/sdk-ts/react/use-optimistic-mutation` — toast convention via `MutationCache`
 
+## Pre-check: Design Specs
+
+Before generating any frontend code, check for existing UX specs:
+
+```bash
+find docs -type f \( -name "*.md" -o -name "*.figma" \) -path "*/ux/*" 2>/dev/null
+find docs -name "DESIGN.md" 2>/dev/null
+find . -name "screens.md" -o -name "navigation.md" -o -name "interactions.md" 2>/dev/null | grep -v node_modules
+```
+
+**If UX specs are found**: Use them as the source of truth for component layout, navigation, states, and interactions. Do NOT generate generic CRUD list/form stubs — implement what the specs describe.
+
+**If no specs found**: Proceed with standard SDK-driven components.
+
 ## Workflow
 
 ### 1. Confirm the endpoint exists in the SDK

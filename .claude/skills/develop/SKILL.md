@@ -42,12 +42,13 @@ For each module, in dependency order, complete ALL of the following before start
 4. Run `/typecheck` — verify types are clean
 
 **Frontend (if applicable):**
-5. Run `/shadcn` — install any needed UI components
-6. Run `/frontend-module` — build API client, hooks, components, routes
-7. Run `/typecheck` — verify frontend types are clean
+5. **Design Spec Check** — scan for `docs/*/ux/`, `DESIGN.md`, `*.figma`, or wireframes. If UX specs exist, use them as the source of truth for frontend implementation instead of generating generic CRUD stubs. Announce: "Found UX specs at X — using these for frontend."
+6. Run `/shadcn` — install any needed UI components
+7. Run `/frontend-module` — build API client, hooks, components, routes (referencing UX specs if found)
+8. Run `/typecheck` — verify frontend types are clean
 
 **Validate:**
-8. Run `/module-review` — completeness check (MUST pass before next module)
+9. Run `/module-review` — completeness check (MUST pass before next module)
 
 Do NOT proceed to the next module until all steps above pass for the current one.
 

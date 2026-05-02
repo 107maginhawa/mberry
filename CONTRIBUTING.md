@@ -1502,6 +1502,16 @@ cd apps/account && bun run typecheck
 - **Handlers**: Test happy path and error cases
 - **E2E**: Cover primary user workflows
 
+### Data Bootstrap Order
+
+When writing seed scripts or test fixtures, follow this order:
+
+1. **Signup** — creates auth user + session
+2. **Create person** — needs active session (person.id = user.id by design)
+3. **Assign roles** — as admin (invalidates the user's session)
+
+Role assignment must come LAST because it invalidates the session. If you assign roles before creating the person, the person creation call will fail with an invalid session.
+
 ## Git Workflow
 
 ### Branching Strategy

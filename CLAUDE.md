@@ -263,6 +263,14 @@ cd apps/account && bun run test:e2e     # E2E tests
 - ✅ **Consent** as JSONB fields on Person model (not a separate module)
 - ✅ **9 API handler modules** (person, booking, billing, audit, notifs, comms, storage, email, reviews)
 
+### Multi-App Architecture
+Production apps typically follow a 3-app pattern:
+- `apps/account` — user-facing account management (auth, profile, settings). Ships with the boilerplate.
+- `apps/{product}` — domain-specific product app (e.g., `apps/memberry`, `apps/clinic`). You create this.
+- `apps/admin` — ops/admin dashboard. You create this.
+
+To scaffold a new app, copy `apps/account/` and update `package.json` name + `vite.config.ts` port. All apps share the same API and SDK.
+
 ### What's Intentionally Absent
 - This template ships **no domain-vertical apps or modules**. Add your own
   (e.g., `apps/admin`, `services/api-ts/src/handlers/tenant/`) on top of the base.

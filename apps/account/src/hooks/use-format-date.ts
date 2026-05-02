@@ -25,9 +25,9 @@ export interface UseFormatDateOptions extends FormatDateOptions {
  */
 export interface UseFormatDateReturn {
   /** Format a date for display */
-  formatDate: (date: Date | number | string) => string
+  formatDate: (date: Date | number | string | null | undefined) => string
   /** Format a date as relative time */
-  formatRelativeDate: (date: Date | number | string, options?: FormatRelativeDateOptions) => string
+  formatRelativeDate: (date: Date | number | string | null | undefined, options?: FormatRelativeDateOptions) => string
   /** Current format type */
   format: DateFormat
 }
