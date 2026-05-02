@@ -37,6 +37,12 @@ import { communications } from '@/handlers/communications';
 // Certificates handler
 import { certificates } from '@/handlers/certificates';
 
+// Events handler
+import { eventsRouter } from '@/handlers/events';
+
+// Training handler
+import { trainingRouter } from '@/handlers/training';
+
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
 import { registerRoutes as registerHealthRoutes } from '@/core/health';
@@ -149,6 +155,12 @@ export function createApp(config: Config): App {
 
   // Register certificates routes
   app.route('/api/certificates', certificates);
+
+  // Register events routes
+  app.route('/api/events', eventsRouter);
+
+  // Register training routes
+  app.route('/api/training', trainingRouter);
 
   // Register API routes
   registerOpenAPIRoutes(app as any);
