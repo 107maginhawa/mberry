@@ -24,6 +24,9 @@ import { registerNotifsJobs } from '@/handlers/notifs/jobs';
 import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
 
+// Dues handler
+import { dues } from '@/handlers/dues';
+
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
 import { registerRoutes as registerHealthRoutes } from '@/core/health';
@@ -124,6 +127,9 @@ export function createApp(config: Config): App {
 
   // Register auth routes
   registerAuthRoutes(app as App);
+
+  // Register dues routes
+  app.route('/api/dues', dues);
 
   // Register API routes
   registerOpenAPIRoutes(app as any);
