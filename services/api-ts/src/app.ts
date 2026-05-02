@@ -147,6 +147,16 @@ export function createApp(config: Config): App {
   // Register auth routes
   registerAuthRoutes(app as App);
 
+  // Auth middleware for all custom module routes
+  // These were previously unprotected — any request could reach handlers
+  app.use('/dues/*', authMiddleware());
+  app.use('/membership/*', authMiddleware());
+  app.use('/communications/*', authMiddleware());
+  app.use('/certificates/*', authMiddleware());
+  app.use('/events/*', authMiddleware());
+  app.use('/training/*', authMiddleware());
+  app.use('/elections/*', authMiddleware());
+
   // Register module routes (no /api prefix — Vite proxy strips it)
   app.route('/dues', dues);
   app.route('/membership', membership);
