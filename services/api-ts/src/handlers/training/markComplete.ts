@@ -1,6 +1,8 @@
 import type { Context } from 'hono';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
+import { CreditEntryRepository } from '../association:member/repos/credits.repo';
+import { getCycleForDate } from '../association:member/utils/credit-cycle';
 
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -22,6 +24,32 @@ export async function markComplete(ctx: Context): Promise<Response> {
   if (personEnrollment.completedAt) throw new ConflictError('Already marked as completed');
 
   const updated = await repo.updateEnrollmentStatus(personEnrollment.id, 'completed');
+
+  // [BR-13] Auto-create credit entry for credit-bearing trainings
+  if (training.creditAmount && training.creditAmount > 0) {
+    try {
+      const creditRepo = new CreditEntryRepository(db);
+      const activityDate = training.endDate ?? new Date();
+      // Default 2-year cycle from activity date as registration proxy
+      const cycle = getCycleForDate(activityDate, activityDate, 2);
+
+      await creditRepo.createOne({
+        tenantId: training.tenantId,
+        personId: body.personId,
+        organizationId: training.organizationId,
+        type: 'auto',
+        trainingId: training.id,
+        activityName: training.title,
+        provider: training.organizationId,
+        activityDate,
+        creditAmount: training.creditAmount,
+        cycleStart: cycle.cycleStart,
+        cycleEnd: cycle.cycleEnd,
+      });
+    } catch {
+      // Credit creation failure should not block marking complete
+    }
+  }
 
   return ctx.json({ data: updated }, 201);
 }

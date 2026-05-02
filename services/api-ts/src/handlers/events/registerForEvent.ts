@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
 import type { Session } from '@/types/auth';
 
 export async function registerForEvent(ctx: Context): Promise<Response> {
@@ -11,6 +12,13 @@ export async function registerForEvent(ctx: Context): Promise<Response> {
 
   const event = await repo.get(eventId);
   if (!event) throw new NotFoundError('Event not found');
+
+  // [BR-02] Only active members can register for events
+  const membershipRepo = new MembershipRepository(db, ctx.get('logger'));
+  const membership = await membershipRepo.findByPersonAndOrg(session.user.id, event.organizationId);
+  if (!membership || membership.status !== 'active') {
+    throw new BusinessLogicError('Active membership required to register for events');
+  }
 
   const regCount = await repo.getRegistrationCount(eventId);
   const isWaitlisted = event.capacity ? regCount >= event.capacity : false;

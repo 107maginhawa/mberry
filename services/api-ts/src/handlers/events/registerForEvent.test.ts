@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { registerForEvent } from './registerForEvent';
 import { EventsRepository } from './repos/events.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -41,6 +42,9 @@ describe('[BR-27] registerForEvent', () => {
       getRegistrationCount: async () => 10,
       register: async (data: any) => ({ ...fakeRegistration, ...data }),
     });
+    const memMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ status: 'active' }),
+    });
 
     const ctx = makeCtx({
       _params: { id: 'evt-1' },
@@ -50,6 +54,7 @@ describe('[BR-27] registerForEvent', () => {
     expect(response.status).toBe(201);
     expect(response.body.data.status).toBe('confirmed');
     expect(response.body.data.eventId).toBe('evt-1');
+    Object.values(memMocks).forEach(m => m.mockRestore());
   });
 
   test('[BR-27] waitlists when event at capacity', async () => {
@@ -58,6 +63,7 @@ describe('[BR-27] registerForEvent', () => {
       getRegistrationCount: async () => 50,
       register: async (data: any) => ({ ...fakeRegistration, ...data }),
     });
+    const memMocks = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
     const ctx = makeCtx({
       _params: { id: 'evt-1' },
@@ -74,14 +80,13 @@ describe('[BR-27] registerForEvent', () => {
       getRegistrationCount: async () => 15,
       register: async (data: any) => ({ ...fakeRegistration, ...data }),
     });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({
-      _params: { id: 'evt-1' },
-    });
-
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
     const response = await registerForEvent(ctx);
     expect(response.status).toBe(201);
     expect(response.body.data.status).toBe('waitlisted');
+    Object.values(mm).forEach(m => m.mockRestore());
   });
 
   test('[BR-27] confirms when no capacity limit (null capacity)', async () => {
@@ -90,63 +95,56 @@ describe('[BR-27] registerForEvent', () => {
       getRegistrationCount: async () => 999,
       register: async (data: any) => ({ ...fakeRegistration, ...data }),
     });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({
-      _params: { id: 'evt-1' },
-    });
-
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
     const response = await registerForEvent(ctx);
     expect(response.status).toBe(201);
     expect(response.body.data.status).toBe('confirmed');
+    Object.values(mm).forEach(m => m.mockRestore());
   });
 
   test('confirms when zero capacity (falsy)', async () => {
-    // capacity: 0 is falsy, so isWaitlisted = false
     mocks = stubRepo(EventsRepository, {
       get: async () => ({ ...fakeEvent, capacity: 0 }),
       getRegistrationCount: async () => 10,
       register: async (data: any) => ({ ...fakeRegistration, ...data }),
     });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({
-      _params: { id: 'evt-1' },
-    });
-
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
     const response = await registerForEvent(ctx);
     expect(response.status).toBe(201);
     expect(response.body.data.status).toBe('confirmed');
+    Object.values(mm).forEach(m => m.mockRestore());
   });
 
-  test('allows registration for cancelled event (no status guard)', async () => {
-    // Handler does not check event status before registering.
+  test('allows registration for cancelled event (no event status guard)', async () => {
     mocks = stubRepo(EventsRepository, {
       get: async () => ({ ...fakeEvent, status: 'cancelled' }),
       getRegistrationCount: async () => 0,
       register: async (data: any) => ({ ...fakeRegistration, ...data }),
     });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({
-      _params: { id: 'evt-1' },
-    });
-
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
     const response = await registerForEvent(ctx);
     expect(response.status).toBe(201);
+    Object.values(mm).forEach(m => m.mockRestore());
   });
 
   test('allows duplicate registration (no uniqueness guard)', async () => {
-    // Handler does not check if user already registered.
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       getRegistrationCount: async () => 5,
       register: async (data: any) => ({ ...fakeRegistration, ...data, id: 'reg-2' }),
     });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({
-      _params: { id: 'evt-1' },
-    });
-
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
     const response = await registerForEvent(ctx);
     expect(response.status).toBe(201);
+    Object.values(mm).forEach(m => m.mockRestore());
   });
 
   test('throws NotFoundError for non-existent event', async () => {
@@ -161,6 +159,47 @@ describe('[BR-27] registerForEvent', () => {
     });
 
     await expect(registerForEvent(ctx)).rejects.toThrow('Event not found');
+  });
+
+  // ─── [BR-02] Grace Period Registration Guard ───────────
+
+  test('[BR-02] blocks grace period member from registering', async () => {
+    mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
+      getRegistrationCount: async () => 0,
+      register: async (data: any) => fakeRegistration,
+    });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'gracePeriod' }) });
+
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
+    await expect(registerForEvent(ctx)).rejects.toThrow('Active membership required');
+    Object.values(mm).forEach(m => m.mockRestore());
+  });
+
+  test('[BR-02] blocks lapsed member from registering', async () => {
+    mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
+      getRegistrationCount: async () => 0,
+      register: async (data: any) => fakeRegistration,
+    });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'lapsed' }) });
+
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
+    await expect(registerForEvent(ctx)).rejects.toThrow('Active membership required');
+    Object.values(mm).forEach(m => m.mockRestore());
+  });
+
+  test('[BR-02] blocks non-member from registering', async () => {
+    mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
+      getRegistrationCount: async () => 0,
+      register: async (data: any) => fakeRegistration,
+    });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => null });
+
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
+    await expect(registerForEvent(ctx)).rejects.toThrow('Active membership required');
+    Object.values(mm).forEach(m => m.mockRestore());
   });
 
   test('crashes without session (no auth)', async () => {

@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
+import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 
 const fakeTraining = {
   id: 'training-1',
@@ -10,6 +11,8 @@ const fakeTraining = {
   title: 'CPD Seminar',
   status: 'published',
   capacity: 50,
+  creditAmount: 8,
+  endDate: new Date('2026-06-01'),
 };
 
 const fakeEnrollment = {
@@ -117,6 +120,68 @@ describe('markComplete', () => {
     });
 
     await expect(markComplete(ctx)).rejects.toThrow('Already marked as completed');
+  });
+
+  // ─── [BR-13] Auto-credit creation ─────────────────────
+
+  test('[BR-13] creates auto credit entry for credit-bearing training', async () => {
+    let creditCreated: any = null;
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        status,
+      }),
+    });
+
+    // Also stub credit repo
+    const creditMock = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => { creditCreated = data; return { id: 'credit-1', ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    const response = await markComplete(ctx);
+    expect(response.status).toBe(201);
+    expect(creditCreated).not.toBeNull();
+    expect(creditCreated.type).toBe('auto');
+    expect(creditCreated.trainingId).toBe('training-1');
+    expect(creditCreated.creditAmount).toBe(8);
+    expect(creditCreated.personId).toBe('person-1');
+
+    Object.values(creditMock).forEach((m) => m.mockRestore());
+  });
+
+  test('[BR-13] skips credit creation for non-credit-bearing training', async () => {
+    let creditCreated = false;
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => ({ ...fakeTraining, creditAmount: 0 }),
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        status,
+      }),
+    });
+
+    const creditMock = stubRepo(CreditEntryRepository, {
+      createOne: async () => { creditCreated = true; return {} as any; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    await markComplete(ctx);
+    expect(creditCreated).toBe(false);
+
+    Object.values(creditMock).forEach((m) => m.mockRestore());
   });
 
   test('crashes without session (no auth)', async () => {
