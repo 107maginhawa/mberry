@@ -43,6 +43,9 @@ import { eventsRouter } from '@/handlers/events';
 // Training handler
 import { trainingRouter } from '@/handlers/training';
 
+// Elections handler
+import { electionsRouter } from '@/handlers/elections';
+
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
 import { registerRoutes as registerHealthRoutes } from '@/core/health';
@@ -161,6 +164,9 @@ export function createApp(config: Config): App {
 
   // Register training routes
   app.route('/api/training', trainingRouter);
+
+  // Register elections routes
+  app.route('/api/elections', electionsRouter);
 
   // Register API routes
   registerOpenAPIRoutes(app as any);
