@@ -30,7 +30,7 @@ export const duesPaymentStatusEnum = pgEnum('dues_payment_status', [
 export const gatewayProviderEnum = pgEnum('gateway_provider', ['paymongo', 'stripe']);
 
 // Tables
-export const duesConfigs = pgTable('dues_config', {
+export const duesConfigs = pgTable('dues_org_config', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull(),
   defaultAmount: integer('default_amount').notNull(),

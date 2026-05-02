@@ -78,6 +78,13 @@
       "when": 1777645800000,
       "tag": "0010_phase1_gaps",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1777700000000,
+      "tag": "0011_dues_module_tables",
+      "breakpoints": true
     }
   ]
 }
