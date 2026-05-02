@@ -27,7 +27,7 @@ const fakeFunds = [
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('recordPayment', () => {
+describe('recordPayment [BR-06]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
@@ -224,5 +224,203 @@ describe('recordPayment', () => {
     await recordPayment(ctx);
     const year = new Date().getFullYear();
     expect(capturedData.receiptNumber).toBe(`ORG-${year}-000042`);
+  });
+
+  // ─── [BR-06] Gap tests from BR text ──────────────────
+
+  test('[BR-06] records officer identity (recordedBy) from session', async () => {
+    let capturedData: any = null;
+    mocks = stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => { capturedData = data; return { ...fakePayment, ...data }; },
+      listFunds: async () => [],
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'treasurer-1', role: 'officer' },
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        paymentMethod: 'cash',
+      },
+    });
+
+    await recordPayment(ctx);
+    expect(capturedData.recordedBy).toBe('treasurer-1');
+    expect(capturedData.createdBy).toBe('treasurer-1');
+  });
+
+  test('[BR-06] records payment method for manual payments', async () => {
+    const methods = ['cash', 'check', 'bank_transfer'];
+    for (const method of methods) {
+      let capturedData: any = null;
+      mocks = stubRepo(DuesRepository, {
+        findRecentPaymentForPerson: async () => undefined,
+        getNextReceiptSequence: async () => 1,
+        createPayment: async (data: any) => { capturedData = data; return { ...fakePayment, ...data }; },
+        listFunds: async () => [],
+      });
+
+      const ctx = makeCtx({
+        _body: {
+          organizationId: 'org-1',
+          personId: 'person-1',
+          amount: 5000,
+          paymentMethod: method,
+        },
+      });
+
+      await recordPayment(ctx);
+      expect(capturedData.paymentMethod).toBe(method);
+    }
+  });
+
+  test('[BR-06] records payment date (paidAt) at creation time', async () => {
+    let capturedData: any = null;
+    const before = new Date();
+    mocks = stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => { capturedData = data; return { ...fakePayment, ...data }; },
+      listFunds: async () => [],
+    });
+
+    const ctx = makeCtx({
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        paymentMethod: 'cash',
+      },
+    });
+
+    await recordPayment(ctx);
+    const after = new Date();
+    expect(capturedData.paidAt).toBeInstanceOf(Date);
+    expect(capturedData.paidAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    expect(capturedData.paidAt.getTime()).toBeLessThanOrEqual(after.getTime());
+  });
+
+  test('[BR-06] includes fund breakdown when funds configured', async () => {
+    let capturedAllocations: any[] = [];
+    mocks = stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      listFunds: async () => fakeFunds,
+      createFundAllocations: async (allocs: any) => { capturedAllocations = allocs; },
+    });
+
+    const ctx = makeCtx({
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        paymentMethod: 'cash',
+      },
+    });
+
+    await recordPayment(ctx);
+    expect(capturedAllocations).toHaveLength(2);
+    // Each allocation links back to the payment and fund
+    expect(capturedAllocations[0].paymentId).toBeTruthy();
+    expect(capturedAllocations[0].fundId).toBe('fund-1');
+    expect(capturedAllocations[1].fundId).toBe('fund-2');
+    expect(capturedAllocations[0].isReversal).toBe(false);
+  });
+
+  // ─── [BR-07] Expiry extension on payment ──────────────
+
+  test('[BR-07] extends dues expiry from current expiry on payment', async () => {
+    let capturedExpiry: Date | null = null;
+    mocks = stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      listFunds: async () => [],
+      getMembershipForExpiry: async () => ({
+        duesExpiryDate: new Date('2026-08-01'),
+        billingCycle: 'annual' as const,
+        customMonths: null,
+      }),
+      updateDuesExpiry: async (_orgId: string, _personId: string, expiry: Date) => {
+        capturedExpiry = expiry;
+      },
+    });
+
+    const ctx = makeCtx({
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        paymentMethod: 'cash',
+      },
+    });
+
+    await recordPayment(ctx);
+    // [BR-07] Extend from current expiry (2026-08-01), not today
+    expect(capturedExpiry).toEqual(new Date('2027-08-01'));
+  });
+
+  test('[BR-07] severely lapsed member gets expiry from today', async () => {
+    let capturedExpiry: Date | null = null;
+    const now = new Date();
+    // Set current expiry to 2 years ago (way more than 1 annual cycle)
+    const twoYearsAgo = new Date(now);
+    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+
+    mocks = stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      listFunds: async () => [],
+      getMembershipForExpiry: async () => ({
+        duesExpiryDate: twoYearsAgo,
+        billingCycle: 'annual' as const,
+        customMonths: null,
+      }),
+      updateDuesExpiry: async (_orgId: string, _personId: string, expiry: Date) => {
+        capturedExpiry = expiry;
+      },
+    });
+
+    const ctx = makeCtx({
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        paymentMethod: 'cash',
+      },
+    });
+
+    await recordPayment(ctx);
+    // Severely lapsed → expiry should be ~12 months from now
+    const expectedYear = now.getFullYear() + 1;
+    expect(capturedExpiry!.getFullYear()).toBe(expectedYear);
+  });
+
+  test('[BR-06] no fund allocations when zero funds configured', async () => {
+    let allocCalled = false;
+    mocks = stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      listFunds: async () => [],
+      createFundAllocations: async () => { allocCalled = true; },
+    });
+
+    const ctx = makeCtx({
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        paymentMethod: 'cash',
+      },
+    });
+
+    await recordPayment(ctx);
+    expect(allocCalled).toBe(false);
   });
 });

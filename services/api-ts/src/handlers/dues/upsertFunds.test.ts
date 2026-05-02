@@ -12,7 +12,7 @@ const fakeFunds = [
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('upsertFunds', () => {
+describe('upsertFunds [BR-05]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {

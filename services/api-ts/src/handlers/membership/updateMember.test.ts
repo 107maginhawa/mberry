@@ -33,7 +33,7 @@ const updatedMember = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('updateMember', () => {
+describe('updateMember [BR-03]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
@@ -120,10 +120,10 @@ describe('updateMember', () => {
     expect(capturedUpdate.memberNumber).toBe('MEM-001');
   });
 
-  test('sets terminatedAt when status is terminated', async () => {
+  test('sets terminatedAt when status is terminated [BR-03]', async () => {
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipRepository, {
-      getMember: async () => existingMember,
+      getMember: async () => existingMember, // status: 'active'
       updateMember: async (_id: string, data: any) => { capturedUpdate = data; return { ...existingMember.membership, ...data }; },
     });
 
@@ -168,5 +168,112 @@ describe('updateMember', () => {
 
     await updateMember(ctx);
     expect(capturedUpdate.updatedBy).toBe('admin-3');
+  });
+
+  // ─── [BR-03] Membership Transitions — Valid ───────────
+
+  describe('[BR-03] valid transitions', () => {
+    const validTransitions: Array<[string, string]> = [
+      ['active', 'suspended'],    // officer suspends
+      ['active', 'terminated'],   // president removes
+      ['grace', 'suspended'],     // officer suspends grace member
+      ['lapsed', 'suspended'],    // officer suspends lapsed member
+      ['lapsed', 'active'],       // member pays dues (manual restore)
+      ['suspended', 'active'],    // officer restores
+    ];
+
+    for (const [from, to] of validTransitions) {
+      test(`${from} → ${to} succeeds`, async () => {
+        const memberWithStatus = {
+          ...existingMember,
+          membership: { ...existingMember.membership, status: from },
+        };
+        let capturedStatus: string | null = null;
+        mocks = stubRepo(MembershipRepository, {
+          getMember: async () => memberWithStatus,
+          updateMember: async (_id: string, data: any) => {
+            capturedStatus = data.status;
+            return { ...memberWithStatus.membership, ...data };
+          },
+        });
+
+        const ctx = makeCtx({
+          _params: { orgId: 'org-1', memberId: 'person-1' },
+          _body: { status: to },
+        });
+
+        const response = await updateMember(ctx);
+        expect(response.status).toBe(200);
+        expect(capturedStatus).toBe(to);
+      });
+    }
+
+    test('same status (no-op) is always valid', async () => {
+      let capturedStatus: string | null = null;
+      mocks = stubRepo(MembershipRepository, {
+        getMember: async () => existingMember, // status: 'active'
+        updateMember: async (_id: string, data: any) => {
+          capturedStatus = data.status;
+          return { ...existingMember.membership, ...data };
+        },
+      });
+
+      const ctx = makeCtx({
+        _params: { orgId: 'org-1', memberId: 'person-1' },
+        _body: { status: 'active' },
+      });
+
+      const response = await updateMember(ctx);
+      expect(response.status).toBe(200);
+      expect(capturedStatus).toBe('active');
+    });
+  });
+
+  // ─── [BR-03] Membership Transitions — Invalid ────────
+
+  describe('[BR-03] invalid transitions silently rejected', () => {
+    const invalidTransitions: Array<[string, string, string]> = [
+      ['active', 'pending', 'cannot revert to pending'],
+      ['active', 'lapsed', 'cannot skip to lapsed'],
+      ['active', 'grace', 'grace is automatic via expiry, not officer action'],
+      ['grace', 'active', 'must pay dues or go through suspended→active'],
+      ['grace', 'lapsed', 'lapsed is automatic via grace expiry'],
+      ['grace', 'terminated', 'only active members can be removed'],
+      ['lapsed', 'grace', 'cannot go backwards to grace'],
+      ['lapsed', 'terminated', 'only active members can be removed'],
+      ['suspended', 'grace', 'restore goes to active only'],
+      ['suspended', 'lapsed', 'restore goes to active only'],
+      ['suspended', 'terminated', 'must restore before removing'],
+      ['suspended', 'pending', 'cannot revert to pending'],
+      ['pending', 'active', 'pending→active via reviewApplication only'],
+      ['pending', 'suspended', 'must approve first'],
+    ];
+
+    for (const [from, to, reason] of invalidTransitions) {
+      test(`${from} → ${to} rejected (${reason})`, async () => {
+        const memberWithStatus = {
+          ...existingMember,
+          membership: { ...existingMember.membership, status: from },
+        };
+        let capturedStatus: string | null = null;
+        mocks = stubRepo(MembershipRepository, {
+          getMember: async () => memberWithStatus,
+          updateMember: async (_id: string, data: any) => {
+            capturedStatus = data.status;
+            return { ...memberWithStatus.membership, ...data };
+          },
+        });
+
+        const ctx = makeCtx({
+          _params: { orgId: 'org-1', memberId: 'person-1' },
+          _body: { status: to },
+        });
+
+        const response = await updateMember(ctx);
+        // [BR-03] Invalid transitions: no error, no state change
+        expect(response.status).toBe(200);
+        expect(capturedStatus).toBe(from); // status unchanged
+      });
+    }
   });
 });

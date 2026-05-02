@@ -30,7 +30,7 @@ const fakeMember = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('reviewApplication', () => {
+describe('reviewApplication [BR-03]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {

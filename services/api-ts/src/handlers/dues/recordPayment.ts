@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { DuesRepository } from './repos/dues.repo';
 import { allocateFunds } from './utils/fund-math';
 import { formatReceiptNumber } from './utils/receipt-number';
+import { computeNewExpiry } from './utils/expiry-extension';
 import type { Session } from '@/types/auth';
 
 export async function recordPayment(ctx: Context): Promise<Response> {
@@ -48,6 +49,19 @@ export async function recordPayment(ctx: Context): Promise<Response> {
         isReversal: false,
       }))
     );
+  }
+
+  // [BR-07] Extend dues_expiry_date on payment
+  if (repo.getMembershipForExpiry && repo.updateDuesExpiry) {
+    const membership = await repo.getMembershipForExpiry(organizationId, personId);
+    if (membership) {
+      const newExpiry = computeNewExpiry({
+        currentExpiry: membership.duesExpiryDate,
+        billingCycle: membership.billingCycle ?? 'annual',
+        customMonths: membership.customMonths ?? undefined,
+      });
+      await repo.updateDuesExpiry(organizationId, personId, newExpiry);
+    }
   }
 
   return ctx.json({

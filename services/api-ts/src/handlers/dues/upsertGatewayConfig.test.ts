@@ -16,7 +16,7 @@ const fakeGateway = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('upsertGatewayConfig', () => {
+describe('upsertGatewayConfig [BR-30]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {

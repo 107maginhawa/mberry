@@ -27,7 +27,7 @@ const fakeAllocations = [
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('refundPayment', () => {
+describe('refundPayment [BR-08]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
@@ -153,5 +153,115 @@ describe('refundPayment', () => {
 
     // session.user.id is accessed for updatedBy
     await expect(refundPayment(ctx)).rejects.toThrow();
+  });
+
+  // ─── [BR-08] Gap tests from BR text ──────────────────
+
+  test('[BR-08] cannot refund already fully refunded payment', async () => {
+    const fullyRefunded = { ...fakePayment, refundedAmount: 10000, status: 'refunded' };
+    mocks = stubRepo(DuesRepository, {
+      getPayment: async () => fullyRefunded,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'pay-1' },
+      _body: { amount: 1000 },
+    });
+
+    // max refundable = 10000 - 10000 = 0, so 1000 > 0 → error
+    await expect(refundPayment(ctx)).rejects.toThrow();
+  });
+
+  test('[BR-08] full refund of default amount (no body.amount) uses payment.amount', async () => {
+    mocks = stubRepo(DuesRepository, {
+      getPayment: async () => fakePayment,
+      getFundAllocations: async () => [],
+      createFundAllocations: async () => {},
+      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+        ...fakePayment,
+        status,
+        ...extra,
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'pay-1' },
+      _body: {}, // no amount → full refund
+    });
+
+    const response = await refundPayment(ctx);
+    expect(response.body.data.refundedAmount).toBe(10000);
+    expect(response.body.data.status).toBe('refunded');
+  });
+
+  test('[BR-08] multiple partial refunds accumulate correctly', async () => {
+    // First partial refund already happened: 3000 of 10000 refunded
+    const partiallyRefunded = { ...fakePayment, refundedAmount: 3000, status: 'partially_refunded' };
+    mocks = stubRepo(DuesRepository, {
+      getPayment: async () => partiallyRefunded,
+      getFundAllocations: async () => fakeAllocations,
+      createFundAllocations: async () => {},
+      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+        ...partiallyRefunded,
+        status,
+        ...extra,
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'pay-1' },
+      _body: { amount: 4000 }, // second partial: 3000 + 4000 = 7000 of 10000
+    });
+
+    const response = await refundPayment(ctx);
+    expect(response.body.data.refundedAmount).toBe(7000);
+    expect(response.body.data.status).toBe('partially_refunded');
+  });
+
+  test('[BR-08] refund reversals are proportional per fund', async () => {
+    let capturedReversals: any[] = [];
+    mocks = stubRepo(DuesRepository, {
+      getPayment: async () => fakePayment, // amount: 10000
+      getFundAllocations: async () => fakeAllocations, // fund-1: 6000, fund-2: 4000
+      createFundAllocations: async (allocs: any) => { capturedReversals = allocs; },
+      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+        ...fakePayment,
+        status,
+        ...extra,
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'pay-1' },
+      _body: {}, // full refund
+    });
+
+    await refundPayment(ctx);
+    // Full refund: 100% reversal
+    expect(capturedReversals[0].amount).toBe(-6000);
+    expect(capturedReversals[1].amount).toBe(-4000);
+    expect(capturedReversals.every((r) => r.isReversal === true)).toBe(true);
+  });
+
+  test('[BR-08] records updatedBy as refunding officer', async () => {
+    let capturedExtra: any = null;
+    mocks = stubRepo(DuesRepository, {
+      getPayment: async () => fakePayment,
+      getFundAllocations: async () => [],
+      createFundAllocations: async () => {},
+      updatePaymentStatus: async (_id: string, _status: string, extra: any) => {
+        capturedExtra = extra;
+        return { ...fakePayment, ...extra };
+      },
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'treasurer-99', role: 'officer' },
+      _params: { id: 'pay-1' },
+      _body: {},
+    });
+
+    await refundPayment(ctx);
+    expect(capturedExtra.updatedBy).toBe('treasurer-99');
   });
 });
