@@ -1,9 +1,10 @@
-/* Memberry Typography - Offline Font Imports */
-@import "@fontsource/montserrat/700.css"; /* Bold for headlines */
-@import "@fontsource/merriweather/400.css"; /* Regular for subtitles */
-@import "@fontsource/open-sans/600.css"; /* Semi-Bold for body text */
+/* Memberry Typography — matches docs/ver-3/DESIGN.md */
+@import "@fontsource-variable/dm-sans"; /* Display: headings, nav, stat values (General Sans substitute) */
+@import "@fontsource-variable/plus-jakarta-sans"; /* Body: paragraphs, forms, tables */
+@import "@fontsource/jetbrains-mono/400.css"; /* Mono: numeric data, system IDs */
+@import "@fontsource/jetbrains-mono/500.css";
 
-/* Better Auth UI styles (after theme variables are defined) */
+/* Better Auth UI styles */
 @import "@daveyplate/better-auth-ui/css";
 
 @custom-variant dark (&:is(.dark *));
@@ -14,142 +15,168 @@
 
 @layer base {
   :root {
-    --radius: 0.625rem;
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* DESIGN.md color tokens — light mode */
+    --color-primary: #554B68;
+    --color-primary-mid: #675D78;
+    --color-primary-light: #9E8890;
+    --color-primary-lighter: #C8B4BC;
+    --color-primary-subtle: #F0E8EC;
+    --color-cream: #F2DEB0;
+    --color-cream-light: #F9F0D8;
+    --color-cream-dark: #D4BA82;
+    --color-bg: #FAF7F2;
+    --color-surface: #FFFFFF;
+    --color-surface-warm: #FDF9F3;
+    --color-text: #2D2635;
+    --color-text-secondary: #554B60;
+    --color-muted: #9E8890;
+    --color-border: #E4D8DC;
+    --color-border-light: #EDE5E8;
+    --color-success: #5A8A6B;
+    --color-success-bg: #EDF5F0;
+    --color-warning: #C4960A;
+    --color-warning-bg: #FDF8E8;
+    --color-error: #B85454;
+    --color-error-bg: #FDF0F0;
+    --color-info: #5B7EB5;
+    --color-info-bg: #EDF2F8;
+
+    /* Shadows */
+    --shadow-soft: 0 2px 12px rgba(85, 75, 104, 0.10);
+    --shadow-medium: 0 4px 24px rgba(85, 75, 104, 0.08);
+    --shadow-deep: 0 8px 32px rgba(85, 75, 104, 0.12);
+
+    /* Radius — DESIGN.md */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-full: 9999px;
+
+    /* shadcn compatibility variables (mapped to DESIGN.md tokens) */
+    --radius: 12px;
+    --background: var(--color-bg);
+    --foreground: var(--color-text);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-text);
+    --popover: var(--color-surface);
+    --popover-foreground: var(--color-text);
+    --primary: var(--color-primary);
+    --primary-foreground: #FFFFFF;
+    --secondary: var(--color-primary-subtle);
+    --secondary-foreground: var(--color-primary);
+    --muted: var(--color-border-light);
+    --muted-foreground: var(--color-muted);
+    --accent: var(--color-cream-light);
+    --accent-foreground: var(--color-primary);
+    --destructive: var(--color-error);
+    --destructive-foreground: #FFFFFF;
+    --border: var(--color-border);
+    --input: var(--color-border);
+    --ring: var(--color-primary);
 
     /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: var(--color-primary);
+    --sidebar-foreground: #FFFFFF;
+    --sidebar-primary: var(--color-cream);
+    --sidebar-primary-foreground: var(--color-primary);
+    --sidebar-accent: rgba(255, 255, 255, 0.12);
+    --sidebar-accent-foreground: #FFFFFF;
+    --sidebar-border: rgba(255, 255, 255, 0.12);
+    --sidebar-ring: var(--color-cream);
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --color-primary: #9E8890;
+    --color-primary-mid: #C8B4BC;
+    --color-primary-light: #675D78;
+    --color-primary-lighter: #554B68;
+    --color-primary-subtle: #2D2635;
+    --color-cream: #D4BA82;
+    --color-cream-light: #3D3520;
+    --color-cream-dark: #F2DEB0;
+    --color-bg: #1E1A22;
+    --color-surface: #2A2530;
+    --color-surface-warm: #302A36;
+    --color-text: #F0E8EC;
+    --color-text-secondary: #C8B4BC;
+    --color-muted: #8A7E88;
+    --color-border: #3D3644;
+    --color-border-light: #342E3A;
+    --color-success: #6BA87E;
+    --color-success-bg: #1E2D22;
+    --color-warning: #D4AA30;
+    --color-warning-bg: #2D2A1A;
+    --color-error: #D47070;
+    --color-error-bg: #2D1E1E;
+    --color-info: #7B9ED5;
+    --color-info-bg: #1E222D;
 
-    /* Sidebar */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.20);
+    --shadow-medium: 0 4px 24px rgba(0, 0, 0, 0.16);
+    --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.24);
+
+    --background: var(--color-bg);
+    --foreground: var(--color-text);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-text);
+    --popover: var(--color-surface);
+    --popover-foreground: var(--color-text);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--color-text);
+    --secondary: var(--color-primary-subtle);
+    --secondary-foreground: var(--color-primary);
+    --muted: var(--color-border-light);
+    --muted-foreground: var(--color-muted);
+    --accent: var(--color-cream-light);
+    --accent-foreground: var(--color-cream);
+    --destructive: var(--color-error);
+    --destructive-foreground: #FFFFFF;
+    --border: var(--color-border);
+    --input: var(--color-border);
+    --ring: var(--color-primary);
+
+    --sidebar-background: #2D2635;
+    --sidebar-foreground: #F0E8EC;
+    --sidebar-primary: var(--color-cream);
+    --sidebar-primary-foreground: #2D2635;
+    --sidebar-accent: rgba(255, 255, 255, 0.08);
+    --sidebar-accent-foreground: #F0E8EC;
+    --sidebar-border: rgba(255, 255, 255, 0.08);
+    --sidebar-ring: var(--color-cream);
   }
-}
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar-background);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
-
-@layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-[var(--color-border)] outline-[var(--color-primary)]/50;
   }
 
   body {
-    @apply bg-background text-foreground font-body;
-    font-weight: 600;
+    font-family: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", sans-serif;
+    font-weight: 400;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    transition: background-color 300ms ease, color 300ms ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline;
+    font-family: "DM Sans Variable", "DM Sans", sans-serif;
     font-weight: 700;
   }
+}
 
-  .subtitle {
-    @apply font-subtitle;
-    font-weight: 400;
-  }
-
-  p, .body-text {
-    @apply font-body;
-    font-weight: 600;
-  }
+/* Typography utility classes matching DESIGN.md 13-style scale */
+@layer utilities {
+  .text-hero { font-family: "DM Sans Variable", sans-serif; font-size: 52px; font-weight: 700; line-height: 1.08; }
+  .text-h1 { font-family: "DM Sans Variable", sans-serif; font-size: 30px; font-weight: 700; line-height: 1.2; }
+  .text-h2 { font-family: "DM Sans Variable", sans-serif; font-size: 26px; font-weight: 700; line-height: 1.2; }
+  .text-h3 { font-family: "DM Sans Variable", sans-serif; font-size: 20px; font-weight: 700; line-height: 1.2; }
+  .text-h4 { font-family: "DM Sans Variable", sans-serif; font-size: 16px; font-weight: 600; line-height: 1.3; }
+  .text-section-label { font-family: "DM Sans Variable", sans-serif; font-size: 13px; font-weight: 600; line-height: 1.4; letter-spacing: 1.5px; text-transform: uppercase; }
+  .text-body { font-family: "Plus Jakarta Sans Variable", sans-serif; font-size: 16px; font-weight: 400; line-height: 1.75; }
+  .text-body-sm { font-family: "Plus Jakarta Sans Variable", sans-serif; font-size: 14px; font-weight: 400; line-height: 1.6; }
+  .text-caption { font-family: "Plus Jakarta Sans Variable", sans-serif; font-size: 13px; font-weight: 500; line-height: 1.5; }
+  .text-micro { font-family: "Plus Jakarta Sans Variable", sans-serif; font-size: 12px; font-weight: 600; line-height: 1.4; }
+  .text-overline { font-size: 11px; font-weight: 600; line-height: 1.3; letter-spacing: 1.5px; text-transform: uppercase; }
+  .text-mono { font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 400; line-height: 1.5; }
+  .text-mono-label { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 500; line-height: 1.3; letter-spacing: 1px; text-transform: uppercase; }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
 }
