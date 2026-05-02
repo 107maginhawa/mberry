@@ -1,8 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getPersonOptions, updatePersonMutation } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
-import { formatPersonName, formatLicenseDisplay, getInitials } from '@/features/profile/lib/profile-display'
-import { useState } from 'react'
+import { formatPersonName, formatLicenseDisplay } from '@/features/profile/lib/profile-display'
+import { useState, useEffect } from 'react'
+import { PageHeader } from '@/components/patterns/page-header'
+import { AvatarInitials } from '@/components/patterns/avatar-initials'
+import { StatusBadge } from '@/components/patterns/status-badge'
+import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
+import { Shield, Lock, CreditCard, Download } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/my/profile')({
   component: MyProfilePage,
@@ -18,6 +23,14 @@ function MyProfilePage() {
     retry: false,
   })
 
+  const [memberships, setMemberships] = useState<any[]>([])
+  useEffect(() => {
+    fetch('/api/persons/me/memberships')
+      .then(res => res.json())
+      .then(res => setMemberships(res?.data || []))
+      .catch(() => {})
+  }, [])
+
   const mutation = useMutation({
     ...updatePersonMutation(),
     onSuccess: () => {
@@ -30,14 +43,14 @@ function MyProfilePage() {
     },
   })
 
-  if (isLoading) return <div className="p-6 text-center text-muted-foreground">Loading profile...</div>
+  if (isLoading) return <ProfileSkeleton />
 
   if (isError || !person) {
     return (
-      <div className="p-6 space-y-4 max-w-2xl">
-        <h1 className="text-2xl font-bold">My Profile</h1>
-        <div className="border rounded-lg p-6 text-center text-muted-foreground">
-          <p>No profile found. Complete onboarding to create your profile.</p>
+      <div>
+        <PageHeader title="Profile" />
+        <div className="rounded-[12px] border border-[var(--color-border-light)] p-6 text-center text-[var(--color-muted)]">
+          No profile found. Complete onboarding to create your profile.
         </div>
       </div>
     )
@@ -50,50 +63,109 @@ function MyProfilePage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My Profile</h1>
-        <button
-          onClick={() => setEditing(true)}
-          className="rounded-md bg-[#554B68] px-4 py-2 text-sm font-medium text-white hover:bg-[#443b55] transition-colors"
-        >
-          Edit Profile
-        </button>
-      </div>
+    <div>
+      <PageHeader
+        title="Profile"
+        subtitle="Your professional identity"
+        actions={
+          <button
+            onClick={() => setEditing(true)}
+            className="px-[22px] py-[10px] rounded-[8px] bg-[var(--color-primary)] text-white text-[14px] font-semibold hover:bg-[var(--color-primary-mid)] transition-colors duration-150"
+          >
+            Edit Profile
+          </button>
+        }
+      />
 
-      <div className="border rounded-lg p-6 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-[#554B68] text-white flex items-center justify-center text-xl font-bold">
-            {getInitials(p?.firstName || '?', p?.lastName)}
+      {/* Two-column layout: photo + info */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Left: Avatar + quick info */}
+        <div className="md:w-1/3 flex flex-col items-center md:items-start">
+          <div data-testid="profile-avatar">
+            <AvatarInitials
+              name={formatPersonName(p?.firstName || '?', p?.lastName, p?.middleName)}
+              size="lg"
+              photoUrl={p?.photoUrl}
+            />
           </div>
-          <div>
-            <div className="text-lg font-medium">
-              {formatPersonName(p?.firstName || '', p?.lastName, p?.middleName)}
-            </div>
-            {p?.specialization && (
-              <div className="text-sm text-muted-foreground">{p.specialization}</div>
-            )}
-            {formatLicenseDisplay(p?.licenseNumber, p?.prcId) && (
-              <div className="text-xs text-muted-foreground">
-                {formatLicenseDisplay(p.licenseNumber, p.prcId)}
-              </div>
-            )}
-          </div>
+          <h2 className="text-[20px] font-bold font-display mt-3 text-center md:text-left">
+            {formatPersonName(p?.firstName || '', p?.lastName, p?.middleName)}
+          </h2>
+          {p?.specialization && (
+            <span className="inline-block mt-1 px-3 py-1 rounded-full text-[12px] font-semibold bg-[var(--color-primary-subtle)] text-[var(--color-primary)]">
+              {p.specialization}
+            </span>
+          )}
+          {formatLicenseDisplay(p?.licenseNumber, p?.prcId) && (
+            <p className="text-[13px] font-medium text-[var(--color-muted)] mt-1">
+              {formatLicenseDisplay(p.licenseNumber, p.prcId)}
+            </p>
+          )}
         </div>
 
-        <div className="grid gap-3 text-sm">
-          {p?.contactInfo?.email && (
-            <div><span className="font-medium">Email:</span> {p.contactInfo.email}</div>
+        {/* Right: Detail sections */}
+        <div className="md:w-2/3 space-y-4">
+          {/* Contact */}
+          <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+            <h3 className="text-[16px] font-semibold font-display mb-3">Contact</h3>
+            <div className="space-y-2 text-[14px]">
+              {p?.contactInfo?.email && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-muted)]">Email</span>
+                  <span>{p.contactInfo.email}</span>
+                </div>
+              )}
+              {p?.contactInfo?.phone && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-muted)]">Phone</span>
+                  <span>{p.contactInfo.phone}</span>
+                </div>
+              )}
+              {p?.timezone && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-muted)]">Timezone</span>
+                  <span>{p.timezone}</span>
+                </div>
+              )}
+              {p?.preferredLanguage && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-muted)]">Language</span>
+                  <span>{p.preferredLanguage}</span>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Org Memberships */}
+          {memberships.length > 0 && (
+            <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+              <h3 className="text-[16px] font-semibold font-display mb-3">Organizations</h3>
+              <div className="space-y-2">
+                {memberships.map((m: any) => (
+                  <div key={m.id} className="flex items-center justify-between py-1">
+                    <span className="text-[14px]">{m.orgName}</span>
+                    <StatusBadge status={m.status ?? 'pending'} />
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
-          {p?.contactInfo?.phone && (
-            <div><span className="font-medium">Phone:</span> {p.contactInfo.phone}</div>
-          )}
-          {p?.timezone && (
-            <div><span className="font-medium">Timezone:</span> {p.timezone}</div>
-          )}
-          {p?.preferredLanguage && (
-            <div><span className="font-medium">Language:</span> {p.preferredLanguage}</div>
-          )}
+
+          {/* Quick Links */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+              <Shield size={18} className="text-[var(--color-muted)]" /> Privacy
+            </Link>
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+              <Lock size={18} className="text-[var(--color-muted)]" /> Security
+            </Link>
+            <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+              <CreditCard size={18} className="text-[var(--color-muted)]" /> ID Card
+            </Link>
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+              <Download size={18} className="text-[var(--color-muted)]" /> Data Export
+            </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -135,7 +207,7 @@ function ProfileEditForm({
         licenseNumber: form.licenseNumber || null,
         prcId: form.prcId || null,
         contactInfo: {
-          email: person?.contactInfo?.email, // don't change email here
+          email: person?.contactInfo?.email,
           phone: form.phone || undefined,
         },
         timezone: form.timezone || null,
@@ -146,51 +218,53 @@ function ProfileEditForm({
 
   const field = (label: string, key: keyof typeof form, opts?: { placeholder?: string }) => (
     <div>
-      <label className="block text-sm font-medium mb-1">{label}</label>
+      <label className="block text-[13px] font-semibold text-[var(--color-text-secondary)] mb-1.5">{label}</label>
       <input
         type="text"
         value={form[key]}
         onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))}
         placeholder={opts?.placeholder}
-        className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#554B68]/50"
+        className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-[14px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
       />
     </div>
   )
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Edit Profile</h1>
-        <button
-          onClick={onCancel}
-          className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
-          Cancel
-        </button>
-      </div>
+    <div>
+      <PageHeader
+        title="Edit Profile"
+        actions={
+          <button
+            onClick={onCancel}
+            className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
+          >
+            Cancel
+          </button>
+        }
+      />
 
       {error && (
-        <div className="border border-destructive/50 bg-destructive/10 text-destructive rounded-md p-3 text-sm">
+        <div className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-[14px] mb-4">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="border rounded-lg p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {field('First Name', 'firstName')}
           {field('Last Name', 'lastName')}
         </div>
         {field('Middle Name', 'middleName')}
 
-        <hr />
+        <div className="border-t border-[var(--color-border-light)] my-4" />
 
         {field('Specialization', 'specialization', { placeholder: 'e.g. Orthodontics' })}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {field('License Number', 'licenseNumber')}
           {field('PRC ID', 'prcId')}
         </div>
 
-        <hr />
+        <div className="border-t border-[var(--color-border-light)] my-4" />
 
         {field('Phone', 'phone', { placeholder: '+63 ...' })}
         {field('Timezone', 'timezone', { placeholder: 'Asia/Manila' })}
@@ -200,14 +274,14 @@ function ProfileEditForm({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50"
+            className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={onSave.isPending || !form.firstName}
-            className="rounded-md bg-[#554B68] px-4 py-2 text-sm font-medium text-white hover:bg-[#443b55] disabled:opacity-50 transition-colors"
+            className="px-[22px] py-[10px] rounded-[8px] bg-[var(--color-primary)] text-white text-[14px] font-semibold hover:bg-[var(--color-primary-mid)] disabled:opacity-50 transition-colors duration-150"
           >
             {onSave.isPending ? 'Saving...' : 'Save Changes'}
           </button>
