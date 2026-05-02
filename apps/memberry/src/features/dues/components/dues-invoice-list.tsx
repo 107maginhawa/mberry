@@ -65,7 +65,7 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
               <td className="px-4 py-3 font-mono text-xs">{inv.invoiceNumber}</td>
               <td className="px-4 py-3">{inv.personId}</td>
               <td className="px-4 py-3 text-xs">
-                {inv.periodStart} — {inv.periodEnd}
+                {inv.periodStart instanceof Date ? inv.periodStart.toLocaleDateString() : inv.periodStart} — {inv.periodEnd instanceof Date ? inv.periodEnd.toLocaleDateString() : inv.periodEnd}
               </td>
               <td className="px-4 py-3 font-mono">
                 {formatCents(Number(inv.totalAmount))}

@@ -16,6 +16,7 @@
     "build": "bun build --compile --minify --sourcemap --external ajv --external ajv-draft-04 src/index.ts --outfile dist/server",
     "generate": "bun scripts/generate.ts",
     "db:generate": "drizzle-kit generate",
+    "db:seed": "bun run src/seed.ts",
     "db:studio": "drizzle-kit studio",
     "test": "bun test src/**/*.test.ts",
     "test:unit": "bun test src/**/*.test.ts",

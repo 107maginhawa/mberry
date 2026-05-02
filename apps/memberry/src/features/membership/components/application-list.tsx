@@ -70,7 +70,7 @@ export function ApplicationList({ orgId, tenantId }: ApplicationListProps) {
             <tr key={app.id} className="border-b hover:bg-muted/50">
               <td className="px-4 py-3">{app.personId}</td>
               <td className="px-4 py-3">{app.tierId}</td>
-              <td className="px-4 py-3">{app.applicationDate}</td>
+              <td className="px-4 py-3">{app.applicationDate instanceof Date ? app.applicationDate.toLocaleDateString() : app.applicationDate}</td>
               <td className="px-4 py-3">
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   {app.status}

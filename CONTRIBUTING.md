@@ -1413,6 +1413,8 @@ export async function signInAsUser(page: Page, email: string, password: string) 
 
 ## Testing Requirements
 
+> **New modules follow the [Vertical TDD Protocol](./VERTICAL_TDD.md)** — test-first, vertical slices, per-module gate enforcement. See that doc for the exact step sequence and test file locations.
+
 ### Unit Tests (API Service)
 
 ```bash

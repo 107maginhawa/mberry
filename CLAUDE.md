@@ -285,9 +285,14 @@ cd apps/account && bun run test:e2e     # E2E tests
   Regenerate from the SVG via:
   `bunx tauri icon apps/account/public/favicon.svg --output apps/account/src-tauri/icons`
 
+## Development Protocol
+
+New modules follow [VERTICAL_TDD.md](./VERTICAL_TDD.md) — test-first, vertical slices, per-module gate enforcement. See that doc for the exact step sequence.
+
 ## When in Doubt
 
 1. Check [README.md](./README.md) for commands and setup
 2. Check [CONTRIBUTING.md](./CONTRIBUTING.md) for development patterns
-3. Reference existing handlers in `services/api-ts/src/handlers/` for implementation patterns
-4. Check OpenAPI spec at `specs/api/dist/openapi/openapi.json` for API contracts
+3. Check [VERTICAL_TDD.md](./VERTICAL_TDD.md) for test-first development protocol
+4. Reference existing handlers in `services/api-ts/src/handlers/` for implementation patterns
+5. Check OpenAPI spec at `specs/api/dist/openapi/openapi.json` for API contracts

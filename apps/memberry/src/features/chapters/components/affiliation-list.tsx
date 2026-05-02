@@ -45,7 +45,7 @@ export function AffiliationList({ orgId, tenantId }: AffiliationListProps) {
                   {a.status}
                 </span>
               </td>
-              <td className="px-4 py-3 text-xs">{a.affiliatedAt}</td>
+              <td className="px-4 py-3 text-xs">{a.affiliatedAt instanceof Date ? a.affiliatedAt.toLocaleDateString() : a.affiliatedAt}</td>
             </tr>
           ))}
         </tbody>

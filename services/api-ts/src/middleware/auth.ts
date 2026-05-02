@@ -160,12 +160,11 @@ export function authMiddleware(options?: AuthMiddlewareOptions) {
       const authInstance = ctx.get('auth');
 
       // Separate ownership-based permissions from role-based permissions
-      const ownershipRoles = opts.roles.filter(r => r.includes(':owner'));
-      const standardRoles = opts.roles.filter(r => !r.includes(':owner'));
+      const ownershipRoles = opts.roles.filter(r => r.endsWith(':owner'));
+      const standardRoles = opts.roles.filter(r => !r.endsWith(':owner'));
 
-      // Extract role names from standard roles only
+      // Use full role names — only strip ':owner' suffix for ownership roles
       const standardRoleNames = standardRoles
-        .map(r => r.split(':')[0])
         .filter((role): role is string => Boolean(role));
 
       // Check if user has any of the required standard roles (OR logic)
