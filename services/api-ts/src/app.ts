@@ -147,26 +147,14 @@ export function createApp(config: Config): App {
   // Register auth routes
   registerAuthRoutes(app as App);
 
-  // Register dues routes
-  app.route('/api/dues', dues);
-
-  // Register membership routes
-  app.route('/api/membership', membership);
-
-  // Register communications routes
-  app.route('/api/communications', communications);
-
-  // Register certificates routes
-  app.route('/api/certificates', certificates);
-
-  // Register events routes
-  app.route('/api/events', eventsRouter);
-
-  // Register training routes
-  app.route('/api/training', trainingRouter);
-
-  // Register elections routes
-  app.route('/api/elections', electionsRouter);
+  // Register module routes (no /api prefix — Vite proxy strips it)
+  app.route('/dues', dues);
+  app.route('/membership', membership);
+  app.route('/communications', communications);
+  app.route('/certificates', certificates);
+  app.route('/events', eventsRouter);
+  app.route('/training', trainingRouter);
+  app.route('/elections', electionsRouter);
 
   // Register API routes
   registerOpenAPIRoutes(app as any);
