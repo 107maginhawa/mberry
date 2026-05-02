@@ -17,7 +17,7 @@ test.describe('Dashboard (/dashboard)', () => {
     await signIn(page, credentials.email, credentials.password)
     await page.goto('/dashboard')
 
-    await expect(page.getByRole('heading', { name: 'Memberry Dashboard' })).toBeVisible()
+    await expect(page.getByText(/good (morning|afternoon|evening)/i)).toBeVisible()
   })
 })
 

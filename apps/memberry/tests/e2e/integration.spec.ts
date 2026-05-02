@@ -28,14 +28,14 @@ test.describe('Auth flows (real API)', () => {
   test('sign in with seeded officer creds → dashboard renders', async ({ page }) => {
     await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
     await page.goto('/dashboard')
-    await expect(page.getByRole('heading', { name: 'Memberry Dashboard' })).toBeVisible()
+    await expect(page.getByText(/good (morning|afternoon|evening)/i)).toBeVisible()
     await expect(page.getByText(OFFICER_EMAIL)).toBeVisible()
   })
 
   test('sign in with seeded member creds → dashboard renders', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
-    await expect(page.getByRole('heading', { name: 'Memberry Dashboard' })).toBeVisible()
+    await expect(page.getByText(/good (morning|afternoon|evening)/i)).toBeVisible()
   })
 
   test('unauthenticated → redirected to sign-in', async ({ page }) => {
@@ -84,7 +84,7 @@ test.describe('Member pages (real API)', () => {
     await signIn(page, credentials.email, credentials.password)
     await page.goto('/dashboard')
 
-    await expect(page.getByRole('heading', { name: 'Memberry Dashboard' })).toBeVisible()
+    await expect(page.getByText(/good (morning|afternoon|evening)/i)).toBeVisible()
   })
 
   test('notifications page renders', async ({ page }) => {
