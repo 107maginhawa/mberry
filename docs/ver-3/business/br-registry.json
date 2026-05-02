@@ -112,9 +112,9 @@
       "phase": 1,
       "modules": ["M04"],
       "priority": "P1",
-      "primaryModule": "platformadmin",
+      "primaryModule": "governance",
       "layers": {
-        "backend": { "required": true, "paths": ["handlers/platformadmin/"] },
+        "backend": { "required": true, "paths": ["handlers/association:member/governance.test.ts"] },
         "contract": { "required": false, "paths": [] },
         "e2e": { "required": true, "paths": ["tests/e2e/officer/settings.spec.ts"] }
       }

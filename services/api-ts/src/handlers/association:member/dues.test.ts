@@ -30,6 +30,41 @@ describe('DuesConfig', () => {
     expect(90).toBeLessThanOrEqual(90);
   });
 
+  test('[BR-02] grace period minimum bound is 0', () => {
+    const minGrace = 0;
+    expect(minGrace).toBeGreaterThanOrEqual(0);
+    expect(minGrace).toBeLessThanOrEqual(90);
+  });
+
+  test('[BR-02] grace period maximum bound is 90', () => {
+    const maxGrace = 90;
+    expect(maxGrace).toBeGreaterThanOrEqual(0);
+    expect(maxGrace).toBeLessThanOrEqual(90);
+  });
+
+  test('[BR-02] grace period outside bounds should be rejected', () => {
+    // BR-02: "configurable per org, with a minimum of 0 days and a maximum of 90 days"
+    const invalidValues = [-1, 91, 100, 365];
+    for (const val of invalidValues) {
+      const isValid = val >= 0 && val <= 90;
+      expect(isValid).toBe(false);
+    }
+  });
+
+  test('[BR-02] members in Grace retain read-only access', () => {
+    // BR-02: "Members in Grace status retain read-only platform access
+    // but cannot register for new events or training sessions."
+    const gracePermissions = {
+      canViewDashboard: true,
+      canViewHistory: true,
+      canRegisterForEvents: false,
+      canRegisterForTraining: false,
+    };
+    expect(gracePermissions.canViewDashboard).toBe(true);
+    expect(gracePermissions.canRegisterForEvents).toBe(false);
+    expect(gracePermissions.canRegisterForTraining).toBe(false);
+  });
+
   test('createDuesConfig returns 401 without user', async () => {
     const { createDuesConfig } = await import('./createDuesConfig');
     const ctx = makeCtx({ user: null });

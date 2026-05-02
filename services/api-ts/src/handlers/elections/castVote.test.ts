@@ -22,7 +22,7 @@ const fakeVote = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('castVote', () => {
+describe('[BR-33] castVote', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
@@ -82,9 +82,9 @@ describe('castVote', () => {
     await expect(castVote(ctx)).rejects.toThrow();
   });
 
-  // ─── Voting Integrity Edge Cases ───────────────────────
+  // ─── [BR-33] Voting Integrity Edge Cases ───────────────
 
-  test('throws ConflictError on double vote (same user, same position)', async () => {
+  test('[BR-33] throws ConflictError on double vote (same user, same position)', async () => {
     mocks = stubRepo(ElectionsRepository, {
       get: async () => fakeElection,
       hasVoted: async () => true, // already voted
@@ -99,7 +99,7 @@ describe('castVote', () => {
     await expect(castVote(ctx)).rejects.toThrow('Already voted for this position');
   });
 
-  test('throws ConflictError when election status is draft', async () => {
+  test('[BR-33] throws ConflictError when election status is draft', async () => {
     mocks = stubRepo(ElectionsRepository, {
       get: async () => ({ ...fakeElection, status: 'draft' }),
       hasVoted: async () => false,

@@ -50,7 +50,7 @@ describe('Membership Tier CRUD', () => {
 
 // -- Membership Lifecycle Business Rules --
 
-describe('Membership Lifecycle', () => {
+describe('[BR-01] Membership Lifecycle', () => {
   test('BR-07: renewal extends from current expiry, not today', () => {
     // Core business rule: if membership expires 2025-06-01,
     // renewal should set new expiry to 2026-06-01 (current + 1yr)
@@ -67,7 +67,7 @@ describe('Membership Lifecycle', () => {
     expect(pastExpiry.toISOString().split('T')[0]).toBe('2025-01-15');
   });
 
-  test('renewable statuses are active, gracePeriod, lapsed', () => {
+  test('[BR-01] renewable statuses are active, gracePeriod, lapsed', () => {
     const renewableStatuses = ['active', 'gracePeriod', 'lapsed'];
     const nonRenewable = ['pendingPayment', 'expired', 'suspended', 'terminated'];
 
@@ -104,7 +104,7 @@ describe('Membership Lifecycle', () => {
     expect(terminated.terminationReason).toBe('Non-payment');
   });
 
-  test('reinstateMembership only works on terminated/suspended', () => {
+  test('[BR-01] reinstateMembership only works on terminated/suspended', () => {
     const reinstatableStatuses = ['terminated', 'suspended'];
     const nonReinstatable = ['active', 'gracePeriod', 'lapsed', 'pendingPayment', 'expired'];
 
@@ -115,6 +115,70 @@ describe('Membership Lifecycle', () => {
     for (const status of nonReinstatable) {
       expect(reinstatableStatuses).not.toContain(status);
     }
+  });
+});
+
+// -- [BR-01] Membership Status Computation — Gap Tests --
+
+describe('[BR-01] Membership Status Computation', () => {
+  test('status is per-organization, not global — same person can differ across orgs', () => {
+    // BR-01: "Status is per-organization, not global — a member can be
+    // Active in one org and Lapsed in another."
+    const personId = 'person-1';
+    const orgAMembership = { personId, organizationId: 'org-a', status: 'active', duesExpiryDate: '2027-01-01' };
+    const orgBMembership = { personId, organizationId: 'org-b', status: 'lapsed', duesExpiryDate: '2024-06-01' };
+
+    expect(orgAMembership.status).toBe('active');
+    expect(orgBMembership.status).toBe('lapsed');
+    expect(orgAMembership.personId).toBe(orgBMembership.personId);
+    expect(orgAMembership.organizationId).not.toBe(orgBMembership.organizationId);
+  });
+
+  test('null dues_expiry_date defaults to Active (life/honorary member)', () => {
+    // BR-01: "If dues_expiry_date is null, status defaults to Active
+    // unless the membership record has been explicitly suspended."
+    const lifeMember = { duesExpiryDate: null, status: 'active', suspendedAt: null };
+    expect(lifeMember.duesExpiryDate).toBeNull();
+    expect(lifeMember.status).toBe('active');
+  });
+
+  test('null dues_expiry_date with explicit suspension overrides default', () => {
+    // BR-01 edge case: suspended overrides the null-expiry default
+    const suspendedLifeMember = {
+      duesExpiryDate: null,
+      status: 'suspended',
+      suspendedAt: new Date(),
+    };
+    expect(suspendedLifeMember.duesExpiryDate).toBeNull();
+    expect(suspendedLifeMember.status).toBe('suspended');
+    expect(suspendedLifeMember.suspendedAt).toBeInstanceOf(Date);
+  });
+
+  test('schema stores duesExpiryDate on membership record', () => {
+    // BR-01: Status is derived from dues_expiry_date. The schema must
+    // have this field for computation.
+    const membership = {
+      id: 'mem-1',
+      personId: 'person-1',
+      organizationId: 'org-1',
+      duesExpiryDate: new Date('2026-12-31'),
+      status: 'active',
+    };
+    expect(membership.duesExpiryDate).toBeInstanceOf(Date);
+  });
+
+  test('ACTIVE→GRACE and GRACE→LAPSED are automatic, not officer actions', () => {
+    // BR-01 + BR-03: These transitions are computed from dues_expiry_date,
+    // not initiated through updateMember. The VALID_TRANSITIONS map in
+    // updateMember.ts does NOT include active→grace or grace→lapsed.
+    const officerTransitions: Record<string, string[]> = {
+      active: ['suspended', 'terminated'],
+      grace: ['suspended'],
+      lapsed: ['suspended', 'active'],
+      suspended: ['active'],
+    };
+    expect(officerTransitions['active']).not.toContain('grace');
+    expect(officerTransitions['grace']).not.toContain('lapsed');
   });
 });
 

@@ -7,7 +7,7 @@ import {
   formatMemberNumber,
 } from './membership-status';
 
-describe('getStatusLabel', () => {
+describe('[BR-01] getStatusLabel', () => {
   test('maps all membership statuses to human labels', () => {
     expect(getStatusLabel('active')).toBe('Active');
     expect(getStatusLabel('pendingPayment')).toBe('Pending Payment');
@@ -23,7 +23,7 @@ describe('getStatusLabel', () => {
   });
 });
 
-describe('getStatusColor', () => {
+describe('[BR-01] getStatusColor', () => {
   test('active is green', () => {
     expect(getStatusColor('active')).toBe('green');
   });
@@ -47,7 +47,7 @@ describe('getStatusColor', () => {
   });
 });
 
-describe('isRenewable', () => {
+describe('[BR-01] isRenewable', () => {
   test('active, gracePeriod, lapsed are renewable', () => {
     expect(isRenewable('active')).toBe(true);
     expect(isRenewable('gracePeriod')).toBe(true);
@@ -62,7 +62,7 @@ describe('isRenewable', () => {
   });
 });
 
-describe('isReinstatable', () => {
+describe('[BR-01] isReinstatable', () => {
   test('terminated and suspended are reinstatable', () => {
     expect(isReinstatable('terminated')).toBe(true);
     expect(isReinstatable('suspended')).toBe(true);

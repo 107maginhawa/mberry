@@ -20,7 +20,7 @@ const fakeConfig = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('upsertDuesConfig', () => {
+describe('[BR-02] upsertDuesConfig', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {

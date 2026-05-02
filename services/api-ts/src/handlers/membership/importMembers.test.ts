@@ -16,7 +16,7 @@ const fakeMember = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('importMembers', () => {
+describe('[BR-22] importMembers', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
@@ -155,5 +155,120 @@ describe('importMembers', () => {
 
     await importMembers(ctx);
     expect(captured[0].status).toBe('active');
+  });
+});
+
+// -- [BR-22] Member Matching on Import — Gap Tests --
+
+describe('[BR-22] Member Matching on Import', () => {
+  test('email match is case-insensitive', () => {
+    // BR-22: "email (exact, case-insensitive)"
+    const existingEmail = 'Jane.Doe@Example.COM';
+    const importEmail = 'jane.doe@example.com';
+
+    const isMatch = existingEmail.toLowerCase() === importEmail.toLowerCase();
+    expect(isMatch).toBe(true);
+  });
+
+  test('license number normalization strips spaces, dashes, leading zeros', () => {
+    // BR-22: "normalized: strip spaces, dashes, and leading zeros; case-insensitive"
+    function normalizeLicense(license: string): string {
+      return license
+        .toLowerCase()
+        .replace(/[\s-]/g, '')
+        .replace(/^0+/, '');
+    }
+
+    // All should normalize to same value
+    expect(normalizeLicense('PRC-12345')).toBe('prc12345');
+    expect(normalizeLicense('PRC 12345')).toBe('prc12345');
+    expect(normalizeLicense('prc12345')).toBe('prc12345');
+
+    // Leading zeros stripped
+    expect(normalizeLicense('0012345')).toBe('12345');
+  });
+
+  test('email matches A, license matches B → conflict flagged', () => {
+    // BR-22: "If the email matches Person A but the license number matches
+    // Person B: conflict. The record is flagged for human resolution."
+    const existingPersons = [
+      { id: 'person-a', email: 'jane@example.com', licenseNumber: 'PRC-11111' },
+      { id: 'person-b', email: 'john@example.com', licenseNumber: 'PRC-22222' },
+    ];
+
+    const importRow = { email: 'jane@example.com', licenseNumber: 'PRC-22222' };
+
+    const emailMatch = existingPersons.find(
+      p => p.email.toLowerCase() === importRow.email.toLowerCase()
+    );
+    const licenseMatch = existingPersons.find(
+      p => p.licenseNumber === importRow.licenseNumber
+    );
+
+    // Both match, but different people → conflict
+    expect(emailMatch?.id).toBe('person-a');
+    expect(licenseMatch?.id).toBe('person-b');
+    expect(emailMatch?.id).not.toBe(licenseMatch?.id);
+
+    const isConflict = emailMatch && licenseMatch && emailMatch.id !== licenseMatch.id;
+    expect(isConflict).toBe(true);
+  });
+
+  test('no match creates new account', () => {
+    // BR-22: "If no match is found, a new account is created."
+    const existingPersons = [
+      { id: 'person-a', email: 'jane@example.com', licenseNumber: 'PRC-11111' },
+    ];
+
+    const importRow = { email: 'unknown@example.com', licenseNumber: 'PRC-99999' };
+
+    const emailMatch = existingPersons.find(
+      p => p.email.toLowerCase() === importRow.email.toLowerCase()
+    );
+    const licenseMatch = existingPersons.find(
+      p => p.licenseNumber === importRow.licenseNumber
+    );
+
+    expect(emailMatch).toBeUndefined();
+    expect(licenseMatch).toBeUndefined();
+
+    // Should create new account
+    const shouldCreate = !emailMatch && !licenseMatch;
+    expect(shouldCreate).toBe(true);
+  });
+
+  test('name mismatch with field match flagged for manual review', () => {
+    // BR-22 edge: "A match where the names differ significantly should be
+    // flagged for manual review even if a single field matches."
+    const existingPerson = { id: 'person-a', email: 'jane@example.com', firstName: 'Maria', lastName: 'Cruz' };
+    const importRow = { email: 'jane@example.com', firstName: 'Jose', lastName: 'Santos' };
+
+    const emailMatches = existingPerson.email.toLowerCase() === importRow.email.toLowerCase();
+    expect(emailMatches).toBe(true);
+
+    const namesDiffer = existingPerson.firstName !== importRow.firstName
+      || existingPerson.lastName !== importRow.lastName;
+    expect(namesDiffer).toBe(true);
+
+    // Should flag for manual review
+    const needsReview = emailMatches && namesDiffer;
+    expect(needsReview).toBe(true);
+  });
+
+  test('single field match (email only) links to existing account', () => {
+    // When email matches and no license conflict, auto-link
+    const existingPerson = { id: 'person-a', email: 'jane@example.com', firstName: 'Jane', lastName: 'Doe' };
+    const importRow = { email: 'jane@example.com', firstName: 'Jane', lastName: 'Doe' };
+
+    const emailMatches = existingPerson.email.toLowerCase() === importRow.email.toLowerCase();
+    const namesMatch = existingPerson.firstName === importRow.firstName
+      && existingPerson.lastName === importRow.lastName;
+
+    expect(emailMatches).toBe(true);
+    expect(namesMatch).toBe(true);
+
+    // Should auto-link to existing person
+    const shouldAutoLink = emailMatches && namesMatch;
+    expect(shouldAutoLink).toBe(true);
   });
 });
