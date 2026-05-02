@@ -1,30 +1,15 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
+import { PageHeader } from '@/components/patterns/page-header'
+import { StatusBadge } from '@/components/patterns/status-badge'
+import { AvatarInitials } from '@/components/patterns/avatar-initials'
+import { EmptyState } from '@/components/patterns/empty-state'
+import { ListSkeleton } from '@/components/patterns/skeleton-loader'
+import { Building2 } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/my/organizations')({
   component: MyOrganizationsPage,
 })
-
-const STATUS_COLORS: Record<string, string> = {
-  active: 'bg-green-100 text-green-800',
-  gracePeriod: 'bg-yellow-100 text-yellow-800',
-  lapsed: 'bg-red-100 text-red-800',
-  pendingPayment: 'bg-orange-100 text-orange-800',
-  suspended: 'bg-gray-100 text-gray-800',
-  terminated: 'bg-gray-200 text-gray-600',
-  expired: 'bg-red-100 text-red-700',
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  active: 'Active',
-  gracePeriod: 'Grace Period',
-  lapsed: 'Lapsed',
-  pendingPayment: 'Pending Payment',
-  suspended: 'Suspended',
-  terminated: 'Terminated',
-  expired: 'Expired',
-}
 
 function MyOrganizationsPage() {
   const [memberships, setMemberships] = useState<any[]>([])
@@ -41,49 +26,66 @@ function MyOrganizationsPage() {
   }, [])
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold">My Organizations</h1>
-      <p className="text-sm text-muted-foreground">
-        Your association memberships across all organizations.
-      </p>
+    <div className="max-w-[720px]">
+      <PageHeader
+        title="Organizations"
+        subtitle="Your memberships across all organizations"
+        actions={
+          <button className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150">
+            Find Organizations
+          </button>
+        }
+      />
 
-      {loading && (
-        <div className="text-center text-muted-foreground">Loading...</div>
-      )}
-
-      {!loading && memberships.length === 0 && (
-        <div className="border rounded-lg p-6 text-center text-muted-foreground">
-          You haven't joined any organizations yet.
-        </div>
-      )}
-
-      {!loading && memberships.length > 0 && (
+      {loading ? (
+        <ListSkeleton rows={3} />
+      ) : !memberships.length ? (
+        <EmptyState
+          icon={<Building2 size={40} />}
+          headline="No memberships yet"
+          description="Join a professional organization to access events, training, and credentials"
+          action={{ label: 'Find Organizations', onClick: () => {} }}
+        />
+      ) : (
         <div className="space-y-3">
           {memberships.map((m: any) => (
             <Link
               key={m.id}
               to="/org/$orgId/members"
               params={{ orgId: m.orgId }}
-              className="block border rounded-lg p-4 hover:border-[#554B68]/30 transition-colors"
+              className="flex items-center gap-4 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5 hover:shadow-soft transition-shadow"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{m.orgName || m.orgId}</div>
+              <AvatarInitials name={m.orgName ?? 'Org'} size="md" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-semibold truncate">{m.orgName}</p>
+                <div className="flex items-center gap-2 mt-1">
                   {m.memberNumber && (
-                    <div className="text-xs text-muted-foreground">Member #{m.memberNumber}</div>
+                    <span className="text-[13px] font-medium text-[var(--color-muted)]">#{m.memberNumber}</span>
                   )}
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_COLORS[m.status] || 'bg-gray-100 text-gray-800'}`}>
-                  {STATUS_LABELS[m.status] || m.status}
-                </span>
+                {m.duesExpiryDate && (
+                  <p className="text-[13px] font-medium text-[var(--color-muted)] mt-1">
+                    Dues expire: {new Date(m.duesExpiryDate).toLocaleDateString()}
+                  </p>
+                )}
               </div>
-              {m.duesExpiryDate && (
-                <div className="text-xs text-muted-foreground mt-2">
-                  Dues expire: {new Date(m.duesExpiryDate).toLocaleDateString()}
-                </div>
-              )}
+              <div className="flex items-center gap-3 shrink-0">
+                <StatusBadge status={m.status ?? 'pending'} />
+                {(m.status === 'grace' || m.status === 'lapsed' || m.status === 'gracePeriod') && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+                    className="px-4 py-[7px] rounded-[8px] bg-[var(--color-primary)] text-white text-[13px] font-semibold hover:bg-[var(--color-primary-mid)] transition-colors duration-150"
+                  >
+                    Pay Dues
+                  </button>
+                )}
+              </div>
             </Link>
           ))}
+
+          <p className="text-[13px] font-medium text-[var(--color-muted)] text-center mt-4">
+            Each organization manages its own membership, dues, and credits independently.
+          </p>
         </div>
       )}
     </div>
