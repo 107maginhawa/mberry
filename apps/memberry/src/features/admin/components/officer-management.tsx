@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { UserPlus, Trash2, Shield } from 'lucide-react'
 
 interface OfficerManagementProps {
@@ -65,18 +65,17 @@ export function OfficerManagement({ orgId: _orgId }: OfficerManagementProps) {
   const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS)
   const [showModal, setShowModal] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState<Officer | null>(null)
-  const { toast } = useToast()
 
   function handleRemove(officer: Officer) {
     setOfficers((prev) => prev.filter((o) => o.id !== officer.id))
     setConfirmRemove(null)
-    toast({ title: `${officer.name} removed as ${officer.role}` })
+    toast.success(`${officer.name} removed as ${officer.role}`)
   }
 
   function handleAssigned(officer: Officer) {
     setOfficers((prev) => [...prev, officer])
     setShowModal(false)
-    toast({ title: `${officer.name} assigned as ${officer.role}` })
+    toast.success(`${officer.name} assigned as ${officer.role}`)
   }
 
   return (

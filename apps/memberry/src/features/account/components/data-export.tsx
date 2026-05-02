@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { Download, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react'
 
 type ExportStatus = 'Processing' | 'Ready' | 'Expired'
@@ -72,7 +72,6 @@ function hoursUntilNextRequest(): number {
 }
 
 export function DataExport() {
-  const { toast } = useToast()
   const [exports, setExports] = useState<ExportRecord[]>(MOCK_EXPORTS)
   const [isRequesting, setIsRequesting] = useState(false)
   const [rateLimited, setRateLimited] = useState(isRateLimited)
@@ -80,10 +79,8 @@ export function DataExport() {
   async function handleRequestExport() {
     if (isRateLimited()) {
       setRateLimited(true)
-      toast({
-        title: 'Export already requested',
+      toast.error('Export already requested', {
         description: `You can request another export in ${hoursUntilNextRequest()} hour(s).`,
-        variant: 'destructive',
       })
       return
     }
@@ -102,8 +99,7 @@ export function DataExport() {
     setRateLimited(true)
     setIsRequesting(false)
 
-    toast({
-      title: 'Export requested',
+    toast.success('Export requested', {
       description: "You'll be notified when your data export is ready.",
     })
   }

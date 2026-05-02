@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { AlertTriangle, ArrowLeft, CreditCard, Mail, Phone, Shield, UserX } from 'lucide-react'
 
 interface MemberDetailProps {
@@ -49,7 +49,6 @@ function getInitials(name: string | undefined): string {
 }
 
 export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const [showChangeCat, setShowChangeCat] = useState(false)
@@ -92,10 +91,10 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
       queryClient.invalidateQueries({ queryKey: ['membership-members', orgId] })
       setShowChangeCat(false)
       setShowSuspend(false)
-      toast({ title: 'Member updated' })
+      toast.success('Member updated')
     },
     onError: () => {
-      toast({ title: 'Update failed', description: 'Please try again.', variant: 'destructive' })
+      toast.error('Update failed', { description: 'Please try again.' })
     },
   })
 

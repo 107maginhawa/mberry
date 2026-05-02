@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { Check, ChevronDown, ChevronUp, ClipboardList, MessageSquare, X } from 'lucide-react'
 
 interface ApplicationListProps {
@@ -22,7 +22,6 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
 }
 
 export function ApplicationList({ orgId }: ApplicationListProps) {
-  const { toast } = useToast()
   const queryClient = useQueryClient()
   const [statusFilter, setStatusFilter] = useState<AppStatus>('pending')
 
@@ -58,10 +57,10 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
         rejected: 'Application rejected',
         info_requested: 'Info requested from applicant',
       }
-      toast({ title: labels[variables.status] ?? 'Application updated' })
+      toast.success(labels[variables.status] ?? 'Application updated')
     },
     onError: () => {
-      toast({ title: 'Action failed', description: 'Please try again.', variant: 'destructive' })
+      toast.error('Action failed', { description: 'Please try again.' })
     },
   })
 

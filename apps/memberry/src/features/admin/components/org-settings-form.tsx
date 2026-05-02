@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { Pencil, X, Save, Globe, Mail, Phone, MapPin, Calendar, Image } from 'lucide-react'
 
 interface OrgSettingsFormProps {
@@ -54,7 +54,6 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState<OrgProfile>(EMPTY_PROFILE)
   const [draft, setDraft] = useState<OrgProfile>(EMPTY_PROFILE)
-  const { toast } = useToast()
 
   useEffect(() => {
     fetchOrgProfile(orgId)
@@ -79,7 +78,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
 
   async function handleSave() {
     if (!draft.name.trim()) {
-      toast({ title: 'Organization name is required', variant: 'destructive' })
+      toast.error('Organization name is required')
       return
     }
     setIsSaving(true)
@@ -88,9 +87,9 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
       await new Promise((r) => setTimeout(r, 600))
       setSaved(draft)
       setIsEditing(false)
-      toast({ title: 'Settings saved' })
+      toast.success('Settings saved')
     } catch {
-      toast({ title: 'Failed to save settings', variant: 'destructive' })
+      toast.error('Failed to save settings')
     } finally {
       setIsSaving(false)
     }

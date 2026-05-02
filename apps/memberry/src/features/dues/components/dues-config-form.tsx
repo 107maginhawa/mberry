@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { parseCentsInput } from '../lib/money'
 
 interface DuesConfigFormProps {
@@ -32,7 +32,6 @@ const DEFAULT_REMINDERS: ReminderRow[] = [
 ]
 
 export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const [defaultAmount, setDefaultAmount] = useState('')
@@ -87,11 +86,11 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dues-config', orgId] })
-      toast({ title: 'Dues configuration updated', description: 'Applies to future billing cycles.' })
+      toast.success('Dues configuration updated', { description: 'Applies to future billing cycles.' })
       setHasChanges(false)
     },
     onError: () => {
-      toast({ title: 'Failed to save', description: 'Please try again.', variant: 'destructive' })
+      toast.error('Failed to save', { description: 'Please try again.' })
     },
   })
 

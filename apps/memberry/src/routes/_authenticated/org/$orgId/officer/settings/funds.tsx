@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { FundAllocationEditor } from '@/features/dues/components/fund-allocation-editor'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/settings/funds')({
@@ -13,7 +13,6 @@ export const Route = createFileRoute('/_authenticated/org/$orgId/officer/setting
 
 function FundSettingsPage() {
   const { orgId } = Route.useParams()
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const [funds, setFunds] = useState<{ id?: string; name: string; percentage: string }[]>([
@@ -49,11 +48,11 @@ function FundSettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dues-funds', orgId] })
-      toast({ title: 'Fund allocation updated', description: 'New allocation applies to future payments.' })
+      toast.success('Fund allocation updated', { description: 'New allocation applies to future payments.' })
       setHasChanges(false)
     },
     onError: (err) => {
-      toast({ title: 'Failed to save', description: err.message, variant: 'destructive' })
+      toast.error('Failed to save', { description: err.message })
     },
   })
 

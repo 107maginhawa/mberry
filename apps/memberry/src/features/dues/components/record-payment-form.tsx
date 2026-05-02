@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { parseCentsInput } from '../lib/money'
 import { FundAllocationPreview } from './fund-allocation-preview'
 
@@ -14,8 +14,6 @@ interface RecordPaymentFormProps {
 }
 
 export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
-  const { toast } = useToast()
-
   const [personId, setPersonId] = useState('')
   const [memberSearch, setMemberSearch] = useState('')
   const [amount, setAmount] = useState('')
@@ -58,7 +56,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
     },
     onSuccess: () => {
       setShowConfirm(false)
-      toast({ title: 'Payment recorded', description: 'Receipt sent to member.' })
+      toast.success('Payment recorded', { description: 'Receipt sent to member.' })
       setPersonId('')
       setMemberSearch('')
       setAmount('')
@@ -66,7 +64,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
       setReferenceNumber('')
     },
     onError: () => {
-      toast({ title: 'Failed to record payment', description: 'Please try again.', variant: 'destructive' })
+      toast.error('Failed to record payment', { description: 'Please try again.' })
     },
   })
 

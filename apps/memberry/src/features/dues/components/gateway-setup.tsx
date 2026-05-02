@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { CheckCircle, XCircle, Wifi, WifiOff } from 'lucide-react'
 
 interface GatewaySetupProps {
@@ -15,7 +15,6 @@ interface GatewaySetupProps {
 }
 
 export function GatewaySetup({ orgId }: GatewaySetupProps) {
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const [provider, setProvider] = useState<string>('paymongo')
@@ -59,13 +58,13 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dues-gateway', orgId] })
-      toast({ title: 'Gateway connected', description: 'Online payments are now enabled.' })
+      toast.success('Gateway connected', { description: 'Online payments are now enabled.' })
       setPublicKey('')
       setSecretKey('')
       setTestResult(null)
     },
     onError: () => {
-      toast({ title: 'Failed to save', description: 'Please try again.', variant: 'destructive' })
+      toast.error('Failed to save', { description: 'Please try again.' })
     },
   })
 
@@ -78,7 +77,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dues-gateway', orgId] })
       setShowDisconnect(false)
-      toast({ title: 'Gateway disconnected' })
+      toast.success('Gateway disconnected')
     },
   })
 

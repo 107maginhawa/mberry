@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { formatCents, parseCentsInput } from '../lib/money'
 
 interface RefundFormProps {
@@ -15,7 +15,6 @@ interface RefundFormProps {
 }
 
 export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) {
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const [expanded, setExpanded] = useState(false)
@@ -42,10 +41,10 @@ export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) 
       setShowConfirm(false)
       setExpanded(false)
       queryClient.invalidateQueries({ queryKey: ['dues-payment', paymentId] })
-      toast({ title: `Refund of ${formatCents(amountCents, currency)} processed.` })
+      toast.success(`Refund of ${formatCents(amountCents, currency)} processed.`)
     },
     onError: () => {
-      toast({ title: 'Refund failed', description: 'Please try again.', variant: 'destructive' })
+      toast.error('Refund failed', { description: 'Please try again.' })
     },
   })
 

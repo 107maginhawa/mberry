@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { Layers, Plus, ToggleLeft } from 'lucide-react'
 
 interface CategoryEditorProps {
@@ -29,7 +29,6 @@ const EMPTY_FORM = {
 }
 
 export function CategoryEditor({ orgId }: CategoryEditorProps) {
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const [showAdd, setShowAdd] = useState(false)
@@ -62,10 +61,10 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
       setShowAdd(false)
       setConfirmDeactivate(null)
       setForm(EMPTY_FORM)
-      toast({ title: 'Category saved' })
+      toast.success('Category saved')
     },
     onError: () => {
-      toast({ title: 'Failed to save', description: 'Please try again.', variant: 'destructive' })
+      toast.error('Failed to save', { description: 'Please try again.' })
     },
   })
 
