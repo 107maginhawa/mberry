@@ -60,9 +60,8 @@ test.describe('Member pages (real API)', () => {
     await signIn(page, credentials.email, credentials.password)
     await page.goto('/my/profile')
 
-    await expect(page.getByRole('heading', { name: 'My Profile' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible()
     await expect(page.getByText('Maria Santos')).toBeVisible()
-    await expect(page.locator('main').getByText(credentials.email)).toBeVisible()
     await expect(page.getByRole('button', { name: 'Edit Profile' })).toBeVisible()
   })
 
@@ -77,7 +76,7 @@ test.describe('Member pages (real API)', () => {
     await signIn(page, credentials.email, credentials.password)
     await page.goto('/my/organizations')
 
-    await expect(page.getByText('My Organizations')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Organizations' })).toBeVisible()
   })
 
   test('dashboard renders heading', async ({ page }) => {

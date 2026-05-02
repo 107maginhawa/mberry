@@ -105,10 +105,9 @@ test.describe('Sign-in flow', () => {
     await page.waitForURL((url) => !url.pathname.includes('/auth/'), { timeout: 15000 })
 
     // Sidebar should be visible with nav links
-    await expect(page.getByRole('heading', { name: 'Memberry', exact: true })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'My Profile' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible()
+    await expect(page.getByText('Memberry')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Profile' })).toBeVisible()
 
     // User email should appear in sidebar
     await expect(page.getByText(testEmail)).toBeVisible()

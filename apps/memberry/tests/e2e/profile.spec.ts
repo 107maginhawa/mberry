@@ -14,7 +14,7 @@ test.describe('Profile page (/my/profile)', () => {
     await signIn(page, credentials.email, credentials.password)
     await page.goto('/my/profile')
 
-    await expect(page.getByRole('heading', { name: 'My Profile' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible()
     await expect(page.getByRole('button', { name: /edit profile/i })).toBeVisible()
   })
 
