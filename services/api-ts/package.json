@@ -18,6 +18,7 @@
     "db:generate": "drizzle-kit generate",
     "db:seed": "bun run src/seed.ts",
     "db:seed-modules": "bun run src/seed-modules.ts",
+    "db:seed-rich": "bun run src/seed-rich.ts",
     "db:studio": "drizzle-kit studio",
     "test": "bun test src/**/*.test.ts",
     "test:unit": "bun test src/**/*.test.ts",
