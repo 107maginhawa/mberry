@@ -3,7 +3,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { CertificatesRepository } from './repos/certificates.repo';
 import { getCertificate } from './getCertificate';
 
-describe('getCertificate', () => {
+describe('[BR-20] getCertificate', () => {
   let mocks: Record<string, { mockRestore: () => void }>;
 
   afterEach(() => {

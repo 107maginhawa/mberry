@@ -28,7 +28,7 @@ const fakeRegistration = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('registerForEvent', () => {
+describe('[BR-27] registerForEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
@@ -52,7 +52,7 @@ describe('registerForEvent', () => {
     expect(response.body.data.eventId).toBe('evt-1');
   });
 
-  test('waitlists when event at capacity', async () => {
+  test('[BR-27] waitlists when event at capacity', async () => {
     mocks = stubRepo(EventsRepository, {
       get: async () => ({ ...fakeEvent, capacity: 50 }),
       getRegistrationCount: async () => 50,
@@ -84,7 +84,7 @@ describe('registerForEvent', () => {
     expect(response.body.data.status).toBe('waitlisted');
   });
 
-  test('confirms when no capacity limit (null capacity)', async () => {
+  test('[BR-27] confirms when no capacity limit (null capacity)', async () => {
     mocks = stubRepo(EventsRepository, {
       get: async () => ({ ...fakeEvent, capacity: null }),
       getRegistrationCount: async () => 999,

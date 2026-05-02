@@ -28,7 +28,7 @@ function makeCert(overrides: Record<string, any> = {}) {
   };
 }
 
-describe('CertificatesRepository', () => {
+describe('[BR-20] CertificatesRepository', () => {
   describe('get', () => {
     test('returns certificate by id', async () => {
       const cert = makeCert();

@@ -62,7 +62,7 @@ describe('Credential Templates', () => {
   });
 });
 
-describe('Digital Credentials', () => {
+describe('[BR-19] Digital Credentials', () => {
   test('issueDigitalCredential returns 401 without user', async () => {
     const { issueDigitalCredential } = await import('./issueDigitalCredential');
     const ctx = makeCtx({ user: null, _body: { personId: 'p1', templateId: 't1', credentialNumber: 'CN-001' } });
@@ -151,7 +151,7 @@ describe('Credential Revocation', () => {
   });
 });
 
-describe('Credential Verification (Public)', () => {
+describe('[BR-18] Credential Verification (Public)', () => {
   const secret = 'test-secret-key';
 
   test('verifyCredentialPublic does NOT require authentication', async () => {

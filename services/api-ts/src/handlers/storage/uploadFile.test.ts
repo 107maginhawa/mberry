@@ -97,7 +97,7 @@ function patchRepo(overrides: {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('uploadFile', () => {
+describe('[BR-31] uploadFile', () => {
   beforeEach(() => {
     patchRepo();
   });

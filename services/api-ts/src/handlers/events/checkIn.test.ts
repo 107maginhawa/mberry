@@ -29,7 +29,7 @@ const fakeAttendance = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('checkIn', () => {
+describe('[BR-17] checkIn', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
@@ -54,7 +54,7 @@ describe('checkIn', () => {
     expect(response.body.data.personId).toBe('person-1');
   });
 
-  test('defaults method to manual', async () => {
+  test('[BR-17] defaults method to manual', async () => {
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
@@ -71,7 +71,7 @@ describe('checkIn', () => {
     expect(capturedData.method).toBe('manual');
   });
 
-  test('accepts qr method', async () => {
+  test('[BR-17] accepts qr method', async () => {
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
@@ -88,7 +88,7 @@ describe('checkIn', () => {
     expect(capturedData.method).toBe('qr');
   });
 
-  test('throws ConflictError when already checked in', async () => {
+  test('[BR-17] throws ConflictError when already checked in (duplicate scan)', async () => {
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       isCheckedIn: async () => true,

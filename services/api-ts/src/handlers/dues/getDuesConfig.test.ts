@@ -23,7 +23,7 @@ const fakeReminders = [{ daysOffset: -30, templateId: 'tpl-1' }];
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('getDuesConfig', () => {
+describe('[BR-04] getDuesConfig', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {

@@ -22,7 +22,7 @@ const fakeTraining = {
   updatedBy: 'user-1',
 };
 
-describe('createTraining', () => {
+describe('[BR-15] createTraining', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {

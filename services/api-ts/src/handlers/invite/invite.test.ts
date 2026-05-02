@@ -77,8 +77,8 @@ describe('invite handler auth guards', () => {
   });
 });
 
-describe('invite business rules', () => {
-  test('M1-R2: tokens expire after 7 days', () => {
+describe('[BR-24] invite business rules', () => {
+  test('[BR-24] tokens expire after 7 days', () => {
     const expires = defaultExpiryDate();
     const sixDaysFromNow = new Date();
     sixDaysFromNow.setDate(sixDaysFromNow.getDate() + 6);

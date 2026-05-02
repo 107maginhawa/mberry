@@ -212,7 +212,7 @@ describe('revokeAdmin last-super guard', () => {
   });
 });
 
-describe('startImpersonation role guard', () => {
+describe('[BR-10] startImpersonation role guard', () => {
   test('only super and support roles can impersonate', () => {
     const allowed = ['super', 'support'];
     expect(allowed).toContain('super');

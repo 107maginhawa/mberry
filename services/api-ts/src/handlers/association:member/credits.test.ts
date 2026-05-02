@@ -183,7 +183,7 @@ describe('getCreditTranscript', () => {
 // Credit Cycle Calculation Tests
 // ---------------------------------------------------------------------------
 
-describe('Credit Cycle — per-member registration-based cycles', () => {
+describe('[BR-11] Credit Cycle — per-member registration-based cycles', () => {
   test('getCycleForDate returns correct cycle for a date within first cycle', () => {
     const regDate = new Date('2024-01-15');
     const targetDate = new Date('2024-06-01');
@@ -235,7 +235,7 @@ describe('Credit Cycle — per-member registration-based cycles', () => {
 // BR-12: Carryover Capped at 50% of Required Credits
 // ---------------------------------------------------------------------------
 
-describe('BR-12: Carryover capped at 50% of required credits', () => {
+describe('[BR-12] Carryover capped at 50% of required credits', () => {
   test('no carryover when disabled', () => {
     const result = calculateCarryover(100, 40, false);
     expect(result).toBe(0);
@@ -280,7 +280,7 @@ describe('BR-12: Carryover capped at 50% of required credits', () => {
 // BR-13: Auto-credits Link to Training
 // ---------------------------------------------------------------------------
 
-describe('BR-13: Auto-credits link to training', () => {
+describe('[BR-13] Auto-credits link to training', () => {
   test('credit entry type enum includes auto and manual', () => {
     // Verify the credit entry schema supports both types
     const validTypes = ['auto', 'manual'];
@@ -354,7 +354,7 @@ describe('summarizeCycle', () => {
 // Cross-Org Aggregation
 // ---------------------------------------------------------------------------
 
-describe('Cross-org credit aggregation', () => {
+describe('[BR-14] Cross-org credit aggregation', () => {
   test('credit entries from multiple orgs sum correctly', () => {
     // Simulate credits from 3 different organizations
     const orgCredits = [

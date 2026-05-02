@@ -25,7 +25,7 @@ const fakeEvent = {
 
 // ─── Tests ──────────────────────────────────────────────
 
-describe('createEvent', () => {
+describe('[BR-15] createEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
