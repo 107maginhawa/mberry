@@ -28,6 +28,9 @@ import { registerDuesJobs } from '@/handlers/dues/jobs';
 // Dues handler
 import { dues } from '@/handlers/dues';
 
+// Membership handler
+import { membership } from '@/handlers/membership';
+
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
 import { registerRoutes as registerHealthRoutes } from '@/core/health';
@@ -131,6 +134,9 @@ export function createApp(config: Config): App {
 
   // Register dues routes
   app.route('/api/dues', dues);
+
+  // Register membership routes
+  app.route('/api/membership', membership);
 
   // Register API routes
   registerOpenAPIRoutes(app as any);
