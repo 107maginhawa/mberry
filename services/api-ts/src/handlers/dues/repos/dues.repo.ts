@@ -231,6 +231,77 @@ export class DuesRepository {
     }
   }
 
+  // ─── Reports ──────────────────────────────────────────
+
+  async reportCollectionSummary(organizationId: string, from: Date, to: Date) {
+    return this.db
+      .select({
+        month: sql<string>`to_char(${duesPayments.paidAt}, 'YYYY-MM')`,
+        method: duesPayments.paymentMethod,
+        count: sql<number>`count(*)::int`,
+        total: sql<number>`COALESCE(SUM(${duesPayments.amount}), 0)::int`,
+      })
+      .from(duesPayments)
+      .where(and(
+        eq(duesPayments.organizationId, organizationId),
+        eq(duesPayments.status, 'completed'),
+        gte(duesPayments.paidAt, from),
+        lte(duesPayments.paidAt, to),
+      ))
+      .groupBy(sql`to_char(${duesPayments.paidAt}, 'YYYY-MM')`, duesPayments.paymentMethod)
+      .orderBy(sql`to_char(${duesPayments.paidAt}, 'YYYY-MM')`);
+  }
+
+  async reportFundBreakdown(organizationId: string, from: Date, to: Date) {
+    return this.db
+      .select({
+        fundId: duesFundAllocations.fundId,
+        fundName: duesFunds.name,
+        percentage: duesFunds.percentage,
+        totalAllocated: sql<number>`COALESCE(SUM(CASE WHEN ${duesFundAllocations.isReversal} = false THEN ${duesFundAllocations.amount} ELSE 0 END), 0)::int`,
+        totalReversals: sql<number>`COALESCE(SUM(CASE WHEN ${duesFundAllocations.isReversal} = true THEN ${duesFundAllocations.amount} ELSE 0 END), 0)::int`,
+        netTotal: sql<number>`COALESCE(SUM(${duesFundAllocations.amount}), 0)::int`,
+      })
+      .from(duesFundAllocations)
+      .innerJoin(duesPayments, eq(duesFundAllocations.paymentId, duesPayments.id))
+      .innerJoin(duesFunds, eq(duesFundAllocations.fundId, duesFunds.id))
+      .where(and(
+        eq(duesPayments.organizationId, organizationId),
+        gte(duesPayments.paidAt, from),
+        lte(duesPayments.paidAt, to),
+      ))
+      .groupBy(duesFundAllocations.fundId, duesFunds.name, duesFunds.percentage);
+  }
+
+  async reportDuesStatus(organizationId: string) {
+    return this.db
+      .select({
+        personId: duesPayments.personId,
+        totalPaid: sql<number>`COALESCE(SUM(CASE WHEN ${duesPayments.status} = 'completed' THEN ${duesPayments.amount} ELSE 0 END), 0)::int`,
+        lastPaymentDate: sql<string>`MAX(${duesPayments.paidAt})`,
+        paymentCount: sql<number>`count(*)::int`,
+      })
+      .from(duesPayments)
+      .where(eq(duesPayments.organizationId, organizationId))
+      .groupBy(duesPayments.personId);
+  }
+
+  async reportAging(organizationId: string) {
+    return this.db
+      .select({
+        personId: duesPayments.personId,
+        amount: duesPayments.amount,
+        paidAt: duesPayments.paidAt,
+        daysPending: sql<number>`EXTRACT(DAY FROM NOW() - ${duesPayments.createdAt})::int`,
+      })
+      .from(duesPayments)
+      .where(and(
+        eq(duesPayments.organizationId, organizationId),
+        eq(duesPayments.status, 'pending'),
+      ))
+      .orderBy(duesPayments.createdAt);
+  }
+
   // ─── Gateway ──────────────────────────────────────────
 
   async getGatewayConfig(organizationId: string): Promise<DuesGatewayConfig | undefined> {

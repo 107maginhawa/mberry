@@ -39,9 +39,11 @@ import { Route as AuthenticatedOrgOrgIdOfficerCommunicationsRouteImport } from '
 import { Route as AuthenticatedOrgOrgIdOfficerApplicationsRouteImport } from './routes/_authenticated/org/$orgId/officer/applications'
 import { Route as AuthenticatedOrgOrgIdOfficerTrainingIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/training/index'
 import { Route as AuthenticatedOrgOrgIdOfficerEventsIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/events/index'
+import { Route as AuthenticatedOrgOrgIdOfficerSettingsGatewayRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/gateway'
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsFundsRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/funds'
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsDuesRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/dues'
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/chapters'
+import { Route as AuthenticatedOrgOrgIdOfficerReportsFinancialRouteImport } from './routes/_authenticated/org/$orgId/officer/reports/financial'
 import { Route as AuthenticatedOrgOrgIdOfficerReportsCreditsRouteImport } from './routes/_authenticated/org/$orgId/officer/reports/credits'
 import { Route as AuthenticatedOrgOrgIdOfficerPaymentsNewRouteImport } from './routes/_authenticated/org/$orgId/officer/payments/new'
 import { Route as AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRouteImport } from './routes/_authenticated/org/$orgId/officer/payments/$paymentId'
@@ -211,6 +213,12 @@ const AuthenticatedOrgOrgIdOfficerEventsIndexRoute =
     path: '/org/$orgId/officer/events/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute =
+  AuthenticatedOrgOrgIdOfficerSettingsGatewayRouteImport.update({
+    id: '/org/$orgId/officer/settings/gateway',
+    path: '/org/$orgId/officer/settings/gateway',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedOrgOrgIdOfficerSettingsFundsRoute =
   AuthenticatedOrgOrgIdOfficerSettingsFundsRouteImport.update({
     id: '/org/$orgId/officer/settings/funds',
@@ -227,6 +235,12 @@ const AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute =
   AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport.update({
     id: '/org/$orgId/officer/settings/chapters',
     path: '/org/$orgId/officer/settings/chapters',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdOfficerReportsFinancialRoute =
+  AuthenticatedOrgOrgIdOfficerReportsFinancialRouteImport.update({
+    id: '/org/$orgId/officer/reports/financial',
+    path: '/org/$orgId/officer/reports/financial',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedOrgOrgIdOfficerReportsCreditsRoute =
@@ -286,9 +300,11 @@ export interface FileRoutesByFullPath {
   '/org/$orgId/officer/payments/$paymentId': typeof AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute
   '/org/$orgId/officer/payments/new': typeof AuthenticatedOrgOrgIdOfficerPaymentsNewRoute
   '/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
+  '/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
   '/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
   '/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
   '/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
+  '/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
   '/org/$orgId/officer/events': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
   '/org/$orgId/officer/training': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
 }
@@ -324,9 +340,11 @@ export interface FileRoutesByTo {
   '/org/$orgId/officer/payments/$paymentId': typeof AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute
   '/org/$orgId/officer/payments/new': typeof AuthenticatedOrgOrgIdOfficerPaymentsNewRoute
   '/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
+  '/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
   '/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
   '/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
   '/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
+  '/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
   '/org/$orgId/officer/events': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
   '/org/$orgId/officer/training': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
 }
@@ -364,9 +382,11 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgId/officer/payments/$paymentId': typeof AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute
   '/_authenticated/org/$orgId/officer/payments/new': typeof AuthenticatedOrgOrgIdOfficerPaymentsNewRoute
   '/_authenticated/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
+  '/_authenticated/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
   '/_authenticated/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
   '/_authenticated/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
   '/_authenticated/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
+  '/_authenticated/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
   '/_authenticated/org/$orgId/officer/events/': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
   '/_authenticated/org/$orgId/officer/training/': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
 }
@@ -404,9 +424,11 @@ export interface FileRouteTypes {
     | '/org/$orgId/officer/payments/$paymentId'
     | '/org/$orgId/officer/payments/new'
     | '/org/$orgId/officer/reports/credits'
+    | '/org/$orgId/officer/reports/financial'
     | '/org/$orgId/officer/settings/chapters'
     | '/org/$orgId/officer/settings/dues'
     | '/org/$orgId/officer/settings/funds'
+    | '/org/$orgId/officer/settings/gateway'
     | '/org/$orgId/officer/events'
     | '/org/$orgId/officer/training'
   fileRoutesByTo: FileRoutesByTo
@@ -442,9 +464,11 @@ export interface FileRouteTypes {
     | '/org/$orgId/officer/payments/$paymentId'
     | '/org/$orgId/officer/payments/new'
     | '/org/$orgId/officer/reports/credits'
+    | '/org/$orgId/officer/reports/financial'
     | '/org/$orgId/officer/settings/chapters'
     | '/org/$orgId/officer/settings/dues'
     | '/org/$orgId/officer/settings/funds'
+    | '/org/$orgId/officer/settings/gateway'
     | '/org/$orgId/officer/events'
     | '/org/$orgId/officer/training'
   id:
@@ -481,9 +505,11 @@ export interface FileRouteTypes {
     | '/_authenticated/org/$orgId/officer/payments/$paymentId'
     | '/_authenticated/org/$orgId/officer/payments/new'
     | '/_authenticated/org/$orgId/officer/reports/credits'
+    | '/_authenticated/org/$orgId/officer/reports/financial'
     | '/_authenticated/org/$orgId/officer/settings/chapters'
     | '/_authenticated/org/$orgId/officer/settings/dues'
     | '/_authenticated/org/$orgId/officer/settings/funds'
+    | '/_authenticated/org/$orgId/officer/settings/gateway'
     | '/_authenticated/org/$orgId/officer/events/'
     | '/_authenticated/org/$orgId/officer/training/'
   fileRoutesById: FileRoutesById
@@ -711,6 +737,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerEventsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/org/$orgId/officer/settings/gateway': {
+      id: '/_authenticated/org/$orgId/officer/settings/gateway'
+      path: '/org/$orgId/officer/settings/gateway'
+      fullPath: '/org/$orgId/officer/settings/gateway'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/org/$orgId/officer/settings/funds': {
       id: '/_authenticated/org/$orgId/officer/settings/funds'
       path: '/org/$orgId/officer/settings/funds'
@@ -730,6 +763,13 @@ declare module '@tanstack/react-router' {
       path: '/org/$orgId/officer/settings/chapters'
       fullPath: '/org/$orgId/officer/settings/chapters'
       preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/officer/reports/financial': {
+      id: '/_authenticated/org/$orgId/officer/reports/financial'
+      path: '/org/$orgId/officer/reports/financial'
+      fullPath: '/org/$orgId/officer/reports/financial'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/org/$orgId/officer/reports/credits': {
@@ -804,9 +844,11 @@ interface AuthenticatedRouteChildren {
   AuthenticatedOrgOrgIdTrainingIndexRoute: typeof AuthenticatedOrgOrgIdTrainingIndexRoute
   AuthenticatedOrgOrgIdOfficerEventsEventIdRoute: typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRoute
   AuthenticatedOrgOrgIdOfficerReportsCreditsRoute: typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
+  AuthenticatedOrgOrgIdOfficerReportsFinancialRoute: typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
   AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
   AuthenticatedOrgOrgIdOfficerSettingsDuesRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
   AuthenticatedOrgOrgIdOfficerSettingsFundsRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
+  AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
   AuthenticatedOrgOrgIdOfficerEventsIndexRoute: typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
   AuthenticatedOrgOrgIdOfficerTrainingIndexRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
 }
@@ -842,12 +884,16 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedOrgOrgIdOfficerEventsEventIdRoute,
   AuthenticatedOrgOrgIdOfficerReportsCreditsRoute:
     AuthenticatedOrgOrgIdOfficerReportsCreditsRoute,
+  AuthenticatedOrgOrgIdOfficerReportsFinancialRoute:
+    AuthenticatedOrgOrgIdOfficerReportsFinancialRoute,
   AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute:
     AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute,
   AuthenticatedOrgOrgIdOfficerSettingsDuesRoute:
     AuthenticatedOrgOrgIdOfficerSettingsDuesRoute,
   AuthenticatedOrgOrgIdOfficerSettingsFundsRoute:
     AuthenticatedOrgOrgIdOfficerSettingsFundsRoute,
+  AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute:
+    AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute,
   AuthenticatedOrgOrgIdOfficerEventsIndexRoute:
     AuthenticatedOrgOrgIdOfficerEventsIndexRoute,
   AuthenticatedOrgOrgIdOfficerTrainingIndexRoute:
