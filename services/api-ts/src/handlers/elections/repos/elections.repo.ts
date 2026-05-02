@@ -1,6 +1,6 @@
 import { eq, and, desc, sql } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
-import { elections, electionNominees, electionVotes, type Election, type NewElection, type ElectionNominee } from './elections.schema';
+import { elections, electionNominees, electionVotes, type Election, type NewElection, type ElectionNominee } from './elections.types';
 
 export class ElectionsRepository {
   constructor(private db: DatabaseInstance) {}

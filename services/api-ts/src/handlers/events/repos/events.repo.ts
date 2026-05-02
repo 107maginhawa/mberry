@@ -10,7 +10,7 @@ import {
   type NewEventRegistration,
   type EventAttendance,
   type NewEventAttendance,
-} from './events.schema';
+} from './events.types';
 
 export class EventsRepository {
   constructor(private db: DatabaseInstance) {}

@@ -10,7 +10,7 @@ import {
   type NewTrainingEnrollment,
   type TrainingAttendance,
   type NewTrainingAttendance,
-} from './training.schema';
+} from './training.types';
 
 export class TrainingRepository {
   constructor(private db: DatabaseInstance) {}

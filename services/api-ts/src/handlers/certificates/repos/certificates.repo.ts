@@ -1,6 +1,6 @@
 import { eq, and, desc, sql } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
-import { certificates, type Certificate, type NewCertificate } from './certificates.schema';
+import { certificates, type Certificate, type NewCertificate } from './certificates.types';
 
 export class CertificatesRepository {
   constructor(private db: DatabaseInstance) {}

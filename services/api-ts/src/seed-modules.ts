@@ -12,12 +12,12 @@ import { Pool } from 'pg';
 
 // Import schemas
 import { duesConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues.schema';
-import { membershipCategories } from './handlers/membership/repos/membership.schema';
-import { events, eventRegistrations } from './handlers/events/repos/events.schema';
-import { trainings, trainingEnrollments, trainingAttendance } from './handlers/training/repos/training.schema';
-import { announcements, announcementStats } from './handlers/communications/repos/communications.schema';
-import { elections } from './handlers/elections/repos/elections.schema';
-import { certificates } from './handlers/certificates/repos/certificates.schema';
+import { membershipCategories } from './handlers/membership/repos/membership.types';
+import { events, eventRegistrations } from './handlers/events/repos/events.types';
+import { trainings, trainingEnrollments, trainingAttendance } from './handlers/training/repos/training.types';
+import { announcements, announcementStats } from './handlers/communications/repos/communications.types';
+import { elections } from './handlers/elections/repos/elections.types';
+import { certificates } from './handlers/certificates/repos/certificates.types';
 import { persons } from './handlers/person/repos/person.schema';
 import { organizations } from './handlers/platformadmin/repos/platform-admin.schema';
 

@@ -5,7 +5,7 @@ import {
   type Membership, type NewMembership,
   type MembershipCategory, type NewMembershipCategory,
   type MembershipApplication,
-} from './membership.schema';
+} from './membership.types';
 import { persons } from '../../person/repos/person.schema';
 
 export class MembershipRepository {
