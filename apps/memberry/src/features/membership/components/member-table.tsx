@@ -14,23 +14,23 @@ interface MemberTableProps {
   orgId: string
 }
 
-type MemberStatus = 'active' | 'grace' | 'lapsed' | 'suspended' | 'pending'
+type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment'
 
 const STATUS_TABS = [
   { value: 'all', label: 'All' },
   { value: 'active', label: 'Active' },
-  { value: 'grace', label: 'Grace' },
+  { value: 'gracePeriod', label: 'Grace' },
   { value: 'lapsed', label: 'Lapsed' },
   { value: 'suspended', label: 'Suspended' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'pendingPayment', label: 'Pending' },
 ]
 
 const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> = {
   active: { label: 'Active', className: 'bg-green-100 text-green-800 hover:bg-green-100' },
-  grace: { label: 'Grace', className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' },
+  gracePeriod: { label: 'Grace', className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' },
   lapsed: { label: 'Lapsed', className: 'bg-red-100 text-red-800 hover:bg-red-100' },
   suspended: { label: 'Suspended', className: 'bg-gray-100 text-gray-800 hover:bg-gray-100' },
-  pending: { label: 'Pending', className: 'bg-blue-100 text-blue-800 hover:bg-blue-100' },
+  pendingPayment: { label: 'Pending', className: 'bg-blue-100 text-blue-800 hover:bg-blue-100' },
 }
 
 const PAGE_SIZE = 50
@@ -187,7 +187,7 @@ export function MemberTable({ orgId }: MemberTableProps) {
               <tbody className="divide-y">
                 {members.map((m: any) => {
                   const status = m.status as MemberStatus
-                  const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pending
+                  const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
                   return (
                     <tr key={m.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3">
@@ -209,7 +209,7 @@ export function MemberTable({ orgId }: MemberTableProps) {
                           <div className="text-xs text-muted-foreground">{m.email}</div>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs">{m.licenseNumber ?? '—'}</td>
+                      <td className="px-4 py-3 font-mono text-xs">{m.memberNumber ?? '—'}</td>
                       <td className="px-4 py-3 text-muted-foreground">{m.categoryName ?? m.categoryId ?? '—'}</td>
                       <td className="px-4 py-3">
                         <Badge className={badge.className}>{badge.label}</Badge>

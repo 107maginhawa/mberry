@@ -199,10 +199,10 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
                 {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : '—'}
               </p>
             </div>
-            {app.licenseNumber && (
+            {app.memberNumber && (
               <div>
-                <p className="text-muted-foreground text-xs">License #</p>
-                <p className="font-mono text-xs">{app.licenseNumber}</p>
+                <p className="text-muted-foreground text-xs">Member #</p>
+                <p className="font-mono text-xs">{app.memberNumber}</p>
               </div>
             )}
           </div>

@@ -41,7 +41,7 @@ function MyTraining() {
 
   const totalCredits = items.reduce((acc, item) => {
     const isCompleted = item.enrollment?.status === 'enrolled' // In reality would check attendance
-    return acc + (isCompleted ? Number(item.training?.creditValue ?? 0) : 0)
+    return acc + (isCompleted ? Number(item.training?.creditAmount ?? 0) : 0)
   }, 0)
 
   const enrolled = items.filter((i) => i.enrollment?.status === 'enrolled').length
@@ -113,13 +113,13 @@ function MyTraining() {
                     {item.training.type?.replace('_', ' ')}
                   </td>
                   <td className="p-3 text-muted-foreground">
-                    {formatDate(item.training.startAt)}
+                    {formatDate(item.training.startDate)}
                   </td>
                   <td className="p-3">
-                    {Number(item.training.creditValue) > 0 ? (
+                    {Number(item.training.creditAmount) > 0 ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
                         <Award className="w-3 h-3" />
-                        {item.training.creditValue} CPE
+                        {item.training.creditAmount} CPE
                       </span>
                     ) : (
                       <span className="text-muted-foreground">—</span>

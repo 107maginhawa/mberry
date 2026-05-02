@@ -1,4 +1,4 @@
-import { MoreHorizontal, Calendar, Users, Award, MapPin, Globe } from 'lucide-react'
+import { MoreHorizontal, Calendar, Users, Award, MapPin } from 'lucide-react'
 import { useState } from 'react'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -33,12 +33,8 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
 
   return (
     <div className="border rounded-xl bg-card overflow-hidden hover:shadow-md transition-shadow relative">
-      {/* Cover / accent strip */}
-      {training.coverImage ? (
-        <img src={training.coverImage} alt="" className="w-full h-28 object-cover" />
-      ) : (
-        <div className="h-2 w-full bg-primary" />
-      )}
+      {/* Accent strip */}
+      <div className="h-2 w-full bg-primary" />
 
       <div className="p-4 space-y-3">
         {/* Header row */}
@@ -95,10 +91,10 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700'}`}>
             {training.status.replace('_', ' ')}
           </span>
-          {Number(training.creditValue) > 0 && (
+          {Number(training.creditAmount) > 0 && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
               <Award className="w-3 h-3" />
-              {training.creditValue} CPE
+              {training.creditAmount} CPE
             </span>
           )}
         </div>
@@ -107,18 +103,12 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
         <div className="space-y-1 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 shrink-0" />
-            <span>{formatDate(training.startAt)}{training.endAt ? ` – ${formatDate(training.endAt)}` : ''}</span>
+            <span>{formatDate(training.startDate)}{training.endDate ? ` – ${formatDate(training.endDate)}` : ''}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            {training.locationType === 'online' ? (
-              <Globe className="w-3.5 h-3.5 shrink-0" />
-            ) : (
-              <MapPin className="w-3.5 h-3.5 shrink-0" />
-            )}
+            <MapPin className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">
-              {training.locationType === 'online'
-                ? 'Online'
-                : training.locationDetails?.venue ?? 'Venue TBA'}
+              {training.location ?? 'Venue TBA'}
             </span>
           </div>
           {(training.enrollmentCount ?? 0) > 0 && (

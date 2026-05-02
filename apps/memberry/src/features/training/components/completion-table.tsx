@@ -4,10 +4,10 @@ import { CheckCircle, Users, Award } from 'lucide-react'
 
 interface CompletionTableProps {
   trainingId: string
-  creditValue: string | number
+  creditAmount: string | number
 }
 
-export function CompletionTable({ trainingId, creditValue }: CompletionTableProps) {
+export function CompletionTable({ trainingId, creditAmount }: CompletionTableProps) {
   const queryClient = useQueryClient()
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [marking, setMarking] = useState<string | null>(null)
@@ -221,7 +221,7 @@ export function CompletionTable({ trainingId, creditValue }: CompletionTableProp
                     )}
                   </td>
                   <td className="p-3 text-xs">
-                    {e.completedAt ? `${creditValue} CPE` : '—'}
+                    {e.completedAt ? `${creditAmount} CPE` : '—'}
                   </td>
                   <td className="p-3 text-center">
                     {!e.completedAt && (

@@ -47,7 +47,7 @@ export interface InviteValidation {
   type: 'claim' | 'invite';
   metadata?: {
     name?: string;
-    licenseNumber?: string;
+    memberNumber?: string;
     membershipCategoryId?: string;
     membershipTierId?: string;
   };

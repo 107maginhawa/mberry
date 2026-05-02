@@ -18,18 +18,18 @@ interface MemberDetailProps {
   memberId: string
 }
 
-type MemberStatus = 'active' | 'grace' | 'lapsed' | 'suspended' | 'pending'
+type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment'
 
 const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> = {
   active: { label: 'Active', className: 'bg-green-100 text-green-800 hover:bg-green-100' },
-  grace: { label: 'Grace Period', className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' },
+  gracePeriod: { label: 'Grace Period', className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' },
   lapsed: { label: 'Lapsed', className: 'bg-red-100 text-red-800 hover:bg-red-100' },
   suspended: { label: 'Suspended', className: 'bg-gray-100 text-gray-800 hover:bg-gray-100' },
-  pending: { label: 'Pending', className: 'bg-blue-100 text-blue-800 hover:bg-blue-100' },
+  pendingPayment: { label: 'Pending Payment', className: 'bg-blue-100 text-blue-800 hover:bg-blue-100' },
 }
 
 const STATUS_BANNER: Partial<Record<MemberStatus, { message: string; className: string }>> = {
-  grace: {
+  gracePeriod: {
     message: 'This member is in their grace period. Dues are overdue but membership is still active.',
     className: 'border-yellow-300 bg-yellow-50 text-yellow-800',
   },
@@ -126,7 +126,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
 
   const member = data
   const status = member.status as MemberStatus
-  const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pending
+  const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
   const banner = STATUS_BANNER[status]
   const isSuspended = status === 'suspended'
 
@@ -163,9 +163,9 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold truncate">{member.name ?? 'Unknown Member'}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
-            {member.licenseNumber && (
+            {member.memberNumber && (
               <span className="font-mono text-xs text-muted-foreground border rounded px-1.5 py-0.5">
-                {member.licenseNumber}
+                {member.memberNumber}
               </span>
             )}
             {member.categoryName && (

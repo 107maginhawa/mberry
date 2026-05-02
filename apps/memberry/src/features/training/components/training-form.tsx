@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { Info, MapPin, Globe } from 'lucide-react'
+import { Info, MapPin } from 'lucide-react'
 
 interface TrainingFormProps {
   orgId: string
@@ -17,24 +17,6 @@ const TYPES = [
   { value: 'skills_training', label: 'Skills Training' },
 ]
 
-const ENROLLMENT_MODES = [
-  { value: 'open', label: 'Open — anyone can enroll' },
-  { value: 'approval_required', label: 'Approval Required' },
-  { value: 'invitation_only', label: 'Invitation Only' },
-]
-
-const REGULATORY_OPTIONS = [
-  { value: 'not_applicable', label: 'Not Applicable' },
-  { value: 'prc_approved', label: 'PRC Approved' },
-  { value: 'pending_approval', label: 'Pending Approval' },
-]
-
-const VISIBILITY_OPTIONS = [
-  { value: 'network', label: 'Network — all members' },
-  { value: 'private', label: 'Private — invite only' },
-  { value: 'public', label: 'Public — anyone with link' },
-]
-
 export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -44,21 +26,12 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
     type: initial?.type ?? 'seminar',
     title: initial?.title ?? '',
     description: initial?.description ?? '',
-    startAt: initial?.startAt ? new Date(initial.startAt).toISOString().slice(0, 16) : '',
-    endAt: initial?.endAt ? new Date(initial.endAt).toISOString().slice(0, 16) : '',
-    scheduleDescription: initial?.scheduleDescription ?? '',
-    locationType: initial?.locationType ?? 'in_person',
-    venue: initial?.locationDetails?.venue ?? '',
-    address: initial?.locationDetails?.address ?? '',
-    meetingUrl: initial?.locationDetails?.meetingUrl ?? '',
-    coverImage: initial?.coverImage ?? '',
-    creditValue: initial?.creditValue ?? '0',
-    regulatoryApproval: initial?.regulatoryApproval ?? 'not_applicable',
-    regulatoryReference: initial?.regulatoryReference ?? '',
-    enrollmentMode: initial?.enrollmentMode ?? 'open',
-    fee: initial?.fee ?? 0,
+    startDate: initial?.startDate ? new Date(initial.startDate).toISOString().slice(0, 16) : '',
+    endDate: initial?.endDate ? new Date(initial.endDate).toISOString().slice(0, 16) : '',
+    location: initial?.location ?? '',
+    creditAmount: initial?.creditAmount ?? '0',
+    registrationFee: initial?.registrationFee ?? 0,
     capacity: initial?.capacity ?? '',
-    visibility: initial?.visibility ?? 'network',
   })
 
   const set = (key: string, val: any) => setForm((f) => ({ ...f, [key]: val }))
@@ -72,15 +45,10 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
     mutationFn: async (status: 'draft' | 'published') => {
       const payload = {
         ...form,
-        startAt: form.startAt ? new Date(form.startAt).toISOString() : undefined,
-        endAt: form.endAt ? new Date(form.endAt).toISOString() : undefined,
-        locationDetails: {
-          venue: form.venue,
-          address: form.address,
-          meetingUrl: form.meetingUrl,
-        },
-        creditValue: parseFloat(form.creditValue) || 0,
-        fee: parseInt(String(form.fee)) || 0,
+        startDate: form.startDate ? new Date(form.startDate).toISOString() : undefined,
+        endDate: form.endDate ? new Date(form.endDate).toISOString() : undefined,
+        creditAmount: parseFloat(String(form.creditAmount)) || 0,
+        registrationFee: parseInt(String(form.registrationFee)) || 0,
         capacity: form.capacity ? parseInt(String(form.capacity)) : undefined,
         status,
       }
@@ -142,135 +110,51 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Start Date & Time <span className="text-destructive">*</span></label>
-            <input type="datetime-local" className={inputClass} {...field('startAt')} />
+            <input type="datetime-local" className={inputClass} {...field('startDate')} />
           </div>
           <div>
             <label className={labelClass}>End Date & Time</label>
-            <input type="datetime-local" className={inputClass} {...field('endAt')} />
+            <input type="datetime-local" className={inputClass} {...field('endDate')} />
           </div>
-        </div>
-        <div>
-          <label className={labelClass}>Multi-session schedule (optional)</label>
-          <textarea
-            rows={2}
-            className={inputClass}
-            placeholder="e.g. Saturdays, Jan 4–Feb 1, 9am–12pm"
-            {...field('scheduleDescription')}
-          />
         </div>
       </div>
 
       {/* Location */}
       <div className={sectionClass}>
         <h2 className="font-semibold flex items-center gap-2">
-          {form.locationType === 'online' ? <Globe className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+          <MapPin className="w-4 h-4" />
           Location
         </h2>
-
-        <div className="flex gap-3">
-          {['in_person', 'online', 'hybrid'].map((lt) => (
-            <label key={lt} className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
-                type="radio"
-                name="locationType"
-                value={lt}
-                checked={form.locationType === lt}
-                onChange={() => set('locationType', lt)}
-              />
-              <span className="capitalize">{lt.replace('_', '-')}</span>
-            </label>
-          ))}
+        <div>
+          <label className={labelClass}>Location</label>
+          <input type="text" className={inputClass} placeholder="e.g. Manila Hotel, Ballroom or https://zoom.us/j/..." {...field('location')} />
         </div>
-
-        {form.locationType !== 'online' && (
-          <>
-            <div>
-              <label className={labelClass}>Venue Name</label>
-              <input type="text" className={inputClass} placeholder="e.g. Manila Hotel, Ballroom" {...field('venue')} />
-            </div>
-            <div>
-              <label className={labelClass}>Address</label>
-              <input type="text" className={inputClass} placeholder="Full address" {...field('address')} />
-            </div>
-          </>
-        )}
-        {form.locationType !== 'in_person' && (
-          <div>
-            <label className={labelClass}>Meeting URL</label>
-            <input type="url" className={inputClass} placeholder="https://zoom.us/j/..." {...field('meetingUrl')} />
-          </div>
-        )}
       </div>
 
-      {/* Credits & Regulatory */}
+      {/* Credits */}
       <div className={sectionClass}>
-        <h2 className="font-semibold">Credits & Regulatory</h2>
+        <h2 className="font-semibold">Credits</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>CPE Credit Value</label>
-            <input type="number" min="0" step="0.5" className={inputClass} {...field('creditValue')} />
-          </div>
-          <div>
-            <label className={labelClass}>Regulatory Approval</label>
-            <select className={inputClass} {...field('regulatoryApproval')}>
-              {REGULATORY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-        </div>
-        {form.regulatoryApproval !== 'not_applicable' && (
-          <div>
-            <label className={labelClass}>Regulatory Reference No.</label>
-            <input type="text" className={inputClass} placeholder="e.g. PRC Resolution No. ..." {...field('regulatoryReference')} />
-          </div>
-        )}
-      </div>
-
-      {/* Enrollment */}
-      <div className={sectionClass}>
-        <h2 className="font-semibold">Enrollment & Access</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="sm:col-span-2">
-            <label className={labelClass}>Enrollment Mode</label>
-            <select className={inputClass} {...field('enrollmentMode')}>
-              {ENROLLMENT_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-            </select>
+            <label className={labelClass}>CPE Credit Amount</label>
+            <input type="number" min="0" step="0.5" className={inputClass} {...field('creditAmount')} />
           </div>
           <div>
             <label className={labelClass}>Capacity</label>
             <input type="number" min="1" className={inputClass} placeholder="Unlimited" {...field('capacity')} />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>Fee (PHP)</label>
-            <input type="number" min="0" className={inputClass} {...field('fee')} />
-          </div>
-          <div>
-            <label className={labelClass}>Visibility</label>
-            <select className={inputClass} {...field('visibility')}>
-              {VISIBILITY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Cover image */}
-      <div className={sectionClass}>
-        <h2 className="font-semibold">Cover Image</h2>
         <div>
-          <label className={labelClass}>Image URL</label>
-          <input type="url" className={inputClass} placeholder="https://..." {...field('coverImage')} />
+          <label className={labelClass}>Registration Fee (PHP)</label>
+          <input type="number" min="0" className={inputClass} {...field('registrationFee')} />
         </div>
-        {form.coverImage && (
-          <img src={form.coverImage} alt="Cover preview" className="rounded-lg h-32 object-cover" />
-        )}
       </div>
 
       {/* Actions */}
       <div className="flex gap-3">
         <button
           type="button"
-          disabled={saveMutation.isPending || !form.title || !form.startAt}
+          disabled={saveMutation.isPending || !form.title || !form.startDate}
           onClick={() => saveMutation.mutate('draft')}
           className="px-4 py-2 text-sm border rounded-lg hover:bg-muted disabled:opacity-50"
         >
@@ -278,7 +162,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         </button>
         <button
           type="button"
-          disabled={saveMutation.isPending || !form.title || !form.startAt}
+          disabled={saveMutation.isPending || !form.title || !form.startDate}
           onClick={() => saveMutation.mutate('published')}
           className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
         >

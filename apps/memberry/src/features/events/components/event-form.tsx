@@ -9,34 +9,17 @@ interface EventFormProps {
   event?: {
     id: string
     title: string
-    type: string
     description?: string | null
-    startAt: string
-    endAt: string
-    locationType: string
-    locationDetails?: { venue?: string; address?: string; meetingUrl?: string } | null
-    coverImage?: string | null
-    registrationEnabled: boolean
-    fee?: number | null
+    startDate: string
+    endDate: string
+    location?: string | null
+    registrationFee?: number | null
     capacity?: number | null
-    qrEnabled: boolean
-    visibility: string
     status: string
   }
   onSuccess?: (event: any) => void
   onCancel?: () => void
 }
-
-const EVENT_TYPES = [
-  { value: 'general_assembly', label: 'General Assembly' },
-  { value: 'induction_ceremony', label: 'Induction Ceremony' },
-  { value: 'fellowship', label: 'Fellowship' },
-  { value: 'medical_mission', label: 'Medical Mission' },
-  { value: 'board_meeting', label: 'Board Meeting' },
-  { value: 'committee_meeting', label: 'Committee Meeting' },
-  { value: 'fundraiser', label: 'Fundraiser' },
-  { value: 'other', label: 'Other' },
-]
 
 function toDatetimeLocal(iso?: string | null) {
   if (!iso) return ''
@@ -49,20 +32,12 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
   const [form, setForm] = useState({
     title: event?.title ?? '',
-    type: event?.type ?? 'general_assembly',
     description: event?.description ?? '',
-    startAt: toDatetimeLocal(event?.startAt),
-    endAt: toDatetimeLocal(event?.endAt),
-    locationType: event?.locationType ?? 'in_person',
-    venue: event?.locationDetails?.venue ?? '',
-    address: event?.locationDetails?.address ?? '',
-    meetingUrl: event?.locationDetails?.meetingUrl ?? '',
-    coverImage: event?.coverImage ?? '',
-    registrationEnabled: event?.registrationEnabled ?? true,
-    fee: event?.fee ? String(event.fee / 100) : '0',
+    startDate: toDatetimeLocal(event?.startDate),
+    endDate: toDatetimeLocal(event?.endDate),
+    location: event?.location ?? '',
+    registrationFee: event?.registrationFee ? String(event.registrationFee / 100) : '0',
     capacity: event?.capacity ? String(event.capacity) : '',
-    qrEnabled: event?.qrEnabled ?? true,
-    visibility: event?.visibility ?? 'internal',
     status: event?.status ?? 'draft',
   })
 
@@ -75,28 +50,14 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         : `/api/events/create/${orgId}`
       const method = isEdit ? 'PUT' : 'POST'
 
-      const locationDetails: Record<string, string> = {}
-      if (form.locationType === 'in_person') {
-        if (form.venue) locationDetails.venue = form.venue
-        if (form.address) locationDetails.address = form.address
-      } else {
-        if (form.meetingUrl) locationDetails.meetingUrl = form.meetingUrl
-      }
-
       const body = {
         title: form.title,
-        type: form.type,
         description: form.description || null,
-        startAt: new Date(form.startAt).toISOString(),
-        endAt: new Date(form.endAt).toISOString(),
-        locationType: form.locationType,
-        locationDetails,
-        coverImage: form.coverImage || null,
-        registrationEnabled: form.registrationEnabled,
-        fee: Math.round(parseFloat(form.fee || '0') * 100),
+        startDate: new Date(form.startDate).toISOString(),
+        endDate: new Date(form.endDate).toISOString(),
+        location: form.location || null,
+        registrationFee: Math.round(parseFloat(form.registrationFee || '0') * 100),
         capacity: form.capacity ? parseInt(form.capacity, 10) : null,
-        qrEnabled: form.qrEnabled,
-        visibility: form.visibility,
         status: submitStatus,
       }
 
@@ -154,34 +115,6 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="type">Event Type</Label>
-            <select
-              id="type"
-              value={form.type}
-              onChange={(e) => set('type', e.target.value)}
-              className="w-full h-10 rounded-md border bg-background px-3 text-sm"
-              required
-            >
-              {EVENT_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="visibility">Visibility</Label>
-            <select
-              id="visibility"
-              value={form.visibility}
-              onChange={(e) => set('visibility', e.target.value)}
-              className="w-full h-10 rounded-md border bg-background px-3 text-sm"
-            >
-              <option value="internal">Internal (members only)</option>
-              <option value="network">Network (public)</option>
-            </select>
-          </div>
-
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -202,22 +135,22 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="startAt">Start</Label>
+            <Label htmlFor="startDate">Start</Label>
             <Input
-              id="startAt"
+              id="startDate"
               type="datetime-local"
-              value={form.startAt}
-              onChange={(e) => set('startAt', e.target.value)}
+              value={form.startDate}
+              onChange={(e) => set('startDate', e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="endAt">End</Label>
+            <Label htmlFor="endDate">End</Label>
             <Input
-              id="endAt"
+              id="endDate"
               type="datetime-local"
-              value={form.endAt}
-              onChange={(e) => set('endAt', e.target.value)}
+              value={form.endDate}
+              onChange={(e) => set('endDate', e.target.value)}
               required
             />
           </div>
@@ -229,74 +162,15 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Location
         </h3>
-        <div className="flex gap-3">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              name="locationType"
-              value="in_person"
-              checked={form.locationType === 'in_person'}
-              onChange={() => set('locationType', 'in_person')}
-            />
-            <span className="text-sm">In-person</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              name="locationType"
-              value="online"
-              checked={form.locationType === 'online'}
-              onChange={() => set('locationType', 'online')}
-            />
-            <span className="text-sm">Online</span>
-          </label>
+        <div className="space-y-2">
+          <Label htmlFor="location">Location</Label>
+          <Input
+            id="location"
+            value={form.location}
+            onChange={(e) => set('location', e.target.value)}
+            placeholder="e.g. Manila Hotel Ballroom or https://meet.google.com/..."
+          />
         </div>
-
-        {form.locationType === 'in_person' ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="venue">Venue Name</Label>
-              <Input
-                id="venue"
-                value={form.venue}
-                onChange={(e) => set('venue', e.target.value)}
-                placeholder="e.g. Manila Hotel Ballroom"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input
-                id="address"
-                value={form.address}
-                onChange={(e) => set('address', e.target.value)}
-                placeholder="Full address"
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <Label htmlFor="meetingUrl">Meeting URL</Label>
-            <Input
-              id="meetingUrl"
-              type="url"
-              value={form.meetingUrl}
-              onChange={(e) => set('meetingUrl', e.target.value)}
-              placeholder="https://meet.google.com/..."
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Cover Image */}
-      <div className="space-y-2">
-        <Label htmlFor="coverImage">Cover Image URL</Label>
-        <Input
-          id="coverImage"
-          type="url"
-          value={form.coverImage}
-          onChange={(e) => set('coverImage', e.target.value)}
-          placeholder="https://..."
-        />
       </div>
 
       {/* Registration */}
@@ -305,26 +179,16 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
           Registration
         </h3>
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.registrationEnabled}
-            onChange={(e) => set('registrationEnabled', e.target.checked)}
-            className="w-4 h-4"
-          />
-          <span className="text-sm">Enable member registration</span>
-        </label>
-
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
-            <Label htmlFor="fee">Registration Fee (PHP)</Label>
+            <Label htmlFor="registrationFee">Registration Fee (PHP)</Label>
             <Input
-              id="fee"
+              id="registrationFee"
               type="number"
               min="0"
               step="0.01"
-              value={form.fee}
-              onChange={(e) => set('fee', e.target.value)}
+              value={form.registrationFee}
+              onChange={(e) => set('registrationFee', e.target.value)}
               placeholder="0"
             />
           </div>
@@ -340,16 +204,6 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
             />
           </div>
         </div>
-
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.qrEnabled}
-            onChange={(e) => set('qrEnabled', e.target.checked)}
-            className="w-4 h-4"
-          />
-          <span className="text-sm">Enable QR code check-in</span>
-        </label>
       </div>
 
       {/* Actions */}

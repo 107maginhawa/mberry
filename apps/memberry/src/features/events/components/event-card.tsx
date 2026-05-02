@@ -1,46 +1,21 @@
 import { useState } from 'react'
-import { Calendar, MapPin, Users, Globe, Building2, MoreHorizontal } from 'lucide-react'
+import { Calendar, MapPin, Users, MoreHorizontal } from 'lucide-react'
 
 interface EventCardProps {
   event: {
     id: string
     title: string
-    type: string
     status: string
-    startAt: string
-    endAt: string
-    locationType: string
-    locationDetails?: { venue?: string; address?: string; meetingUrl?: string } | null
+    startDate: string
+    endDate: string
+    location?: string | null
     registrationCount?: number
     capacity?: number | null
-    visibility: string
   }
   orgId: string
   onEdit?: (id: string) => void
   onCancel?: (id: string) => void
   onDuplicate?: (id: string) => void
-}
-
-const TYPE_LABELS: Record<string, string> = {
-  general_assembly: 'General Assembly',
-  induction_ceremony: 'Induction',
-  fellowship: 'Fellowship',
-  medical_mission: 'Medical Mission',
-  board_meeting: 'Board Meeting',
-  committee_meeting: 'Committee Meeting',
-  fundraiser: 'Fundraiser',
-  other: 'Other',
-}
-
-const TYPE_COLORS: Record<string, string> = {
-  general_assembly: 'bg-blue-100 text-blue-800',
-  induction_ceremony: 'bg-purple-100 text-purple-800',
-  fellowship: 'bg-green-100 text-green-800',
-  medical_mission: 'bg-red-100 text-red-800',
-  board_meeting: 'bg-gray-100 text-gray-800',
-  committee_meeting: 'bg-orange-100 text-orange-800',
-  fundraiser: 'bg-yellow-100 text-yellow-800',
-  other: 'bg-slate-100 text-slate-800',
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -49,9 +24,9 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-red-100 text-red-800',
 }
 
-function formatEventDate(startAt: string, endAt: string) {
-  const start = new Date(startAt)
-  const end = new Date(endAt)
+function formatEventDate(startDate: string, endDate: string) {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
   const dateStr = start.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
   const startTime = start.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })
   const endTime = end.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })
@@ -59,10 +34,7 @@ function formatEventDate(startAt: string, endAt: string) {
 }
 
 function getLocation(event: EventCardProps['event']) {
-  if (event.locationType === 'online') {
-    return event.locationDetails?.meetingUrl ? 'Online (link provided)' : 'Online'
-  }
-  return event.locationDetails?.venue ?? event.locationDetails?.address ?? 'In-person'
+  return event.location ?? 'In-person'
 }
 
 export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: EventCardProps) {
@@ -74,18 +46,9 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: Event
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[event.type] ?? 'bg-muted text-muted-foreground'}`}>
-              {TYPE_LABELS[event.type] ?? event.type}
-            </span>
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[event.status] ?? 'bg-muted text-muted-foreground'}`}>
               {event.status}
             </span>
-            {event.visibility === 'network' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
-                <Globe className="w-3 h-3" />
-                Network
-              </span>
-            )}
           </div>
           <div className="relative">
             <button
@@ -144,14 +107,10 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: Event
         <div className="space-y-1.5 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5 shrink-0" />
-            <span>{formatEventDate(event.startAt, event.endAt)}</span>
+            <span>{formatEventDate(event.startDate, event.endDate)}</span>
           </div>
           <div className="flex items-center gap-2">
-            {event.locationType === 'online' ? (
-              <Globe className="w-3.5 h-3.5 shrink-0" />
-            ) : (
-              <Building2 className="w-3.5 h-3.5 shrink-0" />
-            )}
+            <MapPin className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">{getLocation(event)}</span>
           </div>
           {typeof event.registrationCount === 'number' && (

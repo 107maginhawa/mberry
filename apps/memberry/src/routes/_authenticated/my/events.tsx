@@ -2,17 +2,17 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Calendar, MapPin, Globe, Building2 } from 'lucide-react'
+import { Calendar, Building2 } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/my/events')({
   component: MyEvents,
 })
 
 const STATUS_COLORS: Record<string, string> = {
-  registered: 'bg-green-100 text-green-800',
+  confirmed: 'bg-green-100 text-green-800',
   waitlisted: 'bg-yellow-100 text-yellow-800',
   cancelled: 'bg-red-100 text-red-800',
-  pending_payment: 'bg-orange-100 text-orange-800',
+  pendingPayment: 'bg-orange-100 text-orange-800',
 }
 
 const EVENT_STATUS_COLORS: Record<string, string> = {
@@ -21,8 +21,8 @@ const EVENT_STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-red-100 text-red-800',
 }
 
-function formatEventDate(startAt: string) {
-  return new Date(startAt).toLocaleDateString('en-PH', {
+function formatEventDate(startDate: string) {
+  return new Date(startDate).toLocaleDateString('en-PH', {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
@@ -33,17 +33,16 @@ function formatEventDate(startAt: string) {
 }
 
 function getLocation(event: any) {
-  if (event.locationType === 'online') return 'Online'
-  return event.locationDetails?.venue ?? event.locationDetails?.address ?? 'In-person'
+  return event.location ?? 'In-person'
 }
 
-function isUpcoming(startAt: string) {
-  return new Date(startAt) >= new Date()
+function isUpcoming(startDate: string) {
+  return new Date(startDate) >= new Date()
 }
 
 function EventRegistrationCard({ item }: { item: { registration: any; event: any } }) {
   const { registration, event } = item
-  const upcoming = isUpcoming(event.startAt)
+  const upcoming = isUpcoming(event.startDate)
 
   return (
     <div className={`border rounded-lg p-4 space-y-3 ${!upcoming ? 'opacity-70' : ''}`}>
@@ -66,14 +65,10 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
       <div className="space-y-1.5 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <Calendar className="w-3.5 h-3.5 shrink-0" />
-          <span>{formatEventDate(event.startAt)}</span>
+          <span>{formatEventDate(event.startDate)}</span>
         </div>
         <div className="flex items-center gap-2">
-          {event.locationType === 'online' ? (
-            <Globe className="w-3.5 h-3.5 shrink-0" />
-          ) : (
-            <Building2 className="w-3.5 h-3.5 shrink-0" />
-          )}
+          <Building2 className="w-3.5 h-3.5 shrink-0" />
           <span>{getLocation(event)}</span>
         </div>
       </div>
@@ -95,8 +90,8 @@ function MyEvents() {
 
   const allItems = data?.data ?? []
   const now = new Date()
-  const upcoming = allItems.filter((item) => new Date(item.event.startAt) >= now)
-  const past = allItems.filter((item) => new Date(item.event.startAt) < now)
+  const upcoming = allItems.filter((item) => new Date(item.event.startDate) >= now)
+  const past = allItems.filter((item) => new Date(item.event.startDate) < now)
   const displayed = showPast ? allItems : upcoming
 
   return (

@@ -40,11 +40,11 @@ export function DirectorySearch({ orgId, tenantId }: DirectorySearchProps) {
                 <img src={p.photoUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
-                  {(p.displayName || '?')[0]}
+                  {(p.firstName || '?')[0]}
                 </div>
               )}
               <div>
-                <div className="font-medium text-sm">{p.displayName}</div>
+                <div className="font-medium text-sm">{[p.firstName, p.lastName].filter(Boolean).join(' ')}</div>
                 {p.title && <div className="text-xs text-muted-foreground">{p.title}</div>}
               </div>
             </div>

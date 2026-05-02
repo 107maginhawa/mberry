@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { ArrowLeft, Calendar, MapPin, Globe, Users, Award, Edit2 } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, Users, Award, Edit2 } from 'lucide-react'
 import { TrainingForm } from '@/features/training/components/training-form'
 import { CompletionTable } from '@/features/training/components/completion-table'
 
@@ -90,10 +90,10 @@ function TrainingDetail() {
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700'}`}>
                 {training.status.replace('_', ' ')}
               </span>
-              {Number(training.creditValue) > 0 && (
+              {Number(training.creditAmount) > 0 && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
                   <Award className="w-3 h-3" />
-                  {training.creditValue} CPE
+                  {training.creditAmount} CPE
                 </span>
               )}
             </div>
@@ -136,12 +136,6 @@ function TrainingDetail() {
               </div>
             )}
 
-            {training.scheduleDescription && (
-              <div className="border rounded-xl p-5 bg-card">
-                <h2 className="font-semibold mb-2">Schedule</h2>
-                <p className="text-sm text-muted-foreground">{training.scheduleDescription}</p>
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}
@@ -151,40 +145,21 @@ function TrainingDetail() {
                 <Calendar className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
                 <div>
                   <p className="font-medium">Start</p>
-                  <p className="text-muted-foreground">{formatDate(training.startAt)}</p>
-                  {training.endAt && (
+                  <p className="text-muted-foreground">{formatDate(training.startDate)}</p>
+                  {training.endDate && (
                     <>
                       <p className="font-medium mt-1">End</p>
-                      <p className="text-muted-foreground">{formatDate(training.endAt)}</p>
+                      <p className="text-muted-foreground">{formatDate(training.endDate)}</p>
                     </>
                   )}
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
-                {training.locationType === 'online' ? (
-                  <Globe className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
-                ) : (
-                  <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
-                )}
+                <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
                 <div>
-                  <p className="font-medium capitalize">{training.locationType?.replace('_', '-')}</p>
-                  {training.locationDetails?.venue && (
-                    <p className="text-muted-foreground">{training.locationDetails.venue}</p>
-                  )}
-                  {training.locationDetails?.address && (
-                    <p className="text-muted-foreground text-xs">{training.locationDetails.address}</p>
-                  )}
-                  {training.locationDetails?.meetingUrl && (
-                    <a
-                      href={training.locationDetails.meetingUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-primary text-xs hover:underline"
-                    >
-                      Join Meeting
-                    </a>
-                  )}
+                  <p className="font-medium">Location</p>
+                  <p className="text-muted-foreground">{training.location ?? 'TBA'}</p>
                 </div>
               </div>
 
@@ -196,28 +171,15 @@ function TrainingDetail() {
                     {training.enrollmentCount ?? 0} enrolled
                     {training.capacity ? ` / ${training.capacity} capacity` : ' (unlimited)'}
                   </p>
-                  <p className="text-muted-foreground capitalize text-xs">
-                    Mode: {training.enrollmentMode?.replace('_', ' ')}
-                  </p>
                 </div>
               </div>
-
-              {training.regulatoryApproval !== 'not_applicable' && (
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-muted-foreground">Regulatory</p>
-                  <p className="font-medium text-xs">{training.regulatoryApproval?.replace('_', ' ')}</p>
-                  {training.regulatoryReference && (
-                    <p className="text-xs text-muted-foreground">{training.regulatoryReference}</p>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
       )}
 
       {tab === 'attendance' && (
-        <CompletionTable trainingId={trainingId} creditValue={training.creditValue} />
+        <CompletionTable trainingId={trainingId} creditAmount={training.creditAmount} />
       )}
 
       {tab === 'edit' && (

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EventForm } from '@/features/events/components/event-form'
 import { AttendanceView } from '@/features/events/components/attendance-view'
-import { Calendar, MapPin, Users, Globe, Building2, Clock } from 'lucide-react'
+import { Calendar, MapPin, Users, Clock } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/events/$eventId')({
   component: EventDetail,
@@ -82,7 +82,7 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
               <td className="p-3 font-mono text-xs">{reg.personId}</td>
               <td className="p-3">
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                  reg.status === 'registered' ? 'bg-green-100 text-green-800' :
+                  reg.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                   reg.status === 'waitlisted' ? 'bg-yellow-100 text-yellow-800' :
                   reg.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                   'bg-gray-100 text-gray-700'
@@ -191,44 +191,34 @@ function EventDetail() {
                   <Calendar className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
                   <div>
                     <dt className="text-xs text-muted-foreground mb-0.5">Start</dt>
-                    <dd className="text-sm">{formatDate(event.startAt)}</dd>
+                    <dd className="text-sm">{formatDate(event.startDate)}</dd>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Clock className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
                   <div>
                     <dt className="text-xs text-muted-foreground mb-0.5">End</dt>
-                    <dd className="text-sm">{formatDate(event.endAt)}</dd>
+                    <dd className="text-sm">{formatDate(event.endDate)}</dd>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  {event.locationType === 'online' ? (
-                    <Globe className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
-                  ) : (
-                    <Building2 className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
-                  )}
+                  <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
                   <div>
                     <dt className="text-xs text-muted-foreground mb-0.5">Location</dt>
+                    <dd className="text-sm">{event.location ?? 'TBA'}</dd>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Users className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                  <div>
+                    <dt className="text-xs text-muted-foreground mb-0.5">Registration</dt>
                     <dd className="text-sm">
-                      {event.locationType === 'online'
-                        ? event.locationDetails?.meetingUrl ?? 'Online'
-                        : [event.locationDetails?.venue, event.locationDetails?.address].filter(Boolean).join(', ') || 'In-person'}
+                      {event.registrationCount ?? 0}
+                      {event.capacity ? ` / ${event.capacity}` : ''} registered
+                      {event.registrationFee ? ` · PHP ${(event.registrationFee / 100).toFixed(2)} fee` : ' · Free'}
                     </dd>
                   </div>
                 </div>
-                {event.registrationEnabled && (
-                  <div className="flex items-start gap-3">
-                    <Users className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
-                    <div>
-                      <dt className="text-xs text-muted-foreground mb-0.5">Registration</dt>
-                      <dd className="text-sm">
-                        {event.registrationCount ?? 0}
-                        {event.capacity ? ` / ${event.capacity}` : ''} registered
-                        {event.fee ? ` · PHP ${(event.fee / 100).toFixed(2)} fee` : ' · Free'}
-                      </dd>
-                    </div>
-                  </div>
-                )}
               </dl>
             </div>
           )}

@@ -105,10 +105,10 @@ function InvitePage() {
               <span className="text-muted-foreground">Email:</span>{' '}
               <span className="font-medium">{invite.email}</span>
             </div>
-            {invite.metadata.licenseNumber && (
+            {invite.metadata.memberNumber && (
               <div className="text-sm">
-                <span className="text-muted-foreground">License:</span>{' '}
-                <span className="font-medium">{invite.metadata.licenseNumber}</span>
+                <span className="text-muted-foreground">Member #:</span>{' '}
+                <span className="font-medium">{invite.metadata.memberNumber}</span>
               </div>
             )}
           </div>

@@ -95,7 +95,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
     },
     {
       label: 'CPE Credits Offered',
-      value: trainings.reduce((acc: number, t: any) => acc + Number(t.creditValue ?? 0), 0).toFixed(1),
+      value: trainings.reduce((acc: number, t: any) => acc + Number(t.creditAmount ?? 0), 0).toFixed(1),
       icon: Award,
       color: 'text-amber-600',
       bg: 'bg-amber-100',
