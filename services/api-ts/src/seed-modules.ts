@@ -12,7 +12,7 @@
  */
 
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { Pool } from 'pg';
 
 // Dues tables (new migration)
@@ -300,14 +300,80 @@ async function seedModules() {
     console.log('    (exists, skipping)');
   }
 
-  // ─── F6: Communications — SKIPPED (tables not migrated yet) ───
-  console.log('  F6: Communications... (skipped — table not migrated)');
+  // ─── F6: Communications ────────────────────────────────
+  console.log('  F6: Communications...');
+  try {
+    const announcementCheck = await db.execute(sql`SELECT id FROM announcement WHERE organization_id = ${orgId} LIMIT 1`);
+    if (announcementCheck.rows.length === 0) {
+      await db.execute(sql`
+        INSERT INTO announcement (id, organization_id, author_id, title, content, audience_type, channel_push, channel_email, visibility, status, published_at, created_at, updated_at, version)
+        VALUES
+          (gen_random_uuid(), ${orgId}, ${officerId}, 'May Dues Reminder — Please Pay Before June 1',
+           '<p>Dear members,</p><p>Annual dues for 2026 are due by <strong>June 1, 2026</strong>.</p>',
+           'all', true, true, 'internal', 'sent', NOW() - INTERVAL '3 days', NOW(), NOW(), 1),
+          (gen_random_uuid(), ${orgId}, ${officerId}, 'Election Timeline Announcement (Draft)',
+           '<p>The 2026 Officer Election timeline is now set. Nominations will open on June 15.</p>',
+           'all', true, false, 'internal', 'draft', NULL, NOW(), NOW(), 1)
+      `);
+      console.log('    Announcements: 2 (1 sent, 1 draft)');
+    } else {
+      console.log('    (exists, skipping)');
+    }
+  } catch (e: any) {
+    console.log(`    Error: ${e.message?.slice(0, 80)}`);
+  }
 
-  // ─── F8: Elections — SKIPPED (tables not migrated yet) ────────
-  console.log('  F8: Elections... (skipped — table not migrated)');
+  // ─── F8: Elections ────────────────────────────────────
+  console.log('  F8: Elections...');
+  try {
+    const electionCheck = await db.execute(sql`SELECT id FROM election WHERE organization_id = ${orgId} LIMIT 1`);
+    if (electionCheck.rows.length === 0) {
+      await db.execute(sql`
+        INSERT INTO election (id, organization_id, title, type, status, voting_mode,
+          nominations_open_at, nominations_close_at, voting_open_at, voting_close_at,
+          positions, created_at, updated_at, version)
+        VALUES (gen_random_uuid(), ${orgId}, '2026 Officer Election', 'officer', 'draft', 'online',
+          '2026-06-15', '2026-06-30', '2026-07-05', '2026-07-12',
+          ${JSON.stringify([
+            { id: 'president', title: 'President', sortOrder: 0 },
+            { id: 'vice-president', title: 'Vice President', sortOrder: 1 },
+            { id: 'secretary', title: 'Secretary', sortOrder: 2 },
+            { id: 'treasurer', title: 'Treasurer', sortOrder: 3 },
+            { id: 'auditor', title: 'Auditor', sortOrder: 4 },
+          ])}::jsonb,
+          NOW(), NOW(), 1)
+      `);
+      console.log('    Election: 2026 Officer Election (draft, 5 positions)');
+    } else {
+      console.log('    (exists, skipping)');
+    }
+  } catch (e: any) {
+    console.log(`    Error: ${e.message?.slice(0, 80)}`);
+  }
 
-  // ─── F9: Certificates — SKIPPED (tables not migrated yet) ─────
-  console.log('  F9: Certificates... (skipped — table not migrated)');
+  // ─── F9: Certificates ────────────────────────────────
+  console.log('  F9: Certificates...');
+  try {
+    const certCheck = await db.execute(sql`SELECT id FROM certificate WHERE person_id = ${memberId} LIMIT 1`);
+    if (certCheck.rows.length === 0) {
+      // Find a past training to link the certificate to
+      const pastTrainingResult = await db.execute(sql`SELECT id FROM training WHERE organization_id = ${orgId} AND end_date < NOW() LIMIT 1`);
+      if (pastTrainingResult.rows.length > 0) {
+        const trainingId = (pastTrainingResult.rows[0] as any).id;
+        await db.execute(sql`
+          INSERT INTO certificate (id, organization_id, person_id, training_id, certificate_number, issued_at, created_at, updated_at, version)
+          VALUES (gen_random_uuid(), ${orgId}, ${memberId}, ${trainingId}, 'CERT-2026-000001', NOW(), NOW(), NOW(), 1)
+        `);
+        console.log('    Certificate: CERT-2026-000001 for past training');
+      } else {
+        console.log('    (no past training found, skipping)');
+      }
+    } else {
+      console.log('    (exists, skipping)');
+    }
+  } catch (e: any) {
+    console.log(`    Error: ${e.message?.slice(0, 80)}`);
+  }
 
   // ─── Summary ──────────────────────────────────────────────
   console.log('\n╔══════════════════════════════════════════╗');
