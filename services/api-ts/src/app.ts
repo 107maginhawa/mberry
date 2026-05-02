@@ -23,6 +23,7 @@ import { registerEmailJobs } from '@/handlers/email/jobs';
 import { registerNotifsJobs } from '@/handlers/notifs/jobs';
 import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
+import { registerDuesJobs } from '@/handlers/dues/jobs';
 
 // Dues handler
 import { dues } from '@/handlers/dues';
@@ -185,7 +186,8 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerNotifsJobs(jobs, app.notifs);
   registerAuditJobs(jobs);
   registerBookingJobs(jobs, app.notifs);
-  
+  registerDuesJobs(jobs);
+
   logger.debug('Starting background job scheduler...');
   await jobs.start();
   logger.debug('Background job scheduler started successfully');
