@@ -1,0 +1,68 @@
+import { test, expect } from '@playwright/test'
+import { signIn } from '../helpers/auth'
+
+const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+
+test.describe('Officer Payments', () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+  })
+
+  test('heading "Dues & Payments" is visible', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/payments`)
+    await page.waitForLoadState('networkidle')
+
+    await expect(
+      page.getByRole('heading', { name: /dues.*payments?|payments?/i }).first()
+    ).toBeVisible({ timeout: 10000 })
+  })
+
+  test('shows metric cards: Collection Rate, Total Collected, Outstanding', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/payments`)
+    await page.waitForLoadState('networkidle')
+
+    await expect(
+      page.getByText(/collection rate/i).first()
+    ).toBeVisible({ timeout: 10000 })
+
+    await expect(
+      page.getByText(/total collected/i).first()
+    ).toBeVisible({ timeout: 10000 })
+
+    await expect(
+      page.getByText(/outstanding/i).first()
+    ).toBeVisible({ timeout: 10000 })
+  })
+
+  test('shows Pending metric', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/payments`)
+    await page.waitForLoadState('networkidle')
+
+    await expect(
+      page.getByText(/pending/i).first()
+    ).toBeVisible({ timeout: 10000 })
+  })
+
+  test('Record Payment button or link is visible', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/payments`)
+    await page.waitForLoadState('networkidle')
+
+    const recordBtn = page.getByRole('link', { name: /record payment/i })
+      .or(page.getByRole('button', { name: /record payment/i }))
+      .first()
+    await expect(recordBtn).toBeVisible({ timeout: 10000 })
+  })
+
+  test('can navigate to record payment page', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/payments`)
+    await page.waitForLoadState('networkidle')
+
+    const recordBtn = page.getByRole('link', { name: /record payment/i })
+      .or(page.getByRole('button', { name: /record payment/i }))
+      .first()
+    await recordBtn.click()
+
+    await page.waitForLoadState('networkidle')
+    expect(page.url()).toContain('/payments/new')
+  })
+})
