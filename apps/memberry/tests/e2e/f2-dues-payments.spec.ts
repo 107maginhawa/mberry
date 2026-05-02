@@ -6,11 +6,11 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('F2: Dues & Payments', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(OFFICER_EMAIL)
-    await page.getByLabel('Password').fill(OFFICER_PASS)
-    await page.getByRole('button', { name: /sign in|log in/i }).click()
-    await page.waitForURL(/\/(dashboard|org)/)
+    await page.goto('/auth/sign-in')
+    await page.locator('input[name="email"]').fill(OFFICER_EMAIL)
+    await page.locator('input[name="password"]').fill(OFFICER_PASS)
+    await page.locator('button[type="submit"]').click()
+    await page.waitForURL(/\/(dashboard|org|my)/, { timeout: 15000 })
   })
 
   test('officer can configure dues settings', async ({ page }) => {
