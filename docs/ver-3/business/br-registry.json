@@ -1,0 +1,526 @@
+{
+  "version": "1.0",
+  "description": "Business Rule Test Registry — maps each BR to expected test locations. Machine-readable by scripts/br-coverage.ts.",
+  "rules": [
+    {
+      "id": "BR-01",
+      "title": "Membership Status Computation",
+      "phase": 1,
+      "modules": ["M05"],
+      "priority": "P1",
+      "primaryModule": "membership",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/membership/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": true, "paths": ["tests/e2e/member/"] }
+      }
+    },
+    {
+      "id": "BR-02",
+      "title": "Grace Period Default",
+      "phase": 1,
+      "modules": ["M05"],
+      "priority": "P1",
+      "primaryModule": "membership",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/membership/", "handlers/dues/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": true, "paths": ["tests/e2e/member/"] }
+      }
+    },
+    {
+      "id": "BR-03",
+      "title": "Membership Transitions",
+      "phase": 1,
+      "modules": ["M05"],
+      "priority": "P0",
+      "primaryModule": "membership",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/membership/"] },
+        "contract": { "required": true, "paths": ["tests/contract/membership-flow.hurl"] },
+        "e2e": { "required": true, "paths": ["tests/e2e/journeys/"] }
+      }
+    },
+    {
+      "id": "BR-04",
+      "title": "Dues Amount per Org",
+      "phase": 1,
+      "modules": ["M06"],
+      "priority": "P2",
+      "primaryModule": "dues",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/dues/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-05",
+      "title": "Fund Allocation",
+      "phase": 1,
+      "modules": ["M06"],
+      "priority": "P0",
+      "primaryModule": "dues",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/dues/"] },
+        "contract": { "required": true, "paths": ["tests/contract/dues-flow.hurl"] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-06",
+      "title": "Payment Recording",
+      "phase": 1,
+      "modules": ["M06"],
+      "priority": "P0",
+      "primaryModule": "dues",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/dues/"] },
+        "contract": { "required": true, "paths": ["tests/contract/dues-flow.hurl"] },
+        "e2e": { "required": true, "paths": ["tests/e2e/officer/payments.spec.ts"] }
+      }
+    },
+    {
+      "id": "BR-07",
+      "title": "Dues Expiry Extension on Payment",
+      "phase": 1,
+      "modules": ["M06"],
+      "priority": "P0",
+      "primaryModule": "dues",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/dues/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-08",
+      "title": "Refund Policy",
+      "phase": 1,
+      "modules": ["M06"],
+      "priority": "P0",
+      "primaryModule": "dues",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/dues/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-09",
+      "title": "Officer Role Assignment",
+      "phase": 1,
+      "modules": ["M04"],
+      "priority": "P1",
+      "primaryModule": "platformadmin",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/platformadmin/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": true, "paths": ["tests/e2e/officer/settings.spec.ts"] }
+      }
+    },
+    {
+      "id": "BR-10",
+      "title": "Platform Admin Impersonation",
+      "phase": 1,
+      "modules": ["M03"],
+      "priority": "P2",
+      "primaryModule": "platformadmin",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/platformadmin/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": true, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-11",
+      "title": "Credit Cycle Start",
+      "phase": 1,
+      "modules": ["M10"],
+      "priority": "P2",
+      "primaryModule": "training",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/training/", "handlers/association:member/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-12",
+      "title": "Credit Carry-Over",
+      "phase": 1,
+      "modules": ["M10"],
+      "priority": "P2",
+      "primaryModule": "training",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/training/", "handlers/association:member/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-13",
+      "title": "Auto vs Manual Credits",
+      "phase": 1,
+      "modules": ["M10"],
+      "priority": "P2",
+      "primaryModule": "training",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/training/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": ["tests/e2e/member/credits.spec.ts"] }
+      }
+    },
+    {
+      "id": "BR-14",
+      "title": "Cross-Org Credit Aggregation",
+      "phase": 1,
+      "modules": ["M10"],
+      "priority": "P2",
+      "primaryModule": "training",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/training/", "handlers/association:member/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-15",
+      "title": "Training vs Event Distinction",
+      "phase": 1,
+      "modules": ["M08", "M09"],
+      "priority": "P2",
+      "primaryModule": "events",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/events/", "handlers/training/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-16",
+      "title": "Activity Visibility",
+      "phase": 1,
+      "modules": ["M08", "M09"],
+      "priority": "P2",
+      "primaryModule": "events",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/events/", "handlers/training/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-17",
+      "title": "Attendance Confirmation",
+      "phase": 1,
+      "modules": ["M08", "M09"],
+      "priority": "P2",
+      "primaryModule": "events",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/events/", "handlers/training/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": true, "paths": ["tests/e2e/officer/training.spec.ts"] }
+      }
+    },
+    {
+      "id": "BR-18",
+      "title": "QR Code Authentication",
+      "phase": 1,
+      "modules": ["M11"],
+      "priority": "P2",
+      "primaryModule": "certificates",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/certificates/", "handlers/association:member/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-19",
+      "title": "ID Card Generation",
+      "phase": 1,
+      "modules": ["M11"],
+      "priority": "P2",
+      "primaryModule": "certificates",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/certificates/", "handlers/association:member/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-20",
+      "title": "Certificate Generation",
+      "phase": 1,
+      "modules": ["M11"],
+      "priority": "P2",
+      "primaryModule": "certificates",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/certificates/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": ["tests/e2e/member/certificates.spec.ts"] }
+      }
+    },
+    {
+      "id": "BR-21",
+      "title": "Multi-Org Member Account",
+      "phase": 1,
+      "modules": ["M01"],
+      "priority": "P1",
+      "primaryModule": "membership",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/membership/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": true, "paths": ["tests/e2e/member/"] }
+      }
+    },
+    {
+      "id": "BR-22",
+      "title": "Member Matching on Import",
+      "phase": 1,
+      "modules": ["M01", "M05"],
+      "priority": "P1",
+      "primaryModule": "membership",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/membership/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-23",
+      "title": "License Number Format",
+      "phase": 1,
+      "modules": ["M02"],
+      "priority": "P2",
+      "primaryModule": "membership",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/membership/", "handlers/association:member/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-24",
+      "title": "Invitation Expiry",
+      "phase": 1,
+      "modules": ["M01"],
+      "priority": "P2",
+      "primaryModule": "invite",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/invite/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-25",
+      "title": "OTP Registration",
+      "phase": 1,
+      "modules": ["M01"],
+      "priority": "P2",
+      "primaryModule": "person",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/person/", "middleware/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": ["tests/e2e/auth.spec.ts"] }
+      }
+    },
+    {
+      "id": "BR-26",
+      "title": "Session Management",
+      "phase": 1,
+      "modules": ["M01"],
+      "priority": "P2",
+      "primaryModule": "person",
+      "layers": {
+        "backend": { "required": true, "paths": ["middleware/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-27",
+      "title": "Event Registration Limits",
+      "phase": 1,
+      "modules": ["M08"],
+      "priority": "P2",
+      "primaryModule": "events",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/events/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": ["tests/e2e/member/events.spec.ts"] }
+      }
+    },
+    {
+      "id": "BR-28",
+      "title": "Communication Deduplication",
+      "phase": 1,
+      "modules": ["M07"],
+      "priority": "P2",
+      "primaryModule": "communications",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/communications/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-29",
+      "title": "Org Public Page",
+      "phase": 1,
+      "modules": ["M04"],
+      "priority": "P2",
+      "primaryModule": "platformadmin",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/platformadmin/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-30",
+      "title": "Payment Gateway Isolation",
+      "phase": 1,
+      "modules": ["M06"],
+      "priority": "P0",
+      "primaryModule": "dues",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/dues/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-31",
+      "title": "SVG Upload Security",
+      "phase": 1,
+      "modules": ["M04"],
+      "priority": "P2",
+      "primaryModule": "storage",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/storage/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-32",
+      "title": "Financial Record Retention",
+      "phase": 1,
+      "modules": ["M06"],
+      "priority": "P2",
+      "primaryModule": "dues",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/dues/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-33",
+      "title": "Election Integrity",
+      "phase": 2,
+      "modules": ["M12"],
+      "priority": "P1",
+      "primaryModule": "elections",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/elections/"] },
+        "contract": { "required": true, "paths": ["tests/contract/elections-flow.hurl"] },
+        "e2e": { "required": true, "paths": ["tests/e2e/officer/elections.spec.ts"] }
+      }
+    },
+    {
+      "id": "BR-34",
+      "title": "Nomination Eligibility",
+      "phase": 2,
+      "modules": ["M12"],
+      "priority": "P3",
+      "primaryModule": "elections",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/elections/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-35",
+      "title": "Feed Content Moderation",
+      "phase": 2,
+      "modules": ["M13"],
+      "priority": "P3",
+      "primaryModule": "communications",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/communications/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-36",
+      "title": "National Dashboard Access",
+      "phase": 2,
+      "modules": ["M14"],
+      "priority": "P3",
+      "primaryModule": "platformadmin",
+      "layers": {
+        "backend": { "required": true, "paths": ["handlers/platformadmin/"] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-37",
+      "title": "Job Posting Expiry",
+      "phase": 2,
+      "modules": ["M15"],
+      "priority": "P3",
+      "primaryModule": null,
+      "layers": {
+        "backend": { "required": true, "paths": [] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-38",
+      "title": "Marketplace Referral Disclosure",
+      "phase": 3,
+      "modules": ["M17"],
+      "priority": "P3",
+      "primaryModule": null,
+      "layers": {
+        "backend": { "required": true, "paths": [] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-39",
+      "title": "Committee Dissolution",
+      "phase": 3,
+      "modules": ["M19"],
+      "priority": "P3",
+      "primaryModule": null,
+      "layers": {
+        "backend": { "required": true, "paths": [] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    },
+    {
+      "id": "BR-40",
+      "title": "Survey Anonymity",
+      "phase": 3,
+      "modules": ["M18"],
+      "priority": "P3",
+      "primaryModule": null,
+      "layers": {
+        "backend": { "required": true, "paths": [] },
+        "contract": { "required": false, "paths": [] },
+        "e2e": { "required": false, "paths": [] }
+      }
+    }
+  ]
+}

@@ -35,9 +35,14 @@ For each new/modified module in the plan:
 
 For each module, in dependency order, complete ALL of the following before starting the next module:
 
+**BR Extraction (before any code):**
+1. Read `docs/ver-3/business/business-rules.md` — list every BR-## for this module
+2. Extract rule statements and edge cases — these become test case descriptions
+3. Update `docs/ver-3/business/br-registry.json` with expected test paths
+
 **Backend:**
-1. Run `/db-migrate` — create/update database schema and generate migration
-2. Run `/handler` — write tests FIRST (TDD), then implement handler + repository
+4. Run `/db-migrate` — create/update database schema and generate migration
+5. Run `/handler` — write tests FIRST (TDD) tagged with `[BR-##]`, then implement handler + repository
 3. Run `/test-api` — verify backend tests pass
 4. Run `/typecheck` — verify types are clean
 

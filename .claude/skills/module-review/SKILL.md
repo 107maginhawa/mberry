@@ -69,7 +69,21 @@ cd services/api-ts && bun test src/handlers/{module}/
 grep -rn 'test.skip\|xtest\|xit\|xdescribe' services/api-ts/src/handlers/{module}/
 ```
 
-### 5. Boilerplate Integrity
+### 5. BR Coverage
+
+Check that all business rules assigned to this module have tagged tests:
+
+```bash
+bun run scripts/br-coverage.ts --module={module}
+```
+
+- [ ] All P0/P1 BRs for this module show COVERED
+- [ ] No P0/P1 BRs show MISSING
+- [ ] P2 BRs show at least PARTIAL
+
+If any P0/P1 BR is MISSING, the module is NOT READY. Write tests from the BR text in `docs/ver-3/business/business-rules.md` before proceeding.
+
+### 6. Boilerplate Integrity
 
 Scan for incomplete implementation:
 
@@ -103,6 +117,7 @@ Report in this format:
 **Completeness**: PASS/FAIL — [details]
 **Consistency**: PASS/FAIL — [details]
 **Test Coverage**: PASS/FAIL — [details]
+**BR Coverage**: PASS/FAIL — [N/M BRs covered]
 **Boilerplate**: PASS/FAIL — [details]
 
 ### Issues Found

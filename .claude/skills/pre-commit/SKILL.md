@@ -43,6 +43,14 @@ echo "Test ratchet: all changed handlers have test coverage"
 
 Module-level test files are accepted (e.g., `booking.test.ts` covering create + get + list). Untouched legacy handlers are not blocked.
 
+### 0.5. BR Coverage Warning (informational)
+
+```bash
+bun run scripts/br-coverage.ts 2>/dev/null || true
+```
+
+If P0/P1 BRs are MISSING, warn but do not block the commit. BR gaps are addressed in `/module-review` and `/ship`.
+
 ### 1. Type Check API
 
 ```bash

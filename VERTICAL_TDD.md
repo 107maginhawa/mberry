@@ -32,7 +32,15 @@ Every module follows this exact sequence. Do NOT skip steps. Do NOT reorder.
 Step 1:  TypeSpec        → Define API contract in specs/api/src/modules/{module}.tsp
 Step 2:  Codegen         → cd specs/api && bun run build
                          → cd services/api-ts && bun run generate  (includes db:generate)
-Step 3:  Backend Tests   → Write FAILING unit tests (RED)
+Step 2.5: BR Extraction  → Read docs/ver-3/business/business-rules.md
+                         → List every BR-## that references this module
+                         → Extract: rule statement, edge cases, validation requirements
+                         → Each edge case becomes a test case description
+                         → These ARE your test specs for Steps 3-10
+                         → Add BR entries to docs/ver-3/business/br-registry.json
+                         → DISCIPLINE: read the business rule to know what to test.
+                           Do NOT read the implementation to figure out what to test.
+Step 3:  Backend Tests   → Write FAILING unit tests (RED), tagged with [BR-##]
 Step 4:  Backend Impl    → Implement schemas, repos, handlers until tests PASS (GREEN)
 Step 5:  Contract Tests  → Write FAILING Hurl scenarios (RED)
 Step 6:  Contract Impl   → Fix endpoints until Hurl tests PASS (GREEN)
@@ -73,6 +81,19 @@ For each test file:
 | **Contract** | Hurl | `specs/api/tests/contract/{scenario}.hurl` | Full HTTP request/response per journey |
 | **Frontend unit** | `bun:test` | `apps/{app}/src/features/{module}/components/{component}.test.tsx` | Components, hooks, schemas |
 | **E2E** | Playwright | `apps/{app}/tests/e2e/{journey}.spec.ts` | Critical user journeys end-to-end |
+
+### BR Tagging Convention
+
+Every test that verifies a business rule MUST include `[BR-##]` in its describe or test name:
+```typescript
+describe('[BR-05] Fund Allocation', () => {
+  test('rejects config where percentages do not sum to 100%', ...);
+  test('last fund absorbs rounding remainder', ...);
+});
+```
+Cross-cutting BRs get dedicated files: `br-{id}.{topic}.test.ts` in the primary module directory.
+The BR registry at `docs/ver-3/business/br-registry.json` maps every BR to expected test locations.
+Run `bun run scripts/br-coverage.ts` to verify coverage.
 
 ### Contract Test Organization
 
@@ -127,6 +148,13 @@ cd apps/account && bun run test:e2e
 **Do NOT start the next module until the current module passes ALL applicable gates.**
 
 No regressions: verify previously completed modules still pass.
+
+```bash
+# BR coverage for this module
+bun run scripts/br-coverage.ts --module={module}
+```
+
+All BRs assigned to this module must be COVERED or PARTIAL (with justification) before proceeding.
 
 ### CI Coverage
 
