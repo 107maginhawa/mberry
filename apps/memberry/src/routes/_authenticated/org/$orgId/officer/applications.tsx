@@ -7,14 +7,10 @@ export const Route = createFileRoute('/_authenticated/org/$orgId/officer/applica
 
 function ApplicationsPage() {
   const { orgId } = Route.useParams()
-
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Membership Applications</h1>
-      </div>
-
-      <ApplicationList orgId={orgId} tenantId={orgId} />
+      <h1 className="text-2xl font-bold">Membership Applications</h1>
+      <ApplicationList orgId={orgId} />
     </div>
   )
 }
