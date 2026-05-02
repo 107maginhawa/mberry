@@ -1,0 +1,120 @@
+import { describe, test, expect, afterEach } from 'bun:test';
+import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { updateTraining } from './updateTraining';
+import { TrainingRepository } from './repos/training.repo';
+
+const fakeTraining = {
+  id: 'training-1',
+  tenantId: 'org-1',
+  organizationId: 'org-1',
+  title: 'CPD Seminar',
+  status: 'draft',
+  startDate: new Date('2026-06-01'),
+  endDate: new Date('2026-06-02'),
+  createdBy: 'user-1',
+  updatedBy: 'user-1',
+};
+
+describe('updateTraining', () => {
+  let mocks: ReturnType<typeof stubRepo>;
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+  });
+
+  test('updates training and returns 200', async () => {
+    const updated = { ...fakeTraining, title: 'Updated Seminar' };
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1' },
+      _body: { title: 'Updated Seminar' },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(response.body.data.title).toBe('Updated Seminar');
+  });
+
+  test('throws NotFoundError when training does not exist', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => undefined,
+      update: async () => fakeTraining,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'missing-id' },
+      _body: { title: 'Test' },
+    });
+
+    await expect(updateTraining(ctx)).rejects.toThrow('Training not found');
+  });
+
+  test('maps startAt to startDate', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1' },
+      _body: { startAt: '2026-07-01' },
+    });
+
+    await updateTraining(ctx);
+    expect(capturedData.startDate).toBeInstanceOf(Date);
+  });
+
+  test('maps fee to registrationFee', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1' },
+      _body: { fee: 7500 },
+    });
+
+    await updateTraining(ctx);
+    expect(capturedData.registrationFee).toBe(7500);
+  });
+
+  test('sets updatedBy from session', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'admin-1', role: 'admin' },
+      _params: { id: 'training-1' },
+      _body: { title: 'Test' },
+    });
+
+    await updateTraining(ctx);
+    expect(capturedData.updatedBy).toBe('admin-1');
+  });
+
+  test('crashes without session (no auth)', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      update: async () => fakeTraining,
+    });
+
+    const ctx = makeCtx({
+      user: null,
+      session: null,
+      _params: { id: 'training-1' },
+      _body: { title: 'Test' },
+    });
+
+    await expect(updateTraining(ctx)).rejects.toThrow();
+  });
+});
