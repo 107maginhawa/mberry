@@ -1,35 +1,146 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { Award, Calendar, BookOpen, CheckCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/my/training')({
   component: MyTraining,
 })
 
+const STATUS_STYLES: Record<string, string> = {
+  enrolled: 'bg-green-100 text-green-700',
+  pending_approval: 'bg-yellow-100 text-yellow-700',
+  pending_payment: 'bg-orange-100 text-orange-700',
+  waitlisted: 'bg-blue-100 text-blue-700',
+  rejected: 'bg-red-100 text-red-700',
+  cancelled: 'bg-gray-100 text-gray-500',
+}
+
+const TRAINING_STATUS_STYLES: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-700',
+  published: 'bg-green-100 text-green-700',
+  cancelled: 'bg-red-100 text-red-700',
+  pending_approval: 'bg-yellow-100 text-yellow-700',
+}
+
+function formatDate(iso: string | null | undefined) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
 function MyTraining() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['my-trainings'],
+    queryFn: async () => {
+      const res = await fetch('/api/training/my')
+      if (!res.ok) throw new Error('Failed to load trainings')
+      return res.json() as Promise<{ data: Array<{ enrollment: any; training: any }> }>
+    },
+  })
+
+  const items = data?.data ?? []
+
+  const totalCredits = items.reduce((acc, item) => {
+    const isCompleted = item.enrollment?.status === 'enrolled' // In reality would check attendance
+    return acc + (isCompleted ? Number(item.training?.creditValue ?? 0) : 0)
+  }, 0)
+
+  const enrolled = items.filter((i) => i.enrollment?.status === 'enrolled').length
+  const pending = items.filter((i) => ['pending_approval', 'pending_payment', 'waitlisted'].includes(i.enrollment?.status)).length
+
+  const statCards = [
+    { label: 'Enrolled', value: enrolled, icon: BookOpen, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'Pending', value: pending, icon: Calendar, color: 'text-orange-600', bg: 'bg-orange-100' },
+    { label: 'CPE Credits', value: totalCredits.toFixed(1), icon: Award, color: 'text-amber-600', bg: 'bg-amber-100' },
+    { label: 'Completed', value: items.filter((i) => i.enrollment?.status === 'enrolled').length, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100' },
+  ]
+
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-bold">My Training</h1>
-      <p className="text-sm text-muted-foreground">Training sessions and courses you're enrolled in</p>
-
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-left p-3 font-medium">Training</th>
-              <th className="text-left p-3 font-medium">Organization</th>
-              <th className="text-left p-3 font-medium">Date</th>
-              <th className="text-left p-3 font-medium">Credits</th>
-              <th className="text-left p-3 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-t">
-              <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                No training sessions yet.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div>
+        <h1 className="text-2xl font-bold">My Training</h1>
+        <p className="text-sm text-muted-foreground">Training sessions and courses you&apos;re enrolled in</p>
       </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((s) => (
+          <div key={s.label} className="border rounded-xl p-4 bg-card flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${s.bg}`}>
+              <s.icon className={`w-5 h-5 ${s.color}`} />
+            </div>
+            <div>
+              <p className="text-xl font-bold">{s.value}</p>
+              <p className="text-xs text-muted-foreground">{s.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-16 bg-muted/30 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="border rounded-xl p-8 text-center text-destructive">
+          Failed to load trainings.
+        </div>
+      ) : items.length === 0 ? (
+        <div className="border rounded-xl p-12 text-center text-muted-foreground">
+          No training sessions yet. Browse available trainings and enroll.
+        </div>
+      ) : (
+        <div className="border rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="text-left p-3 font-medium">Training</th>
+                <th className="text-left p-3 font-medium">Type</th>
+                <th className="text-left p-3 font-medium">Date</th>
+                <th className="text-left p-3 font-medium">Credits</th>
+                <th className="text-left p-3 font-medium">Enrollment</th>
+                <th className="text-left p-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.enrollment.id} className="border-t hover:bg-muted/20">
+                  <td className="p-3">
+                    <p className="font-medium line-clamp-1">{item.training.title}</p>
+                  </td>
+                  <td className="p-3 text-muted-foreground capitalize">
+                    {item.training.type?.replace('_', ' ')}
+                  </td>
+                  <td className="p-3 text-muted-foreground">
+                    {formatDate(item.training.startAt)}
+                  </td>
+                  <td className="p-3">
+                    {Number(item.training.creditValue) > 0 ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                        <Award className="w-3 h-3" />
+                        {item.training.creditValue} CPE
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[item.enrollment.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                      {item.enrollment.status.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${TRAINING_STATUS_STYLES[item.training.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                      {item.training.status.replace('_', ' ')}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

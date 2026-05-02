@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { TrainingList } from '@/features/training/components/training-list'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/training/')({
   component: OfficerTraining,
@@ -22,27 +23,7 @@ function OfficerTraining() {
         </a>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-left p-3 font-medium">Title</th>
-              <th className="text-left p-3 font-medium">Instructor</th>
-              <th className="text-left p-3 font-medium">Date</th>
-              <th className="text-left p-3 font-medium">Enrolled</th>
-              <th className="text-left p-3 font-medium">Credits</th>
-              <th className="text-left p-3 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-t">
-              <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                No training sessions yet.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <TrainingList orgId={orgId} />
     </div>
   )
 }
