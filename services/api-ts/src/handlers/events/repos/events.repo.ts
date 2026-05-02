@@ -3,14 +3,14 @@ import type { DatabaseInstance } from '@/core/database';
 import {
   events,
   eventRegistrations,
-  eventAttendance,
+  checkIns,
   type Event,
   type NewEvent,
   type EventRegistration,
   type NewEventRegistration,
-  type EventAttendance,
-  type NewEventAttendance,
-} from './events.types';
+  type CheckIn,
+  type NewCheckIn,
+} from '../../association:operations/repos/events.schema';
 
 export class EventsRepository {
   constructor(private db: DatabaseInstance) {}
@@ -19,7 +19,6 @@ export class EventsRepository {
     orgId: string,
     filters?: {
       status?: string;
-      type?: string;
       search?: string;
       from?: Date;
       to?: Date;
@@ -27,19 +26,21 @@ export class EventsRepository {
       offset?: number;
     },
   ) {
-    const conditions: SQL<unknown>[] = [eq(events.organizationId, orgId)];
+    const conditions: SQL<unknown>[] = [
+      eq(events.organizationId, orgId),
+      eq(events.tenantId, orgId),
+    ];
     if (filters?.status) conditions.push(eq(events.status, filters.status as any));
-    if (filters?.type) conditions.push(eq(events.type, filters.type as any));
     if (filters?.search) conditions.push(like(events.title, `%${filters.search}%`));
-    if (filters?.from) conditions.push(gte(events.startAt, filters.from));
-    if (filters?.to) conditions.push(lte(events.startAt, filters.to));
+    if (filters?.from) conditions.push(gte(events.startDate, filters.from));
+    if (filters?.to) conditions.push(lte(events.startDate, filters.to));
 
     const [data, countResult] = await Promise.all([
       this.db
         .select()
         .from(events)
         .where(and(...conditions))
-        .orderBy(desc(events.startAt))
+        .orderBy(desc(events.startDate))
         .limit(filters?.limit ?? 20)
         .offset(filters?.offset ?? 0),
       this.db
@@ -74,7 +75,7 @@ export class EventsRepository {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const [stats] = await this.db
       .select({
-        totalThisMonth: sql<number>`count(CASE WHEN ${events.startAt} >= ${monthStart} THEN 1 END)::int`,
+        totalThisMonth: sql<number>`count(CASE WHEN ${events.startDate} >= ${monthStart} THEN 1 END)::int`,
         totalRegistrations: sql<number>`0::int`,
       })
       .from(events)
@@ -103,32 +104,32 @@ export class EventsRepository {
       .where(
         and(
           eq(eventRegistrations.eventId, eventId),
-          eq(eventRegistrations.status, 'registered'),
+          eq(eventRegistrations.status, 'confirmed'),
         ),
       );
     return result?.count ?? 0;
   }
 
-  // Attendance
+  // Check-ins (attendance)
   async listAttendance(eventId: string) {
     return this.db
       .select()
-      .from(eventAttendance)
-      .where(eq(eventAttendance.eventId, eventId))
-      .orderBy(desc(eventAttendance.checkedInAt));
+      .from(checkIns)
+      .where(eq(checkIns.eventId, eventId))
+      .orderBy(desc(checkIns.checkedInAt));
   }
 
-  async checkIn(data: NewEventAttendance): Promise<EventAttendance> {
-    const [result] = await this.db.insert(eventAttendance).values(data).returning();
+  async checkIn(data: NewCheckIn): Promise<CheckIn> {
+    const [result] = await this.db.insert(checkIns).values(data).returning();
     return result!;
   }
 
   async isCheckedIn(eventId: string, personId: string): Promise<boolean> {
     const [existing] = await this.db
       .select()
-      .from(eventAttendance)
+      .from(checkIns)
       .where(
-        and(eq(eventAttendance.eventId, eventId), eq(eventAttendance.personId, personId)),
+        and(eq(checkIns.eventId, eventId), eq(checkIns.personId, personId)),
       )
       .limit(1);
     return !!existing;
@@ -138,11 +139,11 @@ export class EventsRepository {
     const [stats] = await this.db
       .select({
         total: sql<number>`count(*)::int`,
-        qr: sql<number>`count(CASE WHEN ${eventAttendance.method} = 'qr' THEN 1 END)::int`,
-        manual: sql<number>`count(CASE WHEN ${eventAttendance.method} = 'manual' THEN 1 END)::int`,
+        qr: sql<number>`count(CASE WHEN ${checkIns.method} = 'qr' THEN 1 END)::int`,
+        manual: sql<number>`count(CASE WHEN ${checkIns.method} = 'manual' THEN 1 END)::int`,
       })
-      .from(eventAttendance)
-      .where(eq(eventAttendance.eventId, eventId));
+      .from(checkIns)
+      .where(eq(checkIns.eventId, eventId));
     return stats;
   }
 
@@ -153,6 +154,6 @@ export class EventsRepository {
       .from(eventRegistrations)
       .innerJoin(events, eq(eventRegistrations.eventId, events.id))
       .where(eq(eventRegistrations.personId, personId))
-      .orderBy(desc(events.startAt));
+      .orderBy(desc(events.startDate));
   }
 }

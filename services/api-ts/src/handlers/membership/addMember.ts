@@ -10,11 +10,17 @@ export async function addMember(ctx: Context): Promise<Response> {
 
   const repo = new MembershipRepository(db);
   const member = await repo.addMember({
-    organizationId: orgId,
+    tenantId: orgId,
+    orgId,
     personId: body.personId,
+    tierId: body.tierId,
     categoryId: body.categoryId,
-    licenseNumber: body.licenseNumber,
+    memberNumber: body.memberNumber ?? body.licenseNumber,
+    startDate: body.startDate ?? new Date().toISOString().split('T')[0],
+    duesExpiryDate: body.duesExpiryDate ?? new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+    gracePeriodDays: body.gracePeriodDays ?? 30,
     status: 'active',
+    joinedAt: new Date(),
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });

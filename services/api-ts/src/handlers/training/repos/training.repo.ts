@@ -3,22 +3,29 @@ import type { DatabaseInstance } from '@/core/database';
 import {
   trainings,
   trainingEnrollments,
-  trainingAttendance,
   type Training,
   type NewTraining,
   type TrainingEnrollment,
   type NewTrainingEnrollment,
-  type TrainingAttendance,
-  type NewTrainingAttendance,
-} from './training.types';
+} from '../../association:operations/repos/training.schema';
 
 export class TrainingRepository {
   constructor(private db: DatabaseInstance) {}
 
-  async list(orgId: string, filters?: { status?: string; type?: string; search?: string; limit?: number; offset?: number }) {
-    const conditions: SQL<unknown>[] = [eq(trainings.organizationId, orgId)];
+  async list(
+    orgId: string,
+    filters?: {
+      status?: string;
+      search?: string;
+      limit?: number;
+      offset?: number;
+    },
+  ) {
+    const conditions: SQL<unknown>[] = [
+      eq(trainings.organizationId, orgId),
+      eq(trainings.tenantId, orgId),
+    ];
     if (filters?.status) conditions.push(eq(trainings.status, filters.status as any));
-    if (filters?.type) conditions.push(eq(trainings.type, filters.type as any));
     if (filters?.search) conditions.push(like(trainings.title, `%${filters.search}%`));
 
     const [data, countResult] = await Promise.all([
@@ -26,7 +33,7 @@ export class TrainingRepository {
         .select()
         .from(trainings)
         .where(and(...conditions))
-        .orderBy(desc(trainings.startAt))
+        .orderBy(desc(trainings.startDate))
         .limit(filters?.limit ?? 20)
         .offset(filters?.offset ?? 0),
       this.db
@@ -61,7 +68,7 @@ export class TrainingRepository {
     quarterStart.setMonth(quarterStart.getMonth() - 3);
     const [stats] = await this.db
       .select({
-        totalThisQuarter: sql<number>`count(CASE WHEN ${trainings.startAt} >= ${quarterStart} THEN 1 END)::int`,
+        totalThisQuarter: sql<number>`count(CASE WHEN ${trainings.startDate} >= ${quarterStart} THEN 1 END)::int`,
         totalEnrollments: sql<number>`0::int`,
       })
       .from(trainings)
@@ -105,45 +112,6 @@ export class TrainingRepository {
     return result!;
   }
 
-  // Attendance
-  async listAttendance(trainingId: string) {
-    return this.db
-      .select()
-      .from(trainingAttendance)
-      .where(eq(trainingAttendance.trainingId, trainingId))
-      .orderBy(desc(trainingAttendance.completedAt));
-  }
-
-  async markComplete(data: NewTrainingAttendance): Promise<TrainingAttendance> {
-    const [result] = await this.db.insert(trainingAttendance).values(data).returning();
-    return result!;
-  }
-
-  async isCompleted(trainingId: string, personId: string): Promise<boolean> {
-    const [existing] = await this.db
-      .select()
-      .from(trainingAttendance)
-      .where(
-        and(
-          eq(trainingAttendance.trainingId, trainingId),
-          eq(trainingAttendance.personId, personId),
-        ),
-      )
-      .limit(1);
-    return !!existing;
-  }
-
-  async getAttendanceStats(trainingId: string) {
-    const [stats] = await this.db
-      .select({
-        completed: sql<number>`count(*)::int`,
-        totalCredits: sql<number>`COALESCE(SUM(${trainingAttendance.creditsAwarded}::numeric), 0)::int`,
-      })
-      .from(trainingAttendance)
-      .where(eq(trainingAttendance.trainingId, trainingId));
-    return stats;
-  }
-
   // Member view
   async listByPerson(personId: string) {
     return this.db
@@ -151,6 +119,6 @@ export class TrainingRepository {
       .from(trainingEnrollments)
       .innerJoin(trainings, eq(trainingEnrollments.trainingId, trainings.id))
       .where(eq(trainingEnrollments.personId, personId))
-      .orderBy(desc(trainings.startAt));
+      .orderBy(desc(trainings.startDate));
   }
 }

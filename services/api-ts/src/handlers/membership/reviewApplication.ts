@@ -8,16 +8,26 @@ export async function reviewApplication(ctx: Context): Promise<Response> {
   const appId = ctx.req.param('appId');
   const body = await ctx.req.json();
 
+  // Map old status values to new schema enums
+  let status = body.status;
+  if (status === 'pending') status = 'submitted';
+  if (status === 'rejected') status = 'denied';
+
   const repo = new MembershipRepository(db);
-  const updated = await repo.reviewApplication(appId, body.status, session.user.id, body.reason);
+  const updated = await repo.reviewApplication(appId, status, session.user.id, body.reason);
 
   // If approved, create membership
-  if (body.status === 'approved') {
+  if (status === 'approved') {
     await repo.addMember({
-      organizationId: updated.organizationId,
+      tenantId: updated.tenantId,
+      orgId: updated.orgId,
       personId: updated.personId,
-      categoryId: updated.categoryId ?? undefined,
+      tierId: updated.tierId,
+      startDate: new Date().toISOString().split('T')[0],
+      duesExpiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      gracePeriodDays: 30,
       status: 'active',
+      joinedAt: new Date(),
       createdBy: session.user.id,
       updatedBy: session.user.id,
     });

@@ -13,11 +13,32 @@ export async function updateTraining(ctx: Context): Promise<Response> {
   const existing = await repo.get(id);
   if (!existing) throw new NotFoundError('Training not found');
 
+  // Strip fields not in new schema
+  const {
+    type: _type,
+    scheduleDescription: _scheduleDescription,
+    locationType: _locationType,
+    locationDetails,
+    coverImage: _coverImage,
+    creditValueLocked: _creditValueLocked,
+    regulatoryApproval: _regulatoryApproval,
+    regulatoryReference: _regulatoryReference,
+    enrollmentMode: _enrollmentMode,
+    visibility: _visibility,
+    startAt,
+    endAt,
+    creditValue,
+    fee,
+    ...rest
+  } = body;
+
   const updated = await repo.update(id, {
-    ...body,
-    startAt: body.startAt ? new Date(body.startAt) : undefined,
-    endAt: body.endAt ? new Date(body.endAt) : undefined,
-    creditValue: body.creditValue !== undefined ? String(body.creditValue) : undefined,
+    ...rest,
+    ...(locationDetails !== undefined && { location: locationDetails }),
+    ...(fee !== undefined && { registrationFee: fee }),
+    ...(creditValue !== undefined && { creditAmount: creditValue }),
+    startDate: startAt ? new Date(startAt) : (body.startDate ? new Date(body.startDate) : undefined),
+    endDate: endAt ? new Date(endAt) : (body.endDate ? new Date(body.endDate) : undefined),
     updatedBy: session.user.id,
   });
 

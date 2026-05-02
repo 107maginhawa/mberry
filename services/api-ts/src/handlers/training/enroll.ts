@@ -14,13 +14,12 @@ export async function enroll(ctx: Context): Promise<Response> {
 
   const count = await repo.getEnrollmentCount(trainingId);
   const isWaitlisted = training.capacity ? count >= training.capacity : false;
-  const needsApproval = training.enrollmentMode === 'approval_required';
 
   const enrollment = await repo.enroll({
+    tenantId: training.tenantId,
     trainingId,
     personId: session.user.id,
-    status: isWaitlisted ? 'waitlisted' : needsApproval ? 'pending_approval' : 'enrolled',
-    waitlistPosition: isWaitlisted ? count - (training.capacity ?? 0) + 1 : undefined,
+    status: isWaitlisted ? 'cancelled' : 'enrolled',
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });

@@ -7,7 +7,6 @@ export async function listTrainings(ctx: Context): Promise<Response> {
   const repo = new TrainingRepository(db);
   const result = await repo.list(orgId, {
     status: ctx.req.query('status') || undefined,
-    type: ctx.req.query('type') || undefined,
     search: ctx.req.query('search') || undefined,
     limit: parseInt(ctx.req.query('limit') ?? '20', 10),
     offset: parseInt(ctx.req.query('offset') ?? '0', 10),

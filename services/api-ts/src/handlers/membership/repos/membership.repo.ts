@@ -1,11 +1,17 @@
 import { eq, and, or, like, desc, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import {
-  memberships, membershipCategories, membershipApplications,
-  type Membership, type NewMembership,
-  type MembershipCategory, type NewMembershipCategory,
+  memberships,
+  membershipCategories,
+  membershipApplications,
+  membershipTiers,
+  type Membership,
+  type NewMembership,
+  type MembershipCategory,
+  type NewMembershipCategory,
   type MembershipApplication,
-} from './membership.types';
+  type NewMembershipApplication,
+} from '../../association:member/repos/membership.schema';
 import { persons } from '../../person/repos/person.schema';
 
 export class MembershipRepository {
@@ -21,15 +27,18 @@ export class MembershipRepository {
     limit?: number;
     offset?: number;
   }) {
-    const conditions: SQL<unknown>[] = [eq(memberships.organizationId, filters.organizationId)];
+    const conditions: SQL<unknown>[] = [
+      eq(memberships.orgId, filters.organizationId),
+      eq(memberships.tenantId, filters.organizationId),
+    ];
 
     if (filters.status) conditions.push(eq(memberships.status, filters.status as any));
     if (filters.categoryId) conditions.push(eq(memberships.categoryId, filters.categoryId));
     if (filters.search) {
       conditions.push(or(
-        like(persons.displayName, `%${filters.search}%`),
-        like(persons.email, `%${filters.search}%`),
-        like(memberships.licenseNumber, `%${filters.search}%`),
+        like(persons.firstName, `%${filters.search}%`),
+        like(persons.lastName, `%${filters.search}%`),
+        like(memberships.memberNumber, `%${filters.search}%`),
       )!);
     }
 
@@ -39,7 +48,12 @@ export class MembershipRepository {
       this.db
         .select({
           membership: memberships,
-          person: { id: persons.id, displayName: persons.displayName, email: persons.email, image: persons.image },
+          person: {
+            id: persons.id,
+            firstName: persons.firstName,
+            lastName: persons.lastName,
+            avatar: persons.avatar,
+          },
           category: { id: membershipCategories.id, name: membershipCategories.name },
         })
         .from(memberships)
@@ -63,13 +77,24 @@ export class MembershipRepository {
     const [result] = await this.db
       .select({
         membership: memberships,
-        person: { id: persons.id, displayName: persons.displayName, email: persons.email, image: persons.image },
+        person: {
+          id: persons.id,
+          firstName: persons.firstName,
+          lastName: persons.lastName,
+          avatar: persons.avatar,
+        },
         category: { id: membershipCategories.id, name: membershipCategories.name },
       })
       .from(memberships)
       .leftJoin(persons, eq(memberships.personId, persons.id))
       .leftJoin(membershipCategories, eq(memberships.categoryId, membershipCategories.id))
-      .where(and(eq(memberships.organizationId, organizationId), eq(memberships.personId, personId)))
+      .where(
+        and(
+          eq(memberships.orgId, organizationId),
+          eq(memberships.tenantId, organizationId),
+          eq(memberships.personId, personId),
+        ),
+      )
       .limit(1);
     return result;
   }
@@ -99,8 +124,12 @@ export class MembershipRepository {
     return this.db
       .select()
       .from(membershipCategories)
-      .where(eq(membershipCategories.organizationId, organizationId))
-      .orderBy(membershipCategories.sortOrder);
+      .where(
+        and(
+          eq(membershipCategories.tenantId, organizationId),
+          eq(membershipCategories.orgId, organizationId),
+        ),
+      );
   }
 
   async upsertCategory(data: NewMembershipCategory): Promise<MembershipCategory> {
@@ -108,25 +137,13 @@ export class MembershipRepository {
       .insert(membershipCategories)
       .values(data)
       .onConflictDoUpdate({
-        target: [membershipCategories.organizationId, membershipCategories.name],
+        target: [membershipCategories.tenantId, membershipCategories.name],
         set: {
           description: data.description,
-          duesAmount: data.duesAmount,
-          billingCycle: data.billingCycle,
-          sortOrder: data.sortOrder,
-          active: data.active,
+          applicableTiers: data.applicableTiers,
           updatedAt: new Date(),
         },
       })
-      .returning();
-    return result!;
-  }
-
-  async deactivateCategory(id: string): Promise<MembershipCategory> {
-    const [result] = await this.db
-      .update(membershipCategories)
-      .set({ active: false, updatedAt: new Date() })
-      .where(eq(membershipCategories.id, id))
       .returning();
     return result!;
   }
@@ -142,13 +159,20 @@ export class MembershipRepository {
   // ─── Applications ─────────────────────────────────────
 
   async listApplications(organizationId: string, status?: string) {
-    const conditions: SQL<unknown>[] = [eq(membershipApplications.organizationId, organizationId)];
+    const conditions: SQL<unknown>[] = [
+      eq(membershipApplications.orgId, organizationId),
+      eq(membershipApplications.tenantId, organizationId),
+    ];
     if (status) conditions.push(eq(membershipApplications.status, status as any));
 
     return this.db
       .select({
         application: membershipApplications,
-        person: { id: persons.id, displayName: persons.displayName, email: persons.email },
+        person: {
+          id: persons.id,
+          firstName: persons.firstName,
+          lastName: persons.lastName,
+        },
       })
       .from(membershipApplications)
       .leftJoin(persons, eq(membershipApplications.personId, persons.id))
@@ -156,15 +180,19 @@ export class MembershipRepository {
       .orderBy(membershipApplications.createdAt);
   }
 
-  async reviewApplication(id: string, status: string, reviewerId: string, reason?: string): Promise<MembershipApplication> {
+  async reviewApplication(
+    id: string,
+    status: string,
+    reviewerId: string,
+    reason?: string,
+  ): Promise<MembershipApplication> {
     const [result] = await this.db
       .update(membershipApplications)
       .set({
         status: status as any,
         reviewedBy: reviewerId,
         reviewedAt: new Date(),
-        rejectionReason: status === 'rejected' ? reason : undefined,
-        infoRequestMessage: status === 'info_requested' ? reason : undefined,
+        denialReason: status === 'denied' ? reason : undefined,
         updatedAt: new Date(),
       })
       .where(eq(membershipApplications.id, id))

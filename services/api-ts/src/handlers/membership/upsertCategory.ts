@@ -10,14 +10,11 @@ export async function upsertCategory(ctx: Context): Promise<Response> {
 
   const repo = new MembershipRepository(db);
   const category = await repo.upsertCategory({
-    organizationId: orgId,
+    tenantId: orgId,
+    orgId,
     name: body.name,
     description: body.description,
-    duesAmount: body.duesAmount ?? 0,
-    billingCycle: body.billingCycle ?? 'annual',
-    customMonths: body.customMonths,
-    sortOrder: body.sortOrder ?? 0,
-    active: body.active ?? true,
+    applicableTiers: body.applicableTiers ?? [],
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });

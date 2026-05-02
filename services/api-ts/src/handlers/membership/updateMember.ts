@@ -14,11 +14,19 @@ export async function updateMember(ctx: Context): Promise<Response> {
   const existing = await repo.getMember(orgId, memberId);
   if (!existing) throw new NotFoundError('Member not found');
 
+  // Map status values: 'grace' -> 'gracePeriod', 'pending' -> 'pendingPayment'
+  let status = body.status ?? existing.membership.status;
+  if (status === 'grace') status = 'gracePeriod';
+  if (status === 'pending') status = 'pendingPayment';
+
   const updated = await repo.updateMember(existing.membership.id, {
     categoryId: body.categoryId ?? existing.membership.categoryId,
-    status: body.status ?? existing.membership.status,
-    suspendedAt: body.status === 'suspended' ? new Date() : existing.membership.suspendedAt,
-    suspendedReason: body.suspendedReason ?? existing.membership.suspendedReason,
+    tierId: body.tierId ?? existing.membership.tierId,
+    status,
+    memberNumber: body.memberNumber ?? body.licenseNumber ?? existing.membership.memberNumber,
+    note: body.note ?? existing.membership.note,
+    terminatedAt: status === 'terminated' ? new Date() : existing.membership.terminatedAt,
+    terminationReason: body.terminationReason ?? existing.membership.terminationReason,
     updatedBy: session.user.id,
   });
 

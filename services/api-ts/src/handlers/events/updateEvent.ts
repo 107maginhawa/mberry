@@ -13,10 +13,27 @@ export async function updateEvent(ctx: Context): Promise<Response> {
   const existing = await repo.get(id);
   if (!existing) throw new NotFoundError('Event not found');
 
+  // Map old field names to new schema columns; omit fields not in schema
+  const {
+    type: _type,
+    locationType: _locationType,
+    locationDetails,
+    coverImage: _coverImage,
+    qrEnabled: _qrEnabled,
+    visibility: _visibility,
+    registrationEnabled: _registrationEnabled,
+    startAt,
+    endAt,
+    fee,
+    ...rest
+  } = body;
+
   const updated = await repo.update(id, {
-    ...body,
-    startAt: body.startAt ? new Date(body.startAt) : undefined,
-    endAt: body.endAt ? new Date(body.endAt) : undefined,
+    ...rest,
+    ...(locationDetails !== undefined && { location: locationDetails }),
+    ...(fee !== undefined && { registrationFee: fee }),
+    startDate: startAt ? new Date(startAt) : (body.startDate ? new Date(body.startDate) : undefined),
+    endDate: endAt ? new Date(endAt) : (body.endDate ? new Date(body.endDate) : undefined),
     updatedBy: session.user.id,
   });
 

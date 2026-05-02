@@ -11,22 +11,17 @@ export async function markComplete(ctx: Context): Promise<Response> {
   const training = await repo.get(trainingId);
   if (!training) throw new NotFoundError('Training not found');
 
-  const alreadyCompleted = await repo.isCompleted(trainingId, body.personId);
-  if (alreadyCompleted) throw new ConflictError('Already marked as completed');
+  // Check enrollment before marking complete
+  const enrollmentCount = await repo.getEnrollmentCount(trainingId);
+  if (enrollmentCount === 0) throw new ConflictError('No active enrollment found');
 
-  // Lock credit value after first completion
-  if (!training.creditValueLocked) {
-    await repo.update(trainingId, { creditValueLocked: true });
-  }
+  // Update enrollment status to completed
+  const enrollments = await repo.listEnrollments(trainingId);
+  const personEnrollment = enrollments.find((e) => e.personId === body.personId);
+  if (!personEnrollment) throw new NotFoundError('Enrollment not found');
+  if (personEnrollment.completedAt) throw new ConflictError('Already marked as completed');
 
-  const attendance = await repo.markComplete({
-    trainingId,
-    personId: body.personId,
-    method: body.method ?? 'manual',
-    creditsAwarded: training.creditValue,
-    createdBy: body.personId,
-    updatedBy: body.personId,
-  });
+  const updated = await repo.updateEnrollmentStatus(personEnrollment.id, 'completed');
 
-  return ctx.json({ data: attendance }, 201);
+  return ctx.json({ data: updated }, 201);
 }
