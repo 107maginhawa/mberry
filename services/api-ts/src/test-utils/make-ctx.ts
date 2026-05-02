@@ -1,5 +1,7 @@
 /**
- * Shared test helper for creating mock handler contexts.
+ * Shared test helpers for creating mock handler contexts and test data.
+ *
+ * ALL test files should import from here. Do NOT define local stubs.
  *
  * Usage:
  *   const ctx = makeCtx({ _body: { name: 'Test' }, tenantId: 'tenant-1' });
@@ -7,10 +9,42 @@
  *   expect(response.status).toBe(201);
  */
 
+// ─── User Factories ──────────────────────────────────────
+
+export interface TestUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  orgId: string;
+}
+
+export function makeUser(overrides: Partial<TestUser> = {}): TestUser {
+  return {
+    id: 'user-1',
+    name: 'Test User',
+    email: 'test@example.com',
+    role: 'user',
+    orgId: 'org-1',
+    ...overrides,
+  };
+}
+
+export function makeOfficer(overrides: Partial<TestUser> = {}): TestUser {
+  return makeUser({ id: 'officer-1', name: 'Officer User', email: 'officer@example.com', role: 'officer', ...overrides });
+}
+
+export function makeMember(overrides: Partial<TestUser> = {}): TestUser {
+  return makeUser({ id: 'member-1', name: 'Member User', email: 'member@example.com', role: 'member', ...overrides });
+}
+
+// ─── Context Factory ─────────────────────────────────────
+
 export function makeCtx(overrides: Record<string, any> = {}) {
+  const user = overrides.user !== undefined ? overrides.user : { id: 'user-1', role: 'user' };
   const vars: Record<string, any> = {
-    user: { id: 'user-1', role: 'user' },
-    session: { id: 'session-1', userId: 'user-1', user: { id: 'user-1' } },
+    user,
+    session: user ? { id: 'session-1', userId: user.id, user } : null,
     tenantId: 'tenant-1',
     orgId: 'org-1',
     database: {},
@@ -41,4 +75,67 @@ export function makeCtx(overrides: Record<string, any> = {}) {
     json: (body: any, status: number) => ({ status, body }) as any as Response,
     body: (body: any, status: number) => ({ status, body }) as any as Response,
   } as any;
+}
+
+// ─── Repository Stubs ────────────────────────────────────
+
+/**
+ * Stub methods on a repository class prototype for testing.
+ * Returns the mock functions for assertion.
+ *
+ * Usage:
+ *   const mocks = stubRepo(DuesRepository, {
+ *     getConfig: async () => ({ id: 'config-1', organizationId: 'org-1' }),
+ *     listFunds: async () => [],
+ *   });
+ *   // handler uses `new DuesRepository(db)` — stubbed methods are used
+ *   // ...
+ *   mocks.getConfig.mockRestore(); // restore after test
+ */
+export function stubRepo<T extends new (...args: any[]) => any>(
+  RepoClass: T,
+  methods: Partial<Record<keyof InstanceType<T>, (...args: any[]) => any>>,
+): Record<string, { mockRestore: () => void }> {
+  const mocks: Record<string, { mockRestore: () => void }> = {};
+
+  for (const [name, fn] of Object.entries(methods)) {
+    const original = RepoClass.prototype[name];
+    RepoClass.prototype[name] = fn;
+    mocks[name] = {
+      mockRestore: () => { RepoClass.prototype[name] = original; },
+    };
+  }
+
+  return mocks;
+}
+
+// ─── Auth Assertion Helpers ──────────────────────────────
+
+/**
+ * Assert a handler returns 401 when called without a user.
+ */
+export async function expectUnauthorized(
+  handler: (ctx: any) => Promise<Response>,
+  ctxOverrides: Record<string, any> = {},
+): Promise<void> {
+  const ctx = makeCtx({ user: null, session: null, ...ctxOverrides });
+  const response = await handler(ctx);
+  if (response.status !== 401) {
+    throw new Error(`Expected 401, got ${response.status}`);
+  }
+}
+
+/**
+ * Assert a handler returns 403 when called with a user from a different org.
+ */
+export async function expectForbidden(
+  handler: (ctx: any) => Promise<Response>,
+  ctxOverrides: Record<string, any> = {},
+): Promise<void> {
+  const wrongOrgUser = makeUser({ orgId: 'wrong-org' });
+  const ctx = makeCtx({ user: wrongOrgUser, orgId: 'wrong-org', ...ctxOverrides });
+  const response = await handler(ctx);
+  if (response.status !== 403) {
+    throw new Error(`Expected 403, got ${response.status}`);
+  }
 }

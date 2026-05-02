@@ -36,6 +36,21 @@ export default defineConfig({
 
   outputDir: './test-results',
 
+  webServer: [
+    {
+      command: 'cd ../../services/api-ts && bun dev',
+      port: 7213,
+      reuseExistingServer: true,
+      timeout: 30000,
+    },
+    {
+      command: 'bun dev',
+      port: 3004,
+      reuseExistingServer: true,
+      timeout: 30000,
+    },
+  ],
+
   projects: [
     {
       name: 'chromium',
