@@ -31,6 +31,12 @@ import { dues } from '@/handlers/dues';
 // Membership handler
 import { membership } from '@/handlers/membership';
 
+// Communications handler
+import { communications } from '@/handlers/communications';
+
+// Certificates handler
+import { certificates } from '@/handlers/certificates';
+
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
 import { registerRoutes as registerHealthRoutes } from '@/core/health';
@@ -137,6 +143,12 @@ export function createApp(config: Config): App {
 
   // Register membership routes
   app.route('/api/membership', membership);
+
+  // Register communications routes
+  app.route('/api/communications', communications);
+
+  // Register certificates routes
+  app.route('/api/certificates', certificates);
 
   // Register API routes
   registerOpenAPIRoutes(app as any);
