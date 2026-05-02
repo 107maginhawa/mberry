@@ -1,4 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { EventList } from '@/features/events/components/event-list'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/events/')({
   component: OfficerEvents,
@@ -14,34 +15,16 @@ function OfficerEvents() {
           <h1 className="text-2xl font-bold">Events</h1>
           <p className="text-sm text-muted-foreground">Manage organization events and registrations</p>
         </div>
-        <a
-          href={`/org/${orgId}/officer/events/new`}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium"
+        <Link
+          to="/org/$orgId/officer/events/new"
+          params={{ orgId }}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"
         >
           Create Event
-        </a>
+        </Link>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-left p-3 font-medium">Title</th>
-              <th className="text-left p-3 font-medium">Date</th>
-              <th className="text-left p-3 font-medium">Registrations</th>
-              <th className="text-left p-3 font-medium">Status</th>
-              <th className="text-left p-3 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-t">
-              <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                No events yet. Create your first event.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <EventList orgId={orgId} />
     </div>
   )
 }
