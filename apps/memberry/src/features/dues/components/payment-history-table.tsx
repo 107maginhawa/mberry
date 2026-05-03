@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -94,7 +95,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
             </thead>
             <tbody>
               {payments.map((p: any) => (
-                <tr key={p.id} className="border-b hover:bg-muted/50 cursor-pointer">
+                <tr key={p.id} className="border-b hover:bg-muted/50 cursor-pointer" onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
                   <td className="px-4 py-3">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</td>
                   <td className="px-4 py-3 font-mono text-xs">{p.receiptNumber}</td>
                   <td className="px-4 py-3 font-mono">{formatCents(p.amount, p.currency)}</td>

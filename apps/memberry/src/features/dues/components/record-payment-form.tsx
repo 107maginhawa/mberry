@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +16,8 @@ interface RecordPaymentFormProps {
 export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   const [personId, setPersonId] = useState('')
   const [memberSearch, setMemberSearch] = useState('')
+  const [memberResults, setMemberResults] = useState<any[]>([])
+  const [searchingMembers, setSearchingMembers] = useState(false)
   const [amount, setAmount] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('')
   const [referenceNumber, setReferenceNumber] = useState('')
@@ -48,6 +50,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
           amount: amountCents,
           currency: 'PHP',
           paymentMethod,
+          paidAt: paymentDate ? new Date(paymentDate).toISOString() : undefined,
           referenceNumber: referenceNumber || undefined,
         }),
       })
@@ -68,6 +71,29 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
     },
   })
 
+  // Debounced member search
+  useEffect(() => {
+    if (!memberSearch.trim() || memberSearch.trim().length < 2 || personId) {
+      setMemberResults([])
+      return
+    }
+    const timer = setTimeout(() => {
+      setSearchingMembers(true)
+      fetch(`/api/membership/members/${orgId}?search=${encodeURIComponent(memberSearch.trim())}&limit=10`, { credentials: 'include' })
+        .then(r => r.ok ? r.json() : { data: [] })
+        .then(json => setMemberResults(json.data || []))
+        .catch(() => setMemberResults([]))
+        .finally(() => setSearchingMembers(false))
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [memberSearch, orgId, personId])
+
+  function selectMember(m: any) {
+    setPersonId(m.personId || m.id)
+    setMemberSearch(`${m.firstName || ''} ${m.lastName || ''}`.trim() || m.name || m.memberNumber)
+    setMemberResults([])
+  }
+
   const canSubmit = personId && amountCents > 0 && paymentMethod
 
   return (
@@ -77,15 +103,28 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
           <Label>Member</Label>
           <Input
             value={memberSearch}
-            onChange={(e) => setMemberSearch(e.target.value)}
+            onChange={(e) => { setMemberSearch(e.target.value); setPersonId('') }}
             placeholder="Search by name or license number..."
           />
-          <Input
-            value={personId}
-            onChange={(e) => setPersonId(e.target.value)}
-            placeholder="Person ID"
-            className="mt-2 text-xs"
-          />
+          {searchingMembers && <p className="text-xs text-muted-foreground mt-1">Searching...</p>}
+          {memberResults.length > 0 && !personId && (
+            <div className="border rounded-md mt-1 max-h-40 overflow-y-auto bg-white">
+              {memberResults.map((m: any) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                  onClick={() => selectMember(m)}
+                >
+                  <span className="font-medium">{m.firstName || ''} {m.lastName || ''}</span>
+                  {m.memberNumber && <span className="text-muted-foreground ml-2 text-xs">#{m.memberNumber}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+          {personId && (
+            <p className="text-xs text-muted-foreground mt-1">Selected: {memberSearch}</p>
+          )}
         </div>
 
         <div>
