@@ -240,9 +240,8 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           </Button>
           <Button variant="outline" size="sm" asChild>
             <Link
-              to="/org/$orgId/officer/payments"
+              to="/org/$orgId/officer/payments/new"
               params={{ orgId }}
-              search={{ memberId }}
             >
               <CreditCard className="h-4 w-4 mr-2" />
               Record Payment
