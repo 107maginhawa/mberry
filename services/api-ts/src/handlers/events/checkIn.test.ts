@@ -136,22 +136,23 @@ describe('[BR-17] checkIn', () => {
     expect(response.body.data.personId).toBe('unregistered-person');
   });
 
-  test('no session does not crash (no auth in handler)', async () => {
-    // checkIn does not access session — it reads personId from body.
+  test('uses session.user.id for audit fields, ignores body.checkedInBy', async () => {
+    let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       isCheckedIn: async () => false,
-      checkIn: async (data: any) => ({ ...fakeAttendance, ...data }),
+      checkIn: async (data: any) => { capturedData = data; return { ...fakeAttendance, ...data }; },
     });
 
     const ctx = makeCtx({
-      user: null,
-      session: null,
       _params: { id: 'evt-1' },
-      _body: { personId: 'person-1', checkedInBy: 'officer-1' },
+      _body: { personId: 'person-1', checkedInBy: 'attacker-fake-id' },
     });
 
     const response = await checkIn(ctx);
     expect(response.status).toBe(201);
+    // P1-3 fix: checkedInBy comes from session, not body
+    expect(capturedData.checkedInBy).not.toBe('attacker-fake-id');
+    expect(capturedData.createdBy).toBe(capturedData.checkedInBy);
   });
 });
