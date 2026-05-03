@@ -59,6 +59,7 @@ describe('updateMember [BR-03]', () => {
   test('throws NotFoundError for non-existent member', async () => {
     mocks = stubRepo(MembershipRepository, {
       getMember: async () => undefined,
+      getMemberById: async () => undefined,
       updateMember: async () => updatedMember,
     });
 
