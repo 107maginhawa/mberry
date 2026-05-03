@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { CalendarDays, BookOpen, Bell, CreditCard, ChevronRight } from 'lucide-react'
+import { CalendarDays, BookOpen, Bell, CreditCard, ChevronRight, Shield } from 'lucide-react'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
@@ -210,6 +211,20 @@ export function MemberDashboard() {
 
 function MembershipCard({ membership: m }: { membership: Membership }) {
   const needsPay = m.status === 'grace' || m.status === 'lapsed'
+  const [isOfficer, setIsOfficer] = useState(false)
+  const [officerRole, setOfficerRole] = useState('')
+
+  useEffect(() => {
+    fetch(`/api/persons/me/officer-role/${m.orgId}`, { credentials: 'include' })
+      .then((r) => r.ok ? r.json() : null)
+      .then((json) => {
+        if (json?.data?.isOfficer) {
+          setIsOfficer(true)
+          setOfficerRole(json.data.positions?.[0]?.title || 'Officer')
+        }
+      })
+      .catch(() => {})
+  }, [m.orgId])
 
   return (
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
@@ -232,8 +247,17 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
         </p>
       )}
 
-      {needsPay && (
-        <div className="mt-4">
+      <div className="flex items-center gap-2 mt-4">
+        {isOfficer && (
+          <Link
+            to={`/org/${m.orgId}/officer/dashboard`}
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white px-4 py-1.5 rounded-[8px] transition-colors"
+          >
+            <Shield size={13} />
+            {officerRole} Dashboard
+          </Link>
+        )}
+        {needsPay && (
           <a
             href={`/org/${m.orgId}/payments`}
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-mid)] px-4 py-1.5 rounded-[8px] transition-colors"
@@ -241,8 +265,8 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
             <CreditCard size={13} />
             Pay Dues
           </a>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

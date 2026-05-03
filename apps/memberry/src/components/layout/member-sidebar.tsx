@@ -14,27 +14,27 @@ interface MemberSidebarProps {
 
 export function MemberSidebar({ userEmail }: MemberSidebarProps) {
   return (
-    <aside className="hidden md:flex w-[250px] bg-[var(--color-primary)] text-white flex-col shrink-0">
+    <aside className="hidden md:flex w-[180px] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col shrink-0">
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-white/[0.12]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[var(--color-cream)] flex items-center justify-center">
-            <span className="text-[var(--color-primary)] font-display font-bold text-[14px]">M</span>
+      <div className="px-5 py-5 border-b border-[var(--color-border-light)]">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-[var(--color-cream)] flex items-center justify-center">
+            <span className="text-[var(--color-primary)] font-display font-bold text-[12px]">M</span>
           </div>
-          <span className="font-display text-[20px] font-bold text-white">Memberry</span>
+          <span className="font-display text-[16px] font-bold text-[var(--color-text)]">Memberry</span>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4">
+      <nav className="flex-1 py-3">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <Link
             key={to}
             to={to}
-            className="flex items-center gap-2.5 px-6 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors duration-150"
+            className="flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-warm)] transition-colors duration-150"
             activeProps={{
               className:
-                "flex items-center gap-2.5 px-6 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[21px]",
+                "flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-[var(--color-primary)] font-semibold border-l-[3px] border-[var(--color-primary)] pl-[17px]",
             }}
           >
             <Icon size={18} className="shrink-0" />
@@ -44,8 +44,8 @@ export function MemberSidebar({ userEmail }: MemberSidebarProps) {
       </nav>
 
       {/* User */}
-      <div className="px-6 py-4 border-t border-white/[0.12]">
-        <p className="text-[11px] text-white/50 truncate">{userEmail}</p>
+      <div className="px-5 py-3 border-t border-[var(--color-border-light)]">
+        <p className="text-[11px] text-[var(--color-muted)] truncate">{userEmail}</p>
       </div>
     </aside>
   )

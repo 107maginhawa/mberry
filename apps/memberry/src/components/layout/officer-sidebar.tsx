@@ -15,6 +15,7 @@ import {
   Shield,
   Award,
   IdCard,
+  ArrowLeft,
 } from "lucide-react"
 
 interface NavSection {
@@ -135,11 +136,31 @@ export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSi
         ))}
       </nav>
 
+      {/* Back to member view */}
+      <div className="px-4 py-2 border-t border-white/[0.12]">
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-2 px-2 py-2 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.08] rounded-[6px] transition-colors"
+        >
+          <ArrowLeft size={14} />
+          Back to Member View
+        </Link>
+      </div>
+
       {/* User info */}
-      <div className="px-6 py-4 border-t border-white/[0.12]">
-        {userName && <p className="text-[14px] text-white font-medium truncate">{userName}</p>}
-        {role && <p className="text-[12px] text-white/50">{role}</p>}
-        {!userName && userEmail && <p className="text-[11px] text-white/50 truncate">{userEmail}</p>}
+      <div className="px-6 py-3 border-t border-white/[0.12]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-[34px] h-[34px] rounded-full bg-[var(--color-primary-mid)] flex items-center justify-center shrink-0">
+            <span className="text-white font-semibold text-[13px]">
+              {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2) : '?'}
+            </span>
+          </div>
+          <div className="min-w-0">
+            {userName && <p className="text-[14px] text-white font-medium truncate">{userName}</p>}
+            {role && <p className="text-[12px] text-white/50">{role}</p>}
+            {!userName && userEmail && <p className="text-[11px] text-white/50 truncate">{userEmail}</p>}
+          </div>
+        </div>
       </div>
     </aside>
   )

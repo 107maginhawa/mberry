@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 import { requireOrgOfficer } from "@/utils/guards"
 import { OfficerSidebar } from "@/components/layout/officer-sidebar"
+import { OfficerMobileNav } from "@/components/layout/officer-mobile-nav"
 
 export const Route = createFileRoute("/_authenticated/org/$orgId/officer")({
   beforeLoad: requireOrgOfficer,
@@ -14,7 +15,11 @@ function OfficerLayout() {
   const primaryRole = positions[0]?.title || "Officer"
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[var(--color-bg)]">
+      <OfficerMobileNav
+        userName={user?.name}
+        role={primaryRole}
+      />
       <OfficerSidebar
         userEmail={user?.email}
         userName={user?.name}
