@@ -9,10 +9,10 @@ const fakeTraining = {
   tenantId: 'org-1',
   organizationId: 'org-1',
   title: 'CPD Seminar',
-  status: 'published',
+  status: 'completed',
   capacity: 50,
   creditAmount: 8,
-  endDate: new Date('2026-06-01'),
+  endDate: new Date('2024-01-01'), // Past date — BR-20 requires activity to have ended
 };
 
 const fakeEnrollment = {
