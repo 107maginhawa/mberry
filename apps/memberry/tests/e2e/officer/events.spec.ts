@@ -30,7 +30,7 @@ test.describe('Officer Events', () => {
     ).toBeVisible({ timeout: 10000 })
 
     await expect(
-      page.getByRole('link', { name: /Dental Mission/i }),
+      page.getByRole('link', { name: /Dental Mission/i }).first(),
     ).toBeVisible({ timeout: 10000 })
   })
 
