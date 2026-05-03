@@ -48,6 +48,17 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
     retry: false,
   })
 
+  const applications = useQuery<{ pendingCount: number }>({
+    queryKey: ['applications-summary', orgId],
+    queryFn: async () => {
+      const res = await fetch(`/api/membership/applications/${orgId}?status=pending`)
+      const json = await res.json()
+      const apps = json.data ?? []
+      return { pendingCount: apps.length }
+    },
+    retry: false,
+  })
+
   const dues = useQuery<DuesDashboard>({
     queryKey: ['dues-dashboard', orgId],
     queryFn: async () => {
@@ -57,7 +68,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
     retry: false,
   })
 
-  const isLoading = members.isLoading || dues.isLoading
+  const isLoading = members.isLoading || dues.isLoading || applications.isLoading
 
   const m = members.data
   const d = dues.data
@@ -119,10 +130,10 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
             )}
 
             {/* Pending applications */}
-            {(m?.pendingCount ?? 0) > 0 && (
+            {(applications.data?.pendingCount ?? 0) > 0 && (
               <ActionCard
                 icon={<ClipboardList size={18} className="text-[var(--color-info)]" />}
-                title={`${m!.pendingCount} pending application${m!.pendingCount !== 1 ? 's' : ''}`}
+                title={`${applications.data!.pendingCount} pending application${applications.data!.pendingCount !== 1 ? 's' : ''}`}
                 description="Review and approve membership applications"
                 href={`/org/${orgId}/officer/applications`}
                 variant="info"
@@ -153,7 +164,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
 
             {/* All good */}
             {(m?.expiringIn30Days ?? 0) === 0 &&
-              (m?.pendingCount ?? 0) === 0 &&
+              (applications.data?.pendingCount ?? 0) === 0 &&
               (m?.graceCount ?? 0) === 0 &&
               collectionRate >= 70 && (
                 <div className="col-span-full rounded-[12px] border border-[var(--color-success-bg)] bg-[var(--color-success-bg)] p-5 flex items-center gap-3">

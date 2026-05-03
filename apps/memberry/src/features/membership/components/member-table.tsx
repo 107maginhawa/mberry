@@ -12,6 +12,8 @@ import { Search, Users } from 'lucide-react'
 
 interface MemberTableProps {
   orgId: string
+  initialStatus?: string
+  expiringDays?: number
 }
 
 type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment'
@@ -35,10 +37,10 @@ const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> =
 
 const PAGE_SIZE = 50
 
-export function MemberTable({ orgId }: MemberTableProps) {
+export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableProps) {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [statusTab, setStatusTab] = useState('all')
+  const [statusTab, setStatusTab] = useState(initialStatus ?? 'all')
   const [categoryId, setCategoryId] = useState('all')
   const [page, setPage] = useState(0)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -80,8 +82,18 @@ export function MemberTable({ orgId }: MemberTableProps) {
     },
   })
 
-  const members: any[] = data?.data ?? []
-  const total: number = data?.total ?? 0
+  const rawMembers: any[] = data?.data ?? []
+
+  // Client-side filter for expiring dues within N days
+  const members = expiringDays
+    ? rawMembers.filter((m: any) => {
+        if (!m.duesExpiryDate) return false
+        const expiry = new Date(m.duesExpiryDate)
+        const daysLeft = (expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        return daysLeft >= 0 && daysLeft <= expiringDays
+      })
+    : rawMembers
+  const total: number = expiringDays ? members.length : (data?.total ?? 0)
 
   const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {

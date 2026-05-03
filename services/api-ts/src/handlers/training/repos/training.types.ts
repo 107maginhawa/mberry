@@ -40,6 +40,7 @@ export const trainings = pgTable('training', {
   creditValueLocked: boolean('credit_value_locked').notNull().default(false),
   regulatoryApproval: regulatoryApprovalEnum('regulatory_approval').notNull().default('not_applicable'),
   regulatoryReference: varchar('regulatory_reference', { length: 100 }),
+  regulatoryExpiresAt: timestamp('regulatory_expires_at'),
   enrollmentMode: enrollmentModeEnum('enrollment_mode').notNull().default('open'),
   fee: integer('fee').default(0), // cents
   capacity: integer('capacity'), // null = unlimited

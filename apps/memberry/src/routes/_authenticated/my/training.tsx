@@ -37,6 +37,16 @@ function MyTraining() {
     },
   })
 
+  // Network-wide trainings available for discovery (SO-9)
+  const { data: availableData } = useQuery({
+    queryKey: ['available-trainings'],
+    queryFn: async () => {
+      const res = await fetch('/api/training?visibility=network&status=published')
+      if (!res.ok) return { data: [] }
+      return res.json() as Promise<{ data: any[] }>
+    },
+  })
+
   const items = data?.data ?? []
 
   const totalCredits = items.reduce((acc, item) => {
@@ -139,6 +149,31 @@ function MyTraining() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Network-wide available trainings (SO-9: cross-org promotion) */}
+      {(availableData?.data ?? []).length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-bold mb-3">Available Trainings</h2>
+          <p className="text-sm text-muted-foreground mb-4">Network-wide trainings from across all organizations</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(availableData?.data ?? []).slice(0, 6).map((t: any) => (
+              <div key={t.id} className="border rounded-xl p-4 bg-card hover:shadow-sm transition-shadow">
+                <p className="font-semibold line-clamp-1">{t.title}</p>
+                <p className="text-xs text-muted-foreground mt-1 capitalize">{t.type?.replace('_', ' ')}</p>
+                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <span>{formatDate(t.startDate ?? t.startAt)}</span>
+                  {Number(t.creditAmount ?? t.creditValue ?? 0) > 0 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                      <Award className="w-3 h-3" />
+                      {t.creditAmount ?? t.creditValue} CPE
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

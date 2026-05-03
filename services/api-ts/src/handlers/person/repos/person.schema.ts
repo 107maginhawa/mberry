@@ -37,6 +37,11 @@ export const persons = pgTable('person', {
   specialization: varchar('specialization', { length: 100 }),
   prcId: varchar('prc_id', { length: 50 }),
   preferredLanguage: varchar('preferred_language', { length: 10 }),
+
+  // Account deletion (DPA 2012 / M-25 / BR-32)
+  deletionRequestedAt: timestamp('deletion_requested_at'),
+  deletionScheduledAt: timestamp('deletion_scheduled_at'),
+  deletionCompletedAt: timestamp('deletion_completed_at'),
 }, (table) => ({
   // Indexes for search operations
   nameIdx: index('persons_name_idx').on(table.firstName, table.lastName),

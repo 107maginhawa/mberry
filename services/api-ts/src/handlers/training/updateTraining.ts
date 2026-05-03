@@ -16,7 +16,7 @@ export async function updateTraining(ctx: Context): Promise<Response> {
   // restricts access by session, but cross-org data leakage is possible if IDs are
   // guessed. Add orgId to the route and pass it to repo.get() once route is updated.
 
-  // Strip fields not in new schema
+  // Strip fields not in new schema (keep regulatory fields for SO-8)
   const {
     type: _type,
     scheduleDescription: _scheduleDescription,
@@ -24,10 +24,11 @@ export async function updateTraining(ctx: Context): Promise<Response> {
     locationDetails,
     coverImage: _coverImage,
     creditValueLocked: _creditValueLocked,
-    regulatoryApproval: _regulatoryApproval,
-    regulatoryReference: _regulatoryReference,
     enrollmentMode: _enrollmentMode,
     visibility: _visibility,
+    regulatoryApproval,
+    regulatoryReference,
+    regulatoryExpiresAt,
     startAt,
     endAt,
     creditValue,
@@ -40,6 +41,9 @@ export async function updateTraining(ctx: Context): Promise<Response> {
     ...(locationDetails !== undefined && { location: locationDetails }),
     ...(fee !== undefined && { registrationFee: fee }),
     ...(creditValue !== undefined && { creditAmount: creditValue }),
+    ...(regulatoryApproval !== undefined && { regulatoryApproval }),
+    ...(regulatoryReference !== undefined && { regulatoryReference }),
+    ...(regulatoryExpiresAt !== undefined && { regulatoryExpiresAt: new Date(regulatoryExpiresAt) }),
     startDate: startAt ? new Date(startAt) : (body.startDate ? new Date(body.startDate) : undefined),
     endDate: endAt ? new Date(endAt) : (body.endDate ? new Date(body.endDate) : undefined),
     updatedBy: session.user.id,

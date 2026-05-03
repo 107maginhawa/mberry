@@ -11,14 +11,14 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { toast } from 'sonner'
-import { AlertTriangle, ArrowLeft, CreditCard, Mail, Phone, Shield, UserX } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, CreditCard, Heart, Mail, Phone, RefreshCw, Shield, UserX } from 'lucide-react'
 
 interface MemberDetailProps {
   orgId: string
   memberId: string
 }
 
-type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment'
+type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment' | 'terminated'
 
 const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> = {
   active: { label: 'Active', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]' },
@@ -26,6 +26,7 @@ const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> =
   lapsed: { label: 'Lapsed', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)]' },
   suspended: { label: 'Suspended', className: 'bg-gray-100 text-gray-800 hover:bg-gray-100' },
   pendingPayment: { label: 'Pending Payment', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
+  terminated: { label: 'Terminated', className: 'bg-gray-200 text-gray-700 hover:bg-gray-200' },
 }
 
 const STATUS_BANNER: Partial<Record<MemberStatus, { message: string; className: string }>> = {
@@ -41,6 +42,10 @@ const STATUS_BANNER: Partial<Record<MemberStatus, { message: string; className: 
     message: 'Membership is currently suspended.',
     className: 'border-gray-300 bg-gray-50 text-gray-800',
   },
+  terminated: {
+    message: 'Membership has been terminated.',
+    className: 'border-gray-300 bg-gray-50 text-gray-700',
+  },
 }
 
 function getInitials(name: string | undefined): string {
@@ -53,6 +58,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
 
   const [showChangeCat, setShowChangeCat] = useState(false)
   const [showSuspend, setShowSuspend] = useState(false)
+  const [showDeceased, setShowDeceased] = useState(false)
   const [newCategoryId, setNewCategoryId] = useState('')
   const [suspendReason, setSuspendReason] = useState('')
 
@@ -98,6 +104,45 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
     },
   })
 
+  const reinstateMutation = useMutation({
+    mutationFn: async (membershipId: string) => {
+      const res = await fetch(`/api/association/member/memberships/${membershipId}/reinstate`, {
+        method: 'POST',
+      })
+      if (!res.ok) throw new Error('Failed to reinstate membership')
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['membership-member', orgId, memberId] })
+      queryClient.invalidateQueries({ queryKey: ['membership-members', orgId] })
+      toast.success('Membership reinstated')
+    },
+    onError: () => {
+      toast.error('Reinstatement failed', { description: 'Please try again.' })
+    },
+  })
+
+  const deceasedMutation = useMutation({
+    mutationFn: async (membershipId: string) => {
+      const res = await fetch(`/api/association/member/memberships/${membershipId}/terminate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ terminationReason: 'deceased' }),
+      })
+      if (!res.ok) throw new Error('Failed to mark member as deceased')
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['membership-member', orgId, memberId] })
+      queryClient.invalidateQueries({ queryKey: ['membership-members', orgId] })
+      setShowDeceased(false)
+      toast.success('Member marked as deceased')
+    },
+    onError: () => {
+      toast.error('Action failed', { description: 'Please try again.' })
+    },
+  })
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-6 max-w-3xl">
@@ -129,6 +174,9 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
   const banner = STATUS_BANNER[status]
   const isSuspended = status === 'suspended'
+  const isTerminated = status === 'terminated'
+  const canReinstate = isSuspended || isTerminated
+  const canMarkDeceased = status === 'active' || status === 'gracePeriod' || status === 'lapsed'
 
   return (
     <div className="p-6 space-y-6 max-w-3xl">
@@ -136,6 +184,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
       <Link
         to="/org/$orgId/officer/roster"
         params={{ orgId }}
+        search={{ status: undefined, expiring: undefined }}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -247,17 +296,19 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
               Record Payment
             </Link>
           </Button>
-          {isSuspended ? (
+          {canReinstate && (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => updateMutation.mutate({ status: 'active' })}
-              disabled={updateMutation.isPending}
+              className="text-green-700 border-green-300 hover:bg-green-50"
+              onClick={() => reinstateMutation.mutate(member.id)}
+              disabled={reinstateMutation.isPending}
             >
-              <UserX className="h-4 w-4 mr-2" />
-              Lift Suspension
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {reinstateMutation.isPending ? 'Reinstating...' : 'Reinstate'}
             </Button>
-          ) : (
+          )}
+          {!canReinstate && !isTerminated && (
             <Button
               variant="outline"
               size="sm"
@@ -266,6 +317,17 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             >
               <UserX className="h-4 w-4 mr-2" />
               Suspend Member
+            </Button>
+          )}
+          {canMarkDeceased && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-muted-foreground border-muted-foreground/30 hover:bg-muted/50"
+              onClick={() => setShowDeceased(true)}
+            >
+              <Heart className="h-4 w-4 mr-2" />
+              Mark Deceased
             </Button>
           )}
         </div>
@@ -326,6 +388,31 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
               disabled={!suspendReason.trim() || updateMutation.isPending}
             >
               {updateMutation.isPending ? 'Suspending...' : 'Suspend'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mark Deceased dialog */}
+      <Dialog open={showDeceased} onOpenChange={setShowDeceased}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mark Member as Deceased</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <p className="text-sm text-muted-foreground">
+              This will terminate the membership with reason &quot;deceased&quot;. This action cannot be undone without manual reinstatement.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeceased(false)}>Cancel</Button>
+            <Button
+              variant="outline"
+              className="text-muted-foreground border-muted-foreground/30 hover:bg-muted/50"
+              onClick={() => deceasedMutation.mutate(member.id)}
+              disabled={deceasedMutation.isPending}
+            >
+              {deceasedMutation.isPending ? 'Saving...' : 'Confirm'}
             </Button>
           </DialogFooter>
         </DialogContent>

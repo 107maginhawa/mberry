@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useSearch } from '@tanstack/react-router'
 import { MemberTable } from '@/features/membership/components/member-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,13 +8,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
 
+const STATUS_MAP: Record<string, string> = {
+  active: 'active',
+  grace: 'gracePeriod',
+  gracePeriod: 'gracePeriod',
+  lapsed: 'lapsed',
+  suspended: 'suspended',
+  pending: 'pendingPayment',
+  pendingPayment: 'pendingPayment',
+}
+
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/roster/')({
   component: RosterPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    status: (search.status as string | undefined),
+    expiring: search.expiring ? Number(search.expiring) : undefined,
+  }),
 })
 
 function RosterPage() {
   const { orgId } = Route.useParams()
+  const { status, expiring } = Route.useSearch()
   const [showAdd, setShowAdd] = useState(false)
+
+  const initialStatus = status ? (STATUS_MAP[status] ?? status) : undefined
 
   return (
     <div className="space-y-6">
@@ -25,7 +42,7 @@ function RosterPage() {
           Add Member
         </Button>
       </div>
-      <MemberTable orgId={orgId} />
+      <MemberTable orgId={orgId} initialStatus={initialStatus} expiringDays={expiring} />
       <AddMemberDialog open={showAdd} onClose={() => setShowAdd(false)} orgId={orgId} />
     </div>
   )

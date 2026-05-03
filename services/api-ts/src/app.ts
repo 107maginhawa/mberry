@@ -182,6 +182,22 @@ export function createApp(config: Config): App {
     return ctx.json({ data }, 200);
   });
 
+  // Data export — DPA 2012 portability
+  app.get('/persons/me/export', authMiddleware(), async (ctx) => {
+    const { exportPersonData } = await import('@/handlers/person/exportPersonData');
+    return exportPersonData(ctx as any);
+  });
+
+  // Account deletion — DPA 2012 / M-25 / BR-32
+  app.post('/persons/me/delete', authMiddleware(), async (ctx) => {
+    const { requestAccountDeletion } = await import('@/handlers/person/requestAccountDeletion');
+    return requestAccountDeletion(ctx as any);
+  });
+  app.post('/persons/me/cancel-delete', authMiddleware(), async (ctx) => {
+    const { cancelAccountDeletion } = await import('@/handlers/person/cancelAccountDeletion');
+    return cancelAccountDeletion(ctx as any);
+  });
+
   // Mark all notifications read (custom endpoint bypassing OpenAPI role check)
   app.post('/notifs/read-all', authMiddleware(), async (ctx) => {
     const user = ctx.get('user');

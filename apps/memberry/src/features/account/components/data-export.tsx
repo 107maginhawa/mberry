@@ -86,22 +86,34 @@ export function DataExport() {
     }
 
     setIsRequesting(true)
-    await new Promise((r) => setTimeout(r, 600))
+    try {
+      const res = await fetch('/api/persons/me/export', { credentials: 'include' })
+      if (!res.ok) throw new Error('Export failed')
+      const data = await res.json()
 
-    const newExport: ExportRecord = {
-      id: `exp-${Date.now()}`,
-      requestedAt: new Date().toISOString(),
-      status: 'Processing',
+      // Create downloadable JSON blob
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+
+      const newExport: ExportRecord = {
+        id: `exp-${Date.now()}`,
+        requestedAt: new Date().toISOString(),
+        status: 'Ready',
+        downloadUrl: url,
+      }
+
+      setExports((prev) => [newExport, ...prev])
+      localStorage.setItem(RATE_LIMIT_KEY, new Date().toISOString())
+      setRateLimited(true)
+
+      toast.success('Export ready', {
+        description: `Exported ${data.categories?.length ?? 0} data categories. Click Download to save.`,
+      })
+    } catch {
+      toast.error('Export failed', { description: 'Please try again later.' })
+    } finally {
+      setIsRequesting(false)
     }
-
-    setExports((prev) => [newExport, ...prev])
-    localStorage.setItem(RATE_LIMIT_KEY, new Date().toISOString())
-    setRateLimited(true)
-    setIsRequesting(false)
-
-    toast.success('Export requested', {
-      description: "You'll be notified when your data export is ready.",
-    })
   }
 
   return (

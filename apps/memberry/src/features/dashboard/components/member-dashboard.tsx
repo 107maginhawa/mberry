@@ -258,13 +258,13 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
           </Link>
         )}
         {needsPay && (
-          <a
-            href={`/org/${m.orgId}/payments`}
+          <Link
+            to="/my/payments"
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-mid)] px-4 py-1.5 rounded-[8px] transition-colors"
           >
             <CreditCard size={13} />
             Pay Dues
-          </a>
+          </Link>
         )}
       </div>
     </div>

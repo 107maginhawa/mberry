@@ -51,6 +51,59 @@ function MySettingsPage() {
 }
 
 function GeneralSection() {
+  const [deleting, setDeleting] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [deletionPending, setDeletionPending] = useState<string | null>(null)
+  const [cancelling, setCancelling] = useState(false)
+
+  // Check if deletion already requested
+  useEffect(() => {
+    fetch('/api/persons/me', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        const p = data.data ?? data
+        if (p?.deletionScheduledAt) setDeletionPending(p.deletionScheduledAt)
+      })
+      .catch(() => {})
+  }, [])
+
+  async function handleDelete() {
+    if (confirmText !== 'DELETE') return
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/persons/me/delete', {
+        method: 'POST',
+        credentials: 'include',
+      })
+      if (!res.ok) throw new Error('Failed')
+      const data = await res.json()
+      setDeletionPending(data.deletionScheduledAt)
+      setShowConfirm(false)
+      setConfirmText('')
+    } catch {
+      // error handled silently
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  async function handleCancel() {
+    setCancelling(true)
+    try {
+      const res = await fetch('/api/persons/me/cancel-delete', {
+        method: 'POST',
+        credentials: 'include',
+      })
+      if (!res.ok) throw new Error('Failed')
+      setDeletionPending(null)
+    } catch {
+      // error handled silently
+    } finally {
+      setCancelling(false)
+    }
+  }
+
   return (
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
       <div>
@@ -70,12 +123,66 @@ function GeneralSection() {
 
       <div className="border-t border-[var(--color-border-light)] pt-4 mt-4">
         <h3 className="text-[14px] font-semibold text-[var(--color-error)]">Danger Zone</h3>
-        <p className="text-[13px] text-[var(--color-muted)] mt-1">
-          Account deletion is permanent. Your data will be anonymized after a 30-day grace period.
-        </p>
-        <button className="mt-3 px-4 py-[7px] rounded-[8px] bg-[var(--color-error)] text-white text-[13px] font-semibold hover:opacity-90 transition-colors duration-150">
-          Delete Account
-        </button>
+
+        {deletionPending ? (
+          <div className="mt-3 rounded-[8px] border border-[var(--color-warning-bg)] bg-[var(--color-warning-bg)] p-4">
+            <p className="text-[14px] font-semibold text-[var(--color-warning)]">Account deletion scheduled</p>
+            <p className="text-[13px] text-[var(--color-muted)] mt-1">
+              Your account will be permanently anonymized on{' '}
+              <strong>{new Date(deletionPending).toLocaleDateString()}</strong>.
+              You can cancel before then.
+            </p>
+            <button
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="mt-3 px-4 py-[7px] rounded-[8px] border border-[var(--color-border)] bg-white text-[13px] font-semibold hover:bg-[var(--color-surface-warm)] transition-colors duration-150"
+            >
+              {cancelling ? 'Cancelling...' : 'Cancel Deletion'}
+            </button>
+          </div>
+        ) : showConfirm ? (
+          <div className="mt-3 rounded-[8px] border border-[var(--color-error-bg)] bg-[var(--color-error-bg)] p-4 space-y-3">
+            <p className="text-[13px] text-[var(--color-muted)]">
+              This will schedule your account for deletion after a 30-day grace period.
+              Your personal data will be anonymized. Financial records are retained per law.
+            </p>
+            <p className="text-[13px] font-semibold">Type DELETE to confirm:</p>
+            <input
+              type="text"
+              value={confirmText}
+              onChange={e => setConfirmText(e.target.value)}
+              className="w-full border border-[var(--color-border)] rounded-[6px] px-3 py-2 text-[13px]"
+              placeholder="DELETE"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleDelete}
+                disabled={confirmText !== 'DELETE' || deleting}
+                className="px-4 py-[7px] rounded-[8px] bg-[var(--color-error)] text-white text-[13px] font-semibold hover:opacity-90 transition-colors duration-150 disabled:opacity-50"
+              >
+                {deleting ? 'Requesting...' : 'Confirm Delete'}
+              </button>
+              <button
+                onClick={() => { setShowConfirm(false); setConfirmText('') }}
+                className="px-4 py-[7px] rounded-[8px] border border-[var(--color-border)] text-[13px] font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="text-[13px] text-[var(--color-muted)] mt-1">
+              Account deletion is permanent. Your data will be anonymized after a 30-day grace period.
+            </p>
+            <button
+              onClick={() => setShowConfirm(true)}
+              className="mt-3 px-4 py-[7px] rounded-[8px] bg-[var(--color-error)] text-white text-[13px] font-semibold hover:opacity-90 transition-colors duration-150"
+            >
+              Delete Account
+            </button>
+          </>
+        )}
       </div>
     </div>
   )

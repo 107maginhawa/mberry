@@ -117,4 +117,68 @@ describe('updateTraining', () => {
 
     await expect(updateTraining(ctx)).rejects.toThrow();
   });
+
+  // --- SO-8: Regulatory approval maintenance ---
+
+  test('[SO-8] updates regulatory approval status', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1' },
+      _body: {
+        regulatoryApproval: 'prc_approved',
+        regulatoryReference: 'PRC-CPD-2026-001',
+      },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(capturedData.regulatoryApproval).toBe('prc_approved');
+    expect(capturedData.regulatoryReference).toBe('PRC-CPD-2026-001');
+  });
+
+  test('[SO-8] updates regulatory expiration date', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1' },
+      _body: {
+        regulatoryApproval: 'prc_approved',
+        regulatoryExpiresAt: '2027-12-31',
+      },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(capturedData.regulatoryExpiresAt).toBeInstanceOf(Date);
+  });
+
+  test('[SO-8] updates basic and regulatory fields together', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1' },
+      _body: {
+        title: 'Updated With Approval',
+        regulatoryApproval: 'pending_approval',
+      },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(capturedData.title).toBe('Updated With Approval');
+    expect(capturedData.regulatoryApproval).toBe('pending_approval');
+  });
 });
