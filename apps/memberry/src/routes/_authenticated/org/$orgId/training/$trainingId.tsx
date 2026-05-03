@@ -39,7 +39,7 @@ function TrainingDetail() {
 
   const enrollMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/training/detail/${trainingId}/enroll`, {
+      const res = await fetch(`/api/training/enroll/${trainingId}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

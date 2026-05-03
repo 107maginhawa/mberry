@@ -28,7 +28,10 @@ export async function updateMember(ctx: Context): Promise<Response> {
   const body = await ctx.req.json();
 
   const repo = new MembershipRepository(db);
-  const existing = await repo.getMember(orgId, memberId);
+  let existing = await repo.getMember(orgId, memberId);
+  if (!existing) {
+    existing = await repo.getMemberById(memberId);
+  }
   if (!existing) throw new NotFoundError('Member not found');
 
   const currentStatus = existing.membership.status;

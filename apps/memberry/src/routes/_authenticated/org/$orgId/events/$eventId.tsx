@@ -39,7 +39,7 @@ function EventDetail() {
 
   const registerMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/events/detail/${eventId}/register`, {
+      const res = await fetch(`/api/events/register/${eventId}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
