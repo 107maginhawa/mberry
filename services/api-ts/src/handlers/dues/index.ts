@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { officerAuthMiddleware } from '@/middleware/officer-auth';
 import { getDuesConfig } from './getDuesConfig';
 import { upsertDuesConfig } from './upsertDuesConfig';
 import { listFunds } from './listFunds';
@@ -14,32 +15,34 @@ import { testGatewayConnection } from './testGatewayConnection';
 import { disconnectGateway } from './disconnectGateway';
 import { generateReport } from './generateReport';
 
+const officerAuth = officerAuthMiddleware();
+
 const dues = new Hono();
 
-// Config
-dues.get('/config/:orgId', getDuesConfig);
-dues.put('/config/:orgId', upsertDuesConfig);
+// Config (officer-only)
+dues.get('/config/:orgId', officerAuth, getDuesConfig);
+dues.put('/config/:orgId', officerAuth, upsertDuesConfig);
 
-// Funds
-dues.get('/funds/:orgId', listFunds);
-dues.put('/funds/:orgId', upsertFunds);
+// Funds (officer-only)
+dues.get('/funds/:orgId', officerAuth, listFunds);
+dues.put('/funds/:orgId', officerAuth, upsertFunds);
 
-// Payments
+// Payments (write=officer, read by ID has per-handler org check)
 dues.get('/payments', listPayments);
 dues.get('/payments/:id', getPayment);
-dues.post('/payments', recordPayment);
-dues.post('/payments/:id/refund', refundPayment);
+dues.post('/payments', officerAuth, recordPayment);
+dues.post('/payments/:id/refund', refundPayment); // per-handler org check (P1-2)
 
-// Dashboard
-dues.get('/dashboard/:orgId', getFinancialDashboard);
+// Dashboard (officer-only)
+dues.get('/dashboard/:orgId', officerAuth, getFinancialDashboard);
 
-// Reports
-dues.get('/reports/:orgId', generateReport);
+// Reports (officer-only)
+dues.get('/reports/:orgId', officerAuth, generateReport);
 
-// Gateway
-dues.get('/gateway/:orgId', getGatewayConfig);
-dues.put('/gateway/:orgId', upsertGatewayConfig);
-dues.post('/gateway/:orgId/test', testGatewayConnection);
-dues.delete('/gateway/:orgId', disconnectGateway);
+// Gateway (officer-only)
+dues.get('/gateway/:orgId', officerAuth, getGatewayConfig);
+dues.put('/gateway/:orgId', officerAuth, upsertGatewayConfig);
+dues.post('/gateway/:orgId/test', officerAuth, testGatewayConnection);
+dues.delete('/gateway/:orgId', officerAuth, disconnectGateway);
 
 export { dues };

@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { officerAuthMiddleware } from '@/middleware/officer-auth';
 import { listEvents } from './listEvents';
 import { getEvent } from './getEvent';
 import { createEvent } from './createEvent';
@@ -9,16 +10,21 @@ import { checkIn } from './checkIn';
 import { listAttendance } from './listAttendance';
 import { listMyEvents } from './listMyEvents';
 
+const officerAuth = officerAuthMiddleware();
+
 const eventsRouter = new Hono();
 
+// Read (any member)
 eventsRouter.get('/list/:orgId', listEvents);
-eventsRouter.get('/detail/:id', getEvent);
-eventsRouter.post('/create/:orgId', createEvent);
-eventsRouter.put('/update/:id', updateEvent);
-eventsRouter.post('/cancel/:id', cancelEvent);
-eventsRouter.post('/register/:id', registerForEvent);
-eventsRouter.post('/checkin/:id', checkIn);
-eventsRouter.get('/attendance/:id', listAttendance);
+eventsRouter.get('/detail/:id', getEvent);        // per-handler org check (P1-2)
 eventsRouter.get('/my', listMyEvents);
+eventsRouter.post('/register/:id', registerForEvent); // member self-registration
+
+// Write (officer-only for create; per-handler org check for update/cancel/checkin)
+eventsRouter.post('/create/:orgId', officerAuth, createEvent);
+eventsRouter.put('/update/:id', updateEvent);      // per-handler org check (P1-2)
+eventsRouter.post('/cancel/:id', cancelEvent);     // per-handler org check (P1-2)
+eventsRouter.post('/checkin/:id', checkIn);        // per-handler org check + session audit (P1-2, P1-3)
+eventsRouter.get('/attendance/:id', listAttendance);
 
 export { eventsRouter };
