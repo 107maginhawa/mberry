@@ -106,7 +106,7 @@ test.describe('Sign-in flow', () => {
     await page.waitForURL((url) => !url.pathname.includes('/auth/'), { timeout: 15000 })
 
     // Sidebar should be visible with nav links
-    await expect(page.getByText('Memberry')).toBeVisible()
+    await expect(page.getByRole('complementary').getByText('Memberry')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Profile' })).toBeVisible()
 
