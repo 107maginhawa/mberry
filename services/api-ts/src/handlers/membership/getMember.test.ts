@@ -41,7 +41,8 @@ describe('getMember', () => {
 
     const response = await getMember(ctx);
     expect(response.status).toBe(200);
-    expect(response.body.data.membership.id).toBe('mem-1');
+    // Response is now flattened (not nested under .membership)
+    expect(response.body.data.id).toBe('mem-1');
   });
 
   test('throws NotFoundError for non-existent member', async () => {
