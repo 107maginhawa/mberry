@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { updateEvent } from './updateEvent';
 import { EventsRepository } from './repos/events.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -25,12 +26,19 @@ const fakeEvent = {
 
 describe('updateEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
+
+  const stubMembership = () => stubRepo(MembershipRepository, {
+    getMember: async () => ({ id: 'mem-1', personId: 'user-1', orgId: 'org-1', status: 'active' }),
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('updates event and returns 200', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -47,6 +55,7 @@ describe('updateEvent', () => {
   });
 
   test('maps alternative field names (startAt/endAt/fee/locationDetails)', async () => {
+    memberMocks = stubMembership();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
@@ -71,6 +80,7 @@ describe('updateEvent', () => {
   });
 
   test('strips unsupported fields from body', async () => {
+    memberMocks = stubMembership();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
@@ -102,6 +112,7 @@ describe('updateEvent', () => {
   });
 
   test('throws NotFoundError for non-existent event', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
       get: async () => undefined,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -116,6 +127,7 @@ describe('updateEvent', () => {
   });
 
   test('crashes without session (no auth)', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -128,7 +140,7 @@ describe('updateEvent', () => {
       _body: { title: 'Updated' },
     });
 
-    // session.user.id is accessed for updatedBy
+    // session.user.id is accessed for org ownership check + updatedBy
     await expect(updateEvent(ctx)).rejects.toThrow();
   });
 });

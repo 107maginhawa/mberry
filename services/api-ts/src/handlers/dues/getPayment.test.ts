@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { getPayment } from './getPayment';
 import { DuesRepository } from './repos/dues.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -26,12 +27,19 @@ const fakeAllocations = [
 
 describe('getPayment', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
+
+  const stubMembership = () => stubRepo(MembershipRepository, {
+    getMember: async () => ({ id: 'mem-1', personId: 'user-1', orgId: 'org-1', status: 'active' }),
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('returns payment with fund allocations and 200', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment,
       getFundAllocations: async () => fakeAllocations,
@@ -46,6 +54,7 @@ describe('getPayment', () => {
   });
 
   test('throws NotFoundError for non-existent payment', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => undefined,
     });
@@ -54,20 +63,20 @@ describe('getPayment', () => {
     await expect(getPayment(ctx)).rejects.toThrow('Payment not found');
   });
 
-  test('crashes without session (no auth)', async () => {
+  test('crashes without session (org ownership requires session)', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment,
       getFundAllocations: async () => [],
     });
 
-    // getPayment doesn't use session directly
     const ctx = makeCtx({
       user: null,
       session: null,
       _params: { id: 'pay-1' },
     });
 
-    const response = await getPayment(ctx);
-    expect(response.status).toBe(200);
+    // session.user.id is accessed for org ownership check
+    await expect(getPayment(ctx)).rejects.toThrow();
   });
 });

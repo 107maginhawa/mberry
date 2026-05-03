@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { getEvent } from './getEvent';
 import { EventsRepository } from './repos/events.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -27,12 +28,19 @@ const fakeStats = { total: 5, qr: 3, manual: 2 };
 
 describe('getEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
+
+  const stubMembership = () => stubRepo(MembershipRepository, {
+    getMember: async () => ({ id: 'mem-1', personId: 'user-1', orgId: 'org-1', status: 'active' }),
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('returns event with registration count and attendance stats', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       getRegistrationCount: async () => 42,
@@ -51,6 +59,7 @@ describe('getEvent', () => {
   });
 
   test('throws NotFoundError for non-existent event', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
       get: async () => undefined,
       getRegistrationCount: async () => 0,
@@ -64,8 +73,8 @@ describe('getEvent', () => {
     await expect(getEvent(ctx)).rejects.toThrow('Event not found');
   });
 
-  test('no session does not crash (no auth in handler)', async () => {
-    // getEvent does not access session — auth middleware handles access control.
+  test('crashes without session (org ownership requires session)', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       getRegistrationCount: async () => 0,
@@ -78,7 +87,7 @@ describe('getEvent', () => {
       _params: { id: 'evt-1' },
     });
 
-    const response = await getEvent(ctx);
-    expect(response.status).toBe(200);
+    // session.user.id is accessed for org ownership check
+    await expect(getEvent(ctx)).rejects.toThrow();
   });
 });

@@ -17,6 +17,7 @@ import { OrganizationRepository, AssociationRepository } from './platformadmin/r
 import { issueDigitalCredential } from './association:member/issueDigitalCredential';
 import { CredentialTemplateRepository, DigitalCredentialRepository } from './association:member/repos/credentials.repo';
 import { MembershipRepository } from './association:member/repos/membership.repo';
+import { MembershipRepository as CustomMembershipRepository } from './membership/repos/membership.repo';
 import { markComplete } from './training/markComplete';
 import { TrainingRepository } from './training/repos/training.repo';
 import { CreditEntryRepository } from './association:member/repos/credits.repo';
@@ -87,13 +88,18 @@ describe('[BR-10] Impersonation session includes impersonator ID in audit contex
 
 describe('[BR-16] Changing visibility from network-wide to internal warns about external registrants', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('[BR-16] updateEvent persists visibility field', async () => {
     // Visibility is now passed through to repo.update() (no longer stripped).
+    memberMocks = stubRepo(CustomMembershipRepository, {
+      getMember: async () => ({ id: 'mem-1', personId: 'user-1', orgId: 'org-1', status: 'active' }),
+    });
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => ({

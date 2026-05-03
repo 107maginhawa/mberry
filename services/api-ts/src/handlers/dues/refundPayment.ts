@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
-import { NotFoundError, ValidationError } from '@/core/errors';
+import { NotFoundError, ForbiddenError, ValidationError } from '@/core/errors';
 import { DuesRepository } from './repos/dues.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 import type { Session } from '@/types/auth';
 
 export async function refundPayment(ctx: Context): Promise<Response> {
@@ -12,6 +13,9 @@ export async function refundPayment(ctx: Context): Promise<Response> {
 
   const payment = await repo.getPayment(id);
   if (!payment) throw new NotFoundError('Payment not found');
+  const membershipRepo = new MembershipRepository(db);
+  const membership = await membershipRepo.getMember(payment.organizationId, session.user.id);
+  if (!membership) throw new ForbiddenError('Access denied to this resource');
 
   const refundAmount = body.amount ?? payment.amount;
   const maxRefundable = payment.amount - payment.refundedAmount;

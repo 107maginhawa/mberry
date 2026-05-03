@@ -3,6 +3,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { refundPayment } from './refundPayment';
 import { DuesRepository } from './repos/dues.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -30,12 +31,19 @@ const fakeAllocations = [
 
 describe('refundPayment [BR-08]', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
+
+  const stubMembership = () => stubRepo(MembershipRepository, {
+    getMember: async () => ({ id: 'mem-1', personId: 'user-1', orgId: 'org-1', status: 'active' }),
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('full refund updates status to refunded', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment,
       getFundAllocations: async () => fakeAllocations,
@@ -59,6 +67,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('partial refund updates status to partially_refunded', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment,
       getFundAllocations: async () => fakeAllocations,
@@ -82,6 +91,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('throws NotFoundError for non-existent payment', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => undefined,
     });
@@ -95,6 +105,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('throws ValidationError when refund exceeds remaining refundable', async () => {
+    memberMocks = stubMembership();
     const partiallyRefunded = { ...fakePayment, refundedAmount: 8000 };
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => partiallyRefunded,
@@ -109,6 +120,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('creates reversal fund allocations proportional to refund', async () => {
+    memberMocks = stubMembership();
     let capturedReversals: any[] = [];
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment,
@@ -134,6 +146,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('crashes without session (no auth)', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment,
       getFundAllocations: async () => [],
@@ -159,6 +172,7 @@ describe('refundPayment [BR-08]', () => {
   // ─── [BR-08] Gap tests from BR text ──────────────────
 
   test('[BR-08] cannot refund already fully refunded payment', async () => {
+    memberMocks = stubMembership();
     const fullyRefunded = { ...fakePayment, refundedAmount: 10000, status: 'refunded' };
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fullyRefunded,
@@ -174,6 +188,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('[BR-08] full refund of default amount (no body.amount) uses payment.amount', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment,
       getFundAllocations: async () => [],
@@ -196,6 +211,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('[BR-08] multiple partial refunds accumulate correctly', async () => {
+    memberMocks = stubMembership();
     // First partial refund already happened: 3000 of 10000 refunded
     const partiallyRefunded = { ...fakePayment, refundedAmount: 3000, status: 'partially_refunded' };
     mocks = stubRepo(DuesRepository, {
@@ -220,6 +236,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('[BR-08] refund reversals are proportional per fund', async () => {
+    memberMocks = stubMembership();
     let capturedReversals: any[] = [];
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment, // amount: 10000
@@ -245,6 +262,7 @@ describe('refundPayment [BR-08]', () => {
   });
 
   test('[BR-08] records updatedBy as refunding officer', async () => {
+    memberMocks = stubMembership();
     let capturedExtra: any = null;
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => fakePayment,
