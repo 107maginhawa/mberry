@@ -39,6 +39,11 @@ export const checkInMethodEnum = pgEnum('check_in_method', [
   'manual',
 ]);
 
+export const eventVisibilityEnum = pgEnum('event_visibility', [
+  'internal',
+  'network',
+]);
+
 export const events = pgTable('event', {
   ...baseEntityFields,
   tenantId: uuid('tenant_id').notNull(),
@@ -54,6 +59,7 @@ export const events = pgTable('event', {
   creditBearing: boolean('credit_bearing').default(false),
   creditAmount: integer('credit_amount').default(0),
   status: eventStatusEnum('status').notNull().default('draft'),
+  visibility: eventVisibilityEnum('visibility').notNull().default('internal'),
   publishedAt: timestamp('published_at'),
 }, (table) => [
   index('idx_event_tenant').on(table.tenantId),

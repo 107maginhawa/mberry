@@ -38,6 +38,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
     location: event?.location ?? '',
     registrationFee: event?.registrationFee ? String(event.registrationFee / 100) : '0',
     capacity: event?.capacity ? String(event.capacity) : '',
+    visibility: event?.visibility ?? 'internal',
     status: event?.status ?? 'draft',
   })
 
@@ -58,6 +59,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         location: form.location || null,
         registrationFee: Math.round(parseFloat(form.registrationFee || '0') * 100),
         capacity: form.capacity ? parseInt(form.capacity, 10) : null,
+        visibility: form.visibility,
         status: submitStatus,
       }
 
@@ -203,6 +205,20 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
               placeholder="Unlimited"
             />
           </div>
+        </div>
+
+        {/* Visibility — BR-16 */}
+        <div className="space-y-1.5">
+          <Label htmlFor="visibility">Visibility</Label>
+          <select
+            id="visibility"
+            value={form.visibility}
+            onChange={(e) => set('visibility', e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="internal">Internal (this org only)</option>
+            <option value="network">Network-Wide (all orgs in association)</option>
+          </select>
         </div>
       </div>
 

@@ -96,7 +96,8 @@ describe('updateEvent', () => {
     expect(capturedData.locationType).toBeUndefined();
     expect(capturedData.coverImage).toBeUndefined();
     expect(capturedData.qrEnabled).toBeUndefined();
-    expect(capturedData.visibility).toBeUndefined();
+    // visibility is now persisted (BR-16)
+    expect(capturedData.visibility).toBe('public');
     expect(capturedData.registrationEnabled).toBeUndefined();
   });
 

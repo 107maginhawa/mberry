@@ -92,12 +92,8 @@ describe('[BR-16] Changing visibility from network-wide to internal warns about 
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
   });
 
-  test.todo('[BR-16] updateEvent returns warning when visibility narrows and external registrants exist');
-
-  test('[BR-16] updateEvent currently strips visibility field (not yet enforced)', async () => {
-    // Current behavior: visibility is destructured out and not passed to repo.
-    // This documents the gap — when BR-16 is implemented, this test should
-    // be replaced with a real warning assertion.
+  test('[BR-16] updateEvent persists visibility field', async () => {
+    // Visibility is now passed through to repo.update() (no longer stripped).
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => ({
@@ -123,8 +119,8 @@ describe('[BR-16] Changing visibility from network-wide to internal warns about 
     const response = await updateEvent(ctx);
     expect(response.status).toBe(200);
 
-    // visibility is intentionally stripped — BR-16 warning not yet implemented
-    expect(capturedData.visibility).toBeUndefined();
+    // visibility is now persisted via ...rest spread
+    expect(capturedData.visibility).toBe('internal');
   });
 });
 

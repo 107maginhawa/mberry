@@ -23,7 +23,6 @@ export async function updateEvent(ctx: Context): Promise<Response> {
     locationDetails,
     coverImage: _coverImage,
     qrEnabled: _qrEnabled,
-    visibility: _visibility,
     registrationEnabled: _registrationEnabled,
     startAt,
     endAt,

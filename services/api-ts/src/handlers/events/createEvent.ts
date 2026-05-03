@@ -22,6 +22,7 @@ export async function createEvent(ctx: Context): Promise<Response> {
     creditBearing: body.creditBearing ?? false,
     creditAmount: body.creditAmount ?? 0,
     status: body.status ?? 'draft',
+    visibility: body.visibility ?? 'internal',
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });
