@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Inbox, Upload,
   Settings, CreditCard, PieChart, BarChart3,
   Calendar, BookOpen, Megaphone,
-  Building, Shield, Award, ArrowLeft,
+  Building, Shield, Award, IdCard, ArrowLeft,
 } from 'lucide-react'
 
 interface OfficerMobileNavProps {
