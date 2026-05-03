@@ -31,13 +31,19 @@ const EVENT_TYPES = [
 ]
 
 function tabToApiParams(tab: StatusTab): Record<string, string> {
-  const now = new Date().toISOString()
   switch (tab) {
     case 'upcoming': return { status: 'published' }
-    case 'past': return { status: 'published' }
+    case 'past': return { status: 'published,completed' }
     case 'drafts': return { status: 'draft' }
     case 'cancelled': return { status: 'cancelled' }
   }
+}
+
+function filterEventsByTab(events: any[], tab: StatusTab): any[] {
+  const now = new Date()
+  if (tab === 'upcoming') return events.filter(e => new Date(e.startDate || e.start_date) >= now)
+  if (tab === 'past') return events.filter(e => new Date(e.startDate || e.start_date) < now)
+  return events
 }
 
 export function EventList({ orgId }: EventListProps) {
@@ -87,8 +93,8 @@ export function EventList({ orgId }: EventListProps) {
     },
   })
 
-  const events = data?.data ?? []
-  const total = data?.meta?.total ?? 0
+  const events = filterEventsByTab(data?.data ?? [], tab)
+  const total = events.length
 
   return (
     <div className="space-y-6">

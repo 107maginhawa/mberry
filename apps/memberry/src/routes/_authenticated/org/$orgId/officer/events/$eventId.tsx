@@ -14,14 +14,14 @@ type Tab = 'details' | 'registrations' | 'attendance'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'details', label: 'Details' },
-  { key: 'registrations', label: 'Registrations' },
-  { key: 'attendance', label: 'Attendance' },
+  { key: 'registrations', label: 'Registered' },
+  { key: 'attendance', label: 'Check-in' },
 ]
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
-  published: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
+  published: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  cancelled: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
 }
 
 function formatDate(iso: string) {
