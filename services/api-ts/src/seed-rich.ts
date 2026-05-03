@@ -22,6 +22,7 @@ import { duesPayments } from './handlers/dues/repos/dues.types';
 import { certificates } from './handlers/certificates/repos/certificates.types';
 import { events, eventRegistrations } from './handlers/association:operations/repos/events.schema';
 import { trainings, trainingEnrollments } from './handlers/association:operations/repos/training.schema';
+import { notifications } from './handlers/notifs/repos/notification.schema';
 import { persons } from './handlers/person/repos/person.schema';
 import { organizations } from './handlers/platformadmin/repos/platform-admin.schema';
 
@@ -76,7 +77,73 @@ async function seedRich() {
   const regularCat = cats.find(c => c.name === 'Regular');
   const associateCat = cats.find(c => c.name === 'Associate');
 
-  // Get existing trainings and events
+  // ═══════════════════════════════════════════════════════════
+  // 0. SEED FUTURE EVENTS + NOTIFICATIONS (before snapshot)
+  // ═══════════════════════════════════════════════════════════
+
+  console.log('  0. Future events + notifications...');
+  const [futureEventCount] = await db.select({ c: count() }).from(events)
+    .where(and(eq(events.organizationId, org1.id), sql`start_date > now()`));
+  if ((futureEventCount?.c ?? 0) >= 3) {
+    console.log('    (future events already seeded, skipping)');
+  } else {
+    const now = new Date();
+    const futureEvents = [
+      { title: 'Annual Convention 2026', description: 'Three-day convention with keynote speakers and workshops', location: 'SMX Convention Center, Manila', startDate: new Date(now.getTime() + 14 * 86400000), endDate: new Date(now.getTime() + 16 * 86400000), capacity: 200, status: 'published' as const },
+      { title: 'CPD Seminar: Digital Dentistry', description: 'Hands-on workshop on CAD/CAM systems', location: 'Hotel Sofitel, Pasay', startDate: new Date(now.getTime() + 30 * 86400000), endDate: new Date(now.getTime() + 30 * 86400000), capacity: 50, creditBearing: true, creditAmount: 8, status: 'published' as const },
+      { title: 'Regional Officers Meeting', description: 'Quarterly meeting of chapter officers', location: 'PDA Office, Quezon City', startDate: new Date(now.getTime() + 45 * 86400000), endDate: new Date(now.getTime() + 45 * 86400000), capacity: 30, status: 'published' as const },
+      { title: 'Community Dental Mission', description: 'Free dental services for underserved communities', location: 'Barangay Hall, Tondo', startDate: new Date(now.getTime() + 60 * 86400000), endDate: new Date(now.getTime() + 60 * 86400000), capacity: 100, status: 'published' as const },
+      { title: 'Year-End Gala Dinner', description: 'Annual celebration and awards night', location: 'Manila Hotel', startDate: new Date(now.getTime() + 90 * 86400000), endDate: new Date(now.getTime() + 90 * 86400000), capacity: 150, status: 'published' as const },
+    ];
+    for (const evt of futureEvents) {
+      await db.insert(events).values({
+        tenantId: org1.id,
+        organizationId: org1.id,
+        ...evt,
+        publishedAt: new Date(),
+      });
+    }
+    // Register first person for first 3 events
+    const insertedEvents = await db.select().from(events)
+      .where(and(eq(events.organizationId, org1.id), sql`start_date > now()`));
+    for (const evt of insertedEvents.slice(0, 3)) {
+      await db.insert(eventRegistrations).values({
+        tenantId: org1.id,
+        eventId: evt.id,
+        personId: allPersons[0].id,
+        status: 'confirmed',
+        registeredAt: new Date(),
+      }).onConflictDoNothing();
+    }
+    console.log(`    Created ${futureEvents.length} future events, registered user for 3`);
+  }
+
+  // Seed notifications for user
+  const [notifCount] = await db.select({ c: count() }).from(notifications)
+    .where(eq(notifications.recipient, allPersons[0].id));
+  if ((notifCount?.c ?? 0) >= 3) {
+    console.log('    (notifications already seeded, skipping)');
+  } else {
+    const notifRows = [
+      { type: 'billing' as const, title: 'Your dues payment was received', message: 'Payment of ₱1,200 for PDA Manila Chapter has been confirmed.', status: 'sent' as const },
+      { type: 'system' as const, title: 'Welcome to Memberry', message: 'Your account has been set up. Complete your profile to get started.', status: 'sent' as const },
+      { type: 'billing' as const, title: 'Dues renewal reminder', message: 'Your membership dues for PDA Metro Manila are due on December 31, 2025.', status: 'sent' as const },
+      { type: 'system' as const, title: 'Profile updated', message: 'Your specialization has been updated to Orthodontics.', status: 'read' as const },
+      { type: 'system' as const, title: 'New training available', message: 'CPD Seminar: Digital Dentistry is now open for registration.', status: 'sent' as const },
+    ];
+    for (const n of notifRows) {
+      await db.insert(notifications).values({
+        recipient: allPersons[0].id,
+        channel: 'in-app',
+        consentValidated: true,
+        sentAt: new Date(),
+        ...n,
+      });
+    }
+    console.log(`    Created ${notifRows.length} notifications for user`);
+  }
+
+  // Get existing trainings and events (AFTER inserting future events)
   const allTrainings = await db.select().from(trainings).where(eq(trainings.organizationId, org1.id));
   const completedTraining = allTrainings.find(t => t.status === 'completed');
   const upcomingTrainings = allTrainings.filter(t => t.status === 'published');
