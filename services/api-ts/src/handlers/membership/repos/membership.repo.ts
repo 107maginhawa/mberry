@@ -170,6 +170,26 @@ export class MembershipRepository {
     return result!;
   }
 
+  async getMemberById(membershipId: string) {
+    const [result] = await this.db
+      .select({
+        membership: memberships,
+        person: {
+          id: persons.id,
+          firstName: persons.firstName,
+          lastName: persons.lastName,
+          avatar: persons.avatar,
+        },
+        category: { id: membershipCategories.id, name: membershipCategories.name },
+      })
+      .from(memberships)
+      .leftJoin(persons, eq(memberships.personId, persons.id))
+      .leftJoin(membershipCategories, eq(memberships.categoryId, membershipCategories.id))
+      .where(eq(memberships.id, membershipId))
+      .limit(1);
+    return result;
+  }
+
   async getMemberCountByCategory(categoryId: string): Promise<number> {
     const [result] = await this.db
       .select({ count: sql<number>`count(*)::int` })

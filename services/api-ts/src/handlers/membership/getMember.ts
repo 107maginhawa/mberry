@@ -8,7 +8,12 @@ export async function getMember(ctx: Context): Promise<Response> {
   const memberId = ctx.req.param('memberId');
 
   const repo = new MembershipRepository(db);
-  const row = await repo.getMember(orgId, memberId);
+  // Try by personId first, then by membership ID
+  let row = await repo.getMember(orgId, memberId);
+  if (!row) {
+    // memberId might be the membership record ID, not personId
+    row = await repo.getMemberById(memberId);
+  }
   if (!row) throw new NotFoundError('Member not found');
 
   // Flatten nested { membership, person, category } for frontend
