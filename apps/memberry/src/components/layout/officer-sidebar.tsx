@@ -123,9 +123,9 @@ export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSi
                 {section.label}
               </div>
             )}
-            {section.items.map(({ to, label, icon: Icon }) => (
+            {section.items.map(({ to, label, icon: Icon }, idx) => (
               <Link
-                key={to}
+                key={`${to}-${idx}`}
                 to={to}
                 className="flex items-center gap-2.5 px-6 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors duration-150"
                 activeProps={{

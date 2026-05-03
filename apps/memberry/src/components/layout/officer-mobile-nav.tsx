@@ -120,7 +120,7 @@ export function OfficerMobileNav({ orgName, userName, role }: OfficerMobileNavPr
                   )}
                   {section.items.map(({ to, label, icon: Icon }) => (
                     <Link
-                      key={to}
+                      key={`${to}-${label}`}
                       to={to}
                       onClick={() => setDrawerOpen(false)}
                       className="flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors"
