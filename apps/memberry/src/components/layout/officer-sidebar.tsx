@@ -16,6 +16,8 @@ import {
   Award,
   IdCard,
   ArrowLeft,
+  Mail,
+  Plug,
 } from "lucide-react"
 
 interface NavSection {
@@ -72,12 +74,15 @@ export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSi
       label: "COMMUNICATIONS",
       items: [
         { to: `${base}/communications`, label: "Announcements", icon: Megaphone },
+        { to: `${base}/communications`, label: "Email Templates", icon: Mail },
       ],
     },
     {
       label: "DOCUMENTS",
       items: [
         { to: `${base}/reports/credits`, label: "Credit Reports", icon: Award },
+        { to: `${base}/reports/credits`, label: "Member Cards", icon: IdCard },
+        { to: `${base}/reports/credits`, label: "Certificates", icon: Award },
       ],
     },
     {
@@ -87,6 +92,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSi
         { to: `${base}/officers`, label: "Officers", icon: Shield },
         { to: `${base}/settings/membership-categories`, label: "Categories", icon: IdCard },
         { to: `${base}/settings/gateway`, label: "Payment Gateway", icon: Settings },
+        { to: `${base}/settings/gateway`, label: "Integrations", icon: Plug },
       ],
     },
   ]

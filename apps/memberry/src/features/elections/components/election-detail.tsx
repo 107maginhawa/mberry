@@ -10,11 +10,11 @@ interface ElectionDetailProps {
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
-  nominations_open: 'bg-blue-100 text-blue-800',
-  voting_open: 'bg-green-100 text-green-800',
-  awaiting_confirmation: 'bg-yellow-100 text-yellow-800',
+  nominations_open: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
+  voting_open: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  awaiting_confirmation: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
   published: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-red-100 text-red-800',
+  cancelled: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -28,8 +28,8 @@ const STATUS_LABELS: Record<string, string> = {
 
 const NOMINEE_STATUS_COLORS: Record<string, string> = {
   nominated: 'bg-muted text-muted-foreground',
-  accepted: 'bg-blue-100 text-blue-800',
-  declined: 'bg-red-100 text-red-800',
+  accepted: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
+  declined: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
   elected: 'bg-emerald-100 text-emerald-800',
 }
 

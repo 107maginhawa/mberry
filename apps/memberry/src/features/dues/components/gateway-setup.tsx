@@ -91,7 +91,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
           <div className="flex items-center gap-3">
             <Wifi className="h-5 w-5 text-green-600" />
             <div>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">Connected</Badge>
+              <Badge variant="secondary" className="bg-[var(--color-success-bg)] text-[var(--color-success)]">Connected</Badge>
               <p className="text-sm text-muted-foreground mt-1">
                 {config.provider === 'paymongo' ? 'PayMongo' : 'Stripe'} ····{config.publicKeyLast4}
               </p>
@@ -138,7 +138,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
       <div className="p-4 border rounded-lg flex items-center gap-3">
         <WifiOff className="h-5 w-5 text-red-500" />
         <div>
-          <Badge variant="secondary" className="bg-red-100 text-red-800">Not Connected</Badge>
+          <Badge variant="secondary" className="bg-[var(--color-error-bg)] text-[var(--color-error)]">Not Connected</Badge>
           <p className="text-sm text-muted-foreground mt-1">
             Connect a payment gateway to accept online payments.
           </p>

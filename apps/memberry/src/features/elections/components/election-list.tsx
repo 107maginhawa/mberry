@@ -9,11 +9,11 @@ interface ElectionListProps {
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   draft: { label: 'Draft', color: 'bg-muted text-muted-foreground', icon: FileText },
-  nominations_open: { label: 'Nominations Open', color: 'bg-blue-100 text-blue-800', icon: Users },
-  voting_open: { label: 'Voting Open', color: 'bg-green-100 text-green-800', icon: Vote },
-  awaiting_confirmation: { label: 'Awaiting Confirmation', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+  nominations_open: { label: 'Nominations Open', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]', icon: Users },
+  voting_open: { label: 'Voting Open', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: Vote },
+  awaiting_confirmation: { label: 'Awaiting Confirmation', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', icon: Clock },
   published: { label: 'Results Published', color: 'bg-emerald-100 text-emerald-800', icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800', icon: Ban },
+  cancelled: { label: 'Cancelled', color: 'bg-[var(--color-error-bg)] text-[var(--color-error)]', icon: Ban },
 }
 
 const TYPE_CONFIG: Record<string, { label: string; color: string }> = {

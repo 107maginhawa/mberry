@@ -15,10 +15,10 @@ interface ApplicationListProps {
 type AppStatus = 'pending' | 'approved' | 'rejected' | 'info_requested' | 'all'
 
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
-  pending: { label: 'Pending', className: 'bg-blue-100 text-blue-800 hover:bg-blue-100' },
-  approved: { label: 'Approved', className: 'bg-green-100 text-green-800 hover:bg-green-100' },
-  rejected: { label: 'Rejected', className: 'bg-red-100 text-red-800 hover:bg-red-100' },
-  info_requested: { label: 'Info Requested', className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' },
+  pending: { label: 'Pending', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
+  approved: { label: 'Approved', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]' },
+  rejected: { label: 'Rejected', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)]' },
+  info_requested: { label: 'Info Requested', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
 }
 
 export function ApplicationList({ orgId }: ApplicationListProps) {

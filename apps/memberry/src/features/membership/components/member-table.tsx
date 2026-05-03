@@ -26,11 +26,11 @@ const STATUS_TABS = [
 ]
 
 const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> = {
-  active: { label: 'Active', className: 'bg-green-100 text-green-800 hover:bg-green-100' },
-  gracePeriod: { label: 'Grace', className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' },
-  lapsed: { label: 'Lapsed', className: 'bg-red-100 text-red-800 hover:bg-red-100' },
+  active: { label: 'Active', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]' },
+  gracePeriod: { label: 'Grace', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
+  lapsed: { label: 'Lapsed', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)]' },
   suspended: { label: 'Suspended', className: 'bg-gray-100 text-gray-800 hover:bg-gray-100' },
-  pendingPayment: { label: 'Pending', className: 'bg-blue-100 text-blue-800 hover:bg-blue-100' },
+  pendingPayment: { label: 'Pending', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
 }
 
 const PAGE_SIZE = 50

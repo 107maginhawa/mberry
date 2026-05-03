@@ -145,7 +145,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
                     </td>
                     <td className="px-4 py-3">
                       {cat.active !== false ? (
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
+                        <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]">Active</Badge>
                       ) : (
                         <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">Inactive</Badge>
                       )}

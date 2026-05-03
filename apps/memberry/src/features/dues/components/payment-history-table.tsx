@@ -11,9 +11,9 @@ interface PaymentHistoryTableProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  completed: 'bg-green-100 text-green-800',
-  pending: 'bg-yellow-100 text-yellow-800',
-  failed: 'bg-red-100 text-red-800',
+  completed: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  pending: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
+  failed: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
   refunded: 'bg-gray-100 text-gray-600',
   partially_refunded: 'bg-gray-100 text-gray-600',
   expired: 'bg-orange-100 text-orange-800',

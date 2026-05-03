@@ -41,7 +41,7 @@ export function AffiliationList({ orgId, tenantId }: AffiliationListProps) {
               <td className="px-4 py-3">{a.chapterId}</td>
               <td className="px-4 py-3">{a.isPrimary ? 'Yes' : 'No'}</td>
               <td className="px-4 py-3">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${a.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${a.status === 'active' ? 'bg-[var(--color-success-bg)] text-[var(--color-success)]' : 'bg-gray-100 text-gray-800'}`}>
                   {a.status}
                 </span>
               </td>
