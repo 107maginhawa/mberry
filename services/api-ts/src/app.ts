@@ -182,6 +182,20 @@ export function createApp(config: Config): App {
     return ctx.json({ data }, 200);
   });
 
+  // Credit entries list (auth required)
+  app.get('/persons/me/credit-entries', authMiddleware(), async (ctx) => {
+    const user = ctx.get('user');
+    if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+    const db = ctx.get('database') as any;
+    const { creditEntries } = await import('@/handlers/association:member/repos/credits.schema');
+    const { eq, desc } = await import('drizzle-orm');
+    const rows = await db.select().from(creditEntries)
+      .where(eq(creditEntries.personId, user.id))
+      .orderBy(desc(creditEntries.activityDate))
+      .limit(50);
+    return ctx.json({ data: rows }, 200);
+  });
+
   // Officer role check (auth required)
   app.get('/persons/me/officer-role/:orgId', authMiddleware(), async (ctx) => {
     const { getMyOfficerRole } = await import('@/handlers/association:member/getMyOfficerRole');
