@@ -54,11 +54,11 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
       })
       .catch(() => {})
 
-    fetch('/api/notifications?limit=1&status=delivered&channel=in-app', { credentials: 'include' })
+    fetch('/api/notifs?limit=50&channel=in-app', { credentials: 'include' })
       .then((r) => r.ok ? r.json() : { data: [] })
       .then((json) => {
         const items = json.data || json.items || []
-        setNotifCount(items.length)
+        setNotifCount(items.filter((n: any) => n.status !== 'read').length)
       })
       .catch(() => {})
   }, [])

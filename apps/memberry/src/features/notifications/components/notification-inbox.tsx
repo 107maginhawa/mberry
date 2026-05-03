@@ -69,7 +69,7 @@ export function NotificationInbox() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/notifications?limit=50&channel=in-app', { credentials: 'include' })
+      const res = await fetch('/api/notifs?limit=50&channel=in-app', { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to load notifications')
       const json = await res.json()
       const items = (json.data || json.items || []).map(mapApiNotification)
@@ -105,7 +105,7 @@ export function NotificationInbox() {
 
   async function markAllRead() {
     try {
-      await fetch('/api/notifications/read-all', { method: 'POST', credentials: 'include' })
+      await fetch('/api/notifs/read-all', { method: 'POST', credentials: 'include' })
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
     } catch {
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
@@ -114,7 +114,7 @@ export function NotificationInbox() {
 
   async function markRead(id: string) {
     try {
-      await fetch(`/api/notifications/${id}/read`, { method: 'POST', credentials: 'include' })
+      await fetch(`/api/notifs/${id}/read`, { method: 'POST', credentials: 'include' })
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
     } catch {
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))

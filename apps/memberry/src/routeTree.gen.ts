@@ -27,7 +27,6 @@ import { Route as AuthenticatedMyNotificationsRouteImport } from './routes/_auth
 import { Route as AuthenticatedMyIdCardRouteImport } from './routes/_authenticated/my/id-card'
 import { Route as AuthenticatedMyEventsRouteImport } from './routes/_authenticated/my/events'
 import { Route as AuthenticatedMyDataExportRouteImport } from './routes/_authenticated/my/data-export'
-import { Route as AuthenticatedMyDashboardRouteImport } from './routes/_authenticated/my/dashboard'
 import { Route as AuthenticatedMyCreditsIndexRouteImport } from './routes/_authenticated/my/credits/index'
 import { Route as AuthenticatedMyCertificatesIndexRouteImport } from './routes/_authenticated/my/certificates/index'
 import { Route as AuthenticatedOrgOrgIdOfficerRouteImport } from './routes/_authenticated/org/$orgId/officer'
@@ -161,12 +160,6 @@ const AuthenticatedMyDataExportRoute =
   AuthenticatedMyDataExportRouteImport.update({
     id: '/my/data-export',
     path: '/my/data-export',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedMyDashboardRoute =
-  AuthenticatedMyDashboardRouteImport.update({
-    id: '/my/dashboard',
-    path: '/my/dashboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedMyCreditsIndexRoute =
@@ -431,7 +424,6 @@ export interface FileRoutesByFullPath {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$token': typeof VerifyTokenRoute
-  '/my/dashboard': typeof AuthenticatedMyDashboardRoute
   '/my/data-export': typeof AuthenticatedMyDataExportRoute
   '/my/events': typeof AuthenticatedMyEventsRoute
   '/my/id-card': typeof AuthenticatedMyIdCardRoute
@@ -493,7 +485,6 @@ export interface FileRoutesByTo {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$token': typeof VerifyTokenRoute
-  '/my/dashboard': typeof AuthenticatedMyDashboardRoute
   '/my/data-export': typeof AuthenticatedMyDataExportRoute
   '/my/events': typeof AuthenticatedMyEventsRoute
   '/my/id-card': typeof AuthenticatedMyIdCardRoute
@@ -557,7 +548,6 @@ export interface FileRoutesById {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$token': typeof VerifyTokenRoute
-  '/_authenticated/my/dashboard': typeof AuthenticatedMyDashboardRoute
   '/_authenticated/my/data-export': typeof AuthenticatedMyDataExportRoute
   '/_authenticated/my/events': typeof AuthenticatedMyEventsRoute
   '/_authenticated/my/id-card': typeof AuthenticatedMyIdCardRoute
@@ -621,7 +611,6 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$token'
-    | '/my/dashboard'
     | '/my/data-export'
     | '/my/events'
     | '/my/id-card'
@@ -683,7 +672,6 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$token'
-    | '/my/dashboard'
     | '/my/data-export'
     | '/my/events'
     | '/my/id-card'
@@ -746,7 +734,6 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$token'
-    | '/_authenticated/my/dashboard'
     | '/_authenticated/my/data-export'
     | '/_authenticated/my/events'
     | '/_authenticated/my/id-card'
@@ -937,13 +924,6 @@ declare module '@tanstack/react-router' {
       path: '/my/data-export'
       fullPath: '/my/data-export'
       preLoaderRoute: typeof AuthenticatedMyDataExportRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/my/dashboard': {
-      id: '/_authenticated/my/dashboard'
-      path: '/my/dashboard'
-      fullPath: '/my/dashboard'
-      preLoaderRoute: typeof AuthenticatedMyDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/my/credits/': {
@@ -1410,7 +1390,6 @@ const AuthenticatedOrgOrgIdOfficerRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedMyDashboardRoute: typeof AuthenticatedMyDashboardRoute
   AuthenticatedMyDataExportRoute: typeof AuthenticatedMyDataExportRoute
   AuthenticatedMyEventsRoute: typeof AuthenticatedMyEventsRoute
   AuthenticatedMyIdCardRoute: typeof AuthenticatedMyIdCardRoute
@@ -1435,7 +1414,6 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedMyDashboardRoute: AuthenticatedMyDashboardRoute,
   AuthenticatedMyDataExportRoute: AuthenticatedMyDataExportRoute,
   AuthenticatedMyEventsRoute: AuthenticatedMyEventsRoute,
   AuthenticatedMyIdCardRoute: AuthenticatedMyIdCardRoute,

@@ -29,15 +29,34 @@ function DashboardPage() {
 
   const [memberships, setMemberships] = useState<any[]>([])
   const [membershipsLoading, setMembershipsLoading] = useState(true)
+  const [upcomingEventCount, setUpcomingEventCount] = useState(0)
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0)
 
   useEffect(() => {
-    fetch('/api/persons/me/memberships')
+    fetch('/api/persons/me/memberships', { credentials: 'include' })
       .then(res => res.json())
       .then(res => {
         setMemberships(res?.data || [])
         setMembershipsLoading(false)
       })
       .catch(() => setMembershipsLoading(false))
+
+    fetch('/api/events/my', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : { data: [] })
+      .then(res => {
+        const now = new Date()
+        const upcoming = (res?.data || []).filter((e: any) => new Date(e.startDate) >= now)
+        setUpcomingEventCount(upcoming.length)
+      })
+      .catch(() => {})
+
+    fetch('/api/notifs?limit=50&channel=in-app', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : { data: [] })
+      .then(res => {
+        const items = res?.data || res?.items || []
+        setUnreadNotifCount(items.filter((n: any) => n.status !== 'read').length)
+      })
+      .catch(() => {})
   }, [])
 
   const displayName = person.data?.firstName ?? 'there'
@@ -92,9 +111,9 @@ function DashboardPage() {
       <section className="mb-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
           <StatCard label="Organizations" value={memberships.length} />
-          <StatCard label="CPD Credits" value="--" />
-          <StatCard label="Upcoming Events" value="--" />
-          <StatCard label="Notifications" value="--" />
+          <StatCard label="CPD Credits" value={memberships.length > 0 ? memberships.length + ' orgs' : '0'} />
+          <StatCard label="Upcoming Events" value={upcomingEventCount} />
+          <StatCard label="Notifications" value={unreadNotifCount} />
         </div>
       </section>
 
