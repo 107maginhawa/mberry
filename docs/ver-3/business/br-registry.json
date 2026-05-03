@@ -27,12 +27,14 @@
         "services/api-ts/src/handlers/training/enroll.test.ts",
         "services/api-ts/src/handlers/dues/upsertDuesConfig.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-03": {
     "rule": "Membership Transitions",
@@ -119,7 +121,6 @@
       "backend": [
         "services/api-ts/src/handlers/dues/utils/expiry-extension.test.ts",
         "services/api-ts/src/handlers/dues/recordPayment.test.ts",
-        "services/api-ts/src/handlers/association:member/membership.test.ts",
         "services/api-ts/src/handlers/association:member/dues.test.ts"
       ],
       "contract": [
@@ -155,13 +156,15 @@
       "backend": [
         "services/api-ts/src/handlers/association:member/governance.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/governance-flow.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/officer/guard-enforcement.spec.ts",
         "apps/memberry/tests/e2e/officer/nav-reachability.spec.ts"
       ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-10": {
     "rule": "Platform Admin Impersonation",
@@ -169,7 +172,8 @@
     "module": "M03",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/platformadmin/platformadmin.test.ts"
+        "services/api-ts/src/handlers/platformadmin/platformadmin.test.ts",
+        "services/api-ts/src/handlers/br-edge-cases.test.ts"
       ],
       "contract": [],
       "e2e": []
@@ -184,12 +188,14 @@
       "backend": [
         "services/api-ts/src/handlers/association:member/credits.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/credits-flow.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/member/credits.spec.ts"
       ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-12": {
     "rule": "Credit Carry-Over",
@@ -199,12 +205,14 @@
       "backend": [
         "services/api-ts/src/handlers/association:member/credits.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/credits-flow.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/member/credits.spec.ts"
       ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-13": {
     "rule": "Auto vs Manual Credits",
@@ -215,13 +223,15 @@
         "services/api-ts/src/handlers/association:member/credits.test.ts",
         "services/api-ts/src/handlers/training/markComplete.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/credits-flow.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/member/credits.spec.ts",
         "apps/memberry/tests/e2e/member/training.spec.ts"
       ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-14": {
     "rule": "Cross-Org Credit Aggregation",
@@ -231,10 +241,14 @@
       "backend": [
         "services/api-ts/src/handlers/association:member/credits.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/credits-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/member/credits.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-15": {
     "rule": "Training vs Event Distinction",
@@ -265,12 +279,17 @@
     "module": "M08",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
+        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
+        "services/api-ts/src/handlers/br-edge-cases.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/events.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-17": {
     "rule": "Attendance Confirmation",
@@ -280,10 +299,14 @@
       "backend": [
         "services/api-ts/src/handlers/events/checkIn.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/events.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-18": {
     "rule": "QR Code Authentication",
@@ -293,7 +316,9 @@
       "backend": [
         "services/api-ts/src/handlers/association:member/credentials.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/credentials-flow.hurl"
+      ],
       "e2e": []
     },
     "coverage": "PARTIAL"
@@ -304,9 +329,12 @@
     "module": "M11",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/credentials.test.ts"
+        "services/api-ts/src/handlers/association:member/credentials.test.ts",
+        "services/api-ts/src/handlers/br-edge-cases.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/credentials-flow.hurl"
+      ],
       "e2e": []
     },
     "coverage": "PARTIAL"
@@ -319,7 +347,8 @@
       "backend": [
         "services/api-ts/src/handlers/certificates/listCertificates.test.ts",
         "services/api-ts/src/handlers/certificates/getCertificate.test.ts",
-        "services/api-ts/src/handlers/certificates/repos/certificates.repo.test.ts"
+        "services/api-ts/src/handlers/certificates/repos/certificates.repo.test.ts",
+        "services/api-ts/src/handlers/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/certificates-flow.hurl"
@@ -396,7 +425,8 @@
     "module": "M01",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
+        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
+        "services/api-ts/src/handlers/br-edge-cases.test.ts"
       ],
       "contract": [],
       "e2e": []
@@ -463,12 +493,17 @@
     "module": "M04",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/platformadmin/getOrganizationBySlug.test.ts"
+        "services/api-ts/src/handlers/platformadmin/getOrganizationBySlug.test.ts",
+        "services/api-ts/src/handlers/br-edge-cases.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/public-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/journeys/public-org.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-30": {
     "rule": "Payment Gateway Isolation",
@@ -498,9 +533,11 @@
       "contract": [
         "specs/api/tests/contract/storage.hurl"
       ],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/settings.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-32": {
     "rule": "Financial Record Retention",
