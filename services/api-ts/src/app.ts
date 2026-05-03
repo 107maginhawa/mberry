@@ -126,6 +126,21 @@ export function createApp(config: Config): App {
     return getMyMemberships(ctx as any);
   });
 
+  // Credit summary (lifetime total, auth required)
+  app.get('/persons/me/credit-summary', authMiddleware(), async (ctx) => {
+    const user = ctx.get('user');
+    if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+    const db = ctx.get('database') as any;
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
+    const repo = new CreditEntryRepository(db, ctx.get('logger'));
+    const total = await repo.sumCreditsForCycle(
+      user.id,
+      new Date('2000-01-01'),
+      new Date('2099-12-31'),
+    );
+    return ctx.json({ totalCredits: total }, 200);
+  });
+
   // Officer role check (auth required)
   app.get('/persons/me/officer-role/:orgId', authMiddleware(), async (ctx) => {
     const { getMyOfficerRole } = await import('@/handlers/association:member/getMyOfficerRole');

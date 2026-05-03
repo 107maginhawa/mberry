@@ -29,7 +29,8 @@ function DashboardPage() {
 
   const [memberships, setMemberships] = useState<any[]>([])
   const [membershipsLoading, setMembershipsLoading] = useState(true)
-  const [upcomingEventCount, setUpcomingEventCount] = useState(0)
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([])
+  const [totalCredits, setTotalCredits] = useState(0)
   const [unreadNotifCount, setUnreadNotifCount] = useState(0)
 
   useEffect(() => {
@@ -45,9 +46,18 @@ function DashboardPage() {
       .then(res => res.ok ? res.json() : { data: [] })
       .then(res => {
         const now = new Date()
-        const upcoming = (res?.data || []).filter((e: any) => new Date(e.startDate) >= now)
-        setUpcomingEventCount(upcoming.length)
+        const items = (res?.data || []).map((e: any) => e.event || e)
+        const upcoming = items
+          .filter((e: any) => new Date(e.startDate || e.start_date) >= now)
+          .sort((a: any, b: any) => new Date(a.startDate || a.start_date).getTime() - new Date(b.startDate || b.start_date).getTime())
+          .slice(0, 3)
+        setUpcomingEvents(upcoming)
       })
+      .catch(() => {})
+
+    fetch('/api/persons/me/credit-summary', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : { totalCredits: 0 })
+      .then(res => setTotalCredits(res?.totalCredits ?? res?.data?.totalCredits ?? 0))
       .catch(() => {})
 
     fetch('/api/notifs?limit=50&channel=in-app', { credentials: 'include' })
@@ -111,23 +121,38 @@ function DashboardPage() {
       <section className="mb-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
           <StatCard label="Organizations" value={memberships.length} />
-          <StatCard label="CPD Credits" value={memberships.length > 0 ? memberships.length + ' orgs' : '0'} />
-          <StatCard label="Upcoming Events" value={upcomingEventCount} />
+          <StatCard label="CPD Credits" value={totalCredits} />
+          <StatCard label="Upcoming Events" value={upcomingEvents.length} />
           <StatCard label="Notifications" value={unreadNotifCount} />
         </div>
       </section>
 
-      {/* Activity placeholders */}
+      {/* Activity sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
           <div className="flex items-center gap-2 mb-3">
             <Calendar size={18} className="text-[var(--color-muted)]" />
             <h3 className="text-[16px] font-semibold font-display">Upcoming Events</h3>
           </div>
-          <EmptyState
-            headline="No upcoming events"
-            description="Events you register for will appear here"
-          />
+          {upcomingEvents.length === 0 ? (
+            <EmptyState
+              headline="No upcoming events"
+              description="Events you register for will appear here"
+            />
+          ) : (
+            <div className="space-y-2">
+              {upcomingEvents.map((e: any, i: number) => (
+                <div key={e.id || i} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
+                  <div>
+                    <p className="text-[13px] font-semibold line-clamp-1">{e.title || e.name}</p>
+                    <p className="text-[12px] text-[var(--color-muted)]">
+                      {new Date(e.startDate || e.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
@@ -135,10 +160,17 @@ function DashboardPage() {
             <Award size={18} className="text-[var(--color-muted)]" />
             <h3 className="text-[16px] font-semibold font-display">Credit Progress</h3>
           </div>
-          <EmptyState
-            headline="No credits yet"
-            description="Complete trainings and events to earn CPD credits"
-          />
+          {totalCredits === 0 ? (
+            <EmptyState
+              headline="No credits yet"
+              description="Complete trainings and events to earn CPD credits"
+            />
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-[32px] font-bold text-[var(--color-primary)]">{totalCredits}</p>
+              <p className="text-[13px] text-[var(--color-muted)]">total CPD credit hours</p>
+            </div>
+          )}
         </section>
       </div>
     </div>
