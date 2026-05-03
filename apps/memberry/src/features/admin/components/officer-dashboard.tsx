@@ -27,16 +27,16 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   const members = useQuery<MemberSummary>({
     queryKey: ['member-summary', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/members/${orgId}?pageSize=0`)
+      const res = await fetch(`/api/membership/members/${orgId}?limit=9999`)
       const json = await res.json()
       const all = json.data ?? []
       const counts = { activeCount: 0, graceCount: 0, lapsedCount: 0, pendingCount: 0, totalCount: 0, expiringIn30Days: 0 }
       for (const m of all) {
         counts.totalCount++
         if (m.status === 'active') counts.activeCount++
-        else if (m.status === 'grace') counts.graceCount++
+        else if (m.status === 'gracePeriod') counts.graceCount++
         else if (m.status === 'lapsed') counts.lapsedCount++
-        else if (m.status === 'pending') counts.pendingCount++
+        else if (m.status === 'pendingPayment') counts.pendingCount++
         if (m.duesExpiryDate) {
           const expiry = new Date(m.duesExpiryDate)
           const daysLeft = (expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
