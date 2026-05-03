@@ -48,6 +48,7 @@ describe('getMember', () => {
   test('throws NotFoundError for non-existent member', async () => {
     mocks = stubRepo(MembershipRepository, {
       getMember: async () => undefined,
+      getMemberById: async () => undefined,
     });
 
     const ctx = makeCtx({
