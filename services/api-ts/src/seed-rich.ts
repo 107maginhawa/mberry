@@ -118,29 +118,35 @@ async function seedRich() {
     console.log(`    Created ${futureEvents.length} future events, registered user for 3`);
   }
 
-  // Seed notifications for user
-  const [notifCount] = await db.select({ c: count() }).from(notifications)
-    .where(eq(notifications.recipient, allPersons[0].id));
-  if ((notifCount?.c ?? 0) >= 3) {
-    console.log('    (notifications already seeded, skipping)');
+  // Seed notifications — use auth user ID (not person ID) because notifs endpoint filters by session.user.id
+  const authUserRows = await db.execute(sql`SELECT id FROM "user" WHERE email = 'test@memberry.ph' LIMIT 1`);
+  const authUserId = (authUserRows as any)?.[0]?.id || (authUserRows as any)?.rows?.[0]?.id;
+  if (!authUserId) {
+    console.log('    (auth user not found, skipping notifications)');
   } else {
-    const notifRows = [
-      { type: 'billing' as const, title: 'Your dues payment was received', message: 'Payment of ₱1,200 for PDA Manila Chapter has been confirmed.', status: 'sent' as const },
-      { type: 'system' as const, title: 'Welcome to Memberry', message: 'Your account has been set up. Complete your profile to get started.', status: 'sent' as const },
-      { type: 'billing' as const, title: 'Dues renewal reminder', message: 'Your membership dues for PDA Metro Manila are due on December 31, 2025.', status: 'sent' as const },
-      { type: 'system' as const, title: 'Profile updated', message: 'Your specialization has been updated to Orthodontics.', status: 'read' as const },
-      { type: 'system' as const, title: 'New training available', message: 'CPD Seminar: Digital Dentistry is now open for registration.', status: 'sent' as const },
-    ];
-    for (const n of notifRows) {
-      await db.insert(notifications).values({
-        recipient: allPersons[0].id,
-        channel: 'in-app',
-        consentValidated: true,
-        sentAt: new Date(),
-        ...n,
-      });
+    const [notifCount] = await db.select({ c: count() }).from(notifications)
+      .where(eq(notifications.recipient, authUserId));
+    if ((notifCount?.c ?? 0) >= 3) {
+      console.log('    (notifications already seeded, skipping)');
+    } else {
+      const notifRows = [
+        { type: 'billing' as const, title: 'Your dues payment was received', message: 'Payment of ₱1,200 for PDA Manila Chapter has been confirmed.', status: 'sent' as const },
+        { type: 'system' as const, title: 'Welcome to Memberry', message: 'Your account has been set up. Complete your profile to get started.', status: 'sent' as const },
+        { type: 'billing' as const, title: 'Dues renewal reminder', message: 'Your membership dues for PDA Metro Manila are due on December 31, 2025.', status: 'sent' as const },
+        { type: 'system' as const, title: 'Profile updated', message: 'Your specialization has been updated to Orthodontics.', status: 'read' as const },
+        { type: 'system' as const, title: 'New training available', message: 'CPD Seminar: Digital Dentistry is now open for registration.', status: 'sent' as const },
+      ];
+      for (const n of notifRows) {
+        await db.insert(notifications).values({
+          recipient: authUserId,
+          channel: 'in-app',
+          consentValidated: true,
+          sentAt: new Date(),
+          ...n,
+        });
+      }
+      console.log(`    Created ${notifRows.length} notifications for user (auth ID: ${authUserId})`);
     }
-    console.log(`    Created ${notifRows.length} notifications for user`);
   }
 
   // Get existing trainings and events (AFTER inserting future events)

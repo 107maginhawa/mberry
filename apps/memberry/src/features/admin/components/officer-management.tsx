@@ -45,9 +45,8 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
   async function fetchOfficers() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/association/member/officer-terms?orgId=${orgId}`, {
+      const res = await fetch(`/api/officer-terms/${orgId}`, {
         credentials: 'include',
-        headers: { 'x-org-id': orgId },
       })
       if (!res.ok) throw new Error('Failed to fetch')
       const json = await res.json()

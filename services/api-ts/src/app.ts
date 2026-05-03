@@ -141,6 +141,47 @@ export function createApp(config: Config): App {
     return ctx.json({ totalCredits: total }, 200);
   });
 
+  // List officer terms for org (custom endpoint bypassing org-context)
+  app.get('/officer-terms/:orgId', authMiddleware(), async (ctx) => {
+    const orgId = ctx.req.param('orgId');
+    const db = ctx.get('database') as any;
+    const { OfficerTermRepository } = await import('@/handlers/association:member/repos/governance.repo');
+    const { PositionRepository } = await import('@/handlers/association:member/repos/governance.repo');
+    const termRepo = new OfficerTermRepository(db);
+    const posRepo = new PositionRepository(db);
+    const terms = await termRepo.findByOrg(orgId, orgId);
+    const positions = await posRepo.findByOrg(orgId, orgId);
+    const posMap = new Map(positions.map(p => [p.id, p.title]));
+
+    // Fetch person names for each term
+    const personIds = [...new Set(terms.map(t => t.personId))];
+    let personMap = new Map<string, string>();
+    if (personIds.length > 0) {
+      const { persons } = await import('@/handlers/person/repos/person.schema');
+      const { inArray } = await import('drizzle-orm');
+      try {
+        const pRows = await db.select({ id: persons.id, firstName: persons.firstName, lastName: persons.lastName })
+          .from(persons)
+          .where(inArray(persons.id, personIds));
+        for (const p of pRows) {
+          personMap.set(p.id, [p.firstName, p.lastName].filter(Boolean).join(' ') || 'Unknown');
+        }
+      } catch { /* fallback */ }
+    }
+
+    const data = terms.map((t: any) => ({
+      id: t.id,
+      positionId: t.positionId,
+      positionTitle: posMap.get(t.positionId) || 'Unknown',
+      personId: t.personId,
+      personName: personMap.get(t.personId) || 'Unknown',
+      status: t.status,
+      startDate: t.startDate,
+      endDate: t.endDate,
+    }));
+    return ctx.json({ data }, 200);
+  });
+
   // Officer role check (auth required)
   app.get('/persons/me/officer-role/:orgId', authMiddleware(), async (ctx) => {
     const { getMyOfficerRole } = await import('@/handlers/association:member/getMyOfficerRole');
