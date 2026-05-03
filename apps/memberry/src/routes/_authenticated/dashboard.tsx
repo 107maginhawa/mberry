@@ -7,7 +7,7 @@ import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
-import { Calendar, Award, UserPlus } from 'lucide-react'
+import { Calendar, Award, UserPlus, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
@@ -82,30 +82,7 @@ function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {memberships.map((m: any) => (
-              <Link
-                key={m.id}
-                to="/org/$orgId/members"
-                params={{ orgId: m.orgId }}
-                className="block rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5 hover:shadow-soft transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <AvatarInitials name={m.orgName ?? 'Org'} size="md" />
-                    <div>
-                      <p className="text-[14px] font-semibold">{m.orgName}</p>
-                      {m.memberNumber && (
-                        <p className="text-[13px] font-medium text-[var(--color-muted)]">#{m.memberNumber}</p>
-                      )}
-                    </div>
-                  </div>
-                  <StatusBadge status={m.status ?? 'pending'} />
-                </div>
-                {m.duesExpiryDate && (
-                  <p className="text-[13px] font-medium text-[var(--color-muted)] mt-3">
-                    Dues expire: {new Date(m.duesExpiryDate).toLocaleDateString()}
-                  </p>
-                )}
-              </Link>
+              <OrgCard key={m.id} membership={m} />
             ))}
           </div>
         )}
@@ -145,6 +122,60 @@ function DashboardPage() {
           />
         </section>
       </div>
+    </div>
+  )
+}
+
+function OrgCard({ membership: m }: { membership: any }) {
+  const [officerRole, setOfficerRole] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch(`/api/persons/me/officer-role/${m.orgId}`, { credentials: 'include' })
+      .then((r) => r.ok ? r.json() : null)
+      .then((json) => {
+        if (json?.data?.isOfficer) {
+          setOfficerRole(json.data.positions?.[0]?.title || 'Officer')
+        }
+      })
+      .catch(() => {})
+  }, [m.orgId])
+
+  return (
+    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+      <Link
+        to="/org/$orgId/members"
+        params={{ orgId: m.orgId }}
+        className="block hover:opacity-80 transition-opacity"
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <AvatarInitials name={m.orgName ?? 'Org'} size="md" />
+            <div>
+              <p className="text-[14px] font-semibold">{m.orgName}</p>
+              {m.memberNumber && (
+                <p className="text-[13px] font-medium text-[var(--color-muted)]">#{m.memberNumber}</p>
+              )}
+            </div>
+          </div>
+          <StatusBadge status={m.status ?? 'pending'} />
+        </div>
+        {m.duesExpiryDate && (
+          <p className="text-[13px] font-medium text-[var(--color-muted)] mt-3">
+            Dues expire: {new Date(m.duesExpiryDate).toLocaleDateString()}
+          </p>
+        )}
+      </Link>
+      {officerRole && (
+        <div className="mt-3 pt-3 border-t border-[var(--color-border-light)]">
+          <Link
+            to={`/org/${m.orgId}/officer/dashboard`}
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] hover:underline"
+          >
+            <Shield size={13} />
+            {officerRole} Dashboard
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
