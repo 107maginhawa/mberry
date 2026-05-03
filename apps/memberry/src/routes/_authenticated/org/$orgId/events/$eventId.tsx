@@ -30,7 +30,7 @@ function EventDetail() {
   const { data: event, isLoading, error } = useQuery({
     queryKey: ['event-detail', eventId],
     queryFn: async () => {
-      const res = await fetch(`/api/events/${eventId}`, { credentials: 'include' })
+      const res = await fetch(`/api/events/detail/${eventId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to load event')
       return res.json() as Promise<{ data: any }>
     },
@@ -39,7 +39,7 @@ function EventDetail() {
 
   const registerMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/events/${eventId}/register`, {
+      const res = await fetch(`/api/events/detail/${eventId}/register`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

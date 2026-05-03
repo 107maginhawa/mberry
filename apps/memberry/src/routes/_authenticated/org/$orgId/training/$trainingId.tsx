@@ -30,7 +30,7 @@ function TrainingDetail() {
   const { data: training, isLoading, error } = useQuery({
     queryKey: ['training-detail', trainingId],
     queryFn: async () => {
-      const res = await fetch(`/api/training/${trainingId}`, { credentials: 'include' })
+      const res = await fetch(`/api/training/detail/${trainingId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to load training')
       return res.json() as Promise<{ data: any }>
     },
@@ -39,7 +39,7 @@ function TrainingDetail() {
 
   const enrollMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/training/${trainingId}/enroll`, {
+      const res = await fetch(`/api/training/detail/${trainingId}/enroll`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
