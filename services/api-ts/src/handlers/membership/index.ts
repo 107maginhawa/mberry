@@ -8,8 +8,14 @@ import { listApplications } from './listApplications';
 import { reviewApplication } from './reviewApplication';
 import { listCategories } from './listCategories';
 import { upsertCategory } from './upsertCategory';
+import { getOrgProfile } from './getOrgProfile';
+import { updateOrgProfile } from './updateOrgProfile';
 
 const membership = new Hono();
+
+// Org Profile (officer-accessible)
+membership.get('/org-profile/:orgId', getOrgProfile);
+membership.put('/org-profile/:orgId', updateOrgProfile);
 
 // Members
 membership.get('/members/:orgId', listMembers);

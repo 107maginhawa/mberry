@@ -35,7 +35,7 @@ const EMPTY_PROFILE: OrgProfile = {
 
 async function fetchOrgProfile(orgId: string): Promise<OrgProfile> {
   try {
-    const res = await fetch(`/api/admin/organizations/${orgId}`, { credentials: 'include' })
+    const res = await fetch(`/api/membership/org-profile/${orgId}`, { credentials: 'include' })
     if (res.ok) {
       const json = await res.json()
       const org = json.data || json
@@ -51,8 +51,6 @@ async function fetchOrgProfile(orgId: string): Promise<OrgProfile> {
       }
     }
   } catch { /* fall through */ }
-  // Fallback: return empty profile if API unavailable
-  // TODO: Add officer-accessible org profile endpoint (current endpoint requires platform admin)
   return {
     name: '',
     description: '',
@@ -100,10 +98,8 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
     }
     setIsSaving(true)
     try {
-      // TODO: Add officer-accessible PATCH endpoint for org profile
-      // Current PATCH /api/admin/organizations/:id requires platform admin role
-      const res = await fetch(`/api/admin/organizations/${orgId}`, {
-        method: 'PATCH',
+      const res = await fetch(`/api/membership/org-profile/${orgId}`, {
+        method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: draft.name, contactEmail: draft.contactEmail }),

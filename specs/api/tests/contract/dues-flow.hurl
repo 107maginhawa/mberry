@@ -1,4 +1,4 @@
-# Business Rules: [BR-04] [BR-05] [BR-06] [BR-07]
+# Business Rules: [BR-02] [BR-04] [BR-05] [BR-06] [BR-07]
 # Dues module contract test: officer configures dues, creates funds,
 # records a payment, views dashboard, and generates a report.
 # Verifies auth enforcement on all custom routes.
@@ -75,3 +75,11 @@ HTTP 200
 
 GET {{api}}/dues/dashboard/ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
+
+
+# ── 6. Verify grace period in config (BR-02) ──────────────
+
+GET {{api}}/dues/config/ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP 200
+[Asserts]
+jsonpath "$.data.gracePeriodDays" exists

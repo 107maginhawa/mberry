@@ -1,4 +1,4 @@
-# Business Rules: [BR-15] [BR-27]
+# Business Rules: [BR-15] [BR-16] [BR-17] [BR-27]
 # Events module contract test: officer creates event, member registers,
 # officer checks in member, lists attendance.
 #
@@ -66,4 +66,22 @@ HTTP 200
 # ── 4. My events (member view) ─────────────────────────────
 
 GET {{api}}/events/my
+HTTP 200
+
+
+# ── 5. Check-in endpoint exists (BR-16) ───────────────────
+# POST without a valid event ID should return 404 or 400, not 500
+
+POST {{api}}/events/checkin/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+{}
+HTTP *
+[Asserts]
+status < 500
+
+
+# ── 6. Attendance list (BR-17) ─────────────────────────────
+# Use the event created in step 2
+
+GET {{api}}/events/attendance/{{event_id}}
 HTTP 200

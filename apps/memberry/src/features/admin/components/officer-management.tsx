@@ -11,16 +11,17 @@ interface OfficerManagementProps {
   orgId: string
 }
 
-type OfficerRole = 'President' | 'Vice President' | 'Secretary' | 'Treasurer' | 'Auditor' | 'Board Member'
+interface Position {
+  id: string
+  title: string
+}
 
-const OFFICER_ROLES: OfficerRole[] = [
-  'President',
-  'Vice President',
-  'Secretary',
-  'Treasurer',
-  'Auditor',
-  'Board Member',
-]
+interface MemberResult {
+  id: string
+  personId: string
+  name: string
+  email: string
+}
 
 interface Officer {
   id: string
@@ -177,7 +178,7 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
         </table>
       </div>
 
-      {/* Assign Role modal — TODO: needs member search API + position list API for full wiring */}
+      {/* Assign Role modal */}
       <AssignRoleModal
         open={showModal}
         onClose={() => setShowModal(false)}
@@ -218,33 +219,106 @@ function AssignRoleModal({
   open,
   onClose,
   onAssign,
-  orgId: _orgId,
+  orgId,
 }: {
   open: boolean
   onClose: () => void
   onAssign: (officer: Officer) => void
   orgId: string
 }) {
-  const [role, setRole] = useState<string>('')
+  const [positionId, setPositionId] = useState<string>('')
+  const [positions, setPositions] = useState<Position[]>([])
+  const [loadingPositions, setLoadingPositions] = useState(false)
   const [memberSearch, setMemberSearch] = useState('')
+  const [memberResults, setMemberResults] = useState<MemberResult[]>([])
+  const [selectedMember, setSelectedMember] = useState<MemberResult | null>(null)
+  const [searchingMembers, setSearchingMembers] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  async function handleSubmit() {
-    if (!role || !memberSearch.trim()) return
-    setIsSaving(true)
-    // TODO: Wire to POST /api/association/member/officer-terms with real positionId + personId
-    // Currently creates a local-only record. Needs: position list endpoint + member search endpoint.
-    await new Promise((r) => setTimeout(r, 400))
-    onAssign({
-      id: crypto.randomUUID(),
-      role: role,
-      name: memberSearch.trim(),
-      email: '',
-      assignedDate: new Date().toISOString().slice(0, 10),
+  // Fetch positions when modal opens
+  useEffect(() => {
+    if (!open) return
+    setLoadingPositions(true)
+    fetch('/api/association/member/positions', {
+      credentials: 'include',
+      headers: { 'x-org-id': orgId },
     })
-    setRole('')
-    setMemberSearch('')
-    setIsSaving(false)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((json) => setPositions(json.items || json.data || []))
+      .catch(() => setPositions([]))
+      .finally(() => setLoadingPositions(false))
+  }, [open, orgId])
+
+  // Debounced member search
+  useEffect(() => {
+    if (!memberSearch.trim() || memberSearch.trim().length < 2) {
+      setMemberResults([])
+      return
+    }
+    const timer = setTimeout(() => {
+      setSearchingMembers(true)
+      fetch(`/api/membership/members/${orgId}?search=${encodeURIComponent(memberSearch.trim())}&limit=10`, {
+        credentials: 'include',
+      })
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((json) => {
+          const members = json.data || json.items || []
+          setMemberResults(
+            members.map((m: any) => ({
+              id: m.id,
+              personId: m.personId || m.id,
+              name: m.name || `${m.firstName || ''} ${m.lastName || ''}`.trim() || 'Unknown',
+              email: m.email || '',
+            }))
+          )
+        })
+        .catch(() => setMemberResults([]))
+        .finally(() => setSearchingMembers(false))
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [memberSearch, orgId])
+
+  function handleSelectMember(member: MemberResult) {
+    setSelectedMember(member)
+    setMemberSearch(member.name)
+    setMemberResults([])
+  }
+
+  async function handleSubmit() {
+    if (!positionId || !selectedMember) return
+    setIsSaving(true)
+    try {
+      const res = await fetch('/api/association/member/officer-terms', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'x-org-id': orgId },
+        body: JSON.stringify({
+          positionId,
+          personId: selectedMember.personId,
+          organizationId: orgId,
+          startDate: new Date().toISOString().slice(0, 10),
+          status: 'active',
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to assign')
+      const json = await res.json()
+      const position = positions.find((p) => p.id === positionId)
+      onAssign({
+        id: json.id || crypto.randomUUID(),
+        role: position?.title || 'Officer',
+        name: selectedMember.name,
+        email: selectedMember.email,
+        assignedDate: new Date().toISOString().slice(0, 10),
+        termId: json.id,
+      })
+    } catch {
+      toast.error('Failed to assign officer role')
+    } finally {
+      setPositionId('')
+      setMemberSearch('')
+      setSelectedMember(null)
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -255,38 +329,61 @@ function AssignRoleModal({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label>Role</Label>
-            <Select value={role} onValueChange={setRole}>
+            <Label>Position</Label>
+            <Select value={positionId} onValueChange={setPositionId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder={loadingPositions ? 'Loading positions...' : 'Select a position'} />
               </SelectTrigger>
               <SelectContent>
-                {OFFICER_ROLES.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {r}
+                {positions.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.title}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Member Name</Label>
+            <Label>Member</Label>
             <Input
               value={memberSearch}
-              onChange={(e) => setMemberSearch(e.target.value)}
-              placeholder="Search member by name…"
+              onChange={(e) => {
+                setMemberSearch(e.target.value)
+                setSelectedMember(null)
+              }}
+              placeholder="Search member by name..."
             />
-            <p className="text-[12px] text-[var(--color-muted)]">
-              Full member search coming soon. Enter a name to assign temporarily.
-            </p>
+            {searchingMembers && (
+              <p className="text-[12px] text-[var(--color-muted)]">Searching...</p>
+            )}
+            {memberResults.length > 0 && !selectedMember && (
+              <div className="border border-[var(--color-border-light)] rounded-md max-h-40 overflow-y-auto">
+                {memberResults.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className="w-full text-left px-3 py-2 text-[14px] hover:bg-[var(--color-surface-warm)] transition-colors"
+                    onClick={() => handleSelectMember(m)}
+                  >
+                    <span className="font-medium">{m.name}</span>
+                    {m.email && <span className="text-[var(--color-muted)] ml-2 text-[12px]">{m.email}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+            {selectedMember && (
+              <p className="text-[12px] text-[var(--color-primary)]">
+                Selected: {selectedMember.name}
+              </p>
+            )}
           </div>
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose} disabled={isSaving}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!role || !memberSearch.trim() || isSaving}>
-            {isSaving ? 'Assigning…' : 'Assign'}
+          <Button onClick={handleSubmit} disabled={!positionId || !selectedMember || isSaving}>
+            {isSaving ? 'Assigning...' : 'Assign'}
           </Button>
         </DialogFooter>
       </DialogContent>
