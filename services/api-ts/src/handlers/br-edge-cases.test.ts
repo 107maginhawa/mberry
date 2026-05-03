@@ -14,6 +14,12 @@ import { updateEvent } from './events/updateEvent';
 import { EventsRepository } from './events/repos/events.repo';
 import { getOrganizationBySlug } from './platformadmin/getOrganizationBySlug';
 import { OrganizationRepository, AssociationRepository } from './platformadmin/repos/platform-admin.repo';
+import { issueDigitalCredential } from './association:member/issueDigitalCredential';
+import { CredentialTemplateRepository, DigitalCredentialRepository } from './association:member/repos/credentials.repo';
+import { MembershipRepository } from './association:member/repos/membership.repo';
+import { markComplete } from './training/markComplete';
+import { TrainingRepository } from './training/repos/training.repo';
+import { CreditEntryRepository } from './association:member/repos/credits.repo';
 
 // ─── [BR-10] Impersonation Audit Context ─────────────────
 
@@ -125,14 +131,67 @@ describe('[BR-16] Changing visibility from network-wide to internal warns about 
 // ─── [BR-19] ID Card Generation Blocked for Lapsed/Suspended ─
 
 describe('[BR-19] ID card generation blocked for lapsed/suspended members', () => {
-  // No handler exists yet for ID card generation.
-  // These todos document the expected behavior for when it is implemented.
+  let mocks: ReturnType<typeof stubRepo>;
 
-  test.todo('[BR-19] returns 403 when member status is lapsed');
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+  });
 
-  test.todo('[BR-19] returns 403 when member status is suspended');
+  test('[BR-19] returns 403 when member status is lapsed', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', orgId: 'tenant-1', status: 'lapsed' }),
+    });
+    const tmplMocks = stubRepo(CredentialTemplateRepository, {
+      findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
+    });
+    Object.assign(mocks, tmplMocks);
 
-  test.todo('[BR-19] returns 200 when member status is active');
+    const ctx = makeCtx({
+      _body: { personId: 'person-1', templateId: 'tmpl-1', credentialNumber: 'CRED-001' },
+    });
+
+    await expect(issueDigitalCredential(ctx)).rejects.toThrow(/lapsed/);
+  });
+
+  test('[BR-19] returns 403 when member status is suspended', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', orgId: 'tenant-1', status: 'suspended' }),
+    });
+    const tmplMocks = stubRepo(CredentialTemplateRepository, {
+      findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
+    });
+    Object.assign(mocks, tmplMocks);
+
+    const ctx = makeCtx({
+      _body: { personId: 'person-1', templateId: 'tmpl-1', credentialNumber: 'CRED-001' },
+    });
+
+    await expect(issueDigitalCredential(ctx)).rejects.toThrow(/suspended/);
+  });
+
+  test('[BR-19] returns 200 when member status is active', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', orgId: 'tenant-1', status: 'active' }),
+    });
+    const tmplMocks = stubRepo(CredentialTemplateRepository, {
+      findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
+    });
+    const credMocks = stubRepo(DigitalCredentialRepository, {
+      createOne: async (data: any) => ({ id: 'cred-1', ...data }),
+      updateOneById: async (_id: string, data: any) => ({ id: 'cred-1', ...data }),
+    });
+    Object.assign(mocks, tmplMocks, credMocks);
+
+    const ctx = makeCtx({
+      _body: { personId: 'person-1', templateId: 'tmpl-1', credentialNumber: 'CRED-001' },
+      // auditAction needs logger
+      logger: { info: () => {}, error: () => {}, warn: () => {}, debug: () => {} },
+      audit: { log: () => {} },
+    });
+
+    const response = await issueDigitalCredential(ctx);
+    expect(response.status).toBe(201);
+  });
 
   test('[BR-19] status guard logic: only active members pass', () => {
     // Encode the business rule as a pure function test
@@ -153,14 +212,89 @@ describe('[BR-19] ID card generation blocked for lapsed/suspended members', () =
 // ─── [BR-20] Certificate Blocked Before End Date / Cancelled ─
 
 describe('[BR-20] Certificate blocked before activity end date and for cancelled activities', () => {
-  // No issueCertificate handler exists yet.
-  // These todos document the expected behavior.
+  let mocks: ReturnType<typeof stubRepo>;
 
-  test.todo('[BR-20] returns error when activity has not ended yet');
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+  });
 
-  test.todo('[BR-20] returns error when activity is cancelled');
+  test('[BR-20] returns error when activity has not ended yet', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => ({
+        id: 'train-1',
+        tenantId: 'tenant-1',
+        organizationId: 'org-1',
+        title: 'Future Training',
+        status: 'published',
+        endDate: new Date('2099-12-31'),
+        creditAmount: 5,
+      }),
+    });
 
-  test.todo('[BR-20] returns 200 when activity has ended and is not cancelled');
+    const ctx = makeCtx({
+      _params: { id: 'train-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    await expect(markComplete(ctx)).rejects.toThrow(/not ended yet/);
+  });
+
+  test('[BR-20] returns error when activity is cancelled', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => ({
+        id: 'train-1',
+        tenantId: 'tenant-1',
+        organizationId: 'org-1',
+        title: 'Cancelled Training',
+        status: 'cancelled',
+        endDate: new Date('2020-01-01'),
+        creditAmount: 5,
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'train-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    await expect(markComplete(ctx)).rejects.toThrow(/cancelled/);
+  });
+
+  test('[BR-20] returns 201 when activity has ended and is not cancelled', async () => {
+    const fakeEnrollment = {
+      id: 'enr-1',
+      trainingId: 'train-1',
+      personId: 'person-1',
+      status: 'enrolled',
+      completedAt: null,
+    };
+    mocks = stubRepo(TrainingRepository, {
+      get: async () => ({
+        id: 'train-1',
+        tenantId: 'tenant-1',
+        organizationId: 'org-1',
+        title: 'Past Training',
+        status: 'completed',
+        endDate: new Date('2020-01-01'),
+        creditAmount: 5,
+      }),
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({ ...fakeEnrollment, status, completedAt: new Date() }),
+    });
+    const creditMocks = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => ({ id: 'credit-1', ...data }),
+    });
+    Object.assign(mocks, creditMocks);
+
+    const ctx = makeCtx({
+      _params: { id: 'train-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    const response = await markComplete(ctx);
+    expect(response.status).toBe(201);
+  });
 
   test('[BR-20] guard logic: certificate issuable only after end date for non-cancelled', () => {
     function canIssueCertificate(activity: { endDate: Date; status: string }): { allowed: boolean; reason?: string } {
@@ -193,12 +327,13 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
 // ─── [BR-25] OTP Rate Limiting Per Email ─────────────────
 
 describe('[BR-25] OTP rate limiting enforced per email address', () => {
-  // No OTP handler exists yet. The existing br-p2-gap.test.ts covers
-  // OTP format/validity/attempts. This covers the rate-limit edge case.
+  // Better Auth owns OTP delivery and rate limiting. The rateLimit config is
+  // enabled in auth.ts (rateLimit: { enabled, window, max }). These handler-level
+  // integration tests are skipped because we cannot unit-test Better Auth internals.
 
-  test.todo('[BR-25] returns 429 after 3 failed OTP requests within 1 hour');
+  test.skip('[BR-25] returns 429 after 3 failed OTP requests within 1 hour — Better Auth owns OTP rate limiting', () => {});
 
-  test.todo('[BR-25] rate limit resets after 1 hour window expires');
+  test.skip('[BR-25] rate limit resets after 1 hour window expires — Better Auth owns OTP rate limiting', () => {});
 
   test('[BR-25] rate limiter logic: rejects after threshold within window', () => {
     const MAX_REQUESTS = 3;

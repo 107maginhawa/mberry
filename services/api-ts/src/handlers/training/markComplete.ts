@@ -13,6 +13,16 @@ export async function markComplete(ctx: Context): Promise<Response> {
   const training = await repo.get(trainingId);
   if (!training) throw new NotFoundError('Training not found');
 
+  // [BR-20] Block completion for cancelled activities
+  if (training.status === 'cancelled') {
+    throw new ConflictError('Cannot mark complete: training activity is cancelled');
+  }
+
+  // [BR-20] Block completion before activity end date has passed
+  if (training.endDate && new Date(training.endDate) > new Date()) {
+    throw new ConflictError('Cannot mark complete: training activity has not ended yet');
+  }
+
   // Check enrollment before marking complete
   const enrollmentCount = await repo.getEnrollmentCount(trainingId);
   if (enrollmentCount === 0) throw new ConflictError('No active enrollment found');

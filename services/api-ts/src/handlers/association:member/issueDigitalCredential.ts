@@ -1,8 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { IssueDigitalCredentialBody } from '@/generated/openapi/validators';
-import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { CredentialTemplateRepository, DigitalCredentialRepository } from './repos/credentials.repo';
+import { MembershipRepository } from './repos/membership.repo';
 import { createCredentialToken } from './utils/credential-token';
 import { auditAction } from '@/utils/audit';
 
@@ -26,6 +27,28 @@ export async function issueDigitalCredential(
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
+
+  // [BR-19] Verify the person has an active membership before issuing credentials
+  if (body.membershipId) {
+    const membershipRepo = new MembershipRepository(db, logger);
+    const membership = await membershipRepo.findOneById(body.membershipId);
+    if (!membership) throw new NotFoundError('Membership');
+    if (membership.status !== 'active') {
+      throw new ForbiddenError(
+        `Cannot issue credential: membership status is "${membership.status}". Only active memberships are eligible.`
+      );
+    }
+  } else if (body.personId) {
+    // If no membershipId provided, check if person has any active membership in this org
+    const membershipRepo = new MembershipRepository(db, logger);
+    const membership = await membershipRepo.findByPersonAndOrg(body.personId, tenantId);
+    if (!membership) throw new ForbiddenError('Cannot issue credential: no membership found for this person');
+    if (membership.status !== 'active') {
+      throw new ForbiddenError(
+        `Cannot issue credential: membership status is "${membership.status}". Only active memberships are eligible.`
+      );
+    }
+  }
 
   // Verify template exists
   const templateRepo = new CredentialTemplateRepository(db, logger);
