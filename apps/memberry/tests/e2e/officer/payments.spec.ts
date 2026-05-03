@@ -1,4 +1,4 @@
-// Business Rules: [BR-04] [BR-05] [BR-06] [BR-08]
+// Business Rules: [BR-04] [BR-05] [BR-06] [BR-08] [BR-32]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
 
@@ -65,5 +65,13 @@ test.describe('Officer Payments', () => {
 
     await page.waitForLoadState('networkidle')
     expect(page.url()).toContain('/payments/new')
+  })
+
+  test('[BR-32] payment history page loads', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/payments`)
+    await page.waitForLoadState('networkidle')
+    const hasTable = await page.locator('table, [role="table"]').first().isVisible().catch(() => false)
+    const hasHeading = await page.getByRole('heading').first().isVisible().catch(() => false)
+    expect(hasTable || hasHeading).toBeTruthy()
   })
 })

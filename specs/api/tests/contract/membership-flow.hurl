@@ -1,4 +1,4 @@
-# Business Rules: [BR-01] [BR-03] [BR-22]
+# Business Rules: [BR-01] [BR-03] [BR-22] [BR-23]
 # Membership module contract test: officer creates a category,
 # adds a member, lists members, updates status, and manages
 # applications. Verifies auth enforcement on all custom routes.
@@ -75,6 +75,14 @@ jsonpath "$.data" isCollection
 # ── 4. List applications ───────────────────────────────────
 
 GET {{api}}/membership/applications/ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP 200
+[Asserts]
+jsonpath "$.data" isCollection
+
+
+# ── 5. [BR-23] License number search ──────────────────────
+
+GET {{api}}/membership/members/ed8e3a96-8126-4341-be42-e6eb7940c562?search=PRC
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection

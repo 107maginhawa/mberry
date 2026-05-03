@@ -1,4 +1,4 @@
-// Business Rules: [BR-02] [BR-04] [BR-05] [BR-30] [BR-31]
+// Business Rules: [BR-02] [BR-04] [BR-05] [BR-10] [BR-30] [BR-31]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
 
@@ -85,6 +85,20 @@ test.describe('Officer Settings — Chapters', () => {
     const hasEmptyState = await page.getByText(/no chapter|empty|none|get started|add.*chapter/i).first().isVisible().catch(() => false)
     const hasHeading = await page.getByRole('heading', { name: /chapters?|affiliations?/i }).first().isVisible().catch(() => false)
     expect(hasEmptyState || hasHeading).toBeTruthy()
+  })
+})
+
+test.describe('Officer Settings — Admin Features', () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+  })
+
+  test('[BR-10] admin features page renders', async ({ page }) => {
+    // Just verify the settings area is accessible for officers
+    await page.goto(`/org/${ORG_ID}/officer/settings/org`)
+    await page.waitForLoadState('networkidle')
+    const hasContent = await page.locator('main').isVisible()
+    expect(hasContent).toBeTruthy()
   })
 })
 

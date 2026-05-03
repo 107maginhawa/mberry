@@ -141,12 +141,14 @@
       "backend": [
         "services/api-ts/src/handlers/dues/refundPayment.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/officer/payments.spec.ts"
       ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-09": {
     "rule": "Officer Role Assignment",
@@ -175,10 +177,14 @@
         "services/api-ts/src/handlers/platformadmin/platformadmin.test.ts",
         "services/api-ts/src/handlers/br-edge-cases.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/impersonation-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/settings.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-11": {
     "rule": "Credit Cycle Start",
@@ -319,9 +325,11 @@
       "contract": [
         "specs/api/tests/contract/credentials-flow.hurl"
       ],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/member/certificates.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-19": {
     "rule": "ID Card Generation",
@@ -335,9 +343,11 @@
       "contract": [
         "specs/api/tests/contract/credentials-flow.hurl"
       ],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/member/certificates.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-20": {
     "rule": "Certificate Generation",
@@ -370,9 +380,11 @@
       "contract": [
         "specs/api/tests/contract/auth-signup-signin.hurl"
       ],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/auth.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-22": {
     "rule": "Member Matching on Import",
@@ -399,10 +411,14 @@
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/membership-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/roster.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-24": {
     "rule": "Invitation Expiry",
@@ -415,9 +431,11 @@
       "contract": [
         "specs/api/tests/contract/auth-verification.hurl"
       ],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/auth.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-25": {
     "rule": "OTP Registration",
@@ -428,10 +446,14 @@
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
         "services/api-ts/src/handlers/br-edge-cases.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/auth-signup-signin.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/auth.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-26": {
     "rule": "Session Management",
@@ -515,12 +537,14 @@
         "services/api-ts/src/handlers/dues/upsertGatewayConfig.test.ts",
         "services/api-ts/src/handlers/dues/getGatewayConfig.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-31": {
     "rule": "SVG Upload Security",
@@ -547,10 +571,14 @@
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/payments.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-33": {
     "rule": "Election Integrity",

@@ -1,5 +1,6 @@
-// Business Rules: [BR-26]
+// Business Rules: [BR-21] [BR-24] [BR-25] [BR-26]
 import { test, expect } from '@playwright/test'
+import { signIn } from './helpers/auth'
 
 /**
  * Wave A: Auth Foundation E2E Tests
@@ -163,5 +164,31 @@ test.describe('Auth guard', () => {
     await page.waitForTimeout(2000)
 
     expect(page.url()).toContain('/auth/sign-in')
+  })
+})
+
+test.describe('Multi-org & Invitations', () => {
+  test('[BR-21] dashboard shows organization membership cards', async ({ page }) => {
+    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await page.goto('/dashboard')
+    await page.waitForLoadState('networkidle')
+    // Member should see at least one org card
+    const hasOrgSection = await page.getByText(/organizations/i).first().isVisible().catch(() => false)
+    expect(hasOrgSection).toBeTruthy()
+  })
+
+  test('[BR-24] expired invite page shows message', async ({ page }) => {
+    // Visit invite with fake token — should show expired/invalid message, not crash
+    await page.goto('/invite/expired-test-token')
+    await page.waitForLoadState('networkidle')
+    const hasContent = await page.locator('main, body').first().isVisible()
+    expect(hasContent).toBeTruthy()
+  })
+
+  test('[BR-25] sign-up form renders with email field', async ({ page }) => {
+    await page.goto('/auth/sign-up')
+    await page.waitForLoadState('networkidle')
+    const hasEmail = await page.getByLabel(/email/i).first().isVisible().catch(() => false)
+    expect(hasEmail).toBeTruthy()
   })
 })

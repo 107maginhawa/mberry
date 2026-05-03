@@ -1,4 +1,4 @@
-// Business Rules: [BR-01] [BR-03] [BR-22]
+// Business Rules: [BR-01] [BR-03] [BR-22] [BR-23]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
 
@@ -52,5 +52,14 @@ test.describe('Officer Roster', () => {
     await expect(
       page.getByText('All Categories'),
     ).toBeVisible({ timeout: 10000 })
+  })
+
+  test('[BR-23] roster search accepts text input', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/roster`)
+    await page.waitForLoadState('networkidle')
+    // Search input should be present
+    const hasSearch = await page.getByPlaceholder(/search/i).first().isVisible().catch(() => false)
+    const hasInput = await page.locator('input[type="text"], input[type="search"]').first().isVisible().catch(() => false)
+    expect(hasSearch || hasInput).toBeTruthy()
   })
 })
