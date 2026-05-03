@@ -56,6 +56,7 @@ import { Route as AuthenticatedOrgOrgIdOfficerSettingsGatewayRouteImport } from 
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsFundsRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/funds'
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsDuesRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/dues'
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/chapters'
+import { Route as AuthenticatedOrgOrgIdOfficerRosterImportRouteImport } from './routes/_authenticated/org/$orgId/officer/roster/import'
 import { Route as AuthenticatedOrgOrgIdOfficerRosterMemberIdRouteImport } from './routes/_authenticated/org/$orgId/officer/roster/$memberId'
 import { Route as AuthenticatedOrgOrgIdOfficerReportsFinancialRouteImport } from './routes/_authenticated/org/$orgId/officer/reports/financial'
 import { Route as AuthenticatedOrgOrgIdOfficerReportsCreditsRouteImport } from './routes/_authenticated/org/$orgId/officer/reports/credits'
@@ -336,6 +337,12 @@ const AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute =
     path: '/settings/chapters',
     getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
   } as any)
+const AuthenticatedOrgOrgIdOfficerRosterImportRoute =
+  AuthenticatedOrgOrgIdOfficerRosterImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRosterRoute,
+  } as any)
 const AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute =
   AuthenticatedOrgOrgIdOfficerRosterMemberIdRouteImport.update({
     id: '/$memberId',
@@ -462,6 +469,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
   '/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
   '/org/$orgId/officer/roster/$memberId': typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute
+  '/org/$orgId/officer/roster/import': typeof AuthenticatedOrgOrgIdOfficerRosterImportRoute
   '/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
   '/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
   '/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
@@ -523,6 +531,7 @@ export interface FileRoutesByTo {
   '/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
   '/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
   '/org/$orgId/officer/roster/$memberId': typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute
+  '/org/$orgId/officer/roster/import': typeof AuthenticatedOrgOrgIdOfficerRosterImportRoute
   '/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
   '/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
   '/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
@@ -586,6 +595,7 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
   '/_authenticated/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
   '/_authenticated/org/$orgId/officer/roster/$memberId': typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute
+  '/_authenticated/org/$orgId/officer/roster/import': typeof AuthenticatedOrgOrgIdOfficerRosterImportRoute
   '/_authenticated/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
   '/_authenticated/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
   '/_authenticated/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
@@ -649,6 +659,7 @@ export interface FileRouteTypes {
     | '/org/$orgId/officer/reports/credits'
     | '/org/$orgId/officer/reports/financial'
     | '/org/$orgId/officer/roster/$memberId'
+    | '/org/$orgId/officer/roster/import'
     | '/org/$orgId/officer/settings/chapters'
     | '/org/$orgId/officer/settings/dues'
     | '/org/$orgId/officer/settings/funds'
@@ -710,6 +721,7 @@ export interface FileRouteTypes {
     | '/org/$orgId/officer/reports/credits'
     | '/org/$orgId/officer/reports/financial'
     | '/org/$orgId/officer/roster/$memberId'
+    | '/org/$orgId/officer/roster/import'
     | '/org/$orgId/officer/settings/chapters'
     | '/org/$orgId/officer/settings/dues'
     | '/org/$orgId/officer/settings/funds'
@@ -772,6 +784,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/$orgId/officer/reports/credits'
     | '/_authenticated/org/$orgId/officer/reports/financial'
     | '/_authenticated/org/$orgId/officer/roster/$memberId'
+    | '/_authenticated/org/$orgId/officer/roster/import'
     | '/_authenticated/org/$orgId/officer/settings/chapters'
     | '/_authenticated/org/$orgId/officer/settings/dues'
     | '/_authenticated/org/$orgId/officer/settings/funds'
@@ -1129,6 +1142,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport
       parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
     }
+    '/_authenticated/org/$orgId/officer/roster/import': {
+      id: '/_authenticated/org/$orgId/officer/roster/import'
+      path: '/import'
+      fullPath: '/org/$orgId/officer/roster/import'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerRosterImportRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRosterRoute
+    }
     '/_authenticated/org/$orgId/officer/roster/$memberId': {
       id: '/_authenticated/org/$orgId/officer/roster/$memberId'
       path: '/$memberId'
@@ -1261,12 +1281,15 @@ const AuthenticatedOrgOrgIdOfficerPaymentsRouteWithChildren =
 
 interface AuthenticatedOrgOrgIdOfficerRosterRouteChildren {
   AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute: typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute
+  AuthenticatedOrgOrgIdOfficerRosterImportRoute: typeof AuthenticatedOrgOrgIdOfficerRosterImportRoute
 }
 
 const AuthenticatedOrgOrgIdOfficerRosterRouteChildren: AuthenticatedOrgOrgIdOfficerRosterRouteChildren =
   {
     AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute:
       AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute,
+    AuthenticatedOrgOrgIdOfficerRosterImportRoute:
+      AuthenticatedOrgOrgIdOfficerRosterImportRoute,
   }
 
 const AuthenticatedOrgOrgIdOfficerRosterRouteWithChildren =

@@ -48,6 +48,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSi
       items: [
         { to: `${base}/roster`, label: "Roster", icon: Users },
         { to: `${base}/applications`, label: "Applications", icon: Inbox },
+        { to: `${base}/roster/import`, label: "Import", icon: Upload },
       ],
     },
     {
