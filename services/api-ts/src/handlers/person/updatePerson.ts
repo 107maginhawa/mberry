@@ -25,9 +25,12 @@ export async function updatePerson(
   // Get authenticated user (guaranteed by auth middleware)
   const user = ctx.get('user') as User;
   
-  // Get path parameter
-  const personId = ctx.req.param('person');
-  
+  // Get path parameter — handle "me" alias
+  let personId = ctx.req.param('person');
+  if (personId === 'me') {
+    personId = user.id;
+  }
+
   // Check authorization - only owner can update their own record
   if (user.id !== personId) {
     throw new ForbiddenError('You can only update your own profile');

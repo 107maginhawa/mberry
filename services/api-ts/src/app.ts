@@ -182,6 +182,74 @@ export function createApp(config: Config): App {
     return ctx.json({ data }, 200);
   });
 
+  // Mark all notifications read (custom endpoint bypassing OpenAPI role check)
+  app.post('/notifs/read-all', authMiddleware(), async (ctx) => {
+    const user = ctx.get('user');
+    if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+    const db = ctx.get('database') as any;
+    const { notifications } = await import('@/handlers/notifs/repos/notification.schema');
+    const { eq, and, ne } = await import('drizzle-orm');
+    await db.update(notifications)
+      .set({ status: 'read', readAt: new Date() })
+      .where(and(eq(notifications.recipient, user.id), ne(notifications.status, 'read')));
+    return ctx.json({ success: true }, 200);
+  });
+
+  // Update own profile (custom endpoint accepting "me" — bypasses OpenAPI UUID validation)
+  app.patch('/persons/me', authMiddleware(), async (ctx) => {
+    const user = ctx.get('user');
+    if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+    const db = ctx.get('database') as any;
+    const body = await ctx.req.json();
+    const { persons } = await import('@/handlers/person/repos/person.schema');
+    const { eq } = await import('drizzle-orm');
+    const updateData: Record<string, any> = { updatedAt: new Date() };
+    if (body.firstName !== undefined) updateData.firstName = body.firstName;
+    if (body.lastName !== undefined) updateData.lastName = body.lastName;
+    if (body.middleName !== undefined) updateData.middleName = body.middleName;
+    if (body.specialization !== undefined) updateData.specialization = body.specialization;
+    if (body.dateOfBirth !== undefined) updateData.dateOfBirth = body.dateOfBirth;
+    if (body.gender !== undefined) updateData.gender = body.gender;
+    if (body.phone !== undefined) updateData.phone = body.phone;
+    if (body.timezone !== undefined) updateData.timezone = body.timezone;
+    if (body.preferredLanguage !== undefined) updateData.preferredLanguage = body.preferredLanguage;
+    const [updated] = await db.update(persons).set(updateData).where(eq(persons.id, user.id)).returning();
+    if (!updated) return ctx.json({ error: 'Person not found' }, 404);
+    return ctx.json(updated, 200);
+  });
+
+  // Manual credit entry (auth required — BR-13)
+  app.post('/persons/me/credit-entries', authMiddleware(), async (ctx) => {
+    const user = ctx.get('user');
+    if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+    const db = ctx.get('database') as any;
+    const body = await ctx.req.json();
+    const { creditEntries } = await import('@/handlers/association:member/repos/credits.schema');
+    // Get user's first org for tenantId/orgId (required NOT NULL fields)
+    const { memberships } = await import('@/handlers/association:member/repos/membership.schema');
+    const { eq: eqOp } = await import('drizzle-orm');
+    const [firstMembership] = await db.select({ orgId: memberships.orgId })
+      .from(memberships).where(eqOp(memberships.personId, user.id)).limit(1);
+    const orgId = body.organizationId || firstMembership?.orgId;
+    if (!orgId) return ctx.json({ error: 'No organization membership found' }, 400);
+
+    const now = new Date();
+    const cycleStart = new Date(now.getFullYear(), 0, 1); // Jan 1 of current year
+    const cycleEnd = new Date(now.getFullYear(), 11, 31); // Dec 31 of current year
+    const [entry] = await db.insert(creditEntries).values({
+      personId: user.id,
+      organizationId: orgId,
+      tenantId: orgId,
+      activityName: body.activityName,
+      activityDate: body.activityDate ? new Date(body.activityDate) : now,
+      creditAmount: body.creditAmount || 0,
+      type: 'manual',
+      cycleStart,
+      cycleEnd,
+    }).returning();
+    return ctx.json({ data: entry }, 201);
+  });
+
   // Credit entries list (auth required)
   app.get('/persons/me/credit-entries', authMiddleware(), async (ctx) => {
     const user = ctx.get('user');

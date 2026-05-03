@@ -24,5 +24,6 @@ trainingRouter.post('/create/:orgId', officerAuth, createTraining);
 trainingRouter.put('/update/:id', updateTraining);    // per-handler (no orgId param)
 trainingRouter.post('/cancel/:id', cancelTraining);   // per-handler
 trainingRouter.post('/complete/:id', markComplete);   // per-handler
+trainingRouter.post('/:id/check-in', markComplete);   // alias for attendance UI
 
 export { trainingRouter };
