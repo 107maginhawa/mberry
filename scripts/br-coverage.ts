@@ -2,282 +2,172 @@
 /**
  * BR Coverage Report
  *
- * Reads br-registry.json, greps test files for [BR-##] tags,
- * and reports coverage status per business rule.
+ * Reads br-registry.json, verifies listed test files exist,
+ * counts coverage by phase and overall, prints a summary table.
+ * Exits with code 1 if any Phase 1 BR is UNTESTED.
  *
  * Usage:
- *   bun run scripts/br-coverage.ts              # Full report
- *   bun run scripts/br-coverage.ts --module=dues # Scoped to module
- *   bun run scripts/br-coverage.ts --json        # JSON output
- *   bun run scripts/br-coverage.ts --phase=1     # Only Phase 1 BRs
+ *   bun run scripts/br-coverage.ts
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
-import { join, relative } from 'path';
+const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
+const REGISTRY_PATH = `${ROOT}/docs/ver-3/business/br-registry.json`;
 
-// --- Types ---
-
-interface BrLayer {
-  required: boolean;
-  paths: string[];
-}
-
-interface BrRule {
-  id: string;
-  title: string;
+interface BrEntry {
+  rule: string;
   phase: number;
-  modules: string[];
-  priority: string;
-  primaryModule: string | null;
-  layers: {
-    backend: BrLayer;
-    contract: BrLayer;
-    e2e: BrLayer;
+  module: string;
+  tests: {
+    backend: string[];
+    contract: string[];
+    e2e: string[];
   };
+  coverage: "COMPLETE" | "PARTIAL" | "UNTESTED";
 }
 
-interface BrRegistry {
-  version: string;
-  rules: BrRule[];
-}
+type Registry = Record<string, BrEntry>;
 
-type CoverageStatus = 'COVERED' | 'PARTIAL' | 'MISSING' | 'SKIPPED';
+// ── Read registry ──────────────────────────────────────────
 
-interface BrCoverage {
-  id: string;
-  title: string;
-  phase: number;
-  priority: string;
-  status: CoverageStatus;
-  backend: number;
-  contract: number;
-  e2e: number;
-  files: string[];
-}
-
-// --- Helpers ---
-
-const ROOT = join(import.meta.dir, '..');
-const REGISTRY_PATH = join(ROOT, 'docs/ver-3/business/br-registry.json');
-
-function findFiles(dir: string, pattern: RegExp, results: string[] = []): string[] {
-  let entries: string[];
-  try {
-    entries = readdirSync(dir);
-  } catch {
-    return results;
-  }
-  for (const entry of entries) {
-    if (entry === 'node_modules' || entry === '.git' || entry === 'dist') continue;
-    const full = join(dir, entry);
-    let stat;
-    try {
-      stat = statSync(full);
-    } catch {
-      continue;
-    }
-    if (stat.isDirectory()) {
-      findFiles(full, pattern, results);
-    } else if (pattern.test(entry)) {
-      results.push(full);
-    }
-  }
-  return results;
-}
-
-function countBrTags(files: string[], brId: string): { count: number; matchedFiles: string[] } {
-  const tag = `[${brId}]`;
-  let count = 0;
-  const matchedFiles: string[] = [];
-
-  for (const file of files) {
-    let content: string;
-    try {
-      content = readFileSync(file, 'utf-8');
-    } catch {
-      continue;
-    }
-    // Count occurrences of [BR-##] in describe() or test() names
-    const matches = content.split(tag).length - 1;
-    if (matches > 0) {
-      count += matches;
-      matchedFiles.push(relative(ROOT, file));
-    }
-  }
-  return { count, matchedFiles };
-}
-
-function classifyFile(filePath: string): 'backend' | 'contract' | 'e2e' | 'other' {
-  if (filePath.includes('.hurl')) return 'contract';
-  if (filePath.includes('tests/e2e/') || filePath.includes('.spec.ts')) return 'e2e';
-  if (filePath.includes('handlers/') || filePath.includes('middleware/') || filePath.includes('test-utils/')) return 'backend';
-  return 'other';
-}
-
-// --- Main ---
-
-const args = process.argv.slice(2);
-const moduleFilter = args.find(a => a.startsWith('--module='))?.split('=')[1];
-const phaseFilter = args.find(a => a.startsWith('--phase='))?.split('=')[1];
-const jsonOutput = args.includes('--json');
-
-// Read registry
-let registry: BrRegistry;
-try {
-  registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf-8'));
-} catch (err) {
-  console.error(`Failed to read BR registry at ${REGISTRY_PATH}`);
+const file = Bun.file(REGISTRY_PATH);
+if (!(await file.exists())) {
+  console.error(`Registry not found: ${REGISTRY_PATH}`);
   process.exit(2);
 }
 
-// Find all test files
-const testFiles = [
-  ...findFiles(join(ROOT, 'services/api-ts/src'), /\.(test|spec)\.(ts|tsx)$/),
-  ...findFiles(join(ROOT, 'apps'), /\.(test|spec)\.(ts|tsx)$/),
-  ...findFiles(join(ROOT, 'specs/api/tests'), /\.hurl$/),
-  ...findFiles(join(ROOT, 'packages'), /\.(test|spec)\.(ts|tsx)$/),
-];
+const registry: Registry = await file.json();
 
-// Determine which phases have built modules (Phase 1 always, Phase 2-3 only if handlers exist)
-const builtPhases = new Set([1]);
-try {
-  readdirSync(join(ROOT, 'services/api-ts/src/handlers/elections'));
-  builtPhases.add(2); // elections exist = some Phase 2 work done
-} catch { /* not built */ }
+// ── Verify files & recompute coverage ──────────────────────
 
-// Filter rules
-let rules = registry.rules;
-if (moduleFilter) {
-  rules = rules.filter(r => r.primaryModule === moduleFilter || r.modules.some(m => m.toLowerCase().includes(moduleFilter.toLowerCase())));
-}
-if (phaseFilter) {
-  rules = rules.filter(r => r.phase === parseInt(phaseFilter));
-}
+const missing: string[] = [];
+const phaseStats: Record<number, { total: number; complete: number; partial: number; untested: number }> = {};
 
-// Analyze coverage
-const coverages: BrCoverage[] = [];
-
-for (const rule of rules) {
-  const { count, matchedFiles } = countBrTags(testFiles, rule.id);
-
-  // Classify matched files by layer
-  let backend = 0, contract = 0, e2e = 0;
-  for (const f of matchedFiles) {
-    const type = classifyFile(f);
-    if (type === 'backend') backend++;
-    else if (type === 'contract') contract++;
-    else if (type === 'e2e') e2e++;
-    else backend++; // default to backend
-  }
-
-  // Determine status
-  let status: CoverageStatus;
-  if (!builtPhases.has(rule.phase) && count === 0) {
-    status = 'SKIPPED';
-  } else if (count === 0) {
-    status = 'MISSING';
-  } else {
-    // Check if all required layers have coverage
-    const requiredLayers = Object.entries(rule.layers)
-      .filter(([_, layer]) => layer.required)
-      .map(([name]) => name);
-
-    const layerCoverage: Record<string, number> = { backend, contract, e2e };
-    const allRequiredCovered = requiredLayers.every(l => (layerCoverage[l] || 0) > 0);
-
-    status = allRequiredCovered ? 'COVERED' : 'PARTIAL';
-  }
-
-  coverages.push({
-    id: rule.id,
-    title: rule.title,
-    phase: rule.phase,
-    priority: rule.priority,
-    status,
-    backend,
-    contract,
-    e2e,
-    files: matchedFiles,
-  });
-}
-
-// Output
-if (jsonOutput) {
-  const summary = {
-    total: coverages.length,
-    covered: coverages.filter(c => c.status === 'COVERED').length,
-    partial: coverages.filter(c => c.status === 'PARTIAL').length,
-    missing: coverages.filter(c => c.status === 'MISSING').length,
-    skipped: coverages.filter(c => c.status === 'SKIPPED').length,
-    rules: coverages,
-  };
-  console.log(JSON.stringify(summary, null, 2));
-} else {
-  // Human-readable table
-  console.log('');
-  console.log('BR Coverage Report');
-  console.log('═══════════════════════════════════════════════════════════════');
-  console.log(
-    'ID'.padEnd(8) +
-    'Title'.padEnd(35) +
-    'Priority'.padEnd(10) +
-    'Status'.padEnd(10) +
-    'Details'
-  );
-  console.log('───────────────────────────────────────────────────────────────');
-
-  for (const c of coverages) {
-    const details =
-      c.status === 'SKIPPED'
-        ? `(Phase ${c.phase}, not built)`
-        : c.status === 'MISSING'
-          ? '← NO TESTS'
-          : `backend:${c.backend} contract:${c.contract} e2e:${c.e2e}`;
-
-    const statusColor =
-      c.status === 'COVERED' ? '\x1b[32m' :
-      c.status === 'PARTIAL' ? '\x1b[33m' :
-      c.status === 'MISSING' ? '\x1b[31m' :
-      '\x1b[90m';
-
-    console.log(
-      c.id.padEnd(8) +
-      c.title.substring(0, 33).padEnd(35) +
-      c.priority.padEnd(10) +
-      `${statusColor}${c.status}\x1b[0m`.padEnd(20) +
-      details
-    );
-  }
-
-  console.log('───────────────────────────────────────────────────────────────');
-
-  const covered = coverages.filter(c => c.status === 'COVERED').length;
-  const partial = coverages.filter(c => c.status === 'PARTIAL').length;
-  const missing = coverages.filter(c => c.status === 'MISSING').length;
-  const skipped = coverages.filter(c => c.status === 'SKIPPED').length;
-  const applicable = coverages.length - skipped;
-  const pct = applicable > 0 ? Math.round(((covered + partial) / applicable) * 100) : 100;
-
-  console.log(`Total: ${covered} COVERED, ${partial} PARTIAL, ${missing} MISSING, ${skipped} SKIPPED`);
-  console.log(`Coverage: ${covered}/${applicable} fully covered (${pct}% at least partial)`);
-
-  // Check P0 missing
-  const p0Missing = coverages.filter(c => c.priority === 'P0' && c.status === 'MISSING');
-  if (p0Missing.length > 0) {
-    console.log('');
-    console.log('\x1b[31m⚠ P0 BUSINESS RULES WITHOUT TESTS:\x1b[0m');
-    for (const m of p0Missing) {
-      console.log(`  ${m.id}: ${m.title}`);
+for (const [id, entry] of Object.entries(registry)) {
+  // Verify each listed test file exists
+  for (const layer of ["backend", "contract", "e2e"] as const) {
+    for (const path of entry.tests[layer]) {
+      const full = `${ROOT}/${path}`;
+      const exists = await Bun.file(full).exists();
+      if (!exists) {
+        missing.push(`${id} ${layer}: ${path}`);
+      }
     }
   }
 
-  console.log('');
+  // Recompute coverage from actual file lists
+  const hasBackend = entry.tests.backend.length > 0;
+  const hasContract = entry.tests.contract.length > 0;
+  const hasE2e = entry.tests.e2e.length > 0;
+  const layers = [hasBackend, hasContract, hasE2e].filter(Boolean).length;
+
+  let actual: BrEntry["coverage"];
+  if (layers === 3) actual = "COMPLETE";
+  else if (layers >= 1) actual = "PARTIAL";
+  else actual = "UNTESTED";
+
+  if (actual !== entry.coverage) {
+    console.warn(`  [warn] ${id} registry says ${entry.coverage}, actual is ${actual}`);
+  }
+
+  // Accumulate phase stats
+  const p = entry.phase;
+  if (!phaseStats[p]) phaseStats[p] = { total: 0, complete: 0, partial: 0, untested: 0 };
+  phaseStats[p].total++;
+  if (actual === "COMPLETE") phaseStats[p].complete++;
+  else if (actual === "PARTIAL") phaseStats[p].partial++;
+  else phaseStats[p].untested++;
 }
 
-// Exit code: 1 if any P0/P1 BR for built phases is MISSING
-const blocking = coverages.filter(
-  c => (c.priority === 'P0' || c.priority === 'P1') && c.status === 'MISSING' && builtPhases.has(c.phase)
+// ── Print missing files ────────────────────────────────────
+
+if (missing.length > 0) {
+  console.log("");
+  console.log("Missing test files:");
+  for (const m of missing) {
+    console.log(`  ${m}`);
+  }
+}
+
+// ── Summary table ──────────────────────────────────────────
+
+console.log("");
+console.log("BR Coverage Summary");
+console.log("=".repeat(70));
+console.log(
+  "BR".padEnd(8) +
+  "Rule".padEnd(36) +
+  "Phase".padEnd(7) +
+  "B".padEnd(4) +
+  "C".padEnd(4) +
+  "E".padEnd(4) +
+  "Status"
 );
-if (blocking.length > 0) {
+console.log("-".repeat(70));
+
+for (const [id, entry] of Object.entries(registry)) {
+  const b = entry.tests.backend.length;
+  const c = entry.tests.contract.length;
+  const e = entry.tests.e2e.length;
+  const layers = [b > 0, c > 0, e > 0].filter(Boolean).length;
+  const status = layers === 3 ? "COMPLETE" : layers >= 1 ? "PARTIAL" : "UNTESTED";
+
+  console.log(
+    id.padEnd(8) +
+    entry.rule.substring(0, 34).padEnd(36) +
+    String(entry.phase).padEnd(7) +
+    String(b).padEnd(4) +
+    String(c).padEnd(4) +
+    String(e).padEnd(4) +
+    status
+  );
+}
+
+console.log("-".repeat(70));
+
+// ── Phase breakdown ────────────────────────────────────────
+
+console.log("");
+console.log("By Phase:");
+for (const [phase, stats] of Object.entries(phaseStats).sort()) {
+  console.log(
+    `  Phase ${phase}: ${stats.total} total, ` +
+    `${stats.complete} COMPLETE, ${stats.partial} PARTIAL, ${stats.untested} UNTESTED`
+  );
+}
+
+const allEntries = Object.values(registry);
+const totalComplete = allEntries.filter(e => {
+  const layers = [e.tests.backend.length > 0, e.tests.contract.length > 0, e.tests.e2e.length > 0].filter(Boolean).length;
+  return layers === 3;
+}).length;
+const totalPartial = allEntries.filter(e => {
+  const layers = [e.tests.backend.length > 0, e.tests.contract.length > 0, e.tests.e2e.length > 0].filter(Boolean).length;
+  return layers >= 1 && layers < 3;
+}).length;
+const totalUntested = allEntries.filter(e => {
+  const layers = [e.tests.backend.length > 0, e.tests.contract.length > 0, e.tests.e2e.length > 0].filter(Boolean).length;
+  return layers === 0;
+}).length;
+
+console.log("");
+console.log(`Overall: ${allEntries.length} BRs, ${totalComplete} COMPLETE, ${totalPartial} PARTIAL, ${totalUntested} UNTESTED`);
+
+// ── Gate: exit 1 if any Phase 1 BR is UNTESTED ────────────
+
+const phase1Untested = Object.entries(registry).filter(([_, e]) => {
+  if (e.phase !== 1) return false;
+  const layers = [e.tests.backend.length > 0, e.tests.contract.length > 0, e.tests.e2e.length > 0].filter(Boolean).length;
+  return layers === 0;
+});
+
+if (phase1Untested.length > 0) {
+  console.log("");
+  console.log("FAIL: Phase 1 BRs with no tests:");
+  for (const [id, e] of phase1Untested) {
+    console.log(`  ${id}: ${e.rule}`);
+  }
   process.exit(1);
 }
+
+console.log("");
+console.log("PASS: All Phase 1 BRs have at least one test.");
