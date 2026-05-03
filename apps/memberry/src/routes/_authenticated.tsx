@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router"
 import { requireAuth } from "@/utils/guards"
 import { MemberSidebar } from "@/components/layout/member-sidebar"
 import { MemberBottomNav } from "@/components/layout/member-bottom-nav"
@@ -10,6 +10,15 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
   const { user } = Route.useRouteContext() as any
+  const matches = useMatches()
+
+  // Officer routes render their own shell via the officer layout route.
+  // Detect if we're inside an officer route to avoid double-wrapping.
+  const isOfficerRoute = matches.some((m) => m.routeId.includes("/officer"))
+
+  if (isOfficerRoute) {
+    return <Outlet />
+  }
 
   return (
     <div className="flex min-h-screen bg-[var(--color-bg)]">

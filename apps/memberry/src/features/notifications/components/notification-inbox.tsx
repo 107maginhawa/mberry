@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Bell, Megaphone, CreditCard, Calendar, BookOpen, Settings, CheckCheck } from 'lucide-react'
+import { Bell, Megaphone, CreditCard, Calendar, BookOpen, Settings, CheckCheck, Loader2 } from 'lucide-react'
 
 type NotifCategory = 'All' | 'Announcements' | 'Payments' | 'Events' | 'Training' | 'System'
 
@@ -13,72 +13,24 @@ interface Notification {
   createdAt: Date
 }
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    title: 'Your dues payment was received',
-    body: 'Payment of ₱1,200 for PDA Manila Chapter has been confirmed.',
-    category: 'Payments',
-    read: false,
-    createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
-  },
-  {
-    id: '2',
-    title: 'Annual Convention 2026 — Registration now open',
-    body: 'Join us at the SMX Convention Center on June 12–14, 2026.',
-    category: 'Events',
-    read: false,
-    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
-  },
-  {
-    id: '3',
-    title: 'Board announcement: New membership categories',
-    body: 'The board has approved two new membership tiers effective Q3 2026.',
-    category: 'Announcements',
-    read: false,
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-  },
-  {
-    id: '4',
-    title: 'CPD Training: Implant Dentistry Basics',
-    body: 'A new 3-credit CPD training is available. Enroll before May 30.',
-    category: 'Training',
-    read: true,
-    createdAt: new Date(Date.now() - 28 * 60 * 60 * 1000),
-  },
-  {
-    id: '5',
-    title: 'Invoice #INV-2026-0042 is now due',
-    body: 'Your renewal invoice of ₱1,500 is due on May 15, 2026.',
-    category: 'Payments',
-    read: true,
-    createdAt: new Date(Date.now() - 30 * 60 * 60 * 1000),
-  },
-  {
-    id: '6',
-    title: 'Regional Summit — Early bird closes May 10',
-    body: 'Secure your seat at the Southern Luzon Regional Summit.',
-    category: 'Events',
-    read: true,
-    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '7',
-    title: 'Welcome to Memberry',
-    body: 'Your account has been set up. Complete your profile to get started.',
-    category: 'System',
-    read: true,
-    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '8',
-    title: 'Monthly newsletter: April 2026',
-    body: 'Read the latest news and updates from the association.',
-    category: 'Announcements',
-    read: true,
-    createdAt: new Date(Date.now() - 32 * 24 * 60 * 60 * 1000),
-  },
-]
+function mapTypeToCategory(type: string): NotifCategory {
+  if (type === 'billing') return 'Payments'
+  if (type.startsWith('booking.')) return 'Events'
+  if (type.startsWith('comms.')) return 'Announcements'
+  if (type === 'system' || type === 'security') return 'System'
+  return 'System'
+}
+
+function mapApiNotification(raw: any): Notification {
+  return {
+    id: raw.id,
+    title: raw.title || 'Notification',
+    body: raw.message || '',
+    category: mapTypeToCategory(raw.type || 'system'),
+    read: raw.status === 'read',
+    createdAt: new Date(raw.createdAt || raw.sentAt || Date.now()),
+  }
+}
 
 const CATEGORIES: NotifCategory[] = ['All', 'Announcements', 'Payments', 'Events', 'Training', 'System']
 
@@ -104,8 +56,31 @@ function getDateGroup(date: Date): string {
 const GROUP_ORDER = ['Today', 'Yesterday', 'This Week', 'Earlier']
 
 export function NotificationInbox() {
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState<NotifCategory>('All')
+
+  useEffect(() => {
+    fetchNotifications()
+  }, [])
+
+  async function fetchNotifications() {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/notifications?limit=50&channel=in-app', { credentials: 'include' })
+      if (!res.ok) throw new Error('Failed to load notifications')
+      const json = await res.json()
+      const items = (json.data || json.items || []).map(mapApiNotification)
+      setNotifications(items)
+    } catch {
+      setError('Could not load notifications')
+      setNotifications([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filtered = useMemo(() => {
     return activeCategory === 'All'
@@ -128,16 +103,41 @@ export function NotificationInbox() {
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
-  function markAllRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  async function markAllRead() {
+    try {
+      await fetch('/api/notifications/read-all', { method: 'POST', credentials: 'include' })
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    } catch {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    }
   }
 
-  function markRead(id: string) {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+  async function markRead(id: string) {
+    try {
+      await fetch(`/api/notifications/${id}/read`, { method: 'POST', credentials: 'include' })
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+    } catch {
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-[var(--color-muted)]">
+        <Loader2 size={24} className="animate-spin mr-2" />
+        Loading notifications...
+      </div>
+    )
   }
 
   return (
     <div className="space-y-5">
+      {error && (
+        <div className="rounded-[12px] border border-[var(--color-error)]/20 bg-[var(--color-error)]/5 p-4 text-[14px] text-[var(--color-error)]">
+          {error}
+        </div>
+      )}
+
       {/* Header row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -176,7 +176,7 @@ export function NotificationInbox() {
       {/* Notification list */}
       {grouped.length === 0 ? (
         <div className="rounded-[12px] border border-[var(--color-border-light)] p-10 text-center text-[var(--color-muted)]">
-          No notifications in this category
+          {notifications.length === 0 ? 'No notifications yet' : 'No notifications in this category'}
         </div>
       ) : (
         <div className="space-y-6">

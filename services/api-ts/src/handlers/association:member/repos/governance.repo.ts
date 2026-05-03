@@ -62,6 +62,32 @@ export class OfficerTermRepository {
     return row;
   }
 
+  async findActiveByPersonAndOrg(personId: string, orgId: string): Promise<(OfficerTerm & { positionTitle: string })[]> {
+    const rows = await this.db
+      .select({
+        id: officerTerms.id,
+        tenantId: officerTerms.tenantId,
+        positionId: officerTerms.positionId,
+        personId: officerTerms.personId,
+        organizationId: officerTerms.organizationId,
+        status: officerTerms.status,
+        startDate: officerTerms.startDate,
+        endDate: officerTerms.endDate,
+        notes: officerTerms.notes,
+        createdAt: officerTerms.createdAt,
+        updatedAt: officerTerms.updatedAt,
+        positionTitle: positions.title,
+      })
+      .from(officerTerms)
+      .innerJoin(positions, eq(officerTerms.positionId, positions.id))
+      .where(and(
+        eq(officerTerms.personId, personId),
+        eq(officerTerms.organizationId, orgId),
+        eq(officerTerms.status, 'active'),
+      ));
+    return rows;
+  }
+
   async update(id: string, data: Partial<OfficerTerm>): Promise<OfficerTerm | undefined> {
     const [row] = await this.db.update(officerTerms).set({ ...data, updatedAt: new Date() }).where(eq(officerTerms.id, id)).returning();
     return row;

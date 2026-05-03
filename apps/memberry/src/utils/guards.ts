@@ -27,6 +27,43 @@ export async function requireGuest({ context }: { context: RouterContext }) {
 }
 
 /**
+ * Requires user to be an active officer for the org specified by $orgId route param.
+ * Checks org+role (per BR-09, BR-21: roles are per-org, not global).
+ * Returns officer positions in route context for downstream use.
+ */
+export async function requireOrgOfficer({ context, params }: { context: RouterContext; params: { orgId: string } }) {
+  const user = (context as any).auth?.user
+  if (!user) {
+    throw redirect({
+      to: '/auth/$authView',
+      params: { authView: 'sign-in' },
+    })
+  }
+
+  const orgId = params.orgId
+  if (!orgId) {
+    throw redirect({ to: '/' })
+  }
+
+  try {
+    const res = await fetch(`/api/persons/me/officer-role/${orgId}`, {
+      credentials: 'include',
+    })
+    if (!res.ok) {
+      throw redirect({ to: '/dashboard' })
+    }
+    const { data } = await res.json()
+    if (!data.isOfficer) {
+      throw redirect({ to: '/dashboard' })
+    }
+    return { officerPositions: data.positions, orgId }
+  } catch (err) {
+    if (err instanceof Error && 'to' in (err as any)) throw err
+    throw redirect({ to: '/dashboard' })
+  }
+}
+
+/**
  * Compose multiple guards into a single beforeLoad handler.
  */
 export function composeGuards(...guards: Array<(opts: any) => Promise<any> | any>) {

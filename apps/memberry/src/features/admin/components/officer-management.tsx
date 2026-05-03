@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { UserPlus, Trash2, Shield } from 'lucide-react'
+import { UserPlus, Trash2, Shield, Loader2 } from 'lucide-react'
 
 interface OfficerManagementProps {
   orgId: string
@@ -24,58 +24,83 @@ const OFFICER_ROLES: OfficerRole[] = [
 
 interface Officer {
   id: string
-  role: OfficerRole
+  role: string
   name: string
   email: string
   assignedDate: string
+  termId?: string
 }
 
-const MOCK_OFFICERS: Officer[] = [
-  {
-    id: '1',
-    role: 'President',
-    name: 'Dr. Maria Santos',
-    email: 'msantos@org.example.com',
-    assignedDate: '2024-01-15',
-  },
-  {
-    id: '2',
-    role: 'Vice President',
-    name: 'Dr. Jose Reyes',
-    email: 'jreyes@org.example.com',
-    assignedDate: '2024-01-15',
-  },
-  {
-    id: '3',
-    role: 'Secretary',
-    name: 'Dr. Ana Cruz',
-    email: 'acruz@org.example.com',
-    assignedDate: '2024-01-15',
-  },
-  {
-    id: '4',
-    role: 'Treasurer',
-    name: 'Dr. Ricardo Lim',
-    email: 'rlim@org.example.com',
-    assignedDate: '2024-03-01',
-  },
-]
-
-export function OfficerManagement({ orgId: _orgId }: OfficerManagementProps) {
-  const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS)
+export function OfficerManagement({ orgId }: OfficerManagementProps) {
+  const [officers, setOfficers] = useState<Officer[]>([])
+  const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState<Officer | null>(null)
 
-  function handleRemove(officer: Officer) {
-    setOfficers((prev) => prev.filter((o) => o.id !== officer.id))
+  useEffect(() => {
+    fetchOfficers()
+  }, [orgId])
+
+  async function fetchOfficers() {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/association/member/officer-terms?orgId=${orgId}`, {
+        credentials: 'include',
+        headers: { 'x-org-id': orgId },
+      })
+      if (!res.ok) throw new Error('Failed to fetch')
+      const json = await res.json()
+      const terms = json.data || json.items || []
+      // Map API officer terms to display format
+      const mapped: Officer[] = terms
+        .filter((t: any) => t.status === 'active')
+        .map((t: any) => ({
+          id: t.id,
+          role: t.position?.title || t.positionTitle || 'Officer',
+          name: t.person?.name || t.personName || 'Unknown',
+          email: t.person?.email || t.personEmail || '',
+          assignedDate: t.startDate ? new Date(t.startDate).toISOString().slice(0, 10) : '',
+          termId: t.id,
+        }))
+      setOfficers(mapped)
+    } catch {
+      toast.error('Could not load officers')
+      setOfficers([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleRemove(officer: Officer) {
+    try {
+      const termId = officer.termId || officer.id
+      await fetch(`/api/association/member/officer-terms/${termId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'x-org-id': orgId },
+      })
+      setOfficers((prev) => prev.filter((o) => o.id !== officer.id))
+      toast.success(`${officer.name} removed as ${officer.role}`)
+    } catch {
+      toast.error('Failed to remove officer')
+    }
     setConfirmRemove(null)
-    toast.success(`${officer.name} removed as ${officer.role}`)
   }
 
   function handleAssigned(officer: Officer) {
     setOfficers((prev) => [...prev, officer])
     setShowModal(false)
     toast.success(`${officer.name} assigned as ${officer.role}`)
+    fetchOfficers()
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-[var(--color-muted)]">
+        <Loader2 size={24} className="animate-spin mr-2" />
+        Loading officers...
+      </div>
+    )
   }
 
   return (
@@ -129,11 +154,11 @@ export function OfficerManagement({ orgId: _orgId }: OfficerManagementProps) {
                   <td className="px-5 py-3.5">
                     <div>
                       <p className="font-medium">{o.name}</p>
-                      <p className="text-[12px] text-[var(--color-muted)]">{o.email}</p>
+                      {o.email && <p className="text-[12px] text-[var(--color-muted)]">{o.email}</p>}
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-[var(--color-muted)] hidden md:table-cell">
-                    {new Date(o.assignedDate).toLocaleDateString()}
+                    {o.assignedDate ? new Date(o.assignedDate).toLocaleDateString() : '—'}
                   </td>
                   <td className="px-5 py-3.5 text-right">
                     <Button
@@ -152,11 +177,12 @@ export function OfficerManagement({ orgId: _orgId }: OfficerManagementProps) {
         </table>
       </div>
 
-      {/* Assign Role modal */}
+      {/* Assign Role modal — TODO: needs member search API + position list API for full wiring */}
       <AssignRoleModal
         open={showModal}
         onClose={() => setShowModal(false)}
         onAssign={handleAssigned}
+        orgId={orgId}
       />
 
       {/* Confirm remove */}
@@ -192,10 +218,12 @@ function AssignRoleModal({
   open,
   onClose,
   onAssign,
+  orgId: _orgId,
 }: {
   open: boolean
   onClose: () => void
   onAssign: (officer: Officer) => void
+  orgId: string
 }) {
   const [role, setRole] = useState<string>('')
   const [memberSearch, setMemberSearch] = useState('')
@@ -204,12 +232,14 @@ function AssignRoleModal({
   async function handleSubmit() {
     if (!role || !memberSearch.trim()) return
     setIsSaving(true)
+    // TODO: Wire to POST /api/association/member/officer-terms with real positionId + personId
+    // Currently creates a local-only record. Needs: position list endpoint + member search endpoint.
     await new Promise((r) => setTimeout(r, 400))
     onAssign({
       id: crypto.randomUUID(),
-      role: role as OfficerRole,
+      role: role,
       name: memberSearch.trim(),
-      email: `${memberSearch.toLowerCase().replace(/\s+/g, '.')}@org.example.com`,
+      email: '',
       assignedDate: new Date().toISOString().slice(0, 10),
     })
     setRole('')
@@ -247,7 +277,7 @@ function AssignRoleModal({
               placeholder="Search member by name…"
             />
             <p className="text-[12px] text-[var(--color-muted)]">
-              Member search will connect to the roster when the API is available.
+              Full member search coming soon. Enter a name to assign temporarily.
             </p>
           </div>
         </div>

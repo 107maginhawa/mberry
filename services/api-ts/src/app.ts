@@ -126,6 +126,12 @@ export function createApp(config: Config): App {
     return getMyMemberships(ctx as any);
   });
 
+  // Officer role check (auth required)
+  app.get('/persons/me/officer-role/:orgId', authMiddleware(), async (ctx) => {
+    const { getMyOfficerRole } = await import('@/handlers/association:member/getMyOfficerRole');
+    return getMyOfficerRole(ctx as any);
+  });
+
   // Custom person endpoints (privacy + notification preferences, auth required)
   app.get('/persons/me/privacy', authMiddleware(), async (ctx) => {
     const { getPrivacySettings } = await import('@/handlers/person/getPrivacySettings');

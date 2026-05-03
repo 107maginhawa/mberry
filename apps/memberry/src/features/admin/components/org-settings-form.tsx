@@ -33,18 +33,35 @@ const EMPTY_PROFILE: OrgProfile = {
   foundingDate: '',
 }
 
-// Mock fetch — replace with real /api/org/:orgId when available
 async function fetchOrgProfile(orgId: string): Promise<OrgProfile> {
-  await new Promise((r) => setTimeout(r, 400))
+  try {
+    const res = await fetch(`/api/admin/organizations/${orgId}`, { credentials: 'include' })
+    if (res.ok) {
+      const json = await res.json()
+      const org = json.data || json
+      return {
+        name: org.name || '',
+        description: org.description || '',
+        logoUrl: org.logoUrl || '',
+        contactEmail: org.contactEmail || '',
+        phone: org.phone || '',
+        address: org.address || '',
+        website: org.website || '',
+        foundingDate: org.foundingDate || '',
+      }
+    }
+  } catch { /* fall through */ }
+  // Fallback: return empty profile if API unavailable
+  // TODO: Add officer-accessible org profile endpoint (current endpoint requires platform admin)
   return {
-    name: `Organization ${orgId.slice(0, 6)}`,
-    description: 'A professional organization dedicated to advancing the field.',
+    name: '',
+    description: '',
     logoUrl: '',
-    contactEmail: 'contact@org.example.com',
-    phone: '+63 2 8123 4567',
-    address: '123 Main Street, Manila, Philippines',
-    website: 'https://org.example.com',
-    foundingDate: '2005-06-15',
+    contactEmail: '',
+    phone: '',
+    address: '',
+    website: '',
+    foundingDate: '',
   }
 }
 
@@ -83,8 +100,15 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
     }
     setIsSaving(true)
     try {
-      // Mock save — replace with real PATCH /api/org/:orgId when available
-      await new Promise((r) => setTimeout(r, 600))
+      // TODO: Add officer-accessible PATCH endpoint for org profile
+      // Current PATCH /api/admin/organizations/:id requires platform admin role
+      const res = await fetch(`/api/admin/organizations/${orgId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: draft.name, contactEmail: draft.contactEmail }),
+      })
+      if (!res.ok) throw new Error('Save failed')
       setSaved(draft)
       setIsEditing(false)
       toast.success('Settings saved')
