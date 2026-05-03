@@ -1,4 +1,4 @@
-// Business Rules: [BR-04] [BR-05] [BR-06]
+// Business Rules: [BR-04] [BR-05] [BR-06] [BR-08]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
 

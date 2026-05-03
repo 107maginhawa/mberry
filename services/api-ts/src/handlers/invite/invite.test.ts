@@ -1,3 +1,4 @@
+// Business Rules: [BR-24]
 import { describe, test, expect } from 'bun:test';
 import { generateInviteToken, hashToken, defaultExpiryDate, isExpired } from './utils/token';
 

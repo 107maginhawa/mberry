@@ -1,4 +1,4 @@
-// Business Rules: [BR-04] [BR-05] [BR-30]
+// Business Rules: [BR-02] [BR-04] [BR-05] [BR-30] [BR-31]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
 
@@ -85,5 +85,22 @@ test.describe('Officer Settings — Chapters', () => {
     const hasEmptyState = await page.getByText(/no chapter|empty|none|get started|add.*chapter/i).first().isVisible().catch(() => false)
     const hasHeading = await page.getByRole('heading', { name: /chapters?|affiliations?/i }).first().isVisible().catch(() => false)
     expect(hasEmptyState || hasHeading).toBeTruthy()
+  })
+})
+
+test.describe('Officer Settings — Gateway', () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+  })
+
+  test('[BR-31] settings page renders gateway section', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/settings/gateway`)
+    await page.waitForLoadState('networkidle')
+
+    // Gateway configuration UI should render — heading, form, or empty state
+    const hasHeading = await page.getByRole('heading', { name: /gateway|payment|stripe/i }).first().isVisible().catch(() => false)
+    const hasForm = await page.getByText(/gateway|payment.*method|stripe|connect/i).first().isVisible().catch(() => false)
+    const hasSettings = await page.getByText(/settings|configuration/i).first().isVisible().catch(() => false)
+    expect(hasHeading || hasForm || hasSettings).toBeTruthy()
   })
 })

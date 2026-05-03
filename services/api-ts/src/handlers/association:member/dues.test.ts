@@ -1,3 +1,4 @@
+// Business Rules: [BR-02] [BR-05] [BR-07]
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
 

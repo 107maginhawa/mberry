@@ -1,3 +1,4 @@
+// Business Rules: [BR-02]
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { enroll } from './enroll';
