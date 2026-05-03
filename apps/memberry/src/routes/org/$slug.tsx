@@ -83,6 +83,12 @@ function PublicOrgProfile() {
                   </a>
                 </div>
               )}
+              {org.memberCount != null && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Active Members</span>
+                  <span className="font-medium">{org.memberCount}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Status</span>
                 <span className="font-medium capitalize">{org.status}</span>

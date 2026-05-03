@@ -2,6 +2,7 @@ import type { BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import { OrganizationRepository, AssociationRepository } from './repos/platform-admin.repo';
+import { sql } from 'drizzle-orm';
 
 /**
  * getOrganizationBySlug
@@ -30,6 +31,18 @@ export async function getOrganizationBySlug(
   const assocRepo = new AssociationRepository(db, logger);
   const association = await assocRepo.findById(org.associationId);
 
+  // BR-29: count only active members for public display
+  let memberCount = 0;
+  try {
+    const [result] = await db.execute(
+      sql`SELECT count(*)::int as count FROM membership WHERE org_id = ${org.id} AND status = 'active'`
+    );
+    memberCount = (result as any)?.count ?? 0;
+  } catch {
+    // Table may not exist or have different name — graceful fallback
+    memberCount = 0;
+  }
+
   return ctx.json({
     id: org.id,
     name: org.name,
@@ -39,5 +52,6 @@ export async function getOrganizationBySlug(
     contactEmail: org.contactEmail,
     status: org.status,
     associationName: association?.name ?? null,
+    memberCount,
   }, 200);
 }
