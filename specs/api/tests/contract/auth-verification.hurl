@@ -1,3 +1,4 @@
+# Business Rules: [BR-24]
 # Auth email verification round-trip. The contract exercise:
 #
 #   1. Sign up a fresh user -> Better-Auth queues a verification email.

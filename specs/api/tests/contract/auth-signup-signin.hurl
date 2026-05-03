@@ -1,3 +1,4 @@
+# Business Rules: [BR-21] [BR-26]
 # Sign-up + sign-in lifecycle (Better-Auth).
 # Validates: account creation, session token issuance, get-session round-trip,
 # sign-out invalidation. Each Hurl run uses a unique email via the {{suffix}}

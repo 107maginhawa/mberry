@@ -1,3 +1,4 @@
+// Business Rules: [BR-26]
 import { test, expect } from '@playwright/test'
 
 /**

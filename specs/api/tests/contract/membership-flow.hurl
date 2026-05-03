@@ -1,3 +1,4 @@
+# Business Rules: [BR-01] [BR-03] [BR-22]
 # Membership module contract test: officer creates a category,
 # adds a member, lists members, updates status, and manages
 # applications. Verifies auth enforcement on all custom routes.

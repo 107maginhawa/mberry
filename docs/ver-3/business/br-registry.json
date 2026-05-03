@@ -7,10 +7,14 @@
       "backend": [
         "services/api-ts/src/handlers/association:member/membership.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/membership-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/roster.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-02": {
     "rule": "Grace Period Default",
@@ -37,10 +41,14 @@
         "services/api-ts/src/handlers/membership/updateMember.test.ts",
         "services/api-ts/src/handlers/membership/reviewApplication.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/membership-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/roster.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-04": {
     "rule": "Dues Amount per Org",
@@ -50,10 +58,16 @@
       "backend": [
         "services/api-ts/src/handlers/dues/getDuesConfig.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/journeys/dues-lifecycle.spec.ts",
+        "apps/memberry/tests/e2e/officer/payments.spec.ts",
+        "apps/memberry/tests/e2e/officer/settings.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-05": {
     "rule": "Fund Allocation",
@@ -65,10 +79,16 @@
         "services/api-ts/src/handlers/dues/upsertFunds.test.ts",
         "services/api-ts/src/handlers/association:member/dues.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/journeys/dues-lifecycle.spec.ts",
+        "apps/memberry/tests/e2e/officer/payments.spec.ts",
+        "apps/memberry/tests/e2e/officer/settings.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-06": {
     "rule": "Payment Recording",
@@ -78,10 +98,16 @@
       "backend": [
         "services/api-ts/src/handlers/dues/recordPayment.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/journeys/dues-lifecycle.spec.ts",
+        "apps/memberry/tests/e2e/officer/payments.spec.ts",
+        "apps/memberry/tests/e2e/member/payments.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-07": {
     "rule": "Dues Expiry Extension on Payment",
@@ -94,10 +120,15 @@
         "services/api-ts/src/handlers/association:member/membership.test.ts",
         "services/api-ts/src/handlers/association:member/dues.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/journeys/dues-lifecycle.spec.ts",
+        "apps/memberry/tests/e2e/member/payments.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-08": {
     "rule": "Refund Policy",
@@ -121,7 +152,10 @@
         "services/api-ts/src/handlers/association:member/governance.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/guard-enforcement.spec.ts",
+        "apps/memberry/tests/e2e/officer/nav-reachability.spec.ts"
+      ]
     },
     "coverage": "PARTIAL"
   },
@@ -147,7 +181,9 @@
         "services/api-ts/src/handlers/association:member/credits.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/member/credits.spec.ts"
+      ]
     },
     "coverage": "PARTIAL"
   },
@@ -160,7 +196,9 @@
         "services/api-ts/src/handlers/association:member/credits.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/member/credits.spec.ts"
+      ]
     },
     "coverage": "PARTIAL"
   },
@@ -174,7 +212,9 @@
         "services/api-ts/src/handlers/training/markComplete.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/member/credits.spec.ts"
+      ]
     },
     "coverage": "PARTIAL"
   },
@@ -200,10 +240,19 @@
         "services/api-ts/src/handlers/events/createEvent.test.ts",
         "services/api-ts/src/handlers/training/createTraining.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl",
+        "specs/api/tests/contract/training-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/journeys/event-lifecycle.spec.ts",
+        "apps/memberry/tests/e2e/member/events.spec.ts",
+        "apps/memberry/tests/e2e/member/training.spec.ts",
+        "apps/memberry/tests/e2e/officer/training.spec.ts",
+        "apps/memberry/tests/e2e/officer/events.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-16": {
     "rule": "Activity Visibility",
@@ -267,10 +316,14 @@
         "services/api-ts/src/handlers/certificates/getCertificate.test.ts",
         "services/api-ts/src/handlers/certificates/repos/certificates.repo.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/certificates-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/member/certificates.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-21": {
     "rule": "Multi-Org Member Account",
@@ -280,7 +333,9 @@
       "backend": [
         "services/api-ts/src/handlers/membership/br-21.multi-org.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/auth-signup-signin.hurl"
+      ],
       "e2e": []
     },
     "coverage": "PARTIAL"
@@ -293,10 +348,14 @@
       "backend": [
         "services/api-ts/src/handlers/membership/importMembers.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/membership-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/roster.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-23": {
     "rule": "License Number Format",
@@ -319,7 +378,9 @@
       "backend": [
         "services/api-ts/src/handlers/invite/invite.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/auth-verification.hurl"
+      ],
       "e2e": []
     },
     "coverage": "PARTIAL"
@@ -345,10 +406,14 @@
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/auth-signup-signin.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/auth.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-27": {
     "rule": "Event Registration Limits",
@@ -358,10 +423,16 @@
       "backend": [
         "services/api-ts/src/handlers/events/registerForEvent.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/journeys/event-lifecycle.spec.ts",
+        "apps/memberry/tests/e2e/member/events.spec.ts",
+        "apps/memberry/tests/e2e/officer/events.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-28": {
     "rule": "Communication Deduplication",
@@ -372,10 +443,14 @@
         "services/api-ts/src/handlers/communication/communication.test.ts",
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/communications-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/communications.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-29": {
     "rule": "Org Public Page",
@@ -401,7 +476,9 @@
         "services/api-ts/src/handlers/dues/getGatewayConfig.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/settings.spec.ts"
+      ]
     },
     "coverage": "PARTIAL"
   },
@@ -413,7 +490,9 @@
       "backend": [
         "services/api-ts/src/handlers/storage/uploadFile.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/storage.hurl"
+      ],
       "e2e": []
     },
     "coverage": "PARTIAL"
@@ -440,10 +519,14 @@
         "services/api-ts/src/handlers/elections/br-33.election-integrity.test.ts",
         "services/api-ts/src/handlers/elections/castVote.test.ts"
       ],
-      "contract": [],
-      "e2e": []
+      "contract": [
+        "specs/api/tests/contract/elections-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/elections.spec.ts"
+      ]
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-34": {
     "rule": "Nomination Eligibility",

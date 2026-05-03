@@ -1,3 +1,4 @@
+# Business Rules: [BR-15] [BR-27]
 # Events module contract test: officer creates event, member registers,
 # officer checks in member, lists attendance.
 #

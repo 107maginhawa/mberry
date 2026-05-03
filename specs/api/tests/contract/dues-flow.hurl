@@ -1,3 +1,4 @@
+# Business Rules: [BR-04] [BR-05] [BR-06] [BR-07]
 # Dues module contract test: officer configures dues, creates funds,
 # records a payment, views dashboard, and generates a report.
 # Verifies auth enforcement on all custom routes.

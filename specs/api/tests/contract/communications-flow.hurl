@@ -1,3 +1,4 @@
+# Business Rules: [BR-28]
 # Communications (announcements) module contract test.
 #
 # Requires: seeded org ed8e3a96-8126-4341-be42-e6eb7940c562
