@@ -1,4 +1,4 @@
-import { eq, and, or, like, desc, sql, type SQL } from 'drizzle-orm';
+import { eq, and, or, like, ilike, desc, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import {
   memberships,
@@ -40,9 +40,9 @@ export class MembershipRepository {
     if (filters.categoryId) conditions.push(eq(memberships.categoryId, filters.categoryId));
     if (filters.search) {
       conditions.push(or(
-        like(persons.firstName, `%${filters.search}%`),
-        like(persons.lastName, `%${filters.search}%`),
-        like(memberships.memberNumber, `%${filters.search}%`),
+        ilike(persons.firstName, `%${filters.search}%`),
+        ilike(persons.lastName, `%${filters.search}%`),
+        ilike(memberships.memberNumber, `%${filters.search}%`),
       )!);
     }
 

@@ -99,7 +99,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr,300px]">
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setShowConfirm(true) }}>
-        <div>
+        <div className="relative">
           <Label>Member</Label>
           <Input
             value={memberSearch}
@@ -108,7 +108,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
           />
           {searchingMembers && <p className="text-xs text-muted-foreground mt-1">Searching...</p>}
           {memberResults.length > 0 && !personId && (
-            <div className="border rounded-md mt-1 max-h-40 overflow-y-auto bg-white">
+            <div className="border rounded-md mt-1 max-h-40 overflow-y-auto bg-white relative z-50 shadow-lg">
               {memberResults.map((m: any) => (
                 <button
                   key={m.id}
