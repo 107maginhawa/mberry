@@ -4,7 +4,7 @@ import type { RouterContext } from '@/router'
 export const Route = createFileRoute('/')({
   beforeLoad: ({ context }: { context: RouterContext }) => {
     if (context.auth.user) {
-      throw redirect({ to: '/dashboard' as any })
+      throw redirect({ to: '/dashboard' })
     }
     // Guest → go to sign-in
     throw redirect({

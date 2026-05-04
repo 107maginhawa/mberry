@@ -1,8 +1,9 @@
 import { useEffect } from "react"
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router"
-import { requireOrgOfficer } from "@/utils/guards"
+import { requireOrgOfficer, type AuthContext, type OfficerContext } from "@/utils/guards"
 import { OfficerSidebar } from "@/components/layout/officer-sidebar"
 import { OfficerMobileNav } from "@/components/layout/officer-mobile-nav"
+import { ErrorBoundary } from "@/components/patterns/error-boundary"
 
 export const Route = createFileRoute("/_authenticated/org/$orgId/officer")({
   beforeLoad: requireOrgOfficer,
@@ -10,8 +11,8 @@ export const Route = createFileRoute("/_authenticated/org/$orgId/officer")({
 })
 
 function OfficerLayout() {
-  const { user } = Route.useRouteContext() as any
-  const routeContext = Route.useRouteContext() as any
+  const routeContext = Route.useRouteContext() as AuthContext & OfficerContext
+  const user = routeContext.user
   const positions = routeContext.officerPositions || []
   const primaryRole = positions[0]?.title || "Officer"
   const location = useLocation()
@@ -36,7 +37,9 @@ function OfficerLayout() {
       />
       <main className="flex-1 overflow-auto">
         <div className="max-w-[1200px] mx-auto px-5 md:px-7 py-5 md:py-7">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </main>
     </div>

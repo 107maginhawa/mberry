@@ -23,14 +23,14 @@ function formatDate(iso: string | null | undefined) {
 }
 
 function TrainingDetail() {
-  const { trainingId } = Route.useParams()
+  const { orgId, trainingId } = Route.useParams()
   const queryClient = useQueryClient()
   const [enrolled, setEnrolled] = useState(false)
 
   const { data: training, isLoading, error } = useQuery({
     queryKey: ['training-detail', trainingId],
     queryFn: async () => {
-      const res = await fetch(`/api/training/detail/${trainingId}`, { credentials: 'include' })
+      const res = await fetch(`/api/training/detail/${orgId}/${trainingId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to load training')
       return res.json() as Promise<{ data: any }>
     },
@@ -39,7 +39,7 @@ function TrainingDetail() {
 
   const enrollMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/training/enroll/${trainingId}`, {
+      const res = await fetch(`/api/training/enroll/${orgId}/${trainingId}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

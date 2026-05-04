@@ -36,13 +36,13 @@ describe('enroll', () => {
 
   test('enrolls user and returns 201', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 10,
       enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     expect(response.body.data.status).toBe('enrolled');
@@ -52,13 +52,13 @@ describe('enroll', () => {
   test('sets status to cancelled when at capacity (waitlist behavior)', async () => {
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => ({ ...fakeTraining, capacity: 20 }),
+      getByOrg: async () => ({ ...fakeTraining, capacity: 20 }),
       getEnrollmentCount: async () => 20,
       enroll: async (data: any) => { capturedData = data; return { ...fakeEnrollment, ...data }; },
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     expect(capturedData.status).toBe('cancelled');
@@ -68,13 +68,13 @@ describe('enroll', () => {
   test('enrolls normally when capacity is null (unlimited)', async () => {
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => ({ ...fakeTraining, capacity: null }),
+      getByOrg: async () => ({ ...fakeTraining, capacity: null }),
       getEnrollmentCount: async () => 999,
       enroll: async (data: any) => { capturedData = data; return { ...fakeEnrollment, ...data }; },
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     expect(capturedData.status).toBe('enrolled');
@@ -83,24 +83,24 @@ describe('enroll', () => {
 
   test('throws NotFoundError when training does not exist', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => undefined,
+      getByOrg: async () => undefined,
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => fakeEnrollment,
     });
 
-    const ctx = makeCtx({ _params: { id: 'missing-id' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'missing-id' } });
     await expect(enroll(ctx)).rejects.toThrow('Training not found');
   });
 
   test('enrolls in cancelled training (no training status guard)', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => ({ ...fakeTraining, status: 'cancelled' }),
+      getByOrg: async () => ({ ...fakeTraining, status: 'cancelled' }),
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     Object.values(mm).forEach(m => m.mockRestore());
@@ -108,13 +108,13 @@ describe('enroll', () => {
 
   test('does not guard against duplicate enrollment', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 10,
       enroll: async (data: any) => ({ ...fakeEnrollment, ...data, id: 'enroll-2' }),
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     Object.values(mm).forEach(m => m.mockRestore());
@@ -124,46 +124,57 @@ describe('enroll', () => {
 
   test('[BR-02] blocks grace period member from enrolling', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => fakeEnrollment,
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'gracePeriod' }) });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Active membership required');
     Object.values(mm).forEach(m => m.mockRestore());
   });
 
   test('[BR-02] blocks suspended member from enrolling', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => fakeEnrollment,
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'suspended' }) });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Active membership required');
     Object.values(mm).forEach(m => m.mockRestore());
   });
 
   test('[BR-02] blocks non-member from enrolling', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => fakeEnrollment,
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => null });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Active membership required');
     Object.values(mm).forEach(m => m.mockRestore());
   });
 
+  test('throws NotFoundError when orgId does not match training org (cross-org blocked)', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => undefined, // getByOrg returns nothing for wrong org
+      getEnrollmentCount: async () => 0,
+      enroll: async (data: any) => fakeEnrollment,
+    });
+
+    const ctx = makeCtx({ _params: { orgId: 'wrong-org', id: 'training-1' } });
+    await expect(enroll(ctx)).rejects.toThrow('Training not found');
+  });
+
   test('crashes without session (no auth)', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => fakeEnrollment,
     });
@@ -171,7 +182,7 @@ describe('enroll', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { id: 'training-1' },
+      _params: { orgId: 'org-1', id: 'training-1' },
     });
 
     await expect(enroll(ctx)).rejects.toThrow();

@@ -7,10 +7,11 @@ import type { Session } from '@/types/auth';
 export async function enroll(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
+  const orgId = ctx.req.param('orgId');
   const trainingId = ctx.req.param('id');
   const repo = new TrainingRepository(db);
 
-  const training = await repo.get(trainingId);
+  const training = await repo.getByOrg(trainingId, orgId);
   if (!training) throw new NotFoundError('Training not found');
 
   // [BR-02] Only active members can enroll in training

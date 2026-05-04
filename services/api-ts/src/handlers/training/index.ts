@@ -8,22 +8,24 @@ import { cancelTraining } from './cancelTraining';
 import { enroll } from './enroll';
 import { markComplete } from './markComplete';
 import { listMyTrainings } from './listMyTrainings';
+import { listEnrollments } from './listEnrollments';
 
 const officerAuth = officerAuthMiddleware();
 
 const trainingRouter = new Hono();
 
-// Read (any member)
+// Read (any authenticated member)
 trainingRouter.get('/list/:orgId', listTrainings);
-trainingRouter.get('/detail/:id', getTraining);
-trainingRouter.post('/enroll/:id', enroll);       // member self-enrollment
+trainingRouter.get('/detail/:orgId/:id', getTraining);
+trainingRouter.post('/enroll/:orgId/:id', enroll); // member self-enrollment (orgId-scoped, BR-02 check)
 trainingRouter.get('/my', listMyTrainings);
+trainingRouter.get('/:orgId/enrollments/:id', officerAuth, listEnrollments);
 
-// Write (officer-only for create; per-handler for update/cancel/complete)
+// Write (officer-only — orgId scoped)
 trainingRouter.post('/create/:orgId', officerAuth, createTraining);
-trainingRouter.put('/update/:id', updateTraining);    // per-handler (no orgId param)
-trainingRouter.post('/cancel/:id', cancelTraining);   // per-handler
-trainingRouter.post('/complete/:id', markComplete);   // per-handler
-trainingRouter.post('/:id/check-in', markComplete);   // alias for attendance UI
+trainingRouter.put('/update/:orgId/:id', officerAuth, updateTraining);
+trainingRouter.post('/cancel/:orgId/:id', officerAuth, cancelTraining);
+trainingRouter.post('/complete/:orgId/:id', officerAuth, markComplete);
+trainingRouter.post('/:orgId/:id/check-in', officerAuth, markComplete);
 
 export { trainingRouter };
