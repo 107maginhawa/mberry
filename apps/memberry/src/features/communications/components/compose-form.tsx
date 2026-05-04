@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -47,17 +48,10 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         status: action,
         scheduledAt: action === 'scheduled' && scheduledAt ? scheduledAt : undefined,
       }
-      const url = `/api/communications/announcements/${orgId}`
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as any).message ?? 'Failed to save announcement')
+      if (existingAnnouncement?.id) {
+        return api.patch(`/api/communications/announcements/${existingAnnouncement.id}`, body)
       }
-      return res.json()
+      return api.post(`/api/communications/announcements/${orgId}`, body)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })

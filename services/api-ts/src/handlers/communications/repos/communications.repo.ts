@@ -40,6 +40,17 @@ export class CommunicationsRepository {
     return result!;
   }
 
+  async update(id: string, data: Partial<Announcement>): Promise<Announcement> {
+    const [result] = await this.db.update(announcements)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(announcements.id, id)).returning();
+    return result!;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.db.delete(announcements).where(eq(announcements.id, id));
+  }
+
   async createStats(announcementId: string, recipients: number) {
     await this.db.insert(announcementStats).values({ announcementId, recipients });
   }

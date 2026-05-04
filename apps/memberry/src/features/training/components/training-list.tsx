@@ -8,7 +8,6 @@ const TABS = [
   { key: 'published', label: 'Upcoming' },
   { key: 'past', label: 'Past' },
   { key: 'draft', label: 'Drafts' },
-  { key: 'pending_approval', label: 'Pending' },
 ]
 
 const TYPE_OPTIONS = [
@@ -36,7 +35,9 @@ export function TrainingList({ orgId }: TrainingListProps) {
     queryKey,
     queryFn: async () => {
       const params = new URLSearchParams()
-      if (activeTab !== 'past') params.set('status', activeTab)
+      const statusMap: Record<string, string> = { published: 'published', past: 'completed', draft: 'draft' }
+      const apiStatus = statusMap[activeTab]
+      if (apiStatus) params.set('status', apiStatus)
       if (typeFilter) params.set('type', typeFilter)
       if (search) params.set('search', search)
       return api.get<{ data: any[]; meta: { total: number } }>(`/api/training/list/${orgId}?${params}`)

@@ -5,6 +5,8 @@ import { getAnnouncement } from './getAnnouncement';
 import { createAnnouncement } from './createAnnouncement';
 import { publishAnnouncement } from './publishAnnouncement';
 import { archiveAnnouncement } from './archiveAnnouncement';
+import { updateAnnouncement } from './updateAnnouncement';
+import { deleteAnnouncement } from './deleteAnnouncement';
 
 const officerAuth = officerAuthMiddleware();
 
@@ -18,5 +20,7 @@ communications.get('/announcements/detail/:id', getAnnouncement);
 communications.post('/announcements/:orgId', officerAuth, createAnnouncement);
 communications.post('/announcements/:id/publish', publishAnnouncement);  // per-handler (no orgId param)
 communications.post('/announcements/:id/archive', archiveAnnouncement);  // per-handler
+communications.patch('/announcements/:id', officerAuth, updateAnnouncement);
+communications.delete('/announcements/:id', officerAuth, deleteAnnouncement);
 
 export { communications };

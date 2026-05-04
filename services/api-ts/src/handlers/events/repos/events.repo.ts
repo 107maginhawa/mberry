@@ -1,4 +1,4 @@
-import { eq, and, desc, gte, lte, like, sql, type SQL } from 'drizzle-orm';
+import { eq, and, desc, gte, lte, like, sql, inArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import {
   events,
@@ -30,7 +30,14 @@ export class EventsRepository {
       eq(events.organizationId, orgId),
       eq(events.tenantId, orgId),
     ];
-    if (filters?.status) conditions.push(eq(events.status, filters.status as any));
+    if (filters?.status) {
+      const statuses = filters.status.split(',').map(s => s.trim());
+      if (statuses.length === 1) {
+        conditions.push(eq(events.status, statuses[0] as any));
+      } else {
+        conditions.push(inArray(events.status, statuses as any));
+      }
+    }
     if (filters?.search) conditions.push(like(events.title, `%${filters.search}%`));
     if (filters?.from) conditions.push(gte(events.startDate, filters.from));
     if (filters?.to) conditions.push(lte(events.startDate, filters.to));

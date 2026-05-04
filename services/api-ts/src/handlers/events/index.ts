@@ -8,6 +8,7 @@ import { cancelEvent } from './cancelEvent';
 import { registerForEvent } from './registerForEvent';
 import { checkIn } from './checkIn';
 import { listAttendance } from './listAttendance';
+import { listRegistrations } from './listRegistrations';
 import { listMyEvents } from './listMyEvents';
 
 const officerAuth = officerAuthMiddleware();
@@ -26,5 +27,6 @@ eventsRouter.put('/update/:id', updateEvent);      // per-handler org check (P1-
 eventsRouter.post('/cancel/:id', cancelEvent);     // per-handler org check (P1-2)
 eventsRouter.post('/checkin/:id', checkIn);        // per-handler org check + session audit (P1-2, P1-3)
 eventsRouter.get('/attendance/:id', listAttendance);
+eventsRouter.get('/registrations/:id', listRegistrations);
 
 export { eventsRouter };

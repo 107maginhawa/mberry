@@ -39,7 +39,7 @@ function formatDate(iso: string) {
 function RegistrationsTab({ eventId }: { eventId: string }) {
   const { data, isLoading } = useQuery<any>({
     queryKey: ['registrations', eventId],
-    queryFn: () => api.get(`/api/events/attendance/${eventId}`),
+    queryFn: () => api.get(`/api/events/registrations/${eventId}`),
   })
 
   const registrations = data?.data ?? []

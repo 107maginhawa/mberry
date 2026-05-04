@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { api } from '@/lib/api'
@@ -24,6 +24,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 function AnnouncementDetailPage() {
   const { orgId, announcementId } = Route.useParams()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
@@ -177,10 +178,23 @@ function AnnouncementDetailPage() {
           <Link
             to="/org/$orgId/officer/communications/new"
             params={{ orgId }}
+            search={{ edit: announcementId }}
             className="px-4 py-2 border rounded-md text-sm font-medium hover:bg-muted"
           >
             Edit
           </Link>
+        )}
+        {ann.status === 'draft' && (
+          <button
+            onClick={async () => {
+              if (!confirm('Delete this draft?')) return
+              await api.delete(`/api/communications/announcements/${announcementId}`)
+              navigate({ to: `/org/${orgId}/officer/communications` })
+            }}
+            className="px-4 py-2 border border-red-200 rounded-md text-sm font-medium text-red-600 hover:bg-red-50"
+          >
+            Delete
+          </button>
         )}
       </div>
     </div>
