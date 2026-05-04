@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { api } from '@/lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,9 +39,8 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['membership-categories', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/categories/${orgId}`)
-      if (!res.ok) throw new Error('Failed to fetch categories')
-      return (await res.json()).data ?? []
+      const json = await api.get<any>(`/api/membership/categories/${orgId}`)
+      return json.data ?? []
     },
   })
 
@@ -48,13 +48,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
 
   const saveMutation = useMutation({
     mutationFn: async (body: Record<string, unknown>) => {
-      const res = await fetch(`/api/membership/categories/${orgId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) throw new Error('Failed to save category')
-      return res.json()
+      return api.put(`/api/membership/categories/${orgId}`, body)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['membership-categories', orgId] })

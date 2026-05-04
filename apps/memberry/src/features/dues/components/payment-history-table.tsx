@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { api } from '@/lib/api'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -42,8 +43,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
       if (orgId) params.set('organizationId', orgId)
       if (statusFilter !== 'all') params.set('status', statusFilter)
       if (methodFilter !== 'all') params.set('method', methodFilter)
-      const res = await fetch(`/api/dues/payments?${params}`)
-      return res.json()
+      return api.get<any>(`/api/dues/payments?${params}`)
     },
   })
 
@@ -85,22 +85,22 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b text-left">
-                <th className="px-4 py-3 font-medium">Date</th>
-                <th className="px-4 py-3 font-medium">Receipt #</th>
-                <th className="px-4 py-3 font-medium">Amount</th>
-                <th className="px-4 py-3 font-medium">Method</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+              <tr className="bg-[var(--color-surface-warm)] border-b text-left">
+                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Date</th>
+                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Receipt #</th>
+                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Amount</th>
+                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Method</th>
+                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Status</th>
               </tr>
             </thead>
             <tbody>
-              {payments.map((p: any) => (
-                <tr key={p.id} className="border-b hover:bg-muted/50 cursor-pointer" onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
-                  <td className="px-4 py-3">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{p.receiptNumber}</td>
-                  <td className="px-4 py-3 font-mono">{formatCents(p.amount, p.currency)}</td>
-                  <td className="px-4 py-3">{METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}</td>
-                  <td className="px-4 py-3">
+              {payments.map((p: any, idx: number) => (
+                <tr key={p.id} className={`hover:bg-muted/50 cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
+                  <td className="px-3 py-2 text-body-sm tabular-nums">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</td>
+                  <td className="px-3 py-2 text-mono tabular-nums">{p.receiptNumber}</td>
+                  <td className="px-3 py-2 text-mono tabular-nums">{formatCents(p.amount, p.currency)}</td>
+                  <td className="px-3 py-2 text-body-sm">{METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}</td>
+                  <td className="px-3 py-2">
                     <Badge variant="secondary" className={STATUS_COLORS[p.status] ?? ''}>
                       {p.status}
                     </Badge>

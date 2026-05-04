@@ -22,11 +22,11 @@ describe('cancelTraining', () => {
 
   test('cancels training and returns 200', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
     const response = await cancelTraining(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data.status).toBe('cancelled');
@@ -34,11 +34,11 @@ describe('cancelTraining', () => {
 
   test('throws NotFoundError when training does not exist', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => undefined,
+      getByOrg: async () => undefined,
       update: async () => fakeTraining,
     });
 
-    const ctx = makeCtx({ _params: { id: 'missing-id' } });
+    const ctx = makeCtx({ _params: { id: 'missing-id', orgId: 'org-1' } });
     await expect(cancelTraining(ctx)).rejects.toThrow('Training not found');
   });
 
@@ -46,11 +46,11 @@ describe('cancelTraining', () => {
     // The current handler does not check for enrollees before cancelling.
     // This documents that behavior.
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'training-1' } });
+    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
     const response = await cancelTraining(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data.status).toBe('cancelled');
@@ -58,7 +58,7 @@ describe('cancelTraining', () => {
 
   test('crashes without session (no auth)', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => { throw new Error('should not reach'); },
+      getByOrg: async () => { throw new Error('should not reach'); },
     });
 
     const ctx = makeCtx({ user: null, session: null, database: undefined });

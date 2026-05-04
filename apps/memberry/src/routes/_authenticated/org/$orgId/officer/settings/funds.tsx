@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { api } from '@/lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -23,8 +24,8 @@ function FundSettingsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['dues-funds', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/dues/funds/${orgId}`)
-      return (await res.json()).data
+      const json = await api.get<any>(`/api/dues/funds/${orgId}`)
+      return json.data
     },
   })
 
@@ -36,15 +37,9 @@ function FundSettingsPage() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/dues/funds/${orgId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          funds: funds.map((f, i) => ({ name: f.name, percentage: f.percentage, sortOrder: i })),
-        }),
+      return api.put(`/api/dues/funds/${orgId}`, {
+        funds: funds.map((f, i) => ({ name: f.name, percentage: f.percentage, sortOrder: i })),
       })
-      if (!res.ok) throw new Error(await res.text())
-      return res.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dues-funds', orgId] })

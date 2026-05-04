@@ -3,11 +3,12 @@ import { useState } from 'react'
 import { CheckCircle, Users, Award } from 'lucide-react'
 
 interface CompletionTableProps {
+  orgId: string
   trainingId: string
   creditAmount: string | number
 }
 
-export function CompletionTable({ trainingId, creditAmount }: CompletionTableProps) {
+export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionTableProps) {
   const queryClient = useQueryClient()
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [marking, setMarking] = useState<string | null>(null)
@@ -15,7 +16,7 @@ export function CompletionTable({ trainingId, creditAmount }: CompletionTablePro
   const enrollmentsQuery = useQuery({
     queryKey: ['training-enrollments', trainingId],
     queryFn: async () => {
-      const res = await fetch(`/api/training/detail/${trainingId}`)
+      const res = await fetch(`/api/training/detail/${orgId}/${trainingId}`)
       if (!res.ok) throw new Error('Failed to load')
       const json = await res.json()
       return json.data
@@ -42,7 +43,7 @@ export function CompletionTable({ trainingId, creditAmount }: CompletionTablePro
 
   const markMutation = useMutation({
     mutationFn: async (personId: string) => {
-      const res = await fetch(`/api/training/complete/${trainingId}`, {
+      const res = await fetch(`/api/training/complete/${orgId}/${trainingId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ personId, method: 'manual' }),
@@ -66,7 +67,7 @@ export function CompletionTable({ trainingId, creditAmount }: CompletionTablePro
   const markAllMutation = useMutation({
     mutationFn: async (personIds: string[]) => {
       for (const pid of personIds) {
-        await fetch(`/api/training/complete/${trainingId}`, {
+        await fetch(`/api/training/complete/${orgId}/${trainingId}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ personId: pid, method: 'manual' }),

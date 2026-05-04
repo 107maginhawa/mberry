@@ -38,7 +38,7 @@ function TrainingDetail() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['training', trainingId],
     queryFn: async () => {
-      const res = await fetch(`/api/training/detail/${trainingId}`)
+      const res = await fetch(`/api/training/detail/${orgId}/${trainingId}`)
       if (!res.ok) throw new Error('Failed to load training')
       return res.json() as Promise<{ data: any }>
     },
@@ -179,7 +179,7 @@ function TrainingDetail() {
       )}
 
       {tab === 'attendance' && (
-        <CompletionTable trainingId={trainingId} creditAmount={training.creditAmount} />
+        <CompletionTable orgId={orgId} trainingId={trainingId} creditAmount={training.creditAmount} />
       )}
 
       {tab === 'edit' && (

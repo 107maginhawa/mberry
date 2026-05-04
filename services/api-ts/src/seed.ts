@@ -13,6 +13,7 @@ import { eq } from 'drizzle-orm';
 import { Pool } from 'pg';
 import { associations, organizations } from './handlers/platformadmin/repos/platform-admin.schema';
 import { membershipTiers, membershipCategories, memberships } from './handlers/association:member/repos/membership.schema';
+import { positions, officerTerms } from './handlers/association:member/repos/governance.schema';
 import { persons } from './handlers/person/repos/person.schema';
 import { user as userTable } from './generated/better-auth/schema';
 
@@ -305,6 +306,36 @@ async function seed() {
       }
     } else {
       console.log(`  Memberships: exist (${existingMemberships.length} found)`);
+    }
+  }
+
+  // ─── 7. Officer Position + Term for admin user ───
+  if (personIds.length > 0) {
+    const existingPositions = await db.select().from(positions).where(eq(positions.organizationId, org1.id));
+
+    if (existingPositions.length === 0) {
+      const [presidentPos] = await db.insert(positions).values({
+        tenantId: org1.id,
+        organizationId: org1.id,
+        title: 'President',
+        description: 'Association President',
+        level: 'chapter',
+        termLengthMonths: 24,
+        sortOrder: 1,
+      }).returning();
+
+      await db.insert(officerTerms).values({
+        tenantId: org1.id,
+        positionId: presidentPos!.id,
+        personId: personIds[0]!,
+        organizationId: org1.id,
+        status: 'active',
+        startDate: new Date('2025-01-01'),
+        endDate: new Date('2026-12-31'),
+      });
+      console.log(`  Officer: ${TEST_USERS[0]!.name} → President (active term)`);
+    } else {
+      console.log(`  Officer positions: exist (${existingPositions.length} found)`);
     }
   }
 

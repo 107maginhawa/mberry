@@ -16,6 +16,7 @@ import {
   Award,
   IdCard,
   ArrowLeft,
+  Vote,
 } from "lucide-react"
 
 interface NavSection {
@@ -72,6 +73,12 @@ export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSi
       label: "COMMUNICATIONS",
       items: [
         { to: `${base}/communications`, label: "Announcements", icon: Megaphone },
+      ],
+    },
+    {
+      label: "GOVERNANCE",
+      items: [
+        { to: `${base}/elections`, label: "Elections", icon: Vote },
       ],
     },
     {

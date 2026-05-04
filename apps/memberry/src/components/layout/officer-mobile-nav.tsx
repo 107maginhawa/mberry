@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Inbox, Upload,
   Settings, CreditCard, PieChart, BarChart3,
   Calendar, BookOpen, Megaphone,
-  Building, Shield, Award, IdCard, ArrowLeft,
+  Building, Shield, Award, IdCard, ArrowLeft, Vote,
 } from 'lucide-react'
 
 interface OfficerMobileNavProps {
@@ -43,6 +43,9 @@ export function OfficerMobileNav({ orgName, userName, role }: OfficerMobileNavPr
     ]},
     { label: 'COMMUNICATIONS', items: [
       { to: `${base}/communications`, label: 'Announcements', icon: Megaphone },
+    ]},
+    { label: 'GOVERNANCE', items: [
+      { to: `${base}/elections`, label: 'Elections', icon: Vote },
     ]},
     { label: 'DOCUMENTS', items: [
       { to: `${base}/reports/credits`, label: 'Credit Reports', icon: Award },

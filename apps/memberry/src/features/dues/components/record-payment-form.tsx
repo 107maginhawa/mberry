@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,8 +28,8 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   const { data: fundsData } = useQuery({
     queryKey: ['dues-funds', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/dues/funds/${orgId}`)
-      return (await res.json()).data
+      const json = await api.get<{ data: any[] }>(`/api/dues/funds/${orgId}`)
+      return json.data
     },
   })
 
@@ -41,21 +42,15 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
 
   const recordMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch('/api/dues/payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organizationId: orgId,
-          personId,
-          amount: amountCents,
-          currency: 'PHP',
-          paymentMethod,
-          paidAt: paymentDate ? new Date(paymentDate).toISOString() : undefined,
-          referenceNumber: referenceNumber || undefined,
-        }),
+      return api.post('/api/dues/payments', {
+        organizationId: orgId,
+        personId,
+        amount: amountCents,
+        currency: 'PHP',
+        paymentMethod,
+        paidAt: paymentDate ? new Date(paymentDate).toISOString() : undefined,
+        referenceNumber: referenceNumber || undefined,
       })
-      if (!res.ok) throw new Error('Failed to record payment')
-      return res.json()
     },
     onSuccess: () => {
       setShowConfirm(false)
@@ -79,8 +74,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
     }
     const timer = setTimeout(() => {
       setSearchingMembers(true)
-      fetch(`/api/membership/members/${orgId}?search=${encodeURIComponent(memberSearch.trim())}&limit=10`, { credentials: 'include' })
-        .then(r => r.ok ? r.json() : { data: [] })
+      api.get<{ data: any[] }>(`/api/membership/members/${orgId}?search=${encodeURIComponent(memberSearch.trim())}&limit=10`)
         .then(json => setMemberResults(json.data || []))
         .catch(() => setMemberResults([]))
         .finally(() => setSearchingMembers(false))

@@ -21,7 +21,7 @@ function TrainingAttendance() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['training-enrollments', trainingId],
     queryFn: async () => {
-      const res = await fetch(`/api/training/${trainingId}/enrollments`, {
+      const res = await fetch(`/api/training/${orgId}/enrollments/${trainingId}`, {
         credentials: 'include',
       })
       if (!res.ok) throw new Error('Failed to load enrollments')
@@ -31,7 +31,7 @@ function TrainingAttendance() {
 
   const checkInMutation = useMutation({
     mutationFn: async (memberId: string) => {
-      const res = await fetch(`/api/training/${trainingId}/check-in`, {
+      const res = await fetch(`/api/training/${orgId}/${trainingId}/check-in`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

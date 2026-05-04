@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Megaphone, Calendar, MapPin, ArrowRight } from 'lucide-react'
 
@@ -23,22 +24,14 @@ function OrgHome() {
   const { data: announcements, isLoading: loadingAnnouncements, error: announcementsError } = useQuery({
     queryKey: ['org-announcements', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/communications/announcements/${orgId}?status=sent&limit=5`, {
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to load announcements')
-      return res.json() as Promise<{ data: any[] }>
+      return api.get<{ data: any[] }>(`/api/communications/announcements/${orgId}?status=sent&limit=5`)
     },
   })
 
   const { data: events, isLoading: loadingEvents, error: eventsError } = useQuery({
     queryKey: ['org-upcoming-events', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/events?orgId=${orgId}&limit=5`, {
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to load events')
-      return res.json() as Promise<{ data: any[] }>
+      return api.get<{ data: any[] }>(`/api/events?orgId=${orgId}&limit=5`)
     },
   })
 

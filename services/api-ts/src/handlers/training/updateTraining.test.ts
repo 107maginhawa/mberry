@@ -25,12 +25,12 @@ describe('updateTraining', () => {
   test('updates training and returns 200', async () => {
     const updated = { ...fakeTraining, title: 'Updated Seminar' };
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { title: 'Updated Seminar' },
     });
 
@@ -41,12 +41,12 @@ describe('updateTraining', () => {
 
   test('throws NotFoundError when training does not exist', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => undefined,
+      getByOrg: async () => undefined,
       update: async () => fakeTraining,
     });
 
     const ctx = makeCtx({
-      _params: { id: 'missing-id' },
+      _params: { id: 'missing-id', orgId: 'org-1' },
       _body: { title: 'Test' },
     });
 
@@ -56,12 +56,12 @@ describe('updateTraining', () => {
   test('maps startAt to startDate', async () => {
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { startAt: '2026-07-01' },
     });
 
@@ -72,12 +72,12 @@ describe('updateTraining', () => {
   test('maps fee to registrationFee', async () => {
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { fee: 7500 },
     });
 
@@ -88,13 +88,13 @@ describe('updateTraining', () => {
   test('sets updatedBy from session', async () => {
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
     });
 
     const ctx = makeCtx({
       user: { id: 'admin-1', role: 'admin' },
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { title: 'Test' },
     });
 
@@ -104,14 +104,14 @@ describe('updateTraining', () => {
 
   test('crashes without session (no auth)', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async () => fakeTraining,
     });
 
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { title: 'Test' },
     });
 
@@ -123,12 +123,12 @@ describe('updateTraining', () => {
   test('[SO-8] updates regulatory approval status', async () => {
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: {
         regulatoryApproval: 'prc_approved',
         regulatoryReference: 'PRC-CPD-2026-001',
@@ -144,12 +144,12 @@ describe('updateTraining', () => {
   test('[SO-8] updates regulatory expiration date', async () => {
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: {
         regulatoryApproval: 'prc_approved',
         regulatoryExpiresAt: '2027-12-31',
@@ -164,12 +164,12 @@ describe('updateTraining', () => {
   test('[SO-8] updates basic and regulatory fields together', async () => {
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: {
         title: 'Updated With Approval',
         regulatoryApproval: 'pending_approval',

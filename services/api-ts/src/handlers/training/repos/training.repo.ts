@@ -49,6 +49,16 @@ export class TrainingRepository {
     return training;
   }
 
+  /** Get training only if it belongs to the specified org. Returns undefined otherwise. */
+  async getByOrg(id: string, orgId: string): Promise<Training | undefined> {
+    const [training] = await this.db
+      .select()
+      .from(trainings)
+      .where(and(eq(trainings.id, id), eq(trainings.organizationId, orgId)))
+      .limit(1);
+    return training;
+  }
+
   async create(data: NewTraining): Promise<Training> {
     const [result] = await this.db.insert(trainings).values(data).returning();
     return result!;

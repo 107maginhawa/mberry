@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { api } from '@/lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,19 +28,14 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
   const { data: config, isLoading } = useQuery({
     queryKey: ['dues-gateway', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/dues/gateway/${orgId}`)
-      return (await res.json()).data
+      const json = await api.get<any>(`/api/dues/gateway/${orgId}`)
+      return json.data
     },
   })
 
   const testMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/dues/gateway/${orgId}/test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, publicKey, secretKey }),
-      })
-      return res.json()
+      return api.post<{ success: boolean; message?: string; error?: string }>(`/api/dues/gateway/${orgId}/test`, { provider, publicKey, secretKey })
     },
     onSuccess: (data) => {
       setTestResult(data)
@@ -48,13 +44,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/dues/gateway/${orgId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, publicKey, secretKey }),
-      })
-      if (!res.ok) throw new Error('Failed to save')
-      return res.json()
+      return api.put(`/api/dues/gateway/${orgId}`, { provider, publicKey, secretKey })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dues-gateway', orgId] })
@@ -70,9 +60,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
 
   const disconnectMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/dues/gateway/${orgId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Failed')
-      return res.json()
+      return api.delete(`/api/dues/gateway/${orgId}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dues-gateway', orgId] })

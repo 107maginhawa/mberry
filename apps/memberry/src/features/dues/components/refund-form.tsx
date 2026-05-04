@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,13 +30,7 @@ export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) 
 
   const refundMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/dues/payments/${paymentId}/refund`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: amountCents, reason }),
-      })
-      if (!res.ok) throw new Error('Refund failed')
-      return res.json()
+      return api.post(`/api/dues/payments/${paymentId}/refund`, { amount: amountCents, reason })
     },
     onSuccess: () => {
       setShowConfirm(false)

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { FinancialDashboard } from '@/features/dues/components/financial-dashboard'
 import { PaymentHistoryTable } from '@/features/dues/components/payment-history-table'
@@ -17,14 +18,7 @@ function OfficerPaymentsPage() {
   async function handleSendReminders() {
     setSending(true)
     try {
-      const res = await fetch('/api/association/member/dues-invoices/generate', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organizationId: orgId }),
-      })
-      if (!res.ok) throw new Error('Failed')
-      const data = await res.json()
+      const data = await api.post<{ count: number }>('/api/association/member/dues-invoices/generate', { organizationId: orgId })
       toast.success('Dues reminders sent', {
         description: data.count > 0 ? `${data.count} reminders queued` : 'Reminder batch queued for processing',
       })

@@ -7,14 +7,12 @@ export async function updateTraining(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const id = ctx.req.param('id');
+  const orgId = ctx.req.param('orgId');
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 
-  const existing = await repo.get(id);
+  const existing = await repo.getByOrg(id, orgId);
   if (!existing) throw new NotFoundError('Training not found');
-  // TODO(org-scoping): routes under /training/:id have no orgId param. Auth middleware
-  // restricts access by session, but cross-org data leakage is possible if IDs are
-  // guessed. Add orgId to the route and pass it to repo.get() once route is updated.
 
   // Strip fields not in new schema (keep regulatory fields for SO-8)
   const {

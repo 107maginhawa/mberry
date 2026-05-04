@@ -7,6 +7,7 @@ import { Context, Hono } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import type { User, Session, AdminLevel } from '@/types/auth';
+import type { PlatformAdmin } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import type { AuthInstance } from '@/core/auth';
 import type { StorageProvider } from '@/core/storage';
 import type { JobScheduler } from '@/core/jobs';
@@ -46,6 +47,9 @@ export type Variables = {
   orgId?: string;
   orgMembership?: OrgMembership;
   tenantId?: string;
+
+  // Platform admin (set by platformAdminAuthMiddleware on /admin/* routes)
+  platformAdmin?: PlatformAdmin;
 
   // Internal service authentication
   internalServiceToken?: string;

@@ -7,10 +7,11 @@ import { getCycleForDate } from '../association:member/utils/credit-cycle';
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const trainingId = ctx.req.param('id');
+  const orgId = ctx.req.param('orgId');
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 
-  const training = await repo.get(trainingId);
+  const training = await repo.getByOrg(trainingId, orgId);
   if (!training) throw new NotFoundError('Training not found');
 
   // [BR-20] Block completion for cancelled activities
@@ -40,7 +41,6 @@ export async function markComplete(ctx: Context): Promise<Response> {
     try {
       const creditRepo = new CreditEntryRepository(db);
       const activityDate = training.endDate ?? new Date();
-      // Default 2-year cycle from activity date as registration proxy
       const cycle = getCycleForDate(activityDate, activityDate, 2);
 
       await creditRepo.createOne({

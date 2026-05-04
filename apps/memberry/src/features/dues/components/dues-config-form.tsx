@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { api } from '@/lib/api'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,8 +47,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   const { data: config, isLoading } = useQuery({
     queryKey: ['dues-config', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/dues/config/${orgId}`)
-      const json = await res.json()
+      const json = await api.get<any>(`/api/dues/config/${orgId}`)
       return json.data
     },
   })
@@ -68,21 +68,15 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/dues/config/${orgId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          defaultAmount: parseCentsInput(defaultAmount),
-          currency,
-          billingFrequency,
-          dueDateMonth: billingFrequency === 'annual' ? parseInt(dueDateMonth) : null,
-          dueDateDay: parseInt(dueDateDay),
-          gracePeriodDays: parseInt(gracePeriodDays),
-          reminderSchedules: reminders,
-        }),
+      return api.put(`/api/dues/config/${orgId}`, {
+        defaultAmount: parseCentsInput(defaultAmount),
+        currency,
+        billingFrequency,
+        dueDateMonth: billingFrequency === 'annual' ? parseInt(dueDateMonth) : null,
+        dueDateDay: parseInt(dueDateDay),
+        gracePeriodDays: parseInt(gracePeriodDays),
+        reminderSchedules: reminders,
       })
-      if (!res.ok) throw new Error('Failed to save')
-      return res.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dues-config', orgId] })

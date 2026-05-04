@@ -35,7 +35,7 @@ describe('markComplete', () => {
 
   test('marks enrollment as completed and returns 201', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 1,
       listEnrollments: async () => [fakeEnrollment],
       updateEnrollmentStatus: async (_id: string, status: string) => ({
@@ -45,7 +45,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -56,14 +56,14 @@ describe('markComplete', () => {
 
   test('throws NotFoundError when training does not exist', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => undefined,
+      getByOrg: async () => undefined,
       getEnrollmentCount: async () => 0,
       listEnrollments: async () => [],
       updateEnrollmentStatus: async () => fakeEnrollment,
     });
 
     const ctx = makeCtx({
-      _params: { id: 'missing-id' },
+      _params: { id: 'missing-id', orgId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -72,14 +72,14 @@ describe('markComplete', () => {
 
   test('throws ConflictError when no active enrollment exists', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 0,
       listEnrollments: async () => [],
       updateEnrollmentStatus: async () => fakeEnrollment,
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -88,14 +88,14 @@ describe('markComplete', () => {
 
   test('throws NotFoundError when person is not enrolled', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 1,
       listEnrollments: async () => [{ ...fakeEnrollment, personId: 'other-person' }],
       updateEnrollmentStatus: async () => fakeEnrollment,
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -104,7 +104,7 @@ describe('markComplete', () => {
 
   test('throws ConflictError when already completed', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 1,
       listEnrollments: async () => [{
         ...fakeEnrollment,
@@ -115,7 +115,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -127,7 +127,7 @@ describe('markComplete', () => {
   test('[BR-13] creates auto credit entry for credit-bearing training', async () => {
     let creditCreated: any = null;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => fakeTraining,
+      getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 1,
       listEnrollments: async () => [fakeEnrollment],
       updateEnrollmentStatus: async (_id: string, status: string) => ({
@@ -142,7 +142,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -160,7 +160,7 @@ describe('markComplete', () => {
   test('[BR-13] skips credit creation for non-credit-bearing training', async () => {
     let creditCreated = false;
     mocks = stubRepo(TrainingRepository, {
-      get: async () => ({ ...fakeTraining, creditAmount: 0 }),
+      getByOrg: async () => ({ ...fakeTraining, creditAmount: 0 }),
       getEnrollmentCount: async () => 1,
       listEnrollments: async () => [fakeEnrollment],
       updateEnrollmentStatus: async (_id: string, status: string) => ({
@@ -174,7 +174,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -186,14 +186,14 @@ describe('markComplete', () => {
 
   test('crashes without session (no auth)', async () => {
     mocks = stubRepo(TrainingRepository, {
-      get: async () => { throw new Error('should not reach'); },
+      getByOrg: async () => { throw new Error('should not reach'); },
     });
 
     const ctx = makeCtx({
       user: null,
       session: null,
       database: undefined,
-      _params: { id: 'training-1' },
+      _params: { id: 'training-1', orgId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 

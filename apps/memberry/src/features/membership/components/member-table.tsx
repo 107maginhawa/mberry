@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Search, Users } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface MemberTableProps {
   orgId: string
@@ -57,9 +58,8 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
   const { data: categoriesData } = useQuery({
     queryKey: ['membership-categories', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/categories/${orgId}`)
-      if (!res.ok) throw new Error('Failed to fetch categories')
-      return (await res.json()).data ?? []
+      const result: any = await api.get(`/api/membership/categories/${orgId}`)
+      return result.data ?? []
     },
   })
 
@@ -76,9 +76,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
   const { data, isLoading, error } = useQuery({
     queryKey: ['membership-members', orgId, statusTab, categoryId, debouncedSearch, page],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/members/${orgId}?${queryParams}`)
-      if (!res.ok) throw new Error('Failed to fetch members')
-      return res.json()
+      return api.get<any>(`/api/membership/members/${orgId}?${queryParams}`)
     },
   })
 
@@ -179,37 +177,37 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr className="border-b text-left">
-                  <th className="px-4 py-3 w-10">
+              <thead>
+                <tr className="bg-[var(--color-surface-warm)] border-b text-left">
+                  <th className="px-3 py-2.5 w-10">
                     <Checkbox
                       checked={allSelected}
                       onCheckedChange={toggleSelectAll}
                       aria-label="Select all"
                     />
                   </th>
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">License #</th>
-                  <th className="px-4 py-3 font-medium">Category</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Dues Expiry</th>
-                  <th className="px-4 py-3 font-medium">Joined</th>
+                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Name</th>
+                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">License #</th>
+                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Category</th>
+                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Status</th>
+                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Dues Expiry</th>
+                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Joined</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {members.map((m: any) => {
+                {members.map((m: any, idx: number) => {
                   const status = m.status as MemberStatus
                   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
                   return (
-                    <tr key={m.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3">
+                    <tr key={m.id} className={`hover:bg-muted/30 transition-colors ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`}>
+                      <td className="px-3 py-2">
                         <Checkbox
                           checked={selected.has(m.id)}
                           onCheckedChange={() => toggleSelect(m.id)}
                           aria-label={`Select ${m.name ?? m.id}`}
                         />
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 text-body-sm">
                         <Link
                           to="/org/$orgId/officer/roster/$memberId"
                           params={{ orgId, memberId: m.id }}
@@ -221,15 +219,15 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
                           <div className="text-xs text-muted-foreground">{m.email}</div>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs">{m.memberNumber ?? '—'}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{m.categoryName ?? m.categoryId ?? '—'}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 text-mono tabular-nums">{m.memberNumber ?? '—'}</td>
+                      <td className="px-3 py-2 text-body-sm text-muted-foreground">{m.categoryName ?? m.categoryId ?? '—'}</td>
+                      <td className="px-3 py-2">
                         <Badge className={badge.className}>{badge.label}</Badge>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="px-3 py-2 text-body-sm tabular-nums text-muted-foreground">
                         {m.duesExpiryDate ? new Date(m.duesExpiryDate).toLocaleDateString() : '—'}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="px-3 py-2 text-body-sm text-muted-foreground">
                         {m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '—'}
                       </td>
                     </tr>

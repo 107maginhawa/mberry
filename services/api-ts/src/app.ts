@@ -64,6 +64,7 @@ import { createRequestId, createRequestLogger } from '@/middleware/request';
 import { createDependencyInjection } from '@/middleware/dependency';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
 import { authMiddleware } from '@/middleware/auth';
+import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 
 
 /**
@@ -325,6 +326,16 @@ export function createApp(config: Config): App {
   app.route('/events', eventsRouter);
   app.route('/training', trainingRouter);
   app.route('/elections', electionsRouter);
+
+  // Platform admin authorization — auth first (sets user), then check platform_admin table
+  app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
+
+  // Platform admin role check endpoint (used by admin app guard)
+  app.get('/admin/me/role', async (ctx) => {
+    const admin = ctx.get('platformAdmin');
+    if (!admin) return ctx.json({ error: 'Not a platform admin' }, 403);
+    return ctx.json({ role: admin.role, email: admin.email, name: admin.name }, 200);
+  });
 
   // Register API routes
   registerOpenAPIRoutes(app as any);

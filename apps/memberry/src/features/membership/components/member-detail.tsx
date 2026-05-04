@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { toast } from 'sonner'
 import { AlertTriangle, ArrowLeft, CreditCard, Heart, Mail, Phone, RefreshCw, Shield, UserX } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface MemberDetailProps {
   orgId: string
@@ -65,18 +66,16 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['membership-member', orgId, memberId],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/members/${orgId}/${memberId}`)
-      if (!res.ok) throw new Error('Failed to fetch member')
-      return (await res.json()).data
+      const result: any = await api.get(`/api/membership/members/${orgId}/${memberId}`)
+      return result.data
     },
   })
 
   const { data: categoriesData } = useQuery({
     queryKey: ['membership-categories', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/categories/${orgId}`)
-      if (!res.ok) throw new Error('Failed to fetch categories')
-      return (await res.json()).data ?? []
+      const result: any = await api.get(`/api/membership/categories/${orgId}`)
+      return result.data ?? []
     },
   })
 
@@ -84,13 +83,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
 
   const updateMutation = useMutation({
     mutationFn: async (body: Record<string, unknown>) => {
-      const res = await fetch(`/api/membership/members/${orgId}/${memberId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) throw new Error('Failed to update member')
-      return res.json()
+      return api.put(`/api/membership/members/${orgId}/${memberId}`, body)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['membership-member', orgId, memberId] })
@@ -106,11 +99,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
 
   const reinstateMutation = useMutation({
     mutationFn: async (membershipId: string) => {
-      const res = await fetch(`/api/association/member/memberships/${membershipId}/reinstate`, {
-        method: 'POST',
-      })
-      if (!res.ok) throw new Error('Failed to reinstate membership')
-      return res.json()
+      return api.post(`/api/association/member/memberships/${membershipId}/reinstate`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['membership-member', orgId, memberId] })
@@ -124,13 +113,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
 
   const deceasedMutation = useMutation({
     mutationFn: async (membershipId: string) => {
-      const res = await fetch(`/api/association/member/memberships/${membershipId}/terminate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ terminationReason: 'deceased' }),
-      })
-      if (!res.ok) throw new Error('Failed to mark member as deceased')
-      return res.json()
+      return api.post(`/api/association/member/memberships/${membershipId}/terminate`, { terminationReason: 'deceased' })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['membership-member', orgId, memberId] })

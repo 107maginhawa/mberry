@@ -62,7 +62,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
 
   const cancelMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/training/cancel/${id}`, { method: 'POST' })
+      const res = await fetch(`/api/training/cancel/${orgId}/${id}`, { method: 'POST' })
       if (!res.ok) throw new Error('Failed to cancel')
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings', orgId] }),

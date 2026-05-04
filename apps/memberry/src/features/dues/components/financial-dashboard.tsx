@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatCents } from '../lib/money'
 
@@ -10,8 +11,8 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
   const { data, isLoading } = useQuery({
     queryKey: ['dues-dashboard', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/dues/dashboard/${orgId}`)
-      return (await res.json()).data
+      const json = await api.get<{ data: any }>(`/api/dues/dashboard/${orgId}`)
+      return json.data
     },
   })
 

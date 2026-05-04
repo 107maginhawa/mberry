@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatCents } from '@/features/dues/lib/money'
@@ -25,9 +26,8 @@ function PaymentDetailPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['dues-payment', paymentId],
     queryFn: async () => {
-      const res = await fetch(`/api/dues/payments/${paymentId}`)
-      if (!res.ok) throw new Error('Not found')
-      return (await res.json()).data
+      const json = await api.get<{ data: any }>(`/api/dues/payments/${paymentId}`)
+      return json.data
     },
   })
 

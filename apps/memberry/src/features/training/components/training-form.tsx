@@ -53,7 +53,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         status,
       }
       const url = isEdit
-        ? `/api/training/update/${trainingId}`
+        ? `/api/training/update/${orgId}/${trainingId}`
         : `/api/training/create/${orgId}`
       const method = isEdit ? 'PUT' : 'POST'
       const res = await fetch(url, {

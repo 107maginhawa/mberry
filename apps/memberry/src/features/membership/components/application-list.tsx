@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import { Check, ChevronDown, ChevronUp, ClipboardList, MessageSquare, X } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface ApplicationListProps {
   orgId: string
@@ -32,9 +33,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['membership-applications', orgId, statusFilter],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/applications/${orgId}?${queryParams}`)
-      if (!res.ok) throw new Error('Failed to fetch applications')
-      return res.json()
+      return api.get<any>(`/api/membership/applications/${orgId}?${queryParams}`)
     },
   })
 
@@ -42,13 +41,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
 
   const reviewMutation = useMutation({
     mutationFn: async ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
-      const res = await fetch(`/api/membership/applications/${appId}/review`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, ...(reason ? { reason } : {}) }),
-      })
-      if (!res.ok) throw new Error('Failed to review application')
-      return res.json()
+      return api.post(`/api/membership/applications/${appId}/review`, { status, ...(reason ? { reason } : {}) })
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['membership-applications', orgId] })

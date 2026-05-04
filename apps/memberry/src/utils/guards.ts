@@ -1,10 +1,20 @@
 import { redirect } from '@tanstack/react-router'
 import type { RouterContext } from '@/router'
+import type { User } from 'better-auth'
+
+export interface AuthContext {
+  user: User
+}
+
+export interface OfficerContext {
+  officerPositions: Array<{ title: string; [key: string]: unknown }>
+  orgId: string
+}
 
 /**
  * Requires authenticated user. Redirects to sign-in if not.
  */
-export async function requireAuth({ context, location }: { context: RouterContext; location?: any }) {
+export async function requireAuth({ context, location }: { context: RouterContext; location?: any }): Promise<AuthContext> {
   if (!context.auth.user) {
     throw redirect({
       to: '/auth/$authView',
@@ -31,8 +41,8 @@ export async function requireGuest({ context }: { context: RouterContext }) {
  * Checks org+role (per BR-09, BR-21: roles are per-org, not global).
  * Returns officer positions in route context for downstream use.
  */
-export async function requireOrgOfficer({ context, params }: { context: RouterContext; params: { orgId: string } }) {
-  const user = (context as any).auth?.user
+export async function requireOrgOfficer({ context, params }: { context: RouterContext; params: { orgId: string } }): Promise<OfficerContext> {
+  const user = context.auth?.user
   if (!user) {
     throw redirect({
       to: '/auth/$authView',

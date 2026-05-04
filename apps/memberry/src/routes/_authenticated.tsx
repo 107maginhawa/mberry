@@ -3,6 +3,7 @@ import { requireAuth } from "@/utils/guards"
 import { MemberSidebar } from "@/components/layout/member-sidebar"
 import { MemberBottomNav } from "@/components/layout/member-bottom-nav"
 import { MemberHeader } from "@/components/layout/member-header"
+import { ErrorBoundary } from "@/components/patterns/error-boundary"
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: requireAuth,
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/_authenticated")({
 })
 
 function AuthenticatedLayout() {
-  const { user } = Route.useRouteContext() as any
+  const { user } = Route.useRouteContext()
   const matches = useMatches()
 
   // Officer routes render their own shell via the officer layout route.
@@ -28,7 +29,9 @@ function AuthenticatedLayout() {
         <MemberHeader userName={user?.name} />
         <main className="flex-1 overflow-auto pb-[68px] md:pb-0">
           <div className="max-w-[1200px] mx-auto px-5 md:px-6 py-5 md:py-7">
-            <Outlet />
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

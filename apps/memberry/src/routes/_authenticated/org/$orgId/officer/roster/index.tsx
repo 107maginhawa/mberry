@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
+import { api } from '@/lib/api'
 
 const STATUS_MAP: Record<string, string> = {
   active: 'active',
@@ -63,37 +64,20 @@ function AddMemberDialog({ open, onClose, orgId }: { open: boolean; onClose: () 
     setSaving(true)
     try {
       // First create person record
-      const personRes = await fetch('/api/persons', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          contactInfo: { email: email.trim() },
-        }),
+      const personData: any = await api.post('/api/persons', {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        contactInfo: { email: email.trim() },
       })
-      let personId: string
-      if (personRes.ok) {
-        const personData = await personRes.json()
-        personId = personData.id || personData.data?.id
-      } else {
-        throw new Error('Failed to create person')
-      }
+      const personId: string = personData.id || personData.data?.id
 
       // Then add membership
-      const memberRes = await fetch(`/api/membership/members/${orgId}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          personId,
-          tierId: 'default',
-          memberNumber: licenseNumber.trim() || undefined,
-          licenseNumber: licenseNumber.trim() || undefined,
-        }),
+      await api.post(`/api/membership/members/${orgId}`, {
+        personId,
+        tierId: 'default',
+        memberNumber: licenseNumber.trim() || undefined,
+        licenseNumber: licenseNumber.trim() || undefined,
       })
-      if (!memberRes.ok) throw new Error('Failed to add membership')
 
       toast.success(`${firstName} ${lastName} added as member`)
       setFirstName('')
