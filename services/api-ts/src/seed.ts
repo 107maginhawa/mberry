@@ -161,6 +161,7 @@ async function seed() {
     console.log(`  Org 1: ${org1.name} (exists: ${org1.id})`);
   } else {
     [org1] = await db.insert(organizations).values({
+      id: 'ed8e3a96-8126-4341-be42-e6eb7940c562',
       associationId: assoc.id,
       name: 'PDA Metro Manila Chapter',
       slug: 'pda-metro-manila',
@@ -276,6 +277,13 @@ async function seed() {
     if (personId) {
       personIds.push(personId);
       console.log(`  Person: ${user.firstName} ${user.lastName} (${personId})`);
+    } else {
+      // Person creation failed (403 on re-seed) — look up existing person by auth user ID
+      const existing = await db.select().from(persons).where(eq(persons.id, auth.userId)).limit(1);
+      if (existing.length > 0) {
+        personIds.push(existing[0]!.id);
+        console.log(`  Person: ${user.firstName} ${user.lastName} (${existing[0]!.id}) [existing]`);
+      }
     }
 
     // Assign proper roles AFTER person creation
