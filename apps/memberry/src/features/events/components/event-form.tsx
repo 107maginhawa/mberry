@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -33,6 +34,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
   const [form, setForm] = useState({
     title: event?.title ?? '',
+    eventType: (event as any)?.eventType ?? 'other',
     description: event?.description ?? '',
     startDate: toDatetimeLocal(event?.startDate),
     endDate: toDatetimeLocal(event?.endDate),
@@ -54,6 +56,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
       const body = {
         title: form.title,
+        eventType: form.eventType,
         description: form.description || null,
         startDate: new Date(form.startDate).toISOString(),
         endDate: new Date(form.endDate).toISOString(),
@@ -64,18 +67,9 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         status: submitStatus,
       }
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as any).message ?? 'Failed to save event')
-      }
-      return res.json()
+      return isEdit ? api.put(url, body) : api.post(url, body)
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['events', orgId] })
       onSuccess?.(data.data)
     },
@@ -116,6 +110,25 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
               placeholder="e.g. Annual General Assembly 2025"
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="eventType">Event Type</Label>
+            <select
+              id="eventType"
+              value={form.eventType}
+              onChange={(e) => set('eventType', e.target.value)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="general_assembly">General Assembly</option>
+              <option value="induction_ceremony">Induction</option>
+              <option value="fellowship">Fellowship</option>
+              <option value="medical_mission">Medical Mission</option>
+              <option value="board_meeting">Board Meeting</option>
+              <option value="committee_meeting">Committee Meeting</option>
+              <option value="fundraiser">Fundraiser</option>
+              <option value="other">Other</option>
+            </select>
           </div>
 
           <div className="sm:col-span-2 space-y-2">

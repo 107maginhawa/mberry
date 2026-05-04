@@ -1,12 +1,15 @@
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { elections, electionNominees, electionVotes, type Election, type NewElection, type ElectionNominee } from './elections.types';
 
 export class ElectionsRepository {
   constructor(private db: DatabaseInstance) {}
 
-  async list(orgId: string) {
-    return this.db.select().from(elections).where(eq(elections.organizationId, orgId)).orderBy(desc(elections.createdAt));
+  async list(orgId: string, filters?: { status?: string; type?: string }) {
+    const conditions: SQL<unknown>[] = [eq(elections.organizationId, orgId)];
+    if (filters?.status) conditions.push(eq(elections.status, filters.status as any));
+    if (filters?.type) conditions.push(eq(elections.type, filters.type as any));
+    return this.db.select().from(elections).where(and(...conditions)).orderBy(desc(elections.createdAt));
   }
 
   async get(id: string): Promise<Election | undefined> {

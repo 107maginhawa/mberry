@@ -13,6 +13,7 @@ export async function createEvent(ctx: Context): Promise<Response> {
     tenantId: orgId,
     organizationId: orgId,
     title: body.title,
+    eventType: body.eventType ?? 'other',
     description: body.description,
     location: body.location ?? body.locationDetails,
     startDate: new Date(body.startAt ?? body.startDate),

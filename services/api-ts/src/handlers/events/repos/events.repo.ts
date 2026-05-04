@@ -19,6 +19,7 @@ export class EventsRepository {
     orgId: string,
     filters?: {
       status?: string;
+      type?: string;
       search?: string;
       from?: Date;
       to?: Date;
@@ -38,6 +39,7 @@ export class EventsRepository {
         conditions.push(inArray(events.status, statuses as any));
       }
     }
+    if (filters?.type) conditions.push(eq(events.eventType, filters.type as any));
     if (filters?.search) conditions.push(like(events.title, `%${filters.search}%`));
     if (filters?.from) conditions.push(gte(events.startDate, filters.from));
     if (filters?.to) conditions.push(lte(events.startDate, filters.to));

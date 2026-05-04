@@ -44,11 +44,17 @@ export const eventVisibilityEnum = pgEnum('event_visibility', [
   'network',
 ]);
 
+export const eventTypeEnum = pgEnum('event_type', [
+  'general_assembly', 'induction_ceremony', 'fellowship', 'medical_mission',
+  'board_meeting', 'committee_meeting', 'fundraiser', 'other',
+]);
+
 export const events = pgTable('event', {
   ...baseEntityFields,
   tenantId: uuid('tenant_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   title: varchar('title', { length: 300 }).notNull(),
+  eventType: eventTypeEnum('event_type').default('other'),
   description: text('description'),
   location: varchar('location', { length: 500 }),
   startDate: timestamp('start_date').notNull(),
