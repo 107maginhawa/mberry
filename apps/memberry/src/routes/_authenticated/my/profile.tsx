@@ -8,6 +8,7 @@ import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
 import { Shield, Lock, CreditCard, Download } from 'lucide-react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/profile')({
   component: MyProfilePage,
@@ -23,13 +24,13 @@ function MyProfilePage() {
     retry: false,
   })
 
-  const [memberships, setMemberships] = useState<any[]>([])
-  useEffect(() => {
-    fetch('/api/persons/me/memberships')
-      .then(res => res.json())
-      .then(res => setMemberships(res?.data || []))
-      .catch(() => {})
-  }, [])
+  const { data: memberships = [] } = useQuery({
+    queryKey: ['my-memberships'],
+    queryFn: async () => {
+      const res = await api.get<any>('/api/persons/me/memberships')
+      return (res?.data || []) as any[]
+    },
+  })
 
   const mutation = useMutation({
     ...updatePersonMutation(),

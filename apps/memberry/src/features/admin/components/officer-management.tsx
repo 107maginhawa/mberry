@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -33,26 +35,16 @@ interface Officer {
 }
 
 export function OfficerManagement({ orgId }: OfficerManagementProps) {
-  const [officers, setOfficers] = useState<Officer[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [showModal, setShowModal] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState<Officer | null>(null)
 
-  useEffect(() => {
-    fetchOfficers()
-  }, [orgId])
-
-  async function fetchOfficers() {
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/officer-terms/${orgId}`, {
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to fetch')
-      const json = await res.json()
+  const { data: officers = [], isLoading: loading } = useQuery({
+    queryKey: ['officer-terms', orgId],
+    queryFn: async () => {
+      const json = await api.get<any>(`/api/officer-terms/${orgId}`)
       const terms = json.data || json.items || []
-      // Map API officer terms to display format
-      const mapped: Officer[] = terms
+      return terms
         .filter((t: any) => t.status === 'active')
         .map((t: any) => ({
           id: t.id,
@@ -61,25 +53,15 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
           email: t.person?.email || t.personEmail || '',
           assignedDate: t.startDate ? new Date(t.startDate).toISOString().slice(0, 10) : '',
           termId: t.id,
-        }))
-      setOfficers(mapped)
-    } catch {
-      toast.error('Could not load officers')
-      setOfficers([])
-    } finally {
-      setLoading(false)
-    }
-  }
+        })) as Officer[]
+    },
+  })
 
   async function handleRemove(officer: Officer) {
     try {
       const termId = officer.termId || officer.id
-      await fetch(`/api/association/member/officer-terms/${termId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'x-org-id': orgId },
-      })
-      setOfficers((prev) => prev.filter((o) => o.id !== officer.id))
+      await api.delete(`/api/association/member/officer-terms/${termId}`, { 'x-org-id': orgId })
+      queryClient.invalidateQueries({ queryKey: ['officer-terms', orgId] })
       toast.success(`${officer.name} removed as ${officer.role}`)
     } catch {
       toast.error('Failed to remove officer')
@@ -88,10 +70,9 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
   }
 
   function handleAssigned(officer: Officer) {
-    setOfficers((prev) => [...prev, officer])
     setShowModal(false)
     toast.success(`${officer.name} assigned as ${officer.role}`)
-    fetchOfficers()
+    queryClient.invalidateQueries({ queryKey: ['officer-terms', orgId] })
   }
 
   if (loading) {
@@ -226,27 +207,20 @@ function AssignRoleModal({
   orgId: string
 }) {
   const [positionId, setPositionId] = useState<string>('')
-  const [positions, setPositions] = useState<Position[]>([])
-  const [loadingPositions, setLoadingPositions] = useState(false)
   const [memberSearch, setMemberSearch] = useState('')
   const [memberResults, setMemberResults] = useState<MemberResult[]>([])
   const [selectedMember, setSelectedMember] = useState<MemberResult | null>(null)
   const [searchingMembers, setSearchingMembers] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Fetch positions when modal opens
-  useEffect(() => {
-    if (!open) return
-    setLoadingPositions(true)
-    fetch('/api/association/member/positions', {
-      credentials: 'include',
-      headers: { 'x-org-id': orgId },
-    })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((json) => setPositions(json.items || json.data || []))
-      .catch(() => setPositions([]))
-      .finally(() => setLoadingPositions(false))
-  }, [open, orgId])
+  const { data: positions = [], isLoading: loadingPositions } = useQuery({
+    queryKey: ['officer-positions', orgId],
+    queryFn: async () => {
+      const json = await api.get<any>('/api/association/member/positions', { 'x-org-id': orgId })
+      return (json.items || json.data || []) as Position[]
+    },
+    enabled: open,
+  })
 
   // Debounced member search
   useEffect(() => {
@@ -256,10 +230,7 @@ function AssignRoleModal({
     }
     const timer = setTimeout(() => {
       setSearchingMembers(true)
-      fetch(`/api/membership/members/${orgId}?search=${encodeURIComponent(memberSearch.trim())}&limit=10`, {
-        credentials: 'include',
-      })
-        .then((r) => (r.ok ? r.json() : Promise.reject()))
+      api.get<any>(`/api/membership/members/${orgId}?search=${encodeURIComponent(memberSearch.trim())}&limit=10`)
         .then((json) => {
           const members = json.data || json.items || []
           setMemberResults(
@@ -287,20 +258,13 @@ function AssignRoleModal({
     if (!positionId || !selectedMember) return
     setIsSaving(true)
     try {
-      const res = await fetch('/api/association/member/officer-terms', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'x-org-id': orgId },
-        body: JSON.stringify({
-          positionId,
-          personId: selectedMember.personId,
-          organizationId: orgId,
-          startDate: new Date().toISOString().slice(0, 10),
-          status: 'active',
-        }),
-      })
-      if (!res.ok) throw new Error('Failed to assign')
-      const json = await res.json()
+      const json = await api.post<any>('/api/association/member/officer-terms', {
+        positionId,
+        personId: selectedMember.personId,
+        organizationId: orgId,
+        startDate: new Date().toISOString().slice(0, 10),
+        status: 'active',
+      }, { 'x-org-id': orgId })
       const position = positions.find((p) => p.id === positionId)
       onAssign({
         id: json.id || crypto.randomUUID(),

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -35,20 +37,17 @@ const EMPTY_PROFILE: OrgProfile = {
 
 async function fetchOrgProfile(orgId: string): Promise<OrgProfile> {
   try {
-    const res = await fetch(`/api/membership/org-profile/${orgId}`, { credentials: 'include' })
-    if (res.ok) {
-      const json = await res.json()
-      const org = json.data || json
-      return {
-        name: org.name || '',
-        description: org.description || '',
-        logoUrl: org.logoUrl || '',
-        contactEmail: org.contactEmail || '',
-        phone: org.phone || '',
-        address: org.address || '',
-        website: org.website || '',
-        foundingDate: org.foundingDate || '',
-      }
+    const json = await api.get<any>(`/api/membership/org-profile/${orgId}`)
+    const org = json.data || json
+    return {
+      name: org.name || '',
+      description: org.description || '',
+      logoUrl: org.logoUrl || '',
+      contactEmail: org.contactEmail || '',
+      phone: org.phone || '',
+      address: org.address || '',
+      website: org.website || '',
+      foundingDate: org.foundingDate || '',
     }
   } catch { /* fall through */ }
   return {
@@ -64,20 +63,20 @@ async function fetchOrgProfile(orgId: string): Promise<OrgProfile> {
 }
 
 export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
-  const [isLoading, setIsLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [saved, setSaved] = useState<OrgProfile>(EMPTY_PROFILE)
   const [draft, setDraft] = useState<OrgProfile>(EMPTY_PROFILE)
 
+  const { data: saved = EMPTY_PROFILE, isLoading } = useQuery({
+    queryKey: ['org-profile', orgId],
+    queryFn: () => fetchOrgProfile(orgId),
+  })
+
+  // Sync draft when saved data loads/changes
   useEffect(() => {
-    fetchOrgProfile(orgId)
-      .then((data) => {
-        setSaved(data)
-        setDraft(data)
-      })
-      .finally(() => setIsLoading(false))
-  }, [orgId])
+    if (!isEditing) setDraft(saved)
+  }, [saved, isEditing])
 
   const isDirty = JSON.stringify(draft) !== JSON.stringify(saved)
 
@@ -98,14 +97,8 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
     }
     setIsSaving(true)
     try {
-      const res = await fetch(`/api/membership/org-profile/${orgId}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: draft.name, contactEmail: draft.contactEmail }),
-      })
-      if (!res.ok) throw new Error('Save failed')
-      setSaved(draft)
+      await api.put(`/api/membership/org-profile/${orgId}`, { name: draft.name, contactEmail: draft.contactEmail })
+      queryClient.invalidateQueries({ queryKey: ['org-profile', orgId] })
       setIsEditing(false)
       toast.success('Settings saved')
     } catch {

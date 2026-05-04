@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { api, ApiError } from '@/lib/api'
 import { PageHeader } from '@/components/patterns/page-header'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
@@ -18,46 +20,38 @@ export const Route = createFileRoute('/_authenticated/my/organizations')({
 })
 
 function MyOrganizationsPage() {
-  const [memberships, setMemberships] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [leaveTarget, setLeaveTarget] = useState<{ membershipId: string; orgName: string; orgId: string } | null>(null)
   const [leaving, setLeaving] = useState(false)
   const [transferTarget, setTransferTarget] = useState<{ membershipId: string; orgId: string; orgName: string } | null>(null)
   const [transferToOrgId, setTransferToOrgId] = useState('')
   const [transferring, setTransferring] = useState(false)
 
-  const fetchMemberships = useCallback(() => {
-    fetch('/api/persons/me/memberships')
-      .then(res => res.json())
-      .then(res => {
-        setMemberships(res?.data || [])
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [])
-
-  useEffect(() => { fetchMemberships() }, [fetchMemberships])
+  const { data: memberships = [], isLoading: loading } = useQuery({
+    queryKey: ['my-memberships'],
+    queryFn: async () => {
+      const res = await api.get<{ data: any[] }>('/api/persons/me/memberships')
+      return res?.data || []
+    },
+  })
 
   async function handleLeaveConfirm() {
     if (!leaveTarget) return
     setLeaving(true)
     try {
-      const res = await fetch(
-        `/api/association/member/memberships/${leaveTarget.membershipId}/terminate`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json', 'x-org-id': leaveTarget.orgId },
-          body: JSON.stringify({ terminationReason: 'voluntary_departure' }),
-        }
-      )
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
+      try {
+        await api.post(
+          `/api/association/member/memberships/${leaveTarget.membershipId}/terminate`,
+          { terminationReason: 'voluntary_departure' },
+          { 'x-org-id': leaveTarget.orgId },
+        )
+      } catch (err) {
+        const body = err instanceof ApiError ? err.body as any : {}
         toast.error(body?.error ?? 'Failed to leave organization. Please try again.')
         return
       }
       toast.success(`You have left ${leaveTarget.orgName}.`)
-      setMemberships(prev => prev.filter(m => m.id !== leaveTarget.membershipId))
+      queryClient.invalidateQueries({ queryKey: ['my-memberships'] })
       setLeaveTarget(null)
     } catch {
       toast.error('Something went wrong. Please try again.')
@@ -192,21 +186,20 @@ function MyOrganizationsPage() {
                 if (!transferTarget) return
                 setTransferring(true)
                 try {
-                  const personRes = await fetch('/api/persons/me', { credentials: 'include' })
-                  const personData = await personRes.json()
+                  const personData = await api.get<any>('/api/persons/me')
                   const personId = personData?.id ?? personData?.data?.id
-                  const res = await fetch('/api/association/member/affiliation-transfers', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json', 'x-org-id': transferTarget.orgId },
-                    body: JSON.stringify({
-                      personId,
-                      fromChapterId: transferTarget.orgId,
-                      toChapterId: transferToOrgId.trim(),
-                    }),
-                  })
-                  if (!res.ok) {
-                    const body = await res.json().catch(() => ({}))
+                  try {
+                    await api.post(
+                      '/api/association/member/affiliation-transfers',
+                      {
+                        personId,
+                        fromChapterId: transferTarget.orgId,
+                        toChapterId: transferToOrgId.trim(),
+                      },
+                      { 'x-org-id': transferTarget.orgId },
+                    )
+                  } catch (err) {
+                    const body = err instanceof ApiError ? err.body as any : {}
                     toast.error(body?.error ?? 'Transfer request failed')
                     return
                   }

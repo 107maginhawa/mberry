@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import { Bell, ChevronDown } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface MemberHeaderProps {
   userName?: string
@@ -11,6 +13,9 @@ interface OrgMembership {
   organizationName?: string
   membershipStatus?: string
   membershipNumber?: string
+  orgId?: string
+  memberNumber?: string
+  status?: string
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -30,8 +35,6 @@ const STATUS_LABEL: Record<string, string> = {
 const SELECTED_ORG_KEY = 'memberry:selectedOrgId'
 
 export function MemberHeader({ userName }: MemberHeaderProps) {
-  const [orgs, setOrgs] = useState<OrgMembership[]>([])
-  const [notifCount, setNotifCount] = useState(0)
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(
     () => localStorage.getItem(SELECTED_ORG_KEY)
   )
@@ -39,29 +42,37 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    fetch('/api/persons/me/memberships', { credentials: 'include' })
-      .then((r) => r.ok ? r.json() : { data: [] })
-      .then((json) => {
-        const data = json.data || []
-        setOrgs(data)
-        // Default to stored selection, or first org
-        if (data.length > 0 && !data.find((o: OrgMembership) => o.organizationId === selectedOrgId)) {
-          const defaultId = data[0].organizationId
-          setSelectedOrgId(defaultId)
-          localStorage.setItem(SELECTED_ORG_KEY, defaultId)
-        }
-      })
-      .catch(() => {})
+  const { data: orgs = [] } = useQuery({
+    queryKey: ['my-memberships'],
+    queryFn: async () => {
+      const json = await api.get<any>('/api/persons/me/memberships')
+      const raw = json.data || []
+      return raw.map((m: any) => ({
+        ...m,
+        organizationId: m.organizationId || m.orgId,
+        membershipNumber: m.membershipNumber || m.memberNumber,
+        membershipStatus: m.membershipStatus || m.status,
+      })) as OrgMembership[]
+    },
+  })
 
-    fetch('/api/notifs?limit=50&channel=in-app', { credentials: 'include' })
-      .then((r) => r.ok ? r.json() : { data: [] })
-      .then((json) => {
-        const items = json.data || json.items || []
-        setNotifCount(items.filter((n: any) => n.status !== 'read').length)
-      })
-      .catch(() => {})
-  }, [])
+  const { data: notifCount = 0 } = useQuery({
+    queryKey: ['notif-unread-count'],
+    queryFn: async () => {
+      const json = await api.get<any>('/api/notifs?limit=50&channel=in-app')
+      const items = json.data || json.items || []
+      return items.filter((n: any) => n.status !== 'read').length as number
+    },
+  })
+
+  // Default to stored selection, or first org
+  useEffect(() => {
+    if (orgs.length > 0 && !orgs.find((o) => o.organizationId === selectedOrgId)) {
+      const defaultId = orgs[0]!.organizationId
+      setSelectedOrgId(defaultId)
+      localStorage.setItem(SELECTED_ORG_KEY, defaultId)
+    }
+  }, [orgs, selectedOrgId])
 
   // Close dropdown on outside click
   useEffect(() => {

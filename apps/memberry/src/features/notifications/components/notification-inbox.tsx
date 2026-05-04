@@ -1,6 +1,8 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Bell, Megaphone, CreditCard, Calendar, BookOpen, Settings, CheckCheck, Loader2 } from 'lucide-react'
+import { api } from '@/lib/api'
 
 type NotifCategory = 'All' | 'Announcements' | 'Payments' | 'Events' | 'Training' | 'System'
 
@@ -56,31 +58,18 @@ function getDateGroup(date: Date): string {
 const GROUP_ORDER = ['Today', 'Yesterday', 'This Week', 'Earlier']
 
 export function NotificationInbox() {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
   const [activeCategory, setActiveCategory] = useState<NotifCategory>('All')
 
-  useEffect(() => {
-    fetchNotifications()
-  }, [])
+  const { data: notifications = [], isLoading: loading, error: fetchError } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      const json = await api.get<any>('/api/notifs?limit=50&channel=in-app')
+      return (json.data || json.items || []).map(mapApiNotification) as Notification[]
+    },
+  })
 
-  async function fetchNotifications() {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/notifs?limit=50&channel=in-app', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to load notifications')
-      const json = await res.json()
-      const items = (json.data || json.items || []).map(mapApiNotification)
-      setNotifications(items)
-    } catch {
-      setError('Could not load notifications')
-      setNotifications([])
-    } finally {
-      setLoading(false)
-    }
-  }
+  const error = fetchError ? 'Could not load notifications' : null
 
   const filtered = useMemo(() => {
     return activeCategory === 'All'
@@ -105,20 +94,20 @@ export function NotificationInbox() {
 
   async function markAllRead() {
     try {
-      await fetch('/api/notifs/read-all', { method: 'POST', credentials: 'include' })
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    } catch {
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    }
+      await api.post('/api/notifs/read-all')
+    } catch { /* ignore */ }
+    queryClient.setQueryData<Notification[]>(['notifications'], (old) =>
+      old?.map((n) => ({ ...n, read: true })) ?? []
+    )
   }
 
   async function markRead(id: string) {
     try {
-      await fetch(`/api/notifs/${id}/read`, { method: 'POST', credentials: 'include' })
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-    } catch {
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-    }
+      await api.post(`/api/notifs/${id}/read`)
+    } catch { /* ignore */ }
+    queryClient.setQueryData<Notification[]>(['notifications'], (old) =>
+      old?.map((n) => (n.id === id ? { ...n, read: true } : n)) ?? []
+    )
   }
 
   if (loading) {
