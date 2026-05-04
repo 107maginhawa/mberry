@@ -25,22 +25,43 @@ interface Member {
 function MembersPage() {
   const [search, setSearch] = useState('')
 
-  const { data: orgs, isLoading, isError, error } = useQuery({
+  const { data: orgs } = useQuery({
     queryKey: ['admin', 'organizations'],
     queryFn: async () => {
       const res = await fetch('/api/admin/organizations', { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch organizations')
-      return res.json() as Promise<Organization[]>
+      const json = await res.json()
+      return (json.data ?? json) as Organization[]
     },
   })
 
-  // Flatten members from all organizations
-  const allMembers: Member[] = (orgs || []).flatMap((org) =>
-    (org.members || []).map((m) => ({
-      ...m,
-      organizationName: org.name,
-    }))
-  )
+  // Fetch members for each org via membership API
+  const { data: allMembers = [], isLoading, isError, error } = useQuery({
+    queryKey: ['admin', 'all-members', orgs?.map((o) => o.id)],
+    enabled: !!orgs && orgs.length > 0,
+    queryFn: async () => {
+      const results: Member[] = []
+      for (const org of orgs!) {
+        try {
+          const res = await fetch(`/api/membership/members/${org.id}?limit=9999`, { credentials: 'include' })
+          if (!res.ok) continue
+          const json = await res.json()
+          const members = json.data ?? []
+          for (const m of members) {
+            results.push({
+              id: m.id,
+              name: m.name || [m.firstName, m.lastName].filter(Boolean).join(' ') || m.memberNumber || m.id,
+              email: m.email || '',
+              role: m.categoryName || 'member',
+              status: m.status,
+              organizationName: org.name,
+            })
+          }
+        } catch { /* skip org on error */ }
+      }
+      return results
+    },
+  })
 
   const filteredMembers = search.length >= 2
     ? allMembers.filter(

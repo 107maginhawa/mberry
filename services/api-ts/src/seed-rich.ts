@@ -61,6 +61,27 @@ async function seedRich() {
   const allPersons = await db.select({ id: persons.id }).from(persons);
   if (allPersons.length < 10) { console.error('Need at least 10 persons. Run base seed first!'); process.exit(1); }
 
+  // Give realistic Filipino names to persons that have "Test User" names
+  const FILIPINO_NAMES = [
+    ['Ana', 'Reyes'], ['Carlos', 'Garcia'], ['Elena', 'Torres'], ['Miguel', 'Bautista'],
+    ['Sofia', 'Mendoza'], ['Rafael', 'Villanueva'], ['Isabella', 'Dela Cruz'], ['Luis', 'Ramos'],
+    ['Patricia', 'Navarro'], ['Fernando', 'Castillo'], ['Carmen', 'Aquino'], ['Roberto', 'Gonzales'],
+    ['Teresa', 'Santiago'], ['Antonio', 'Flores'], ['Rosa', 'Diaz'], ['Diego', 'Rivera'],
+    ['Lucia', 'Hernandez'], ['Marco', 'Lim'], ['Gabriela', 'Tan'], ['Pedro', 'Sy'],
+    ['Andrea', 'Ong'], ['Jose', 'Co'], ['Valeria', 'Chua'], ['Ricardo', 'Go'],
+    ['Catalina', 'Yap'], ['Eduardo', 'Ang'], ['Mariana', 'Wu'], ['Sergio', 'Lee'],
+    ['Daniela', 'Tiu'], ['Francisco', 'Uy'], ['Claudia', 'Cheng'], ['Alejandro', 'Koh'],
+    ['Beatriz', 'Lao'], ['Manuel', 'Yu'], ['Victoria', 'Que'], ['Enrique', 'Siy'],
+    ['Monica', 'Dee'], ['Arturo', 'Lam'], ['Natalia', 'Ty'], ['Ignacio', 'Ngo'],
+  ];
+  const testPersons = await db.select({ id: persons.id, firstName: persons.firstName }).from(persons)
+    .where(sql`${persons.firstName} LIKE 'Test'`);
+  for (let i = 0; i < testPersons.length && i < FILIPINO_NAMES.length; i++) {
+    const [first, last] = FILIPINO_NAMES[i]!;
+    await db.update(persons).set({ firstName: first, lastName: last }).where(eq(persons.id, testPersons[i]!.id));
+  }
+  if (testPersons.length > 0) console.log(`    Renamed ${Math.min(testPersons.length, FILIPINO_NAMES.length)} "Test User" persons to Filipino names`);
+
   // Get existing membership person IDs to exclude
   const existingMemberships = await db.select({ personId: memberships.personId }).from(memberships);
   const existingPersonIds = new Set(existingMemberships.map(m => m.personId));
