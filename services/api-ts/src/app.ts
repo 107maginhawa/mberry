@@ -281,6 +281,47 @@ export function createApp(config: Config): App {
     return ctx.json({ data: rows }, 200);
   });
 
+  // Credit compliance report for officers (auth required)
+  app.get('/credit-compliance/:orgId', authMiddleware(), async (ctx) => {
+    const db = ctx.get('database') as any;
+    const orgId = ctx.req.param('orgId');
+    const { sql } = await import('drizzle-orm');
+    const requiredCredits = 40; // default per cycle
+
+    const rows = await db.execute(sql`
+      SELECT
+        m.person_id,
+        p.first_name,
+        p.last_name,
+        m.member_number,
+        m.status as membership_status,
+        COALESCE(SUM(c.credit_amount), 0)::int as earned,
+        ${requiredCredits} as required,
+        GREATEST(${requiredCredits} - COALESCE(SUM(c.credit_amount), 0), 0)::int as remaining,
+        CASE
+          WHEN COALESCE(SUM(c.credit_amount), 0) >= ${requiredCredits} THEN 'compliant'
+          WHEN COALESCE(SUM(c.credit_amount), 0) >= ${requiredCredits} * 0.5 THEN 'at_risk'
+          ELSE 'non_compliant'
+        END as compliance_status
+      FROM membership m
+      JOIN person p ON m.person_id = p.id
+      LEFT JOIN credit_entry c ON c.person_id = m.person_id AND c.organization_id = m.org_id
+      WHERE m.org_id = ${orgId} AND m.status IN ('active', 'gracePeriod')
+      GROUP BY m.person_id, p.first_name, p.last_name, m.member_number, m.status
+      ORDER BY COALESCE(SUM(c.credit_amount), 0) ASC
+    `);
+
+    const data = (rows as any).rows ?? rows ?? [];
+    const compliant = data.filter((r: any) => r.compliance_status === 'compliant').length;
+    const atRisk = data.filter((r: any) => r.compliance_status === 'at_risk').length;
+    const nonCompliant = data.filter((r: any) => r.compliance_status === 'non_compliant').length;
+
+    return ctx.json({
+      data,
+      summary: { compliant, atRisk, nonCompliant, total: data.length, requiredCredits },
+    }, 200);
+  });
+
   // Officer role check (auth required)
   app.get('/persons/me/officer-role/:orgId', authMiddleware(), async (ctx) => {
     const { getMyOfficerRole } = await import('@/handlers/association:member/getMyOfficerRole');

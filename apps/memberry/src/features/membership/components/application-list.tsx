@@ -25,6 +25,8 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
 export function ApplicationList({ orgId }: ApplicationListProps) {
   const queryClient = useQueryClient()
   const [statusFilter, setStatusFilter] = useState<AppStatus>('pending')
+  const [sortBy, setSortBy] = useState<'date' | 'name'>('date')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const queryParams = new URLSearchParams(
     statusFilter !== 'all' ? { status: statusFilter } : {}
@@ -37,7 +39,11 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
     },
   })
 
-  const applications: any[] = data?.data ?? []
+  const rawApplications: any[] = data?.data ?? []
+  const applications = [...rawApplications].sort((a, b) => {
+    if (sortBy === 'name') return (a.name ?? a.personId ?? '').localeCompare(b.name ?? b.personId ?? '')
+    return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+  })
 
   const reviewMutation = useMutation({
     mutationFn: async ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
@@ -59,8 +65,8 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
 
   return (
     <div className="space-y-4">
-      {/* Filter */}
-      <div className="flex items-center gap-3">
+      {/* Filters */}
+      <div className="flex items-center gap-3 flex-wrap">
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as AppStatus)}>
           <SelectTrigger className="w-44">
             <SelectValue placeholder="Filter by status" />
@@ -73,10 +79,33 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
             <SelectItem value="rejected">Rejected</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'date' | 'name')}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date">Newest first</SelectItem>
+            <SelectItem value="name">By name</SelectItem>
+          </SelectContent>
+        </Select>
         {!isLoading && (
           <span className="text-sm text-muted-foreground">
             {applications.length} result{applications.length !== 1 ? 's' : ''}
           </span>
+        )}
+        {selectedIds.size > 0 && statusFilter === 'pending' && (
+          <Button
+            size="sm"
+            onClick={async () => {
+              for (const id of selectedIds) {
+                await reviewMutation.mutateAsync({ appId: id, status: 'approved' })
+              }
+              setSelectedIds(new Set())
+            }}
+            disabled={reviewMutation.isPending}
+          >
+            Approve {selectedIds.size} Selected
+          </Button>
         )}
       </div>
 
@@ -97,14 +126,29 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
       ) : (
         <div className="space-y-3">
           {applications.map((app: any) => (
-            <ApplicationCard
-              key={app.id}
-              app={app}
-              onReview={(status, reason) =>
-                reviewMutation.mutate({ appId: app.id, status, reason })
-              }
-              isPending={reviewMutation.isPending && reviewMutation.variables?.appId === app.id}
-            />
+            <div key={app.id} className="flex items-start gap-3">
+              {statusFilter === 'pending' && (
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(app.id)}
+                  onChange={(e) => {
+                    const next = new Set(selectedIds)
+                    e.target.checked ? next.add(app.id) : next.delete(app.id)
+                    setSelectedIds(next)
+                  }}
+                  className="mt-5 h-4 w-4 rounded border-gray-300"
+                />
+              )}
+              <div className="flex-1">
+                <ApplicationCard
+                  app={app}
+                  onReview={(status, reason) =>
+                    reviewMutation.mutate({ appId: app.id, status, reason })
+                  }
+                  isPending={reviewMutation.isPending && reviewMutation.variables?.appId === app.id}
+                />
+              </div>
+            </div>
           ))}
         </div>
       )}
