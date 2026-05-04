@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { createRootRouteWithContext, Link, Outlet, redirect } from '@tanstack/react-router'
+import { Toaster } from 'sonner'
 import {
   LayoutDashboard,
   Building2,
@@ -9,9 +10,21 @@ import {
   ToggleLeft,
   ShieldCheck,
 } from 'lucide-react'
+import type { RouterContext } from '@/router'
 import '@/styles/globals.css'
 
-export const Route = createRootRoute({
+const MEMBERRY_LOGIN_URL = import.meta.env.VITE_MEMBERRY_URL
+  ? `${import.meta.env.VITE_MEMBERRY_URL}/auth/sign-in?redirect=admin`
+  : 'http://localhost:3004/auth/sign-in?redirect=admin'
+
+export const Route = createRootRouteWithContext<RouterContext>()({
+  beforeLoad: ({ context }) => {
+    if (!context.auth.user) {
+      // Admin has no auth UI — redirect to memberry sign-in
+      window.location.href = MEMBERRY_LOGIN_URL
+      throw redirect({ to: '/' })
+    }
+  },
   component: RootComponent,
 })
 
@@ -69,6 +82,7 @@ function RootComponent() {
       <main className="flex-1 overflow-auto bg-background">
         <Outlet />
       </main>
+      <Toaster richColors position="top-right" />
     </div>
   )
 }

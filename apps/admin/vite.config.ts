@@ -6,6 +6,13 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 export default defineConfig({
   server: {
     port: 3003,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:7213',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
   plugins: [
     tsConfigPaths({

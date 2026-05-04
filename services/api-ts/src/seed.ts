@@ -11,7 +11,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 import { Pool } from 'pg';
-import { associations, organizations } from './handlers/platformadmin/repos/platform-admin.schema';
+import { associations, organizations, platformAdmins } from './handlers/platformadmin/repos/platform-admin.schema';
 import { membershipTiers, membershipCategories, memberships } from './handlers/association:member/repos/membership.schema';
 import { positions, officerTerms } from './handlers/association:member/repos/governance.schema';
 import { persons } from './handlers/person/repos/person.schema';
@@ -253,6 +253,7 @@ async function seed() {
   console.log('\n  Creating test users (requires API on port 7213)...');
 
   const personIds: string[] = [];
+  const userRecords: { userId: string; email: string; name: string }[] = [];
 
   for (const user of TEST_USERS) {
     const auth = await signUpUser(user.email, user.password, user.name);
@@ -261,6 +262,7 @@ async function seed() {
       continue;
     }
     console.log(`  User: ${user.email} (${auth.userId})`);
+    userRecords.push({ userId: auth.userId, email: user.email, name: user.name });
 
     // Create person FIRST (uses original session cookie before role change)
     const personId = await createPerson(auth.cookie, {
@@ -339,6 +341,23 @@ async function seed() {
     }
   }
 
+  // ─── Platform Admin (idempotent) ───
+  // Make the first test user (test@memberry.ph) a platform admin
+  if (userRecords[0]) {
+    const existingAdmin = await db.select().from(platformAdmins).where(eq(platformAdmins.email, 'test@memberry.ph')).limit(1);
+    if (existingAdmin.length > 0) {
+      console.log(`  Platform Admin: test@memberry.ph (exists)`);
+    } else {
+      await db.insert(platformAdmins).values({
+        userId: userRecords[0].userId,
+        email: 'test@memberry.ph',
+        name: 'Maria Santos',
+        role: 'super',
+      });
+      console.log(`  Platform Admin: test@memberry.ph (created as super)`);
+    }
+  }
+
   // ─── Summary ───
   console.log('\n╔══════════════════════════════════════════╗');
   console.log('║         SEED COMPLETE                    ║');
@@ -352,6 +371,11 @@ async function seed() {
   console.log('║  Member account:                        ║');
   console.log('║    Email:    member@memberry.ph          ║');
   console.log('║    Password: TestPass123!               ║');
+  console.log('║                                         ║');
+  console.log('║  Admin account (same as officer):       ║');
+  console.log('║    Email:    test@memberry.ph            ║');
+  console.log('║    Password: TestPass123!               ║');
+  console.log('║    Role:     super (platform admin)     ║');
   console.log('╠══════════════════════════════════════════╣');
   console.log(`║  Org ID: ${org1.id}  ║`);
   console.log('║  Public: /org/pda-metro-manila          ║');
