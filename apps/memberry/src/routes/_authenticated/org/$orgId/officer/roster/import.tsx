@@ -3,6 +3,7 @@ import { createFileRoute, Link, useParams } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Upload, FileText, ArrowLeft, Check, AlertTriangle, Loader2 } from 'lucide-react'
+import { api, ApiError } from '@/lib/api'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/roster/import',
@@ -23,7 +24,7 @@ function parseCSV(text: string): { headers: string[]; rows: ParsedRow[] } {
   const lines = text.trim().split('\n')
   if (lines.length < 2) return { headers: [], rows: [] }
 
-  const headers = lines[0].split(',').map((h) => h.trim().replace(/^"(.*)"$/, '$1'))
+  const headers = lines[0]!.split(',').map((h) => h.trim().replace(/^"(.*)"$/, '$1'))
 
   const rows = lines.slice(1).map((line) => {
     const values = line.split(',').map((v) => v.trim().replace(/^"(.*)"$/, '$1'))
@@ -98,23 +99,13 @@ function RosterImportPage() {
           licenseNumber: r.licenseNumber || undefined,
         }))
 
-      const res = await fetch(`/api/membership/members/${orgId}/import`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ members }),
-      })
+      const json: any = await api.post(`/api/membership/members/${orgId}/import`, { members })
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || 'Import failed')
-      }
-
-      const json = await res.json()
       setResult(json.data)
       toast.success(`Imported ${json.data.imported} members`)
     } catch (err: any) {
-      toast.error(err.message || 'Import failed')
+      const msg = err instanceof ApiError ? ((err.body as any)?.message ?? 'Import failed') : (err.message || 'Import failed')
+      toast.error(msg)
     } finally {
       setImporting(false)
     }
@@ -125,7 +116,7 @@ function RosterImportPage() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link
-          to={`/org/${orgId}/officer/roster`}
+          to={`/org/${orgId}/officer/roster` as any}
           className="p-1.5 rounded-lg hover:bg-[var(--color-surface-warm)] transition-colors"
         >
           <ArrowLeft size={18} className="text-[var(--color-muted)]" />

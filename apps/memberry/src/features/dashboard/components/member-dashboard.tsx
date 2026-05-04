@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { CalendarDays, BookOpen, Bell, CreditCard, ChevronRight, Shield } from 'lucide-react'
+import { api } from '@/lib/api'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
@@ -46,8 +46,8 @@ export function MemberDashboard() {
   const memberships = useQuery<Membership[]>({
     queryKey: ['my-memberships'],
     queryFn: async () => {
-      const res = await fetch('/api/persons/me/memberships')
-      return (await res.json()).data ?? []
+      const json = await api.get<any>('/api/persons/me/memberships')
+      return json.data ?? []
     },
     retry: false,
   })
@@ -55,8 +55,8 @@ export function MemberDashboard() {
   const events = useQuery<OrgEvent[]>({
     queryKey: ['my-events'],
     queryFn: async () => {
-      const res = await fetch('/api/events/my')
-      return (await res.json()).data ?? []
+      const json = await api.get<any>('/api/events/my')
+      return json.data ?? []
     },
     retry: false,
   })
@@ -64,8 +64,8 @@ export function MemberDashboard() {
   const trainings = useQuery<Training[]>({
     queryKey: ['my-trainings'],
     queryFn: async () => {
-      const res = await fetch('/api/training/my')
-      return (await res.json()).data ?? []
+      const json = await api.get<any>('/api/training/my')
+      return json.data ?? []
     },
     retry: false,
   })
@@ -73,8 +73,8 @@ export function MemberDashboard() {
   const notifications = useQuery<Notification[]>({
     queryKey: ['my-notifications'],
     queryFn: async () => {
-      const res = await fetch('/api/notifications/my?limit=3')
-      return (await res.json()).data ?? []
+      const json = await api.get<any>('/api/notifications/my?limit=3')
+      return json.data ?? []
     },
     retry: false,
   })
@@ -211,20 +211,21 @@ export function MemberDashboard() {
 
 function MembershipCard({ membership: m }: { membership: Membership }) {
   const needsPay = m.status === 'grace' || m.status === 'lapsed'
-  const [isOfficer, setIsOfficer] = useState(false)
-  const [officerRole, setOfficerRole] = useState('')
 
-  useEffect(() => {
-    fetch(`/api/persons/me/officer-role/${m.orgId}`, { credentials: 'include' })
-      .then((r) => r.ok ? r.json() : null)
-      .then((json) => {
-        if (json?.data?.isOfficer) {
-          setIsOfficer(true)
-          setOfficerRole(json.data.positions?.[0]?.title || 'Officer')
-        }
-      })
-      .catch(() => {})
-  }, [m.orgId])
+  const officerQuery = useQuery<{ isOfficer: boolean; role: string }>({
+    queryKey: ['officer-role', m.orgId],
+    queryFn: async () => {
+      const json = await api.get<any>(`/api/persons/me/officer-role/${m.orgId}`)
+      if (json?.data?.isOfficer) {
+        return { isOfficer: true, role: json.data.positions?.[0]?.title || 'Officer' }
+      }
+      return { isOfficer: false, role: '' }
+    },
+    retry: false,
+  })
+
+  const isOfficer = officerQuery.data?.isOfficer ?? false
+  const officerRole = officerQuery.data?.role ?? ''
 
   return (
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
@@ -250,7 +251,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
       <div className="flex items-center gap-2 mt-4">
         {isOfficer && (
           <Link
-            to={`/org/${m.orgId}/officer/dashboard`}
+            to={`/org/${m.orgId}/officer/dashboard` as any}
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white px-4 py-1.5 rounded-[8px] transition-colors"
           >
             <Shield size={13} />

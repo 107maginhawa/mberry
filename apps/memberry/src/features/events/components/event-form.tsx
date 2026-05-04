@@ -15,6 +15,7 @@ interface EventFormProps {
     location?: string | null
     registrationFee?: number | null
     capacity?: number | null
+    visibility?: string | null
     status: string
   }
   onSuccess?: (event: any) => void

@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PageHeader } from '@/components/patterns/page-header'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/settings')({
   component: MySettingsPage,
@@ -51,34 +53,30 @@ function MySettingsPage() {
 }
 
 function GeneralSection() {
+  const queryClient = useQueryClient()
   const [deleting, setDeleting] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
-  const [deletionPending, setDeletionPending] = useState<string | null>(null)
   const [cancelling, setCancelling] = useState(false)
 
-  // Check if deletion already requested
-  useEffect(() => {
-    fetch('/api/persons/me', { credentials: 'include' })
-      .then(r => r.json())
-      .then(data => {
-        const p = data.data ?? data
-        if (p?.deletionScheduledAt) setDeletionPending(p.deletionScheduledAt)
-      })
-      .catch(() => {})
-  }, [])
+  const deletionQuery = useQuery<string | null>({
+    queryKey: ['person-deletion-status'],
+    queryFn: async () => {
+      const data = await api.get<any>('/api/persons/me')
+      const p = data.data ?? data
+      return p?.deletionScheduledAt ?? null
+    },
+    retry: false,
+  })
+
+  const deletionPending = deletionQuery.data ?? null
 
   async function handleDelete() {
     if (confirmText !== 'DELETE') return
     setDeleting(true)
     try {
-      const res = await fetch('/api/persons/me/delete', {
-        method: 'POST',
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed')
-      const data = await res.json()
-      setDeletionPending(data.deletionScheduledAt)
+      await api.post<any>('/api/persons/me/delete')
+      await queryClient.invalidateQueries({ queryKey: ['person-deletion-status'] })
       setShowConfirm(false)
       setConfirmText('')
     } catch {
@@ -91,12 +89,8 @@ function GeneralSection() {
   async function handleCancel() {
     setCancelling(true)
     try {
-      const res = await fetch('/api/persons/me/cancel-delete', {
-        method: 'POST',
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed')
-      setDeletionPending(null)
+      await api.post('/api/persons/me/cancel-delete')
+      await queryClient.invalidateQueries({ queryKey: ['person-deletion-status'] })
     } catch {
       // error handled silently
     } finally {
@@ -189,39 +183,36 @@ function GeneralSection() {
 }
 
 function NotificationPreferencesSection() {
-  const [prefs, setPrefs] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [prefs, setPrefs] = useState<any[] | null>(null)
 
-  useEffect(() => {
-    fetch('/api/persons/me/notification-preferences')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to load')
-        return res.json()
-      })
-      .then(data => { setPrefs(Array.isArray(data) ? data : []); setLoading(false) })
-      .catch(() => setLoading(false))
-  }, [])
+  const prefsQuery = useQuery<any[]>({
+    queryKey: ['notification-preferences'],
+    queryFn: async () => {
+      const data = await api.get<any>('/api/persons/me/notification-preferences')
+      return Array.isArray(data) ? data : []
+    },
+    retry: false,
+  })
+
+  // Use local state for optimistic updates, fall back to query data
+  const effectivePrefs = prefs ?? prefsQuery.data ?? []
 
   const toggle = useCallback(async (category: string, field: 'pushEnabled' | 'emailEnabled', value: boolean) => {
-    setPrefs(prev => prev.map(p =>
+    const current = prefs ?? prefsQuery.data ?? []
+    setPrefs(current.map(p =>
       p.category === category ? { ...p, [field]: value } : p
     ))
 
     try {
-      const res = await fetch('/api/persons/me/notification-preferences', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, [field]: value }),
-      })
-      if (!res.ok) throw new Error('Save failed')
+      await api.patch('/api/persons/me/notification-preferences', { category, [field]: value })
     } catch {
-      setPrefs(prev => prev.map(p =>
+      setPrefs(current.map(p =>
         p.category === category ? { ...p, [field]: !value } : p
       ))
     }
-  }, [])
+  }, [prefs, prefsQuery.data])
 
-  if (loading) return <div className="text-[14px] text-[var(--color-muted)]">Loading preferences...</div>
+  if (prefsQuery.isLoading) return <div className="text-[14px] text-[var(--color-muted)]">Loading preferences...</div>
 
   return (
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
@@ -232,7 +223,7 @@ function NotificationPreferencesSection() {
 
       <div className="space-y-3">
         {NOTIFICATION_CATEGORIES.map(cat => {
-          const pref = prefs.find(p => p.category === cat.key) || { pushEnabled: true, emailEnabled: false }
+          const pref = effectivePrefs.find(p => p.category === cat.key) || { pushEnabled: true, emailEnabled: false }
           return (
             <div key={cat.key} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
               <div>
@@ -260,9 +251,8 @@ function NotificationPreferencesSection() {
 }
 
 function PrivacySection() {
-  const [allSettings, setAllSettings] = useState<any[]>([])
+  const [allSettings, setAllSettings] = useState<any[] | null>(null)
   const [selectedOrgIndex, setSelectedOrgIndex] = useState(0)
-  const [loading, setLoading] = useState(true)
 
   const defaults = {
     emailVisible: false,
@@ -271,48 +261,44 @@ function PrivacySection() {
     addressVisible: false,
   }
 
-  useEffect(() => {
-    fetch('/api/persons/me/privacy')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to load')
-        return res.json()
-      })
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setAllSettings(data)
-        }
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [])
+  const privacyQuery = useQuery<any[]>({
+    queryKey: ['privacy-settings'],
+    queryFn: async () => {
+      const data = await api.get<any>('/api/persons/me/privacy')
+      if (Array.isArray(data) && data.length > 0) {
+        return data
+      }
+      return []
+    },
+    retry: false,
+  })
 
-  const privacy = allSettings[selectedOrgIndex] ?? defaults
+  // Use local state for optimistic updates, fall back to query data
+  const effectiveSettings = allSettings ?? privacyQuery.data ?? []
+
+  const privacy = effectiveSettings[selectedOrgIndex] ?? defaults
   const orgId = privacy.orgId
 
   const toggle = useCallback(async (field: string, value: boolean) => {
     if (!orgId) return // no org context — cannot save
 
-    setAllSettings(prev => prev.map((s, i) =>
+    const current = allSettings ?? privacyQuery.data ?? []
+    setAllSettings(current.map((s, i) =>
       i === selectedOrgIndex ? { ...s, [field]: value } : s
     ))
 
     try {
-      const res = await fetch('/api/persons/me/privacy', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orgId, [field]: value }),
-      })
-      if (!res.ok) throw new Error('Save failed')
+      await api.patch('/api/persons/me/privacy', { orgId, [field]: value })
     } catch {
-      setAllSettings(prev => prev.map((s, i) =>
+      setAllSettings(current.map((s, i) =>
         i === selectedOrgIndex ? { ...s, [field]: !value } : s
       ))
     }
-  }, [orgId, selectedOrgIndex])
+  }, [orgId, selectedOrgIndex, allSettings, privacyQuery.data])
 
-  if (loading) return null
+  if (privacyQuery.isLoading) return null
 
-  if (allSettings.length === 0) {
+  if (effectiveSettings.length === 0) {
     return (
       <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
         <h2 className="text-[16px] font-semibold font-display">Privacy</h2>
@@ -333,13 +319,13 @@ function PrivacySection() {
         </p>
       </div>
 
-      {allSettings.length > 1 && (
+      {effectiveSettings.length > 1 && (
         <select
           value={selectedOrgIndex}
           onChange={(e) => setSelectedOrgIndex(Number(e.target.value))}
           className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-[14px]"
         >
-          {allSettings.map((s, i) => (
+          {effectiveSettings.map((s, i) => (
             <option key={s.orgId} value={i}>
               {s.orgName || s.orgId}
             </option>

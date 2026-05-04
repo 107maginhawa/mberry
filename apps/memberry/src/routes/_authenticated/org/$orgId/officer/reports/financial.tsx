@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,9 +23,8 @@ function FinancialReportsPage() {
   const { data: reportData, isLoading } = useQuery({
     queryKey: ['dues-report', orgId, selectedType, fromDate, toDate],
     queryFn: async () => {
-      const params = new URLSearchParams({ type: selectedType!, from: fromDate, to: toDate })
-      const res = await fetch(`/api/dues/reports/${orgId}?${params}`)
-      return res.json()
+      const params = new URLSearchParams({ type: selectedType!, from: fromDate ?? '', to: toDate ?? '' })
+      return api.get<any>(`/api/dues/reports/${orgId}?${params}`)
     },
     enabled: shouldFetch && !!selectedType,
   })
@@ -33,7 +33,7 @@ function FinancialReportsPage() {
     setShouldFetch(true)
   }
 
-  const dateError = new Date(fromDate) > new Date(toDate)
+  const dateError = fromDate && toDate ? new Date(fromDate) > new Date(toDate) : false
 
   return (
     <div className="p-6 space-y-6">

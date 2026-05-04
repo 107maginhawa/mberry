@@ -8,7 +8,8 @@ import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { Calendar, Award, UserPlus, Shield } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: DashboardPage,
@@ -27,47 +28,53 @@ function DashboardPage() {
     retry: false,
   })
 
-  const [memberships, setMemberships] = useState<any[]>([])
-  const [membershipsLoading, setMembershipsLoading] = useState(true)
-  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([])
-  const [totalCredits, setTotalCredits] = useState(0)
-  const [unreadNotifCount, setUnreadNotifCount] = useState(0)
+  const membershipsQuery = useQuery<any[]>({
+    queryKey: ['my-memberships'],
+    queryFn: async () => {
+      const res = await api.get<any>('/api/persons/me/memberships')
+      return res?.data || []
+    },
+    retry: false,
+  })
 
-  useEffect(() => {
-    fetch('/api/persons/me/memberships', { credentials: 'include' })
-      .then(res => res.json())
-      .then(res => {
-        setMemberships(res?.data || [])
-        setMembershipsLoading(false)
-      })
-      .catch(() => setMembershipsLoading(false))
+  const eventsQuery = useQuery<any[]>({
+    queryKey: ['my-upcoming-events'],
+    queryFn: async () => {
+      const res = await api.get<any>('/api/events/my')
+      const now = new Date()
+      const items = (res?.data || []).map((e: any) => e.event || e)
+      return items
+        .filter((e: any) => new Date(e.startDate || e.start_date) >= now)
+        .sort((a: any, b: any) => new Date(a.startDate || a.start_date).getTime() - new Date(b.startDate || b.start_date).getTime())
+        .slice(0, 3)
+    },
+    retry: false,
+  })
 
-    fetch('/api/events/my', { credentials: 'include' })
-      .then(res => res.ok ? res.json() : { data: [] })
-      .then(res => {
-        const now = new Date()
-        const items = (res?.data || []).map((e: any) => e.event || e)
-        const upcoming = items
-          .filter((e: any) => new Date(e.startDate || e.start_date) >= now)
-          .sort((a: any, b: any) => new Date(a.startDate || a.start_date).getTime() - new Date(b.startDate || b.start_date).getTime())
-          .slice(0, 3)
-        setUpcomingEvents(upcoming)
-      })
-      .catch(() => {})
+  const creditsQuery = useQuery<number>({
+    queryKey: ['my-credit-summary'],
+    queryFn: async () => {
+      const res = await api.get<any>('/api/persons/me/credit-summary')
+      return res?.totalCredits ?? res?.data?.totalCredits ?? 0
+    },
+    retry: false,
+  })
 
-    fetch('/api/persons/me/credit-summary', { credentials: 'include' })
-      .then(res => res.ok ? res.json() : { totalCredits: 0 })
-      .then(res => setTotalCredits(res?.totalCredits ?? res?.data?.totalCredits ?? 0))
-      .catch(() => {})
+  const notifsQuery = useQuery<number>({
+    queryKey: ['my-unread-notif-count'],
+    queryFn: async () => {
+      const res = await api.get<any>('/api/notifs?limit=50&channel=in-app')
+      const items = res?.data || res?.items || []
+      return items.filter((n: any) => n.status !== 'read').length
+    },
+    retry: false,
+  })
 
-    fetch('/api/notifs?limit=50&channel=in-app', { credentials: 'include' })
-      .then(res => res.ok ? res.json() : { data: [] })
-      .then(res => {
-        const items = res?.data || res?.items || []
-        setUnreadNotifCount(items.filter((n: any) => n.status !== 'read').length)
-      })
-      .catch(() => {})
-  }, [])
+  const memberships = membershipsQuery.data ?? []
+  const membershipsLoading = membershipsQuery.isLoading
+  const upcomingEvents = eventsQuery.data ?? []
+  const totalCredits = creditsQuery.data ?? 0
+  const unreadNotifCount = notifsQuery.data ?? 0
 
   const displayName = person.data?.firstName ?? 'there'
 
@@ -178,18 +185,19 @@ function DashboardPage() {
 }
 
 function OrgCard({ membership: m }: { membership: any }) {
-  const [officerRole, setOfficerRole] = useState<string | null>(null)
+  const officerQuery = useQuery<string | null>({
+    queryKey: ['officer-role', m.orgId],
+    queryFn: async () => {
+      const json = await api.get<any>(`/api/persons/me/officer-role/${m.orgId}`)
+      if (json?.data?.isOfficer) {
+        return json.data.positions?.[0]?.title || 'Officer'
+      }
+      return null
+    },
+    retry: false,
+  })
 
-  useEffect(() => {
-    fetch(`/api/persons/me/officer-role/${m.orgId}`, { credentials: 'include' })
-      .then((r) => r.ok ? r.json() : null)
-      .then((json) => {
-        if (json?.data?.isOfficer) {
-          setOfficerRole(json.data.positions?.[0]?.title || 'Officer')
-        }
-      })
-      .catch(() => {})
-  }, [m.orgId])
+  const officerRole = officerQuery.data ?? null
 
   return (
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
@@ -219,7 +227,7 @@ function OrgCard({ membership: m }: { membership: any }) {
       {officerRole && (
         <div className="mt-3 pt-3 border-t border-[var(--color-border-light)]">
           <Link
-            to={`/org/${m.orgId}/officer/dashboard`}
+            to={`/org/${m.orgId}/officer/dashboard` as any}
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] hover:underline"
           >
             <Shield size={13} />

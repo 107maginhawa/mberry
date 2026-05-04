@@ -4,7 +4,7 @@
  * without a server round-trip (UX: show invite details before claiming).
  */
 
-import { client } from '@monobase/sdk-ts/client'
+import { api, ApiError } from '@/lib/api'
 
 // ---------------------------------------------------------------------------
 // Client-side utilities (no server call needed)
@@ -68,14 +68,12 @@ export async function validateInviteToken(token: string): Promise<
   { ok: true; data: InviteValidation } | { ok: false; error: InviteError; status: number }
 > {
   try {
-    const response = await fetch(`/api/invite/${encodeURIComponent(token)}/validate`);
-    const body = await response.json();
-
-    if (response.ok) {
-      return { ok: true, data: body as InviteValidation };
+    const data = await api.get<InviteValidation>(`/api/invite/${encodeURIComponent(token)}/validate`);
+    return { ok: true, data };
+  } catch (err) {
+    if (err instanceof ApiError) {
+      return { ok: false, error: (err.body ?? { error: err.message }) as InviteError, status: err.status };
     }
-    return { ok: false, error: body as InviteError, status: response.status };
-  } catch {
     return {
       ok: false,
       error: { error: 'Network error. Please check your connection.' },
@@ -91,17 +89,13 @@ export async function claimInviteToken(token: string): Promise<
   { ok: true; data: { claimed: boolean; orgId: string } } | { ok: false; error: string }
 > {
   try {
-    const response = await fetch(`/api/invite/${encodeURIComponent(token)}/claim`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    const body = await response.json();
-
-    if (response.ok) {
-      return { ok: true, data: body };
+    const data = await api.post<{ claimed: boolean; orgId: string }>(`/api/invite/${encodeURIComponent(token)}/claim`);
+    return { ok: true, data };
+  } catch (err) {
+    if (err instanceof ApiError) {
+      const body = err.body as any;
+      return { ok: false, error: body?.error || 'Failed to claim invitation' };
     }
-    return { ok: false, error: body.error || 'Failed to claim invitation' };
-  } catch {
     return { ok: false, error: 'Network error. Please check your connection.' };
   }
 }

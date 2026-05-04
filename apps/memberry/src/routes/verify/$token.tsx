@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { api, ApiError } from '@/lib/api'
 
 export const Route = createFileRoute('/verify/$token')({
   component: PublicVerification,
@@ -11,26 +12,29 @@ export const Route = createFileRoute('/verify/$token')({
  */
 function PublicVerification() {
   const { token } = Route.useParams()
-  const [loading, setLoading] = useState(true)
-  const [result, setResult] = useState<any>(null)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetch(`/api/verify/${encodeURIComponent(token)}`)
-      .then(res => res.json())
-      .then(data => {
+  const verifyQuery = useQuery<{ result: any; error: string | null }>({
+    queryKey: ['verify-token', token],
+    queryFn: async () => {
+      try {
+        const data = await api.get<any>(`/api/verify/${encodeURIComponent(token)}`)
         if (data.error) {
-          setError(data.error)
-        } else {
-          setResult(data)
+          return { result: null, error: data.error }
         }
-        setLoading(false)
-      })
-      .catch(() => {
-        setError('Unable to verify. Please try again.')
-        setLoading(false)
-      })
-  }, [token])
+        return { result: data, error: null }
+      } catch (err) {
+        if (err instanceof ApiError && err.body && typeof err.body === 'object' && 'error' in (err.body as any)) {
+          return { result: null, error: (err.body as any).error }
+        }
+        return { result: null, error: 'Unable to verify. Please try again.' }
+      }
+    },
+    retry: false,
+  })
+
+  const loading = verifyQuery.isLoading
+  const result = verifyQuery.data?.result ?? null
+  const error = verifyQuery.data?.error ?? null
 
   if (loading) {
     return (

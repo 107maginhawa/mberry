@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { api, ApiError } from '@/lib/api'
 
 export const Route = createFileRoute('/org/$slug')({
   component: PublicOrgProfile,
@@ -12,9 +14,18 @@ export const Route = createFileRoute('/org/$slug')({
  */
 function PublicOrgProfile() {
   const { slug } = Route.useParams()
-  const [loading, setLoading] = useState(true)
-  const [org, setOrg] = useState<any>(null)
-  const [error, setError] = useState<string | null>(null)
+
+  const orgQuery = useQuery<any>({
+    queryKey: ['public-org', slug],
+    queryFn: async () => {
+      return await api.get(`/api/public/org/${encodeURIComponent(slug)}`)
+    },
+    retry: false,
+  })
+
+  const loading = orgQuery.isLoading
+  const org = orgQuery.data ?? null
+  const error = orgQuery.error ? 'Organization not found' : null
 
   // Apply dialog state
   const [applyOpen, setApplyOpen] = useState(false)
@@ -26,36 +37,15 @@ function PublicOrgProfile() {
   const [personId, setPersonId] = useState<string | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
 
-  useEffect(() => {
-    fetch(`/api/public/org/${encodeURIComponent(slug)}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Not found')
-        return res.json()
-      })
-      .then(data => {
-        setOrg(data)
-        setLoading(false)
-      })
-      .catch(() => {
-        setError('Organization not found')
-        setLoading(false)
-      })
-  }, [slug])
-
   async function handleApplyClick() {
     // Check auth first
     if (!authChecked) {
       try {
-        const res = await fetch('/api/persons/me', { credentials: 'include' })
-        if (!res.ok) {
-          // Not logged in — redirect to sign-in
-          window.location.href = `/auth/sign-in?redirect=/org/${encodeURIComponent(slug)}`
-          return
-        }
-        const person = await res.json()
+        const person: any = await api.get('/api/persons/me')
         setPersonId(person?.data?.id ?? person?.id ?? null)
         setAuthChecked(true)
       } catch {
+        // Not logged in — redirect to sign-in
         window.location.href = `/auth/sign-in?redirect=/org/${encodeURIComponent(slug)}`
         return
       }
@@ -65,16 +55,10 @@ function PublicOrgProfile() {
     setApplyOpen(true)
     setTiersLoading(true)
     try {
-      const res = await fetch('/api/association/member/tiers', {
-        credentials: 'include',
-        headers: { 'x-org-id': org.id },
-      })
-      if (res.ok) {
-        const data = await res.json()
-        const tierList = data?.data ?? []
-        setTiers(tierList)
-        if (tierList.length === 1) setSelectedTierId(tierList[0].id)
-      }
+      const data: any = await api.get('/api/association/member/tiers', { 'x-org-id': org.id })
+      const tierList = data?.data ?? []
+      setTiers(tierList)
+      if (tierList.length === 1) setSelectedTierId(tierList[0].id)
     } catch {
       // Silently handle — user can still see the form without tiers
     } finally {
@@ -95,42 +79,32 @@ function PublicOrgProfile() {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/association/member/applications', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-org-id': org.id,
-        },
-        body: JSON.stringify({
-          personId,
-          organizationId: org.id,
-          tierId: selectedTierId || (tiers[0]?.id ?? ''),
-          applicationDate: new Date().toISOString().split('T')[0],
-        }),
-      })
-
-      if (res.status === 401) {
-        window.location.href = `/auth/sign-in?redirect=/org/${encodeURIComponent(slug)}`
-        return
-      }
-      if (res.status === 409) {
-        toast.error('You already have a pending application for this organization.')
-        setApplyOpen(false)
-        return
-      }
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        toast.error(body?.error ?? 'Failed to submit application. Please try again.')
-        return
-      }
+      await api.post('/api/association/member/applications', {
+        personId,
+        organizationId: org.id,
+        tierId: selectedTierId || (tiers[0]?.id ?? ''),
+        applicationDate: new Date().toISOString().split('T')[0],
+      }, { 'x-org-id': org.id })
 
       toast.success('Application submitted! The organization will review it shortly.')
       setApplyOpen(false)
       setMessage('')
       setSelectedTierId('')
-    } catch {
-      toast.error('Something went wrong. Please try again.')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          window.location.href = `/auth/sign-in?redirect=/org/${encodeURIComponent(slug)}`
+          return
+        }
+        if (err.status === 409) {
+          toast.error('You already have a pending application for this organization.')
+          setApplyOpen(false)
+          return
+        }
+        toast.error((err.body as any)?.error ?? 'Failed to submit application. Please try again.')
+      } else {
+        toast.error('Something went wrong. Please try again.')
+      }
     } finally {
       setSubmitting(false)
     }
