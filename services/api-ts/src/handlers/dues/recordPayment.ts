@@ -52,15 +52,16 @@ export async function recordPayment(ctx: Context): Promise<Response> {
   }
 
   // [BR-07] Extend dues_expiry_date on payment
-  if (repo.getMembershipForExpiry && repo.updateDuesExpiry) {
-    const membership = await repo.getMembershipForExpiry(organizationId, personId);
+  const repoAny = repo as any;
+  if (repoAny.getMembershipForExpiry && repoAny.updateDuesExpiry) {
+    const membership = await repoAny.getMembershipForExpiry(organizationId, personId);
     if (membership) {
       const newExpiry = computeNewExpiry({
         currentExpiry: membership.duesExpiryDate,
         billingCycle: membership.billingCycle ?? 'annual',
         customMonths: membership.customMonths ?? undefined,
       });
-      await repo.updateDuesExpiry(organizationId, personId, newExpiry);
+      await repoAny.updateDuesExpiry(organizationId, personId, newExpiry);
     }
   }
 

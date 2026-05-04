@@ -12,6 +12,7 @@ export const auditEventTypeEnum = pgEnum('audit_event_type', [
   'authentication',
   'data-access',
   'data-modification',
+  'data-deletion',
   'system-config',
   'security',
   'compliance'
@@ -43,7 +44,11 @@ export const auditActionEnum = pgEnum('audit_action', [
   'reinstate',
   'mark-paid',
   'complete',
-  'transfer'
+  'transfer',
+  'delete-request',
+  'delete-cancel',
+  'anonymize',
+  'export'
 ]);
 
 // Audit outcome enumeration - matches TypeSpec definition
@@ -114,9 +119,9 @@ export type AuditLogEntry = typeof auditLogEntries.$inferSelect;
 export type NewAuditLogEntry = typeof auditLogEntries.$inferInsert;
 
 // Enum type exports for type safety
-export type AuditEventType = 'authentication' | 'data-access' | 'data-modification' | 'system-config' | 'security' | 'compliance';
+export type AuditEventType = 'authentication' | 'data-access' | 'data-modification' | 'data-deletion' | 'system-config' | 'security' | 'compliance';
 export type AuditCategory = 'hipaa' | 'security' | 'privacy' | 'administrative' | 'clinical' | 'financial' | 'association';
-export type AuditAction = 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer';
+export type AuditAction = 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'delete-request' | 'delete-cancel' | 'anonymize' | 'export';
 export type AuditOutcome = 'success' | 'failure' | 'partial' | 'denied';
 export type AuditRetentionStatus = 'active' | 'archived' | 'pending-purge';
 export type UserType = 'client' | 'host' | 'admin' | 'system';

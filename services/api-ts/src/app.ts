@@ -217,10 +217,10 @@ export function createApp(config: Config): App {
     const user = ctx.get('user');
     if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
     const db = ctx.get('database') as any;
-    const body = await ctx.req.json();
+    const body: any = await ctx.req.json();
     const { persons } = await import('@/handlers/person/repos/person.schema');
     const { eq } = await import('drizzle-orm');
-    const updateData: Record<string, any> = { updatedAt: new Date() };
+    const updateData: any = { updatedAt: new Date() };
     if (body.firstName !== undefined) updateData.firstName = body.firstName;
     if (body.lastName !== undefined) updateData.lastName = body.lastName;
     if (body.middleName !== undefined) updateData.middleName = body.middleName;

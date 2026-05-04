@@ -46,8 +46,8 @@ export async function generateReport(ctx: Context): Promise<Response> {
       for (const row of data) {
         const days = row.daysPending;
         const bucket = days <= 30 ? '1-30' : days <= 60 ? '31-60' : days <= 90 ? '61-90' : '90+';
-        buckets[bucket]++;
-        bucketAmounts[bucket] += row.amount;
+        buckets[bucket] = (buckets[bucket] ?? 0) + 1;
+        bucketAmounts[bucket] = (bucketAmounts[bucket] ?? 0) + row.amount;
       }
       summary = { buckets, bucketAmounts, totalOverdue: data.length };
       break;

@@ -62,7 +62,7 @@ export class OfficerTermRepository {
     return row;
   }
 
-  async findActiveByPersonAndOrg(personId: string, orgId: string): Promise<(OfficerTerm & { positionTitle: string })[]> {
+  async findActiveByPersonAndOrg(personId: string, orgId: string): Promise<any[]> {
     const rows = await this.db
       .select({
         id: officerTerms.id,

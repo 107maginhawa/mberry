@@ -17,10 +17,10 @@ export async function updateOrgProfile(ctx: Context): Promise<Response> {
   const existing = await repo.findById(orgId);
   if (!existing) throw new NotFoundError('Organization not found');
 
-  const body = await ctx.req.json();
+  const body: any = await ctx.req.json();
 
   // Only allow updating fields that exist in the schema
-  const updates: Record<string, any> = {};
+  const updates: any = {};
   if (body.name !== undefined) updates.name = body.name;
   if (body.contactEmail !== undefined) updates.contactEmail = body.contactEmail;
   if (body.region !== undefined) updates.region = body.region;

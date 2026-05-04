@@ -34,10 +34,10 @@ export async function getOrganizationBySlug(
   // BR-29: count only active members for public display
   let memberCount = 0;
   try {
-    const [result] = await db.execute(
+    const result = await db.execute(
       sql`SELECT count(*)::int as count FROM membership WHERE org_id = ${org.id} AND status = 'active'`
     );
-    memberCount = (result as any)?.count ?? 0;
+    memberCount = (result as any)?.rows?.[0]?.count ?? (result as any)?.[0]?.count ?? 0;
   } catch {
     // Table may not exist or have different name — graceful fallback
     memberCount = 0;
