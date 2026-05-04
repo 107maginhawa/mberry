@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/pay/$token')({
   component: PublicPaymentPage,
@@ -21,47 +23,31 @@ interface InvoiceInfo {
  */
 function PublicPaymentPage() {
   const { token } = Route.useParams()
-  const [loading, setLoading] = useState(true)
   const [paying, setPaying] = useState(false)
-  const [invoice, setInvoice] = useState<InvoiceInfo | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [alreadyPaid, setAlreadyPaid] = useState(false)
+  const [payError, setPayError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetch(`/api/pay/${encodeURIComponent(token)}/validate`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'already_paid') {
-          setAlreadyPaid(true)
-        } else if (data.valid) {
-          setInvoice(data)
-        } else {
-          setError(data.error || 'Invalid payment link')
-        }
-        setLoading(false)
-      })
-      .catch(() => {
-        setError('Network error. Please try again.')
-        setLoading(false)
-      })
-  }, [token])
+  const { data, isLoading: loading, error: fetchError } = useQuery({
+    queryKey: ['pay-validate', token],
+    queryFn: () => api.get<any>(`/api/pay/${encodeURIComponent(token)}/validate`),
+  })
+
+  const alreadyPaid = data?.status === 'already_paid'
+  const invoice: InvoiceInfo | null = data?.valid ? data : null
+  const error = payError || (fetchError ? 'Network error. Please try again.' : (data && !data.valid && !alreadyPaid ? (data.error || 'Invalid payment link') : null))
 
   const handlePay = async () => {
     if (!invoice) return
     setPaying(true)
     try {
-      const res = await fetch(`/api/pay/${encodeURIComponent(token)}/checkout`, {
-        method: 'POST',
-      })
-      const data = await res.json()
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl
+      const result = await api.post<any>(`/api/pay/${encodeURIComponent(token)}/checkout`)
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl
       } else {
-        setError(data.error || 'Failed to start payment')
+        setPayError(result.error || 'Failed to start payment')
         setPaying(false)
       }
     } catch {
-      setError('Network error. Please try again.')
+      setPayError('Network error. Please try again.')
       setPaying(false)
     }
   }

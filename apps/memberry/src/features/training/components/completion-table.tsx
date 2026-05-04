@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { CheckCircle, Users, Award } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface CompletionTableProps {
   orgId: string
@@ -16,9 +17,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
   const enrollmentsQuery = useQuery({
     queryKey: ['training-enrollments', trainingId],
     queryFn: async () => {
-      const res = await fetch(`/api/training/detail/${orgId}/${trainingId}`)
-      if (!res.ok) throw new Error('Failed to load')
-      const json = await res.json()
+      const json = await api.get<any>(`/api/training/detail/${orgId}/${trainingId}`)
       return json.data
     },
   })
@@ -43,16 +42,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
 
   const markMutation = useMutation({
     mutationFn: async (personId: string) => {
-      const res = await fetch(`/api/training/complete/${orgId}/${trainingId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ personId, method: 'manual' }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message ?? 'Failed to mark complete')
-      }
-      return res.json()
+      return api.post(`/api/training/complete/${orgId}/${trainingId}`, { personId, method: 'manual' })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['training-enrollments', trainingId] })
@@ -67,11 +57,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
   const markAllMutation = useMutation({
     mutationFn: async (personIds: string[]) => {
       for (const pid of personIds) {
-        await fetch(`/api/training/complete/${orgId}/${trainingId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ personId: pid, method: 'manual' }),
-        })
+        await api.post(`/api/training/complete/${orgId}/${trainingId}`, { personId: pid, method: 'manual' })
       }
     },
     onSuccess: () => {

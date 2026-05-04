@@ -3,27 +3,22 @@ import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { getStatusLabel } from '@/features/membership/lib/membership-status'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/id-card')({
   component: MyIdCard,
 })
 
 function MyIdCard() {
-  const { data: person, isLoading: personLoading } = useQuery({
+  const { data: person, isLoading: personLoading } = useQuery<any>({
     queryKey: ['my-person'],
-    queryFn: async () => {
-      const res = await fetch('/api/persons/me', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch person')
-      return res.json()
-    },
+    queryFn: () => api.get('/api/persons/me'),
   })
 
-  const { data: memberships, isLoading: membershipsLoading } = useQuery({
+  const { data: memberships, isLoading: membershipsLoading } = useQuery<any>({
     queryKey: ['my-memberships'],
     queryFn: async () => {
-      const res = await fetch('/api/persons/me/memberships', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch memberships')
-      const json = await res.json()
+      const json = await api.get<any>('/api/persons/me/memberships')
       return json.data ?? json
     },
   })

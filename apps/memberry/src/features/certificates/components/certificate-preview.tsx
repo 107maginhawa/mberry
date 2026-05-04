@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
+import { api } from '@/lib/api'
 
 interface CertificatePreviewProps {
   certificateId: string
@@ -14,9 +15,7 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['certificate', certificateId],
     queryFn: async () => {
-      const res = await fetch(`/api/certificates/${certificateId}`)
-      if (!res.ok) throw new Error('Certificate not found')
-      return res.json() as Promise<{ data: any }>
+      return api.get<{ data: any }>(`/api/certificates/${certificateId}`)
     },
   })
 

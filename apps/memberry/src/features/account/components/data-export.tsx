@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { api } from '@/lib/api'
 import { Download, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react'
 
 type ExportStatus = 'Processing' | 'Ready' | 'Expired'
@@ -87,9 +88,7 @@ export function DataExport() {
 
     setIsRequesting(true)
     try {
-      const res = await fetch('/api/persons/me/export', { credentials: 'include' })
-      if (!res.ok) throw new Error('Export failed')
-      const data = await res.json()
+      const data = await api.get<any>('/api/persons/me/export')
 
       // Create downloadable JSON blob
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })

@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/credits/')({
   component: MyCredits,
@@ -16,23 +17,19 @@ interface CreditEntry {
 }
 
 function MyCredits() {
-  const [totalCredits, setTotalCredits] = useState(0)
-  const [entries, setEntries] = useState<CreditEntry[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: summary, isLoading: summaryLoading } = useQuery({
+    queryKey: ['credit-summary'],
+    queryFn: () => api.get<{ totalCredits: number }>('/api/persons/me/credit-summary'),
+  })
 
-  useEffect(() => {
-    Promise.all([
-      fetch('/api/persons/me/credit-summary', { credentials: 'include' })
-        .then(r => r.ok ? r.json() : { totalCredits: 0 }),
-      fetch('/api/persons/me/credit-entries', { credentials: 'include' })
-        .then(r => r.ok ? r.json() : { data: [] })
-        .catch(() => ({ data: [] })),
-    ]).then(([summary, entriesResp]) => {
-      setTotalCredits(summary.totalCredits || 0)
-      setEntries(entriesResp.data || [])
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [])
+  const { data: entriesResp, isLoading: entriesLoading } = useQuery({
+    queryKey: ['credit-entries'],
+    queryFn: () => api.get<{ data: CreditEntry[] }>('/api/persons/me/credit-entries'),
+  })
+
+  const totalCredits = summary?.totalCredits || 0
+  const entries = entriesResp?.data || []
+  const loading = summaryLoading || entriesLoading
 
   if (loading) {
     return (

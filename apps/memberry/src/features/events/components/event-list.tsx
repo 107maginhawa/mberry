@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EventCard } from './event-card'
 import { Calendar, Users, Clock } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface EventListProps {
   orgId: string
@@ -59,21 +60,17 @@ export function EventList({ orgId }: EventListProps) {
       if (typeFilter) params.set('type', typeFilter)
       if (search) params.set('search', search)
       params.set('limit', '50')
-      const res = await fetch(`/api/events/list/${orgId}?${params}`)
-      if (!res.ok) throw new Error('Failed to load events')
-      return res.json() as Promise<{ data: any[]; meta: { total: number } }>
+      return api.get<{ data: any[]; meta: { total: number } }>(`/api/events/list/${orgId}?${params}`)
     },
   })
 
   const { data: statsData } = useQuery({
     queryKey: ['events-stats', orgId],
     queryFn: async () => {
-      const [upcomingRes, draftRes] = await Promise.all([
-        fetch(`/api/events/list/${orgId}?status=published&limit=1`),
-        fetch(`/api/events/list/${orgId}?status=draft&limit=1`),
+      const [upcoming, drafts] = await Promise.all([
+        api.get<any>(`/api/events/list/${orgId}?status=published&limit=1`),
+        api.get<any>(`/api/events/list/${orgId}?status=draft&limit=1`),
       ])
-      const upcoming = await upcomingRes.json()
-      const drafts = await draftRes.json()
       return {
         upcoming: upcoming.meta?.total ?? 0,
         drafts: drafts.meta?.total ?? 0,
@@ -83,9 +80,7 @@ export function EventList({ orgId }: EventListProps) {
 
   const cancelMutation = useMutation({
     mutationFn: async (eventId: string) => {
-      const res = await fetch(`/api/events/cancel/${eventId}`, { method: 'POST' })
-      if (!res.ok) throw new Error('Failed to cancel event')
-      return res.json()
+      return api.post(`/api/events/cancel/${eventId}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events', orgId] })

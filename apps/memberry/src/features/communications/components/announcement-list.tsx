@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
+import { api } from '@/lib/api'
 
 interface AnnouncementListProps {
   orgId: string
@@ -40,17 +41,14 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
       const params = new URLSearchParams()
       if (activeTab !== 'all') params.set('status', activeTab)
       if (search) params.set('search', search)
-      const res = await fetch(`/api/communications/announcements/${orgId}?${params}`)
-      if (!res.ok) throw new Error('Failed to load announcements')
-      return res.json() as Promise<{ data: any[]; meta: { total: number } }>
+      return api.get<{ data: any[]; meta: { total: number } }>(`/api/communications/announcements/${orgId}?${params}`)
     },
   })
 
   const { data: statsData } = useQuery({
     queryKey: ['announcements-stats', orgId],
     queryFn: async () => {
-      const sentRes = await fetch(`/api/communications/announcements/${orgId}?status=sent&limit=1`)
-      const sentJson = await sentRes.json()
+      const sentJson = await api.get<any>(`/api/communications/announcements/${orgId}?status=sent&limit=1`)
       return { totalSent: sentJson.meta?.total ?? 0 }
     },
   })

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/communications/$announcementId')({
   component: AnnouncementDetailPage,
@@ -27,19 +28,11 @@ function AnnouncementDetailPage() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['announcement', announcementId],
-    queryFn: async () => {
-      const res = await fetch(`/api/communications/announcements/detail/${announcementId}`)
-      if (!res.ok) throw new Error('Failed to load announcement')
-      return res.json() as Promise<{ data: any }>
-    },
+    queryFn: () => api.get<{ data: any }>(`/api/communications/announcements/detail/${announcementId}`),
   })
 
   const publishMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`/api/communications/announcements/${announcementId}/publish`, { method: 'POST' })
-      if (!res.ok) throw new Error('Failed to publish')
-      return res.json()
-    },
+    mutationFn: () => api.post(`/api/communications/announcements/${announcementId}/publish`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcement', announcementId] })
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })
@@ -47,11 +40,7 @@ function AnnouncementDetailPage() {
   })
 
   const archiveMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`/api/communications/announcements/${announcementId}/archive`, { method: 'POST' })
-      if (!res.ok) throw new Error('Failed to archive')
-      return res.json()
-    },
+    mutationFn: () => api.post(`/api/communications/announcements/${announcementId}/archive`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcement', announcementId] })
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })

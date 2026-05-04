@@ -1,6 +1,7 @@
 import { redirect } from '@tanstack/react-router'
 import type { RouterContext } from '@/router'
 import type { User } from 'better-auth'
+import { api } from '@/lib/api'
 
 export interface AuthContext {
   user: User
@@ -56,13 +57,7 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
   }
 
   try {
-    const res = await fetch(`/api/persons/me/officer-role/${orgId}`, {
-      credentials: 'include',
-    })
-    if (!res.ok) {
-      throw redirect({ to: '/dashboard' })
-    }
-    const { data } = await res.json()
+    const { data } = await api.get<{ data: { isOfficer: boolean; positions: Array<{ title: string; [key: string]: unknown }> } }>(`/api/persons/me/officer-role/${orgId}`)
     if (!data.isOfficer) {
       throw redirect({ to: '/dashboard' })
     }

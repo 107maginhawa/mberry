@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
+import { api } from '@/lib/api'
 
 function formatDate(iso: string | null | undefined) {
   if (!iso) return '—'
@@ -10,9 +11,7 @@ export function CertificateList() {
   const { data, isLoading } = useQuery({
     queryKey: ['my-certificates'],
     queryFn: async () => {
-      const res = await fetch('/api/certificates/my')
-      if (!res.ok) throw new Error('Failed to load certificates')
-      return res.json() as Promise<{ data: any[] }>
+      return api.get<{ data: any[] }>('/api/certificates/my')
     },
   })
 

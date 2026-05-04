@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ArrowLeft, Calendar, MapPin, Users, Award, Edit2 } from 'lucide-react'
 import { TrainingForm } from '@/features/training/components/training-form'
 import { CompletionTable } from '@/features/training/components/completion-table'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/training/$trainingId')({
   component: TrainingDetail,
@@ -37,11 +38,7 @@ function TrainingDetail() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['training', trainingId],
-    queryFn: async () => {
-      const res = await fetch(`/api/training/detail/${orgId}/${trainingId}`)
-      if (!res.ok) throw new Error('Failed to load training')
-      return res.json() as Promise<{ data: any }>
-    },
+    queryFn: () => api.get<{ data: any }>(`/api/training/detail/${orgId}/${trainingId}`),
   })
 
   const training = data?.data

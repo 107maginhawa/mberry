@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, Award, DollarSign, Clock, BookOpen, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/training/$trainingId')({
   component: TrainingDetail,
@@ -29,35 +30,20 @@ function TrainingDetail() {
 
   const { data: training, isLoading, error } = useQuery({
     queryKey: ['training-detail', trainingId],
-    queryFn: async () => {
-      const res = await fetch(`/api/training/detail/${orgId}/${trainingId}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to load training')
-      return res.json() as Promise<{ data: any }>
-    },
+    queryFn: () => api.get<{ data: any }>(`/api/training/detail/${orgId}/${trainingId}`),
     select: (d) => d.data,
   })
 
   const enrollMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`/api/training/enroll/${orgId}/${trainingId}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.message ?? 'Enrollment failed')
-      }
-      return res.json()
-    },
+    mutationFn: () => api.post(`/api/training/enroll/${orgId}/${trainingId}`),
     onSuccess: () => {
       toast.success('Successfully enrolled in this training!')
       setEnrolled(true)
       queryClient.invalidateQueries({ queryKey: ['training-detail', trainingId] })
       queryClient.invalidateQueries({ queryKey: ['my-trainings'] })
     },
-    onError: (err: Error) => {
-      toast.error(err.message)
+    onError: (err: any) => {
+      toast.error(err?.body?.message ?? err?.message ?? 'Enrollment failed')
     },
   })
 

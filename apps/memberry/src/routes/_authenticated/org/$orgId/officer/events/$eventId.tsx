@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { EventForm } from '@/features/events/components/event-form'
 import { AttendanceView } from '@/features/events/components/attendance-view'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/events/$eventId')({
   component: EventDetail,
@@ -36,13 +37,9 @@ function formatDate(iso: string) {
 }
 
 function RegistrationsTab({ eventId }: { eventId: string }) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<any>({
     queryKey: ['registrations', eventId],
-    queryFn: async () => {
-      const res = await fetch(`/api/events/attendance/${eventId}`)
-      if (!res.ok) throw new Error('Failed to load')
-      return res.json()
-    },
+    queryFn: () => api.get(`/api/events/attendance/${eventId}`),
   })
 
   const registrations = data?.data ?? []
@@ -109,11 +106,7 @@ function EventDetail() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['event', eventId],
-    queryFn: async () => {
-      const res = await fetch(`/api/events/detail/${eventId}`)
-      if (!res.ok) throw new Error('Failed to load event')
-      return res.json() as Promise<{ data: any }>
-    },
+    queryFn: () => api.get<{ data: any }>(`/api/events/detail/${eventId}`),
   })
 
   const event = data?.data

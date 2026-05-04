@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/credits/log')({
   component: CreditLog,
@@ -24,18 +25,12 @@ function CreditLog() {
     }
     setSaving(true)
     try {
-      const res = await fetch('/api/persons/me/credit-entries', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          activityName: activityName.trim(),
-          activityDate,
-          creditAmount: parseFloat(creditAmount),
-          description: description.trim() || undefined,
-        }),
+      await api.post('/api/persons/me/credit-entries', {
+        activityName: activityName.trim(),
+        activityDate,
+        creditAmount: parseFloat(creditAmount),
+        description: description.trim() || undefined,
       })
-      if (!res.ok) throw new Error('Failed to save')
       toast.success('Credit entry added')
       setActivityName('')
       setCreditAmount('')

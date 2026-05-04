@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Users, AlertTriangle, UserMinus, TrendingUp, CalendarDays, Bell, ClipboardList, UserX } from 'lucide-react'
+import { api } from '@/lib/api'
 import { StatCard } from '@/components/patterns/stat-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -27,8 +28,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   const members = useQuery<MemberSummary>({
     queryKey: ['member-summary', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/members/${orgId}?limit=9999`)
-      const json = await res.json()
+      const json = await api.get<any>(`/api/membership/members/${orgId}?limit=9999`)
       const all = json.data ?? []
       const counts = { activeCount: 0, graceCount: 0, lapsedCount: 0, pendingCount: 0, totalCount: 0, expiringIn30Days: 0 }
       for (const m of all) {
@@ -51,8 +51,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   const applications = useQuery<{ pendingCount: number }>({
     queryKey: ['applications-summary', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/membership/applications/${orgId}?status=pending`)
-      const json = await res.json()
+      const json = await api.get<any>(`/api/membership/applications/${orgId}?status=pending`)
       const apps = json.data ?? []
       return { pendingCount: apps.length }
     },
@@ -62,8 +61,8 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   const dues = useQuery<DuesDashboard>({
     queryKey: ['dues-dashboard', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/dues/dashboard/${orgId}`)
-      return (await res.json()).data ?? { collectionRate: 0, upcomingActivities: 0 }
+      const json = await api.get<any>(`/api/dues/dashboard/${orgId}`)
+      return json.data ?? { collectionRate: 0, upcomingActivities: 0 }
     },
     retry: false,
   })

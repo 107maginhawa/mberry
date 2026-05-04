@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { api, ApiError } from '@/lib/api'
 
 interface Position {
   id: string
@@ -86,22 +87,13 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
       if (form.votingCloseAt) body.votingCloseAt = new Date(form.votingCloseAt).toISOString()
       if (form.type === 'bylaw' && form.passageThreshold) body.passageThreshold = parseInt(form.passageThreshold, 10)
 
-      const res = await fetch(`/api/elections/create/${orgId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => null)
-        throw new Error(err?.message ?? 'Failed to create election')
-      }
-      return res.json()
+      return api.post(`/api/elections/create/${orgId}`, body)
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['elections', orgId] })
       onSuccess?.(data.data)
     },
-    onError: (err: Error) => {
+    onError: (err: Error | ApiError) => {
       setError(err.message)
     },
   })

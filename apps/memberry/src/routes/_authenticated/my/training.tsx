@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Award, Calendar, BookOpen, CheckCircle } from 'lucide-react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/training')({
   component: MyTraining,
@@ -30,20 +31,18 @@ function formatDate(iso: string | null | undefined) {
 function MyTraining() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['my-trainings'],
-    queryFn: async () => {
-      const res = await fetch('/api/training/my')
-      if (!res.ok) throw new Error('Failed to load trainings')
-      return res.json() as Promise<{ data: Array<{ enrollment: any; training: any }> }>
-    },
+    queryFn: () => api.get<{ data: Array<{ enrollment: any; training: any }> }>('/api/training/my'),
   })
 
   // Network-wide trainings available for discovery (SO-9)
   const { data: availableData } = useQuery({
     queryKey: ['available-trainings'],
     queryFn: async () => {
-      const res = await fetch('/api/training?visibility=network&status=published')
-      if (!res.ok) return { data: [] }
-      return res.json() as Promise<{ data: any[] }>
+      try {
+        return await api.get<{ data: any[] }>('/api/training?visibility=network&status=published')
+      } catch {
+        return { data: [] }
+      }
     },
   })
 

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, MapPin, Users, Clock, Loader2, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/events/$eventId')({
   component: EventDetail,
@@ -29,28 +30,15 @@ function EventDetail() {
 
   const { data: event, isLoading, error } = useQuery({
     queryKey: ['event-detail', eventId],
-    queryFn: async () => {
-      const res = await fetch(`/api/events/detail/${eventId}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to load event')
-      return res.json() as Promise<{ data: any }>
-    },
+    queryFn: () => api.get<{ data: any }>(`/api/events/detail/${eventId}`),
     select: (d) => d.data,
   })
 
   const registerMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/events/register/${eventId}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.message ?? 'Registration failed')
-      }
-      return res.json()
+      return api.post(`/api/events/register/${eventId}`)
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       const status = data?.data?.status
       if (status === 'waitlisted') {
         toast.info('You have been added to the waitlist.')
@@ -61,8 +49,8 @@ function EventDetail() {
       queryClient.invalidateQueries({ queryKey: ['event-detail', eventId] })
       queryClient.invalidateQueries({ queryKey: ['my-events'] })
     },
-    onError: (err: Error) => {
-      toast.error(err.message)
+    onError: (err: any) => {
+      toast.error(err?.body?.message ?? err?.message ?? 'Registration failed')
     },
   })
 

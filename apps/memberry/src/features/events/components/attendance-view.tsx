@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UserCheck, QrCode, Hand, Search } from 'lucide-react'
+import { api, ApiError } from '@/lib/api'
 
 interface AttendanceViewProps {
   eventId: string
@@ -25,27 +26,16 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
   const { data, isLoading } = useQuery({
     queryKey: ['attendance', eventId],
     queryFn: async () => {
-      const res = await fetch(`/api/events/attendance/${eventId}`)
-      if (!res.ok) throw new Error('Failed to load attendance')
-      return res.json() as Promise<{
+      return api.get<{
         data: any[]
         meta: { total: number; qr: number; manual: number }
-      }>
+      }>(`/api/events/attendance/${eventId}`)
     },
   })
 
   const checkInMutation = useMutation({
     mutationFn: async (personId: string) => {
-      const res = await fetch(`/api/events/checkin/${eventId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ personId, method: 'manual' }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as any).message ?? 'Check-in failed')
-      }
-      return res.json()
+      return api.post(`/api/events/checkin/${eventId}`, { personId, method: 'manual' })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['attendance', eventId] })
@@ -54,7 +44,7 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
       setCheckInSuccess(true)
       setTimeout(() => setCheckInSuccess(false), 2000)
     },
-    onError: (err: Error) => {
+    onError: (err: Error | ApiError) => {
       setCheckInError(err.message)
     },
   })

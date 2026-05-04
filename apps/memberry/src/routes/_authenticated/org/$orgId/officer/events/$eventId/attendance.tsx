@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, Loader2, Users, UserCheck } from 'lucide-react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/events/$eventId/attendance',
@@ -20,37 +21,19 @@ function EventAttendance() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['event-registrations', eventId],
-    queryFn: async () => {
-      const res = await fetch(`/api/events/${eventId}/registrations`, {
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to load registrations')
-      return res.json() as Promise<{ data: any[] }>
-    },
+    queryFn: () => api.get<{ data: any[] }>(`/api/events/${eventId}/registrations`),
   })
 
   const checkInMutation = useMutation({
-    mutationFn: async (memberId: string) => {
-      const res = await fetch(`/api/events/${eventId}/check-in`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ memberId }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as any).message ?? 'Check-in failed')
-      }
-      return res.json()
-    },
+    mutationFn: (memberId: string) => api.post(`/api/events/${eventId}/check-in`, { memberId }),
     onSuccess: (_data, memberId) => {
       setCheckedIn((prev) => new Set(prev).add(memberId))
       queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] })
       queryClient.invalidateQueries({ queryKey: ['attendance', eventId] })
       toast.success('Member checked in successfully')
     },
-    onError: (err: Error) => {
-      toast.error(err.message)
+    onError: (err: any) => {
+      toast.error(err?.body?.message ?? err?.message ?? 'Check-in failed')
     },
   })
 

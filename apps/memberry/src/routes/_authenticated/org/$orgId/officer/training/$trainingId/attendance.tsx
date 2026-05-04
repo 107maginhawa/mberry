@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, Loader2, Users, UserCheck } from 'lucide-react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/training/$trainingId/attendance',
@@ -20,45 +21,23 @@ function TrainingAttendance() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['training-enrollments', trainingId],
-    queryFn: async () => {
-      const res = await fetch(`/api/training/${orgId}/enrollments/${trainingId}`, {
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to load enrollments')
-      return res.json() as Promise<{ data: any[] }>
-    },
+    queryFn: () => api.get<{ data: any[] }>(`/api/training/${orgId}/enrollments/${trainingId}`),
   })
 
   const checkInMutation = useMutation({
-    mutationFn: async (memberId: string) => {
-      const res = await fetch(`/api/training/${orgId}/${trainingId}/check-in`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ memberId }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        // BR-17: duplicate check-in returns a specific message
-        const message = (err as any).message ?? 'Check-in failed'
-        if (message.toLowerCase().includes('already')) {
-          throw new Error('Already checked in')
-        }
-        throw new Error(message)
-      }
-      return res.json()
-    },
+    mutationFn: (memberId: string) => api.post(`/api/training/${orgId}/${trainingId}/check-in`, { memberId }),
     onSuccess: (_data, memberId) => {
       setCheckedIn((prev) => new Set(prev).add(memberId))
       queryClient.invalidateQueries({ queryKey: ['training-enrollments', trainingId] })
       toast.success('Member checked in successfully')
     },
-    onError: (err: Error) => {
+    onError: (err: any) => {
       // BR-17: show "Already checked in" as a warning, not a hard error
-      if (err.message === 'Already checked in') {
+      const message = err?.body?.message ?? err?.message ?? 'Check-in failed'
+      if (message.toLowerCase().includes('already')) {
         toast.warning('Already checked in')
       } else {
-        toast.error(err.message)
+        toast.error(message)
       }
     },
   })

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { BookOpen, Users, Award, TrendingUp, Search, SlidersHorizontal } from 'lucide-react'
 import { TrainingCard } from './training-card'
+import { api } from '@/lib/api'
 
 const TABS = [
   { key: 'published', label: 'Upcoming' },
@@ -38,9 +39,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
       if (activeTab !== 'past') params.set('status', activeTab)
       if (typeFilter) params.set('type', typeFilter)
       if (search) params.set('search', search)
-      const res = await fetch(`/api/training/list/${orgId}?${params}`)
-      if (!res.ok) throw new Error('Failed to load trainings')
-      return res.json() as Promise<{ data: any[]; meta: { total: number } }>
+      return api.get<{ data: any[]; meta: { total: number } }>(`/api/training/list/${orgId}?${params}`)
     },
   })
 
@@ -48,11 +47,10 @@ export function TrainingList({ orgId }: TrainingListProps) {
     queryKey: ['training-stats', orgId],
     queryFn: async () => {
       // Approximate from list counts
-      const [pubRes, draftRes] = await Promise.all([
-        fetch(`/api/training/list/${orgId}?status=published&limit=1`),
-        fetch(`/api/training/list/${orgId}?status=draft&limit=1`),
+      const [pub, draft] = await Promise.all([
+        api.get<any>(`/api/training/list/${orgId}?status=published&limit=1`),
+        api.get<any>(`/api/training/list/${orgId}?status=draft&limit=1`),
       ])
-      const [pub, draft] = await Promise.all([pubRes.json(), draftRes.json()])
       return {
         published: pub?.meta?.total ?? 0,
         drafts: draft?.meta?.total ?? 0,
@@ -62,8 +60,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
 
   const cancelMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/training/cancel/${orgId}/${id}`, { method: 'POST' })
-      if (!res.ok) throw new Error('Failed to cancel')
+      await api.post(`/api/training/cancel/${orgId}/${id}`)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings', orgId] }),
   })

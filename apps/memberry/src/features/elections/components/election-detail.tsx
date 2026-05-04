@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Vote, Trophy, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { api } from '@/lib/api'
 
 interface ElectionDetailProps {
   electionId: string
@@ -55,21 +56,13 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['election', electionId],
     queryFn: async () => {
-      const res = await fetch(`/api/elections/detail/${electionId}`)
-      if (!res.ok) throw new Error('Failed to load election')
-      return res.json() as Promise<{ data: any }>
+      return api.get<{ data: any }>(`/api/elections/detail/${electionId}`)
     },
   })
 
   const statusMutation = useMutation({
     mutationFn: async (nextStatus: string) => {
-      const res = await fetch(`/api/elections/status/${electionId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: nextStatus }),
-      })
-      if (!res.ok) throw new Error('Failed to update status')
-      return res.json()
+      return api.post(`/api/elections/status/${electionId}`, { status: nextStatus })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['election', electionId] })

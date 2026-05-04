@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Vote, Users, CheckCircle2, Clock, FileText, Ban, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { api } from '@/lib/api'
 
 interface ElectionListProps {
   orgId: string
@@ -49,9 +50,7 @@ export function ElectionList({ orgId }: ElectionListProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['elections', orgId],
     queryFn: async () => {
-      const res = await fetch(`/api/elections/list/${orgId}`)
-      if (!res.ok) throw new Error('Failed to load elections')
-      return res.json() as Promise<{ data: any[] }>
+      return api.get<{ data: any[] }>(`/api/elections/list/${orgId}`)
     },
   })
 

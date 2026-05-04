@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, Building2 } from 'lucide-react'
+import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/events')({
   component: MyEvents,
@@ -81,11 +82,7 @@ function MyEvents() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['my-events'],
-    queryFn: async () => {
-      const res = await fetch('/api/events/my')
-      if (!res.ok) throw new Error('Failed to load events')
-      return res.json() as Promise<{ data: Array<{ registration: any; event: any }> }>
-    },
+    queryFn: () => api.get<{ data: Array<{ registration: any; event: any }> }>('/api/events/my'),
   })
 
   const allItems = data?.data ?? []
