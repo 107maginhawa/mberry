@@ -25,11 +25,11 @@ test.describe('Member Dashboard (/dashboard)', () => {
 
     // Org card shows membership ID and Active badge
     await expect(
-      page.getByText(/PDA-2025/),
+      page.getByText(/PDA-2025/).first(),
     ).toBeVisible({ timeout: 10000 })
 
     await expect(
-      page.getByText('Active'),
+      page.getByText('Active').first(),
     ).toBeVisible({ timeout: 10000 })
   })
 

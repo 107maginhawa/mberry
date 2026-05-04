@@ -55,14 +55,14 @@ test.describe('Dues & Payments Actions', () => {
   test('fund allocation page shows funds totaling 100%', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/funds`)
 
-    await expect(page.getByText(/Fund Allocation/i)).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText(/100/)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Fund Allocation/i })).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/100/).first()).toBeVisible()
   })
 
   test('gateway settings page renders with provider fields', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/gateway`)
 
-    await expect(page.getByText(/Payment Gateway/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: /Payment Gateway/i })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText(/PayMongo|Provider/i).first()).toBeVisible()
   })
 

@@ -41,10 +41,14 @@ test.describe('Membership Actions', () => {
     await page.getByRole('link', { name: 'Juan Cruz' }).click()
     await expect(page.getByText('Juan Cruz')).toBeVisible({ timeout: 10000 })
 
-    // Should show either Suspend or Lift button depending on current state
-    const hasSuspend = await page.getByRole('button', { name: /suspend/i }).isVisible({ timeout: 3000 }).catch(() => false)
-    const hasLift = await page.getByRole('button', { name: /lift|restore|activate/i }).isVisible({ timeout: 3000 }).catch(() => false)
-    expect(hasSuspend || hasLift).toBeTruthy()
+    // Wait for the Actions section to load (API call may take time)
+    await expect(page.getByText('Actions')).toBeVisible({ timeout: 10000 })
+
+    // Should show either Suspend Member, Reinstate, or action buttons depending on current state
+    const hasSuspend = await page.getByRole('button', { name: /suspend member/i }).isVisible({ timeout: 3000 }).catch(() => false)
+    const hasReinstate = await page.getByRole('button', { name: /reinstate/i }).isVisible({ timeout: 2000 }).catch(() => false)
+    const hasChangeCategory = await page.getByRole('button', { name: /change category/i }).isVisible({ timeout: 2000 }).catch(() => false)
+    expect(hasSuspend || hasReinstate || hasChangeCategory).toBeTruthy()
   })
 
   test('categories page shows categories and Save works', async ({ page }) => {

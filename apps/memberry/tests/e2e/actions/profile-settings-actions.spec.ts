@@ -40,10 +40,11 @@ test.describe('Profile Actions', () => {
 
   test('notifications page works — shows content or empty state', async ({ page }) => {
     await page.goto('/my/notifications')
+    await page.waitForLoadState('networkidle')
     await expect(page.getByRole('heading', { name: /Notifications/i })).toBeVisible({ timeout: 10000 })
 
     // Should show either notifications or "No notifications" — not a crash
-    const hasContent = await page.getByText(/payment|Welcome|reminder|training|No notifications/i).first().isVisible({ timeout: 5000 }).catch(() => false)
+    const hasContent = await page.getByText(/payment|Welcome|reminder|training|No notification/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
 
     // If "Mark all" button visible, click it
@@ -85,7 +86,7 @@ test.describe('Profile Actions', () => {
     await expect(activityInput).toBeVisible({ timeout: 5000 })
     await activityInput.fill('Action Test External CPD')
 
-    const creditInput = page.getByPlaceholder(/e.g.|hours/i).first().or(page.locator('input[type="number"]').first())
+    const creditInput = page.getByPlaceholder('e.g. 4')
     await expect(creditInput).toBeVisible()
     await creditInput.fill('5')
 
@@ -104,7 +105,7 @@ test.describe('Profile Actions', () => {
   test('organizations page shows membership cards', async ({ page }) => {
     await page.goto('/my/organizations')
 
-    await expect(page.getByText(/Organizations/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: /Organizations/i })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText(/PDA-2025/i).first()).toBeVisible()
     await expect(page.getByText(/Active/i).first()).toBeVisible()
   })

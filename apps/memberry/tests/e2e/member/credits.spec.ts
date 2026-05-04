@@ -24,7 +24,7 @@ test.describe('Member Credits (/my/credits)', () => {
     await page.waitForLoadState('networkidle')
 
     await expect(
-      page.getByText(/view full log/i),
+      page.getByText(/Manual Entry/i),
     ).toBeVisible({ timeout: 10000 })
   })
 
@@ -34,7 +34,7 @@ test.describe('Member Credits (/my/credits)', () => {
     await page.waitForLoadState('networkidle')
 
     await expect(
-      page.getByRole('heading', { name: /credit log/i }),
+      page.getByRole('heading', { name: /Log Manual Credit/i }),
     ).toBeVisible({ timeout: 10000 })
   })
 

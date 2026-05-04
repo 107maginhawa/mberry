@@ -30,8 +30,8 @@ test.describe('Officer Management Actions', () => {
   test('org settings page loads data and Save works', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/org`)
 
-    // Should show org settings form
-    await expect(page.getByText(/Organization|Org Profile|Settings/i).first()).toBeVisible({ timeout: 10000 })
+    // Should show org settings heading or profile form header
+    await expect(page.getByRole('heading', { name: /Organization Settings|Organization Profile/i }).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('member-to-officer navigation: click President Dashboard', async ({ page }) => {
