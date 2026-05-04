@@ -1,11 +1,44 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import { Building, Plus } from 'lucide-react'
 
 export const Route = createFileRoute('/organizations/')({
   component: OrganizationsPage,
 })
 
+interface Organization {
+  id: string
+  name: string
+  type?: string
+  status?: string
+  memberCount?: number
+  associationId?: string
+  associationName?: string
+  association?: { id: string; name: string }
+  createdAt?: string
+  created_at?: string
+}
+
+interface OrganizationsResponse {
+  data: Organization[]
+  total?: number
+}
+
 function OrganizationsPage() {
+  const { data, isLoading, error } = useQuery<OrganizationsResponse>({
+    queryKey: ['admin', 'organizations'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/organizations?limit=50', { credentials: 'include' })
+      if (!res.ok) throw new Error('Failed to fetch organizations')
+      return res.json()
+    },
+  })
+
+  const organizations = data?.data ?? []
+  const total = data?.total ?? organizations.length
+  const activeCount = organizations.filter((o) => o.status === 'active').length
+  const suspendedCount = organizations.filter((o) => o.status === 'suspended').length
+
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
@@ -30,17 +63,24 @@ function OrganizationsPage() {
       <div className="grid grid-cols-3 gap-6 mb-8">
         <div className="rounded-lg border bg-card p-6">
           <p className="text-sm text-muted-foreground">Total Organizations</p>
-          <p className="text-3xl font-bold mt-1">--</p>
+          <p className="text-3xl font-bold mt-1">{isLoading ? '...' : total}</p>
         </div>
         <div className="rounded-lg border bg-card p-6">
           <p className="text-sm text-muted-foreground">Active</p>
-          <p className="text-3xl font-bold mt-1">--</p>
+          <p className="text-3xl font-bold mt-1">{isLoading ? '...' : activeCount}</p>
         </div>
         <div className="rounded-lg border bg-card p-6">
           <p className="text-sm text-muted-foreground">Suspended</p>
-          <p className="text-3xl font-bold mt-1">--</p>
+          <p className="text-3xl font-bold mt-1">{isLoading ? '...' : suspendedCount}</p>
         </div>
       </div>
+
+      {/* Error state */}
+      {error && (
+        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
+          {error.message}
+        </div>
+      )}
 
       {/* Table */}
       <div className="rounded-lg border bg-card">
@@ -56,11 +96,59 @@ function OrganizationsPage() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                No organizations loaded. Connect SDK to populate data.
-              </td>
-            </tr>
+            {isLoading ? (
+              <tr>
+                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                  Loading...
+                </td>
+              </tr>
+            ) : organizations.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                  No organizations found.
+                </td>
+              </tr>
+            ) : (
+              organizations.map((org) => {
+                const assocName = org.associationName || org.association?.name || '--'
+                return (
+                  <tr key={org.id} className="border-b last:border-b-0 hover:bg-muted/50">
+                    <td className="p-4 text-sm font-medium">
+                      <Link
+                        to="/organizations/$organizationId"
+                        params={{ organizationId: org.id }}
+                        className="text-foreground hover:underline"
+                      >
+                        {org.name}
+                      </Link>
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground">{assocName}</td>
+                    <td className="p-4 text-sm text-muted-foreground">{org.type ?? '--'}</td>
+                    <td className="p-4 text-sm">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                        org.status === 'active'
+                          ? 'bg-green-100 text-green-700'
+                          : org.status === 'suspended'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {org.status ?? 'unknown'}
+                      </span>
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground">{org.memberCount ?? '--'}</td>
+                    <td className="p-4 text-sm text-right">
+                      <Link
+                        to="/organizations/$organizationId"
+                        params={{ organizationId: org.id }}
+                        className="text-sm text-muted-foreground hover:text-foreground"
+                      >
+                        View
+                      </Link>
+                    </td>
+                  </tr>
+                )
+              })
+            )}
           </tbody>
         </table>
       </div>
