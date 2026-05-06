@@ -10,9 +10,11 @@ import "./common/security.tsp";
 // Import all module definitions
 // Note: identity/auth is handled by Better-Auth, not TypeSpec
 import "./modules/person.tsp";
+import "./modules/person-custom.tsp";
 import "./modules/billing.tsp";
 import "./modules/audit.tsp";
 import "./modules/notifs.tsp";
+import "./modules/notifs-custom.tsp";
 import "./modules/comms.tsp";
 import "./modules/storage.tsp";
 import "./modules/email.tsp";
@@ -39,6 +41,7 @@ import "./association/core/consent.tsp";
 import "./association/core/reporting.tsp";
 import "./association/member/membership.tsp";
 import "./association/member/dues.tsp";
+import "./association/member/credits.tsp";
 import "./association/member/chapters.tsp";
 import "./association/member/governance.tsp";
 import "./association/member/certificates.tsp";
@@ -132,6 +135,10 @@ namespace MonobaseAPI {
   @route("/persons")
   interface PersonManagement extends PersonModule.PersonManagement {}
 
+  // Person Custom (me endpoints — privacy, notification prefs, credits, export, deletion)
+  @tag("Person")
+  interface PersonCustomManagement extends PersonCustomModule.PersonCustomManagement {}
+
   // Billing Management
   @tag("Billing")
   @route("/billing")
@@ -154,6 +161,10 @@ namespace MonobaseAPI {
   @tag("Notifs")
   @route("/notifs")
   interface NotificationManagement extends Notifs.NotificationManagement {}
+
+  // Notification Custom (bulk read-all)
+  @tag("Notifs")
+  interface NotifsCustomManagement extends NotifsCustomModule.NotifsCustomManagement {}
   
   // Comms Management
   @tag("Comms")
@@ -234,6 +245,16 @@ namespace MonobaseAPI {
   @tag("Association:Member")
   @route("/association/member/org-profile")
   interface AssocOrganizationProfileManagement extends Association.Member.Membership.OrganizationProfileManagement {}
+
+  // =========================================================================
+  // Association Domain — CPD Credits (compliance report + officer terms)
+  // =========================================================================
+
+  @tag("Association:Member")
+  interface CreditComplianceManagement extends Association.Member.Credits.CreditComplianceManagement {}
+
+  @tag("Association:Member")
+  interface OfficerTermsManagement extends Association.Member.Credits.OfficerTermsManagement {}
 
   // =========================================================================
   // Association Domain — Dues
