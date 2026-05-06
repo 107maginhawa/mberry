@@ -61,7 +61,7 @@ describe('getElection', () => {
   });
 
   test('includes tallies when status is awaiting_confirmation', async () => {
-    const awaitingElection = { ...fakeElection, status: 'awaiting_confirmation' };
+    const awaitingElection = { ...fakeElection, status: 'awaitingConfirmation' };
     const tallies = [{ positionId: 'pos-1', nomineeId: 'nom-1', count: 3 }];
 
     mocks = stubRepo(ElectionsRepository, {

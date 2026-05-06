@@ -10,7 +10,7 @@
 
 import type { DatabaseInstance } from '@/core/database';
 import { eq, and } from 'drizzle-orm';
-import { duesConfigs, duesReminderSchedules } from '../repos/dues.schema';
+import { duesConfigs, duesReminderSchedules } from '../repos/dues-payments.schema';
 
 interface ReminderContext {
   db: DatabaseInstance;

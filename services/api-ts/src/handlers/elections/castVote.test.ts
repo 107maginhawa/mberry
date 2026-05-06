@@ -9,7 +9,7 @@ const fakeElection = {
   id: 'election-1',
   organizationId: 'org-1',
   title: '2026 Board Election',
-  status: 'voting_open',
+  status: 'votingOpen',
 };
 
 const fakeVote = {
@@ -116,7 +116,7 @@ describe('[BR-33] castVote', () => {
 
   test('throws ConflictError when election status is nominations_open', async () => {
     mocks = stubRepo(ElectionsRepository, {
-      get: async () => ({ ...fakeElection, status: 'nominations_open' }),
+      get: async () => ({ ...fakeElection, status: 'nominationsOpen' }),
       hasVoted: async () => false,
       castVote: async () => { throw new Error('should not reach'); },
     });
@@ -161,7 +161,7 @@ describe('[BR-33] castVote', () => {
 
   test('throws ConflictError when election status is awaiting_confirmation', async () => {
     mocks = stubRepo(ElectionsRepository, {
-      get: async () => ({ ...fakeElection, status: 'awaiting_confirmation' }),
+      get: async () => ({ ...fakeElection, status: 'awaitingConfirmation' }),
       hasVoted: async () => false,
       castVote: async () => { throw new Error('should not reach'); },
     });

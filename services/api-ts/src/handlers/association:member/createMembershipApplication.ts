@@ -26,17 +26,14 @@ export async function createMembershipApplication(
   const tierRepo = new MembershipTierRepository(db, logger);
   const appRepo = new MembershipApplicationRepository(db, logger);
 
-  const orgId = body.organizationId;
-
   // Validate tier exists
   const tier = await tierRepo.findOneById(body.tierId);
   if (!tier) throw new NotFoundError('Membership tier');
 
   // Check no existing pending application for this person+org
   const existing = await appRepo.findOne({
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
-    orgId,
     status: 'submitted',
   });
   if (existing) {
@@ -44,9 +41,8 @@ export async function createMembershipApplication(
   }
 
   const application = await appRepo.createOne({
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
-    orgId,
     tierId: body.tierId,
     applicationDate: (body.applicationDate || new Date().toISOString().split('T')[0]) as string,
     status: 'submitted',

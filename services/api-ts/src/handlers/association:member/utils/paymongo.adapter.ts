@@ -17,7 +17,7 @@ import type {
 
 export class PayMongoAdapter implements GatewayAdapter {
   readonly name = 'paymongo';
-  readonly supportedMethods = ['gcash', 'maya', 'card', 'bank_transfer'];
+  readonly supportedMethods = ['gcash', 'maya', 'card', 'bankTransfer'];
 
   constructor(
     private secretKey: string,

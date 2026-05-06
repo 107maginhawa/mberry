@@ -16,7 +16,7 @@ import {
   type NewDuesFundAllocation,
   type DuesReminderSchedule,
   type DuesGatewayConfig,
-} from './dues.schema';
+} from './dues-payments.schema';
 
 export class DuesRepository {
   constructor(private db: DatabaseInstance) {}

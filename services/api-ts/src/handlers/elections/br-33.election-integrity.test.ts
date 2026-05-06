@@ -88,7 +88,7 @@ describe('[BR-33] Election Integrity', () => {
     // election is officially closed by the President."
     const election = {
       id: 'election-1',
-      status: 'voting_open',
+      status: 'votingOpen',
       closedBy: null,
     };
 
@@ -108,7 +108,7 @@ describe('[BR-33] Election Integrity', () => {
 
   test('results hidden during voting_open status', () => {
     const resultsVisibleStatuses = ['published'];
-    const hiddenStatuses = ['draft', 'nominations_open', 'voting_open', 'awaiting_confirmation'];
+    const hiddenStatuses = ['draft', 'nominationsOpen', 'votingOpen', 'awaitingConfirmation'];
 
     for (const status of hiddenStatuses) {
       expect(resultsVisibleStatuses).not.toContain(status);
@@ -117,7 +117,7 @@ describe('[BR-33] Election Integrity', () => {
 
   test('results hidden during awaiting_confirmation status', () => {
     // Even after voting closes, results stay hidden until officially published
-    const election = { status: 'awaiting_confirmation' };
+    const election = { status: 'awaitingConfirmation' };
     const canViewResults = election.status === 'published';
     expect(canViewResults).toBe(false);
   });
@@ -133,7 +133,7 @@ describe('[BR-33] Election Integrity', () => {
       nominatedAt: new Date('2026-06-01'),
     };
     const election = {
-      status: 'voting_open',
+      status: 'votingOpen',
       nominationsClosedAt: new Date('2026-06-15'),
     };
 

@@ -253,7 +253,7 @@ describe('recordPayment [BR-06]', () => {
   });
 
   test('[BR-06] records payment method for manual payments', async () => {
-    const methods = ['cash', 'check', 'bank_transfer'];
+    const methods = ['cash', 'check', 'bankTransfer'];
     for (const method of methods) {
       let capturedData: any = null;
       mocks = stubRepo(DuesRepository, {

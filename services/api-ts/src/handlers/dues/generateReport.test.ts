@@ -7,7 +7,7 @@ import { DuesRepository } from './repos/dues.repo';
 
 const fakeCollectionData = [
   { month: '2025-01', method: 'cash', count: 5, total: 25000 },
-  { month: '2025-02', method: 'bank_transfer', count: 3, total: 15000 },
+  { month: '2025-02', method: 'bankTransfer', count: 3, total: 15000 },
 ];
 
 const fakeFundBreakdown = [
