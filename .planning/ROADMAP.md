@@ -14,7 +14,7 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
 - [x] **Phase 1: Billing Schema Completion** - Complete the billing module with all TODO fields and access controls
 - [x] **Phase 2: Audit Module Completion** - Full audit trail for compliance across all modules
 - [ ] **Phase 3: Data Model Unification** - Single canonical schema replacing dual custom/TypeSpec models
-- [ ] **Phase 4: TypeSpec/OpenAPI Reconciliation** - Spec-first definitions for all 6 custom modules
+- [x] **Phase 4: TypeSpec/OpenAPI Reconciliation** - Spec-first definitions for all 6 custom modules
 - [ ] **Phase 5: Account & Admin App Hardening** - E2E test coverage for account and admin apps
 - [ ] **Phase 6: CI/CD & DevOps Pipeline** - Production-ready build, test, and deploy workflows
 - [ ] **Phase 7: Shared Component Library** - DRY up duplicated UI components across apps
@@ -98,10 +98,10 @@ Plans:
 - [x] 04-01-PLAN.md — Reconcile election enum + register elections/certificates in main.tsp (SPEC-05, SPEC-06)
 - [x] 04-02-PLAN.md — Author dues + membership custom operation TypeSpec (SPEC-01, SPEC-02)
 - [x] 04-03-PLAN.md — Author events + training custom operation TypeSpec (SPEC-03, SPEC-04)
-- [ ] 04-04-PLAN.md — Build pipeline + SDK generation + decommission hand-wired routes (SPEC-07, SPEC-08)
+- [x] 04-04-PLAN.md — Build pipeline + SDK generation + decommission hand-wired routes (SPEC-07, SPEC-08)
 - [x] 04-05-PLAN.md — Migrate dues + membership frontend to SDK hooks (SPEC-07)
-- [ ] 04-06-PLAN.md — Migrate elections/certificates/events/training frontend to SDK hooks (SPEC-07)
-- [ ] 04-07-PLAN.md — Migrate route files to SDK hooks + human verification (SPEC-07)
+- [x] 04-06-PLAN.md — Migrate elections/certificates/events/training frontend to SDK hooks (SPEC-07)
+- [x] 04-07-PLAN.md — Migrate route files to SDK hooks + human verification (SPEC-07)
 
 ### Phase 5: Account & Admin App Hardening
 **Goal**: Account and admin apps have E2E test coverage for critical user flows
@@ -172,7 +172,7 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 1. Billing Schema Completion | 0/2 | Not started | - |
 | 2. Audit Module Completion | 2/3 | Executing | - |
 | 3. Data Model Unification | 0/? | Not started | - |
-| 4. TypeSpec/OpenAPI Reconciliation | 1/7 | In Progress|  |
+| 4. TypeSpec/OpenAPI Reconciliation | 7/7 | Complete | 2026-05-06 |
 | 5. Account & Admin App Hardening | 0/? | Not started | - |
 | 6. CI/CD & DevOps Pipeline | 0/? | Not started | - |
 | 7. Shared Component Library | 0/? | Not started | - |

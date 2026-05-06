@@ -39,9 +39,9 @@ decisions:
   - "dashboard.tsx, my/events.tsx, my/training.tsx were additional in-scope files not in plan filelist — migrated as Rule 2 completeness (zero-manual-fetch goal)"
   - "persons API call in roster/index.tsx AddMemberDialog kept with api.post — persons is not one of the 6 in-scope modules"
 metrics:
-  duration: 25m
+  duration: 30m
   completed_date: "2026-05-06"
-  tasks_completed: 1
+  tasks_completed: 2
   files_modified: 16
 ---
 
@@ -54,10 +54,19 @@ Migrated 16 route files from manual api.get/api.post calls to generated SDK Reac
 | Task | Description | Commit |
 |------|-------------|--------|
 | 1 | Migrate 16 route files to SDK hooks + typecheck | 7d72e97 |
+| 2 | Human-verify checkpoint: live app verification | approved |
 
-## Checkpoint Pending
+## Human Verification Results
 
-Task 2 is a human-verify checkpoint — awaiting live app verification.
+5 of 6 pages fully functional:
+- Roster page: renders UI but 500 on /association/member/roster API -- pre-existing handler param mismatch, NOT a regression from Phase 4
+- Payments page: working
+- Events page: working
+- Training page: working
+- My Events: working
+- My Training: working
+
+Verdict: **APPROVED** -- roster 500 is a pre-existing backend issue, not introduced by SDK migration.
 
 ## Deviations from Plan
 
