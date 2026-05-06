@@ -105,7 +105,7 @@ Plans:
 - [x] 04-08-PLAN.md — [GAP] Fix broken db import in 48 handler stubs + API typecheck (SPEC-08)
 - [x] 04-09-PLAN.md — [GAP] Replace manual api.get in record-payment-form with SDK hook (SPEC-07)
 - [x] 04-10-PLAN.md — [GAP] TypeSpec for persons/me, credits, officer-terms, notifs custom endpoints (SPEC-08)
-- [ ] 04-11-PLAN.md — [GAP] TypeSpec for announcements + admin + public + rebuild pipeline (SPEC-08)
+- [x] 04-11-PLAN.md — [GAP] TypeSpec for announcements + admin + public + rebuild pipeline (SPEC-08)
 
 ### Phase 5: Account & Admin App Hardening
 **Goal**: Account and admin apps have E2E test coverage for critical user flows
