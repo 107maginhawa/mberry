@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
 import {
   listDuesFundsOptions,
+  listRosterMembersOptions,
   recordDuesPaymentMutation,
 } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
@@ -21,8 +21,7 @@ interface RecordPaymentFormProps {
 export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   const [personId, setPersonId] = useState('')
   const [memberSearch, setMemberSearch] = useState('')
-  const [memberResults, setMemberResults] = useState<any[]>([])
-  const [searchingMembers, setSearchingMembers] = useState(false)
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [amount, setAmount] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('')
   const [referenceNumber, setReferenceNumber] = useState('')
@@ -54,26 +53,34 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
     },
   })
 
-  // Debounced member search
+  // Debounce the search input before querying
   useEffect(() => {
     if (!memberSearch.trim() || memberSearch.trim().length < 2 || personId) {
-      setMemberResults([])
+      setDebouncedSearch('')
       return
     }
-    const timer = setTimeout(() => {
-      setSearchingMembers(true)
-      api.get<{ data: any[] }>(`/api/membership/members/${orgId}?search=${encodeURIComponent(memberSearch.trim())}&limit=10`)
-        .then(json => setMemberResults(json.data || []))
-        .catch(() => setMemberResults([]))
-        .finally(() => setSearchingMembers(false))
-    }, 300)
+    const timer = setTimeout(() => setDebouncedSearch(memberSearch.trim()), 300)
     return () => clearTimeout(timer)
-  }, [memberSearch, orgId, personId])
+  }, [memberSearch, personId])
 
-  function selectMember(m: any) {
+  // SDK-based member search
+  const { data: memberSearchData, isFetching: searchingMembers } = useQuery({
+    ...listRosterMembersOptions({
+      query: {
+        q: debouncedSearch,
+        limit: 10,
+        organizationId: orgId,
+      },
+    }),
+    enabled: debouncedSearch.length >= 2,
+  })
+
+  const memberResults = memberSearchData?.data ?? []
+
+  function selectMember(m: { personId: string; memberNumber?: string; id: string }) {
     setPersonId(m.personId || m.id)
-    setMemberSearch(`${m.firstName || ''} ${m.lastName || ''}`.trim() || m.name || m.memberNumber)
-    setMemberResults([])
+    setMemberSearch(m.memberNumber || m.personId)
+    setDebouncedSearch('')
   }
 
   const canSubmit = personId && amountCents > 0 && paymentMethod
@@ -91,15 +98,15 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
           {searchingMembers && <p className="text-xs text-muted-foreground mt-1">Searching...</p>}
           {memberResults.length > 0 && !personId && (
             <div className="border rounded-md mt-1 max-h-40 overflow-y-auto bg-white relative z-50 shadow-lg">
-              {memberResults.map((m: any) => (
+              {memberResults.map((m) => (
                 <button
                   key={m.id}
                   type="button"
                   className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
                   onClick={() => selectMember(m)}
                 >
-                  <span className="font-medium">{m.firstName || ''} {m.lastName || ''}</span>
-                  {m.memberNumber && <span className="text-muted-foreground ml-2 text-xs">#{m.memberNumber}</span>}
+                  <span className="font-medium">{m.memberNumber || m.personId}</span>
+                  {m.memberNumber && <span className="text-muted-foreground ml-2 text-xs font-mono">#{m.memberNumber}</span>}
                 </button>
               ))}
             </div>
