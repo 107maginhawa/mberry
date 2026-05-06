@@ -347,3 +347,7 @@ jobs:
         run: cd services/api-ts && bun test
       - name: Run frontend unit tests
         run: cd apps/memberry && bun run test
+      - name: Run account unit tests
+        run: cd apps/account && bun run test
+      - name: Run SDK unit tests
+        run: cd packages/sdk-ts && bun run test
