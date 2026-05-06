@@ -54,7 +54,7 @@ Requirements for current milestone. Each maps to roadmap phases.
 ### DevOps
 
 - [ ] **DEVX-01**: GitHub Actions workflow for build across all apps and services
-- [ ] **DEVX-02**: GitHub Actions workflow for deploy to staging environment
+- [x] **DEVX-02**: GitHub Actions workflow for deploy to staging environment
 - [ ] **DEVX-03**: Production deploy workflow with health checks
 - [ ] **DEVX-04**: Canary/health monitoring for production
 
@@ -128,7 +128,7 @@ Requirements for current milestone. Each maps to roadmap phases.
 | SPEC-07 | Phase 4 | Complete |
 | SPEC-08 | Phase 4 | Complete |
 | DEVX-01 | Phase 6 | Pending |
-| DEVX-02 | Phase 6 | Pending |
+| DEVX-02 | Phase 6 | Complete |
 | DEVX-03 | Phase 6 | Pending |
 | DEVX-04 | Phase 6 | Pending |
 | UINF-01 | Phase 7 | Pending |
