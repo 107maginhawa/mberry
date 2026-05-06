@@ -11,7 +11,7 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
 - Decimal phases (e.g., 2.1): Urgent insertions (marked with INSERTED)
 
 - [ ] **Phase 0: Test Retrofit & CI Foundation** - Complete test coverage safety net for safe refactoring
-- [ ] **Phase 1: Billing Schema Completion** - Complete the billing module with all TODO fields and access controls
+- [x] **Phase 1: Billing Schema Completion** - Complete the billing module with all TODO fields and access controls
 - [ ] **Phase 2: Audit Module Completion** - Full audit trail for compliance across all modules
 - [ ] **Phase 3: Data Model Unification** - Single canonical schema replacing dual custom/TypeSpec models
 - [ ] **Phase 4: TypeSpec/OpenAPI Reconciliation** - Spec-first definitions for all 6 custom modules
@@ -50,7 +50,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 01-01-PLAN.md — Handler response mapping, access controls, void threshold, schema verification
-- [ ] 01-02-PLAN.md — TDD lifecycle + access control + response field tests
+- [x] 01-02-PLAN.md — TDD lifecycle + access control + response field tests
 
 ### Phase 2: Audit Module Completion
 **Goal**: All write operations across modules are automatically captured in an audit trail
