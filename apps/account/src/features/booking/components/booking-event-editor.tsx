@@ -19,13 +19,13 @@ import {
   stateToCreateBody,
   stateToUpdateBody,
 } from '@/features/booking/lib/event-state'
-import { Button } from '@/components/button'
-import { Input } from '@/components/input'
-import { Label } from '@/components/label'
-import { Switch } from '@/components/switch'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/select'
-import { Checkbox } from '@/components/checkbox'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
+import { Switch } from '@monobase/ui'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Checkbox } from '@monobase/ui'
 
 const LOCATION_OPTIONS: LocationType[] = ['video', 'phone', 'in-person']
 

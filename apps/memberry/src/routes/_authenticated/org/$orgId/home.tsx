@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { searchEventsOptions } from '@monobase/sdk-ts/generated/react-query'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@monobase/ui'
 import { Megaphone, Calendar, MapPin, ArrowRight } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/home')({

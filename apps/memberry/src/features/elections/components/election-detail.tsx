@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Vote, Trophy, ArrowRight, CheckCircle2 } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@monobase/ui'
 import {
   getElectionOptions,
   listElectionsQueryKey,

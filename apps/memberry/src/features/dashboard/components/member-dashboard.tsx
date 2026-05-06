@@ -6,7 +6,7 @@ import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { EmptyState } from '@/components/patterns/empty-state'
-import { Button } from '@/components/ui/button'
+import { Button } from '@monobase/ui'
 
 interface Membership {
   id: string

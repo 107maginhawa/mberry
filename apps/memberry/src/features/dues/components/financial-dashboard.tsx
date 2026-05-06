@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@monobase/ui'
 import { AlertTriangle, CreditCard, Settings } from 'lucide-react'
 import { formatCents } from '../lib/money'
 

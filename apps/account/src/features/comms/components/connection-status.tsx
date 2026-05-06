@@ -3,7 +3,7 @@
  * Shows connection state indicator
  */
 
-import { Badge } from '@/components/badge'
+import { Badge } from '@monobase/ui'
 import { Loader2 } from 'lucide-react'
 
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected' | 'failed'

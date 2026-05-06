@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@monobase/ui"
 import { PersonalInfoForm } from '@/features/person/components/personal-info-form'
 import { AddressForm } from '@/features/person/components/address-form'
 import { ContactInfoForm } from '@/features/person/components/contact-info-form'

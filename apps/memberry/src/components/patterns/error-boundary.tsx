@@ -1,6 +1,6 @@
 import { Component, useRef, useEffect, type ReactNode, type ErrorInfo } from 'react'
 import { AlertCircle, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@monobase/ui'
 
 interface ErrorBoundaryProps {
   children: ReactNode

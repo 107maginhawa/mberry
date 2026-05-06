@@ -6,11 +6,11 @@ import {
   approveMembershipApplicationMutation,
   denyMembershipApplicationMutation,
 } from '@monobase/sdk-ts/generated/react-query'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@monobase/ui'
+import { Badge } from '@monobase/ui'
+import { Skeleton } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Separator } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Check, ChevronDown, ChevronUp, ClipboardList, MessageSquare, X } from 'lucide-react'
 

@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Button } from '@/components/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
-import { Progress } from '@/components/progress'
+import { Button } from '@monobase/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
+import { Progress } from '@monobase/ui'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
 import {

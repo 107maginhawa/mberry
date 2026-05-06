@@ -5,13 +5,13 @@ import {
   listRosterMembersOptions,
   listMembershipCategoriesOptions,
 } from '@monobase/sdk-ts/generated/react-query'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Badge } from '@monobase/ui'
+import { Skeleton } from '@monobase/ui'
+import { Checkbox } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Search, Users } from 'lucide-react'
 
 interface MemberTableProps {

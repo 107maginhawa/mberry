@@ -10,8 +10,8 @@ import { getSdkBaseUrl } from '@monobase/sdk-ts/client'
 import type { IceServer } from '@monobase/sdk-ts/generated/types.gen'
 import { useVideoCall } from '@/features/comms/hooks/use-video-call'
 import { VideoCallUI } from '@/features/comms/components/video-call-ui'
-import { Button } from '@/components/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@monobase/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
 import { Video, VideoOff } from 'lucide-react'
 
 interface VideoCallPanelProps {

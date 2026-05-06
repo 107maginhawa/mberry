@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@monobase/ui'
 import { Calendar, Building2 } from 'lucide-react'
 import { listMyCustomEventsOptions } from '@monobase/sdk-ts/generated/react-query'
 

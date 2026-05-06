@@ -1,6 +1,6 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@monobase/ui'
+import { Button } from '@monobase/ui'
+import { Skeleton } from '@monobase/ui'
 import { formatCents } from '../lib/money'
 import { Download } from 'lucide-react'
 

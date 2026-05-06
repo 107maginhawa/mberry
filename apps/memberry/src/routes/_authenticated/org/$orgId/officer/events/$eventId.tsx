@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@monobase/ui'
 import { EventForm } from '@/features/events/components/event-form'
 import { AttendanceView } from '@/features/events/components/attendance-view'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'

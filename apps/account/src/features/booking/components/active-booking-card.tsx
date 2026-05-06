@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { Check, CreditCard, AlertCircle, UserCheck, XCircle, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/format-date'
-import { Button } from '@/components/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
-import { Alert, AlertDescription } from '@/components/alert'
+import { Button } from '@monobase/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
+import { Alert, AlertDescription } from '@monobase/ui'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +16,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/alert-dialog'
+} from '@monobase/ui'
 import type { Booking } from '@monobase/sdk-ts/generated/types.gen'
 import type { User } from 'better-auth'
 

@@ -26,23 +26,23 @@ import {
 import { useOptimisticMutation } from '@monobase/sdk-ts/react/use-optimistic-mutation'
 import type { ListNotificationsResponse } from '@monobase/sdk-ts/generated/types.gen'
 import { useFormatDate } from '@/hooks/use-format-date'
-import { Button } from "@/components/button"
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/card"
-import { Badge } from "@/components/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs"
+import { Button } from "@monobase/ui"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@monobase/ui"
+import { Badge } from "@monobase/ui"
+import { Avatar, AvatarFallback, AvatarImage } from "@monobase/ui"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@monobase/ui"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/dropdown-menu"
+} from "@monobase/ui"
 
 export const Route = createFileRoute('/_dashboard/notifications')({
   component: NotificationsPage,
