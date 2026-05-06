@@ -171,10 +171,13 @@ Plans:
   2. Critical components (dashboard, dues table, member list) have unit tests
   3. Unit tests run in CI alongside E2E and contract tests
 **Plans**: 3 plans
-Plans:
-- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
-- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
-- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
+
+**Wave 1**
+- [ ] 08-01-PLAN.md — Install Vitest, configure happy-dom, migrate 6 lib tests from bun:test (TEST-07)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 08-02-PLAN.md — Component unit tests for MemberDashboard, DuesInvoiceList, MemberTable (TEST-07)
+- [ ] 08-03-PLAN.md — Add frontend unit test step to CI workflow (TEST-07)
 
 ## Progress
 
@@ -191,4 +194,4 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 5. Account & Admin App Hardening | 0/4 | Planned | - |
 | 6. CI/CD & DevOps Pipeline | 0/3 | Planned | - |
 | 7. Shared Component Library | 0/3 | Planned | - |
-| 8. Frontend Unit Tests | 0/? | Not started | - |
+| 8. Frontend Unit Tests | 0/3 | Planned | - |
