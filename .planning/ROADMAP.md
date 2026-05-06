@@ -102,8 +102,8 @@ Plans:
 - [x] 04-05-PLAN.md — Migrate dues + membership frontend to SDK hooks (SPEC-07)
 - [x] 04-06-PLAN.md — Migrate elections/certificates/events/training frontend to SDK hooks (SPEC-07)
 - [x] 04-07-PLAN.md — Migrate route files to SDK hooks + human verification (SPEC-07)
-- [ ] 04-08-PLAN.md — [GAP] Fix broken db import in 48 handler stubs + API typecheck (SPEC-08)
-- [ ] 04-09-PLAN.md — [GAP] Replace manual api.get in record-payment-form with SDK hook (SPEC-07)
+- [x] 04-08-PLAN.md — [GAP] Fix broken db import in 48 handler stubs + API typecheck (SPEC-08)
+- [x] 04-09-PLAN.md — [GAP] Replace manual api.get in record-payment-form with SDK hook (SPEC-07)
 - [ ] 04-10-PLAN.md — [GAP] TypeSpec for persons/me, credits, officer-terms, notifs custom endpoints (SPEC-08)
 - [ ] 04-11-PLAN.md — [GAP] TypeSpec for announcements + admin + public + rebuild pipeline (SPEC-08)
 
@@ -176,7 +176,7 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 1. Billing Schema Completion | 0/2 | Not started | - |
 | 2. Audit Module Completion | 2/3 | Executing | - |
 | 3. Data Model Unification | 0/? | Not started | - |
-| 4. TypeSpec/OpenAPI Reconciliation | 7/11 | Gap closure | 2026-05-06 |
+| 4. TypeSpec/OpenAPI Reconciliation | 9/11 | In Progress|  |
 | 5. Account & Admin App Hardening | 0/? | Not started | - |
 | 6. CI/CD & DevOps Pipeline | 0/? | Not started | - |
 | 7. Shared Component Library | 0/? | Not started | - |
