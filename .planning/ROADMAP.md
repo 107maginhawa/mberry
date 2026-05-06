@@ -93,11 +93,13 @@ Plans:
   2. `cd specs/api && bun run build` produces OpenAPI including all custom module endpoints
   3. SDK auto-generates React Query hooks for all custom modules (no manual fetch calls)
   4. OpenAPI spec documents every endpoint in the system (base + custom)
-**Plans**: 3 plans
+**Plans**: 5 plans
 Plans:
-- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
-- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
-- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
+- [ ] 04-01-PLAN.md — Register elections in main.tsp + author certificates.tsp (SPEC-05, SPEC-06)
+- [ ] 04-02-PLAN.md — Author dues + membership custom operation TypeSpec (SPEC-01, SPEC-02)
+- [ ] 04-03-PLAN.md — Author events + training custom operation TypeSpec (SPEC-03, SPEC-04)
+- [ ] 04-04-PLAN.md — Build pipeline + SDK generation + decommission hand-wired routes (SPEC-07, SPEC-08)
+- [ ] 04-05-PLAN.md — Frontend migration to SDK hooks + human verification (SPEC-07)
 
 ### Phase 5: Account & Admin App Hardening
 **Goal**: Account and admin apps have E2E test coverage for critical user flows
@@ -168,7 +170,7 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 1. Billing Schema Completion | 0/2 | Not started | - |
 | 2. Audit Module Completion | 2/3 | Executing | - |
 | 3. Data Model Unification | 0/? | Not started | - |
-| 4. TypeSpec/OpenAPI Reconciliation | 0/? | Not started | - |
+| 4. TypeSpec/OpenAPI Reconciliation | 0/5 | Not started | - |
 | 5. Account & Admin App Hardening | 0/? | Not started | - |
 | 6. CI/CD & DevOps Pipeline | 0/? | Not started | - |
 | 7. Shared Component Library | 0/? | Not started | - |
