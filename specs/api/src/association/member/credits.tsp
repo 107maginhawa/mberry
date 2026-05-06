@@ -121,8 +121,6 @@ model OfficerTermRecord {
 // ---------------------------------------------------------------------------
 
 namespace Association.Member.Credits {
-  @route("/credit-compliance")
-  @tag("Association:Member")
   interface CreditComplianceManagement {
     @doc("Generate a CPD credit compliance report for all active members in the specified organisation. Officers only.")
     @operationId("getCreditCompliance")
@@ -138,8 +136,6 @@ namespace Association.Member.Credits {
       | ApiNotFoundResponse;
   }
 
-  @route("/officer-terms")
-  @tag("Association:Member")
   interface OfficerTermsManagement {
     @doc("List all officer terms for the specified organisation (enriched with position title and person name).")
     @operationId("listOfficerTerms")

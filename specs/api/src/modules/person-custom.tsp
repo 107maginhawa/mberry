@@ -106,8 +106,8 @@ model CreateCreditEntryRequest {
   organizationId?: UUID;
 }
 
-@doc("A single CPD credit entry")
-model CreditEntry extends BaseEntity {
+@doc("A single CPD credit entry (person/me scope)")
+model MyCreditEntry extends BaseEntity {
   @doc("Person this credit belongs to")
   personId: UUID;
 
@@ -341,7 +341,7 @@ namespace PersonCustomModule {
     @extension("x-security-required-roles", #["user"])
     createMyCreditEntry(
       @body entry: CreateCreditEntryRequest
-    ): ApiCreatedResponse<{ data: CreditEntry }>
+    ): ApiCreatedResponse<{ data: MyCreditEntry }>
       | ApiBadRequestResponse
       | ApiUnauthorizedResponse;
 
@@ -351,7 +351,7 @@ namespace PersonCustomModule {
     @route("/credit-entries")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
-    listMyCreditEntries(): ApiOkResponse<{ data: CreditEntry[] }>
+    listMyCreditEntries(): ApiOkResponse<{ data: MyCreditEntry[] }>
       | ApiUnauthorizedResponse;
 
     @doc("Check whether the authenticated user holds an active officer position in the specified organisation.")

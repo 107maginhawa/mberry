@@ -27,6 +27,7 @@ import "./modules/provider.tsp";
 
 // Platform administration
 import "./modules/platform-admin.tsp";
+import "./modules/platform-admin-custom.tsp";
 
 // Association management specs
 import "./association/core/primitives.tsp";
@@ -61,6 +62,9 @@ import "./association/operations/portal.tsp";
 import "./association/operations/marketing.tsp";
 import "./association/integration/webhooks.tsp";
 import "./association/integration/automation.tsp";
+
+// Association communications — announcements
+import "./association/operations/announcements.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.Versioning;
@@ -251,9 +255,11 @@ namespace MonobaseAPI {
   // =========================================================================
 
   @tag("Association:Member")
+  @route("/credit-compliance")
   interface CreditComplianceManagement extends Association.Member.Credits.CreditComplianceManagement {}
 
   @tag("Association:Member")
+  @route("/officer-terms")
   interface OfficerTermsManagement extends Association.Member.Credits.OfficerTermsManagement {}
 
   // =========================================================================
@@ -487,6 +493,23 @@ namespace MonobaseAPI {
   @tag("PlatformAdmin")
   @route("/admin/admins")
   interface PlatformAdminManagement extends PlatformAdminModule.AdminManagement {}
+
+  // =========================================================================
+  // Platform Admin Custom (public org lookup + admin identity)
+  // =========================================================================
+
+  @tag("PlatformAdmin")
+  interface PlatformPublicEndpoints extends PlatformAdminCustomModule.PublicEndpoints {}
+
+  @tag("PlatformAdmin")
+  interface PlatformAdminIdentityEndpoints extends PlatformAdminCustomModule.AdminIdentityEndpoints {}
+
+  // =========================================================================
+  // Association Domain — Announcements
+  // =========================================================================
+
+  @tag("Communication")
+  interface AssocAnnouncementManagement extends Association.Operations.Announcements.AnnouncementManagement {}
 
 }
 
