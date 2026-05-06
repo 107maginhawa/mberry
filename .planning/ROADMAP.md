@@ -137,11 +137,11 @@ Plans:
 **Plans**: 3 plans
 
 **Wave 1**
-- [ ] 06-01-PLAN.md — Extend CI with build-api, build-frontends, and unit-tests jobs (DEVX-01)
+- [x] 06-01-PLAN.md — Extend CI with build-api, build-frontends, and unit-tests jobs (DEVX-01)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 06-02-PLAN.md — Staging + production deploy workflow with health check gates (DEVX-02, DEVX-03)
-- [ ] 06-03-PLAN.md — Scheduled production health monitor with GitHub issue alerting (DEVX-04)
+- [x] 06-02-PLAN.md — Staging + production deploy workflow with health check gates (DEVX-02, DEVX-03)
+- [x] 06-03-PLAN.md — Scheduled production health monitor with GitHub issue alerting (DEVX-04)
 
 ### Phase 7: Shared Component Library
 **Goal**: Duplicated UI components extracted into a shared package used by all apps
