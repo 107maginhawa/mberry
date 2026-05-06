@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 04-08-PLAN.md — 48 handler stubs cleaned
-last_updated: "2026-05-06T09:38:57.935Z"
+stopped_at: Completed 04-11-PLAN.md — full OpenAPI + SDK pipeline with all endpoints covered
+last_updated: "2026-05-06T14:45:00.000Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 9
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 04 (typespec-openapi-reconciliation) — COMPLETE
-Plan: 7 of 7
-Status: Phase complete — ready for verification
+Plan: 11 of 11 (gap closure wave complete)
+Status: Phase complete — all endpoints documented, SDK regenerated
 Last activity: 2026-05-06
 
 Progress: [██████░░░░] 58%
@@ -59,6 +59,7 @@ Progress: [██████░░░░] 58%
 | Phase 02-audit-module-completion P03 | 5m | 1 task | 1 file |
 | Phase 04-typespec P07 | 30m | 2 tasks | 16 files |
 | Phase 04-typespec P08 | 3m | 2 tasks | 48 files |
+| Phase 04-typespec P11 | 20m | 2 tasks | 27 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - EventLifecycleService added as separate interface (not merged into EventManagement) to avoid duplicating cancelEvent
 - checkInCustomEvent reuses CheckInCreateRequest; completeCustomTraining reuses TrainingEnrollmentCompleteRequest
 - Communications route kept hand-wired in app.ts (announcements not in Phase 4 TypeSpec scope)
+- Renamed CreditEntry to MyCreditEntry in person-custom.tsp (avoids duplicate-symbol with certification.tsp)
+- Route prefixes for CreditCompliance/OfficerTerms moved to main.tsp extends (not inside credits.tsp namespace)
+- Announcement handler registry imports point to communications/ (existing impl), not generated communication/ stubs
 - registerDuesJobs import retained — still invoked at app startup despite dues route decommission
 - mutationFn extracted from SDK mutation options to avoid throwOnError generic conflict in useMutation
 - Pagination uses totalCount field (not total) in SDK PaginationMeta type
@@ -104,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-06T09:38:57.933Z
-Stopped at: Completed 04-08-PLAN.md — 48 handler stubs cleaned
+Last session: 2026-05-06T14:45:00.000Z
+Stopped at: Completed 04-11-PLAN.md — full OpenAPI + SDK pipeline with all endpoints covered
 Resume file: None
