@@ -243,6 +243,18 @@ namespace MonobaseAPI {
   @route("/association/member/dunning")
   interface AssocDunningManagement extends Association.Member.Dues.DunningManagement {}
 
+  @tag("Association:Member")
+  @route("/association/member/dues-payments")
+  interface AssocDuesPaymentManagement extends Association.Member.Dues.DuesPaymentManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/dues-gateway")
+  interface AssocDuesGatewayManagement extends Association.Member.Dues.DuesGatewayManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/dues-reporting")
+  interface AssocDuesReportingService extends Association.Member.Dues.DuesReportingService {}
+
   // =========================================================================
   // Association Domain — Chapters
   // =========================================================================

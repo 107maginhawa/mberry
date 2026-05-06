@@ -368,6 +368,237 @@ model DunningRunResult {
 }
 
 // ---------------------------------------------------------------------------
+// Payment, Gateway, and Reporting Models
+// ---------------------------------------------------------------------------
+
+@doc("Payment method for dues")
+enum DuesPaymentMethod {
+  online: "online",
+  cash: "cash",
+  check: "check",
+  bankTransfer: "bankTransfer",
+  gcash: "gcash",
+  other: "other",
+}
+
+@doc("Status of a dues payment")
+enum DuesPaymentStatus {
+  pending: "pending",
+  completed: "completed",
+  failed: "failed",
+  refunded: "refunded",
+  partiallyRefunded: "partiallyRefunded",
+  expired: "expired",
+}
+
+@doc("Payment gateway provider")
+enum GatewayProvider {
+  paymongo: "paymongo",
+  stripe: "stripe",
+}
+
+@doc("A recorded dues payment from a member")
+model DuesPayment extends BaseEntity {
+  @doc("ID of the association organization")
+  organizationId: string;
+
+  @doc("ID of the member person")
+  personId: string;
+
+  @doc("ID of the related invoice, if any")
+  invoiceId?: string;
+
+  @doc("Human-readable receipt number")
+  @minLength(1)
+  @maxLength(50)
+  receiptNumber: string;
+
+  @doc("Payment amount in minor currency units")
+  @minValue(0)
+  amount: int64;
+
+  @doc("ISO 4217 currency code")
+  @minLength(3)
+  @maxLength(3)
+  currency: string;
+
+  @doc("Payment method used")
+  paymentMethod: DuesPaymentMethod;
+
+  @doc("External reference number from the payment provider")
+  @maxLength(100)
+  referenceNumber?: string;
+
+  @doc("Lifecycle status of this payment")
+  status: DuesPaymentStatus;
+
+  @doc("ID of the staff member who recorded this payment")
+  recordedBy?: string;
+
+  @doc("Date from which the membership was extended")
+  membershipExtendedFrom?: plainDate;
+
+  @doc("Date to which the membership was extended")
+  membershipExtendedTo?: plainDate;
+
+  @doc("Timestamp when payment was received")
+  paidAt?: utcDateTime;
+
+  @doc("Amount already refunded in minor currency units")
+  @minValue(0)
+  refundedAmount: int64;
+}
+
+@doc("Request to record a manual dues payment")
+model RecordPaymentRequest {
+  @doc("ID of the organization")
+  organizationId: string;
+
+  @doc("ID of the member person")
+  personId: string;
+
+  @doc("Optional invoice to link this payment to")
+  invoiceId?: string;
+
+  @doc("Payment amount in minor currency units")
+  @minValue(1)
+  amount: int64;
+
+  @doc("ISO 4217 currency code")
+  currency: string;
+
+  @doc("Payment method")
+  paymentMethod: DuesPaymentMethod;
+
+  @doc("External reference number")
+  referenceNumber?: string;
+
+  @doc("Timestamp when payment was received")
+  paidAt?: utcDateTime;
+}
+
+@doc("Request to refund a dues payment")
+model DuesRefundRequest {
+  @doc("Amount to refund in minor currency units; omit for full refund")
+  @minValue(1)
+  amount?: int64;
+
+  @doc("Reason for the refund")
+  @maxLength(500)
+  reason?: string;
+}
+
+@doc("Gateway configuration for a payment provider")
+model GatewayConfig extends BaseEntity {
+  @doc("ID of the association organization")
+  organizationId: string;
+
+  @doc("Payment gateway provider")
+  provider: GatewayProvider;
+
+  @doc("Public key for the payment provider")
+  @minLength(1)
+  @maxLength(255)
+  publicKey: string;
+
+  @doc("Whether the gateway connection has been tested and confirmed")
+  connected: boolean;
+
+  @doc("Timestamp of the most recent connection test")
+  lastTestAt?: utcDateTime;
+}
+
+@doc("Request to configure or update a payment gateway")
+model GatewayConfigRequest {
+  @doc("Payment gateway provider")
+  provider: GatewayProvider;
+
+  @doc("Public key for the payment provider")
+  @minLength(1)
+  @maxLength(255)
+  publicKey: string;
+
+  @doc("Secret key for the payment provider (write-only; never returned)")
+  @minLength(1)
+  secretKey: string;
+}
+
+@doc("Result of a gateway connection test")
+model GatewayTestResult {
+  @doc("Whether the connection test succeeded")
+  success: boolean;
+
+  @doc("Human-readable message from the test")
+  @maxLength(500)
+  message: string;
+
+  @doc("Timestamp when the test was performed")
+  testedAt: utcDateTime;
+}
+
+@doc("A dues fund allocation pool for an organization")
+model DuesFund extends BaseEntity {
+  @doc("ID of the association organization")
+  organizationId: string;
+
+  @doc("Name of the fund")
+  @minLength(1)
+  @maxLength(100)
+  name: string;
+
+  @doc("Percentage of each payment allocated to this fund")
+  percentage: float64;
+
+  @doc("Sort order for display")
+  sortOrder: int32;
+
+  @doc("Whether this fund is currently active")
+  active: boolean;
+}
+
+@doc("Request to upsert dues fund allocations for an organization")
+model UpsertFundsRequest {
+  @doc("Full replacement list of fund allocations (percentages must sum to 100)")
+  funds: FundAllocation[];
+}
+
+@doc("Financial dashboard statistics for an organization")
+model FinancialDashboard {
+  @doc("Total amount collected from completed payments")
+  totalCollected: int64;
+
+  @doc("Total outstanding amount from pending payments")
+  totalOutstanding: int64;
+
+  @doc("Number of pending payment records")
+  pendingCount: int32;
+
+  @doc("Number of completed payment records")
+  completedCount: int32;
+
+  @doc("Total number of payment records")
+  totalCount: int32;
+
+  @doc("Percentage of payments that have been completed (0–100)")
+  collectionRate: int32;
+}
+
+@doc("Dues collection report entry grouped by month and payment method")
+model DuesReportEntry {
+  @doc("Year-month string in YYYY-MM format")
+  month: string;
+
+  @doc("Payment method for this group")
+  method: DuesPaymentMethod;
+
+  @doc("Number of payments in this group")
+  count: int32;
+
+  @doc("Total amount collected in this group (minor currency units)")
+  total: int64;
+}
+
+// ---------------------------------------------------------------------------
 // Interfaces
 // ---------------------------------------------------------------------------
 
@@ -657,6 +888,173 @@ namespace Association.Member.Dues {
       @body body: RunDunningRequest
     ): ApiOkResponse<DunningRunResult>
       | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+  }
+
+  @doc("Record, retrieve, and refund dues payments")
+  interface DuesPaymentManagement {
+    @doc("List dues payments with optional filters.")
+    @operationId("listDuesPayments")
+    @get
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin", "association:member"])
+    listDuesPayments(
+      ...PaginationQuery,
+      @query organizationId?: string,
+      @query personId?: string,
+      @query status?: DuesPaymentStatus
+    ): ApiOkResponse<PaginatedResponse<DuesPayment>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Get a dues payment by ID.")
+    @operationId("getDuesPayment")
+    @get
+    @route("/{paymentId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin", "association:member"])
+    getDuesPayment(
+      @path paymentId: string
+    ): ApiOkResponse<DuesPayment>
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Record a manual dues payment for a member.")
+    @operationId("recordDuesPayment")
+    @post
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    recordDuesPayment(
+      @body body: RecordPaymentRequest
+    ): ApiCreatedResponse<DuesPayment>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Refund a dues payment fully or partially.")
+    @operationId("refundDuesPayment")
+    @post
+    @route("/{paymentId}/refund")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    refundDuesPayment(
+      @path paymentId: string,
+      @body body: DuesRefundRequest
+    ): ApiOkResponse<DuesPayment>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse
+      | ApiForbiddenResponse;
+  }
+
+  @doc("Configure, test, and disconnect the payment gateway for an organization")
+  interface DuesGatewayManagement {
+    @doc("Get the payment gateway configuration for an organization.")
+    @operationId("getDuesGatewayConfig")
+    @get
+    @route("/{organizationId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    getDuesGatewayConfig(
+      @path organizationId: string
+    ): ApiOkResponse<GatewayConfig>
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Create or update the payment gateway configuration for an organization.")
+    @operationId("upsertDuesGatewayConfig")
+    @put
+    @route("/{organizationId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    upsertDuesGatewayConfig(
+      @path organizationId: string,
+      @body body: GatewayConfigRequest
+    ): ApiOkResponse<GatewayConfig>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Test the payment gateway connection for an organization.")
+    @operationId("testDuesGatewayConnection")
+    @post
+    @route("/{organizationId}/test")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    testDuesGatewayConnection(
+      @path organizationId: string
+    ): ApiOkResponse<GatewayTestResult>
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Disconnect and remove the payment gateway configuration for an organization.")
+    @operationId("disconnectDuesGateway")
+    @delete
+    @route("/{organizationId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    disconnectDuesGateway(
+      @path organizationId: string
+    ): ApiNoContentResponse
+      | ApiNotFoundResponse
+      | ApiForbiddenResponse;
+  }
+
+  @doc("Fund allocation management and financial reporting for dues")
+  interface DuesReportingService {
+    @doc("List dues fund allocations for an organization.")
+    @operationId("listDuesFunds")
+    @get
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    listDuesFunds(
+      @query organizationId: string
+    ): ApiOkResponse<PaginatedResponse<DuesFund>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Replace the fund allocations for an organization.")
+    @operationId("upsertDuesFunds")
+    @put
+    @route("/{organizationId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    upsertDuesFunds(
+      @path organizationId: string,
+      @body body: UpsertFundsRequest
+    ): ApiOkResponse<PaginatedResponse<DuesFund>>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Get financial dashboard statistics for an organization.")
+    @operationId("getDuesFinancialDashboard")
+    @get
+    @route("/{organizationId}/dashboard")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    getDuesFinancialDashboard(
+      @path organizationId: string
+    ): ApiOkResponse<FinancialDashboard>
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Generate a dues collection report for an organization.")
+    @operationId("generateDuesReport")
+    @get
+    @route("/{organizationId}/report")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    generateDuesReport(
+      @path organizationId: string,
+      @query from?: utcDateTime,
+      @query to?: utcDateTime
+    ): ApiOkResponse<PaginatedResponse<DuesReportEntry>>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
   }
