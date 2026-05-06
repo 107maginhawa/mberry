@@ -56,7 +56,7 @@ export async function exportPersonData(
   // Collect payments
   let payments: any[] = [];
   try {
-    const { duesPayments } = await import('@/handlers/dues/repos/dues.types');
+    const { duesPayments } = await import('@/handlers/dues/repos/dues-payments.schema');
     const { eq } = await import('drizzle-orm');
     payments = await db.select().from(duesPayments).where(eq(duesPayments.personId, user.id));
   } catch (e) {

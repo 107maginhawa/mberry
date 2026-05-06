@@ -26,8 +26,6 @@ export async function createMembership(
   const tierRepo = new MembershipTierRepository(db, logger);
   const membershipRepo = new MembershipRepository(db, logger);
 
-  const orgId = body.organizationId;
-
   // Validate tier exists
   const tier = await tierRepo.findOneById(body.tierId);
   if (!tier) throw new NotFoundError('Membership tier');
@@ -45,9 +43,8 @@ export async function createMembership(
   const expiryDate = oneYearLater.toISOString().split('T')[0];
 
   const membership = await membershipRepo.createOne({
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
-    orgId,
     tierId: body.tierId,
     categoryId: body.categoryId ?? null,
     memberNumber: body.memberNumber ?? null,

@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { DuesRepository } from './repos/dues.repo';
-import { duesGatewayConfigs } from './repos/dues.types';
+import { duesGatewayConfigs } from './repos/dues-payments.schema';
 import { eq } from 'drizzle-orm';
 import type { Session } from '@/types/auth';
 import { createCipheriv, randomBytes } from 'crypto';

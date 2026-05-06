@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { eq } from 'drizzle-orm';
-import { duesGatewayConfigs } from './repos/dues.types';
+import { duesGatewayConfigs } from './repos/dues-payments.schema';
 import { NotFoundError } from '@/core/errors';
 import { DuesRepository } from './repos/dues.repo';
 
