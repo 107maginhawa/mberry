@@ -152,10 +152,14 @@ Plans:
   2. Component preview exists (Storybook or equivalent) for shared components
   3. All three apps (account, memberry, admin) import from `packages/ui` instead of local copies
 **Plans**: 3 plans
-Plans:
-- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
-- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
-- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
+
+**Wave 1**
+- [ ] 07-01-PLAN.md — Create packages/ui scaffold + extract 20+ shadcn components from account (UINF-01)
+- [ ] 07-02-PLAN.md — Ladle component preview with 8+ stories (UINF-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 07-03-PLAN.md — Migrate all three apps to import from @monobase/ui, delete local duplicates (UINF-03)
+
 **UI hint**: yes
 
 ### Phase 8: Frontend Unit Tests
@@ -186,5 +190,5 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 4. TypeSpec/OpenAPI Reconciliation | 9/11 | In Progress|  |
 | 5. Account & Admin App Hardening | 0/4 | Planned | - |
 | 6. CI/CD & DevOps Pipeline | 0/3 | Planned | - |
-| 7. Shared Component Library | 0/? | Not started | - |
+| 7. Shared Component Library | 0/3 | Planned | - |
 | 8. Frontend Unit Tests | 0/? | Not started | - |
