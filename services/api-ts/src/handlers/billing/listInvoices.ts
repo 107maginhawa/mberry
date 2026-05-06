@@ -65,6 +65,23 @@ export async function listInvoices(
     filters.context = query.context;
   }
 
+  // Access control: non-admin users can only see their own invoices
+  const userRoles = user.role ? user.role.split(',').map((r: string) => r.trim()) : [];
+  const isAdmin = userRoles.includes('admin');
+
+  if (!isAdmin) {
+    // Non-admin: scope to invoices where user is customer or merchant
+    // If they specified a customer/merchant filter that isn't themselves, deny
+    if (filters.customer && filters.customer !== user.id && filters.merchant !== user.id) {
+      throw new ForbiddenError('You can only view your own invoices');
+    }
+    if (!filters.customer && !filters.merchant) {
+      // Default scope: show invoices where user is either customer or merchant
+      // Use customer filter as primary, repo will handle OR logic via customerOrMerchant
+      filters.customerOrMerchant = user.id;
+    }
+  }
+
   // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
 

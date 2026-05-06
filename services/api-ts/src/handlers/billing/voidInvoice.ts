@@ -70,6 +70,17 @@ export async function voidInvoice(
     }
   }
 
+  // D-06: Void threshold enforcement
+  if (invoice.voidThresholdMinutes && invoice.paidAt) {
+    const minutesSincePaid = (Date.now() - invoice.paidAt.getTime()) / (1000 * 60);
+    if (minutesSincePaid > invoice.voidThresholdMinutes) {
+      throw new BusinessLogicError(
+        `Cannot void invoice: void threshold of ${invoice.voidThresholdMinutes} minutes has passed`,
+        'VOID_THRESHOLD_EXCEEDED'
+      );
+    }
+  }
+
   // Check for already voided payment (Conflict 409)
   if (invoice.paymentStatus === 'canceled') {
     throw new ConflictError('Payment has already been voided');
@@ -169,28 +180,37 @@ export async function voidInvoice(
       providerDecision: (updatedInvoice.metadata as any)?.providerDecision,
     } : null;
 
+    // Fetch with line items for complete response
+    const invoiceWithLineItems = await invoiceRepo.findOneWithLineItems(invoiceId);
+
     return ctx.json({
       id: updatedInvoice.id,
       invoiceNumber: updatedInvoice.invoiceNumber,
       customer: updatedInvoice.customer,
       merchant: updatedInvoice.merchant,
-      context: updatedInvoice.context,
+      context: updatedInvoice.context || null,
       status: updatedInvoice.status,
       subtotal: updatedInvoice.subtotal,
       tax: updatedInvoice.tax ?? null,
       total: updatedInvoice.total,
       currency: updatedInvoice.currency,
-      paymentCaptureMethod: 'manual',
+      paymentCaptureMethod: updatedInvoice.paymentCaptureMethod,
       paymentDueAt: updatedInvoice.paymentDueAt?.toISOString() ?? null,
-      lineItems: [],
+      lineItems: ((invoiceWithLineItems as any)?.lineItems || []).map((item: any) => ({
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        amount: item.amount,
+        metadata: item.metadata || null
+      })),
       paymentStatus: updatedInvoice.paymentStatus ?? null,
       paidAt: updatedInvoice.paidAt?.toISOString() ?? null,
-      paidBy: null,
+      paidBy: updatedInvoice.paidBy ?? null,
       voidedAt: updatedInvoice.voidedAt?.toISOString() ?? null,
-      voidedBy: null,
-      voidThresholdMinutes: null,
-      authorizedAt: null,
-      authorizedBy: null,
+      voidedBy: updatedInvoice.voidedBy ?? null,
+      voidThresholdMinutes: updatedInvoice.voidThresholdMinutes ?? null,
+      authorizedAt: updatedInvoice.authorizedAt?.toISOString() ?? null,
+      authorizedBy: updatedInvoice.authorizedBy ?? null,
       metadata: safeMetadata,
       createdAt: updatedInvoice.createdAt.toISOString(),
       updatedAt: updatedInvoice.updatedAt.toISOString()

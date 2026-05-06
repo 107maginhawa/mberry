@@ -306,6 +306,7 @@ export interface MerchantAccountWithPerson extends Omit<MerchantAccount, 'person
 export interface InvoiceFilters {
   customer?: string;
   merchant?: string;
+  customerOrMerchant?: string;
   status?: InvoiceStatus;
   context?: string;
   paymentStatus?: PaymentStatus;

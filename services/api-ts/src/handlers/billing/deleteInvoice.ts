@@ -14,7 +14,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DeleteInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
-import { PersonRepository } from '../person/repos/person.repo';
 
 /**
  * deleteInvoice
@@ -40,9 +39,8 @@ export async function deleteInvoice(
 
   logger.info({ invoiceId, userId: user.id }, 'Deleting invoice');
 
-  // Create repository instances
+  // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
-  const personRepo = new PersonRepository(database, logger);
 
   // Get existing invoice
   const invoice = await invoiceRepo.findOneById(invoiceId);
@@ -55,18 +53,12 @@ export async function deleteInvoice(
     });
   }
 
-  // Authorization check: must be the provider who created the invoice
-  const merchantPerson = await personRepo.findOneById(invoice.merchant);
-  if (!merchantPerson) {
-    throw new NotFoundError('Merchant person not found', {
-      resourceType: 'person',
-      resource: invoice.merchant,
-      suggestions: ['Check merchant person ID format', 'Verify merchant person exists in system']
-    });
-  }
+  // Authorization check: must be the merchant or admin
+  const userRoles = user.role ? user.role.split(',').map((r: string) => r.trim()) : [];
+  const isAdmin = userRoles.includes('admin');
 
-  if (merchantPerson.id !== user.id) {
-    throw new ForbiddenError('You can only delete invoices for your own provider profile');
+  if (!isAdmin && invoice.merchant !== user.id) {
+    throw new ForbiddenError('Only admins or the merchant can delete invoices');
   }
 
   // Business rule: only draft invoices can be deleted

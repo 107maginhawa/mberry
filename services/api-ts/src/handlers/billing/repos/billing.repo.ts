@@ -3,7 +3,7 @@
  * Follows the DatabaseRepository pattern with domain-specific methods
  */
 
-import { eq, and, like, desc, sql, inArray, type SQL } from 'drizzle-orm';
+import { eq, and, or, like, desc, sql, inArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import {
@@ -63,6 +63,15 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
 
     if (filters.paymentStatus) {
       conditions.push(eq(invoices.paymentStatus, filters.paymentStatus));
+    }
+
+    if (filters.customerOrMerchant) {
+      conditions.push(
+        or(
+          eq(invoices.customer, filters.customerOrMerchant),
+          eq(invoices.merchant, filters.customerOrMerchant)
+        )!
+      );
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;

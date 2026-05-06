@@ -84,8 +84,11 @@ export async function createInvoice(
   }
 
   // Authorization check: must be the merchant or admin
-  if (merchant !== user.id) {
-    throw new ForbiddenError('You can only create invoices for your own merchant account');
+  const userRoles = user.role ? user.role.split(',').map((r: string) => r.trim()) : [];
+  const isAdmin = userRoles.includes('admin');
+
+  if (!isAdmin && merchant !== user.id) {
+    throw new ForbiddenError('Only admins or the merchant can create invoices');
   }
 
   // Validate line items

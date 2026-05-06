@@ -15,7 +15,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { UpdateInvoiceBody, UpdateInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
-import { PersonRepository } from '../person/repos/person.repo';
 
 /**
  * updateInvoice
@@ -47,9 +46,8 @@ export async function updateInvoice(
     updateFields: Object.keys(body)
   }, 'Updating invoice');
 
-  // Create repository instances
+  // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
-  const personRepo = new PersonRepository(database, logger);
 
   // Get existing invoice
   const invoice = await invoiceRepo.findOneById(invoiceId);
@@ -62,18 +60,12 @@ export async function updateInvoice(
     });
   }
 
-  // Authorization check: must be the provider who created the invoice
-  const merchantPerson = await personRepo.findOneById(invoice.merchant);
-  if (!merchantPerson) {
-    throw new NotFoundError('Merchant person not found', {
-      resourceType: 'person',
-      resource: invoice.merchant,
-      suggestions: ['Check merchant person ID format', 'Verify merchant person exists in system']
-    });
-  }
+  // Authorization check: must be the merchant or admin
+  const userRoles = user.role ? user.role.split(',').map((r: string) => r.trim()) : [];
+  const isAdmin = userRoles.includes('admin');
 
-  if (merchantPerson.id !== user.id) {
-    throw new ForbiddenError('You can only update invoices for your own provider profile');
+  if (!isAdmin && invoice.merchant !== user.id) {
+    throw new ForbiddenError('Only admins or the merchant can update invoices');
   }
 
   // Business rule: only draft invoices can be updated
@@ -91,7 +83,22 @@ export async function updateInvoice(
 
   // Handle payment due date update
   if (body.paymentDueAt !== undefined) {
-    updateData.dueAt = body.paymentDueAt ? new Date(body.paymentDueAt) : null;
+    updateData.paymentDueAt = body.paymentDueAt ? new Date(body.paymentDueAt) : null;
+  }
+
+  // Handle paymentCaptureMethod update
+  if (body.paymentCaptureMethod !== undefined) {
+    updateData.paymentCaptureMethod = body.paymentCaptureMethod;
+  }
+
+  // Handle voidThresholdMinutes update
+  if (body.voidThresholdMinutes !== undefined) {
+    updateData.voidThresholdMinutes = body.voidThresholdMinutes;
+  }
+
+  // Handle metadata update
+  if (body.metadata !== undefined) {
+    updateData.metadata = body.metadata;
   }
 
   // Handle line items update
@@ -118,19 +125,11 @@ export async function updateInvoice(
     const tax = 0; // TODO: Calculate tax based on jurisdiction
     const total = subtotal + tax;
 
-    // Update amounts and description
-    updateData.amount = total.toString();
-    updateData.providerAmount = total.toString(); // TODO: Calculate after platform fees
-    updateData.platformAmount = '0.00'; // TODO: Calculate platform fees
-    updateData.description = processedLineItems.map((item: any) => item.description).join(', ');
-
-    // TODO: Store line items in proper JSONB field when schema is updated
+    // Update totals
+    updateData.subtotal = subtotal;
+    updateData.tax = tax || undefined;
+    updateData.total = total;
   }
-
-  // TODO: Handle other fields when schema is updated
-  // - paymentCaptureMethod
-  // - voidThresholdMinutes
-  // - metadata
 
   // Update invoice
   const updatedInvoice = await invoiceRepo.updateOneById(invoiceId, updateData);
@@ -142,30 +141,39 @@ export async function updateInvoice(
     newAmount: (updatedInvoice as any).amount
   }, 'Invoice updated successfully');
 
+  // Fetch updated invoice with line items for complete response
+  const invoiceWithLineItems = await invoiceRepo.findOneWithLineItems(invoiceId);
+
   // Format response to match TypeSpec Invoice model
   const response = {
     id: updatedInvoice.id,
     invoiceNumber: updatedInvoice.invoiceNumber,
-    customer: updatedInvoice.customer, // Already correct field name
-    merchant: updatedInvoice.merchant, // Already correct field name
-    context: null, // TODO: Add context field to schema
+    customer: updatedInvoice.customer,
+    merchant: updatedInvoice.merchant,
+    context: updatedInvoice.context || null,
     status: updatedInvoice.status,
-    subtotal: parseFloat((updatedInvoice as any).amount) - 0, // TODO: Calculate proper subtotal
-    tax: null, // TODO: Implement tax calculation
-    total: parseFloat((updatedInvoice as any).amount),
+    subtotal: updatedInvoice.subtotal,
+    tax: updatedInvoice.tax || null,
+    total: updatedInvoice.total,
     currency: updatedInvoice.currency,
-    paymentCaptureMethod: body.paymentCaptureMethod || 'automatic', // TODO: Add to schema
-    paymentDueAt: (updatedInvoice as any).dueAt?.toISOString() || null,
-    lineItems: body.lineItems || [], // TODO: Store and retrieve from proper field
+    paymentCaptureMethod: updatedInvoice.paymentCaptureMethod,
+    paymentDueAt: updatedInvoice.paymentDueAt?.toISOString() || null,
+    lineItems: ((invoiceWithLineItems as any)?.lineItems || []).map((item: any) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      amount: item.amount,
+      metadata: item.metadata || null
+    })),
     paymentStatus: updatedInvoice.paymentStatus || null,
     paidAt: updatedInvoice.paidAt?.toISOString() || null,
-    paidBy: null, // TODO: Add to schema
+    paidBy: updatedInvoice.paidBy || null,
     voidedAt: updatedInvoice.voidedAt?.toISOString() || null,
-    voidedBy: null, // TODO: Add to schema
-    voidThresholdMinutes: body.voidThresholdMinutes || null, // TODO: Add to schema
-    authorizedAt: null, // TODO: Add to schema
-    authorizedBy: null, // TODO: Add to schema
-    metadata: body.metadata || null, // TODO: Add metadata support
+    voidedBy: updatedInvoice.voidedBy || null,
+    voidThresholdMinutes: updatedInvoice.voidThresholdMinutes || null,
+    authorizedAt: updatedInvoice.authorizedAt?.toISOString() || null,
+    authorizedBy: updatedInvoice.authorizedBy || null,
+    metadata: updatedInvoice.metadata || null,
     createdAt: updatedInvoice.createdAt.toISOString(),
     updatedAt: updatedInvoice.updatedAt.toISOString()
   };
