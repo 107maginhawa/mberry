@@ -53,11 +53,13 @@ Source: `members/index.tsx` uses `p-8` (page), `mb-8` (header), `mb-6` (search),
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body / table cell | 14px (text-sm) | 400 (regular) | 1.5 |
-| Label / table header | 14px (text-sm) | 500 (medium) | 1.5 |
+| Label / table header | 14px (text-sm) | 600 (semibold) | 1.5 |
 | Page heading | 24px (text-2xl) | 600 (semibold) | 1.2 |
 | Summary / caption | 14px (text-sm) | 400 (regular) | 1.5 |
 
-Source: `members/index.tsx` — `text-2xl font-semibold` for h1, `text-sm font-medium` for th, `text-sm` for td/p. No display size needed for this page.
+2 weights only: 400 (body, caption) and 600 (headings, table headers). Table headers use `font-semibold` instead of `font-medium` — differentiates via weight consistency with page heading.
+
+Source: `members/index.tsx` — `text-2xl font-semibold` for h1, `text-sm` for td/p. No display size needed for this page.
 
 ---
 
