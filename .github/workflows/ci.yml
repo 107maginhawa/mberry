@@ -26,7 +26,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16-alpine
@@ -101,12 +101,71 @@ jobs:
           exit 1
       - name: Run E2E tests
         run: cd apps/memberry && bun run test:e2e
-      - name: Upload test results
+
+      - name: Install Playwright browsers (admin)
+        run: cd apps/admin && bunx playwright install --with-deps chromium
+
+      - name: Start Admin app
+        run: |
+          cd apps/admin
+          bun dev > /tmp/admin.log 2>&1 &
+          echo $! > /tmp/admin.pid
+
+      - name: Wait for Admin app
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "http://localhost:3003" > /dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "Admin app never became ready"
+          tail -100 /tmp/admin.log
+          exit 1
+
+      - name: Run Admin E2E tests
+        run: cd apps/admin && bun run test:e2e
+
+      - name: Install Playwright browsers (account)
+        run: cd apps/account && bunx playwright install --with-deps chromium
+
+      - name: Start Account app
+        run: |
+          cd apps/account
+          bun dev > /tmp/account.log 2>&1 &
+          echo $! > /tmp/account.pid
+
+      - name: Wait for Account app
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "http://localhost:3002" > /dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "Account app never became ready"
+          tail -100 /tmp/account.log
+          exit 1
+
+      - name: Run Account E2E tests
+        run: cd apps/account && bun run test:e2e
+
+      - name: Upload Memberry test results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-memberry
           path: apps/memberry/playwright-report/
+
+      - name: Upload Admin test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-admin
+          path: apps/admin/playwright-report/
+
+      - name: Upload Account test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-account
+          path: apps/account/playwright-report/
 
   contract:
     runs-on: ubuntu-latest
