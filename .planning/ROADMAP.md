@@ -64,7 +64,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 02-01-PLAN.md — Global audit middleware + unit tests (AUDT-01, AUDT-02)
-- [ ] 02-02-PLAN.md — Admin audit dashboard at /audit (AUDT-04)
+- [x] 02-02-PLAN.md — Admin audit dashboard at /audit (AUDT-04)
 - [ ] 02-03-PLAN.md — E2E tests for audit capture + dashboard verification (AUDT-03)
 **UI hint**: yes
 
@@ -166,7 +166,7 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 |-------|----------------|--------|-----------|
 | 0. Test Retrofit & CI Foundation | 0/? | Not started | - |
 | 1. Billing Schema Completion | 0/2 | Not started | - |
-| 2. Audit Module Completion | 0/3 | Not started | - |
+| 2. Audit Module Completion | 2/3 | Executing | - |
 | 3. Data Model Unification | 0/? | Not started | - |
 | 4. TypeSpec/OpenAPI Reconciliation | 0/? | Not started | - |
 | 5. Account & Admin App Hardening | 0/? | Not started | - |
