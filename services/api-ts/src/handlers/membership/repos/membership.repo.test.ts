@@ -16,7 +16,7 @@ import { MembershipRepository } from './membership.repo';
 function makeMembership(overrides: Record<string, any> = {}) {
   return {
     id: 'mem-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     orgId: 'org-1',
     personId: 'person-1',
     tierId: 'tier-1',
@@ -52,7 +52,7 @@ function makePerson(overrides: Record<string, any> = {}) {
 function makeCategory(overrides: Record<string, any> = {}) {
   return {
     id: 'cat-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     orgId: 'org-1',
     name: 'Regular',
     description: 'Regular membership',
@@ -69,7 +69,7 @@ function makeCategory(overrides: Record<string, any> = {}) {
 function makeApplication(overrides: Record<string, any> = {}) {
   return {
     id: 'app-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     orgId: 'org-1',
     personId: 'person-1',
     tierId: 'tier-1',

@@ -64,7 +64,7 @@ describe('invite handler auth guards', () => {
   test('createInvite requires org context', async () => {
     const { makeCtx } = await import('@/test-utils/make-ctx');
     const { createInvite } = await import('./createInvite');
-    const ctx = makeCtx({ user: { id: 'user-1' }, tenantId: null });
+    const ctx = makeCtx({ user: { id: 'user-1' }, organizationId: null });
     const response = await createInvite(ctx);
     expect(response.status).toBe(403);
   });

@@ -15,7 +15,7 @@ import { TrainingRepository } from './training.repo';
 function makeTraining(overrides: Record<string, any> = {}) {
   return {
     id: 'training-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     organizationId: 'org-1',
     title: 'CPD Seminar',
     description: 'Dental CPD seminar',
@@ -43,7 +43,7 @@ function makeTraining(overrides: Record<string, any> = {}) {
 function makeEnrollment(overrides: Record<string, any> = {}) {
   return {
     id: 'enroll-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     trainingId: 'training-1',
     personId: 'person-1',
     status: 'enrolled',
@@ -208,7 +208,7 @@ describe('TrainingRepository.create', () => {
     const repo = new TrainingRepository(db as any);
 
     const result = await repo.create({
-      tenantId: 'org-1',
+      organizationId: 'org-1',
       organizationId: 'org-1',
       title: 'CPD Seminar',
       startDate: new Date('2026-06-01'),
@@ -284,7 +284,7 @@ describe('TrainingRepository.enroll', () => {
     const repo = new TrainingRepository(db as any);
 
     const result = await repo.enroll({
-      tenantId: 'org-1',
+      organizationId: 'org-1',
       trainingId: 'training-1',
       personId: 'person-1',
       status: 'enrolled',

@@ -73,9 +73,9 @@ describe('DuesConfig', () => {
     expect(response.status).toBe(401);
   });
 
-  test('createDuesConfig returns 403 without tenantId', async () => {
+  test('createDuesConfig returns 403 without organizationId', async () => {
     const { createDuesConfig } = await import('./createDuesConfig');
-    const ctx = makeCtx({ tenantId: null });
+    const ctx = makeCtx({ organizationId: null });
     const response = await createDuesConfig(ctx);
     expect(response.status).toBe(403);
   });
@@ -184,9 +184,9 @@ describe('recordManualPayment', () => {
     expect(response.status).toBe(401);
   });
 
-  test('requires tenantId', async () => {
+  test('requires organizationId', async () => {
     const { recordManualPayment } = await import('./recordManualPayment');
-    const ctx = makeCtx({ user: { id: 'u1' }, tenantId: null });
+    const ctx = makeCtx({ user: { id: 'u1' }, organizationId: null });
     const response = await recordManualPayment(ctx);
     expect(response.status).toBe(403);
   });

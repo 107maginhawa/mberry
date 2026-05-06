@@ -104,7 +104,7 @@ describe('[BR-16] Changing visibility from network-wide to internal warns about 
     mocks = stubRepo(EventsRepository, {
       get: async () => ({
         id: 'evt-1',
-        tenantId: 'org-1',
+        organizationId: 'org-1',
         organizationId: 'org-1',
         title: 'Network Event',
         status: 'published',
@@ -224,7 +224,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({
         id: 'train-1',
-        tenantId: 'tenant-1',
+        organizationId: 'tenant-1',
         organizationId: 'org-1',
         title: 'Future Training',
         status: 'published',
@@ -245,7 +245,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({
         id: 'train-1',
-        tenantId: 'tenant-1',
+        organizationId: 'tenant-1',
         organizationId: 'org-1',
         title: 'Cancelled Training',
         status: 'cancelled',
@@ -273,7 +273,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({
         id: 'train-1',
-        tenantId: 'tenant-1',
+        organizationId: 'tenant-1',
         organizationId: 'org-1',
         title: 'Past Training',
         status: 'completed',

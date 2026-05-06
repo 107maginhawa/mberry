@@ -7,7 +7,7 @@ import { MembershipRepository } from './repos/membership.repo';
 
 const fakeMember = {
   id: 'mem-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   orgId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
@@ -92,9 +92,9 @@ describe('[BR-22] importMembers', () => {
     await importMembers(ctx);
     expect(captured.length).toBe(2);
     expect(captured[0].orgId).toBe('org-77');
-    expect(captured[0].tenantId).toBe('org-77');
+    expect(captured[0].organizationId).toBe('org-77');
     expect(captured[1].orgId).toBe('org-77');
-    expect(captured[1].tenantId).toBe('org-77');
+    expect(captured[1].organizationId).toBe('org-77');
   });
 
   test('uses licenseNumber as memberNumber fallback', async () => {

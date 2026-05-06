@@ -7,7 +7,7 @@ import { MembershipRepository } from './repos/membership.repo';
 
 const fakeCategory = {
   id: 'cat-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   orgId: 'org-1',
   name: 'Regular',
   description: 'Regular members',
@@ -70,7 +70,7 @@ describe('upsertCategory', () => {
 
     await upsertCategory(ctx);
     expect(captured.orgId).toBe('org-88');
-    expect(captured.tenantId).toBe('org-88');
+    expect(captured.organizationId).toBe('org-88');
   });
 
   test('defaults applicableTiers to empty array when not provided', async () => {

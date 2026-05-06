@@ -7,7 +7,7 @@ import { EventsRepository } from './repos/events.repo';
 
 const fakeEvent = {
   id: 'evt-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   organizationId: 'org-1',
   title: 'Annual Conference',
   status: 'published',
@@ -17,7 +17,7 @@ const fakeEvent = {
 
 const fakeAttendance = {
   id: 'att-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   eventId: 'evt-1',
   personId: 'person-1',
   method: 'manual',

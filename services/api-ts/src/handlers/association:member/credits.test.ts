@@ -30,9 +30,9 @@ describe('createProfessionalLicense', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { createProfessionalLicense } = await import('./createProfessionalLicense');
-    const ctx = makeCtx({ tenantId: null });
+    const ctx = makeCtx({ organizationId: null });
     const response = await createProfessionalLicense(ctx);
     expect(response.status).toBe(403);
   });
@@ -46,9 +46,9 @@ describe('getProfessionalLicense', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { getProfessionalLicense } = await import('./getProfessionalLicense');
-    const ctx = makeCtx({ tenantId: null, _params: { licenseId: 'lic-1' } });
+    const ctx = makeCtx({ organizationId: null, _params: { licenseId: 'lic-1' } });
     const response = await getProfessionalLicense(ctx);
     expect(response.status).toBe(403);
   });
@@ -62,9 +62,9 @@ describe('listProfessionalLicenses', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { listProfessionalLicenses } = await import('./listProfessionalLicenses');
-    const ctx = makeCtx({ tenantId: null });
+    const ctx = makeCtx({ organizationId: null });
     const response = await listProfessionalLicenses(ctx);
     expect(response.status).toBe(403);
   });
@@ -78,9 +78,9 @@ describe('updateProfessionalLicense', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { updateProfessionalLicense } = await import('./updateProfessionalLicense');
-    const ctx = makeCtx({ tenantId: null, _params: { licenseId: 'lic-1' } });
+    const ctx = makeCtx({ organizationId: null, _params: { licenseId: 'lic-1' } });
     const response = await updateProfessionalLicense(ctx);
     expect(response.status).toBe(403);
   });
@@ -94,9 +94,9 @@ describe('deleteProfessionalLicense', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { deleteProfessionalLicense } = await import('./deleteProfessionalLicense');
-    const ctx = makeCtx({ tenantId: null, _params: { licenseId: 'lic-1' } });
+    const ctx = makeCtx({ organizationId: null, _params: { licenseId: 'lic-1' } });
     const response = await deleteProfessionalLicense(ctx);
     expect(response.status).toBe(403);
   });
@@ -110,9 +110,9 @@ describe('listLicenseRenewalAlerts', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { listLicenseRenewalAlerts } = await import('./listLicenseRenewalAlerts');
-    const ctx = makeCtx({ tenantId: null });
+    const ctx = makeCtx({ organizationId: null });
     const response = await listLicenseRenewalAlerts(ctx);
     expect(response.status).toBe(403);
   });
@@ -126,9 +126,9 @@ describe('acknowledgeLicenseRenewalAlert', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { acknowledgeLicenseRenewalAlert } = await import('./acknowledgeLicenseRenewalAlert');
-    const ctx = makeCtx({ tenantId: null, _params: { alertId: 'alert-1' } });
+    const ctx = makeCtx({ organizationId: null, _params: { alertId: 'alert-1' } });
     const response = await acknowledgeLicenseRenewalAlert(ctx);
     expect(response.status).toBe(403);
   });
@@ -146,9 +146,9 @@ describe('createCreditEntry', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { createCreditEntry } = await import('./createCreditEntry');
-    const ctx = makeCtx({ tenantId: null });
+    const ctx = makeCtx({ organizationId: null });
     const response = await createCreditEntry(ctx);
     expect(response.status).toBe(403);
   });
@@ -162,9 +162,9 @@ describe('listCreditEntries', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 without tenantId', async () => {
+  test('returns 403 without organizationId', async () => {
     const { listCreditEntries } = await import('./listCreditEntries');
-    const ctx = makeCtx({ tenantId: null });
+    const ctx = makeCtx({ organizationId: null });
     const response = await listCreditEntries(ctx);
     expect(response.status).toBe(403);
   });

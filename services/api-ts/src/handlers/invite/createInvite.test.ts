@@ -89,14 +89,14 @@ describe('createInvite', () => {
     expect(response.body.error).toBe('Unauthorized');
   });
 
-  test('returns 403 when no tenantId in context', async () => {
+  test('returns 403 when no organizationId in context', async () => {
     mocks = stubRepo(InviteRepository, {
       findPendingByEmail: async () => undefined,
       create: async (data: any) => ({ ...fakeInvite, ...data }),
     });
 
     const ctx = makeCtx({
-      tenantId: null,
+      organizationId: null,
       _body: { email: 'member@example.com' },
     });
 
@@ -184,7 +184,7 @@ describe('createInvite', () => {
     expect(capturedData.type).toBe('invite');
   });
 
-  test('uses tenantId as orgId for the invite record', async () => {
+  test('uses organizationId as orgId for the invite record', async () => {
     let capturedData: any = null;
     mocks = stubRepo(InviteRepository, {
       findPendingByEmail: async () => undefined,
@@ -195,7 +195,7 @@ describe('createInvite', () => {
     });
 
     const ctx = makeCtx({
-      tenantId: 'tenant-XYZ',
+      organizationId: 'tenant-XYZ',
       _body: { email: 'new@example.com' },
     });
 

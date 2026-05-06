@@ -7,7 +7,7 @@ import { MembershipRepository } from '../association:member/repos/membership.rep
 
 const fakeTraining = {
   id: 'training-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   organizationId: 'org-1',
   title: 'CPD Seminar',
   status: 'published',
@@ -18,7 +18,7 @@ const fakeTraining = {
 
 const fakeEnrollment = {
   id: 'enroll-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   trainingId: 'training-1',
   personId: 'user-1',
   status: 'enrolled',

@@ -6,8 +6,8 @@ import { MembershipRepository } from './repos/membership.repo';
 // ─── Fixtures ───────────────────────────────────────────
 
 const fakeCategories = [
-  { id: 'cat-1', tenantId: 'org-1', orgId: 'org-1', name: 'Regular', description: 'Regular member' },
-  { id: 'cat-2', tenantId: 'org-1', orgId: 'org-1', name: 'Senior', description: 'Senior member' },
+  { id: 'cat-1', organizationId: 'org-1', orgId: 'org-1', name: 'Regular', description: 'Regular member' },
+  { id: 'cat-2', organizationId: 'org-1', orgId: 'org-1', name: 'Senior', description: 'Senior member' },
 ];
 
 // ─── Tests ──────────────────────────────────────────────

@@ -9,7 +9,7 @@ import { NotFoundError } from '@/core/errors';
 const fakeMemberResult = {
   membership: {
     id: 'mem-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     orgId: 'org-1',
     personId: 'person-1',
     tierId: 'tier-1',

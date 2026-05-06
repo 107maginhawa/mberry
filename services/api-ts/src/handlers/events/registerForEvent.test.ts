@@ -9,7 +9,7 @@ import { MembershipRepository } from '../association:member/repos/membership.rep
 
 const fakeEvent = {
   id: 'evt-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   organizationId: 'org-1',
   title: 'Annual Conference',
   capacity: 100,
@@ -20,7 +20,7 @@ const fakeEvent = {
 
 const fakeRegistration = {
   id: 'reg-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   eventId: 'evt-1',
   personId: 'user-1',
   status: 'confirmed',
