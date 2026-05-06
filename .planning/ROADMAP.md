@@ -192,8 +192,8 @@ Plans:
 **Plans**: 2 plans
 
 **Wave 1**
-- [ ] 09-01-PLAN.md — Extract hardcoded credentials from E2E tests into shared test-config modules (TEST-02)
-- [ ] 09-02-PLAN.md — Wire all workspace unit tests into CI + expand pre-commit hook (TEST-03, TEST-08)
+- [x] 09-01-PLAN.md — Extract hardcoded credentials from E2E tests into shared test-config modules (TEST-02)
+- [x] 09-02-PLAN.md — Wire all workspace unit tests into CI + expand pre-commit hook (TEST-03, TEST-08)
 
 ### Phase 10: Deploy Platform Decision
 **Goal**: Choose a deploy platform and replace placeholder deploy commands with real ones
