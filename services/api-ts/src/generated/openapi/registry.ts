@@ -3,23 +3,6 @@
  * This file is regenerated on each run
  */
 
-import { updateMyProfile } from '../../handlers/person/updateMyProfile';
-import { cancelMyAccountDeletion } from '../../handlers/person/cancelMyAccountDeletion';
-import { createMyCreditEntry } from '../../handlers/person/createMyCreditEntry';
-import { listMyCreditEntries } from '../../handlers/person/listMyCreditEntries';
-import { getMyCreditSummary } from '../../handlers/person/getMyCreditSummary';
-import { requestMyAccountDeletion } from '../../handlers/person/requestMyAccountDeletion';
-import { exportMyData } from '../../handlers/person/exportMyData';
-import { getMyMemberships } from '../../handlers/person/getMyMemberships';
-import { getMyNotificationPreferences } from '../../handlers/person/getMyNotificationPreferences';
-import { updateMyNotificationPreferences } from '../../handlers/person/updateMyNotificationPreferences';
-import { getMyOfficerRole } from '../../handlers/person/getMyOfficerRole';
-import { createPerson } from '../../handlers/person/createPerson';
-import { listPersons } from '../../handlers/person/listPersons';
-import { getPerson } from '../../handlers/person/getPerson';
-import { updatePerson } from '../../handlers/person/updatePerson';
-import { getMyPrivacySettings } from '../../handlers/person/getMyPrivacySettings';
-import { updateMyPrivacySettings } from '../../handlers/person/updateMyPrivacySettings';
 import { inviteAdmin } from '../../handlers/platformadmin/inviteAdmin';
 import { listAdmins } from '../../handlers/platformadmin/listAdmins';
 import { updateAdmin } from '../../handlers/platformadmin/updateAdmin';
@@ -275,13 +258,13 @@ import { createSubscriptionTopic } from '../../handlers/communication/createSubs
 import { getSubscriptionTopic } from '../../handlers/communication/getSubscriptionTopic';
 import { updateSubscriptionTopic } from '../../handlers/communication/updateSubscriptionTopic';
 import { deleteSubscriptionTopic } from '../../handlers/communication/deleteSubscriptionTopic';
-import { getAnnouncement } from '../../handlers/communications/getAnnouncement';
-import { updateAnnouncement } from '../../handlers/communications/updateAnnouncement';
-import { deleteAnnouncement } from '../../handlers/communications/deleteAnnouncement';
-import { archiveAnnouncement } from '../../handlers/communications/archiveAnnouncement';
-import { publishAnnouncement } from '../../handlers/communications/publishAnnouncement';
-import { listAnnouncements } from '../../handlers/communications/listAnnouncements';
-import { createAnnouncement } from '../../handlers/communications/createAnnouncement';
+import { getAnnouncement } from '../../handlers/communication/getAnnouncement';
+import { updateAnnouncement } from '../../handlers/communication/updateAnnouncement';
+import { deleteAnnouncement } from '../../handlers/communication/deleteAnnouncement';
+import { archiveAnnouncement } from '../../handlers/communication/archiveAnnouncement';
+import { publishAnnouncement } from '../../handlers/communication/publishAnnouncement';
+import { listAnnouncements } from '../../handlers/communication/listAnnouncements';
+import { createAnnouncement } from '../../handlers/communication/createAnnouncement';
 import { listAuditLogs } from '../../handlers/audit/listAuditLogs';
 import { createInvoice } from '../../handlers/billing/createInvoice';
 import { listInvoices } from '../../handlers/billing/listInvoices';
@@ -341,6 +324,23 @@ import { markAllNotificationsAsRead } from '../../handlers/notifs/markAllNotific
 import { getNotification } from '../../handlers/notifs/getNotification';
 import { markNotificationAsRead } from '../../handlers/notifs/markNotificationAsRead';
 import { markAllNotificationsRead } from '../../handlers/notifs/markAllNotificationsRead';
+import { createPerson } from '../../handlers/person/createPerson';
+import { listPersons } from '../../handlers/person/listPersons';
+import { updateMyProfile } from '../../handlers/person/updateMyProfile';
+import { cancelMyAccountDeletion } from '../../handlers/person/cancelMyAccountDeletion';
+import { createMyCreditEntry } from '../../handlers/person/createMyCreditEntry';
+import { listMyCreditEntries } from '../../handlers/person/listMyCreditEntries';
+import { getMyCreditSummary } from '../../handlers/person/getMyCreditSummary';
+import { requestMyAccountDeletion } from '../../handlers/person/requestMyAccountDeletion';
+import { exportMyData } from '../../handlers/person/exportMyData';
+import { getMyMemberships } from '../../handlers/person/getMyMemberships';
+import { getMyNotificationPreferences } from '../../handlers/person/getMyNotificationPreferences';
+import { updateMyNotificationPreferences } from '../../handlers/person/updateMyNotificationPreferences';
+import { getMyOfficerRole } from '../../handlers/person/getMyOfficerRole';
+import { getMyPrivacySettings } from '../../handlers/person/getMyPrivacySettings';
+import { updateMyPrivacySettings } from '../../handlers/person/updateMyPrivacySettings';
+import { getPerson } from '../../handlers/person/getPerson';
+import { updatePerson } from '../../handlers/person/updatePerson';
 import { createReview } from '../../handlers/reviews/createReview';
 import { listReviews } from '../../handlers/reviews/listReviews';
 import { getReview } from '../../handlers/reviews/getReview';
@@ -353,25 +353,6 @@ import { completeFileUpload } from '../../handlers/storage/completeFileUpload';
 import { getFileDownload } from '../../handlers/storage/getFileDownload';
 
 export const registry = {
-  // Person handlers
-  updateMyProfile,
-  cancelMyAccountDeletion,
-  createMyCreditEntry,
-  listMyCreditEntries,
-  getMyCreditSummary,
-  requestMyAccountDeletion,
-  exportMyData,
-  getMyMemberships,
-  getMyNotificationPreferences,
-  updateMyNotificationPreferences,
-  getMyOfficerRole,
-  createPerson,
-  listPersons,
-  getPerson,
-  updatePerson,
-  getMyPrivacySettings,
-  updateMyPrivacySettings,
-
   // Platformadmin handlers
   inviteAdmin,
   listAdmins,
@@ -714,6 +695,25 @@ export const registry = {
   getNotification,
   markNotificationAsRead,
   markAllNotificationsRead,
+
+  // Person handlers
+  createPerson,
+  listPersons,
+  updateMyProfile,
+  cancelMyAccountDeletion,
+  createMyCreditEntry,
+  listMyCreditEntries,
+  getMyCreditSummary,
+  requestMyAccountDeletion,
+  exportMyData,
+  getMyMemberships,
+  getMyNotificationPreferences,
+  updateMyNotificationPreferences,
+  getMyOfficerRole,
+  getMyPrivacySettings,
+  updateMyPrivacySettings,
+  getPerson,
+  updatePerson,
 
   // Reviews handlers
   createReview,

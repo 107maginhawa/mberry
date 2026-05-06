@@ -6,16 +6,16 @@ import {
   ValidationError,
   BusinessLogicError
 } from '@/core/errors';
-import type { UpdateMyNotificationPreferencesBody } from '@/generated/openapi/validators';
+import type { DeleteAnnouncementParams } from '@/generated/openapi/validators';
 
 /**
- * updateMyNotificationPreferences
+ * deleteAnnouncement
  * 
- * Path: PATCH /notification-preferences
- * OperationId: updateMyNotificationPreferences
+ * Path: DELETE /communications/announcements/{id}
+ * OperationId: deleteAnnouncement
  */
-export async function updateMyNotificationPreferences(
-  ctx: ValidatedContext<UpdateMyNotificationPreferencesBody, never, never>
+export async function deleteAnnouncement(
+  ctx: ValidatedContext<never, never, DeleteAnnouncementParams>
 ): Promise<Response> {
   // Get authenticated session from Better-Auth
   const session = ctx.get('session');
@@ -23,10 +23,10 @@ export async function updateMyNotificationPreferences(
     throw new UnauthorizedError();
   }
   
+  // Extract validated parameters
+  const params = ctx.req.valid('param');
   
   
-  // Extract validated request body
-  const body = ctx.req.valid('json');
   
   // TODO: Implement business logic
   // Examples of throwing errors:
@@ -36,5 +36,5 @@ export async function updateMyNotificationPreferences(
   // throw new ValidationError('Invalid input');
   // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
   
-  throw new Error('Not implemented: updateMyNotificationPreferences');
+  throw new Error('Not implemented: deleteAnnouncement');
 }

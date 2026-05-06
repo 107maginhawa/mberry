@@ -1,5 +1,4 @@
 import type { BaseContext } from '@/types/app';
-import { db } from '@/core/database';
 import { 
   UnauthorizedError,
   ForbiddenError,

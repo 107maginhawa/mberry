@@ -141,6 +141,7 @@ namespace MonobaseAPI {
 
   // Person Custom (me endpoints — privacy, notification prefs, credits, export, deletion)
   @tag("Person")
+  @route("/persons/me")
   interface PersonCustomManagement extends PersonCustomModule.PersonCustomManagement {}
 
   // Billing Management

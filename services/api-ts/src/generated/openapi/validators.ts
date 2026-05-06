@@ -8988,11 +8988,6 @@ export const WebhookSubscriptionUpdateSchema = z.object({
   lastDeliveryStatus: z.string().optional()
 });
 
-export const UpdateMyProfileBody = PersonMeUpdateRequestSchema;
-export type UpdateMyProfileBody = z.infer<typeof UpdateMyProfileBody>;
-
-export const UpdateMyProfileResponse = z.record(z.string(), z.unknown());
-
 export const InviteAdminBody = PlatformAdminModulePlatformAdminRequestSchema;
 export type InviteAdminBody = z.infer<typeof InviteAdminBody>;
 
@@ -11596,8 +11591,6 @@ export type GetTimeSlotQuery = z.infer<typeof GetTimeSlotQuery>;
 
 export const GetTimeSlotResponse = TimeSlotSchema;
 
-export const CancelMyAccountDeletionResponse = CancelDeletionResponseSchema;
-
 export const CreateChatRoomBody = CreateChatRoomRequestSchema;
 export type CreateChatRoomBody = z.infer<typeof CreateChatRoomBody>;
 
@@ -11764,21 +11757,6 @@ export type GetCreditComplianceParams = z.infer<typeof GetCreditComplianceParams
 
 export const GetCreditComplianceResponse = CreditComplianceReportSchema;
 
-export const CreateMyCreditEntryBody = CreateCreditEntryRequestSchema;
-export type CreateMyCreditEntryBody = z.infer<typeof CreateMyCreditEntryBody>;
-
-export const CreateMyCreditEntryResponse = z.object({
-  data: MyCreditEntrySchema
-});
-
-export const ListMyCreditEntriesResponse = z.object({
-  data: z.array(MyCreditEntrySchema)
-});
-
-export const GetMyCreditSummaryResponse = MyCreditSummarySchema;
-
-export const RequestMyAccountDeletionResponse = AccountDeletionResponseSchema;
-
 export const ListEmailQueueItemsQuery = z.object({
   status: z.union([EmailQueueStatusSchema, z.array(EmailQueueStatusSchema), z.string().transform(val => val.split(",").map(s => s.trim())).pipe(z.array(EmailQueueStatusSchema))]).optional(),
   recipientEmail: EmailSchema.optional(),
@@ -11867,19 +11845,6 @@ export type TestEmailTemplateBody = z.infer<typeof TestEmailTemplateBody>;
 
 export const TestEmailTemplateResponse = TestTemplateResultSchema;
 
-export const ExportMyDataResponse = MyDataExportSchema;
-
-export const GetMyMembershipsResponse = z.object({
-  data: z.array(MyMembershipSchema)
-});
-
-export const GetMyNotificationPreferencesResponse = z.array(NotificationPreferenceSchema);
-
-export const UpdateMyNotificationPreferencesBody = UpdateNotificationPreferencesRequestSchema;
-export type UpdateMyNotificationPreferencesBody = z.infer<typeof UpdateMyNotificationPreferencesBody>;
-
-export const UpdateMyNotificationPreferencesResponse = z.array(NotificationPreferenceSchema);
-
 export const ListNotificationsQuery = z.object({
   type: NotificationTypeSchema.optional(),
   channel: NotificationChannelSchema.optional(),
@@ -11920,13 +11885,6 @@ export type MarkNotificationAsReadParams = z.infer<typeof MarkNotificationAsRead
 
 export const MarkNotificationAsReadResponse = NotificationSchema;
 
-export const GetMyOfficerRoleParams = z.object({
-  orgId: UUIDSchema,
-});
-export type GetMyOfficerRoleParams = z.infer<typeof GetMyOfficerRoleParams>;
-
-export const GetMyOfficerRoleResponse = OfficerRoleResponseSchema;
-
 export const ListOfficerTermsParams = z.object({
   orgId: UUIDSchema,
 });
@@ -11949,6 +11907,60 @@ export type ListPersonsQuery = z.infer<typeof ListPersonsQuery>;
 
 export const ListPersonsResponse = PersonListResponseSchema;
 
+export const UpdateMyProfileBody = PersonMeUpdateRequestSchema;
+export type UpdateMyProfileBody = z.infer<typeof UpdateMyProfileBody>;
+
+export const UpdateMyProfileResponse = z.record(z.string(), z.unknown());
+
+export const CancelMyAccountDeletionResponse = CancelDeletionResponseSchema;
+
+export const CreateMyCreditEntryBody = CreateCreditEntryRequestSchema;
+export type CreateMyCreditEntryBody = z.infer<typeof CreateMyCreditEntryBody>;
+
+export const CreateMyCreditEntryResponse = z.object({
+  data: MyCreditEntrySchema
+});
+
+export const ListMyCreditEntriesResponse = z.object({
+  data: z.array(MyCreditEntrySchema)
+});
+
+export const GetMyCreditSummaryResponse = MyCreditSummarySchema;
+
+export const RequestMyAccountDeletionResponse = AccountDeletionResponseSchema;
+
+export const ExportMyDataResponse = MyDataExportSchema;
+
+export const GetMyMembershipsResponse = z.object({
+  data: z.array(MyMembershipSchema)
+});
+
+export const GetMyNotificationPreferencesResponse = z.array(NotificationPreferenceSchema);
+
+export const UpdateMyNotificationPreferencesBody = UpdateNotificationPreferencesRequestSchema;
+export type UpdateMyNotificationPreferencesBody = z.infer<typeof UpdateMyNotificationPreferencesBody>;
+
+export const UpdateMyNotificationPreferencesResponse = z.array(NotificationPreferenceSchema);
+
+export const GetMyOfficerRoleParams = z.object({
+  orgId: UUIDSchema,
+});
+export type GetMyOfficerRoleParams = z.infer<typeof GetMyOfficerRoleParams>;
+
+export const GetMyOfficerRoleResponse = OfficerRoleResponseSchema;
+
+export const GetMyPrivacySettingsQuery = z.object({
+  orgId: UUIDSchema.optional(),
+});
+export type GetMyPrivacySettingsQuery = z.infer<typeof GetMyPrivacySettingsQuery>;
+
+export const GetMyPrivacySettingsResponse = z.union([PrivacySettingsSchema, z.array(PrivacySettingsSchema)]);
+
+export const UpdateMyPrivacySettingsBody = UpdatePrivacySettingsRequestSchema;
+export type UpdateMyPrivacySettingsBody = z.infer<typeof UpdateMyPrivacySettingsBody>;
+
+export const UpdateMyPrivacySettingsResponse = PrivacySettingsSchema;
+
 export const GetPersonParams = z.object({
   person: z.union([UUIDSchema, z.enum(["me"])]),
 });
@@ -11965,18 +11977,6 @@ export const UpdatePersonBody = PersonUpdateRequestSchema;
 export type UpdatePersonBody = z.infer<typeof UpdatePersonBody>;
 
 export const UpdatePersonResponse = PersonSchema;
-
-export const GetMyPrivacySettingsQuery = z.object({
-  orgId: UUIDSchema.optional(),
-});
-export type GetMyPrivacySettingsQuery = z.infer<typeof GetMyPrivacySettingsQuery>;
-
-export const GetMyPrivacySettingsResponse = z.union([PrivacySettingsSchema, z.array(PrivacySettingsSchema)]);
-
-export const UpdateMyPrivacySettingsBody = UpdatePrivacySettingsRequestSchema;
-export type UpdateMyPrivacySettingsBody = z.infer<typeof UpdateMyPrivacySettingsBody>;
-
-export const UpdateMyPrivacySettingsResponse = PrivacySettingsSchema;
 
 export const GetOrganizationBySlugParams = z.object({
   slug: z.string(),

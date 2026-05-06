@@ -8,13 +8,6 @@ import { validationErrorHandler } from '@/middleware/validation';
 import { createExpandMiddleware } from '@/middleware/expand';
 
 export function registerRoutes(app: Hono<{ Variables: Variables }>) {
-  // updateMyProfile
-  app.patch('/',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('json', validators.UpdateMyProfileBody, validationErrorHandler),
-    registry.updateMyProfile as unknown as Handler
-  );
-
   // inviteAdmin
   app.post('/admin/admins',
     authMiddleware(),
@@ -2070,12 +2063,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getTimeSlot as unknown as Handler
   );
 
-  // cancelMyAccountDeletion
-  app.post('/cancel-delete',
-    authMiddleware({ roles: ["user"] }),
-    registry.cancelMyAccountDeletion as unknown as Handler
-  );
-
   // createChatRoom
   app.post('/comms/chat-rooms',
     authMiddleware({ roles: ["user"] }),
@@ -2208,31 +2195,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getCreditCompliance as unknown as Handler
   );
 
-  // createMyCreditEntry
-  app.post('/credit-entries',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('json', validators.CreateMyCreditEntryBody, validationErrorHandler),
-    registry.createMyCreditEntry as unknown as Handler
-  );
-
-  // listMyCreditEntries
-  app.get('/credit-entries',
-    authMiddleware({ roles: ["user"] }),
-    registry.listMyCreditEntries as unknown as Handler
-  );
-
-  // getMyCreditSummary
-  app.get('/credit-summary',
-    authMiddleware({ roles: ["user"] }),
-    registry.getMyCreditSummary as unknown as Handler
-  );
-
-  // requestMyAccountDeletion
-  app.post('/delete',
-    authMiddleware({ roles: ["user"] }),
-    registry.requestMyAccountDeletion as unknown as Handler
-  );
-
   // listEmailQueueItems
   app.get('/email/queue',
     authMiddleware({ roles: ["admin"] }),
@@ -2299,31 +2261,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.testEmailTemplate as unknown as Handler
   );
 
-  // exportMyData
-  app.get('/export',
-    authMiddleware({ roles: ["user"] }),
-    registry.exportMyData as unknown as Handler
-  );
-
-  // getMyMemberships
-  app.get('/memberships',
-    authMiddleware({ roles: ["user"] }),
-    registry.getMyMemberships as unknown as Handler
-  );
-
-  // getMyNotificationPreferences
-  app.get('/notification-preferences',
-    authMiddleware({ roles: ["user"] }),
-    registry.getMyNotificationPreferences as unknown as Handler
-  );
-
-  // updateMyNotificationPreferences
-  app.patch('/notification-preferences',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('json', validators.UpdateMyNotificationPreferencesBody, validationErrorHandler),
-    registry.updateMyNotificationPreferences as unknown as Handler
-  );
-
   // listNotifications
   app.get('/notifs',
     authMiddleware({ roles: ["user", "admin"] }),
@@ -2352,13 +2289,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.markNotificationAsRead as unknown as Handler
   );
 
-  // getMyOfficerRole
-  app.get('/officer-role/:orgId',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('param', validators.GetMyOfficerRoleParams, validationErrorHandler),
-    registry.getMyOfficerRole as unknown as Handler
-  );
-
   // listOfficerTerms
   app.get('/officer-terms/:orgId',
     authMiddleware({ roles: ["user"] }),
@@ -2380,6 +2310,90 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.listPersons as unknown as Handler
   );
 
+  // updateMyProfile
+  app.patch('/persons/me',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.UpdateMyProfileBody, validationErrorHandler),
+    registry.updateMyProfile as unknown as Handler
+  );
+
+  // cancelMyAccountDeletion
+  app.post('/persons/me/cancel-delete',
+    authMiddleware({ roles: ["user"] }),
+    registry.cancelMyAccountDeletion as unknown as Handler
+  );
+
+  // createMyCreditEntry
+  app.post('/persons/me/credit-entries',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.CreateMyCreditEntryBody, validationErrorHandler),
+    registry.createMyCreditEntry as unknown as Handler
+  );
+
+  // listMyCreditEntries
+  app.get('/persons/me/credit-entries',
+    authMiddleware({ roles: ["user"] }),
+    registry.listMyCreditEntries as unknown as Handler
+  );
+
+  // getMyCreditSummary
+  app.get('/persons/me/credit-summary',
+    authMiddleware({ roles: ["user"] }),
+    registry.getMyCreditSummary as unknown as Handler
+  );
+
+  // requestMyAccountDeletion
+  app.post('/persons/me/delete',
+    authMiddleware({ roles: ["user"] }),
+    registry.requestMyAccountDeletion as unknown as Handler
+  );
+
+  // exportMyData
+  app.get('/persons/me/export',
+    authMiddleware({ roles: ["user"] }),
+    registry.exportMyData as unknown as Handler
+  );
+
+  // getMyMemberships
+  app.get('/persons/me/memberships',
+    authMiddleware({ roles: ["user"] }),
+    registry.getMyMemberships as unknown as Handler
+  );
+
+  // getMyNotificationPreferences
+  app.get('/persons/me/notification-preferences',
+    authMiddleware({ roles: ["user"] }),
+    registry.getMyNotificationPreferences as unknown as Handler
+  );
+
+  // updateMyNotificationPreferences
+  app.patch('/persons/me/notification-preferences',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.UpdateMyNotificationPreferencesBody, validationErrorHandler),
+    registry.updateMyNotificationPreferences as unknown as Handler
+  );
+
+  // getMyOfficerRole
+  app.get('/persons/me/officer-role/:orgId',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.GetMyOfficerRoleParams, validationErrorHandler),
+    registry.getMyOfficerRole as unknown as Handler
+  );
+
+  // getMyPrivacySettings
+  app.get('/persons/me/privacy',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.GetMyPrivacySettingsQuery, validationErrorHandler),
+    registry.getMyPrivacySettings as unknown as Handler
+  );
+
+  // updateMyPrivacySettings
+  app.patch('/persons/me/privacy',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.UpdateMyPrivacySettingsBody, validationErrorHandler),
+    registry.updateMyPrivacySettings as unknown as Handler
+  );
+
   // getPerson
   app.get('/persons/:person',
     authMiddleware({ roles: ["admin", "support", "user:owner"] }),
@@ -2393,20 +2407,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('param', validators.UpdatePersonParams, validationErrorHandler),
     zValidator('json', validators.UpdatePersonBody, validationErrorHandler),
     registry.updatePerson as unknown as Handler
-  );
-
-  // getMyPrivacySettings
-  app.get('/privacy',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('query', validators.GetMyPrivacySettingsQuery, validationErrorHandler),
-    registry.getMyPrivacySettings as unknown as Handler
-  );
-
-  // updateMyPrivacySettings
-  app.patch('/privacy',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('json', validators.UpdateMyPrivacySettingsBody, validationErrorHandler),
-    registry.updateMyPrivacySettings as unknown as Handler
   );
 
   // getOrganizationBySlug
