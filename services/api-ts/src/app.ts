@@ -65,6 +65,7 @@ import { createDependencyInjection } from '@/middleware/dependency';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
 import { authMiddleware } from '@/middleware/auth';
 import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
+import { createAuditMiddleware } from '@/middleware/audit';
 
 
 /**
@@ -102,6 +103,9 @@ export function createApp(config: Config): App {
 
   // Dependency injection - Inject logger, database, storage, auth, jobs early
   app.use('*', createDependencyInjection(app as App, config));
+
+  // Audit trail - Automatically log all write operations (POST/PUT/PATCH/DELETE)
+  app.use('*', createAuditMiddleware());
 
   // Request logger - Log all incoming requests
   app.use('*', createRequestLogger(config));
@@ -156,7 +160,7 @@ export function createApp(config: Config): App {
 
     // Fetch person names for each term
     const personIds = [...new Set(terms.map(t => t.personId))];
-    let personMap = new Map<string, string>();
+    const personMap = new Map<string, string>();
     if (personIds.length > 0) {
       const { persons } = await import('@/handlers/person/repos/person.schema');
       const { inArray } = await import('drizzle-orm');
