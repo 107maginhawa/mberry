@@ -53,6 +53,12 @@ export function makeCtx(overrides: Record<string, any> = {}) {
     ...overrides,
   };
 
+  // Propagate organizationId to orgId for test context consistency
+  // Handlers check ctx.get('orgId'), so organizationId overrides must flow through
+  if ('organizationId' in overrides && !('orgId' in overrides)) {
+    vars.orgId = overrides.organizationId;
+  }
+
   const jsonBody: any = overrides['_body'] || {};
   const paramValues: any = overrides['_params'] || {};
   const queryValues: any = overrides['_query'] || {};
