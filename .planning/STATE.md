@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 04 (typespec-openapi-reconciliation) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-05-06
 
@@ -76,6 +76,9 @@ Recent decisions affecting current work:
 - checkInCustomEvent reuses CheckInCreateRequest; completeCustomTraining reuses TrainingEnrollmentCompleteRequest
 - Communications route kept hand-wired in app.ts (announcements not in Phase 4 TypeSpec scope)
 - registerDuesJobs import retained — still invoked at app startup despite dues route decommission
+- mutationFn extracted from SDK mutation options to avoid throwOnError generic conflict in useMutation
+- Pagination uses totalCount field (not total) in SDK PaginationMeta type
+- Election status transitions map: nominations_open→openElectionNominationsMutation, voting_open→openElectionVotingMutation, published→certifyElectionMutation
 
 ### Pending Todos
 
@@ -95,5 +98,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-06T00:30:00.000Z
-Stopped at: Completed 04-04-PLAN.md — build pipeline run, 6 hand-wired routes decommissioned
+Stopped at: Completed 04-06-PLAN.md — 10 feature components migrated to SDK hooks (elections, certificates, events, training)
 Resume file: None
