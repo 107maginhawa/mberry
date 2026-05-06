@@ -1,6 +1,12 @@
 import { useState } from 'react'
-import { api } from '@/lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  getDuesGatewayConfigOptions,
+  getDuesGatewayConfigQueryKey,
+  upsertDuesGatewayConfigMutation,
+  testDuesGatewayConnectionMutation,
+  disconnectDuesGatewayMutation,
+} from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,29 +31,21 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
   const [testResult, setTestResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null)
   const [showDisconnect, setShowDisconnect] = useState(false)
 
-  const { data: config, isLoading } = useQuery({
-    queryKey: ['dues-gateway', orgId],
-    queryFn: async () => {
-      const json = await api.get<any>(`/api/dues/gateway/${orgId}`)
-      return json.data
-    },
-  })
+  // Cast to any: TypeSpec GatewayConfig type differs from hand-wired endpoint shape
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: config, isLoading } = useQuery(getDuesGatewayConfigOptions({ path: { organizationId: orgId } }) as any) as { data: any; isLoading: boolean }
 
   const testMutation = useMutation({
-    mutationFn: async () => {
-      return api.post<{ success: boolean; message?: string; error?: string }>(`/api/dues/gateway/${orgId}/test`, { provider, publicKey, secretKey })
-    },
+    ...testDuesGatewayConnectionMutation(),
     onSuccess: (data) => {
-      setTestResult(data)
+      setTestResult({ success: data.success, message: data.message })
     },
   })
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
-      return api.put(`/api/dues/gateway/${orgId}`, { provider, publicKey, secretKey })
-    },
+    ...upsertDuesGatewayConfigMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dues-gateway', orgId] })
+      queryClient.invalidateQueries({ queryKey: getDuesGatewayConfigQueryKey({ path: { organizationId: orgId } }) })
       toast.success('Gateway connected', { description: 'Online payments are now enabled.' })
       setPublicKey('')
       setSecretKey('')
@@ -59,11 +57,9 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
   })
 
   const disconnectMutation = useMutation({
-    mutationFn: async () => {
-      return api.delete(`/api/dues/gateway/${orgId}`)
-    },
+    ...disconnectDuesGatewayMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dues-gateway', orgId] })
+      queryClient.invalidateQueries({ queryKey: getDuesGatewayConfigQueryKey({ path: { organizationId: orgId } }) })
       setShowDisconnect(false)
       toast.success('Gateway disconnected')
     },
@@ -106,7 +102,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
               <Button variant="outline" onClick={() => setShowDisconnect(false)}>Cancel</Button>
               <Button
                 variant="destructive"
-                onClick={() => disconnectMutation.mutate()}
+                onClick={() => disconnectMutation.mutate({ path: { organizationId: orgId } })}
                 disabled={disconnectMutation.isPending}
               >
                 {disconnectMutation.isPending ? 'Disconnecting...' : 'Disconnect'}
@@ -182,13 +178,13 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
         <div className="flex gap-3">
           <Button
             variant="outline"
-            onClick={() => testMutation.mutate()}
+            onClick={() => testMutation.mutate({ path: { organizationId: orgId } })}
             disabled={!publicKey || !secretKey || testMutation.isPending}
           >
             {testMutation.isPending ? 'Testing...' : 'Test Connection'}
           </Button>
           <Button
-            onClick={() => saveMutation.mutate()}
+            onClick={() => saveMutation.mutate({ path: { organizationId: orgId }, body: { provider: provider as 'paymongo' | 'stripe', publicKey, secretKey } })}
             disabled={!canSave || saveMutation.isPending}
           >
             {saveMutation.isPending ? 'Saving...' : 'Save & Activate'}

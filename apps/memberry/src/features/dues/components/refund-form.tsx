@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import {
+  refundDuesPaymentMutation,
+  getDuesPaymentQueryKey,
+} from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,13 +32,11 @@ export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) 
     : null
 
   const refundMutation = useMutation({
-    mutationFn: async () => {
-      return api.post(`/api/dues/payments/${paymentId}/refund`, { amount: amountCents, reason })
-    },
+    ...refundDuesPaymentMutation(),
     onSuccess: () => {
       setShowConfirm(false)
       setExpanded(false)
-      queryClient.invalidateQueries({ queryKey: ['dues-payment', paymentId] })
+      queryClient.invalidateQueries({ queryKey: getDuesPaymentQueryKey({ path: { paymentId } }) })
       toast.success(`Refund of ${formatCents(amountCents, currency)} processed.`)
     },
     onError: () => {
@@ -94,7 +95,7 @@ export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) 
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => refundMutation.mutate()} disabled={refundMutation.isPending}>
+            <Button variant="destructive" onClick={() => (refundMutation as any).mutate({ path: { paymentId }, body: { amount: amountCents, reason } })} disabled={refundMutation.isPending}>
               {refundMutation.isPending ? 'Processing...' : 'Confirm Refund'}
             </Button>
           </DialogFooter>

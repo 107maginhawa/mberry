@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { api } from '@/lib/api'
+import { listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -36,19 +36,19 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
   const [offset, setOffset] = useState(0)
   const limit = 25
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['dues-payments', scope, orgId, statusFilter, methodFilter, offset],
-    queryFn: async () => {
-      const params = new URLSearchParams({ scope, limit: String(limit), offset: String(offset) })
-      if (orgId) params.set('organizationId', orgId)
-      if (statusFilter !== 'all') params.set('status', statusFilter)
-      if (methodFilter !== 'all') params.set('method', methodFilter)
-      return api.get<any>(`/api/dues/payments?${params}`)
-    },
-  })
+  const { data, isLoading } = useQuery(
+    listDuesPaymentsOptions({
+      query: {
+        ...(orgId ? { organizationId: orgId } : {}),
+        ...(statusFilter !== 'all' ? { status: statusFilter as any } : {}),
+        limit,
+        offset,
+      },
+    })
+  )
 
   const payments = data?.data ?? []
-  const total = data?.meta?.total ?? 0
+  const total = data?.pagination?.totalCount ?? 0
 
   return (
     <div className="space-y-4">

@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import {
+  listDuesFundsOptions,
+  recordDuesPaymentMutation,
+} from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,15 +29,9 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
   const [showConfirm, setShowConfirm] = useState(false)
 
-  const { data: fundsData } = useQuery({
-    queryKey: ['dues-funds', orgId],
-    queryFn: async () => {
-      const json = await api.get<{ data: any[] }>(`/api/dues/funds/${orgId}`)
-      return json.data
-    },
-  })
+  const { data: fundsData } = useQuery(listDuesFundsOptions({ query: { organizationId: orgId } }))
 
-  const funds = (fundsData ?? []).map((f: any) => ({
+  const funds = (fundsData?.data ?? []).map((f: any) => ({
     fundId: f.name,
     percentage: parseFloat(f.percentage),
   }))
@@ -41,17 +39,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   const amountCents = parseCentsInput(amount)
 
   const recordMutation = useMutation({
-    mutationFn: async () => {
-      return api.post('/api/dues/payments', {
-        organizationId: orgId,
-        personId,
-        amount: amountCents,
-        currency: 'PHP',
-        paymentMethod,
-        paidAt: paymentDate ? new Date(paymentDate).toISOString() : undefined,
-        referenceNumber: referenceNumber || undefined,
-      })
-    },
+    ...recordDuesPaymentMutation(),
     onSuccess: () => {
       setShowConfirm(false)
       toast.success('Payment recorded', { description: 'Receipt sent to member.' })
@@ -188,7 +176,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancel</Button>
-            <Button onClick={() => recordMutation.mutate()} disabled={recordMutation.isPending}>
+            <Button onClick={() => (recordMutation as any).mutate({ body: { organizationId: orgId, personId, amount: amountCents, currency: 'PHP', paymentMethod, paidAt: paymentDate ? new Date(paymentDate).toISOString() : undefined, referenceNumber: referenceNumber || undefined } })} disabled={recordMutation.isPending}>
               {recordMutation.isPending ? 'Recording...' : 'Confirm'}
             </Button>
           </DialogFooter>

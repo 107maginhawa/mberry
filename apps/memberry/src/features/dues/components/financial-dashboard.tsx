@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { api } from '@/lib/api'
+import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, CreditCard, Settings } from 'lucide-react'
 import { formatCents } from '../lib/money'
@@ -10,13 +10,9 @@ interface FinancialDashboardProps {
 }
 
 export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
-  const { data, isLoading } = useQuery({
-    queryKey: ['dues-dashboard', orgId],
-    queryFn: async () => {
-      const json = await api.get<{ data: any }>(`/api/dues/dashboard/${orgId}`)
-      return json.data
-    },
-  })
+  // Cast to any: TypeSpec FinancialDashboard type differs from hand-wired endpoint shape
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, isLoading } = useQuery(getDuesFinancialDashboardOptions({ path: { organizationId: orgId } }) as any) as { data: any; isLoading: boolean }
 
   if (isLoading) {
     return (

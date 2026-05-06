@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
-import { api } from '@/lib/api'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  getDuesConfigOptions,
+  getDuesConfigQueryKey,
+  updateDuesConfigMutation,
+} from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -44,13 +48,9 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   const [reminders, setReminders] = useState<ReminderRow[]>(DEFAULT_REMINDERS)
   const [hasChanges, setHasChanges] = useState(false)
 
-  const { data: config, isLoading } = useQuery({
-    queryKey: ['dues-config', orgId],
-    queryFn: async () => {
-      const json = await api.get<any>(`/api/dues/config/${orgId}`)
-      return json.data
-    },
-  })
+  // Config shape from hand-wired endpoint differs from TypeSpec DuesConfig — cast to any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: config, isLoading } = useQuery(getDuesConfigOptions({ path: { duesConfigId: orgId } }) as any) as { data: any; isLoading: boolean }
 
   useEffect(() => {
     if (config) {
@@ -67,26 +67,16 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   }, [config])
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
-      return api.put(`/api/dues/config/${orgId}`, {
-        defaultAmount: parseCentsInput(defaultAmount),
-        currency,
-        billingFrequency,
-        dueDateMonth: billingFrequency === 'annual' ? parseInt(dueDateMonth) : null,
-        dueDateDay: parseInt(dueDateDay),
-        gracePeriodDays: parseInt(gracePeriodDays),
-        reminderSchedules: reminders,
-      })
-    },
+    ...updateDuesConfigMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dues-config', orgId] })
+      queryClient.invalidateQueries({ queryKey: getDuesConfigQueryKey({ path: { duesConfigId: orgId } }) })
       toast.success('Dues configuration updated', { description: 'Applies to future billing cycles.' })
       setHasChanges(false)
     },
     onError: () => {
       toast.error('Failed to save', { description: 'Please try again.' })
     },
-  })
+  } as any)
 
   const handleChange = () => setHasChanges(true)
 
@@ -173,7 +163,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
       </section>
 
       <div className="flex gap-3">
-        <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || gracePeriodError || !defaultAmount}>
+        <Button onClick={() => (saveMutation as any).mutate({ path: { duesConfigId: orgId }, body: { defaultAmount: parseCentsInput(defaultAmount), currency, billingFrequency, dueDateMonth: billingFrequency === 'annual' ? parseInt(dueDateMonth) : null, dueDateDay: parseInt(dueDateDay), gracePeriodDays: parseInt(gracePeriodDays), reminderSchedules: reminders } })} disabled={saveMutation.isPending || gracePeriodError || !defaultAmount}>
           {saveMutation.isPending ? 'Saving...' : 'Save'}
         </Button>
         {hasChanges && <span className="text-xs text-muted-foreground self-center">Unsaved changes</span>}
