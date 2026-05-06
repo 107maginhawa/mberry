@@ -117,9 +117,9 @@ Plans:
   3. All E2E tests pass in CI alongside existing memberry app tests
 **Plans**: 3 plans
 Plans:
-- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
-- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
-- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
+- [ ] 05-01-PLAN.md — Admin app E2E tests: organizations, associations, members CRUD (TEST-06)
+- [ ] 05-02-PLAN.md — Account activation test + Memberry security flow spec (TEST-05)
+- [ ] 05-03-PLAN.md — CI workflow extension: boot admin + account apps, run all E2E suites (TEST-05, TEST-06)
 
 ### Phase 6: CI/CD & DevOps Pipeline
 **Goal**: Production-ready build, test, and deploy pipeline in GitHub Actions
@@ -177,7 +177,7 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 2. Audit Module Completion | 2/3 | Executing | - |
 | 3. Data Model Unification | 0/? | Not started | - |
 | 4. TypeSpec/OpenAPI Reconciliation | 9/11 | In Progress|  |
-| 5. Account & Admin App Hardening | 0/? | Not started | - |
+| 5. Account & Admin App Hardening | 0/3 | Planned | - |
 | 6. CI/CD & DevOps Pipeline | 0/? | Not started | - |
 | 7. Shared Component Library | 0/? | Not started | - |
 | 8. Frontend Unit Tests | 0/? | Not started | - |
