@@ -1,6 +1,10 @@
 import { useState } from 'react'
-import { api } from '@/lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  listMembershipCategoriesOptions,
+  listMembershipCategoriesQueryKey,
+  upsertMembershipCategoryMutation,
+} from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,22 +40,18 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
   const [confirmDeactivate, setConfirmDeactivate] = useState<string | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['membership-categories', orgId],
-    queryFn: async () => {
-      const json = await api.get<any>(`/api/membership/categories/${orgId}`)
-      return json.data ?? []
-    },
-  })
+  const { data, isLoading, error } = useQuery(
+    listMembershipCategoriesOptions({ query: { organizationId: orgId } })
+  )
 
-  const categories: any[] = data ?? []
+  const categories: any[] = data?.data ?? []
 
   const saveMutation = useMutation({
-    mutationFn: async (body: Record<string, unknown>) => {
-      return api.put(`/api/membership/categories/${orgId}`, body)
-    },
+    ...upsertMembershipCategoryMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership-categories', orgId] })
+      queryClient.invalidateQueries({
+        queryKey: listMembershipCategoriesQueryKey({ query: { organizationId: orgId } }),
+      })
       setShowAdd(false)
       setConfirmDeactivate(null)
       setForm(EMPTY_FORM)
@@ -64,18 +64,21 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
 
   function handleAdd() {
     if (!form.name.trim() || !form.duesAmount) return
-    saveMutation.mutate({
-      name: form.name.trim(),
-      description: form.description.trim() || undefined,
-      duesAmount: Math.round(parseFloat(form.duesAmount) * 100),
-      billingCycle: form.billingCycle,
-      sortOrder: parseInt(form.sortOrder) || 0,
-      active: true,
+    ;(saveMutation as any).mutate({
+      path: { organizationId: orgId },
+      body: {
+        name: form.name.trim(),
+        description: form.description.trim() || undefined,
+        duesAmount: Math.round(parseFloat(form.duesAmount) * 100),
+        billingCycle: form.billingCycle,
+        sortOrder: parseInt(form.sortOrder) || 0,
+        active: true,
+      },
     })
   }
 
   function handleDeactivate(categoryId: string) {
-    saveMutation.mutate({ id: categoryId, active: false })
+    ;(saveMutation as any).mutate({ path: { organizationId: orgId }, body: { id: categoryId, active: false } })
   }
 
   const formValid = form.name.trim() && form.duesAmount && parseFloat(form.duesAmount) >= 0

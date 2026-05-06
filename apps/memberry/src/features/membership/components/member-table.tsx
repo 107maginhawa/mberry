@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import {
+  listRosterMembersOptions,
+  listMembershipCategoriesOptions,
+} from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +13,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Search, Users } from 'lucide-react'
-import { api } from '@/lib/api'
 
 interface MemberTableProps {
   orgId: string
@@ -55,30 +58,24 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
     return () => clearTimeout(timer)
   }, [search])
 
-  const { data: categoriesData } = useQuery({
-    queryKey: ['membership-categories', orgId],
-    queryFn: async () => {
-      const result: any = await api.get(`/api/membership/categories/${orgId}`)
-      return result.data ?? []
-    },
-  })
+  const { data: categoriesData } = useQuery(
+    listMembershipCategoriesOptions({ query: { organizationId: orgId } })
+  )
 
-  const categories = categoriesData ?? []
+  const categories = categoriesData?.data ?? []
 
-  const queryParams = new URLSearchParams({
-    limit: String(PAGE_SIZE),
-    offset: String(page * PAGE_SIZE),
-    ...(statusTab !== 'all' && { status: statusTab }),
-    ...(categoryId !== 'all' && { categoryId }),
-    ...(debouncedSearch && { search: debouncedSearch }),
-  })
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['membership-members', orgId, statusTab, categoryId, debouncedSearch, page],
-    queryFn: async () => {
-      return api.get<any>(`/api/membership/members/${orgId}?${queryParams}`)
-    },
-  })
+  const { data, isLoading, error } = useQuery(
+    listRosterMembersOptions({
+      query: {
+        organizationId: orgId,
+        limit: PAGE_SIZE,
+        offset: page * PAGE_SIZE,
+        ...(statusTab !== 'all' ? { status: statusTab as any } : {}),
+        ...(categoryId !== 'all' ? { categoryId } : {}),
+        ...(debouncedSearch ? { search: debouncedSearch } : {}),
+      },
+    })
+  )
 
   const rawMembers: any[] = data?.data ?? []
 
@@ -91,7 +88,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
         return daysLeft >= 0 && daysLeft <= expiringDays
       })
     : rawMembers
-  const total: number = expiringDays ? members.length : (data?.total ?? 0)
+  const total: number = expiringDays ? members.length : (data?.pagination?.totalCount ?? 0)
 
   const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {

@@ -1,6 +1,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import {
+  getRosterMemberOptions,
+  getRosterMemberQueryKey,
+  updateRosterMemberMutation,
+  listRosterMembersQueryKey,
+  listMembershipCategoriesOptions,
+  reinstateMembershipMutation,
+  terminateMembershipMutation,
+} from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -12,7 +21,6 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { toast } from 'sonner'
 import { AlertTriangle, ArrowLeft, CreditCard, Heart, Mail, Phone, RefreshCw, Shield, UserX } from 'lucide-react'
-import { api } from '@/lib/api'
 
 interface MemberDetailProps {
   orgId: string
@@ -63,31 +71,25 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   const [newCategoryId, setNewCategoryId] = useState('')
   const [suspendReason, setSuspendReason] = useState('')
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['membership-member', orgId, memberId],
-    queryFn: async () => {
-      const result: any = await api.get(`/api/membership/members/${orgId}/${memberId}`)
-      return result.data
-    },
-  })
+  // Cast to any: TypeSpec RosterMember type differs from hand-wired endpoint shape
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, isLoading, error } = useQuery(getRosterMemberOptions({ path: { memberId }, query: { organizationId: orgId } }) as any) as { data: any; isLoading: boolean; error: unknown }
 
-  const { data: categoriesData } = useQuery({
-    queryKey: ['membership-categories', orgId],
-    queryFn: async () => {
-      const result: any = await api.get(`/api/membership/categories/${orgId}`)
-      return result.data ?? []
-    },
-  })
+  const { data: categoriesData } = useQuery(
+    listMembershipCategoriesOptions({ query: { organizationId: orgId } })
+  )
 
-  const categories: any[] = categoriesData ?? []
+  const categories: any[] = categoriesData?.data ?? []
+
+  const invalidateMember = () => {
+    queryClient.invalidateQueries({ queryKey: getRosterMemberQueryKey({ path: { memberId }, query: { organizationId: orgId } }) })
+    queryClient.invalidateQueries({ queryKey: listRosterMembersQueryKey({ query: { organizationId: orgId } }) })
+  }
 
   const updateMutation = useMutation({
-    mutationFn: async (body: Record<string, unknown>) => {
-      return api.put(`/api/membership/members/${orgId}/${memberId}`, body)
-    },
+    ...updateRosterMemberMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership-member', orgId, memberId] })
-      queryClient.invalidateQueries({ queryKey: ['membership-members', orgId] })
+      invalidateMember()
       setShowChangeCat(false)
       setShowSuspend(false)
       toast.success('Member updated')
@@ -98,12 +100,9 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   })
 
   const reinstateMutation = useMutation({
-    mutationFn: async (membershipId: string) => {
-      return api.post(`/api/association/member/memberships/${membershipId}/reinstate`)
-    },
+    ...reinstateMembershipMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership-member', orgId, memberId] })
-      queryClient.invalidateQueries({ queryKey: ['membership-members', orgId] })
+      invalidateMember()
       toast.success('Membership reinstated')
     },
     onError: () => {
@@ -112,12 +111,9 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   })
 
   const deceasedMutation = useMutation({
-    mutationFn: async (membershipId: string) => {
-      return api.post(`/api/association/member/memberships/${membershipId}/terminate`, { terminationReason: 'deceased' })
-    },
+    ...terminateMembershipMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership-member', orgId, memberId] })
-      queryClient.invalidateQueries({ queryKey: ['membership-members', orgId] })
+      invalidateMember()
       setShowDeceased(false)
       toast.success('Member marked as deceased')
     },
@@ -284,7 +280,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
               variant="outline"
               size="sm"
               className="text-green-700 border-green-300 hover:bg-green-50"
-              onClick={() => reinstateMutation.mutate(member.id)}
+              onClick={() => reinstateMutation.mutate({ path: { membershipId: member.id } })}
               disabled={reinstateMutation.isPending}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -338,7 +334,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowChangeCat(false)}>Cancel</Button>
             <Button
-              onClick={() => updateMutation.mutate({ categoryId: newCategoryId })}
+              onClick={() => (updateMutation as any).mutate({ path: { memberId }, body: { categoryId: newCategoryId } })}
               disabled={!newCategoryId || updateMutation.isPending}
             >
               {updateMutation.isPending ? 'Saving...' : 'Save'}
@@ -367,7 +363,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <Button variant="outline" onClick={() => setShowSuspend(false)}>Cancel</Button>
             <Button
               variant="destructive"
-              onClick={() => updateMutation.mutate({ status: 'suspended', suspendedReason: suspendReason })}
+              onClick={() => (updateMutation as any).mutate({ path: { memberId }, body: { status: 'suspended', suspendedReason: suspendReason } })}
               disabled={!suspendReason.trim() || updateMutation.isPending}
             >
               {updateMutation.isPending ? 'Suspending...' : 'Suspend'}
@@ -392,7 +388,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <Button
               variant="outline"
               className="text-muted-foreground border-muted-foreground/30 hover:bg-muted/50"
-              onClick={() => deceasedMutation.mutate(member.id)}
+              onClick={() => (deceasedMutation as any).mutate({ path: { membershipId: member.id }, body: { terminationReason: 'deceased' } })}
               disabled={deceasedMutation.isPending}
             >
               {deceasedMutation.isPending ? 'Saving...' : 'Confirm'}

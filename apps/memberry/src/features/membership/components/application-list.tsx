@@ -1,5 +1,11 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  listMembershipApplicationsOptions,
+  listMembershipApplicationsQueryKey,
+  approveMembershipApplicationMutation,
+  denyMembershipApplicationMutation,
+} from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import { Check, ChevronDown, ChevronUp, ClipboardList, MessageSquare, X } from 'lucide-react'
-import { api } from '@/lib/api'
 
 interface ApplicationListProps {
   orgId: string
@@ -28,16 +33,14 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
   const [sortBy, setSortBy] = useState<'date' | 'name'>('date')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  const queryParams = new URLSearchParams(
-    statusFilter !== 'all' ? { status: statusFilter } : {}
+  const { data, isLoading, error } = useQuery(
+    listMembershipApplicationsOptions({
+      query: {
+        organizationId: orgId,
+        ...(statusFilter !== 'all' ? { status: statusFilter as any } : {}),
+      },
+    })
   )
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['membership-applications', orgId, statusFilter],
-    queryFn: async () => {
-      return api.get<any>(`/api/membership/applications/${orgId}?${queryParams}`)
-    },
-  })
 
   const rawApplications: any[] = data?.data ?? []
   const applications = [...rawApplications].sort((a, b) => {
@@ -45,23 +48,56 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
     return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
   })
 
-  const reviewMutation = useMutation({
-    mutationFn: async ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
-      return api.post(`/api/membership/applications/${appId}/review`, { status, ...(reason ? { reason } : {}) })
-    },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['membership-applications', orgId] })
-      const labels: Record<string, string> = {
-        approved: 'Application approved',
-        rejected: 'Application rejected',
-        info_requested: 'Info requested from applicant',
-      }
-      toast.success(labels[variables.status] ?? 'Application updated')
+  const invalidateApplications = () => {
+    queryClient.invalidateQueries({
+      queryKey: listMembershipApplicationsQueryKey({ query: { organizationId: orgId } }),
+    })
+  }
+
+  const approveMutation = useMutation({
+    ...approveMembershipApplicationMutation(),
+    onSuccess: () => {
+      invalidateApplications()
+      toast.success('Application approved')
     },
     onError: () => {
       toast.error('Action failed', { description: 'Please try again.' })
     },
   })
+
+  const denyMutation = useMutation({
+    ...denyMembershipApplicationMutation(),
+    onSuccess: () => {
+      invalidateApplications()
+      toast.success('Application rejected')
+    },
+    onError: () => {
+      toast.error('Action failed', { description: 'Please try again.' })
+    },
+  })
+
+  const reviewMutation = {
+    mutate: ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
+      if (status === 'approved') {
+        approveMutation.mutate({ path: { applicationId: appId } })
+      } else if (status === 'rejected') {
+        denyMutation.mutate({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
+      } else if (status === 'info_requested') {
+        denyMutation.mutate({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
+      }
+    },
+    mutateAsync: async ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
+      if (status === 'approved') {
+        return approveMutation.mutateAsync({ path: { applicationId: appId } })
+      } else if (status === 'rejected') {
+        return denyMutation.mutateAsync({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
+      } else {
+        return denyMutation.mutateAsync({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
+      }
+    },
+    isPending: approveMutation.isPending || denyMutation.isPending,
+    variables: approveMutation.variables ?? denyMutation.variables,
+  }
 
   return (
     <div className="space-y-4">
@@ -145,7 +181,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
                   onReview={(status, reason) =>
                     reviewMutation.mutate({ appId: app.id, status, reason })
                   }
-                  isPending={reviewMutation.isPending && reviewMutation.variables?.appId === app.id}
+                  isPending={reviewMutation.isPending}
                 />
               </div>
             </div>
