@@ -3,7 +3,7 @@
  * Follows the DatabaseRepository pattern with domain-specific methods
  */
 
-import { eq, and, like, desc, sql, type SQL } from 'drizzle-orm';
+import { eq, and, like, desc, sql, inArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import {
@@ -91,6 +91,26 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
       ...invoice,
       lineItems
     };
+  }
+
+  /**
+   * Batch-fetch line items for multiple invoices
+   */
+  async findLineItemsByInvoiceIds(invoiceIds: string[]): Promise<Map<string, InvoiceLineItem[]>> {
+    if (invoiceIds.length === 0) return new Map();
+
+    const items = await this.db
+      .select()
+      .from(invoiceLineItems)
+      .where(inArray(invoiceLineItems.invoice, invoiceIds));
+
+    const map = new Map<string, InvoiceLineItem[]>();
+    for (const item of items) {
+      const existing = map.get(item.invoice) || [];
+      existing.push(item);
+      map.set(item.invoice, existing);
+    }
+    return map;
   }
 
   /**

@@ -10,7 +10,6 @@ import type { GetInvoiceQuery, GetInvoiceParams } from '@/generated/openapi/vali
 import { ForbiddenError, NotFoundError } from '@/core/errors';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
-import { PersonRepository } from '../person/repos/person.repo';
 
 /**
  * getInvoice
@@ -38,12 +37,11 @@ export async function getInvoice(
 
   logger.debug({ invoiceId, userId: user.id }, 'Getting invoice');
 
-  // Create repository instances
+  // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
-  const personRepo = new PersonRepository(database, logger);
 
-  // Get invoice (expand handled automatically by generated route wrapper)
-  const invoice = await invoiceRepo.findOneById(invoiceId);
+  // Get invoice with line items
+  const invoice = await invoiceRepo.findOneWithLineItems(invoiceId);
 
   if (!invoice) {
     throw new NotFoundError('Invoice not found', {
@@ -53,21 +51,11 @@ export async function getInvoice(
     });
   }
 
-  // Authorization check: user must be the provider who created the invoice
-  // or the patient who is being billed (when we have patient auth)
-  // Authorization: merchant, customer, or admin can view
-  const merchantPerson = await personRepo.findOneById(invoice.merchant);
-  if (!merchantPerson) {
-    throw new NotFoundError('Merchant person not found', {
-      resourceType: 'person',
-      resource: invoice.merchant,
-      suggestions: ['Check merchant person ID format', 'Verify merchant person exists in system']
-    });
-  }
+  // Authorization check: merchant, customer, or admin can view
+  const userRoles = user.role ? user.role.split(',').map((r: string) => r.trim()) : [];
+  const isAdmin = userRoles.includes('admin');
 
-  // Check if user is merchant or customer
-  if (invoice.merchant !== user.id && invoice.customer !== user.id) {
-    // TODO: Add admin access check
+  if (!isAdmin && invoice.merchant !== user.id && invoice.customer !== user.id) {
     throw new ForbiddenError('You can only access invoices where you are the merchant or customer');
   }
 
@@ -84,26 +72,32 @@ export async function getInvoice(
   const response = {
     id: invoice.id,
     invoiceNumber: invoice.invoiceNumber,
-    customer: invoice.customer, // Already correct field name
-    merchant: invoice.merchant, // Already correct field name
-    context: null, // TODO: Add context field to schema
+    customer: invoice.customer,
+    merchant: invoice.merchant,
+    context: invoice.context || null,
     status: invoice.status,
     subtotal: invoice.subtotal,
     tax: invoice.tax || null,
     total: invoice.total,
     currency: invoice.currency,
-    paymentCaptureMethod: 'automatic', // TODO: Add to schema
+    paymentCaptureMethod: invoice.paymentCaptureMethod,
     paymentDueAt: invoice.paymentDueAt?.toISOString() || null,
-    lineItems: [], // TODO: Implement proper line items storage
+    lineItems: (invoice.lineItems || []).map((item: any) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      amount: item.amount,
+      metadata: item.metadata || null
+    })),
     paymentStatus: invoice.paymentStatus || null,
     paidAt: invoice.paidAt?.toISOString() || null,
-    paidBy: null, // TODO: Add to schema
+    paidBy: invoice.paidBy || null,
     voidedAt: invoice.voidedAt?.toISOString() || null,
-    voidedBy: null, // TODO: Add to schema
-    voidThresholdMinutes: null, // TODO: Add to schema
-    authorizedAt: null, // TODO: Add to schema
-    authorizedBy: null, // TODO: Add to schema
-    metadata: null, // TODO: Add metadata support
+    voidedBy: invoice.voidedBy || null,
+    voidThresholdMinutes: invoice.voidThresholdMinutes || null,
+    authorizedAt: invoice.authorizedAt?.toISOString() || null,
+    authorizedBy: invoice.authorizedBy || null,
+    metadata: invoice.metadata || null,
     createdAt: invoice.createdAt.toISOString(),
     updatedAt: invoice.updatedAt.toISOString()
   };

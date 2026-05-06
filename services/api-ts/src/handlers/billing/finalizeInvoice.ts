@@ -14,7 +14,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { FinalizeInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
-import { PersonRepository } from '../person/repos/person.repo';
 
 /**
  * finalizeInvoice
@@ -40,9 +39,8 @@ export async function finalizeInvoice(
 
   logger.info({ invoiceId, userId: user.id }, 'Finalizing invoice');
 
-  // Create repository instances
+  // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
-  const personRepo = new PersonRepository(database, logger);
 
   // Get existing invoice
   const invoice = await invoiceRepo.findOneById(invoiceId);
@@ -55,18 +53,12 @@ export async function finalizeInvoice(
     });
   }
 
-  // Authorization check: must be the provider who created the invoice
-  const merchantPerson = await personRepo.findOneById(invoice.merchant);
-  if (!merchantPerson) {
-    throw new NotFoundError('Merchant person not found', {
-      resourceType: 'person',
-      resource: invoice.merchant,
-      suggestions: ['Check merchant person ID format', 'Verify merchant person exists in system']
-    });
-  }
+  // Authorization check: must be the merchant or admin
+  const userRoles = user.role ? user.role.split(',').map((r: string) => r.trim()) : [];
+  const isAdmin = userRoles.includes('admin');
 
-  if (merchantPerson.id !== user.id) {
-    throw new ForbiddenError('You can only finalize invoices for your own provider profile');
+  if (!isAdmin && invoice.merchant !== user.id) {
+    throw new ForbiddenError('Only admins or the merchant can finalize invoices');
   }
 
   // Business rule: only draft invoices can be finalized
@@ -86,7 +78,16 @@ export async function finalizeInvoice(
   }
 
   // Update invoice status to open and set issued timestamp
-  const finalizedInvoice = await invoiceRepo.updateStatus(invoiceId, 'open', user.id);
+  await invoiceRepo.updateStatus(invoiceId, 'open', user.id);
+
+  // Fetch fresh invoice with line items for complete response
+  const finalizedInvoice = await invoiceRepo.findOneWithLineItems(invoiceId);
+  if (!finalizedInvoice) {
+    throw new NotFoundError('Finalized invoice not found', {
+      resourceType: 'invoice',
+      resource: invoiceId
+    });
+  }
 
   logger.info({
     invoiceId,
@@ -103,24 +104,30 @@ export async function finalizeInvoice(
     invoiceNumber: finalizedInvoice.invoiceNumber,
     customer: finalizedInvoice.customer,
     merchant: finalizedInvoice.merchant,
-    context: finalizedInvoice.context,
+    context: finalizedInvoice.context || null,
     status: finalizedInvoice.status,
     subtotal: finalizedInvoice.subtotal,
-    tax: finalizedInvoice.tax,
+    tax: finalizedInvoice.tax || null,
     total: finalizedInvoice.total,
     currency: finalizedInvoice.currency,
     paymentCaptureMethod: finalizedInvoice.paymentCaptureMethod,
-    paymentDueAt: null, // TODO: Add dueAt field to schema
-    lineItems: [], // TODO: Implement proper line items storage
+    paymentDueAt: finalizedInvoice.paymentDueAt?.toISOString() || null,
+    lineItems: (finalizedInvoice.lineItems || []).map((item: any) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      amount: item.amount,
+      metadata: item.metadata || null
+    })),
     paymentStatus: finalizedInvoice.paymentStatus || null,
     paidAt: finalizedInvoice.paidAt?.toISOString() || null,
-    paidBy: null, // TODO: Add to schema
+    paidBy: finalizedInvoice.paidBy || null,
     voidedAt: finalizedInvoice.voidedAt?.toISOString() || null,
-    voidedBy: null, // TODO: Add to schema
-    voidThresholdMinutes: null, // TODO: Add to schema
-    authorizedAt: null, // TODO: Add to schema
-    authorizedBy: null, // TODO: Add to schema
-    metadata: null, // TODO: Add metadata support
+    voidedBy: finalizedInvoice.voidedBy || null,
+    voidThresholdMinutes: finalizedInvoice.voidThresholdMinutes || null,
+    authorizedAt: finalizedInvoice.authorizedAt?.toISOString() || null,
+    authorizedBy: finalizedInvoice.authorizedBy || null,
+    metadata: finalizedInvoice.metadata || null,
     createdAt: finalizedInvoice.createdAt.toISOString(),
     updatedAt: finalizedInvoice.updatedAt.toISOString()
   };

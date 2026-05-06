@@ -10,7 +10,7 @@ import type { ListInvoicesQuery } from '@/generated/openapi/validators';
 import { ForbiddenError } from '@/core/errors';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository, type InvoiceFilters } from './repos/billing.repo';
-import { parsePagination, buildPaginationMeta, parseFilters } from '@/utils/query';
+import { parsePagination, buildPaginationMeta } from '@/utils/query';
 
 /**
  * listInvoices
@@ -77,30 +77,40 @@ export async function listInvoices(
   // Build pagination metadata
   const paginationMeta = buildPaginationMeta(invoices, totalCount, limit, offset);
 
+  // Batch-fetch line items for all invoices in one query
+  const invoiceIds = invoices.map((inv: any) => inv.id);
+  const lineItemsMap = await invoiceRepo.findLineItemsByInvoiceIds(invoiceIds);
+
   // Format response to match TypeSpec Invoice model
   const formattedInvoices = invoices.map((invoice: any) => ({
     id: invoice.id,
     invoiceNumber: invoice.invoiceNumber,
-    customer: invoice.customer, // Already correct field name
-    merchant: invoice.merchant, // Already correct field name
+    customer: invoice.customer,
+    merchant: invoice.merchant,
     context: invoice.context || null,
     status: invoice.status,
     subtotal: invoice.subtotal,
     tax: invoice.tax || null,
     total: invoice.total,
     currency: invoice.currency,
-    paymentCaptureMethod: 'automatic', // TODO: Add to schema
-    paymentDueAt: invoice.dueAt?.toISOString() || null,
-    lineItems: [], // TODO: Implement proper line items storage
+    paymentCaptureMethod: invoice.paymentCaptureMethod,
+    paymentDueAt: invoice.paymentDueAt?.toISOString() || null,
+    lineItems: (lineItemsMap.get(invoice.id) || []).map((item: any) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      amount: item.amount,
+      metadata: item.metadata || null
+    })),
     paymentStatus: invoice.paymentStatus || null,
     paidAt: invoice.paidAt?.toISOString() || null,
-    paidBy: null, // TODO: Add to schema
+    paidBy: invoice.paidBy || null,
     voidedAt: invoice.voidedAt?.toISOString() || null,
-    voidedBy: null, // TODO: Add to schema
-    voidThresholdMinutes: null, // TODO: Add to schema
-    authorizedAt: null, // TODO: Add to schema
-    authorizedBy: null, // TODO: Add to schema
-    metadata: null, // TODO: Add metadata support
+    voidedBy: invoice.voidedBy || null,
+    voidThresholdMinutes: invoice.voidThresholdMinutes || null,
+    authorizedAt: invoice.authorizedAt?.toISOString() || null,
+    authorizedBy: invoice.authorizedBy || null,
+    metadata: invoice.metadata || null,
     createdAt: invoice.createdAt.toISOString(),
     updatedAt: invoice.updatedAt.toISOString()
   }));
