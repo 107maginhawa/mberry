@@ -25,7 +25,6 @@ export async function enroll(ctx: Context): Promise<Response> {
   const isWaitlisted = training.capacity ? count >= training.capacity : false;
 
   const enrollment = await repo.enroll({
-    tenantId: training.tenantId,
     trainingId,
     personId: session.user.id,
     status: isWaitlisted ? 'cancelled' : 'enrolled',

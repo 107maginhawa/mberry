@@ -16,7 +16,7 @@ export async function listDigitalCredentials(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
-  const tenantId = ctx.get('tenantId');
+  const orgId = ctx.get('orgId');
   const query = ctx.req.valid('query');
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
@@ -26,7 +26,7 @@ export async function listDigitalCredentials(
 
   const result = await repo.findManyWithPagination(
     {
-      tenantId,
+      orgId,
       personId: query.personId,
       templateId: query.templateId,
       status: query.status,

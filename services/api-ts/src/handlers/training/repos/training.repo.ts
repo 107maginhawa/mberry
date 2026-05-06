@@ -23,7 +23,6 @@ export class TrainingRepository {
   ) {
     const conditions: SQL<unknown>[] = [
       eq(trainings.organizationId, orgId),
-      eq(trainings.tenantId, orgId),
     ];
     if (filters?.status) conditions.push(eq(trainings.status, filters.status as any));
     if (filters?.search) conditions.push(like(trainings.title, `%${filters.search}%`));

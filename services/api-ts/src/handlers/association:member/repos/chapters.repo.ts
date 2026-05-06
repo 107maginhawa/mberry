@@ -19,7 +19,7 @@ import {
 } from './chapters.schema';
 
 export interface ChapterAffiliationFilters {
-  tenantId?: string;
+  organizationId?: string;
   personId?: string;
   chapterId?: string;
   isPrimary?: boolean;
@@ -43,8 +43,8 @@ export class ChapterAffiliationRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(chapterAffiliations.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(chapterAffiliations.organizationId, filters.organizationId));
     }
 
     if (filters.personId) {
@@ -70,8 +70,8 @@ export class ChapterAffiliationRepository extends DatabaseRepository<
    * Set the specified affiliation as primary and clear isPrimary on all other
    * affiliations for the same person within the same tenant.
    */
-  async setPrimary(affiliationId: string, tenantId: string): Promise<ChapterAffiliation> {
-    this.logger?.debug({ affiliationId, tenantId }, 'Setting primary chapter affiliation');
+  async setPrimary(affiliationId: string, organizationId: string): Promise<ChapterAffiliation> {
+    this.logger?.debug({ affiliationId, organizationId }, 'Setting primary chapter affiliation');
 
     // Fetch the target affiliation to get personId
     const target = await this.findOneById(affiliationId);
@@ -85,7 +85,7 @@ export class ChapterAffiliationRepository extends DatabaseRepository<
       .set({ isPrimary: false, updatedAt: new Date() })
       .where(
         and(
-          eq(chapterAffiliations.tenantId, tenantId),
+          eq(chapterAffiliations.organizationId, organizationId),
           eq(chapterAffiliations.personId, target.personId)
         )
       );
@@ -112,7 +112,7 @@ export class ChapterAffiliationRepository extends DatabaseRepository<
 // ---------------------------------------------------------------------------
 
 export interface AffiliationTransferFilters {
-  tenantId?: string;
+  organizationId?: string;
   personId?: string;
   fromChapterId?: string;
   toChapterId?: string;
@@ -133,8 +133,8 @@ export class AffiliationTransferRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(affiliationTransfers.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(affiliationTransfers.organizationId, filters.organizationId));
     }
 
     if (filters.personId) {
@@ -162,7 +162,7 @@ export class AffiliationTransferRepository extends DatabaseRepository<
 // ---------------------------------------------------------------------------
 
 export interface RoyaltySplitFilters {
-  tenantId?: string;
+  organizationId?: string;
   membershipId?: string;
   chapterId?: string;
   nationalOrgId?: string;
@@ -182,8 +182,8 @@ export class RoyaltySplitRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(royaltySplits.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(royaltySplits.organizationId, filters.organizationId));
     }
 
     if (filters.membershipId) {

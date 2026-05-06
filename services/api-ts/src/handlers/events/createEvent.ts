@@ -10,7 +10,6 @@ export async function createEvent(ctx: Context): Promise<Response> {
   const repo = new EventsRepository(db);
 
   const event = await repo.create({
-    tenantId: orgId,
     organizationId: orgId,
     title: body.title,
     eventType: body.eventType ?? 'other',

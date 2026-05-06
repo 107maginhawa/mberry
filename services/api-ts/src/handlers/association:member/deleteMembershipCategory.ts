@@ -15,8 +15,8 @@ export async function deleteMembershipCategory(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const id = ctx.req.valid('param').membershipCategoryId;
   const db = ctx.get('database') as DatabaseInstance;
@@ -24,7 +24,7 @@ export async function deleteMembershipCategory(
   const repo = new MembershipCategoryRepository(db, logger);
 
   const existing = await repo.findOneById(id);
-  if (!existing || existing.tenantId !== tenantId) {
+  if (!existing || existing.organizationId !== orgId) {
     throw new NotFoundError('Membership category');
   }
 

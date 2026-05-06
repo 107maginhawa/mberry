@@ -26,7 +26,7 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface DocumentFilters {
-  tenantId?: string;
+  organizationId?: string;
   ownerId?: string;
   ownerType?: string;
   accessLevel?: string;
@@ -49,8 +49,8 @@ export class DocumentRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(documents.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(documents.organizationId, filters.organizationId));
     }
 
     if (filters.ownerId) {
@@ -92,7 +92,7 @@ export class DocumentRepository extends DatabaseRepository<
 
 export interface DocumentVersionFilters {
   documentId?: string;
-  tenantId?: string;
+  organizationId?: string;
 }
 
 export class DocumentVersionRepository extends DatabaseRepository<
@@ -113,8 +113,8 @@ export class DocumentVersionRepository extends DatabaseRepository<
       conditions.push(eq(documentVersions.documentId, filters.documentId));
     }
 
-    if (filters.tenantId) {
-      conditions.push(eq(documentVersions.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(documentVersions.organizationId, filters.organizationId));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
@@ -139,7 +139,7 @@ export class DocumentVersionRepository extends DatabaseRepository<
 // ---------------------------------------------------------------------------
 
 export interface DocumentTagFilters {
-  tenantId?: string;
+  organizationId?: string;
   q?: string;
 }
 
@@ -157,8 +157,8 @@ export class DocumentTagRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(documentTags.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(documentTags.organizationId, filters.organizationId));
     }
 
     if (filters.q) {

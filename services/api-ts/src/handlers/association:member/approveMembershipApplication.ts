@@ -50,9 +50,8 @@ export async function approveMembershipApplication(
   const expiryDate = oneYearLater.toISOString().split('T')[0];
 
   await membershipRepo.createOne({
-    tenantId: application.tenantId,
+    organizationId: application.organizationId,
     personId: application.personId,
-    orgId: application.orgId,
     tierId: application.tierId,
     startDate: today as string,
     duesExpiryDate: expiryDate as string,

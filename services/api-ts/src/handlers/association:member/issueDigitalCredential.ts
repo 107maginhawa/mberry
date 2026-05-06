@@ -21,8 +21,8 @@ export async function issueDigitalCredential(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -41,7 +41,7 @@ export async function issueDigitalCredential(
   } else if (body.personId) {
     // If no membershipId provided, check if person has any active membership in this org
     const membershipRepo = new MembershipRepository(db, logger);
-    const membership = await membershipRepo.findByPersonAndOrg(body.personId, tenantId);
+    const membership = await membershipRepo.findByPersonAndOrg(body.personId, orgId);
     if (!membership) throw new ForbiddenError('Cannot issue credential: no membership found for this person');
     if (membership.status !== 'active') {
       throw new ForbiddenError(
@@ -66,7 +66,7 @@ export async function issueDigitalCredential(
 
   // Create the credential first to get the ID
   const credential = await credentialRepo.createOne({
-    tenantId,
+    orgId,
     personId: body.personId,
     templateId: body.templateId,
     membershipId: body.membershipId ?? null,
@@ -78,7 +78,7 @@ export async function issueDigitalCredential(
 
   // Generate HMAC verification token
   const secret = process.env['CREDENTIAL_VERIFY_SECRET'] || 'dev-credential-verify-secret';
-  const token = createCredentialToken(credential.id, tenantId, secret);
+  const token = createCredentialToken(credential.id, orgId, secret);
 
   // Update credential with qrPayload and verificationUrl
   const baseUrl = process.env['PUBLIC_URL'] || 'http://localhost:7213';

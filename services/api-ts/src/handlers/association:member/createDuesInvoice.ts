@@ -17,8 +17,8 @@ export async function createDuesInvoice(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -28,7 +28,7 @@ export async function createDuesInvoice(
   const invoiceNumber = `INV-${Date.now()}`;
 
   const invoice = await repo.createOne({
-    tenantId,
+    orgId,
     membershipId: body.membershipId,
     personId: body.personId || user.id,
     organizationId: body.organizationId,

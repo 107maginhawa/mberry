@@ -13,7 +13,7 @@ import {
 } from './directory.schema';
 
 export interface DirectoryProfileFilters {
-  tenantId?: string;
+  organizationId?: string;
   personId?: string;
   visibility?: 'public' | 'memberOnly' | 'hidden';
   q?: string; // General search query across headline/bio
@@ -36,8 +36,8 @@ export class DirectoryProfileRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(directoryProfiles.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(directoryProfiles.organizationId, filters.organizationId));
     }
 
     if (filters.personId) {

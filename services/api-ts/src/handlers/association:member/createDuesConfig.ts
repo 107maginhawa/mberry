@@ -17,8 +17,8 @@ export async function createDuesConfig(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -26,7 +26,7 @@ export async function createDuesConfig(
   const repo = new DuesConfigRepository(db, logger);
 
   const config = await repo.createOne({
-    tenantId,
+    orgId,
     organizationId: body.organizationId,
     tierId: body.tierId,
     annualAmount: body.annualAmount,

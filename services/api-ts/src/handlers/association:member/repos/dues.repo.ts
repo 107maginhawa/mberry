@@ -23,7 +23,6 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface DuesConfigFilters {
-  tenantId?: string;
   organizationId?: string;
   tierId?: string;
   status?: 'active' | 'retired';
@@ -41,10 +40,6 @@ export class DuesConfigRepository extends DatabaseRepository<DuesConfig, NewDues
     if (!filters) return undefined;
 
     const conditions = [];
-
-    if (filters.tenantId) {
-      conditions.push(eq(duesConfigs.tenantId, filters.tenantId));
-    }
 
     if (filters.organizationId) {
       conditions.push(eq(duesConfigs.organizationId, filters.organizationId));
@@ -67,7 +62,6 @@ export class DuesConfigRepository extends DatabaseRepository<DuesConfig, NewDues
 // ---------------------------------------------------------------------------
 
 export interface DuesInvoiceFilters {
-  tenantId?: string;
   organizationId?: string;
   membershipId?: string;
   status?: 'generated' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'writtenOff';
@@ -85,10 +79,6 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
     if (!filters) return undefined;
 
     const conditions = [];
-
-    if (filters.tenantId) {
-      conditions.push(eq(duesInvoices.tenantId, filters.tenantId));
-    }
 
     if (filters.organizationId) {
       conditions.push(eq(duesInvoices.organizationId, filters.organizationId));
@@ -109,8 +99,8 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
    * Find all overdue invoices for an organization —
    * invoices whose due date (periodEnd) has passed and status is not paid/cancelled/writtenOff
    */
-  async findOverdue(tenantId: string, organizationId: string): Promise<DuesInvoice[]> {
-    this.logger?.debug({ tenantId, organizationId }, 'Finding overdue invoices');
+  async findOverdue(organizationId: string): Promise<DuesInvoice[]> {
+    this.logger?.debug({ organizationId }, 'Finding overdue invoices');
 
     const now = new Date().toISOString().split('T')[0]!; // YYYY-MM-DD
 
@@ -119,7 +109,6 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
       .from(duesInvoices)
       .where(
         and(
-          eq(duesInvoices.tenantId, tenantId),
           eq(duesInvoices.organizationId, organizationId),
           notInArray(duesInvoices.status, ['paid', 'cancelled', 'writtenOff']),
           lt(duesInvoices.periodEnd, now)
@@ -127,7 +116,7 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
       );
 
     this.logger?.debug(
-      { tenantId, organizationId, count: records.length },
+      { organizationId, count: records.length },
       'Overdue invoices retrieved'
     );
 
@@ -170,7 +159,6 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
 // ---------------------------------------------------------------------------
 
 export interface AgingBucketFilters {
-  tenantId?: string;
   organizationId?: string;
 }
 
@@ -186,10 +174,6 @@ export class AgingBucketRepository extends DatabaseRepository<AgingBucket, NewAg
     if (!filters) return undefined;
 
     const conditions = [];
-
-    if (filters.tenantId) {
-      conditions.push(eq(agingBuckets.tenantId, filters.tenantId));
-    }
 
     if (filters.organizationId) {
       conditions.push(eq(agingBuckets.organizationId, filters.organizationId));

@@ -17,8 +17,8 @@ export async function createInvite(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -31,7 +31,7 @@ export async function createInvite(
   }
 
   // Check for existing pending invite to same email+org
-  const existing = await inviteRepo.findPendingByEmail(email, tenantId);
+  const existing = await inviteRepo.findPendingByEmail(email, orgId);
   if (existing) {
     throw new ConflictError('An active invitation already exists for this email');
   }
@@ -41,7 +41,7 @@ export async function createInvite(
   const { raw, hash } = generateInviteToken(secret);
 
   const invite = await inviteRepo.create({
-    orgId: tenantId,
+    orgId: orgId,
     personId: body.personId || null,
     tokenHash: hash,
     type: body.type || 'invite',

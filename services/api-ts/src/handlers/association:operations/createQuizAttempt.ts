@@ -21,8 +21,8 @@ export async function createQuizAttempt(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -43,7 +43,7 @@ export async function createQuizAttempt(
   const passed = maxScore > 0 ? (score / maxScore) >= PASS_THRESHOLD : false;
 
   const attempt = await quizRepo.createOne({
-    tenantId,
+    orgId,
     courseId,
     personId,
     score,

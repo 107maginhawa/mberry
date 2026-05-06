@@ -19,8 +19,8 @@ export async function uploadNewDocumentVersion(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const { documentId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
@@ -38,7 +38,7 @@ export async function uploadNewDocumentVersion(
   const nextVersion = latestVersion + 1;
 
   const version = await versionRepo.createOne({
-    tenantId,
+    orgId,
     documentId,
     versionNumber: nextVersion,
     fileName: body.fileName,

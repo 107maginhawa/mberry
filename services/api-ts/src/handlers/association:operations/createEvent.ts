@@ -16,8 +16,8 @@ export async function createEvent(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -25,8 +25,7 @@ export async function createEvent(
   const repo = new EventRepository(db, logger);
 
   const event = await repo.createOne({
-    tenantId,
-    organizationId: (body as any).organizationId || ctx.get('orgId') || tenantId,
+    organizationId: (body as any).organizationId || orgId,
     title: (body as any).title,
     description: (body as any).description,
     location: (body as any).location,

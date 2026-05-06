@@ -17,12 +17,12 @@ export async function getAgingBucket(
   if (!session) throw new UnauthorizedError();
 
   const { organizationId } = ctx.req.valid('param');
-  const tenantId = ctx.get('tenantId');
+  const orgId = ctx.get('orgId');
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new AgingBucketRepository(db, ctx.get('logger'));
 
   // Find the latest aging bucket for this organization
-  const result = await repo.findMany({ tenantId, organizationId });
+  const result = await repo.findMany({ orgId, organizationId });
   const latest = result.length > 0 ? result[result.length - 1] : null;
 
   if (latest) {

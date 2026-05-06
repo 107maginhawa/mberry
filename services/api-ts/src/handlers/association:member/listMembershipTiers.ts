@@ -16,7 +16,7 @@ export async function listMembershipTiers(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
-  const tenantId = ctx.get('tenantId');
+  const orgId = ctx.get('orgId');
   const query = ctx.req.valid('query');
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
@@ -25,7 +25,7 @@ export async function listMembershipTiers(
   const repo = new MembershipTierRepository(db, ctx.get('logger'));
 
   const result = await repo.findManyWithPagination(
-    { tenantId, q: query.q as string | undefined },
+    { orgId, q: query.q as string | undefined },
     { pagination: { offset, limit } },
   );
 

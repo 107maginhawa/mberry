@@ -19,8 +19,8 @@ export async function promoteWaitlistEntry(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
@@ -37,7 +37,7 @@ export async function promoteWaitlistEntry(
 
   // Create confirmed registration
   const registration = await regRepo.createOne({
-    tenantId,
+    orgId,
     eventId: entry.eventId,
     personId: entry.personId,
     status: 'confirmed',

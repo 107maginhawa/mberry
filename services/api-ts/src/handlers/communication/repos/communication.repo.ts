@@ -26,11 +26,11 @@ export class MessageTemplateRepository {
     return row;
   }
 
-  async findByTenant(tenantId: string): Promise<MessageTemplate[]> {
-    return this.db.select().from(messageTemplates).where(eq(messageTemplates.tenantId, tenantId));
+  async findByOrg(organizationId: string): Promise<MessageTemplate[]> {
+    return this.db.select().from(messageTemplates).where(eq(messageTemplates.organizationId, organizationId));
   }
 
-  async search(tenantId: string, filters: {
+  async search(organizationId: string, filters: {
     q?: string;
     channel?: string;
     category?: string;
@@ -39,7 +39,7 @@ export class MessageTemplateRepository {
     limit?: number;
     offset?: number;
   }): Promise<MessageTemplate[]> {
-    const conditions = [eq(messageTemplates.tenantId, tenantId)];
+    const conditions = [eq(messageTemplates.organizationId, organizationId)];
     if (filters.channel) conditions.push(eq(messageTemplates.channel, filters.channel as any));
     if (filters.category) conditions.push(eq(messageTemplates.category, filters.category));
     if (filters.status) conditions.push(eq(messageTemplates.status, filters.status as any));
@@ -75,11 +75,11 @@ export class MessageRepository {
     return row;
   }
 
-  async findByTenant(tenantId: string): Promise<Message[]> {
-    return this.db.select().from(messages).where(eq(messages.tenantId, tenantId));
+  async findByOrg(organizationId: string): Promise<Message[]> {
+    return this.db.select().from(messages).where(eq(messages.organizationId, organizationId));
   }
 
-  async search(tenantId: string, filters: {
+  async search(organizationId: string, filters: {
     channel?: string;
     senderId?: string;
     status?: string;
@@ -87,7 +87,7 @@ export class MessageRepository {
     limit?: number;
     offset?: number;
   }): Promise<Message[]> {
-    const conditions = [eq(messages.tenantId, tenantId)];
+    const conditions = [eq(messages.organizationId, organizationId)];
     if (filters.channel) conditions.push(eq(messages.channel, filters.channel as any));
     if (filters.senderId) conditions.push(eq(messages.senderId, filters.senderId));
     if (filters.status) conditions.push(eq(messages.status, filters.status as any));
@@ -102,13 +102,13 @@ export class MessageRepository {
   /**
    * BR-28 deduplication: check if a message with same channel + recipient was already sent today.
    */
-  async findDuplicateSentToday(tenantId: string, channel: string, recipientPersonId: string): Promise<Message | undefined> {
+  async findDuplicateSentToday(organizationId: string, channel: string, recipientPersonId: string): Promise<Message | undefined> {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
     const rows = await this.db.select().from(messages)
       .where(and(
-        eq(messages.tenantId, tenantId),
+        eq(messages.organizationId, organizationId),
         eq(messages.channel, channel as any),
         eq(messages.status, 'sent'),
         gte(messages.sentAt, startOfDay),
@@ -144,8 +144,8 @@ export class SubscriptionTopicRepository {
     return row;
   }
 
-  async findByTenant(tenantId: string): Promise<SubscriptionTopic[]> {
-    return this.db.select().from(subscriptionTopics).where(eq(subscriptionTopics.tenantId, tenantId));
+  async findByOrg(organizationId: string): Promise<SubscriptionTopic[]> {
+    return this.db.select().from(subscriptionTopics).where(eq(subscriptionTopics.organizationId, organizationId));
   }
 
   async update(id: string, data: Partial<SubscriptionTopic>): Promise<SubscriptionTopic | undefined> {
@@ -171,9 +171,9 @@ export class PersonSubscriptionRepository {
     return row;
   }
 
-  async findByPerson(personId: string, tenantId: string): Promise<PersonSubscription[]> {
+  async findByPerson(personId: string, organizationId: string): Promise<PersonSubscription[]> {
     return this.db.select().from(personSubscriptions)
-      .where(and(eq(personSubscriptions.personId, personId), eq(personSubscriptions.tenantId, tenantId)));
+      .where(and(eq(personSubscriptions.personId, personId), eq(personSubscriptions.organizationId, organizationId)));
   }
 
   async findByPersonAndTopic(personId: string, topicId: string): Promise<PersonSubscription | undefined> {

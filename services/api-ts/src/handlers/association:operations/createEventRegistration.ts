@@ -21,8 +21,8 @@ export async function createEventRegistration(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -44,12 +44,12 @@ export async function createEventRegistration(
 
   // Check capacity
   if (event.capacity) {
-    const confirmedCount = await regRepo.count({ tenantId, eventId, status: 'confirmed' });
+    const confirmedCount = await regRepo.count({ orgId, eventId, status: 'confirmed' });
     if (confirmedCount >= event.capacity) {
       // Auto-waitlist
       const position = await waitlistRepo.nextPosition(eventId);
       const entry = await waitlistRepo.createOne({
-        tenantId,
+        orgId,
         eventId,
         personId,
         position,
@@ -67,7 +67,7 @@ export async function createEventRegistration(
   }
 
   const registration = await regRepo.createOne({
-    tenantId,
+    orgId,
     eventId,
     personId,
     status: 'confirmed',

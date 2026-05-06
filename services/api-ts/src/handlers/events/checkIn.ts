@@ -17,7 +17,6 @@ export async function checkIn(ctx: Context): Promise<Response> {
   if (alreadyCheckedIn) throw new ConflictError('Already checked in');
 
   const attendance = await repo.checkIn({
-    tenantId: event.tenantId,
     eventId,
     personId: body.personId,
     method: body.method ?? 'manual',

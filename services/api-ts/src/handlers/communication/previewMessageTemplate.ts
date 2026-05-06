@@ -18,8 +18,8 @@ export async function previewMessageTemplate(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
@@ -28,7 +28,7 @@ export async function previewMessageTemplate(
   const repo = new MessageTemplateRepository(db, logger);
 
   const template = await repo.findById(params.templateId);
-  if (!template || template.tenantId !== tenantId) {
+  if (!template || template.organizationId !== orgId) {
     throw new NotFoundError('Message template not found');
   }
 

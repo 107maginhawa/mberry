@@ -15,8 +15,8 @@ export async function createMembershipCategory(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -24,8 +24,8 @@ export async function createMembershipCategory(
   const repo = new MembershipCategoryRepository(db, logger);
 
   const category = await repo.createOne({
-    tenantId,
-    orgId: body.organizationId || tenantId,
+    orgId,
+    orgId: body.organizationId || orgId,
     name: body.name,
     description: body.description || null,
     applicableTiers: body.applicableTiers || null,

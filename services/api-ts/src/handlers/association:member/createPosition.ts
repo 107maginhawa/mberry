@@ -15,8 +15,8 @@ export async function createPosition(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -24,7 +24,7 @@ export async function createPosition(
   const repo = new PositionRepository(db, logger);
 
   const position = await repo.create({
-    tenantId,
+    orgId,
     title: body.title,
     description: body.description || null,
     level: body.level,

@@ -15,8 +15,8 @@ export async function searchMessages(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const query = ctx.req.valid('query');
   const db = ctx.get('database') as DatabaseInstance;
@@ -26,7 +26,7 @@ export async function searchMessages(
   const limit = query.limit ?? query.pageSize ?? 20;
   const offset = query.offset ?? (query.page ? (query.page - 1) * limit : 0);
 
-  const items = await repo.search(tenantId, {
+  const items = await repo.search(orgId, {
     channel: query.channel,
     senderId: query.senderId,
     status: query.status,

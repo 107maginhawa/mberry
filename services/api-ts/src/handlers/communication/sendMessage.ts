@@ -19,8 +19,8 @@ export async function sendMessage(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
@@ -28,7 +28,7 @@ export async function sendMessage(
   const repo = new MessageRepository(db, logger);
 
   const existing = await repo.findById(params.messageId);
-  if (!existing || existing.tenantId !== tenantId) {
+  if (!existing || existing.organizationId !== orgId) {
     throw new NotFoundError('Message not found');
   }
 

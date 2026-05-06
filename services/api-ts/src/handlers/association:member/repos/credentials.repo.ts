@@ -20,7 +20,7 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface CredentialTemplateFilters {
-  tenantId?: string;
+  organizationId?: string;
   type?: string;
   status?: string;
   q?: string;
@@ -40,8 +40,8 @@ export class CredentialTemplateRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(credentialTemplates.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(credentialTemplates.organizationId, filters.organizationId));
     }
 
     if (filters.type) {
@@ -65,7 +65,7 @@ export class CredentialTemplateRepository extends DatabaseRepository<
 // ---------------------------------------------------------------------------
 
 export interface DigitalCredentialFilters {
-  tenantId?: string;
+  organizationId?: string;
   personId?: string;
   templateId?: string;
   status?: string;
@@ -86,8 +86,8 @@ export class DigitalCredentialRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(digitalCredentials.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(digitalCredentials.organizationId, filters.organizationId));
     }
 
     if (filters.personId) {

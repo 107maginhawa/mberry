@@ -20,8 +20,8 @@ export async function createMessage(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -31,7 +31,7 @@ export async function createMessage(
   // BR-28: deduplicate recipients who already received same channel today
   const dedupedRecipients: MessageRecipient[] = [];
   for (const personId of body.recipientPersonIds) {
-    const dup = await repo.findDuplicateSentToday(tenantId, body.channel, personId);
+    const dup = await repo.findDuplicateSentToday(orgId, body.channel, personId);
     if (dup) {
       logger?.info({ personId, channel: body.channel }, 'BR-28: skipping duplicate recipient');
       continue;
@@ -40,7 +40,7 @@ export async function createMessage(
   }
 
   const message = await repo.create({
-    tenantId,
+    organizationId: orgId,
     templateId: body.templateId ?? null,
     channel: body.channel,
     senderId: body.senderId,

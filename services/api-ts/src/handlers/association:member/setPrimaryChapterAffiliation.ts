@@ -17,14 +17,14 @@ export async function setPrimaryChapterAffiliation(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const { affiliationId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new ChapterAffiliationRepository(db, ctx.get('logger'));
 
-  const updated = await repo.setPrimary(affiliationId, tenantId);
+  const updated = await repo.setPrimary(affiliationId, orgId);
 
   await auditAction(ctx, {
     action: 'update',

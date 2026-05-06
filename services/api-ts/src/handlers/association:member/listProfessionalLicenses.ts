@@ -15,8 +15,8 @@ export async function listProfessionalLicenses(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const query = ctx.req.valid('query');
   const offset = Number(query.offset) || 0;
@@ -28,7 +28,7 @@ export async function listProfessionalLicenses(
 
   const result = await repo.findManyWithPagination(
     {
-      tenantId,
+      orgId,
       personId: query.personId,
       licenseType: query.licenseType,
       status: query.status,

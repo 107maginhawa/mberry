@@ -15,8 +15,8 @@ export async function getOfficerTerm(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const { termId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
@@ -24,7 +24,7 @@ export async function getOfficerTerm(
   const repo = new OfficerTermRepository(db, logger);
 
   const term = await repo.findById(termId);
-  if (!term || term.tenantId !== tenantId) {
+  if (!term || term.organizationId !== orgId) {
     throw new NotFoundError('Officer term');
   }
 

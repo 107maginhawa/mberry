@@ -103,7 +103,6 @@ describe('orgContextMiddleware', () => {
 
     expect(isNextCalled()).toBe(true);
     expect(vars['orgId']).toBe('org-1');
-    expect(vars['tenantId']).toBe('org-1');
     expect(vars['orgMembership']).toEqual({
       membershipId: 'mem-1',
       personId: 'user-1',

@@ -10,8 +10,7 @@ export async function addMember(ctx: Context): Promise<Response> {
 
   const repo = new MembershipRepository(db);
   const member = await repo.addMember({
-    tenantId: orgId,
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
     tierId: body.tierId,
     categoryId: body.categoryId,

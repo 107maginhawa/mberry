@@ -16,7 +16,7 @@ export async function listDuesConfigs(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
-  const tenantId = ctx.get('tenantId');
+  const orgId = ctx.get('orgId');
   const query = ctx.req.valid('query');
   const offset = Number(query.offset) || 0;
   const limit = Math.min(Number(query.limit) || 20, 100);
@@ -25,7 +25,7 @@ export async function listDuesConfigs(
   const repo = new DuesConfigRepository(db, ctx.get('logger'));
 
   const result = await repo.findManyWithPagination(
-    { tenantId, organizationId: (query as any).organizationId },
+    { orgId, organizationId: (query as any).organizationId },
     { pagination: { offset, limit } },
   );
 
