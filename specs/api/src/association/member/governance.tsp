@@ -31,11 +31,10 @@ enum PositionLevel {
 @doc("Lifecycle status of an election")
 enum ElectionStatus {
   draft: "draft",
-  nominationOpen: "nominationOpen",
-  nominationClosed: "nominationClosed",
+  nominationsOpen: "nominationsOpen",
   votingOpen: "votingOpen",
-  votingClosed: "votingClosed",
-  certified: "certified",
+  awaitingConfirmation: "awaitingConfirmation",
+  published: "published",
   cancelled: "cancelled",
 }
 
