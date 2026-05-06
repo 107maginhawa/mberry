@@ -4,7 +4,11 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EventCard } from './event-card'
 import { Calendar, Users, Clock } from 'lucide-react'
-import { api } from '@/lib/api'
+import {
+  searchEventsOptions,
+  searchEventsQueryKey,
+  cancelEventMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface EventListProps {
   orgId: string
@@ -53,42 +57,38 @@ export function EventList({ orgId }: EventListProps) {
   const [typeFilter, setTypeFilter] = useState('')
   const [search, setSearch] = useState('')
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['events', orgId, tab, typeFilter, search],
-    queryFn: async () => {
-      const params = new URLSearchParams(tabToApiParams(tab))
-      if (typeFilter) params.set('type', typeFilter)
-      if (search) params.set('search', search)
-      params.set('limit', '50')
-      return api.get<{ data: any[]; meta: { total: number } }>(`/api/events/list/${orgId}?${params}`)
-    },
-  })
+  const tabParams = tabToApiParams(tab)
+  const { data, isLoading } = useQuery(
+    searchEventsOptions({
+      query: {
+        organizationId: orgId,
+        status: tabParams.status as any,
+        eventType: typeFilter as any || undefined,
+        q: search || undefined,
+        limit: 50,
+      },
+    }),
+  )
 
-  const { data: statsData } = useQuery({
-    queryKey: ['events-stats', orgId],
-    queryFn: async () => {
-      const [upcoming, drafts] = await Promise.all([
-        api.get<any>(`/api/events/list/${orgId}?status=published&limit=1`),
-        api.get<any>(`/api/events/list/${orgId}?status=draft&limit=1`),
-      ])
-      return {
-        upcoming: upcoming.meta?.total ?? 0,
-        drafts: drafts.meta?.total ?? 0,
-      }
-    },
-  })
+  const { data: upcomingData } = useQuery(
+    searchEventsOptions({ query: { organizationId: orgId, status: 'published' as any, limit: 1 } }),
+  )
+  const { data: draftsData } = useQuery(
+    searchEventsOptions({ query: { organizationId: orgId, status: 'draft' as any, limit: 1 } }),
+  )
+  const statsData = {
+    upcoming: upcomingData?.pagination?.totalCount ?? 0,
+    drafts: draftsData?.pagination?.totalCount ?? 0,
+  }
 
-  const cancelMutation = useMutation({
-    mutationFn: async (eventId: string) => {
-      return api.post(`/api/events/cancel/${eventId}`)
-    },
+  const doCancel = useMutation({
+    ...cancelEventMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events', orgId] })
-      queryClient.invalidateQueries({ queryKey: ['events-stats', orgId] })
+      queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
     },
   })
 
-  const events = filterEventsByTab(data?.data ?? [], tab)
+  const events = filterEventsByTab((data?.data ?? []) as any[], tab)
   const total = events.length
 
   return (
@@ -177,7 +177,7 @@ export function EventList({ orgId }: EventListProps) {
               event={event}
               orgId={orgId}
               onCancel={(id) => {
-                if (confirm('Cancel this event?')) cancelMutation.mutate(id)
+                if (confirm('Cancel this event?')) doCancel.mutate({ path: { eventId: id } })
               }}
             />
           ))}

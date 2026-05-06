@@ -3,7 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UserCheck, QrCode, Hand, Search } from 'lucide-react'
-import { api, ApiError } from '@/lib/api'
+import {
+  listCustomEventAttendanceOptions,
+  listCustomEventAttendanceQueryKey,
+  checkInCustomEventMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface AttendanceViewProps {
   eventId: string
@@ -23,34 +27,26 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
   const [checkInError, setCheckInError] = useState<string | null>(null)
   const [checkInSuccess, setCheckInSuccess] = useState(false)
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['attendance', eventId],
-    queryFn: async () => {
-      return api.get<{
-        data: any[]
-        meta: { total: number; qr: number; manual: number }
-      }>(`/api/events/attendance/${eventId}`)
-    },
-  })
+  const { data, isLoading } = useQuery(
+    listCustomEventAttendanceOptions({ path: { eventId } }),
+  )
 
-  const checkInMutation = useMutation({
-    mutationFn: async (personId: string) => {
-      return api.post(`/api/events/checkin/${eventId}`, { personId, method: 'manual' })
-    },
+  const checkInMut = useMutation({
+    mutationFn: checkInCustomEventMutation().mutationFn,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance', eventId] })
+      queryClient.invalidateQueries({ queryKey: listCustomEventAttendanceQueryKey({ path: { eventId } }) })
       setPersonIdInput('')
       setCheckInError(null)
       setCheckInSuccess(true)
       setTimeout(() => setCheckInSuccess(false), 2000)
     },
-    onError: (err: Error | ApiError) => {
+    onError: (err: Error) => {
       setCheckInError(err.message)
     },
   })
 
-  const attendance = data?.data ?? []
-  const stats = data?.meta
+  const attendance = (data?.data ?? []) as any[]
+  const stats = data?.pagination as any
 
   const filtered = search
     ? attendance.filter((a: any) =>
@@ -98,17 +94,17 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && personIdInput.trim()) {
-                checkInMutation.mutate(personIdInput.trim())
+                checkInMut.mutate({ path: { eventId }, body: { personId: personIdInput.trim(), method: 'manual' } as any })
               }
             }}
             className="flex-1"
           />
           <button
-            onClick={() => personIdInput.trim() && checkInMutation.mutate(personIdInput.trim())}
-            disabled={!personIdInput.trim() || checkInMutation.isPending}
+            onClick={() => personIdInput.trim() && checkInMut.mutate({ path: { eventId }, body: { personId: personIdInput.trim(), method: 'manual' } as any })}
+            disabled={!personIdInput.trim() || checkInMut.isPending}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50 hover:bg-primary/90"
           >
-            {checkInMutation.isPending ? 'Checking in...' : 'Check In'}
+            {checkInMut.isPending ? 'Checking in...' : 'Check In'}
           </button>
         </div>
         {checkInError && (

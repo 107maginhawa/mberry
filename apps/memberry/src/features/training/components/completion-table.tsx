@@ -1,7 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { CheckCircle, Users, Award } from 'lucide-react'
-import { api } from '@/lib/api'
+import {
+  listCustomTrainingEnrollmentsOptions,
+  listCustomTrainingEnrollmentsQueryKey,
+  completeCustomTrainingMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface CompletionTableProps {
   orgId: string
@@ -14,64 +18,32 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [marking, setMarking] = useState<string | null>(null)
 
-  const enrollmentsQuery = useQuery({
-    queryKey: ['training-enrollments', trainingId],
-    queryFn: async () => {
-      const json = await api.get<any>(`/api/training/detail/${orgId}/${trainingId}`)
-      return json.data
-    },
-  })
-
-  const attendanceQuery = useQuery({
-    queryKey: ['training-attendance', trainingId],
-    queryFn: async () => {
-      // attendance is included in detail response via stats
-      return enrollmentsQuery.data?.attendance ?? { completed: 0, totalCredits: 0 }
-    },
-    enabled: !!enrollmentsQuery.data,
-  })
-
-  const enrollmentsListQuery = useQuery({
-    queryKey: ['training-enrollments-list', trainingId],
-    queryFn: async () => {
-      // Fetch enrollments from detail (we don't have a dedicated endpoint — use what we have)
-      // In production this would call a dedicated enrollments list endpoint
-      return [] as any[]
-    },
-  })
+  const enrollmentsListQuery = useQuery(
+    listCustomTrainingEnrollmentsOptions({ path: { trainingId }, query: { organizationId: orgId } }),
+  )
 
   const markMutation = useMutation({
-    mutationFn: async (personId: string) => {
-      return api.post(`/api/training/complete/${orgId}/${trainingId}`, { personId, method: 'manual' })
-    },
+    ...completeCustomTrainingMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['training-enrollments', trainingId] })
-      queryClient.invalidateQueries({ queryKey: ['training-attendance', trainingId] })
+      queryClient.invalidateQueries({ queryKey: listCustomTrainingEnrollmentsQueryKey({ path: { trainingId }, query: { organizationId: orgId } }) })
       setMarking(null)
     },
-    onError: (_err, personId) => {
-      setMarking(null)
-    },
+    onError: () => { setMarking(null) },
   })
 
   const markAllMutation = useMutation({
-    mutationFn: async (personIds: string[]) => {
-      for (const pid of personIds) {
-        await api.post(`/api/training/complete/${orgId}/${trainingId}`, { personId: pid, method: 'manual' })
-      }
-    },
+    ...completeCustomTrainingMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['training-enrollments', trainingId] })
-      queryClient.invalidateQueries({ queryKey: ['training-attendance', trainingId] })
+      queryClient.invalidateQueries({ queryKey: listCustomTrainingEnrollmentsQueryKey({ path: { trainingId }, query: { organizationId: orgId } }) })
       setSelected(new Set())
     },
   })
 
-  const detail = enrollmentsQuery.data
-  const enrollmentCount = detail?.enrollmentCount ?? 0
-  const attendance = detail?.attendance ?? { completed: 0, totalCredits: 0 }
+  const enrollments = (enrollmentsListQuery.data?.data ?? []) as any[]
+  const enrollmentCount = enrollmentsListQuery.data?.pagination?.totalCount ?? enrollments.length
+  const attendance = { completed: enrollments.filter((e: any) => e.completedAt).length, totalCredits: 0 }
 
-  const enrollments: any[] = enrollmentsListQuery.data ?? []
+  // enrollments already derived above
   const allIds = enrollments.map((e) => e.personId)
   const allSelected = allIds.length > 0 && allIds.every((id) => selected.has(id))
 
@@ -130,7 +102,13 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
         <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
           <span className="text-sm font-medium">{selected.size} selected</span>
           <button
-            onClick={() => markAllMutation.mutate([...selected])}
+            onClick={() => {
+              const ids = [...selected]
+              // Fire one mutation per person (SDK doesn't support bulk)
+              ids.forEach(pid =>
+                markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: pid, creditAmount: Number(creditAmount) } } as any)
+              )
+            }}
             disabled={markAllMutation.isPending}
             className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md disabled:opacity-50"
           >
@@ -164,7 +142,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
             </tr>
           </thead>
           <tbody>
-            {enrollmentsQuery.isLoading ? (
+            {enrollmentsListQuery.isLoading ? (
               <tr>
                 <td colSpan={6} className="p-8 text-center text-muted-foreground">Loading…</td>
               </tr>
@@ -215,7 +193,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                       <button
                         onClick={() => {
                           setMarking(e.personId)
-                          markMutation.mutate(e.personId)
+                          markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: e.personId, creditAmount: Number(creditAmount) } } as any)
                         }}
                         disabled={markMutation.isPending && marking === e.personId}
                         className="px-2 py-1 text-xs border rounded hover:bg-muted disabled:opacity-50"

@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  createEventMutation,
+  updateEventMutation,
+  searchEventsQueryKey,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface EventFormProps {
   orgId: string
@@ -47,36 +51,47 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
   const [error, setError] = useState<string | null>(null)
 
-  const mutation = useMutation({
-    mutationFn: async (submitStatus: 'draft' | 'published') => {
-      const url = isEdit
-        ? `/api/events/update/${event.id}`
-        : `/api/events/create/${orgId}`
-      const method = isEdit ? 'PUT' : 'POST'
-
-      const body = {
-        title: form.title,
-        eventType: form.eventType,
-        description: form.description || null,
-        startDate: new Date(form.startDate).toISOString(),
-        endDate: new Date(form.endDate).toISOString(),
-        location: form.location || null,
-        registrationFee: Math.round(parseFloat(form.registrationFee || '0') * 100),
-        capacity: form.capacity ? parseInt(form.capacity, 10) : null,
-        visibility: form.visibility,
-        status: submitStatus,
-      }
-
-      return isEdit ? api.put(url, body) : api.post(url, body)
-    },
+  const createMutOpts = createEventMutation()
+  const createMut = useMutation({
+    mutationFn: createMutOpts.mutationFn,
     onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ['events', orgId] })
-      onSuccess?.(data.data)
+      queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
+      onSuccess?.(data)
     },
-    onError: (err: Error) => {
-      setError(err.message)
-    },
+    onError: (err: Error) => { setError(err.message) },
   })
+
+  const updateMutOpts = updateEventMutation()
+  const updateMut = useMutation({
+    mutationFn: updateMutOpts.mutationFn,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
+      onSuccess?.(data)
+    },
+    onError: (err: Error) => { setError(err.message) },
+  })
+
+  const mutation = isEdit ? updateMut : createMut
+
+  function submitEvent(submitStatus: 'draft' | 'published') {
+    const body: any = {
+      title: form.title,
+      organizationId: orgId,
+      eventType: form.eventType as any,
+      description: form.description || undefined,
+      startDate: new Date(form.startDate),
+      endDate: new Date(form.endDate),
+      location: form.location || undefined,
+      registrationFee: BigInt(Math.round(parseFloat(form.registrationFee || '0') * 100)),
+      capacity: form.capacity ? parseInt(form.capacity, 10) : undefined,
+      creditBearing: false,
+    }
+    if (isEdit) {
+      updateMut.mutate({ path: { eventId: event!.id }, body })
+    } else {
+      createMut.mutate({ body })
+    }
+  }
 
   const set = (field: string, value: any) =>
     setForm((f) => ({ ...f, [field]: value }))
@@ -86,7 +101,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       onSubmit={(e) => {
         e.preventDefault()
         setError(null)
-        mutation.mutate(form.status as 'draft' | 'published')
+        submitEvent(form.status as 'draft' | 'published')
       }}
       className="space-y-6"
     >
@@ -251,7 +266,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
           onClick={() => {
             setError(null)
             set('status', 'published')
-            mutation.mutate('published')
+            submitEvent('published')
           }}
           disabled={mutation.isPending}
           className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50"

@@ -1,8 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { BookOpen, Users, Award, TrendingUp, Search, SlidersHorizontal } from 'lucide-react'
+import { BookOpen, Users, Award, Search, SlidersHorizontal } from 'lucide-react'
 import { TrainingCard } from './training-card'
-import { api } from '@/lib/api'
+import {
+  searchTrainingsOptions,
+  searchTrainingsQueryKey,
+  cancelCustomTrainingMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 const TABS = [
   { key: 'published', label: 'Upcoming' },
@@ -29,45 +33,40 @@ export function TrainingList({ orgId }: TrainingListProps) {
   const [search, setSearch] = useState('')
   const queryClient = useQueryClient()
 
-  const queryKey = ['trainings', orgId, activeTab, typeFilter, search]
+  const statusMap: Record<string, string> = { published: 'published', past: 'completed', draft: 'draft' }
+  const apiStatus = statusMap[activeTab]
 
-  const { data, isLoading } = useQuery({
-    queryKey,
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      const statusMap: Record<string, string> = { published: 'published', past: 'completed', draft: 'draft' }
-      const apiStatus = statusMap[activeTab]
-      if (apiStatus) params.set('status', apiStatus)
-      if (typeFilter) params.set('type', typeFilter)
-      if (search) params.set('search', search)
-      return api.get<{ data: any[]; meta: { total: number } }>(`/api/training/list/${orgId}?${params}`)
-    },
-  })
+  const { data, isLoading } = useQuery(
+    searchTrainingsOptions({
+      query: {
+        organizationId: orgId,
+        status: apiStatus as any || undefined,
+        type: typeFilter as any || undefined,
+        q: search || undefined,
+      },
+    }),
+  )
 
-  const statsQuery = useQuery({
-    queryKey: ['training-stats', orgId],
-    queryFn: async () => {
-      // Approximate from list counts
-      const [pub, draft] = await Promise.all([
-        api.get<any>(`/api/training/list/${orgId}?status=published&limit=1`),
-        api.get<any>(`/api/training/list/${orgId}?status=draft&limit=1`),
-      ])
-      return {
-        published: pub?.meta?.total ?? 0,
-        drafts: draft?.meta?.total ?? 0,
-      }
+  const { data: pubData } = useQuery(
+    searchTrainingsOptions({ query: { organizationId: orgId, status: 'published' as any, limit: 1 } }),
+  )
+  const { data: draftData } = useQuery(
+    searchTrainingsOptions({ query: { organizationId: orgId, status: 'draft' as any, limit: 1 } }),
+  )
+  const statsQuery = {
+    data: {
+      published: pubData?.pagination?.totalCount ?? 0,
+      drafts: draftData?.pagination?.totalCount ?? 0,
     },
-  })
+  }
 
   const cancelMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await api.post(`/api/training/cancel/${orgId}/${id}`)
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trainings', orgId] }),
+    ...cancelCustomTrainingMutation(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: searchTrainingsQueryKey({ query: { organizationId: orgId } }) }),
   })
 
-  const trainings = data?.data ?? []
-  const total = data?.meta?.total ?? 0
+  const trainings = (data?.data ?? []) as any[]
+  const total = data?.pagination?.totalCount ?? 0
 
   const statCards = [
     {
@@ -180,7 +179,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
                 training={t}
                 orgId={orgId}
                 onCancel={(id) => {
-                  if (confirm('Cancel this training?')) cancelMutation.mutate(id)
+                  if (confirm('Cancel this training?')) cancelMutation.mutate({ path: { trainingId: id }, query: { organizationId: orgId } })
                 }}
               />
             ))}
