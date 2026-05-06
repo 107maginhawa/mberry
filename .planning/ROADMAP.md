@@ -196,14 +196,17 @@ Plans:
 - [x] 09-02-PLAN.md — Wire all workspace unit tests into CI + expand pre-commit hook (TEST-03, TEST-08)
 
 ### Phase 10: Deploy Platform Decision
-**Goal**: Choose a deploy platform and replace placeholder deploy commands with real ones
+**Goal**: Replace placeholder deploy commands with real Railway (API) + Cloudflare Pages (frontends) commands
 **Depends on**: Phase 6
 **Requirements**: DEVX-02
 **Success Criteria** (what must be TRUE):
   1. Deploy platform selected with documented rationale
   2. Staging deploy workflow uses real deploy commands (not placeholders)
   3. Production deploy workflow includes health checks against real endpoints
-**Plans**: TBD (created during discuss/plan)
+**Plans**: 1 plan
+
+**Wave 1**
+- [ ] 10-01-PLAN.md — Replace deploy.yml TODOs with Railway (API) + Cloudflare Pages (frontends) commands (DEVX-02)
 
 ## Progress
 
@@ -222,4 +225,4 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 7. Shared Component Library | 0/3 | Planned | - |
 | 8. Frontend Unit Tests | 0/3 | Planned | - |
 | 9. Test Infrastructure Hardening | 0/2 | Planned | - |
-| 10. Deploy Platform Decision | 0/? | Not started | - |
+| 10. Deploy Platform Decision | 0/1 | Planned | - |
