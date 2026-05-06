@@ -18,8 +18,8 @@ import { Pool } from 'pg';
 import { memberships, membershipTiers, membershipCategories } from './handlers/association:member/repos/membership.schema';
 import { positions, officerTerms } from './handlers/association:member/repos/governance.schema';
 import { creditEntries } from './handlers/association:member/repos/credits.schema';
-import { duesPayments } from './handlers/dues/repos/dues.types';
-import { certificates } from './handlers/certificates/repos/certificates.types';
+import { duesPayments } from './handlers/dues/repos/dues.schema';
+import { certificates } from './handlers/certificates/repos/certificates.schema';
 import { events, eventRegistrations } from './handlers/association:operations/repos/events.schema';
 import { trainings, trainingEnrollments } from './handlers/association:operations/repos/training.schema';
 import { notifications } from './handlers/notifs/repos/notification.schema';
@@ -88,13 +88,13 @@ async function seedRich() {
   const availablePersons = allPersons.filter(p => !existingPersonIds.has(p.id));
 
   // Get tiers (only exist for org1)
-  const tiers = await db.select().from(membershipTiers).where(eq(membershipTiers.tenantId, org1.id));
+  const tiers = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, org1.id));
   const regularTier = tiers.find(t => t.code === 'REGULAR');
   const associateTier = tiers.find(t => t.code === 'ASSOCIATE');
   if (!regularTier || !associateTier) { console.error('No tiers found. Run base seed first!'); process.exit(1); }
 
   // Get categories
-  const cats = await db.select().from(membershipCategories).where(eq(membershipCategories.tenantId, org1.id));
+  const cats = await db.select().from(membershipCategories).where(eq(membershipCategories.organizationId, org1.id));
   const regularCat = cats.find(c => c.name === 'Regular');
   const associateCat = cats.find(c => c.name === 'Associate');
 
@@ -118,7 +118,6 @@ async function seedRich() {
     ];
     for (const evt of futureEvents) {
       await db.insert(events).values({
-        tenantId: org1.id,
         organizationId: org1.id,
         ...evt,
         publishedAt: new Date(),
@@ -129,7 +128,6 @@ async function seedRich() {
       .where(and(eq(events.organizationId, org1.id), sql`start_date > now()`));
     for (const evt of insertedEvents.slice(0, 3)) {
       await db.insert(eventRegistrations).values({
-        tenantId: org1.id,
         eventId: evt.id,
         personId: allPersons[0].id,
         status: 'confirmed',
@@ -182,18 +180,18 @@ async function seedRich() {
   // ═══════════════════════════════════════════════════════════
 
   console.log('  1. Memberships...');
-  const [memCount] = await db.select({ c: count() }).from(memberships).where(eq(memberships.orgId, org1.id));
+  const [memCount] = await db.select({ c: count() }).from(memberships).where(eq(memberships.organizationId, org1.id));
   if ((memCount?.c ?? 0) > 10) {
     console.log('    (already seeded, skipping)');
   } else {
     // Ensure tiers exist for org2
-    const org2Tiers = await db.select().from(membershipTiers).where(eq(membershipTiers.tenantId, org2.id));
+    const org2Tiers = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, org2.id));
     let org2RegularTier = org2Tiers.find(t => t.code === 'REGULAR');
     let org2AssociateTier = org2Tiers.find(t => t.code === 'ASSOCIATE');
 
     if (!org2RegularTier) {
       const [inserted] = await db.insert(membershipTiers).values({
-        tenantId: org2.id,
+        organizationId: org2.id,
         name: 'Regular',
         code: 'REGULAR',
         description: 'Licensed practicing dentists',
@@ -201,14 +199,13 @@ async function seedRich() {
         currency: 'PHP',
         benefits: ['Full voting rights', 'Event access', 'CPD tracking'],
         status: 'active',
-        sortOrder: 0,
       }).returning();
       org2RegularTier = inserted;
       console.log('    Created Regular tier for PDA Cebu');
     }
     if (!org2AssociateTier) {
       const [inserted] = await db.insert(membershipTiers).values({
-        tenantId: org2.id,
+        organizationId: org2.id,
         name: 'Associate',
         code: 'ASSOCIATE',
         description: 'Dental students and recent graduates',
@@ -216,22 +213,21 @@ async function seedRich() {
         currency: 'PHP',
         benefits: ['Event access', 'CPD tracking'],
         status: 'active',
-        sortOrder: 1,
       }).returning();
       org2AssociateTier = inserted;
       console.log('    Created Associate tier for PDA Cebu');
     }
 
     // Ensure categories exist for org2
-    const org2Cats = await db.select().from(membershipCategories).where(eq(membershipCategories.tenantId, org2.id));
+    const org2Cats = await db.select().from(membershipCategories).where(eq(membershipCategories.organizationId, org2.id));
     if (org2Cats.length === 0) {
       await db.insert(membershipCategories).values([
-        { tenantId: org2.id, orgId: org2.id, name: 'Regular', description: 'Licensed practicing dentists', applicableTiers: [] },
-        { tenantId: org2.id, orgId: org2.id, name: 'Associate', description: 'Dental students and recent graduates', applicableTiers: [] },
+        { organizationId: org2.id, name: 'Regular', description: 'Licensed practicing dentists', applicableTiers: [] },
+        { organizationId: org2.id, name: 'Associate', description: 'Dental students and recent graduates', applicableTiers: [] },
       ]);
       console.log('    Created categories for PDA Cebu');
     }
-    const org2CatsRefresh = await db.select().from(membershipCategories).where(eq(membershipCategories.tenantId, org2.id));
+    const org2CatsRefresh = await db.select().from(membershipCategories).where(eq(membershipCategories.organizationId, org2.id));
     const org2RegularCat = org2CatsRefresh.find(c => c.name === 'Regular');
     const org2AssociateCat = org2CatsRefresh.find(c => c.name === 'Associate');
 
@@ -259,9 +255,8 @@ async function seedRich() {
       const isAssociate = i % 5 === 4; // 20% associate
       const joinDate = randomDate(2023, 2025);
       membershipRows.push({
-        tenantId: org1.id,
+        organizationId: org1.id,
         personId: person.id,
-        orgId: org1.id,
         tierId: isAssociate ? associateTier.id : regularTier.id,
         categoryId: isAssociate ? (associateCat?.id ?? null) : (regularCat?.id ?? null),
         memberNumber: `PDA-2026-${String(100 + i).padStart(3, '0')}`,
@@ -280,9 +275,8 @@ async function seedRich() {
       const isAssociate = i % 5 === 4;
       const joinDate = randomDate(2023, 2025);
       membershipRows.push({
-        tenantId: org2.id,
+        organizationId: org2.id,
         personId: person.id,
-        orgId: org2.id,
         tierId: isAssociate ? org2AssociateTier!.id : org2RegularTier!.id,
         categoryId: isAssociate ? (org2AssociateCat?.id ?? null) : (org2RegularCat?.id ?? null),
         memberNumber: `PDA-CEBU-${String(100 + i).padStart(3, '0')}`,
@@ -300,7 +294,7 @@ async function seedRich() {
 
   // Refresh membership list for subsequent sections
   const allMembershipsNow = await db.select().from(memberships);
-  const org1Members = allMembershipsNow.filter(m => m.orgId === org1.id);
+  const org1Members = allMembershipsNow.filter(m => m.organizationId === org1.id);
   const activeOrg1Members = org1Members.filter(m => m.status === 'active');
 
   // ═══════════════════════════════════════════════════════════
@@ -317,7 +311,6 @@ async function seedRich() {
     // Create positions for both orgs
     for (const org of [org1, org2]) {
       const posRows = positionTitles.map((title, idx) => ({
-        tenantId: org.id,
         organizationId: org.id,
         title,
         description: `${title} of ${org.slug === 'pda-metro-manila' ? 'PDA Metro Manila' : 'PDA Cebu'}`,
@@ -333,7 +326,7 @@ async function seedRich() {
     // Create officer terms using active members
     const org1Positions = await db.select().from(positions).where(eq(positions.organizationId, org1.id));
     const org2Positions = await db.select().from(positions).where(eq(positions.organizationId, org2.id));
-    const org2Members = allMembershipsNow.filter(m => m.orgId === org2.id && m.status === 'active');
+    const org2Members = allMembershipsNow.filter(m => m.organizationId === org2.id && m.status === 'active');
 
     const termStart = new Date('2025-07-01');
     const termEnd = new Date('2026-06-30');
@@ -345,7 +338,6 @@ async function seedRich() {
     // Active terms for org1
     for (let i = 0; i < Math.min(org1Positions.length, activeOrg1Members.length); i++) {
       termRows.push({
-        tenantId: org1.id,
         positionId: org1Positions[i]!.id,
         personId: activeOrg1Members[i]!.personId,
         organizationId: org1.id,
@@ -358,7 +350,6 @@ async function seedRich() {
     // Active terms for org2
     for (let i = 0; i < Math.min(org2Positions.length, org2Members.length); i++) {
       termRows.push({
-        tenantId: org2.id,
         positionId: org2Positions[i]!.id,
         personId: org2Members[i]!.personId,
         organizationId: org2.id,
@@ -371,7 +362,6 @@ async function seedRich() {
     // 2 completed historical terms for org1 (different persons)
     if (activeOrg1Members.length > 7 && org1Positions.length >= 2) {
       termRows.push({
-        tenantId: org1.id,
         positionId: org1Positions[0]!.id, // President
         personId: activeOrg1Members[6]!.personId,
         organizationId: org1.id,
@@ -380,7 +370,6 @@ async function seedRich() {
         endDate: prevTermEnd,
       });
       termRows.push({
-        tenantId: org1.id,
         positionId: org1Positions[2]!.id, // Secretary
         personId: activeOrg1Members[7]!.personId,
         organizationId: org1.id,
@@ -412,7 +401,6 @@ async function seedRich() {
       const autoMembers = activeOrg1Members.slice(0, 10);
       for (const member of autoMembers) {
         creditRows.push({
-          tenantId: org1.id,
           personId: member.personId,
           organizationId: org1.id,
           type: 'auto' as const,
@@ -452,7 +440,6 @@ async function seedRich() {
       const member = activeOrg1Members[memberIdx + 2]; // offset from auto-credit members
       if (member) {
         creditRows.push({
-          tenantId: org1.id,
           personId: member.personId,
           organizationId: org1.id,
           type: 'manual' as const,
@@ -544,7 +531,6 @@ async function seedRich() {
     if (upcomingEvents[0]) {
       for (let i = 0; i < Math.min(8, activeOrg1Members.length); i++) {
         regRows.push({
-          tenantId: org1.id,
           eventId: upcomingEvents[0].id,
           personId: activeOrg1Members[i]!.personId,
           status: 'confirmed' as const,
@@ -556,7 +542,6 @@ async function seedRich() {
     if (upcomingEvents[1]) {
       for (let i = 8; i < Math.min(13, activeOrg1Members.length); i++) {
         regRows.push({
-          tenantId: org1.id,
           eventId: upcomingEvents[1].id,
           personId: activeOrg1Members[i]!.personId,
           status: (i >= 11 ? 'waitlisted' : 'confirmed') as const,
@@ -568,7 +553,6 @@ async function seedRich() {
     if (pastEvents[0]) {
       for (let i = 13; i < Math.min(15, activeOrg1Members.length); i++) {
         regRows.push({
-          tenantId: org1.id,
           eventId: pastEvents[0].id,
           personId: activeOrg1Members[i]!.personId,
           status: 'confirmed' as const,
@@ -597,7 +581,6 @@ async function seedRich() {
     if (upcomingTrainings[0]) {
       for (let i = 2; i < Math.min(6, activeOrg1Members.length); i++) {
         enrollRows.push({
-          tenantId: org1.id,
           trainingId: upcomingTrainings[0].id,
           personId: activeOrg1Members[i]!.personId,
           status: 'enrolled' as const,
@@ -609,7 +592,6 @@ async function seedRich() {
     if (upcomingTrainings[1]) {
       for (let i = 6; i < Math.min(9, activeOrg1Members.length); i++) {
         enrollRows.push({
-          tenantId: org1.id,
           trainingId: upcomingTrainings[1].id,
           personId: activeOrg1Members[i]!.personId,
           status: 'enrolled' as const,
@@ -621,7 +603,6 @@ async function seedRich() {
     if (completedTraining) {
       for (let i = 9; i < Math.min(12, activeOrg1Members.length); i++) {
         enrollRows.push({
-          tenantId: org1.id,
           trainingId: completedTraining.id,
           personId: activeOrg1Members[i]!.personId,
           status: 'completed' as const,

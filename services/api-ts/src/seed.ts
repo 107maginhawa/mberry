@@ -193,7 +193,7 @@ async function seed() {
   }
 
   // ─── 3. Membership Tiers (idempotent) ───
-  const existingTiers = await db.select().from(membershipTiers).where(eq(membershipTiers.tenantId, org1.id));
+  const existingTiers = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, org1.id));
   let regularTier: any;
   let associateTier: any;
 
@@ -203,7 +203,7 @@ async function seed() {
     console.log(`  Tiers: exist (${existingTiers.length} found)`);
   } else {
     [regularTier] = await db.insert(membershipTiers).values({
-      tenantId: org1.id,
+      organizationId: org1.id,
       name: 'Regular Member',
       code: 'REGULAR',
       description: 'Standard membership for licensed dentists',
@@ -214,7 +214,7 @@ async function seed() {
     }).returning();
 
     [associateTier] = await db.insert(membershipTiers).values({
-      tenantId: org1.id,
+      organizationId: org1.id,
       name: 'Associate Member',
       code: 'ASSOCIATE',
       description: 'For dental students and recent graduates',
@@ -228,21 +228,19 @@ async function seed() {
   }
 
   // ─── 4. Membership Categories (idempotent) ───
-  const existingCats = await db.select().from(membershipCategories).where(eq(membershipCategories.tenantId, org1.id));
+  const existingCats = await db.select().from(membershipCategories).where(eq(membershipCategories.organizationId, org1.id));
 
   if (existingCats.length >= 2) {
     console.log(`  Categories: exist (${existingCats.length} found)`);
   } else {
     await db.insert(membershipCategories).values({
-      tenantId: org1.id,
-      orgId: org1.id,
+      organizationId: org1.id,
       name: 'Practicing Dentist',
       description: 'Licensed and actively practicing',
       applicableTiers: [regularTier.id],
     });
     await db.insert(membershipCategories).values({
-      tenantId: org1.id,
-      orgId: org1.id,
+      organizationId: org1.id,
       name: 'Student',
       description: 'Currently enrolled in dental school',
       applicableTiers: [associateTier.id],
@@ -295,15 +293,14 @@ async function seed() {
 
   // ─── 6. Memberships (direct DB insert) ───
   if (personIds.length > 0) {
-    const existingMemberships = await db.select().from(memberships).where(eq(memberships.orgId, org1.id));
+    const existingMemberships = await db.select().from(memberships).where(eq(memberships.organizationId, org1.id));
 
     if (existingMemberships.length === 0) {
       for (let i = 0; i < personIds.length; i++) {
         const tier = i === 0 ? regularTier : associateTier;
         await db.insert(memberships).values({
-          tenantId: org1.id,
+          organizationId: org1.id,
           personId: personIds[i]!,
-          orgId: org1.id,
           tierId: tier.id,
           memberNumber: `PDA-2025-${String(i + 1).padStart(3, '0')}`,
           startDate: '2025-01-01',
@@ -325,7 +322,6 @@ async function seed() {
 
     if (existingPositions.length === 0) {
       const [presidentPos] = await db.insert(positions).values({
-        tenantId: org1.id,
         organizationId: org1.id,
         title: 'President',
         description: 'Association President',
@@ -335,7 +331,6 @@ async function seed() {
       }).returning();
 
       await db.insert(officerTerms).values({
-        tenantId: org1.id,
         positionId: presidentPos!.id,
         personId: personIds[0]!,
         organizationId: org1.id,

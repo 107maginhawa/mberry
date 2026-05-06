@@ -16,7 +16,7 @@ import { eq, sql } from 'drizzle-orm';
 import { Pool } from 'pg';
 
 // Dues tables (new migration)
-import { duesConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues.types';
+import { duesConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues.schema';
 
 // Membership, Events, Training — OLD schemas (existing DB tables)
 import { membershipCategories } from './handlers/association:member/repos/membership.schema';
@@ -46,8 +46,6 @@ async function seedModules() {
   if (!officerPerson) { console.error('No persons found. Run base seed first!'); process.exit(1); }
 
   const orgId = org.id;
-  // tenantId convention: org.id is used as tenantId for org-scoped tables
-  const tenantId = org.id;
   const officerId = officerPerson.id;
   const memberId = memberPerson!.id;
 
@@ -101,36 +99,31 @@ async function seedModules() {
   }
 
   // ─── F3: Membership Categories ────────────────────────────
-  // Schema: membership_category(tenantId, orgId, name, description, applicableTiers jsonb)
   console.log('  F3: Membership categories...');
 
-  const existingCats = await db.select().from(membershipCategories).where(eq(membershipCategories.tenantId, tenantId)).limit(1);
+  const existingCats = await db.select().from(membershipCategories).where(eq(membershipCategories.organizationId, orgId)).limit(1);
   if (existingCats.length === 0) {
     await db.insert(membershipCategories).values([
       {
-        tenantId,
-        orgId,
+        organizationId: orgId,
         name: 'Regular',
         description: 'Licensed practicing dentists',
         applicableTiers: [],
       },
       {
-        tenantId,
-        orgId,
+        organizationId: orgId,
         name: 'Associate',
         description: 'Dental students and recent graduates',
         applicableTiers: [],
       },
       {
-        tenantId,
-        orgId,
+        organizationId: orgId,
         name: 'Life',
         description: 'Lifetime members (exempt from dues)',
         applicableTiers: [],
       },
       {
-        tenantId,
-        orgId,
+        organizationId: orgId,
         name: 'Honorary',
         description: 'Distinguished contributors',
         applicableTiers: [],
@@ -142,8 +135,6 @@ async function seedModules() {
   }
 
   // ─── F4: Events ───────────────────────────────────────────
-  // Schema: event(tenantId, organizationId, title, description, location varchar,
-  //              startDate, endDate, capacity, registrationFee bigint, status event_status)
   console.log('  F4: Events...');
 
   const existingEvents = await db.select().from(events).where(eq(events.organizationId, orgId)).limit(1);
@@ -158,7 +149,6 @@ async function seedModules() {
 
     const inserted = await db.insert(events).values([
       {
-        tenantId,
         organizationId: orgId,
         title: 'Monthly General Assembly - May 2026',
         description: 'Regular monthly meeting of PDA Metro Manila members. Agenda includes quarterly financial report and upcoming election timeline.',
@@ -170,7 +160,6 @@ async function seedModules() {
         status: 'published',
       },
       {
-        tenantId,
         organizationId: orgId,
         title: 'Dental Mission - Tondo Community',
         description: 'Free dental services for the Tondo community. Volunteers needed for extraction, cleaning, and oral health education.',
@@ -182,7 +171,6 @@ async function seedModules() {
         status: 'published',
       },
       {
-        tenantId,
         organizationId: orgId,
         title: 'April General Assembly (Past)',
         description: 'Regular monthly meeting. Minutes available in the documents section.',
@@ -200,7 +188,6 @@ async function seedModules() {
     const upcomingEvent = inserted[0];
     if (upcomingEvent) {
       await db.insert(eventRegistrations).values({
-        tenantId,
         eventId: upcomingEvent.id,
         personId: memberId,
         status: 'confirmed',
@@ -212,9 +199,6 @@ async function seedModules() {
   }
 
   // ─── F5: Training ─────────────────────────────────────────
-  // Schema: training(tenantId, organizationId, title, description, instructorName,
-  //                  instructorId, location, startDate, endDate, creditValue numeric,
-  //                  status training_status)
   console.log('  F5: Training...');
 
   const existingTrainings = await db.select().from(trainings).where(eq(trainings.organizationId, orgId)).limit(1);
@@ -228,7 +212,6 @@ async function seedModules() {
 
     const insertedTrainings = await db.insert(trainings).values([
       {
-        tenantId,
         organizationId: orgId,
         title: 'Advanced Endodontics Workshop',
         description: 'Hands-on workshop covering modern endodontic techniques including rotary instrumentation and bioceramic sealers.',
@@ -242,7 +225,6 @@ async function seedModules() {
         status: 'published',
       },
       {
-        tenantId,
         organizationId: orgId,
         title: 'Infection Control Update 2026 (Online)',
         description: 'Annual infection control compliance training. Required for license renewal.',
@@ -256,7 +238,6 @@ async function seedModules() {
         status: 'published',
       },
       {
-        tenantId,
         organizationId: orgId,
         title: 'Dental Photography Seminar (Completed)',
         description: 'Clinical photography techniques for documentation and case presentation.',
@@ -276,7 +257,6 @@ async function seedModules() {
     const upcomingTraining = insertedTrainings[0];
     if (upcomingTraining) {
       await db.insert(trainingEnrollments).values({
-        tenantId,
         trainingId: upcomingTraining.id,
         personId: memberId,
         status: 'enrolled',
@@ -288,7 +268,6 @@ async function seedModules() {
     const pastTraining = insertedTrainings[2];
     if (pastTraining) {
       await db.insert(trainingEnrollments).values({
-        tenantId,
         trainingId: pastTraining.id,
         personId: memberId,
         status: 'completed',

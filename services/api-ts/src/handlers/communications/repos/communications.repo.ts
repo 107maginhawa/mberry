@@ -1,6 +1,6 @@
 import { eq, and, desc, like, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
-import { announcements, announcementStats, type Announcement, type NewAnnouncement, type AnnouncementStats } from './communications.types';
+import { announcements, announcementStats, type Announcement, type NewAnnouncement, type AnnouncementStats } from './communications.schema';
 
 export class CommunicationsRepository {
   constructor(private db: DatabaseInstance) {}
