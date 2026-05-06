@@ -223,6 +223,18 @@ namespace MonobaseAPI {
   @route("/association/member/institutional-memberships/{institutionalMembershipId}/seats")
   interface AssocSeatAllocationManagement extends Association.Member.Membership.SeatAllocationManagement {}
 
+  @tag("Association:Member")
+  @route("/association/member/roster")
+  interface AssocMemberRosterManagement extends Association.Member.Membership.MemberRosterManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/membership-categories")
+  interface AssocMembershipCategoryManagement extends Association.Member.Membership.MembershipCategoryManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/org-profile")
+  interface AssocOrganizationProfileManagement extends Association.Member.Membership.OrganizationProfileManagement {}
+
   // =========================================================================
   // Association Domain — Dues
   // =========================================================================
