@@ -10,6 +10,6 @@ export async function getElection(ctx: Context): Promise<Response> {
   if (!election) throw new NotFoundError('Election not found');
   const nominees = await repo.listNominees(id);
   const voterCount = await repo.getVoterCount(id);
-  const tallies = election.status === 'awaiting_confirmation' || election.status === 'published' ? await repo.getVoteTallies(id) : [];
+  const tallies = election.status === 'awaitingConfirmation' || election.status === 'published' ? await repo.getVoteTallies(id) : [];
   return ctx.json({ data: { ...election, nominees, voterCount, tallies } }, 200);
 }

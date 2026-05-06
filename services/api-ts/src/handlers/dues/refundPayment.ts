@@ -39,7 +39,7 @@ export async function refundPayment(ctx: Context): Promise<Response> {
   }
 
   const newRefundedAmount = payment.refundedAmount + refundAmount;
-  const newStatus = newRefundedAmount >= payment.amount ? 'refunded' : 'partially_refunded';
+  const newStatus = newRefundedAmount >= payment.amount ? 'refunded' : 'partiallyRefunded';
 
   const updated = await repo.updatePaymentStatus(id, newStatus, {
     refundedAmount: newRefundedAmount,
