@@ -3,8 +3,8 @@ import { baseEntityFields } from '@/core/database.schema';
 import { persons } from '../../person/repos/person.schema';
 
 export const electionTypeEnum = pgEnum('election_type', ['officer', 'bylaw']);
-export const electionStatusEnum = pgEnum('election_status', ['draft', 'nominations_open', 'voting_open', 'awaiting_confirmation', 'published', 'cancelled']);
-export const votingModeEnum = pgEnum('voting_mode', ['online', 'in_person', 'hybrid']);
+export const electionStatusEnum = pgEnum('election_status', ['draft', 'nominationsOpen', 'votingOpen', 'awaitingConfirmation', 'published', 'cancelled']);
+export const votingModeEnum = pgEnum('voting_mode', ['online', 'inPerson', 'hybrid']);
 export const nomineeStatusEnum = pgEnum('nominee_status', ['nominated', 'accepted', 'declined', 'elected']);
 
 export const elections = pgTable('election', {

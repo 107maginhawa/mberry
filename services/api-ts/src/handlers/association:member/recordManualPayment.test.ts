@@ -165,7 +165,7 @@ describe('recordManualPayment', () => {
     const ctx = makeCtx({
       _body: {
         duesInvoiceId: 'inv-1',
-        paymentMethod: 'bank_transfer',
+        paymentMethod: 'bankTransfer',
         reference: 'BT-999',
       },
     });

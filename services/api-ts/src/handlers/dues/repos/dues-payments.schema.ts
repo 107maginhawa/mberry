@@ -20,11 +20,11 @@ import { persons } from '../../person/repos/person.schema';
 export const billingFrequencyEnum = pgEnum('billing_frequency', ['annual', 'quarterly']);
 
 export const duesPaymentMethodEnum = pgEnum('dues_payment_method', [
-  'online', 'cash', 'check', 'bank_transfer', 'gcash', 'other'
+  'online', 'cash', 'check', 'bankTransfer', 'gcash', 'other'
 ]);
 
 export const duesPaymentStatusEnum = pgEnum('dues_payment_status', [
-  'pending', 'completed', 'failed', 'refunded', 'partially_refunded', 'expired'
+  'pending', 'completed', 'failed', 'refunded', 'partiallyRefunded', 'expired'
 ]);
 
 export const gatewayProviderEnum = pgEnum('gateway_provider', ['paymongo', 'stripe']);

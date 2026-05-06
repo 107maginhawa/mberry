@@ -12,7 +12,7 @@ export async function castVote(ctx: Context): Promise<Response> {
 
   const election = await repo.get(electionId);
   if (!election) throw new NotFoundError('Election not found');
-  if (election.status !== 'voting_open') throw new ConflictError('Voting is not open');
+  if (election.status !== 'votingOpen') throw new ConflictError('Voting is not open');
 
   const alreadyVoted = await repo.hasVoted(electionId, session.user.id, body.positionId);
   if (alreadyVoted) throw new ConflictError('Already voted for this position');

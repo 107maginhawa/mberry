@@ -5,7 +5,7 @@ import { baseEntityFields } from '@/core/database.schema';
 import { persons } from '../../person/repos/person.schema';
 
 export const announcementStatusEnum = pgEnum('announcement_status', [
-  'draft', 'scheduled', 'sent', 'scheduled_failed', 'archived'
+  'draft', 'scheduled', 'sent', 'scheduledFailed', 'archived'
 ]);
 
 export const announcementVisibilityEnum = pgEnum('announcement_visibility', [

@@ -7,7 +7,7 @@ import { ElectionsRepository } from './repos/elections.repo';
 
 const fakeElections = [
   { id: 'e-1', organizationId: 'org-1', title: '2026 Board Election', status: 'draft' },
-  { id: 'e-2', organizationId: 'org-1', title: 'Bylaw Amendment', status: 'voting_open' },
+  { id: 'e-2', organizationId: 'org-1', title: 'Bylaw Amendment', status: 'votingOpen' },
 ];
 
 // ─── Tests ──────────────────────────────────────────────

@@ -45,8 +45,8 @@ export const eventVisibilityEnum = pgEnum('event_visibility', [
 ]);
 
 export const eventTypeEnum = pgEnum('event_type', [
-  'general_assembly', 'induction_ceremony', 'fellowship', 'medical_mission',
-  'board_meeting', 'committee_meeting', 'fundraiser', 'other',
+  'generalAssembly', 'inductionCeremony', 'fellowship', 'medicalMission',
+  'boardMeeting', 'committeeMeeting', 'fundraiser', 'other',
 ]);
 
 export const events = pgTable('event', {

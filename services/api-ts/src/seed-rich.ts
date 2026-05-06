@@ -485,7 +485,7 @@ async function seedRich() {
     const officerId = activeOrg1Members[0]?.personId;
     if (!officerId) { console.log('    (no active members for recordedBy, skipping)'); }
     else {
-      type PaymentDef = { memberIdx: number; amount: number; status: 'pending' | 'completed' | 'failed' | 'refunded'; method: 'cash' | 'gcash' | 'bank_transfer' | 'check' | 'online'; paidAt: Date | null };
+      type PaymentDef = { memberIdx: number; amount: number; status: 'pending' | 'completed' | 'failed' | 'refunded'; method: 'cash' | 'gcash' | 'bankTransfer' | 'check' | 'online'; paidAt: Date | null };
       const paymentDefs: PaymentDef[] = [
         { memberIdx: 0, amount: 150000, status: 'completed', method: 'cash', paidAt: new Date('2026-01-10') },
         { memberIdx: 1, amount: 150000, status: 'completed', method: 'cash', paidAt: new Date('2026-01-20') },
@@ -493,15 +493,15 @@ async function seedRich() {
         { memberIdx: 3, amount: 150000, status: 'completed', method: 'gcash', paidAt: new Date('2026-02-15') },
         { memberIdx: 4, amount: 150000, status: 'completed', method: 'gcash', paidAt: new Date('2026-03-01') },
         { memberIdx: 5, amount: 150000, status: 'completed', method: 'gcash', paidAt: new Date('2026-03-20') },
-        { memberIdx: 6, amount: 150000, status: 'completed', method: 'bank_transfer', paidAt: new Date('2026-02-28') },
-        { memberIdx: 7, amount: 150000, status: 'completed', method: 'bank_transfer', paidAt: new Date('2026-03-10') },
+        { memberIdx: 6, amount: 150000, status: 'completed', method: 'bankTransfer', paidAt: new Date('2026-02-28') },
+        { memberIdx: 7, amount: 150000, status: 'completed', method: 'bankTransfer', paidAt: new Date('2026-03-10') },
         { memberIdx: 8, amount: 150000, status: 'completed', method: 'check', paidAt: new Date('2026-01-15') },
         { memberIdx: 9, amount: 150000, status: 'completed', method: 'cash', paidAt: new Date('2026-04-01') },
         { memberIdx: 10, amount: 150000, status: 'pending', method: 'online', paidAt: null },
         { memberIdx: 11, amount: 150000, status: 'pending', method: 'online', paidAt: null },
         { memberIdx: 12, amount: 100000, status: 'completed', method: 'check', paidAt: new Date('2026-01-25') },
         { memberIdx: 13, amount: 150000, status: 'failed', method: 'online', paidAt: null },
-        { memberIdx: 14, amount: 150000, status: 'refunded', method: 'bank_transfer', paidAt: new Date('2026-01-05') },
+        { memberIdx: 14, amount: 150000, status: 'refunded', method: 'bankTransfer', paidAt: new Date('2026-01-05') },
       ];
 
       const paymentRows = paymentDefs

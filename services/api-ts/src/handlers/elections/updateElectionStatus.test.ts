@@ -29,18 +29,18 @@ describe('updateElectionStatus', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { status: 'nominations_open' },
+      _body: { status: 'nominationsOpen' },
     });
 
     const response = await updateElectionStatus(ctx);
     expect(response.status).toBe(200);
-    expect(response.body.data.status).toBe('nominations_open');
+    expect(response.body.data.status).toBe('nominationsOpen');
   });
 
   test('sets publishedAt when status is published', async () => {
     let capturedData: any;
     mocks = stubRepo(ElectionsRepository, {
-      get: async () => ({ ...fakeElection, status: 'awaiting_confirmation' }),
+      get: async () => ({ ...fakeElection, status: 'awaitingConfirmation' }),
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeElection, ...data }; },
     });
 
@@ -62,7 +62,7 @@ describe('updateElectionStatus', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { status: 'voting_open' },
+      _body: { status: 'votingOpen' },
     });
 
     await updateElectionStatus(ctx);
@@ -77,7 +77,7 @@ describe('updateElectionStatus', () => {
 
     const ctx = makeCtx({
       _params: { id: 'missing-id' },
-      _body: { status: 'voting_open' },
+      _body: { status: 'votingOpen' },
     });
 
     await expect(updateElectionStatus(ctx)).rejects.toThrow('Election not found');

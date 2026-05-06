@@ -86,7 +86,7 @@ describe('refundPayment [BR-08]', () => {
 
     const response = await refundPayment(ctx);
     expect(response.status).toBe(200);
-    expect(response.body.data.status).toBe('partially_refunded');
+    expect(response.body.data.status).toBe('partiallyRefunded');
     expect(response.body.data.refundedAmount).toBe(5000);
   });
 
@@ -213,7 +213,7 @@ describe('refundPayment [BR-08]', () => {
   test('[BR-08] multiple partial refunds accumulate correctly', async () => {
     memberMocks = stubMembership();
     // First partial refund already happened: 3000 of 10000 refunded
-    const partiallyRefunded = { ...fakePayment, refundedAmount: 3000, status: 'partially_refunded' };
+    const partiallyRefunded = { ...fakePayment, refundedAmount: 3000, status: 'partiallyRefunded' };
     mocks = stubRepo(DuesRepository, {
       getPayment: async () => partiallyRefunded,
       getFundAllocations: async () => fakeAllocations,
@@ -232,7 +232,7 @@ describe('refundPayment [BR-08]', () => {
 
     const response = await refundPayment(ctx);
     expect(response.body.data.refundedAmount).toBe(7000);
-    expect(response.body.data.status).toBe('partially_refunded');
+    expect(response.body.data.status).toBe('partiallyRefunded');
   });
 
   test('[BR-08] refund reversals are proportional per fund', async () => {

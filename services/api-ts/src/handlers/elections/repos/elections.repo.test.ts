@@ -189,12 +189,12 @@ describe('ElectionsRepository.create', () => {
 
 describe('ElectionsRepository.update', () => {
   test('updates status and returns updated election', async () => {
-    const updated = makeElection({ status: 'voting_open' });
+    const updated = makeElection({ status: 'votingOpen' });
     const db = makeDb({ updateRow: updated });
     const repo = new ElectionsRepository(db as any);
 
-    const result = await repo.update('election-1', { status: 'voting_open' } as any);
-    expect(result.status).toBe('voting_open');
+    const result = await repo.update('election-1', { status: 'votingOpen' } as any);
+    expect(result.status).toBe('votingOpen');
   });
 });
 
