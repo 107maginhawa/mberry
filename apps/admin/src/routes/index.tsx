@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { LayoutDashboard, Building2, Building, Users, ShieldCheck, UserCog, ToggleLeft } from 'lucide-react'
+import { LayoutDashboard, Building2, Building, Users, ShieldCheck, UserCog, ToggleLeft, RefreshCw } from 'lucide-react'
+import { Button } from '@monobase/ui'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
@@ -78,6 +79,13 @@ function DashboardPage() {
         <h1 className="text-2xl font-semibold text-foreground">
           Platform Admin
         </h1>
+      </div>
+
+      <div className="mb-4">
+        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh Stats
+        </Button>
       </div>
 
       <div className="grid grid-cols-4 gap-6">
