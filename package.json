@@ -15,7 +15,14 @@
     "build": "bun run --filter '*' build",
     "clean": "rm -rf node_modules bun.lock && find . -name 'node_modules' -type d -prune -exec rm -rf {} +",
     "test:contract": "bun scripts/run-contract-tests.ts",
-    "test:contract:fuzz": "bun scripts/run-schemathesis.ts"
+    "test:contract:fuzz": "bun scripts/run-schemathesis.ts",
+    "prepare": "husky",
+    "typecheck": "bun run --filter '*' typecheck",
+    "lint": "bun run --filter '*' lint"
+  },
+  "lint-staged": {
+    "services/api-ts/**/*.{ts,tsx}": ["eslint --fix --max-warnings=0"],
+    "apps/account/**/*.{ts,tsx}": ["eslint --fix --max-warnings=0"]
   },
   "engines": {
     "node": ">=18.0.0",
@@ -28,6 +35,8 @@
     "@rollup/rollup-linux-x64-gnu": "^4.52.3",
     "@tauri-apps/cli-darwin-arm64": "^2.10.1",
     "@tauri-apps/cli-linux-x64-gnu": "^2.10.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "pg-cloudflare": "^1.2.7"
   }
 }
