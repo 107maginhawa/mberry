@@ -47,11 +47,10 @@ Plans:
   2. Billing Drizzle schema matches TypeSpec billing definitions with no drift
   3. Non-admin users cannot access billing management endpoints
   4. E2E tests verify full invoice lifecycle (create, pay, void, refund)
-**Plans**: 3 plans
+**Plans**: 2 plans
 Plans:
-- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
-- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
-- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
+- [ ] 01-01-PLAN.md — Handler response mapping, access controls, void threshold, schema verification
+- [ ] 01-02-PLAN.md — TDD lifecycle + access control + response field tests
 
 ### Phase 2: Audit Module Completion
 **Goal**: All write operations across modules are automatically captured in an audit trail
@@ -166,7 +165,7 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 0. Test Retrofit & CI Foundation | 0/? | Not started | - |
-| 1. Billing Schema Completion | 0/? | Not started | - |
+| 1. Billing Schema Completion | 0/2 | Not started | - |
 | 2. Audit Module Completion | 0/? | Not started | - |
 | 3. Data Model Unification | 0/? | Not started | - |
 | 4. TypeSpec/OpenAPI Reconciliation | 0/? | Not started | - |
