@@ -118,12 +118,12 @@ Plans:
 **Plans**: 4 plans
 Plans:
 **Wave 1**
-- [ ] 05-01-PLAN.md — Admin app E2E tests: organizations, associations, members CRUD with delete (TEST-06)
-- [ ] 05-02-PLAN.md — Account activation test + playwright config fix + Memberry security flow spec (TEST-05)
-- [ ] 05-04-PLAN.md — Account app booking + settings E2E tests (TEST-05)
+- [x] 05-01-PLAN.md — Admin app E2E tests: organizations, associations, members CRUD with delete (TEST-06)
+- [x] 05-02-PLAN.md — Account activation test + playwright config fix + Memberry security flow spec (TEST-05)
+- [x] 05-04-PLAN.md — Account app booking + settings E2E tests (TEST-05)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 05-03-PLAN.md — CI workflow extension: boot admin + account apps, run all E2E suites (TEST-05, TEST-06)
+- [x] 05-03-PLAN.md — CI workflow extension: boot admin + account apps, run all E2E suites (TEST-05, TEST-06)
 
 ### Phase 6: CI/CD & DevOps Pipeline
 **Goal**: Production-ready build, test, and deploy pipeline in GitHub Actions
