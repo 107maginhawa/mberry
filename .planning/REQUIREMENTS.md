@@ -46,8 +46,8 @@ Requirements for current milestone. Each maps to roadmap phases.
 - [ ] **SPEC-02**: TypeSpec definitions exist for membership module
 - [ ] **SPEC-03**: TypeSpec definitions exist for events module
 - [ ] **SPEC-04**: TypeSpec definitions exist for training module
-- [ ] **SPEC-05**: TypeSpec definitions exist for elections module
-- [ ] **SPEC-06**: TypeSpec definitions exist for certificates module
+- [x] **SPEC-05**: TypeSpec definitions exist for elections module
+- [x] **SPEC-06**: TypeSpec definitions exist for certificates module
 - [ ] **SPEC-07**: SDK auto-generates React Query hooks for all custom modules
 - [ ] **SPEC-08**: OpenAPI spec documents all endpoints (base + custom)
 
@@ -123,8 +123,8 @@ Requirements for current milestone. Each maps to roadmap phases.
 | SPEC-02 | Phase 4 | Pending |
 | SPEC-03 | Phase 4 | Pending |
 | SPEC-04 | Phase 4 | Pending |
-| SPEC-05 | Phase 4 | Pending |
-| SPEC-06 | Phase 4 | Pending |
+| SPEC-05 | Phase 4 | Complete |
+| SPEC-06 | Phase 4 | Complete |
 | SPEC-07 | Phase 4 | Pending |
 | SPEC-08 | Phase 4 | Pending |
 | DEVX-01 | Phase 6 | Pending |

@@ -95,7 +95,7 @@ Plans:
   4. OpenAPI spec documents every endpoint in the system (base + custom)
 **Plans**: 7 plans
 Plans:
-- [ ] 04-01-PLAN.md — Reconcile election enum + register elections/certificates in main.tsp (SPEC-05, SPEC-06)
+- [x] 04-01-PLAN.md — Reconcile election enum + register elections/certificates in main.tsp (SPEC-05, SPEC-06)
 - [ ] 04-02-PLAN.md — Author dues + membership custom operation TypeSpec (SPEC-01, SPEC-02)
 - [ ] 04-03-PLAN.md — Author events + training custom operation TypeSpec (SPEC-03, SPEC-04)
 - [ ] 04-04-PLAN.md — Build pipeline + SDK generation + decommission hand-wired routes (SPEC-07, SPEC-08)
@@ -172,7 +172,7 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 1. Billing Schema Completion | 0/2 | Not started | - |
 | 2. Audit Module Completion | 2/3 | Executing | - |
 | 3. Data Model Unification | 0/? | Not started | - |
-| 4. TypeSpec/OpenAPI Reconciliation | 0/7 | Not started | - |
+| 4. TypeSpec/OpenAPI Reconciliation | 1/7 | In Progress|  |
 | 5. Account & Admin App Hardening | 0/? | Not started | - |
 | 6. CI/CD & DevOps Pipeline | 0/? | Not started | - |
 | 7. Shared Component Library | 0/? | Not started | - |
