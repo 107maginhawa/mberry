@@ -38,7 +38,7 @@ export async function uploadNewDocumentVersion(
   const nextVersion = latestVersion + 1;
 
   const version = await versionRepo.createOne({
-    orgId,
+    organizationId: orgId,
     documentId,
     versionNumber: nextVersion,
     fileName: body.fileName,

@@ -28,7 +28,7 @@ export async function listProfessionalLicenses(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       personId: query.personId,
       licenseType: query.licenseType,
       status: query.status,

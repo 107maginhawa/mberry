@@ -37,7 +37,6 @@ export async function promoteWaitlistEntry(
 
   // Create confirmed registration
   const registration = await regRepo.createOne({
-    orgId,
     eventId: entry.eventId,
     personId: entry.personId,
     status: 'confirmed',

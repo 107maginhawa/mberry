@@ -52,7 +52,6 @@ export async function createCheckIn(
   if (!event) throw new NotFoundError('Event not found');
 
   const checkIn = await checkInRepo.createOne({
-    orgId,
     eventId,
     personId,
     method,

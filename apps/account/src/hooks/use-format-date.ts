@@ -69,7 +69,8 @@ export function useFormatDate(
   const format = formatOptions.format || 'long'
 
   const formatDate = useCallback(
-    (date: Date | number | string) => {
+    (date: Date | number | string | null | undefined) => {
+      if (date == null) return ''
       return formatDateUtil(date, formatOptions)
     },
     memoize
@@ -81,7 +82,8 @@ export function useFormatDate(
   )
 
   const formatRelativeDate = useCallback(
-    (date: Date | number | string, relativeOptions?: FormatRelativeDateOptions) => {
+    (date: Date | number | string | null | undefined, relativeOptions?: FormatRelativeDateOptions) => {
+      if (date == null) return ''
       return formatRelativeDateUtil(date, {
         locale: formatOptions.locale,
         ...relativeOptions

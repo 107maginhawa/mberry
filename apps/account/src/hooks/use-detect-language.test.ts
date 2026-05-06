@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach } from 'vitest'
 import { renderHook, cleanup } from '@testing-library/react'
 import { useDetectLanguage } from './use-detect-language'
 import type { Language } from '@/constants/languages'

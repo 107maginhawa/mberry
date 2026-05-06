@@ -26,7 +26,7 @@ export async function listDigitalCredentials(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       personId: query.personId,
       templateId: query.templateId,
       status: query.status,

@@ -26,7 +26,7 @@ export async function createAffiliationTransfer(
   const repo = new AffiliationTransferRepository(db, logger);
 
   const transfer = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
     fromChapterId: body.fromChapterId,
     toChapterId: body.toChapterId,

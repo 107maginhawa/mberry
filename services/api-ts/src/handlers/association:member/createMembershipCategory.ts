@@ -24,8 +24,7 @@ export async function createMembershipCategory(
   const repo = new MembershipCategoryRepository(db, logger);
 
   const category = await repo.createOne({
-    orgId,
-    orgId: body.organizationId || orgId,
+    organizationId: orgId,
     name: body.name,
     description: body.description || null,
     applicableTiers: body.applicableTiers || null,

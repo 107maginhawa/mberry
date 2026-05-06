@@ -7,13 +7,13 @@
  * RouterContext shape:
  *   { auth: { user: User | null, session: Session | null, person: Person | null } }
  */
-import { describe, test, expect, mock, beforeEach } from 'bun:test'
+import { describe, test, expect, vi, beforeEach } from 'vitest'
 
 // ---------------------------------------------------------------------------
 // Mock @tanstack/react-router so `redirect()` produces a plain inspectable
 // object rather than requiring the full router runtime.
 // ---------------------------------------------------------------------------
-mock.module('@tanstack/react-router', () => ({
+vi.mock('@tanstack/react-router', () => ({
   redirect: (opts: unknown) => {
     // Return a tagged object so tests can inspect it.
     return { __redirect: true, ...( opts as object ) }

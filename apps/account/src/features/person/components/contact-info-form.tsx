@@ -49,7 +49,7 @@ export function ContactInfoForm({
   const defaultCountry = useDetectCountry()
 
   const form = useForm<ContactInfo>({
-    resolver: zodResolver(contactInfoSchema),
+    resolver: zodResolver(contactInfoSchema as any),
     defaultValues: {
       email: userEmail || defaultValues?.email || '',
       phone: defaultValues?.phone || '',

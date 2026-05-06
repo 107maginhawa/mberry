@@ -20,7 +20,7 @@ export async function listMembershipCategories(
   const logger = ctx.get('logger');
   const repo = new MembershipCategoryRepository(db, logger);
 
-  const categories = await repo.findMany({ orgId });
+  const categories = await repo.findMany({ organizationId: orgId });
 
   return ctx.json({ items: categories });
 }

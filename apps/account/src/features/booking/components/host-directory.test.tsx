@@ -1,11 +1,11 @@
-import { describe, test, expect, afterEach, beforeEach, mock } from 'bun:test'
+import { describe, test, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 
 // Stub TanStack Router's <Link> so we don't need a full RouterProvider.
 // The component only uses Link's children/className visually.
-mock.module('@tanstack/react-router', () => ({
+vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, className }: { children: ReactNode; className?: string }) => (
     <a className={className}>{children}</a>
   ),

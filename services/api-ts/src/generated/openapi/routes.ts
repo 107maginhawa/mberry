@@ -2289,11 +2289,11 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.markNotificationAsRead as unknown as Handler
   );
 
-  // listOfficerTerms
+  // listOfficerTermsSummary
   app.get('/officer-terms/:orgId',
     authMiddleware({ roles: ["user"] }),
-    zValidator('param', validators.ListOfficerTermsParams, validationErrorHandler),
-    registry.listOfficerTerms as unknown as Handler
+    zValidator('param', validators.ListOfficerTermsSummaryParams, validationErrorHandler),
+    registry.listOfficerTermsSummary as unknown as Handler
   );
 
   // createPerson

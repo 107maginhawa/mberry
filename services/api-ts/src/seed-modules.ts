@@ -16,7 +16,7 @@ import { eq, sql } from 'drizzle-orm';
 import { Pool } from 'pg';
 
 // Dues tables (new migration)
-import { duesConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues.schema';
+import { duesConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues-payments.schema';
 
 // Membership, Events, Training — OLD schemas (existing DB tables)
 import { membershipCategories } from './handlers/association:member/repos/membership.schema';
@@ -27,7 +27,7 @@ import { trainings, trainingEnrollments } from './handlers/association:operation
 import { persons } from './handlers/person/repos/person.schema';
 import { organizations } from './handlers/platformadmin/repos/platform-admin.schema';
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgres://elad-mini@localhost:5432/monobase';
+const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://elad-mini@localhost:5432/monobase';
 
 async function seedModules() {
   const pool = new Pool({ connectionString: DATABASE_URL });

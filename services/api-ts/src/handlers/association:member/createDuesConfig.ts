@@ -26,8 +26,7 @@ export async function createDuesConfig(
   const repo = new DuesConfigRepository(db, logger);
 
   const config = await repo.createOne({
-    orgId,
-    organizationId: body.organizationId,
+    organizationId: orgId,
     tierId: body.tierId,
     annualAmount: body.annualAmount,
     currency: body.currency,

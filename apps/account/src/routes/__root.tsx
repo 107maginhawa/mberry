@@ -38,7 +38,7 @@ function RootComponent() {
         // Force router to re-evaluate guards after auth state changes
         router.invalidate()
       }}
-      Link={({ href, ...props }) => <Link to={href} {...props} />}
+      Link={({ href, ...props }: { href: string; [key: string]: any }) => <Link to={href} {...props} />}
       emailVerification
       emailOTP
       credentials

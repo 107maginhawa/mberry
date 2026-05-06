@@ -11885,10 +11885,14 @@ export type MarkNotificationAsReadParams = z.infer<typeof MarkNotificationAsRead
 
 export const MarkNotificationAsReadResponse = NotificationSchema;
 
-export const ListOfficerTermsParams = z.object({
+export const ListOfficerTermsSummaryParams = z.object({
   orgId: UUIDSchema,
 });
-export type ListOfficerTermsParams = z.infer<typeof ListOfficerTermsParams>;
+export type ListOfficerTermsSummaryParams = z.infer<typeof ListOfficerTermsSummaryParams>;
+
+export const ListOfficerTermsSummaryResponse = z.object({
+  data: z.array(OfficerTermRecordSchema)
+});
 
 export const CreatePersonBody = PersonCreateRequestSchema;
 export type CreatePersonBody = z.infer<typeof CreatePersonBody>;

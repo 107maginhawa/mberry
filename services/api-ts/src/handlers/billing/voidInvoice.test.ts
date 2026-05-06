@@ -92,6 +92,7 @@ describe('voidInvoice', () => {
         return callCount === 1 ? fakeInvoice : fakeVoidedInvoice;
       },
       updateOneById: async () => fakeVoidedInvoice,
+      findOneWithLineItems: async () => ({ ...fakeVoidedInvoice, lineItems: [] }),
     });
     merchantMocks = stubRepo(MerchantAccountRepository, {
       findByPerson: async () => fakeMerchantAccount,
@@ -116,6 +117,7 @@ describe('voidInvoice', () => {
         return callCount === 1 ? fakeInvoice : fakeVoidedInvoice;
       },
       updateOneById: async () => fakeVoidedInvoice,
+      findOneWithLineItems: async () => ({ ...fakeVoidedInvoice, lineItems: [] }),
     });
     merchantMocks = stubRepo(MerchantAccountRepository, {
       findByPerson: async () => fakeMerchantAccount,

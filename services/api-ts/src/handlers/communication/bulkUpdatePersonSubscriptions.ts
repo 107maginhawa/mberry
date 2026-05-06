@@ -29,7 +29,7 @@ export async function bulkUpdatePersonSubscriptions(
   const results = [];
   for (const item of body.updates) {
     const subscription = await repo.upsert({
-      orgId,
+      organizationId: orgId,
       personId: user.id,
       topicId: item.topicId,
       enabled: item.enabled,

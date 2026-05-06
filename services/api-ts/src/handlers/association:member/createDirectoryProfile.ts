@@ -26,7 +26,7 @@ export async function createDirectoryProfile(
   const repo = new DirectoryProfileRepository(db, logger);
 
   const profile = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
     displayName: body.displayName,
     title: body.title ?? null,

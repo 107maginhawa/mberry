@@ -34,7 +34,6 @@ export async function createCourseEnrollment(
   if (!course) throw new NotFoundError('Course not found');
 
   const enrollment = await enrollRepo.createOne({
-    orgId,
     courseId,
     personId,
     progress: 0,

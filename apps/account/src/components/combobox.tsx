@@ -195,7 +195,7 @@ export function Combobox({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
-          <Command filter={(value, search) => {
+          <Command filter={(value: string, search: string) => {
             // Custom filter function for fuzzy search
             const option = options.find(opt => opt.value === value)
             if (!option) return 0

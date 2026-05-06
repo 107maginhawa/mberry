@@ -26,8 +26,7 @@ export async function listMembershipApplications(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
-      orgId: (query as any).orgId,
+      organizationId: orgId,
       status: (query as any).status,
     },
     { pagination: { offset, limit } },

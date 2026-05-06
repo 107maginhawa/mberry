@@ -80,7 +80,6 @@ describe('addMember', () => {
     });
 
     await addMember(ctx);
-    expect(captured.orgId).toBe('org-99');
     expect(captured.organizationId).toBe('org-99');
   });
 

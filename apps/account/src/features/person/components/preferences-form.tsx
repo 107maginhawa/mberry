@@ -45,7 +45,7 @@ export function PreferencesForm({
   const detectedTimezoneName = TIMEZONE_OPTIONS.find(tz => tz.value === detectedTimezone)?.label
 
   const form = useForm<Preferences>({
-    resolver: zodResolver(preferencesSchema),
+    resolver: zodResolver(preferencesSchema as any),
     defaultValues: {
       languagesSpoken: defaultValues?.languagesSpoken || [detectedLanguage],
       timezone: defaultValues?.timezone || detectedTimezone,

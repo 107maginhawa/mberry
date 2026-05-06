@@ -26,7 +26,7 @@ export async function createChapterAffiliation(
   const repo = new ChapterAffiliationRepository(db, logger);
 
   const affiliation = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
     chapterId: body.chapterId,
     isPrimary: body.isPrimary ?? false,

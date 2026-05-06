@@ -26,7 +26,7 @@ export async function createCredentialTemplate(
   const repo = new CredentialTemplateRepository(db, logger);
 
   const template = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     name: body.name,
     type: body.type,
     design: body.design ?? null,

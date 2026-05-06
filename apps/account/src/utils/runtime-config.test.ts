@@ -14,7 +14,7 @@
  * Strategy: replace the global `fetch` with a bun:test `mock()` before each
  * test, and call `clearRuntimeConfigCache()` to reset module-level state.
  */
-import { describe, test, expect, mock, beforeEach, afterEach, spyOn } from 'bun:test'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fetchRuntimeConfig, clearRuntimeConfigCache } from './runtime-config'
 
 // ---------------------------------------------------------------------------
@@ -52,7 +52,7 @@ afterEach(() => {
 
 describe('fetchRuntimeConfig — successful responses', () => {
   test('normalises api_url to apiUrl', async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve(makeResponse({ api_url: 'https://api.example.com' })),
     ) as any
 
@@ -62,7 +62,7 @@ describe('fetchRuntimeConfig — successful responses', () => {
   })
 
   test('normalises onesignal_app_id to onesignalAppId', async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve(makeResponse({ onesignal_app_id: 'app-id-123' })),
     ) as any
 
@@ -72,7 +72,7 @@ describe('fetchRuntimeConfig — successful responses', () => {
   })
 
   test('normalises both fields at once', async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve(
         makeResponse({ api_url: 'https://api.example.com', onesignal_app_id: 'oss-99' }),
       ),
@@ -85,7 +85,7 @@ describe('fetchRuntimeConfig — successful responses', () => {
   })
 
   test('returns empty config when /config.json contains no known keys', async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve(makeResponse({})),
     ) as any
 
@@ -96,7 +96,7 @@ describe('fetchRuntimeConfig — successful responses', () => {
 
   test('fetches /config.json with cache-busting headers', async () => {
     let capturedInit: RequestInit | undefined
-    globalThis.fetch = mock((_url: string, init?: RequestInit) => {
+    globalThis.fetch = vi.fn((_url: string, init?: RequestInit) => {
       capturedInit = init
       return Promise.resolve(makeResponse({}))
     }) as any
@@ -110,7 +110,7 @@ describe('fetchRuntimeConfig — successful responses', () => {
 
   test('calls fetch with /config.json path', async () => {
     let capturedUrl = ''
-    globalThis.fetch = mock((url: string) => {
+    globalThis.fetch = vi.fn((url: string) => {
       capturedUrl = url
       return Promise.resolve(makeResponse({}))
     }) as any
@@ -128,7 +128,7 @@ describe('fetchRuntimeConfig — successful responses', () => {
 describe('fetchRuntimeConfig — caching', () => {
   test('returns cached result on second call without re-fetching', async () => {
     let callCount = 0
-    globalThis.fetch = mock(() => {
+    globalThis.fetch = vi.fn(() => {
       callCount++
       return Promise.resolve(makeResponse({ api_url: 'https://cached.example.com' }))
     }) as any
@@ -142,7 +142,7 @@ describe('fetchRuntimeConfig — caching', () => {
 
   test('re-fetches after cache is cleared', async () => {
     let callCount = 0
-    globalThis.fetch = mock(() => {
+    globalThis.fetch = vi.fn(() => {
       callCount++
       return Promise.resolve(makeResponse({ api_url: 'https://example.com' }))
     }) as any
@@ -160,7 +160,7 @@ describe('fetchRuntimeConfig — caching', () => {
       makeResponse({ api_url: 'https://second.example.com' }),
     ]
     let idx = 0
-    globalThis.fetch = mock(() => Promise.resolve(responses[idx++]!)) as any
+    globalThis.fetch = vi.fn(() => Promise.resolve(responses[idx++]!)) as any
 
     const first = await fetchRuntimeConfig()
     clearRuntimeConfigCache()
@@ -177,7 +177,7 @@ describe('fetchRuntimeConfig — caching', () => {
 
 describe('fetchRuntimeConfig — non-OK HTTP responses', () => {
   test('returns empty object on 404 response', async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve(makeResponse('Not Found', 404)),
     ) as any
 
@@ -187,7 +187,7 @@ describe('fetchRuntimeConfig — non-OK HTTP responses', () => {
   })
 
   test('returns empty object on 500 response', async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve(makeResponse('Internal Server Error', 500)),
     ) as any
 
@@ -198,7 +198,7 @@ describe('fetchRuntimeConfig — non-OK HTTP responses', () => {
 
   test('does NOT cache the fallback empty config after a failed response', async () => {
     let callCount = 0
-    globalThis.fetch = mock(() => {
+    globalThis.fetch = vi.fn(() => {
       callCount++
       // First call fails, second succeeds
       if (callCount === 1) return Promise.resolve(makeResponse('err', 503))
@@ -221,7 +221,7 @@ describe('fetchRuntimeConfig — non-OK HTTP responses', () => {
 
 describe('fetchRuntimeConfig — network errors', () => {
   test('returns empty object when fetch rejects with a network error', async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.reject(new Error('Network error')),
     ) as any
 
@@ -231,7 +231,7 @@ describe('fetchRuntimeConfig — network errors', () => {
   })
 
   test('returns empty object when fetch is aborted (AbortError / timeout)', async () => {
-    globalThis.fetch = mock(() => {
+    globalThis.fetch = vi.fn(() => {
       const err = new Error('The operation was aborted')
       err.name = 'AbortError'
       return Promise.reject(err)
@@ -243,7 +243,7 @@ describe('fetchRuntimeConfig — network errors', () => {
   })
 
   test('does not throw on any error — always resolves', async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.reject(new TypeError('Failed to fetch')),
     ) as any
 
@@ -253,7 +253,7 @@ describe('fetchRuntimeConfig — network errors', () => {
 
   test('does not cache after an AbortError', async () => {
     let callCount = 0
-    globalThis.fetch = mock(() => {
+    globalThis.fetch = vi.fn(() => {
       callCount++
       if (callCount === 1) {
         const err = new Error('aborted')
@@ -290,7 +290,7 @@ describe('clearRuntimeConfigCache', () => {
 
   test('after clearing, fetchRuntimeConfig hits the network again', async () => {
     let fetchCalls = 0
-    globalThis.fetch = mock(() => {
+    globalThis.fetch = vi.fn(() => {
       fetchCalls++
       return Promise.resolve(makeResponse({ api_url: 'https://example.com' }))
     }) as any

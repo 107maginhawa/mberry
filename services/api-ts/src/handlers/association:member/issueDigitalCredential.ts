@@ -66,7 +66,7 @@ export async function issueDigitalCredential(
 
   // Create the credential first to get the ID
   const credential = await credentialRepo.createOne({
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
     templateId: body.templateId,
     membershipId: body.membershipId ?? null,

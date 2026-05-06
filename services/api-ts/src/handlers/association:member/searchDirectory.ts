@@ -28,7 +28,7 @@ export async function searchDirectory(
   // We search for both visibility levels; 'hidden' profiles are excluded
   const publicResult = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       visibility: 'public',
       q: (query as any).q,
     },
@@ -37,7 +37,7 @@ export async function searchDirectory(
 
   const memberOnlyResult = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       visibility: 'memberOnly',
       q: (query as any).q,
     },

@@ -17,8 +17,8 @@ import { positions, officerTerms } from './handlers/association:member/repos/gov
 import { persons } from './handlers/person/repos/person.schema';
 import { user as userTable } from './generated/better-auth/schema';
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgres://elad-mini@localhost:5432/monobase';
-const API_URL = process.env.API_URL || 'http://localhost:7213';
+const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://elad-mini@localhost:5432/monobase';
+const API_URL = process.env['API_URL'] || 'http://localhost:7213';
 
 // Test credentials
 const TEST_USERS = [

@@ -223,7 +223,7 @@ describe('approveMembershipApplication', () => {
     await approveMembershipApplication(ctx);
     expect(capturedMembership.status).toBe('pendingPayment');
     expect(capturedMembership.personId).toBe('person-1');
-    expect(capturedMembership.orgId).toBe('org-1');
+    expect(capturedMembership.organizationId).toBe('tenant-1');
     expect(capturedMembership.tierId).toBe('tier-1');
 
     Object.values(membershipMocks).forEach((m) => m.mockRestore());

@@ -236,7 +236,7 @@ import { getMembershipTier } from '../../handlers/association:member/getMembersh
 import { updateMembershipTier } from '../../handlers/association:member/updateMembershipTier';
 import { deleteMembershipTier } from '../../handlers/association:member/deleteMembershipTier';
 import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
-import { listOfficerTerms } from '../../handlers/association:member/listOfficerTerms';
+import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
 import { createMessageTemplate } from '../../handlers/communication/createMessageTemplate';
 import { searchMessageTemplates } from '../../handlers/communication/searchMessageTemplates';
 import { getMessageTemplate } from '../../handlers/communication/getMessageTemplate';
@@ -593,7 +593,7 @@ export const registry = {
   updateMembershipTier,
   deleteMembershipTier,
   getCreditCompliance,
-  listOfficerTerms,
+  listOfficerTermsSummary,
 
   // Communication handlers
   createMessageTemplate,

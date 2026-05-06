@@ -143,6 +143,7 @@ export function ImageCropperDialog({
         <div className="space-y-4">
           {/* Cropper Area */}
           <div className="relative h-96 bg-muted rounded-lg overflow-hidden">
+            {/* @ts-expect-error Cropper JSX type mismatch with React 19 */}
             <Cropper
               image={imageSrc}
               crop={crop}

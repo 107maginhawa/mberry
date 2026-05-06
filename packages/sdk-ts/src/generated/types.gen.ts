@@ -30672,41 +30672,6 @@ export type TrainingSearchParamsStatus = TrainingStatus;
  */
 export type TrainingSearchParamsType = TrainingType;
 
-export type UpdateMyProfileData = {
-    body: PersonMeUpdateRequest;
-    path?: never;
-    query?: never;
-    url: '/';
-};
-
-export type UpdateMyProfileErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type UpdateMyProfileError = UpdateMyProfileErrors[keyof UpdateMyProfileErrors];
-
-export type UpdateMyProfileResponses = {
-    /**
-     * Success response with data
-     */
-    200: {
-        [key: string]: unknown;
-    };
-};
-
-export type UpdateMyProfileResponse = UpdateMyProfileResponses[keyof UpdateMyProfileResponses];
-
 export type ListAdminsData = {
     body?: never;
     path?: never;
@@ -42182,35 +42147,6 @@ export type GetTimeSlotResponses = {
 
 export type GetTimeSlotResponse = GetTimeSlotResponses[keyof GetTimeSlotResponses];
 
-export type CancelMyAccountDeletionData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/cancel-delete';
-};
-
-export type CancelMyAccountDeletionErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type CancelMyAccountDeletionError = CancelMyAccountDeletionErrors[keyof CancelMyAccountDeletionErrors];
-
-export type CancelMyAccountDeletionResponses = {
-    /**
-     * Success response with data
-     */
-    200: CancelDeletionResponse;
-};
-
-export type CancelMyAccountDeletionResponse = CancelMyAccountDeletionResponses[keyof CancelMyAccountDeletionResponses];
-
 export type ListChatRoomsData = {
     body?: never;
     path?: never;
@@ -42935,122 +42871,6 @@ export type GetCreditComplianceResponses = {
 
 export type GetCreditComplianceResponse = GetCreditComplianceResponses[keyof GetCreditComplianceResponses];
 
-export type ListMyCreditEntriesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/credit-entries';
-};
-
-export type ListMyCreditEntriesErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type ListMyCreditEntriesError = ListMyCreditEntriesErrors[keyof ListMyCreditEntriesErrors];
-
-export type ListMyCreditEntriesResponses = {
-    /**
-     * Success response with data
-     */
-    200: {
-        data: Array<MyCreditEntry>;
-    };
-};
-
-export type ListMyCreditEntriesResponse = ListMyCreditEntriesResponses[keyof ListMyCreditEntriesResponses];
-
-export type CreateMyCreditEntryData = {
-    body: CreateCreditEntryRequest;
-    path?: never;
-    query?: never;
-    url: '/credit-entries';
-};
-
-export type CreateMyCreditEntryErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type CreateMyCreditEntryError = CreateMyCreditEntryErrors[keyof CreateMyCreditEntryErrors];
-
-export type CreateMyCreditEntryResponses = {
-    /**
-     * Resource created response
-     */
-    201: {
-        data: MyCreditEntry;
-    };
-};
-
-export type CreateMyCreditEntryResponse = CreateMyCreditEntryResponses[keyof CreateMyCreditEntryResponses];
-
-export type GetMyCreditSummaryData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/credit-summary';
-};
-
-export type GetMyCreditSummaryErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type GetMyCreditSummaryError = GetMyCreditSummaryErrors[keyof GetMyCreditSummaryErrors];
-
-export type GetMyCreditSummaryResponses = {
-    /**
-     * Success response with data
-     */
-    200: MyCreditSummary;
-};
-
-export type GetMyCreditSummaryResponse = GetMyCreditSummaryResponses[keyof GetMyCreditSummaryResponses];
-
-export type RequestMyAccountDeletionData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/delete';
-};
-
-export type RequestMyAccountDeletionErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-    /**
-     * Conflict response
-     */
-    409: ConflictError;
-};
-
-export type RequestMyAccountDeletionError = RequestMyAccountDeletionErrors[keyof RequestMyAccountDeletionErrors];
-
-export type RequestMyAccountDeletionResponses = {
-    /**
-     * Success response with data
-     */
-    200: AccountDeletionResponse;
-};
-
-export type RequestMyAccountDeletionResponse = RequestMyAccountDeletionResponses[keyof RequestMyAccountDeletionResponses];
-
 export type ListEmailQueueItemsData = {
     body?: never;
     path?: never;
@@ -43454,116 +43274,6 @@ export type TestEmailTemplateResponses = {
 
 export type TestEmailTemplateResponse = TestEmailTemplateResponses[keyof TestEmailTemplateResponses];
 
-export type ExportMyDataData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/export';
-};
-
-export type ExportMyDataErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type ExportMyDataError = ExportMyDataErrors[keyof ExportMyDataErrors];
-
-export type ExportMyDataResponses = {
-    /**
-     * Success response with data
-     */
-    200: MyDataExport;
-};
-
-export type ExportMyDataResponse = ExportMyDataResponses[keyof ExportMyDataResponses];
-
-export type GetMyMembershipsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/memberships';
-};
-
-export type GetMyMembershipsErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type GetMyMembershipsError = GetMyMembershipsErrors[keyof GetMyMembershipsErrors];
-
-export type GetMyMembershipsResponses = {
-    /**
-     * Success response with data
-     */
-    200: {
-        data: Array<MyMembership>;
-    };
-};
-
-export type GetMyMembershipsResponse = GetMyMembershipsResponses[keyof GetMyMembershipsResponses];
-
-export type GetMyNotificationPreferencesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/notification-preferences';
-};
-
-export type GetMyNotificationPreferencesErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type GetMyNotificationPreferencesError = GetMyNotificationPreferencesErrors[keyof GetMyNotificationPreferencesErrors];
-
-export type GetMyNotificationPreferencesResponses = {
-    /**
-     * Success response with data
-     */
-    200: Array<NotificationPreference>;
-};
-
-export type GetMyNotificationPreferencesResponse = GetMyNotificationPreferencesResponses[keyof GetMyNotificationPreferencesResponses];
-
-export type UpdateMyNotificationPreferencesData = {
-    body: UpdateNotificationPreferencesRequest;
-    path?: never;
-    query?: never;
-    url: '/notification-preferences';
-};
-
-export type UpdateMyNotificationPreferencesErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type UpdateMyNotificationPreferencesError = UpdateMyNotificationPreferencesErrors[keyof UpdateMyNotificationPreferencesErrors];
-
-export type UpdateMyNotificationPreferencesResponses = {
-    /**
-     * Success response with data
-     */
-    200: Array<NotificationPreference>;
-};
-
-export type UpdateMyNotificationPreferencesResponse = UpdateMyNotificationPreferencesResponses[keyof UpdateMyNotificationPreferencesResponses];
-
 export type ListNotificationsData = {
     body?: never;
     path?: never;
@@ -43751,41 +43461,7 @@ export type MarkNotificationAsReadResponses = {
 
 export type MarkNotificationAsReadResponse = MarkNotificationAsReadResponses[keyof MarkNotificationAsReadResponses];
 
-export type GetMyOfficerRoleData = {
-    body?: never;
-    path: {
-        /**
-         * Organisation ID to check officer status for
-         */
-        orgId: Uuid;
-    };
-    query?: never;
-    url: '/officer-role/{orgId}';
-};
-
-export type GetMyOfficerRoleErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type GetMyOfficerRoleError = GetMyOfficerRoleErrors[keyof GetMyOfficerRoleErrors];
-
-export type GetMyOfficerRoleResponses = {
-    /**
-     * Success response with data
-     */
-    200: OfficerRoleResponse;
-};
-
-export type GetMyOfficerRoleResponse = GetMyOfficerRoleResponses[keyof GetMyOfficerRoleResponses];
-
-export type ListOfficerTerms2Data = {
+export type ListOfficerTermsSummaryData = {
     body?: never;
     path: {
         /**
@@ -43797,16 +43473,16 @@ export type ListOfficerTerms2Data = {
     url: '/officer-terms/{orgId}';
 };
 
-export type ListOfficerTerms2Errors = {
+export type ListOfficerTermsSummaryErrors = {
     /**
      * Unauthorized access response
      */
     401: AuthenticationError;
 };
 
-export type ListOfficerTerms2Error = ListOfficerTerms2Errors[keyof ListOfficerTerms2Errors];
+export type ListOfficerTermsSummaryError = ListOfficerTermsSummaryErrors[keyof ListOfficerTermsSummaryErrors];
 
-export type ListOfficerTerms2Responses = {
+export type ListOfficerTermsSummaryResponses = {
     /**
      * Success response with data
      */
@@ -43815,7 +43491,7 @@ export type ListOfficerTerms2Responses = {
     };
 };
 
-export type ListOfficerTerms2Response = ListOfficerTerms2Responses[keyof ListOfficerTerms2Responses];
+export type ListOfficerTermsSummaryResponse = ListOfficerTermsSummaryResponses[keyof ListOfficerTermsSummaryResponses];
 
 export type ListPersonsData = {
     body?: never;
@@ -43908,6 +43584,389 @@ export type CreatePersonResponses = {
 
 export type CreatePersonResponse = CreatePersonResponses[keyof CreatePersonResponses];
 
+export type UpdateMyProfileData = {
+    body: PersonMeUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/persons/me';
+};
+
+export type UpdateMyProfileErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateMyProfileError = UpdateMyProfileErrors[keyof UpdateMyProfileErrors];
+
+export type UpdateMyProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type UpdateMyProfileResponse = UpdateMyProfileResponses[keyof UpdateMyProfileResponses];
+
+export type CancelMyAccountDeletionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/persons/me/cancel-delete';
+};
+
+export type CancelMyAccountDeletionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CancelMyAccountDeletionError = CancelMyAccountDeletionErrors[keyof CancelMyAccountDeletionErrors];
+
+export type CancelMyAccountDeletionResponses = {
+    /**
+     * Success response with data
+     */
+    200: CancelDeletionResponse;
+};
+
+export type CancelMyAccountDeletionResponse = CancelMyAccountDeletionResponses[keyof CancelMyAccountDeletionResponses];
+
+export type ListMyCreditEntriesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/persons/me/credit-entries';
+};
+
+export type ListMyCreditEntriesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListMyCreditEntriesError = ListMyCreditEntriesErrors[keyof ListMyCreditEntriesErrors];
+
+export type ListMyCreditEntriesResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<MyCreditEntry>;
+    };
+};
+
+export type ListMyCreditEntriesResponse = ListMyCreditEntriesResponses[keyof ListMyCreditEntriesResponses];
+
+export type CreateMyCreditEntryData = {
+    body: CreateCreditEntryRequest;
+    path?: never;
+    query?: never;
+    url: '/persons/me/credit-entries';
+};
+
+export type CreateMyCreditEntryErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type CreateMyCreditEntryError = CreateMyCreditEntryErrors[keyof CreateMyCreditEntryErrors];
+
+export type CreateMyCreditEntryResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: MyCreditEntry;
+    };
+};
+
+export type CreateMyCreditEntryResponse = CreateMyCreditEntryResponses[keyof CreateMyCreditEntryResponses];
+
+export type GetMyCreditSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/persons/me/credit-summary';
+};
+
+export type GetMyCreditSummaryErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyCreditSummaryError = GetMyCreditSummaryErrors[keyof GetMyCreditSummaryErrors];
+
+export type GetMyCreditSummaryResponses = {
+    /**
+     * Success response with data
+     */
+    200: MyCreditSummary;
+};
+
+export type GetMyCreditSummaryResponse = GetMyCreditSummaryResponses[keyof GetMyCreditSummaryResponses];
+
+export type RequestMyAccountDeletionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/persons/me/delete';
+};
+
+export type RequestMyAccountDeletionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RequestMyAccountDeletionError = RequestMyAccountDeletionErrors[keyof RequestMyAccountDeletionErrors];
+
+export type RequestMyAccountDeletionResponses = {
+    /**
+     * Success response with data
+     */
+    200: AccountDeletionResponse;
+};
+
+export type RequestMyAccountDeletionResponse = RequestMyAccountDeletionResponses[keyof RequestMyAccountDeletionResponses];
+
+export type ExportMyDataData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/persons/me/export';
+};
+
+export type ExportMyDataErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ExportMyDataError = ExportMyDataErrors[keyof ExportMyDataErrors];
+
+export type ExportMyDataResponses = {
+    /**
+     * Success response with data
+     */
+    200: MyDataExport;
+};
+
+export type ExportMyDataResponse = ExportMyDataResponses[keyof ExportMyDataResponses];
+
+export type GetMyMembershipsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/persons/me/memberships';
+};
+
+export type GetMyMembershipsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyMembershipsError = GetMyMembershipsErrors[keyof GetMyMembershipsErrors];
+
+export type GetMyMembershipsResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<MyMembership>;
+    };
+};
+
+export type GetMyMembershipsResponse = GetMyMembershipsResponses[keyof GetMyMembershipsResponses];
+
+export type GetMyNotificationPreferencesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/persons/me/notification-preferences';
+};
+
+export type GetMyNotificationPreferencesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyNotificationPreferencesError = GetMyNotificationPreferencesErrors[keyof GetMyNotificationPreferencesErrors];
+
+export type GetMyNotificationPreferencesResponses = {
+    /**
+     * Success response with data
+     */
+    200: Array<NotificationPreference>;
+};
+
+export type GetMyNotificationPreferencesResponse = GetMyNotificationPreferencesResponses[keyof GetMyNotificationPreferencesResponses];
+
+export type UpdateMyNotificationPreferencesData = {
+    body: UpdateNotificationPreferencesRequest;
+    path?: never;
+    query?: never;
+    url: '/persons/me/notification-preferences';
+};
+
+export type UpdateMyNotificationPreferencesErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type UpdateMyNotificationPreferencesError = UpdateMyNotificationPreferencesErrors[keyof UpdateMyNotificationPreferencesErrors];
+
+export type UpdateMyNotificationPreferencesResponses = {
+    /**
+     * Success response with data
+     */
+    200: Array<NotificationPreference>;
+};
+
+export type UpdateMyNotificationPreferencesResponse = UpdateMyNotificationPreferencesResponses[keyof UpdateMyNotificationPreferencesResponses];
+
+export type GetMyOfficerRoleData = {
+    body?: never;
+    path: {
+        /**
+         * Organisation ID to check officer status for
+         */
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/persons/me/officer-role/{orgId}';
+};
+
+export type GetMyOfficerRoleErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyOfficerRoleError = GetMyOfficerRoleErrors[keyof GetMyOfficerRoleErrors];
+
+export type GetMyOfficerRoleResponses = {
+    /**
+     * Success response with data
+     */
+    200: OfficerRoleResponse;
+};
+
+export type GetMyOfficerRoleResponse = GetMyOfficerRoleResponses[keyof GetMyOfficerRoleResponses];
+
+export type GetMyPrivacySettingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Organisation ID to scope the privacy settings lookup
+         */
+        orgId?: Uuid;
+    };
+    url: '/persons/me/privacy';
+};
+
+export type GetMyPrivacySettingsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyPrivacySettingsError = GetMyPrivacySettingsErrors[keyof GetMyPrivacySettingsErrors];
+
+export type GetMyPrivacySettingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: PrivacySettings | Array<PrivacySettings>;
+};
+
+export type GetMyPrivacySettingsResponse = GetMyPrivacySettingsResponses[keyof GetMyPrivacySettingsResponses];
+
+export type UpdateMyPrivacySettingsData = {
+    body: UpdatePrivacySettingsRequest;
+    path?: never;
+    query?: never;
+    url: '/persons/me/privacy';
+};
+
+export type UpdateMyPrivacySettingsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type UpdateMyPrivacySettingsError = UpdateMyPrivacySettingsErrors[keyof UpdateMyPrivacySettingsErrors];
+
+export type UpdateMyPrivacySettingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: PrivacySettings;
+};
+
+export type UpdateMyPrivacySettingsResponse = UpdateMyPrivacySettingsResponses[keyof UpdateMyPrivacySettingsResponses];
+
 export type GetPersonData = {
     body?: never;
     path: {
@@ -43984,65 +44043,6 @@ export type UpdatePersonResponses = {
 };
 
 export type UpdatePersonResponse = UpdatePersonResponses[keyof UpdatePersonResponses];
-
-export type GetMyPrivacySettingsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Organisation ID to scope the privacy settings lookup
-         */
-        orgId?: Uuid;
-    };
-    url: '/privacy';
-};
-
-export type GetMyPrivacySettingsErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type GetMyPrivacySettingsError = GetMyPrivacySettingsErrors[keyof GetMyPrivacySettingsErrors];
-
-export type GetMyPrivacySettingsResponses = {
-    /**
-     * Success response with data
-     */
-    200: PrivacySettings | Array<PrivacySettings>;
-};
-
-export type GetMyPrivacySettingsResponse = GetMyPrivacySettingsResponses[keyof GetMyPrivacySettingsResponses];
-
-export type UpdateMyPrivacySettingsData = {
-    body: UpdatePrivacySettingsRequest;
-    path?: never;
-    query?: never;
-    url: '/privacy';
-};
-
-export type UpdateMyPrivacySettingsErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type UpdateMyPrivacySettingsError = UpdateMyPrivacySettingsErrors[keyof UpdateMyPrivacySettingsErrors];
-
-export type UpdateMyPrivacySettingsResponses = {
-    /**
-     * Success response with data
-     */
-    200: PrivacySettings;
-};
-
-export type UpdateMyPrivacySettingsResponse = UpdateMyPrivacySettingsResponses[keyof UpdateMyPrivacySettingsResponses];
 
 export type GetOrganizationBySlugData = {
     body?: never;

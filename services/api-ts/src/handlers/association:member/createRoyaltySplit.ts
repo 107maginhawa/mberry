@@ -36,7 +36,7 @@ export async function createRoyaltySplit(
   }
 
   const royaltySplit = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     membershipId: body.membershipId,
     nationalOrgId: body.nationalOrgId,
     chapterId: body.chapterId,

@@ -44,12 +44,11 @@ export async function createEventRegistration(
 
   // Check capacity
   if (event.capacity) {
-    const confirmedCount = await regRepo.count({ orgId, eventId, status: 'confirmed' });
+    const confirmedCount = await regRepo.count({ eventId, status: 'confirmed' });
     if (confirmedCount >= event.capacity) {
       // Auto-waitlist
       const position = await waitlistRepo.nextPosition(eventId);
       const entry = await waitlistRepo.createOne({
-        orgId,
         eventId,
         personId,
         position,
@@ -67,7 +66,6 @@ export async function createEventRegistration(
   }
 
   const registration = await regRepo.createOne({
-    orgId,
     eventId,
     personId,
     status: 'confirmed',

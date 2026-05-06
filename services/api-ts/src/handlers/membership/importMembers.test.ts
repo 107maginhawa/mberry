@@ -91,9 +91,7 @@ describe('[BR-22] importMembers', () => {
 
     await importMembers(ctx);
     expect(captured.length).toBe(2);
-    expect(captured[0].orgId).toBe('org-77');
     expect(captured[0].organizationId).toBe('org-77');
-    expect(captured[1].orgId).toBe('org-77');
     expect(captured[1].organizationId).toBe('org-77');
   });
 

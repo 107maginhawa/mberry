@@ -25,7 +25,7 @@ export async function listDuesConfigs(
   const repo = new DuesConfigRepository(db, ctx.get('logger'));
 
   const result = await repo.findManyWithPagination(
-    { orgId, organizationId: (query as any).organizationId },
+    { organizationId: orgId },
     { pagination: { offset, limit } },
   );
 

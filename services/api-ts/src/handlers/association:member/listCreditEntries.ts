@@ -55,9 +55,8 @@ export async function listCreditEntries(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       personId,
-      organizationId: query.organizationId,
       type: query.type,
       cycleStart,
       cycleEnd,

@@ -52,9 +52,8 @@ export async function createCreditEntry(
   const repo = new CreditEntryRepository(db, logger);
 
   const entry = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     personId: user.id,
-    organizationId: body.organizationId,
     type: 'manual',
     activityName: body.activityName,
     provider: body.provider,

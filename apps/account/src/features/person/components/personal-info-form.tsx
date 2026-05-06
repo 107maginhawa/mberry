@@ -70,7 +70,7 @@ export function PersonalInfoForm({
   const [isAvatarRemoved, setIsAvatarRemoved] = useState(false)
 
   const form = useForm<PersonalInfo>({
-    resolver: zodResolver(personalInfoSchema),
+    resolver: zodResolver(personalInfoSchema as any),
     defaultValues: {
       firstName: defaultValues?.firstName || '',
       lastName: defaultValues?.lastName || '',

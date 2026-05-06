@@ -28,10 +28,9 @@ export async function createDuesInvoice(
   const invoiceNumber = `INV-${Date.now()}`;
 
   const invoice = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     membershipId: body.membershipId,
     personId: body.personId || user.id,
-    organizationId: body.organizationId,
     invoiceNumber,
     periodStart: body.periodStart,
     periodEnd: body.periodEnd,

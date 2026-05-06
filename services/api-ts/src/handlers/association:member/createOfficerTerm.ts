@@ -24,10 +24,9 @@ export async function createOfficerTerm(
   const repo = new OfficerTermRepository(db, logger);
 
   const term = await repo.create({
-    orgId,
+    organizationId: orgId,
     positionId: body.positionId,
     personId: body.personId,
-    organizationId: body.organizationId,
     startDate: new Date(body.startDate),
     endDate: body.endDate ? new Date(body.endDate) : null,
     status: body.status || 'upcoming',

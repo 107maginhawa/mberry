@@ -22,7 +22,7 @@ export async function getAgingBucket(
   const repo = new AgingBucketRepository(db, ctx.get('logger'));
 
   // Find the latest aging bucket for this organization
-  const result = await repo.findMany({ orgId, organizationId });
+  const result = await repo.findMany({ organizationId: orgId });
   const latest = result.length > 0 ? result[result.length - 1] : null;
 
   if (latest) {

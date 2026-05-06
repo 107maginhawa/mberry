@@ -38,14 +38,13 @@ export async function createTrainingEnrollment(
   }
 
   if (training.capacity) {
-    const enrolledCount = await enrollRepo.count({ orgId, trainingId, status: 'enrolled' });
+    const enrolledCount = await enrollRepo.count({ trainingId, status: 'enrolled' });
     if (enrolledCount >= training.capacity) {
       throw new BusinessLogicError('Training is at full capacity', 'CAPACITY_FULL');
     }
   }
 
   const enrollment = await enrollRepo.createOne({
-    orgId,
     trainingId,
     personId,
     status: 'enrolled',

@@ -25,8 +25,7 @@ export async function createCourse(
   const repo = new CourseRepository(db, logger);
 
   const course = await repo.createOne({
-    orgId,
-    organizationId: (body as any).organizationId || ctx.get('orgId') || orgId,
+    organizationId: orgId,
     title: (body as any).title,
     description: (body as any).description,
     creditAmount: (body as any).creditAmount,

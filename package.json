@@ -37,6 +37,7 @@
     "@tauri-apps/cli-linux-x64-gnu": "^2.10.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "pg-cloudflare": "^1.2.7"
+    "pg-cloudflare": "^1.2.7",
+    "react-hook-form": "^7.75.0"
   }
 }

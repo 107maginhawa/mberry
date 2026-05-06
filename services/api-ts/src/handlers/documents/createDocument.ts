@@ -26,7 +26,7 @@ export async function createDocument(
   const repo = new DocumentRepository(db, logger);
 
   const document = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     title: body.title,
     fileName: body.fileName,
     mimeType: body.mimeType,

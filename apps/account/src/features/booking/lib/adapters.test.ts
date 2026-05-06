@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import type { BookingEvent, Person, TimeSlot } from '@monobase/sdk-ts/generated/types.gen'
 import { toBookingHost, toBookingTimeSlot } from './adapters'
 

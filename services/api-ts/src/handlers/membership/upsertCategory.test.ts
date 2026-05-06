@@ -69,7 +69,6 @@ describe('upsertCategory', () => {
     });
 
     await upsertCategory(ctx);
-    expect(captured.orgId).toBe('org-88');
     expect(captured.organizationId).toBe('org-88');
   });
 

@@ -24,13 +24,12 @@ export async function createPosition(
   const repo = new PositionRepository(db, logger);
 
   const position = await repo.create({
-    orgId,
+    organizationId: orgId,
     title: body.title,
     description: body.description || null,
     level: body.level,
     termLengthMonths: body.termLengthMonths,
     maxTerms: body.maxTerms ?? null,
-    organizationId: body.organizationId,
     sortOrder: body.sortOrder ?? 0,
   });
 

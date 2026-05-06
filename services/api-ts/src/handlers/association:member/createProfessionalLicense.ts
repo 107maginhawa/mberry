@@ -25,7 +25,7 @@ export async function createProfessionalLicense(
   const repo = new ProfessionalLicenseRepository(db, logger);
 
   const license = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     personId: body.personId,
     licenseType: body.licenseType,
     licenseNumber: body.licenseNumber,

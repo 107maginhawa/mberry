@@ -31,7 +31,7 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
     .from(memberships)
     .where(and(
       eq(memberships.personId, user.id),
-      eq(memberships.orgId, body.orgId),
+      eq(memberships.organizationId, body.orgId),
       inArray(memberships.status, ['active', 'gracePeriod']),
     ))
     .limit(1);

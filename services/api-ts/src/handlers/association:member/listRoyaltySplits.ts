@@ -26,7 +26,7 @@ export async function listRoyaltySplits(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       chapterId: (query as any).chapterId,
       membershipId: (query as any).membershipId,
     },

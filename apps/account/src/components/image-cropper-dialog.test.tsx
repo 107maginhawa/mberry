@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach, mock } from 'bun:test'
+import { describe, test, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ImageCropperDialog } from './image-cropper-dialog'
@@ -11,8 +11,8 @@ describe('ImageCropperDialog', () => {
   const mockImageSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
 
   test('renders when open is true', () => {
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog
@@ -27,8 +27,8 @@ describe('ImageCropperDialog', () => {
   })
 
   test('does not render when open is false', () => {
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     const { container } = render(
       <ImageCropperDialog
@@ -44,8 +44,8 @@ describe('ImageCropperDialog', () => {
   })
 
   test('renders Cancel and Crop Image buttons', () => {
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog
@@ -61,8 +61,8 @@ describe('ImageCropperDialog', () => {
   })
 
   test('renders zoom slider', () => {
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog
@@ -78,8 +78,8 @@ describe('ImageCropperDialog', () => {
 
   test('calls onClose when Cancel button is clicked', async () => {
     const user = userEvent.setup()
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog
@@ -97,8 +97,8 @@ describe('ImageCropperDialog', () => {
   })
 
   test('accepts custom aspectRatio prop', () => {
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog
@@ -115,8 +115,8 @@ describe('ImageCropperDialog', () => {
   })
 
   test('accepts custom cropShape prop', () => {
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog
@@ -133,8 +133,8 @@ describe('ImageCropperDialog', () => {
   })
 
   test('uses default values when optional props not provided', () => {
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog
@@ -152,8 +152,8 @@ describe('ImageCropperDialog', () => {
 
   test('shows processing state when cropping', async () => {
     const user = userEvent.setup()
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog
@@ -173,8 +173,8 @@ describe('ImageCropperDialog', () => {
   })
 
   test('disables buttons during processing', async () => {
-    const onClose = mock(() => {})
-    const onCropComplete = mock(() => {})
+    const onClose = vi.fn()
+    const onCropComplete = vi.fn()
 
     render(
       <ImageCropperDialog

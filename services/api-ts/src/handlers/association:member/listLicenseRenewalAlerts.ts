@@ -28,7 +28,7 @@ export async function listLicenseRenewalAlerts(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       personId: query.personId,
       licenseId: query.licenseId,
       status: query.status,

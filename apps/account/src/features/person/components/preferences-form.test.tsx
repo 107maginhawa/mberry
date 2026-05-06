@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach } from 'bun:test'
+import { describe, test, expect, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
 import { PreferencesForm } from './preferences-form'
 

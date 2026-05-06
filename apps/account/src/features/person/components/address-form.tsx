@@ -63,7 +63,8 @@ export function AddressForm({
   }
 
   const form = useForm<OptionalAddress>({
-    resolver: zodResolver(required ? addressSchema : optionalAddressSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver((required ? addressSchema : optionalAddressSchema) as any),
     defaultValues: {
       street1: defaultValues?.street1 || '',
       street2: defaultValues?.street2 || '',

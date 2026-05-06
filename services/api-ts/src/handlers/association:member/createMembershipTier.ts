@@ -32,7 +32,7 @@ export async function createMembershipTier(
   }
 
   const tier = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     name: body.name,
     code: body.code,
     description: body.description || null,

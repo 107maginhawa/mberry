@@ -43,7 +43,6 @@ export async function createQuizAttempt(
   const passed = maxScore > 0 ? (score / maxScore) >= PASS_THRESHOLD : false;
 
   const attempt = await quizRepo.createOne({
-    orgId,
     courseId,
     personId,
     score,

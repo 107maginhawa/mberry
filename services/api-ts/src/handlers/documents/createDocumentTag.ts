@@ -26,7 +26,7 @@ export async function createDocumentTag(
   const repo = new DocumentTagRepository(db, logger);
 
   const tag = await repo.createOne({
-    orgId,
+    organizationId: orgId,
     name: body.name,
     color: body.color ?? null,
   });

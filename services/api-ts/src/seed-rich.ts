@@ -18,7 +18,7 @@ import { Pool } from 'pg';
 import { memberships, membershipTiers, membershipCategories } from './handlers/association:member/repos/membership.schema';
 import { positions, officerTerms } from './handlers/association:member/repos/governance.schema';
 import { creditEntries } from './handlers/association:member/repos/credits.schema';
-import { duesPayments } from './handlers/dues/repos/dues.schema';
+import { duesPayments } from './handlers/dues/repos/dues-payments.schema';
 import { certificates } from './handlers/certificates/repos/certificates.schema';
 import { events, eventRegistrations } from './handlers/association:operations/repos/events.schema';
 import { trainings, trainingEnrollments } from './handlers/association:operations/repos/training.schema';
@@ -129,7 +129,7 @@ async function seedRich() {
     for (const evt of insertedEvents.slice(0, 3)) {
       await db.insert(eventRegistrations).values({
         eventId: evt.id,
-        personId: allPersons[0].id,
+        personId: allPersons[0]!.id,
         status: 'confirmed',
         registeredAt: new Date(),
       }).onConflictDoNothing();
@@ -544,7 +544,7 @@ async function seedRich() {
         regRows.push({
           eventId: upcomingEvents[1].id,
           personId: activeOrg1Members[i]!.personId,
-          status: (i >= 11 ? 'waitlisted' : 'confirmed') as const,
+          status: (i >= 11 ? 'waitlisted' : 'confirmed') as 'waitlisted' | 'confirmed',
         });
       }
     }

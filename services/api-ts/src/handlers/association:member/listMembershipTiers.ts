@@ -25,7 +25,7 @@ export async function listMembershipTiers(
   const repo = new MembershipTierRepository(db, ctx.get('logger'));
 
   const result = await repo.findManyWithPagination(
-    { orgId, q: query.q as string | undefined },
+    { organizationId: orgId, q: query.q as string | undefined },
     { pagination: { offset, limit } },
   );
 

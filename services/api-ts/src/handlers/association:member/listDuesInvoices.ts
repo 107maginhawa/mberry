@@ -26,8 +26,7 @@ export async function listDuesInvoices(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
-      organizationId: query.organizationId,
+      organizationId: orgId,
       membershipId: query.membershipId,
       status: query.status,
     },

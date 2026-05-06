@@ -138,7 +138,7 @@ namespace Association.Member.Credits {
 
   interface OfficerTermsManagement {
     @doc("List all officer terms for the specified organisation (enriched with position title and person name).")
-    @operationId("listOfficerTerms")
+    @operationId("listOfficerTermsSummary")
     @get
     @route("/{orgId}")
     @useAuth(bearerAuth)

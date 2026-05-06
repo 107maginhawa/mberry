@@ -25,7 +25,7 @@ export async function listDocumentTags(
   const repo = new DocumentTagRepository(db, ctx.get('logger'));
 
   const result = await repo.findManyWithPagination(
-    { orgId, q: query.q },
+    { organizationId: orgId, q: query.q },
     { pagination: { offset, limit } },
   );
 

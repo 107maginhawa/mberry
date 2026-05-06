@@ -26,7 +26,7 @@ export async function searchDocuments(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       ownerId: query.ownerId,
       ownerType: query.ownerType,
       accessLevel: query.accessLevel,

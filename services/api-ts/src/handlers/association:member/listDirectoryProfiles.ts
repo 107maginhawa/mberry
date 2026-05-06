@@ -26,7 +26,7 @@ export async function listDirectoryProfiles(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       visibility: (query as any).visibility,
     },
     { pagination: { offset, limit } },

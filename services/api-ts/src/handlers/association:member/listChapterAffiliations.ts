@@ -26,7 +26,7 @@ export async function listChapterAffiliations(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       personId: (query as any).personId,
       chapterId: (query as any).chapterId,
     },

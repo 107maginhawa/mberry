@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useFormatCurrency } from './use-format-currency'
 

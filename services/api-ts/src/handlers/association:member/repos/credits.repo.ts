@@ -27,7 +27,6 @@ import {
 export interface CreditEntryFilters {
   organizationId?: string;
   personId?: string;
-  organizationId?: string;
   type?: 'auto' | 'manual';
   cycleStart?: Date;
   cycleEnd?: Date;

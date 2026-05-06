@@ -26,7 +26,7 @@ export async function listCredentialTemplates(
 
   const result = await repo.findManyWithPagination(
     {
-      orgId,
+      organizationId: orgId,
       type: query.type,
       status: query.status,
       q: query.q,
