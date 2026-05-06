@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 04 (typespec-openapi-reconciliation) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-05-06
 
@@ -72,6 +72,8 @@ Recent decisions affecting current work:
 - Used makeCtx + stubRepo pattern for billing tests (matches project test standard)
 - Renamed RefundRequest → DuesRefundRequest to avoid duplicate-symbol conflict with billing.tsp
 - organizationId used as @query (not @path) on listRosterMembers to match hand-wired route pattern
+- EventLifecycleService added as separate interface (not merged into EventManagement) to avoid duplicating cancelEvent
+- checkInCustomEvent reuses CheckInCreateRequest; completeCustomTraining reuses TrainingEnrollmentCompleteRequest
 
 ### Pending Todos
 
@@ -91,5 +93,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-06T00:30:00.000Z
-Stopped at: Completed 04-02-PLAN.md — dues+membership TypeSpec custom endpoint coverage
+Stopped at: Completed 04-03-PLAN.md — events+training TypeSpec lifecycle service coverage
 Resume file: None

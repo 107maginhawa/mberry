@@ -96,8 +96,8 @@ Plans:
 **Plans**: 7 plans
 Plans:
 - [x] 04-01-PLAN.md — Reconcile election enum + register elections/certificates in main.tsp (SPEC-05, SPEC-06)
-- [ ] 04-02-PLAN.md — Author dues + membership custom operation TypeSpec (SPEC-01, SPEC-02)
-- [ ] 04-03-PLAN.md — Author events + training custom operation TypeSpec (SPEC-03, SPEC-04)
+- [x] 04-02-PLAN.md — Author dues + membership custom operation TypeSpec (SPEC-01, SPEC-02)
+- [x] 04-03-PLAN.md — Author events + training custom operation TypeSpec (SPEC-03, SPEC-04)
 - [ ] 04-04-PLAN.md — Build pipeline + SDK generation + decommission hand-wired routes (SPEC-07, SPEC-08)
 - [ ] 04-05-PLAN.md — Migrate dues + membership frontend to SDK hooks (SPEC-07)
 - [ ] 04-06-PLAN.md — Migrate elections/certificates/events/training frontend to SDK hooks (SPEC-07)
