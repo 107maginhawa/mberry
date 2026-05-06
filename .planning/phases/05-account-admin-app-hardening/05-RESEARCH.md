@@ -104,6 +104,8 @@ Existing structure to follow — no new directories needed:
 ```
 apps/account/tests/e2e/
 ├── activation.spec.ts           ← NEW (minimal: verify account activates)
+├── bookings.spec.ts             ← NEW (booking flow for TEST-05)
+├── settings.spec.ts             ← NEW (settings flow for TEST-05)
 apps/admin/tests/e2e/
 ├── admin-smoke.spec.ts          (exists)
 ├── audit.spec.ts                (exists)
@@ -115,7 +117,6 @@ apps/admin/tests/e2e/
 apps/memberry/tests/e2e/
 ├── member/
 │   └── (existing specs)
-├── bookings.spec.ts             ← NEW or gap-fill if missing
 ├── settings.spec.ts             (exists — check coverage)
 └── security.spec.ts             ← NEW
 ```
@@ -232,7 +233,7 @@ test('account app loads dashboard for activated user', async ({ page }) => {
 ### Pitfall 5: TEST-05 Scope Mismatch
 **What goes wrong:** TEST-05 says "booking, settings, and security flows" but CONTEXT.md locks to "minimal — just verify account is activated". These contradict.
 **Why it happens:** Requirement was written before CONTEXT.md discussion narrowed scope.
-**How to avoid:** Planner must treat CONTEXT.md as authoritative. TEST-05 satisfies minimal activation check; full booking/settings/security coverage is deferred.
+**How to avoid:** Planner treats CONTEXT.md "Memberry app: fill gaps — booking, settings, and security flows" as authoritative scope direction. Booking and settings routes live in account app; security flow tests go in memberry. Plan 05-04 covers booking + settings in account app.
 **Warning signs:** Planner generates 10+ account test cases when 1-2 are expected.
 
 ## Code Examples
@@ -322,22 +323,19 @@ test.describe('Account app activation', () => {
 | A3 | Admin members endpoint requires org-scoped path `/organizations/{id}/members` not `/admin/members` | Common Pitfalls | If flat members admin endpoint exists, pattern is simpler |
 | A4 | `bun run test:e2e` is defined in admin `package.json` | CI Extension | Need to verify admin package.json has this script |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Admin members route vs API endpoint mismatch**
+1. **Admin members route vs API endpoint mismatch** (RESOLVED)
    - What we know: `/members` exists in admin route tree; API uses `/organizations/{id}/members`
-   - What's unclear: Is there a flat `/admin/members` endpoint for listing all members across orgs?
-   - Recommendation: Planner should check OpenAPI spec before writing members CRUD test
+   - Resolution: Plan 05-01 Task 2 uses defensive approach — tries `/admin/organizations?limit=1` then org-scoped `/organizations/{orgId}/members`, with `/admin/members` as fallback. Executor verifies against OpenAPI spec at read_first time.
 
-2. **Account app test:e2e script**
+2. **Account app test:e2e webServer config** (RESOLVED)
    - What we know: Account `package.json` has `"test:e2e": "playwright test"` — [VERIFIED]
-   - What's unclear: webServer config is commented out — needs un-comment or CI boot step
-   - Recommendation: Add explicit boot step in CI; uncomment webServer with `reuseExistingServer: true`
+   - Resolution: Plan 05-02 Task 1 uncomments webServer in playwright.config.ts with `reuseExistingServer: true`. CI also adds explicit boot step (plan 05-03) as belt-and-suspenders.
 
-3. **TEST-05 scope (booking/settings/security vs minimal activation)**
-   - What we know: CONTEXT.md says "minimal — just verify account is activated"
-   - What's unclear: Which interpretation satisfies the requirement check for phase completion
-   - Recommendation: Implement activation check only; defer booking/settings/security to later phase per CONTEXT.md
+3. **TEST-05 scope (booking/settings/security vs minimal activation)** (RESOLVED)
+   - What we know: CONTEXT.md says account app is "minimal — just verify account is activated" but also says "Memberry app: fill gaps — booking, settings, and security flows". Bookings and settings routes actually live in the account app (apps/account/src/routes/_dashboard/bookings/, settings/).
+   - Resolution: Plan 05-02 covers account activation (minimal) + memberry security. Plan 05-04 covers account app booking + settings E2E tests to fully satisfy TEST-05. The CONTEXT.md "Memberry gap-fill" language referred to the overall phase gap-fill work, not that these routes are in the memberry app.
 
 ## Environment Availability
 
@@ -366,8 +364,8 @@ test.describe('Account app activation', () => {
 ### Phase Requirements → Test Map
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| TEST-05 | Account app activates (minimal) | smoke | `cd apps/account && bun run test:e2e` | ❌ Wave 0 |
-| TEST-06 | Admin CRUD: orgs, associations, members | e2e | `cd apps/admin && bun run test:e2e` | ❌ Wave 0 |
+| TEST-05 | Account app activates (minimal) + booking/settings/security flows | smoke + e2e | `cd apps/account && bun run test:e2e` | activation: Wave 0, booking/settings: Wave 0 |
+| TEST-06 | Admin CRUD: orgs, associations, members | e2e | `cd apps/admin && bun run test:e2e` | Wave 0 |
 
 ### Sampling Rate
 - **Per task commit:** `cd apps/admin && bun run test:e2e`
@@ -376,6 +374,8 @@ test.describe('Account app activation', () => {
 
 ### Wave 0 Gaps
 - [ ] `apps/account/tests/e2e/activation.spec.ts` — covers TEST-05 (minimal activation)
+- [ ] `apps/account/tests/e2e/bookings.spec.ts` — covers TEST-05 (booking flows)
+- [ ] `apps/account/tests/e2e/settings.spec.ts` — covers TEST-05 (settings flows)
 - [ ] `apps/admin/tests/e2e/organizations.spec.ts` — covers TEST-06 (org CRUD)
 - [ ] `apps/admin/tests/e2e/associations.spec.ts` — covers TEST-06 (association CRUD)
 - [ ] `apps/admin/tests/e2e/members.spec.ts` — covers TEST-06 (member CRUD)
