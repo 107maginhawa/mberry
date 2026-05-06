@@ -728,4 +728,78 @@ namespace Association.Operations.Events {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
   }
+
+  /**
+   * Member-facing and officer lifecycle operations for hand-wired events routes.
+   * Covers operations not addressed by EventManagement CRUD interfaces.
+   */
+  @useAuth(bearerAuth)
+  interface EventLifecycleService {
+    @doc("List events the authenticated member is registered for.")
+    @operationId("listMyCustomEvents")
+    @get
+    @route("/my")
+    @extension("x-security-required-roles", #["association:member"])
+    listMyCustomEvents(
+      @query organizationId?: string,
+      ...PaginationQuery
+    ): ApiOkResponse<PaginatedResponse<Event>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Self-register the authenticated member for an event.")
+    @operationId("registerForCustomEvent")
+    @post
+    @route("/{eventId}/register")
+    @extension("x-security-required-roles", #["association:member"])
+    registerForCustomEvent(
+      @path eventId: string
+    ): ApiCreatedResponse<EventRegistration>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("Check in an attendee at a specific event.")
+    @operationId("checkInCustomEvent")
+    @post
+    @route("/{eventId}/check-in")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    checkInCustomEvent(
+      @path eventId: string,
+      @body body: CheckInCreateRequest
+    ): ApiCreatedResponse<CheckIn>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("List all attendance check-in records for a specific event.")
+    @operationId("listCustomEventAttendance")
+    @get
+    @route("/{eventId}/attendance")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    listCustomEventAttendance(
+      @path eventId: string,
+      ...PaginationQuery
+    ): ApiOkResponse<PaginatedResponse<CheckIn>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+
+    @doc("List all registrations for a specific event.")
+    @operationId("listCustomEventRegistrations")
+    @get
+    @route("/{eventId}/registrations")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    listCustomEventRegistrations(
+      @path eventId: string,
+      ...PaginationQuery
+    ): ApiOkResponse<PaginatedResponse<EventRegistration>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+  }
 }

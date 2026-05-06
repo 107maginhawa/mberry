@@ -411,6 +411,10 @@ namespace MonobaseAPI {
   @route("/association/events")
   interface AssocCheckInManagement extends Association.Operations.Events.CheckInManagement {}
 
+  @tag("Association:Operations")
+  @route("/association/event-lifecycle")
+  interface AssocEventLifecycleService extends Association.Operations.Events.EventLifecycleService {}
+
   // =========================================================================
   // Association Domain — Training
   // =========================================================================
@@ -434,6 +438,10 @@ namespace MonobaseAPI {
   @tag("Association:Operations")
   @route("/association/training")
   interface AssocQuizAttemptManagement extends Association.Operations.Training.QuizAttemptManagement {}
+
+  @tag("Association:Operations")
+  @route("/association/training-lifecycle")
+  interface AssocTrainingLifecycleService extends Association.Operations.Training.TrainingLifecycleService {}
 
   // =========================================================================
   // Platform Administration (M03)
