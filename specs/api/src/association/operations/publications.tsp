@@ -159,8 +159,6 @@ enum SIGMembershipStatus {
 
 @doc("An association publication (journal, newsletter, magazine, etc.)")
 model Publication extends BaseEntity {
-  @doc("Tenant this publication belongs to")
-  tenantId: string;
 
   @doc("Publication display title")
   @minLength(1)
@@ -185,8 +183,6 @@ model Publication extends BaseEntity {
 
 @doc("A single issue within a publication")
 model PublicationIssue extends BaseEntity {
-  @doc("Tenant this issue belongs to")
-  tenantId: string;
 
   @doc("Parent publication")
   publicationId: string;
@@ -216,8 +212,6 @@ model PublicationIssue extends BaseEntity {
 
 @doc("An article within a publication issue")
 model Article extends BaseEntity {
-  @doc("Tenant this article belongs to")
-  tenantId: string;
 
   @doc("Parent issue")
   issueId: string;
@@ -252,8 +246,6 @@ model Article extends BaseEntity {
 
 @doc("A member-driven Special Interest Group")
 model SpecialInterestGroup extends BaseEntity {
-  @doc("Tenant this SIG belongs to")
-  tenantId: string;
 
   @doc("SIG display name")
   @minLength(1)
@@ -283,8 +275,6 @@ model SpecialInterestGroup extends BaseEntity {
 
 @doc("A person's membership record within a SIG")
 model SIGMembership extends BaseEntity {
-  @doc("Tenant this membership belongs to")
-  tenantId: string;
 
   @doc("Parent SIG")
   sigId: string;

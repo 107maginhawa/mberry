@@ -133,7 +133,7 @@ enum ConnectorAuthMethod {
 @doc("An outbound webhook subscription that receives event notifications")
 model WebhookSubscription extends BaseEntity {
   @doc("Tenant this subscription belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Human-readable subscription name")
   @minLength(1)
@@ -170,7 +170,7 @@ model WebhookSubscription extends BaseEntity {
 @doc("A record of a single webhook payload delivery attempt")
 model WebhookDelivery extends BaseEntity {
   @doc("Tenant this delivery belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Parent subscription")
   subscriptionId: string;
@@ -205,7 +205,7 @@ model WebhookDelivery extends BaseEntity {
 @doc("A registered event topic that subscriptions can listen to")
 model EventTopic extends BaseEntity {
   @doc("Tenant this topic belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Unique topic name (e.g., 'member.created', 'event.published')")
   @minLength(1)
@@ -230,7 +230,7 @@ model EventTopic extends BaseEntity {
 @doc("An external system connector configuration")
 model Connector extends BaseEntity {
   @doc("Tenant this connector belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Human-readable connector name")
   @minLength(1)
@@ -260,7 +260,7 @@ model Connector extends BaseEntity {
 @doc("A credential record for a connector (secrets are never returned in responses)")
 model ConnectorCredential extends BaseEntity {
   @doc("Tenant this credential belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Parent connector")
   connectorId: string;

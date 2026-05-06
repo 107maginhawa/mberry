@@ -108,8 +108,6 @@ enum TierStatus {
 
 @doc("Membership tier defining fee structure and benefits")
 model MembershipTier extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("Display name of the tier")
   @minLength(1)
@@ -148,8 +146,6 @@ model MembershipTier extends BaseEntity {
 
 @doc("Membership category grouping tiers for reporting and eligibility")
 model MembershipCategory extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("Display name of the category")
   @minLength(1)
@@ -166,8 +162,6 @@ model MembershipCategory extends BaseEntity {
 
 @doc("Individual membership record linking a person to an organization and tier")
 model Membership extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the person holding this membership")
   personId: string;
@@ -215,8 +209,6 @@ model Membership extends BaseEntity {
 
 @doc("Application submitted by a prospective member")
 model MembershipApplication extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the person submitting the application")
   personId: string;
@@ -246,8 +238,6 @@ model MembershipApplication extends BaseEntity {
 
 @doc("A single renewal period within a membership lifecycle")
 model RenewalCycle extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the membership this cycle belongs to")
   membershipId: string;
@@ -270,8 +260,6 @@ model RenewalCycle extends BaseEntity {
 
 @doc("Institutional (organizational) membership granting seat allocations to individuals")
 model InstitutionalMembership extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the member institution")
   organizationId: string;
@@ -308,8 +296,6 @@ model InstitutionalMembership extends BaseEntity {
 
 @doc("Allocation of one institutional membership seat to an individual")
 model SeatAllocation extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the institutional membership from which this seat is drawn")
   institutionalMembershipId: string;

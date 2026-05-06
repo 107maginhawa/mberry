@@ -13,7 +13,7 @@ using TypeSpec.OpenAPI;
  * Association Core — Primitive / shared types
  *
  * All top-level association entities extend AssociationBaseEntity which
- * adds a mandatory tenantId to the common BaseEntity audit fields.
+ * adds a mandatory organizationId to the common BaseEntity audit fields.
  */
 namespace Association.Core;
 
@@ -21,11 +21,11 @@ namespace Association.Core;
 // Base entity
 // ---------------------------------------------------------------------------
 
-/** Base entity for every association-domain model.  Adds multi-tenant isolation on top of the common audit fields. */
-@doc("Base entity for association domain models; extends BaseEntity with multi-tenant isolation.")
+/** Base entity for every association-domain model.  Adds multi-organization isolation on top of the common audit fields. */
+@doc("Base entity for association domain models; extends BaseEntity with multi-organization isolation.")
 model AssociationBaseEntity extends BaseEntity {
-  @doc("Tenant (association) this record belongs to.")
-  tenantId: string;
+  @doc("Organization (association) this record belongs to.")
+  organizationId: string;
 }
 
 // ---------------------------------------------------------------------------

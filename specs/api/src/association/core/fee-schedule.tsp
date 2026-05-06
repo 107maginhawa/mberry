@@ -68,9 +68,6 @@ model FeeSchedule extends AssociationBaseEntity {
   @doc("Human-readable name (e.g. 'FY 2025 Standard Dues Schedule').")
   name: string;
 
-  @doc("Organisation this schedule applies to; omit for association-wide schedules.")
-  organizationId?: string;
-
   @doc("Date from which this schedule is used for new billing.")
   effectiveDate: plainDate;
 

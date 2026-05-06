@@ -155,7 +155,7 @@ model AutoAction {
 @doc("An event-driven automation rule that evaluates conditions and executes actions")
 model AutomationRule extends BaseEntity {
   @doc("Tenant this rule belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Human-readable rule name")
   @minLength(1)
@@ -192,7 +192,7 @@ model AutomationRule extends BaseEntity {
 @doc("A record of a single automation rule execution")
 model AutomationExecution extends BaseEntity {
   @doc("Tenant this execution belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Automation rule that was executed")
   ruleId: string;
@@ -224,7 +224,7 @@ model AutomationExecution extends BaseEntity {
 @doc("An AI agent task dispatched for asynchronous model processing")
 model AIAgentTask extends BaseEntity {
   @doc("Tenant this task belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Type of AI operation to perform")
   agentType: AIAgentType;
@@ -267,7 +267,7 @@ model AIAgentTask extends BaseEntity {
 @doc("A human review gate created when an AI task requires manual approval")
 model HumanReviewGate extends BaseEntity {
   @doc("Tenant this gate belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("AI agent task requiring review")
   agentTaskId: string;

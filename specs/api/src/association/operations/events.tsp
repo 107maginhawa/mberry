@@ -128,8 +128,6 @@ enum CheckInMethod {
 
 @doc("Association event with scheduling and registration metadata")
 model Event extends BaseEntity {
-  @doc("Tenant this event belongs to")
-  tenantId: string;
 
   @doc("Display title of the event")
   @minLength(1)
@@ -198,8 +196,6 @@ model Event extends BaseEntity {
 
 @doc("An individual person's registration for a specific event")
 model EventRegistration extends BaseEntity {
-  @doc("Tenant this registration belongs to")
-  tenantId: string;
 
   @doc("Event being registered for")
   eventId: string;
@@ -227,8 +223,6 @@ model EventRegistration extends BaseEntity {
 
 @doc("A position held on an event waitlist")
 model WaitlistEntry extends BaseEntity {
-  @doc("Tenant this waitlist entry belongs to")
-  tenantId: string;
 
   @doc("Event this entry is waiting for")
   eventId: string;
@@ -252,8 +246,6 @@ model WaitlistEntry extends BaseEntity {
 
 @doc("An attendance check-in record for an event registrant")
 model CheckIn extends BaseEntity {
-  @doc("Tenant this check-in belongs to")
-  tenantId: string;
 
   @doc("Event at which the check-in occurred")
   eventId: string;

@@ -35,7 +35,7 @@ export type AiAgentTask = {
     /**
      * Tenant this task belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Type of AI operation to perform
      */
@@ -122,7 +122,7 @@ export type AiAgentTaskUpdate = {
     /**
      * Tenant this task belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Type of AI operation to perform
      */
@@ -212,10 +212,6 @@ export type AbstractSubmission = {
      */
     updatedBy?: string;
     /**
-     * Tenant this submission belongs to
-     */
-    tenantId: string;
-    /**
      * Target conference
      */
     conferenceId: string;
@@ -289,10 +285,6 @@ export type AbstractSubmissionUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this submission belongs to
-     */
-    tenantId?: string;
     /**
      * Target conference
      */
@@ -373,10 +365,6 @@ export type AccreditedProvider = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the provider organization
      */
     organizationId: string;
@@ -438,10 +426,6 @@ export type AccreditedProviderUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the provider organization
      */
@@ -507,7 +491,7 @@ export type ActionAlert = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the legislative issue this alert relates to
      */
@@ -574,7 +558,7 @@ export type ActionAlertUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the legislative issue this alert relates to
      */
@@ -782,7 +766,7 @@ export type AffiliationTransfer = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the member requesting the transfer
      */
@@ -908,7 +892,7 @@ export type AffiliationTransferUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the member requesting the transfer
      */
@@ -976,10 +960,6 @@ export type AgingBucket = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the association organization
      */
     organizationId: string;
@@ -1041,10 +1021,6 @@ export type AgingBucketUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the association organization
      */
@@ -1112,10 +1088,6 @@ export type Article = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this article belongs to
-     */
-    tenantId: string;
     /**
      * Parent issue
      */
@@ -1193,10 +1165,6 @@ export type ArticleUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this article belongs to
-     */
-    tenantId?: string;
-    /**
      * Parent issue
      */
     issueId?: string;
@@ -1235,7 +1203,7 @@ export type ArticleUpdate = {
 };
 
 /**
- * Base entity for association domain models; extends BaseEntity with multi-tenant isolation.
+ * Base entity for association domain models; extends BaseEntity with multi-organization isolation.
  */
 export type AssociationCoreAssociationBaseEntity = {
     /**
@@ -1263,13 +1231,13 @@ export type AssociationCoreAssociationBaseEntity = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
 };
 
 /**
- * Base entity for association domain models; extends BaseEntity with multi-tenant isolation.
+ * Base entity for association domain models; extends BaseEntity with multi-organization isolation.
  */
 export type AssociationCoreAssociationBaseEntityUpdate = {
     /**
@@ -1297,9 +1265,9 @@ export type AssociationCoreAssociationBaseEntityUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
 };
 
 /**
@@ -1331,9 +1299,9 @@ export type AssociationCoreBillingInvoice = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable, auto-generated invoice number (e.g. 'INV-2025-00042').
      */
@@ -1342,10 +1310,6 @@ export type AssociationCoreBillingInvoice = {
      * Person this invoice was issued to (optional; use organizationId for org billing).
      */
     personId?: string;
-    /**
-     * Organisation this invoice was issued to (optional).
-     */
-    organizationId?: string;
     /**
      * Current lifecycle status.
      */
@@ -1456,9 +1420,9 @@ export type AssociationCoreBillingInvoiceUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable, auto-generated invoice number (e.g. 'INV-2025-00042').
      */
@@ -1467,10 +1431,6 @@ export type AssociationCoreBillingInvoiceUpdate = {
      * Person this invoice was issued to (optional; use organizationId for org billing).
      */
     personId?: string;
-    /**
-     * Organisation this invoice was issued to (optional).
-     */
-    organizationId?: string;
     /**
      * Current lifecycle status.
      */
@@ -1546,9 +1506,9 @@ export type AssociationCoreBillingPayment = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Invoice this payment is applied to (optional for unallocated payments).
      */
@@ -1622,9 +1582,9 @@ export type AssociationCoreBillingPaymentUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Invoice this payment is applied to (optional for unallocated payments).
      */
@@ -1715,9 +1675,9 @@ export type AssociationCoreBillingRefund = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Original payment being refunded.
      */
@@ -1774,9 +1734,9 @@ export type AssociationCoreBillingRefundUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Original payment being refunded.
      */
@@ -1828,9 +1788,9 @@ export type AssociationCoreBillingRevenueSchedule = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Invoice whose revenue is being recognised.
      */
@@ -1874,9 +1834,9 @@ export type AssociationCoreBillingRevenueScheduleUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Invoice whose revenue is being recognised.
      */
@@ -1930,9 +1890,9 @@ export type AssociationCoreCommunicationMessage = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Template this message was composed from (optional; may be ad-hoc).
      */
@@ -2091,9 +2051,9 @@ export type AssociationCoreCommunicationMessageTemplate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Internal name used to identify the template.
      */
@@ -2217,9 +2177,9 @@ export type AssociationCoreCommunicationMessageTemplateUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Internal name used to identify the template.
      */
@@ -2313,9 +2273,9 @@ export type AssociationCoreCommunicationMessageUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Template this message was composed from (optional; may be ad-hoc).
      */
@@ -2383,9 +2343,9 @@ export type AssociationCoreCommunicationPersonSubscription = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Person this preference belongs to.
      */
@@ -2439,9 +2399,9 @@ export type AssociationCoreCommunicationPersonSubscriptionUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Person this preference belongs to.
      */
@@ -2485,9 +2445,9 @@ export type AssociationCoreCommunicationSubscriptionTopic = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Display name of the topic.
      */
@@ -2591,9 +2551,9 @@ export type AssociationCoreCommunicationSubscriptionTopicUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Display name of the topic.
      */
@@ -2660,9 +2620,9 @@ export type AssociationCoreConsentConsentRecord = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Person who made the decision.
      */
@@ -2730,9 +2690,9 @@ export type AssociationCoreConsentConsentRecordUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Person who made the decision.
      */
@@ -2800,9 +2760,9 @@ export type AssociationCoreConsentConsentTemplate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Display title shown to the member (e.g. 'Terms of Service — v3.2').
      */
@@ -2867,9 +2827,9 @@ export type AssociationCoreConsentConsentTemplateUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Display title shown to the member (e.g. 'Terms of Service — v3.2').
      */
@@ -2929,9 +2889,9 @@ export type AssociationCoreConsentDataDeletionRequest = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Person requesting erasure of their data.
      */
@@ -2987,9 +2947,9 @@ export type AssociationCoreConsentDataDeletionRequestUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Person requesting erasure of their data.
      */
@@ -3050,9 +3010,9 @@ export type AssociationCoreDocumentsDocument = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Display title of the document.
      */
@@ -3223,9 +3183,9 @@ export type AssociationCoreDocumentsDocumentTag = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Unique tag name within the tenant.
      */
@@ -3279,9 +3239,9 @@ export type AssociationCoreDocumentsDocumentTagUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Unique tag name within the tenant.
      */
@@ -3335,9 +3295,9 @@ export type AssociationCoreDocumentsDocumentUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Display title of the document.
      */
@@ -3435,9 +3395,9 @@ export type AssociationCoreDocumentsDocumentVersion = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Document this version belongs to.
      */
@@ -3501,9 +3461,9 @@ export type AssociationCoreDocumentsDocumentVersionUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Document this version belongs to.
      */
@@ -3572,9 +3532,9 @@ export type AssociationCoreEngagementEngagementScore = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Person the score applies to.
      */
@@ -3628,9 +3588,9 @@ export type AssociationCoreEngagementEngagementScoreUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Person the score applies to.
      */
@@ -3684,9 +3644,9 @@ export type AssociationCoreEngagementInteractionEvent = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Person this event belongs to.
      */
@@ -3745,9 +3705,9 @@ export type AssociationCoreEngagementInteractionEventUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Person this event belongs to.
      */
@@ -3806,9 +3766,9 @@ export type AssociationCoreFeeScheduleFeeItem = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Parent fee schedule.
      */
@@ -3872,9 +3832,9 @@ export type AssociationCoreFeeScheduleFeeItemUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Parent fee schedule.
      */
@@ -3938,17 +3898,13 @@ export type AssociationCoreFeeScheduleFeeSchedule = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable name (e.g. 'FY 2025 Standard Dues Schedule').
      */
     name: string;
-    /**
-     * Organisation this schedule applies to; omit for association-wide schedules.
-     */
-    organizationId?: string;
     /**
      * Date from which this schedule is used for new billing.
      */
@@ -3997,17 +3953,13 @@ export type AssociationCoreFeeScheduleFeeScheduleUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable name (e.g. 'FY 2025 Standard Dues Schedule').
      */
     name?: string;
-    /**
-     * Organisation this schedule applies to; omit for association-wide schedules.
-     */
-    organizationId?: string;
     /**
      * Date from which this schedule is used for new billing.
      */
@@ -4051,9 +4003,9 @@ export type AssociationCoreFeeSchedulePricingTier = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Fee item this tier modifies.
      */
@@ -4109,9 +4061,9 @@ export type AssociationCoreFeeSchedulePricingTierUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Fee item this tier modifies.
      */
@@ -4172,9 +4124,9 @@ export type AssociationCoreFeeSchedulePromotionalCode = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Case-insensitive redemption code entered by the payer.
      */
@@ -4246,9 +4198,9 @@ export type AssociationCoreFeeSchedulePromotionalCodeUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Case-insensitive redemption code entered by the payer.
      */
@@ -4320,9 +4272,9 @@ export type AssociationCoreReportingExportJob = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable job name.
      */
@@ -4388,9 +4340,9 @@ export type AssociationCoreReportingExportJobUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable job name.
      */
@@ -4466,9 +4418,9 @@ export type AssociationCoreReportingImportJob = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable job name.
      */
@@ -4541,9 +4493,9 @@ export type AssociationCoreReportingImportJobUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable job name.
      */
@@ -4616,9 +4568,9 @@ export type AssociationCoreReportingReport = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable name of the report.
      */
@@ -4723,9 +4675,9 @@ export type AssociationCoreReportingReportRun = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Report definition that was executed.
      */
@@ -4787,9 +4739,9 @@ export type AssociationCoreReportingReportRunUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Report definition that was executed.
      */
@@ -4892,9 +4844,9 @@ export type AssociationCoreReportingReportUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable name of the report.
      */
@@ -4972,9 +4924,9 @@ export type AssociationCoreSchedulingSchedule = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable display name for this schedule.
      */
@@ -5022,9 +4974,9 @@ export type AssociationCoreSchedulingScheduleBlock = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Schedule this block applies to.
      */
@@ -5076,9 +5028,9 @@ export type AssociationCoreSchedulingScheduleBlockUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Schedule this block applies to.
      */
@@ -5135,9 +5087,9 @@ export type AssociationCoreSchedulingScheduleUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable display name for this schedule.
      */
@@ -5185,9 +5137,9 @@ export type AssociationCoreSchedulingSlot = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Schedule this slot belongs to.
      */
@@ -5244,9 +5196,9 @@ export type AssociationCoreSchedulingSlotUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Schedule this slot belongs to.
      */
@@ -5308,9 +5260,9 @@ export type AssociationCoreStaffStaffInvitation = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Email address the invitation was sent to.
      */
@@ -5366,9 +5318,9 @@ export type AssociationCoreStaffStaffInvitationUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organization (association) this record belongs to.
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Email address the invitation was sent to.
      */
@@ -5424,17 +5376,13 @@ export type AssociationCoreStaffStaffMember = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organisation this staff member primarily belongs to (HQ or chapter).
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Person record this staff member maps to.
      */
     personId: string;
-    /**
-     * Organisation this staff member primarily belongs to (HQ or chapter).
-     */
-    organizationId: string;
     /**
      * Functional role governing access permissions.
      */
@@ -5498,17 +5446,13 @@ export type AssociationCoreStaffStaffMemberUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant (association) this record belongs to.
+     * Organisation this staff member primarily belongs to (HQ or chapter).
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Person record this staff member maps to.
      */
     personId?: string;
-    /**
-     * Organisation this staff member primarily belongs to (HQ or chapter).
-     */
-    organizationId?: string;
     /**
      * Functional role governing access permissions.
      */
@@ -5554,6 +5498,53 @@ export type AssociationCoreStaffStaffRole = 'admin' | 'coordinator' | 'accountan
 export type AssociationCoreStaffStaffStatus = 'invited' | 'active' | 'onLeave' | 'terminated';
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type AssociationListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<PlatformAdminModuleAssociation>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Status of a COI attestation
  */
 export type AttestationStatus = 'submitted' | 'reviewed' | 'cleared' | 'flagged';
@@ -5589,7 +5580,7 @@ export type AudienceSegment = {
     /**
      * Tenant this segment belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Segment display name
      */
@@ -5639,7 +5630,7 @@ export type AudienceSegmentUpdate = {
     /**
      * Tenant this segment belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Segment display name
      */
@@ -6128,7 +6119,7 @@ export type AutomationExecution = {
     /**
      * Tenant this execution belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Automation rule that was executed
      */
@@ -6199,7 +6190,7 @@ export type AutomationExecutionUpdate = {
     /**
      * Tenant this execution belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Automation rule that was executed
      */
@@ -6265,7 +6256,7 @@ export type AutomationRule = {
     /**
      * Tenant this rule belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable rule name
      */
@@ -6331,7 +6322,7 @@ export type AutomationRuleUpdate = {
     /**
      * Tenant this rule belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable rule name
      */
@@ -6402,7 +6393,7 @@ export type AwardNomination = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the award program
      */
@@ -6460,7 +6451,7 @@ export type AwardNominationUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the award program
      */
@@ -6518,7 +6509,7 @@ export type AwardProgram = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Display name of the program
      */
@@ -6606,7 +6597,7 @@ export type AwardProgramUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Display name of the program
      */
@@ -6684,7 +6675,7 @@ export type AwardRecipient = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the award program
      */
@@ -6754,7 +6745,7 @@ export type AwardRecipientUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the award program
      */
@@ -6822,10 +6813,6 @@ export type Ballot = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the election this ballot was cast in
      */
     electionId: string;
@@ -6887,10 +6874,6 @@ export type BallotUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the election this ballot was cast in
      */
@@ -7016,7 +6999,7 @@ export type BenefitOffer = {
     /**
      * Tenant this offer belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Partner providing this offer
      */
@@ -7095,7 +7078,7 @@ export type BenefitOfferUpdate = {
     /**
      * Tenant this offer belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Partner providing this offer
      */
@@ -7169,7 +7152,7 @@ export type BenefitPartner = {
     /**
      * Tenant this partner belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Partner organization display name
      */
@@ -7236,7 +7219,7 @@ export type BenefitPartnerUpdate = {
     /**
      * Tenant this partner belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Partner organization display name
      */
@@ -7298,7 +7281,7 @@ export type BenefitRedemption = {
     /**
      * Tenant this redemption belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Offer that was redeemed
      */
@@ -7348,7 +7331,7 @@ export type BenefitRedemptionUpdate = {
     /**
      * Tenant this redemption belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Offer that was redeemed
      */
@@ -7432,10 +7415,6 @@ export type BoardMeeting = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the organization whose board is meeting
      */
     organizationId: string;
@@ -7495,10 +7474,6 @@ export type BoardMeetingUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the organization whose board is meeting
      */
     organizationId?: string;
@@ -7552,10 +7527,6 @@ export type BoardResolution = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the board meeting at which this resolution was presented
      */
@@ -7626,10 +7597,6 @@ export type BoardResolutionUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the board meeting at which this resolution was presented
      */
@@ -8482,7 +8449,7 @@ export type Bookmark = {
     /**
      * Tenant this bookmark belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Bookmarked resource
      */
@@ -8524,7 +8491,7 @@ export type BookmarkUpdate = {
     /**
      * Tenant this bookmark belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Bookmarked resource
      */
@@ -8566,7 +8533,7 @@ export type CoiAttestation = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the member submitting the attestation
      */
@@ -8620,7 +8587,7 @@ export type CoiAttestationUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the member submitting the attestation
      */
@@ -8731,7 +8698,7 @@ export type Campaign = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Display name of the campaign
      */
@@ -8797,7 +8764,7 @@ export type CampaignSendRecord = {
     /**
      * Tenant this send record belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Parent campaign
      */
@@ -8851,7 +8818,7 @@ export type CampaignSendRecordUpdate = {
     /**
      * Tenant this send record belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Parent campaign
      */
@@ -8905,7 +8872,7 @@ export type CampaignSequence = {
     /**
      * Tenant this sequence step belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Parent campaign
      */
@@ -8963,7 +8930,7 @@ export type CampaignSequenceUpdate = {
     /**
      * Tenant this sequence step belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Parent campaign
      */
@@ -9031,7 +8998,7 @@ export type CampaignUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Display name of the campaign
      */
@@ -9105,10 +9072,6 @@ export type Candidate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the election this candidacy belongs to
      */
     electionId: string;
@@ -9175,10 +9138,6 @@ export type CandidateUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the election this candidacy belongs to
      */
@@ -9275,10 +9234,6 @@ export type CertificationEnrollment = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the enrolled member
      */
     personId: string;
@@ -9336,10 +9291,6 @@ export type CertificationEnrollmentUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the enrolled member
      */
@@ -9399,10 +9350,6 @@ export type CertificationProgram = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * Display name of the certification program
      */
     name: string;
@@ -9460,10 +9407,6 @@ export type CertificationProgramUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * Display name of the certification program
      */
@@ -9525,7 +9468,7 @@ export type ChapterAffiliation = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the affiliated member
      */
@@ -9641,7 +9584,7 @@ export type ChapterAffiliationUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the affiliated member
      */
@@ -10102,10 +10045,6 @@ export type CheckIn = {
      */
     updatedBy?: string;
     /**
-     * Tenant this check-in belongs to
-     */
-    tenantId: string;
-    /**
      * Event at which the check-in occurred
      */
     eventId: string;
@@ -10238,10 +10177,6 @@ export type CheckInUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this check-in belongs to
-     */
-    tenantId?: string;
-    /**
      * Event at which the check-in occurred
      */
     eventId?: string;
@@ -10295,10 +10230,6 @@ export type Committee = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * Display name of the committee
      */
@@ -10358,10 +10289,6 @@ export type CommitteeMeeting = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the committee holding the meeting
      */
     committeeId: string;
@@ -10412,10 +10339,6 @@ export type CommitteeMeetingUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the committee holding the meeting
      */
     committeeId?: string;
@@ -10465,10 +10388,6 @@ export type CommitteeSeat = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the committee
      */
@@ -10534,10 +10453,6 @@ export type CommitteeSeatUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the committee
      */
     committeeId?: string;
@@ -10601,10 +10516,6 @@ export type CommitteeUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * Display name of the committee
      */
@@ -10673,10 +10584,6 @@ export type Conference = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this conference belongs to
-     */
-    tenantId: string;
     /**
      * Conference display title
      */
@@ -10782,10 +10689,6 @@ export type ConferenceUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this conference belongs to
-     */
-    tenantId?: string;
     /**
      * Conference display title
      */
@@ -10933,7 +10836,7 @@ export type Connector = {
     /**
      * Tenant this connector belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable connector name
      */
@@ -11000,7 +10903,7 @@ export type ConnectorCredential = {
     /**
      * Tenant this credential belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Parent connector
      */
@@ -11050,7 +10953,7 @@ export type ConnectorCredentialUpdate = {
     /**
      * Tenant this credential belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Parent connector
      */
@@ -11115,7 +11018,7 @@ export type ConnectorUpdate = {
     /**
      * Tenant this connector belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable connector name
      */
@@ -11193,10 +11096,6 @@ export type Course = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this course belongs to
-     */
-    tenantId: string;
     /**
      * Course display title
      */
@@ -11285,10 +11184,6 @@ export type CourseEnrollment = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this enrollment belongs to
-     */
-    tenantId: string;
     /**
      * Course enrolled in
      */
@@ -11403,10 +11298,6 @@ export type CourseEnrollmentUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this enrollment belongs to
-     */
-    tenantId?: string;
     /**
      * Course enrolled in
      */
@@ -11565,10 +11456,6 @@ export type CourseUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this course belongs to
-     */
-    tenantId?: string;
     /**
      * Course display title
      */
@@ -11829,7 +11716,7 @@ export type CredentialTemplate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Display name of the template
      */
@@ -11946,7 +11833,7 @@ export type CredentialTemplateUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Display name of the template
      */
@@ -12015,7 +11902,7 @@ export type CredentialVerificationLog = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the credential that was verified
      */
@@ -12065,7 +11952,7 @@ export type CredentialVerificationLogUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the credential that was verified
      */
@@ -12117,10 +12004,6 @@ export type CreditCycle = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the member this cycle belongs to
      */
@@ -12180,10 +12063,6 @@ export type CreditCycleUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the member this cycle belongs to
      */
     personId?: string;
@@ -12241,10 +12120,6 @@ export type CreditEntry = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the member receiving the credit
      */
@@ -12319,10 +12194,6 @@ export type CreditEntryUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the member receiving the credit
      */
@@ -12462,7 +12333,7 @@ export type DigitalCredential = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the person this credential was issued to
      */
@@ -12587,7 +12458,7 @@ export type DigitalCredentialUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the person this credential was issued to
      */
@@ -12665,7 +12536,7 @@ export type DirectoryProfile = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the person this profile belongs to
      */
@@ -12829,7 +12700,7 @@ export type DirectoryProfileUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the person this profile belongs to
      */
@@ -12945,7 +12816,7 @@ export type DirectorySearchIndex = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the person this index entry represents
      */
@@ -13012,7 +12883,7 @@ export type DirectorySearchIndexUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the person this index entry represents
      */
@@ -13089,7 +12960,7 @@ export type DisciplinaryAction = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the complaint that led to this action
      */
@@ -13161,7 +13032,7 @@ export type DisciplinaryActionUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the complaint that led to this action
      */
@@ -13416,7 +13287,7 @@ export type Donation = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the donor (person or organization)
      */
@@ -13499,7 +13370,7 @@ export type DonationUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the donor (person or organization)
      */
@@ -13579,10 +13450,6 @@ export type DuesConfig = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the association organization this configuration applies to
      */
@@ -13712,10 +13579,6 @@ export type DuesConfigUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the association organization this configuration applies to
      */
     organizationId?: string;
@@ -13788,10 +13651,6 @@ export type DuesInvoice = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the membership this invoice was generated for
      */
@@ -13941,10 +13800,6 @@ export type DuesInvoiceUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the membership this invoice was generated for
      */
     membershipId?: string;
@@ -14031,10 +13886,6 @@ export type DunningEvent = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the membership this dunning event targets
      */
@@ -14141,10 +13992,6 @@ export type DunningEventUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the membership this dunning event targets
      */
     membershipId?: string;
@@ -14220,10 +14067,6 @@ export type DunningTemplate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * Display name of this template
      */
@@ -14348,10 +14191,6 @@ export type DunningTemplateUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * Display name of this template
      */
     name?: string;
@@ -14421,10 +14260,6 @@ export type Election = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the organization running the election
      */
@@ -14509,10 +14344,6 @@ export type ElectionUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the organization running the election
      */
@@ -15124,7 +14955,7 @@ export type EthicsComplaint = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the complainant (null for anonymous complaints where policy allows)
      */
@@ -15190,7 +15021,7 @@ export type EthicsComplaintUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the complainant (null for anonymous complaints where policy allows)
      */
@@ -15253,10 +15084,6 @@ export type Event = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this event belongs to
-     */
-    tenantId: string;
     /**
      * Display title of the event
      */
@@ -15473,10 +15300,6 @@ export type EventRegistration = {
      */
     updatedBy?: string;
     /**
-     * Tenant this registration belongs to
-     */
-    tenantId: string;
-    /**
      * Event being registered for
      */
     eventId: string;
@@ -15608,10 +15431,6 @@ export type EventRegistrationUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this registration belongs to
-     */
-    tenantId?: string;
-    /**
      * Event being registered for
      */
     eventId?: string;
@@ -15677,7 +15496,7 @@ export type EventTopic = {
     /**
      * Tenant this topic belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Unique topic name (e.g., 'member.created', 'event.published')
      */
@@ -15731,7 +15550,7 @@ export type EventTopicUpdate = {
     /**
      * Tenant this topic belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Unique topic name (e.g., 'member.created', 'event.published')
      */
@@ -15787,10 +15606,6 @@ export type EventUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this event belongs to
-     */
-    tenantId?: string;
     /**
      * Display title of the event
      */
@@ -15956,10 +15771,6 @@ export type ExamResult = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the enrollment this exam result belongs to
      */
     enrollmentId: string;
@@ -16018,10 +15829,6 @@ export type ExamResultUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the enrollment this exam result belongs to
      */
     enrollmentId?: string;
@@ -16079,10 +15886,6 @@ export type ExhibitorProfile = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this exhibitor record belongs to
-     */
-    tenantId: string;
     /**
      * Parent conference
      */
@@ -16153,10 +15956,6 @@ export type ExhibitorProfileUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this exhibitor record belongs to
-     */
-    tenantId?: string;
     /**
      * Parent conference
      */
@@ -16683,7 +16482,7 @@ export type GrantApplication = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the grant program this application is for
      */
@@ -16757,7 +16556,7 @@ export type GrantApplicationUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the grant program this application is for
      */
@@ -16831,7 +16630,7 @@ export type GrantProgressReport = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the grant application this report corresponds to
      */
@@ -16889,7 +16688,7 @@ export type GrantProgressReportUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the grant application this report corresponds to
      */
@@ -16952,7 +16751,7 @@ export type HumanReviewGate = {
     /**
      * Tenant this gate belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * AI agent task requiring review
      */
@@ -17012,7 +16811,7 @@ export type HumanReviewGateUpdate = {
     /**
      * Tenant this gate belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * AI agent task requiring review
      */
@@ -17097,10 +16896,6 @@ export type InstitutionalMembership = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the member institution
      */
@@ -17246,10 +17041,6 @@ export type InstitutionalMembershipUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the member institution
      */
@@ -17721,10 +17512,6 @@ export type JobApplication = {
      */
     updatedBy?: string;
     /**
-     * Tenant this application belongs to
-     */
-    tenantId: string;
-    /**
      * Job posting being applied for
      */
     postingId: string;
@@ -17784,10 +17571,6 @@ export type JobApplicationUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this application belongs to
-     */
-    tenantId?: string;
-    /**
      * Job posting being applied for
      */
     postingId?: string;
@@ -17841,10 +17624,6 @@ export type JobPosting = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this posting belongs to
-     */
-    tenantId: string;
     /**
      * Position title
      */
@@ -17925,10 +17704,6 @@ export type JobPostingUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this posting belongs to
-     */
-    tenantId?: string;
     /**
      * Position title
      */
@@ -18043,7 +17818,7 @@ export type LegislativeIssue = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Title of the legislative issue or bill
      */
@@ -18106,7 +17881,7 @@ export type LegislativeIssueUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Title of the legislative issue or bill
      */
@@ -18164,7 +17939,7 @@ export type LicenseRenewalAlert = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the professional license triggering this alert
      */
@@ -18265,7 +18040,7 @@ export type LicenseRenewalAlertUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the professional license triggering this alert
      */
@@ -18343,7 +18118,7 @@ export type MarketingCampaign = {
     /**
      * Tenant this campaign belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Campaign display name
      */
@@ -18422,7 +18197,7 @@ export type MarketingCampaignUpdate = {
     /**
      * Tenant this campaign belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Campaign display name
      */
@@ -18522,10 +18297,6 @@ export type MeetingMinutes = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the meeting these minutes document
      */
     meetingId: string;
@@ -18579,10 +18350,6 @@ export type MeetingMinutesUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the meeting these minutes document
      */
@@ -18642,10 +18409,6 @@ export type Membership = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the person holding this membership
      */
@@ -18728,10 +18491,6 @@ export type MembershipApplication = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * ID of the person submitting the application
      */
@@ -18872,10 +18631,6 @@ export type MembershipApplicationUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the person submitting the application
      */
     personId?: string;
@@ -18938,10 +18693,6 @@ export type MembershipCategory = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * Display name of the category
      */
     name: string;
@@ -18983,10 +18734,6 @@ export type MembershipCategoryUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * Display name of the category
      */
@@ -19106,10 +18853,6 @@ export type MembershipTier = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
     /**
      * Display name of the tier
      */
@@ -19234,10 +18977,6 @@ export type MembershipTierUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * Display name of the tier
      */
     name?: string;
@@ -19311,10 +19050,6 @@ export type MembershipUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the person holding this membership
      */
@@ -19410,10 +19145,6 @@ export type MentorshipPair = {
      */
     updatedBy?: string;
     /**
-     * Tenant this pair belongs to
-     */
-    tenantId: string;
-    /**
      * Parent mentorship programme
      */
     programId: string;
@@ -19471,10 +19202,6 @@ export type MentorshipPairUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this pair belongs to
-     */
-    tenantId?: string;
     /**
      * Parent mentorship programme
      */
@@ -19534,10 +19261,6 @@ export type MentorshipProgram = {
      */
     updatedBy?: string;
     /**
-     * Tenant this programme belongs to
-     */
-    tenantId: string;
-    /**
      * Programme display name
      */
     name: string;
@@ -19592,10 +19315,6 @@ export type MentorshipProgramUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this programme belongs to
-     */
-    tenantId?: string;
     /**
      * Programme display name
      */
@@ -19844,10 +19563,6 @@ export type Motion = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the meeting in which the motion was introduced
      */
     meetingId: string;
@@ -19902,10 +19617,6 @@ export type MotionUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the meeting in which the motion was introduced
      */
@@ -20256,10 +19967,6 @@ export type OfficerTerm = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the position held
      */
     positionId: string;
@@ -20294,6 +20001,77 @@ export type OfficerTerm = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type OfficerTermListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<OfficerTerm>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Request to record or update an officer term
+ */
+export type OfficerTermRequest = {
+    positionId: string;
+    personId: string;
+    organizationId: string;
+    startDate: Date;
+    endDate: Date;
+    appointedBy?: string;
+};
+
+/**
+ * Request to record or update an officer term
+ */
+export type OfficerTermRequestUpdate = {
+    positionId?: string;
+    personId?: string;
+    organizationId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    appointedBy?: string;
+};
+
+/**
  * A term served by a person in an elected or appointed position
  */
 export type OfficerTermUpdate = {
@@ -20321,10 +20099,6 @@ export type OfficerTermUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the position held
      */
@@ -20390,6 +20164,53 @@ export type OnboardingResponse = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type OrganizationListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<PlatformAdminModuleOrganization>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * A political action committee contribution record
  */
 export type PacContribution = {
@@ -20420,7 +20241,7 @@ export type PacContribution = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the contributor (person or organization)
      */
@@ -20487,7 +20308,7 @@ export type PacContributionUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the contributor (person or organization)
      */
@@ -20748,7 +20569,7 @@ export type PeerReviewPanel = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the complaint this panel is reviewing
      */
@@ -20802,7 +20623,7 @@ export type PeerReviewPanelUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the complaint this panel is reviewing
      */
@@ -21519,6 +21340,224 @@ export type PharmacyInfoUpdate = {
 export type PhoneNumber = string;
 
 /**
+ * Platform admin role
+ */
+export type PlatformAdminModuleAdminRole = 'super' | 'support' | 'analyst';
+
+/**
+ * Top-level tenant — a healthcare association
+ */
+export type PlatformAdminModuleAssociation = {
+    id: string;
+    name: string;
+    country: string;
+    currency: string;
+    locale: string;
+    /**
+     * Regex pattern for validating professional license numbers
+     */
+    licenseFormatRegex?: string;
+    /**
+     * Credit cycle period in years (1, 2, or 3)
+     */
+    creditCyclePeriod?: number;
+    /**
+     * Required credits per cycle
+     */
+    requiredCreditsPerCycle?: number;
+    /**
+     * Whether excess credits carry over to next cycle
+     */
+    carryoverEnabled?: boolean;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+/**
+ * Request body for creating/updating an association
+ */
+export type PlatformAdminModuleAssociationRequest = {
+    name: string;
+    country: string;
+    currency: string;
+    locale?: string;
+    licenseFormatRegex?: string;
+    creditCyclePeriod?: number;
+    requiredCreditsPerCycle?: number;
+    carryoverEnabled?: boolean;
+};
+
+/**
+ * Request body for creating/updating an association
+ */
+export type PlatformAdminModuleAssociationRequestUpdate = {
+    name?: string;
+    country?: string;
+    currency?: string;
+    locale?: string;
+    licenseFormatRegex?: string;
+    creditCyclePeriod?: number;
+    requiredCreditsPerCycle?: number;
+    carryoverEnabled?: boolean;
+};
+
+/**
+ * Feature flag configuration: module × tier matrix
+ */
+export type PlatformAdminModuleFeatureFlagConfig = {
+    id: string;
+    /**
+     * Target: association ID, org ID, or tier name
+     */
+    targetType: string;
+    targetId: string;
+    /**
+     * Module name being flagged
+     */
+    moduleName: string;
+    enabled: boolean;
+    /**
+     * Per-org override (overrides tier default)
+     */
+    isOverride: boolean;
+    updatedAt: Date;
+    updatedBy: string;
+};
+
+/**
+ * Request body for setting a feature flag
+ */
+export type PlatformAdminModuleFeatureFlagRequest = {
+    targetType: string;
+    targetId: string;
+    moduleName: string;
+    enabled: boolean;
+};
+
+/**
+ * Impersonation session record
+ */
+export type PlatformAdminModuleImpersonationSession = {
+    id: string;
+    adminId: string;
+    targetUserId: string;
+    targetOrgId?: string;
+    /**
+     * Scoped read-only token
+     */
+    sessionToken: string;
+    startedAt: Date;
+    /**
+     * Auto-expires after 30 minutes
+     */
+    expiresAt: Date;
+    endedAt?: Date;
+};
+
+/**
+ * Lifecycle status of an organization
+ */
+export type PlatformAdminModuleOrgLifecycleStatus = 'trial' | 'active' | 'suspended' | 'cancelled';
+
+/**
+ * Type of organization
+ */
+export type PlatformAdminModuleOrgType = 'chapter' | 'society' | 'national' | 'clinic';
+
+/**
+ * An organization within an association
+ */
+export type PlatformAdminModuleOrganization = {
+    id: string;
+    associationId: string;
+    name: string;
+    orgType: PlatformAdminModuleOrgType;
+    region?: string;
+    contactEmail?: string;
+    status: PlatformAdminModuleOrgLifecycleStatus;
+    trialStartDate?: Date;
+    trialEndDate?: Date;
+    /**
+     * Feature flags as JSONB — module-level toggles
+     */
+    featureFlags?: {
+        [key: string]: boolean;
+    };
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+/**
+ * Request body for creating/updating an organization
+ */
+export type PlatformAdminModuleOrganizationRequest = {
+    associationId: string;
+    name: string;
+    orgType: PlatformAdminModuleOrgType;
+    region?: string;
+    contactEmail?: string;
+    /**
+     * Initial officer email for invitation
+     */
+    initialOfficerEmail?: string;
+    /**
+     * Trial duration in days (7-180)
+     */
+    trialDurationDays?: number;
+};
+
+/**
+ * Request body for creating/updating an organization
+ */
+export type PlatformAdminModuleOrganizationRequestUpdate = {
+    associationId?: string;
+    name?: string;
+    orgType?: PlatformAdminModuleOrgType;
+    region?: string;
+    contactEmail?: string;
+    /**
+     * Initial officer email for invitation
+     */
+    initialOfficerEmail?: string;
+    /**
+     * Trial duration in days (7-180)
+     */
+    trialDurationDays?: number;
+};
+
+/**
+ * Platform admin user
+ */
+export type PlatformAdminModulePlatformAdmin = {
+    id: string;
+    userId: string;
+    email: string;
+    name: string;
+    role: PlatformAdminModuleAdminRole;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+/**
+ * Request body for inviting/updating a platform admin
+ */
+export type PlatformAdminModulePlatformAdminRequest = {
+    email: string;
+    name: string;
+    role: PlatformAdminModuleAdminRole;
+};
+
+/**
+ * Request body for inviting/updating a platform admin
+ */
+export type PlatformAdminModulePlatformAdminRequestUpdate = {
+    email?: string;
+    name?: string;
+    role?: PlatformAdminModuleAdminRole;
+};
+
+/**
  * A pledge by a donor to make one or more future donations
  */
 export type Pledge = {
@@ -21549,7 +21588,7 @@ export type Pledge = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the pledging donor
      */
@@ -21625,7 +21664,7 @@ export type PledgeUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the pledging donor
      */
@@ -21691,7 +21730,7 @@ export type PortalInbox = {
     /**
      * Tenant this inbox item belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Portal user who owns this inbox item
      */
@@ -21745,7 +21784,7 @@ export type PortalInboxUpdate = {
     /**
      * Tenant this inbox item belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Portal user who owns this inbox item
      */
@@ -21799,7 +21838,7 @@ export type PortalUser = {
     /**
      * Tenant this portal user belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Linked person record
      */
@@ -21866,7 +21905,7 @@ export type PortalUserUpdate = {
     /**
      * Tenant this portal user belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Linked person record
      */
@@ -21926,10 +21965,6 @@ export type Position = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * Official title of the position
      */
     title: string;
@@ -21969,6 +22004,81 @@ export type Position = {
 export type PositionLevel = 'national' | 'regional' | 'chapter';
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type PositionListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Position>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Request to create or update a position
+ */
+export type PositionRequest = {
+    title: string;
+    organizationId: string;
+    level: PositionLevel;
+    termLengthMonths: number;
+    maxConsecutiveTerms?: number;
+    description?: string;
+    responsibilities?: Array<string>;
+    status: PositionStatus;
+};
+
+/**
+ * Request to create or update a position
+ */
+export type PositionRequestUpdate = {
+    title?: string;
+    organizationId?: string;
+    level?: PositionLevel;
+    termLengthMonths?: number;
+    maxConsecutiveTerms?: number;
+    description?: string;
+    responsibilities?: Array<string>;
+    status?: PositionStatus;
+};
+
+/**
  * Lifecycle status of a position
  */
 export type PositionStatus = 'active' | 'vacant' | 'retired';
@@ -22001,10 +22111,6 @@ export type PositionUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * Official title of the position
      */
@@ -22070,7 +22176,7 @@ export type ProfessionalLicense = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the person holding the license
      */
@@ -22210,7 +22316,7 @@ export type ProfessionalLicenseUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the person holding the license
      */
@@ -22307,7 +22413,7 @@ export type Prospect = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Full name of the prospect
      */
@@ -22373,7 +22479,7 @@ export type ProspectActivity = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the prospect this activity is associated with
      */
@@ -22432,7 +22538,7 @@ export type ProspectActivityUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the prospect this activity is associated with
      */
@@ -22496,7 +22602,7 @@ export type ProspectUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Full name of the prospect
      */
@@ -22773,10 +22879,6 @@ export type Publication = {
      */
     updatedBy?: string;
     /**
-     * Tenant this publication belongs to
-     */
-    tenantId: string;
-    /**
      * Publication display title
      */
     title: string;
@@ -22835,10 +22937,6 @@ export type PublicationIssue = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this issue belongs to
-     */
-    tenantId: string;
     /**
      * Parent publication
      */
@@ -22902,10 +23000,6 @@ export type PublicationIssueUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this issue belongs to
-     */
-    tenantId?: string;
     /**
      * Parent publication
      */
@@ -22975,10 +23069,6 @@ export type PublicationUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this publication belongs to
-     */
-    tenantId?: string;
-    /**
      * Publication display title
      */
     title?: string;
@@ -23032,10 +23122,6 @@ export type QuizAttempt = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this attempt belongs to
-     */
-    tenantId: string;
     /**
      * Course containing the quiz module
      */
@@ -23175,10 +23261,6 @@ export type QuizAttemptUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this attempt belongs to
-     */
-    tenantId?: string;
     /**
      * Course containing the quiz module
      */
@@ -23431,10 +23513,6 @@ export type RenewalCycle = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the membership this cycle belongs to
      */
     membershipId: string;
@@ -23488,10 +23566,6 @@ export type RenewalCycleUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
     /**
      * ID of the membership this cycle belongs to
      */
@@ -23559,7 +23633,7 @@ export type Resource = {
     /**
      * Tenant this resource belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Resource title
      */
@@ -23660,7 +23734,7 @@ export type ResourceUpdate = {
     /**
      * Tenant this resource belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Resource title
      */
@@ -23916,7 +23990,7 @@ export type RoyaltySplit = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the membership this split applies to
      */
@@ -24033,7 +24107,7 @@ export type RoyaltySplitUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the membership this split applies to
      */
@@ -24122,10 +24196,6 @@ export type SigMembership = {
      */
     updatedBy?: string;
     /**
-     * Tenant this membership belongs to
-     */
-    tenantId: string;
-    /**
      * Parent SIG
      */
     sigId: string;
@@ -24180,10 +24250,6 @@ export type SigMembershipUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this membership belongs to
-     */
-    tenantId?: string;
     /**
      * Parent SIG
      */
@@ -24247,7 +24313,7 @@ export type SanctionRecord = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the sanctioned member
      */
@@ -24314,7 +24380,7 @@ export type SanctionRecordUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the sanctioned member
      */
@@ -24670,10 +24736,6 @@ export type SeatAllocation = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId: string;
-    /**
      * ID of the institutional membership from which this seat is drawn
      */
     institutionalMembershipId: string;
@@ -24785,10 +24847,6 @@ export type SeatAllocationUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant identifier for multi-tenancy isolation
-     */
-    tenantId?: string;
-    /**
      * ID of the institutional membership from which this seat is drawn
      */
     institutionalMembershipId?: string;
@@ -24894,10 +24952,6 @@ export type Session = {
      */
     updatedBy?: string;
     /**
-     * Tenant this session belongs to
-     */
-    tenantId: string;
-    /**
      * Parent conference
      */
     conferenceId: string;
@@ -24976,10 +25030,6 @@ export type SessionUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this session belongs to
-     */
-    tenantId?: string;
     /**
      * Parent conference
      */
@@ -25060,10 +25110,6 @@ export type Speaker = {
      */
     updatedBy?: string;
     /**
-     * Tenant this speaker record belongs to
-     */
-    tenantId: string;
-    /**
      * Parent conference
      */
     conferenceId: string;
@@ -25139,10 +25185,6 @@ export type SpeakerUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this speaker record belongs to
-     */
-    tenantId?: string;
-    /**
      * Parent conference
      */
     conferenceId?: string;
@@ -25213,10 +25255,6 @@ export type SpecialInterestGroup = {
      */
     updatedBy?: string;
     /**
-     * Tenant this SIG belongs to
-     */
-    tenantId: string;
-    /**
      * SIG display name
      */
     name: string;
@@ -25274,10 +25312,6 @@ export type SpecialInterestGroupUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this SIG belongs to
-     */
-    tenantId?: string;
     /**
      * SIG display name
      */
@@ -25536,7 +25570,7 @@ export type SuppressionList = {
     /**
      * Tenant this suppression entry belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Suppressed email address
      */
@@ -25590,7 +25624,7 @@ export type SuppressionListUpdate = {
     /**
      * Tenant this suppression entry belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Suppressed email address
      */
@@ -25649,7 +25683,7 @@ export type TaxReceipt = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * ID of the donation this receipt covers (null for consolidated annual receipts)
      */
@@ -25711,7 +25745,7 @@ export type TaxReceiptUpdate = {
     /**
      * Tenant identifier for multi-tenancy isolation
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * ID of the donation this receipt covers (null for consolidated annual receipts)
      */
@@ -26156,10 +26190,6 @@ export type Training = {
      */
     updatedBy?: string;
     /**
-     * Tenant this training belongs to
-     */
-    tenantId: string;
-    /**
      * Display title
      */
     title: string;
@@ -26312,10 +26342,6 @@ export type TrainingEnrollment = {
      */
     updatedBy?: string;
     /**
-     * Tenant this enrollment belongs to
-     */
-    tenantId: string;
-    /**
      * Training session enrolled in
      */
     trainingId: string;
@@ -26454,10 +26480,6 @@ export type TrainingEnrollmentUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this enrollment belongs to
-     */
-    tenantId?: string;
-    /**
      * Training session enrolled in
      */
     trainingId?: string;
@@ -26572,10 +26594,6 @@ export type TrainingUpdate = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this training belongs to
-     */
-    tenantId?: string;
     /**
      * Display title
      */
@@ -26932,7 +26950,7 @@ export type VerifyCredentialResult = {
         /**
          * Tenant identifier for multi-tenancy isolation
          */
-        tenantId: string;
+        organizationId: string;
         /**
          * ID of the person this credential was issued to
          */
@@ -27143,10 +27161,6 @@ export type VolunteerApplication = {
      */
     updatedBy?: string;
     /**
-     * Tenant this application belongs to
-     */
-    tenantId: string;
-    /**
      * Opportunity being applied for
      */
     opportunityId: string;
@@ -27201,10 +27215,6 @@ export type VolunteerApplicationUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this application belongs to
-     */
-    tenantId?: string;
-    /**
      * Opportunity being applied for
      */
     opportunityId?: string;
@@ -27258,10 +27268,6 @@ export type VolunteerHours = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this hours record belongs to
-     */
-    tenantId: string;
     /**
      * Person who volunteered
      */
@@ -27326,10 +27332,6 @@ export type VolunteerHoursUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this hours record belongs to
-     */
-    tenantId?: string;
-    /**
      * Person who volunteered
      */
     personId?: string;
@@ -27387,10 +27389,6 @@ export type VolunteerOpportunity = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this opportunity belongs to
-     */
-    tenantId: string;
     /**
      * Opportunity title
      */
@@ -27471,10 +27469,6 @@ export type VolunteerOpportunityUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this opportunity belongs to
-     */
-    tenantId?: string;
-    /**
      * Opportunity title
      */
     title?: string;
@@ -27548,10 +27542,6 @@ export type WaitlistEntry = {
      * User who last updated the entity
      */
     updatedBy?: string;
-    /**
-     * Tenant this waitlist entry belongs to
-     */
-    tenantId: string;
     /**
      * Event this entry is waiting for
      */
@@ -27659,10 +27649,6 @@ export type WaitlistEntryUpdate = {
      */
     updatedBy?: string;
     /**
-     * Tenant this waitlist entry belongs to
-     */
-    tenantId?: string;
-    /**
      * Event this entry is waiting for
      */
     eventId?: string;
@@ -27719,7 +27705,7 @@ export type WebhookDelivery = {
     /**
      * Tenant this delivery belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Parent subscription
      */
@@ -27796,7 +27782,7 @@ export type WebhookDeliveryUpdate = {
     /**
      * Tenant this delivery belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Parent subscription
      */
@@ -27873,7 +27859,7 @@ export type WebhookSubscription = {
     /**
      * Tenant this subscription belongs to
      */
-    tenantId: string;
+    organizationId: string;
     /**
      * Human-readable subscription name
      */
@@ -27940,7 +27926,7 @@ export type WebhookSubscriptionUpdate = {
     /**
      * Tenant this subscription belongs to
      */
-    tenantId?: string;
+    organizationId?: string;
     /**
      * Human-readable subscription name
      */
@@ -28220,6 +28206,625 @@ export type TrainingSearchParamsStatus = TrainingStatus;
  * Filter by delivery format
  */
 export type TrainingSearchParamsType = TrainingType;
+
+export type ListAdminsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/admins';
+};
+
+export type ListAdminsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListAdminsError = ListAdminsErrors[keyof ListAdminsErrors];
+
+export type ListAdminsResponses = {
+    /**
+     * Success response with data
+     */
+    200: Array<PlatformAdminModulePlatformAdmin>;
+};
+
+export type ListAdminsResponse = ListAdminsResponses[keyof ListAdminsResponses];
+
+export type InviteAdminData = {
+    body: PlatformAdminModulePlatformAdminRequest;
+    path?: never;
+    query?: never;
+    url: '/admin/admins';
+};
+
+export type InviteAdminErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type InviteAdminError = InviteAdminErrors[keyof InviteAdminErrors];
+
+export type InviteAdminResponses = {
+    /**
+     * Resource created response
+     */
+    201: PlatformAdminModulePlatformAdmin;
+};
+
+export type InviteAdminResponse = InviteAdminResponses[keyof InviteAdminResponses];
+
+export type RevokeAdminData = {
+    body?: never;
+    path: {
+        adminId: string;
+    };
+    query?: never;
+    url: '/admin/admins/{adminId}';
+};
+
+export type RevokeAdminErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RevokeAdminError = RevokeAdminErrors[keyof RevokeAdminErrors];
+
+export type RevokeAdminResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type RevokeAdminResponse = RevokeAdminResponses[keyof RevokeAdminResponses];
+
+export type UpdateAdminData = {
+    body: PlatformAdminModulePlatformAdminRequestUpdate;
+    path: {
+        adminId: string;
+    };
+    query?: never;
+    url: '/admin/admins/{adminId}';
+};
+
+export type UpdateAdminErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateAdminError = UpdateAdminErrors[keyof UpdateAdminErrors];
+
+export type UpdateAdminResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformAdminModulePlatformAdmin;
+};
+
+export type UpdateAdminResponse = UpdateAdminResponses[keyof UpdateAdminResponses];
+
+export type ListAssociationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/admin/associations';
+};
+
+export type ListAssociationsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListAssociationsError = ListAssociationsErrors[keyof ListAssociationsErrors];
+
+export type ListAssociationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationListResponse;
+};
+
+export type ListAssociationsResponse = ListAssociationsResponses[keyof ListAssociationsResponses];
+
+export type CreateAssociationData = {
+    body: PlatformAdminModuleAssociationRequest;
+    path?: never;
+    query?: never;
+    url: '/admin/associations';
+};
+
+export type CreateAssociationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateAssociationError = CreateAssociationErrors[keyof CreateAssociationErrors];
+
+export type CreateAssociationResponses = {
+    /**
+     * Resource created response
+     */
+    201: PlatformAdminModuleAssociation;
+};
+
+export type CreateAssociationResponse = CreateAssociationResponses[keyof CreateAssociationResponses];
+
+export type DeleteAssociationData = {
+    body?: never;
+    path: {
+        associationId: string;
+    };
+    query?: never;
+    url: '/admin/associations/{associationId}';
+};
+
+export type DeleteAssociationErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteAssociationError = DeleteAssociationErrors[keyof DeleteAssociationErrors];
+
+export type DeleteAssociationResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteAssociationResponse = DeleteAssociationResponses[keyof DeleteAssociationResponses];
+
+export type GetAssociationData = {
+    body?: never;
+    path: {
+        associationId: string;
+    };
+    query?: never;
+    url: '/admin/associations/{associationId}';
+};
+
+export type GetAssociationErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetAssociationError = GetAssociationErrors[keyof GetAssociationErrors];
+
+export type GetAssociationResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformAdminModuleAssociation;
+};
+
+export type GetAssociationResponse = GetAssociationResponses[keyof GetAssociationResponses];
+
+export type UpdateAssociationData = {
+    body: PlatformAdminModuleAssociationRequestUpdate;
+    path: {
+        associationId: string;
+    };
+    query?: never;
+    url: '/admin/associations/{associationId}';
+};
+
+export type UpdateAssociationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateAssociationError = UpdateAssociationErrors[keyof UpdateAssociationErrors];
+
+export type UpdateAssociationResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformAdminModuleAssociation;
+};
+
+export type UpdateAssociationResponse = UpdateAssociationResponses[keyof UpdateAssociationResponses];
+
+export type ListFeatureFlagsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        targetType?: string;
+        targetId?: string;
+    };
+    url: '/admin/feature-flags';
+};
+
+export type ListFeatureFlagsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListFeatureFlagsError = ListFeatureFlagsErrors[keyof ListFeatureFlagsErrors];
+
+export type ListFeatureFlagsResponses = {
+    /**
+     * Success response with data
+     */
+    200: Array<PlatformAdminModuleFeatureFlagConfig>;
+};
+
+export type ListFeatureFlagsResponse = ListFeatureFlagsResponses[keyof ListFeatureFlagsResponses];
+
+export type SetFeatureFlagData = {
+    body: PlatformAdminModuleFeatureFlagRequest;
+    path?: never;
+    query?: never;
+    url: '/admin/feature-flags';
+};
+
+export type SetFeatureFlagErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type SetFeatureFlagError = SetFeatureFlagErrors[keyof SetFeatureFlagErrors];
+
+export type SetFeatureFlagResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformAdminModuleFeatureFlagConfig;
+};
+
+export type SetFeatureFlagResponse = SetFeatureFlagResponses[keyof SetFeatureFlagResponses];
+
+export type DeleteFeatureFlagData = {
+    body?: never;
+    path: {
+        flagId: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flagId}';
+};
+
+export type DeleteFeatureFlagErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteFeatureFlagError = DeleteFeatureFlagErrors[keyof DeleteFeatureFlagErrors];
+
+export type DeleteFeatureFlagResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteFeatureFlagResponse = DeleteFeatureFlagResponses[keyof DeleteFeatureFlagResponses];
+
+export type StartImpersonationData = {
+    body: {
+        targetUserId: string;
+        targetOrgId?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/admin/impersonate';
+};
+
+export type StartImpersonationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type StartImpersonationError = StartImpersonationErrors[keyof StartImpersonationErrors];
+
+export type StartImpersonationResponses = {
+    /**
+     * Resource created response
+     */
+    201: PlatformAdminModuleImpersonationSession;
+};
+
+export type StartImpersonationResponse = StartImpersonationResponses[keyof StartImpersonationResponses];
+
+export type EndImpersonationData = {
+    body?: never;
+    path: {
+        sessionId: string;
+    };
+    query?: never;
+    url: '/admin/impersonate/{sessionId}/end';
+};
+
+export type EndImpersonationErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type EndImpersonationError = EndImpersonationErrors[keyof EndImpersonationErrors];
+
+export type EndImpersonationResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformAdminModuleImpersonationSession;
+};
+
+export type EndImpersonationResponse = EndImpersonationResponses[keyof EndImpersonationResponses];
+
+export type ListOrganizationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        associationId?: string;
+        status?: PlatformAdminModuleOrgLifecycleStatus;
+    };
+    url: '/admin/organizations';
+};
+
+export type ListOrganizationsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListOrganizationsError = ListOrganizationsErrors[keyof ListOrganizationsErrors];
+
+export type ListOrganizationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: OrganizationListResponse;
+};
+
+export type ListOrganizationsResponse = ListOrganizationsResponses[keyof ListOrganizationsResponses];
+
+export type CreateOrganizationData = {
+    body: PlatformAdminModuleOrganizationRequest;
+    path?: never;
+    query?: never;
+    url: '/admin/organizations';
+};
+
+export type CreateOrganizationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type CreateOrganizationError = CreateOrganizationErrors[keyof CreateOrganizationErrors];
+
+export type CreateOrganizationResponses = {
+    /**
+     * Resource created response
+     */
+    201: PlatformAdminModuleOrganization;
+};
+
+export type CreateOrganizationResponse = CreateOrganizationResponses[keyof CreateOrganizationResponses];
+
+export type GetOrganizationData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/admin/organizations/{organizationId}';
+};
+
+export type GetOrganizationErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetOrganizationError = GetOrganizationErrors[keyof GetOrganizationErrors];
+
+export type GetOrganizationResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformAdminModuleOrganization;
+};
+
+export type GetOrganizationResponse = GetOrganizationResponses[keyof GetOrganizationResponses];
+
+export type UpdateOrganizationData = {
+    body: PlatformAdminModuleOrganizationRequestUpdate;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/admin/organizations/{organizationId}';
+};
+
+export type UpdateOrganizationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateOrganizationError = UpdateOrganizationErrors[keyof UpdateOrganizationErrors];
+
+export type UpdateOrganizationResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformAdminModuleOrganization;
+};
+
+export type UpdateOrganizationResponse = UpdateOrganizationResponses[keyof UpdateOrganizationResponses];
+
+export type TransitionOrgStatusData = {
+    body: {
+        status: PlatformAdminModuleOrgLifecycleStatus;
+    };
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/admin/organizations/{organizationId}/transition';
+};
+
+export type TransitionOrgStatusErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type TransitionOrgStatusError = TransitionOrgStatusErrors[keyof TransitionOrgStatusErrors];
+
+export type TransitionOrgStatusResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformAdminModuleOrganization;
+};
+
+export type TransitionOrgStatusResponse = TransitionOrgStatusResponses[keyof TransitionOrgStatusResponses];
 
 export type ListDocumentTagsData = {
     body?: never;
@@ -32942,6 +33547,391 @@ export type TerminateMembershipResponses = {
      */
     200: unknown;
 };
+
+export type ListOfficerTermsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        personId?: string;
+        status?: TermStatus;
+    };
+    url: '/association/member/officer-terms';
+};
+
+export type ListOfficerTermsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListOfficerTermsError = ListOfficerTermsErrors[keyof ListOfficerTermsErrors];
+
+export type ListOfficerTermsResponses = {
+    /**
+     * Success response with data
+     */
+    200: OfficerTermListResponse;
+};
+
+export type ListOfficerTermsResponse = ListOfficerTermsResponses[keyof ListOfficerTermsResponses];
+
+export type CreateOfficerTermData = {
+    body: OfficerTermRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/officer-terms';
+};
+
+export type CreateOfficerTermErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateOfficerTermError = CreateOfficerTermErrors[keyof CreateOfficerTermErrors];
+
+export type CreateOfficerTermResponses = {
+    /**
+     * Resource created response
+     */
+    201: OfficerTerm;
+};
+
+export type CreateOfficerTermResponse = CreateOfficerTermResponses[keyof CreateOfficerTermResponses];
+
+export type DeleteOfficerTermData = {
+    body?: never;
+    path: {
+        termId: string;
+    };
+    query?: never;
+    url: '/association/member/officer-terms/{termId}';
+};
+
+export type DeleteOfficerTermErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteOfficerTermError = DeleteOfficerTermErrors[keyof DeleteOfficerTermErrors];
+
+export type DeleteOfficerTermResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteOfficerTermResponse = DeleteOfficerTermResponses[keyof DeleteOfficerTermResponses];
+
+export type GetOfficerTermData = {
+    body?: never;
+    path: {
+        termId: string;
+    };
+    query?: never;
+    url: '/association/member/officer-terms/{termId}';
+};
+
+export type GetOfficerTermErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetOfficerTermError = GetOfficerTermErrors[keyof GetOfficerTermErrors];
+
+export type GetOfficerTermResponses = {
+    /**
+     * Success response with data
+     */
+    200: OfficerTerm;
+};
+
+export type GetOfficerTermResponse = GetOfficerTermResponses[keyof GetOfficerTermResponses];
+
+export type UpdateOfficerTermData = {
+    body: OfficerTermRequestUpdate;
+    path: {
+        termId: string;
+    };
+    query?: never;
+    url: '/association/member/officer-terms/{termId}';
+};
+
+export type UpdateOfficerTermErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateOfficerTermError = UpdateOfficerTermErrors[keyof UpdateOfficerTermErrors];
+
+export type UpdateOfficerTermResponses = {
+    /**
+     * Success response with data
+     */
+    200: OfficerTerm;
+};
+
+export type UpdateOfficerTermResponse = UpdateOfficerTermResponses[keyof UpdateOfficerTermResponses];
+
+export type ListPositionsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        level?: PositionLevel;
+    };
+    url: '/association/member/positions';
+};
+
+export type ListPositionsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListPositionsError = ListPositionsErrors[keyof ListPositionsErrors];
+
+export type ListPositionsResponses = {
+    /**
+     * Success response with data
+     */
+    200: PositionListResponse;
+};
+
+export type ListPositionsResponse = ListPositionsResponses[keyof ListPositionsResponses];
+
+export type CreatePositionData = {
+    body: PositionRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/positions';
+};
+
+export type CreatePositionErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreatePositionError = CreatePositionErrors[keyof CreatePositionErrors];
+
+export type CreatePositionResponses = {
+    /**
+     * Resource created response
+     */
+    201: Position;
+};
+
+export type CreatePositionResponse = CreatePositionResponses[keyof CreatePositionResponses];
+
+export type DeletePositionData = {
+    body?: never;
+    path: {
+        positionId: string;
+    };
+    query?: never;
+    url: '/association/member/positions/{positionId}';
+};
+
+export type DeletePositionErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeletePositionError = DeletePositionErrors[keyof DeletePositionErrors];
+
+export type DeletePositionResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeletePositionResponse = DeletePositionResponses[keyof DeletePositionResponses];
+
+export type GetPositionData = {
+    body?: never;
+    path: {
+        positionId: string;
+    };
+    query?: never;
+    url: '/association/member/positions/{positionId}';
+};
+
+export type GetPositionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetPositionError = GetPositionErrors[keyof GetPositionErrors];
+
+export type GetPositionResponses = {
+    /**
+     * Success response with data
+     */
+    200: Position;
+};
+
+export type GetPositionResponse = GetPositionResponses[keyof GetPositionResponses];
+
+export type UpdatePositionData = {
+    body: PositionRequestUpdate;
+    path: {
+        positionId: string;
+    };
+    query?: never;
+    url: '/association/member/positions/{positionId}';
+};
+
+export type UpdatePositionErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdatePositionError = UpdatePositionErrors[keyof UpdatePositionErrors];
+
+export type UpdatePositionResponses = {
+    /**
+     * Success response with data
+     */
+    200: Position;
+};
+
+export type UpdatePositionResponse = UpdatePositionResponses[keyof UpdatePositionResponses];
 
 export type ListRoyaltySplitsData = {
     body?: never;

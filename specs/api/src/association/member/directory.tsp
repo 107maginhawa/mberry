@@ -39,7 +39,7 @@ enum DirectoryVisibility {
 @doc("A member's curated public-facing profile in the association directory")
 model DirectoryProfile extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the person this profile belongs to")
   personId: string;
@@ -100,7 +100,7 @@ model DirectoryProfile extends BaseEntity {
 @doc("Optimized search index entry for a member directory profile")
 model DirectorySearchIndex extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the person this index entry represents")
   personId: string;

@@ -198,7 +198,7 @@ enum PACContributionStatus {
 @doc("A prospective member being tracked in the CRM")
 model Prospect extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Full name of the prospect")
   @minLength(1)
@@ -233,7 +233,7 @@ model Prospect extends BaseEntity {
 @doc("A CRM activity recorded against a prospect")
 model ProspectActivity extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the prospect this activity is associated with")
   prospectId: string;
@@ -256,7 +256,7 @@ model ProspectActivity extends BaseEntity {
 @doc("A fundraising or membership-drive campaign")
 model Campaign extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Display name of the campaign")
   @minLength(1)
@@ -291,7 +291,7 @@ model Campaign extends BaseEntity {
 @doc("A monetary or in-kind donation made to the association")
 model Donation extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the donor (person or organization)")
   donorId: string;
@@ -334,7 +334,7 @@ model Donation extends BaseEntity {
 @doc("A pledge by a donor to make one or more future donations")
 model Pledge extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the pledging donor")
   donorId: string;
@@ -366,7 +366,7 @@ model Pledge extends BaseEntity {
 @doc("A tax receipt issued to a donor for one or more donations")
 model TaxReceipt extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the donation this receipt covers (null for consolidated annual receipts)")
   donationId?: string;
@@ -397,7 +397,7 @@ model TaxReceipt extends BaseEntity {
 @doc("A legislative or policy issue being tracked by the association's advocacy program")
 model LegislativeIssue extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Title of the legislative issue or bill")
   @minLength(1)
@@ -426,7 +426,7 @@ model LegislativeIssue extends BaseEntity {
 @doc("An action alert sent to members to mobilize advocacy responses")
 model ActionAlert extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the legislative issue this alert relates to")
   issueId: string;
@@ -459,7 +459,7 @@ model ActionAlert extends BaseEntity {
 @doc("A political action committee contribution record")
 model PACContribution extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the contributor (person or organization)")
   contributorId: string;
