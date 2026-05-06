@@ -173,11 +173,11 @@ Plans:
 **Plans**: 3 plans
 
 **Wave 1**
-- [ ] 08-01-PLAN.md — Install Vitest, configure happy-dom, migrate 6 lib tests from bun:test (TEST-07)
+- [x] 08-01-PLAN.md — Install Vitest, configure happy-dom, migrate 6 lib tests from bun:test (TEST-07)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 08-02-PLAN.md — Component unit tests for MemberDashboard, DuesInvoiceList, MemberTable (TEST-07)
-- [ ] 08-03-PLAN.md — Add frontend unit test step to CI workflow (TEST-07)
+- [x] 08-02-PLAN.md — Component unit tests for MemberDashboard, DuesInvoiceList, MemberTable (TEST-07)
+- [x] 08-03-PLAN.md — Add frontend unit test step to CI workflow (TEST-07)
 
 ## Progress
 
