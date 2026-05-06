@@ -14,7 +14,7 @@ Complete the billing module: fill all TODO schema fields so handlers read from D
 ## Implementation Decisions
 
 ### Line Items Storage
-- **D-01:** Store line items as a JSONB column on the invoice table (not a separate table). TypeSpec defines `InvoiceLineItem` with `description`, `quantity`, `unitPrice`, `amount`, `metadata`. Association dues invoices typically have 1-3 line items — JSONB keeps queries simple and avoids join overhead.
+- **D-01:** ~~Store line items as a JSONB column~~ **AMENDED:** Keep existing `invoice_line_items` separate table (already built and working in createInvoice). Migration to JSONB adds risk for no benefit. TypeSpec defines `InvoiceLineItem` with `description`, `quantity`, `unitPrice`, `amount`, `metadata` — these fields exist on the line items table already.
 
 ### Access Control Model
 - **D-02:** Admin-only for write operations (create, update, finalize, void invoices; manage merchant accounts). Customers can read their own invoices filtered by `customer = authenticated person ID`. No cross-customer access.

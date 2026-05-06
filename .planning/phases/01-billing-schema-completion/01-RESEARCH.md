@@ -318,17 +318,17 @@ function makeSession(userId = MERCHANT_ID, role = 'user') {
 | A1 | No Drizzle migration needed (all columns exist) | Summary | Would need migration step added to plan |
 | A2 | Line items stay in separate table (not JSONB despite D-01) | Pitfall 1 | Would require schema change + data migration |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Line items in list endpoint**
+1. **Line items in list endpoint** — RESOLVED by Plan 01 Task 1
    - What we know: createInvoice returns them, getInvoice should return them
    - What's unclear: Should listInvoices include line items or make it optional (expand param)?
-   - Recommendation: Include line items in list (association invoices have 1-3 items, low overhead). Batch-fetch to avoid N+1.
+   - Resolution: Include line items in list via batch-fetch (association invoices have 1-3 items, low overhead). No expand param needed.
 
-2. **Admin access model for createInvoice**
+2. **Admin access model for createInvoice** — RESOLVED by Plan 01 Task 2
    - What we know: D-02 says admin-only for writes. Current createInvoice allows merchant self-service.
    - What's unclear: Should merchants still be able to create their own invoices, or only admins?
-   - Recommendation: Allow both admin AND merchant-self (current behavior), matching voidInvoice pattern.
+   - Resolution: Allow both admin AND merchant-self (current behavior), matching voidInvoice pattern per D-03.
 
 ## Sources
 
