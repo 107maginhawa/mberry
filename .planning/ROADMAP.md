@@ -187,8 +187,8 @@ Plans:
 **Requirements**: TEST-02, TEST-03, TEST-08
 **Success Criteria** (what must be TRUE):
   1. E2E helpers use deterministic fixtures instead of hardcoded credentials
-  2. Unit tests for all workspaces (api-ts, memberry, account, admin, sdk-ts) run in CI
-  3. Pre-commit hook runs typecheck + tests + build before every commit
+  2. Unit tests for all workspaces with test suites (api-ts, memberry, account, sdk-ts) run in CI
+  3. Pre-commit hook runs typecheck + lint-staged before every commit
 **Plans**: 2 plans
 
 **Wave 1**
