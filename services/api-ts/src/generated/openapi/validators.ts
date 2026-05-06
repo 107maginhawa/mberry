@@ -218,6 +218,17 @@ export const ActionAlertUpdateSchema = z.object({
   status: z.enum(["draft", "active", "closed"]).optional()
 });
 
+export const AddMemberRequestSchema = z.object({
+  personId: z.string(),
+  tierId: z.string(),
+  categoryId: z.string().optional(),
+  memberNumber: z.string().max(50).optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  gracePeriodDays: z.number().int().gte(0).optional(),
+  note: z.string().max(2000).optional()
+});
+
 export const AddressSchema = z.object({
   street1: z.string().min(1).max(100),
   street2: z.string().max(100).optional(),
@@ -2016,6 +2027,20 @@ export const BallotSchema = z.object({
   verificationHash: z.string().max(128).optional()
 });
 
+export const BallotListResponseSchema = z.object({
+  data: z.array(BallotSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
 export const BallotUpdateSchema = z.object({
   id: z.string().uuid().optional(),
   version: z.number().int().optional(),
@@ -2822,6 +2847,38 @@ export const CandidateSchema = z.object({
   platform: z.string().max(5000).optional()
 });
 
+export const CandidateListResponseSchema = z.object({
+  data: z.array(CandidateSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const CandidateRequestSchema = z.object({
+  electionId: z.string(),
+  positionId: z.string(),
+  personId: z.string(),
+  nominatedBy: z.string(),
+  bio: z.string().optional(),
+  platform: z.string().optional()
+});
+
+export const CandidateRequestUpdateSchema = z.object({
+  electionId: z.string().optional(),
+  positionId: z.string().optional(),
+  personId: z.string().optional(),
+  nominatedBy: z.string().optional(),
+  bio: z.string().optional(),
+  platform: z.string().optional()
+});
+
 export const CandidateStatusSchema = z.enum(["nominated", "accepted", "declined", "withdrawn", "elected", "notElected"]);
 
 export const CandidateUpdateSchema = z.object({
@@ -2843,6 +2900,14 @@ export const CandidateUpdateSchema = z.object({
 
 export const CaptureMethodSchema = z.enum(["automatic", "manual"]);
 
+export const CastBallotRequestSchema = z.object({
+  electionId: z.string(),
+  positionId: z.string(),
+  candidateId: z.string(),
+  isProxy: z.boolean(),
+  proxyFor: z.string().optional()
+});
+
 export const CertProgramStatusSchema = z.enum(["active", "suspended", "retired"]);
 
 export const CertRequirementSchema = z.object({
@@ -2852,6 +2917,48 @@ export const CertRequirementSchema = z.object({
 });
 
 export const CertRequirementTypeSchema = z.enum(["exam", "training", "experience", "attestation"]);
+
+export const CertificateSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  personId: z.string(),
+  trainingId: z.string(),
+  certificateNumber: z.string().min(1).max(50),
+  issuedAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const CertificateListResponseSchema = z.object({
+  data: z.array(CertificateSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const CertificateUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  personId: z.string().optional(),
+  trainingId: z.string().optional(),
+  certificateNumber: z.string().min(1).max(50).optional(),
+  issuedAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
 
 export const CertificationEnrollmentSchema = z.object({
   id: z.string().uuid(),
@@ -4174,6 +4281,48 @@ export const DuesConfigUpdateRequestSchema = z.object({
   status: DuesConfigStatusSchema.optional()
 });
 
+export const DuesFundSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  name: z.string().min(1).max(100),
+  percentage: z.number(),
+  sortOrder: z.number().int(),
+  active: z.boolean()
+});
+
+export const DuesFundListResponseSchema = z.object({
+  data: z.array(DuesFundSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const DuesFundUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  name: z.string().min(1).max(100).optional(),
+  percentage: z.number().optional(),
+  sortOrder: z.number().int().optional(),
+  active: z.boolean().optional()
+});
+
 export const DuesInvoiceAllocationSchema = z.object({
   fundName: z.string().min(1).max(100),
   amount: z.number().int().gte(0)
@@ -4237,6 +4386,96 @@ export const DuesInvoiceUpdateSchema = z.object({
   sentAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   paidAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   paymentId: z.string().optional()
+});
+
+export const DuesPaymentSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  personId: z.string(),
+  invoiceId: z.string().optional(),
+  receiptNumber: z.string().min(1).max(50),
+  amount: z.number().int().gte(0),
+  currency: z.string().min(3).max(3),
+  paymentMethod: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]),
+  referenceNumber: z.string().max(100).optional(),
+  status: z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired"]),
+  recordedBy: z.string().optional(),
+  membershipExtendedFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  membershipExtendedTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  paidAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  refundedAmount: z.number().int().gte(0)
+});
+
+export const DuesPaymentListResponseSchema = z.object({
+  data: z.array(DuesPaymentSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const DuesPaymentMethodSchema = z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]);
+
+export const DuesPaymentStatusSchema = z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired"]);
+
+export const DuesPaymentUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  personId: z.string().optional(),
+  invoiceId: z.string().optional(),
+  receiptNumber: z.string().min(1).max(50).optional(),
+  amount: z.number().int().gte(0).optional(),
+  currency: z.string().min(3).max(3).optional(),
+  paymentMethod: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]).optional(),
+  referenceNumber: z.string().max(100).optional(),
+  status: z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired"]).optional(),
+  recordedBy: z.string().optional(),
+  membershipExtendedFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  membershipExtendedTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  paidAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  refundedAmount: z.number().int().gte(0).optional()
+});
+
+export const DuesRefundRequestSchema = z.object({
+  amount: z.number().int().gte(1).optional(),
+  reason: z.string().max(500).optional()
+});
+
+export const DuesReportEntrySchema = z.object({
+  month: z.string(),
+  method: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]),
+  count: z.number().int(),
+  total: z.number().int()
+});
+
+export const DuesReportEntryListResponseSchema = z.object({
+  data: z.array(DuesReportEntrySchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
 });
 
 export const DunningChannelSchema = z.enum(["email", "sms", "letter"]);
@@ -4375,14 +4614,52 @@ export const ElectionSchema = z.object({
   nominationEnd: z.string().datetime().transform((str) => new Date(str)),
   votingStart: z.string().datetime().transform((str) => new Date(str)),
   votingEnd: z.string().datetime().transform((str) => new Date(str)),
-  status: z.enum(["draft", "nominationOpen", "nominationClosed", "votingOpen", "votingClosed", "certified", "cancelled"]),
+  status: z.enum(["draft", "nominationsOpen", "votingOpen", "awaitingConfirmation", "published", "cancelled"]),
   quorumRequired: z.number().int().gte(1).optional(),
   quorumMet: z.boolean().optional()
 });
 
-export const ElectionStatusSchema = z.enum(["draft", "nominationOpen", "nominationClosed", "votingOpen", "votingClosed", "certified", "cancelled"]);
-
 export const ElectionTypeSchema = z.enum(["general", "special", "byElection"]);
+
+export const ElectionCreateRequestSchema = z.object({
+  organizationId: z.string(),
+  title: z.string(),
+  electionType: ElectionTypeSchema,
+  positions: z.array(z.string()),
+  nominationStart: z.string().datetime().transform((str) => new Date(str)),
+  nominationEnd: z.string().datetime().transform((str) => new Date(str)),
+  votingStart: z.string().datetime().transform((str) => new Date(str)),
+  votingEnd: z.string().datetime().transform((str) => new Date(str)),
+  quorumRequired: z.number().int().optional()
+});
+
+export const ElectionCreateRequestUpdateSchema = z.object({
+  organizationId: z.string().optional(),
+  title: z.string().optional(),
+  electionType: ElectionTypeSchema.optional(),
+  positions: z.array(z.string()).optional(),
+  nominationStart: z.string().datetime().transform((str) => new Date(str)).optional(),
+  nominationEnd: z.string().datetime().transform((str) => new Date(str)).optional(),
+  votingStart: z.string().datetime().transform((str) => new Date(str)).optional(),
+  votingEnd: z.string().datetime().transform((str) => new Date(str)).optional(),
+  quorumRequired: z.number().int().optional()
+});
+
+export const ElectionListResponseSchema = z.object({
+  data: z.array(ElectionSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const ElectionStatusSchema = z.enum(["draft", "nominationsOpen", "votingOpen", "awaitingConfirmation", "published", "cancelled"]);
 
 export const ElectionUpdateSchema = z.object({
   id: z.string().uuid().optional(),
@@ -4399,7 +4676,7 @@ export const ElectionUpdateSchema = z.object({
   nominationEnd: z.string().datetime().transform((str) => new Date(str)).optional(),
   votingStart: z.string().datetime().transform((str) => new Date(str)).optional(),
   votingEnd: z.string().datetime().transform((str) => new Date(str)).optional(),
-  status: z.enum(["draft", "nominationOpen", "nominationClosed", "votingOpen", "votingClosed", "certified", "cancelled"]).optional(),
+  status: z.enum(["draft", "nominationsOpen", "votingOpen", "awaitingConfirmation", "published", "cancelled"]).optional(),
   quorumRequired: z.number().int().gte(1).optional(),
   quorumMet: z.boolean().optional()
 });
@@ -4898,6 +5175,15 @@ export const FileUploadResponseSchema = z.object({
   expiresAt: z.string().datetime().transform((str) => new Date(str))
 });
 
+export const FinancialDashboardSchema = z.object({
+  totalCollected: z.number().int(),
+  totalOutstanding: z.number().int(),
+  pendingCount: z.number().int(),
+  completedCount: z.number().int(),
+  totalCount: z.number().int(),
+  collectionRate: z.number().int()
+});
+
 export const FormConfigSchema = z.object({
   fields: z.array(FormFieldConfigSchema).optional()
 });
@@ -4941,6 +5227,48 @@ export const FormResponsesUpdateSchema = z.object({
 });
 
 export const FundraisingCampaignTypeSchema = z.enum(["fundraising", "membershipDrive", "eventPromotion", "advocacy", "awareness"]);
+
+export const GatewayConfigSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  provider: z.enum(["paymongo", "stripe"]),
+  publicKey: z.string().min(1).max(255),
+  connected: z.boolean(),
+  lastTestAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const GatewayConfigRequestSchema = z.object({
+  provider: z.enum(["paymongo", "stripe"]),
+  publicKey: z.string().min(1).max(255),
+  secretKey: z.string().min(1)
+});
+
+export const GatewayConfigUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  provider: z.enum(["paymongo", "stripe"]).optional(),
+  publicKey: z.string().min(1).max(255).optional(),
+  connected: z.boolean().optional(),
+  lastTestAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const GatewayProviderSchema = z.enum(["paymongo", "stripe"]);
+
+export const GatewayTestResultSchema = z.object({
+  success: z.boolean(),
+  message: z.string().max(500),
+  testedAt: z.string().datetime().transform((str) => new Date(str))
+});
 
 export const GenderSchema = z.enum(["male", "female", "non-binary", "other", "prefer-not-to-say"]);
 
@@ -5078,6 +5406,18 @@ export const IceServerSchema = z.object({
 
 export const IceServersResponseSchema = z.object({
   iceServers: z.array(IceServerSchema)
+});
+
+export const ImportMembersRequestSchema = z.object({
+  organizationId: z.string(),
+  members: z.array(AddMemberRequestSchema)
+});
+
+export const ImportResultSchema = z.object({
+  imported: z.number().int(),
+  skipped: z.number().int(),
+  failed: z.number().int(),
+  errors: z.array(z.string())
 });
 
 export const InstitutionalMembershipSchema = z.object({
@@ -5649,6 +5989,20 @@ export const MembershipCategorySchema = z.object({
   applicableTiers: z.array(z.string())
 });
 
+export const MembershipCategoryListResponseSchema = z.object({
+  data: z.array(MembershipCategorySchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
 export const MembershipCategoryUpdateSchema = z.object({
   id: z.string().uuid().optional(),
   version: z.number().int().optional(),
@@ -6110,6 +6464,22 @@ export const OrganizationListResponseSchema = z.object({
   hasNextPage: z.boolean(),
   hasPreviousPage: z.boolean()
 })
+});
+
+export const OrganizationProfileSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1).max(200),
+  slug: z.string().max(100),
+  contactEmail: z.string().max(254),
+  region: z.string().max(100).optional(),
+  orgType: z.string().max(50).optional(),
+  status: z.string().max(50),
+  description: z.string().max(2000).optional(),
+  logoUrl: z.string().max(500).optional(),
+  phone: z.string().max(30).optional(),
+  address: z.string().max(500).optional(),
+  website: z.string().max(500).optional(),
+  foundingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional()
 });
 
 export const PACContributionSchema = z.object({
@@ -6985,6 +7355,17 @@ export const RateLimitErrorSchema = z.object({
   windowSize: z.number().int()
 });
 
+export const RecordPaymentRequestSchema = z.object({
+  organizationId: z.string(),
+  personId: z.string(),
+  invoiceId: z.string().optional(),
+  amount: z.number().int().gte(1),
+  currency: z.string(),
+  paymentMethod: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]),
+  referenceNumber: z.string().optional(),
+  paidAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
 export const RecurrencePatternSchema = z.object({
   type: z.enum(["daily", "weekly", "monthly", "yearly"]),
   interval: z.number().int().gte(1).optional(),
@@ -7156,6 +7537,60 @@ export const ReviewUpdateSchema = z.object({
 
 export const RevokeCredentialRequestSchema = z.object({
   reason: z.string().min(1).max(500)
+});
+
+export const RosterMemberSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  personId: z.string(),
+  tierId: z.string(),
+  categoryId: z.string().optional(),
+  memberNumber: z.string().max(50).optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated"]),
+  joinedAt: z.string().datetime().transform((str) => new Date(str)),
+  gracePeriodDays: z.number().int().gte(0),
+  note: z.string().max(2000).optional()
+});
+
+export const RosterMemberListResponseSchema = z.object({
+  data: z.array(RosterMemberSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const RosterMemberUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  personId: z.string().optional(),
+  tierId: z.string().optional(),
+  categoryId: z.string().optional(),
+  memberNumber: z.string().max(50).optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated"]).optional(),
+  joinedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  gracePeriodDays: z.number().int().gte(0).optional(),
+  note: z.string().max(2000).optional()
 });
 
 export const RoyaltySplitSchema = z.object({
@@ -7893,6 +8328,28 @@ export const UpdateInvoiceRequestSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional()
 });
 
+export const UpdateMemberRequestSchema = z.object({
+  tierId: z.string().optional(),
+  categoryId: z.union([z.string(), z.null()]).optional(),
+  memberNumber: z.union([z.string().max(50), z.null()]).optional(),
+  duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  gracePeriodDays: z.number().int().gte(0).optional(),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated"]).optional(),
+  note: z.union([z.string().max(2000), z.null()]).optional()
+});
+
+export const UpdateOrgProfileRequestSchema = z.object({
+  name: z.string().max(200).optional(),
+  contactEmail: z.string().max(254).optional(),
+  region: z.string().max(100).optional(),
+  description: z.string().max(2000).optional(),
+  logoUrl: z.string().max(500).optional(),
+  phone: z.string().max(30).optional(),
+  address: z.string().max(500).optional(),
+  website: z.string().max(500).optional(),
+  foundingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional()
+});
+
 export const UpdateParticipantRequestSchema = z.object({
   audioEnabled: z.boolean().optional(),
   videoEnabled: z.boolean().optional()
@@ -7911,6 +8368,16 @@ export const UpdateTemplateRequestSchema = z.object({
   replyToEmail: z.string().email().optional(),
   replyToName: z.string().optional(),
   status: z.enum(["draft", "active", "archived"]).optional()
+});
+
+export const UpsertCategoryRequestSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(1000).optional(),
+  applicableTiers: z.array(z.string())
+});
+
+export const UpsertFundsRequestSchema = z.object({
+  funds: z.array(FundAllocationSchema)
 });
 
 export const UrlSchema = z.string().url();
@@ -8520,6 +8987,70 @@ export type GetDocumentVersionParams = z.infer<typeof GetDocumentVersionParams>;
 
 export const GetDocumentVersionResponse = AssociationCoreDocumentsDocumentVersionSchema;
 
+export const ListMyCustomEventsQuery = z.object({
+  organizationId: z.string().optional(),
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListMyCustomEventsQuery = z.infer<typeof ListMyCustomEventsQuery>;
+
+export const ListMyCustomEventsResponse = EventListResponseSchema;
+
+export const ListCustomEventAttendanceParams = z.object({
+  eventId: z.string(),
+});
+export type ListCustomEventAttendanceParams = z.infer<typeof ListCustomEventAttendanceParams>;
+
+export const ListCustomEventAttendanceQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListCustomEventAttendanceQuery = z.infer<typeof ListCustomEventAttendanceQuery>;
+
+export const ListCustomEventAttendanceResponse = CheckInListResponseSchema;
+
+export const CheckInCustomEventParams = z.object({
+  eventId: z.string(),
+});
+export type CheckInCustomEventParams = z.infer<typeof CheckInCustomEventParams>;
+
+export const CheckInCustomEventBody = CheckInCreateRequestSchema;
+export type CheckInCustomEventBody = z.infer<typeof CheckInCustomEventBody>;
+
+export const CheckInCustomEventResponse = CheckInSchema;
+
+export const RegisterForCustomEventParams = z.object({
+  eventId: z.string(),
+});
+export type RegisterForCustomEventParams = z.infer<typeof RegisterForCustomEventParams>;
+
+export const RegisterForCustomEventResponse = EventRegistrationSchema;
+
+export const ListCustomEventRegistrationsParams = z.object({
+  eventId: z.string(),
+});
+export type ListCustomEventRegistrationsParams = z.infer<typeof ListCustomEventRegistrationsParams>;
+
+export const ListCustomEventRegistrationsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListCustomEventRegistrationsQuery = z.infer<typeof ListCustomEventRegistrationsQuery>;
+
+export const ListCustomEventRegistrationsResponse = EventRegistrationListResponseSchema;
+
 export const CreateEventBody = EventCreateRequestSchema;
 export type CreateEventBody = z.infer<typeof CreateEventBody>;
 
@@ -8822,6 +9353,87 @@ export type DenyMembershipApplicationBody = z.infer<typeof DenyMembershipApplica
 
 export const DenyMembershipApplicationResponse = MembershipApplicationSchema;
 
+export const CastBallotBody = CastBallotRequestSchema;
+export type CastBallotBody = z.infer<typeof CastBallotBody>;
+
+export const CastBallotResponse = BallotSchema;
+
+export const ListBallotsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  electionId: z.string().optional(),
+  positionId: z.string().optional(),
+});
+export type ListBallotsQuery = z.infer<typeof ListBallotsQuery>;
+
+export const ListBallotsResponse = BallotListResponseSchema;
+
+export const CreateCandidateBody = CandidateRequestSchema;
+export type CreateCandidateBody = z.infer<typeof CreateCandidateBody>;
+
+export const CreateCandidateResponse = CandidateSchema;
+
+export const ListCandidatesQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  electionId: z.string().optional(),
+  positionId: z.string().optional(),
+});
+export type ListCandidatesQuery = z.infer<typeof ListCandidatesQuery>;
+
+export const ListCandidatesResponse = CandidateListResponseSchema;
+
+export const GetCandidateParams = z.object({
+  candidateId: z.string(),
+});
+export type GetCandidateParams = z.infer<typeof GetCandidateParams>;
+
+export const GetCandidateResponse = CandidateSchema;
+
+export const UpdateCandidateParams = z.object({
+  candidateId: z.string(),
+});
+export type UpdateCandidateParams = z.infer<typeof UpdateCandidateParams>;
+
+export const UpdateCandidateBody = CandidateRequestUpdateSchema;
+export type UpdateCandidateBody = z.infer<typeof UpdateCandidateBody>;
+
+export const UpdateCandidateResponse = CandidateSchema;
+
+export const DeleteCandidateParams = z.object({
+  candidateId: z.string(),
+});
+export type DeleteCandidateParams = z.infer<typeof DeleteCandidateParams>;
+
+export const DeleteCandidateResponse = z.void();
+
+export const ListMyCertificatesQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListMyCertificatesQuery = z.infer<typeof ListMyCertificatesQuery>;
+
+export const ListMyCertificatesResponse = CertificateListResponseSchema;
+
+export const GetCertificateParams = z.object({
+  certificateId: z.string(),
+});
+export type GetCertificateParams = z.infer<typeof GetCertificateParams>;
+
+export const GetCertificateResponse = CertificateSchema;
+
 export const CreateChapterAffiliationBody = ChapterAffiliationCreateRequestSchema;
 export type CreateChapterAffiliationBody = z.infer<typeof CreateChapterAffiliationBody>;
 
@@ -9091,6 +9703,37 @@ export type DeleteDuesConfigParams = z.infer<typeof DeleteDuesConfigParams>;
 
 export const DeleteDuesConfigResponse = z.void();
 
+export const GetDuesGatewayConfigParams = z.object({
+  organizationId: z.string(),
+});
+export type GetDuesGatewayConfigParams = z.infer<typeof GetDuesGatewayConfigParams>;
+
+export const GetDuesGatewayConfigResponse = GatewayConfigSchema;
+
+export const UpsertDuesGatewayConfigParams = z.object({
+  organizationId: z.string(),
+});
+export type UpsertDuesGatewayConfigParams = z.infer<typeof UpsertDuesGatewayConfigParams>;
+
+export const UpsertDuesGatewayConfigBody = GatewayConfigRequestSchema;
+export type UpsertDuesGatewayConfigBody = z.infer<typeof UpsertDuesGatewayConfigBody>;
+
+export const UpsertDuesGatewayConfigResponse = GatewayConfigSchema;
+
+export const DisconnectDuesGatewayParams = z.object({
+  organizationId: z.string(),
+});
+export type DisconnectDuesGatewayParams = z.infer<typeof DisconnectDuesGatewayParams>;
+
+export const DisconnectDuesGatewayResponse = z.void();
+
+export const TestDuesGatewayConnectionParams = z.object({
+  organizationId: z.string(),
+});
+export type TestDuesGatewayConnectionParams = z.infer<typeof TestDuesGatewayConnectionParams>;
+
+export const TestDuesGatewayConnectionResponse = GatewayTestResultSchema;
+
 export const CreateDuesInvoiceBody = DuesInvoiceSchema;
 export type CreateDuesInvoiceBody = z.infer<typeof CreateDuesInvoiceBody>;
 
@@ -9149,6 +9792,80 @@ export const MarkDuesInvoicePaidBody = MarkInvoicePaidRequestSchema;
 export type MarkDuesInvoicePaidBody = z.infer<typeof MarkDuesInvoicePaidBody>;
 
 export const MarkDuesInvoicePaidResponse = DuesInvoiceSchema;
+
+export const ListDuesPaymentsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  organizationId: z.string().optional(),
+  personId: z.string().optional(),
+  status: DuesPaymentStatusSchema.optional(),
+});
+export type ListDuesPaymentsQuery = z.infer<typeof ListDuesPaymentsQuery>;
+
+export const ListDuesPaymentsResponse = DuesPaymentListResponseSchema;
+
+export const RecordDuesPaymentBody = RecordPaymentRequestSchema;
+export type RecordDuesPaymentBody = z.infer<typeof RecordDuesPaymentBody>;
+
+export const RecordDuesPaymentResponse = DuesPaymentSchema;
+
+export const GetDuesPaymentParams = z.object({
+  paymentId: z.string(),
+});
+export type GetDuesPaymentParams = z.infer<typeof GetDuesPaymentParams>;
+
+export const GetDuesPaymentResponse = DuesPaymentSchema;
+
+export const RefundDuesPaymentParams = z.object({
+  paymentId: z.string(),
+});
+export type RefundDuesPaymentParams = z.infer<typeof RefundDuesPaymentParams>;
+
+export const RefundDuesPaymentBody = DuesRefundRequestSchema;
+export type RefundDuesPaymentBody = z.infer<typeof RefundDuesPaymentBody>;
+
+export const RefundDuesPaymentResponse = DuesPaymentSchema;
+
+export const ListDuesFundsQuery = z.object({
+  organizationId: z.string(),
+});
+export type ListDuesFundsQuery = z.infer<typeof ListDuesFundsQuery>;
+
+export const ListDuesFundsResponse = DuesFundListResponseSchema;
+
+export const UpsertDuesFundsParams = z.object({
+  organizationId: z.string(),
+});
+export type UpsertDuesFundsParams = z.infer<typeof UpsertDuesFundsParams>;
+
+export const UpsertDuesFundsBody = UpsertFundsRequestSchema;
+export type UpsertDuesFundsBody = z.infer<typeof UpsertDuesFundsBody>;
+
+export const UpsertDuesFundsResponse = DuesFundListResponseSchema;
+
+export const GetDuesFinancialDashboardParams = z.object({
+  organizationId: z.string(),
+});
+export type GetDuesFinancialDashboardParams = z.infer<typeof GetDuesFinancialDashboardParams>;
+
+export const GetDuesFinancialDashboardResponse = FinancialDashboardSchema;
+
+export const GenerateDuesReportParams = z.object({
+  organizationId: z.string(),
+});
+export type GenerateDuesReportParams = z.infer<typeof GenerateDuesReportParams>;
+
+export const GenerateDuesReportQuery = z.object({
+  from: z.string().datetime().transform((str) => new Date(str)).optional(),
+  to: z.string().datetime().transform((str) => new Date(str)).optional(),
+});
+export type GenerateDuesReportQuery = z.infer<typeof GenerateDuesReportQuery>;
+
+export const GenerateDuesReportResponse = DuesReportEntryListResponseSchema;
 
 export const ListDunningEventsQuery = z.object({
   offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
@@ -9210,6 +9927,70 @@ export const DeleteDunningTemplateParams = z.object({
 export type DeleteDunningTemplateParams = z.infer<typeof DeleteDunningTemplateParams>;
 
 export const DeleteDunningTemplateResponse = z.void();
+
+export const CreateElectionBody = ElectionCreateRequestSchema;
+export type CreateElectionBody = z.infer<typeof CreateElectionBody>;
+
+export const CreateElectionResponse = ElectionSchema;
+
+export const ListElectionsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  organizationId: z.string().optional(),
+  status: ElectionStatusSchema.optional(),
+});
+export type ListElectionsQuery = z.infer<typeof ListElectionsQuery>;
+
+export const ListElectionsResponse = ElectionListResponseSchema;
+
+export const GetElectionParams = z.object({
+  electionId: z.string(),
+});
+export type GetElectionParams = z.infer<typeof GetElectionParams>;
+
+export const GetElectionResponse = ElectionSchema;
+
+export const UpdateElectionParams = z.object({
+  electionId: z.string(),
+});
+export type UpdateElectionParams = z.infer<typeof UpdateElectionParams>;
+
+export const UpdateElectionBody = ElectionCreateRequestUpdateSchema;
+export type UpdateElectionBody = z.infer<typeof UpdateElectionBody>;
+
+export const UpdateElectionResponse = ElectionSchema;
+
+export const DeleteElectionParams = z.object({
+  electionId: z.string(),
+});
+export type DeleteElectionParams = z.infer<typeof DeleteElectionParams>;
+
+export const DeleteElectionResponse = z.void();
+
+export const CertifyElectionParams = z.object({
+  electionId: z.string(),
+});
+export type CertifyElectionParams = z.infer<typeof CertifyElectionParams>;
+
+export const CertifyElectionResponse = ElectionSchema;
+
+export const OpenElectionNominationsParams = z.object({
+  electionId: z.string(),
+});
+export type OpenElectionNominationsParams = z.infer<typeof OpenElectionNominationsParams>;
+
+export const OpenElectionNominationsResponse = ElectionSchema;
+
+export const OpenElectionVotingParams = z.object({
+  electionId: z.string(),
+});
+export type OpenElectionVotingParams = z.infer<typeof OpenElectionVotingParams>;
+
+export const OpenElectionVotingResponse = ElectionSchema;
 
 export const CreateInstitutionalMembershipBody = InstitutionalMembershipCreateRequestSchema;
 export type CreateInstitutionalMembershipBody = z.infer<typeof CreateInstitutionalMembershipBody>;
@@ -9357,6 +10138,29 @@ export type DeleteProfessionalLicenseParams = z.infer<typeof DeleteProfessionalL
 
 export const DeleteProfessionalLicenseResponse = z.void();
 
+export const ListMembershipCategoriesQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  organizationId: z.string(),
+});
+export type ListMembershipCategoriesQuery = z.infer<typeof ListMembershipCategoriesQuery>;
+
+export const ListMembershipCategoriesResponse = MembershipCategoryListResponseSchema;
+
+export const UpsertMembershipCategoryParams = z.object({
+  organizationId: z.string(),
+});
+export type UpsertMembershipCategoryParams = z.infer<typeof UpsertMembershipCategoryParams>;
+
+export const UpsertMembershipCategoryBody = UpsertCategoryRequestSchema;
+export type UpsertMembershipCategoryBody = z.infer<typeof UpsertMembershipCategoryBody>;
+
+export const UpsertMembershipCategoryResponse = MembershipCategorySchema;
+
 export const CreateMembershipBody = MembershipCreateRequestSchema;
 export type CreateMembershipBody = z.infer<typeof CreateMembershipBody>;
 
@@ -9469,6 +10273,23 @@ export type DeleteOfficerTermParams = z.infer<typeof DeleteOfficerTermParams>;
 
 export const DeleteOfficerTermResponse = z.void();
 
+export const GetOrganizationProfileParams = z.object({
+  organizationId: z.string(),
+});
+export type GetOrganizationProfileParams = z.infer<typeof GetOrganizationProfileParams>;
+
+export const GetOrganizationProfileResponse = OrganizationProfileSchema;
+
+export const UpdateOrganizationProfileParams = z.object({
+  organizationId: z.string(),
+});
+export type UpdateOrganizationProfileParams = z.infer<typeof UpdateOrganizationProfileParams>;
+
+export const UpdateOrganizationProfileBody = UpdateOrgProfileRequestSchema;
+export type UpdateOrganizationProfileBody = z.infer<typeof UpdateOrganizationProfileBody>;
+
+export const UpdateOrganizationProfileResponse = OrganizationProfileSchema;
+
 export const CreatePositionBody = PositionRequestSchema;
 export type CreatePositionBody = z.infer<typeof CreatePositionBody>;
 
@@ -9511,6 +10332,54 @@ export const DeletePositionParams = z.object({
 export type DeletePositionParams = z.infer<typeof DeletePositionParams>;
 
 export const DeletePositionResponse = z.void();
+
+export const ListRosterMembersQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  organizationId: z.string(),
+  status: MembershipStatusSchema.optional(),
+  categoryId: z.string().optional(),
+  search: z.string().optional(),
+});
+export type ListRosterMembersQuery = z.infer<typeof ListRosterMembersQuery>;
+
+export const ListRosterMembersResponse = RosterMemberListResponseSchema;
+
+export const AddRosterMemberBody = AddMemberRequestSchema;
+export type AddRosterMemberBody = z.infer<typeof AddRosterMemberBody>;
+
+export const AddRosterMemberResponse = RosterMemberSchema;
+
+export const ImportRosterMembersBody = ImportMembersRequestSchema;
+export type ImportRosterMembersBody = z.infer<typeof ImportRosterMembersBody>;
+
+export const ImportRosterMembersResponse = ImportResultSchema;
+
+export const GetRosterMemberParams = z.object({
+  memberId: z.string(),
+});
+export type GetRosterMemberParams = z.infer<typeof GetRosterMemberParams>;
+
+export const GetRosterMemberQuery = z.object({
+  organizationId: z.string(),
+});
+export type GetRosterMemberQuery = z.infer<typeof GetRosterMemberQuery>;
+
+export const GetRosterMemberResponse = RosterMemberSchema;
+
+export const UpdateRosterMemberParams = z.object({
+  memberId: z.string(),
+});
+export type UpdateRosterMemberParams = z.infer<typeof UpdateRosterMemberParams>;
+
+export const UpdateRosterMemberBody = UpdateMemberRequestSchema;
+export type UpdateRosterMemberBody = z.infer<typeof UpdateRosterMemberBody>;
+
+export const UpdateRosterMemberResponse = RosterMemberSchema;
 
 export const CreateRoyaltySplitBody = RoyaltySplitCreateRequestSchema;
 export type CreateRoyaltySplitBody = z.infer<typeof CreateRoyaltySplitBody>;
@@ -9797,6 +10666,88 @@ export const SearchTrainingsQuery = z.object({
 export type SearchTrainingsQuery = z.infer<typeof SearchTrainingsQuery>;
 
 export const SearchTrainingsResponse = TrainingListResponseSchema;
+
+export const ListMyCustomTrainingsQuery = z.object({
+  organizationId: z.string().optional(),
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListMyCustomTrainingsQuery = z.infer<typeof ListMyCustomTrainingsQuery>;
+
+export const ListMyCustomTrainingsResponse = TrainingListResponseSchema;
+
+export const CancelCustomTrainingParams = z.object({
+  trainingId: z.string(),
+});
+export type CancelCustomTrainingParams = z.infer<typeof CancelCustomTrainingParams>;
+
+export const CancelCustomTrainingQuery = z.object({
+  organizationId: z.string(),
+});
+export type CancelCustomTrainingQuery = z.infer<typeof CancelCustomTrainingQuery>;
+
+export const CancelCustomTrainingResponse = z.unknown();
+
+export const CheckInCustomTrainingParams = z.object({
+  trainingId: z.string(),
+});
+export type CheckInCustomTrainingParams = z.infer<typeof CheckInCustomTrainingParams>;
+
+export const CheckInCustomTrainingQuery = z.object({
+  organizationId: z.string(),
+});
+export type CheckInCustomTrainingQuery = z.infer<typeof CheckInCustomTrainingQuery>;
+
+export const CheckInCustomTrainingResponse = TrainingEnrollmentSchema;
+
+export const CompleteCustomTrainingParams = z.object({
+  trainingId: z.string(),
+});
+export type CompleteCustomTrainingParams = z.infer<typeof CompleteCustomTrainingParams>;
+
+export const CompleteCustomTrainingQuery = z.object({
+  organizationId: z.string(),
+});
+export type CompleteCustomTrainingQuery = z.infer<typeof CompleteCustomTrainingQuery>;
+
+export const CompleteCustomTrainingBody = TrainingEnrollmentCompleteRequestSchema;
+export type CompleteCustomTrainingBody = z.infer<typeof CompleteCustomTrainingBody>;
+
+export const CompleteCustomTrainingResponse = z.unknown();
+
+export const EnrollInCustomTrainingParams = z.object({
+  trainingId: z.string(),
+});
+export type EnrollInCustomTrainingParams = z.infer<typeof EnrollInCustomTrainingParams>;
+
+export const EnrollInCustomTrainingQuery = z.object({
+  organizationId: z.string(),
+});
+export type EnrollInCustomTrainingQuery = z.infer<typeof EnrollInCustomTrainingQuery>;
+
+export const EnrollInCustomTrainingResponse = TrainingEnrollmentSchema;
+
+export const ListCustomTrainingEnrollmentsParams = z.object({
+  trainingId: z.string(),
+});
+export type ListCustomTrainingEnrollmentsParams = z.infer<typeof ListCustomTrainingEnrollmentsParams>;
+
+export const ListCustomTrainingEnrollmentsQuery = z.object({
+  organizationId: z.string(),
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListCustomTrainingEnrollmentsQuery = z.infer<typeof ListCustomTrainingEnrollmentsQuery>;
+
+export const ListCustomTrainingEnrollmentsResponse = TrainingEnrollmentListResponseSchema;
 
 export const CreateCourseBody = CourseCreateRequestSchema;
 export type CreateCourseBody = z.infer<typeof CreateCourseBody>;

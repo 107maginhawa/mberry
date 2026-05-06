@@ -37,6 +37,11 @@ import { archiveDocument } from '../../handlers/documents/archiveDocument';
 import { uploadNewDocumentVersion } from '../../handlers/documents/uploadNewDocumentVersion';
 import { listDocumentVersions } from '../../handlers/documents/listDocumentVersions';
 import { getDocumentVersion } from '../../handlers/documents/getDocumentVersion';
+import { listMyCustomEvents } from '../../handlers/association:operations/listMyCustomEvents';
+import { listCustomEventAttendance } from '../../handlers/association:operations/listCustomEventAttendance';
+import { checkInCustomEvent } from '../../handlers/association:operations/checkInCustomEvent';
+import { registerForCustomEvent } from '../../handlers/association:operations/registerForCustomEvent';
+import { listCustomEventRegistrations } from '../../handlers/association:operations/listCustomEventRegistrations';
 import { createEvent } from '../../handlers/association:operations/createEvent';
 import { searchEvents } from '../../handlers/association:operations/searchEvents';
 import { createCheckIn } from '../../handlers/association:operations/createCheckIn';
@@ -57,6 +62,12 @@ import { listWaitlistEntries } from '../../handlers/association:operations/listW
 import { promoteWaitlistEntry } from '../../handlers/association:operations/promoteWaitlistEntry';
 import { createTraining } from '../../handlers/association:operations/createTraining';
 import { searchTrainings } from '../../handlers/association:operations/searchTrainings';
+import { listMyCustomTrainings } from '../../handlers/association:operations/listMyCustomTrainings';
+import { cancelCustomTraining } from '../../handlers/association:operations/cancelCustomTraining';
+import { checkInCustomTraining } from '../../handlers/association:operations/checkInCustomTraining';
+import { completeCustomTraining } from '../../handlers/association:operations/completeCustomTraining';
+import { enrollInCustomTraining } from '../../handlers/association:operations/enrollInCustomTraining';
+import { listCustomTrainingEnrollments } from '../../handlers/association:operations/listCustomTrainingEnrollments';
 import { createCourse } from '../../handlers/association:operations/createCourse';
 import { searchCourses } from '../../handlers/association:operations/searchCourses';
 import { createCourseEnrollment } from '../../handlers/association:operations/createCourseEnrollment';
@@ -96,6 +107,15 @@ import { updateMembershipApplication } from '../../handlers/association:member/u
 import { deleteMembershipApplication } from '../../handlers/association:member/deleteMembershipApplication';
 import { approveMembershipApplication } from '../../handlers/association:member/approveMembershipApplication';
 import { denyMembershipApplication } from '../../handlers/association:member/denyMembershipApplication';
+import { castBallot } from '../../handlers/association:member/castBallot';
+import { listBallots } from '../../handlers/association:member/listBallots';
+import { createCandidate } from '../../handlers/association:member/createCandidate';
+import { listCandidates } from '../../handlers/association:member/listCandidates';
+import { getCandidate } from '../../handlers/association:member/getCandidate';
+import { updateCandidate } from '../../handlers/association:member/updateCandidate';
+import { deleteCandidate } from '../../handlers/association:member/deleteCandidate';
+import { listMyCertificates } from '../../handlers/association:member/listMyCertificates';
+import { getCertificate } from '../../handlers/association:member/getCertificate';
 import { createChapterAffiliation } from '../../handlers/association:member/createChapterAffiliation';
 import { listChapterAffiliations } from '../../handlers/association:member/listChapterAffiliations';
 import { getChapterAffiliation } from '../../handlers/association:member/getChapterAffiliation';
@@ -127,6 +147,10 @@ import { listDuesConfigs } from '../../handlers/association:member/listDuesConfi
 import { getDuesConfig } from '../../handlers/association:member/getDuesConfig';
 import { updateDuesConfig } from '../../handlers/association:member/updateDuesConfig';
 import { deleteDuesConfig } from '../../handlers/association:member/deleteDuesConfig';
+import { getDuesGatewayConfig } from '../../handlers/association:member/getDuesGatewayConfig';
+import { upsertDuesGatewayConfig } from '../../handlers/association:member/upsertDuesGatewayConfig';
+import { disconnectDuesGateway } from '../../handlers/association:member/disconnectDuesGateway';
+import { testDuesGatewayConnection } from '../../handlers/association:member/testDuesGatewayConnection';
 import { createDuesInvoice } from '../../handlers/association:member/createDuesInvoice';
 import { listDuesInvoices } from '../../handlers/association:member/listDuesInvoices';
 import { generateDuesInvoicesForOrg } from '../../handlers/association:member/generateDuesInvoicesForOrg';
@@ -134,6 +158,14 @@ import { getDuesInvoice } from '../../handlers/association:member/getDuesInvoice
 import { updateDuesInvoice } from '../../handlers/association:member/updateDuesInvoice';
 import { deleteDuesInvoice } from '../../handlers/association:member/deleteDuesInvoice';
 import { markDuesInvoicePaid } from '../../handlers/association:member/markDuesInvoicePaid';
+import { listDuesPayments } from '../../handlers/association:member/listDuesPayments';
+import { recordDuesPayment } from '../../handlers/association:member/recordDuesPayment';
+import { getDuesPayment } from '../../handlers/association:member/getDuesPayment';
+import { refundDuesPayment } from '../../handlers/association:member/refundDuesPayment';
+import { listDuesFunds } from '../../handlers/association:member/listDuesFunds';
+import { upsertDuesFunds } from '../../handlers/association:member/upsertDuesFunds';
+import { getDuesFinancialDashboard } from '../../handlers/association:member/getDuesFinancialDashboard';
+import { generateDuesReport } from '../../handlers/association:member/generateDuesReport';
 import { listDunningEvents } from '../../handlers/association:member/listDunningEvents';
 import { runDunning } from '../../handlers/association:member/runDunning';
 import { createDunningTemplate } from '../../handlers/association:member/createDunningTemplate';
@@ -141,6 +173,14 @@ import { listDunningTemplates } from '../../handlers/association:member/listDunn
 import { getDunningTemplate } from '../../handlers/association:member/getDunningTemplate';
 import { updateDunningTemplate } from '../../handlers/association:member/updateDunningTemplate';
 import { deleteDunningTemplate } from '../../handlers/association:member/deleteDunningTemplate';
+import { createElection } from '../../handlers/association:member/createElection';
+import { listElections } from '../../handlers/association:member/listElections';
+import { getElection } from '../../handlers/association:member/getElection';
+import { updateElection } from '../../handlers/association:member/updateElection';
+import { deleteElection } from '../../handlers/association:member/deleteElection';
+import { certifyElection } from '../../handlers/association:member/certifyElection';
+import { openElectionNominations } from '../../handlers/association:member/openElectionNominations';
+import { openElectionVoting } from '../../handlers/association:member/openElectionVoting';
 import { createInstitutionalMembership } from '../../handlers/association:member/createInstitutionalMembership';
 import { listInstitutionalMemberships } from '../../handlers/association:member/listInstitutionalMemberships';
 import { getInstitutionalMembership } from '../../handlers/association:member/getInstitutionalMembership';
@@ -156,6 +196,8 @@ import { listProfessionalLicenses } from '../../handlers/association:member/list
 import { getProfessionalLicense } from '../../handlers/association:member/getProfessionalLicense';
 import { updateProfessionalLicense } from '../../handlers/association:member/updateProfessionalLicense';
 import { deleteProfessionalLicense } from '../../handlers/association:member/deleteProfessionalLicense';
+import { listMembershipCategories } from '../../handlers/association:member/listMembershipCategories';
+import { upsertMembershipCategory } from '../../handlers/association:member/upsertMembershipCategory';
 import { createMembership } from '../../handlers/association:member/createMembership';
 import { listMemberships } from '../../handlers/association:member/listMemberships';
 import { getMembership } from '../../handlers/association:member/getMembership';
@@ -169,11 +211,18 @@ import { listOfficerTerms } from '../../handlers/association:member/listOfficerT
 import { getOfficerTerm } from '../../handlers/association:member/getOfficerTerm';
 import { updateOfficerTerm } from '../../handlers/association:member/updateOfficerTerm';
 import { deleteOfficerTerm } from '../../handlers/association:member/deleteOfficerTerm';
+import { getOrganizationProfile } from '../../handlers/association:member/getOrganizationProfile';
+import { updateOrganizationProfile } from '../../handlers/association:member/updateOrganizationProfile';
 import { createPosition } from '../../handlers/association:member/createPosition';
 import { listPositions } from '../../handlers/association:member/listPositions';
 import { getPosition } from '../../handlers/association:member/getPosition';
 import { updatePosition } from '../../handlers/association:member/updatePosition';
 import { deletePosition } from '../../handlers/association:member/deletePosition';
+import { listRosterMembers } from '../../handlers/association:member/listRosterMembers';
+import { addRosterMember } from '../../handlers/association:member/addRosterMember';
+import { importRosterMembers } from '../../handlers/association:member/importRosterMembers';
+import { getRosterMember } from '../../handlers/association:member/getRosterMember';
+import { updateRosterMember } from '../../handlers/association:member/updateRosterMember';
 import { createRoyaltySplit } from '../../handlers/association:member/createRoyaltySplit';
 import { listRoyaltySplits } from '../../handlers/association:member/listRoyaltySplits';
 import { getRoyaltySplit } from '../../handlers/association:member/getRoyaltySplit';
@@ -318,6 +367,11 @@ export const registry = {
   getDocumentVersion,
 
   // Association:operations handlers
+  listMyCustomEvents,
+  listCustomEventAttendance,
+  checkInCustomEvent,
+  registerForCustomEvent,
+  listCustomEventRegistrations,
   createEvent,
   searchEvents,
   createCheckIn,
@@ -338,6 +392,12 @@ export const registry = {
   promoteWaitlistEntry,
   createTraining,
   searchTrainings,
+  listMyCustomTrainings,
+  cancelCustomTraining,
+  checkInCustomTraining,
+  completeCustomTraining,
+  enrollInCustomTraining,
+  listCustomTrainingEnrollments,
   createCourse,
   searchCourses,
   createCourseEnrollment,
@@ -379,6 +439,15 @@ export const registry = {
   deleteMembershipApplication,
   approveMembershipApplication,
   denyMembershipApplication,
+  castBallot,
+  listBallots,
+  createCandidate,
+  listCandidates,
+  getCandidate,
+  updateCandidate,
+  deleteCandidate,
+  listMyCertificates,
+  getCertificate,
   createChapterAffiliation,
   listChapterAffiliations,
   getChapterAffiliation,
@@ -410,6 +479,10 @@ export const registry = {
   getDuesConfig,
   updateDuesConfig,
   deleteDuesConfig,
+  getDuesGatewayConfig,
+  upsertDuesGatewayConfig,
+  disconnectDuesGateway,
+  testDuesGatewayConnection,
   createDuesInvoice,
   listDuesInvoices,
   generateDuesInvoicesForOrg,
@@ -417,6 +490,14 @@ export const registry = {
   updateDuesInvoice,
   deleteDuesInvoice,
   markDuesInvoicePaid,
+  listDuesPayments,
+  recordDuesPayment,
+  getDuesPayment,
+  refundDuesPayment,
+  listDuesFunds,
+  upsertDuesFunds,
+  getDuesFinancialDashboard,
+  generateDuesReport,
   listDunningEvents,
   runDunning,
   createDunningTemplate,
@@ -424,6 +505,14 @@ export const registry = {
   getDunningTemplate,
   updateDunningTemplate,
   deleteDunningTemplate,
+  createElection,
+  listElections,
+  getElection,
+  updateElection,
+  deleteElection,
+  certifyElection,
+  openElectionNominations,
+  openElectionVoting,
   createInstitutionalMembership,
   listInstitutionalMemberships,
   getInstitutionalMembership,
@@ -439,6 +528,8 @@ export const registry = {
   getProfessionalLicense,
   updateProfessionalLicense,
   deleteProfessionalLicense,
+  listMembershipCategories,
+  upsertMembershipCategory,
   createMembership,
   listMemberships,
   getMembership,
@@ -452,11 +543,18 @@ export const registry = {
   getOfficerTerm,
   updateOfficerTerm,
   deleteOfficerTerm,
+  getOrganizationProfile,
+  updateOrganizationProfile,
   createPosition,
   listPositions,
   getPosition,
   updatePosition,
   deletePosition,
+  listRosterMembers,
+  addRosterMember,
+  importRosterMembers,
+  getRosterMember,
+  updateRosterMember,
   createRoyaltySplit,
   listRoyaltySplits,
   getRoyaltySplit,

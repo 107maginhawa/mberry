@@ -590,6 +590,44 @@ export type ActionAlertUpdate = {
 };
 
 /**
+ * Request to add a new member to the organization roster
+ */
+export type AddMemberRequest = {
+    /**
+     * ID of the person to add as a member
+     */
+    personId: string;
+    /**
+     * ID of the membership tier
+     */
+    tierId: string;
+    /**
+     * Optional membership category ID
+     */
+    categoryId?: string;
+    /**
+     * Human-readable member number or license number
+     */
+    memberNumber?: string;
+    /**
+     * Date on which membership begins
+     */
+    startDate?: Date;
+    /**
+     * Date on which current dues period expires
+     */
+    duesExpiryDate?: Date;
+    /**
+     * Grace period days before lapse (default 30)
+     */
+    gracePeriodDays?: number;
+    /**
+     * Internal note about this membership
+     */
+    note?: string;
+};
+
+/**
  * Physical mailing address
  */
 export type Address = {
@@ -6847,6 +6885,53 @@ export type Ballot = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type BallotListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Ballot>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * A single ballot cast by a voter in an election
  */
 export type BallotUpdate = {
@@ -9106,6 +9191,77 @@ export type Candidate = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type CandidateListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Candidate>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Request to create or update a candidate
+ */
+export type CandidateRequest = {
+    electionId: string;
+    positionId: string;
+    personId: string;
+    nominatedBy: string;
+    bio?: string;
+    platform?: string;
+};
+
+/**
+ * Request to create or update a candidate
+ */
+export type CandidateRequestUpdate = {
+    electionId?: string;
+    positionId?: string;
+    personId?: string;
+    nominatedBy?: string;
+    bio?: string;
+    platform?: string;
+};
+
+/**
  * Status of a nomination/candidacy
  */
 export type CandidateStatus = 'nominated' | 'accepted' | 'declined' | 'withdrawn' | 'elected' | 'notElected';
@@ -9178,6 +9334,17 @@ export type CandidateUpdate = {
 export type CaptureMethod = 'automatic' | 'manual';
 
 /**
+ * Request to cast a ballot
+ */
+export type CastBallotRequest = {
+    electionId: string;
+    positionId: string;
+    candidateId: string;
+    isProxy: boolean;
+    proxyFor?: string;
+};
+
+/**
  * Lifecycle status of a certification program
  */
 export type CertProgramStatus = 'active' | 'suspended' | 'retired';
@@ -9204,6 +9371,153 @@ export type CertRequirement = {
  * Type of requirement within a certification program
  */
 export type CertRequirementType = 'exam' | 'training' | 'experience' | 'attestation';
+
+/**
+ * A certificate issued to a member upon completing a training activity
+ */
+export type Certificate = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the organization that issued the certificate
+     */
+    organizationId: string;
+    /**
+     * ID of the person the certificate was issued to
+     */
+    personId: string;
+    /**
+     * ID of the training activity this certificate relates to
+     */
+    trainingId: string;
+    /**
+     * Unique certificate number for verification
+     */
+    certificateNumber: string;
+    /**
+     * Date and time the certificate was issued
+     */
+    issuedAt: Date;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type CertificateListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Certificate>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A certificate issued to a member upon completing a training activity
+ */
+export type CertificateUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the organization that issued the certificate
+     */
+    organizationId?: string;
+    /**
+     * ID of the person the certificate was issued to
+     */
+    personId?: string;
+    /**
+     * ID of the training activity this certificate relates to
+     */
+    trainingId?: string;
+    /**
+     * Unique certificate number for verification
+     */
+    certificateNumber?: string;
+    /**
+     * Date and time the certificate was issued
+     */
+    issuedAt?: Date;
+};
 
 /**
  * A member's enrollment record in a certification program
@@ -13624,6 +13938,153 @@ export type DuesConfigUpdateRequest = {
 };
 
 /**
+ * A dues fund allocation pool for an organization
+ */
+export type DuesFund = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * Name of the fund
+     */
+    name: string;
+    /**
+     * Percentage of each payment allocated to this fund
+     */
+    percentage: number;
+    /**
+     * Sort order for display
+     */
+    sortOrder: number;
+    /**
+     * Whether this fund is currently active
+     */
+    active: boolean;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DuesFundListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DuesFund>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A dues fund allocation pool for an organization
+ */
+export type DuesFundUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * Name of the fund
+     */
+    name?: string;
+    /**
+     * Percentage of each payment allocated to this fund
+     */
+    percentage?: number;
+    /**
+     * Sort order for display
+     */
+    sortOrder?: number;
+    /**
+     * Whether this fund is currently active
+     */
+    active?: boolean;
+};
+
+/**
  * Dues invoice issued to a member for a renewal period
  */
 export type DuesInvoice = {
@@ -13851,6 +14312,318 @@ export type DuesInvoiceUpdate = {
      * ID of the payment transaction that settled this invoice
      */
     paymentId?: string;
+};
+
+/**
+ * A recorded dues payment from a member
+ */
+export type DuesPayment = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * ID of the member person
+     */
+    personId: string;
+    /**
+     * ID of the related invoice, if any
+     */
+    invoiceId?: string;
+    /**
+     * Human-readable receipt number
+     */
+    receiptNumber: string;
+    /**
+     * Payment amount in minor currency units
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency: string;
+    /**
+     * Payment method used
+     */
+    paymentMethod: 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
+    /**
+     * External reference number from the payment provider
+     */
+    referenceNumber?: string;
+    /**
+     * Lifecycle status of this payment
+     */
+    status: 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired';
+    /**
+     * ID of the staff member who recorded this payment
+     */
+    recordedBy?: string;
+    /**
+     * Date from which the membership was extended
+     */
+    membershipExtendedFrom?: Date;
+    /**
+     * Date to which the membership was extended
+     */
+    membershipExtendedTo?: Date;
+    /**
+     * Timestamp when payment was received
+     */
+    paidAt?: Date;
+    /**
+     * Amount already refunded in minor currency units
+     */
+    refundedAmount: bigint;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DuesPaymentListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DuesPayment>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Payment method for dues
+ */
+export type DuesPaymentMethod = 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
+
+/**
+ * Status of a dues payment
+ */
+export type DuesPaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired';
+
+/**
+ * A recorded dues payment from a member
+ */
+export type DuesPaymentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * ID of the member person
+     */
+    personId?: string;
+    /**
+     * ID of the related invoice, if any
+     */
+    invoiceId?: string;
+    /**
+     * Human-readable receipt number
+     */
+    receiptNumber?: string;
+    /**
+     * Payment amount in minor currency units
+     */
+    amount?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Payment method used
+     */
+    paymentMethod?: 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
+    /**
+     * External reference number from the payment provider
+     */
+    referenceNumber?: string;
+    /**
+     * Lifecycle status of this payment
+     */
+    status?: 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired';
+    /**
+     * ID of the staff member who recorded this payment
+     */
+    recordedBy?: string;
+    /**
+     * Date from which the membership was extended
+     */
+    membershipExtendedFrom?: Date;
+    /**
+     * Date to which the membership was extended
+     */
+    membershipExtendedTo?: Date;
+    /**
+     * Timestamp when payment was received
+     */
+    paidAt?: Date;
+    /**
+     * Amount already refunded in minor currency units
+     */
+    refundedAmount?: bigint;
+};
+
+/**
+ * Request to refund a dues payment
+ */
+export type DuesRefundRequest = {
+    /**
+     * Amount to refund in minor currency units; omit for full refund
+     */
+    amount?: bigint;
+    /**
+     * Reason for the refund
+     */
+    reason?: string;
+};
+
+/**
+ * Dues collection report entry grouped by month and payment method
+ */
+export type DuesReportEntry = {
+    /**
+     * Year-month string in YYYY-MM format
+     */
+    month: string;
+    /**
+     * Payment method for this group
+     */
+    method: 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
+    /**
+     * Number of payments in this group
+     */
+    count: number;
+    /**
+     * Total amount collected in this group (minor currency units)
+     */
+    total: bigint;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type DuesReportEntryListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<DuesReportEntry>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
 };
 
 /**
@@ -14295,7 +15068,7 @@ export type Election = {
     /**
      * Current status of the election
      */
-    status: 'draft' | 'nominationOpen' | 'nominationClosed' | 'votingOpen' | 'votingClosed' | 'certified' | 'cancelled';
+    status: 'draft' | 'nominationsOpen' | 'votingOpen' | 'awaitingConfirmation' | 'published' | 'cancelled';
     /**
      * Minimum number of votes required for the election results to be valid
      */
@@ -14307,9 +15080,86 @@ export type Election = {
 };
 
 /**
+ * Request to create an election
+ */
+export type ElectionCreateRequest = {
+    organizationId: string;
+    title: string;
+    electionType: ElectionType;
+    positions: Array<string>;
+    nominationStart: Date;
+    nominationEnd: Date;
+    votingStart: Date;
+    votingEnd: Date;
+    quorumRequired?: number;
+};
+
+/**
+ * Request to create an election
+ */
+export type ElectionCreateRequestUpdate = {
+    organizationId?: string;
+    title?: string;
+    electionType?: ElectionType;
+    positions?: Array<string>;
+    nominationStart?: Date;
+    nominationEnd?: Date;
+    votingStart?: Date;
+    votingEnd?: Date;
+    quorumRequired?: number;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type ElectionListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Election>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Lifecycle status of an election
  */
-export type ElectionStatus = 'draft' | 'nominationOpen' | 'nominationClosed' | 'votingOpen' | 'votingClosed' | 'certified' | 'cancelled';
+export type ElectionStatus = 'draft' | 'nominationsOpen' | 'votingOpen' | 'awaitingConfirmation' | 'published' | 'cancelled';
 
 /**
  * Type of election
@@ -14379,7 +15229,7 @@ export type ElectionUpdate = {
     /**
      * Current status of the election
      */
-    status?: 'draft' | 'nominationOpen' | 'nominationClosed' | 'votingOpen' | 'votingClosed' | 'certified' | 'cancelled';
+    status?: 'draft' | 'nominationsOpen' | 'votingOpen' | 'awaitingConfirmation' | 'published' | 'cancelled';
     /**
      * Minimum number of votes required for the election results to be valid
      */
@@ -16163,6 +17013,36 @@ export type FileUploadResponse = {
 };
 
 /**
+ * Financial dashboard statistics for an organization
+ */
+export type FinancialDashboard = {
+    /**
+     * Total amount collected from completed payments
+     */
+    totalCollected: bigint;
+    /**
+     * Total outstanding amount from pending payments
+     */
+    totalOutstanding: bigint;
+    /**
+     * Number of pending payment records
+     */
+    pendingCount: number;
+    /**
+     * Number of completed payment records
+     */
+    completedCount: number;
+    /**
+     * Total number of payment records
+     */
+    totalCount: number;
+    /**
+     * Percentage of payments that have been completed (0–100)
+     */
+    collectionRate: number;
+};
+
+/**
  * Configuration for booking forms
  */
 export type FormConfig = {
@@ -16386,6 +17266,147 @@ export type FundAllocation = {
  * Type of fundraising campaign
  */
 export type FundraisingCampaignType = 'fundraising' | 'membershipDrive' | 'eventPromotion' | 'advocacy' | 'awareness';
+
+/**
+ * Gateway configuration for a payment provider
+ */
+export type GatewayConfig = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * Payment gateway provider
+     */
+    provider: 'paymongo' | 'stripe';
+    /**
+     * Public key for the payment provider
+     */
+    publicKey: string;
+    /**
+     * Whether the gateway connection has been tested and confirmed
+     */
+    connected: boolean;
+    /**
+     * Timestamp of the most recent connection test
+     */
+    lastTestAt?: Date;
+};
+
+/**
+ * Request to configure or update a payment gateway
+ */
+export type GatewayConfigRequest = {
+    /**
+     * Payment gateway provider
+     */
+    provider: 'paymongo' | 'stripe';
+    /**
+     * Public key for the payment provider
+     */
+    publicKey: string;
+    /**
+     * Secret key for the payment provider (write-only; never returned)
+     */
+    secretKey: string;
+};
+
+/**
+ * Gateway configuration for a payment provider
+ */
+export type GatewayConfigUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * Payment gateway provider
+     */
+    provider?: 'paymongo' | 'stripe';
+    /**
+     * Public key for the payment provider
+     */
+    publicKey?: string;
+    /**
+     * Whether the gateway connection has been tested and confirmed
+     */
+    connected?: boolean;
+    /**
+     * Timestamp of the most recent connection test
+     */
+    lastTestAt?: Date;
+};
+
+/**
+ * Payment gateway provider
+ */
+export type GatewayProvider = 'paymongo' | 'stripe';
+
+/**
+ * Result of a gateway connection test
+ */
+export type GatewayTestResult = {
+    /**
+     * Whether the connection test succeeded
+     */
+    success: boolean;
+    /**
+     * Human-readable message from the test
+     */
+    message: string;
+    /**
+     * Timestamp when the test was performed
+     */
+    testedAt: Date;
+};
 
 /**
  * Gender identity
@@ -16866,6 +17887,42 @@ export type IceServersResponse = {
      * List of ICE servers (STUN/TURN) for WebRTC peer connections
      */
     iceServers: Array<IceServer>;
+};
+
+/**
+ * Request to import multiple members from an external source
+ */
+export type ImportMembersRequest = {
+    /**
+     * ID of the organization to import members into
+     */
+    organizationId: string;
+    /**
+     * Array of member records to import
+     */
+    members: Array<AddMemberRequest>;
+};
+
+/**
+ * Result of a bulk member import operation
+ */
+export type ImportResult = {
+    /**
+     * Number of records successfully imported
+     */
+    imported: number;
+    /**
+     * Number of records skipped due to duplicates
+     */
+    skipped: number;
+    /**
+     * Number of records that failed validation
+     */
+    failed: number;
+    /**
+     * Validation errors for failed records, indexed by position
+     */
+    errors: Array<string>;
 };
 
 /**
@@ -18707,6 +19764,53 @@ export type MembershipCategory = {
 };
 
 /**
+ * Offset-based paginated response with page navigation
+ */
+export type MembershipCategoryListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<MembershipCategory>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
  * Membership category grouping tiers for reporting and eligibility
  */
 export type MembershipCategoryUpdate = {
@@ -20208,6 +21312,64 @@ export type OrganizationListResponse = {
          */
         hasPreviousPage: boolean;
     };
+};
+
+/**
+ * Profile of an association organization
+ */
+export type OrganizationProfile = {
+    /**
+     * ID of the organization
+     */
+    id: string;
+    /**
+     * Display name of the organization
+     */
+    name: string;
+    /**
+     * URL-safe unique slug for the organization
+     */
+    slug: string;
+    /**
+     * Primary contact email address
+     */
+    contactEmail: string;
+    /**
+     * Geographic region or province
+     */
+    region?: string;
+    /**
+     * Organization type classification
+     */
+    orgType?: string;
+    /**
+     * Lifecycle status of the organization
+     */
+    status: string;
+    /**
+     * Human-readable description of the organization
+     */
+    description?: string;
+    /**
+     * URL of the organization logo image
+     */
+    logoUrl?: string;
+    /**
+     * Contact phone number
+     */
+    phone?: string;
+    /**
+     * Physical address
+     */
+    address?: string;
+    /**
+     * Website URL
+     */
+    website?: string;
+    /**
+     * Founding date of the organization
+     */
+    foundingDate?: Date;
 };
 
 /**
@@ -23366,6 +24528,44 @@ export type RateLimitError = {
 };
 
 /**
+ * Request to record a manual dues payment
+ */
+export type RecordPaymentRequest = {
+    /**
+     * ID of the organization
+     */
+    organizationId: string;
+    /**
+     * ID of the member person
+     */
+    personId: string;
+    /**
+     * Optional invoice to link this payment to
+     */
+    invoiceId?: string;
+    /**
+     * Payment amount in minor currency units
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency: string;
+    /**
+     * Payment method
+     */
+    paymentMethod: 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
+    /**
+     * External reference number
+     */
+    referenceNumber?: string;
+    /**
+     * Timestamp when payment was received
+     */
+    paidAt?: Date;
+};
+
+/**
  * Recurrence pattern for schedule exceptions
  */
 export type RecurrencePattern = {
@@ -23957,6 +25157,201 @@ export type RevokeCredentialRequest = {
      * Reason for revoking the credential
      */
     reason: string;
+};
+
+/**
+ * A member in the organization roster, combining membership and person details
+ */
+export type RosterMember = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * ID of the person
+     */
+    personId: string;
+    /**
+     * ID of the membership tier
+     */
+    tierId: string;
+    /**
+     * Optional membership category ID
+     */
+    categoryId?: string;
+    /**
+     * Human-readable member number or license number
+     */
+    memberNumber?: string;
+    /**
+     * Date on which membership benefits began
+     */
+    startDate: Date;
+    /**
+     * Date on which current dues period expires
+     */
+    duesExpiryDate: Date;
+    /**
+     * Lifecycle status of this membership
+     */
+    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    /**
+     * Timestamp when the person first joined the association
+     */
+    joinedAt: Date;
+    /**
+     * Number of days after duesExpiryDate before membership lapses
+     */
+    gracePeriodDays: number;
+    /**
+     * Internal note about this membership
+     */
+    note?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type RosterMemberListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<RosterMember>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * A member in the organization roster, combining membership and person details
+ */
+export type RosterMemberUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * ID of the person
+     */
+    personId?: string;
+    /**
+     * ID of the membership tier
+     */
+    tierId?: string;
+    /**
+     * Optional membership category ID
+     */
+    categoryId?: string;
+    /**
+     * Human-readable member number or license number
+     */
+    memberNumber?: string;
+    /**
+     * Date on which membership benefits began
+     */
+    startDate?: Date;
+    /**
+     * Date on which current dues period expires
+     */
+    duesExpiryDate?: Date;
+    /**
+     * Lifecycle status of this membership
+     */
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    /**
+     * Timestamp when the person first joined the association
+     */
+    joinedAt?: Date;
+    /**
+     * Number of days after duesExpiryDate before membership lapses
+     */
+    gracePeriodDays?: number;
+    /**
+     * Internal note about this membership
+     */
+    note?: string;
 };
 
 /**
@@ -26767,6 +28162,82 @@ export type UpdateInvoiceRequest = {
 };
 
 /**
+ * Request to update an existing roster member
+ */
+export type UpdateMemberRequest = {
+    /**
+     * ID of the membership tier
+     */
+    tierId?: string;
+    /**
+     * Optional membership category ID
+     */
+    categoryId?: string | null;
+    /**
+     * Human-readable member number
+     */
+    memberNumber?: string | null;
+    /**
+     * Date on which current dues period expires
+     */
+    duesExpiryDate?: Date;
+    /**
+     * Grace period days before lapse
+     */
+    gracePeriodDays?: number;
+    /**
+     * Lifecycle status
+     */
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    /**
+     * Internal note about this membership
+     */
+    note?: string | null;
+};
+
+/**
+ * Request to update an organization profile
+ */
+export type UpdateOrgProfileRequest = {
+    /**
+     * Display name
+     */
+    name?: string;
+    /**
+     * Primary contact email
+     */
+    contactEmail?: string;
+    /**
+     * Geographic region
+     */
+    region?: string;
+    /**
+     * Human-readable description
+     */
+    description?: string;
+    /**
+     * URL of the organization logo
+     */
+    logoUrl?: string;
+    /**
+     * Contact phone number
+     */
+    phone?: string;
+    /**
+     * Physical address
+     */
+    address?: string;
+    /**
+     * Website URL
+     */
+    website?: string;
+    /**
+     * Founding date
+     */
+    foundingDate?: Date;
+};
+
+/**
  * Update video call participant status
  */
 export type UpdateParticipantRequest = {
@@ -26832,6 +28303,34 @@ export type UpdateTemplateRequest = {
      * Template status
      */
     status?: 'draft' | 'active' | 'archived';
+};
+
+/**
+ * Request to create or update a membership category
+ */
+export type UpsertCategoryRequest = {
+    /**
+     * Display name of the category
+     */
+    name: string;
+    /**
+     * Description of the category
+     */
+    description?: string;
+    /**
+     * IDs of the tiers that belong to this category
+     */
+    applicableTiers: Array<string>;
+};
+
+/**
+ * Request to upsert dues fund allocations for an organization
+ */
+export type UpsertFundsRequest = {
+    /**
+     * Full replacement list of fund allocations (percentages must sum to 100)
+     */
+    funds: Array<FundAllocation>;
 };
 
 /**
@@ -29452,6 +30951,267 @@ export type GetDocumentVersionResponses = {
 
 export type GetDocumentVersionResponse = GetDocumentVersionResponses[keyof GetDocumentVersionResponses];
 
+export type ListMyCustomEventsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: string;
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/event-lifecycle/my';
+};
+
+export type ListMyCustomEventsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListMyCustomEventsError = ListMyCustomEventsErrors[keyof ListMyCustomEventsErrors];
+
+export type ListMyCustomEventsResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventListResponse;
+};
+
+export type ListMyCustomEventsResponse = ListMyCustomEventsResponses[keyof ListMyCustomEventsResponses];
+
+export type ListCustomEventAttendanceData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/event-lifecycle/{eventId}/attendance';
+};
+
+export type ListCustomEventAttendanceErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ListCustomEventAttendanceError = ListCustomEventAttendanceErrors[keyof ListCustomEventAttendanceErrors];
+
+export type ListCustomEventAttendanceResponses = {
+    /**
+     * Success response with data
+     */
+    200: CheckInListResponse;
+};
+
+export type ListCustomEventAttendanceResponse = ListCustomEventAttendanceResponses[keyof ListCustomEventAttendanceResponses];
+
+export type CheckInCustomEventData = {
+    body: CheckInCreateRequest;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/event-lifecycle/{eventId}/check-in';
+};
+
+export type CheckInCustomEventErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CheckInCustomEventError = CheckInCustomEventErrors[keyof CheckInCustomEventErrors];
+
+export type CheckInCustomEventResponses = {
+    /**
+     * Resource created response
+     */
+    201: CheckIn;
+};
+
+export type CheckInCustomEventResponse = CheckInCustomEventResponses[keyof CheckInCustomEventResponses];
+
+export type RegisterForCustomEventData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/event-lifecycle/{eventId}/register';
+};
+
+export type RegisterForCustomEventErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RegisterForCustomEventError = RegisterForCustomEventErrors[keyof RegisterForCustomEventErrors];
+
+export type RegisterForCustomEventResponses = {
+    /**
+     * Resource created response
+     */
+    201: EventRegistration;
+};
+
+export type RegisterForCustomEventResponse = RegisterForCustomEventResponses[keyof RegisterForCustomEventResponses];
+
+export type ListCustomEventRegistrationsData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/event-lifecycle/{eventId}/registrations';
+};
+
+export type ListCustomEventRegistrationsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ListCustomEventRegistrationsError = ListCustomEventRegistrationsErrors[keyof ListCustomEventRegistrationsErrors];
+
+export type ListCustomEventRegistrationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventRegistrationListResponse;
+};
+
+export type ListCustomEventRegistrationsResponse = ListCustomEventRegistrationsResponses[keyof ListCustomEventRegistrationsResponses];
+
 export type SearchEventsData = {
     body?: never;
     path?: never;
@@ -30857,6 +32617,382 @@ export type DenyMembershipApplicationResponses = {
 
 export type DenyMembershipApplicationResponse = DenyMembershipApplicationResponses[keyof DenyMembershipApplicationResponses];
 
+export type ListBallotsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        electionId?: string;
+        positionId?: string;
+    };
+    url: '/association/member/ballots';
+};
+
+export type ListBallotsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListBallotsError = ListBallotsErrors[keyof ListBallotsErrors];
+
+export type ListBallotsResponses = {
+    /**
+     * Success response with data
+     */
+    200: BallotListResponse;
+};
+
+export type ListBallotsResponse = ListBallotsResponses[keyof ListBallotsResponses];
+
+export type CastBallotData = {
+    body: CastBallotRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/ballots';
+};
+
+export type CastBallotErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CastBallotError = CastBallotErrors[keyof CastBallotErrors];
+
+export type CastBallotResponses = {
+    /**
+     * Resource created response
+     */
+    201: Ballot;
+};
+
+export type CastBallotResponse = CastBallotResponses[keyof CastBallotResponses];
+
+export type ListCandidatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        electionId?: string;
+        positionId?: string;
+    };
+    url: '/association/member/candidates';
+};
+
+export type ListCandidatesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListCandidatesError = ListCandidatesErrors[keyof ListCandidatesErrors];
+
+export type ListCandidatesResponses = {
+    /**
+     * Success response with data
+     */
+    200: CandidateListResponse;
+};
+
+export type ListCandidatesResponse = ListCandidatesResponses[keyof ListCandidatesResponses];
+
+export type CreateCandidateData = {
+    body: CandidateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/candidates';
+};
+
+export type CreateCandidateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateCandidateError = CreateCandidateErrors[keyof CreateCandidateErrors];
+
+export type CreateCandidateResponses = {
+    /**
+     * Resource created response
+     */
+    201: Candidate;
+};
+
+export type CreateCandidateResponse = CreateCandidateResponses[keyof CreateCandidateResponses];
+
+export type DeleteCandidateData = {
+    body?: never;
+    path: {
+        candidateId: string;
+    };
+    query?: never;
+    url: '/association/member/candidates/{candidateId}';
+};
+
+export type DeleteCandidateErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteCandidateError = DeleteCandidateErrors[keyof DeleteCandidateErrors];
+
+export type DeleteCandidateResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteCandidateResponse = DeleteCandidateResponses[keyof DeleteCandidateResponses];
+
+export type GetCandidateData = {
+    body?: never;
+    path: {
+        candidateId: string;
+    };
+    query?: never;
+    url: '/association/member/candidates/{candidateId}';
+};
+
+export type GetCandidateErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetCandidateError = GetCandidateErrors[keyof GetCandidateErrors];
+
+export type GetCandidateResponses = {
+    /**
+     * Success response with data
+     */
+    200: Candidate;
+};
+
+export type GetCandidateResponse = GetCandidateResponses[keyof GetCandidateResponses];
+
+export type UpdateCandidateData = {
+    body: CandidateRequestUpdate;
+    path: {
+        candidateId: string;
+    };
+    query?: never;
+    url: '/association/member/candidates/{candidateId}';
+};
+
+export type UpdateCandidateErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateCandidateError = UpdateCandidateErrors[keyof UpdateCandidateErrors];
+
+export type UpdateCandidateResponses = {
+    /**
+     * Success response with data
+     */
+    200: Candidate;
+};
+
+export type UpdateCandidateResponse = UpdateCandidateResponses[keyof UpdateCandidateResponses];
+
+export type ListMyCertificatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/member/certificates';
+};
+
+export type ListMyCertificatesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListMyCertificatesError = ListMyCertificatesErrors[keyof ListMyCertificatesErrors];
+
+export type ListMyCertificatesResponses = {
+    /**
+     * Success response with data
+     */
+    200: CertificateListResponse;
+};
+
+export type ListMyCertificatesResponse = ListMyCertificatesResponses[keyof ListMyCertificatesResponses];
+
+export type GetCertificateData = {
+    body?: never;
+    path: {
+        certificateId: string;
+    };
+    query?: never;
+    url: '/association/member/certificates/{certificateId}';
+};
+
+export type GetCertificateErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetCertificateError = GetCertificateErrors[keyof GetCertificateErrors];
+
+export type GetCertificateResponses = {
+    /**
+     * Success response with data
+     */
+    200: Certificate;
+};
+
+export type GetCertificateResponse = GetCertificateResponses[keyof GetCertificateResponses];
+
 export type ListChapterAffiliationsData = {
     body?: never;
     path?: never;
@@ -32085,6 +34221,142 @@ export type UpdateDuesConfigResponses = {
 
 export type UpdateDuesConfigResponse = UpdateDuesConfigResponses[keyof UpdateDuesConfigResponses];
 
+export type DisconnectDuesGatewayData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-gateway/{organizationId}';
+};
+
+export type DisconnectDuesGatewayErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DisconnectDuesGatewayError = DisconnectDuesGatewayErrors[keyof DisconnectDuesGatewayErrors];
+
+export type DisconnectDuesGatewayResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DisconnectDuesGatewayResponse = DisconnectDuesGatewayResponses[keyof DisconnectDuesGatewayResponses];
+
+export type GetDuesGatewayConfigData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-gateway/{organizationId}';
+};
+
+export type GetDuesGatewayConfigErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDuesGatewayConfigError = GetDuesGatewayConfigErrors[keyof GetDuesGatewayConfigErrors];
+
+export type GetDuesGatewayConfigResponses = {
+    /**
+     * Success response with data
+     */
+    200: GatewayConfig;
+};
+
+export type GetDuesGatewayConfigResponse = GetDuesGatewayConfigResponses[keyof GetDuesGatewayConfigResponses];
+
+export type UpsertDuesGatewayConfigData = {
+    body: GatewayConfigRequest;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-gateway/{organizationId}';
+};
+
+export type UpsertDuesGatewayConfigErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type UpsertDuesGatewayConfigError = UpsertDuesGatewayConfigErrors[keyof UpsertDuesGatewayConfigErrors];
+
+export type UpsertDuesGatewayConfigResponses = {
+    /**
+     * Success response with data
+     */
+    200: GatewayConfig;
+};
+
+export type UpsertDuesGatewayConfigResponse = UpsertDuesGatewayConfigResponses[keyof UpsertDuesGatewayConfigResponses];
+
+export type TestDuesGatewayConnectionData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-gateway/{organizationId}/test';
+};
+
+export type TestDuesGatewayConnectionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type TestDuesGatewayConnectionError = TestDuesGatewayConnectionErrors[keyof TestDuesGatewayConnectionErrors];
+
+export type TestDuesGatewayConnectionResponses = {
+    /**
+     * Success response with data
+     */
+    200: GatewayTestResult;
+};
+
+export type TestDuesGatewayConnectionResponse = TestDuesGatewayConnectionResponses[keyof TestDuesGatewayConnectionResponses];
+
 export type ListDuesInvoicesData = {
     body?: never;
     path?: never;
@@ -32351,6 +34623,305 @@ export type MarkDuesInvoicePaidResponses = {
 };
 
 export type MarkDuesInvoicePaidResponse = MarkDuesInvoicePaidResponses[keyof MarkDuesInvoicePaidResponses];
+
+export type ListDuesPaymentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        personId?: string;
+        status?: DuesPaymentStatus;
+    };
+    url: '/association/member/dues-payments';
+};
+
+export type ListDuesPaymentsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDuesPaymentsError = ListDuesPaymentsErrors[keyof ListDuesPaymentsErrors];
+
+export type ListDuesPaymentsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesPaymentListResponse;
+};
+
+export type ListDuesPaymentsResponse = ListDuesPaymentsResponses[keyof ListDuesPaymentsResponses];
+
+export type RecordDuesPaymentData = {
+    body: RecordPaymentRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/dues-payments';
+};
+
+export type RecordDuesPaymentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type RecordDuesPaymentError = RecordDuesPaymentErrors[keyof RecordDuesPaymentErrors];
+
+export type RecordDuesPaymentResponses = {
+    /**
+     * Resource created response
+     */
+    201: DuesPayment;
+};
+
+export type RecordDuesPaymentResponse = RecordDuesPaymentResponses[keyof RecordDuesPaymentResponses];
+
+export type GetDuesPaymentData = {
+    body?: never;
+    path: {
+        paymentId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-payments/{paymentId}';
+};
+
+export type GetDuesPaymentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDuesPaymentError = GetDuesPaymentErrors[keyof GetDuesPaymentErrors];
+
+export type GetDuesPaymentResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesPayment;
+};
+
+export type GetDuesPaymentResponse = GetDuesPaymentResponses[keyof GetDuesPaymentResponses];
+
+export type RefundDuesPaymentData = {
+    body: DuesRefundRequest;
+    path: {
+        paymentId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-payments/{paymentId}/refund';
+};
+
+export type RefundDuesPaymentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RefundDuesPaymentError = RefundDuesPaymentErrors[keyof RefundDuesPaymentErrors];
+
+export type RefundDuesPaymentResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesPayment;
+};
+
+export type RefundDuesPaymentResponse = RefundDuesPaymentResponses[keyof RefundDuesPaymentResponses];
+
+export type ListDuesFundsData = {
+    body?: never;
+    path?: never;
+    query: {
+        organizationId: string;
+    };
+    url: '/association/member/dues-reporting';
+};
+
+export type ListDuesFundsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListDuesFundsError = ListDuesFundsErrors[keyof ListDuesFundsErrors];
+
+export type ListDuesFundsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesFundListResponse;
+};
+
+export type ListDuesFundsResponse = ListDuesFundsResponses[keyof ListDuesFundsResponses];
+
+export type UpsertDuesFundsData = {
+    body: UpsertFundsRequest;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-reporting/{organizationId}';
+};
+
+export type UpsertDuesFundsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type UpsertDuesFundsError = UpsertDuesFundsErrors[keyof UpsertDuesFundsErrors];
+
+export type UpsertDuesFundsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesFundListResponse;
+};
+
+export type UpsertDuesFundsResponse = UpsertDuesFundsResponses[keyof UpsertDuesFundsResponses];
+
+export type GetDuesFinancialDashboardData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-reporting/{organizationId}/dashboard';
+};
+
+export type GetDuesFinancialDashboardErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDuesFinancialDashboardError = GetDuesFinancialDashboardErrors[keyof GetDuesFinancialDashboardErrors];
+
+export type GetDuesFinancialDashboardResponses = {
+    /**
+     * Success response with data
+     */
+    200: FinancialDashboard;
+};
+
+export type GetDuesFinancialDashboardResponse = GetDuesFinancialDashboardResponses[keyof GetDuesFinancialDashboardResponses];
+
+export type GenerateDuesReportData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: {
+        from?: Date;
+        to?: Date;
+    };
+    url: '/association/member/dues-reporting/{organizationId}/report';
+};
+
+export type GenerateDuesReportErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GenerateDuesReportError = GenerateDuesReportErrors[keyof GenerateDuesReportErrors];
+
+export type GenerateDuesReportResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesReportEntryListResponse;
+};
+
+export type GenerateDuesReportResponse = GenerateDuesReportResponses[keyof GenerateDuesReportResponses];
 
 export type ListDunningEventsData = {
     body?: never;
@@ -32629,6 +35200,305 @@ export type UpdateDunningTemplateResponses = {
 };
 
 export type UpdateDunningTemplateResponse = UpdateDunningTemplateResponses[keyof UpdateDunningTemplateResponses];
+
+export type ListElectionsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId?: string;
+        status?: ElectionStatus;
+    };
+    url: '/association/member/elections';
+};
+
+export type ListElectionsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListElectionsError = ListElectionsErrors[keyof ListElectionsErrors];
+
+export type ListElectionsResponses = {
+    /**
+     * Success response with data
+     */
+    200: ElectionListResponse;
+};
+
+export type ListElectionsResponse = ListElectionsResponses[keyof ListElectionsResponses];
+
+export type CreateElectionData = {
+    body: ElectionCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/elections';
+};
+
+export type CreateElectionErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateElectionError = CreateElectionErrors[keyof CreateElectionErrors];
+
+export type CreateElectionResponses = {
+    /**
+     * Resource created response
+     */
+    201: Election;
+};
+
+export type CreateElectionResponse = CreateElectionResponses[keyof CreateElectionResponses];
+
+export type DeleteElectionData = {
+    body?: never;
+    path: {
+        electionId: string;
+    };
+    query?: never;
+    url: '/association/member/elections/{electionId}';
+};
+
+export type DeleteElectionErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeleteElectionError = DeleteElectionErrors[keyof DeleteElectionErrors];
+
+export type DeleteElectionResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteElectionResponse = DeleteElectionResponses[keyof DeleteElectionResponses];
+
+export type GetElectionData = {
+    body?: never;
+    path: {
+        electionId: string;
+    };
+    query?: never;
+    url: '/association/member/elections/{electionId}';
+};
+
+export type GetElectionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetElectionError = GetElectionErrors[keyof GetElectionErrors];
+
+export type GetElectionResponses = {
+    /**
+     * Success response with data
+     */
+    200: Election;
+};
+
+export type GetElectionResponse = GetElectionResponses[keyof GetElectionResponses];
+
+export type UpdateElectionData = {
+    body: ElectionCreateRequestUpdate;
+    path: {
+        electionId: string;
+    };
+    query?: never;
+    url: '/association/member/elections/{electionId}';
+};
+
+export type UpdateElectionErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateElectionError = UpdateElectionErrors[keyof UpdateElectionErrors];
+
+export type UpdateElectionResponses = {
+    /**
+     * Success response with data
+     */
+    200: Election;
+};
+
+export type UpdateElectionResponse = UpdateElectionResponses[keyof UpdateElectionResponses];
+
+export type CertifyElectionData = {
+    body?: never;
+    path: {
+        electionId: string;
+    };
+    query?: never;
+    url: '/association/member/elections/{electionId}/certify';
+};
+
+export type CertifyElectionErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CertifyElectionError = CertifyElectionErrors[keyof CertifyElectionErrors];
+
+export type CertifyElectionResponses = {
+    /**
+     * Success response with data
+     */
+    200: Election;
+};
+
+export type CertifyElectionResponse = CertifyElectionResponses[keyof CertifyElectionResponses];
+
+export type OpenElectionNominationsData = {
+    body?: never;
+    path: {
+        electionId: string;
+    };
+    query?: never;
+    url: '/association/member/elections/{electionId}/open-nominations';
+};
+
+export type OpenElectionNominationsErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type OpenElectionNominationsError = OpenElectionNominationsErrors[keyof OpenElectionNominationsErrors];
+
+export type OpenElectionNominationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: Election;
+};
+
+export type OpenElectionNominationsResponse = OpenElectionNominationsResponses[keyof OpenElectionNominationsResponses];
+
+export type OpenElectionVotingData = {
+    body?: never;
+    path: {
+        electionId: string;
+    };
+    query?: never;
+    url: '/association/member/elections/{electionId}/open-voting';
+};
+
+export type OpenElectionVotingErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type OpenElectionVotingError = OpenElectionVotingErrors[keyof OpenElectionVotingErrors];
+
+export type OpenElectionVotingResponses = {
+    /**
+     * Success response with data
+     */
+    200: Election;
+};
+
+export type OpenElectionVotingResponse = OpenElectionVotingResponses[keyof OpenElectionVotingResponses];
 
 export type ListInstitutionalMembershipsData = {
     body?: never;
@@ -33252,6 +36122,96 @@ export type UpdateProfessionalLicenseResponses = {
 
 export type UpdateProfessionalLicenseResponse = UpdateProfessionalLicenseResponses[keyof UpdateProfessionalLicenseResponses];
 
+export type ListMembershipCategoriesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId: string;
+    };
+    url: '/association/member/membership-categories';
+};
+
+export type ListMembershipCategoriesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListMembershipCategoriesError = ListMembershipCategoriesErrors[keyof ListMembershipCategoriesErrors];
+
+export type ListMembershipCategoriesResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipCategoryListResponse;
+};
+
+export type ListMembershipCategoriesResponse = ListMembershipCategoriesResponses[keyof ListMembershipCategoriesResponses];
+
+export type UpsertMembershipCategoryData = {
+    body: UpsertCategoryRequest;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/membership-categories/{organizationId}';
+};
+
+export type UpsertMembershipCategoryErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type UpsertMembershipCategoryError = UpsertMembershipCategoryErrors[keyof UpsertMembershipCategoryErrors];
+
+export type UpsertMembershipCategoryResponses = {
+    /**
+     * Success response with data
+     */
+    200: MembershipCategory;
+};
+
+export type UpsertMembershipCategoryResponse = UpsertMembershipCategoryResponses[keyof UpsertMembershipCategoryResponses];
+
 export type ListMembershipsData = {
     body?: never;
     path?: never;
@@ -33739,6 +36699,76 @@ export type UpdateOfficerTermResponses = {
 
 export type UpdateOfficerTermResponse = UpdateOfficerTermResponses[keyof UpdateOfficerTermResponses];
 
+export type GetOrganizationProfileData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/org-profile/{organizationId}';
+};
+
+export type GetOrganizationProfileErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetOrganizationProfileError = GetOrganizationProfileErrors[keyof GetOrganizationProfileErrors];
+
+export type GetOrganizationProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: OrganizationProfile;
+};
+
+export type GetOrganizationProfileResponse = GetOrganizationProfileResponses[keyof GetOrganizationProfileResponses];
+
+export type UpdateOrganizationProfileData = {
+    body: UpdateOrgProfileRequest;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/org-profile/{organizationId}';
+};
+
+export type UpdateOrganizationProfileErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateOrganizationProfileError = UpdateOrganizationProfileErrors[keyof UpdateOrganizationProfileErrors];
+
+export type UpdateOrganizationProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: OrganizationProfile;
+};
+
+export type UpdateOrganizationProfileResponse = UpdateOrganizationProfileResponses[keyof UpdateOrganizationProfileResponses];
+
 export type ListPositionsData = {
     body?: never;
     path?: never;
@@ -33932,6 +36962,206 @@ export type UpdatePositionResponses = {
 };
 
 export type UpdatePositionResponse = UpdatePositionResponses[keyof UpdatePositionResponses];
+
+export type ListRosterMembersData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId: string;
+        status?: MembershipStatus;
+        categoryId?: string;
+        search?: string;
+    };
+    url: '/association/member/roster';
+};
+
+export type ListRosterMembersErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListRosterMembersError = ListRosterMembersErrors[keyof ListRosterMembersErrors];
+
+export type ListRosterMembersResponses = {
+    /**
+     * Success response with data
+     */
+    200: RosterMemberListResponse;
+};
+
+export type ListRosterMembersResponse = ListRosterMembersResponses[keyof ListRosterMembersResponses];
+
+export type AddRosterMemberData = {
+    body: AddMemberRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/roster';
+};
+
+export type AddRosterMemberErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type AddRosterMemberError = AddRosterMemberErrors[keyof AddRosterMemberErrors];
+
+export type AddRosterMemberResponses = {
+    /**
+     * Resource created response
+     */
+    201: RosterMember;
+};
+
+export type AddRosterMemberResponse = AddRosterMemberResponses[keyof AddRosterMemberResponses];
+
+export type ImportRosterMembersData = {
+    body: ImportMembersRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/roster/import';
+};
+
+export type ImportRosterMembersErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ImportRosterMembersError = ImportRosterMembersErrors[keyof ImportRosterMembersErrors];
+
+export type ImportRosterMembersResponses = {
+    /**
+     * Success response with data
+     */
+    200: ImportResult;
+};
+
+export type ImportRosterMembersResponse = ImportRosterMembersResponses[keyof ImportRosterMembersResponses];
+
+export type GetRosterMemberData = {
+    body?: never;
+    path: {
+        memberId: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/association/member/roster/{memberId}';
+};
+
+export type GetRosterMemberErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetRosterMemberError = GetRosterMemberErrors[keyof GetRosterMemberErrors];
+
+export type GetRosterMemberResponses = {
+    /**
+     * Success response with data
+     */
+    200: RosterMember;
+};
+
+export type GetRosterMemberResponse = GetRosterMemberResponses[keyof GetRosterMemberResponses];
+
+export type UpdateRosterMemberData = {
+    body: UpdateMemberRequest;
+    path: {
+        memberId: string;
+    };
+    query?: never;
+    url: '/association/member/roster/{memberId}';
+};
+
+export type UpdateRosterMemberErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateRosterMemberError = UpdateRosterMemberErrors[keyof UpdateRosterMemberErrors];
+
+export type UpdateRosterMemberResponses = {
+    /**
+     * Success response with data
+     */
+    200: RosterMember;
+};
+
+export type UpdateRosterMemberResponse = UpdateRosterMemberResponses[keyof UpdateRosterMemberResponses];
 
 export type ListRoyaltySplitsData = {
     body?: never;
@@ -35276,6 +38506,294 @@ export type CreateTrainingResponses = {
      */
     201: unknown;
 };
+
+export type ListMyCustomTrainingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: string;
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/training-lifecycle/my';
+};
+
+export type ListMyCustomTrainingsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListMyCustomTrainingsError = ListMyCustomTrainingsErrors[keyof ListMyCustomTrainingsErrors];
+
+export type ListMyCustomTrainingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingListResponse;
+};
+
+export type ListMyCustomTrainingsResponse = ListMyCustomTrainingsResponses[keyof ListMyCustomTrainingsResponses];
+
+export type CancelCustomTrainingData = {
+    body?: never;
+    path: {
+        trainingId: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/association/training-lifecycle/{trainingId}/cancel';
+};
+
+export type CancelCustomTrainingErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CancelCustomTrainingError = CancelCustomTrainingErrors[keyof CancelCustomTrainingErrors];
+
+export type CancelCustomTrainingResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type CheckInCustomTrainingData = {
+    body?: never;
+    path: {
+        trainingId: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/association/training-lifecycle/{trainingId}/check-in';
+};
+
+export type CheckInCustomTrainingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CheckInCustomTrainingError = CheckInCustomTrainingErrors[keyof CheckInCustomTrainingErrors];
+
+export type CheckInCustomTrainingResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingEnrollment;
+};
+
+export type CheckInCustomTrainingResponse = CheckInCustomTrainingResponses[keyof CheckInCustomTrainingResponses];
+
+export type CompleteCustomTrainingData = {
+    body: TrainingEnrollmentCompleteRequest;
+    path: {
+        trainingId: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/association/training-lifecycle/{trainingId}/complete';
+};
+
+export type CompleteCustomTrainingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CompleteCustomTrainingError = CompleteCustomTrainingErrors[keyof CompleteCustomTrainingErrors];
+
+export type CompleteCustomTrainingResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type EnrollInCustomTrainingData = {
+    body?: never;
+    path: {
+        trainingId: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/association/training-lifecycle/{trainingId}/enroll';
+};
+
+export type EnrollInCustomTrainingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type EnrollInCustomTrainingError = EnrollInCustomTrainingErrors[keyof EnrollInCustomTrainingErrors];
+
+export type EnrollInCustomTrainingResponses = {
+    /**
+     * Resource created response
+     */
+    201: TrainingEnrollment;
+};
+
+export type EnrollInCustomTrainingResponse = EnrollInCustomTrainingResponses[keyof EnrollInCustomTrainingResponses];
+
+export type ListCustomTrainingEnrollmentsData = {
+    body?: never;
+    path: {
+        trainingId: string;
+    };
+    query: {
+        organizationId: string;
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/association/training-lifecycle/{trainingId}/enrollments';
+};
+
+export type ListCustomTrainingEnrollmentsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ListCustomTrainingEnrollmentsError = ListCustomTrainingEnrollmentsErrors[keyof ListCustomTrainingEnrollmentsErrors];
+
+export type ListCustomTrainingEnrollmentsResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingEnrollmentListResponse;
+};
+
+export type ListCustomTrainingEnrollmentsResponse = ListCustomTrainingEnrollmentsResponses[keyof ListCustomTrainingEnrollmentsResponses];
 
 export type SearchCoursesData = {
     body?: never;

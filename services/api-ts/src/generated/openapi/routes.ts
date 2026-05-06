@@ -254,6 +254,39 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getDocumentVersion as unknown as Handler
   );
 
+  // listMyCustomEvents
+  app.get('/association/event-lifecycle/my',
+    zValidator('query', validators.ListMyCustomEventsQuery, validationErrorHandler),
+    registry.listMyCustomEvents as unknown as Handler
+  );
+
+  // listCustomEventAttendance
+  app.get('/association/event-lifecycle/:eventId/attendance',
+    zValidator('param', validators.ListCustomEventAttendanceParams, validationErrorHandler),
+    zValidator('query', validators.ListCustomEventAttendanceQuery, validationErrorHandler),
+    registry.listCustomEventAttendance as unknown as Handler
+  );
+
+  // checkInCustomEvent
+  app.post('/association/event-lifecycle/:eventId/check-in',
+    zValidator('param', validators.CheckInCustomEventParams, validationErrorHandler),
+    zValidator('json', validators.CheckInCustomEventBody, validationErrorHandler),
+    registry.checkInCustomEvent as unknown as Handler
+  );
+
+  // registerForCustomEvent
+  app.post('/association/event-lifecycle/:eventId/register',
+    zValidator('param', validators.RegisterForCustomEventParams, validationErrorHandler),
+    registry.registerForCustomEvent as unknown as Handler
+  );
+
+  // listCustomEventRegistrations
+  app.get('/association/event-lifecycle/:eventId/registrations',
+    zValidator('param', validators.ListCustomEventRegistrationsParams, validationErrorHandler),
+    zValidator('query', validators.ListCustomEventRegistrationsQuery, validationErrorHandler),
+    registry.listCustomEventRegistrations as unknown as Handler
+  );
+
   // createEvent
   app.post('/association/events',
     zValidator('json', validators.CreateEventBody, validationErrorHandler),
@@ -482,6 +515,70 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.denyMembershipApplication as unknown as Handler
   );
 
+  // castBallot
+  app.post('/association/member/ballots',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('json', validators.CastBallotBody, validationErrorHandler),
+    registry.castBallot as unknown as Handler
+  );
+
+  // listBallots
+  app.get('/association/member/ballots',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListBallotsQuery, validationErrorHandler),
+    registry.listBallots as unknown as Handler
+  );
+
+  // createCandidate
+  app.post('/association/member/candidates',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('json', validators.CreateCandidateBody, validationErrorHandler),
+    registry.createCandidate as unknown as Handler
+  );
+
+  // listCandidates
+  app.get('/association/member/candidates',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('query', validators.ListCandidatesQuery, validationErrorHandler),
+    registry.listCandidates as unknown as Handler
+  );
+
+  // getCandidate
+  app.get('/association/member/candidates/:candidateId',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('param', validators.GetCandidateParams, validationErrorHandler),
+    registry.getCandidate as unknown as Handler
+  );
+
+  // updateCandidate
+  app.patch('/association/member/candidates/:candidateId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateCandidateParams, validationErrorHandler),
+    zValidator('json', validators.UpdateCandidateBody, validationErrorHandler),
+    registry.updateCandidate as unknown as Handler
+  );
+
+  // deleteCandidate
+  app.delete('/association/member/candidates/:candidateId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteCandidateParams, validationErrorHandler),
+    registry.deleteCandidate as unknown as Handler
+  );
+
+  // listMyCertificates
+  app.get('/association/member/certificates',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('query', validators.ListMyCertificatesQuery, validationErrorHandler),
+    registry.listMyCertificates as unknown as Handler
+  );
+
+  // getCertificate
+  app.get('/association/member/certificates/:certificateId',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('param', validators.GetCertificateParams, validationErrorHandler),
+    registry.getCertificate as unknown as Handler
+  );
+
   // createChapterAffiliation
   app.post('/association/member/chapter-affiliations',
     authMiddleware({ roles: ["association:admin"] }),
@@ -705,6 +802,35 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.deleteDuesConfig as unknown as Handler
   );
 
+  // getDuesGatewayConfig
+  app.get('/association/member/dues-gateway/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetDuesGatewayConfigParams, validationErrorHandler),
+    registry.getDuesGatewayConfig as unknown as Handler
+  );
+
+  // upsertDuesGatewayConfig
+  app.put('/association/member/dues-gateway/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpsertDuesGatewayConfigParams, validationErrorHandler),
+    zValidator('json', validators.UpsertDuesGatewayConfigBody, validationErrorHandler),
+    registry.upsertDuesGatewayConfig as unknown as Handler
+  );
+
+  // disconnectDuesGateway
+  app.delete('/association/member/dues-gateway/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DisconnectDuesGatewayParams, validationErrorHandler),
+    registry.disconnectDuesGateway as unknown as Handler
+  );
+
+  // testDuesGatewayConnection
+  app.post('/association/member/dues-gateway/:organizationId/test',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.TestDuesGatewayConnectionParams, validationErrorHandler),
+    registry.testDuesGatewayConnection as unknown as Handler
+  );
+
   // createDuesInvoice
   app.post('/association/member/dues-invoices',
     authMiddleware({ roles: ["association:admin"] }),
@@ -756,6 +882,65 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.markDuesInvoicePaid as unknown as Handler
   );
 
+  // listDuesPayments
+  app.get('/association/member/dues-payments',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('query', validators.ListDuesPaymentsQuery, validationErrorHandler),
+    registry.listDuesPayments as unknown as Handler
+  );
+
+  // recordDuesPayment
+  app.post('/association/member/dues-payments',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.RecordDuesPaymentBody, validationErrorHandler),
+    registry.recordDuesPayment as unknown as Handler
+  );
+
+  // getDuesPayment
+  app.get('/association/member/dues-payments/:paymentId',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('param', validators.GetDuesPaymentParams, validationErrorHandler),
+    registry.getDuesPayment as unknown as Handler
+  );
+
+  // refundDuesPayment
+  app.post('/association/member/dues-payments/:paymentId/refund',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.RefundDuesPaymentParams, validationErrorHandler),
+    zValidator('json', validators.RefundDuesPaymentBody, validationErrorHandler),
+    registry.refundDuesPayment as unknown as Handler
+  );
+
+  // listDuesFunds
+  app.get('/association/member/dues-reporting',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListDuesFundsQuery, validationErrorHandler),
+    registry.listDuesFunds as unknown as Handler
+  );
+
+  // upsertDuesFunds
+  app.put('/association/member/dues-reporting/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpsertDuesFundsParams, validationErrorHandler),
+    zValidator('json', validators.UpsertDuesFundsBody, validationErrorHandler),
+    registry.upsertDuesFunds as unknown as Handler
+  );
+
+  // getDuesFinancialDashboard
+  app.get('/association/member/dues-reporting/:organizationId/dashboard',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetDuesFinancialDashboardParams, validationErrorHandler),
+    registry.getDuesFinancialDashboard as unknown as Handler
+  );
+
+  // generateDuesReport
+  app.get('/association/member/dues-reporting/:organizationId/report',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GenerateDuesReportParams, validationErrorHandler),
+    zValidator('query', validators.GenerateDuesReportQuery, validationErrorHandler),
+    registry.generateDuesReport as unknown as Handler
+  );
+
   // listDunningEvents
   app.get('/association/member/dunning/events',
     authMiddleware({ roles: ["association:admin"] }),
@@ -804,6 +989,63 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.DeleteDunningTemplateParams, validationErrorHandler),
     registry.deleteDunningTemplate as unknown as Handler
+  );
+
+  // createElection
+  app.post('/association/member/elections',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.CreateElectionBody, validationErrorHandler),
+    registry.createElection as unknown as Handler
+  );
+
+  // listElections
+  app.get('/association/member/elections',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('query', validators.ListElectionsQuery, validationErrorHandler),
+    registry.listElections as unknown as Handler
+  );
+
+  // getElection
+  app.get('/association/member/elections/:electionId',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('param', validators.GetElectionParams, validationErrorHandler),
+    registry.getElection as unknown as Handler
+  );
+
+  // updateElection
+  app.patch('/association/member/elections/:electionId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateElectionParams, validationErrorHandler),
+    zValidator('json', validators.UpdateElectionBody, validationErrorHandler),
+    registry.updateElection as unknown as Handler
+  );
+
+  // deleteElection
+  app.delete('/association/member/elections/:electionId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeleteElectionParams, validationErrorHandler),
+    registry.deleteElection as unknown as Handler
+  );
+
+  // certifyElection
+  app.post('/association/member/elections/:electionId/certify',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.CertifyElectionParams, validationErrorHandler),
+    registry.certifyElection as unknown as Handler
+  );
+
+  // openElectionNominations
+  app.post('/association/member/elections/:electionId/open-nominations',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.OpenElectionNominationsParams, validationErrorHandler),
+    registry.openElectionNominations as unknown as Handler
+  );
+
+  // openElectionVoting
+  app.post('/association/member/elections/:electionId/open-voting',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.OpenElectionVotingParams, validationErrorHandler),
+    registry.openElectionVoting as unknown as Handler
   );
 
   // createInstitutionalMembership
@@ -915,6 +1157,21 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.deleteProfessionalLicense as unknown as Handler
   );
 
+  // listMembershipCategories
+  app.get('/association/member/membership-categories',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('query', validators.ListMembershipCategoriesQuery, validationErrorHandler),
+    registry.listMembershipCategories as unknown as Handler
+  );
+
+  // upsertMembershipCategory
+  app.put('/association/member/membership-categories/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpsertMembershipCategoryParams, validationErrorHandler),
+    zValidator('json', validators.UpsertMembershipCategoryBody, validationErrorHandler),
+    registry.upsertMembershipCategory as unknown as Handler
+  );
+
   // createMembership
   app.post('/association/member/memberships',
     authMiddleware({ roles: ["association:admin"] }),
@@ -1009,6 +1266,21 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.deleteOfficerTerm as unknown as Handler
   );
 
+  // getOrganizationProfile
+  app.get('/association/member/org-profile/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetOrganizationProfileParams, validationErrorHandler),
+    registry.getOrganizationProfile as unknown as Handler
+  );
+
+  // updateOrganizationProfile
+  app.put('/association/member/org-profile/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateOrganizationProfileParams, validationErrorHandler),
+    zValidator('json', validators.UpdateOrganizationProfileBody, validationErrorHandler),
+    registry.updateOrganizationProfile as unknown as Handler
+  );
+
   // createPosition
   app.post('/association/member/positions',
     authMiddleware({ roles: ["association:admin"] }),
@@ -1043,6 +1315,43 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.DeletePositionParams, validationErrorHandler),
     registry.deletePosition as unknown as Handler
+  );
+
+  // listRosterMembers
+  app.get('/association/member/roster',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListRosterMembersQuery, validationErrorHandler),
+    registry.listRosterMembers as unknown as Handler
+  );
+
+  // addRosterMember
+  app.post('/association/member/roster',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.AddRosterMemberBody, validationErrorHandler),
+    registry.addRosterMember as unknown as Handler
+  );
+
+  // importRosterMembers
+  app.post('/association/member/roster/import',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.ImportRosterMembersBody, validationErrorHandler),
+    registry.importRosterMembers as unknown as Handler
+  );
+
+  // getRosterMember
+  app.get('/association/member/roster/:memberId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetRosterMemberParams, validationErrorHandler),
+    zValidator('query', validators.GetRosterMemberQuery, validationErrorHandler),
+    registry.getRosterMember as unknown as Handler
+  );
+
+  // updateRosterMember
+  app.put('/association/member/roster/:memberId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateRosterMemberParams, validationErrorHandler),
+    zValidator('json', validators.UpdateRosterMemberBody, validationErrorHandler),
+    registry.updateRosterMember as unknown as Handler
   );
 
   // createRoyaltySplit
@@ -1280,6 +1589,48 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   app.get('/association/training',
     zValidator('query', validators.SearchTrainingsQuery, validationErrorHandler),
     registry.searchTrainings as unknown as Handler
+  );
+
+  // listMyCustomTrainings
+  app.get('/association/training-lifecycle/my',
+    zValidator('query', validators.ListMyCustomTrainingsQuery, validationErrorHandler),
+    registry.listMyCustomTrainings as unknown as Handler
+  );
+
+  // cancelCustomTraining
+  app.post('/association/training-lifecycle/:trainingId/cancel',
+    zValidator('param', validators.CancelCustomTrainingParams, validationErrorHandler),
+    zValidator('query', validators.CancelCustomTrainingQuery, validationErrorHandler),
+    registry.cancelCustomTraining as unknown as Handler
+  );
+
+  // checkInCustomTraining
+  app.post('/association/training-lifecycle/:trainingId/check-in',
+    zValidator('param', validators.CheckInCustomTrainingParams, validationErrorHandler),
+    zValidator('query', validators.CheckInCustomTrainingQuery, validationErrorHandler),
+    registry.checkInCustomTraining as unknown as Handler
+  );
+
+  // completeCustomTraining
+  app.post('/association/training-lifecycle/:trainingId/complete',
+    zValidator('param', validators.CompleteCustomTrainingParams, validationErrorHandler),
+    zValidator('query', validators.CompleteCustomTrainingQuery, validationErrorHandler),
+    zValidator('json', validators.CompleteCustomTrainingBody, validationErrorHandler),
+    registry.completeCustomTraining as unknown as Handler
+  );
+
+  // enrollInCustomTraining
+  app.post('/association/training-lifecycle/:trainingId/enroll',
+    zValidator('param', validators.EnrollInCustomTrainingParams, validationErrorHandler),
+    zValidator('query', validators.EnrollInCustomTrainingQuery, validationErrorHandler),
+    registry.enrollInCustomTraining as unknown as Handler
+  );
+
+  // listCustomTrainingEnrollments
+  app.get('/association/training-lifecycle/:trainingId/enrollments',
+    zValidator('param', validators.ListCustomTrainingEnrollmentsParams, validationErrorHandler),
+    zValidator('query', validators.ListCustomTrainingEnrollmentsQuery, validationErrorHandler),
+    registry.listCustomTrainingEnrollments as unknown as Handler
   );
 
   // createCourse
