@@ -20,9 +20,9 @@ Requirements for current milestone. Each maps to roadmap phases.
 
 ### Billing
 
-- [ ] **BILL-01**: Billing schema includes all TODO fields (paymentCaptureMethod, lineItems, paidBy, voidedBy, etc.)
-- [ ] **BILL-02**: Billing Drizzle schema matches TypeSpec billing definitions
-- [ ] **BILL-03**: Admin access checks enforced on billing handlers
+- [x] **BILL-01**: Billing schema includes all TODO fields (paymentCaptureMethod, lineItems, paidBy, voidedBy, etc.)
+- [x] **BILL-02**: Billing Drizzle schema matches TypeSpec billing definitions
+- [x] **BILL-03**: Admin access checks enforced on billing handlers
 - [ ] **BILL-04**: Billing module has E2E tests covering invoice lifecycle
 
 ### Audit
@@ -106,9 +106,9 @@ Requirements for current milestone. Each maps to roadmap phases.
 | TEST-06 | Phase 5 | Pending |
 | TEST-07 | Phase 8 | Pending |
 | TEST-08 | Phase 0 | Pending |
-| BILL-01 | Phase 1 | Pending |
-| BILL-02 | Phase 1 | Pending |
-| BILL-03 | Phase 1 | Pending |
+| BILL-01 | Phase 1 | Complete |
+| BILL-02 | Phase 1 | Complete |
+| BILL-03 | Phase 1 | Complete |
 | BILL-04 | Phase 1 | Pending |
 | AUDT-01 | Phase 2 | Pending |
 | AUDT-02 | Phase 2 | Pending |

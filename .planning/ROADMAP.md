@@ -49,7 +49,7 @@ Plans:
   4. E2E tests verify full invoice lifecycle (create, pay, void, refund)
 **Plans**: 2 plans
 Plans:
-- [ ] 01-01-PLAN.md — Handler response mapping, access controls, void threshold, schema verification
+- [x] 01-01-PLAN.md — Handler response mapping, access controls, void threshold, schema verification
 - [ ] 01-02-PLAN.md — TDD lifecycle + access control + response field tests
 
 ### Phase 2: Audit Module Completion
