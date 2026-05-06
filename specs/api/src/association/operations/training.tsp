@@ -907,4 +907,97 @@ namespace Association.Operations.Training {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
   }
+
+  /**
+   * Member-facing and officer lifecycle operations for hand-wired training routes.
+   * Covers operations not addressed by TrainingManagement CRUD interfaces.
+   */
+  @useAuth(bearerAuth)
+  interface TrainingLifecycleService {
+    @doc("List training sessions the authenticated member is enrolled in.")
+    @operationId("listMyCustomTrainings")
+    @get
+    @route("/my")
+    @extension("x-security-required-roles", #["association:member"])
+    listMyCustomTrainings(
+      @query organizationId?: string,
+      ...PaginationQuery
+    ): ApiOkResponse<PaginatedResponse<Training>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Self-enroll the authenticated member in a training session.")
+    @operationId("enrollInCustomTraining")
+    @post
+    @route("/{trainingId}/enroll")
+    @extension("x-security-required-roles", #["association:member"])
+    enrollInCustomTraining(
+      @path trainingId: string,
+      @query organizationId: string
+    ): ApiCreatedResponse<TrainingEnrollment>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("Cancel a training session.")
+    @operationId("cancelCustomTraining")
+    @post
+    @route("/{trainingId}/cancel")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    cancelCustomTraining(
+      @path trainingId: string,
+      @query organizationId: string
+    ): ApiOkResponse<Training>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("Mark a training session as completed and award CE credits to enrolled members.")
+    @operationId("completeCustomTraining")
+    @post
+    @route("/{trainingId}/complete")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    completeCustomTraining(
+      @path trainingId: string,
+      @query organizationId: string,
+      @body body: TrainingEnrollmentCompleteRequest
+    ): ApiOkResponse<Training>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("Check in a participant at a training session.")
+    @operationId("checkInCustomTraining")
+    @post
+    @route("/{trainingId}/check-in")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    checkInCustomTraining(
+      @path trainingId: string,
+      @query organizationId: string
+    ): ApiOkResponse<TrainingEnrollment>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("List all enrollments for a specific training session.")
+    @operationId("listCustomTrainingEnrollments")
+    @get
+    @route("/{trainingId}/enrollments")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    listCustomTrainingEnrollments(
+      @path trainingId: string,
+      @query organizationId: string,
+      ...PaginationQuery
+    ): ApiOkResponse<PaginatedResponse<TrainingEnrollment>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+  }
 }
