@@ -27,8 +27,8 @@ Requirements for current milestone. Each maps to roadmap phases.
 
 ### Audit
 
-- [ ] **AUDT-01**: Audit module captures write events (create, update, delete) across all modules
-- [ ] **AUDT-02**: Audit event triggers fire on CRUD operations automatically
+- [x] **AUDT-01**: Audit module captures write events (create, update, delete) across all modules
+- [x] **AUDT-02**: Audit event triggers fire on CRUD operations automatically
 - [ ] **AUDT-03**: Audit module has E2E tests for event capture and log retrieval
 - [ ] **AUDT-04**: Admin app has audit dashboard showing recent events
 
@@ -110,8 +110,8 @@ Requirements for current milestone. Each maps to roadmap phases.
 | BILL-02 | Phase 1 | Complete |
 | BILL-03 | Phase 1 | Complete |
 | BILL-04 | Phase 1 | Complete |
-| AUDT-01 | Phase 2 | Pending |
-| AUDT-02 | Phase 2 | Pending |
+| AUDT-01 | Phase 2 | Complete |
+| AUDT-02 | Phase 2 | Complete |
 | AUDT-03 | Phase 2 | Pending |
 | AUDT-04 | Phase 2 | Pending |
 | DATA-01 | Phase 3 | Pending |

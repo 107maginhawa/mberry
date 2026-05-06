@@ -63,7 +63,7 @@ Plans:
   4. E2E tests verify audit capture for representative CRUD operations
 **Plans**: 3 plans
 Plans:
-- [ ] 02-01-PLAN.md — Global audit middleware + unit tests (AUDT-01, AUDT-02)
+- [x] 02-01-PLAN.md — Global audit middleware + unit tests (AUDT-01, AUDT-02)
 - [ ] 02-02-PLAN.md — Admin audit dashboard at /audit (AUDT-04)
 - [ ] 02-03-PLAN.md — E2E tests for audit capture + dashboard verification (AUDT-03)
 **UI hint**: yes
