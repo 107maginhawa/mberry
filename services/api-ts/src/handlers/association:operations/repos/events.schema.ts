@@ -51,7 +51,6 @@ export const eventTypeEnum = pgEnum('event_type', [
 
 export const events = pgTable('event', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   title: varchar('title', { length: 300 }).notNull(),
   eventType: eventTypeEnum('event_type').default('other'),
@@ -68,7 +67,6 @@ export const events = pgTable('event', {
   visibility: eventVisibilityEnum('visibility').notNull().default('internal'),
   publishedAt: timestamp('published_at'),
 }, (table) => [
-  index('idx_event_tenant').on(table.tenantId),
   index('idx_event_org').on(table.organizationId),
   index('idx_event_status').on(table.status),
   index('idx_event_start').on(table.startDate),
@@ -76,7 +74,6 @@ export const events = pgTable('event', {
 
 export const eventRegistrations = pgTable('event_registration', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   status: registrationStatusEnum('status').notNull().default('confirmed'),
@@ -90,7 +87,6 @@ export const eventRegistrations = pgTable('event_registration', {
 
 export const checkIns = pgTable('check_in', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   method: checkInMethodEnum('method').notNull(),
@@ -103,7 +99,6 @@ export const checkIns = pgTable('check_in', {
 
 export const waitlistEntries = pgTable('waitlist_entry', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   position: integer('position').notNull(),

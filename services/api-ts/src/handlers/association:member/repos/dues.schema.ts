@@ -50,7 +50,6 @@ export interface DuesInvoiceAllocation {
 export const duesConfigs = pgTable('dues_config', {
   ...baseEntityFields,
 
-  tenantId: varchar('tenant_id', { length: 255 }).notNull(),
   organizationId: varchar('organization_id', { length: 255 }).notNull(),
   tierId: varchar('tier_id', { length: 255 }).notNull(),
   annualAmount: bigint('annual_amount', { mode: 'number' }).notNull(),
@@ -60,14 +59,13 @@ export const duesConfigs = pgTable('dues_config', {
   effectiveDate: date('effective_date').notNull(),
   status: duesConfigStatusEnum('status').default('active').notNull(),
 }, (table) => ({
-  tenantOrgIdx: index('dues_config_tenant_org_idx').on(table.tenantId, table.organizationId),
+  orgIdx: index('dues_config_org_idx').on(table.organizationId),
 }));
 
 /** Dues invoice issued to a member for a renewal period */
 export const duesInvoices = pgTable('dues_invoice', {
   ...baseEntityFields,
 
-  tenantId: varchar('tenant_id', { length: 255 }).notNull(),
   membershipId: varchar('membership_id', { length: 255 }).notNull(),
   personId: varchar('person_id', { length: 255 }).notNull(),
   organizationId: varchar('organization_id', { length: 255 }).notNull(),
@@ -82,15 +80,14 @@ export const duesInvoices = pgTable('dues_invoice', {
   paidAt: timestamp('paid_at'),
   paymentId: varchar('payment_id', { length: 255 }),
 }, (table) => ({
-  tenantOrgStatusIdx: index('dues_invoice_tenant_org_status_idx').on(table.tenantId, table.organizationId, table.status),
-  tenantMembershipIdx: index('dues_invoice_tenant_membership_idx').on(table.tenantId, table.membershipId),
+  orgStatusIdx: index('dues_invoice_org_status_idx').on(table.organizationId, table.status),
+  membershipIdx: index('dues_invoice_membership_idx').on(table.membershipId),
 }));
 
 /** Accounts-receivable aging snapshot for an organization as of a specific date */
 export const agingBuckets = pgTable('aging_bucket', {
   ...baseEntityFields,
 
-  tenantId: varchar('tenant_id', { length: 255 }).notNull(),
   organizationId: varchar('organization_id', { length: 255 }).notNull(),
   asOfDate: date('as_of_date').notNull(),
   current: bigint('current', { mode: 'number' }).default(0).notNull(),
@@ -100,7 +97,7 @@ export const agingBuckets = pgTable('aging_bucket', {
   overNinety: bigint('over_ninety', { mode: 'number' }).default(0).notNull(),
   totalOutstanding: bigint('total_outstanding', { mode: 'number' }).default(0).notNull(),
 }, (table) => ({
-  tenantOrgIdx: index('aging_bucket_tenant_org_idx').on(table.tenantId, table.organizationId),
+  orgIdx: index('aging_bucket_org_idx').on(table.organizationId),
 }));
 
 // ---------------------------------------------------------------------------

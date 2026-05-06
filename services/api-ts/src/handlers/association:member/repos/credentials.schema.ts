@@ -40,7 +40,7 @@ export const renewalAlertStatusEnum = pgEnum('renewal_alert_status', [
 
 export const professionalLicenses = pgTable('professional_license', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   personId: uuid('person_id').notNull(),
   licenseType: varchar('license_type', { length: 100 }).notNull(),
   licenseNumber: varchar('license_number', { length: 100 }).notNull(),
@@ -53,7 +53,7 @@ export const professionalLicenses = pgTable('professional_license', {
   verifiedAt: timestamp('verified_at'),
   verifiedBy: uuid('verified_by'),
 }, (table) => [
-  index('idx_license_tenant').on(table.tenantId),
+  index('idx_license_org').on(table.organizationId),
   index('idx_license_person').on(table.personId),
   index('idx_license_status').on(table.status),
   index('idx_license_expiration').on(table.expirationDate),
@@ -61,14 +61,14 @@ export const professionalLicenses = pgTable('professional_license', {
 
 export const licenseRenewalAlerts = pgTable('license_renewal_alert', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   licenseId: uuid('license_id').notNull(),
   personId: uuid('person_id').notNull(),
   alertDate: date('alert_date').notNull(),
   daysUntilExpiry: integer('days_until_expiry').notNull(),
   status: renewalAlertStatusEnum('status').notNull(),
 }, (table) => [
-  index('idx_renewal_alert_tenant').on(table.tenantId),
+  index('idx_renewal_alert_org').on(table.organizationId),
   index('idx_renewal_alert_license').on(table.licenseId),
   index('idx_renewal_alert_person').on(table.personId),
   index('idx_renewal_alert_status').on(table.status),
@@ -103,14 +103,14 @@ export const credentialStatusEnum = pgEnum('credential_status', [
 
 export const credentialTemplates = pgTable('credential_template', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   name: varchar('name', { length: 100 }).notNull(),
   type: credentialTypeEnum('type').notNull(),
   design: varchar('design', { length: 50000 }),
   validityPeriod: integer('validity_period'), // days
   status: credentialTemplateStatusEnum('status').notNull().default('active'),
 }, (table) => [
-  index('idx_cred_template_tenant').on(table.tenantId),
+  index('idx_cred_template_org').on(table.organizationId),
   index('idx_cred_template_type').on(table.type),
   index('idx_cred_template_status').on(table.status),
 ]);
@@ -121,7 +121,7 @@ export const credentialTemplates = pgTable('credential_template', {
 
 export const digitalCredentials = pgTable('digital_credential', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   personId: uuid('person_id').notNull(),
   templateId: uuid('template_id').notNull(),
   membershipId: uuid('membership_id'),
@@ -136,7 +136,7 @@ export const digitalCredentials = pgTable('digital_credential', {
   revokedAt: timestamp('revoked_at'),
   revocationReason: varchar('revocation_reason', { length: 500 }),
 }, (table) => [
-  index('idx_dc_tenant').on(table.tenantId),
+  index('idx_dc_org').on(table.organizationId),
   index('idx_dc_person').on(table.personId),
   index('idx_dc_template').on(table.templateId),
   index('idx_dc_status').on(table.status),

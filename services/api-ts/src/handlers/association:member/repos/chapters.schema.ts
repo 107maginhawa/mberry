@@ -35,7 +35,7 @@ export const transferStatusEnum = pgEnum('transfer_status', [
 export const chapterAffiliations = pgTable('chapter_affiliation', {
   ...baseEntityFields,
 
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   personId: uuid('person_id').notNull(),
   chapterId: uuid('chapter_id').notNull(),
   isPrimary: boolean('is_primary').default(false).notNull(),
@@ -43,15 +43,15 @@ export const chapterAffiliations = pgTable('chapter_affiliation', {
   transferredFrom: uuid('transferred_from'),
   status: affiliationStatusEnum('status').default('active').notNull(),
 }, (table) => ({
-  tenantPersonIdx: index('chapter_affiliation_tenant_person_idx').on(table.tenantId, table.personId),
-  tenantChapterIdx: index('chapter_affiliation_tenant_chapter_idx').on(table.tenantId, table.chapterId),
+  orgPersonIdx: index('chapter_affiliation_org_person_idx').on(table.organizationId, table.personId),
+  orgChapterIdx: index('chapter_affiliation_org_chapter_idx').on(table.organizationId, table.chapterId),
 }));
 
 /** Request to transfer a member's primary chapter affiliation */
 export const affiliationTransfers = pgTable('affiliation_transfer', {
   ...baseEntityFields,
 
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   personId: uuid('person_id').notNull(),
   fromChapterId: uuid('from_chapter_id').notNull(),
   toChapterId: uuid('to_chapter_id').notNull(),
@@ -62,14 +62,14 @@ export const affiliationTransfers = pgTable('affiliation_transfer', {
   status: transferStatusEnum('status').default('requested').notNull(),
   completedAt: timestamp('completed_at'),
 }, (table) => ({
-  tenantStatusIdx: index('affiliation_transfer_tenant_status_idx').on(table.tenantId, table.status),
+  orgStatusIdx: index('affiliation_transfer_org_status_idx').on(table.organizationId, table.status),
 }));
 
 /** Royalty split configuration for dues revenue between national org and chapter */
 export const royaltySplits = pgTable('royalty_split', {
   ...baseEntityFields,
 
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   membershipId: uuid('membership_id').notNull(),
   nationalOrgId: uuid('national_org_id').notNull(),
   chapterId: uuid('chapter_id').notNull(),
@@ -77,8 +77,8 @@ export const royaltySplits = pgTable('royalty_split', {
   splitPercentChapter: real('split_percent_chapter').notNull(),
   effectiveDate: date('effective_date').notNull(),
 }, (table) => ({
-  tenantChapterIdx: index('royalty_split_tenant_chapter_idx').on(table.tenantId, table.chapterId),
-  tenantMembershipIdx: index('royalty_split_tenant_membership_idx').on(table.tenantId, table.membershipId),
+  orgChapterIdx: index('royalty_split_org_chapter_idx').on(table.organizationId, table.chapterId),
+  orgMembershipIdx: index('royalty_split_org_membership_idx').on(table.organizationId, table.membershipId),
 }));
 
 // ---------------------------------------------------------------------------

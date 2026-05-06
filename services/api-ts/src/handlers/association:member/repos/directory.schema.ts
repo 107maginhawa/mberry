@@ -25,7 +25,7 @@ export const directoryVisibilityEnum = pgEnum('directory_visibility', [
 export const directoryProfiles = pgTable('directory_profile', {
   ...baseEntityFields,
 
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   personId: uuid('person_id').notNull(),
   displayName: varchar('display_name', { length: 150 }).notNull(),
   title: varchar('title', { length: 100 }),
@@ -42,8 +42,8 @@ export const directoryProfiles = pgTable('directory_profile', {
   publishedAt: timestamp('published_at'),
   lastUpdatedAt: timestamp('last_updated_at').defaultNow().notNull(),
 }, (table) => ({
-  tenantPersonIdx: index('directory_profile_tenant_person_idx').on(table.tenantId, table.personId),
-  tenantVisibilityIdx: index('directory_profile_tenant_visibility_idx').on(table.tenantId, table.visibility),
+  orgPersonIdx: index('directory_profile_org_person_idx').on(table.organizationId, table.personId),
+  orgVisibilityIdx: index('directory_profile_org_visibility_idx').on(table.organizationId, table.visibility),
 }));
 
 // ---------------------------------------------------------------------------
