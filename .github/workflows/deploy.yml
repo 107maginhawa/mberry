@@ -1,5 +1,14 @@
 name: Deploy
 
+# Required GitHub Secrets (per environment: staging, production):
+#   RAILWAY_TOKEN          — Railway API token (Account Settings -> Tokens)
+#   CLOUDFLARE_API_TOKEN   — Cloudflare API token (Edit Pages permission)
+#   CLOUDFLARE_ACCOUNT_ID  — Cloudflare account ID
+#
+# Required GitHub Variables (per environment):
+#   STAGING_API_URL        — Railway staging URL (e.g., https://memberry-staging.up.railway.app)
+#   PRODUCTION_API_URL     — Railway production URL
+
 on:
   push:
     branches: [main]
@@ -121,17 +130,21 @@ jobs:
           path: apps/account/dist/
 
       - name: Deploy API to staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          echo "::notice::Deploy API image ${{ needs.build.outputs.image_tag }} to staging"
-          echo "TODO: Add platform-specific deploy command here"
-          echo "Example: railway up --image ${{ needs.build.outputs.image_tag }}"
-          echo "Example: fly deploy --image ${{ needs.build.outputs.image_tag }}"
+          npm install -g @railway/cli
+          railway up --service memberry-api --environment staging --image ${{ needs.build.outputs.image_tag }}
 
       - name: Deploy frontends to staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          echo "::notice::Deploy frontend artifacts to staging"
-          echo "TODO: Add platform-specific deploy command here"
-          echo "Example: wrangler pages deploy apps/memberry/dist/ --project-name memberry-staging"
+          npm install -g wrangler
+          wrangler pages deploy apps/memberry/dist/ --project-name memberry-staging --branch main
+          wrangler pages deploy apps/admin/dist/ --project-name memberry-admin-staging --branch main
+          wrangler pages deploy apps/account/dist/ --project-name memberry-account-staging --branch main
 
       - name: Health check — staging API
         if: vars.STAGING_API_URL != ''
@@ -174,16 +187,21 @@ jobs:
           path: apps/account/dist/
 
       - name: Deploy API to production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          echo "::notice::Deploy API image ${{ needs.build.outputs.image_tag }} to production"
-          echo "TODO: Add platform-specific deploy command here"
-          echo "Uses SAME image SHA that was validated in staging"
+          npm install -g @railway/cli
+          railway up --service memberry-api --environment production --image ${{ needs.build.outputs.image_tag }}
 
       - name: Deploy frontends to production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          echo "::notice::Deploy frontend artifacts to production"
-          echo "TODO: Add platform-specific deploy command here"
-          echo "Example: wrangler pages deploy apps/memberry/dist/ --project-name memberry-production"
+          npm install -g wrangler
+          wrangler pages deploy apps/memberry/dist/ --project-name memberry-production --branch main
+          wrangler pages deploy apps/admin/dist/ --project-name memberry-admin-production --branch main
+          wrangler pages deploy apps/account/dist/ --project-name memberry-account-production --branch main
 
       - name: Health check — production API
         if: vars.PRODUCTION_API_URL != ''
