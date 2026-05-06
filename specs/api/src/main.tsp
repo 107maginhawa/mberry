@@ -41,6 +41,7 @@ import "./association/member/membership.tsp";
 import "./association/member/dues.tsp";
 import "./association/member/chapters.tsp";
 import "./association/member/governance.tsp";
+import "./association/member/certificates.tsp";
 import "./association/member/directory.tsp";
 import "./association/member/credentials.tsp";
 import "./association/member/certification.tsp";
@@ -269,6 +270,30 @@ namespace MonobaseAPI {
   @tag("Association:Member")
   @route("/association/member/officer-terms")
   interface AssocOfficerTermManagement extends Association.Member.Governance.OfficerTermManagement {}
+
+  // =========================================================================
+  // Association Domain — Governance (Elections, Candidates & Ballots)
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/elections")
+  interface AssocElectionManagement extends Association.Member.Governance.ElectionManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/candidates")
+  interface AssocCandidateManagement extends Association.Member.Governance.CandidateManagement {}
+
+  @tag("Association:Member")
+  @route("/association/member/ballots")
+  interface AssocBallotManagement extends Association.Member.Governance.BallotManagement {}
+
+  // =========================================================================
+  // Association Domain — Certificates
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/certificates")
+  interface AssocCertificateManagement extends Association.Member.Certificates.CertificateManagement {}
 
   // =========================================================================
   // Association Domain — Directory
