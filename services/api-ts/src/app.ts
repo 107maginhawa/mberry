@@ -25,26 +25,8 @@ import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
 import { registerDuesJobs } from '@/handlers/dues/jobs';
 
-// Dues handler
-import { dues } from '@/handlers/dues';
-
-// Membership handler
-import { membership } from '@/handlers/membership';
-
 // Communications handler
 import { communications } from '@/handlers/communications';
-
-// Certificates handler
-import { certificates } from '@/handlers/certificates';
-
-// Events handler
-import { eventsRouter } from '@/handlers/events';
-
-// Training handler
-import { trainingRouter } from '@/handlers/training';
-
-// Elections handler
-import { electionsRouter } from '@/handlers/elections';
 
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
@@ -154,8 +136,8 @@ export function createApp(config: Config): App {
     const { PositionRepository } = await import('@/handlers/association:member/repos/governance.repo');
     const termRepo = new OfficerTermRepository(db);
     const posRepo = new PositionRepository(db);
-    const terms = await termRepo.findByOrg(orgId, orgId);
-    const positions = await posRepo.findByOrg(orgId, orgId);
+    const terms = await termRepo.findByOrg(orgId);
+    const positions = await posRepo.findByOrg(orgId);
     const posMap = new Map(positions.map(p => [p.id, p.title]));
 
     // Fetch person names for each term
@@ -352,24 +334,11 @@ export function createApp(config: Config): App {
   // Register auth routes
   registerAuthRoutes(app as App);
 
-  // Auth middleware for all custom module routes
-  // These were previously unprotected — any request could reach handlers
-  app.use('/dues/*', authMiddleware());
-  app.use('/membership/*', authMiddleware());
+  // Auth middleware for communications (announcements — not yet in TypeSpec)
   app.use('/communications/*', authMiddleware());
-  app.use('/certificates/*', authMiddleware());
-  app.use('/events/*', authMiddleware());
-  app.use('/training/*', authMiddleware());
-  app.use('/elections/*', authMiddleware());
 
-  // Register module routes (no /api prefix — Vite proxy strips it)
-  app.route('/dues', dues);
-  app.route('/membership', membership);
+  // Register communications route (not yet migrated to generated routes)
   app.route('/communications', communications);
-  app.route('/certificates', certificates);
-  app.route('/events', eventsRouter);
-  app.route('/training', trainingRouter);
-  app.route('/elections', electionsRouter);
 
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
