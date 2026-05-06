@@ -359,3 +359,85 @@ Key routing rules:
 - Ship/deploy/PR → invoke /ship or /land-and-deploy
 - Save progress → invoke /context-save
 - Resume context → invoke /context-restore
+
+<!-- GSD:project-start source:PROJECT.md -->
+## Project
+
+**Memberry**
+
+A generic healthcare Association Management System (AMS) built on the Monobase monorepo template. Manages membership, dues, events, training, credits, communications, and governance for healthcare professional associations. Starts with Philippine dental associations, expands to medical and global. Three apps: account (auth/profile), admin (ops dashboard), memberry (product app).
+
+**Core Value:** Members can manage their association membership, track continuing education credits, and stay current on dues — from any device, with minimal friction.
+
+### Constraints
+
+- **Tech stack**: Bun, PostgreSQL, Drizzle ORM, Hono API, TypeSpec, TanStack Router — established, not changing
+- **Spec-first**: OpenAPI at `specs/api/dist/openapi/openapi.json` is single source of truth
+- **Module pattern**: Router → Validators → Handlers → Repositories (established, follow it)
+- **Test-first**: VERTICAL_TDD.md protocol — vertical slices per module, not horizontal layers
+<!-- GSD:project-end -->
+
+<!-- GSD:stack-start source:STACK.md -->
+## Technology Stack
+
+Technology stack not yet documented. Will populate after codebase mapping or first phase.
+<!-- GSD:stack-end -->
+
+<!-- GSD:conventions-start source:CONVENTIONS.md -->
+## Conventions
+
+Conventions not yet established. Will populate as patterns emerge during development.
+<!-- GSD:conventions-end -->
+
+<!-- GSD:architecture-start source:ARCHITECTURE.md -->
+## Architecture
+
+Architecture not yet mapped. Follow existing patterns found in the codebase.
+<!-- GSD:architecture-end -->
+
+<!-- GSD:skills-start source:skills/ -->
+## Project Skills
+
+| Skill | Description | Path |
+|-------|-------------|------|
+| br-extract | Extract business rules for a module from business-rules.md, derive test specs with edge cases, and update br-registry.json. Use before writing any tests, when starting a module, or "extract BRs", "what rules apply to {module}", "derive test cases". | `.claude/skills/br-extract/SKILL.md` |
+| commit | Create a conventional commit with proper format and branch naming. Use after /pre-commit passes and changes are ready to ship. | `.claude/skills/commit/SKILL.md` |
+| contract-scaffold | Generate FAILING Hurl contract test scenarios from OpenAPI spec for a module. RED phase for API contracts — scaffolds .hurl files with auth flows, happy paths, error codes, and multi-step journeys. Use after backend GREEN, "write contract tests", "scaffold hurl", "contract RED phase". | `.claude/skills/contract-scaffold/SKILL.md` |
+| db-migrate | Create or modify Drizzle ORM database schemas and generate migrations. Use when adding tables, fields, indexes, or relationships to the database. | `.claude/skills/db-migrate/SKILL.md` |
+| debug | Troubleshooting procedures for common development issues. Use when encountering errors with ports, database, types, builds, or dependencies. | `.claude/skills/debug/SKILL.md` |
+| dev-api | Start the API development server on port 7213. Use when you need the backend running for development or testing. | `.claude/skills/dev-api/SKILL.md` |
+| dev-app | Start the account app development server on port 3002. Use when you need the frontend running for development or testing. | `.claude/skills/dev-app/SKILL.md` |
+| develop | Orchestrator agent that takes a PRD or feature description and drives end-to-end implementation by dispatching the right skills in the right order. Use when given a PRD, feature spec, or multi-step development task. | `.claude/skills/develop/SKILL.md` |
+| frontend-module | Build a frontend feature in apps/account using the auto-generated @monobase/sdk-ts hooks. Use when implementing UI for an existing API module or a new feature spanning routes/components/forms. | `.claude/skills/frontend-module/SKILL.md` |
+| handler | Implement API handler business logic and database repository for a module. Use after /typespec has generated handler stubs. Follows the exact pattern from services/api-ts/src/handlers/person/createPerson.ts. | `.claude/skills/handler/SKILL.md` |
+| module-review | Validate module completeness, consistency, test coverage, and boilerplate integrity. Use after implementing a module and before committing. Wired into /develop Phase 3 as mandatory gate. | `.claude/skills/module-review/SKILL.md` |
+| persona-audit | Validate module user journeys against defined personas before implementation. Finds dead ends, missing states, role confusion, and unreachable features. Use before /develop, "audit persona journey", "who uses this", "journey audit", or when starting a new module. | `.claude/skills/persona-audit/SKILL.md` |
+| prd | Analyze a PRD (Product Requirements Document) and produce a structured technical implementation plan mapped to the Monobase monorepo patterns. Use when given a PRD file, pasted requirements, or feature description that needs to be broken down into implementation tasks. | `.claude/skills/prd/SKILL.md` |
+| pre-commit | Run the full pre-commit verification checklist (typecheck + tests + build). Use before committing any changes to ensure everything passes. | `.claude/skills/pre-commit/SKILL.md` |
+| shadcn | Add shadcn/ui components to a frontend app using the CLI. NEVER manually create or edit files in src/components/ui/. Use when a component needs a new shadcn/ui primitive. | `.claude/skills/shadcn/SKILL.md` |
+| test-api | Run API service unit tests using the Bun test runner. Use after implementing handlers or making backend changes to verify correctness. | `.claude/skills/test-api/SKILL.md` |
+| test-contract | Run the Hurl contract suite against any running API impl on $API_URL. Use after handler changes, before shipping API work, or to verify a new server impl is contract-compliant. | `.claude/skills/test-contract/SKILL.md` |
+| test-e2e | Run Playwright E2E tests for frontend apps. Use after implementing frontend features or before shipping UI changes. | `.claude/skills/test-e2e/SKILL.md` |
+| typecheck | Run TypeScript type checking across all workspaces (API service and frontend apps). Use before committing or when diagnosing type errors. | `.claude/skills/typecheck/SKILL.md` |
+| typespec | Author TypeSpec API definitions and run the full code generation pipeline (OpenAPI + types + routes + validators + handler stubs). Use when creating new API endpoints or modifying existing ones. | `.claude/skills/typespec/SKILL.md` |
+<!-- GSD:skills-end -->
+
+<!-- GSD:workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+
+Use these entry points:
+- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd-debug` for investigation and bug fixing
+- `/gsd-execute-phase` for planned phase work
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- GSD:workflow-end -->
+
+<!-- GSD:profile-start -->
+## Developer Profile
+
+> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- GSD:profile-end -->
