@@ -60,7 +60,7 @@ export const membershipTiers = pgTable(
   {
     ...baseEntityFields,
 
-    tenantId: uuid('tenant_id').notNull(),
+    organizationId: uuid('organization_id').notNull(),
     name: varchar('name', { length: 100 }).notNull(),
     code: varchar('code', { length: 30 }).notNull(),
     description: text('description'),
@@ -71,9 +71,9 @@ export const membershipTiers = pgTable(
     status: tierStatusEnum('status').notNull().default('active'),
   },
   (table) => ({
-    tenantIdx: index('membership_tier_tenant_idx').on(table.tenantId),
-    tenantCodeIdx: index('membership_tier_tenant_code_idx').on(
-      table.tenantId,
+    orgIdx: index('membership_tier_org_idx').on(table.organizationId),
+    orgCodeIdx: index('membership_tier_org_code_idx').on(
+      table.organizationId,
       table.code,
     ),
   }),
@@ -85,14 +85,13 @@ export const membershipCategories = pgTable(
   {
     ...baseEntityFields,
 
-    tenantId: uuid('tenant_id').notNull(),
-    orgId: uuid('org_id'),
+    organizationId: uuid('organization_id').notNull(),
     name: varchar('name', { length: 100 }).notNull(),
     description: text('description'),
     applicableTiers: jsonb('applicable_tiers').$type<string[]>().notNull(),
   },
   (table) => ({
-    tenantIdx: index('membership_category_tenant_idx').on(table.tenantId),
+    orgIdx: index('membership_category_org_idx').on(table.organizationId),
   }),
 );
 
@@ -102,9 +101,8 @@ export const memberships = pgTable(
   {
     ...baseEntityFields,
 
-    tenantId: uuid('tenant_id').notNull(),
+    organizationId: uuid('organization_id').notNull(),
     personId: uuid('person_id').notNull(),
-    orgId: uuid('org_id').notNull(),
     tierId: uuid('tier_id')
       .notNull()
       .references(() => membershipTiers.id),
@@ -120,16 +118,12 @@ export const memberships = pgTable(
     note: text('note'),
   },
   (table) => ({
-    tenantOrgIdx: index('membership_tenant_org_idx').on(
-      table.tenantId,
-      table.orgId,
-    ),
-    tenantPersonIdx: index('membership_tenant_person_idx').on(
-      table.tenantId,
+    orgPersonIdx: index('membership_org_person_idx').on(
+      table.organizationId,
       table.personId,
     ),
-    tenantStatusIdx: index('membership_tenant_status_idx').on(
-      table.tenantId,
+    orgStatusIdx: index('membership_org_status_idx').on(
+      table.organizationId,
       table.status,
     ),
   }),
@@ -141,9 +135,8 @@ export const membershipApplications = pgTable(
   {
     ...baseEntityFields,
 
-    tenantId: uuid('tenant_id').notNull(),
+    organizationId: uuid('organization_id').notNull(),
     personId: uuid('person_id').notNull(),
-    orgId: uuid('org_id').notNull(),
     tierId: uuid('tier_id')
       .notNull()
       .references(() => membershipTiers.id),
@@ -154,9 +147,8 @@ export const membershipApplications = pgTable(
     denialReason: text('denial_reason'),
   },
   (table) => ({
-    tenantOrgStatusIdx: index('membership_app_tenant_org_status_idx').on(
-      table.tenantId,
-      table.orgId,
+    orgStatusIdx: index('membership_app_org_status_idx').on(
+      table.organizationId,
       table.status,
     ),
   }),

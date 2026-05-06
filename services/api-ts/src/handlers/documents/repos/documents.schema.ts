@@ -26,7 +26,7 @@ export const documentStatusEnum = pgEnum('document_status', [
 
 export const documents = pgTable('document', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   title: varchar('title', { length: 300 }).notNull(),
   fileName: varchar('file_name', { length: 300 }).notNull(),
   mimeType: varchar('mime_type', { length: 100 }).notNull(),
@@ -34,20 +34,20 @@ export const documents = pgTable('document', {
   storageKey: varchar('storage_key', { length: 500 }).notNull(),
   ownerId: uuid('owner_id').notNull(),
   ownerType: varchar('owner_type', { length: 100 }).notNull(),
-  accessLevel: varchar('access_level', { length: 50 }).notNull().default('tenantOnly'),
+  accessLevel: varchar('access_level', { length: 50 }).notNull().default('orgOnly'),
   category: varchar('category', { length: 100 }),
   status: documentStatusEnum('document_status').notNull().default('draft'),
   currentVersionId: uuid('current_version_id'),
   tags: jsonb('tags').$type<string[]>().default([]),
 }, (table) => [
-  index('idx_doc_tenant').on(table.tenantId),
+  index('idx_doc_org').on(table.organizationId),
   index('idx_doc_owner').on(table.ownerId),
   index('idx_doc_status').on(table.status),
 ]);
 
 export const documentVersions = pgTable('document_version', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   documentId: uuid('document_id').notNull(),
   versionNumber: integer('version_number').notNull(),
   fileName: varchar('file_name', { length: 300 }).notNull(),
@@ -61,11 +61,11 @@ export const documentVersions = pgTable('document_version', {
 
 export const documentTags = pgTable('document_tag', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   name: varchar('name', { length: 100 }).notNull(),
   color: varchar('color', { length: 7 }),
 }, (table) => [
-  index('idx_doctag_tenant').on(table.tenantId),
+  index('idx_doctag_org').on(table.organizationId),
 ]);
 
 export const documentAccessLogs = pgTable('document_access_log', {

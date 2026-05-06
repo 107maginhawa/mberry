@@ -31,7 +31,6 @@ export const termStatusEnum = pgEnum('term_status', [
 
 export const positions = pgTable('position', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   title: varchar('title', { length: 200 }).notNull(),
   description: text('description'),
@@ -41,12 +40,10 @@ export const positions = pgTable('position', {
   sortOrder: integer('sort_order').default(0),
 }, (table) => [
   index('idx_position_org').on(table.organizationId),
-  index('idx_position_tenant').on(table.tenantId),
 ]);
 
 export const officerTerms = pgTable('officer_term', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   positionId: uuid('position_id').notNull(),
   personId: uuid('person_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
@@ -58,7 +55,6 @@ export const officerTerms = pgTable('officer_term', {
   index('idx_officer_term_org').on(table.organizationId),
   index('idx_officer_term_person').on(table.personId),
   index('idx_officer_term_position').on(table.positionId),
-  index('idx_officer_term_tenant').on(table.tenantId),
 ]);
 
 export type Position = typeof positions.$inferSelect;

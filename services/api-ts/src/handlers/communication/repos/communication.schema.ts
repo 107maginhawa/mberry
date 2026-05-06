@@ -58,7 +58,7 @@ export const deliveryStatusEnum = pgEnum('delivery_status', [
 
 export const messageTemplates = pgTable('message_template', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   name: varchar('name', { length: 200 }).notNull(),
   channel: channelEnum('channel').notNull(),
   subject: varchar('subject', { length: 500 }),
@@ -68,13 +68,13 @@ export const messageTemplates = pgTable('message_template', {
   isTransactional: boolean('is_transactional').notNull().default(false),
   status: templateStatusEnum('status').notNull().default('draft'),
 }, (table) => [
-  index('idx_msg_template_tenant').on(table.tenantId),
+  index('idx_msg_template_org').on(table.organizationId),
   index('idx_msg_template_category').on(table.category),
 ]);
 
 export const messages = pgTable('message', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   templateId: uuid('template_id'),
   channel: channelEnum('channel').notNull(),
   senderId: uuid('sender_id').notNull(),
@@ -85,30 +85,31 @@ export const messages = pgTable('message', {
   sentAt: timestamp('sent_at'),
   status: messageStatusEnum('status').notNull().default('draft'),
 }, (table) => [
-  index('idx_message_tenant').on(table.tenantId),
+  index('idx_message_org').on(table.organizationId),
   index('idx_message_status').on(table.status),
   index('idx_message_sender').on(table.senderId),
 ]);
 
 export const subscriptionTopics = pgTable('subscription_topic', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   name: varchar('name', { length: 200 }).notNull(),
   description: text('description'),
   channel: channelEnum('channel').notNull(),
   category: varchar('category', { length: 100 }).notNull(),
   defaultEnabled: boolean('default_enabled').notNull().default(true),
 }, (table) => [
-  index('idx_sub_topic_tenant').on(table.tenantId),
+  index('idx_sub_topic_org').on(table.organizationId),
 ]);
 
 export const personSubscriptions = pgTable('person_subscription', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
+  organizationId: uuid('organization_id').notNull(),
   personId: uuid('person_id').notNull(),
   topicId: uuid('topic_id').notNull(),
   enabled: boolean('enabled').notNull().default(true),
 }, (table) => [
+  index('idx_person_sub_org').on(table.organizationId),
   index('idx_person_sub_person').on(table.personId),
   uniqueIndex('idx_person_sub_unique').on(table.personId, table.topicId),
 ]);

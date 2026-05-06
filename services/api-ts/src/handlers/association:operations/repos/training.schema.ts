@@ -42,7 +42,6 @@ export const courseStatusEnum = pgEnum('course_status', [
 
 export const trainings = pgTable('training', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   title: varchar('title', { length: 300 }).notNull(),
   description: text('description'),
@@ -59,14 +58,12 @@ export const trainings = pgTable('training', {
   status: trainingStatusEnum('status').notNull().default('draft'),
   publishedAt: timestamp('published_at'),
 }, (table) => [
-  index('idx_training_tenant').on(table.tenantId),
   index('idx_training_org').on(table.organizationId),
   index('idx_training_status').on(table.status),
 ]);
 
 export const trainingEnrollments = pgTable('training_enrollment', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   trainingId: uuid('training_id').notNull(),
   personId: uuid('person_id').notNull(),
   status: enrollmentStatusEnum('status').notNull().default('enrolled'),
@@ -80,7 +77,6 @@ export const trainingEnrollments = pgTable('training_enrollment', {
 
 export const courses = pgTable('course', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   title: varchar('title', { length: 300 }).notNull(),
   description: text('description'),
@@ -88,13 +84,11 @@ export const courses = pgTable('course', {
   status: courseStatusEnum('status').notNull().default('draft'),
   publishedAt: timestamp('published_at'),
 }, (table) => [
-  index('idx_course_tenant').on(table.tenantId),
   index('idx_course_org').on(table.organizationId),
 ]);
 
 export const courseEnrollments = pgTable('course_enrollment', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   courseId: uuid('course_id').notNull(),
   personId: uuid('person_id').notNull(),
   progress: real('progress').default(0),
@@ -107,7 +101,6 @@ export const courseEnrollments = pgTable('course_enrollment', {
 
 export const quizAttempts = pgTable('quiz_attempt', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   courseId: uuid('course_id').notNull(),
   personId: uuid('person_id').notNull(),
   score: real('score'),

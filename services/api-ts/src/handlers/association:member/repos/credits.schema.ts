@@ -24,7 +24,6 @@ export const creditEntryTypeEnum = pgEnum('credit_entry_type', [
 
 export const creditEntries = pgTable('credit_entry', {
   ...baseEntityFields,
-  tenantId: uuid('tenant_id').notNull(),
   personId: uuid('person_id').notNull(),
   /** Organization where the credit was earned */
   organizationId: uuid('organization_id').notNull(),
@@ -47,7 +46,6 @@ export const creditEntries = pgTable('credit_entry', {
 }, (table) => [
   index('idx_credit_person').on(table.personId),
   index('idx_credit_org').on(table.organizationId),
-  index('idx_credit_tenant').on(table.tenantId),
   index('idx_credit_cycle').on(table.personId, table.cycleStart, table.cycleEnd),
   index('idx_credit_training').on(table.trainingId),
 ]);
