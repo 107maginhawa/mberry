@@ -19,6 +19,8 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
 - [ ] **Phase 6: CI/CD & DevOps Pipeline** - Production-ready build, test, and deploy workflows
 - [ ] **Phase 7: Shared Component Library** - DRY up duplicated UI components across apps
 - [ ] **Phase 8: Frontend Unit Tests** - Component-level test coverage for critical Memberry components
+- [ ] **Phase 9: Test Infrastructure Hardening** - Replace hardcoded creds, wire all unit tests into CI, expand pre-commit
+- [ ] **Phase 10: Deploy Platform Decision** - Choose deploy platform and wire real staging deploy commands
 
 ## Phase Details
 
@@ -179,6 +181,30 @@ Plans:
 - [x] 08-02-PLAN.md — Component unit tests for MemberDashboard, DuesInvoiceList, MemberTable (TEST-07)
 - [x] 08-03-PLAN.md — Add frontend unit test step to CI workflow (TEST-07)
 
+### Phase 9: Test Infrastructure Hardening
+**Goal**: Eliminate hardcoded credentials from tests, wire all workspace unit tests into CI, and expand pre-commit to run full verification
+**Depends on**: Phase 0, Phase 8
+**Requirements**: TEST-02, TEST-03, TEST-08
+**Success Criteria** (what must be TRUE):
+  1. E2E helpers use deterministic fixtures instead of hardcoded credentials
+  2. Unit tests for all workspaces (api-ts, memberry, account, admin, sdk-ts) run in CI
+  3. Pre-commit hook runs typecheck + tests + build before every commit
+**Plans**: 2 plans
+
+**Wave 1**
+- [ ] 09-01-PLAN.md — Extract hardcoded credentials from E2E tests into shared test-config modules (TEST-02)
+- [ ] 09-02-PLAN.md — Wire all workspace unit tests into CI + expand pre-commit hook (TEST-03, TEST-08)
+
+### Phase 10: Deploy Platform Decision
+**Goal**: Choose a deploy platform and replace placeholder deploy commands with real ones
+**Depends on**: Phase 6
+**Requirements**: DEVX-02
+**Success Criteria** (what must be TRUE):
+  1. Deploy platform selected with documented rationale
+  2. Staging deploy workflow uses real deploy commands (not placeholders)
+  3. Production deploy workflow includes health checks against real endpoints
+**Plans**: TBD (created during discuss/plan)
+
 ## Progress
 
 **Execution Order:**
@@ -195,3 +221,5 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 6. CI/CD & DevOps Pipeline | 0/3 | Planned | - |
 | 7. Shared Component Library | 0/3 | Planned | - |
 | 8. Frontend Unit Tests | 0/3 | Planned | - |
+| 9. Test Infrastructure Hardening | 0/2 | Planned | - |
+| 10. Deploy Platform Decision | 0/? | Not started | - |
