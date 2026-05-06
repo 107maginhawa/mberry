@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Vote, Users, CheckCircle2, Clock, FileText, Ban, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { api } from '@/lib/api'
+import { listElectionsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface ElectionListProps {
   orgId: string
@@ -47,14 +47,11 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function ElectionList({ orgId }: ElectionListProps) {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['elections', orgId],
-    queryFn: async () => {
-      return api.get<{ data: any[] }>(`/api/elections/list/${orgId}`)
-    },
-  })
+  const { data, isLoading, error } = useQuery(
+    listElectionsOptions({ query: { organizationId: orgId } }),
+  )
 
-  const elections = data?.data ?? []
+  const elections = (data?.data ?? []) as any[]
 
   const stats = {
     total: elections.length,

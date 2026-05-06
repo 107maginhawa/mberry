@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Vote, Trophy, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { api } from '@/lib/api'
+import {
+  getElectionOptions,
+  listElectionsQueryKey,
+  openElectionNominationsMutation,
+  openElectionVotingMutation,
+  certifyElectionMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface ElectionDetailProps {
   electionId: string
@@ -53,23 +59,37 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
   const queryClient = useQueryClient()
   const [confirmAction, setConfirmAction] = useState<string | null>(null)
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['election', electionId],
-    queryFn: async () => {
-      return api.get<{ data: any }>(`/api/elections/detail/${electionId}`)
-    },
+  const { data, isLoading, error } = useQuery(
+    getElectionOptions({ path: { electionId } }),
+  )
+
+  const onStatusSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: getElectionOptions({ path: { electionId } }).queryKey })
+    queryClient.invalidateQueries({ queryKey: listElectionsQueryKey({ query: { organizationId: orgId } }) })
+    setConfirmAction(null)
+  }
+
+  const nominationsMutation = useMutation({
+    mutationFn: openElectionNominationsMutation().mutationFn,
+    onSuccess: onStatusSuccess,
+  })
+  const votingMutation = useMutation({
+    mutationFn: openElectionVotingMutation().mutationFn,
+    onSuccess: onStatusSuccess,
+  })
+  const certifyMut = useMutation({
+    mutationFn: certifyElectionMutation().mutationFn,
+    onSuccess: onStatusSuccess,
   })
 
-  const statusMutation = useMutation({
-    mutationFn: async (nextStatus: string) => {
-      return api.post(`/api/elections/status/${electionId}`, { status: nextStatus })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['election', electionId] })
-      queryClient.invalidateQueries({ queryKey: ['elections', orgId] })
-      setConfirmAction(null)
-    },
-  })
+  function handleStatusAdvance(nextStatus: string) {
+    const opts = { path: { electionId } } as any
+    if (nextStatus === 'nominations_open') nominationsMutation.mutate(opts)
+    else if (nextStatus === 'voting_open') votingMutation.mutate(opts)
+    else certifyMut.mutate(opts)
+  }
+
+  const statusMutationPending = nominationsMutation.isPending || votingMutation.isPending || certifyMut.isPending
 
   if (isLoading) {
     return (
@@ -81,12 +101,12 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     )
   }
 
-  if (error || !data?.data) {
+  if (error || !data) {
     return <div className="p-6 text-center text-destructive">Failed to load election</div>
   }
 
-  const election = data.data
-  const nextAction = NEXT_ACTION[election.status]
+  const election = data as any
+  const nextAction = NEXT_ACTION[election.status as string]
   const positions: { id: string; title: string; sortOrder: number }[] = election.positions ?? []
   const nominees: any[] = election.nominees ?? []
   const tallies: { positionId: string; nomineeId: string; count: number }[] = election.tallies ?? []
@@ -138,11 +158,11 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Confirm?</span>
                 <button
-                  onClick={() => statusMutation.mutate(nextAction.nextStatus)}
-                  disabled={statusMutation.isPending}
+                  onClick={() => handleStatusAdvance(nextAction.nextStatus)}
+                  disabled={statusMutationPending}
                   className="px-3 py-1.5 bg-primary text-primary-foreground rounded text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {statusMutation.isPending ? 'Updating...' : 'Yes, proceed'}
+                  {statusMutationPending ? 'Updating...' : 'Yes, proceed'}
                 </button>
                 <button
                   onClick={() => setConfirmAction(null)}

@@ -3,7 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { api, ApiError } from '@/lib/api'
+import {
+  createElectionMutation,
+  listElectionsQueryKey,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface Position {
   id: string
@@ -74,26 +77,12 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
   }
 
   const mutation = useMutation({
-    mutationFn: async () => {
-      const body: any = {
-        title: form.title,
-        type: form.type,
-        votingMode: form.votingMode,
-        positions: positions.filter((p) => p.title.trim()).map((p) => ({ id: p.id, title: p.title.trim(), sortOrder: p.sortOrder })),
-      }
-      if (form.nominationsOpenAt) body.nominationsOpenAt = new Date(form.nominationsOpenAt).toISOString()
-      if (form.nominationsCloseAt) body.nominationsCloseAt = new Date(form.nominationsCloseAt).toISOString()
-      if (form.votingOpenAt) body.votingOpenAt = new Date(form.votingOpenAt).toISOString()
-      if (form.votingCloseAt) body.votingCloseAt = new Date(form.votingCloseAt).toISOString()
-      if (form.type === 'bylaw' && form.passageThreshold) body.passageThreshold = parseInt(form.passageThreshold, 10)
-
-      return api.post(`/api/elections/create/${orgId}`, body)
-    },
+    mutationFn: createElectionMutation().mutationFn,
     onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ['elections', orgId] })
-      onSuccess?.(data.data)
+      queryClient.invalidateQueries({ queryKey: listElectionsQueryKey({ query: { organizationId: orgId } }) })
+      onSuccess?.(data)
     },
-    onError: (err: Error | ApiError) => {
+    onError: (err: Error) => {
       setError(err.message)
     },
   })
@@ -333,7 +322,21 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
           ) : (
             <button
               type="button"
-              onClick={() => mutation.mutate()}
+              onClick={() => {
+                mutation.mutate({
+                  body: {
+                    organizationId: orgId,
+                    title: form.title,
+                    electionType: form.type === 'bylaw' ? 'special' : 'general',
+                    positions: positions.filter((p) => p.title.trim()).map((p) => p.id),
+                    nominationStart: form.nominationsOpenAt ? new Date(form.nominationsOpenAt) : new Date(),
+                    nominationEnd: form.nominationsCloseAt ? new Date(form.nominationsCloseAt) : new Date(),
+                    votingStart: form.votingOpenAt ? new Date(form.votingOpenAt) : new Date(),
+                    votingEnd: form.votingCloseAt ? new Date(form.votingCloseAt) : new Date(),
+                    ...(form.type === 'bylaw' && form.passageThreshold ? { quorumRequired: parseInt(form.passageThreshold, 10) } : {}),
+                  },
+                })
+              }}
               disabled={mutation.isPending || !form.title.trim()}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
             >

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
-import { api } from '@/lib/api'
+import { getCertificateOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface CertificatePreviewProps {
   certificateId: string
@@ -12,14 +12,11 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['certificate', certificateId],
-    queryFn: async () => {
-      return api.get<{ data: any }>(`/api/certificates/${certificateId}`)
-    },
-  })
+  const { data, isLoading, error } = useQuery(
+    getCertificateOptions({ path: { certificateId } }),
+  )
 
-  const cert = data?.data
+  const cert = data as any
 
   if (isLoading) {
     return (
@@ -30,7 +27,7 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
     )
   }
 
-  if (error || !cert) {
+  if (error || !cert?.id) {
     return (
       <div className="max-w-2xl border rounded-xl p-8 text-center text-muted-foreground">
         Certificate not found or you do not have permission to view it.

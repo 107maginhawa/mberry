@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
-import { api } from '@/lib/api'
+import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 function formatDate(iso: string | null | undefined) {
   if (!iso) return '—'
@@ -8,14 +8,9 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function CertificateList() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['my-certificates'],
-    queryFn: async () => {
-      return api.get<{ data: any[] }>('/api/certificates/my')
-    },
-  })
+  const { data, isLoading } = useQuery(listMyCertificatesOptions())
 
-  const certificates = data?.data ?? []
+  const certificates = (data?.data ?? []) as any[]
 
   if (isLoading) {
     return (
