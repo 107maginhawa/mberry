@@ -135,10 +135,13 @@ Plans:
   3. Production deploy workflow includes health checks before traffic switch
   4. Canary/health monitoring alerts on production failures
 **Plans**: 3 plans
-Plans:
-- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
-- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
-- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
+
+**Wave 1**
+- [ ] 06-01-PLAN.md — Extend CI with build-api, build-frontends, and unit-tests jobs (DEVX-01)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 06-02-PLAN.md — Staging + production deploy workflow with health check gates (DEVX-02, DEVX-03)
+- [ ] 06-03-PLAN.md — Scheduled production health monitor with GitHub issue alerting (DEVX-04)
 
 ### Phase 7: Shared Component Library
 **Goal**: Duplicated UI components extracted into a shared package used by all apps
@@ -182,6 +185,6 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 3. Data Model Unification | 0/? | Not started | - |
 | 4. TypeSpec/OpenAPI Reconciliation | 9/11 | In Progress|  |
 | 5. Account & Admin App Hardening | 0/4 | Planned | - |
-| 6. CI/CD & DevOps Pipeline | 0/? | Not started | - |
+| 6. CI/CD & DevOps Pipeline | 0/3 | Planned | - |
 | 7. Shared Component Library | 0/? | Not started | - |
 | 8. Frontend Unit Tests | 0/? | Not started | - |
