@@ -9,6 +9,7 @@ import {
   UserCog,
   ToggleLeft,
   ShieldCheck,
+  Shield,
 } from 'lucide-react'
 import type { RouterContext } from '@/router'
 import '@/styles/globals.css'
@@ -36,6 +37,7 @@ const navItems = [
   { to: '/operators', label: 'Operators', icon: ShieldCheck },
   { to: '/impersonate', label: 'Impersonate', icon: UserCog },
   { to: '/feature-flags', label: 'Feature Flags', icon: ToggleLeft },
+  { to: '/audit', label: 'Audit Log', icon: Shield },
 ]
 
 function RootComponent() {
