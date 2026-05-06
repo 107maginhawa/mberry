@@ -8,6 +8,13 @@ import { validationErrorHandler } from '@/middleware/validation';
 import { createExpandMiddleware } from '@/middleware/expand';
 
 export function registerRoutes(app: Hono<{ Variables: Variables }>) {
+  // updateMyProfile
+  app.patch('/',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.UpdateMyProfileBody, validationErrorHandler),
+    registry.updateMyProfile as unknown as Handler
+  );
+
   // inviteAdmin
   app.post('/admin/admins',
     authMiddleware(),
@@ -105,6 +112,12 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware(),
     zValidator('param', validators.EndImpersonationParams, validationErrorHandler),
     registry.endImpersonation as unknown as Handler
+  );
+
+  // getAdminRole
+  app.get('/admin/me/role',
+    authMiddleware({ roles: ["platform_admin"] }),
+    registry.getAdminRole as unknown as Handler
   );
 
   // createOrganization
@@ -2057,6 +2070,12 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getTimeSlot as unknown as Handler
   );
 
+  // cancelMyAccountDeletion
+  app.post('/cancel-delete',
+    authMiddleware({ roles: ["user"] }),
+    registry.cancelMyAccountDeletion as unknown as Handler
+  );
+
   // createChatRoom
   app.post('/comms/chat-rooms',
     authMiddleware({ roles: ["user"] }),
@@ -2130,6 +2149,90 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getIceServers as unknown as Handler
   );
 
+  // getAnnouncement
+  app.get('/communications/announcements/detail/:id',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('param', validators.GetAnnouncementParams, validationErrorHandler),
+    registry.getAnnouncement as unknown as Handler
+  );
+
+  // updateAnnouncement
+  app.patch('/communications/announcements/:id',
+    authMiddleware({ roles: ["association:officer"] }),
+    zValidator('param', validators.UpdateAnnouncementParams, validationErrorHandler),
+    zValidator('json', validators.UpdateAnnouncementBody, validationErrorHandler),
+    registry.updateAnnouncement as unknown as Handler
+  );
+
+  // deleteAnnouncement
+  app.delete('/communications/announcements/:id',
+    authMiddleware({ roles: ["association:officer"] }),
+    zValidator('param', validators.DeleteAnnouncementParams, validationErrorHandler),
+    registry.deleteAnnouncement as unknown as Handler
+  );
+
+  // archiveAnnouncement
+  app.post('/communications/announcements/:id/archive',
+    authMiddleware({ roles: ["association:officer"] }),
+    zValidator('param', validators.ArchiveAnnouncementParams, validationErrorHandler),
+    registry.archiveAnnouncement as unknown as Handler
+  );
+
+  // publishAnnouncement
+  app.post('/communications/announcements/:id/publish',
+    authMiddleware({ roles: ["association:officer"] }),
+    zValidator('param', validators.PublishAnnouncementParams, validationErrorHandler),
+    registry.publishAnnouncement as unknown as Handler
+  );
+
+  // listAnnouncements
+  app.get('/communications/announcements/:orgId',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('param', validators.ListAnnouncementsParams, validationErrorHandler),
+    zValidator('query', validators.ListAnnouncementsQuery, validationErrorHandler),
+    registry.listAnnouncements as unknown as Handler
+  );
+
+  // createAnnouncement
+  app.post('/communications/announcements/:orgId',
+    authMiddleware({ roles: ["association:officer"] }),
+    zValidator('param', validators.CreateAnnouncementParams, validationErrorHandler),
+    zValidator('json', validators.CreateAnnouncementBody, validationErrorHandler),
+    registry.createAnnouncement as unknown as Handler
+  );
+
+  // getCreditCompliance
+  app.get('/credit-compliance/:orgId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetCreditComplianceParams, validationErrorHandler),
+    registry.getCreditCompliance as unknown as Handler
+  );
+
+  // createMyCreditEntry
+  app.post('/credit-entries',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.CreateMyCreditEntryBody, validationErrorHandler),
+    registry.createMyCreditEntry as unknown as Handler
+  );
+
+  // listMyCreditEntries
+  app.get('/credit-entries',
+    authMiddleware({ roles: ["user"] }),
+    registry.listMyCreditEntries as unknown as Handler
+  );
+
+  // getMyCreditSummary
+  app.get('/credit-summary',
+    authMiddleware({ roles: ["user"] }),
+    registry.getMyCreditSummary as unknown as Handler
+  );
+
+  // requestMyAccountDeletion
+  app.post('/delete',
+    authMiddleware({ roles: ["user"] }),
+    registry.requestMyAccountDeletion as unknown as Handler
+  );
+
   // listEmailQueueItems
   app.get('/email/queue',
     authMiddleware({ roles: ["admin"] }),
@@ -2196,6 +2299,31 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.testEmailTemplate as unknown as Handler
   );
 
+  // exportMyData
+  app.get('/export',
+    authMiddleware({ roles: ["user"] }),
+    registry.exportMyData as unknown as Handler
+  );
+
+  // getMyMemberships
+  app.get('/memberships',
+    authMiddleware({ roles: ["user"] }),
+    registry.getMyMemberships as unknown as Handler
+  );
+
+  // getMyNotificationPreferences
+  app.get('/notification-preferences',
+    authMiddleware({ roles: ["user"] }),
+    registry.getMyNotificationPreferences as unknown as Handler
+  );
+
+  // updateMyNotificationPreferences
+  app.patch('/notification-preferences',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.UpdateMyNotificationPreferencesBody, validationErrorHandler),
+    registry.updateMyNotificationPreferences as unknown as Handler
+  );
+
   // listNotifications
   app.get('/notifs',
     authMiddleware({ roles: ["user", "admin"] }),
@@ -2222,6 +2350,20 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.MarkNotificationAsReadParams, validationErrorHandler),
     registry.markNotificationAsRead as unknown as Handler
+  );
+
+  // getMyOfficerRole
+  app.get('/officer-role/:orgId',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.GetMyOfficerRoleParams, validationErrorHandler),
+    registry.getMyOfficerRole as unknown as Handler
+  );
+
+  // listOfficerTerms
+  app.get('/officer-terms/:orgId',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.ListOfficerTermsParams, validationErrorHandler),
+    registry.listOfficerTerms as unknown as Handler
   );
 
   // createPerson
@@ -2251,6 +2393,32 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('param', validators.UpdatePersonParams, validationErrorHandler),
     zValidator('json', validators.UpdatePersonBody, validationErrorHandler),
     registry.updatePerson as unknown as Handler
+  );
+
+  // getMyPrivacySettings
+  app.get('/privacy',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.GetMyPrivacySettingsQuery, validationErrorHandler),
+    registry.getMyPrivacySettings as unknown as Handler
+  );
+
+  // updateMyPrivacySettings
+  app.patch('/privacy',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.UpdateMyPrivacySettingsBody, validationErrorHandler),
+    registry.updateMyPrivacySettings as unknown as Handler
+  );
+
+  // getOrganizationBySlug
+  app.get('/public/org/:slug',
+    zValidator('param', validators.GetOrganizationBySlugParams, validationErrorHandler),
+    registry.getOrganizationBySlug as unknown as Handler
+  );
+
+  // markAllNotificationsRead
+  app.post('/read-all',
+    authMiddleware({ roles: ["user"] }),
+    registry.markAllNotificationsRead as unknown as Handler
   );
 
   // createReview

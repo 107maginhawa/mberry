@@ -3,6 +3,23 @@
  * This file is regenerated on each run
  */
 
+import { updateMyProfile } from '../../handlers/person/updateMyProfile';
+import { cancelMyAccountDeletion } from '../../handlers/person/cancelMyAccountDeletion';
+import { createMyCreditEntry } from '../../handlers/person/createMyCreditEntry';
+import { listMyCreditEntries } from '../../handlers/person/listMyCreditEntries';
+import { getMyCreditSummary } from '../../handlers/person/getMyCreditSummary';
+import { requestMyAccountDeletion } from '../../handlers/person/requestMyAccountDeletion';
+import { exportMyData } from '../../handlers/person/exportMyData';
+import { getMyMemberships } from '../../handlers/person/getMyMemberships';
+import { getMyNotificationPreferences } from '../../handlers/person/getMyNotificationPreferences';
+import { updateMyNotificationPreferences } from '../../handlers/person/updateMyNotificationPreferences';
+import { getMyOfficerRole } from '../../handlers/person/getMyOfficerRole';
+import { createPerson } from '../../handlers/person/createPerson';
+import { listPersons } from '../../handlers/person/listPersons';
+import { getPerson } from '../../handlers/person/getPerson';
+import { updatePerson } from '../../handlers/person/updatePerson';
+import { getMyPrivacySettings } from '../../handlers/person/getMyPrivacySettings';
+import { updateMyPrivacySettings } from '../../handlers/person/updateMyPrivacySettings';
 import { inviteAdmin } from '../../handlers/platformadmin/inviteAdmin';
 import { listAdmins } from '../../handlers/platformadmin/listAdmins';
 import { updateAdmin } from '../../handlers/platformadmin/updateAdmin';
@@ -17,11 +34,13 @@ import { listFeatureFlags } from '../../handlers/platformadmin/listFeatureFlags'
 import { deleteFeatureFlag } from '../../handlers/platformadmin/deleteFeatureFlag';
 import { startImpersonation } from '../../handlers/platformadmin/startImpersonation';
 import { endImpersonation } from '../../handlers/platformadmin/endImpersonation';
+import { getAdminRole } from '../../handlers/platformadmin/getAdminRole';
 import { createOrganization } from '../../handlers/platformadmin/createOrganization';
 import { listOrganizations } from '../../handlers/platformadmin/listOrganizations';
 import { getOrganization } from '../../handlers/platformadmin/getOrganization';
 import { updateOrganization } from '../../handlers/platformadmin/updateOrganization';
 import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
+import { getOrganizationBySlug } from '../../handlers/platformadmin/getOrganizationBySlug';
 import { createDocumentTag } from '../../handlers/documents/createDocumentTag';
 import { listDocumentTags } from '../../handlers/documents/listDocumentTags';
 import { getDocumentTag } from '../../handlers/documents/getDocumentTag';
@@ -233,6 +252,8 @@ import { listMembershipTiers } from '../../handlers/association:member/listMembe
 import { getMembershipTier } from '../../handlers/association:member/getMembershipTier';
 import { updateMembershipTier } from '../../handlers/association:member/updateMembershipTier';
 import { deleteMembershipTier } from '../../handlers/association:member/deleteMembershipTier';
+import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
+import { listOfficerTerms } from '../../handlers/association:member/listOfficerTerms';
 import { createMessageTemplate } from '../../handlers/communication/createMessageTemplate';
 import { searchMessageTemplates } from '../../handlers/communication/searchMessageTemplates';
 import { getMessageTemplate } from '../../handlers/communication/getMessageTemplate';
@@ -254,6 +275,13 @@ import { createSubscriptionTopic } from '../../handlers/communication/createSubs
 import { getSubscriptionTopic } from '../../handlers/communication/getSubscriptionTopic';
 import { updateSubscriptionTopic } from '../../handlers/communication/updateSubscriptionTopic';
 import { deleteSubscriptionTopic } from '../../handlers/communication/deleteSubscriptionTopic';
+import { getAnnouncement } from '../../handlers/communications/getAnnouncement';
+import { updateAnnouncement } from '../../handlers/communications/updateAnnouncement';
+import { deleteAnnouncement } from '../../handlers/communications/deleteAnnouncement';
+import { archiveAnnouncement } from '../../handlers/communications/archiveAnnouncement';
+import { publishAnnouncement } from '../../handlers/communications/publishAnnouncement';
+import { listAnnouncements } from '../../handlers/communications/listAnnouncements';
+import { createAnnouncement } from '../../handlers/communications/createAnnouncement';
 import { listAuditLogs } from '../../handlers/audit/listAuditLogs';
 import { createInvoice } from '../../handlers/billing/createInvoice';
 import { listInvoices } from '../../handlers/billing/listInvoices';
@@ -312,10 +340,7 @@ import { listNotifications } from '../../handlers/notifs/listNotifications';
 import { markAllNotificationsAsRead } from '../../handlers/notifs/markAllNotificationsAsRead';
 import { getNotification } from '../../handlers/notifs/getNotification';
 import { markNotificationAsRead } from '../../handlers/notifs/markNotificationAsRead';
-import { createPerson } from '../../handlers/person/createPerson';
-import { listPersons } from '../../handlers/person/listPersons';
-import { getPerson } from '../../handlers/person/getPerson';
-import { updatePerson } from '../../handlers/person/updatePerson';
+import { markAllNotificationsRead } from '../../handlers/notifs/markAllNotificationsRead';
 import { createReview } from '../../handlers/reviews/createReview';
 import { listReviews } from '../../handlers/reviews/listReviews';
 import { getReview } from '../../handlers/reviews/getReview';
@@ -328,6 +353,25 @@ import { completeFileUpload } from '../../handlers/storage/completeFileUpload';
 import { getFileDownload } from '../../handlers/storage/getFileDownload';
 
 export const registry = {
+  // Person handlers
+  updateMyProfile,
+  cancelMyAccountDeletion,
+  createMyCreditEntry,
+  listMyCreditEntries,
+  getMyCreditSummary,
+  requestMyAccountDeletion,
+  exportMyData,
+  getMyMemberships,
+  getMyNotificationPreferences,
+  updateMyNotificationPreferences,
+  getMyOfficerRole,
+  createPerson,
+  listPersons,
+  getPerson,
+  updatePerson,
+  getMyPrivacySettings,
+  updateMyPrivacySettings,
+
   // Platformadmin handlers
   inviteAdmin,
   listAdmins,
@@ -343,11 +387,13 @@ export const registry = {
   deleteFeatureFlag,
   startImpersonation,
   endImpersonation,
+  getAdminRole,
   createOrganization,
   listOrganizations,
   getOrganization,
   updateOrganization,
   transitionOrgStatus,
+  getOrganizationBySlug,
 
   // Documents handlers
   createDocumentTag,
@@ -565,6 +611,8 @@ export const registry = {
   getMembershipTier,
   updateMembershipTier,
   deleteMembershipTier,
+  getCreditCompliance,
+  listOfficerTerms,
 
   // Communication handlers
   createMessageTemplate,
@@ -588,6 +636,13 @@ export const registry = {
   getSubscriptionTopic,
   updateSubscriptionTopic,
   deleteSubscriptionTopic,
+  getAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
+  archiveAnnouncement,
+  publishAnnouncement,
+  listAnnouncements,
+  createAnnouncement,
 
   // Audit handlers
   listAuditLogs,
@@ -658,12 +713,7 @@ export const registry = {
   markAllNotificationsAsRead,
   getNotification,
   markNotificationAsRead,
-
-  // Person handlers
-  createPerson,
-  listPersons,
-  getPerson,
-  updatePerson,
+  markAllNotificationsRead,
 
   // Reviews handlers
   createReview,

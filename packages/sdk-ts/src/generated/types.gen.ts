@@ -332,6 +332,20 @@ export type AbstractSubmissionUpdate = {
 };
 
 /**
+ * Response from account deletion request
+ */
+export type AccountDeletionResponse = {
+    /**
+     * ISO 8601 timestamp when deletion is scheduled to execute
+     */
+    deletionScheduledAt: string;
+    /**
+     * Number of days in the grace period before deletion executes
+     */
+    gracePeriodDays: number;
+};
+
+/**
  * Accreditation status of a CE provider organization
  */
 export type AccreditationStatus = 'applied' | 'approved' | 'probation' | 'suspended' | 'revoked' | 'expired';
@@ -769,6 +783,24 @@ export type AddressUpdate = {
 };
 
 /**
+ * Platform admin identity response
+ */
+export type AdminRoleResponse = {
+    /**
+     * Platform admin role: super, support, or analyst
+     */
+    role: string;
+    /**
+     * Email address of the platform admin
+     */
+    email: string;
+    /**
+     * Display name of the platform admin
+     */
+    name: string;
+};
+
+/**
  * Lifecycle status of a chapter affiliation record
  */
 export type AffiliationStatus = 'active' | 'transferred' | 'withdrawn';
@@ -1092,6 +1124,299 @@ export type AgingBucketUpdate = {
      */
     totalOutstanding?: bigint;
 };
+
+/**
+ * An organisation-scoped announcement record
+ */
+export type Announcement = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation this announcement belongs to
+     */
+    organizationId: string;
+    /**
+     * Person who authored the announcement
+     */
+    authorId: string;
+    /**
+     * Short descriptive title
+     */
+    title: string;
+    /**
+     * Full announcement body (HTML or plain text)
+     */
+    content: string;
+    /**
+     * Audience targeting strategy: 'all' members or 'by_category'
+     */
+    audienceType: string;
+    /**
+     * Category IDs when audienceType is 'by_category'
+     */
+    audienceCategories?: Array<string>;
+    /**
+     * Whether to send a push notification
+     */
+    channelPush: boolean;
+    /**
+     * Whether to send an email notification
+     */
+    channelEmail: boolean;
+    /**
+     * Announcement visibility scope
+     */
+    visibility: 'internal' | 'network';
+    /**
+     * Lifecycle status of the announcement
+     */
+    status: 'draft' | 'scheduled' | 'sent' | 'scheduledFailed' | 'archived';
+    /**
+     * When the announcement was/will be sent
+     */
+    scheduledAt?: Date;
+    /**
+     * When the announcement was published
+     */
+    publishedAt?: Date;
+};
+
+/**
+ * Request body for creating an announcement
+ */
+export type AnnouncementCreateRequest = {
+    /**
+     * Short descriptive title
+     */
+    title: string;
+    /**
+     * Full announcement body
+     */
+    content: string;
+    /**
+     * Audience targeting: 'all' or 'by_category'
+     */
+    audienceType?: string;
+    /**
+     * Category IDs when audienceType is 'by_category'
+     */
+    audienceCategories?: Array<string>;
+    /**
+     * Whether to send a push notification
+     */
+    channelPush?: boolean;
+    /**
+     * Whether to send an email notification
+     */
+    channelEmail?: boolean;
+    /**
+     * Visibility scope
+     */
+    visibility?: 'internal' | 'network';
+    /**
+     * Initial status (defaults to 'draft')
+     */
+    status?: 'draft' | 'scheduled' | 'sent' | 'scheduledFailed' | 'archived';
+    /**
+     * Scheduled send time (for status 'scheduled')
+     */
+    scheduledAt?: Date;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type AnnouncementListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Announcement>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Announcement lifecycle status
+ */
+export type AnnouncementStatus = 'draft' | 'scheduled' | 'sent' | 'scheduledFailed' | 'archived';
+
+/**
+ * An organisation-scoped announcement record
+ */
+export type AnnouncementUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation this announcement belongs to
+     */
+    organizationId?: string;
+    /**
+     * Person who authored the announcement
+     */
+    authorId?: string;
+    /**
+     * Short descriptive title
+     */
+    title?: string;
+    /**
+     * Full announcement body (HTML or plain text)
+     */
+    content?: string;
+    /**
+     * Audience targeting strategy: 'all' members or 'by_category'
+     */
+    audienceType?: string;
+    /**
+     * Category IDs when audienceType is 'by_category'
+     */
+    audienceCategories?: Array<string>;
+    /**
+     * Whether to send a push notification
+     */
+    channelPush?: boolean;
+    /**
+     * Whether to send an email notification
+     */
+    channelEmail?: boolean;
+    /**
+     * Announcement visibility scope
+     */
+    visibility?: 'internal' | 'network';
+    /**
+     * Lifecycle status of the announcement
+     */
+    status?: 'draft' | 'scheduled' | 'sent' | 'scheduledFailed' | 'archived';
+    /**
+     * When the announcement was/will be sent
+     */
+    scheduledAt?: Date;
+    /**
+     * When the announcement was published
+     */
+    publishedAt?: Date;
+};
+
+/**
+ * Request body for updating an announcement
+ */
+export type AnnouncementUpdateRequest = {
+    /**
+     * Updated title
+     */
+    title?: string;
+    /**
+     * Updated content
+     */
+    content?: string;
+    /**
+     * Updated audience targeting
+     */
+    audienceType?: string;
+    /**
+     * Updated category IDs
+     */
+    audienceCategories?: Array<string>;
+    /**
+     * Updated push channel setting
+     */
+    channelPush?: boolean;
+    /**
+     * Updated email channel setting
+     */
+    channelEmail?: boolean;
+    /**
+     * Updated visibility
+     */
+    visibility?: 'internal' | 'network';
+    /**
+     * Updated scheduled send time
+     */
+    scheduledAt?: Date;
+};
+
+/**
+ * Announcement audience visibility
+ */
+export type AnnouncementVisibility = 'internal' | 'network';
 
 /**
  * Status of a membership application
@@ -9119,6 +9444,16 @@ export type CampaignUpdate = {
 };
 
 /**
+ * Cancel account deletion response
+ */
+export type CancelDeletionResponse = {
+    /**
+     * Confirmation message
+     */
+    message: string;
+};
+
+/**
  * Request to cancel a pending email
  */
 export type CancelEmailRequest = {
@@ -10871,6 +11206,79 @@ export type ComplaintCategory = 'professionalMisconduct' | 'codeViolation' | 'fi
 export type ComplaintStatus = 'filed' | 'preliminaryReview' | 'investigation' | 'hearing' | 'decision' | 'appeal' | 'closed';
 
 /**
+ * A single member row in a credit compliance report
+ */
+export type ComplianceRow = {
+    /**
+     * Person ID
+     */
+    personId: string;
+    /**
+     * First name
+     */
+    firstName: string;
+    /**
+     * Last name
+     */
+    lastName?: string;
+    /**
+     * Member number assigned by the organisation
+     */
+    memberNumber?: string;
+    /**
+     * Current membership status
+     */
+    membershipStatus: string;
+    /**
+     * Total CPD credits earned this cycle
+     */
+    earned: number;
+    /**
+     * Credits required to be compliant this cycle
+     */
+    required: number;
+    /**
+     * Credits still needed to reach compliance
+     */
+    remaining: number;
+    /**
+     * Compliance status derived from earned vs required
+     */
+    complianceStatus: 'compliant' | 'at_risk' | 'non_compliant';
+};
+
+/**
+ * CPD compliance status
+ */
+export type ComplianceStatus = 'compliant' | 'at_risk' | 'non_compliant';
+
+/**
+ * Summary totals for a credit compliance report
+ */
+export type ComplianceSummary = {
+    /**
+     * Number of members who are compliant
+     */
+    compliant: number;
+    /**
+     * Number of members who are at risk
+     */
+    atRisk: number;
+    /**
+     * Number of members who are non-compliant
+     */
+    nonCompliant: number;
+    /**
+     * Total active/grace-period members in the compliance report
+     */
+    total: number;
+    /**
+     * Required CPD credit count used for the compliance threshold
+     */
+    requiredCredits: number;
+};
+
+/**
  * An association conference or multi-day event
  */
 export type Conference = {
@@ -11823,6 +12231,28 @@ export type CreateChatRoomRequest = {
 };
 
 /**
+ * Request body for creating a manual credit entry
+ */
+export type CreateCreditEntryRequest = {
+    /**
+     * Name of the CPD activity
+     */
+    activityName: string;
+    /**
+     * Date the activity was completed (ISO 8601)
+     */
+    activityDate?: string;
+    /**
+     * Number of CPD credits earned for this activity
+     */
+    creditAmount: number;
+    /**
+     * Organisation ID to associate the entry with; defaults to user's first membership org
+     */
+    organizationId?: string;
+};
+
+/**
  * Request to create an invoice
  */
 export type CreateInvoiceRequest = {
@@ -12289,6 +12719,41 @@ export type CredentialVerificationLogUpdate = {
  * Category of activity for which CE credit is awarded
  */
 export type CreditActivityType = 'event' | 'training' | 'conference' | 'selfStudy' | 'publication' | 'teaching' | 'other';
+
+/**
+ * Credit compliance report response
+ */
+export type CreditComplianceReport = {
+    /**
+     * Per-member compliance rows
+     */
+    data: Array<ComplianceRow>;
+    /**
+     * Aggregated compliance summary
+     */
+    summary: {
+        /**
+         * Number of members who are compliant
+         */
+        compliant: number;
+        /**
+         * Number of members who are at risk
+         */
+        atRisk: number;
+        /**
+         * Number of members who are non-compliant
+         */
+        nonCompliant: number;
+        /**
+         * Total active/grace-period members in the compliance report
+         */
+        total: number;
+        /**
+         * Required CPD credit count used for the compliance threshold
+         */
+        requiredCredits: number;
+    };
+};
 
 /**
  * A continuing education credit cycle defining the period and credit requirements for a member
@@ -19131,6 +19596,16 @@ export type LicenseStatus = 'active' | 'expired' | 'suspended' | 'revoked' | 'pe
 export type LocationType = 'video' | 'phone' | 'in-person';
 
 /**
+ * Response body returned when all notifications are marked read
+ */
+export type MarkAllReadResponse = {
+    /**
+     * Confirmation that the bulk-read operation succeeded
+     */
+    success: boolean;
+};
+
+/**
  * Request to mark a dues invoice as paid
  */
 export type MarkInvoicePaidRequest = {
@@ -20744,6 +21219,210 @@ export type MotionUpdate = {
 };
 
 /**
+ * A single CPD credit entry (person/me scope)
+ */
+export type MyCreditEntry = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Person this credit belongs to
+     */
+    personId: string;
+    /**
+     * Organisation the credit is associated with
+     */
+    organizationId: string;
+    /**
+     * Name of the CPD activity
+     */
+    activityName: string;
+    /**
+     * Date the activity was completed
+     */
+    activityDate: Date;
+    /**
+     * Number of CPD credits
+     */
+    creditAmount: number;
+    /**
+     * Entry type (manual or system)
+     */
+    type: string;
+    /**
+     * Start of the CPD cycle this entry counts toward
+     */
+    cycleStart: Date;
+    /**
+     * End of the CPD cycle this entry counts toward
+     */
+    cycleEnd: Date;
+};
+
+/**
+ * A single CPD credit entry (person/me scope)
+ */
+export type MyCreditEntryUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Person this credit belongs to
+     */
+    personId?: string;
+    /**
+     * Organisation the credit is associated with
+     */
+    organizationId?: string;
+    /**
+     * Name of the CPD activity
+     */
+    activityName?: string;
+    /**
+     * Date the activity was completed
+     */
+    activityDate?: Date;
+    /**
+     * Number of CPD credits
+     */
+    creditAmount?: number;
+    /**
+     * Entry type (manual or system)
+     */
+    type?: string;
+    /**
+     * Start of the CPD cycle this entry counts toward
+     */
+    cycleStart?: Date;
+    /**
+     * End of the CPD cycle this entry counts toward
+     */
+    cycleEnd?: Date;
+};
+
+/**
+ * Lifetime credit total for the authenticated person
+ */
+export type MyCreditSummary = {
+    /**
+     * Total CPD credits earned across all cycles
+     */
+    totalCredits: number;
+};
+
+/**
+ * DPA 2012 personal data export envelope
+ */
+export type MyDataExport = {
+    /**
+     * ISO 8601 timestamp when the export was generated
+     */
+    exportedAt: string;
+    /**
+     * List of data categories included in the export
+     */
+    categories: Array<string>;
+    /**
+     * Person profile record (internal fields stripped)
+     */
+    profile: {
+        [key: string]: unknown;
+    };
+    /**
+     * All membership records for this person
+     */
+    memberships: Array<unknown>;
+    /**
+     * All dues payment records for this person
+     */
+    payments: Array<unknown>;
+    /**
+     * All CPD credit entries for this person
+     */
+    credits: Array<unknown>;
+    /**
+     * Notification history for this person
+     */
+    notifications: Array<unknown>;
+};
+
+/**
+ * Summary of a person's membership in an organisation
+ */
+export type MyMembership = {
+    /**
+     * Membership record ID
+     */
+    id: string;
+    /**
+     * Organisation ID the membership belongs to
+     */
+    organizationId: string;
+    /**
+     * Member number assigned by the organisation
+     */
+    memberNumber?: string;
+    /**
+     * Membership tier ID
+     */
+    tierId?: string;
+    /**
+     * Current membership status
+     */
+    status: string;
+    /**
+     * Date the membership started
+     */
+    startDate?: Date;
+    /**
+     * Date the membership expires
+     */
+    endDate?: Date;
+};
+
+/**
  * Status of an award nomination
  */
 export type NominationStatus = 'submitted' | 'underReview' | 'shortlisted' | 'selected' | 'notSelected' | 'withdrawn';
@@ -20945,6 +21624,46 @@ export type NotificationListResponse = {
 };
 
 /**
+ * Notification preference for a single category
+ */
+export type NotificationPreference = {
+    /**
+     * Notification category (e.g. dues, events, credits)
+     */
+    category: string;
+    /**
+     * Whether push notifications are enabled for this category
+     */
+    pushEnabled: boolean;
+    /**
+     * Whether email notifications are enabled for this category
+     */
+    emailEnabled: boolean;
+    /**
+     * Whether in-app notifications are enabled (always true per M02-R8)
+     */
+    inApp: boolean;
+};
+
+/**
+ * A single notification preference update
+ */
+export type NotificationPreferenceUpdate = {
+    /**
+     * Notification category to update
+     */
+    category: string;
+    /**
+     * Whether push notifications should be enabled
+     */
+    pushEnabled?: boolean;
+    /**
+     * Whether email notifications should be enabled
+     */
+    emailEnabled?: boolean;
+};
+
+/**
  * Notification delivery status
  */
 export type NotificationStatus = 'queued' | 'sent' | 'delivered' | 'read' | 'failed' | 'expired' | 'unread';
@@ -21040,6 +21759,65 @@ export type NotificationUpdate = {
      * Consent validation status
      */
     consentValidated?: boolean;
+};
+
+/**
+ * A single officer position held by the authenticated user
+ */
+export type OfficerPosition = {
+    /**
+     * Position ID
+     */
+    id: string;
+    /**
+     * Position title
+     */
+    title: string;
+    /**
+     * Term record ID
+     */
+    termId: string;
+    /**
+     * Term start date
+     */
+    startDate?: Date;
+    /**
+     * Term end date
+     */
+    endDate?: Date;
+};
+
+/**
+ * Officer role data for a specific organisation
+ */
+export type OfficerRoleData = {
+    /**
+     * Whether the authenticated user is an active officer in the org
+     */
+    isOfficer: boolean;
+    /**
+     * List of active officer positions held by the user
+     */
+    positions: Array<OfficerPosition>;
+};
+
+/**
+ * Officer role response wrapper
+ */
+export type OfficerRoleResponse = {
+    /**
+     * Officer role data for the requested org
+     */
+    data: {
+        /**
+         * Whether the authenticated user is an active officer in the org
+         */
+        isOfficer: boolean;
+        /**
+         * List of active officer positions held by the user
+         */
+        positions: Array<OfficerPosition>;
+    };
 };
 
 /**
@@ -21149,6 +21927,44 @@ export type OfficerTermListResponse = {
          */
         hasPreviousPage: boolean;
     };
+};
+
+/**
+ * An officer term record enriched with position title and person name
+ */
+export type OfficerTermRecord = {
+    /**
+     * Officer term ID
+     */
+    id: string;
+    /**
+     * Position ID
+     */
+    positionId: string;
+    /**
+     * Position title
+     */
+    positionTitle: string;
+    /**
+     * Person ID of the officer
+     */
+    personId: string;
+    /**
+     * Full name of the officer
+     */
+    personName: string;
+    /**
+     * Term status
+     */
+    status: string;
+    /**
+     * Term start date
+     */
+    startDate?: Date;
+    /**
+     * Term end date
+     */
+    endDate?: Date;
 };
 
 /**
@@ -22121,6 +22937,48 @@ export type PersonListResponse = {
          */
         hasPreviousPage: boolean;
     };
+};
+
+/**
+ * Partial person update request scoped to /persons/me
+ */
+export type PersonMeUpdateRequest = {
+    /**
+     * First name
+     */
+    firstName?: string;
+    /**
+     * Last name
+     */
+    lastName?: string;
+    /**
+     * Middle name
+     */
+    middleName?: string;
+    /**
+     * Professional specialization
+     */
+    specialization?: string;
+    /**
+     * Date of birth (ISO 8601 date string)
+     */
+    dateOfBirth?: string;
+    /**
+     * Gender identity
+     */
+    gender?: string;
+    /**
+     * Primary phone number in E.164 format
+     */
+    phone?: string;
+    /**
+     * IANA timezone identifier
+     */
+    timezone?: string;
+    /**
+     * Preferred language code (ISO 639-1)
+     */
+    preferredLanguage?: string;
 };
 
 /**
@@ -23308,6 +24166,36 @@ export type PositionUpdate = {
 };
 
 /**
+ * Privacy visibility settings for the authenticated user in an organisation
+ */
+export type PrivacySettings = {
+    /**
+     * Person ID
+     */
+    personId: string;
+    /**
+     * Organisation scope for these settings
+     */
+    orgId?: string;
+    /**
+     * Whether email is visible to other members in the directory
+     */
+    emailVisible: boolean;
+    /**
+     * Whether phone number is visible to other members in the directory
+     */
+    phoneVisible: boolean;
+    /**
+     * Whether profile photo is visible to other members in the directory
+     */
+    photoVisible: boolean;
+    /**
+     * Whether address is visible to other members in the directory
+     */
+    addressVisible: boolean;
+};
+
+/**
  * A professional license held by a member and tracked by the association
  */
 export type ProfessionalLicense = {
@@ -24010,6 +24898,48 @@ export type PublicDirectoryProfile = {
      * Whether the profile has been verified
      */
     verified: boolean;
+};
+
+/**
+ * Public organisation profile returned from the slug lookup
+ */
+export type PublicOrganization = {
+    /**
+     * Organisation ID
+     */
+    id: string;
+    /**
+     * Organisation display name
+     */
+    name: string;
+    /**
+     * URL-safe slug used to identify the organisation publicly
+     */
+    slug: string;
+    /**
+     * Organisation type: chapter, society, national, or clinic
+     */
+    orgType: string;
+    /**
+     * Geographic region
+     */
+    region?: string;
+    /**
+     * Public contact email
+     */
+    contactEmail?: string;
+    /**
+     * Lifecycle status of the organisation
+     */
+    status: string;
+    /**
+     * Name of the parent association
+     */
+    associationName?: string;
+    /**
+     * Count of active members (publicly visible)
+     */
+    memberCount: number;
 };
 
 /**
@@ -28196,6 +29126,16 @@ export type UpdateMemberRequest = {
 };
 
 /**
+ * Request body for updating notification preferences
+ */
+export type UpdateNotificationPreferencesRequest = {
+    /**
+     * List of preference updates to apply
+     */
+    preferences?: Array<NotificationPreferenceUpdate>;
+};
+
+/**
  * Request to update an organization profile
  */
 export type UpdateOrgProfileRequest = {
@@ -28249,6 +29189,32 @@ export type UpdateParticipantRequest = {
      * Video enabled status
      */
     videoEnabled?: boolean;
+};
+
+/**
+ * Request body for updating privacy settings
+ */
+export type UpdatePrivacySettingsRequest = {
+    /**
+     * Organisation scope — required to scope the update
+     */
+    orgId?: string;
+    /**
+     * Whether email is visible to other members in the directory
+     */
+    emailVisible?: boolean;
+    /**
+     * Whether phone number is visible to other members in the directory
+     */
+    phoneVisible?: boolean;
+    /**
+     * Whether profile photo is visible to other members in the directory
+     */
+    photoVisible?: boolean;
+    /**
+     * Whether address is visible to other members in the directory
+     */
+    addressVisible?: boolean;
 };
 
 /**
@@ -29706,6 +30672,41 @@ export type TrainingSearchParamsStatus = TrainingStatus;
  */
 export type TrainingSearchParamsType = TrainingType;
 
+export type UpdateMyProfileData = {
+    body: PersonMeUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/';
+};
+
+export type UpdateMyProfileErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateMyProfileError = UpdateMyProfileErrors[keyof UpdateMyProfileErrors];
+
+export type UpdateMyProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type UpdateMyProfileResponse = UpdateMyProfileResponses[keyof UpdateMyProfileResponses];
+
 export type ListAdminsData = {
     body?: never;
     path?: never;
@@ -30148,6 +31149,35 @@ export type EndImpersonationResponses = {
 };
 
 export type EndImpersonationResponse = EndImpersonationResponses[keyof EndImpersonationResponses];
+
+export type GetAdminRoleData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/me/role';
+};
+
+export type GetAdminRoleErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GetAdminRoleError = GetAdminRoleErrors[keyof GetAdminRoleErrors];
+
+export type GetAdminRoleResponses = {
+    /**
+     * Success response with data
+     */
+    200: AdminRoleResponse;
+};
+
+export type GetAdminRoleResponse = GetAdminRoleResponses[keyof GetAdminRoleResponses];
 
 export type ListOrganizationsData = {
     body?: never;
@@ -41152,6 +42182,35 @@ export type GetTimeSlotResponses = {
 
 export type GetTimeSlotResponse = GetTimeSlotResponses[keyof GetTimeSlotResponses];
 
+export type CancelMyAccountDeletionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/cancel-delete';
+};
+
+export type CancelMyAccountDeletionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CancelMyAccountDeletionError = CancelMyAccountDeletionErrors[keyof CancelMyAccountDeletionErrors];
+
+export type CancelMyAccountDeletionResponses = {
+    /**
+     * Success response with data
+     */
+    200: CancelDeletionResponse;
+};
+
+export type CancelMyAccountDeletionResponse = CancelMyAccountDeletionResponses[keyof CancelMyAccountDeletionResponses];
+
 export type ListChatRoomsData = {
     body?: never;
     path?: never;
@@ -41566,6 +42625,432 @@ export type GetIceServersResponses = {
 
 export type GetIceServersResponse = GetIceServersResponses[keyof GetIceServersResponses];
 
+export type GetAnnouncementData = {
+    body?: never;
+    path: {
+        id: Uuid;
+    };
+    query?: never;
+    url: '/communications/announcements/detail/{id}';
+};
+
+export type GetAnnouncementErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetAnnouncementError = GetAnnouncementErrors[keyof GetAnnouncementErrors];
+
+export type GetAnnouncementResponses = {
+    /**
+     * Success response with data
+     */
+    200: Announcement;
+};
+
+export type GetAnnouncementResponse = GetAnnouncementResponses[keyof GetAnnouncementResponses];
+
+export type DeleteAnnouncementData = {
+    body?: never;
+    path: {
+        id: Uuid;
+    };
+    query?: never;
+    url: '/communications/announcements/{id}';
+};
+
+export type DeleteAnnouncementErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteAnnouncementError = DeleteAnnouncementErrors[keyof DeleteAnnouncementErrors];
+
+export type DeleteAnnouncementResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteAnnouncementResponse = DeleteAnnouncementResponses[keyof DeleteAnnouncementResponses];
+
+export type UpdateAnnouncementData = {
+    body: AnnouncementUpdateRequest;
+    path: {
+        id: Uuid;
+    };
+    query?: never;
+    url: '/communications/announcements/{id}';
+};
+
+export type UpdateAnnouncementErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateAnnouncementError = UpdateAnnouncementErrors[keyof UpdateAnnouncementErrors];
+
+export type UpdateAnnouncementResponses = {
+    /**
+     * Success response with data
+     */
+    200: Announcement;
+};
+
+export type UpdateAnnouncementResponse = UpdateAnnouncementResponses[keyof UpdateAnnouncementResponses];
+
+export type ArchiveAnnouncementData = {
+    body?: never;
+    path: {
+        id: Uuid;
+    };
+    query?: never;
+    url: '/communications/announcements/{id}/archive';
+};
+
+export type ArchiveAnnouncementErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ArchiveAnnouncementError = ArchiveAnnouncementErrors[keyof ArchiveAnnouncementErrors];
+
+export type ArchiveAnnouncementResponses = {
+    /**
+     * Success response with data
+     */
+    200: Announcement;
+};
+
+export type ArchiveAnnouncementResponse = ArchiveAnnouncementResponses[keyof ArchiveAnnouncementResponses];
+
+export type PublishAnnouncementData = {
+    body?: never;
+    path: {
+        id: Uuid;
+    };
+    query?: never;
+    url: '/communications/announcements/{id}/publish';
+};
+
+export type PublishAnnouncementErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type PublishAnnouncementError = PublishAnnouncementErrors[keyof PublishAnnouncementErrors];
+
+export type PublishAnnouncementResponses = {
+    /**
+     * Success response with data
+     */
+    200: Announcement;
+};
+
+export type PublishAnnouncementResponse = PublishAnnouncementResponses[keyof PublishAnnouncementResponses];
+
+export type ListAnnouncementsData = {
+    body?: never;
+    path: {
+        orgId: Uuid;
+    };
+    query?: {
+        status?: AnnouncementStatus;
+        search?: string;
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/communications/announcements/{orgId}';
+};
+
+export type ListAnnouncementsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListAnnouncementsError = ListAnnouncementsErrors[keyof ListAnnouncementsErrors];
+
+export type ListAnnouncementsResponses = {
+    /**
+     * Success response with data
+     */
+    200: AnnouncementListResponse;
+};
+
+export type ListAnnouncementsResponse = ListAnnouncementsResponses[keyof ListAnnouncementsResponses];
+
+export type CreateAnnouncementData = {
+    body: AnnouncementCreateRequest;
+    path: {
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/communications/announcements/{orgId}';
+};
+
+export type CreateAnnouncementErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateAnnouncementError = CreateAnnouncementErrors[keyof CreateAnnouncementErrors];
+
+export type CreateAnnouncementResponses = {
+    /**
+     * Resource created response
+     */
+    201: Announcement;
+};
+
+export type CreateAnnouncementResponse = CreateAnnouncementResponses[keyof CreateAnnouncementResponses];
+
+export type GetCreditComplianceData = {
+    body?: never;
+    path: {
+        /**
+         * Organisation ID to generate the compliance report for
+         */
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/credit-compliance/{orgId}';
+};
+
+export type GetCreditComplianceErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetCreditComplianceError = GetCreditComplianceErrors[keyof GetCreditComplianceErrors];
+
+export type GetCreditComplianceResponses = {
+    /**
+     * Success response with data
+     */
+    200: CreditComplianceReport;
+};
+
+export type GetCreditComplianceResponse = GetCreditComplianceResponses[keyof GetCreditComplianceResponses];
+
+export type ListMyCreditEntriesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/credit-entries';
+};
+
+export type ListMyCreditEntriesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListMyCreditEntriesError = ListMyCreditEntriesErrors[keyof ListMyCreditEntriesErrors];
+
+export type ListMyCreditEntriesResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<MyCreditEntry>;
+    };
+};
+
+export type ListMyCreditEntriesResponse = ListMyCreditEntriesResponses[keyof ListMyCreditEntriesResponses];
+
+export type CreateMyCreditEntryData = {
+    body: CreateCreditEntryRequest;
+    path?: never;
+    query?: never;
+    url: '/credit-entries';
+};
+
+export type CreateMyCreditEntryErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type CreateMyCreditEntryError = CreateMyCreditEntryErrors[keyof CreateMyCreditEntryErrors];
+
+export type CreateMyCreditEntryResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: MyCreditEntry;
+    };
+};
+
+export type CreateMyCreditEntryResponse = CreateMyCreditEntryResponses[keyof CreateMyCreditEntryResponses];
+
+export type GetMyCreditSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/credit-summary';
+};
+
+export type GetMyCreditSummaryErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyCreditSummaryError = GetMyCreditSummaryErrors[keyof GetMyCreditSummaryErrors];
+
+export type GetMyCreditSummaryResponses = {
+    /**
+     * Success response with data
+     */
+    200: MyCreditSummary;
+};
+
+export type GetMyCreditSummaryResponse = GetMyCreditSummaryResponses[keyof GetMyCreditSummaryResponses];
+
+export type RequestMyAccountDeletionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/delete';
+};
+
+export type RequestMyAccountDeletionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RequestMyAccountDeletionError = RequestMyAccountDeletionErrors[keyof RequestMyAccountDeletionErrors];
+
+export type RequestMyAccountDeletionResponses = {
+    /**
+     * Success response with data
+     */
+    200: AccountDeletionResponse;
+};
+
+export type RequestMyAccountDeletionResponse = RequestMyAccountDeletionResponses[keyof RequestMyAccountDeletionResponses];
+
 export type ListEmailQueueItemsData = {
     body?: never;
     path?: never;
@@ -41969,6 +43454,116 @@ export type TestEmailTemplateResponses = {
 
 export type TestEmailTemplateResponse = TestEmailTemplateResponses[keyof TestEmailTemplateResponses];
 
+export type ExportMyDataData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/export';
+};
+
+export type ExportMyDataErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ExportMyDataError = ExportMyDataErrors[keyof ExportMyDataErrors];
+
+export type ExportMyDataResponses = {
+    /**
+     * Success response with data
+     */
+    200: MyDataExport;
+};
+
+export type ExportMyDataResponse = ExportMyDataResponses[keyof ExportMyDataResponses];
+
+export type GetMyMembershipsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/memberships';
+};
+
+export type GetMyMembershipsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyMembershipsError = GetMyMembershipsErrors[keyof GetMyMembershipsErrors];
+
+export type GetMyMembershipsResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<MyMembership>;
+    };
+};
+
+export type GetMyMembershipsResponse = GetMyMembershipsResponses[keyof GetMyMembershipsResponses];
+
+export type GetMyNotificationPreferencesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notification-preferences';
+};
+
+export type GetMyNotificationPreferencesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyNotificationPreferencesError = GetMyNotificationPreferencesErrors[keyof GetMyNotificationPreferencesErrors];
+
+export type GetMyNotificationPreferencesResponses = {
+    /**
+     * Success response with data
+     */
+    200: Array<NotificationPreference>;
+};
+
+export type GetMyNotificationPreferencesResponse = GetMyNotificationPreferencesResponses[keyof GetMyNotificationPreferencesResponses];
+
+export type UpdateMyNotificationPreferencesData = {
+    body: UpdateNotificationPreferencesRequest;
+    path?: never;
+    query?: never;
+    url: '/notification-preferences';
+};
+
+export type UpdateMyNotificationPreferencesErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type UpdateMyNotificationPreferencesError = UpdateMyNotificationPreferencesErrors[keyof UpdateMyNotificationPreferencesErrors];
+
+export type UpdateMyNotificationPreferencesResponses = {
+    /**
+     * Success response with data
+     */
+    200: Array<NotificationPreference>;
+};
+
+export type UpdateMyNotificationPreferencesResponse = UpdateMyNotificationPreferencesResponses[keyof UpdateMyNotificationPreferencesResponses];
+
 export type ListNotificationsData = {
     body?: never;
     path?: never;
@@ -42156,6 +43751,72 @@ export type MarkNotificationAsReadResponses = {
 
 export type MarkNotificationAsReadResponse = MarkNotificationAsReadResponses[keyof MarkNotificationAsReadResponses];
 
+export type GetMyOfficerRoleData = {
+    body?: never;
+    path: {
+        /**
+         * Organisation ID to check officer status for
+         */
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/officer-role/{orgId}';
+};
+
+export type GetMyOfficerRoleErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyOfficerRoleError = GetMyOfficerRoleErrors[keyof GetMyOfficerRoleErrors];
+
+export type GetMyOfficerRoleResponses = {
+    /**
+     * Success response with data
+     */
+    200: OfficerRoleResponse;
+};
+
+export type GetMyOfficerRoleResponse = GetMyOfficerRoleResponses[keyof GetMyOfficerRoleResponses];
+
+export type ListOfficerTerms2Data = {
+    body?: never;
+    path: {
+        /**
+         * Organisation ID to list officer terms for
+         */
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/officer-terms/{orgId}';
+};
+
+export type ListOfficerTerms2Errors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListOfficerTerms2Error = ListOfficerTerms2Errors[keyof ListOfficerTerms2Errors];
+
+export type ListOfficerTerms2Responses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<OfficerTermRecord>;
+    };
+};
+
+export type ListOfficerTerms2Response = ListOfficerTerms2Responses[keyof ListOfficerTerms2Responses];
+
 export type ListPersonsData = {
     body?: never;
     path?: never;
@@ -42323,6 +43984,117 @@ export type UpdatePersonResponses = {
 };
 
 export type UpdatePersonResponse = UpdatePersonResponses[keyof UpdatePersonResponses];
+
+export type GetMyPrivacySettingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Organisation ID to scope the privacy settings lookup
+         */
+        orgId?: Uuid;
+    };
+    url: '/privacy';
+};
+
+export type GetMyPrivacySettingsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyPrivacySettingsError = GetMyPrivacySettingsErrors[keyof GetMyPrivacySettingsErrors];
+
+export type GetMyPrivacySettingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: PrivacySettings | Array<PrivacySettings>;
+};
+
+export type GetMyPrivacySettingsResponse = GetMyPrivacySettingsResponses[keyof GetMyPrivacySettingsResponses];
+
+export type UpdateMyPrivacySettingsData = {
+    body: UpdatePrivacySettingsRequest;
+    path?: never;
+    query?: never;
+    url: '/privacy';
+};
+
+export type UpdateMyPrivacySettingsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type UpdateMyPrivacySettingsError = UpdateMyPrivacySettingsErrors[keyof UpdateMyPrivacySettingsErrors];
+
+export type UpdateMyPrivacySettingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: PrivacySettings;
+};
+
+export type UpdateMyPrivacySettingsResponse = UpdateMyPrivacySettingsResponses[keyof UpdateMyPrivacySettingsResponses];
+
+export type GetOrganizationBySlugData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/public/org/{slug}';
+};
+
+export type GetOrganizationBySlugErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetOrganizationBySlugError = GetOrganizationBySlugErrors[keyof GetOrganizationBySlugErrors];
+
+export type GetOrganizationBySlugResponses = {
+    /**
+     * Success response with data
+     */
+    200: PublicOrganization;
+};
+
+export type GetOrganizationBySlugResponse = GetOrganizationBySlugResponses[keyof GetOrganizationBySlugResponses];
+
+export type MarkAllNotificationsReadData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/read-all';
+};
+
+export type MarkAllNotificationsReadErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type MarkAllNotificationsReadError = MarkAllNotificationsReadErrors[keyof MarkAllNotificationsReadErrors];
+
+export type MarkAllNotificationsReadResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarkAllReadResponse;
+};
+
+export type MarkAllNotificationsReadResponse = MarkAllNotificationsReadResponses[keyof MarkAllNotificationsReadResponses];
 
 export type ListReviewsData = {
     body?: never;
