@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: "Completed 02-03-PLAN.md task 1 — awaiting checkpoint:human-verify for audit module"
-last_updated: "2026-05-06T08:19:43.006Z"
+last_updated: "2026-05-06T00:30:00.000Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 19
-  completed_plans: 9
-  percent: 47
+  completed_plans: 10
+  percent: 53
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 04 (typespec-openapi-reconciliation) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-05-06
 
@@ -70,6 +70,8 @@ Recent decisions affecting current work:
 - Used customerOrMerchant OR-filter in repo for non-admin list scoping
 - Fixed lint-staged to use bunx + workspace eslint configs (was broken)
 - Used makeCtx + stubRepo pattern for billing tests (matches project test standard)
+- Renamed RefundRequest → DuesRefundRequest to avoid duplicate-symbol conflict with billing.tsp
+- organizationId used as @query (not @path) on listRosterMembers to match hand-wired route pattern
 
 ### Pending Todos
 
@@ -88,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-06T08:19:43.003Z
-Stopped at: Completed 02-03-PLAN.md task 1 — awaiting checkpoint:human-verify for audit module
+Last session: 2026-05-06T00:30:00.000Z
+Stopped at: Completed 04-02-PLAN.md — dues+membership TypeSpec custom endpoint coverage
 Resume file: None
