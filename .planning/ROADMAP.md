@@ -93,7 +93,7 @@ Plans:
   2. `cd specs/api && bun run build` produces OpenAPI including all custom module endpoints
   3. SDK auto-generates React Query hooks for all custom modules (no manual fetch calls)
   4. OpenAPI spec documents every endpoint in the system (base + custom)
-**Plans**: 7 plans
+**Plans**: 11 plans (7 original + 4 gap closure)
 Plans:
 - [x] 04-01-PLAN.md — Reconcile election enum + register elections/certificates in main.tsp (SPEC-05, SPEC-06)
 - [x] 04-02-PLAN.md — Author dues + membership custom operation TypeSpec (SPEC-01, SPEC-02)
@@ -102,6 +102,10 @@ Plans:
 - [x] 04-05-PLAN.md — Migrate dues + membership frontend to SDK hooks (SPEC-07)
 - [x] 04-06-PLAN.md — Migrate elections/certificates/events/training frontend to SDK hooks (SPEC-07)
 - [x] 04-07-PLAN.md — Migrate route files to SDK hooks + human verification (SPEC-07)
+- [ ] 04-08-PLAN.md — [GAP] Fix broken db import in 48 handler stubs + API typecheck (SPEC-08)
+- [ ] 04-09-PLAN.md — [GAP] Replace manual api.get in record-payment-form with SDK hook (SPEC-07)
+- [ ] 04-10-PLAN.md — [GAP] TypeSpec for persons/me, credits, officer-terms, notifs custom endpoints (SPEC-08)
+- [ ] 04-11-PLAN.md — [GAP] TypeSpec for announcements + admin + public + rebuild pipeline (SPEC-08)
 
 ### Phase 5: Account & Admin App Hardening
 **Goal**: Account and admin apps have E2E test coverage for critical user flows
@@ -172,7 +176,7 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 1. Billing Schema Completion | 0/2 | Not started | - |
 | 2. Audit Module Completion | 2/3 | Executing | - |
 | 3. Data Model Unification | 0/? | Not started | - |
-| 4. TypeSpec/OpenAPI Reconciliation | 7/7 | Complete | 2026-05-06 |
+| 4. TypeSpec/OpenAPI Reconciliation | 7/11 | Gap closure | 2026-05-06 |
 | 5. Account & Admin App Hardening | 0/? | Not started | - |
 | 6. CI/CD & DevOps Pipeline | 0/? | Not started | - |
 | 7. Shared Component Library | 0/? | Not started | - |
