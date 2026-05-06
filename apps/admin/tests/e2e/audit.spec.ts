@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { signInAndNavigate, signInAsAdmin } from './helpers/auth'
+import { API_BASE } from './helpers/test-config'
 
-const API_URL = 'http://localhost:7213'
+const API_URL = API_BASE
 
 test.describe('Audit event capture via API', () => {
   test('create operation produces audit event', async ({ page }) => {

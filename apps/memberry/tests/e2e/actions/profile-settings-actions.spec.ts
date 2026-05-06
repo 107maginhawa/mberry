@@ -2,10 +2,11 @@
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
 import { signIn } from '../helpers/auth'
+import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
 test.describe('Profile Actions', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('edit profile → change specialization → save → persists on reload', async ({ page }) => {

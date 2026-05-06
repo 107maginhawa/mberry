@@ -1,12 +1,13 @@
 // Business Rules: [BR-04] [BR-05] [BR-06] [BR-08] [BR-32]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
+import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Payments', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('heading "Dues & Payments" is visible', async ({ page }) => {

@@ -1,12 +1,13 @@
 // Business Rules: [BR-02] [BR-04] [BR-05] [BR-10] [BR-30] [BR-31]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
+import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Settings — Dues Config', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('dues config page shows form with amount field', async ({ page }) => {
@@ -25,7 +26,7 @@ test.describe('Officer Settings — Dues Config', () => {
 
 test.describe('Officer Settings — Fund Allocation', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('fund allocation page shows 3 funds totaling 100%', async ({ page }) => {
@@ -58,7 +59,7 @@ test.describe('Officer Settings — Fund Allocation', () => {
 
 test.describe('Officer Settings — Membership Categories', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('membership categories page renders', async ({ page }) => {
@@ -75,7 +76,7 @@ test.describe('Officer Settings — Membership Categories', () => {
 
 test.describe('Officer Settings — Chapters', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('chapters page shows empty state', async ({ page }) => {
@@ -90,7 +91,7 @@ test.describe('Officer Settings — Chapters', () => {
 
 test.describe('Officer Settings — Admin Features', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('[BR-10] admin features page renders', async ({ page }) => {
@@ -104,7 +105,7 @@ test.describe('Officer Settings — Admin Features', () => {
 
 test.describe('Officer Settings — Gateway', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('[BR-31] settings page renders gateway section', async ({ page }) => {

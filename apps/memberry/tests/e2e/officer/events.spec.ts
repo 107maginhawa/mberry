@@ -1,12 +1,13 @@
 // Business Rules: [BR-15] [BR-16] [BR-17] [BR-27]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
+import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Events', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('events page shows heading and stat cards', async ({ page }) => {

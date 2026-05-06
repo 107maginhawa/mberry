@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { TEST_PASSWORD } from './helpers/test-config'
 
 /**
  * Helper function to create a fresh test user via UI signup flow
@@ -8,7 +9,7 @@ async function signUpNewUser(page: any) {
   const timestamp = Date.now()
   const random = Math.floor(Math.random() * 10000)
   const email = `test-${timestamp}-${random}@example.com`
-  const password = 'TestPass123!'
+  const password = TEST_PASSWORD
   const name = `TestUser ${timestamp}` // Include space for lastName split
 
   // Navigate to signup page and wait for the form to fully hydrate. Without

@@ -3,10 +3,11 @@
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
 import { signIn } from '../helpers/auth'
+import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
-const OFFICER_EMAIL = 'test@memberry.ph'
-const OFFICER_PASSWORD = 'TestPass123!'
+const OFFICER_EMAIL = SEED_OFFICER_EMAIL
+const OFFICER_PASSWORD = TEST_PASSWORD
 
 test.describe('Membership Actions', () => {
   test.beforeEach(async ({ page }) => {

@@ -2,12 +2,13 @@
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
 import { signIn } from '../helpers/auth'
+import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Dues & Payments Actions', () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
   })
 
   test('payments page shows real payment data', async ({ page }) => {

@@ -1,9 +1,10 @@
 // Business Rules: [BR-06] [BR-07]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
+import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
-const MEMBER_EMAIL = 'member@memberry.ph'
-const MEMBER_PASSWORD = 'TestPass123!'
+const MEMBER_EMAIL = SEED_MEMBER_EMAIL
+const MEMBER_PASSWORD = TEST_PASSWORD
 
 test.describe('Member Payments (/my/payments)', () => {
   test('shows "My Payments" heading', async ({ page }) => {

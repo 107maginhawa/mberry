@@ -1,6 +1,7 @@
 // Business Rules: Security flow coverage for Phase 5 hardening
 import { test, expect } from '@playwright/test'
 import { signIn } from './helpers/auth'
+import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
 
 test.describe('Security Flows', () => {
   test('unauthenticated user cannot access member dashboard', async ({ page }) => {
@@ -20,7 +21,7 @@ test.describe('Security Flows', () => {
   })
 
   test('authenticated user can access protected routes', async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto('/my/dashboard')
     await page.waitForLoadState('networkidle')
     // Should NOT redirect to auth

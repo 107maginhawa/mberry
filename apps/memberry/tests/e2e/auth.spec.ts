@@ -1,6 +1,7 @@
 // Business Rules: [BR-21] [BR-24] [BR-25] [BR-26]
 import { test, expect } from '@playwright/test'
 import { signIn } from './helpers/auth'
+import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
 
 /**
  * Wave A: Auth Foundation E2E Tests
@@ -25,7 +26,7 @@ test.describe('Sign-up flow', () => {
     await nameInput.fill('Test Signup User')
     await emailInput.fill(email)
     await passwordInput.click()
-    await passwordInput.pressSequentially('TestPass123!', { delay: 10 })
+    await passwordInput.pressSequentially(TEST_PASSWORD, { delay: 10 })
 
     // Submit
     const submit = page.getByRole('button', { name: /create an account/i })
@@ -49,7 +50,7 @@ test.describe('Sign-up flow', () => {
     await page.getByLabel('Email', { exact: true }).fill(email)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially('TestPass123!', { delay: 10 })
+    await pw.pressSequentially(TEST_PASSWORD, { delay: 10 })
     await page.getByRole('button', { name: /create an account/i }).click()
     await page.waitForTimeout(3000)
 
@@ -61,7 +62,7 @@ test.describe('Sign-up flow', () => {
     await page.getByLabel('Email', { exact: true }).fill(email)
     const pw2 = page.getByLabel('Password', { exact: true })
     await pw2.click()
-    await pw2.pressSequentially('TestPass123!', { delay: 10 })
+    await pw2.pressSequentially(TEST_PASSWORD, { delay: 10 })
     await page.getByRole('button', { name: /create an account/i }).click()
 
     // Should show an error — user already exists
@@ -73,7 +74,7 @@ test.describe('Sign-up flow', () => {
 
 test.describe('Sign-in flow', () => {
   let testEmail: string
-  const testPassword = 'TestPass123!'
+  const testPassword = TEST_PASSWORD
 
   test.beforeAll(async ({ browser }) => {
     // Create a user to sign in with
@@ -169,7 +170,7 @@ test.describe('Auth guard', () => {
 
 test.describe('Multi-org & Invitations', () => {
   test('[BR-21] dashboard shows organization membership cards', async ({ page }) => {
-    await signIn(page, 'test@memberry.ph', 'TestPass123!')
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto('/dashboard')
     await page.waitForLoadState('networkidle')
     // Member should see at least one org card

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { signUp, signIn } from './helpers/auth'
+import { TEST_PASSWORD } from './helpers/test-config'
 
 test.describe('Profile page (/my/profile)', () => {
   let credentials: { email: string; password: string; name: string }
@@ -27,7 +28,7 @@ test.describe('Profile page (/my/profile)', () => {
     await page.getByLabel('Email', { exact: true }).fill(freshEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially('TestPass123!', { delay: 10 })
+    await pw.pressSequentially(TEST_PASSWORD, { delay: 10 })
     await page.getByRole('button', { name: /create an account/i }).click()
     await page.waitForTimeout(3000)
 

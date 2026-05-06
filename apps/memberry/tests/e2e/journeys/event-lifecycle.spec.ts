@@ -1,11 +1,12 @@
 // Business Rules: [BR-15] [BR-27]
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
+import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
-const MEMBER_EMAIL = 'member@memberry.ph'
-const MEMBER_PASSWORD = 'TestPass123!'
-const OFFICER_EMAIL = 'test@memberry.ph'
-const OFFICER_PASSWORD = 'TestPass123!'
+const MEMBER_EMAIL = SEED_MEMBER_EMAIL
+const MEMBER_PASSWORD = TEST_PASSWORD
+const OFFICER_EMAIL = SEED_OFFICER_EMAIL
+const OFFICER_PASSWORD = TEST_PASSWORD
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Event lifecycle: officer manages events, member views registrations', () => {
