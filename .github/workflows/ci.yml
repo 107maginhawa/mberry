@@ -345,3 +345,5 @@ jobs:
         run: bun --filter @monobase/api-ts run generate
       - name: Run unit tests
         run: cd services/api-ts && bun test
+      - name: Run frontend unit tests
+        run: cd apps/memberry && bun run test
