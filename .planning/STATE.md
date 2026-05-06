@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Completed 02-03-PLAN.md task 1 — awaiting checkpoint:human-verify for audit module"
-last_updated: "2026-05-06T08:30:00.000Z"
+stopped_at: "Completed 04-05-PLAN.md — dues and membership components migrated to SDK hooks"
+last_updated: "2026-05-06T12:00:00.000Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 9
@@ -79,6 +79,8 @@ Recent decisions affecting current work:
 - mutationFn extracted from SDK mutation options to avoid throwOnError generic conflict in useMutation
 - Pagination uses totalCount field (not total) in SDK PaginationMeta type
 - Election status transitions map: nominations_open→openElectionNominationsMutation, voting_open→openElectionVotingMutation, published→certifyElectionMutation
+- Cast SDK data to any where TypeSpec type diverges from hand-wired endpoint runtime shape (dues-config, financial-dashboard, gateway-config, roster-member, category)
+- application-list deny uses denialReason field (not reason) per MembershipApplicationDenyRequest
 
 ### Pending Todos
 
@@ -97,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-06T00:30:00.000Z
-Stopped at: Completed 04-06-PLAN.md — 10 feature components migrated to SDK hooks (elections, certificates, events, training)
+Last session: 2026-05-06T12:00:00.000Z
+Stopped at: Completed 04-05-PLAN.md — dues and membership components migrated to SDK hooks (10 files)
 Resume file: None

@@ -99,7 +99,7 @@ Plans:
 - [x] 04-02-PLAN.md — Author dues + membership custom operation TypeSpec (SPEC-01, SPEC-02)
 - [x] 04-03-PLAN.md — Author events + training custom operation TypeSpec (SPEC-03, SPEC-04)
 - [ ] 04-04-PLAN.md — Build pipeline + SDK generation + decommission hand-wired routes (SPEC-07, SPEC-08)
-- [ ] 04-05-PLAN.md — Migrate dues + membership frontend to SDK hooks (SPEC-07)
+- [x] 04-05-PLAN.md — Migrate dues + membership frontend to SDK hooks (SPEC-07)
 - [ ] 04-06-PLAN.md — Migrate elections/certificates/events/training frontend to SDK hooks (SPEC-07)
 - [ ] 04-07-PLAN.md — Migrate route files to SDK hooks + human verification (SPEC-07)
 
