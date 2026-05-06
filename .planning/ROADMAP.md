@@ -154,11 +154,11 @@ Plans:
 **Plans**: 3 plans
 
 **Wave 1**
-- [ ] 07-01-PLAN.md — Create packages/ui scaffold + extract 20+ shadcn components from account (UINF-01)
-- [ ] 07-02-PLAN.md — Ladle component preview with 8+ stories (UINF-02)
+- [x] 07-01-PLAN.md — Create packages/ui scaffold + extract 20+ shadcn components from account (UINF-01)
+- [x] 07-02-PLAN.md — Ladle component preview with 8+ stories (UINF-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 07-03-PLAN.md — Migrate all three apps to import from @monobase/ui, delete local duplicates (UINF-03)
+- [x] 07-03-PLAN.md — Migrate all three apps to import from @monobase/ui, delete local duplicates (UINF-03)
 
 **UI hint**: yes
 
