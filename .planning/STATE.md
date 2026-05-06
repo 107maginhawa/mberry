@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: "Completed 02-03-PLAN.md task 1 — awaiting checkpoint:human-verify for audit module"
-last_updated: "2026-05-06T00:30:00.000Z"
+last_updated: "2026-05-06T08:30:00.000Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 9
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 04 (typespec-openapi-reconciliation) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-05-06
 
@@ -74,6 +74,8 @@ Recent decisions affecting current work:
 - organizationId used as @query (not @path) on listRosterMembers to match hand-wired route pattern
 - EventLifecycleService added as separate interface (not merged into EventManagement) to avoid duplicating cancelEvent
 - checkInCustomEvent reuses CheckInCreateRequest; completeCustomTraining reuses TrainingEnrollmentCompleteRequest
+- Communications route kept hand-wired in app.ts (announcements not in Phase 4 TypeSpec scope)
+- registerDuesJobs import retained — still invoked at app startup despite dues route decommission
 
 ### Pending Todos
 
@@ -93,5 +95,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-06T00:30:00.000Z
-Stopped at: Completed 04-03-PLAN.md — events+training TypeSpec lifecycle service coverage
+Stopped at: Completed 04-04-PLAN.md — build pipeline run, 6 hand-wired routes decommissioned
 Resume file: None
