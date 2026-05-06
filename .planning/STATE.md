@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Completed 04-05-PLAN.md — dues and membership components migrated to SDK hooks"
-last_updated: "2026-05-06T12:00:00.000Z"
+stopped_at: "Completed 04-07-PLAN.md Task 1 — route files migrated to SDK hooks; awaiting human-verify checkpoint"
+last_updated: "2026-05-06T13:00:00.000Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 9
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 04 (typespec-openapi-reconciliation) — EXECUTING
-Plan: 6 of 7
-Status: Ready to execute
+Plan: 7 of 7 (checkpoint pending human-verify)
+Status: Awaiting checkpoint
 Last activity: 2026-05-06
 
 Progress: [██░░░░░░░░] 22%
@@ -81,6 +81,9 @@ Recent decisions affecting current work:
 - Election status transitions map: nominations_open→openElectionNominationsMutation, voting_open→openElectionVotingMutation, published→certifyElectionMutation
 - Cast SDK data to any where TypeSpec type diverges from hand-wired endpoint runtime shape (dues-config, financial-dashboard, gateway-config, roster-member, category)
 - application-list deny uses denialReason field (not reason) per MembershipApplicationDenyRequest
+- credits.tsx kept manual api.get — /api/credit-compliance not in TypeSpec (not one of 6 in-scope modules)
+- generateDuesInvoicesForOrg requires periodStart/periodEnd — defaulted to full calendar year for reminder batch
+- checkInCustomEventMutation requires registrationId+personId in body — mutate call changed to pass full reg object
 
 ### Pending Todos
 
@@ -99,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-06T12:00:00.000Z
-Stopped at: Completed 04-05-PLAN.md — dues and membership components migrated to SDK hooks (10 files)
+Last session: 2026-05-06T13:00:00.000Z
+Stopped at: 04-07 Task 1 complete (16 route files migrated); checkpoint:human-verify pending
 Resume file: None
