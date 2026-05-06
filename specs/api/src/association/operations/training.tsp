@@ -154,8 +154,6 @@ model CourseModule {
 
 @doc("An instructor-led training event with CE credit tracking")
 model Training extends BaseEntity {
-  @doc("Tenant this training belongs to")
-  tenantId: string;
 
   @doc("Display title")
   @minLength(1)
@@ -213,8 +211,6 @@ model Training extends BaseEntity {
 
 @doc("Enrollment of a person in an instructor-led training session")
 model TrainingEnrollment extends BaseEntity {
-  @doc("Tenant this enrollment belongs to")
-  tenantId: string;
 
   @doc("Training session enrolled in")
   trainingId: string;
@@ -240,8 +236,6 @@ model TrainingEnrollment extends BaseEntity {
 
 @doc("A self-paced online course composed of ordered modules")
 model Course extends BaseEntity {
-  @doc("Tenant this course belongs to")
-  tenantId: string;
 
   @doc("Course display title")
   @minLength(1)
@@ -272,8 +266,6 @@ model Course extends BaseEntity {
 
 @doc("A learner's enrollment and progress record for an online course")
 model CourseEnrollment extends BaseEntity {
-  @doc("Tenant this enrollment belongs to")
-  tenantId: string;
 
   @doc("Course enrolled in")
   courseId: string;
@@ -306,8 +298,6 @@ model CourseEnrollment extends BaseEntity {
 
 @doc("A quiz attempt record for a specific module within a course")
 model QuizAttempt extends BaseEntity {
-  @doc("Tenant this attempt belongs to")
-  tenantId: string;
 
   @doc("Course containing the quiz module")
   courseId: string;

@@ -8,7 +8,7 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 
 const fakeApplication = {
   id: 'app-1',
-  tenantId: 'tenant-1',
+  organizationId: 'tenant-1',
   orgId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',

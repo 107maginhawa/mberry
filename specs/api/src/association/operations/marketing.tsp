@@ -135,7 +135,7 @@ model SegmentRule {
 @doc("A marketing campaign definition")
 model MarketingCampaign extends BaseEntity {
   @doc("Tenant this campaign belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Campaign display name")
   @minLength(1)
@@ -179,7 +179,7 @@ model MarketingCampaign extends BaseEntity {
 @doc("A dynamic audience segment for targeting campaigns")
 model AudienceSegment extends BaseEntity {
   @doc("Tenant this segment belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Segment display name")
   @minLength(1)
@@ -200,7 +200,7 @@ model AudienceSegment extends BaseEntity {
 @doc("A single step within a campaign sequence (drip programme)")
 model CampaignSequence extends BaseEntity {
   @doc("Tenant this sequence step belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Parent campaign")
   campaignId: string;
@@ -226,7 +226,7 @@ model CampaignSequence extends BaseEntity {
 @doc("An individual message send record within a campaign")
 model CampaignSendRecord extends BaseEntity {
   @doc("Tenant this send record belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Parent campaign")
   campaignId: string;
@@ -248,7 +248,7 @@ model CampaignSendRecord extends BaseEntity {
 @doc("A contact suppressed from receiving marketing communications")
 model SuppressionList extends BaseEntity {
   @doc("Tenant this suppression entry belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Suppressed email address")
   @format("email")

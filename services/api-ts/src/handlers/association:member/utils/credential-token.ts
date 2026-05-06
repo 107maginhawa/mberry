@@ -1,6 +1,6 @@
 /**
  * Credential verification token utilities.
- * Encodes credentialId + tenantId into HMAC-signed token for public credential verification.
+ * Encodes credentialId + organizationId into HMAC-signed token for public credential verification.
  * Reuses the payment-token.ts pattern.
  */
 
@@ -8,17 +8,17 @@ import { createHmac } from 'crypto';
 
 interface CredentialTokenPayload {
   credentialId: string;
-  tenantId: string;
+  organizationId: string;
   issuedAt: number;
 }
 
 /**
  * Create a signed credential verification token.
  */
-export function createCredentialToken(credentialId: string, tenantId: string, secret: string): string {
+export function createCredentialToken(credentialId: string, organizationId: string, secret: string): string {
   const payload: CredentialTokenPayload = {
     credentialId,
-    tenantId,
+    organizationId,
     issuedAt: Date.now(),
   };
   const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');

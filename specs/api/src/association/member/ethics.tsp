@@ -204,7 +204,7 @@ model COIDisclosure {
 @doc("An ethics complaint filed against a member")
 model EthicsComplaint extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the complainant (null for anonymous complaints where policy allows)")
   complainantId?: string;
@@ -236,7 +236,7 @@ model EthicsComplaint extends BaseEntity {
 @doc("A peer review panel convened to deliberate on an ethics complaint")
 model PeerReviewPanel extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the complaint this panel is reviewing")
   complaintId: string;
@@ -257,7 +257,7 @@ model PeerReviewPanel extends BaseEntity {
 @doc("A disciplinary action imposed on a member following an ethics review")
 model DisciplinaryAction extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the complaint that led to this action")
   complaintId: string;
@@ -286,7 +286,7 @@ model DisciplinaryAction extends BaseEntity {
 @doc("A public or internal record of a sanction imposed on a member")
 model SanctionRecord extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the sanctioned member")
   personId: string;
@@ -315,7 +315,7 @@ model SanctionRecord extends BaseEntity {
 @doc("A conflict-of-interest attestation submitted by a member")
 model COIAttestation extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the member submitting the attestation")
   personId: string;

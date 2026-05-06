@@ -150,8 +150,6 @@ enum PositionStatus {
 
 @doc("An elected or appointed position within the association hierarchy")
 model Position extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("Official title of the position")
   @minLength(1)
@@ -185,8 +183,6 @@ model Position extends BaseEntity {
 
 @doc("An election event for one or more positions")
 model Election extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the organization running the election")
   organizationId: string;
@@ -227,8 +223,6 @@ model Election extends BaseEntity {
 
 @doc("A candidate nominated for a position in an election")
 model Candidate extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the election this candidacy belongs to")
   electionId: string;
@@ -259,8 +253,6 @@ model Candidate extends BaseEntity {
 
 @doc("A single ballot cast by a voter in an election")
 model Ballot extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the election this ballot was cast in")
   electionId: string;
@@ -290,8 +282,6 @@ model Ballot extends BaseEntity {
 
 @doc("A term served by a person in an elected or appointed position")
 model OfficerTerm extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the position held")
   positionId: string;
@@ -320,8 +310,6 @@ model OfficerTerm extends BaseEntity {
 
 @doc("A standing or ad-hoc committee of the association")
 model Committee extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("Display name of the committee")
   @minLength(1)
@@ -351,8 +339,6 @@ model Committee extends BaseEntity {
 
 @doc("A seat held by a person on a committee")
 model CommitteeSeat extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the committee")
   committeeId: string;
@@ -375,8 +361,6 @@ model CommitteeSeat extends BaseEntity {
 
 @doc("A scheduled or completed committee meeting")
 model CommitteeMeeting extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the committee holding the meeting")
   committeeId: string;
@@ -398,8 +382,6 @@ model CommitteeMeeting extends BaseEntity {
 
 @doc("A motion introduced during a committee meeting")
 model Motion extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the meeting in which the motion was introduced")
   meetingId: string;
@@ -421,8 +403,6 @@ model Motion extends BaseEntity {
 
 @doc("Approved minutes documenting what occurred at a committee meeting")
 model MeetingMinutes extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the meeting these minutes document")
   meetingId: string;
@@ -446,8 +426,6 @@ model MeetingMinutes extends BaseEntity {
 
 @doc("A board-level meeting of the association's governing body")
 model BoardMeeting extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the organization whose board is meeting")
   organizationId: string;
@@ -471,8 +449,6 @@ model BoardMeeting extends BaseEntity {
 
 @doc("A formal resolution adopted (or considered) by the board")
 model BoardResolution extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the board meeting at which this resolution was presented")
   boardMeetingId: string;

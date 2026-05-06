@@ -7,7 +7,7 @@ import { MembershipRepository } from './repos/membership.repo';
 
 const fakeMember = {
   id: 'mem-1',
-  tenantId: 'org-1',
+  organizationId: 'org-1',
   orgId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
@@ -81,7 +81,7 @@ describe('addMember', () => {
 
     await addMember(ctx);
     expect(captured.orgId).toBe('org-99');
-    expect(captured.tenantId).toBe('org-99');
+    expect(captured.organizationId).toBe('org-99');
   });
 
   test('defaults startDate to today when not provided', async () => {

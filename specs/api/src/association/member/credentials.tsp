@@ -114,7 +114,7 @@ enum CredentialTemplateStatus {
 @doc("A reusable design template for generating digital credentials")
 model CredentialTemplate extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Display name of the template")
   @minLength(1)
@@ -139,7 +139,7 @@ model CredentialTemplate extends BaseEntity {
 @doc("A digital credential issued to a specific member")
 model DigitalCredential extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the person this credential was issued to")
   personId: string;
@@ -184,7 +184,7 @@ model DigitalCredential extends BaseEntity {
 @doc("A log entry recording a credential verification attempt")
 model CredentialVerificationLog extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the credential that was verified")
   credentialId: string;
@@ -203,7 +203,7 @@ model CredentialVerificationLog extends BaseEntity {
 @doc("A professional license held by a member and tracked by the association")
 model ProfessionalLicense extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the person holding the license")
   personId: string;
@@ -251,7 +251,7 @@ model ProfessionalLicense extends BaseEntity {
 @doc("An alert notifying a member that one of their licenses is approaching expiry")
 model LicenseRenewalAlert extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the professional license triggering this alert")
   licenseId: string;

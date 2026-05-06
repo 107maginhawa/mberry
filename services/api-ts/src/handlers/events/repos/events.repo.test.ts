@@ -16,7 +16,7 @@ import { EventsRepository } from './events.repo';
 function makeEvent(overrides: Record<string, any> = {}) {
   return {
     id: 'evt-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     organizationId: 'org-1',
     title: 'Annual General Assembly',
     description: 'Yearly meeting',
@@ -42,7 +42,7 @@ function makeEvent(overrides: Record<string, any> = {}) {
 function makeRegistration(overrides: Record<string, any> = {}) {
   return {
     id: 'reg-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     eventId: 'evt-1',
     personId: 'person-1',
     status: 'confirmed',
@@ -61,7 +61,7 @@ function makeRegistration(overrides: Record<string, any> = {}) {
 function makeCheckIn(overrides: Record<string, any> = {}) {
   return {
     id: 'ci-1',
-    tenantId: 'org-1',
+    organizationId: 'org-1',
     eventId: 'evt-1',
     personId: 'person-1',
     method: 'qr',
@@ -239,7 +239,7 @@ describe('EventsRepository.create', () => {
     const repo = new EventsRepository(db as any);
 
     const result = await repo.create({
-      tenantId: 'org-1',
+      organizationId: 'org-1',
       organizationId: 'org-1',
       title: 'Annual General Assembly',
       description: 'Yearly meeting',
@@ -324,7 +324,7 @@ describe('EventsRepository.register', () => {
     const repo = new EventsRepository(db as any);
 
     const result = await repo.register({
-      tenantId: 'org-1',
+      organizationId: 'org-1',
       eventId: 'evt-1',
       personId: 'person-1',
       status: 'confirmed',
@@ -348,7 +348,7 @@ describe('EventsRepository.checkIn', () => {
     const repo = new EventsRepository(db as any);
 
     const result = await repo.checkIn({
-      tenantId: 'org-1',
+      organizationId: 'org-1',
       eventId: 'evt-1',
       personId: 'person-1',
       method: 'qr',

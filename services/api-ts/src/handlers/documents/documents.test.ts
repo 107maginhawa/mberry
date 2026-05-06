@@ -15,9 +15,9 @@ describe('Documents - Auth Guards', () => {
     expect(response.status).toBe(401);
   });
 
-  test('createDocument returns 403 without tenantId', async () => {
+  test('createDocument returns 403 without organizationId', async () => {
     const { createDocument } = await import('./createDocument');
-    const ctx = makeCtx({ tenantId: null, _body: { title: 'Test', fileName: 'test.pdf', mimeType: 'application/pdf', size: 1024, storageKey: 'key', ownerId: 'o1', ownerType: 'person', accessLevel: 'tenantOnly' } });
+    const ctx = makeCtx({ organizationId: null, _body: { title: 'Test', fileName: 'test.pdf', mimeType: 'application/pdf', size: 1024, storageKey: 'key', ownerId: 'o1', ownerType: 'person', accessLevel: 'tenantOnly' } });
     const response = await createDocument(ctx);
     expect(response.status).toBe(403);
   });
@@ -62,9 +62,9 @@ describe('Documents - Versioning', () => {
     expect(response.status).toBe(401);
   });
 
-  test('uploadNewDocumentVersion returns 403 without tenantId', async () => {
+  test('uploadNewDocumentVersion returns 403 without organizationId', async () => {
     const { uploadNewDocumentVersion } = await import('./uploadNewDocumentVersion');
-    const ctx = makeCtx({ tenantId: null, _params: { documentId: 'x' }, _body: { fileName: 'v2.pdf', size: 2048, storageKey: 'key2' } });
+    const ctx = makeCtx({ organizationId: null, _params: { documentId: 'x' }, _body: { fileName: 'v2.pdf', size: 2048, storageKey: 'key2' } });
     const response = await uploadNewDocumentVersion(ctx);
     expect(response.status).toBe(403);
   });
@@ -150,9 +150,9 @@ describe('Document Tags', () => {
     expect(response.status).toBe(401);
   });
 
-  test('createDocumentTag returns 403 without tenantId', async () => {
+  test('createDocumentTag returns 403 without organizationId', async () => {
     const { createDocumentTag } = await import('./createDocumentTag');
-    const ctx = makeCtx({ tenantId: null, _body: { name: 'Important' } });
+    const ctx = makeCtx({ organizationId: null, _body: { name: 'Important' } });
     const response = await createDocumentTag(ctx);
     expect(response.status).toBe(403);
   });

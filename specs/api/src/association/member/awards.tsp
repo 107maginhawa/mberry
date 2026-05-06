@@ -144,7 +144,7 @@ enum GrantApplicantType {
 @doc("An award, scholarship, fellowship, or grant program offered by the association")
 model AwardProgram extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Display name of the program")
   @minLength(1)
@@ -191,7 +191,7 @@ model AwardProgram extends BaseEntity {
 @doc("A nomination submitted for an award program")
 model AwardNomination extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the award program")
   programId: string;
@@ -216,7 +216,7 @@ model AwardNomination extends BaseEntity {
 @doc("A recipient record for an award program cycle")
 model AwardRecipient extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the award program")
   programId: string;
@@ -252,7 +252,7 @@ model AwardRecipient extends BaseEntity {
 @doc("A grant application submitted to an award program")
 model GrantApplication extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the grant program this application is for")
   programId: string;
@@ -296,7 +296,7 @@ model GrantApplication extends BaseEntity {
 @doc("A progress report submitted by a grant recipient")
 model GrantProgressReport extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the grant application this report corresponds to")
   grantApplicationId: string;

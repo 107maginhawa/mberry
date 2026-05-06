@@ -63,7 +63,7 @@ enum TransferStatus {
 @doc("Affiliation between a person and a chapter within the association")
 model ChapterAffiliation extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the affiliated member")
   personId: string;
@@ -87,7 +87,7 @@ model ChapterAffiliation extends BaseEntity {
 @doc("Request to transfer a member's primary chapter affiliation from one chapter to another")
 model AffiliationTransfer extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the member requesting the transfer")
   personId: string;
@@ -120,7 +120,7 @@ model AffiliationTransfer extends BaseEntity {
 @doc("Royalty split configuration defining how dues revenue is divided between the national organization and a chapter")
 model RoyaltySplit extends BaseEntity {
   @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
+  organizationId: string;
 
   @doc("ID of the membership this split applies to")
   membershipId: string;

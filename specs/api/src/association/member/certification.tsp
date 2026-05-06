@@ -167,8 +167,6 @@ model CertRequirement {
 
 @doc("A professional certification program offered by the association")
 model CertificationProgram extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("Display name of the certification program")
   @minLength(1)
@@ -201,8 +199,6 @@ model CertificationProgram extends BaseEntity {
 
 @doc("A member's enrollment record in a certification program")
 model CertificationEnrollment extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the enrolled member")
   personId: string;
@@ -229,8 +225,6 @@ model CertificationEnrollment extends BaseEntity {
 
 @doc("The result of a certification examination attempt")
 model ExamResult extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the enrollment this exam result belongs to")
   enrollmentId: string;
@@ -259,8 +253,6 @@ model ExamResult extends BaseEntity {
 
 @doc("An organization accredited to deliver continuing education activities")
 model AccreditedProvider extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the provider organization")
   organizationId: string;
@@ -294,8 +286,6 @@ model AccreditedProvider extends BaseEntity {
 
 @doc("A continuing education credit cycle defining the period and credit requirements for a member")
 model CreditCycle extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the member this cycle belongs to")
   personId: string;
@@ -324,8 +314,6 @@ model CreditCycle extends BaseEntity {
 
 @doc("A single CE credit entry awarded to a member for a specific activity")
 model CreditEntry extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the member receiving the credit")
   personId: string;

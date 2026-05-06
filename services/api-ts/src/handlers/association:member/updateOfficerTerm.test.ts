@@ -8,7 +8,7 @@ import { NotFoundError } from '@/core/errors';
 
 const existingTerm = {
   id: 'term-1',
-  tenantId: 'tenant-1',
+  organizationId: 'tenant-1',
   positionId: 'pos-1',
   personId: 'person-1',
   organizationId: 'org-1',
@@ -101,15 +101,15 @@ describe('updateOfficerTerm', () => {
   });
 
   test('throws NotFoundError when term belongs to a different tenant', async () => {
-    const termInOtherTenant = { ...existingTerm, tenantId: 'tenant-99' };
+    const termInOtherTenant = { ...existingTerm, organizationId: 'tenant-99' };
     mocks = stubRepo(OfficerTermRepository, {
       findById: async () => termInOtherTenant,
       update: async () => termInOtherTenant,
     });
 
-    // ctx uses tenantId: 'tenant-1' by default — mismatch should trigger NotFoundError
+    // ctx uses organizationId: 'tenant-1' by default — mismatch should trigger NotFoundError
     const ctx = makeCtx({
-      tenantId: 'tenant-1',
+      organizationId: 'tenant-1',
       _params: { termId: 'term-1' },
       _body: { status: 'completed' },
     });
@@ -123,8 +123,8 @@ describe('updateOfficerTerm', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 when tenantId is missing', async () => {
-    const ctx = makeCtx({ user: { id: 'u1', role: 'user' }, tenantId: null });
+  test('returns 403 when organizationId is missing', async () => {
+    const ctx = makeCtx({ user: { id: 'u1', role: 'user' }, organizationId: null });
     const response = await updateOfficerTerm(ctx);
     expect(response.status).toBe(403);
   });

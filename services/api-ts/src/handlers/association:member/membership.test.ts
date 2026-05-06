@@ -36,8 +36,8 @@ describe('Membership Tier CRUD', () => {
     expect(response.status).toBe(401);
   });
 
-  test('createMembershipTier returns 403 without tenantId', async () => {
-    const ctx = makeCtx({ tenantId: null });
+  test('createMembershipTier returns 403 without organizationId', async () => {
+    const ctx = makeCtx({ organizationId: null });
     const response = await createMembershipTier(ctx);
     expect(response.status).toBe(403);
   });
@@ -254,9 +254,9 @@ describe('membershipCategory handlers', () => {
     expect(response.status).toBe(401);
   });
 
-  test('createMembershipCategory requires tenantId', async () => {
+  test('createMembershipCategory requires organizationId', async () => {
     const { createMembershipCategory } = await import('./createMembershipCategory');
-    const ctx = makeCtx({ user: { id: 'u1' }, tenantId: null });
+    const ctx = makeCtx({ user: { id: 'u1' }, organizationId: null });
     const response = await createMembershipCategory(ctx);
     expect(response.status).toBe(403);
   });
@@ -268,9 +268,9 @@ describe('membershipCategory handlers', () => {
     expect(response.status).toBe(401);
   });
 
-  test('listMembershipCategories requires tenantId', async () => {
+  test('listMembershipCategories requires organizationId', async () => {
     const { listMembershipCategories } = await import('./listMembershipCategories');
-    const ctx = makeCtx({ user: { id: 'u1' }, tenantId: null });
+    const ctx = makeCtx({ user: { id: 'u1' }, organizationId: null });
     const response = await listMembershipCategories(ctx);
     expect(response.status).toBe(403);
   });

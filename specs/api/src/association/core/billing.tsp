@@ -174,9 +174,6 @@ model Invoice extends AssociationBaseEntity {
   @doc("Person this invoice was issued to (optional; use organizationId for org billing).")
   personId?: string;
 
-  @doc("Organisation this invoice was issued to (optional).")
-  organizationId?: string;
-
   @doc("Current lifecycle status.")
   status: InvoiceStatus;
 

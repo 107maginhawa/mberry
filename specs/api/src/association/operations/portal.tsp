@@ -42,7 +42,7 @@ enum PortalUserStatus {
 @doc("A member's self-service portal account")
 model PortalUser extends BaseEntity {
   @doc("Tenant this portal user belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Linked person record")
   personId: string;
@@ -70,7 +70,7 @@ model PortalUser extends BaseEntity {
 @doc("An inbox item linking a portal user to a system or direct message")
 model PortalInbox extends BaseEntity {
   @doc("Tenant this inbox item belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Portal user who owns this inbox item")
   userId: string;

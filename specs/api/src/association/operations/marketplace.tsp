@@ -115,7 +115,7 @@ enum ResourceStatus {
 @doc("An organization that provides member benefit offers")
 model BenefitPartner extends BaseEntity {
   @doc("Tenant this partner belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Partner organization display name")
   @minLength(1)
@@ -147,7 +147,7 @@ model BenefitPartner extends BaseEntity {
 @doc("A member discount or benefit offer from a partner")
 model BenefitOffer extends BaseEntity {
   @doc("Tenant this offer belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Partner providing this offer")
   partnerId: string;
@@ -187,7 +187,7 @@ model BenefitOffer extends BaseEntity {
 @doc("A record of a member redeeming a benefit offer")
 model BenefitRedemption extends BaseEntity {
   @doc("Tenant this redemption belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Offer that was redeemed")
   offerId: string;
@@ -206,7 +206,7 @@ model BenefitRedemption extends BaseEntity {
 @doc("A knowledge resource in the association library")
 model Resource extends BaseEntity {
   @doc("Tenant this resource belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Resource title")
   @minLength(1)
@@ -258,7 +258,7 @@ model Resource extends BaseEntity {
 @doc("A member's bookmark on a knowledge resource")
 model Bookmark extends BaseEntity {
   @doc("Tenant this bookmark belongs to")
-  tenantId: string;
+  organizationId: string;
 
   @doc("Bookmarked resource")
   resourceId: string;

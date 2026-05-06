@@ -4,7 +4,7 @@
  * ALL test files should import from here. Do NOT define local stubs.
  *
  * Usage:
- *   const ctx = makeCtx({ _body: { name: 'Test' }, tenantId: 'tenant-1' });
+ *   const ctx = makeCtx({ _body: { name: 'Test' }, organizationId: 'tenant-1' });
  *   const response = await someHandler(ctx);
  *   expect(response.status).toBe(201);
  */
@@ -45,7 +45,7 @@ export function makeCtx(overrides: Record<string, any> = {}) {
   const vars: Record<string, any> = {
     user,
     session: user ? { id: 'session-1', userId: user.id, user } : null,
-    tenantId: 'tenant-1',
+    organizationId: 'tenant-1',
     orgId: 'org-1',
     database: {},
     logger: null,

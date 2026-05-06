@@ -17,9 +17,9 @@ describe('Credential Templates', () => {
     expect(response.status).toBe(401);
   });
 
-  test('createCredentialTemplate returns 403 without tenantId', async () => {
+  test('createCredentialTemplate returns 403 without organizationId', async () => {
     const { createCredentialTemplate } = await import('./createCredentialTemplate');
-    const ctx = makeCtx({ tenantId: null, _body: { name: 'Test', type: 'certificate', status: 'active' } });
+    const ctx = makeCtx({ organizationId: null, _body: { name: 'Test', type: 'certificate', status: 'active' } });
     const response = await createCredentialTemplate(ctx);
     expect(response.status).toBe(403);
   });
@@ -70,9 +70,9 @@ describe('[BR-19] Digital Credentials', () => {
     expect(response.status).toBe(401);
   });
 
-  test('issueDigitalCredential returns 403 without tenantId', async () => {
+  test('issueDigitalCredential returns 403 without organizationId', async () => {
     const { issueDigitalCredential } = await import('./issueDigitalCredential');
-    const ctx = makeCtx({ tenantId: null, _body: { personId: 'p1', templateId: 't1', credentialNumber: 'CN-001' } });
+    const ctx = makeCtx({ organizationId: null, _body: { personId: 'p1', templateId: 't1', credentialNumber: 'CN-001' } });
     const response = await issueDigitalCredential(ctx);
     expect(response.status).toBe(403);
   });
@@ -175,7 +175,7 @@ describe('[BR-18] Credential Verification (Public)', () => {
     const payload = verifyCredentialToken(token, secret);
     expect(payload).not.toBeNull();
     expect(payload!.credentialId).toBe('cred-1');
-    expect(payload!.tenantId).toBe('tenant-1');
+    expect(payload!.organizationId).toBe('tenant-1');
   });
 
   test('verifyCredentialToken rejects tampered token', () => {

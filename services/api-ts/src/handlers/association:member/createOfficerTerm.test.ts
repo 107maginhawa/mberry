@@ -8,7 +8,7 @@ import { OfficerTermRepository } from './repos/governance.repo';
 
 const createdTerm = {
   id: 'term-1',
-  tenantId: 'tenant-1',
+  organizationId: 'tenant-1',
   positionId: 'pos-1',
   personId: 'person-1',
   organizationId: 'org-1',
@@ -118,17 +118,17 @@ describe('createOfficerTerm [BR-09]', () => {
     expect(capturedData.endDate).toBeNull();
   });
 
-  test('scopes creation to tenantId from context', async () => {
+  test('scopes creation to organizationId from context', async () => {
     let capturedData: any = null;
     mocks = stubRepo(OfficerTermRepository, {
       create: async (data: any) => {
         capturedData = data;
-        return { ...createdTerm, tenantId: data.tenantId };
+        return { ...createdTerm, organizationId: data.organizationId };
       },
     });
 
     const ctx = makeCtx({
-      tenantId: 'tenant-99',
+      organizationId: 'tenant-99',
       _body: {
         positionId: 'pos-1',
         personId: 'person-2',
@@ -138,7 +138,7 @@ describe('createOfficerTerm [BR-09]', () => {
     });
 
     await createOfficerTerm(ctx);
-    expect(capturedData.tenantId).toBe('tenant-99');
+    expect(capturedData.organizationId).toBe('tenant-99');
   });
 
   test('returns 401 when no user session', async () => {
@@ -148,8 +148,8 @@ describe('createOfficerTerm [BR-09]', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 when tenantId is missing', async () => {
-    const ctx = makeCtx({ user: { id: 'u1', role: 'user' }, tenantId: null });
+  test('returns 403 when organizationId is missing', async () => {
+    const ctx = makeCtx({ user: { id: 'u1', role: 'user' }, organizationId: null });
     const response = await createOfficerTerm(ctx);
     expect(response.status).toBe(403);
   });

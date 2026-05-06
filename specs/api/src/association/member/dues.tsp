@@ -109,8 +109,6 @@ model DuesInvoiceAllocation {
 
 @doc("Dues configuration defining amounts and fund allocations for a tier within an organization")
 model DuesConfig extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the association organization this configuration applies to")
   organizationId: string;
@@ -143,8 +141,6 @@ model DuesConfig extends BaseEntity {
 
 @doc("Dues invoice issued to a member for a renewal period")
 model DuesInvoice extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the membership this invoice was generated for")
   membershipId: string;
@@ -191,8 +187,6 @@ model DuesInvoice extends BaseEntity {
 
 @doc("Accounts-receivable aging snapshot for an organization as of a specific date")
 model AgingBucket extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the association organization")
   organizationId: string;
@@ -227,8 +221,6 @@ model AgingBucket extends BaseEntity {
 
 @doc("Template used to generate dunning communications at a specific collection stage")
 model DunningTemplate extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("Display name of this template")
   @minLength(1)
@@ -261,8 +253,6 @@ model DunningTemplate extends BaseEntity {
 
 @doc("Record of a dunning communication sent to a member")
 model DunningEvent extends BaseEntity {
-  @doc("Tenant identifier for multi-tenancy isolation")
-  tenantId: string;
 
   @doc("ID of the membership this dunning event targets")
   membershipId: string;

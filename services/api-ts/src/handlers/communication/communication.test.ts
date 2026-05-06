@@ -155,34 +155,34 @@ describe('communication auth guards', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tenant guard tests — handlers return 403 when tenantId is missing
+// Tenant guard tests — handlers return 403 when organizationId is missing
 // ---------------------------------------------------------------------------
 
 describe('communication tenant guards', () => {
-  test('createMessageTemplate returns 403 without tenantId', async () => {
+  test('createMessageTemplate returns 403 without organizationId', async () => {
     const { createMessageTemplate } = await import('./createMessageTemplate');
-    const ctx = makeCtx({ tenantId: null, _body: { name: 'T', channel: 'email', body: 'b', mergeFields: [], category: 'c', isTransactional: false } });
+    const ctx = makeCtx({ organizationId: null, _body: { name: 'T', channel: 'email', body: 'b', mergeFields: [], category: 'c', isTransactional: false } });
     const response = await createMessageTemplate(ctx);
     expect(response.status).toBe(403);
   });
 
-  test('createMessage returns 403 without tenantId', async () => {
+  test('createMessage returns 403 without organizationId', async () => {
     const { createMessage } = await import('./createMessage');
-    const ctx = makeCtx({ tenantId: null, _body: { channel: 'email', senderId: 's', recipientPersonIds: [], body: 'b' } });
+    const ctx = makeCtx({ organizationId: null, _body: { channel: 'email', senderId: 's', recipientPersonIds: [], body: 'b' } });
     const response = await createMessage(ctx);
     expect(response.status).toBe(403);
   });
 
-  test('createSubscriptionTopic returns 403 without tenantId', async () => {
+  test('createSubscriptionTopic returns 403 without organizationId', async () => {
     const { createSubscriptionTopic } = await import('./createSubscriptionTopic');
-    const ctx = makeCtx({ tenantId: null, _body: { name: 'T', channel: 'email', category: 'c', defaultEnabled: true } });
+    const ctx = makeCtx({ organizationId: null, _body: { name: 'T', channel: 'email', category: 'c', defaultEnabled: true } });
     const response = await createSubscriptionTopic(ctx);
     expect(response.status).toBe(403);
   });
 
-  test('bulkUpdatePersonSubscriptions returns 403 without tenantId', async () => {
+  test('bulkUpdatePersonSubscriptions returns 403 without organizationId', async () => {
     const { bulkUpdatePersonSubscriptions } = await import('./bulkUpdatePersonSubscriptions');
-    const ctx = makeCtx({ tenantId: null, _body: { updates: [] } });
+    const ctx = makeCtx({ organizationId: null, _body: { updates: [] } });
     const response = await bulkUpdatePersonSubscriptions(ctx);
     expect(response.status).toBe(403);
   });

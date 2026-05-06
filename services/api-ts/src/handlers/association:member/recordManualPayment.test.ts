@@ -7,7 +7,7 @@ import { DuesInvoiceRepository } from './repos/dues.repo';
 
 const fakeInvoice = {
   id: 'inv-1',
-  tenantId: 'tenant-1',
+  organizationId: 'tenant-1',
   organizationId: 'org-1',
   membershipId: 'mem-1',
   status: 'generated' as const,
@@ -95,14 +95,14 @@ describe('recordManualPayment', () => {
     expect(response.body.error).toBe('Unauthorized');
   });
 
-  test('returns 403 when no tenantId in context', async () => {
+  test('returns 403 when no organizationId in context', async () => {
     mocks = stubRepo(DuesInvoiceRepository, {
       findOneById: async () => fakeInvoice,
       markPaid: async () => fakeMarkedPaid,
     });
 
     const ctx = makeCtx({
-      tenantId: null,
+      organizationId: null,
       _body: { duesInvoiceId: 'inv-1', paymentMethod: 'cash' },
     });
 
@@ -127,12 +127,12 @@ describe('recordManualPayment', () => {
 
   test('throws NotFoundError when invoice belongs to a different tenant', async () => {
     mocks = stubRepo(DuesInvoiceRepository, {
-      findOneById: async () => ({ ...fakeInvoice, tenantId: 'tenant-OTHER' }),
+      findOneById: async () => ({ ...fakeInvoice, organizationId: 'tenant-OTHER' }),
       markPaid: async () => fakeMarkedPaid,
     });
 
     const ctx = makeCtx({
-      tenantId: 'tenant-1',
+      organizationId: 'tenant-1',
       _body: { duesInvoiceId: 'inv-1', paymentMethod: 'cash' },
     });
 

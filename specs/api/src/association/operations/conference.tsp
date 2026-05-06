@@ -129,8 +129,6 @@ model ConferenceTrack {
 
 @doc("An association conference or multi-day event")
 model Conference extends BaseEntity {
-  @doc("Tenant this conference belongs to")
-  tenantId: string;
 
   @doc("Conference display title")
   @minLength(1)
@@ -182,8 +180,6 @@ model Conference extends BaseEntity {
 
 @doc("A scheduled session within a conference program")
 model Session extends BaseEntity {
-  @doc("Tenant this session belongs to")
-  tenantId: string;
 
   @doc("Parent conference")
   conferenceId: string;
@@ -227,8 +223,6 @@ model Session extends BaseEntity {
 
 @doc("A confirmed or invited speaker at a conference")
 model Speaker extends BaseEntity {
-  @doc("Tenant this speaker record belongs to")
-  tenantId: string;
 
   @doc("Parent conference")
   conferenceId: string;
@@ -267,8 +261,6 @@ model Speaker extends BaseEntity {
 
 @doc("A paper or presentation abstract submitted for conference review")
 model AbstractSubmission extends BaseEntity {
-  @doc("Tenant this submission belongs to")
-  tenantId: string;
 
   @doc("Target conference")
   conferenceId: string;
@@ -311,8 +303,6 @@ model AbstractSubmission extends BaseEntity {
 
 @doc("An exhibitor or sponsor profile for a conference")
 model ExhibitorProfile extends BaseEntity {
-  @doc("Tenant this exhibitor record belongs to")
-  tenantId: string;
 
   @doc("Parent conference")
   conferenceId: string;

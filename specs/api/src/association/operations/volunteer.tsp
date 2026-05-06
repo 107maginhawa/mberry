@@ -161,8 +161,6 @@ enum PairStatus {
 
 @doc("A volunteer opportunity posted by an organization")
 model VolunteerOpportunity extends BaseEntity {
-  @doc("Tenant this opportunity belongs to")
-  tenantId: string;
 
   @doc("Opportunity title")
   @minLength(1)
@@ -206,8 +204,6 @@ model VolunteerOpportunity extends BaseEntity {
 
 @doc("A volunteer's application for an opportunity")
 model VolunteerApplication extends BaseEntity {
-  @doc("Tenant this application belongs to")
-  tenantId: string;
 
   @doc("Opportunity being applied for")
   opportunityId: string;
@@ -230,8 +226,6 @@ model VolunteerApplication extends BaseEntity {
 
 @doc("A log entry recording volunteer hours worked")
 model VolunteerHours extends BaseEntity {
-  @doc("Tenant this hours record belongs to")
-  tenantId: string;
 
   @doc("Person who volunteered")
   personId: string;
@@ -258,8 +252,6 @@ model VolunteerHours extends BaseEntity {
 
 @doc("A job posting on the association member job board")
 model JobPosting extends BaseEntity {
-  @doc("Tenant this posting belongs to")
-  tenantId: string;
 
   @doc("Position title")
   @minLength(1)
@@ -300,8 +292,6 @@ model JobPosting extends BaseEntity {
 
 @doc("A member's application for a job posting")
 model JobApplication extends BaseEntity {
-  @doc("Tenant this application belongs to")
-  tenantId: string;
 
   @doc("Job posting being applied for")
   postingId: string;
@@ -324,8 +314,6 @@ model JobApplication extends BaseEntity {
 
 @doc("A structured mentorship programme definition")
 model MentorshipProgram extends BaseEntity {
-  @doc("Tenant this programme belongs to")
-  tenantId: string;
 
   @doc("Programme display name")
   @minLength(1)
@@ -348,8 +336,6 @@ model MentorshipProgram extends BaseEntity {
 
 @doc("A matched mentor-mentee pair within a programme")
 model MentorshipPair extends BaseEntity {
-  @doc("Tenant this pair belongs to")
-  tenantId: string;
 
   @doc("Parent mentorship programme")
   programId: string;

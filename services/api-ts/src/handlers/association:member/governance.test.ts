@@ -10,9 +10,9 @@ describe('position handlers', () => {
     expect(response.status).toBe(401);
   });
 
-  test('createPosition requires tenantId', async () => {
+  test('createPosition requires organizationId', async () => {
     const { createPosition } = await import('./createPosition');
-    const ctx = makeCtx({ user: { id: 'u1' }, tenantId: null });
+    const ctx = makeCtx({ user: { id: 'u1' }, organizationId: null });
     const response = await createPosition(ctx);
     expect(response.status).toBe(403);
   });
@@ -47,9 +47,9 @@ describe('[BR-09] officer term handlers', () => {
     expect(response.status).toBe(401);
   });
 
-  test('createOfficerTerm requires tenantId', async () => {
+  test('createOfficerTerm requires organizationId', async () => {
     const { createOfficerTerm } = await import('./createOfficerTerm');
-    const ctx = makeCtx({ user: { id: 'u1' }, tenantId: null });
+    const ctx = makeCtx({ user: { id: 'u1' }, organizationId: null });
     const response = await createOfficerTerm(ctx);
     expect(response.status).toBe(403);
   });
