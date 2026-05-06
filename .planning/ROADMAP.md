@@ -20,7 +20,7 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
 - [ ] **Phase 7: Shared Component Library** - DRY up duplicated UI components across apps
 - [ ] **Phase 8: Frontend Unit Tests** - Component-level test coverage for critical Memberry components
 - [ ] **Phase 9: Test Infrastructure Hardening** - Replace hardcoded creds, wire all unit tests into CI, expand pre-commit
-- [ ] **Phase 10: Deploy Platform Decision** - Choose deploy platform and wire real staging deploy commands
+- [x] **Phase 10: Deploy Platform Decision** - Choose deploy platform and wire real staging deploy commands (completed 2026-05-06)
 
 ## Phase Details
 
@@ -206,7 +206,7 @@ Plans:
 **Plans**: 1 plan
 
 **Wave 1**
-- [ ] 10-01-PLAN.md — Replace deploy.yml TODOs with Railway (API) + Cloudflare Pages (frontends) commands (DEVX-02)
+- [x] 10-01-PLAN.md — Replace deploy.yml TODOs with Railway (API) + Cloudflare Pages (frontends) commands (DEVX-02)
 
 ## Progress
 
@@ -225,4 +225,4 @@ Phase 0 first. Then Phases 1, 2, 5, 6, 8 in parallel (all depend only on Phase 0
 | 7. Shared Component Library | 0/3 | Planned | - |
 | 8. Frontend Unit Tests | 0/3 | Planned | - |
 | 9. Test Infrastructure Hardening | 0/2 | Planned | - |
-| 10. Deploy Platform Decision | 0/1 | Planned | - |
+| 10. Deploy Platform Decision | 1/1 | Complete   | 2026-05-06 |
