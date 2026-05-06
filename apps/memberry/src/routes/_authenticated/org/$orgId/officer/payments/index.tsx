@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { generateDuesInvoicesForOrgMutation } from '@monobase/sdk-ts/generated/react-query'
-import { Button } from '@/components/ui/button'
+import { Button } from '@monobase/ui'
 import { FinancialDashboard } from '@/features/dues/components/financial-dashboard'
 import { PaymentHistoryTable } from '@/features/dues/components/payment-history-table'
 import { Plus, Bell } from 'lucide-react'

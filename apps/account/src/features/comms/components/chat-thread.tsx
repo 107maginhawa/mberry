@@ -6,9 +6,9 @@ import {
   sendChatMessageMutation,
 } from '@monobase/sdk-ts/generated/react-query'
 import type { ChatMessage } from '@monobase/sdk-ts/generated/types.gen'
-import { Button } from '@/components/button'
-import { Input } from '@/components/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Card, CardContent, CardHeader, CardTitle } from '@monobase/ui'
 import { Loader2, Send } from 'lucide-react'
 
 interface ChatThreadProps {

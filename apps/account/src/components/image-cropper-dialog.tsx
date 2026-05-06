@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react'
-import Cropper, { Area } from 'react-easy-crop'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './dialog'
-import { Button } from './button'
-import { Slider } from './slider'
+import type { Area } from 'react-easy-crop';
+import Cropper from 'react-easy-crop'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
+import { Button } from '@monobase/ui'
+import { Slider } from '@monobase/ui'
 import { Loader2 } from 'lucide-react'
 
 interface ImageCropperDialogProps {

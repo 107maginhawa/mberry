@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@monobase/ui'
+import { Badge } from '@monobase/ui'
 import { getStatusLabel } from '@/features/membership/lib/membership-status'
 import { api } from '@/lib/api'
 

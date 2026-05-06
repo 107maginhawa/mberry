@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@monobase/ui'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/reports/credits')({

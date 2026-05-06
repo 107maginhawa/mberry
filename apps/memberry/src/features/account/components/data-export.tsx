@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@monobase/ui'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { Download, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react'

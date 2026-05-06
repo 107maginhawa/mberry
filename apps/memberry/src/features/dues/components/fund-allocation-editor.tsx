@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
 import { GripVertical, Trash2, Plus } from 'lucide-react'
 
 interface Fund {

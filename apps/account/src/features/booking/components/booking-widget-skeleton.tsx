@@ -1,6 +1,6 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
-import { Skeleton } from '@/components/skeleton'
-import { Separator } from '@/components/separator'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
+import { Skeleton } from '@monobase/ui'
+import { Separator } from '@monobase/ui'
 
 export function BookingWidgetSkeleton({ className }: { className?: string }): React.JSX.Element {
   return (

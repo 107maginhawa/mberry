@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Button } from '@/components/ui/button'
+import { Button } from '@monobase/ui'
 import { Bell, Megaphone, CreditCard, Calendar, BookOpen, Settings, CheckCheck, Loader2 } from 'lucide-react'
 import { api } from '@/lib/api'
 

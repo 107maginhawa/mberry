@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
+import { Textarea } from '@monobase/ui'
 import {
   createEventMutation,
   updateEventMutation,

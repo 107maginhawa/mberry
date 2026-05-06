@@ -4,11 +4,11 @@ import {
   refundDuesPaymentMutation,
   getDuesPaymentQueryKey,
 } from '@monobase/sdk-ts/generated/react-query'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
+import { Textarea } from '@monobase/ui'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
 import { formatCents, parseCentsInput } from '../lib/money'
 

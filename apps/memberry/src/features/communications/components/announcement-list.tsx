@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Input } from '@/components/ui/input'
+import { Skeleton } from '@monobase/ui'
+import { Input } from '@monobase/ui'
 import { api } from '@/lib/api'
 
 interface AnnouncementListProps {

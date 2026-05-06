@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { createFileRoute, Link, useParams } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
+import { Button } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Upload, FileText, ArrowLeft, Check, AlertTriangle, Loader2 } from 'lucide-react'
 import { importRosterMembersMutation } from '@monobase/sdk-ts/generated/react-query'

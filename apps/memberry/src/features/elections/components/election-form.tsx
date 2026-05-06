@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
 import {
   createElectionMutation,
   listElectionsQueryKey,

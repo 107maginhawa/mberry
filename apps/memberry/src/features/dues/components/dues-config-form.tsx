@@ -5,12 +5,12 @@ import {
   getDuesConfigQueryKey,
   updateDuesConfigMutation,
 } from '@monobase/sdk-ts/generated/react-query'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Switch } from '@monobase/ui'
+import { Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
 import { parseCentsInput } from '../lib/money'
 

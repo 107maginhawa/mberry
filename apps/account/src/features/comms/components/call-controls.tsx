@@ -4,7 +4,7 @@
  */
 
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Monitor, MonitorOff } from 'lucide-react'
-import { Button } from '@/components/button'
+import { Button } from '@monobase/ui'
 import { cn } from '@/lib/utils'
 
 interface CallControlsProps {

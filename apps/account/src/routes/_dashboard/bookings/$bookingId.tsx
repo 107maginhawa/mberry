@@ -17,8 +17,8 @@ import type { Booking, ChatRoom, Person } from '@monobase/sdk-ts/generated/types
 import { ActiveBookingCard } from '@/features/booking/components/active-booking-card'
 import { ChatThread } from '@/features/comms/components/chat-thread'
 import { VideoCallPanel } from '@/features/comms/components/video-call-panel'
-import { Button } from '@/components/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@monobase/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
 import { Loader2, ExternalLink } from 'lucide-react'
 
 export const Route = createFileRoute('/_dashboard/bookings/$bookingId')({

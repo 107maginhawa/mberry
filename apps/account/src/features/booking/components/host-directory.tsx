@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { listBookingEventsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { BookingEvent, Person } from '@monobase/sdk-ts/generated/types.gen'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/avatar'
-import { Badge } from '@/components/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@monobase/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@monobase/ui'
+import { Badge } from '@monobase/ui'
 import { Loader2, Calendar } from 'lucide-react'
 
 function ownerOf(event: BookingEvent): Person | null {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
 import { HostDirectory } from '@/features/booking/components/host-directory'
 import { BookingList } from '@/features/booking/components/booking-list'
 

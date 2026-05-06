@@ -10,7 +10,7 @@ import {
   Settings,
   Loader2
 } from 'lucide-react'
-import { Button } from "@/components/button"
+import { Button } from "@monobase/ui"
 import {
   Card,
   CardContent,
@@ -18,10 +18,10 @@ import {
   CardHeader,
   CardTitle,
   CardFooter
-} from "@/components/card"
-import { Badge } from "@/components/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar"
-import { Separator } from "@/components/separator"
+} from "@monobase/ui"
+import { Badge } from "@monobase/ui"
+import { Avatar, AvatarFallback, AvatarImage } from "@monobase/ui"
+import { Separator } from "@monobase/ui"
 import { useListSessions, useListPasskeys, useEmailVerification } from '@monobase/sdk-ts/react/hooks/use-auth'
 import { toast } from 'sonner'
 

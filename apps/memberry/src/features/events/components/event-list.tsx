@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Input } from '@monobase/ui'
+import { Skeleton } from '@monobase/ui'
 import { EventCard } from './event-card'
 import { Calendar, Users, Clock } from 'lucide-react'
 import {

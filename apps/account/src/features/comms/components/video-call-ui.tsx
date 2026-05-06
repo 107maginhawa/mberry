@@ -9,7 +9,7 @@
 import { VideoTile } from './video-tile'
 import { CallControls } from './call-controls'
 import { ConnectionStatus } from './connection-status'
-import { Alert, AlertDescription } from '@/components/alert'
+import { Alert, AlertDescription } from '@monobase/ui'
 import { AlertCircle } from 'lucide-react'
 
 export type ConnectionState = 
