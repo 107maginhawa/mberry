@@ -396,19 +396,13 @@ await repo.createOne({ organizationId, ... });
 **Validation for A1:** Run `SELECT COUNT(*) FROM training WHERE tenant_id != organization_id` before running migration.
 **Validation for A3:** Review `membership.schema.ts` comment line 17-20 — confirms `tenantId` and `orgId` are set to same value in current deployment.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `membership.schema.ts` use `orgId` or `organizationId` as the canonical FK?**
-   - What we know: `membership` table has `tenantId` + `orgId` (not `organizationId`). `membershipTiers` + `membershipCategories` + `membershipApplications` use `tenantId` only.
-   - What's unclear: Is `orgId` the same concept as `organizationId` in other modules?
-   - Recommendation: Check membership.repo.ts comment (line 17): "tenantId and orgId are set to the same value" — confirms they are equivalent. Rename both `tenantId` → `organizationId` and `orgId` → `organizationId` (or keep `orgId` as chapter FK if it represents chapter affiliation).
+   - RESOLVED: `membership` table has `tenantId` + `orgId` (not `organizationId`). Per membership.repo.ts comment (line 17): "tenantId and orgId are set to the same value". Both are semantically equivalent. **Decision:** Rename `tenantId` → `organizationId` and DROP `orgId` (they hold the same value). Migration SQL handles this in Plan 01 Task 1.
 
 2. **Which old modules have no `association:*` equivalent yet?**
-   - `handlers/certificates/` — `association:member/repos/credentials.schema.ts` exists (covers professional licenses and digital credentials)
-   - `handlers/elections/` — no `association:*` equivalent found
-   - `handlers/communications/` (announcements) — `association:*` has `communication.schema.ts` (messaging) but not announcements
-   - `handlers/dues/` (payments, gateways) — `association:member/dues.schema.ts` exists but covers different tables
-   - Recommendation: For modules without `association:*` equivalents, rename `*.types.ts` → `*.schema.ts` and migrate in-place.
+   - RESOLVED: `handlers/elections/` and `handlers/communications/` (announcements) have no `association:*` equivalents. `handlers/certificates/` is covered by `credentials.schema.ts`. `handlers/dues/` is covered by `association:member/dues.schema.ts`. **Decision:** elections/ and communications/ will be renamed in-place during Plan 02 Task 2 (delete old `*.types.ts` files, keep schema in current location).
 
 ## Environment Availability
 
