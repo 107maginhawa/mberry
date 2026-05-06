@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { getDuesPaymentOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatCents } from '@/features/dues/lib/money'
@@ -24,11 +24,8 @@ function PaymentDetailPage() {
   const { orgId, paymentId } = Route.useParams()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['dues-payment', paymentId],
-    queryFn: async () => {
-      const json = await api.get<{ data: any }>(`/api/dues/payments/${paymentId}`)
-      return json.data
-    },
+    ...getDuesPaymentOptions({ path: { paymentId } }),
+    select: (d: any) => d?.data ?? d,
   })
 
   if (isLoading) return <div className="p-6"><Skeleton className="h-64 w-full" /></div>

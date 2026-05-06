@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, Loader2, Users, UserCheck } from 'lucide-react'
-import { api } from '@/lib/api'
+import { listCustomEventRegistrationsOptions, checkInCustomEventMutation } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/events/$eventId/attendance',
@@ -19,14 +19,18 @@ function EventAttendance() {
   const queryClient = useQueryClient()
   const [checkedIn, setCheckedIn] = useState<Set<string>>(new Set())
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['event-registrations', eventId],
-    queryFn: () => api.get<{ data: any[] }>(`/api/events/${eventId}/registrations`),
-  })
+  const { data, isLoading, error } = useQuery(
+    listCustomEventRegistrationsOptions({ path: { eventId } })
+  )
 
+  const checkInMutOpts = checkInCustomEventMutation()
   const checkInMutation = useMutation({
-    mutationFn: (memberId: string) => api.post(`/api/events/${eventId}/check-in`, { memberId }),
-    onSuccess: (_data, memberId) => {
+    mutationFn: (reg: any) => (checkInMutOpts.mutationFn as Function)({
+      path: { eventId },
+      body: { eventId, registrationId: reg.id, personId: reg.personId ?? reg.memberId, method: 'manual' as const },
+    }),
+    onSuccess: (_data, reg: any) => {
+      const memberId = reg.personId ?? reg.memberId
       setCheckedIn((prev) => new Set(prev).add(memberId))
       queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] })
       queryClient.invalidateQueries({ queryKey: ['attendance', eventId] })
@@ -37,7 +41,7 @@ function EventAttendance() {
     },
   })
 
-  const registrations = data?.data ?? []
+  const registrations = (data as any)?.data ?? []
   const presentCount = registrations.filter(
     (r: any) => r.checkedIn || checkedIn.has(r.memberId ?? r.personId),
   ).length
@@ -111,7 +115,7 @@ function EventAttendance() {
                     disabled={isPresent || checkInMutation.isPending}
                     onCheckedChange={() => {
                       if (!isPresent) {
-                        checkInMutation.mutate(memberId)
+                        checkInMutation.mutate(reg)
                       }
                     }}
                   />
@@ -134,10 +138,10 @@ function EventAttendance() {
                       size="sm"
                       variant="outline"
                       disabled={checkInMutation.isPending}
-                      onClick={() => checkInMutation.mutate(memberId)}
+                      onClick={() => checkInMutation.mutate(reg)}
                     >
                       {checkInMutation.isPending &&
-                      checkInMutation.variables === memberId ? (
+                      (checkInMutation.variables as any)?.memberId === memberId ? (
                         <Loader2 className="w-3 h-3 animate-spin" />
                       ) : (
                         'Mark Present'

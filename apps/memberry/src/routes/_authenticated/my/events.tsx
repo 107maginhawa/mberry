@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, Building2 } from 'lucide-react'
-import { api } from '@/lib/api'
+import { listMyCustomEventsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/_authenticated/my/events')({
   component: MyEvents,
@@ -80,15 +80,14 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
 function MyEvents() {
   const [showPast, setShowPast] = useState(false)
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['my-events'],
-    queryFn: () => api.get<{ data: Array<{ registration: any; event: any }> }>('/api/events/my'),
-  })
+  const { data, isLoading, error } = useQuery(
+    listMyCustomEventsOptions()
+  )
 
-  const allItems = data?.data ?? []
+  const allItems: Array<{ registration: any; event: any }> = (data as any)?.data ?? []
   const now = new Date()
-  const upcoming = allItems.filter((item) => new Date(item.event.startDate) >= now)
-  const past = allItems.filter((item) => new Date(item.event.startDate) < now)
+  const upcoming = allItems.filter((item: any) => new Date(item.event.startDate) >= now)
+  const past = allItems.filter((item: any) => new Date(item.event.startDate) < now)
   const displayed = showPast ? allItems : upcoming
 
   return (

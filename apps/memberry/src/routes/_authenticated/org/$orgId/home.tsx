@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { searchEventsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Megaphone, Calendar, MapPin, ArrowRight } from 'lucide-react'
 
@@ -28,15 +29,12 @@ function OrgHome() {
     },
   })
 
-  const { data: events, isLoading: loadingEvents, error: eventsError } = useQuery({
-    queryKey: ['org-upcoming-events', orgId],
-    queryFn: async () => {
-      return api.get<{ data: any[] }>(`/api/events?orgId=${orgId}&limit=5`)
-    },
-  })
+  const { data: events, isLoading: loadingEvents, error: eventsError } = useQuery(
+    searchEventsOptions({ query: { organizationId: orgId, limit: 5 } })
+  )
 
   const announcementItems = announcements?.data ?? []
-  const eventItems = events?.data ?? []
+  const eventItems = (events as any)?.data ?? []
 
   return (
     <div className="space-y-8 p-6">

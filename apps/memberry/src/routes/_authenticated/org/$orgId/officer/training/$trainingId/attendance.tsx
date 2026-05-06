@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, Loader2, Users, UserCheck } from 'lucide-react'
-import { api } from '@/lib/api'
+import { listCustomTrainingEnrollmentsOptions, checkInCustomTrainingMutation } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/training/$trainingId/attendance',
@@ -19,16 +19,19 @@ function TrainingAttendance() {
   const queryClient = useQueryClient()
   const [checkedIn, setCheckedIn] = useState<Set<string>>(new Set())
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['training-enrollments', trainingId],
-    queryFn: () => api.get<{ data: any[] }>(`/api/training/${orgId}/enrollments/${trainingId}`),
-  })
+  const { data, isLoading, error } = useQuery(
+    listCustomTrainingEnrollmentsOptions({ path: { trainingId }, query: { organizationId: orgId } })
+  )
 
+  const checkInMutOpts = checkInCustomTrainingMutation()
   const checkInMutation = useMutation({
-    mutationFn: (memberId: string) => api.post(`/api/training/${orgId}/${trainingId}/check-in`, { memberId }),
+    mutationFn: (memberId: string) => (checkInMutOpts.mutationFn as Function)({
+      path: { trainingId },
+      query: { organizationId: orgId },
+    }),
     onSuccess: (_data, memberId) => {
       setCheckedIn((prev) => new Set(prev).add(memberId))
-      queryClient.invalidateQueries({ queryKey: ['training-enrollments', trainingId] })
+      queryClient.invalidateQueries({ queryKey: ['listCustomTrainingEnrollments'] })
       toast.success('Member checked in successfully')
     },
     onError: (err: any) => {
@@ -42,7 +45,7 @@ function TrainingAttendance() {
     },
   })
 
-  const enrollments = data?.data ?? []
+  const enrollments = (data as any)?.data ?? []
   const presentCount = enrollments.filter(
     (e: any) => e.checkedIn || checkedIn.has(e.memberId ?? e.personId),
   ).length

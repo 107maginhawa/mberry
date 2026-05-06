@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createFileRoute, useSearch } from '@tanstack/react-router'
 import { MemberTable } from '@/features/membership/components/member-table'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
 import { api } from '@/lib/api'
+import { addRosterMemberMutation } from '@monobase/sdk-ts/generated/react-query'
 
 const STATUS_MAP: Record<string, string> = {
   active: 'active',
@@ -56,6 +57,8 @@ function AddMemberDialog({ open, onClose, orgId }: { open: boolean; onClose: () 
   const [licenseNumber, setLicenseNumber] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const addMemberMutOpts = addRosterMemberMutation()
+
   async function handleSubmit() {
     if (!firstName.trim() || !email.trim()) {
       toast.error('First name and email are required')
@@ -63,7 +66,7 @@ function AddMemberDialog({ open, onClose, orgId }: { open: boolean; onClose: () 
     }
     setSaving(true)
     try {
-      // First create person record
+      // First create person record via persons API (out of scope for SDK migration)
       const personData: any = await api.post('/api/persons', {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -71,12 +74,13 @@ function AddMemberDialog({ open, onClose, orgId }: { open: boolean; onClose: () 
       })
       const personId: string = personData.id || personData.data?.id
 
-      // Then add membership
-      await api.post(`/api/membership/members/${orgId}`, {
-        personId,
-        tierId: 'default',
-        memberNumber: licenseNumber.trim() || undefined,
-        licenseNumber: licenseNumber.trim() || undefined,
+      // Then add membership via SDK hook
+      await (addMemberMutOpts.mutationFn as Function)({
+        body: {
+          personId,
+          tierId: 'default',
+          memberNumber: licenseNumber.trim() || undefined,
+        },
       })
 
       toast.success(`${firstName} ${lastName} added as member`)

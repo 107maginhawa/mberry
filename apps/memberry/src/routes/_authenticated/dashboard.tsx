@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { getPersonOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { getPersonOptions, listMyCustomEventsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { PageHeader } from '@/components/patterns/page-header'
 import { StatCard } from '@/components/patterns/stat-card'
 import { StatusBadge } from '@/components/patterns/status-badge'
@@ -37,10 +37,9 @@ function DashboardPage() {
     retry: false,
   })
 
-  const eventsQuery = useQuery<any[]>({
-    queryKey: ['my-upcoming-events'],
-    queryFn: async () => {
-      const res = await api.get<any>('/api/events/my')
+  const eventsQuery = useQuery({
+    ...listMyCustomEventsOptions({ query: { limit: 10 } }),
+    select: (res: any) => {
       const now = new Date()
       const items = (res?.data || []).map((e: any) => e.event || e)
       return items

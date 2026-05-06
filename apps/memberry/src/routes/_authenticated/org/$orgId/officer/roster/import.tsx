@@ -3,7 +3,8 @@ import { createFileRoute, Link, useParams } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Upload, FileText, ArrowLeft, Check, AlertTriangle, Loader2 } from 'lucide-react'
-import { api, ApiError } from '@/lib/api'
+import { importRosterMembersMutation } from '@monobase/sdk-ts/generated/react-query'
+import { ApiError } from '@/lib/api'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/roster/import',
@@ -83,6 +84,8 @@ function RosterImportPage() {
     if (f) handleFile(f)
   }
 
+  const importMutOpts = importRosterMembersMutation()
+
   async function handleImport() {
     if (!parsed || parsed.rows.length === 0) return
     setImporting(true)
@@ -95,14 +98,15 @@ function RosterImportPage() {
         .map((r) => ({
           personId: '', // server will match or create
           tierId: 'default',
-          memberNumber: r.memberNumber || undefined,
-          licenseNumber: r.licenseNumber || undefined,
+          memberNumber: r.memberNumber || r.licenseNumber || undefined,
         }))
 
-      const json: any = await api.post(`/api/membership/members/${orgId}/import`, { members })
+      const data: any = await (importMutOpts.mutationFn as Function)({
+        body: { organizationId: orgId, members },
+      })
 
-      setResult(json.data)
-      toast.success(`Imported ${json.data.imported} members`)
+      setResult(data?.imported != null ? data : { imported: data?.data?.imported ?? 0 })
+      toast.success(`Imported ${data?.imported ?? data?.data?.imported ?? 0} members`)
     } catch (err: any) {
       const msg = err instanceof ApiError ? ((err.body as any)?.message ?? 'Import failed') : (err.message || 'Import failed')
       toast.error(msg)

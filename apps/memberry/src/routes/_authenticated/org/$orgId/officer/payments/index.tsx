@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { api } from '@/lib/api'
+import { useMutation } from '@tanstack/react-query'
+import { generateDuesInvoicesForOrgMutation } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { FinancialDashboard } from '@/features/dues/components/financial-dashboard'
 import { PaymentHistoryTable } from '@/features/dues/components/payment-history-table'
@@ -13,20 +13,30 @@ export const Route = createFileRoute('/_authenticated/org/$orgId/officer/payment
 
 function OfficerPaymentsPage() {
   const { orgId } = Route.useParams()
-  const [sending, setSending] = useState(false)
 
-  async function handleSendReminders() {
-    setSending(true)
-    try {
-      const data = await api.post<{ count: number }>('/api/association/member/dues-invoices/generate', { organizationId: orgId })
+  const genInvoicesMutOpts = generateDuesInvoicesForOrgMutation()
+  const genInvoicesMutation = useMutation({
+    ...genInvoicesMutOpts,
+    onSuccess: (data: any) => {
+      const count = data?.data?.length ?? 0
       toast.success('Dues reminders sent', {
-        description: data.count > 0 ? `${data.count} reminders queued` : 'Reminder batch queued for processing',
+        description: count > 0 ? `${count} reminders queued` : 'Reminder batch queued for processing',
       })
-    } catch {
+    },
+    onError: () => {
       toast.error('Failed to send reminders')
-    } finally {
-      setSending(false)
-    }
+    },
+  })
+
+  const sending = genInvoicesMutation.isPending
+
+  function handleSendReminders() {
+    const now = new Date()
+    const periodStart = new Date(now.getFullYear(), 0, 1)
+    const periodEnd = new Date(now.getFullYear(), 11, 31)
+    genInvoicesMutation.mutate({
+      body: { organizationId: orgId, periodStart, periodEnd },
+    })
   }
 
   return (

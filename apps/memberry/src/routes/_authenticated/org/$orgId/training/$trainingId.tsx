@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, Award, DollarSign, Clock, BookOpen, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
+import { getTrainingOptions, enrollInCustomTrainingMutation } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/training/$trainingId')({
   component: TrainingDetail,
@@ -29,13 +29,13 @@ function TrainingDetail() {
   const [enrolled, setEnrolled] = useState(false)
 
   const { data: training, isLoading, error } = useQuery({
-    queryKey: ['training-detail', trainingId],
-    queryFn: () => api.get<{ data: any }>(`/api/training/detail/${orgId}/${trainingId}`),
-    select: (d) => d.data,
+    ...getTrainingOptions({ path: { trainingId } }),
+    select: (d) => (d as any)?.data ?? d,
   })
 
+  const enrollMutOpts = enrollInCustomTrainingMutation()
   const enrollMutation = useMutation({
-    mutationFn: () => api.post(`/api/training/enroll/${orgId}/${trainingId}`),
+    mutationFn: () => (enrollMutOpts.mutationFn as Function)({ path: { trainingId }, query: { organizationId: orgId } }),
     onSuccess: () => {
       toast.success('Successfully enrolled in this training!')
       setEnrolled(true)

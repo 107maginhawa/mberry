@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { ArrowLeft, Calendar, MapPin, Users, Award, Edit2 } from 'lucide-react'
 import { TrainingForm } from '@/features/training/components/training-form'
 import { CompletionTable } from '@/features/training/components/completion-table'
-import { api } from '@/lib/api'
+import { getTrainingOptions } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/training/$trainingId')({
   component: TrainingDetail,
@@ -36,12 +36,11 @@ function TrainingDetail() {
   const { orgId, trainingId } = Route.useParams()
   const [tab, setTab] = useState<Tab>('details')
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['training', trainingId],
-    queryFn: () => api.get<{ data: any }>(`/api/training/detail/${orgId}/${trainingId}`),
-  })
+  const { data, isLoading, error } = useQuery(
+    getTrainingOptions({ path: { trainingId } })
+  )
 
-  const training = data?.data
+  const training = (data as any)?.data ?? data
 
   if (isLoading) {
     return (

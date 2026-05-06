@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { generateDuesReportOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,11 +21,10 @@ function FinancialReportsPage() {
   const [shouldFetch, setShouldFetch] = useState(false)
 
   const { data: reportData, isLoading } = useQuery({
-    queryKey: ['dues-report', orgId, selectedType, fromDate, toDate],
-    queryFn: async () => {
-      const params = new URLSearchParams({ type: selectedType!, from: fromDate ?? '', to: toDate ?? '' })
-      return api.get<any>(`/api/dues/reports/${orgId}?${params}`)
-    },
+    ...generateDuesReportOptions({
+      path: { organizationId: orgId },
+      query: fromDate && toDate ? { from: new Date(fromDate), to: new Date(toDate) } : undefined,
+    }),
     enabled: shouldFetch && !!selectedType,
   })
 
@@ -60,8 +59,8 @@ function FinancialReportsPage() {
 
       <ReportResults
         type={selectedType ?? ''}
-        data={reportData?.data ?? null}
-        summary={reportData?.summary ?? null}
+        data={(reportData as any)?.data ?? null}
+        summary={(reportData as any)?.summary ?? null}
         isLoading={isLoading && shouldFetch}
       />
     </div>

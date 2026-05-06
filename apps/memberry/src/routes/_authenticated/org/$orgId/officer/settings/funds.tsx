@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { api } from '@/lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { listDuesFundsOptions, upsertDuesFundsMutation } from '@monobase/sdk-ts/generated/react-query'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -21,32 +21,29 @@ function FundSettingsPage() {
   ])
   const [hasChanges, setHasChanges] = useState(false)
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['dues-funds', orgId],
-    queryFn: async () => {
-      const json = await api.get<any>(`/api/dues/funds/${orgId}`)
-      return json.data
-    },
+  const { data: fundsData, isLoading } = useQuery({
+    ...listDuesFundsOptions({ query: { organizationId: orgId } }),
+    select: (d: any) => d?.data ?? [],
   })
 
   useEffect(() => {
-    if (data && data.length > 0) {
-      setFunds(data.map((f: any) => ({ id: f.id, name: f.name, percentage: f.percentage })))
+    if (fundsData && (fundsData as any[]).length > 0) {
+      setFunds((fundsData as any[]).map((f: any) => ({ id: f.id, name: f.name, percentage: f.percentage })))
     }
-  }, [data])
+  }, [fundsData])
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      return api.put(`/api/dues/funds/${orgId}`, {
-        funds: funds.map((f, i) => ({ name: f.name, percentage: f.percentage, sortOrder: i })),
-      })
-    },
+  const upsertMutOpts = upsertDuesFundsMutation()
+  const saveMutation = useMutation<any, Error, void>({
+    mutationFn: () => (upsertMutOpts.mutationFn as Function)({
+      path: { organizationId: orgId },
+      body: { funds: funds.map((f, i) => ({ name: f.name, percentage: f.percentage, sortOrder: i })) },
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dues-funds', orgId] })
+      queryClient.invalidateQueries({ queryKey: ['listDuesFunds'] })
       toast.success('Fund allocation updated', { description: 'New allocation applies to future payments.' })
       setHasChanges(false)
     },
-    onError: (err) => {
+    onError: (err: any) => {
       toast.error('Failed to save', { description: err.message })
     },
   })
@@ -63,7 +60,7 @@ function FundSettingsPage() {
         {hasChanges && <span className="text-sm text-muted-foreground">Unsaved changes</span>}
       </div>
 
-      {data && data.length > 0 && (
+      {fundsData && (fundsData as any[]).length > 0 && (
         <Alert>
           <AlertDescription>
             Existing payment allocations will not be recalculated. Only future payments will use the new allocation.
@@ -81,7 +78,7 @@ function FundSettingsPage() {
         <Button onClick={() => saveMutation.mutate()} disabled={!isValid || saveMutation.isPending || !hasChanges}>
           {saveMutation.isPending ? 'Saving...' : 'Save'}
         </Button>
-        <Button variant="outline" onClick={() => { if (data && data.length > 0) { setFunds(data.map((f: any) => ({ id: f.id, name: f.name, percentage: f.percentage }))) }; setHasChanges(false) }} disabled={!hasChanges}>
+        <Button variant="outline" onClick={() => { if (fundsData && (fundsData as any[]).length > 0) { setFunds((fundsData as any[]).map((f: any) => ({ id: f.id, name: f.name, percentage: f.percentage }))) }; setHasChanges(false) }} disabled={!hasChanges}>
           Cancel
         </Button>
       </div>

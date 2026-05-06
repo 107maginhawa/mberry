@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Award, Calendar, BookOpen, CheckCircle } from 'lucide-react'
-import { api } from '@/lib/api'
+import { listMyCustomTrainingsOptions, searchTrainingsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/_authenticated/my/training')({
   component: MyTraining,
@@ -29,24 +29,16 @@ function formatDate(iso: string | null | undefined) {
 }
 
 function MyTraining() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['my-trainings'],
-    queryFn: () => api.get<{ data: Array<{ enrollment: any; training: any }> }>('/api/training/my'),
-  })
+  const { data, isLoading, error } = useQuery(
+    listMyCustomTrainingsOptions()
+  )
 
   // Network-wide trainings available for discovery (SO-9)
   const { data: availableData } = useQuery({
-    queryKey: ['available-trainings'],
-    queryFn: async () => {
-      try {
-        return await api.get<{ data: any[] }>('/api/training?visibility=network&status=published')
-      } catch {
-        return { data: [] }
-      }
-    },
+    ...searchTrainingsOptions({ query: { status: 'published' } }),
   })
 
-  const items = data?.data ?? []
+  const items: Array<{ enrollment: any; training: any }> = (data as any)?.data ?? []
 
   const totalCredits = items.reduce((acc, item) => {
     const isCompleted = item.enrollment?.status === 'enrolled' // In reality would check attendance
@@ -152,12 +144,12 @@ function MyTraining() {
       )}
 
       {/* Network-wide available trainings (SO-9: cross-org promotion) */}
-      {(availableData?.data ?? []).length > 0 && (
+      {((availableData as any)?.data ?? []).length > 0 && (
         <div className="mt-8">
           <h2 className="text-lg font-bold mb-3">Available Trainings</h2>
           <p className="text-sm text-muted-foreground mb-4">Network-wide trainings from across all organizations</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {(availableData?.data ?? []).slice(0, 6).map((t: any) => (
+            {((availableData as any)?.data ?? []).slice(0, 6).map((t: any) => (
               <div key={t.id} className="border rounded-xl p-4 bg-card hover:shadow-sm transition-shadow">
                 <p className="font-semibold line-clamp-1">{t.title}</p>
                 <p className="text-xs text-muted-foreground mt-1 capitalize">{t.type?.replace('_', ' ')}</p>

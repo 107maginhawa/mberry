@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, MapPin, Users, Clock, Loader2, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
+import { getEventOptions, registerForCustomEventMutation } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/events/$eventId')({
   component: EventDetail,
@@ -29,17 +29,15 @@ function EventDetail() {
   const [registered, setRegistered] = useState(false)
 
   const { data: event, isLoading, error } = useQuery({
-    queryKey: ['event-detail', eventId],
-    queryFn: () => api.get<{ data: any }>(`/api/events/detail/${eventId}`),
-    select: (d) => d.data,
+    ...getEventOptions({ path: { eventId } }),
+    select: (d) => (d as any)?.data ?? d,
   })
 
+  const registerMutOpts = registerForCustomEventMutation()
   const registerMutation = useMutation({
-    mutationFn: async () => {
-      return api.post(`/api/events/register/${eventId}`)
-    },
+    mutationFn: () => (registerMutOpts.mutationFn as Function)({ path: { eventId } }),
     onSuccess: (data: any) => {
-      const status = data?.data?.status
+      const status = data?.status
       if (status === 'waitlisted') {
         toast.info('You have been added to the waitlist.')
       } else {

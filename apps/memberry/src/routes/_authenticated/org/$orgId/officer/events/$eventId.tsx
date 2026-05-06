@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { EventForm } from '@/features/events/components/event-form'
 import { AttendanceView } from '@/features/events/components/attendance-view'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'
-import { api } from '@/lib/api'
+import { getEventOptions, listCustomEventRegistrationsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/events/$eventId')({
   component: EventDetail,
@@ -37,12 +37,11 @@ function formatDate(iso: string) {
 }
 
 function RegistrationsTab({ eventId }: { eventId: string }) {
-  const { data, isLoading } = useQuery<any>({
-    queryKey: ['registrations', eventId],
-    queryFn: () => api.get(`/api/events/registrations/${eventId}`),
-  })
+  const { data, isLoading } = useQuery(
+    listCustomEventRegistrationsOptions({ path: { eventId } })
+  )
 
-  const registrations = data?.data ?? []
+  const registrations = (data as any)?.data ?? []
 
   if (isLoading) {
     return (
@@ -104,12 +103,11 @@ function EventDetail() {
   const [tab, setTab] = useState<Tab>('details')
   const [editMode, setEditMode] = useState(false)
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['event', eventId],
-    queryFn: () => api.get<{ data: any }>(`/api/events/detail/${eventId}`),
-  })
+  const { data, isLoading, error } = useQuery(
+    getEventOptions({ path: { eventId } })
+  )
 
-  const event = data?.data
+  const event = (data as any)?.data ?? data
 
   return (
     <div className="space-y-6 p-6">
