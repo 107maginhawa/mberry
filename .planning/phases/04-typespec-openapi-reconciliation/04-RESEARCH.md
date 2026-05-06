@@ -13,13 +13,13 @@
 - Mirror existing TypeSpec patterns from base modules (billing, booking, person) exactly — consistency over optimization
 - Author all 6 custom modules in one pass — shared patterns, single build/verify cycle
 - Include all CRUD operations per module — complete API surface, future-proof, matches base module coverage
-- Use Phase 3's unified `orgId` field naming throughout (locked from Phase 3)
+- Use Phase 3's unified `organizationId` field naming throughout (locked from Phase 3 — DB column is `organization_id`, Drizzle maps to `organizationId`)
 - Replace hand-wired routes with TypeSpec-generated routes immediately — generated routes include validators, keeps one pattern
 - Keep existing handler business logic — handlers have working business logic, only swap the route/validator layer
 - Add ALL endpoints to TypeSpec — goal is 100% OpenAPI coverage (SPEC-08), no manual route remnants
 - Replace all manual fetch calls with generated React Query hooks — SPEC-07 requires this, eliminates manual boilerplate
-- Regenerate SDK in same build step — `bun run build` in specs/api triggers OpenAPI → SDK pipeline
-- Update frontend imports in this phase — complete the TypeSpec→SDK→frontend chain end-to-end
+- Regenerate SDK in same build step — `bun run build` in specs/api triggers OpenAPI -> SDK pipeline
+- Update frontend imports in this phase — complete the TypeSpec->SDK->frontend chain end-to-end
 
 ### Claude's Discretion
 - TypeSpec file naming and internal organization within `specs/api/src/modules/`
@@ -64,7 +64,7 @@ Elections and certificates are the only two modules with zero TypeSpec coverage.
 | Capability | Primary Tier | Secondary Tier | Rationale |
 |------------|-------------|----------------|-----------|
 | TypeSpec authoring | specs/api/src/ | — | Single source of truth for API contracts |
-| OpenAPI generation | specs/api build pipeline | — | `bun run build` compiles .tsp → openapi.json |
+| OpenAPI generation | specs/api build pipeline | — | `bun run build` compiles .tsp -> openapi.json |
 | Hono route registration | services/api-ts/src/generated/openapi/routes.ts | — | `bun run generate` produces routes from openapi.json |
 | Handler business logic | services/api-ts/src/handlers/{module}/*.ts | — | Already implemented; not touched in this phase |
 | SDK React Query hooks | packages/sdk-ts/src/generated/ | — | `bun run generate` in sdk-ts regenerates from openapi.json |
@@ -119,14 +119,14 @@ openapi.json (specs/api/dist/openapi/)
 ### Build Pipeline (VERIFIED: codebase inspection)
 
 ```bash
-# Step 1: TypeSpec → OpenAPI
+# Step 1: TypeSpec -> OpenAPI
 cd specs/api && bun run build
 # Produces: dist/openapi/openapi.json, dist/typescript-types/api.d.ts
 
-# Step 2: OpenAPI → Hono routes + validators + handler stubs
+# Step 2: OpenAPI -> Hono routes + validators + handler stubs
 cd services/api-ts && bun run generate
 
-# Step 3: OpenAPI → SDK hooks
+# Step 3: OpenAPI -> SDK hooks
 cd packages/sdk-ts && bun run generate
 ```
 
@@ -291,12 +291,12 @@ These serve **different URL namespaces** — they are not duplicates of each oth
 
 ### Finding 3: Certificates — Truly Missing
 No TypeSpec exists anywhere for certificates. The `certificates` handler exposes:
-- `GET /certificates/my` → `listCertificates`
-- `GET /certificates/:id` → `getCertificate`
+- `GET /certificates/my` -> `listCertificates`
+- `GET /certificates/:id` -> `getCertificate`
 
 The schema: `certificate` table has `organizationId`, `personId`, `trainingId`, `certificateNumber`, `issuedAt`.
 
-**Fix:** Author `specs/api/src/modules/certificates.tsp` (or `association/member/certificates.tsp`) with 2 operations.
+**Fix:** Author `specs/api/src/association/member/certificates.tsp` with 2 operations.
 
 ### Finding 4: Events and Training — TypeSpec Exists, SDK Hooks Exist
 [VERIFIED: codebase inspection] OpenAPI already has `/association/events/*` and `/association/training/*` paths. SDK already generates hooks for these. The hand-wired `/events/*` and `/training/*` routes are legacy.
@@ -314,6 +314,20 @@ The schema: `certificate` table has `organizationId`, `personId`, `trainingId`, 
 
 Similarly for membership: hand-wired `/membership/members/:orgId` uses a custom data model; TypeSpec covers the full membership lifecycle model. These may conflict.
 
+### Finding 6: ElectionStatus Enum Conflict (RESOLVED)
+[VERIFIED: codebase inspection] The `ElectionStatus` enum in `governance.tsp` does not match the DB schema:
+
+| governance.tsp | DB schema (elections.schema.ts) |
+|---|---|
+| `nominationOpen` | `nominationsOpen` (plural) |
+| `nominationClosed` | (not in DB) |
+| `votingClosed` | (not in DB) |
+| `certified` | (not in DB) |
+| (missing) | `awaitingConfirmation` |
+| (missing) | `published` |
+
+**Resolution:** DB values are canonical (Phase 3 unified the data model). Update governance.tsp enum to match DB: `draft, nominationsOpen, votingOpen, awaitingConfirmation, published, cancelled`. Plan 04-01 Task 1 handles this.
+
 ---
 
 ## Common Pitfalls
@@ -321,7 +335,7 @@ Similarly for membership: hand-wired `/membership/members/:orgId` uses a custom 
 ### Pitfall 1: Forgetting the 3-Step Build Chain
 **What goes wrong:** `bun run build` in specs/api succeeds but generated routes don't update.
 **Why it happens:** `bun run generate` in api-ts is a separate step; SDK also needs its own `bun run generate`.
-**How to avoid:** Always run all three steps in sequence: `specs/api build` → `api-ts generate` → `sdk-ts generate`.
+**How to avoid:** Always run all three steps in sequence: `specs/api build` -> `api-ts generate` -> `sdk-ts generate`.
 **Warning signs:** Generated routes file timestamp older than openapi.json.
 
 ### Pitfall 2: Interface Registered But Not Exported from Namespace
@@ -350,7 +364,7 @@ Similarly for membership: hand-wired `/membership/members/:orgId` uses a custom 
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
-| Hand-wired Hono routes | TypeSpec-generated routes with validators | Phase 0→Phase 4 | Type safety, validation, OpenAPI coverage |
+| Hand-wired Hono routes | TypeSpec-generated routes with validators | Phase 0->Phase 4 | Type safety, validation, OpenAPI coverage |
 | Manual `useQuery` with `api.get()` | Generated `queryOptions` from SDK | Phase 4 | Eliminates fetch boilerplate, types auto-maintained |
 
 ---
@@ -373,10 +387,10 @@ Similarly for membership: hand-wired `/membership/members/:orgId` uses a custom 
 
 | Dependency | Required By | Available | Version | Fallback |
 |------------|------------|-----------|---------|----------|
-| Bun | Build pipeline | ✓ | 1.2.21 [VERIFIED] | — |
-| TypeSpec compiler | `bun run build` in specs/api | ✓ | Current [VERIFIED: build runs cleanly] | — |
-| openapi-typescript | Type generation | ✓ | 7.9.1 [VERIFIED] | — |
-| @hey-api/openapi-ts | SDK generation | ✓ | Current [VERIFIED] | — |
+| Bun | Build pipeline | yes | 1.2.21 [VERIFIED] | — |
+| TypeSpec compiler | `bun run build` in specs/api | yes | Current [VERIFIED: build runs cleanly] | — |
+| openapi-typescript | Type generation | yes | 7.9.1 [VERIFIED] | — |
+| @hey-api/openapi-ts | SDK generation | yes | Current [VERIFIED] | — |
 
 ---
 
@@ -390,14 +404,14 @@ Similarly for membership: hand-wired `/membership/members/:orgId` uses a custom 
 | Quick run command | `cd services/api-ts && bun test src/handlers/elections/` |
 | Full suite command | `cd services/api-ts && bun test` |
 
-### Phase Requirements → Test Map
+### Phase Requirements -> Test Map
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| SPEC-01 | Dues TypeSpec generates valid OpenAPI paths | smoke | `cd specs/api && bun run build && cat dist/openapi/openapi.json \| python3 -c "import json,sys; d=json.load(sys.stdin); assert '/association/member/dues-payments' in d['paths']"` | ❌ Wave 0 |
-| SPEC-05 | Elections endpoints appear in OpenAPI | smoke | `cd specs/api && bun run build && cat dist/openapi/openapi.json \| python3 -c "import json,sys; d=json.load(sys.stdin); assert any('election' in p for p in d['paths'])"` | ❌ Wave 0 |
-| SPEC-06 | Certificates endpoints appear in OpenAPI | smoke | Same pattern for 'certificate' | ❌ Wave 0 |
-| SPEC-07 | SDK exports hooks for elections + certificates | smoke | `grep -n "listMyCertificates\|listElections" packages/sdk-ts/src/generated/@tanstack/react-query.gen.ts` | ❌ Wave 0 |
-| SPEC-08 | No hand-wired route registrations remain | smoke | `grep -c "app.route('/dues'" services/api-ts/src/app.ts && test $? -eq 1` | ❌ Wave 0 |
+| SPEC-01 | Dues TypeSpec generates valid OpenAPI paths | smoke | `cd specs/api && bun run build && cat dist/openapi/openapi.json \| python3 -c "import json,sys; d=json.load(sys.stdin); assert '/association/member/dues-payments' in d['paths']"` | Wave 0 |
+| SPEC-05 | Elections endpoints appear in OpenAPI | smoke | `cd specs/api && bun run build && cat dist/openapi/openapi.json \| python3 -c "import json,sys; d=json.load(sys.stdin); assert any('election' in p for p in d['paths'])"` | Wave 0 |
+| SPEC-06 | Certificates endpoints appear in OpenAPI | smoke | Same pattern for 'certificate' | Wave 0 |
+| SPEC-07 | SDK exports hooks for elections + certificates | smoke | `grep -n "listMyCertificates\|listElections" packages/sdk-ts/src/generated/@tanstack/react-query.gen.ts` | Wave 0 |
+| SPEC-08 | No hand-wired route registrations remain | smoke | `grep -c "app.route('/dues'" services/api-ts/src/app.ts && test $? -eq 1` | Wave 0 |
 
 ### Sampling Rate
 - **Per task commit:** `cd specs/api && bun run build` (build must succeed)
@@ -436,26 +450,20 @@ Similarly for membership: hand-wired `/membership/members/:orgId` uses a custom 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
 | A1 | The hand-wired `/dues/payments`, `/dues/gateway`, `/dues/dashboard`, `/dues/reports`, `/dues/funds` have no TypeSpec equivalents in `dues.tsp` | Critical Findings #5 | These endpoints would be missing from OpenAPI after decommission — breaking frontend |
-| A2 | `governance.tsp` `ElectionManagement` models map cleanly to the hand-wired elections handler behavior | Critical Findings #2 | Status enum differences (governance uses `draft/nominationOpen/votingOpen/certified`; schema uses `draft/nominationsOpen/votingOpen/awaitingConfirmation/published`) — may need reconciliation |
+| A2 | `governance.tsp` `ElectionManagement` models map cleanly to the hand-wired elections handler behavior | Critical Findings #2 | Status enum differences — RESOLVED: update governance.tsp enum to match DB (see Finding 6) |
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Dues route gap: partial TypeSpec coverage**
-   - What we know: `dues.tsp` covers invoice management; hand-wired dues covers payments, gateway, funds, dashboard, reports
-   - What's unclear: Are payment/gateway/funds endpoints in scope for SPEC-01 or is SPEC-01 satisfied by the existing invoice TypeSpec?
-   - Recommendation: Author the missing dues operations (payments, gateway, funds, dashboard) in TypeSpec to achieve SPEC-08 (100% coverage). These are distinct from the invoice model.
+1. **Dues route gap: partial TypeSpec coverage** — RESOLVED
+   - Answer: YES, payment/gateway/funds endpoints are in scope for SPEC-01 per CONTEXT.md decision "Include all CRUD operations per module." Plan 04-02 authors the missing TypeSpec interfaces (DuesPaymentManagement, DuesGatewayManagement, DuesReportingService).
 
-2. **Membership route gap: data model alignment**
-   - What we know: Hand-wired `/membership/members/:orgId` returns custom member model; TypeSpec `MembershipManagement` uses the full membership lifecycle model
-   - What's unclear: After Phase 3 schema unification, do these models align?
-   - Recommendation: Check Phase 3 output before decommissioning `/membership/*` routes.
+2. **Membership route gap: data model alignment** — RESOLVED
+   - Answer: Phase 3 is substantively complete, models are unified. The hand-wired membership routes use the same underlying schema. Plan 04-02 adds MemberRosterManagement, MembershipCategoryManagement, and OrganizationProfileManagement interfaces.
 
-3. **Elections status enum conflict**
-   - What we know: DB schema uses `['draft', 'nominationsOpen', 'votingOpen', 'awaitingConfirmation', 'published', 'cancelled']`; `governance.tsp` uses `draft/nominationOpen/votingOpen/votingClosed/certified/cancelled`
-   - What's unclear: Which enum is authoritative?
-   - Recommendation: Use the DB schema enum values in TypeSpec to avoid a data migration.
+3. **Elections status enum conflict** — RESOLVED
+   - Answer: DB values are canonical (Phase 3 unified the data model). Plan 04-01 Task 1 updates `governance.tsp` ElectionStatus enum to match DB: `draft, nominationsOpen, votingOpen, awaitingConfirmation, published, cancelled`.
 
 ---
 
@@ -463,8 +471,8 @@ Similarly for membership: hand-wired `/membership/members/:orgId` uses a custom 
 
 ### Primary (HIGH confidence)
 - `specs/api/src/main.tsp` — confirmed what is/isn't registered
-- `specs/api/src/association/member/governance.tsp` — confirmed ElectionManagement defined but unregistered
-- `services/api-ts/src/handlers/elections/repos/elections.schema.ts` — DB schema for elections
+- `specs/api/src/association/member/governance.tsp` — confirmed ElectionManagement defined but unregistered; ElectionStatus enum verified
+- `services/api-ts/src/handlers/elections/repos/elections.schema.ts` — DB schema for elections (canonical enum values)
 - `services/api-ts/src/handlers/certificates/repos/certificates.schema.ts` — DB schema for certificates
 - `services/api-ts/src/app.ts` — confirmed hand-wired route registrations
 - `services/api-ts/src/generated/openapi/routes.ts` — confirmed no elections/certificates in generated routes
