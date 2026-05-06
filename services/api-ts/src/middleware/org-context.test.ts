@@ -93,7 +93,7 @@ describe('orgContextMiddleware', () => {
       membershipRows: [{
         id: 'mem-1',
         personId: 'user-1',
-        orgId: 'org-1',
+        organizationId: 'org-1',
         status: 'active',
       }],
       adminRows: [],

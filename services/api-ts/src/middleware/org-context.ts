@@ -71,14 +71,14 @@ export function orgContextMiddleware() {
       .select({
         id: memberships.id,
         personId: memberships.personId,
-        orgId: memberships.orgId,
+        organizationId: memberships.organizationId,
         status: memberships.status,
       })
       .from(memberships)
       .where(
         and(
           eq(memberships.personId, user.id),
-          eq(memberships.orgId, orgId),
+          eq(memberships.organizationId, orgId),
           inArray(memberships.status, ['active', 'gracePeriod']),
         )
       )
@@ -95,7 +95,7 @@ export function orgContextMiddleware() {
     ctx.set('orgMembership', {
       membershipId: membership.id,
       personId: membership.personId,
-      orgId: membership.orgId,
+      orgId: membership.organizationId,
       role: 'member', // role granularity comes from governance module
       status: membership.status,
     });

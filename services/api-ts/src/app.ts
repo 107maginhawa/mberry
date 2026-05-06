@@ -249,9 +249,9 @@ export function createApp(config: Config): App {
     // Get user's first org for organizationId (required NOT NULL field)
     const { memberships } = await import('@/handlers/association:member/repos/membership.schema');
     const { eq: eqOp } = await import('drizzle-orm');
-    const [firstMembership] = await db.select({ orgId: memberships.orgId })
+    const [firstMembership] = await db.select({ organizationId: memberships.organizationId })
       .from(memberships).where(eqOp(memberships.personId, user.id)).limit(1);
-    const orgId = body.organizationId || firstMembership?.orgId;
+    const orgId = body.organizationId || firstMembership?.organizationId;
     if (!orgId) return ctx.json({ error: 'No organization membership found' }, 400);
 
     const now = new Date();
