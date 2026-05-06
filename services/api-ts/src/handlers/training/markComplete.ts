@@ -44,7 +44,6 @@ export async function markComplete(ctx: Context): Promise<Response> {
       const cycle = getCycleForDate(activityDate, activityDate, 2);
 
       await creditRepo.createOne({
-        tenantId: training.tenantId,
         personId: body.personId,
         organizationId: training.organizationId,
         type: 'auto',

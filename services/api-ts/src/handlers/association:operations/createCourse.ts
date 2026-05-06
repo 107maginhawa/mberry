@@ -16,8 +16,8 @@ export async function createCourse(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -25,8 +25,8 @@ export async function createCourse(
   const repo = new CourseRepository(db, logger);
 
   const course = await repo.createOne({
-    tenantId,
-    organizationId: (body as any).organizationId || ctx.get('orgId') || tenantId,
+    orgId,
+    organizationId: (body as any).organizationId || ctx.get('orgId') || orgId,
     title: (body as any).title,
     description: (body as any).description,
     creditAmount: (body as any).creditAmount,

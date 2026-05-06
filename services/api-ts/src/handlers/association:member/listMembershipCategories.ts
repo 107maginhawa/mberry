@@ -13,14 +13,14 @@ export async function listMembershipCategories(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new MembershipCategoryRepository(db, logger);
 
-  const categories = await repo.findMany({ tenantId });
+  const categories = await repo.findMany({ orgId });
 
   return ctx.json({ items: categories });
 }

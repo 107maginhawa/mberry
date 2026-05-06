@@ -14,10 +14,7 @@ import {
 } from '../../association:member/repos/membership.schema';
 import { persons } from '../../person/repos/person.schema';
 
-// NOTE: tenantId and orgId are set to the same value (the org's ID).
-// In a multi-association setup, tenantId would be the association ID
-// and orgId would be the chapter ID. This simplification works for
-// single-association deployments (current Memberry setup).
+// organizationId is the canonical ID used for all org-scoped queries.
 export class MembershipRepository {
   constructor(private db: DatabaseInstance) {}
 
@@ -32,8 +29,7 @@ export class MembershipRepository {
     offset?: number;
   }) {
     const conditions: SQL<unknown>[] = [
-      eq(memberships.orgId, filters.organizationId),
-      eq(memberships.tenantId, filters.organizationId),
+      eq(memberships.organizationId, filters.organizationId),
     ];
 
     if (filters.status) conditions.push(eq(memberships.status, filters.status as any));
@@ -94,8 +90,7 @@ export class MembershipRepository {
       .leftJoin(membershipCategories, eq(memberships.categoryId, membershipCategories.id))
       .where(
         and(
-          eq(memberships.orgId, organizationId),
-          eq(memberships.tenantId, organizationId),
+          eq(memberships.organizationId, organizationId),
           eq(memberships.personId, personId),
         ),
       )
@@ -128,23 +123,18 @@ export class MembershipRepository {
     return this.db
       .select()
       .from(membershipCategories)
-      .where(
-        and(
-          eq(membershipCategories.tenantId, organizationId),
-          eq(membershipCategories.orgId, organizationId),
-        ),
-      );
+      .where(eq(membershipCategories.organizationId, organizationId));
   }
 
   async upsertCategory(data: NewMembershipCategory): Promise<MembershipCategory> {
-    // No unique constraint exists on (tenantId, name), so we use check-then-update
+    // No unique constraint exists on (organizationId, name), so we use check-then-update
     // instead of onConflictDoUpdate to avoid a runtime constraint error.
     const [existing] = await this.db
       .select()
       .from(membershipCategories)
       .where(
         and(
-          eq(membershipCategories.tenantId, data.tenantId),
+          eq(membershipCategories.organizationId, data.organizationId),
           eq(membershipCategories.name, data.name),
         ),
       )
@@ -202,8 +192,7 @@ export class MembershipRepository {
 
   async listApplications(organizationId: string, status?: string) {
     const conditions: SQL<unknown>[] = [
-      eq(membershipApplications.orgId, organizationId),
-      eq(membershipApplications.tenantId, organizationId),
+      eq(membershipApplications.organizationId, organizationId),
     ];
     if (status) conditions.push(eq(membershipApplications.status, status as any));
 

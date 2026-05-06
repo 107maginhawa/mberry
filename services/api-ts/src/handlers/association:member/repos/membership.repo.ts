@@ -26,15 +26,14 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface MembershipTierFilters {
-  tenantId?: string;
+  organizationId?: string;
   status?: string;
   name?: string;
   q?: string;
 }
 
 export interface MembershipFilters {
-  tenantId?: string;
-  orgId?: string;
+  organizationId?: string;
   personId?: string;
   status?: string;
   tierId?: string;
@@ -42,15 +41,13 @@ export interface MembershipFilters {
 }
 
 export interface MembershipApplicationFilters {
-  tenantId?: string;
-  orgId?: string;
+  organizationId?: string;
   personId?: string;
   status?: string;
 }
 
 export interface MembershipCategoryFilters {
-  tenantId?: string;
-  orgId?: string;
+  organizationId?: string;
   name?: string;
 }
 
@@ -74,8 +71,8 @@ export class MembershipTierRepository extends DatabaseRepository<
 
     const conditions: SQL<unknown>[] = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(membershipTiers.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(membershipTiers.organizationId, filters.organizationId));
     }
 
     if (filters.status) {
@@ -99,20 +96,20 @@ export class MembershipTierRepository extends DatabaseRepository<
   }
 
   /**
-   * Find a tier by its unique code within a tenant
+   * Find a tier by its unique code within an organization
    */
   async findByCode(
-    tenantId: string,
+    organizationId: string,
     code: string,
   ): Promise<MembershipTier | null> {
-    this.logger?.debug({ tenantId, code }, 'Finding membership tier by code');
+    this.logger?.debug({ organizationId, code }, 'Finding membership tier by code');
 
     const [record] = await this.db
       .select()
       .from(membershipTiers)
       .where(
         and(
-          eq(membershipTiers.tenantId, tenantId),
+          eq(membershipTiers.organizationId, organizationId),
           eq(membershipTiers.code, code),
         ),
       )
@@ -142,12 +139,8 @@ export class MembershipRepository extends DatabaseRepository<
 
     const conditions: SQL<unknown>[] = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(memberships.tenantId, filters.tenantId));
-    }
-
-    if (filters.orgId) {
-      conditions.push(eq(memberships.orgId, filters.orgId));
+    if (filters.organizationId) {
+      conditions.push(eq(memberships.organizationId, filters.organizationId));
     }
 
     if (filters.personId) {
@@ -170,10 +163,10 @@ export class MembershipRepository extends DatabaseRepository<
    */
   async findByPersonAndOrg(
     personId: string,
-    orgId: string,
+    organizationId: string,
   ): Promise<Membership | null> {
     this.logger?.debug(
-      { personId, orgId },
+      { personId, organizationId },
       'Finding membership by person and org',
     );
 
@@ -183,7 +176,7 @@ export class MembershipRepository extends DatabaseRepository<
       .where(
         and(
           eq(memberships.personId, personId),
-          eq(memberships.orgId, orgId),
+          eq(memberships.organizationId, organizationId),
         ),
       )
       .limit(1);
@@ -226,14 +219,10 @@ export class MembershipApplicationRepository extends DatabaseRepository<
 
     const conditions: SQL<unknown>[] = [];
 
-    if (filters.tenantId) {
+    if (filters.organizationId) {
       conditions.push(
-        eq(membershipApplications.tenantId, filters.tenantId),
+        eq(membershipApplications.organizationId, filters.organizationId),
       );
-    }
-
-    if (filters.orgId) {
-      conditions.push(eq(membershipApplications.orgId, filters.orgId));
     }
 
     if (filters.personId) {
@@ -272,14 +261,10 @@ export class MembershipCategoryRepository extends DatabaseRepository<
 
     const conditions: SQL<unknown>[] = [];
 
-    if (filters.tenantId) {
+    if (filters.organizationId) {
       conditions.push(
-        eq(membershipCategories.tenantId, filters.tenantId),
+        eq(membershipCategories.organizationId, filters.organizationId),
       );
-    }
-
-    if (filters.orgId) {
-      conditions.push(eq(membershipCategories.orgId, filters.orgId));
     }
 
     if (filters.name) {

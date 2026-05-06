@@ -246,7 +246,7 @@ export function createApp(config: Config): App {
     const db = ctx.get('database') as any;
     const body = await ctx.req.json();
     const { creditEntries } = await import('@/handlers/association:member/repos/credits.schema');
-    // Get user's first org for tenantId/orgId (required NOT NULL fields)
+    // Get user's first org for organizationId (required NOT NULL field)
     const { memberships } = await import('@/handlers/association:member/repos/membership.schema');
     const { eq: eqOp } = await import('drizzle-orm');
     const [firstMembership] = await db.select({ orgId: memberships.orgId })
@@ -260,7 +260,6 @@ export function createApp(config: Config): App {
     const [entry] = await db.insert(creditEntries).values({
       personId: user.id,
       organizationId: orgId,
-      tenantId: orgId,
       activityName: body.activityName,
       activityDate: body.activityDate ? new Date(body.activityDate) : now,
       creditAmount: body.creditAmount || 0,

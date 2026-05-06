@@ -25,8 +25,7 @@ export async function importMembers(ctx: Context): Promise<Response> {
 
   const imported = await repo.bulkImportMembers(
     members.map((m: any) => ({
-      tenantId: orgId,
-      orgId,
+      organizationId: orgId,
       personId: m.personId,
       tierId: m.tierId,
       categoryId: m.categoryId,

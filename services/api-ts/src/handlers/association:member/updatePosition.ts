@@ -16,8 +16,8 @@ export async function updatePosition(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const { positionId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
@@ -26,7 +26,7 @@ export async function updatePosition(
   const repo = new PositionRepository(db, logger);
 
   const existing = await repo.findById(positionId);
-  if (!existing || existing.tenantId !== tenantId) {
+  if (!existing || existing.organizationId !== orgId) {
     throw new NotFoundError('Position');
   }
 

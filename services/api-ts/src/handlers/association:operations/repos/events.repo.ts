@@ -25,7 +25,6 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface EventFilters {
-  tenantId?: string;
   organizationId?: string;
   status?: string;
 }
@@ -39,9 +38,6 @@ export class EventRepository extends DatabaseRepository<Event, NewEvent, EventFi
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(events.tenantId, filters.tenantId));
-    }
     if (filters.organizationId) {
       conditions.push(eq(events.organizationId, filters.organizationId));
     }
@@ -86,7 +82,6 @@ export class EventRepository extends DatabaseRepository<Event, NewEvent, EventFi
 // ---------------------------------------------------------------------------
 
 export interface EventRegistrationFilters {
-  tenantId?: string;
   eventId?: string;
   personId?: string;
   status?: string;
@@ -105,9 +100,6 @@ export class EventRegistrationRepository extends DatabaseRepository<
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(eventRegistrations.tenantId, filters.tenantId));
-    }
     if (filters.eventId) {
       conditions.push(eq(eventRegistrations.eventId, filters.eventId));
     }
@@ -127,7 +119,6 @@ export class EventRegistrationRepository extends DatabaseRepository<
 // ---------------------------------------------------------------------------
 
 export interface CheckInFilters {
-  tenantId?: string;
   eventId?: string;
   personId?: string;
 }
@@ -141,9 +132,6 @@ export class CheckInRepository extends DatabaseRepository<CheckIn, NewCheckIn, C
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(checkIns.tenantId, filters.tenantId));
-    }
     if (filters.eventId) {
       conditions.push(eq(checkIns.eventId, filters.eventId));
     }
@@ -160,7 +148,6 @@ export class CheckInRepository extends DatabaseRepository<CheckIn, NewCheckIn, C
 // ---------------------------------------------------------------------------
 
 export interface WaitlistEntryFilters {
-  tenantId?: string;
   eventId?: string;
   personId?: string;
 }
@@ -178,9 +165,6 @@ export class WaitlistEntryRepository extends DatabaseRepository<
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(waitlistEntries.tenantId, filters.tenantId));
-    }
     if (filters.eventId) {
       conditions.push(eq(waitlistEntries.eventId, filters.eventId));
     }

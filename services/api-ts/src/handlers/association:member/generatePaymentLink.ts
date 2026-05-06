@@ -17,8 +17,8 @@ export async function generatePaymentLink(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -26,7 +26,7 @@ export async function generatePaymentLink(
   const invoiceRepo = new DuesInvoiceRepository(db, logger);
 
   const invoice = await invoiceRepo.findOneById(body.duesInvoiceId);
-  if (!invoice || invoice.tenantId !== tenantId) {
+  if (!invoice || invoice.organizationId !== orgId) {
     throw new NotFoundError('Dues invoice');
   }
 
@@ -35,7 +35,7 @@ export async function generatePaymentLink(
   }
 
   const secret = process.env['PAYMENT_LINK_SECRET'] || 'dev-payment-link-secret';
-  const token = createPaymentToken(invoice.id, tenantId, secret);
+  const token = createPaymentToken(invoice.id, orgId, secret);
 
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 30);

@@ -10,7 +10,6 @@ export async function createTraining(ctx: Context): Promise<Response> {
   const repo = new TrainingRepository(db);
 
   const training = await repo.create({
-    tenantId: orgId,
     organizationId: orgId,
     title: body.title,
     description: body.description,

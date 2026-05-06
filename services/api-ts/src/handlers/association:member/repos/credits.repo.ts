@@ -25,7 +25,7 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface CreditEntryFilters {
-  tenantId?: string;
+  organizationId?: string;
   personId?: string;
   organizationId?: string;
   type?: 'auto' | 'manual';
@@ -43,8 +43,8 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(creditEntries.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(creditEntries.organizationId, filters.organizationId));
     }
 
     if (filters.personId) {
@@ -132,7 +132,7 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
 // ---------------------------------------------------------------------------
 
 export interface ProfessionalLicenseFilters {
-  tenantId?: string;
+  organizationId?: string;
   personId?: string;
   licenseType?: string;
   status?: string;
@@ -153,8 +153,8 @@ export class ProfessionalLicenseRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(professionalLicenses.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(professionalLicenses.organizationId, filters.organizationId));
     }
 
     if (filters.personId) {
@@ -182,7 +182,7 @@ export class ProfessionalLicenseRepository extends DatabaseRepository<
 // ---------------------------------------------------------------------------
 
 export interface LicenseRenewalAlertFilters {
-  tenantId?: string;
+  organizationId?: string;
   personId?: string;
   licenseId?: string;
   status?: string;
@@ -202,8 +202,8 @@ export class LicenseRenewalAlertRepository extends DatabaseRepository<
 
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(licenseRenewalAlerts.tenantId, filters.tenantId));
+    if (filters.organizationId) {
+      conditions.push(eq(licenseRenewalAlerts.organizationId, filters.organizationId));
     }
 
     if (filters.personId) {

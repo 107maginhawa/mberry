@@ -41,7 +41,7 @@ export async function completeAffiliationTransfer(
 
   // Find the source affiliation and mark it as transferred
   const sourceAffiliations = await affiliationRepo.findMany({
-    tenantId: transfer.tenantId,
+    organizationId: transfer.organizationId,
     personId: transfer.personId,
     chapterId: transfer.fromChapterId,
     status: 'active',
@@ -55,7 +55,7 @@ export async function completeAffiliationTransfer(
 
   // Create new affiliation in the target chapter
   await affiliationRepo.createOne({
-    tenantId: transfer.tenantId,
+    organizationId: transfer.organizationId,
     personId: transfer.personId,
     chapterId: transfer.toChapterId,
     isPrimary: true,

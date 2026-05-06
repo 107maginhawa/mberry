@@ -19,10 +19,9 @@ export async function reviewApplication(ctx: Context): Promise<Response> {
   // If approved, create membership
   if (status === 'approved') {
     await repo.addMember({
-      tenantId: updated.tenantId!,
-      orgId: updated.orgId!,
+      organizationId: updated.organizationId,
       personId: updated.personId!,
-      tierId: updated.tierId!,
+      tierId: updated.tierId,
       startDate: new Date().toISOString().split('T')[0]!,
       duesExpiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]!,
       gracePeriodDays: 30,

@@ -65,19 +65,19 @@ export function requireActiveStatus(ctx: BaseContext): Response | null {
 }
 
 /**
- * Check that the current user has access to this tenant/org.
+ * Check that the current user has access to this org.
  * Returns a 403 Response if denied, or null if allowed.
  */
 export function requireTenantAccess(ctx: BaseContext): Response | null {
-  const tenantId = ctx.get('tenantId');
+  const orgId = ctx.get('orgId');
   const orgMembership = ctx.get('orgMembership');
 
-  if (!tenantId || !orgMembership) {
-    return ctx.json({ error: 'Tenant access required' }, 403);
+  if (!orgId || !orgMembership) {
+    return ctx.json({ error: 'Organization access required' }, 403);
   }
 
-  if (orgMembership.orgId !== tenantId) {
-    return ctx.json({ error: 'Tenant mismatch' }, 403);
+  if (orgMembership.orgId !== orgId) {
+    return ctx.json({ error: 'Organization mismatch' }, 403);
   }
 
   return null;

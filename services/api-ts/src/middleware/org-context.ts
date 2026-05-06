@@ -3,7 +3,7 @@
  *
  * Mounted on `/association/*` — extracts orgId from the authenticated
  * user's request, resolves their membership in that org, and sets
- * ctx.var.orgId, ctx.var.orgMembership, and ctx.var.tenantId.
+ * ctx.var.orgId and ctx.var.orgMembership.
  *
  * Fails closed: if org context cannot be established, returns 403.
  */
@@ -55,7 +55,6 @@ export function orgContextMiddleware() {
 
     if (admin) {
       ctx.set('orgId', orgId);
-      ctx.set('tenantId', orgId);
       ctx.set('orgMembership', {
         membershipId: 'platform-admin',
         personId: user.id,
@@ -93,7 +92,6 @@ export function orgContextMiddleware() {
     }
 
     ctx.set('orgId', orgId);
-    ctx.set('tenantId', orgId);
     ctx.set('orgMembership', {
       membershipId: membership.id,
       personId: membership.personId,

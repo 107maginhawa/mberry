@@ -15,15 +15,15 @@ export async function listPersonSubscriptions(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const query = ctx.req.valid('query');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new PersonSubscriptionRepository(db, logger);
 
-  const items = await repo.findByPerson(query.personId, tenantId);
+  const items = await repo.findByPerson(query.personId, orgId);
 
   const limit = query.limit ?? query.pageSize ?? 20;
   const offset = query.offset ?? (query.page ? (query.page - 1) * limit : 0);

@@ -16,8 +16,8 @@ export async function createMessageTemplate(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -25,7 +25,7 @@ export async function createMessageTemplate(
   const repo = new MessageTemplateRepository(db, logger);
 
   const template = await repo.create({
-    tenantId,
+    organizationId: orgId,
     name: body.name,
     channel: body.channel,
     subject: body.subject ?? null,

@@ -29,7 +29,6 @@ export class EventsRepository {
   ) {
     const conditions: SQL<unknown>[] = [
       eq(events.organizationId, orgId),
-      eq(events.tenantId, orgId),
     ];
     if (filters?.status) {
       const statuses = filters.status.split(',').map(s => s.trim());

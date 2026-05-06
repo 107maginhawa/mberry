@@ -15,8 +15,8 @@ export async function listWaitlistEntries(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const params = ctx.req.valid('param');
   const query = ctx.req.valid('query');
@@ -27,7 +27,7 @@ export async function listWaitlistEntries(
   const limit = Number((query as any)?.limit) || 20;
   const offset = Number((query as any)?.offset) || 0;
 
-  const filters: any = { tenantId, eventId: (params as any).eventId };
+  const filters: any = { eventId: (params as any).eventId };
 
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);

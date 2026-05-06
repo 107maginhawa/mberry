@@ -16,8 +16,8 @@ export async function getSubscriptionTopic(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const tenantId = ctx.get('tenantId');
-  if (!tenantId) return ctx.json({ error: 'Organization context required' }, 403);
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
@@ -25,7 +25,7 @@ export async function getSubscriptionTopic(
   const repo = new SubscriptionTopicRepository(db, logger);
 
   const topic = await repo.findById(params.topicId);
-  if (!topic || topic.tenantId !== tenantId) {
+  if (!topic || topic.organizationId !== orgId) {
     throw new NotFoundError('Subscription topic not found');
   }
 

@@ -28,7 +28,6 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface TrainingFilters {
-  tenantId?: string;
   organizationId?: string;
   status?: string;
 }
@@ -42,9 +41,6 @@ export class TrainingRepository extends DatabaseRepository<Training, NewTraining
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(trainings.tenantId, filters.tenantId));
-    }
     if (filters.organizationId) {
       conditions.push(eq(trainings.organizationId, filters.organizationId));
     }
@@ -72,7 +68,6 @@ export class TrainingRepository extends DatabaseRepository<Training, NewTraining
 // ---------------------------------------------------------------------------
 
 export interface TrainingEnrollmentFilters {
-  tenantId?: string;
   trainingId?: string;
   personId?: string;
   status?: string;
@@ -91,9 +86,6 @@ export class TrainingEnrollmentRepository extends DatabaseRepository<
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(trainingEnrollments.tenantId, filters.tenantId));
-    }
     if (filters.trainingId) {
       conditions.push(eq(trainingEnrollments.trainingId, filters.trainingId));
     }
@@ -113,7 +105,6 @@ export class TrainingEnrollmentRepository extends DatabaseRepository<
 // ---------------------------------------------------------------------------
 
 export interface CourseFilters {
-  tenantId?: string;
   organizationId?: string;
   status?: string;
 }
@@ -127,9 +118,6 @@ export class CourseRepository extends DatabaseRepository<Course, NewCourse, Cour
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(courses.tenantId, filters.tenantId));
-    }
     if (filters.organizationId) {
       conditions.push(eq(courses.organizationId, filters.organizationId));
     }
@@ -146,7 +134,6 @@ export class CourseRepository extends DatabaseRepository<Course, NewCourse, Cour
 // ---------------------------------------------------------------------------
 
 export interface CourseEnrollmentFilters {
-  tenantId?: string;
   courseId?: string;
   personId?: string;
   status?: string;
@@ -165,9 +152,6 @@ export class CourseEnrollmentRepository extends DatabaseRepository<
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(courseEnrollments.tenantId, filters.tenantId));
-    }
     if (filters.courseId) {
       conditions.push(eq(courseEnrollments.courseId, filters.courseId));
     }
@@ -187,7 +171,6 @@ export class CourseEnrollmentRepository extends DatabaseRepository<
 // ---------------------------------------------------------------------------
 
 export interface QuizAttemptFilters {
-  tenantId?: string;
   courseId?: string;
   personId?: string;
 }
@@ -205,9 +188,6 @@ export class QuizAttemptRepository extends DatabaseRepository<
     if (!filters) return undefined;
     const conditions = [];
 
-    if (filters.tenantId) {
-      conditions.push(eq(quizAttempts.tenantId, filters.tenantId));
-    }
     if (filters.courseId) {
       conditions.push(eq(quizAttempts.courseId, filters.courseId));
     }

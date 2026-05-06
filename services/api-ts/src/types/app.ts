@@ -3,7 +3,7 @@
  * Relaxed typing approach to avoid complex validation issues
  */
 
-import { Context, Hono } from 'hono';
+import type { Context, Hono } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import type { User, Session, AdminLevel } from '@/types/auth';
@@ -46,7 +46,6 @@ export type Variables = {
   // Association org context (set by org-context middleware on /association/* routes)
   orgId?: string;
   orgMembership?: OrgMembership;
-  tenantId?: string;
 
   // Platform admin (set by platformAdminAuthMiddleware on /admin/* routes)
   platformAdmin?: PlatformAdmin;

@@ -24,7 +24,6 @@ export async function registerForEvent(ctx: Context): Promise<Response> {
   const isWaitlisted = event.capacity ? regCount >= event.capacity : false;
 
   const registration = await repo.register({
-    tenantId: event.tenantId,
     eventId,
     personId: session.user.id,
     status: isWaitlisted ? 'waitlisted' : 'confirmed',

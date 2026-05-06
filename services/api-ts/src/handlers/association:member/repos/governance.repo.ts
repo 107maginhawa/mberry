@@ -20,10 +20,8 @@ export class PositionRepository {
     return row;
   }
 
-  async findByOrg(tenantId: string, orgId?: string): Promise<Position[]> {
-    const conditions = [eq(positions.tenantId, tenantId)];
-    if (orgId) conditions.push(eq(positions.organizationId, orgId));
-    return this.db.select().from(positions).where(and(...conditions));
+  async findByOrg(organizationId: string): Promise<Position[]> {
+    return this.db.select().from(positions).where(eq(positions.organizationId, organizationId));
   }
 
   async update(id: string, data: Partial<Position>): Promise<Position | undefined> {
@@ -49,10 +47,8 @@ export class OfficerTermRepository {
     return row;
   }
 
-  async findByOrg(tenantId: string, orgId?: string): Promise<OfficerTerm[]> {
-    const conditions = [eq(officerTerms.tenantId, tenantId)];
-    if (orgId) conditions.push(eq(officerTerms.organizationId, orgId));
-    return this.db.select().from(officerTerms).where(and(...conditions));
+  async findByOrg(organizationId: string): Promise<OfficerTerm[]> {
+    return this.db.select().from(officerTerms).where(eq(officerTerms.organizationId, organizationId));
   }
 
   async findActiveByPosition(positionId: string): Promise<OfficerTerm | undefined> {
@@ -66,7 +62,6 @@ export class OfficerTermRepository {
     const rows = await this.db
       .select({
         id: officerTerms.id,
-        tenantId: officerTerms.tenantId,
         positionId: officerTerms.positionId,
         personId: officerTerms.personId,
         organizationId: officerTerms.organizationId,
