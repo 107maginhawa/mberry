@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
+import { API_BASE, TEST_PASSWORD } from './test-config'
 
 /**
  * Sign up a new user via the UI.
@@ -9,7 +10,7 @@ export async function signUp(page: Page) {
   const timestamp = Date.now()
   const random = Math.floor(Math.random() * 10000)
   const email = `test-${timestamp}-${random}@example.com`
-  const password = 'TestPass123!'
+  const password = TEST_PASSWORD
   const name = `Test User ${timestamp}`
 
   await page.goto('/auth/sign-up')
@@ -46,8 +47,8 @@ export async function signUp(page: Page) {
   // Create person record (sign-up only creates auth user, not person)
   const [firstName, ...lastParts] = name.split(' ')
   const lastName = lastParts.join(' ') || null
-  await page.evaluate(async ({ firstName, lastName, email }) => {
-    await fetch('http://localhost:7213/persons', {
+  await page.evaluate(async ({ firstName, lastName, email, apiBase }) => {
+    await fetch(`${apiBase}/persons`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -57,7 +58,7 @@ export async function signUp(page: Page) {
         contactInfo: { email },
       }),
     })
-  }, { firstName, lastName, email })
+  }, { firstName, lastName, email, apiBase: API_BASE })
 
   await page.waitForTimeout(1000)
 

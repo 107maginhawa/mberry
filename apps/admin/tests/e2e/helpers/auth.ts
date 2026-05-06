@@ -4,14 +4,13 @@
  */
 
 import type { Page, BrowserContext } from '@playwright/test'
-
-const API_URL = 'http://localhost:7213'
+import { API_BASE, TEST_PASSWORD } from './test-config'
 
 export async function signInAsAdmin(context: BrowserContext): Promise<void> {
-  const response = await context.request.post(`${API_URL}/auth/sign-in/email`, {
+  const response = await context.request.post(`${API_BASE}/auth/sign-in/email`, {
     data: {
       email: 'test@memberry.ph',
-      password: 'TestPass123!',
+      password: TEST_PASSWORD,
     },
   })
 

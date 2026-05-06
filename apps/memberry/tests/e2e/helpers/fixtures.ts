@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test'
-
-const API_BASE = 'http://localhost:7213'
+import { API_BASE } from './test-config'
 
 /**
  * Create a test user via the API.
