@@ -32,7 +32,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   3. `bun run test` and `bun run typecheck` pass in GitHub Actions on every PR
   4. Contract test suite (Hurl) runs green in CI covering all API endpoints
   5. Pre-commit gate (typecheck + tests + build) passes reliably on local dev
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 
 ### Phase 1: Billing Schema Completion
 **Goal**: Billing module is fully functional with complete schema, access controls, and test coverage
@@ -43,7 +47,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   2. Billing Drizzle schema matches TypeSpec billing definitions with no drift
   3. Non-admin users cannot access billing management endpoints
   4. E2E tests verify full invoice lifecycle (create, pay, void, refund)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 
 ### Phase 2: Audit Module Completion
 **Goal**: All write operations across modules are automatically captured in an audit trail
@@ -54,7 +62,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   2. Audit triggers fire automatically (not manually called in each handler)
   3. Admin can view recent audit events in a dashboard with filtering
   4. E2E tests verify audit capture for representative CRUD operations
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 **UI hint**: yes
 
 ### Phase 3: Data Model Unification
@@ -67,7 +79,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   3. Translation glue code (`organization_id` <-> `tenant_id`) is removed
   4. All existing records survive migration with zero data loss
   5. All tests pass against the unified schema
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 
 ### Phase 4: TypeSpec/OpenAPI Reconciliation
 **Goal**: All 6 custom modules have TypeSpec definitions and auto-generated SDK hooks
@@ -78,7 +94,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   2. `cd specs/api && bun run build` produces OpenAPI including all custom module endpoints
   3. SDK auto-generates React Query hooks for all custom modules (no manual fetch calls)
   4. OpenAPI spec documents every endpoint in the system (base + custom)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 
 ### Phase 5: Account & Admin App Hardening
 **Goal**: Account and admin apps have E2E test coverage for critical user flows
@@ -88,7 +108,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   1. Account app E2E tests cover booking, settings, and security flows
   2. Admin app E2E tests cover CRUD operations on orgs, associations, and members
   3. All E2E tests pass in CI alongside existing memberry app tests
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 
 ### Phase 6: CI/CD & DevOps Pipeline
 **Goal**: Production-ready build, test, and deploy pipeline in GitHub Actions
@@ -99,7 +123,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   2. Staging deploy triggers automatically on merge to main
   3. Production deploy workflow includes health checks before traffic switch
   4. Canary/health monitoring alerts on production failures
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 
 ### Phase 7: Shared Component Library
 **Goal**: Duplicated UI components extracted into a shared package used by all apps
@@ -109,7 +137,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   1. `packages/ui` contains extracted Radix-UI wrapper components
   2. Component preview exists (Storybook or equivalent) for shared components
   3. All three apps (account, memberry, admin) import from `packages/ui` instead of local copies
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 **UI hint**: yes
 
 ### Phase 8: Frontend Unit Tests
@@ -120,7 +152,11 @@ Memberry is a brownfield healthcare AMS with 9 base modules and 6 custom domain 
   1. Vitest + testing-library configured and running in the memberry app
   2. Critical components (dashboard, dues table, member list) have unit tests
   3. Unit tests run in CI alongside E2E and contract tests
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 00-01-PLAN.md — Deterministic fixtures + 7 stub E2E tests (BR-34 to BR-40)
+- [ ] 00-02-PLAN.md — Unified CI workflow + Hurl contract tests for stub BRs
+- [ ] 00-03-PLAN.md — Husky pre-commit hook with lint-staged
 
 ## Progress
 
