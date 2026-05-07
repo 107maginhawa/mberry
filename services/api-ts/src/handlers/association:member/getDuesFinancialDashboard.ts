@@ -22,5 +22,14 @@ export async function getDuesFinancialDashboard(
 
   const stats = await repo.getDashboardStats(organizationId);
 
-  return ctx.json(stats, 200);
+  // Ensure all numeric fields are plain numbers (not BigInt) for JSON serialization
+  return ctx.json({
+    ...stats,
+    totalCollected: Number(stats.totalCollected),
+    totalOutstanding: Number(stats.totalOutstanding),
+    pendingCount: Number(stats.pendingCount),
+    completedCount: Number(stats.completedCount),
+    totalCount: Number(stats.totalCount),
+    collectionRate: Number(stats.collectionRate),
+  }, 200);
 }

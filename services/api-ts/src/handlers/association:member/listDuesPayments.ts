@@ -33,5 +33,12 @@ export async function listDuesPayments(
     offset,
   });
 
-  return ctx.json({ data: result.data, totalCount: result.total }, 200);
+  // Ensure numeric fields are plain numbers (not BigInt) for JSON serialization
+  const data = result.data.map((p: any) => ({
+    ...p,
+    amount: Number(p.amount),
+    refundedAmount: Number(p.refundedAmount),
+  }));
+
+  return ctx.json({ data, totalCount: Number(result.total) }, 200);
 }

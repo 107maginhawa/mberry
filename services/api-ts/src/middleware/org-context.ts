@@ -24,8 +24,17 @@ import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.sc
  * It then queries the membership table to verify the user belongs to that org
  * and populates ctx.var with the org context.
  */
+/** Paths under /association/* that are user-scoped and don't require org context */
+const ORG_CONTEXT_EXEMPT_PATHS = ['/association/event-lifecycle/my'];
+
 export function orgContextMiddleware() {
   return createMiddleware<{ Variables: Variables }>(async (ctx, next): Promise<void | Response> => {
+    // Skip org-context for user-scoped endpoints (e.g. "my events")
+    if (ORG_CONTEXT_EXEMPT_PATHS.some((p) => ctx.req.path.endsWith(p) || ctx.req.path === p)) {
+      await next();
+      return;
+    }
+
     const user = ctx.get('user');
     if (!user) {
       return ctx.json({ error: 'Authentication required' }, 401);

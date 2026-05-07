@@ -52,19 +52,22 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: config, isLoading } = useQuery(getDuesConfigOptions({ path: { duesConfigId: orgId } }) as any) as { data: any; isLoading: boolean }
 
+  const hasConfig = config && config.defaultAmount != null
+
   useEffect(() => {
-    if (config) {
+    if (hasConfig) {
       setDefaultAmount((config.defaultAmount / 100).toFixed(2))
-      setCurrency(config.currency)
-      setBillingFrequency(config.billingFrequency)
+      setCurrency(config.currency ?? 'PHP')
+      setBillingFrequency(config.billingFrequency ?? 'annual')
       setDueDateMonth(String(config.dueDateMonth ?? 1))
-      setDueDateDay(String(config.dueDateDay))
-      setGracePeriodDays(String(config.gracePeriodDays))
+      setDueDateDay(String(config.dueDateDay ?? 1))
+      setGracePeriodDays(String(config.gracePeriodDays ?? 30))
       if (config.reminderSchedules?.length > 0) {
         setReminders(config.reminderSchedules)
       }
     }
-  }, [config])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when config existence changes
+  }, [hasConfig])
 
   const saveMutation = useMutation({
     ...updateDuesConfigMutation(),
@@ -88,7 +91,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
 
   return (
     <div className="space-y-8 max-w-2xl">
-      {!config && (
+      {!hasConfig && (
         <p className="text-sm text-muted-foreground">Set up your dues structure to start collecting membership dues.</p>
       )}
 

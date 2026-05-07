@@ -12,24 +12,26 @@ import { Skeleton } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Separator } from '@monobase/ui'
 import { toast } from 'sonner'
-import { Check, ChevronDown, ChevronUp, ClipboardList, MessageSquare, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ClipboardList, X } from 'lucide-react'
 
 interface ApplicationListProps {
   orgId: string
 }
 
-type AppStatus = 'pending' | 'approved' | 'rejected' | 'info_requested' | 'all'
+// TypeSpec ApplicationStatus enum values: submitted, underReview, approved, denied, waitlisted
+type AppStatus = 'submitted' | 'underReview' | 'approved' | 'denied' | 'waitlisted' | 'all'
 
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
-  pending: { label: 'Pending', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
+  submitted: { label: 'Pending', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
+  underReview: { label: 'Under Review', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
   approved: { label: 'Approved', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]' },
-  rejected: { label: 'Rejected', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)]' },
-  info_requested: { label: 'Info Requested', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
+  denied: { label: 'Denied', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)]' },
+  waitlisted: { label: 'Waitlisted', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
 }
 
 export function ApplicationList({ orgId }: ApplicationListProps) {
   const queryClient = useQueryClient()
-  const [statusFilter, setStatusFilter] = useState<AppStatus>('pending')
+  const [statusFilter, setStatusFilter] = useState<AppStatus>('submitted')
   const [sortBy, setSortBy] = useState<'date' | 'name'>('date')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
@@ -80,17 +82,13 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
     mutate: ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
       if (status === 'approved') {
         approveMutation.mutate({ path: { applicationId: appId } })
-      } else if (status === 'rejected') {
-        denyMutation.mutate({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
-      } else if (status === 'info_requested') {
+      } else if (status === 'denied') {
         denyMutation.mutate({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
       }
     },
     mutateAsync: async ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
       if (status === 'approved') {
         return approveMutation.mutateAsync({ path: { applicationId: appId } })
-      } else if (status === 'rejected') {
-        return denyMutation.mutateAsync({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
       } else {
         return denyMutation.mutateAsync({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
       }
@@ -109,10 +107,11 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Applications</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="info_requested">Info Requested</SelectItem>
+            <SelectItem value="submitted">Pending</SelectItem>
+            <SelectItem value="underReview">Under Review</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="denied">Denied</SelectItem>
+            <SelectItem value="waitlisted">Waitlisted</SelectItem>
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'date' | 'name')}>
@@ -129,7 +128,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
             {applications.length} result{applications.length !== 1 ? 's' : ''}
           </span>
         )}
-        {selectedIds.size > 0 && statusFilter === 'pending' && (
+        {selectedIds.size > 0 && statusFilter === 'submitted' && (
           <Button
             size="sm"
             onClick={async () => {
@@ -163,13 +162,13 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
         <div className="space-y-3">
           {applications.map((app: any) => (
             <div key={app.id} className="flex items-start gap-3">
-              {statusFilter === 'pending' && (
+              {statusFilter === 'submitted' && (
                 <input
                   type="checkbox"
                   checked={selectedIds.has(app.id)}
                   onChange={(e) => {
                     const next = new Set(selectedIds)
-                    e.target.checked ? next.add(app.id) : next.delete(app.id)
+                    if (e.target.checked) { next.add(app.id) } else { next.delete(app.id) }
                     setSelectedIds(next)
                   }}
                   className="mt-5 h-4 w-4 rounded border-gray-300"
@@ -201,34 +200,21 @@ interface ApplicationCardProps {
 function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [rejectMode, setRejectMode] = useState(false)
-  const [infoMode, setInfoMode] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
-  const [infoReason, setInfoReason] = useState('')
 
   const badge = STATUS_BADGE[app.status] ?? STATUS_BADGE['pending']!
-  const canAct = ['pending', 'info_requested'].includes(app.status)
+  const canAct = ['submitted', 'underReview'].includes(app.status)
 
   function handleApprove() {
     setRejectMode(false)
-    setInfoMode(false)
     onReview('approved')
   }
 
-  function handleReject() {
+  function handleDeny() {
     if (!rejectMode) {
-      setInfoMode(false)
       setRejectMode(true)
     } else if (rejectReason.trim()) {
-      onReview('rejected', rejectReason)
-    }
-  }
-
-  function handleInfo() {
-    if (!infoMode) {
-      setRejectMode(false)
-      setInfoMode(true)
-    } else if (infoReason.trim()) {
-      onReview('info_requested', infoReason)
+      onReview('denied', rejectReason)
     }
   }
 
@@ -287,31 +273,16 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
             </div>
           )}
 
-          {/* Reject reason textarea */}
+          {/* Denial reason textarea */}
           {rejectMode && (
             <div className="space-y-2">
               <Separator />
-              <p className="text-sm font-medium">Reason for rejection</p>
+              <p className="text-sm font-medium">Reason for denial</p>
               <textarea
                 className="w-full border rounded-md px-3 py-2 text-sm min-h-[72px] resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder="Explain why this application is being rejected..."
+                placeholder="Explain why this application is being denied..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                autoFocus
-              />
-            </div>
-          )}
-
-          {/* Info request textarea */}
-          {infoMode && (
-            <div className="space-y-2">
-              <Separator />
-              <p className="text-sm font-medium">Information needed</p>
-              <textarea
-                className="w-full border rounded-md px-3 py-2 text-sm min-h-[72px] resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder="Specify what additional information is required..."
-                value={infoReason}
-                onChange={(e) => setInfoReason(e.target.value)}
                 autoFocus
               />
             </div>
@@ -332,26 +303,17 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
               <Button
                 size="sm"
                 variant={rejectMode ? 'destructive' : 'outline'}
-                onClick={handleReject}
+                onClick={handleDeny}
                 disabled={isPending || (rejectMode && !rejectReason.trim())}
               >
                 <X className="h-3.5 w-3.5 mr-1" />
-                {rejectMode ? 'Confirm Reject' : 'Reject'}
+                {rejectMode ? 'Confirm Deny' : 'Deny'}
               </Button>
-              <Button
-                size="sm"
-                variant={infoMode ? 'default' : 'outline'}
-                onClick={handleInfo}
-                disabled={isPending || (infoMode && !infoReason.trim())}
-              >
-                <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                {infoMode ? 'Send Request' : 'Request Info'}
-              </Button>
-              {(rejectMode || infoMode) && (
+              {rejectMode && (
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => { setRejectMode(false); setInfoMode(false) }}
+                  onClick={() => setRejectMode(false)}
                   disabled={isPending}
                 >
                   Cancel

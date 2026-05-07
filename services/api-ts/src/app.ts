@@ -329,6 +329,80 @@ export function createApp(config: Config): App {
     return ctx.json(updated, 200);
   });
 
+  // Officer dashboard — membership summary for an org (hand-wired route)
+  app.get('/membership/members/:orgId', authMiddleware(), async (ctx) => {
+    const db = ctx.get('database') as any;
+    const orgId = ctx.req.param('orgId');
+    const { memberships } = await import('@/handlers/association:member/repos/membership.schema');
+    const { persons } = await import('@/handlers/person/repos/person.schema');
+    const { eq } = await import('drizzle-orm');
+
+    const rows = await db
+      .select({
+        id: memberships.id,
+        personId: memberships.personId,
+        firstName: persons.firstName,
+        lastName: persons.lastName,
+        status: memberships.status,
+        memberNumber: memberships.memberNumber,
+        duesExpiryDate: memberships.duesExpiryDate,
+        categoryId: memberships.categoryId,
+      })
+      .from(memberships)
+      .innerJoin(persons, eq(memberships.personId, persons.id))
+      .where(eq(memberships.organizationId, orgId));
+
+    return ctx.json({ data: rows }, 200);
+  });
+
+  // Officer dashboard — applications summary for an org (hand-wired route)
+  app.get('/membership/applications/:orgId', authMiddleware(), async (ctx) => {
+    const db = ctx.get('database') as any;
+    const orgId = ctx.req.param('orgId');
+    const statusFilter = ctx.req.query('status');
+    const { membershipApplications } = await import('@/handlers/association:member/repos/membership.schema');
+    const { eq, and } = await import('drizzle-orm');
+
+    const conditions = [eq(membershipApplications.organizationId, orgId)];
+    if (statusFilter) {
+      conditions.push(eq(membershipApplications.status, statusFilter as any));
+    }
+
+    const rows = await db
+      .select()
+      .from(membershipApplications)
+      .where(and(...conditions));
+
+    return ctx.json({ data: rows }, 200);
+  });
+
+  // Officer dashboard — dues dashboard summary for an org (hand-wired route)
+  app.get('/dues/dashboard/:orgId', authMiddleware(), async (ctx) => {
+    const orgId = ctx.req.param('orgId');
+    const db = ctx.get('database') as any;
+    const { DuesRepository } = await import('@/handlers/dues/repos/dues.repo');
+    const repo = new DuesRepository(db);
+    const stats = await repo.getDashboardStats(orgId);
+
+    // Also count upcoming activities from events
+    const { events } = await import('@/handlers/association:operations/repos/events.schema');
+    const { eq, gte, and } = await import('drizzle-orm');
+    const { sql } = await import('drizzle-orm');
+    const [activityCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(events)
+      .where(and(eq(events.organizationId, orgId), gte(events.startDate, new Date())));
+
+    return ctx.json({
+      data: {
+        ...stats,
+        totalCollected: Number(stats.totalCollected),
+        totalOutstanding: Number(stats.totalOutstanding),
+        upcomingActivities: Number(activityCount?.count ?? 0),
+      }
+    }, 200);
+  });
+
   // Officer role check (auth required)
   app.get('/persons/me/officer-role/:orgId', authMiddleware(), async (ctx) => {
     const { getMyOfficerRole } = await import('@/handlers/association:member/getMyOfficerRole');

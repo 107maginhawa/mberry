@@ -98,7 +98,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
                 <tr key={p.id} className={`hover:bg-muted/50 cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
                   <td className="px-3 py-2 text-body-sm tabular-nums">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</td>
                   <td className="px-3 py-2 text-mono tabular-nums">{p.receiptNumber}</td>
-                  <td className="px-3 py-2 text-mono tabular-nums">{formatCents(p.amount, p.currency)}</td>
+                  <td className="px-3 py-2 text-mono tabular-nums">{formatCents(Number(p.amount), p.currency)}</td>
                   <td className="px-3 py-2 text-body-sm">{METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}</td>
                   <td className="px-3 py-2">
                     <Badge variant="secondary" className={STATUS_COLORS[p.status] ?? ''}>

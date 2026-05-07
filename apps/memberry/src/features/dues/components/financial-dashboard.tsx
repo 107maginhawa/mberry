@@ -30,8 +30,8 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
       value: `${data?.collectionRate ?? 0}%`,
       color: (data?.collectionRate ?? 0) > 80 ? 'text-green-600' : (data?.collectionRate ?? 0) > 50 ? 'text-yellow-600' : 'text-red-600',
     },
-    { label: 'Total Collected', value: formatCents(data?.totalCollected ?? 0), color: 'text-foreground' },
-    { label: 'Outstanding', value: formatCents(data?.totalOutstanding ?? 0), color: 'text-foreground' },
+    { label: 'Total Collected', value: formatCents(Number(data?.totalCollected ?? 0)), color: 'text-foreground' },
+    { label: 'Outstanding', value: formatCents(Number(data?.totalOutstanding ?? 0)), color: 'text-foreground' },
     { label: 'Pending Payments', value: String(data?.pendingCount ?? 0), color: 'text-foreground' },
   ]
 
