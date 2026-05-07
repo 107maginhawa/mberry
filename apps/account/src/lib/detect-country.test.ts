@@ -3,18 +3,38 @@ import { detectCountry } from './detect-country'
 
 describe('detectCountry', () => {
   let originalNavigator: any
+  let originalIntl: typeof Intl
 
   beforeEach(() => {
     originalNavigator = global.navigator
+    originalIntl = global.Intl
     // @ts-ignore
     global.navigator = {
       language: undefined,
       languages: undefined
     }
+    // Mock Intl so timezone detection returns UTC (no country mapping → fallback)
+    Object.defineProperty(global, 'Intl', {
+      value: {
+        ...originalIntl,
+        DateTimeFormat: class {
+          resolvedOptions() {
+            return { timeZone: 'UTC' }
+          }
+        }
+      },
+      writable: true,
+      configurable: true
+    })
   })
 
   afterEach(() => {
     global.navigator = originalNavigator
+    Object.defineProperty(global, 'Intl', {
+      value: originalIntl,
+      writable: true,
+      configurable: true
+    })
   })
 
   test('returns fallback when no locale or timezone available', () => {

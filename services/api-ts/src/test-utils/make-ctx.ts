@@ -86,6 +86,40 @@ export function makeCtx(overrides: Record<string, any> = {}) {
 // ─── Repository Stubs ────────────────────────────────────
 
 /**
+ * Pristine prototype snapshots. The FIRST stubRepo call for a class saves
+ * all methods before any modification. restoreRepo() uses this to fully
+ * undo cross-file prototype pollution caused by Bun's parallel test execution.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+const pristinePrototypes = new WeakMap<Function, Map<string, (...args: any[]) => any>>();
+
+function ensurePristine<T extends new (...args: any[]) => any>(RepoClass: T) {
+  if (!pristinePrototypes.has(RepoClass)) {
+    const originals = new Map<string, (...args: any[]) => any>();
+    for (const name of Object.getOwnPropertyNames(RepoClass.prototype)) {
+      const val = RepoClass.prototype[name];
+      if (typeof val === 'function' && name !== 'constructor') {
+        originals.set(name, val);
+      }
+    }
+    pristinePrototypes.set(RepoClass, originals);
+  }
+}
+
+/**
+ * Restore ALL prototype methods to their pristine (pre-stub) state.
+ * Use in beforeEach() of repo unit tests to undo cross-file pollution.
+ */
+export function restoreRepo<T extends new (...args: any[]) => any>(RepoClass: T) {
+  const originals = pristinePrototypes.get(RepoClass);
+  if (originals) {
+    for (const [name, fn] of originals) {
+      RepoClass.prototype[name] = fn;
+    }
+  }
+}
+
+/**
  * Stub methods on a repository class prototype for testing.
  * Returns the mock functions for assertion.
  *
@@ -102,6 +136,7 @@ export function stubRepo<T extends new (...args: any[]) => any>(
   RepoClass: T,
   methods: Partial<Record<keyof InstanceType<T>, (...args: any[]) => any>>,
 ): Record<string, { mockRestore: () => void }> {
+  ensurePristine(RepoClass);
   const mocks: Record<string, { mockRestore: () => void }> = {};
 
   for (const [name, fn] of Object.entries(methods)) {

@@ -8,6 +8,39 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { DuesRepository } from './dues.repo';
+import { restoreRepo } from '@/test-utils/make-ctx';
+
+// ---------------------------------------------------------------------------
+// Prototype isolation — Bun runs test files in-process and in parallel.
+// Handler tests use stubRepo() which mutates DuesRepository.prototype.
+// restoreRepo() restores ALL methods from a pristine snapshot captured
+// on the first stubRepo() call (before any modification). We also save
+// a direct reference to each restored method so that even if a parallel
+// file re-stubs the prototype between beforeEach and the test body,
+// the test can call the real method via the saved reference.
+// ---------------------------------------------------------------------------
+let _restored: Record<string, (...args: any[]) => any> = {};
+beforeEach(() => {
+  restoreRepo(DuesRepository);
+  // Snapshot restored methods — immune to subsequent prototype mutations
+  _restored = {};
+  for (const name of Object.getOwnPropertyNames(DuesRepository.prototype)) {
+    const val = (DuesRepository.prototype as any)[name];
+    if (typeof val === 'function' && name !== 'constructor') {
+      _restored[name] = val;
+    }
+  }
+});
+
+/** Create a DuesRepository with restored methods as own properties,
+ *  immune to prototype re-stubbing by parallel test files. */
+function safeRepo(db: any): DuesRepository {
+  const repo = new DuesRepository(db);
+  for (const [name, fn] of Object.entries(_restored)) {
+    (repo as any)[name] = fn.bind(repo);
+  }
+  return repo;
+}
 
 // ---------------------------------------------------------------------------
 // Factories
@@ -156,7 +189,7 @@ describe('DuesRepository.getConfig', () => {
   test('returns config for an organization', async () => {
     const cfg = makeConfig();
     const db = makeDb({ selectRows: [cfg] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getConfig('org-1');
     expect(result).toBeDefined();
@@ -167,7 +200,7 @@ describe('DuesRepository.getConfig', () => {
 
   test('returns undefined when no config exists', async () => {
     const db = makeDb({ selectRows: [] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getConfig('org-1');
     expect(result).toBeUndefined();
@@ -182,7 +215,7 @@ describe('DuesRepository.upsertConfig', () => {
   test('creates a new config and returns it', async () => {
     const cfg = makeConfig();
     const db = makeDb({ insertRow: cfg });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.upsertConfig('org-1', {
       defaultAmount: 5000,
@@ -198,7 +231,7 @@ describe('DuesRepository.upsertConfig', () => {
   test('updates existing config via onConflict and returns it', async () => {
     const updated = makeConfig({ defaultAmount: 7500, updatedAt: new Date() });
     const db = makeDb({ insertRow: updated });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.upsertConfig('org-1', {
       defaultAmount: 7500,
@@ -219,7 +252,7 @@ describe('DuesRepository.listFunds', () => {
   test('returns active funds for an organization', async () => {
     const fund = makeFund();
     const db = makeDb({ selectRows: [fund] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listFunds('org-1');
     expect(result).toHaveLength(1);
@@ -229,7 +262,7 @@ describe('DuesRepository.listFunds', () => {
 
   test('returns empty array when no funds exist', async () => {
     const db = makeDb({ selectRows: [] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listFunds('org-1');
     expect(result).toEqual([]);
@@ -264,7 +297,7 @@ describe('DuesRepository.replaceFunds', () => {
       },
     };
 
-    const repo = new DuesRepository(db);
+    const repo = safeRepo(db);
     await repo.replaceFunds('org-1', [
       { name: 'New Fund', percentage: '100.00', sortOrder: 0 },
     ]);
@@ -296,7 +329,7 @@ describe('DuesRepository.replaceFunds', () => {
       },
     };
 
-    const repo = new DuesRepository(db);
+    const repo = safeRepo(db);
     await repo.replaceFunds('org-1', []);
 
     expect(updateCalled).toBe(true);
@@ -315,7 +348,7 @@ describe('DuesRepository.listPayments', () => {
 
     // listPayments uses Promise.all with two selects
     const db = makeDb({ selectRowsSets: [[payment], [countRow]] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listPayments({ organizationId: 'org-1' });
     expect(result.data).toHaveLength(1);
@@ -325,7 +358,7 @@ describe('DuesRepository.listPayments', () => {
 
   test('returns empty data and zero total when no payments', async () => {
     const db = makeDb({ selectRowsSets: [[], [{ count: 0 }]] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listPayments({ organizationId: 'org-1' });
     expect(result.data).toEqual([]);
@@ -334,7 +367,7 @@ describe('DuesRepository.listPayments', () => {
 
   test('supports personId filter without error', async () => {
     const db = makeDb({ selectRowsSets: [[], [{ count: 0 }]] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listPayments({
       organizationId: 'org-1',
@@ -345,7 +378,7 @@ describe('DuesRepository.listPayments', () => {
 
   test('supports status filter without error', async () => {
     const db = makeDb({ selectRowsSets: [[], [{ count: 0 }]] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listPayments({
       organizationId: 'org-1',
@@ -356,7 +389,7 @@ describe('DuesRepository.listPayments', () => {
 
   test('supports method filter without error', async () => {
     const db = makeDb({ selectRowsSets: [[], [{ count: 0 }]] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listPayments({
       organizationId: 'org-1',
@@ -367,7 +400,7 @@ describe('DuesRepository.listPayments', () => {
 
   test('supports date range filters without error', async () => {
     const db = makeDb({ selectRowsSets: [[], [{ count: 0 }]] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listPayments({
       organizationId: 'org-1',
@@ -379,7 +412,7 @@ describe('DuesRepository.listPayments', () => {
 
   test('supports pagination via limit and offset', async () => {
     const db = makeDb({ selectRowsSets: [[], [{ count: 0 }]] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.listPayments({
       organizationId: 'org-1',
@@ -398,7 +431,7 @@ describe('DuesRepository.getPayment', () => {
   test('returns payment when found', async () => {
     const payment = makePayment();
     const db = makeDb({ selectRows: [payment] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getPayment('pay-1');
     expect(result).toBeDefined();
@@ -408,7 +441,7 @@ describe('DuesRepository.getPayment', () => {
 
   test('returns undefined when payment not found', async () => {
     const db = makeDb({ selectRows: [] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getPayment('missing-id');
     expect(result).toBeUndefined();
@@ -423,7 +456,7 @@ describe('DuesRepository.createPayment', () => {
   test('inserts and returns payment record', async () => {
     const payment = makePayment();
     const db = makeDb({ insertRow: payment });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.createPayment({
       organizationId: 'org-1',
@@ -448,7 +481,7 @@ describe('DuesRepository.updatePaymentStatus', () => {
   test('updates status and returns updated payment', async () => {
     const updated = makePayment({ status: 'refunded' });
     const db = makeDb({ updateRow: updated });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.updatePaymentStatus('pay-1', 'refunded');
     expect(result.status).toBe('refunded');
@@ -470,7 +503,7 @@ describe('DuesRepository.updatePaymentStatus', () => {
       }),
     };
 
-    const repo = new DuesRepository(db);
+    const repo = safeRepo(db);
     const result = await repo.updatePaymentStatus('pay-1', 'refunded', {
       refundedAmount: 5000,
     } as any);
@@ -499,7 +532,7 @@ describe('DuesRepository.createFundAllocations', () => {
       },
     };
 
-    const repo = new DuesRepository(db);
+    const repo = safeRepo(db);
     await repo.createFundAllocations([
       makeAllocation() as any,
       makeAllocation({ id: 'alloc-2', fundId: 'fund-2' }) as any,
@@ -520,7 +553,7 @@ describe('DuesRepository.createFundAllocations', () => {
       },
     };
 
-    const repo = new DuesRepository(db);
+    const repo = safeRepo(db);
     await repo.createFundAllocations([]);
     expect(insertCalled).toBe(false);
   });
@@ -534,7 +567,7 @@ describe('DuesRepository.findRecentPaymentForPerson', () => {
   test('returns recent payment when found within time window', async () => {
     const payment = makePayment({ createdAt: new Date() });
     const db = makeDb({ selectRows: [payment] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.findRecentPaymentForPerson('org-1', 'person-1', 5);
     expect(result).toBeDefined();
@@ -543,7 +576,7 @@ describe('DuesRepository.findRecentPaymentForPerson', () => {
 
   test('returns undefined when no recent payment exists', async () => {
     const db = makeDb({ selectRows: [] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.findRecentPaymentForPerson('org-1', 'person-1', 5);
     expect(result).toBeUndefined();
@@ -551,7 +584,7 @@ describe('DuesRepository.findRecentPaymentForPerson', () => {
 
   test('uses default 5-minute window when withinMinutes not specified', async () => {
     const db = makeDb({ selectRows: [] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     // Should not throw even without the third argument
     const result = await repo.findRecentPaymentForPerson('org-1', 'person-1');
@@ -566,7 +599,7 @@ describe('DuesRepository.findRecentPaymentForPerson', () => {
 describe('DuesRepository.getNextReceiptSequence', () => {
   test('returns count + 1 based on receipt number pattern', async () => {
     const db = makeDb({ selectRows: [{ count: 5 }] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getNextReceiptSequence('org-1', 2026);
     expect(result).toBe(6);
@@ -574,7 +607,7 @@ describe('DuesRepository.getNextReceiptSequence', () => {
 
   test('returns 1 when no receipts exist for the year', async () => {
     const db = makeDb({ selectRows: [{ count: 0 }] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getNextReceiptSequence('org-1', 2026);
     expect(result).toBe(1);
@@ -595,7 +628,7 @@ describe('DuesRepository.getDashboardStats', () => {
       totalCount: 12,
     };
     const db = makeDb({ selectRows: [statsRow] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getDashboardStats('org-1');
     expect(result.totalCollected).toBe(50000);
@@ -615,7 +648,7 @@ describe('DuesRepository.getDashboardStats', () => {
       totalCount: 0,
     };
     const db = makeDb({ selectRows: [emptyStats] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getDashboardStats('org-1');
     expect(result.totalCollected).toBe(0);
@@ -628,7 +661,7 @@ describe('DuesRepository.getDashboardStats', () => {
 
   test('handles null stats row gracefully', async () => {
     const db = makeDb({ selectRows: [undefined] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.getDashboardStats('org-1');
     expect(result.totalCollected).toBe(0);
@@ -648,7 +681,7 @@ describe('DuesRepository.reportCollectionSummary', () => {
       { month: '2026-02', method: 'cash', count: 2, total: 10000 },
     ];
     const db = makeDb({ selectRows: rows });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.reportCollectionSummary(
       'org-1',
@@ -662,7 +695,7 @@ describe('DuesRepository.reportCollectionSummary', () => {
 
   test('returns empty array when no data in date range', async () => {
     const db = makeDb({ selectRows: [] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.reportCollectionSummary(
       'org-1',
@@ -698,7 +731,7 @@ describe('DuesRepository.reportFundBreakdown', () => {
       },
     ];
     const db = makeDb({ selectRows: rows });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.reportFundBreakdown(
       'org-1',
@@ -713,7 +746,7 @@ describe('DuesRepository.reportFundBreakdown', () => {
 
   test('returns empty array when no allocations in date range', async () => {
     const db = makeDb({ selectRows: [] });
-    const repo = new DuesRepository(db as any);
+    const repo = safeRepo(db as any);
 
     const result = await repo.reportFundBreakdown(
       'org-1',

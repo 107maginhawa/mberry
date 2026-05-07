@@ -56,9 +56,23 @@ describe('useDetectCountry', () => {
       configurable: true
     })
 
+    // Mock Intl so timezone detection returns UTC (no country mapping → fallback)
+    Object.defineProperty(global, 'Intl', {
+      value: {
+        ...originalIntl,
+        DateTimeFormat: class {
+          resolvedOptions() {
+            return { timeZone: 'UTC' }
+          }
+        }
+      },
+      writable: true,
+      configurable: true
+    })
+
     const { result } = renderHook(() => useDetectCountry({ fallback: 'GB' as Country }))
-    // Since 'en' without region defaults to fallback
-    expect(['GB', 'CA']).toContain(result.current) // Could be GB (fallback) or CA (default)
+    // Since 'en' without region and UTC timezone → fallback
+    expect(result.current).toBe('GB')
   })
 
   test('returns default fallback (CA) when no fallback specified', () => {
