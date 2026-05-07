@@ -59,7 +59,7 @@ export const duesConfigs = pgTable('dues_config', {
   effectiveDate: date('effective_date').notNull(),
   status: duesConfigStatusEnum('status').default('active').notNull(),
 }, (table) => ({
-  orgIdx: index('dues_config_org_idx').on(table.organizationId),
+  orgIdx: index('dues_config_legacy_org_idx').on(table.organizationId),
 }));
 
 /** Dues invoice issued to a member for a renewal period */

@@ -201,7 +201,7 @@ function OrgCard({ membership: m }: { membership: any }) {
   return (
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
       <Link
-        to="/org/$orgId/members"
+        to="/org/$orgId/home"
         params={{ orgId: m.orgId }}
         className="block hover:opacity-80 transition-opacity"
       >

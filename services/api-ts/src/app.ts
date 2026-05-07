@@ -350,6 +350,9 @@ export function createApp(config: Config): App {
     return ctx.json({ role: admin.role, email: admin.email, name: admin.name }, 200);
   });
 
+  // Auth middleware for all association routes (sets user/session on context)
+  app.use('/association/*', authMiddleware());
+
   // Register API routes
   registerOpenAPIRoutes(app as any);
 
