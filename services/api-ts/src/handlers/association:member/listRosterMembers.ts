@@ -1,8 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
-import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
 import type { ListRosterMembersQuery } from '@/generated/openapi/validators';
-import { MembershipRepository } from './repos/membership.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
 /**
  * listRosterMembers
@@ -18,22 +18,45 @@ export async function listRosterMembers(
 
   const query = ctx.req.valid('query');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
-  const repo = new MembershipRepository(db, logger);
+  const repo = new MembershipRepository(db);
 
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 20;
   const offset = (page - 1) * pageSize;
 
-  const result = await repo.findManyWithPagination(
-    {
-      organizationId: query.organizationId,
-      status: query.status,
-      tierId: query.categoryId,
-      q: query.q ?? query.search,
-    },
-    { pagination: { offset, limit: pageSize } },
-  );
+  const result = await repo.listMembers({
+    organizationId: query.organizationId,
+    status: query.status,
+    categoryId: query.categoryId,
+    search: query.q ?? query.search,
+    limit: pageSize,
+    offset,
+  });
 
-  return ctx.json(result, 200);
+  // Flatten nested { membership, person, category } for frontend
+  const data = result.data.map((row: any) => {
+    const m = row.membership || row;
+    const p = row.person || {};
+    const c = row.category || {};
+    return {
+      id: m.id,
+      personId: m.personId || p.id,
+      firstName: p.firstName || null,
+      lastName: p.lastName || null,
+      name: [p.firstName, p.lastName].filter(Boolean).join(' ') || null,
+      email: p.email || null,
+      avatar: p.avatar || null,
+      memberNumber: m.memberNumber || null,
+      categoryId: m.categoryId || null,
+      categoryName: c.name || null,
+      status: m.status || 'pending',
+      duesExpiryDate: m.duesExpiryDate || null,
+      gracePeriodDays: m.gracePeriodDays || 30,
+      joinedAt: m.joinedAt || m.createdAt || null,
+      startDate: m.startDate || null,
+      organizationId: m.organizationId || null,
+    };
+  });
+
+  return ctx.json({ data, totalCount: result.total }, 200);
 }
