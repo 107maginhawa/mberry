@@ -24,8 +24,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Officer records a dues payment',
     modules: ['dues', 'membership'],
     sideEffects: ['Payment record created', 'Membership expiry extended', 'Member status recalculated'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/dues/flow-01.payment-membership-extension.test.ts'],
+    status: 'covered',
   },
   {
     id: 'FLOW-02',
@@ -33,8 +33,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Member completes training event',
     modules: ['training', 'events'],
     sideEffects: ['Attendance confirmed', 'Credit entry created', 'Credit summary updated'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/training/flow-02.training-credit-award.test.ts'],
+    status: 'covered',
   },
   {
     id: 'FLOW-03',
@@ -42,8 +42,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Officer approves membership application',
     modules: ['membership', 'invite'],
     sideEffects: ['Application status updated', 'Membership record created', 'Welcome notification sent'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/membership/flow-03.application-membership.test.ts'],
+    status: 'partial', // Codex review: welcome notification not implemented in handler
   },
   {
     id: 'FLOW-04',
@@ -51,8 +51,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Member casts vote in election',
     modules: ['elections'],
     sideEffects: ['Vote recorded', 'Tally updated', 'Winner determined when voting closes'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/elections/flow-04.election-vote-tally.test.ts'],
+    status: 'partial', // Codex review: tally computation + winner determination not implemented
   },
   {
     id: 'FLOW-05',
@@ -60,8 +60,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Officer creates event with registration',
     modules: ['events', 'communications'],
     sideEffects: ['Event record created', 'Registration slots available', 'Announcement optionally sent'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/events/flow-05.event-creation-registration.test.ts'],
+    status: 'covered',
   },
   {
     id: 'FLOW-06',
@@ -69,8 +69,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Officer configures dues for org',
     modules: ['dues', 'membership'],
     sideEffects: ['Dues config saved', 'Fund allocation percentages set', 'Invoice amounts reflect new config'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/dues/flow-06.dues-config-invoices.test.ts'],
+    status: 'covered',
   },
   {
     id: 'FLOW-07',
@@ -78,8 +78,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Officer bulk imports members',
     modules: ['membership', 'person', 'invite'],
     sideEffects: ['Existing members matched by license number', 'New accounts created for unmatched', 'Invitations sent'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/membership/flow-07.member-import.test.ts'],
+    status: 'partial', // Codex review: license matching + invite paths not in handler
   },
   {
     id: 'FLOW-08',
@@ -87,8 +87,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Officer term created for member',
     modules: ['membership'],
     sideEffects: ['Officer term record created', 'Member gains officer privileges', 'Dashboard access unlocked'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/membership/flow-08.addmember-defaults.test.ts'],
+    status: 'partial', // Codex review: officer-term + role-grant logic not in addMember handler
   },
   {
     id: 'FLOW-09',
@@ -96,8 +96,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Member requests certificate for event',
     modules: ['certificates', 'events', 'training'],
     sideEffects: ['Eligibility verified (attendance + credits)', 'Certificate generated', 'Certificate record stored'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/certificates/flow-09.certificate-retrieval.test.ts'],
+    status: 'partial',
   },
   {
     id: 'FLOW-10',
@@ -105,8 +105,8 @@ export const flowRegistry: FlowEntry[] = [
     trigger: 'Dues expiry date passes without payment',
     modules: ['membership', 'dues'],
     sideEffects: ['Status changes to expired/lapsed', 'Grace period starts', 'Member notified'],
-    testFiles: [],
-    status: 'untested',
+    testFiles: ['services/api-ts/src/handlers/membership/flow-10.membership-status-transitions.test.ts'],
+    status: 'partial', // Codex review: auto-expiry/downgrade not implemented, only manual transitions
   },
 ]
 

@@ -2279,6 +2279,65 @@ const client = await db
 
 ---
 
+## TDD Workflow
+
+All new features and bug fixes follow a test-first development cycle. See [VERTICAL_TDD.md](./VERTICAL_TDD.md) for the full protocol.
+
+### Test Layers
+
+| Layer | Tool | Location | Run |
+|-------|------|----------|-----|
+| Backend unit/domain | Bun test | `services/api-ts/src/**/*.test.ts` (co-located) | `cd services/api-ts && bun test` |
+| Frontend components | Vitest + RTL | `apps/memberry/src/**/*.test.tsx` (co-located) | `cd apps/memberry && bun run test:components` |
+| API contracts | Hurl | `specs/api/tests/contract/` | `bun run test:contract` |
+| E2E journeys | Playwright | `apps/memberry/tests/e2e/` | `cd apps/memberry && bun run test:e2e` |
+| Flow integration | Bun test | `services/api-ts/src/handlers/*/flow-*.test.ts` | `cd services/api-ts && bun test` |
+
+### Writing a New Handler Test
+
+1. Create test file co-located with handler: `myHandler.test.ts` or `flow-NN.description.test.ts`
+2. Import test helpers: `import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx'`
+3. Stub repository methods with `stubRepo(RepoClass, { method: async () => result })`
+4. Call `restoreRepo(RepoClass)` in `beforeEach` to prevent cross-file prototype pollution
+5. Call `mockRestore()` on all stubs in `afterEach`
+
+```typescript
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { myHandler } from './myHandler';
+import { MyRepository } from './repos/my.repo';
+
+describe('myHandler', () => {
+  let mocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => restoreRepo(MyRepository));
+  afterEach(() => { if (mocks) Object.values(mocks).forEach(m => m.mockRestore()); });
+
+  test('does the thing', async () => {
+    mocks = stubRepo(MyRepository, {
+      findById: async () => ({ id: '1', name: 'Test' }),
+    });
+    const ctx = makeCtx({ _body: { id: '1' }, _params: { orgId: 'org-1' } });
+    const response = await myHandler(ctx);
+    expect(response.status).toBe(200);
+  });
+});
+```
+
+### Registries
+
+- **BR Registry** (`testing/registry/br-registry.ts`): Maps business rules → test files. P0 gaps block CI.
+- **Flow Registry** (`testing/registry/flow-registry.ts`): Maps cross-module chains → integration tests.
+- Run `bun run test:registry` to check coverage. CI gates on P0 untested BRs.
+
+### Naming Convention
+
+- Business rule tests: `br-NN.description.test.ts` (e.g., `br-06.payment-recording.test.ts`)
+- Flow integration tests: `flow-NN.description.test.ts` (e.g., `flow-01.payment-membership-extension.test.ts`)
+- Unit tests: `handlerName.test.ts` (co-located with handler)
+
+---
+
 ## Thank You!
 
 Thank you for contributing to Monobase Application Platform. Your work helps improve healthcare access and user management.
