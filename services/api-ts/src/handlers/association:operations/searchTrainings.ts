@@ -32,5 +32,20 @@ export async function searchTrainings(
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);
 
-  return ctx.json({ data: results, totalCount, limit, offset }, 200);
+  const totalPages = Math.ceil(totalCount / limit);
+  const currentPage = Math.floor(offset / limit) + 1;
+
+  return ctx.json({
+    data: results,
+    pagination: {
+      offset,
+      limit,
+      count: results.length,
+      totalCount,
+      totalPages,
+      currentPage,
+      hasNextPage: currentPage < totalPages,
+      hasPreviousPage: currentPage > 1,
+    },
+  }, 200);
 }

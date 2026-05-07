@@ -17,8 +17,8 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
  * Format an integer amount in cents to a display string.
  * Example: formatCents(10050, 'PHP') → '₱100.50'
  */
-export function formatCents(cents: number | bigint, currency: string = 'PHP'): string {
-  const n = Number(cents);
+export function formatCents(cents: number | bigint | string | null | undefined, currency: string = 'PHP'): string {
+  const n = Number(cents ?? 0);
   const isNegative = n < 0;
   const abs = Math.abs(n);
   const whole = Math.floor(abs / 100);

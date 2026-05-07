@@ -49,14 +49,17 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   const [hasChanges, setHasChanges] = useState(false)
 
   // Config shape from hand-wired endpoint differs from TypeSpec DuesConfig — cast to any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: config, isLoading } = useQuery(getDuesConfigOptions({ path: { duesConfigId: orgId } }) as any) as { data: any; isLoading: boolean }
+   
+  const { data: config, isLoading } = useQuery({
+    ...getDuesConfigOptions({ path: { duesConfigId: orgId } }) as any,
+    select: (res: any) => res?.data ?? res,
+  }) as { data: any; isLoading: boolean }
 
   const hasConfig = config && config.defaultAmount != null
 
   useEffect(() => {
     if (hasConfig) {
-      setDefaultAmount((config.defaultAmount / 100).toFixed(2))
+      setDefaultAmount((Number(config.defaultAmount) / 100).toFixed(2))
       setCurrency(config.currency ?? 'PHP')
       setBillingFrequency(config.billingFrequency ?? 'annual')
       setDueDateMonth(String(config.dueDateMonth ?? 1))
