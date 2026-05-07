@@ -25,6 +25,12 @@ import { trainings, trainingEnrollments } from './handlers/association:operation
 import { notifications } from './handlers/notifs/repos/notification.schema';
 import { persons } from './handlers/person/repos/person.schema';
 import { organizations } from './handlers/platformadmin/repos/platform-admin.schema';
+import { membershipApplications } from './handlers/association:member/repos/membership.schema';
+import { electionNominees, electionVotes } from './handlers/elections/repos/elections.schema';
+import { announcementStats } from './handlers/communications/repos/communications.schema';
+import { duesInvoices } from './handlers/association:member/repos/dues.schema';
+import { personPrivacySettings } from './handlers/person/repos/privacy-settings.schema';
+import { notificationPreferences } from './handlers/person/repos/notification-preferences.schema';
 
 const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://elad-mini@localhost:5432/monobase';
 
@@ -661,6 +667,252 @@ async function seedRich() {
   }
 
   // ═══════════════════════════════════════════════════════════
+  // 8. MEMBERSHIP APPLICATIONS (7)
+  // ═══════════════════════════════════════════════════════════
+
+  console.log('  8. Membership Applications...');
+  const [appCount] = await db.select({ c: count() }).from(membershipApplications)
+    .where(eq(membershipApplications.organizationId, org1.id));
+  if ((appCount?.c ?? 0) > 0) {
+    console.log('    (already seeded, skipping)');
+  } else {
+    const officerPersonId = activeOrg1Members[0]?.personId;
+    // Use persons from end of array who are less likely to already be members
+    const applicantPersons = allPersons.slice(-10);
+    if (applicantPersons.length >= 7 && officerPersonId) {
+      const applicationRows = [
+        { personId: applicantPersons[0]!.id, tierId: regularTier.id, applicationDate: '2026-04-25', status: 'submitted' as const, reviewedBy: null, reviewedAt: null, denialReason: null },
+        { personId: applicantPersons[1]!.id, tierId: regularTier.id, applicationDate: '2026-04-20', status: 'submitted' as const, reviewedBy: null, reviewedAt: null, denialReason: null },
+        { personId: applicantPersons[2]!.id, tierId: associateTier.id, applicationDate: '2026-03-15', status: 'underReview' as const, reviewedBy: officerPersonId, reviewedAt: null, denialReason: null },
+        { personId: applicantPersons[3]!.id, tierId: regularTier.id, applicationDate: '2026-03-10', status: 'approved' as const, reviewedBy: officerPersonId, reviewedAt: new Date('2026-03-12'), denialReason: null },
+        { personId: applicantPersons[4]!.id, tierId: regularTier.id, applicationDate: '2026-02-20', status: 'approved' as const, reviewedBy: officerPersonId, reviewedAt: new Date('2026-02-25'), denialReason: null },
+        { personId: applicantPersons[5]!.id, tierId: associateTier.id, applicationDate: '2026-02-15', status: 'denied' as const, reviewedBy: officerPersonId, reviewedAt: new Date('2026-02-18'), denialReason: 'Incomplete documentation — PRC license number could not be verified against registry records.' },
+        { personId: applicantPersons[6]!.id, tierId: regularTier.id, applicationDate: '2026-01-30', status: 'waitlisted' as const, reviewedBy: officerPersonId, reviewedAt: new Date('2026-02-05'), denialReason: null },
+      ];
+      await db.insert(membershipApplications).values(
+        applicationRows.map(a => ({ organizationId: org1.id, ...a }))
+      );
+      console.log(`    Created ${applicationRows.length} membership applications`);
+    } else {
+      console.log('    (not enough persons for applications, skipping)');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // 9. ELECTION NOMINEES + VOTES
+  // ═══════════════════════════════════════════════════════════
+
+  console.log('  9. Election Nominees + Votes...');
+  const nomineeCountResult = await db.execute(sql`SELECT count(*)::int as c FROM election_nominee`);
+  const nomineeCountRows = (nomineeCountResult as any)?.rows ?? nomineeCountResult;
+  const existingNominees = Number(nomineeCountRows?.[0]?.c ?? 0);
+  if (existingNominees > 0) {
+    console.log('    (already seeded, skipping)');
+  } else {
+    const electionRows = await db.execute(sql`SELECT id, positions, status FROM election WHERE organization_id = ${org1.id} LIMIT 1`);
+    const election = (electionRows as any)?.[0] || (electionRows as any)?.rows?.[0];
+    if (election && activeOrg1Members.length >= 20) {
+      // Update election to published with past dates
+      await db.execute(sql`
+        UPDATE election SET
+          status = 'published',
+          nominations_open_at = '2026-03-01',
+          nominations_close_at = '2026-03-15',
+          voting_open_at = '2026-03-20',
+          voting_close_at = '2026-04-05',
+          published_at = '2026-04-06'
+        WHERE id = ${election.id} AND status = 'draft'
+      `);
+
+      // Parse positions from JSONB
+      const electionPositions: { id: string; title: string }[] = typeof election.positions === 'string'
+        ? JSON.parse(election.positions) : election.positions;
+
+      // Insert 2 nominees per position
+      const nomineeRows: { electionId: string; positionId: string; personId: string; nominatedBy: string; status: 'elected' | 'accepted' }[] = [];
+      for (let pi = 0; pi < Math.min(electionPositions.length, 5); pi++) {
+        const pos = electionPositions[pi]!;
+        const winnerMember = activeOrg1Members[10 + pi * 2];
+        const runnerMember = activeOrg1Members[11 + pi * 2];
+        if (winnerMember && runnerMember) {
+          nomineeRows.push({ electionId: election.id, positionId: pos.id, personId: winnerMember.personId, nominatedBy: activeOrg1Members[0]!.personId, status: 'elected' });
+          nomineeRows.push({ electionId: election.id, positionId: pos.id, personId: runnerMember.personId, nominatedBy: activeOrg1Members[1]!.personId, status: 'accepted' });
+        }
+      }
+
+      if (nomineeRows.length > 0) {
+        const insertedNominees = await db.insert(electionNominees).values(nomineeRows).returning();
+        console.log(`    Created ${insertedNominees.length} election nominees`);
+
+        // Insert votes: 15 voters, each votes on all positions
+        const voters = activeOrg1Members.slice(0, 15);
+        const voteRows: { electionId: string; positionId: string; nomineeId: string; voterId: string }[] = [];
+        for (const voter of voters) {
+          for (let pi = 0; pi < Math.min(electionPositions.length, 5); pi++) {
+            const pos = electionPositions[pi]!;
+            const posNominees = insertedNominees.filter(n => n.positionId === pos.id);
+            if (posNominees.length >= 2) {
+              // 65% chance vote for winner (index 0), 35% for runner-up
+              const nominee = Math.random() < 0.65 ? posNominees[0]! : posNominees[1]!;
+              voteRows.push({ electionId: election.id, positionId: pos.id, nomineeId: nominee.id, voterId: voter.personId });
+            }
+          }
+        }
+        if (voteRows.length > 0) {
+          await db.insert(electionVotes).values(voteRows);
+          console.log(`    Created ${voteRows.length} election votes`);
+        }
+      }
+    } else {
+      console.log('    (no election or not enough members, skipping)');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // 10. ANNOUNCEMENT STATS
+  // ═══════════════════════════════════════════════════════════
+
+  console.log('  10. Announcement Stats...');
+  const [statsCount] = await db.select({ c: count() }).from(announcementStats);
+  if ((statsCount?.c ?? 0) > 0) {
+    console.log('    (already seeded, skipping)');
+  } else {
+    const announcementRows = await db.execute(
+      sql`SELECT id, status FROM announcement WHERE organization_id = ${org1.id}`
+    );
+    const sentAnnouncements = ((announcementRows as any)?.rows ?? (announcementRows as unknown as any[]))
+      .filter((a: any) => a.status === 'sent');
+
+    const statsRows = sentAnnouncements.map((a: any) => ({
+      announcementId: a.id,
+      recipients: 50,
+      inappViews: 35 + Math.floor(Math.random() * 10),
+      pushDelivered: 42 + Math.floor(Math.random() * 8),
+      emailSent: 50,
+      emailOpened: 20 + Math.floor(Math.random() * 10),
+    }));
+
+    if (statsRows.length > 0) {
+      await db.insert(announcementStats).values(statsRows);
+      console.log(`    Created ${statsRows.length} announcement stats`);
+    } else {
+      console.log('    (no sent announcements found, skipping)');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // 11. DUES INVOICES (10)
+  // ═══════════════════════════════════════════════════════════
+
+  console.log('  11. Dues Invoices...');
+  const [invoiceCount] = await db.select({ c: count() }).from(duesInvoices);
+  if ((invoiceCount?.c ?? 0) > 0) {
+    console.log('    (already seeded, skipping)');
+  } else if (activeOrg1Members.length >= 10) {
+    const fundAlloc = (amountCents: number) => [
+      { fundName: 'General Fund', amount: Math.floor(amountCents * 0.50) },
+      { fundName: 'Education Fund', amount: Math.floor(amountCents * 0.30) },
+      { fundName: 'Social Fund', amount: amountCents - Math.floor(amountCents * 0.50) - Math.floor(amountCents * 0.30) },
+    ];
+
+    type InvDef = { memberIdx: number; status: 'generated' | 'sent' | 'paid' | 'overdue' | 'cancelled'; sentAt: Date | null; paidAt: Date | null };
+    const invDefs: InvDef[] = [
+      { memberIdx: 0, status: 'paid', sentAt: new Date('2026-01-05'), paidAt: new Date('2026-01-10') },
+      { memberIdx: 1, status: 'paid', sentAt: new Date('2026-01-05'), paidAt: new Date('2026-01-18') },
+      { memberIdx: 2, status: 'paid', sentAt: new Date('2026-01-05'), paidAt: new Date('2026-01-25') },
+      { memberIdx: 3, status: 'sent', sentAt: new Date('2026-01-05'), paidAt: null },
+      { memberIdx: 4, status: 'sent', sentAt: new Date('2026-01-05'), paidAt: null },
+      { memberIdx: 5, status: 'sent', sentAt: new Date('2026-02-01'), paidAt: null },
+      { memberIdx: 6, status: 'overdue', sentAt: new Date('2026-01-05'), paidAt: null },
+      { memberIdx: 7, status: 'overdue', sentAt: new Date('2026-01-05'), paidAt: null },
+      { memberIdx: 8, status: 'generated', sentAt: null, paidAt: null },
+      { memberIdx: 9, status: 'cancelled', sentAt: null, paidAt: null },
+    ];
+
+    const invoiceRows = invDefs.map((inv, i) => {
+      const member = activeOrg1Members[inv.memberIdx]!;
+      const amountCents = 150000; // ₱1,500
+      return {
+        membershipId: member.id,
+        personId: member.personId,
+        organizationId: org1.id,
+        invoiceNumber: `INV-2026-${String(i + 1).padStart(3, '0')}`,
+        periodStart: '2026-01-01',
+        periodEnd: '2026-12-31',
+        totalAmount: amountCents,
+        fundAllocations: fundAlloc(amountCents),
+        status: inv.status,
+        generatedAt: new Date('2026-01-01'),
+        sentAt: inv.sentAt,
+        paidAt: inv.paidAt,
+      };
+    });
+
+    await db.insert(duesInvoices).values(invoiceRows);
+    console.log(`    Created ${invoiceRows.length} dues invoices`);
+  } else {
+    console.log('    (not enough active members, skipping)');
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // 12. PRIVACY SETTINGS (20)
+  // ═══════════════════════════════════════════════════════════
+
+  console.log('  12. Privacy Settings...');
+  const privacyCountResult = await db.execute(sql`SELECT count(*)::int as c FROM person_privacy_setting`);
+  const privacyExisting = Number((privacyCountResult as any)?.rows?.[0]?.c ?? (privacyCountResult as any)?.[0]?.c ?? 0);
+  if (privacyExisting > 0) {
+    console.log('    (already seeded, skipping)');
+  } else {
+    // Schema has org_id column but DB table doesn't — use raw SQL
+    let privacyInserted = 0;
+    for (let i = 0; i < Math.min(20, activeOrg1Members.length); i++) {
+      const member = activeOrg1Members[i]!;
+      const pct = i / 20;
+      const emailVisible = pct >= 0.6;
+      const phoneVisible = pct >= 0.8;
+      const addressVisible = pct >= 0.8;
+      await db.execute(sql`
+        INSERT INTO person_privacy_setting (person_id, email_visible, phone_visible, photo_visible, address_visible)
+        VALUES (${member.personId}, ${emailVisible}, ${phoneVisible}, true, ${addressVisible})
+      `);
+      privacyInserted++;
+    }
+    console.log(`    Created ${privacyInserted} privacy settings`);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // 13. NOTIFICATION PREFERENCES
+  // ═══════════════════════════════════════════════════════════
+
+  console.log('  13. Notification Preferences...');
+  const [prefCount] = await db.select({ c: count() }).from(notificationPreferences);
+  if ((prefCount?.c ?? 0) > 0) {
+    console.log('    (already seeded, skipping)');
+  } else {
+    const categories = ['dues', 'events', 'trainings', 'announcements', 'credits'] as const;
+    const prefRows: any[] = [];
+
+    // For first 12 active members
+    const prefMembers = activeOrg1Members.slice(0, 12);
+    for (const member of prefMembers) {
+      for (const cat of categories) {
+        prefRows.push({
+          personId: member.personId,
+          category: cat,
+          pushEnabled: cat !== 'credits', // most people want push for everything except credits
+          emailEnabled: cat === 'dues' || cat === 'announcements', // email only for important stuff
+        });
+      }
+    }
+
+    if (prefRows.length > 0) {
+      await db.insert(notificationPreferences).values(prefRows);
+      console.log(`    Created ${prefRows.length} notification preferences`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
   // SUMMARY
   // ═══════════════════════════════════════════════════════════
 
@@ -674,6 +926,13 @@ async function seedRich() {
     db.select({ c: count() }).from(eventRegistrations),
     db.select({ c: count() }).from(trainingEnrollments),
     db.select({ c: count() }).from(certificates),
+    db.select({ c: count() }).from(membershipApplications),
+    db.select({ c: count() }).from(electionNominees),
+    db.select({ c: count() }).from(electionVotes),
+    db.select({ c: count() }).from(announcementStats),
+    db.select({ c: count() }).from(duesInvoices),
+    db.execute(sql`SELECT count(*)::int as c FROM person_privacy_setting`),
+    db.select({ c: count() }).from(notificationPreferences),
   ]);
 
   console.log('\n╔══════════════════════════════════════════╗');
@@ -687,6 +946,14 @@ async function seedRich() {
   console.log(`║  Event Regs:       ${String(finalCounts[5]![0]!.c).padStart(4)}               ║`);
   console.log(`║  Enrollments:      ${String(finalCounts[6]![0]!.c).padStart(4)}               ║`);
   console.log(`║  Certificates:     ${String(finalCounts[7]![0]!.c).padStart(4)}               ║`);
+  console.log(`║  Applications:     ${String(finalCounts[8]![0]!.c).padStart(4)}               ║`);
+  console.log(`║  Nominees:         ${String(finalCounts[9]![0]!.c).padStart(4)}               ║`);
+  console.log(`║  Votes:            ${String(finalCounts[10]![0]!.c).padStart(4)}               ║`);
+  console.log(`║  Announce Stats:   ${String(finalCounts[11]![0]!.c).padStart(4)}               ║`);
+  console.log(`║  Invoices:         ${String(finalCounts[12]![0]!.c).padStart(4)}               ║`);
+  const privacyFinal = (finalCounts[13] as any)?.rows?.[0]?.c ?? (finalCounts[13] as any)?.[0]?.c ?? 0;
+  console.log(`║  Privacy Settings: ${String(privacyFinal).padStart(4)}               ║`);
+  console.log(`║  Notif Prefs:      ${String(finalCounts[14]![0]!.c).padStart(4)}               ║`);
   console.log('╚══════════════════════════════════════════╝');
 
   await pool.end();
