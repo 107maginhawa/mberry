@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { useSession } from '@monobase/sdk-ts/react/hooks/use-auth'
 import { createRouter } from './router'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7213'
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 const router = createRouter()
 
 /**
