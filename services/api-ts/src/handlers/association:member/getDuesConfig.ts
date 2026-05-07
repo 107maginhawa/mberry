@@ -38,5 +38,12 @@ export async function getDuesConfig(
     return ctx.json({}, 200);
   }
 
-  return ctx.json(config, 200);
+  // Map DB field names to TypeSpec schema names so the SDK response transformer
+  // (which expects annualAmount, effectiveDate) doesn't crash on undefined fields.
+  const c = config as any;
+  return ctx.json({
+    ...c,
+    annualAmount: c.defaultAmount ?? c.annualAmount ?? 0,
+    effectiveDate: c.effectiveDate ?? c.createdAt ?? new Date().toISOString(),
+  }, 200);
 }

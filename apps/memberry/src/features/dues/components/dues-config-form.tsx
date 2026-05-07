@@ -55,11 +55,12 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
     select: (res: any) => res?.data ?? res,
   }) as { data: any; isLoading: boolean }
 
-  const hasConfig = config && config.defaultAmount != null
+  const configAmount = config?.annualAmount ?? config?.defaultAmount
+  const hasConfig = config && configAmount != null
 
   useEffect(() => {
     if (hasConfig) {
-      setDefaultAmount((Number(config.defaultAmount) / 100).toFixed(2))
+      setDefaultAmount((Number(configAmount) / 100).toFixed(2))
       setCurrency(config.currency ?? 'PHP')
       setBillingFrequency(config.billingFrequency ?? 'annual')
       setDueDateMonth(String(config.dueDateMonth ?? 1))
