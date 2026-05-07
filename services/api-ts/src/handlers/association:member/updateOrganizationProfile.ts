@@ -1,41 +1,42 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdateOrganizationProfileBody, UpdateOrganizationProfileParams } from '@/generated/openapi/validators';
+import { eq } from 'drizzle-orm';
+import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updateOrganizationProfile
- * 
+ *
  * Path: PUT /association/member/org-profile/{organizationId}
  * OperationId: updateOrganizationProfile
  */
 export async function updateOrganizationProfile(
   ctx: ValidatedContext<UpdateOrganizationProfileBody, never, UpdateOrganizationProfileParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: updateOrganizationProfile');
+  const db = ctx.get('database') as DatabaseInstance;
+
+  const existing = await db.select().from(organizations).where(eq(organizations.id, params.organizationId));
+  if (!existing.length) throw new NotFoundError('Organization');
+
+  const updated = await db
+    .update(organizations)
+    .set({ ...body, updatedAt: new Date() } as any)
+    .where(eq(organizations.id, params.organizationId))
+    .returning();
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'organization-profile',
+    resourceId: params.organizationId,
+    description: 'Organization profile updated',
+  });
+
+  return ctx.json(updated[0], 200);
 }

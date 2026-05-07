@@ -1,39 +1,24 @@
 import type { BaseContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
-
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
+import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 
 /**
  * getMyMemberships
- * 
+ *
  * Path: GET /memberships
  * OperationId: getMyMemberships
  */
-export async function getMyMemberships(
-  ctx: BaseContext
-): Promise<Response> {
-  // Get authenticated session from Better-Auth
+export async function getMyMemberships(ctx: BaseContext): Promise<Response> {
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: getMyMemberships');
+  if (!session) throw new UnauthorizedError();
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const personId = session.user.id;
+
+  const repo = new MembershipRepository(db, logger);
+  const memberships = await repo.findAllByPerson(personId);
+
+  return ctx.json({ data: memberships, total: memberships.length }, 200);
 }

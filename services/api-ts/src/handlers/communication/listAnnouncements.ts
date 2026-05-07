@@ -1,41 +1,37 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import { UnauthorizedError } from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { ListAnnouncementsQuery, ListAnnouncementsParams } from '@/generated/openapi/validators';
+import { CommunicationsRepository } from '../communications/repos/communications.repo';
 
 /**
  * listAnnouncements
- * 
+ *
  * Path: GET /communications/announcements/{orgId}
  * OperationId: listAnnouncements
  */
 export async function listAnnouncements(
   ctx: ValidatedContext<never, ListAnnouncementsQuery, ListAnnouncementsParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
   const params = ctx.req.valid('param');
-  // Extract validated query parameters
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: listAnnouncements');
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new CommunicationsRepository(db);
+
+  const page = Number(query?.page ?? 1);
+  const pageSize = Number(query?.pageSize ?? 20);
+  const offset = (page - 1) * pageSize;
+
+  const { data, total } = await repo.list(params.orgId, {
+    status: query?.status as string | undefined,
+    search: query?.search as string | undefined,
+    limit: pageSize,
+    offset,
+  });
+
+  return ctx.json({ data, total, page, pageSize }, 200);
 }

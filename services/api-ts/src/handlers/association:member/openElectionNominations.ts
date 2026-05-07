@@ -1,40 +1,44 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { OpenElectionNominationsParams } from '@/generated/openapi/validators';
+import { ElectionsRepository } from '../elections/repos/elections.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * openElectionNominations
- * 
+ *
  * Path: POST /association/member/elections/{electionId}/open-nominations
  * OperationId: openElectionNominations
  */
 export async function openElectionNominations(
   ctx: ValidatedContext<never, never, OpenElectionNominationsParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: openElectionNominations');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new ElectionsRepository(db);
+
+  const existing = await repo.get(params.electionId);
+  if (!existing) throw new NotFoundError('Election');
+
+  if (existing.status !== 'draft') {
+    throw new BusinessLogicError('Only draft elections can open nominations', 'INVALID_STATUS_TRANSITION');
+  }
+
+  const updated = await repo.update(params.electionId, {
+    status: 'nominationsOpen',
+    nominationsOpenAt: new Date(),
+  });
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'election',
+    resourceId: updated.id,
+    description: `Election nominations opened: ${updated.title}`,
+  });
+
+  return ctx.json({ data: updated }, 200);
 }

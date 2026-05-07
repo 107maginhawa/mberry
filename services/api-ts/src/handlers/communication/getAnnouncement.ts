@@ -1,40 +1,28 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { GetAnnouncementParams } from '@/generated/openapi/validators';
+import { CommunicationsRepository } from '../communications/repos/communications.repo';
 
 /**
  * getAnnouncement
- * 
+ *
  * Path: GET /communications/announcements/detail/{id}
  * OperationId: getAnnouncement
  */
 export async function getAnnouncement(
   ctx: ValidatedContext<never, never, GetAnnouncementParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: getAnnouncement');
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new CommunicationsRepository(db);
+
+  const announcement = await repo.get(params.id);
+  if (!announcement) throw new NotFoundError('Announcement');
+
+  return ctx.json({ data: announcement }, 200);
 }

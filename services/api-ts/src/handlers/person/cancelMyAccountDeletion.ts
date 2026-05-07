@@ -1,39 +1,44 @@
 import type { BaseContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
-
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError, BusinessLogicError } from '@/core/errors';
+import { PersonRepository } from './repos/person.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * cancelMyAccountDeletion
- * 
+ *
  * Path: POST /cancel-delete
  * OperationId: cancelMyAccountDeletion
  */
-export async function cancelMyAccountDeletion(
-  ctx: BaseContext
-): Promise<Response> {
-  // Get authenticated session from Better-Auth
+export async function cancelMyAccountDeletion(ctx: BaseContext): Promise<Response> {
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
+  if (!session) throw new UnauthorizedError();
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const personId = session.user.id;
+
+  const repo = new PersonRepository(db, logger);
+
+  const person = await repo.findOneById(personId);
+  if (!person) throw new UnauthorizedError();
+
+  if (!person.deletionRequestedAt) {
+    throw new BusinessLogicError('No pending deletion request', 'NO_DELETION_REQUEST');
   }
-  
-  
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: cancelMyAccountDeletion');
+
+  await repo.updateOneById(personId, {
+    deletionRequestedAt: null,
+    deletionScheduledAt: null,
+    updatedBy: personId,
+  } as any);
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'person',
+    resourceId: personId,
+    description: 'Account deletion request cancelled',
+  });
+
+  return ctx.json({ message: 'Deletion request cancelled.' }, 200);
 }

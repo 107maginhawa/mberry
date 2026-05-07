@@ -1,37 +1,38 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { NotFoundError } from '@/core/errors';
 import type { ListCustomTrainingEnrollmentsQuery, ListCustomTrainingEnrollmentsParams } from '@/generated/openapi/validators';
+import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
 
 /**
  * listCustomTrainingEnrollments
- * 
+ *
  * Path: GET /association/training-lifecycle/{trainingId}/enrollments
  * OperationId: listCustomTrainingEnrollments
  */
 export async function listCustomTrainingEnrollments(
   ctx: ValidatedContext<never, ListCustomTrainingEnrollmentsQuery, ListCustomTrainingEnrollmentsParams>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
   const params = ctx.req.valid('param');
-  // Extract validated query parameters
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: listCustomTrainingEnrollments');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+
+  const trainingRepo = new TrainingRepository(db, logger);
+  const enrollRepo = new TrainingEnrollmentRepository(db, logger);
+
+  const training = await trainingRepo.findOneById(params.trainingId);
+  if (!training) throw new NotFoundError('Training not found');
+
+  const filters: { trainingId: string; status?: string } = { trainingId: params.trainingId };
+  if ((query as any)?.status) {
+    filters.status = (query as any).status;
+  }
+
+  const enrollments = await enrollRepo.findMany(filters);
+
+  return ctx.json({ data: enrollments, total: enrollments.length }, 200);
 }

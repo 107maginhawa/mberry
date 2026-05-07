@@ -1,40 +1,33 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
 import type { ListMyCertificatesQuery } from '@/generated/openapi/validators';
+import { DigitalCredentialRepository } from './repos/credentials.repo';
 
 /**
  * listMyCertificates
- * 
+ *
  * Path: GET /association/member/certificates
  * OperationId: listMyCertificates
  */
 export async function listMyCertificates(
   ctx: ValidatedContext<never, ListMyCertificatesQuery, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  // Extract validated query parameters
+  if (!session) throw new UnauthorizedError();
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const personId = session.user.id;
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: listMyCertificates');
+  const q = query as any;
+
+  const repo = new DigitalCredentialRepository(db, logger);
+  const certs = await repo.findMany({
+    personId,
+    organizationId: q.organizationId,
+    status: q.status,
+  });
+
+  return ctx.json({ data: certs, total: certs.length }, 200);
 }

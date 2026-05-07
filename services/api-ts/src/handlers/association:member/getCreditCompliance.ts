@@ -1,40 +1,54 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
 import type { GetCreditComplianceParams } from '@/generated/openapi/validators';
+import { CreditEntryRepository } from './repos/credits.repo';
+import { getCycleForDate, summarizeCycle } from './utils/credit-cycle';
 
 /**
  * getCreditCompliance
- * 
+ *
  * Path: GET /credit-compliance/{orgId}
  * OperationId: getCreditCompliance
+ *
+ * Returns compliance summary for the current user in a given org.
+ * Query params: registrationDate, cyclePeriodYears (default 2), requiredCredits (default 40)
  */
 export async function getCreditCompliance(
   ctx: ValidatedContext<never, never, GetCreditComplianceParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: getCreditCompliance');
+  const orgId = (params as any).orgId;
+  const personId = session.user.id;
+
+  const registrationDateStr = ctx.req.query('registrationDate');
+  const registrationDate = registrationDateStr ? new Date(registrationDateStr) : new Date();
+  const cyclePeriodYears = Number(ctx.req.query('cyclePeriodYears') ?? '2');
+  const requiredCredits = Number(ctx.req.query('requiredCredits') ?? '40');
+  const targetDate = ctx.req.query('targetDate') ? new Date(ctx.req.query('targetDate')!) : new Date();
+
+  const cycle = getCycleForDate(registrationDate, targetDate, cyclePeriodYears);
+
+  const repo = new CreditEntryRepository(db, logger);
+  const earned = await repo.sumCreditsForCycle(personId, cycle.cycleStart, cycle.cycleEnd, orgId);
+
+  const summary = summarizeCycle(cycle, earned, requiredCredits, 0);
+
+  return ctx.json({
+    personId,
+    organizationId: orgId,
+    cycle: {
+      cycleStart: cycle.cycleStart.toISOString(),
+      cycleEnd: cycle.cycleEnd.toISOString(),
+    },
+    earned: summary.earned,
+    required: summary.required,
+    remaining: summary.remaining,
+    compliant: summary.compliant,
+  }, 200);
 }

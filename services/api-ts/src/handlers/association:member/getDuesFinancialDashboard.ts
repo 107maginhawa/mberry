@@ -1,40 +1,26 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
 import type { GetDuesFinancialDashboardParams } from '@/generated/openapi/validators';
+import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 
 /**
  * getDuesFinancialDashboard
- * 
+ *
  * Path: GET /association/member/dues-reporting/{organizationId}/dashboard
  * OperationId: getDuesFinancialDashboard
  */
 export async function getDuesFinancialDashboard(
   ctx: ValidatedContext<never, never, GetDuesFinancialDashboardParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
-  const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: getDuesFinancialDashboard');
+  if (!session) throw new UnauthorizedError();
+
+  const { organizationId } = ctx.req.valid('param');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new DuesRepository(db);
+
+  const stats = await repo.getDashboardStats(organizationId);
+
+  return ctx.json(stats, 200);
 }

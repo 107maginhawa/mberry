@@ -1,41 +1,43 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import { UnauthorizedError } from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpsertMembershipCategoryBody, UpsertMembershipCategoryParams } from '@/generated/openapi/validators';
+import { MembershipCategoryRepository } from './repos/membership.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * upsertMembershipCategory
- * 
+ *
  * Path: PUT /association/member/membership-categories/{organizationId}
  * OperationId: upsertMembershipCategory
  */
 export async function upsertMembershipCategory(
   ctx: ValidatedContext<UpsertMembershipCategoryBody, never, UpsertMembershipCategoryParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: upsertMembershipCategory');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MembershipCategoryRepository(db, logger);
+
+  const isUpdate = !!(body as any).id;
+  let result;
+
+  if (isUpdate) {
+    result = await repo.updateOneById((body as any).id, body as any);
+  } else {
+    result = await repo.createOne({ ...body, organizationId: params.organizationId } as any);
+  }
+
+  await auditAction(ctx, {
+    action: isUpdate ? 'update' : 'create',
+    resourceType: 'membership-category',
+    resourceId: (result as any).id,
+    description: `Membership category ${isUpdate ? 'updated' : 'created'}`,
+  });
+
+  return ctx.json(result, isUpdate ? 200 : 201);
 }

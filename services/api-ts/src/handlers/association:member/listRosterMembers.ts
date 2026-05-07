@@ -1,40 +1,39 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import { UnauthorizedError } from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { ListRosterMembersQuery } from '@/generated/openapi/validators';
+import { MembershipRepository } from './repos/membership.repo';
 
 /**
  * listRosterMembers
- * 
+ *
  * Path: GET /association/member/roster
  * OperationId: listRosterMembers
  */
 export async function listRosterMembers(
   ctx: ValidatedContext<never, ListRosterMembersQuery, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  // Extract validated query parameters
+  if (!session) throw new UnauthorizedError();
+
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: listRosterMembers');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MembershipRepository(db, logger);
+
+  const page = query.page ?? 1;
+  const pageSize = query.pageSize ?? 20;
+  const offset = (page - 1) * pageSize;
+
+  const result = await repo.findManyWithPagination(
+    {
+      organizationId: query.organizationId,
+      status: query.status,
+      tierId: query.categoryId,
+      q: query.q ?? query.search,
+    },
+    { pagination: { offset, limit: pageSize } },
+  );
+
+  return ctx.json(result, 200);
 }

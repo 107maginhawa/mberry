@@ -1,40 +1,36 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import { UnauthorizedError } from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { AddRosterMemberBody } from '@/generated/openapi/validators';
+import { MembershipRepository } from './repos/membership.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * addRosterMember
- * 
+ *
  * Path: POST /association/member/roster
  * OperationId: addRosterMember
  */
 export async function addRosterMember(
   ctx: ValidatedContext<AddRosterMemberBody, never, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  // Extract validated request body
+  if (!session) throw new UnauthorizedError();
+
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: addRosterMember');
+  const orgId = ctx.get('orgId') as string;
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new MembershipRepository(db, logger);
+
+  const member = await repo.createOne({ ...body, organizationId: orgId } as any);
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'roster-member',
+    resourceId: member.id,
+    description: 'Roster member added',
+  });
+
+  return ctx.json(member, 201);
 }

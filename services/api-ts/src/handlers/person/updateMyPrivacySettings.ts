@@ -1,40 +1,81 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError, ValidationError, ForbiddenError } from '@/core/errors';
 import type { UpdateMyPrivacySettingsBody } from '@/generated/openapi/validators';
+import { eq, and, inArray } from 'drizzle-orm';
+import { personPrivacySettings } from './repos/privacy-settings.schema';
+import { memberships } from '@/handlers/association:member/repos/membership.schema';
+import { auditAction } from '@/utils/audit';
 
 /**
  * updateMyPrivacySettings
- * 
+ *
  * Path: PATCH /privacy
  * OperationId: updateMyPrivacySettings
  */
 export async function updateMyPrivacySettings(
   ctx: ValidatedContext<UpdateMyPrivacySettingsBody, never, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  // Extract validated request body
+  if (!session) throw new UnauthorizedError();
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const personId = session.user.id;
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: updateMyPrivacySettings');
+  const b = body as any;
+
+  if (!b.orgId) throw new ValidationError('orgId is required');
+
+  // Verify membership
+  const [membership] = await db
+    .select({ id: memberships.id })
+    .from(memberships)
+    .where(and(
+      eq(memberships.personId, personId),
+      eq(memberships.organizationId, b.orgId),
+      inArray(memberships.status, ['active', 'gracePeriod']),
+    ))
+    .limit(1);
+
+  if (!membership) throw new ForbiddenError('Not a member of this organization');
+
+  const [existing] = await db
+    .select()
+    .from(personPrivacySettings)
+    .where(and(
+      eq(personPrivacySettings.personId, personId),
+      eq(personPrivacySettings.orgId, b.orgId),
+    ))
+    .limit(1);
+
+  const updates = {
+    emailVisible: b.emailVisible ?? existing?.emailVisible ?? false,
+    phoneVisible: b.phoneVisible ?? existing?.phoneVisible ?? false,
+    photoVisible: b.photoVisible ?? existing?.photoVisible ?? true,
+    addressVisible: b.addressVisible ?? existing?.addressVisible ?? false,
+  };
+
+  let row;
+  if (existing) {
+    [row] = await db
+      .update(personPrivacySettings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(personPrivacySettings.id, existing.id))
+      .returning();
+  } else {
+    [row] = await db
+      .insert(personPrivacySettings)
+      .values({ personId, orgId: b.orgId, ...updates })
+      .returning();
+  }
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'privacy-settings',
+    resourceId: personId,
+    description: 'Self-service privacy settings update',
+    details: { orgId: b.orgId },
+  });
+
+  return ctx.json(row, existing ? 200 : 201);
 }

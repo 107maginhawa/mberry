@@ -1,41 +1,42 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import { UnauthorizedError } from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { CreateAnnouncementBody, CreateAnnouncementParams } from '@/generated/openapi/validators';
+import { CommunicationsRepository } from '../communications/repos/communications.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * createAnnouncement
- * 
+ *
  * Path: POST /communications/announcements/{orgId}
  * OperationId: createAnnouncement
  */
 export async function createAnnouncement(
   ctx: ValidatedContext<CreateAnnouncementBody, never, CreateAnnouncementParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: createAnnouncement');
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new CommunicationsRepository(db);
+
+  const announcement = await repo.create({
+    ...body,
+    organizationId: params.orgId,
+    authorId: session.user.id,
+    status: 'draft',
+  } as any);
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'announcement',
+    resourceId: announcement.id,
+    description: `Created announcement: ${announcement.title}`,
+    details: { orgId: params.orgId },
+  });
+
+  return ctx.json({ data: announcement }, 201);
 }

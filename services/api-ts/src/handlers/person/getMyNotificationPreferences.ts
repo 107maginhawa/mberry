@@ -1,39 +1,35 @@
 import type { BaseContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
-
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
+import { eq } from 'drizzle-orm';
+import { notificationPreferences, NOTIFICATION_CATEGORIES } from './repos/notification-preferences.schema';
 
 /**
  * getMyNotificationPreferences
- * 
+ *
  * Path: GET /notification-preferences
  * OperationId: getMyNotificationPreferences
  */
-export async function getMyNotificationPreferences(
-  ctx: BaseContext
-): Promise<Response> {
-  // Get authenticated session from Better-Auth
+export async function getMyNotificationPreferences(ctx: BaseContext): Promise<Response> {
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: getMyNotificationPreferences');
+  if (!session) throw new UnauthorizedError();
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const personId = session.user.id;
+
+  const rows = await db
+    .select()
+    .from(notificationPreferences)
+    .where(eq(notificationPreferences.personId, personId));
+
+  const byCategory = new Map(rows.map(r => [r.category, r]));
+
+  const result = NOTIFICATION_CATEGORIES.map(category => ({
+    category,
+    pushEnabled: byCategory.get(category)?.pushEnabled ?? true,
+    emailEnabled: byCategory.get(category)?.emailEnabled ?? false,
+    inApp: true, // always on, M02-R8
+  }));
+
+  return ctx.json(result, 200);
 }

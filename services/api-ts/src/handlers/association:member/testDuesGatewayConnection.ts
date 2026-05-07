@@ -1,40 +1,30 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
 import type { TestDuesGatewayConnectionParams } from '@/generated/openapi/validators';
+import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 
 /**
  * testDuesGatewayConnection
- * 
+ *
  * Path: POST /association/member/dues-gateway/{organizationId}/test
  * OperationId: testDuesGatewayConnection
  */
 export async function testDuesGatewayConnection(
   ctx: ValidatedContext<never, never, TestDuesGatewayConnectionParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
+  if (!session) throw new UnauthorizedError();
+
+  const { organizationId } = ctx.req.valid('param');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new DuesRepository(db);
+
+  const config = await repo.getGatewayConfig(organizationId);
+
+  if (!config) {
+    return ctx.json({ success: false, message: 'No gateway configured' }, 200);
   }
-  
-  // Extract validated parameters
-  const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: testDuesGatewayConnection');
+
+  return ctx.json({ success: true, message: 'Gateway configuration found' }, 200);
 }

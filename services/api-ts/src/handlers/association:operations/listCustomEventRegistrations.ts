@@ -1,37 +1,38 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { NotFoundError } from '@/core/errors';
 import type { ListCustomEventRegistrationsQuery, ListCustomEventRegistrationsParams } from '@/generated/openapi/validators';
+import { EventRepository, EventRegistrationRepository } from './repos/events.repo';
 
 /**
  * listCustomEventRegistrations
- * 
+ *
  * Path: GET /association/event-lifecycle/{eventId}/registrations
  * OperationId: listCustomEventRegistrations
  */
 export async function listCustomEventRegistrations(
   ctx: ValidatedContext<never, ListCustomEventRegistrationsQuery, ListCustomEventRegistrationsParams>
 ): Promise<Response> {
-  // Public endpoint - no auth required
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
   const params = ctx.req.valid('param');
-  // Extract validated query parameters
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: listCustomEventRegistrations');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+
+  const eventRepo = new EventRepository(db, logger);
+  const regRepo = new EventRegistrationRepository(db, logger);
+
+  const event = await eventRepo.findOneById(params.eventId);
+  if (!event) throw new NotFoundError('Event not found');
+
+  const filters: { eventId: string; status?: string } = { eventId: params.eventId };
+  if ((query as any)?.status) {
+    filters.status = (query as any).status;
+  }
+
+  const registrations = await regRepo.findMany(filters);
+
+  return ctx.json({ data: registrations, total: registrations.length }, 200);
 }

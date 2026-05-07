@@ -1,40 +1,42 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { DeleteCandidateParams } from '@/generated/openapi/validators';
+import { electionNominees } from '../elections/repos/elections.schema';
+import { eq } from 'drizzle-orm';
+import { auditAction } from '@/utils/audit';
 
 /**
  * deleteCandidate
- * 
+ *
  * Path: DELETE /association/member/candidates/{candidateId}
  * OperationId: deleteCandidate
  */
 export async function deleteCandidate(
   ctx: ValidatedContext<never, never, DeleteCandidateParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  if (!session) throw new UnauthorizedError();
+
   const params = ctx.req.valid('param');
-  
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: deleteCandidate');
+  const db = ctx.get('database') as DatabaseInstance;
+
+  const [existing] = await db
+    .select()
+    .from(electionNominees)
+    .where(eq(electionNominees.id, params.candidateId))
+    .limit(1);
+
+  if (!existing) throw new NotFoundError('Candidate');
+
+  await db.delete(electionNominees).where(eq(electionNominees.id, params.candidateId));
+
+  await auditAction(ctx, {
+    action: 'delete',
+    resourceType: 'election-nominee',
+    resourceId: params.candidateId,
+    description: 'Nominee removed from election',
+  });
+
+  return ctx.json({ success: true }, 200);
 }

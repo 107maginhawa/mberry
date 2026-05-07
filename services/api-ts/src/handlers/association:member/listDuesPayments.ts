@@ -1,40 +1,37 @@
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
 import type { ListDuesPaymentsQuery } from '@/generated/openapi/validators';
+import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 
 /**
  * listDuesPayments
- * 
+ *
  * Path: GET /association/member/dues-payments
  * OperationId: listDuesPayments
  */
 export async function listDuesPayments(
   ctx: ValidatedContext<never, ListDuesPaymentsQuery, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
   const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  // Extract validated query parameters
+  if (!session) throw new UnauthorizedError();
+
   const query = ctx.req.valid('query');
-  
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new Error('Not implemented: listDuesPayments');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new DuesRepository(db);
+
+  const page = query.page ?? 1;
+  const pageSize = query.pageSize ?? 20;
+  const offset = query.offset ?? (page - 1) * pageSize;
+  const limit = query.limit ?? pageSize;
+
+  const result = await repo.listPayments({
+    organizationId: query.organizationId,
+    personId: query.personId,
+    status: query.status,
+    limit,
+    offset,
+  });
+
+  return ctx.json({ data: result.data, totalCount: result.total }, 200);
 }
