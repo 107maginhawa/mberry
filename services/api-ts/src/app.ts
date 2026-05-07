@@ -48,6 +48,7 @@ import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/securi
 import { authMiddleware } from '@/middleware/auth';
 import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
+import { orgContextMiddleware } from '@/middleware/org-context';
 
 
 /**
@@ -290,8 +291,8 @@ export function createApp(config: Config): App {
         END as compliance_status
       FROM membership m
       JOIN person p ON m.person_id = p.id
-      LEFT JOIN credit_entry c ON c.person_id = m.person_id AND c.organization_id = m.org_id
-      WHERE m.org_id = ${orgId} AND m.status IN ('active', 'gracePeriod')
+      LEFT JOIN credit_entry c ON c.person_id = m.person_id AND c.organization_id = m.organization_id
+      WHERE m.organization_id = ${orgId} AND m.status IN ('active', 'gracePeriod')
       GROUP BY m.person_id, p.first_name, p.last_name, m.member_number, m.status
       ORDER BY COALESCE(SUM(c.credit_amount), 0) ASC
     `);
@@ -305,6 +306,27 @@ export function createApp(config: Config): App {
       data,
       summary: { compliant, atRisk, nonCompliant, total: data.length, requiredCredits },
     }, 200);
+  });
+
+  // Org profile (custom route for frontend)
+  app.get('/membership/org-profile/:orgId', authMiddleware(), async (ctx) => {
+    const { eq } = await import('drizzle-orm');
+    const { organizations } = await import('@/handlers/platformadmin/repos/platform-admin.schema');
+    const db = ctx.get('database') as any;
+    const orgId = ctx.req.param('orgId');
+    const [org] = await db.select().from(organizations).where(eq(organizations.id, orgId)).limit(1);
+    if (!org) return ctx.json({ error: 'Organization not found' }, 404);
+    return ctx.json(org, 200);
+  });
+  app.put('/membership/org-profile/:orgId', authMiddleware(), async (ctx) => {
+    const { eq } = await import('drizzle-orm');
+    const { organizations } = await import('@/handlers/platformadmin/repos/platform-admin.schema');
+    const db = ctx.get('database') as any;
+    const orgId = ctx.req.param('orgId');
+    const body = await ctx.req.json();
+    const [updated] = await db.update(organizations).set({ ...body, updatedAt: new Date() }).where(eq(organizations.id, orgId)).returning();
+    if (!updated) return ctx.json({ error: 'Organization not found' }, 404);
+    return ctx.json(updated, 200);
   });
 
   // Officer role check (auth required)
@@ -352,6 +374,8 @@ export function createApp(config: Config): App {
 
   // Auth middleware for all association routes (sets user/session on context)
   app.use('/association/*', authMiddleware());
+  // Org-context middleware for association routes (sets orgId from header/query)
+  app.use('/association/*', orgContextMiddleware());
 
   // Register API routes
   registerOpenAPIRoutes(app as any);
