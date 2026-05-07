@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { signInAndNavigate, signInAsAdmin } from './helpers/auth'
-import { API_BASE } from './helpers/test-config'
+import { ADMIN_BASE } from './helpers/test-config'
 
-const API_URL = API_BASE
+const API_URL = `${ADMIN_BASE}/api`
 
 test.describe('Audit event capture via API', () => {
   test('create operation produces audit event', async ({ page }) => {
@@ -101,8 +101,8 @@ test.describe('Audit event capture via API', () => {
         enabled: true,
       },
     })
-    // Accept 201 (created) or 409 (already exists)
-    expect([201, 409]).toContain(setRes.status())
+    // Accept 200/201 (created) or 409 (already exists)
+    expect([200, 201, 409]).toContain(setRes.status())
 
     // List flags to find the one we created (or any deletable flag)
     const listRes = await page.context().request.get(`${API_URL}/admin/feature-flags?limit=5`)

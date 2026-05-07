@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.spec.ts',
 
-  maxFailures: process.env.CI ? 0 : 1,
+  maxFailures: process.env.CI ? 0 : 3,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

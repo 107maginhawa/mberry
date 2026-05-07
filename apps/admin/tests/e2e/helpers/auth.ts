@@ -4,10 +4,10 @@
  */
 
 import type { Page, BrowserContext } from '@playwright/test'
-import { API_BASE, TEST_PASSWORD } from './test-config'
+import { ADMIN_BASE, TEST_PASSWORD } from './test-config'
 
 export async function signInAsAdmin(context: BrowserContext): Promise<void> {
-  const response = await context.request.post(`${API_BASE}/auth/sign-in/email`, {
+  const response = await context.request.post(`${ADMIN_BASE}/api/auth/sign-in/email`, {
     data: {
       email: 'test@memberry.ph',
       password: TEST_PASSWORD,

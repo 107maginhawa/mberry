@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { signInAsAdmin, signInAndNavigate } from './helpers/auth'
-import { API_BASE } from './helpers/test-config'
+import { ADMIN_BASE } from './helpers/test-config'
 
-const API_URL = API_BASE
+const API_URL = `${ADMIN_BASE}/api`
 
 test.describe('Admin Members', () => {
   test('members page renders table or empty state', async ({ page }) => {
