@@ -17,6 +17,8 @@
     "test:contract": "bun scripts/run-contract-tests.ts",
     "test:contract:fuzz": "bun scripts/run-schemathesis.ts",
     "prepare": "husky",
+    "test:registry": "bun run testing/registry/report.ts",
+    "test:inventory": "bun run testing/scripts/generate-endpoint-inventory.ts && bun run testing/scripts/generate-screen-inventory.ts && bun run testing/scripts/generate-component-inventory.ts",
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "bun run --filter '*' lint"
   },
