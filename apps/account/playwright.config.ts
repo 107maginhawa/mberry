@@ -55,10 +55,18 @@ export default defineConfig({
     // },
   ],
 
-  webServer: {
-    command: 'bun run dev --port 3002',
-    url: 'http://localhost:3002',
-    reuseExistingServer: true,
-    timeout: 120 * 1000,
-  },
+  webServer: [
+    {
+      command: 'cd ../../services/api-ts && bun dev',
+      port: 7213,
+      reuseExistingServer: true,
+      timeout: 30000,
+    },
+    {
+      command: 'bun run dev --port 3002',
+      url: 'http://localhost:3002',
+      reuseExistingServer: true,
+      timeout: 120 * 1000,
+    },
+  ],
 })

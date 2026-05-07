@@ -302,7 +302,7 @@ cd apps/account && bun run test:e2e     # E2E tests
 
 ### Multi-App Architecture
 Production apps typically follow a 3-app pattern:
-- `apps/account` — user-facing account management (auth, profile, settings). Ships with the boilerplate.
+- `apps/account` — cloud account (license, activation, storage). Boilerplate features (bookings, billing UI, etc.) will be replaced. Only auth/profile/setup are permanent.
 - `apps/{product}` — domain-specific product app (e.g., `apps/memberry`, `apps/clinic`). You create this.
 - `apps/admin` — ops/admin dashboard. You create this.
 

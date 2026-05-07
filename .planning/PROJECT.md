@@ -41,7 +41,8 @@ Members can manage their association membership, track continuing education cred
 - [ ] Unify dual data models (custom vs TypeSpec-generated schemas)
 - [ ] TypeSpec definitions for 6 custom modules
 - [ ] Full CI/CD pipeline (build, test, lint, deploy)
-- [ ] Account & admin app E2E test coverage
+- [ ] Account app E2E: auth/profile/setup flows only (boilerplate features excluded — will be replaced)
+- [ ] Admin app E2E test coverage
 - [ ] Shared component library (deduplicate across apps)
 - [ ] Frontend unit tests (vitest + testing-library)
 - [ ] Deterministic test data strategy (CI-portable)
@@ -57,7 +58,7 @@ Members can manage their association membership, track continuing education cred
 ## Context
 
 - **Brownfield project** — 9 base modules + 6 custom domain modules already implemented
-- **Three-app architecture:** account (auth), memberry (product), admin (ops)
+- **Three-app architecture:** account (cloud account — license/activation/storage only; boilerplate features like bookings/billing UI will be replaced), memberry (product), admin (ops)
 - **Dual data model problem:** Custom handlers use `organization_id` with one set of status enums; TypeSpec-generated association handlers use `tenant_id/org_id` with different enums. Translation glue exists. Needs unification.
 - **Custom modules lack TypeSpec:** dues, membership, events, training, elections, certificates are hand-wired with manual route registration. No auto-generated SDK hooks.
 - **CI/CD minimal:** Only contract test workflow in GitHub Actions. No build/test/lint/deploy pipelines.
