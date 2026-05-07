@@ -206,7 +206,7 @@ function EventDetail() {
                     <dd className="text-sm">
                       {event.registrationCount ?? 0}
                       {event.capacity ? ` / ${event.capacity}` : ''} registered
-                      {event.registrationFee ? ` · PHP ${(event.registrationFee / 100).toFixed(2)} fee` : ' · Free'}
+                      {event.registrationFee ? ` · PHP ${(Number(event.registrationFee) / 100).toFixed(2)} fee` : ' · Free'}
                     </dd>
                   </div>
                 </div>

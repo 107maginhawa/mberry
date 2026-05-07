@@ -35,7 +35,7 @@ function PaymentDetailPage() {
   const allocations = payment.fundAllocations ?? []
   const origAllocations = allocations.filter((a: any) => !a.isReversal)
   const reversals = allocations.filter((a: any) => a.isReversal)
-  const maxRefundable = payment.amount - payment.refundedAmount
+  const maxRefundable = Number(payment.amount) - Number(payment.refundedAmount)
 
   return (
     <div className="p-6 space-y-6 max-w-3xl">

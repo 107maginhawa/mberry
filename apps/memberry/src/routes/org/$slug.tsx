@@ -221,7 +221,7 @@ function PublicOrgProfile() {
                     <option value="">Select a tier…</option>
                     {tiers.map((t: any) => (
                       <option key={t.id} value={t.id}>
-                        {t.name}{t.annualFee != null ? ` — ₱${t.annualFee}/yr` : ''}
+                        {t.name}{t.annualFee != null ? ` — ₱${Number(t.annualFee)}/yr` : ''}
                       </option>
                     ))}
                   </select>
@@ -230,7 +230,7 @@ function PublicOrgProfile() {
                 <div className="text-sm text-muted-foreground">
                   Tier: <span className="font-medium text-gray-900">{tiers[0].name}</span>
                   {tiers[0].annualFee != null && (
-                    <span className="ml-1">— ₱{tiers[0].annualFee}/yr</span>
+                    <span className="ml-1">— ₱{Number(tiers[0].annualFee)}/yr</span>
                   )}
                 </div>
               ) : (
