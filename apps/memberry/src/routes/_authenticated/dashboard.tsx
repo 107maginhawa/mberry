@@ -148,7 +148,7 @@ function DashboardPage() {
           ) : (
             <div className="space-y-2">
               {upcomingEvents.map((e: any, i: number) => (
-                <div key={e.id || i} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
+                <div key={`${e.id}-${i}`} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
                   <div>
                     <p className="text-[13px] font-semibold line-clamp-1">{e.title || e.name}</p>
                     <p className="text-[12px] text-[var(--color-muted)]">
