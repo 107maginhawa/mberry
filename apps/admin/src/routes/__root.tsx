@@ -12,6 +12,7 @@ import {
   Shield,
 } from 'lucide-react'
 import type { RouterContext } from '@/router'
+import { ROUTE_ROLES, useAdminUser } from '@/lib/role-gate'
 import '@/styles/globals.css'
 
 const MEMBERRY_LOGIN_URL = import.meta.env.VITE_MEMBERRY_URL
@@ -41,6 +42,12 @@ const navItems = [
 ]
 
 function RootComponent() {
+  const user = useAdminUser()
+  const visibleNavItems = navItems.filter((item) => {
+    const allowed = ROUTE_ROLES[item.to]
+    return !allowed || allowed.includes(user.role)
+  })
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
@@ -59,7 +66,7 @@ function RootComponent() {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <Link
               key={item.label}
               to={item.to}
@@ -76,7 +83,7 @@ function RootComponent() {
 
         {/* Footer */}
         <div className="px-5 py-4 border-t border-white/10 text-xs text-white/40">
-          Platform Admin
+          <span className="capitalize">{user.role}</span> — {user.email}
         </div>
       </aside>
 

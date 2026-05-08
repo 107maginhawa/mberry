@@ -3,9 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ShieldCheck, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { RequireRole } from '@/lib/role-gate'
 
 export const Route = createFileRoute('/operators/')({
-  component: OperatorsPage,
+  component: () => (
+    <RequireRole allowed={['super']}>
+      <OperatorsPage />
+    </RequireRole>
+  ),
 })
 
 interface Admin {

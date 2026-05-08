@@ -3,9 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserCog, Search, AlertTriangle, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { RequireRole } from '@/lib/role-gate'
 
 export const Route = createFileRoute('/impersonate/')({
-  component: ImpersonatePage,
+  component: () => (
+    <RequireRole allowed={['super']}>
+      <ImpersonatePage />
+    </RequireRole>
+  ),
 })
 
 interface Organization {

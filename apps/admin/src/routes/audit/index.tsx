@@ -2,9 +2,14 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Shield, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
+import { RequireRole } from '@/lib/role-gate'
 
 export const Route = createFileRoute('/audit/')({
-  component: AuditPage,
+  component: () => (
+    <RequireRole allowed={['super', 'support']}>
+      <AuditPage />
+    </RequireRole>
+  ),
 })
 
 interface AuditLogEntry {

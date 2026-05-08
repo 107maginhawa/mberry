@@ -4,8 +4,14 @@ import { ToggleLeft, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { RequireRole } from '@/lib/role-gate'
+
 export const Route = createFileRoute('/feature-flags/')({
-  component: FeatureFlagsPage,
+  component: () => (
+    <RequireRole allowed={['super']}>
+      <FeatureFlagsPage />
+    </RequireRole>
+  ),
 })
 
 interface FeatureFlag {

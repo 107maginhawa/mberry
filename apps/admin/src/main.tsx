@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { useEffect, useState } from 'react'
 import { routeTree } from './routeTree.gen'
 import type { RouterContext } from './router'
+import { AdminUserContext } from './lib/role-gate'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,9 +54,11 @@ function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} context={{ auth }} />
-    </QueryClientProvider>
+    <AdminUserContext.Provider value={auth.user}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} context={{ auth }} />
+      </QueryClientProvider>
+    </AdminUserContext.Provider>
   )
 }
 
