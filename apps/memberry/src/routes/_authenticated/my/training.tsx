@@ -44,7 +44,8 @@ function MyTraining() {
     enabled: !!orgId,
   })
 
-  const items: Array<{ enrollment: any; training: any }> = (data as any)?.data ?? []
+  const rawItems: Array<{ enrollment: any; training: any }> = (data as any)?.data ?? []
+  const items = rawItems.filter((i) => i.training && i.enrollment)
 
   const totalCredits = items.reduce((acc, item) => {
     const isCompleted = item.enrollment?.status === 'enrolled' // In reality would check attendance
