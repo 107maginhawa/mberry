@@ -31,6 +31,10 @@ export class ChatRoomRepository extends DatabaseRepository<ChatRoom, NewChatRoom
 
     const conditions = [];
 
+    if (filters.organizationId) {
+      conditions.push(eq(chatRooms.organizationId, filters.organizationId));
+    }
+
     // Array-based participant filtering using JSON operators
     if (filters.participants && filters.participants.length > 0) {
       const participantConditions = filters.participants.map(participantId =>
@@ -154,7 +158,8 @@ export class ChatRoomRepository extends DatabaseRepository<ChatRoom, NewChatRoom
   async findOrCreateBookingChatRoom(
     bookingId: string,
     participantIds: string[],
-    adminIds?: string[]
+    adminIds?: string[],
+    organizationId?: string
   ): Promise<{ room: ChatRoom; created: boolean }> {
     this.logger?.debug({
       bookingId,
@@ -189,6 +194,7 @@ export class ChatRoomRepository extends DatabaseRepository<ChatRoom, NewChatRoom
 
     // Create new room for booking
     const newRoom = await this.createOne({
+      organizationId: organizationId!,
       participants: participantIds,
       admins: adminIds || participantIds, // Default: all participants are admins
       context: bookingId,

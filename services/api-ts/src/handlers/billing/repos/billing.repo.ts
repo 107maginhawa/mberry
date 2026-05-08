@@ -45,6 +45,10 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
 
     const conditions = [];
 
+    if (filters.organizationId) {
+      conditions.push(eq(invoices.organizationId, filters.organizationId));
+    }
+
     if (filters.customer) {
       conditions.push(eq(invoices.customer, filters.customer));
     }
@@ -249,9 +253,13 @@ export class MerchantAccountRepository extends DatabaseRepository<MerchantAccoun
    */
   protected buildWhereConditions(filters?: MerchantAccountFilters): SQL<unknown> | undefined {
     if (!filters) return undefined;
-    
+
     const conditions = [];
-    
+
+    if (filters.organizationId) {
+      conditions.push(eq(merchantAccounts.organizationId, filters.organizationId));
+    }
+
     if (filters.person) {
       conditions.push(eq(merchantAccounts.person, filters.person));
     }

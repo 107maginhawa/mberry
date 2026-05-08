@@ -3,7 +3,7 @@
  * Uses Drizzle ORM with PostgreSQL
  */
 
-import { pgTable, uuid, varchar, bigint, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, bigint, timestamp, pgEnum, index } from 'drizzle-orm/pg-core';
 import { baseEntityFields, type BaseEntity } from '@/core/database.schema';
 
 // File status enum
@@ -18,7 +18,10 @@ export const fileStatusEnum = pgEnum('file_status', [
 export const storedFiles = pgTable('stored_file', {
   // Base entity fields (includes id, timestamps, version, audit fields)
   ...baseEntityFields,
-  
+
+  // Multi-tenant scoping (P0-7: file isolation between orgs)
+  organizationId: uuid('organization_id').notNull(),
+
   // File metadata
   filename: varchar('filename', { length: 255 }).notNull(),
   mimeType: varchar('mime_type', { length: 100 }).notNull(),
@@ -32,7 +35,10 @@ export const storedFiles = pgTable('stored_file', {
   
   // File-specific timestamp
   uploadedAt: timestamp('uploaded_at').defaultNow(),
-});
+}, (table) => ({
+  orgIdx: index('stored_files_org_idx').on(table.organizationId),
+  ownerIdx: index('stored_files_owner_idx').on(table.owner),
+}));
 
 // Type exports for TypeScript
 export type StoredFile = typeof storedFiles.$inferSelect;

@@ -57,6 +57,9 @@ export async function createChatRoom(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
 
+  // Multi-tenant scoping (P0-7)
+  const organizationId = ctx.get('orgId') as string;
+
   // Business rule: user must be one of the participants or admins (using Person ID)
   // Check if the authenticated user's Person ID is in the participants or admins list
   const allInvolvedIds = [...body.participants, ...admins];
@@ -118,6 +121,7 @@ export async function createChatRoom(
   } else {
     // Create new room
     room = await repo.createOne({
+      organizationId,
       participants: body.participants,
       admins: admins,
       context: body.context,

@@ -33,13 +33,24 @@ export interface Session extends BetterAuthSession {
 /**
  * Auth configuration
  */
+/**
+ * Versioned secret for non-destructive key rotation.
+ * Better-Auth v1.5+ decrypts with the matching version, encrypts with the highest.
+ */
+export interface VersionedSecret {
+  version: number;
+  value: string;
+}
+
 export interface AuthConfig {
   baseUrl: string;
   secret: string;
+  secrets?: VersionedSecret[]; // Versioned secrets for key rotation
   sessionExpiresIn?: number; // seconds
   rateLimitEnabled?: boolean;
   rateLimitWindow?: number; // seconds
   rateLimitMax?: number; // max attempts
+  requireEmailVerification?: boolean; // default true — set false only for local dev
   adminEmails?: string[]; // emails to automatically promote to admin
   cookieSameSite?: 'strict' | 'lax' | 'none';
   secureCookies?: boolean;

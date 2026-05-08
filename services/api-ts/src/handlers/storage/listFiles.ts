@@ -36,7 +36,10 @@ export async function listFiles(
   const { limit, offset } = parsePagination(query, { limit: 20 });
 
   // Parse filters with utilities
-  const filters = parseFilters(query, ['status', 'owner']);
+  const filters = parseFilters(query, ['status', 'owner']) as Record<string, string>;
+
+  // Multi-tenant scoping (P0-7)
+  filters['organizationId'] = ctx.get('orgId') as string;
 
   // Get dependencies from context
   const logger = ctx.get('logger');

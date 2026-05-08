@@ -54,6 +54,9 @@ export async function sendChatMessage(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
 
+  // Multi-tenant scoping (P0-7): inherit orgId from room on message creation
+  const organizationId = ctx.get('orgId') as string;
+
   // Authorization uses Person ID directly (no profile lookups needed)
 
   // Instantiate repositories
@@ -90,7 +93,8 @@ export async function sendChatMessage(
     message = await messageRepo.createTextMessage(
       params.room,
       user.id,
-      textBody.message
+      textBody.message,
+      organizationId
     );
     
     logger?.info({
@@ -150,7 +154,8 @@ export async function sendChatMessage(
     message = await messageRepo.createVideoCallMessage(
       params.room,
       user.id,
-      videoCallData
+      videoCallData,
+      organizationId
     );
     
     // Update room's active video call reference

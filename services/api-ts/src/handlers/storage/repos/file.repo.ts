@@ -9,6 +9,7 @@ import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo
 import { storedFiles, type StoredFile, type NewStoredFile } from './file.schema';
 
 export interface ListFilesFilters {
+  organizationId?: string;
   status?: 'uploading' | 'processing' | 'available' | 'failed';
   owner?: string;
 }
@@ -36,13 +37,17 @@ export class StorageFileRepository extends DatabaseRepository<StoredFile, NewSto
    */
   protected buildWhereConditions(filters?: ListFilesFilters): SQL<unknown> | undefined {
     if (!filters) return undefined;
-    
+
     const conditions = [];
-    
+
+    if (filters.organizationId) {
+      conditions.push(eq(storedFiles.organizationId, filters.organizationId));
+    }
+
     if (filters.status) {
       conditions.push(eq(storedFiles.status, filters.status));
     }
-    
+
     if (filters.owner) {
       conditions.push(eq(storedFiles.owner, filters.owner));
     }

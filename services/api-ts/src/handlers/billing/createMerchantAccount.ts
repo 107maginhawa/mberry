@@ -41,7 +41,10 @@ export async function createMerchantAccount(
 
   const { person: personId = user.id, refreshUrl, returnUrl, metadata } = body;
 
-  logger.info({ personId, userId: user.id }, 'Creating merchant account for person');
+  // Multi-tenant scoping (P0-7)
+  const organizationId = ctx.get('orgId') as string;
+
+  logger.info({ personId, userId: user.id, organizationId }, 'Creating merchant account for person');
 
   // Create repository instances
   const merchantAccountRepo = new MerchantAccountRepository(database, logger);
@@ -106,6 +109,7 @@ export async function createMerchantAccount(
     // Create merchant account record
     // Store all Stripe-specific data in metadata JSONB field
     const merchantAccount = await merchantAccountRepo.createOne({
+      organizationId,
       person: personId,
       active: true,
       metadata: {

@@ -105,7 +105,8 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
   async createBooking(
     clientId: string,
     slotId: string,
-    request: BookingCreateRequest
+    request: BookingCreateRequest,
+    organizationId?: string
   ): Promise<BookingWithDetails> {
     this.logger?.debug({ clientId, slotId, request }, 'Creating booking');
 
@@ -147,6 +148,7 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
       
       try {
         const invoice = await invoiceRepo.createOne({
+          organizationId: organizationId!,
           invoiceNumber: `INV-${Date.now()}-${bookingId.substring(0, 8)}`,
           customer: clientId,
           merchant: slot.owner,

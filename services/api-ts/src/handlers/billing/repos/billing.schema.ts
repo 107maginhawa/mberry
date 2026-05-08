@@ -47,6 +47,9 @@ export const invoices = pgTable('invoice', {
   // Base entity fields (includes id, timestamps, version, audit fields)
   ...baseEntityFields,
 
+  // Multi-tenant scoping (P0-7: cross-org financial data isolation)
+  organizationId: uuid('organization_id').notNull(),
+
   // Auto-generated invoice number
   invoiceNumber: varchar('invoice_number', { length: 50 }).notNull(),
 
@@ -106,6 +109,7 @@ export const invoices = pgTable('invoice', {
 
 }, (table) => ({
   // Performance indexes
+  orgIdx: index('invoices_org_idx').on(table.organizationId),
   customerIdx: index('invoices_customer_idx').on(table.customer),
   merchantIdx: index('invoices_merchant_idx').on(table.merchant),
   merchantAccountIdx: index('invoices_merchant_account_idx').on(table.merchantAccount),
@@ -131,6 +135,9 @@ export const merchantAccounts = pgTable('merchant_account', {
   // Base entity fields
   ...baseEntityFields,
 
+  // Multi-tenant scoping (P0-7: payment credential isolation)
+  organizationId: uuid('organization_id').notNull(),
+
   // Person who owns this merchant account (TypeSpec: person)
   person: uuid('person')
     .notNull()
@@ -144,6 +151,7 @@ export const merchantAccounts = pgTable('merchant_account', {
 
 }, (table) => ({
   // Performance indexes
+  orgIdx: index('merchant_accounts_org_idx').on(table.organizationId),
   personIdx: index('merchant_accounts_person_idx').on(table.person),
   activeIdx: index('merchant_accounts_active_idx').on(table.active),
 
@@ -304,6 +312,7 @@ export interface MerchantAccountWithPerson extends Omit<MerchantAccount, 'person
 
 // Filter interfaces for repository queries
 export interface InvoiceFilters {
+  organizationId?: string;
   customer?: string;
   merchant?: string;
   customerOrMerchant?: string;
@@ -313,6 +322,7 @@ export interface InvoiceFilters {
 }
 
 export interface MerchantAccountFilters {
+  organizationId?: string;
   person?: string;
   active?: boolean;
 }

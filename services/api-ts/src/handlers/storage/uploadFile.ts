@@ -13,6 +13,40 @@ import { type FileUploadResponse, type NewStoredFile } from './repos/file.schema
 import type { StorageProvider } from '@/core/storage';
 import { StorageFileRepository } from './repos/file.repo';
 import { addMinutes } from 'date-fns';
+import path from 'path';
+
+/** Allowed MIME types for file upload */
+const ALLOWED_MIME_TYPES = new Set([
+  // Images
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+  // Documents
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  // Text
+  'text/plain', 'text/csv',
+  // Archives
+  'application/zip',
+]);
+
+/** Sanitize filename: strip path components, null bytes, control chars */
+function sanitizeFilename(filename: string): string {
+  // Extract basename (strip directory traversal)
+  let clean = path.basename(filename);
+  // Remove null bytes and control characters (eslint-disable-next-line: intentional control char matching)
+  // eslint-disable-next-line no-control-regex
+  clean = clean.replace(/[\x00-\x1f]/g, '');
+  // Collapse whitespace
+  clean = clean.replace(/\s+/g, ' ').trim();
+  if (!clean || clean === '.' || clean === '..') {
+    throw new ValidationError('Invalid filename');
+  }
+  return clean;
+}
 
 /**
  * uploadFile
@@ -29,13 +63,24 @@ export async function uploadFile(
     size: number;
     mimeType: string;
   };
+  if (!body.filename || !body.mimeType || typeof body.size !== 'number') {
+    throw new ValidationError('Missing required fields: filename, mimeType, size');
+  }
   
+  // Validate MIME type against allowlist
+  if (!ALLOWED_MIME_TYPES.has(body.mimeType)) {
+    throw new ValidationError(`File type '${body.mimeType}' is not allowed`);
+  }
+
+  // Sanitize filename (strips path traversal, null bytes, control chars)
+  body.filename = sanitizeFilename(body.filename);
+
   // Get dependencies from context (injected by middleware)
   const storage = ctx.get('storage') as StorageProvider;
   const logger = ctx.get('logger');
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new StorageFileRepository(db, logger);
-  
+
   // Check file size limit (50MB)
   const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
   if (body.size > MAX_FILE_SIZE) {
@@ -51,6 +96,9 @@ export async function uploadFile(
   if (!user?.id) {
     throw new ValidationError('Valid user ID required');
   }
+
+  // Multi-tenant scoping (P0-7)
+  const organizationId = ctx.get('orgId') as string;
   
   // Create database record with "uploading" status
   let fileCreated = false;
@@ -58,6 +106,7 @@ export async function uploadFile(
   try {
     await repo.createOne({
       id: fileId, // Use the same UUID for both storage key and database record
+      organizationId,
       filename: body.filename,
       mimeType: body.mimeType,
       size: body.size,

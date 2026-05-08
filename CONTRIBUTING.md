@@ -17,6 +17,7 @@ Thank you for your interest in contributing to Monobase! This guide will help yo
 - [Debugging Tips](#debugging-tips)
 - [Frontend Development Patterns](#frontend-development-patterns)
 - [Getting Help](#getting-help)
+- [Existing Codebase Adoption Rule](#existing-codebase-adoption-rule)
 
 ## Development Setup
 
@@ -2335,6 +2336,39 @@ describe('myHandler', () => {
 - Business rule tests: `br-NN.description.test.ts` (e.g., `br-06.payment-recording.test.ts`)
 - Flow integration tests: `flow-NN.description.test.ts` (e.g., `flow-01.payment-membership-extension.test.ts`)
 - Unit tests: `handlerName.test.ts` (co-located with handler)
+
+---
+
+## Existing Codebase Adoption Rule
+
+When adopting or extending existing code in this codebase, follow these rules:
+
+### Before Changing Existing Code
+
+1. **Audit first, change second.** Read the full audit at `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` before starting work on any module.
+2. **Add tests around risky behavior BEFORE changing it.** If a module has low test coverage, write tests that capture current behavior first. Then refactor.
+3. **Existing code behavior is not automatically the correct product requirement.** Cross-reference against `docs/ver-3/` module specs and business rules before assuming current behavior is intended.
+4. **Check the P0/P1 risk list.** If your module has open P0 or P1 risks (see §13 of the audit), address those before adding new features.
+
+### When Adding New Modules
+
+1. **Follow TypeSpec-first workflow.** No new hand-wired routes. Define in `specs/api/src/modules/`, generate routes + validators.
+2. **Add organizationId to every new table.** 26/72 existing tables lack org scoping — don't add to the debt.
+3. **Include tests from day one.** Minimum: unit tests for handler logic, integration test for auth/permissions, contract test scenario.
+4. **Run the security checklist.** Before PR: validate input (zValidator), enforce auth (middleware, not per-handler), scope to org, audit write operations, rate limit.
+
+### Authority Hierarchy for Conflicts
+
+When existing code, docs, and specs disagree, resolve using this order:
+
+1. Current user/team instruction
+2. Existing working code behavior (document as "provisional" if not spec'd)
+3. `docs/ver-3/` product requirements (v3 PRD suite, 33 files)
+4. `specs/api/dist/openapi/openapi.json` (TypeSpec-generated API contract)
+5. `ARCHITECTURE.md`
+6. `CONTRIBUTING.md` (this file)
+7. `CLAUDE.md`
+8. Existing code patterns
 
 ---
 

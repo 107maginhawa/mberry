@@ -49,6 +49,9 @@ export const chatRooms = pgTable('chat_room', {
   // Base entity fields (includes id, timestamps, version, audit fields)
   ...baseEntityFields,
 
+  // Multi-tenant scoping (P0-7: chat data isolation between orgs)
+  organizationId: uuid('organization_id').notNull(),
+
   // Flexible participant and admin arrays
   participants: jsonb('participants')
     .$type<string[]>()
@@ -76,7 +79,8 @@ export const chatRooms = pgTable('chat_room', {
   // Efficiency reference for active video call
   activeVideoCallMessage: uuid('active_video_call_message_id'),
 }, (table) => ({
-  // Performance indexes for array operations
+  // Performance indexes
+  orgIdx: index('chat_rooms_org_idx').on(table.organizationId),
   participantsIdx: index('chat_rooms_participants_idx').using('gin', table.participants),
   adminsIdx: index('chat_rooms_admins_idx').using('gin', table.admins),
   contextIdx: index('chat_rooms_context_idx').on(table.context),
@@ -94,7 +98,10 @@ export const chatRooms = pgTable('chat_room', {
 export const chatMessages = pgTable('chat_message', {
   // Base entity fields
   ...baseEntityFields,
-  
+
+  // Multi-tenant scoping (P0-7: inherit from chat_room on insert)
+  organizationId: uuid('organization_id').notNull(),
+
   // Core message fields
   chatRoom: uuid('chat_room_id')
     .notNull()
@@ -117,6 +124,7 @@ export const chatMessages = pgTable('chat_message', {
   videoCallData: jsonb('video_call_data').$type<VideoCallData>(),
 }, (table) => ({
   // Performance indexes
+  orgIdx: index('chat_messages_org_idx').on(table.organizationId),
   chatRoomIdx: index('chat_messages_chat_room_idx').on(table.chatRoom),
   senderIdx: index('chat_messages_sender_idx').on(table.sender),
   timestampIdx: index('chat_messages_timestamp_idx').on(table.timestamp),
@@ -162,6 +170,7 @@ export type NewChatMessage = typeof chatMessages.$inferInsert;
 
 // Request/Response types for handlers
 export interface ChatRoomFilters {
+  organizationId?: string;
   participants?: string[]; // Find rooms containing any of these participants
   admins?: string[]; // Find rooms with any of these admins
   status?: 'active' | 'archived';
@@ -171,6 +180,7 @@ export interface ChatRoomFilters {
 }
 
 export interface ChatMessageFilters {
+  organizationId?: string;
   chatRoom?: string;
   sender?: string;
   messageType?: 'text' | 'system' | 'video_call';

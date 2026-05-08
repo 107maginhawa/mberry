@@ -35,8 +35,11 @@ export async function createBooking(
   // Instantiate repository
   const repo = new BookingRepository(db, logger);
   
+  // Multi-tenant scoping (P0-7): pass orgId for invoice creation
+  const organizationId = ctx.get('orgId') as string;
+
   // Create booking with slot validation
-  const booking = await repo.createBooking(user.id, body.slot, body);
+  const booking = await repo.createBooking(user.id, body.slot, body, organizationId);
   
   // Log audit trail
   logger?.info({

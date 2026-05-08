@@ -51,10 +51,14 @@ export async function createInvoice(
     metadata
   } = body;
 
+  // Multi-tenant scoping (P0-7)
+  const organizationId = ctx.get('orgId') as string;
+
   logger.info({
     customer,
     merchant,
     context,
+    organizationId,
     lineItemCount: lineItems?.length || 0
   }, 'Creating new invoice');
 
@@ -126,6 +130,7 @@ export async function createInvoice(
   // Create invoice with line items using transaction
   const invoiceWithLineItems = await invoiceRepo.createWithLineItems(
     {
+      organizationId,
       customer,
       merchant,
       context,

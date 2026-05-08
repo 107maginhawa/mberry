@@ -31,9 +31,13 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
    */
   protected buildWhereConditions(filters?: ChatMessageFilters): SQL<unknown> | undefined {
     if (!filters) return undefined;
-    
+
     const conditions = [];
-    
+
+    if (filters.organizationId) {
+      conditions.push(eq(chatMessages.organizationId, filters.organizationId));
+    }
+
     if (filters.chatRoom) {
       conditions.push(eq(chatMessages.chatRoom, filters.chatRoom));
     }
@@ -63,7 +67,8 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
   async createTextMessage(
     chatRoomId: string,
     senderId: string,
-    messageContent: string
+    messageContent: string,
+    organizationId?: string
   ): Promise<ChatMessage> {
     this.logger?.debug({ chatRoomId, senderId }, 'Creating text message');
     
@@ -81,13 +86,14 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
       sender: senderId,
       messageType: 'text',
       message: messageContent.trim(),
-      timestamp: new Date()
+      timestamp: new Date(),
+      organizationId: organizationId!
     });
-    
-    this.logger?.info({ 
+
+    this.logger?.info({
       messageId: message.id,
       chatRoomId,
-      senderId 
+      senderId
     }, 'Text message created');
     
     return message;
@@ -99,7 +105,8 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
   async createVideoCallMessage(
     chatRoomId: string,
     senderId: string,
-    videoCallData: VideoCallData
+    videoCallData: VideoCallData,
+    organizationId?: string
   ): Promise<ChatMessage> {
     this.logger?.debug({ chatRoomId, senderId }, 'Creating video call message');
     
@@ -120,14 +127,15 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
       sender: senderId,
       messageType: 'video_call',
       videoCallData: callData,
-      timestamp: new Date()
+      timestamp: new Date(),
+      organizationId: organizationId!
     });
-    
-    this.logger?.info({ 
+
+    this.logger?.info({
       messageId: message.id,
       chatRoomId,
       senderId,
-      participantCount: callData.participants.length 
+      participantCount: callData.participants.length
     }, 'Video call message created');
     
     return message;
@@ -139,7 +147,8 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
   async createSystemMessage(
     chatRoomId: string,
     systemMessage: string,
-    triggeredByUserId: string
+    triggeredByUserId: string,
+    organizationId?: string
   ): Promise<ChatMessage> {
     this.logger?.debug({ chatRoomId, systemMessage, triggeredByUserId }, 'Creating system message');
 
@@ -148,12 +157,13 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
       sender: triggeredByUserId, // User who triggered the system action
       messageType: 'system',
       message: systemMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
+      organizationId: organizationId!
     });
-    
-    this.logger?.info({ 
+
+    this.logger?.info({
       messageId: message.id,
-      chatRoomId 
+      chatRoomId
     }, 'System message created');
     
     return message;
