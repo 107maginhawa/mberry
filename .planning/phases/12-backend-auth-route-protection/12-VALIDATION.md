@@ -48,9 +48,9 @@ created: 2026-05-08
 
 ## Wave 0 Requirements
 
-- [ ] `services/api-ts/src/middleware/route-protection-handwired.test.ts` — stubs for D-01 hand-wired route tests
-- [ ] `services/api-ts/src/middleware/route-protection-association.test.ts` — stubs for D-01 association route tests
-- [ ] `services/api-ts/src/middleware/route-protection-idor.test.ts` — stubs for D-03/D-04 IDOR tests
+- [ ] `services/api-ts/src/tests/route-protection-handwired.test.ts` — stubs for D-01 hand-wired route tests
+- [ ] `services/api-ts/src/tests/route-protection-association.test.ts` — stubs for D-01 association route tests
+- [ ] `services/api-ts/src/tests/route-protection-idor.test.ts` — stubs for D-03/D-04 IDOR tests
 
 *Existing test infrastructure (Bun test, apiAs helper) covers all framework needs.*
 
