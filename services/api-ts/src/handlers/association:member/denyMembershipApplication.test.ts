@@ -1,7 +1,8 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { denyMembershipApplication } from './denyMembershipApplication';
 import { MembershipApplicationRepository } from './repos/membership.repo';
+import { OfficerTermRepository } from './repos/governance.repo';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
@@ -22,12 +23,20 @@ const fakeApplication = {
 
 describe('denyMembershipApplication', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+    restoreRepo(MembershipApplicationRepository);
+  });
 
   afterEach(() => {
-    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
+    restoreRepo(MembershipApplicationRepository);
   });
 
   test('denies a submitted application and returns 200', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     mocks = stubRepo(MembershipApplicationRepository, {
       findOneById: async () => fakeApplication,
       updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
@@ -44,6 +53,7 @@ describe('denyMembershipApplication', () => {
   });
 
   test('denies an underReview application and returns 200', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     const underReviewApp = { ...fakeApplication, status: 'underReview' };
     mocks = stubRepo(MembershipApplicationRepository, {
       findOneById: async () => underReviewApp,
@@ -61,6 +71,7 @@ describe('denyMembershipApplication', () => {
   });
 
   test('throws NotFoundError for non-existent application', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     mocks = stubRepo(MembershipApplicationRepository, {
       findOneById: async () => undefined,
     });
@@ -74,6 +85,7 @@ describe('denyMembershipApplication', () => {
   });
 
   test('throws BusinessLogicError when application is already approved', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     mocks = stubRepo(MembershipApplicationRepository, {
       findOneById: async () => ({ ...fakeApplication, status: 'approved' }),
     });
@@ -87,6 +99,7 @@ describe('denyMembershipApplication', () => {
   });
 
   test('throws BusinessLogicError when application is already denied', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     mocks = stubRepo(MembershipApplicationRepository, {
       findOneById: async () => ({ ...fakeApplication, status: 'denied' }),
     });
@@ -99,11 +112,7 @@ describe('denyMembershipApplication', () => {
     await expect(denyMembershipApplication(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
-  test('throws UnauthorizedError when no session', async () => {
-    mocks = stubRepo(MembershipApplicationRepository, {
-      findOneById: async () => fakeApplication,
-    });
-
+  test('returns 401 when no session', async () => {
     const ctx = makeCtx({
       user: null,
       session: null,
@@ -111,10 +120,12 @@ describe('denyMembershipApplication', () => {
       _body: { denialReason: 'No auth' },
     });
 
-    await expect(denyMembershipApplication(ctx)).rejects.toBeInstanceOf(UnauthorizedError);
+    const res = await denyMembershipApplication(ctx);
+    expect(res.status).toBe(401);
   });
 
   test('captures denialReason in the update', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipApplicationRepository, {
       findOneById: async () => fakeApplication,
@@ -132,6 +143,7 @@ describe('denyMembershipApplication', () => {
   });
 
   test('stores null denialReason when not provided', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipApplicationRepository, {
       findOneById: async () => fakeApplication,
@@ -148,6 +160,7 @@ describe('denyMembershipApplication', () => {
   });
 
   test('sets reviewedBy to the session user id', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipApplicationRepository, {
       findOneById: async () => fakeApplication,
@@ -165,6 +178,7 @@ describe('denyMembershipApplication', () => {
   });
 
   test('sets reviewedAt to current timestamp', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     let capturedUpdate: any = null;
     const before = new Date();
     mocks = stubRepo(MembershipApplicationRepository, {
@@ -191,6 +205,7 @@ describe('denyMembershipApplication', () => {
 
     for (const status of nonDeniableStatuses) {
       test(`throws BusinessLogicError for status '${status}'`, async () => {
+        officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
         mocks = stubRepo(MembershipApplicationRepository, {
           findOneById: async () => ({ ...fakeApplication, status }),
         });

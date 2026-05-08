@@ -1,5 +1,5 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { updateOfficerTerm } from './updateOfficerTerm';
 import { OfficerTermRepository } from './repos/governance.repo';
 import { NotFoundError } from '@/core/errors';
@@ -25,8 +25,12 @@ const existingTerm = {
 describe('updateOfficerTerm', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
-    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('updates officer term and returns the updated record', async () => {

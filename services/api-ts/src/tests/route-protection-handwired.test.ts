@@ -21,28 +21,12 @@
  *   GET  /membership/org-profile/:orgId  — member allowed
  */
 
-import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { Hono } from 'hono';
 import { authMiddleware } from '@/middleware/auth';
 import { officerAuthMiddleware } from '@/middleware/officer-auth';
-
-// ---------------------------------------------------------------------------
-// Module mock: OfficerTermRepository.findActiveByPersonAndOrg
-// We control the return value per app factory to simulate member vs officer.
-// ---------------------------------------------------------------------------
-
-const mockFindActiveByPersonAndOrg = mock(async (_personId: string, _orgId: string) => {
-  return [] as any[];
-});
-
-mock.module('@/handlers/association:member/repos/governance.repo', () => ({
-  OfficerTermRepository: class {
-    findActiveByPersonAndOrg = mockFindActiveByPersonAndOrg;
-  },
-  PositionRepository: class {
-    async findByOrg() { return []; }
-  },
-}));
+import { stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 // ---------------------------------------------------------------------------
 // Shared mock DI middleware (sets user + logger + database on context)
@@ -156,13 +140,14 @@ describe('Hand-wired route officer protection — member gets 403', () => {
   let memberApp: Hono;
 
   beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
     // Member: findActiveByPersonAndOrg returns empty array (no officer term)
-    mockFindActiveByPersonAndOrg.mockImplementation(async () => []);
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     memberApp = makeMemberApp();
   });
 
   afterEach(() => {
-    mockFindActiveByPersonAndOrg.mockRestore();
+    restoreRepo(OfficerTermRepository);
   });
 
   for (const route of officerRoutes) {
@@ -185,13 +170,14 @@ describe('Hand-wired route officer protection — officer gets 200', () => {
   let officerApp: Hono;
 
   beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
     // Officer: findActiveByPersonAndOrg returns one active term
-    mockFindActiveByPersonAndOrg.mockImplementation(async () => [{ id: 'term-1', status: 'active' }]);
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', status: 'active' }] });
     officerApp = makeOfficerApp();
   });
 
   afterEach(() => {
-    mockFindActiveByPersonAndOrg.mockRestore();
+    restoreRepo(OfficerTermRepository);
   });
 
   for (const route of officerRoutes) {

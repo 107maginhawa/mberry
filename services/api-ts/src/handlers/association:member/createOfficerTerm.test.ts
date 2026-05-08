@@ -1,6 +1,6 @@
 // Business Rules: [BR-09] — one person per role per org
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { createOfficerTerm } from './createOfficerTerm';
 import { OfficerTermRepository } from './repos/governance.repo';
 
@@ -25,13 +25,18 @@ const createdTerm = {
 describe('createOfficerTerm [BR-09]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
-    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('creates officer term and returns 201', async () => {
     mocks = stubRepo(OfficerTermRepository, {
       create: async () => createdTerm,
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -57,6 +62,7 @@ describe('createOfficerTerm [BR-09]', () => {
         capturedData = data;
         return { ...createdTerm, status: data.status };
       },
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -80,6 +86,7 @@ describe('createOfficerTerm [BR-09]', () => {
         capturedData = data;
         return { ...createdTerm, endDate: data.endDate };
       },
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -103,6 +110,7 @@ describe('createOfficerTerm [BR-09]', () => {
         capturedData = data;
         return { ...createdTerm, endDate: data.endDate };
       },
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -125,6 +133,7 @@ describe('createOfficerTerm [BR-09]', () => {
         capturedData = data;
         return { ...createdTerm, organizationId: data.organizationId };
       },
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -198,6 +207,7 @@ describe('createOfficerTerm [BR-09]', () => {
     // The handler must NOT throw when audit is absent.
     mocks = stubRepo(OfficerTermRepository, {
       create: async () => createdTerm,
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({

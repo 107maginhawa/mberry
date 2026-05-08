@@ -51,8 +51,11 @@ function makeMockCtx(overrides: {
     get: (key: string) => vars[key],
     set: (key: string, val: any) => { vars[key] = val; },
     req: {
+      path: '/test-path',
+      method: 'GET',
       header: (name: string) => name === 'x-org-id' ? headerOrgId : null,
       query: () => null,
+      param: () => undefined,
     },
     json: (body: any, status: number) => ({ status, body }) as any as Response,
   };

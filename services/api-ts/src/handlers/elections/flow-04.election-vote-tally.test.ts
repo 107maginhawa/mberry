@@ -11,8 +11,8 @@ import { ElectionsRepository } from './repos/elections.repo';
 
 const ELECTION_ID = 'election-1';
 const VOTER = 'voter-1';
-const POSITION_ID = 'pos-president';
-const NOMINEE_ID = 'nominee-1';
+const POSITION_ID = '00000000-0000-4000-8000-000000000001';
+const NOMINEE_ID = '00000000-0000-4000-8000-000000000002';
 
 const fakeElection = {
   id: ELECTION_ID,
@@ -50,7 +50,7 @@ describe('[FLOW-04] Election Vote → Tally → Winner', () => {
   });
 
   afterEach(() => {
-    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(ElectionsRepository);
   });
 
   // ── Vote Casting ──

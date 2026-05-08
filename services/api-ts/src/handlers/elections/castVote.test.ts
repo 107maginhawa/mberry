@@ -1,5 +1,5 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { castVote } from './castVote';
 import { ElectionsRepository } from './repos/elections.repo';
 
@@ -15,8 +15,8 @@ const fakeElection = {
 const fakeVote = {
   id: 'vote-1',
   electionId: 'election-1',
-  positionId: 'pos-1',
-  nomineeId: 'nominee-1',
+  positionId: '00000000-0000-4000-8000-000000000001',
+  nomineeId: '00000000-0000-4000-8000-000000000002',
   voterId: 'user-1',
 };
 
@@ -25,8 +25,12 @@ const fakeVote = {
 describe('[BR-33] castVote', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(ElectionsRepository);
+  });
+
   afterEach(() => {
-    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(ElectionsRepository);
   });
 
   test('casts vote and returns 201', async () => {
@@ -38,13 +42,13 @@ describe('[BR-33] castVote', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     const response = await castVote(ctx);
     expect(response.status).toBe(201);
-    expect(response.body.data.positionId).toBe('pos-1');
-    expect(response.body.data.nomineeId).toBe('nominee-1');
+    expect(response.body.data.positionId).toBe('00000000-0000-4000-8000-000000000001');
+    expect(response.body.data.nomineeId).toBe('00000000-0000-4000-8000-000000000002');
   });
 
   test('uses session user as voterId', async () => {
@@ -58,7 +62,7 @@ describe('[BR-33] castVote', () => {
     const ctx = makeCtx({
       user: { id: 'voter-99', role: 'member' },
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await castVote(ctx);
@@ -76,7 +80,7 @@ describe('[BR-33] castVote', () => {
       user: null,
       session: null,
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await expect(castVote(ctx)).rejects.toThrow();
@@ -93,7 +97,7 @@ describe('[BR-33] castVote', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await expect(castVote(ctx)).rejects.toThrow('Already voted for this position');
@@ -108,7 +112,7 @@ describe('[BR-33] castVote', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await expect(castVote(ctx)).rejects.toThrow('Voting is not open');
@@ -123,7 +127,7 @@ describe('[BR-33] castVote', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await expect(castVote(ctx)).rejects.toThrow('Voting is not open');
@@ -138,7 +142,7 @@ describe('[BR-33] castVote', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await expect(castVote(ctx)).rejects.toThrow('Voting is not open');
@@ -153,7 +157,7 @@ describe('[BR-33] castVote', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await expect(castVote(ctx)).rejects.toThrow('Voting is not open');
@@ -168,7 +172,7 @@ describe('[BR-33] castVote', () => {
 
     const ctx = makeCtx({
       _params: { id: 'election-1' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await expect(castVote(ctx)).rejects.toThrow('Voting is not open');
@@ -183,7 +187,7 @@ describe('[BR-33] castVote', () => {
 
     const ctx = makeCtx({
       _params: { id: 'missing-id' },
-      _body: { positionId: 'pos-1', nomineeId: 'nominee-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
     });
 
     await expect(castVote(ctx)).rejects.toThrow('Election not found');

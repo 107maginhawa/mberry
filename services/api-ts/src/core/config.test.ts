@@ -417,8 +417,8 @@ describe('parseConfig — default values (clean environment)', () => {
     expect(cfg.auth.socialProviders?.google).toBeUndefined();
   });
 
-  test('auth.sessionExpiresIn defaults to 7 days in seconds', () => {
-    expect(cfg.auth.sessionExpiresIn).toBe(60 * 60 * 24 * 7);
+  test('auth.sessionExpiresIn defaults to 24 hours in seconds (P0-2 mitigation)', () => {
+    expect(cfg.auth.sessionExpiresIn).toBe(60 * 60 * 24);
   });
 });
 
