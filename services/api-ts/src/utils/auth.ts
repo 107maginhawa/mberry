@@ -4,7 +4,7 @@
  */
 
 import { createAccessControl } from 'better-auth/plugins/access';
-import { betterAuth } from 'better-auth';
+import type { betterAuth } from 'better-auth';
 import type { DatabaseInstance } from '@/core/database';
 import { user } from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
@@ -76,6 +76,9 @@ export async function userHasRole(
 
   const userRoles = user.role.split(',').map(r => r.trim());
   const rolesToCheck = Array.isArray(roleToCheck) ? roleToCheck : [roleToCheck];
+
+  // "user" means "any authenticated user" — if user has any role at all, they qualify
+  if (rolesToCheck.includes('user') && userRoles.length > 0) return true;
 
   return rolesToCheck.some(role => userRoles.includes(role));
 }
