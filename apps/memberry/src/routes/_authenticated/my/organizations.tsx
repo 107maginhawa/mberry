@@ -66,7 +66,10 @@ function MyOrganizationsPage() {
         title="Organizations"
         subtitle="Your memberships across all organizations"
         actions={
-          <button className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150">
+          <button
+            onClick={() => toast.info('Organization discovery coming soon')}
+            className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
+          >
             Find Organizations
           </button>
         }
@@ -79,7 +82,7 @@ function MyOrganizationsPage() {
           icon={<Building2 size={40} />}
           headline="No memberships yet"
           description="Join a professional organization to access events, training, and credentials"
-          action={{ label: 'Find Organizations', onClick: () => {} }}
+          action={{ label: 'Find Organizations', onClick: () => toast.info('Organization discovery coming soon') }}
         />
       ) : (
         <div className="space-y-3">

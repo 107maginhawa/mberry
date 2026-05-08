@@ -63,6 +63,11 @@ function MyIdCard() {
             </div>
             <Skeleton className="h-32 w-full" />
           </div>
+        ) : !membership ? (
+          <div className="text-center py-8 text-muted-foreground space-y-2">
+            <p className="font-semibold text-foreground">No ID card available</p>
+            <p className="text-sm">Join an organization to get your digital member ID card.</p>
+          </div>
         ) : (
           <>
             <div className="text-center space-y-2">

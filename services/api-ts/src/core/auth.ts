@@ -16,6 +16,7 @@ import type { EmailService } from '@/core/email';
 import type { AuthInstance } from '@/utils/auth';
 import { EmailTemplateTags } from '@/handlers/email/repos/email.schema';
 import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
+import { PersonRepository } from '@/handlers/person/repos/person.repo';
 import * as schema from '@/generated/better-auth/schema';
 import { createTrustedOriginsList, determineCookieConfig } from '@/utils/cors';
 import { ac } from '@/utils/auth';
@@ -147,6 +148,27 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
             }
 
             return { data: user }; // Return unchanged if already admin
+          },
+          after: async (user) => {
+            // Auto-create person record so profile/dashboard work immediately
+            try {
+              const personRepo = new PersonRepository(database, logger);
+              const existing = await personRepo.findOneById(user.id);
+              if (!existing) {
+                const nameParts = (user.name || '').trim().split(/\s+/);
+                const firstName = nameParts[0] || user.email?.split('@')[0] || 'Member';
+                await personRepo.createOne({
+                  id: user.id,
+                  firstName,
+                  lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : null,
+                  contactInfo: { email: user.email },
+                  createdBy: user.id,
+                });
+                logger?.info({ userId: user.id }, 'Auto-created person record on signup');
+              }
+            } catch (err) {
+              logger?.warn({ error: err, userId: user.id }, 'Failed to auto-create person on signup');
+            }
           }
         }
       },

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getPersonOptions, updatePersonMutation } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { getPersonOptions, updatePersonMutation, createPersonMutation } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { formatPersonName, formatLicenseDisplay } from '@/features/profile/lib/profile-display'
 import { useState, useEffect } from 'react'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -23,6 +23,28 @@ function MyProfilePage() {
     ...getPersonOptions({ path: { person: 'me' } }),
     retry: false,
   })
+
+  // Auto-create person record if missing (for users who signed up before the hook)
+  const { user } = Route.useRouteContext()
+  const createPerson = useMutation({
+    ...createPersonMutation(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getPersonOptions({ path: { person: 'me' } }).queryKey })
+    },
+  })
+
+  useEffect(() => {
+    if (isError && user && !createPerson.isPending && !createPerson.isSuccess) {
+      const nameParts = (user.name || '').trim().split(/\s+/)
+      createPerson.mutate({
+        body: {
+          firstName: nameParts[0] || user.email?.split('@')[0] || 'Member',
+          lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined,
+          contactInfo: { email: user.email },
+        },
+      })
+    }
+  }, [isError, user])
 
   const { data: memberships = [] } = useQuery({
     queryKey: ['my-memberships'],

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   updatePersonMutation,
+  createPersonMutation,
   getPersonQueryKey,
 } from '@monobase/sdk-ts/generated/react-query'
 
@@ -25,15 +26,29 @@ function MemberOnboarding() {
   const updatePerson = useMutation({
     ...updatePersonMutation(),
   })
+  const createPerson = useMutation({
+    ...createPersonMutation(),
+  })
 
   const handleComplete = async () => {
     try {
-      await updatePerson.mutateAsync({
-        path: { person: 'me' },
-        body: {
-          specialization: specialization || undefined,
-        },
-      })
+      // Try update first; if person doesn't exist, create it
+      try {
+        await updatePerson.mutateAsync({
+          path: { person: 'me' },
+          body: {
+            specialization: specialization || undefined,
+          },
+        })
+      } catch {
+        // Person doesn't exist yet — create it
+        await createPerson.mutateAsync({
+          body: {
+            firstName: 'Member',
+            specialization: specialization || undefined,
+          } as any,
+        })
+      }
       await queryClient.invalidateQueries({
         queryKey: getPersonQueryKey({ path: { person: 'me' } }),
       })

@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { Calendar, Award, UserPlus, Shield } from 'lucide-react'
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
@@ -23,6 +24,7 @@ function getGreeting(): string {
 }
 
 function DashboardPage() {
+  const navigate = useNavigate()
   const person = useQuery({
     ...getPersonOptions({ path: { person: 'me' } }),
     retry: false,
@@ -75,7 +77,8 @@ function DashboardPage() {
   const totalCredits = creditsQuery.data ?? 0
   const unreadNotifCount = notifsQuery.data ?? 0
 
-  const displayName = person.data?.firstName ?? 'there'
+  const { user } = Route.useRouteContext()
+  const displayName = person.data?.firstName ?? user?.name?.split(' ')[0] ?? 'there'
 
   return (
     <div>
@@ -112,7 +115,7 @@ function DashboardPage() {
           <EmptyState
             headline="No memberships yet"
             description="Join an organization to get started"
-            action={{ label: 'Find Organizations', onClick: () => {} }}
+            action={{ label: 'Find Organizations', onClick: () => navigate({ to: '/my/organizations' }) }}
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

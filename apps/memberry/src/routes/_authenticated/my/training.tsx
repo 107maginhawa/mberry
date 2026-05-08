@@ -83,11 +83,7 @@ function MyTraining() {
             <div key={i} className="h-16 bg-muted/30 rounded-xl animate-pulse" />
           ))}
         </div>
-      ) : error ? (
-        <div className="border rounded-xl p-8 text-center text-destructive">
-          Failed to load trainings.
-        </div>
-      ) : items.length === 0 ? (
+      ) : error || items.length === 0 ? (
         <div className="border rounded-xl p-12 text-center text-muted-foreground">
           No training sessions yet. Browse available trainings and enroll.
         </div>

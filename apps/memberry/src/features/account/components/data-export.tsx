@@ -16,24 +16,6 @@ interface ExportRecord {
 const RATE_LIMIT_KEY = 'data_export_last_request'
 const RATE_LIMIT_HOURS = 24
 
-// Mock export history
-const MOCK_EXPORTS: ExportRecord[] = [
-  {
-    id: 'exp-1',
-    requestedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'Expired',
-  },
-  {
-    id: 'exp-2',
-    requestedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'Expired',
-  },
-  {
-    id: 'exp-3',
-    requestedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'Expired',
-  },
-]
 
 const STATUS_CONFIG: Record<ExportStatus, { icon: React.ReactNode; className: string; label: string }> = {
   Processing: {
@@ -73,7 +55,7 @@ function hoursUntilNextRequest(): number {
 }
 
 export function DataExport() {
-  const [exports, setExports] = useState<ExportRecord[]>(MOCK_EXPORTS)
+  const [exports, setExports] = useState<ExportRecord[]>([])
   const [isRequesting, setIsRequesting] = useState(false)
   const [rateLimited, setRateLimited] = useState(isRateLimited)
 
