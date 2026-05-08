@@ -43,23 +43,49 @@ workspace.
 
 ## Business Domain Modules
 
-The API service ships nine vertical-neutral handler modules. Build your product
-on top of these — add a `patient`, `tenant`, `student`, `merchant`, etc. module
-under `services/api-ts/src/handlers/` for each domain you need.
+The API service has **22 handler directories** under `services/api-ts/src/handlers/`. ~60% have matching TypeSpec definitions; the remainder use hand-wired routes.
 
-1. **person** - User profile management and central PII safeguard
-2. **booking** - Generic time-based scheduling (hosts, slots, bookings, events)
-3. **billing** - Invoice-based payments via Stripe Connect
-4. **audit** - Compliance logging (Pino structured logging)
-5. **notifs** - Multi-channel notifications (email, push via OneSignal)
-6. **comms** - Real-time chat rooms with embedded video calls (WebRTC)
-7. **storage** - File upload/download (S3/MinIO)
-8. **email** - Transactional emails (SMTP/Postmark)
-9. **reviews** - NPS review system
+**Core Identity**:
+1. **person** — Central PII hub (25 handlers, TypeSpec)
 
-All nine have matching TypeSpec definitions under `specs/api/src/modules/`.
+**Association**:
+2. **association:member** — Mega-module: membership, chapters, officers, positions (157 handlers, TypeSpec)
+3. **association:operations** — Analytics, cross-chapter rollups (54 handlers, TypeSpec)
 
-**Note**: Authentication is handled by Better-Auth (integrated, not a separate module). Consent management is implemented as JSONB fields on the Person model (not a standalone module).
+**Platform**:
+4. **platformadmin** — Admin-tier operations (21 handlers, TypeSpec)
+
+**Membership**:
+5. **membership** — Applications, approvals, tiers (12 handlers, hand-wired)
+6. **dues** — Invoicing, payments, funds (15 handlers, hand-wired)
+7. **invite** — Org invitations (3 handlers, TypeSpec)
+
+**Billing**:
+8. **billing** — Stripe Connect integration (16 handlers, TypeSpec)
+
+**Events/Training**:
+9. **booking** — Time-based scheduling (19 handlers, TypeSpec)
+10. **events** — Event management (11 handlers, TypeSpec)
+11. **training** — CPD/CE credit tracking (10 handlers, hand-wired)
+12. **elections** — Voting and nominations (6 handlers, TypeSpec)
+
+**Communications**:
+13. **communication** — Templates, queuing (28 handlers, TypeSpec)
+14. **communications** — Announcements (8 handlers, hand-wired)
+15. **comms** — WebSocket: video, chat (11 handlers, TypeSpec)
+
+**Content**:
+16. **documents** — Document management with access-log tracking (15 handlers, TypeSpec)
+17. **certificates** — Certificate generation (3 handlers, TypeSpec)
+18. **storage** — File upload/download via S3/MinIO (6 handlers, TypeSpec)
+19. **reviews** — NPS review system (4 handlers, TypeSpec)
+
+**Compliance**:
+20. **audit** — Compliance logging (1 handler, TypeSpec)
+21. **email** — Transactional email queue (9 handlers, TypeSpec)
+22. **notifs** — Multi-channel notifications via OneSignal (5 handlers, mixed)
+
+**Note**: Authentication is handled by Better-Auth (integrated, not a separate module). Three comms modules (comms, communication, communications) overlap and need consolidation.
 
 ## Key Architectural Patterns
 
@@ -67,22 +93,7 @@ All nine have matching TypeSpec definitions under `specs/api/src/modules/`.
 The Person module is the central PII safeguard for user data.
 
 ### Consent Management
-Consent is embedded in the Person model as JSONB fields rather than a standalone module:
-```typescript
-{
-  granted: boolean,
-  granted_at: timestamp,
-  ip_address: string,
-  updated_at: timestamp,
-  updated_by: string
-}
-```
-
-Consent types on Person:
-- **marketing_consent**: Marketing communications
-- **data_sharing_consent**: Data sharing preferences
-- **sms_consent**: SMS notifications
-- **email_consent**: Email communications
+Consent management is planned but **not yet implemented** in the database schema. No JSONB consent fields exist on the Person model currently. See `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` §7 for current Person table structure.
 
 ### API-First Development
 Always follow this workflow:
@@ -161,7 +172,7 @@ When working with regulated data:
 
 ### Data Privacy
 - **Audit Trails**: All user data access is logged with Pino
-- **Consent Validation**: Check JSONB consent fields before processing
+- **Consent Validation**: Consent management not yet implemented in schema (planned)
 - **Role-Based Access**: Verify user roles via Better-Auth
 - **Correlation IDs**: Include in all log entries for traceability
 
@@ -294,11 +305,12 @@ cd apps/account && bun run test:e2e     # E2E tests
 - ✅ **specs/api/** (`@monobase/api-spec`) - TypeSpec sources + generated OpenAPI + TS types
 - ✅ **packages/sdk-ts/** - Auto-generated TanStack Query hooks + hand-written client/flows/utils
 - ✅ **packages/eslint-config/** - Shared ESLint flat configs
-- ✅ **specs/api/tests/contract/** - Hurl contract suite (22 scenarios, ~5s)
-- ✅ **.claude/skills/** - 16 Claude Code skills (curated for the post-merge structure)
+- ✅ **apps/admin** - Platform ops dashboard (port 3003)
+- ✅ **apps/memberry** - Product app — membership, dues, events, training (port 3004)
+- ✅ **specs/api/tests/contract/** - Hurl contract suite (27 scenarios, 44 files)
+- ✅ **.claude/skills/** - 17 Claude Code skills for end-to-end development workflow
 - ✅ **Authentication** via Better-Auth (integrated, not a separate module)
-- ✅ **Consent** as JSONB fields on Person model (not a separate module)
-- ✅ **9 API handler modules** (person, booking, billing, audit, notifs, comms, storage, email, reviews)
+- ✅ **22 handler directories** under `services/api-ts/src/handlers/` (~60% with TypeSpec coverage)
 
 ### Multi-App Architecture
 Production apps typically follow a 3-app pattern:
@@ -317,6 +329,16 @@ To scaffold a new app, copy `apps/account/` and update `package.json` name + `vi
   `SyncEngine`/`SqliteBackend` integration in `init`/`start` is still a
   stub (see `TODO` comments). `cargo check` is green; runtime sync is
   not yet activated end-to-end.
+
+### P0/P1 Risk Summary (from Codebase Audit)
+
+Full audit: `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md`
+
+**7 P0 (fix immediately)**: 2FA secrets plaintext, castVote no validation, uploadFile no MIME allowlist, 36% tables not org-scoped, session tokens plaintext, email verification disabled, audit log no organizationId.
+
+**11 P1 (fix before major new work)**: Per-handler auth bypass (6+ routes), internal service token untyped/no rotation, rate limiting only on auth routes, officerAuth silent skip without `:orgId`, 2FA not enforced for privileged roles, no session invalidation on role change, admin app no role gates, user.email unique globally blocks multi-org, 8 inline app.ts routes bypass TypeSpec, auth events not in audit trail, association:member mega-module (171 handlers).
+
+**Gate**: No new feature development until P0/P1 fixes are ≥50% complete.
 
 ### Working with Cadence (Rust)
 - Cadence lives at `services/cadence/` and is a Cargo crate independent of
