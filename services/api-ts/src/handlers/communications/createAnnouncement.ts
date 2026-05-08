@@ -1,11 +1,12 @@
 import type { Context } from 'hono';
 import { CommunicationsRepository } from './repos/communications.repo';
 import type { Session } from '@/types/auth';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 import type { BaseContext } from '@/types/app';
 
 export async function createAnnouncement(ctx: Context): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx as unknown as BaseContext);
+  const denied = await requirePosition(ctx as unknown as BaseContext, [POSITION_TITLES.SECRETARY, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const db = ctx.get('database');

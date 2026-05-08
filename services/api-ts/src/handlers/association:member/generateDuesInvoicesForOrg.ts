@@ -2,7 +2,8 @@ import type { ValidatedContext } from '@/types/app';
 import { UnauthorizedError } from '@/core/errors';
 import type { GenerateDuesInvoicesForOrgBody } from '@/generated/openapi/validators';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * generateDuesInvoicesForOrg
@@ -13,7 +14,7 @@ import { requireOfficerTerm } from '@/utils/officer-check';
 export async function generateDuesInvoicesForOrg(
   ctx: ValidatedContext<GenerateDuesInvoicesForOrgBody, never, never>
 ): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const session = ctx.get('session');

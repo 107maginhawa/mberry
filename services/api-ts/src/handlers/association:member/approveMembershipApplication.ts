@@ -4,7 +4,8 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { ApproveMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository, MembershipRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * approveMembershipApplication
@@ -15,7 +16,7 @@ import { requireOfficerTerm } from '@/utils/officer-check';
 export async function approveMembershipApplication(
   ctx: ValidatedContext<never, never, ApproveMembershipApplicationParams>
 ): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.SECRETARY, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const session = ctx.get('session');

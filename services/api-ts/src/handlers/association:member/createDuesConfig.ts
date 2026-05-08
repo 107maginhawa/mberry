@@ -4,7 +4,8 @@ import type { CreateDuesConfigBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { DuesConfigRepository } from './repos/dues.repo';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * createDuesConfig
@@ -15,7 +16,7 @@ import { requireOfficerTerm } from '@/utils/officer-check';
 export async function createDuesConfig(
   ctx: ValidatedContext<CreateDuesConfigBody, never, never>
 ): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const user = ctx.get('user');

@@ -4,7 +4,8 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { RefundDuesPaymentBody, RefundDuesPaymentParams } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * refundDuesPayment
@@ -15,7 +16,7 @@ import { requireOfficerTerm } from '@/utils/officer-check';
 export async function refundDuesPayment(
   ctx: ValidatedContext<RefundDuesPaymentBody, never, RefundDuesPaymentParams>
 ): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const session = ctx.get('session');
