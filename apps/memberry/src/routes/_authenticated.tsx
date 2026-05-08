@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router"
+import { createFileRoute, Outlet, useMatches, Link } from "@tanstack/react-router"
 import { requireAuth } from "@/utils/guards"
 import { MemberSidebar } from "@/components/layout/member-sidebar"
 import { MemberBottomNav } from "@/components/layout/member-bottom-nav"
@@ -8,6 +8,18 @@ import { ErrorBoundary } from "@/components/patterns/error-boundary"
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: requireAuth,
   component: AuthenticatedLayout,
+  notFoundComponent: () => (
+    <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+      <h1 className="text-hero text-[var(--color-primary)]">404</h1>
+      <p className="text-h3 text-[var(--color-text)]">Page not found</p>
+      <p className="text-body-sm text-[var(--color-text-secondary)] max-w-md">
+        The page you're looking for doesn't exist or has been moved.
+      </p>
+      <Link to="/dashboard" className="mt-4 px-6 py-2.5 rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white text-body-sm font-medium hover:opacity-90 transition-opacity">
+        Go home
+      </Link>
+    </div>
+  ),
 })
 
 function AuthenticatedLayout() {

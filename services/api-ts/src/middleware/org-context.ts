@@ -25,12 +25,22 @@ import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.sc
  * and populates ctx.var with the org context.
  */
 /** Paths under /association/* that are user-scoped and don't require org context */
-const ORG_CONTEXT_EXEMPT_PATHS = ['/association/event-lifecycle/my'];
+const ORG_CONTEXT_EXEMPT: { path: string; methods: string[] }[] = [
+  { path: '/association/event-lifecycle/my', methods: ['GET'] },
+  { path: '/association/training', methods: ['GET'] },
+  { path: '/association/member/certificates', methods: ['GET'] },
+  { path: '/association/member/dues-payments', methods: ['GET'] },
+];
 
 export function orgContextMiddleware() {
   return createMiddleware<{ Variables: Variables }>(async (ctx, next): Promise<void | Response> => {
-    // Skip org-context for user-scoped endpoints (e.g. "my events")
-    if (ORG_CONTEXT_EXEMPT_PATHS.some((p) => ctx.req.path.endsWith(p) || ctx.req.path === p)) {
+    // Skip org-context for user-scoped endpoints (e.g. "my events", "my certificates")
+    const isExempt = ORG_CONTEXT_EXEMPT.some(
+      (e) =>
+        (ctx.req.path.endsWith(e.path) || ctx.req.path === e.path) &&
+        e.methods.includes(ctx.req.method)
+    );
+    if (isExempt) {
       await next();
       return;
     }
