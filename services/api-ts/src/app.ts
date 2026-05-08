@@ -47,6 +47,7 @@ import { createDependencyInjection } from '@/middleware/dependency';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
 import { authMiddleware } from '@/middleware/auth';
 import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
+import { officerAuthMiddleware } from '@/middleware/officer-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
 import { orgContextMiddleware } from '@/middleware/org-context';
 
@@ -130,7 +131,7 @@ export function createApp(config: Config): App {
   });
 
   // List officer terms for org (custom endpoint bypassing org-context)
-  app.get('/officer-terms/:orgId', authMiddleware(), async (ctx) => {
+  app.get('/officer-terms/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
     const orgId = ctx.req.param('orgId');
     const db = ctx.get('database') as any;
     const { OfficerTermRepository } = await import('@/handlers/association:member/repos/governance.repo');
@@ -268,7 +269,7 @@ export function createApp(config: Config): App {
   });
 
   // Credit compliance report for officers (auth required)
-  app.get('/credit-compliance/:orgId', authMiddleware(), async (ctx) => {
+  app.get('/credit-compliance/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
     const db = ctx.get('database') as any;
     const orgId = ctx.req.param('orgId');
     const { sql } = await import('drizzle-orm');
@@ -318,7 +319,7 @@ export function createApp(config: Config): App {
     if (!org) return ctx.json({ error: 'Organization not found' }, 404);
     return ctx.json(org, 200);
   });
-  app.put('/membership/org-profile/:orgId', authMiddleware(), async (ctx) => {
+  app.put('/membership/org-profile/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
     const { eq } = await import('drizzle-orm');
     const { organizations } = await import('@/handlers/platformadmin/repos/platform-admin.schema');
     const db = ctx.get('database') as any;
@@ -330,7 +331,7 @@ export function createApp(config: Config): App {
   });
 
   // Officer dashboard — membership summary for an org (hand-wired route)
-  app.get('/membership/members/:orgId', authMiddleware(), async (ctx) => {
+  app.get('/membership/members/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
     const db = ctx.get('database') as any;
     const orgId = ctx.req.param('orgId');
     const { memberships } = await import('@/handlers/association:member/repos/membership.schema');
@@ -356,7 +357,7 @@ export function createApp(config: Config): App {
   });
 
   // Officer dashboard — applications summary for an org (hand-wired route)
-  app.get('/membership/applications/:orgId', authMiddleware(), async (ctx) => {
+  app.get('/membership/applications/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
     const db = ctx.get('database') as any;
     const orgId = ctx.req.param('orgId');
     const statusFilter = ctx.req.query('status');
@@ -377,7 +378,7 @@ export function createApp(config: Config): App {
   });
 
   // Officer dashboard — dues dashboard summary for an org (hand-wired route)
-  app.get('/dues/dashboard/:orgId', authMiddleware(), async (ctx) => {
+  app.get('/dues/dashboard/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
     const orgId = ctx.req.param('orgId');
     const db = ctx.get('database') as any;
     const { DuesRepository } = await import('@/handlers/dues/repos/dues.repo');
