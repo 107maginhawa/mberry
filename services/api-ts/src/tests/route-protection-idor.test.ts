@@ -1,0 +1,89 @@
+import { describe, test, expect, beforeAll } from 'bun:test';
+import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
+
+/**
+ * Cross-org isolation (IDOR) tests.
+ *
+ * Verifies an officer of Org A cannot access Org B's data and vice versa.
+ * Uses seed data: treasurer@memberry.ph is officer of org1 (pda-metro-manila),
+ * idor-officer@memberry.ph is officer of org2 (pda-cebu).
+ *
+ * These tests require:
+ * 1. API server running on port 7213
+ * 2. Seed data applied (bun run db:seed)
+ *
+ * Security properties verified (STRIDE T-12-10 through T-12-13):
+ * - Information Disclosure: GET /membership/members/:orgId blocked cross-org
+ * - Information Disclosure: GET /dues/dashboard/:orgId blocked cross-org
+ * - Information Disclosure: GET /membership/applications/:orgId blocked cross-org
+ * - Elevation of Privilege: officer cannot escalate access via orgId param manipulation
+ */
+
+const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'; // pda-metro-manila (hardcoded in seed)
+
+describe('Cross-org isolation (IDOR prevention)', () => {
+  let orgAOfficer: ApiClient; // treasurer of org A (pda-metro-manila)
+  let orgBOfficer: ApiClient; // president of org B (pda-cebu)
+  let orgBId: string;
+
+  beforeAll(async () => {
+    orgAOfficer = await apiAs('treasurer@memberry.ph');
+    orgBOfficer = await apiAs('idor-officer@memberry.ph');
+
+    // Look up org B ID via the public org endpoint
+    const orgRes = await fetch('http://localhost:7213/public/org/pda-cebu');
+    if (orgRes.ok) {
+      const org = await orgRes.json() as { id: string };
+      orgBId = org.id;
+    } else {
+      // Fallback: mark as missing so tests fail with a clear message
+      orgBId = 'org-b-not-found-run-db-seed';
+    }
+  });
+
+  // ── Org A officer cannot access Org B data ──────────────────────────────
+
+  test('Org A officer gets 403 on Org B roster (GET /membership/members/:orgBId)', async () => {
+    const res = await orgAOfficer.get(`/membership/members/${orgBId}`);
+    expect(res.status).toBe(403);
+  });
+
+  test('Org A officer gets 403 on Org B dues dashboard (GET /dues/dashboard/:orgBId)', async () => {
+    const res = await orgAOfficer.get(`/dues/dashboard/${orgBId}`);
+    expect(res.status).toBe(403);
+  });
+
+  test('Org A officer gets 403 on Org B applications (GET /membership/applications/:orgBId)', async () => {
+    const res = await orgAOfficer.get(`/membership/applications/${orgBId}`);
+    expect(res.status).toBe(403);
+  });
+
+  // ── Org B officer cannot access Org A data ──────────────────────────────
+
+  test('Org B officer gets 403 on Org A roster (GET /membership/members/:orgAId)', async () => {
+    const res = await orgBOfficer.get(`/membership/members/${ORG_A_ID}`);
+    expect(res.status).toBe(403);
+  });
+
+  test('Org B officer gets 403 on Org A dues dashboard (GET /dues/dashboard/:orgAId)', async () => {
+    const res = await orgBOfficer.get(`/dues/dashboard/${ORG_A_ID}`);
+    expect(res.status).toBe(403);
+  });
+
+  test('Org B officer gets 403 on Org A applications (GET /membership/applications/:orgAId)', async () => {
+    const res = await orgBOfficer.get(`/membership/applications/${ORG_A_ID}`);
+    expect(res.status).toBe(403);
+  });
+
+  // ── Sanity checks: each officer CAN access their own org ────────────────
+
+  test('Org A officer gets 200 on own roster (GET /membership/members/:orgAId)', async () => {
+    const res = await orgAOfficer.get(`/membership/members/${ORG_A_ID}`);
+    expect(res.status).toBe(200);
+  });
+
+  test('Org B officer gets 200 on own roster (GET /membership/members/:orgBId)', async () => {
+    const res = await orgBOfficer.get(`/membership/members/${orgBId}`);
+    expect(res.status).toBe(200);
+  });
+});
