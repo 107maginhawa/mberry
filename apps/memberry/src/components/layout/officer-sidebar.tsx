@@ -1,4 +1,5 @@
 import { Link, useParams } from "@tanstack/react-router"
+import { POSITION_NAV_CONFIG } from "@/config/position-nav"
 import {
   LayoutDashboard,
   Users,
@@ -33,9 +34,10 @@ interface OfficerSidebarProps {
   userEmail?: string
   userName?: string
   role?: string
+  positions?: Array<{ title: string }>
 }
 
-export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSidebarProps) {
+export function OfficerSidebar({ orgName, userEmail, userName, role, positions }: OfficerSidebarProps) {
   const { orgId } = useParams({ strict: false }) as { orgId: string }
   const base = `/org/${orgId}/officer`
 
@@ -98,6 +100,21 @@ export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSi
     },
   ]
 
+  const allowedSections = new Set<string>()
+  // Dashboard (no label) always visible
+  allowedSections.add('')
+  if (positions && positions.length > 0) {
+    for (const pos of positions) {
+      const allowed = POSITION_NAV_CONFIG[pos.title.toLowerCase()] || []
+      allowed.forEach(s => allowedSections.add(s))
+    }
+  } else {
+    // Fallback: show all sections if no position data (safety net)
+    sections.forEach(s => allowedSections.add(s.label || ''))
+  }
+
+  const filteredSections = sections.filter(s => allowedSections.has(s.label || ''))
+
   return (
     <aside className="hidden md:flex w-[240px] bg-[var(--color-primary)] text-white flex-col shrink-0">
       {/* Logo + Org Name */}
@@ -117,7 +134,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role }: OfficerSi
 
       {/* Navigation */}
       <nav className="flex-1 py-2 overflow-y-auto">
-        {sections.map((section, si) => (
+        {filteredSections.map((section, si) => (
           <div key={si} className={si > 0 ? "mt-3" : ""}>
             {section.label && (
               <div className="px-6 py-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-white/40">

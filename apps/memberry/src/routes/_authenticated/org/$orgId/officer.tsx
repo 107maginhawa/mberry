@@ -34,6 +34,7 @@ function OfficerLayout() {
         userEmail={user?.email}
         userName={user?.name}
         role={primaryRole}
+        positions={positions}
       />
       <main className="flex-1 overflow-auto">
         <div className="max-w-[1200px] mx-auto px-5 md:px-7 py-5 md:py-7">
