@@ -5,6 +5,7 @@ import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
 import { verifyQrToken } from './utils/qr-checkin';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * createCheckIn
@@ -22,6 +23,9 @@ export async function createCheckIn(
 
   const orgId = ctx.get('orgId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;

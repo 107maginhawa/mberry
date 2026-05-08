@@ -4,6 +4,7 @@ import type { PublishEventParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * publishEvent
@@ -16,6 +17,9 @@ export async function publishEvent(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
