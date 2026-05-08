@@ -2,7 +2,7 @@
 
 **Source**: `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` §13–§14
 **Created**: 2026-05-08
-**Status**: Planning — no code changes yet
+**Status**: 15/18 complete (83%) — past 50% gate
 
 ---
 
@@ -631,26 +631,26 @@ Start after P0-1 through P0-6 complete. P0-7 can run in parallel with Wave 2.
 
 ## Summary Table
 
-| ID | Finding | Wave | Effort | Depends On | Blocks |
-|----|---------|------|--------|------------|--------|
-| P0-1 | 2FA secrets plaintext | 1 | M | — | P1-3 |
-| P0-2 | Session tokens plaintext | 1 | M | — | P1-4 |
-| P0-3 | Audit log no orgId | 1 | S | — | P0-7, P1-6, P1-10 |
-| P0-4 | Email verification disabled | 1 | S | — | — |
-| P0-5 | uploadFile no MIME check | 1 | S | — | — |
-| P0-6 | castVote no validation | 1 | S | — | — |
-| P0-7 | 26/72 tables not org-scoped | 1 | L | P0-3 | — |
-| P1-1 | officerAuth silent skip | 2 | S | — | — |
-| P1-2 | Internal service token unsecured | 2 | M | — | — |
-| P1-3 | 2FA not enforced for admins | 2 | S | P0-1 | — |
-| P1-4 | No session invalidation on role change | 2 | S | P0-2 | — |
-| P1-5 | Rate limiting only on auth routes | 2 | M | — | — |
-| P1-6 | Auth events not in audit trail | 2 | S | P0-3 | P1-10 |
-| P1-7 | Admin app no role gates | 2 | M | — | — |
-| P1-8 | user.email unique globally | 2 | M | — | — |
-| P1-9 | 22+ inline routes bypass TypeSpec | 2 | L | — | P1-11 |
-| P1-10 | Audit + email zero test coverage | 2 | M | P0-3, P1-6 | — |
-| P1-11 | Mega-module split plan | 2 | L | P1-9 | — |
+| ID | Finding | Wave | Effort | Depends On | Blocks | Status |
+|----|---------|------|--------|------------|--------|--------|
+| P0-1 | 2FA secrets plaintext | 1 | M | — | P1-3 | DONE |
+| P0-2 | Session tokens plaintext | 1 | M | — | P1-4 | DONE |
+| P0-3 | Audit log no orgId | 1 | S | — | P0-7, P1-6, P1-10 | DONE |
+| P0-4 | Email verification disabled | 1 | S | — | — | DONE |
+| P0-5 | uploadFile no MIME check | 1 | S | — | — | DONE |
+| P0-6 | castVote no validation | 1 | S | — | — | DONE |
+| P0-7 | 26/72 tables not org-scoped | 1 | L | P0-3 | — | DONE (10 tables scoped) |
+| P1-1 | officerAuth silent skip | 2 | S | — | — | DONE (7f6ae9f) |
+| P1-2 | Internal service token unsecured | 2 | M | — | — | DONE (099081e) |
+| P1-3 | 2FA not enforced for admins | 2 | S | P0-1 | — | DONE (5a4d00e) |
+| P1-4 | No session invalidation on role change | 2 | S | P0-2 | — | DONE (7f6ae9f) |
+| P1-5 | Rate limiting only on auth routes | 2 | M | — | — | DONE (5a4d00e) |
+| P1-6 | Auth events not in audit trail | 2 | S | P0-3 | P1-10 | DONE (7f6ae9f) |
+| P1-7 | Admin app no role gates | 2 | M | — | — | DONE (5f735e7) |
+| P1-8 | user.email unique globally | 2 | M | — | — | TODO |
+| P1-9 | 22+ inline routes bypass TypeSpec | 2 | L | — | P1-11 | TODO |
+| P1-10 | Audit + email zero test coverage | 2 | M | P0-3, P1-6 | — | DONE (00140cf) |
+| P1-11 | Mega-module split plan | 2 | L | P1-9 | — | TODO |
 
 **Effort key**: S = 1-2 hours, M = 3-6 hours, L = 1-3 days
 
