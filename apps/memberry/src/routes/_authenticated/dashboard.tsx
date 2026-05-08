@@ -187,16 +187,19 @@ function DashboardPage() {
 }
 
 function OrgCard({ membership: m }: { membership: any }) {
+  const orgId = m.orgId ?? m.organizationId
   const officerQuery = useQuery<string | null>({
-    queryKey: ['officer-role', m.orgId],
+    queryKey: ['officer-role', orgId],
     queryFn: async () => {
-      const json = await api.get<any>(`/api/persons/me/officer-role/${m.orgId}`)
+      if (!orgId) return null
+      const json = await api.get<any>(`/api/persons/me/officer-role/${orgId}`)
       if (json?.data?.isOfficer) {
         return json.data.positions?.[0]?.title || 'Officer'
       }
       return null
     },
     retry: false,
+    enabled: !!orgId,
   })
 
   const officerRole = officerQuery.data ?? null
@@ -205,7 +208,7 @@ function OrgCard({ membership: m }: { membership: any }) {
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
       <Link
         to="/org/$orgId/home"
-        params={{ orgId: m.orgId }}
+        params={{ orgId: orgId ?? '' }}
         className="block hover:opacity-80 transition-opacity"
       >
         <div className="flex items-start justify-between">
@@ -229,7 +232,7 @@ function OrgCard({ membership: m }: { membership: any }) {
       {officerRole && (
         <div className="mt-3 pt-3 border-t border-[var(--color-border-light)]">
           <Link
-            to={`/org/${m.orgId}/officer/dashboard` as any}
+            to={`/org/${orgId}/officer/dashboard` as any}
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] hover:underline"
           >
             <Shield size={13} />

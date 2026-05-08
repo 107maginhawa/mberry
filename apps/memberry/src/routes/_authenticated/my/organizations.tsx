@@ -24,6 +24,9 @@ function MyOrganizationsPage() {
   const [leaveTarget, setLeaveTarget] = useState<{ membershipId: string; orgName: string; orgId: string } | null>(null)
   const [leaving, setLeaving] = useState(false)
   const [transferTarget, setTransferTarget] = useState<{ membershipId: string; orgId: string; orgName: string } | null>(null)
+
+  // Normalize orgId field (API returns organizationId, some transforms use orgId)
+  const normalizeOrgId = (m: any) => m.orgId ?? m.organizationId
   const [transferToOrgId, setTransferToOrgId] = useState('')
   const [transferring, setTransferring] = useState(false)
 
@@ -93,7 +96,7 @@ function MyOrganizationsPage() {
             >
               <Link
                 to="/org/$orgId/members"
-                params={{ orgId: m.orgId }}
+                params={{ orgId: normalizeOrgId(m) ?? '' }}
                 className="flex items-center gap-4 flex-1 min-w-0"
               >
                 <AvatarInitials name={m.orgName ?? 'Org'} size="md" />
@@ -124,14 +127,14 @@ function MyOrganizationsPage() {
                 {m.status !== 'terminated' && (
                   <>
                     <button
-                      onClick={() => setTransferTarget({ membershipId: m.id, orgId: m.orgId, orgName: m.orgName ?? 'this organization' })}
+                      onClick={() => setTransferTarget({ membershipId: m.id, orgId: normalizeOrgId(m), orgName: m.orgName ?? 'this organization' })}
                       className="px-3 py-[7px] rounded-[8px] border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors duration-150"
                       title="Transfer membership"
                     >
                       <ArrowRightLeft size={14} />
                     </button>
                     <button
-                      onClick={() => setLeaveTarget({ membershipId: m.id, orgName: m.orgName ?? 'this organization', orgId: m.orgId })}
+                      onClick={() => setLeaveTarget({ membershipId: m.id, orgName: m.orgName ?? 'this organization', orgId: normalizeOrgId(m) })}
                       className="px-3 py-[7px] rounded-[8px] border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-muted)] hover:border-red-300 hover:text-red-600 hover:bg-red-50 transition-colors duration-150"
                       title="Leave organization"
                     >
