@@ -48,6 +48,9 @@ export const notifications = pgTable('notification', {
   // Base entity fields (includes id, timestamps, version, audit fields)
   ...baseEntityFields,
   
+  // P1 multi-tenant scoping
+  organizationId: uuid('organization_id'),
+
   // Core notification fields from TypeSpec
   recipient: uuid('recipient_id').notNull(), // Person ID (foreign key)
   type: notificationTypeEnum('type').notNull(),
@@ -69,6 +72,7 @@ export const notifications = pgTable('notification', {
   consentValidated: boolean('consent_validated').notNull().default(false),
 }, (table) => ({
   // Indexes for efficient querying
+  orgIdx: index('notifications_org_idx').on(table.organizationId),
   recipientStatusIdx: index('notifications_recipient_status_idx').on(table.recipient, table.status),
   scheduledStatusIdx: index('notifications_scheduled_status_idx').on(table.scheduledAt, table.status),
   typeChannelIdx: index('notifications_type_channel_idx').on(table.type, table.channel),

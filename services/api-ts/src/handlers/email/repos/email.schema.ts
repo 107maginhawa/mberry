@@ -77,7 +77,10 @@ export enum EmailTemplateTags {
  */
 export const emailTemplates = pgTable('email_template', {
   ...baseEntityFields,
-  
+
+  // P1 multi-tenant scoping
+  organizationId: uuid('organization_id'),
+
   // Human-readable template name
   name: varchar('name', { length: 255 }).notNull(),
   
@@ -117,6 +120,8 @@ export const emailTemplates = pgTable('email_template', {
   // Template version number
   version: integer('version').notNull().default(1),
 }, (table) => ({
+  // Index for org scoping
+  orgIdx: index('email_template_org_idx').on(table.organizationId),
   // Index for status filtering
   statusIdx: index('email_template_status_idx').on(table.status),
   // Index for tags filtering (GIN index for jsonb array)
@@ -128,6 +133,9 @@ export const emailTemplates = pgTable('email_template', {
  */
 export const emailQueue = pgTable('email_queue', {
   ...baseEntityFields,
+
+  // P1 multi-tenant scoping
+  organizationId: uuid('organization_id'),
 
   // Direct template ID reference (alternative to templateTags)
   template: uuid('template').references(() => emailTemplates.id, { onDelete: 'set null' }),
@@ -186,6 +194,8 @@ export const emailQueue = pgTable('email_queue', {
   // Cancellation reason
   cancellationReason: text('cancellation_reason'),
 }, (table) => ({
+  // Index for org scoping
+  orgIdx: index('email_queue_org_idx').on(table.organizationId),
   // Index for status filtering and processing
   statusIdx: index('email_queue_status_idx').on(table.status),
   // Index for priority-based processing

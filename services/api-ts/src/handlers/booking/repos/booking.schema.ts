@@ -66,6 +66,9 @@ export const bookingEvents = pgTable('booking_event', {
   // Base entity fields (includes id, timestamps, version, audit fields)
   ...baseEntityFields,
 
+  // P1 multi-tenant scoping
+  organizationId: uuid('organization_id'),
+
   // Core event fields
   owner: uuid('owner_id')
     .notNull()
@@ -124,6 +127,7 @@ export const bookingEvents = pgTable('booking_event', {
     .notNull(),
 }, (table) => ({
   // Indexes for performance
+  orgIdx: index('booking_events_org_idx').on(table.organizationId),
   ownerIdx: index('booking_events_owner_id_idx').on(table.owner),
   contextIdx: index('booking_events_context_id_idx').on(table.context),
   statusIdx: index('booking_events_status_idx').on(table.status),
@@ -151,6 +155,9 @@ export const bookingEvents = pgTable('booking_event', {
 export const timeSlots: any = pgTable('time_slot', {
   // Base entity fields
   ...baseEntityFields,
+
+  // P1 multi-tenant scoping
+  organizationId: uuid('organization_id'),
 
   // References (updated to use BookingEvent system)
   owner: uuid('owner_id')
@@ -185,6 +192,7 @@ export const timeSlots: any = pgTable('time_slot', {
     .references(() => bookings.id, { onDelete: 'set null' }),
 }, (table) => ({
   // Performance indexes (updated for BookingEvent system)
+  orgIdx: index('time_slots_org_idx').on(table.organizationId),
   ownerStartTimeIdx: index('time_slots_owner_start_time_idx')
     .on(table.owner, table.startTime),
 
@@ -209,6 +217,9 @@ export const timeSlots: any = pgTable('time_slot', {
 export const bookings: any = pgTable('booking', {
   // Base entity fields
   ...baseEntityFields,
+
+  // P1 multi-tenant scoping
+  organizationId: uuid('organization_id'),
 
   // Core relationships (both use person IDs)
   client: uuid('client_id')
@@ -256,6 +267,7 @@ export const bookings: any = pgTable('booking', {
   invoice: uuid('invoice') // Reference to billing invoice if payment required
 }, (table) => ({
   // Performance indexes
+  orgIdx: index('bookings_org_idx').on(table.organizationId),
   clientIdx: index('bookings_client_id_idx').on(table.client),
   hostIdx: index('bookings_host_id_idx').on(table.host),
   statusIdx: index('bookings_status_idx').on(table.status),
@@ -285,6 +297,9 @@ export const scheduleExceptions = pgTable('schedule_exception', {
   // Base entity fields
   ...baseEntityFields,
 
+  // P1 multi-tenant scoping
+  organizationId: uuid('organization_id'),
+
   // Core fields (updated for BookingEvent system)
   event: uuid('event_id')
     .notNull()
@@ -311,6 +326,7 @@ export const scheduleExceptions = pgTable('schedule_exception', {
 
   recurrencePattern: jsonb('recurrence_pattern').$type<RecurrencePattern>(), // JSON pattern instead of text
 }, (table) => ({  // Performance indexes (updated for BookingEvent system)
+  orgIdx: index('schedule_exceptions_org_idx').on(table.organizationId),
   eventIdx: index('schedule_exceptions_event_id_idx').on(table.event),
   ownerIdx: index('schedule_exceptions_owner_id_idx').on(table.owner),
   contextIdx: index('schedule_exceptions_context_id_idx').on(table.context),

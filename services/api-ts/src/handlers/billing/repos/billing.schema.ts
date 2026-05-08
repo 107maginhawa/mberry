@@ -165,6 +165,9 @@ export const invoiceLineItems = pgTable('invoice_line_item', {
   // Base entity fields (includes id, timestamps, etc.)
   ...baseEntityFields,
 
+  // Multi-tenant scoping (P1: defense-in-depth, also on parent invoice)
+  organizationId: uuid('organization_id'),
+
   // Reference to invoice
   invoice: uuid('invoice')
     .notNull()
@@ -187,6 +190,7 @@ export const invoiceLineItems = pgTable('invoice_line_item', {
 
 }, (table) => ({
   // Performance indexes
+  orgIdx: index('invoice_line_items_org_idx').on(table.organizationId),
   invoiceIdx: index('invoice_line_items_invoice_idx').on(table.invoice),
 }));
 
