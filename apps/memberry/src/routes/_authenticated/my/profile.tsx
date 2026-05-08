@@ -185,7 +185,7 @@ function MyProfilePage() {
             <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
               <CreditCard size={18} className="text-[var(--color-muted)]" /> ID Card
             </Link>
-            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+            <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
               <Download size={18} className="text-[var(--color-muted)]" /> Data Export
             </Link>
           </div>
