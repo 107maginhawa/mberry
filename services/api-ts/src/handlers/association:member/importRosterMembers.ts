@@ -4,6 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { ImportRosterMembersBody } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * importRosterMembers
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function importRosterMembers(
   ctx: ValidatedContext<ImportRosterMembersBody, never, never>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

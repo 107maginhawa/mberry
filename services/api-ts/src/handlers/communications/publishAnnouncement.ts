@@ -1,8 +1,13 @@
 import type { Context } from 'hono';
 import { NotFoundError } from '@/core/errors';
 import { CommunicationsRepository } from './repos/communications.repo';
+import { requireOfficerTerm } from '@/utils/officer-check';
+import type { BaseContext } from '@/types/app';
 
 export async function publishAnnouncement(ctx: Context): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx as unknown as BaseContext);
+  if (denied) return denied;
+
   const db = ctx.get('database');
   const id = ctx.req.param('id');
   const repo = new CommunicationsRepository(db);

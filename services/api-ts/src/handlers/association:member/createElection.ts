@@ -4,6 +4,7 @@ import { UnauthorizedError } from '@/core/errors';
 import type { CreateElectionBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * createElection
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function createElection(
   ctx: ValidatedContext<CreateElectionBody, never, never>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

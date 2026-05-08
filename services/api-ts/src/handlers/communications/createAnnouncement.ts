@@ -1,8 +1,13 @@
 import type { Context } from 'hono';
 import { CommunicationsRepository } from './repos/communications.repo';
 import type { Session } from '@/types/auth';
+import { requireOfficerTerm } from '@/utils/officer-check';
+import type { BaseContext } from '@/types/app';
 
 export async function createAnnouncement(ctx: Context): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx as unknown as BaseContext);
+  if (denied) return denied;
+
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('orgId');
