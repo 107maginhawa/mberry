@@ -2,7 +2,8 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { OfficerTermRepository } from './repos/governance.repo';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * createOfficerTerm
@@ -13,7 +14,7 @@ import { requireOfficerTerm } from '@/utils/officer-check';
 export async function createOfficerTerm(
   ctx: ValidatedContext<any, never, never>
 ): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const user = ctx.get('user');

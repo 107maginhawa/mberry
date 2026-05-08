@@ -5,7 +5,8 @@ import type { UpdateOrganizationProfileBody, UpdateOrganizationProfileParams } f
 import { eq } from 'drizzle-orm';
 import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * updateOrganizationProfile
@@ -16,7 +17,7 @@ import { requireOfficerTerm } from '@/utils/officer-check';
 export async function updateOrganizationProfile(
   ctx: ValidatedContext<UpdateOrganizationProfileBody, never, UpdateOrganizationProfileParams>
 ): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const session = ctx.get('session');
