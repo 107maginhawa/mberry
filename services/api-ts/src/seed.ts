@@ -42,6 +42,36 @@ const TEST_USERS = [
     licenseNumber: '0067890',
     dbRole: 'association:member',
   },
+  {
+    email: 'treasurer@memberry.ph',
+    password: 'TestPass123!',
+    name: 'Jose Reyes',
+    firstName: 'Jose',
+    lastName: 'Reyes',
+    specialization: 'Prosthodontics',
+    licenseNumber: '0054321',
+    dbRole: 'association:member',
+  },
+  {
+    email: 'secretary@memberry.ph',
+    password: 'TestPass123!',
+    name: 'Ana Lim',
+    firstName: 'Ana',
+    lastName: 'Lim',
+    specialization: 'Pediatric Dentistry',
+    licenseNumber: '0078901',
+    dbRole: 'association:member',
+  },
+  {
+    email: 'society@memberry.ph',
+    password: 'TestPass123!',
+    name: 'Lito Tan',
+    firstName: 'Lito',
+    lastName: 'Tan',
+    specialization: 'Endodontics',
+    licenseNumber: '0098765',
+    dbRole: 'association:member',
+  },
 ];
 
 async function signUpUser(email: string, password: string, name: string): Promise<{ userId: string; cookie: string } | null> {
@@ -253,6 +283,7 @@ async function seed() {
 
   const personIds: string[] = [];
   const userRecords: { userId: string; email: string; name: string }[] = [];
+  const personIdMap = new Map<string, string>();
 
   for (const user of TEST_USERS) {
     const auth = await signUpUser(user.email, user.password, user.name);
@@ -274,12 +305,14 @@ async function seed() {
 
     if (personId) {
       personIds.push(personId);
+      personIdMap.set(user.email, personId);
       console.log(`  Person: ${user.firstName} ${user.lastName} (${personId})`);
     } else {
       // Person creation failed (403 on re-seed) — look up existing person by auth user ID
       const existing = await db.select().from(persons).where(eq(persons.id, auth.userId)).limit(1);
       if (existing.length > 0) {
         personIds.push(existing[0]!.id);
+        personIdMap.set(user.email, existing[0]!.id);
         console.log(`  Person: ${user.firstName} ${user.lastName} (${existing[0]!.id}) [existing]`);
       }
     }
@@ -297,7 +330,8 @@ async function seed() {
 
     if (existingMemberships.length === 0) {
       for (let i = 0; i < personIds.length; i++) {
-        const tier = i === 0 ? regularTier : associateTier;
+        // First user (admin) gets regular tier; all others get regular tier too (officers are regular members)
+        const tier = regularTier;
         await db.insert(memberships).values({
           organizationId: org1.id,
           personId: personIds[i]!,
@@ -316,29 +350,41 @@ async function seed() {
     }
   }
 
-  // ─── 7. Officer Position + Term for admin user ───
-  if (personIds.length > 0) {
+  // ─── 7. Officer Positions + Terms ───
+  if (personIdMap.size > 0) {
     const existingPositions = await db.select().from(positions).where(eq(positions.organizationId, org1.id));
 
     if (existingPositions.length === 0) {
-      const [presidentPos] = await db.insert(positions).values({
-        organizationId: org1.id,
-        title: 'President',
-        description: 'Association President',
-        level: 'chapter',
-        termLengthMonths: 24,
-        sortOrder: 1,
-      }).returning();
+      const OFFICER_POSITIONS = [
+        { title: 'President', email: 'test@memberry.ph', sortOrder: 1 },
+        { title: 'Treasurer', email: 'treasurer@memberry.ph', sortOrder: 2 },
+        { title: 'Secretary', email: 'secretary@memberry.ph', sortOrder: 3 },
+        { title: 'Society Officer', email: 'society@memberry.ph', sortOrder: 4 },
+      ];
 
-      await db.insert(officerTerms).values({
-        positionId: presidentPos!.id,
-        personId: personIds[0]!,
-        organizationId: org1.id,
-        status: 'active',
-        startDate: new Date('2025-01-01'),
-        endDate: new Date('2026-12-31'),
-      });
-      console.log(`  Officer: ${TEST_USERS[0]!.name} → President (active term)`);
+      for (const pos of OFFICER_POSITIONS) {
+        const [position] = await db.insert(positions).values({
+          organizationId: org1.id,
+          title: pos.title,
+          description: `${pos.title} of PDA Metro Manila`,
+          level: 'chapter',
+          termLengthMonths: 24,
+          sortOrder: pos.sortOrder,
+        }).returning();
+
+        const personId = personIdMap.get(pos.email);
+        if (personId && position) {
+          await db.insert(officerTerms).values({
+            positionId: position.id,
+            personId,
+            organizationId: org1.id,
+            status: 'active',
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2026-12-31'),
+          });
+          console.log(`  Officer: ${pos.email} -> ${pos.title} (active term)`);
+        }
+      }
     } else {
       console.log(`  Officer positions: exist (${existingPositions.length} found)`);
     }
@@ -367,18 +413,29 @@ async function seed() {
   console.log('╠══════════════════════════════════════════╣');
   console.log('║  App:  http://localhost:3004             ║');
   console.log('║                                         ║');
-  console.log('║  Officer account:                       ║');
+  console.log('║  Officer/Admin account:                 ║');
   console.log('║    Email:    test@memberry.ph            ║');
   console.log('║    Password: TestPass123!               ║');
+  console.log('║    Position: President                  ║');
   console.log('║                                         ║');
   console.log('║  Member account:                        ║');
   console.log('║    Email:    member@memberry.ph          ║');
   console.log('║    Password: TestPass123!               ║');
   console.log('║                                         ║');
-  console.log('║  Admin account (same as officer):       ║');
-  console.log('║    Email:    test@memberry.ph            ║');
+  console.log('║  Treasurer account:                     ║');
+  console.log('║    Email:    treasurer@memberry.ph       ║');
   console.log('║    Password: TestPass123!               ║');
-  console.log('║    Role:     super (platform admin)     ║');
+  console.log('║    Position: Treasurer                  ║');
+  console.log('║                                         ║');
+  console.log('║  Secretary account:                     ║');
+  console.log('║    Email:    secretary@memberry.ph       ║');
+  console.log('║    Password: TestPass123!               ║');
+  console.log('║    Position: Secretary                  ║');
+  console.log('║                                         ║');
+  console.log('║  Society Officer account:               ║');
+  console.log('║    Email:    society@memberry.ph         ║');
+  console.log('║    Password: TestPass123!               ║');
+  console.log('║    Position: Society Officer            ║');
   console.log('╠══════════════════════════════════════════╣');
   console.log(`║  Org ID: ${org1.id}  ║`);
   console.log('║  Public: /org/pda-metro-manila          ║');
