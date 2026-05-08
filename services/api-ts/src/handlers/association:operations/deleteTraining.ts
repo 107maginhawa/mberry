@@ -4,7 +4,8 @@ import type { DeleteTrainingParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * deleteTraining
@@ -18,7 +19,7 @@ export async function deleteTraining(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const params = ctx.req.valid('param');

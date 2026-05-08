@@ -3,7 +3,8 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateEventBody } from '@/generated/openapi/validators';
 import { EventRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * createEvent
@@ -20,7 +21,7 @@ export async function createEvent(
   const orgId = ctx.get('orgId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const body = ctx.req.valid('json');

@@ -3,7 +3,8 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateCourseBody } from '@/generated/openapi/validators';
 import { CourseRepository } from './repos/training.repo';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * createCourse
@@ -20,7 +21,7 @@ export async function createCourse(
   const orgId = ctx.get('orgId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
-  const denied = await requireOfficerTerm(ctx);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const body = ctx.req.valid('json');
