@@ -3,6 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0.0 Foundation** — Phases 0-10 (shipped 2026-05-07)
+- 🔄 **v1.1.0 Auth & Permission Enforcement** — Phases 11-16 (TDD)
 
 ## Phases
 
@@ -23,6 +24,77 @@
 
 </details>
 
+### v1.1.0 Auth & Permission Enforcement (TDD)
+
+**Goal:** Fix authorization gaps found by UAT audit + Codex cross-review. Every phase uses TDD — failing tests first, then implementation.
+
+**Reference:** `docs/TDD-AUTH-PLAN.md` (full plan), `docs/UAT-CHECKLIST.md` (267 testable items)
+
+- [ ] **Phase 11: Test Infrastructure & Seed Users**
+  - Create 3 dedicated officer test users (Treasurer, Secretary, Society Officer)
+  - Add officer_term records linking each to correct position
+  - Create `apiAs(email)` test helper for role-based API calls
+  - Update E2E test config with new user constants
+  - **Verify:** All 5 users login, correct positions in DB
+  - **Deps:** None
+  - **Est:** 2-3 hours
+  - **Plans:** 3 plans
+    - [ ] 11-01-PLAN.md -- Seed script + E2E config (3 officers, 4 positions, 4 terms)
+    - [ ] 11-02-PLAN.md -- apiAs() test helper (TDD)
+    - [ ] 11-03-PLAN.md -- Seed user verification tests
+
+- [ ] **Phase 12: Backend Auth — Route Protection**
+  - RED: Write ~35 API tests asserting member gets 403 on officer endpoints
+  - RED: Write cross-org isolation (IDOR) tests — officer of Org A blocked from Org B
+  - GREEN: Add `officerAuthMiddleware()` to hand-wired `app.ts` routes (org profile, roster, applications, dues dashboard, payments, gateway)
+  - GREEN: Add role middleware to generated `/association/*` mutation routes (events, training, elections, dues, communications)
+  - GREEN: Ensure `orgContextMiddleware` validates officer's org scope
+  - **Verify:** Member gets 403 on all officer endpoints. Cross-org blocked.
+  - **Deps:** Phase 11
+  - **Est:** 2-3 days
+
+- [ ] **Phase 13: Position-Based RBAC**
+  - RED: Write position-specific API tests (Treasurer-only, President-only, Secretary-allowed endpoints)
+  - GREEN: Create `requirePosition(positions[])` middleware checking `officer_term` table
+  - GREEN: Wire `requirePosition` to each route group per permission matrix
+  - GREEN: Update `officer-sidebar.tsx` to filter nav by position
+  - GREEN: Update `requireOrgOfficer` guard to pass position info to route context
+  - **Verify:** Each role sees only their sections. Cross-position mutations blocked.
+  - **Deps:** Phase 12
+  - **Est:** 2-3 days
+
+- [ ] **Phase 14: Negative E2E Tests — Role Boundaries**
+  - RED->GREEN: Member cannot access officer routes (6 tests)
+  - RED->GREEN: Treasurer cannot create events/send announcements (5 tests)
+  - RED->GREEN: Secretary cannot record payments/refunds/configure gateway (5 tests)
+  - RED->GREEN: Cross-org isolation E2E (3 tests)
+  - **Verify:** All 19 negative tests pass
+  - **Deps:** Phase 13
+  - **Est:** 1-2 days
+
+- [ ] **Phase 15: Dues Reminder UI + BR Edge Cases**
+  - RED: Batch dues reminder trigger — treasurer sends reminders to filtered members
+  - RED: Dunning template CRUD — treasurer creates/edits templates
+  - GREEN: Build reminder trigger UI, wire to existing dunning API
+  - RED: Dues expiry extension logic (BR-07) — extend from current expiry, not today
+  - RED: Fund allocation rounding (BR-05) — last fund absorbs remainder
+  - RED: Refund reversal (BR-08) — reverses expiry, status auto-recomputes
+  - RED: Membership state machine (BR-03) — valid transitions only, invalid silently rejected
+  - RED: Event registration limits (BR-27) — waitlist promotion, late cancellation
+  - GREEN: Verify/fix all BR logic
+  - **Verify:** All BR edge cases pass. Reminder UI works.
+  - **Deps:** Phase 13
+  - **Est:** 2-3 days
+
+- [ ] **Phase 16: Mobile & Transfer Validation**
+  - RED: Transfer lifecycle E2E — member initiates, source approves, target approves
+  - RED: Mobile viewport tests (375x812) — dashboard, officer nav, payment form, event registration
+  - GREEN: Fix layout issues found
+  - GREEN: Validate existing transfer UI + API flow
+  - **Verify:** Core flows work on mobile. Transfer lifecycle completes.
+  - **Deps:** Phase 14
+  - **Est:** 1-2 days
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -38,3 +110,9 @@
 | 8. Frontend Unit Tests | v1.0.0 | 3/3 | Complete | 2026-05-06 |
 | 9. Test Infrastructure Hardening | v1.0.0 | 2/2 | Complete | 2026-05-06 |
 | 10. Deploy Platform Decision | v1.0.0 | 1/1 | Complete | 2026-05-06 |
+| 11. Test Infrastructure & Seed Users | v1.1.0 | 0/3 | Not Started | -- |
+| 12. Backend Auth — Route Protection | v1.1.0 | 0/0 | Not Started | -- |
+| 13. Position-Based RBAC | v1.1.0 | 0/0 | Not Started | -- |
+| 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 0/0 | Not Started | -- |
+| 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 0/0 | Not Started | -- |
+| 16. Mobile & Transfer Validation | v1.1.0 | 0/0 | Not Started | -- |
