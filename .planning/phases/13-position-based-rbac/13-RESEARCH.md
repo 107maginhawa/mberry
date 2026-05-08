@@ -191,13 +191,13 @@ if (denied) return denied;
 // apps/memberry/src/config/position-nav.ts
 export const POSITION_NAV_CONFIG: Record<string, string[]> = {
   'president': ['MEMBERS', 'FINANCES', 'ACTIVITIES', 'COMMUNICATIONS', 'GOVERNANCE', 'DOCUMENTS', 'SETTINGS'],
-  'treasurer': ['FINANCES', 'DOCUMENTS'],
-  'secretary': ['MEMBERS', 'COMMUNICATIONS'],
-  'society officer': ['ACTIVITIES', 'DOCUMENTS'],
+  'treasurer': ['FINANCES', 'DOCUMENTS', 'SETTINGS'],
+  'secretary': ['MEMBERS', 'COMMUNICATIONS', 'SETTINGS'],
+  'society officer': ['ACTIVITIES', 'DOCUMENTS', 'SETTINGS'],
 };
 
 // Dashboard (unlabeled first section) is always visible to all officers.
-// SETTINGS items like "Org Profile" are shared read — visible to all.
+// SETTINGS is visible to all officers (shared read access per D-01).
 ```
 
 ### Pattern 4: Sidebar Filtering in Officer Layout
@@ -372,22 +372,16 @@ describe('Position-based RBAC - Treasurer restrictions', () => {
 | A2 | Dashboard (unlabeled first nav section) should be visible to ALL officers | Pattern 3 | Some officers might see an empty dashboard; low risk |
 | A3 | The 7 hand-wired officer routes in app.ts can have position checks added as inline `requirePosition()` calls without extracting to separate handler files | Pitfall 3 | May need refactoring if inline handlers get too complex; medium risk |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Credit compliance endpoint ownership**
-   - What we know: `/credit-compliance/:orgId` tracks training credit compliance. D-01 assigns Treasurer to "dues, billing, payment gateway" and Society Officer to "events, training, courses, credit compliance."
-   - What's unclear: Should this be Society Officer + President only, or also Treasurer?
-   - Recommendation: Assign to Society Officer + President per D-01. Treasurer focuses on financial matters.
+1. **Credit compliance endpoint ownership (RESOLVED)**
+   - Decision: Assigned to Society Officer + President per D-01. Treasurer focuses on financial matters. Implemented in Plan 04 (app.ts inline route with `[SOCIETY_OFFICER, PRESIDENT]`).
 
-2. **app.ts inline handler position checks**
-   - What we know: 7+ routes in app.ts are inline handlers with `officerAuthMiddleware()`. Adding `requirePosition()` means calling it inside the inline async function.
-   - What's unclear: Whether to extract these to proper handler files for cleaner architecture.
-   - Recommendation: Add inline `requirePosition()` calls for v1 simplicity. Extraction is a future cleanup.
+2. **app.ts inline handler position checks (RESOLVED)**
+   - Decision: Keep inline `requirePosition()` calls for v1 simplicity. Extraction to proper handler files is a future cleanup. Implemented in Plan 04 with 3 inline requirePosition calls.
 
-3. **TDD-AUTH-PLAN.md and UAT-CHECKLIST.md referenced but missing**
-   - What we know: Both documents are referenced in ROADMAP and CONTEXT but do not exist in the repo.
-   - What's unclear: Whether they were deleted or never created.
-   - Recommendation: Derive test requirements from D-01 permission matrix and Phase 12 test patterns instead.
+3. **TDD-AUTH-PLAN.md and UAT-CHECKLIST.md referenced but missing (RESOLVED)**
+   - Decision: Derive test requirements from D-01 permission matrix and Phase 12 test patterns instead. Plan 01 RED-phase tests cover the full permission matrix derived from D-01.
 
 ## Validation Architecture
 
