@@ -50,6 +50,8 @@ import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 import { officerAuthMiddleware } from '@/middleware/officer-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
 import { orgContextMiddleware } from '@/middleware/org-context';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 
 /**
@@ -270,6 +272,8 @@ export function createApp(config: Config): App {
 
   // Credit compliance report for officers (auth required)
   app.get('/credit-compliance/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
+    const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
+    if (denied) return denied;
     const db = ctx.get('database') as any;
     const orgId = ctx.req.param('orgId');
     const { sql } = await import('drizzle-orm');
@@ -320,6 +324,8 @@ export function createApp(config: Config): App {
     return ctx.json(org, 200);
   });
   app.put('/membership/org-profile/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
+    const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT]);
+    if (denied) return denied;
     const { eq } = await import('drizzle-orm');
     const { organizations } = await import('@/handlers/platformadmin/repos/platform-admin.schema');
     const db = ctx.get('database') as any;
@@ -379,6 +385,8 @@ export function createApp(config: Config): App {
 
   // Officer dashboard — dues dashboard summary for an org (hand-wired route)
   app.get('/dues/dashboard/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => {
+    const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
+    if (denied) return denied;
     const orgId = ctx.req.param('orgId');
     const db = ctx.get('database') as any;
     const { DuesRepository } = await import('@/handlers/dues/repos/dues.repo');
