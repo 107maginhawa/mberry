@@ -36,9 +36,9 @@ function formatDate(iso: string) {
   })
 }
 
-function RegistrationsTab({ eventId }: { eventId: string }) {
+function RegistrationsTab({ eventId, orgId }: { eventId: string; orgId: string }) {
   const { data, isLoading } = useQuery(
-    listCustomEventRegistrationsOptions({ path: { eventId } })
+    listCustomEventRegistrationsOptions({ path: { eventId }, headers: { 'x-org-id': orgId } })
   )
 
   const registrations = (data as any)?.data ?? []
@@ -104,7 +104,7 @@ function EventDetail() {
   const [editMode, setEditMode] = useState(false)
 
   const { data, isLoading, error } = useQuery(
-    getEventOptions({ path: { eventId } })
+    getEventOptions({ path: { eventId }, headers: { 'x-org-id': orgId } })
   )
 
   const event = (data as any)?.data ?? data
@@ -226,7 +226,7 @@ function EventDetail() {
           )}
 
           {tab === 'registrations' && (
-            <RegistrationsTab eventId={eventId} />
+            <RegistrationsTab eventId={eventId} orgId={orgId} />
           )}
 
           {tab === 'attendance' && (

@@ -24,18 +24,19 @@ function formatDateTime(iso: string | null | undefined) {
 }
 
 function EventDetail() {
-  const { eventId } = Route.useParams()
+  const { orgId, eventId } = Route.useParams()
   const queryClient = useQueryClient()
   const [registered, setRegistered] = useState(false)
 
   const { data: event, isLoading, error } = useQuery({
-    ...getEventOptions({ path: { eventId } }),
+    ...getEventOptions({ path: { eventId }, headers: { 'x-org-id': orgId } }),
     select: (d) => (d as any)?.data ?? d,
   })
 
   const registerMutOpts = registerForCustomEventMutation()
   const registerMutation = useMutation({
-    mutationFn: () => (registerMutOpts.mutationFn as Function)({ path: { eventId } }),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+    mutationFn: () => (registerMutOpts.mutationFn as Function)({ path: { eventId }, headers: { 'x-org-id': orgId } }),
     onSuccess: (data: any) => {
       const status = data?.status
       if (status === 'waitlisted') {
