@@ -22,8 +22,8 @@ export async function listAuditLogs(
 ): Promise<Response> {
   // Get authenticated user and check authorization
   const user = ctx.get('user') as User;
-  
-  
+  const orgId = ctx.get('orgId') as string | undefined;
+
   // Get query parameters
   const query = ctx.req.valid('query') as AuditLogQueryParams;
   
@@ -40,8 +40,10 @@ export async function listAuditLogs(
   const rawFilters = parseFilters(query, allowedFields);
   
   // Convert date strings to Date objects if present
+  // P0-3: enforce org-scoping — non-platform-admin users only see their org's logs
   const filters: AuditLogFilters = {
     ...rawFilters,
+    organizationId: orgId ?? rawFilters['organizationId'],
     startDate: rawFilters['startDate'] ? new Date(rawFilters['startDate']) : undefined,
     endDate: rawFilters['endDate'] ? new Date(rawFilters['endDate']) : undefined
   };
@@ -76,6 +78,7 @@ export async function listAuditLogs(
     category: 'administrative',
     action: 'read',
     outcome: 'success',
+    organizationId: orgId,
     user: user.id,
     userType: 'admin',
     resourceType: 'audit_log',

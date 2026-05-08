@@ -3,7 +3,7 @@
  * Parses environment variables into a typed configuration object
  */
 
-import type { AuthConfig } from '@/types/auth';
+import type { AuthConfig, VersionedSecret } from '@/types/auth';
 import { DEFAULT_ICE_SERVERS, parseIceServerUrls, type IceServer } from '@/utils/webrtc';
 import type { DatabaseConfig } from './database';
 import type { StorageConfig } from './storage';
@@ -100,6 +100,40 @@ export function parseConfig(): Config {
   const serverHost = process.env['SERVER_HOST'] || '0.0.0.0';
   const publicUrl = process.env['SERVER_PUBLIC_URL'] || process.env['PUBLIC_URL'];
 
+  // Production guard: AUTH_SECRET is required in production
+  const nodeEnv = process.env['NODE_ENV'] || 'development';
+  const authSecret = process.env['AUTH_SECRET'];
+  if (nodeEnv === 'production' && !authSecret) {
+    throw new Error(
+      'AUTH_SECRET environment variable is required in production. ' +
+      'Generate one with: openssl rand -base64 32'
+    );
+  }
+
+  // Parse versioned secrets for key rotation: "2:new-key,1:old-key"
+  const parseSecrets = (raw: string | undefined): VersionedSecret[] | undefined => {
+    if (!raw) return undefined;
+    const entries = raw.split(',').map(s => s.trim()).filter(Boolean);
+    return entries.map(entry => {
+      const colonIdx = entry.indexOf(':');
+      if (colonIdx === -1) {
+        throw new Error(
+          `Invalid BETTER_AUTH_SECRETS format: "${entry}". Expected "version:key" (e.g. "2:my-secret-key,1:old-key").`
+        );
+      }
+      const version = Number.parseInt(entry.slice(0, colonIdx), 10);
+      const value = entry.slice(colonIdx + 1);
+      if (Number.isNaN(version) || version < 1 || !value) {
+        throw new Error(
+          `Invalid BETTER_AUTH_SECRETS entry: "${entry}". Version must be ≥1 and key must be non-empty.`
+        );
+      }
+      return { version, value };
+    });
+  };
+
+  const secrets = parseSecrets(process.env['BETTER_AUTH_SECRETS']);
+
   return {
     // Server configuration
     server: {
@@ -136,11 +170,13 @@ export function parseConfig(): Config {
     // Authentication configuration
     auth: {
       baseUrl: process.env['AUTH_BASE_URL'] || publicUrl || `http://${serverHost}:${serverPort}`,
-      secret: process.env['AUTH_SECRET'] || 'development-secret-change-in-production-' + Math.random(),
-      sessionExpiresIn: parseIntValue(process.env['AUTH_SESSION_EXPIRES_IN'], 60 * 60 * 24 * 7), // 7 days
+      secret: authSecret || 'development-secret-change-in-production',
+      secrets,
+      sessionExpiresIn: parseIntValue(process.env['AUTH_SESSION_EXPIRES_IN'], 60 * 60 * 24), // 24 hours (P0-2: reduced from 7d to limit token exposure window)
       rateLimitEnabled: parseBool(process.env['AUTH_RATE_LIMIT_ENABLED'], true),
       rateLimitWindow: parseIntValue(process.env['AUTH_RATE_LIMIT_WINDOW'], 60), // 1 minute
       rateLimitMax: parseIntValue(process.env['AUTH_RATE_LIMIT_MAX'], 10), // 10 attempts
+      requireEmailVerification: parseBool(process.env['AUTH_REQUIRE_EMAIL_VERIFICATION'], true),
       adminEmails: parseList(process.env['AUTH_ADMIN_EMAILS'], []),
       cookieSameSite: (process.env['AUTH_COOKIE_SAMESITE'] as 'strict' | 'lax' | 'none') || undefined,
       secureCookies: process.env['AUTH_COOKIE_SECURE'] !== undefined ? parseBool(process.env['AUTH_COOKIE_SECURE'], false) : undefined,

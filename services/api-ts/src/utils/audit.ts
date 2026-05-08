@@ -24,6 +24,7 @@ export async function auditAction(ctx: BaseContext, opts: AuditActionOpts): Prom
   if (!audit) return;
 
   const user = ctx.get('user');
+  const orgId = ctx.get('orgId');
   const logger = ctx.get('logger');
 
   try {
@@ -32,6 +33,7 @@ export async function auditAction(ctx: BaseContext, opts: AuditActionOpts): Prom
       category: 'association',
       action: opts.action,
       outcome: 'success',
+      organizationId: orgId,
       user: user?.id,
       userType: 'client' as const,
       resourceType: opts.resourceType,

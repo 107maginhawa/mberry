@@ -39,7 +39,12 @@ export class AuditRepository extends DatabaseRepository<AuditLogEntry, NewAuditL
     if (!filters) return undefined;
     
     const conditions = [];
-    
+
+    // Multi-tenant scoping (P0-3: always filter by org when provided)
+    if (filters.organizationId) {
+      conditions.push(eq(auditLogEntries.organizationId, filters.organizationId));
+    }
+
     // Event classification filters
     if (filters.eventType) {
       conditions.push(eq(auditLogEntries.eventType, filters.eventType));
@@ -109,6 +114,7 @@ export class AuditRepository extends DatabaseRepository<AuditLogEntry, NewAuditL
       category: request.category,
       action: request.action,
       outcome: request.outcome,
+      organizationId: request.organizationId,
       user: request.user,
       resourceType: request.resourceType,
       resource: request.resource,
@@ -182,6 +188,7 @@ export class AuditRepository extends DatabaseRepository<AuditLogEntry, NewAuditL
         category: entry.category,
         action: entry.action,
         outcome: entry.outcome,
+        organizationId: entry.organizationId,
         user: entry.user,
         resourceType: entry.resourceType,
         resource: entry.resource,

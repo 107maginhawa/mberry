@@ -77,6 +77,9 @@ export const auditLogEntries = pgTable('audit_log_entry', {
   action: auditActionEnum('action').notNull(),
   outcome: auditOutcomeEnum('outcome').notNull(),
   
+  // Multi-tenant scoping (P0-3: HIPAA compliance — every audit entry must be org-scoped)
+  organizationId: uuid('organization_id'),
+
   // Context information
   user: uuid('user'), // UUID reference to user
   userType: varchar('user_type', { length: 20 }), // client, provider, admin, system
@@ -101,14 +104,16 @@ export const auditLogEntries = pgTable('audit_log_entry', {
   purgeAfter: timestamp('purge_after'),
 }, (table) => ({
   // Performance indexes for common queries
+  orgIdx: index('audit_organization_id_idx').on(table.organizationId),
   eventTypeIdx: index('audit_event_type_idx').on(table.eventType),
   categoryIdx: index('audit_category_idx').on(table.category),
   userIdx: index('audit_user_idx').on(table.user),
   resourceIdx: index('audit_resource_idx').on(table.resourceType, table.resource),
   createdAtIdx: index('audit_created_at_idx').on(table.createdAt),
   retentionStatusIdx: index('audit_retention_status_idx').on(table.retentionStatus),
-  
+
   // Composite indexes for common filter combinations
+  orgEventIdx: index('audit_org_event_idx').on(table.organizationId, table.eventType),
   userEventIdx: index('audit_user_event_idx').on(table.user, table.eventType),
   resourceTypeEventIdx: index('audit_resource_type_event_idx').on(table.resourceType, table.eventType),
   dateRangeIdx: index('audit_date_range_idx').on(table.createdAt, table.retentionStatus),
@@ -132,6 +137,7 @@ export interface CreateAuditLogRequest {
   category: AuditCategory;
   action: AuditAction;
   outcome: AuditOutcome;
+  organizationId?: string;
   user?: string;
   userType?: UserType;
   resourceType: string;
@@ -167,6 +173,7 @@ export interface AuditLogFilters {
   category?: AuditCategory;
   action?: AuditAction;
   outcome?: AuditOutcome;
+  organizationId?: string;
   user?: string;
   userType?: UserType;
   resourceType?: string;

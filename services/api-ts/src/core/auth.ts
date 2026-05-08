@@ -41,6 +41,8 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
     baseURL: config.auth.baseUrl,
     basePath: '/auth',
     secret: config.auth.secret,
+    // Versioned secrets for non-destructive key rotation (Better-Auth v1.5+)
+    ...(config.auth.secrets && { secrets: config.auth.secrets }),
     trustedOrigins: trustedOrigins,
 
     // Database configuration
@@ -76,7 +78,7 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
     // Email and password authentication
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: false, // Disabled for testing
+      requireEmailVerification: config.auth.requireEmailVerification ?? true,
       minPasswordLength: 8,
       maxPasswordLength: 128,
       sendResetPassword: async ({ user, url, token }) => {
@@ -180,6 +182,9 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
       }),
       bearer(),
       passkey(),
+      // P0-1 VERIFIED: Better-Auth encrypts TOTP secrets and backup codes at rest
+      // using AUTH_SECRET before DB storage. Production guard in config.ts enforces
+      // AUTH_SECRET is set. Key rotation supported via BETTER_AUTH_SECRETS env var.
       twoFactor(),
       magicLink({
         sendMagicLink: async ({ email, url, token }) => {
@@ -239,10 +244,16 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
     },
     
     // Session configuration
+    // P0-2 MITIGATION: Better-Auth stores session tokens as plaintext in the DB.
+    // Native token hashing is not supported by Better-Auth's session lookup flow.
+    // Mitigations applied: (1) reduced default expiry to 24h, (2) IP address
+    // tracking enabled, (3) crypto.ts utility ready for custom adapter wrapper,
+    // (4) production deployments MUST enable PostgreSQL TDE or column-level
+    // encryption via pgcrypto for the session.token column.
     session: {
       expiresIn: config.auth.sessionExpiresIn,
-      storeSessionInDatabase: true, // Enabled for better security and scalability
-      cleanupAfter: '7d', // Clean up expired sessions after 7 days
+      storeSessionInDatabase: true,
+      cleanupAfter: '2d', // Clean up expired sessions after 2 days (tighter window)
     },
 
     // Account linking

@@ -73,6 +73,7 @@ export async function executeAccountDeletion(
         category: 'privacy',
         action: 'anonymize',
         outcome: 'success',
+        organizationId: ctx.get('orgId'),
         user: 'system',
         userType: 'system' as const,
         resourceType: 'person',

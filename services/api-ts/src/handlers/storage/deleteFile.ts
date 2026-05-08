@@ -71,6 +71,7 @@ export async function deleteFile(
         category: 'hipaa',
         action: 'delete',
         outcome: 'success',
+        organizationId: ctx.get('orgId'),
         user: user.id,
         userType: (user.role === 'user' ? 'client' : user.role || 'client') as 'client' | 'host' | 'admin' | 'system',
         resourceType: 'file',

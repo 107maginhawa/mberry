@@ -98,6 +98,7 @@ export async function exportPersonData(
         category: 'privacy',
         action: 'export',
         outcome: 'success',
+        organizationId: ctx.get('orgId'),
         user: user.id,
         userType: 'client' as const,
         resourceType: 'person',

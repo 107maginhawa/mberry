@@ -48,6 +48,7 @@ export async function cancelAccountDeletion(
         category: 'privacy',
         action: 'delete-cancel',
         outcome: 'success',
+        organizationId: ctx.get('orgId'),
         user: user.id,
         userType: 'client' as const,
         resourceType: 'person',

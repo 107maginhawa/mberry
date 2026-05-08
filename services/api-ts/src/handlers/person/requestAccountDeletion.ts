@@ -50,6 +50,7 @@ export async function requestAccountDeletion(
         category: 'privacy',
         action: 'delete-request',
         outcome: 'success',
+        organizationId: ctx.get('orgId'),
         user: user.id,
         userType: 'client' as const,
         resourceType: 'person',
