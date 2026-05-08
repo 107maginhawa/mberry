@@ -72,6 +72,16 @@ const TEST_USERS = [
     licenseNumber: '0098765',
     dbRole: 'association:member',
   },
+  {
+    email: 'idor-officer@memberry.ph',
+    password: 'TestPass123!',
+    name: 'Carlos Dizon',
+    firstName: 'Carlos',
+    lastName: 'Dizon',
+    specialization: 'Oral Surgery',
+    licenseNumber: '0011223',
+    dbRole: 'association:member',
+  },
 ];
 
 async function signUpUser(email: string, password: string, name: string): Promise<{ userId: string; cookie: string } | null> {
@@ -325,16 +335,18 @@ async function seed() {
   }
 
   // ─── 6. Memberships (direct DB insert) ───
-  if (personIds.length > 0) {
+  // Only seed org1 memberships for non-IDOR users (idor-officer gets org2 membership in section 8)
+  const org1PersonIds = personIds.filter((_, i) => TEST_USERS[i]?.email !== 'idor-officer@memberry.ph');
+  if (org1PersonIds.length > 0) {
     const existingMemberships = await db.select().from(memberships).where(eq(memberships.organizationId, org1.id));
 
     if (existingMemberships.length === 0) {
-      for (let i = 0; i < personIds.length; i++) {
+      for (let i = 0; i < org1PersonIds.length; i++) {
         // First user (admin) gets regular tier; all others get regular tier too (officers are regular members)
         const tier = regularTier;
         await db.insert(memberships).values({
           organizationId: org1.id,
-          personId: personIds[i]!,
+          personId: org1PersonIds[i]!,
           tierId: tier.id,
           memberNumber: `PDA-2025-${String(i + 1).padStart(3, '0')}`,
           startDate: '2025-01-01',
@@ -343,7 +355,8 @@ async function seed() {
           status: 'active',
           joinedAt: new Date(),
         });
-        console.log(`  Membership: PDA-2025-${String(i + 1).padStart(3, '0')} (${TEST_USERS[i]!.email})`);
+        const orgUserEmail = TEST_USERS.filter(u => u.email !== 'idor-officer@memberry.ph')[i]?.email ?? '';
+        console.log(`  Membership: PDA-2025-${String(i + 1).padStart(3, '0')} (${orgUserEmail})`);
       }
     } else {
       console.log(`  Memberships: exist (${existingMemberships.length} found)`);
@@ -387,6 +400,76 @@ async function seed() {
       }
     } else {
       console.log(`  Officer positions: exist (${existingPositions.length} found)`);
+    }
+  }
+
+  // ─── 8. Org 2 Officer (for IDOR/cross-org tests — D-03/D-04) ───
+  const org2PersonId = personIdMap.get('idor-officer@memberry.ph');
+  if (org2PersonId) {
+    // Create a tier for org2 (required — tierId is NOT NULL)
+    const existingOrg2Tiers = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, org2.id));
+    let org2Tier: any;
+    if (existingOrg2Tiers.length > 0) {
+      org2Tier = existingOrg2Tiers[0];
+      console.log(`  Org 2 tier: exists (${org2Tier.id})`);
+    } else {
+      [org2Tier] = await db.insert(membershipTiers).values({
+        organizationId: org2.id,
+        name: 'Regular Member',
+        code: 'REGULAR',
+        description: 'Standard membership for licensed dentists',
+        annualFee: 250000,
+        currency: 'PHP',
+        benefits: ['Directory listing', 'Event discounts', 'CPD tracking'],
+        status: 'active',
+      }).returning();
+      console.log(`  Org 2 tier: ${org2Tier.name} (${org2Tier.id})`);
+    }
+
+    // Create membership in org2
+    const existingOrg2Memberships = await db.select().from(memberships).where(eq(memberships.organizationId, org2.id));
+    if (existingOrg2Memberships.length === 0) {
+      await db.insert(memberships).values({
+        organizationId: org2.id,
+        personId: org2PersonId,
+        tierId: org2Tier.id,
+        memberNumber: 'PDA-CEBU-001',
+        startDate: '2025-01-01',
+        duesExpiryDate: '2025-12-31',
+        gracePeriodDays: 30,
+        status: 'active',
+        joinedAt: new Date(),
+      });
+      console.log('  Membership: PDA-CEBU-001 (idor-officer@memberry.ph in org2)');
+    } else {
+      console.log(`  Org 2 memberships: exist (${existingOrg2Memberships.length} found)`);
+    }
+
+    // Create position + active officer term in org2
+    const existingOrg2Positions = await db.select().from(positions).where(eq(positions.organizationId, org2.id));
+    if (existingOrg2Positions.length === 0) {
+      const [org2Position] = await db.insert(positions).values({
+        organizationId: org2.id,
+        title: 'President',
+        description: 'President of PDA Cebu',
+        level: 'chapter',
+        termLengthMonths: 24,
+        sortOrder: 1,
+      }).returning();
+
+      if (org2Position) {
+        await db.insert(officerTerms).values({
+          positionId: org2Position.id,
+          personId: org2PersonId,
+          organizationId: org2.id,
+          status: 'active',
+          startDate: new Date('2025-01-01'),
+          endDate: new Date('2026-12-31'),
+        });
+        console.log('  Officer: idor-officer@memberry.ph -> President of PDA Cebu (active term)');
+      }
+    } else {
+      console.log(`  Org 2 positions: exist (${existingOrg2Positions.length} found)`);
     }
   }
 
@@ -437,8 +520,10 @@ async function seed() {
   console.log('║    Password: TestPass123!               ║');
   console.log('║    Position: Society Officer            ║');
   console.log('╠══════════════════════════════════════════╣');
-  console.log(`║  Org ID: ${org1.id}  ║`);
+  console.log(`║  Org 1 ID: ${org1.id}  ║`);
   console.log('║  Public: /org/pda-metro-manila          ║');
+  console.log(`║  Org 2 ID: ${org2.id}  ║`);
+  console.log('║  IDOR Officer: idor-officer@memberry.ph ║');
   console.log('╚══════════════════════════════════════════╝');
 
   await pool.end();
