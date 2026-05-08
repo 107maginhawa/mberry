@@ -120,6 +120,20 @@
       "when": 1778200000000,
       "tag": "0016_multi_tenant_scoping",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1778250000000,
+      "tag": "0017_p1_multi_tenant_scoping",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1778300000000,
+      "tag": "0018_credential_tables",
+      "breakpoints": true
     }
   ]
 }
