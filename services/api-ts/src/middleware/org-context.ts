@@ -27,9 +27,7 @@ import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.sc
 /** Paths under /association/* that are user-scoped and don't require org context */
 const ORG_CONTEXT_EXEMPT: { path: string; methods: string[] }[] = [
   { path: '/association/event-lifecycle/my', methods: ['GET'] },
-  { path: '/association/training', methods: ['GET'] },
-  { path: '/association/member/certificates', methods: ['GET'] },
-  { path: '/association/member/dues-payments', methods: ['GET'] },
+  { path: '/association/training-lifecycle/my', methods: ['GET'] },
 ];
 
 export function orgContextMiddleware() {

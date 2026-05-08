@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@monobase/ui'
 import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { useOrgContext } from '@/hooks/useOrgContext'
 
 function formatDate(iso: string | null | undefined) {
   if (!iso) return '—'
@@ -8,7 +9,11 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function CertificateList() {
-  const { data, isLoading } = useQuery(listMyCertificatesOptions())
+  const { orgId } = useOrgContext()
+  const { data, isLoading } = useQuery({
+    ...listMyCertificatesOptions(orgId ? { headers: { 'x-org-id': orgId } } : undefined),
+    enabled: !!orgId,
+  })
 
   const certificates = (data?.data ?? []) as any[]
 

@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Award, Calendar, BookOpen, CheckCircle } from 'lucide-react'
 import { listMyCustomTrainingsOptions, searchTrainingsOptions } from '@monobase/sdk-ts/generated/react-query'
+import { useOrgContext } from '@/hooks/useOrgContext'
 
 export const Route = createFileRoute('/_authenticated/my/training')({
   component: MyTraining,
@@ -29,13 +30,18 @@ function formatDate(iso: string | null | undefined) {
 }
 
 function MyTraining() {
-  const { data, isLoading, error } = useQuery(
-    listMyCustomTrainingsOptions()
-  )
+  const { orgId } = useOrgContext()
+  const orgHeaders = orgId ? { 'x-org-id': orgId } : undefined
+
+  const { data, isLoading, error } = useQuery({
+    ...listMyCustomTrainingsOptions(orgHeaders ? { headers: orgHeaders } : undefined),
+    enabled: !!orgId,
+  })
 
   // Network-wide trainings available for discovery (SO-9)
   const { data: availableData } = useQuery({
-    ...searchTrainingsOptions({ query: { status: 'published' } }),
+    ...searchTrainingsOptions({ query: { status: 'published' }, headers: orgHeaders }),
+    enabled: !!orgId,
   })
 
   const items: Array<{ enrollment: any; training: any }> = (data as any)?.data ?? []

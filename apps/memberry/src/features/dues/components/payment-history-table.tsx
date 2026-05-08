@@ -36,16 +36,18 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
   const [offset, setOffset] = useState(0)
   const limit = 25
 
-  const { data, isLoading } = useQuery(
-    listDuesPaymentsOptions({
+  const { data, isLoading } = useQuery({
+    ...listDuesPaymentsOptions({
       query: {
         ...(orgId ? { organizationId: orgId } : {}),
         ...(statusFilter !== 'all' ? { status: statusFilter as any } : {}),
         limit,
         offset,
       },
-    })
-  )
+      ...(orgId ? { headers: { 'x-org-id': orgId } } : {}),
+    }),
+    enabled: !!orgId,
+  })
 
   const payments = data?.data ?? []
   const total = data?.pagination?.totalCount ?? 0
