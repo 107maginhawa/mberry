@@ -70,7 +70,7 @@
   - **Deps:** Phase 12
   - **Est:** 2-3 days
   - **Plans:** 5 plans
-    - [ ] 13-01-PLAN.md — RED tests + requirePosition utility + position titles constants
+    - [x] 13-01-PLAN.md — RED tests + requirePosition utility + position titles constants
     - [ ] 13-02-PLAN.md — Wire requirePosition to 16 member + communications handlers
     - [ ] 13-03-PLAN.md — Wire requirePosition to 13 operations handlers
     - [ ] 13-04-PLAN.md — Wire requirePosition to app.ts inline routes + verify GREEN
@@ -125,7 +125,7 @@
 | 10. Deploy Platform Decision | v1.0.0 | 1/1 | Complete | 2026-05-06 |
 | 11. Test Infrastructure & Seed Users | v1.1.0 | 3/3 | Complete   | 2026-05-08 |
 | 12. Backend Auth — Route Protection | v1.1.0 | 0/6 | Not Started | -- |
-| 13. Position-Based RBAC | v1.1.0 | 0/5 | Planned | -- |
+| 13. Position-Based RBAC | v1.1.0 | 1/5 | In Progress|  |
 | 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 0/0 | Not Started | -- |
 | 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 0/0 | Not Started | -- |
 | 16. Mobile & Transfer Validation | v1.1.0 | 0/0 | Not Started | -- |
