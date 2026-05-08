@@ -30,7 +30,7 @@ dues.put('/funds/:orgId', officerAuth, upsertFunds);
 // Payments (write=officer, read by ID has per-handler org check)
 dues.get('/payments', listPayments);
 dues.get('/payments/:id', getPayment);
-dues.post('/payments', officerAuth, recordPayment);
+dues.post('/payments/:orgId', officerAuth, recordPayment);
 dues.post('/payments/:id/refund', refundPayment); // per-handler org check (P1-2)
 
 // Dashboard (officer-only)

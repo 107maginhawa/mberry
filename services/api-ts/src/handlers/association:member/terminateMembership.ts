@@ -38,5 +38,19 @@ export async function terminateMembership(
     description: 'Membership terminated',
   });
 
+  // P1-4: Invalidate terminated member's sessions so they can't access org resources
+  try {
+    const auth = ctx.get('auth');
+    if (auth && membership.personId) {
+      await (auth.api as any).revokeUserSessions({
+        body: { userId: membership.personId },
+        headers: ctx.req.raw.headers,
+      });
+    }
+  } catch (err) {
+    const logger = ctx.get('logger');
+    logger?.warn({ error: err, personId: membership.personId }, 'Failed to revoke sessions after membership termination');
+  }
+
   return ctx.json(updated, 200);
 }

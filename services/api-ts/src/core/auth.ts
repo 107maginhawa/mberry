@@ -15,6 +15,7 @@ import type { Logger } from '@/types/logger';
 import type { EmailService } from '@/core/email';
 import type { AuthInstance } from '@/utils/auth';
 import { EmailTemplateTags } from '@/handlers/email/repos/email.schema';
+import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
 import * as schema from '@/generated/better-auth/schema';
 import { createTrustedOriginsList, determineCookieConfig } from '@/utils/cors';
 import { ac } from '@/utils/auth';
@@ -148,7 +149,32 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
             return { data: user }; // Return unchanged if already admin
           }
         }
-      }
+      },
+      // P1-6: Audit auth events — log session creation (login) to audit trail
+      session: {
+        create: {
+          after: async (session) => {
+            try {
+              const auditRepo = new AuditRepository(database, logger);
+              await auditRepo.logEvent({
+                eventType: 'authentication',
+                category: 'security',
+                action: 'login',
+                outcome: 'success',
+                user: session.userId,
+                userType: 'client',
+                resourceType: 'session',
+                resource: session.id,
+                description: 'User logged in — session created',
+                ipAddress: (session as any).ipAddress ?? undefined,
+                userAgent: (session as any).userAgent ?? undefined,
+              });
+            } catch (err) {
+              logger?.warn({ error: err, userId: session.userId }, 'Failed to audit login event');
+            }
+          },
+        },
+      },
     },
 
     // Extension plugins

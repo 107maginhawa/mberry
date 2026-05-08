@@ -38,5 +38,19 @@ export async function deleteOfficerTerm(
     description: 'Officer term deleted',
   });
 
+  // P1-4: Invalidate removed officer's sessions so they re-authenticate without officer role
+  try {
+    const auth = ctx.get('auth');
+    if (auth && existing.personId) {
+      await (auth.api as any).revokeUserSessions({
+        body: { userId: existing.personId },
+        headers: ctx.req.raw.headers,
+      });
+      logger?.info({ personId: existing.personId, termId }, 'Sessions revoked after officer term deletion');
+    }
+  } catch (err) {
+    logger?.warn({ error: err, personId: existing.personId }, 'Failed to revoke sessions after officer term deletion');
+  }
+
   return ctx.json({ success: true });
 }

@@ -3,12 +3,13 @@
  * Verifies the authenticated user has an active officer term for the org
  * specified by the :orgId route parameter. Returns 403 if not an officer.
  *
- * For routes without :orgId in the path (e.g., /events/update/:id),
- * the per-handler org ownership check (P1-2) handles authorization instead.
+ * P1-1 FIX: Throws 400 if :orgId is missing from the route. Every route
+ * that uses this middleware MUST include :orgId in the path. Routes without
+ * :orgId should use per-handler authorization instead.
  */
 
 import type { Context, Next } from 'hono';
-import { ForbiddenError } from '@/core/errors';
+import { ForbiddenError, ValidationError } from '@/core/errors';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 export function officerAuthMiddleware() {
@@ -18,8 +19,7 @@ export function officerAuthMiddleware() {
 
     const orgId = ctx.req.param('orgId');
     if (!orgId) {
-      // Route doesn't have :orgId — skip middleware, rely on per-handler checks
-      return next();
+      throw new ValidationError('Missing organization context — route must include :orgId parameter');
     }
 
     const db = ctx.get('database');

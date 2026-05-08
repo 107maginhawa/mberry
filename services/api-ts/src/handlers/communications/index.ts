@@ -20,7 +20,7 @@ communications.get('/announcements/detail/:id', getAnnouncement);
 communications.post('/announcements/:orgId', officerAuth, createAnnouncement);
 communications.post('/announcements/:id/publish', publishAnnouncement);  // per-handler (no orgId param)
 communications.post('/announcements/:id/archive', archiveAnnouncement);  // per-handler
-communications.patch('/announcements/:id', officerAuth, updateAnnouncement);
-communications.delete('/announcements/:id', officerAuth, deleteAnnouncement);
+communications.patch('/announcements/:orgId/:id', officerAuth, updateAnnouncement);
+communications.delete('/announcements/:orgId/:id', officerAuth, deleteAnnouncement);
 
 export { communications };
