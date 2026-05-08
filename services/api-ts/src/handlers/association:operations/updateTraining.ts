@@ -4,6 +4,7 @@ import type { UpdateTrainingBody, UpdateTrainingParams } from '@/generated/opena
 import { NotFoundError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * updateTraining
@@ -19,6 +20,9 @@ export async function updateTraining(
 
   const orgId = ctx.get('orgId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
