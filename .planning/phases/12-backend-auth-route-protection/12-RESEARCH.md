@@ -69,19 +69,20 @@ No new dependencies needed. All tools exist in the codebase.
 ### System Architecture Diagram
 
 ```
-Request → authMiddleware() → officerAuthMiddleware() → Handler
-  │              │                     │                   │
-  │         Sets user/session    Checks officer_term   Business logic
-  │         on context           for :orgId param
-  │                                    │
-  │                              No active term?
-  │                              throw ForbiddenError()
-  │
-  └─ /association/* routes:
-     authMiddleware() → orgContextMiddleware() → Handler → requireOrgRole()
-                              │                               │
-                        Sets orgId,                    Returns 403 Response
-                        orgMembership                  if role not in allowed list
+Request -> authMiddleware() -> officerAuthMiddleware() -> Handler
+  |              |                     |                   |
+  |         Sets user/session    Checks officer_term   Business logic
+  |         on context           for :orgId param
+  |                                    |
+  |                              No active term?
+  |                              throw ForbiddenError()
+  |
+  +-- /association/* routes:
+     authMiddleware() -> orgContextMiddleware() -> Handler -> requireOfficerTerm()
+                              |                               |
+                        Sets orgId,                    Queries officer_term directly
+                        orgMembership                  Returns 403 Response if no active term
+                        (role always 'member')         (cannot use requireOrgRole -- Pitfall 2)
 ```
 
 ### Two Authorization Strategies
@@ -93,9 +94,9 @@ Request → authMiddleware() → officerAuthMiddleware() → Handler
 
 **Strategy B: Handler-level (generated /association/* routes)**
 - `registerOpenAPIRoutes()` cannot accept per-route middleware injection
-- Handlers call `requireOrgRole(ctx, ['president', 'treasurer', ...])` at top of function
-- Returns 403 Response (not thrown) -- different pattern from Strategy A
-- Per D-09, do NOT refactor this to throw-style unless handler is being modified
+- Handlers call `requireOfficerTerm(ctx)` at top of function -- queries `officer_term` table directly
+- Returns 403 Response (not thrown) -- return-style per D-09 convention
+- CANNOT use `requireOrgRole()` because `orgContextMiddleware` always sets `role: 'member'` (Pitfall 2)
 
 ### Key Code Locations
 
@@ -103,16 +104,17 @@ Request → authMiddleware() → officerAuthMiddleware() → Handler
 |------|------|-------------------|
 | `services/api-ts/src/app.ts` (lines 270-410) | Inline hand-wired routes | Add `officerAuthMiddleware()` to middleware chain |
 | `services/api-ts/src/generated/openapi/routes.ts` | Generated route registration | DO NOT EDIT -- handler-level checks instead |
-| `services/api-ts/src/handlers/*/` | Handler implementations | Add `requireOrgRole()` calls to mutation handlers |
+| `services/api-ts/src/handlers/*/` | Handler implementations | Add `requireOfficerTerm()` calls to mutation handlers |
 | `services/api-ts/src/seed.ts` | Seed data | Add second org + officer |
 | `services/api-ts/src/middleware/officer-auth.ts` | Officer check middleware | No changes needed |
 | `services/api-ts/src/utils/org-auth.ts` | Role check utilities | No changes needed |
 
 ### Anti-Patterns to Avoid
 - **Editing generated routes.ts:** This file is regenerated. Any middleware injection here will be overwritten. Use handler-level checks instead.
-- **Mixing throw vs return-style in same handler:** `officerAuthMiddleware` throws `ForbiddenError`; `requireOrgRole` returns a Response. Don't mix within a single handler -- pick the one that matches the route category.
+- **Mixing throw vs return-style in same handler:** `officerAuthMiddleware` throws `ForbiddenError`; `requireOfficerTerm` returns a Response. Don't mix within a single handler -- pick the one that matches the route category.
 - **Testing with full app boot:** Creates fragile, slow tests. Use lightweight Hono mock pattern from `custom-routes-auth.test.ts`.
 - **Putting IDOR tests in unit test files:** IDOR tests need real DB context with two orgs. These are integration tests using `apiAs()` and require running API server.
+- **Using requireOrgRole for officer checks on /association/* routes:** `orgContextMiddleware` sets `role='member'` for ALL users. `requireOrgRole()` checks this role, so it denies everyone including officers. Use `requireOfficerTerm()` instead (queries `officer_term` table directly).
 
 ## Don't Hand-Roll
 
@@ -168,14 +170,15 @@ app.put('/membership/org-profile/:orgId', authMiddleware(), async (ctx) => { ...
 app.put('/membership/org-profile/:orgId', authMiddleware(), officerAuthMiddleware(), async (ctx) => { ... });
 ```
 
-### Pattern 2: Handler-level requireOrgRole for generated routes
+### Pattern 2: Handler-level requireOfficerTerm for generated routes
 ```typescript
-// Source: utils/org-auth.ts
-import { requireOrgRole } from '@/utils/org-auth';
+// Source: NEW utility at utils/officer-check.ts
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 export async function createEvent(ctx: BaseContext) {
   // Officer check at handler level (generated routes can't use middleware)
-  const denied = requireOrgRole(ctx, ['president', 'vice-president', 'secretary', 'officer']);
+  // Uses requireOfficerTerm (NOT requireOrgRole -- Pitfall 2)
+  const denied = await requireOfficerTerm(ctx);
   if (denied) return denied;
   
   // ... handler logic
@@ -317,7 +320,7 @@ Derived from TDD-AUTH-PLAN.md sections 1.1, 1.2, 1.3:
 |---------------|---------|-----------------|
 | V2 Authentication | no | Already handled by `authMiddleware()` |
 | V3 Session Management | no | Already handled by Better-Auth |
-| V4 Access Control | **yes** | `officerAuthMiddleware()` + `requireOrgRole()` |
+| V4 Access Control | **yes** | `officerAuthMiddleware()` + `requireOfficerTerm()` |
 | V5 Input Validation | no | Not in scope for this phase |
 | V6 Cryptography | no | Not in scope |
 
@@ -325,7 +328,7 @@ Derived from TDD-AUTH-PLAN.md sections 1.1, 1.2, 1.3:
 
 | Pattern | STRIDE | Standard Mitigation |
 |---------|--------|---------------------|
-| Privilege escalation (member accessing officer endpoints) | Elevation of Privilege | `officerAuthMiddleware()` on hand-wired routes; `requireOrgRole()` on handlers |
+| Privilege escalation (member accessing officer endpoints) | Elevation of Privilege | `officerAuthMiddleware()` on hand-wired routes; `requireOfficerTerm()` on handlers |
 | IDOR (officer accessing other org's data) | Information Disclosure / Tampering | `orgContextMiddleware` validates membership; `requireTenantAccess()` compares orgIds |
 | Bypassing middleware via direct handler call | Elevation of Privilege | Tests verify at HTTP level, not handler level |
 | Officer term expiry bypass | Elevation of Privilege | `officerAuthMiddleware` queries `officer_term` for active terms only |
@@ -335,21 +338,17 @@ Derived from TDD-AUTH-PLAN.md sections 1.1, 1.2, 1.3:
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
 | A1 | Module routers (dues/index.ts, membership/index.ts) are dead code -- not mounted in app.ts | Architecture Patterns | If they ARE mounted somewhere, adding officerAuth to app.ts inline routes would double-protect |
-| A2 | `requireOrgRole` with `orgMembership.role='member'` (set by orgContextMiddleware) will correctly deny members | Pitfall 2 | If officer status is needed from officer_term, requireOrgRole alone won't work -- need to query officer_term in handler |
+| A2 | `requireOrgRole` with `orgMembership.role='member'` (set by orgContextMiddleware) will correctly deny members but ALSO deny officers | Pitfall 2 | Confirmed -- requireOrgRole cannot be used for officer checks on /association/* routes |
 
-**A2 is critical:** The `orgContextMiddleware` always sets `role: 'member'`. For `/association/*` handler-level checks, `requireOrgRole()` checks against this role. If the allowed roles list includes only officer roles (president, treasurer, etc.), members will be correctly denied. But officers will ALSO be denied because their context role is 'member'. Handler-level officer checks likely need to query `officer_term` directly, not rely on `orgMembership.role`. This must be verified during implementation.
+**A2 is confirmed:** The `orgContextMiddleware` always sets `role: 'member'`. `requireOrgRole()` checks this role, so it denies everyone including officers. Plan 03a creates `requireOfficerTerm()` which queries `officer_term` table directly, bypassing this limitation.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **How do /association/* handlers currently check officer status?**
-   - What we know: `orgContextMiddleware` sets `role: 'member'` for all. `requireOrgRole` checks this role.
-   - What's unclear: Do any existing handlers already query `officer_term`? Or is `requireOrgRole` meant to work with a role that's never set to officer values?
-   - Recommendation: During RED phase, write tests that verify officer gets 200 on mutation routes. If tests fail (officer also gets 403), the handler-level check needs to query `officer_term` instead of relying on `requireOrgRole`.
+1. **How do /association/* handlers currently check officer status?** (RESOLVED)
+   - **Answer:** No existing handlers query `officer_term`. `requireOrgRole()` checks `orgMembership.role` which is always `'member'` (set by `orgContextMiddleware`). This means `requireOrgRole()` cannot distinguish members from officers. Plan 03a creates a new `requireOfficerTerm()` utility that queries the `officer_term` table directly -- same approach as `officerAuthMiddleware` but as a handler-level function returning `Response | null` (per D-06/D-09 convention).
 
-2. **Should hand-wired inline routes be refactored to use module routers?**
-   - What we know: Module routers exist with proper `officerAuth`. But they're not mounted.
-   - What's unclear: Whether refactoring to mount them would simplify this phase.
-   - Recommendation: Per D-05, do NOT refactor. Just add `officerAuthMiddleware()` to inline routes. Refactoring is a separate concern.
+2. **Should hand-wired inline routes be refactored to use module routers?** (RESOLVED)
+   - **Answer:** No. Per D-05, add `officerAuthMiddleware()` to inline `app.ts` routes. Refactoring to module routers is out of scope for this phase.
 
 ## Sources
 

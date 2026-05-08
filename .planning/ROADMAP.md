@@ -52,11 +52,13 @@
   - **Verify:** Member gets 403 on all officer endpoints. Cross-org blocked.
   - **Deps:** Phase 11
   - **Est:** 2-3 days
-  - **Plans:** 4 plans
-    - [ ] 12-01-PLAN.md -- RED: hand-wired route officer protection tests
-    - [ ] 12-02-PLAN.md -- RED: association mutation route officer protection tests
-    - [ ] 12-03-PLAN.md -- GREEN: wire officerAuthMiddleware + requireOfficerTerm
-    - [ ] 12-04-PLAN.md -- Seed second org officer + IDOR tests
+  - **Plans:** 6 plans
+    - [ ] 12-01-PLAN.md — RED: hand-wired route officer protection tests
+    - [ ] 12-02-PLAN.md — RED: association mutation route officer protection tests
+    - [ ] 12-03-PLAN.md — GREEN: wire officerAuthMiddleware to app.ts + create requireOfficerTerm utility
+    - [ ] 12-03b-PLAN.md — GREEN: add requireOfficerTerm to association:operations handlers
+    - [ ] 12-03c-PLAN.md — GREEN: add requireOfficerTerm to association:member handlers
+    - [ ] 12-04-PLAN.md — Seed second org officer + IDOR tests
 
 - [ ] **Phase 13: Position-Based RBAC**
   - RED: Write position-specific API tests (Treasurer-only, President-only, Secretary-allowed endpoints)
@@ -116,7 +118,7 @@
 | 9. Test Infrastructure Hardening | v1.0.0 | 2/2 | Complete | 2026-05-06 |
 | 10. Deploy Platform Decision | v1.0.0 | 1/1 | Complete | 2026-05-06 |
 | 11. Test Infrastructure & Seed Users | v1.1.0 | 3/3 | Complete   | 2026-05-08 |
-| 12. Backend Auth — Route Protection | v1.1.0 | 0/4 | Not Started | -- |
+| 12. Backend Auth — Route Protection | v1.1.0 | 0/6 | Not Started | -- |
 | 13. Position-Based RBAC | v1.1.0 | 0/0 | Not Started | -- |
 | 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 0/0 | Not Started | -- |
 | 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 0/0 | Not Started | -- |
