@@ -4,6 +4,7 @@ import { NotFoundError, UnauthorizedError, ConflictError } from '@/core/errors';
 import type { CreateMembershipBody } from '@/generated/openapi/validators';
 import { MembershipTierRepository, MembershipRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * createMembership
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function createMembership(
   ctx: ValidatedContext<CreateMembershipBody, never, never>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 

@@ -4,6 +4,7 @@ import { UnauthorizedError } from '@/core/errors';
 import type { RecordDuesPaymentBody } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * recordDuesPayment
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function recordDuesPayment(
   ctx: ValidatedContext<RecordDuesPaymentBody, never, never>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

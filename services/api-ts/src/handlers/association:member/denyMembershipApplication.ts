@@ -4,6 +4,7 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { DenyMembershipApplicationBody, DenyMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * denyMembershipApplication
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function denyMembershipApplication(
   ctx: ValidatedContext<DenyMembershipApplicationBody, never, DenyMembershipApplicationParams>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

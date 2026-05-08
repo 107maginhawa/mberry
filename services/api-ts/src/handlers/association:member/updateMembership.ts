@@ -4,6 +4,7 @@ import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { UpdateMembershipBody, UpdateMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * updateMembership
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function updateMembership(
   ctx: ValidatedContext<UpdateMembershipBody, never, UpdateMembershipParams>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

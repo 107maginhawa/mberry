@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import { UnauthorizedError } from '@/core/errors';
 import type { GenerateDuesInvoicesForOrgBody } from '@/generated/openapi/validators';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * generateDuesInvoicesForOrg
@@ -12,6 +13,9 @@ import { auditAction } from '@/utils/audit';
 export async function generateDuesInvoicesForOrg(
   ctx: ValidatedContext<GenerateDuesInvoicesForOrgBody, never, never>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

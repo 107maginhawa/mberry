@@ -4,6 +4,7 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { ApproveMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository, MembershipRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * approveMembershipApplication
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function approveMembershipApplication(
   ctx: ValidatedContext<never, never, ApproveMembershipApplicationParams>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
