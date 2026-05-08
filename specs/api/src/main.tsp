@@ -29,6 +29,10 @@ import "./modules/provider.tsp";
 import "./modules/platform-admin.tsp";
 import "./modules/platform-admin-custom.tsp";
 
+// Officer dashboard custom endpoints
+import "./modules/membership-custom.tsp";
+import "./modules/dues-custom.tsp";
+
 // Association management specs
 import "./association/core/primitives.tsp";
 import "./association/core/engagement.tsp";
@@ -511,6 +515,20 @@ namespace MonobaseAPI {
 
   @tag("Communication")
   interface AssocAnnouncementManagement extends Association.Operations.Announcements.AnnouncementManagement {}
+
+  // =========================================================================
+  // Membership Custom (officer dashboard endpoints)
+  // =========================================================================
+
+  @tag("Membership")
+  interface MembershipCustomManagement extends MembershipCustomModule.MembershipCustomManagement {}
+
+  // =========================================================================
+  // Dues Custom (officer dashboard endpoint)
+  // =========================================================================
+
+  @tag("Dues")
+  interface DuesCustomManagement extends DuesCustomModule.DuesCustomManagement {}
 
 }
 

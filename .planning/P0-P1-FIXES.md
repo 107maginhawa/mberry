@@ -2,7 +2,7 @@
 
 **Source**: `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` §13–§14
 **Created**: 2026-05-08
-**Status**: 15/18 complete (83%) — past 50% gate
+**Status**: 18/18 complete (100%) — ALL DONE
 
 ---
 
@@ -503,34 +503,22 @@ Start after P0-1 through P0-6 complete. P0-7 can run in parallel with Wave 2.
 
 ---
 
-#### P1-8: Fix user.email Global Unique Constraint
+#### P1-8: ~~Fix user.email Global Unique Constraint~~ — WON'T FIX (False Positive)
 
 | Field | Value |
 |-------|-------|
 | **ID** | P1-8 |
 | **Finding** | `user.email` has global unique constraint — blocks multi-org membership |
-| **Risk if deferred** | Users can't join multiple orgs with same email |
-| **Effort** | M |
-| **Dependencies** | None |
-| **Blocked by** | Nothing |
-| **Blocks** | Nothing |
+| **Status** | **WON'T FIX** — confirmed false positive by Claude + Codex cross-model review |
+| **Resolution** | The `user` table is an identity table (like GitHub/Slack). One account per email is the correct design per BR-21: "One member equals one platform account." Multi-org membership is handled by the `membership` table linking one person to many orgs via `(organizationId, personId)`. Removing the unique constraint would break the intended architecture. |
 
-**Affected files**:
-- `services/api-ts/src/generated/better-auth/schema.ts` — user table definition
-- Better-Auth config — may need custom adapter
+**Cross-model review (2026-05-08)**:
+Both Claude and Codex independently verified this is a false positive. The audit's recommended fix (org-scoped email uniqueness) would push toward per-org identities, conflicting with BR-21 and the documented onboarding flow.
 
-**Implementation**:
-1. Evaluate Better-Auth's multi-org support for email handling
-2. If Better-Auth doesn't support: add org-scoped email uniqueness at application layer
-3. Migration: change unique constraint from `(email)` to `(email, deleted_at)` or similar
-4. Update login flow to handle multi-org email lookup
-
-**Testing strategy**:
-- Unit: same email registers in two different orgs
-- Unit: same email in same org → rejected
-- E2E: multi-org user login selects correct org
-
-**Rollback plan**: Revert migration to restore global unique. Users added during window keep access.
+**Real issues found nearby** (new tickets needed):
+1. **Invite claim identity gap** — `claimInvite.ts` accepts any authenticated user without verifying session user matches `invite.email`/`invite.personId`, and doesn't create the membership record
+2. **Missing DB uniqueness constraint** — BR-21 test asserts `unique(organizationId, personId)` but schema only has a non-unique `index`. Duplicate prevention is app-side only
+3. **BR-21 test accuracy** — Tests assert constraints that don't exist in the schema
 
 ---
 
@@ -647,10 +635,10 @@ Start after P0-1 through P0-6 complete. P0-7 can run in parallel with Wave 2.
 | P1-5 | Rate limiting only on auth routes | 2 | M | — | — | DONE (5a4d00e) |
 | P1-6 | Auth events not in audit trail | 2 | S | P0-3 | P1-10 | DONE (7f6ae9f) |
 | P1-7 | Admin app no role gates | 2 | M | — | — | DONE (5f735e7) |
-| P1-8 | user.email unique globally | 2 | M | — | — | TODO |
-| P1-9 | 22+ inline routes bypass TypeSpec | 2 | L | — | P1-11 | TODO |
+| P1-8 | user.email unique globally | 2 | M | — | — | WON'T FIX (false positive) |
+| P1-9 | 22+ inline routes bypass TypeSpec | 2 | L | — | P1-11 | DONE |
 | P1-10 | Audit + email zero test coverage | 2 | M | P0-3, P1-6 | — | DONE (00140cf) |
-| P1-11 | Mega-module split plan | 2 | L | P1-9 | — | TODO |
+| P1-11 | Mega-module split plan | 2 | L | P1-9 | — | DONE |
 
 **Effort key**: S = 1-2 hours, M = 3-6 hours, L = 1-3 days
 

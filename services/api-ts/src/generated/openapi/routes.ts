@@ -2195,6 +2195,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getCreditCompliance as unknown as Handler
   );
 
+  // getDuesDashboard
+  app.get('/dues/dashboard/:orgId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetDuesDashboardParams, validationErrorHandler),
+    registry.getDuesDashboard as unknown as Handler
+  );
+
   // listEmailQueueItems
   app.get('/email/queue',
     authMiddleware({ roles: ["admin"] }),
@@ -2259,6 +2266,36 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('param', validators.TestEmailTemplateParams, validationErrorHandler),
     zValidator('json', validators.TestEmailTemplateBody, validationErrorHandler),
     registry.testEmailTemplate as unknown as Handler
+  );
+
+  // listOrgApplications
+  app.get('/membership/applications/:orgId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.ListOrgApplicationsParams, validationErrorHandler),
+    zValidator('query', validators.ListOrgApplicationsQuery, validationErrorHandler),
+    registry.listOrgApplications as unknown as Handler
+  );
+
+  // listOrgMembers
+  app.get('/membership/members/:orgId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.ListOrgMembersParams, validationErrorHandler),
+    registry.listOrgMembers as unknown as Handler
+  );
+
+  // getOrgProfile
+  app.get('/membership/org-profile/:orgId',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.GetOrgProfileParams, validationErrorHandler),
+    registry.getOrgProfile as unknown as Handler
+  );
+
+  // updateOrgProfile
+  app.put('/membership/org-profile/:orgId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.UpdateOrgProfileParams, validationErrorHandler),
+    zValidator('json', validators.UpdateOrgProfileBody, validationErrorHandler),
+    registry.updateOrgProfile as unknown as Handler
   );
 
   // listNotifications

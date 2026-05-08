@@ -4419,6 +4419,15 @@ export const DuesConfigUpdateRequestSchema = z.object({
   status: DuesConfigStatusSchema.optional()
 });
 
+export const DuesDashboardDataSchema = z.object({
+  totalCollected: z.number(),
+  totalOutstanding: z.number(),
+  paidCount: z.number().int(),
+  unpaidCount: z.number().int(),
+  overdueCount: z.number().int(),
+  upcomingActivities: z.number().int()
+});
+
 export const DuesFundSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -6031,6 +6040,17 @@ export const MeetingMinutesUpdateSchema = z.object({
 
 export const MeetingStatusSchema = z.enum(["scheduled", "inProgress", "completed", "cancelled"]);
 
+export const MemberSummarySchema = z.object({
+  id: z.string().uuid(),
+  personId: z.string().uuid(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  status: z.string(),
+  memberNumber: z.string().optional(),
+  duesExpiryDate: z.string().datetime().transform((str) => new Date(str)).optional(),
+  categoryId: z.string().uuid().optional()
+});
+
 export const MembershipSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -6100,6 +6120,15 @@ export const MembershipApplicationListResponseSchema = z.object({
   hasNextPage: z.boolean(),
   hasPreviousPage: z.boolean()
 })
+});
+
+export const MembershipApplicationSummarySchema = z.object({
+  id: z.string().uuid(),
+  personId: z.string().uuid(),
+  organizationId: z.string().uuid(),
+  status: z.string(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const MembershipApplicationUpdateSchema = z.object({
@@ -6279,6 +6308,13 @@ export const MembershipUpdateSchema = z.object({
   terminatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   terminationReason: z.string().max(500).optional(),
   note: z.string().max(2000).optional()
+});
+
+export const MembershipUpdateOrgProfileRequestSchema = z.object({
+  name: z.string().max(255).optional(),
+  contactEmail: z.string().optional(),
+  website: z.string().optional(),
+  region: z.string().optional()
 });
 
 export const MembershipUpdateRequestSchema = z.object({
@@ -6675,6 +6711,18 @@ export const OnboardingRequestSchema = z.object({
 export const OnboardingResponseSchema = z.object({
   onboardingUrl: z.string(),
   metadata: z.record(z.string(), z.unknown()).optional()
+});
+
+export const OrgProfileSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  slug: z.string().optional(),
+  orgType: z.string().optional(),
+  region: z.string().optional(),
+  contactEmail: z.string().optional(),
+  website: z.string().optional(),
+  status: z.string().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const PlatformAdminModuleOrgTypeSchema = z.enum(["chapter", "society", "national", "clinic"]);
@@ -11757,6 +11805,15 @@ export type GetCreditComplianceParams = z.infer<typeof GetCreditComplianceParams
 
 export const GetCreditComplianceResponse = CreditComplianceReportSchema;
 
+export const GetDuesDashboardParams = z.object({
+  orgId: UUIDSchema,
+});
+export type GetDuesDashboardParams = z.infer<typeof GetDuesDashboardParams>;
+
+export const GetDuesDashboardResponse = z.object({
+  data: DuesDashboardDataSchema
+});
+
 export const ListEmailQueueItemsQuery = z.object({
   status: z.union([EmailQueueStatusSchema, z.array(EmailQueueStatusSchema), z.string().transform(val => val.split(",").map(s => s.trim())).pipe(z.array(EmailQueueStatusSchema))]).optional(),
   recipientEmail: EmailSchema.optional(),
@@ -11844,6 +11901,46 @@ export const TestEmailTemplateBody = TestTemplateRequestSchema;
 export type TestEmailTemplateBody = z.infer<typeof TestEmailTemplateBody>;
 
 export const TestEmailTemplateResponse = TestTemplateResultSchema;
+
+export const ListOrgApplicationsParams = z.object({
+  orgId: UUIDSchema,
+});
+export type ListOrgApplicationsParams = z.infer<typeof ListOrgApplicationsParams>;
+
+export const ListOrgApplicationsQuery = z.object({
+  status: z.string().optional(),
+});
+export type ListOrgApplicationsQuery = z.infer<typeof ListOrgApplicationsQuery>;
+
+export const ListOrgApplicationsResponse = z.object({
+  data: z.array(MembershipApplicationSummarySchema)
+});
+
+export const ListOrgMembersParams = z.object({
+  orgId: UUIDSchema,
+});
+export type ListOrgMembersParams = z.infer<typeof ListOrgMembersParams>;
+
+export const ListOrgMembersResponse = z.object({
+  data: z.array(MemberSummarySchema)
+});
+
+export const GetOrgProfileParams = z.object({
+  orgId: UUIDSchema,
+});
+export type GetOrgProfileParams = z.infer<typeof GetOrgProfileParams>;
+
+export const GetOrgProfileResponse = OrgProfileSchema;
+
+export const UpdateOrgProfileParams = z.object({
+  orgId: UUIDSchema,
+});
+export type UpdateOrgProfileParams = z.infer<typeof UpdateOrgProfileParams>;
+
+export const UpdateOrgProfileBody = MembershipUpdateOrgProfileRequestSchema;
+export type UpdateOrgProfileBody = z.infer<typeof UpdateOrgProfileBody>;
+
+export const UpdateOrgProfileResponse = OrgProfileSchema;
 
 export const ListNotificationsQuery = z.object({
   type: NotificationTypeSchema.optional(),

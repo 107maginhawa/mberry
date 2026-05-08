@@ -310,6 +310,7 @@ import { joinVideoCall } from '../../handlers/comms/joinVideoCall';
 import { leaveVideoCall } from '../../handlers/comms/leaveVideoCall';
 import { updateVideoCallParticipant } from '../../handlers/comms/updateVideoCallParticipant';
 import { getIceServers } from '../../handlers/comms/getIceServers';
+import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
 import { listEmailQueueItems } from '../../handlers/email/listEmailQueueItems';
 import { getEmailQueueItem } from '../../handlers/email/getEmailQueueItem';
 import { cancelEmailQueueItem } from '../../handlers/email/cancelEmailQueueItem';
@@ -319,6 +320,10 @@ import { createEmailTemplate } from '../../handlers/email/createEmailTemplate';
 import { getEmailTemplate } from '../../handlers/email/getEmailTemplate';
 import { updateEmailTemplate } from '../../handlers/email/updateEmailTemplate';
 import { testEmailTemplate } from '../../handlers/email/testEmailTemplate';
+import { listOrgApplications } from '../../handlers/membership/listOrgApplications';
+import { listOrgMembers } from '../../handlers/membership/listOrgMembers';
+import { getOrgProfile } from '../../handlers/membership/getOrgProfile';
+import { updateOrgProfile } from '../../handlers/membership/updateOrgProfile';
 import { listNotifications } from '../../handlers/notifs/listNotifications';
 import { markAllNotificationsAsRead } from '../../handlers/notifs/markAllNotificationsAsRead';
 import { getNotification } from '../../handlers/notifs/getNotification';
@@ -678,6 +683,9 @@ export const registry = {
   updateVideoCallParticipant,
   getIceServers,
 
+  // Dues handlers
+  getDuesDashboard,
+
   // Email handlers
   listEmailQueueItems,
   getEmailQueueItem,
@@ -688,6 +696,12 @@ export const registry = {
   getEmailTemplate,
   updateEmailTemplate,
   testEmailTemplate,
+
+  // Membership handlers
+  listOrgApplications,
+  listOrgMembers,
+  getOrgProfile,
+  updateOrgProfile,
 
   // Notifs handlers
   listNotifications,
