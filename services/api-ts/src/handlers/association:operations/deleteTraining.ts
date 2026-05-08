@@ -4,6 +4,7 @@ import type { DeleteTrainingParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * deleteTraining
@@ -16,6 +17,9 @@ export async function deleteTraining(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;

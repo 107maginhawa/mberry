@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateCourseBody } from '@/generated/openapi/validators';
 import { CourseRepository } from './repos/training.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * createCourse
@@ -18,6 +19,9 @@ export async function createCourse(
 
   const orgId = ctx.get('orgId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;

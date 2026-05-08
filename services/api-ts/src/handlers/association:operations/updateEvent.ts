@@ -4,6 +4,7 @@ import type { UpdateEventBody, UpdateEventParams } from '@/generated/openapi/val
 import { NotFoundError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * updateEvent
@@ -19,6 +20,9 @@ export async function updateEvent(
 
   const orgId = ctx.get('orgId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
