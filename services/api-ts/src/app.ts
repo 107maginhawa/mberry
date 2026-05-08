@@ -62,10 +62,8 @@ import { POSITION_TITLES } from '@/utils/position-titles';
 export function createApp(config: Config): App {
   const app = new Hono<{ Variables: Variables }>();
 
-  // Generate internal service token for secure service-to-service communication
-  // Used for expand requests and future microservice communication
-  // TODO: Move to config/env for production deployments
-  const internalServiceToken = crypto.randomUUID();
+  // P1-2: Internal service token — use env var in production, random fallback for dev
+  const internalServiceToken = process.env['INTERNAL_SERVICE_TOKEN'] || crypto.randomUUID();
 
   // Create core dependencies with config
   const logger = createLogger(config);

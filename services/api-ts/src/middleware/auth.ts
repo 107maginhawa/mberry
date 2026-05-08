@@ -9,6 +9,7 @@
  * - Performance optimized: no DB queries in middleware
  */
 
+import { timingSafeEqual, createHash } from 'crypto';
 import type { Context, Next } from 'hono';
 import type { Variables } from '@/types/app';
 import type { AuthInstance } from '@/utils/auth';
@@ -98,24 +99,36 @@ export function authMiddleware(options?: AuthMiddlewareOptions) {
   };
 
   return async (ctx: Context<{ Variables: Variables }>, next: Next) => {
-    // Check for internal service-to-service expand requests
+    // P1-2: Internal service-to-service expand requests with timing-safe comparison
     const internalServiceToken = ctx.req.header('X-Internal-Service-Token');
     const isExpandContext = ctx.req.header('X-Expand-Context');
     const storedToken = ctx.get('internalServiceToken');
 
-    if (internalServiceToken && isExpandContext && internalServiceToken === storedToken) {
-      // Trusted internal expand request - skip user auth
+    if (internalServiceToken && isExpandContext && storedToken) {
+      // Timing-safe comparison to prevent token extraction via timing attacks
+      const incomingHash = createHash('sha256').update(internalServiceToken).digest();
+      const storedHash = createHash('sha256').update(storedToken).digest();
+      const tokensMatch = timingSafeEqual(incomingHash, storedHash);
+
+      if (tokensMatch) {
+        const logger = ctx.get('logger');
+        logger.debug({
+          expandContext: true,
+          path: ctx.req.path,
+          originalAuth: ctx.req.header('Authorization') ? 'present' : 'none',
+        }, 'Internal expand request — service token verified');
+
+        ctx.set('isInternalExpand', true);
+        await next();
+        return;
+      }
+
+      // Token mismatch — log as security event and fall through to normal auth
       const logger = ctx.get('logger');
-      logger.debug({
-        expandContext: true,
-        originalAuth: ctx.req.header('Authorization') ? 'present' : 'none'
-      }, 'Internal expand request - bypassing user auth');
-
-      // Set a marker so handlers know this is an internal expand request
-      ctx.set('isInternalExpand', true);
-
-      await next();
-      return;
+      logger.warn({
+        path: ctx.req.path,
+        ip: ctx.req.header('x-forwarded-for') || 'unknown',
+      }, 'Internal service token mismatch — possible token leak');
     }
 
     // Get auth instance from context (injected by dependency middleware)
