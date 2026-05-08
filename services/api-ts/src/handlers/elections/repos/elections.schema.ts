@@ -28,23 +28,27 @@ export const elections = pgTable('election', {
 
 export const electionNominees = pgTable('election_nominee', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   electionId: uuid('election_id').notNull().references(() => elections.id, { onDelete: 'cascade' }),
   positionId: varchar('position_id', { length: 50 }).notNull(),
   personId: uuid('person_id').notNull().references(() => persons.id),
   nominatedBy: uuid('nominated_by').references(() => persons.id),
   status: nomineeStatusEnum('status').notNull().default('nominated'),
 }, (table) => ({
+  orgIdx: index('nominee_org_idx').on(table.organizationId),
   electionIdx: index('nominee_election_idx').on(table.electionId),
   personIdx: index('nominee_person_idx').on(table.personId),
 }));
 
 export const electionVotes = pgTable('election_vote', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   electionId: uuid('election_id').notNull().references(() => elections.id, { onDelete: 'cascade' }),
   positionId: varchar('position_id', { length: 50 }).notNull(),
   nomineeId: uuid('nominee_id').notNull().references(() => electionNominees.id),
   voterId: uuid('voter_id').notNull().references(() => persons.id),
 }, (table) => ({
+  orgIdx: index('vote_org_idx').on(table.organizationId),
   electionIdx: index('vote_election_idx').on(table.electionId),
   voterIdx: index('vote_voter_idx').on(table.voterId),
   electionVoterIdx: index('vote_election_voter_idx').on(table.electionId, table.voterId, table.positionId),

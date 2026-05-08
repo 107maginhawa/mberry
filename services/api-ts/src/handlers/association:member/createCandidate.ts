@@ -32,6 +32,7 @@ export async function createCandidate(
     positionId: body.positionId,
     personId: body.personId,
     nominatedBy: body.nominatedBy ?? user?.id ?? body.personId,
+    organizationId: election.organizationId,
   });
 
   await auditAction(ctx, {

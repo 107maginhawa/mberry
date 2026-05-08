@@ -64,6 +64,7 @@ export const trainings = pgTable('training', {
 
 export const trainingEnrollments = pgTable('training_enrollment', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   trainingId: uuid('training_id').notNull(),
   personId: uuid('person_id').notNull(),
   status: enrollmentStatusEnum('status').notNull().default('enrolled'),
@@ -71,6 +72,7 @@ export const trainingEnrollments = pgTable('training_enrollment', {
   completedAt: timestamp('completed_at'),
   cancelledAt: timestamp('cancelled_at'),
 }, (table) => [
+  index('idx_training_enroll_org').on(table.organizationId),
   index('idx_training_enroll_training').on(table.trainingId),
   index('idx_training_enroll_person').on(table.personId),
 ]);
@@ -89,18 +91,21 @@ export const courses = pgTable('course', {
 
 export const courseEnrollments = pgTable('course_enrollment', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   courseId: uuid('course_id').notNull(),
   personId: uuid('person_id').notNull(),
   progress: real('progress').default(0),
   completedAt: timestamp('completed_at'),
   status: enrollmentStatusEnum('status').notNull().default('enrolled'),
 }, (table) => [
+  index('idx_course_enroll_org').on(table.organizationId),
   index('idx_course_enroll_course').on(table.courseId),
   index('idx_course_enroll_person').on(table.personId),
 ]);
 
 export const quizAttempts = pgTable('quiz_attempt', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   courseId: uuid('course_id').notNull(),
   personId: uuid('person_id').notNull(),
   score: real('score'),
@@ -109,6 +114,7 @@ export const quizAttempts = pgTable('quiz_attempt', {
   attemptedAt: timestamp('attempted_at').notNull().defaultNow(),
   answers: jsonb('answers').$type<Record<string, unknown>>(),
 }, (table) => [
+  index('idx_quiz_org').on(table.organizationId),
   index('idx_quiz_course').on(table.courseId),
   index('idx_quiz_person').on(table.personId),
 ]);

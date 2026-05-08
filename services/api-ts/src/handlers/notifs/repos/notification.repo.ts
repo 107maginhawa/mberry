@@ -13,7 +13,7 @@ import {
   type NotificationFilters,
   type CreateNotificationRequest
 } from './notification.schema';
-import { PersonRepository } from '../../person/repos/person.repo';
+import type { PersonRepository } from '../../person/repos/person.repo';
 import { ValidationError, NotFoundError, ForbiddenError } from '@/core/errors';
 import * as OneSignal from '@onesignal/node-onesignal';
 import { SYSTEM_USER_ID } from '@/core/constants';
@@ -50,6 +50,10 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
     if (!filters) return undefined;
 
     const conditions = [];
+
+    if (filters.organizationId) {
+      conditions.push(eq(notifications.organizationId, filters.organizationId));
+    }
 
     if (filters.recipient) {
       conditions.push(eq(notifications.recipient, filters.recipient));
@@ -128,6 +132,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
 
     // Create notification record with final status in single operation
     const notification = await this.createOne({
+      organizationId: request.organizationId,
       recipient: request.recipient,
       type: request.type as any,
       channel: request.channel as any,

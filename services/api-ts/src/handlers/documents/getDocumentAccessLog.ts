@@ -42,6 +42,7 @@ export async function getDocumentAccessLog(
       action: 'view_access_log',
       accessedAt: new Date(),
       ipAddress: ctx.req.header('x-forwarded-for') || ctx.req.header('x-real-ip') || null,
+      organizationId: document.organizationId,
     });
   } catch {
     // Non-critical: don't fail the request if meta-logging fails

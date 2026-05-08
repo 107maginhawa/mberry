@@ -72,7 +72,8 @@ export class ScheduleExceptionRepository extends DatabaseRepository<ScheduleExce
   async createExceptionForEvent(
     eventId: string,
     ownerId: string,
-    request: ScheduleExceptionCreateRequest
+    request: ScheduleExceptionCreateRequest,
+    organizationId?: string
   ): Promise<ScheduleException> {
     this.logger?.debug({ eventId, ownerId, request }, 'Creating schedule exception');
 
@@ -89,6 +90,7 @@ export class ScheduleExceptionRepository extends DatabaseRepository<ScheduleExce
     const exceptionData: NewScheduleException = {
       event: eventId,
       owner: ownerId,
+      organizationId: organizationId || event[0].organizationId,
       context: event[0].context,
       timezone: request.timezone || event[0].timezone,
       startDatetime: new Date(request.startDatetime),

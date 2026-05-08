@@ -70,12 +70,14 @@ export const documentTags = pgTable('document_tag', {
 
 export const documentAccessLogs = pgTable('document_access_log', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   documentId: uuid('document_id').notNull(),
   personId: uuid('person_id').notNull(),
   action: varchar('action', { length: 50 }).notNull(), // 'view', 'download', 'edit'
   accessedAt: timestamp('accessed_at').notNull().defaultNow(),
   ipAddress: varchar('ip_address', { length: 45 }),
 }, (table) => [
+  index('idx_docaccess_org').on(table.organizationId),
   index('idx_docaccess_document').on(table.documentId),
   index('idx_docaccess_person').on(table.personId),
 ]);

@@ -47,6 +47,7 @@ export async function recordPayment(ctx: Context): Promise<Response> {
         fundId: s.fundId,
         amount: s.amount,
         isReversal: false,
+        organizationId,
       }))
     );
   }

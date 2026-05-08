@@ -51,8 +51,8 @@ export class CommunicationsRepository {
     await this.db.delete(announcements).where(eq(announcements.id, id));
   }
 
-  async createStats(announcementId: string, recipients: number) {
-    await this.db.insert(announcementStats).values({ announcementId, recipients });
+  async createStats(announcementId: string, recipients: number, organizationId: string) {
+    await this.db.insert(announcementStats).values({ announcementId, recipients, organizationId });
   }
 
   async getStats(orgId: string) {

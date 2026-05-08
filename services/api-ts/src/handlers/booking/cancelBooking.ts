@@ -36,6 +36,7 @@ export async function cancelBooking(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const auth = ctx.get('auth');
+  const organizationId = ctx.get('orgId') as string;
   const notificationService = ctx.get('notifs') as NotificationService;
   
   // Instantiate repository
@@ -101,6 +102,7 @@ export async function cancelBooking(
     // Notification for the person who cancelled (confirmation)
     // (automatically sends WebSocket notification via NotificationService)
     await notificationService.createNotification({
+      organizationId,
       recipient: user.id,
       type: 'booking.cancelled',
       channel: 'in-app',
@@ -114,6 +116,7 @@ export async function cancelBooking(
     // Notification for the other party (cancellation notice)
     // (automatically sends WebSocket notification via NotificationService)
     await notificationService.createNotification({
+      organizationId,
       recipient: otherPartyPersonId,
       type: 'booking.cancelled',
       channel: 'in-app',

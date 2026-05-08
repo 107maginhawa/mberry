@@ -21,11 +21,11 @@ export async function upsertDuesConfig(ctx: Context): Promise<Response> {
   });
 
   if (body.categoryOverrides) {
-    await repo.replaceCategoryOverrides(config.id, body.categoryOverrides);
+    await repo.replaceCategoryOverrides(config.id, body.categoryOverrides, orgId);
   }
 
   if (body.reminderSchedules) {
-    await repo.replaceReminderSchedules(config.id, body.reminderSchedules);
+    await repo.replaceReminderSchedules(config.id, body.reminderSchedules, orgId);
   }
 
   return ctx.json({ data: config }, 200);

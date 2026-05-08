@@ -8,6 +8,9 @@ import { eq, and, or, lte, gte, isNull, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import { ConflictError } from '@/core/errors';
+import type {
+  DayOfWeek
+} from './booking.schema';
 import {
   bookingEvents,
   type BookingEvent,
@@ -17,8 +20,7 @@ import {
   type DailyConfig,
   type TimeBlock,
   type FormConfig,
-  type BillingConfig,
-  DayOfWeek
+  type BillingConfig
 } from './booking.schema';
 import { persons } from '../../person/repos/person.schema';
 
@@ -129,7 +131,9 @@ export interface BookingEventFilters {
    * Create a booking event with smart defaults applied
    */
   async createWithSmartDefaults(
-    ownerId: string,    request: BookingEventCreateRequest
+    ownerId: string,
+    request: BookingEventCreateRequest,
+    organizationId: string
   ): Promise<BookingEvent> {
     this.logger?.debug({ ownerId, request }, 'Creating booking event with smart defaults');
 
@@ -139,6 +143,7 @@ export interface BookingEventFilters {
 
     const eventData: NewBookingEvent = {
       owner: ownerId,
+      organizationId,
       title: request.title,
       description: request.description,
       keywords: request.keywords,

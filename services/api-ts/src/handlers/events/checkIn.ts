@@ -21,6 +21,7 @@ export async function checkIn(ctx: Context): Promise<Response> {
     personId: body.personId,
     method: body.method ?? 'manual',
     checkedInBy: session.user.id,
+    organizationId: event.organizationId,
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });

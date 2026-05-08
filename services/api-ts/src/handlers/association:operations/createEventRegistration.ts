@@ -52,6 +52,7 @@ export async function createEventRegistration(
         eventId,
         personId,
         position,
+        organizationId: orgId,
       });
 
       await auditAction(ctx, {
@@ -69,6 +70,7 @@ export async function createEventRegistration(
     eventId,
     personId,
     status: 'confirmed',
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {

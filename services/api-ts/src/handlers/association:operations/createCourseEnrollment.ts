@@ -38,6 +38,7 @@ export async function createCourseEnrollment(
     personId,
     progress: 0,
     status: 'enrolled',
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {

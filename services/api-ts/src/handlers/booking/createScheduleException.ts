@@ -51,8 +51,8 @@ export async function createScheduleException(
     throw new ForbiddenError('You can only create exceptions for your own booking events');
   }
 
-  // Create exception
-  const exception = await exceptionRepo.createExceptionForEvent(params.event, user.id, body);
+  // Create exception (organizationId inherited from the parent booking event)
+  const exception = await exceptionRepo.createExceptionForEvent(params.event, user.id, body, event.organizationId);
 
   // Log audit trail
   logger?.info({

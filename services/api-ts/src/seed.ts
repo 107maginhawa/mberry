@@ -84,7 +84,12 @@ const TEST_USERS = [
   },
 ];
 
-async function signUpUser(email: string, password: string, name: string): Promise<{ userId: string; cookie: string } | null> {
+/** Mark a user's email as verified directly in DB (seed users skip email flow) */
+async function verifyEmail(db: ReturnType<typeof drizzle>, email: string): Promise<void> {
+  await db.update(userTable).set({ emailVerified: true }).where(eq(userTable.email, email));
+}
+
+async function signUpUser(db: ReturnType<typeof drizzle>, email: string, password: string, name: string): Promise<{ userId: string; cookie: string } | null> {
   const res = await fetch(`${API_URL}/auth/sign-up/email`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -92,7 +97,8 @@ async function signUpUser(email: string, password: string, name: string): Promis
   });
 
   if (res.status === 409 || res.status === 422) {
-    // User already exists — sign in instead to get cookie
+    // User already exists — verify email and sign in
+    await verifyEmail(db, email);
     const signIn = await fetch(`${API_URL}/auth/sign-in/email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -114,6 +120,8 @@ async function signUpUser(email: string, password: string, name: string): Promis
   }
 
   const data = await res.json() as any;
+  // Mark email verified for seed user (skip verification flow)
+  await verifyEmail(db, email);
   const cookie = extractSessionCookie(res);
   return { userId: data.user?.id || data.id, cookie };
 }
@@ -296,7 +304,7 @@ async function seed() {
   const personIdMap = new Map<string, string>();
 
   for (const user of TEST_USERS) {
-    const auth = await signUpUser(user.email, user.password, user.name);
+    const auth = await signUpUser(db, user.email, user.password, user.name);
     if (!auth) {
       console.log(`  ⚠ Skipping ${user.email}`);
       continue;

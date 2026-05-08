@@ -34,6 +34,7 @@ export async function refundPayment(ctx: Context): Promise<Response> {
       fundId: a.fundId,
       amount: -Math.round(a.amount * refundRatio),
       isReversal: true,
+      organizationId: payment.organizationId,
     }));
     await repo.createFundAllocations(reversals);
   }

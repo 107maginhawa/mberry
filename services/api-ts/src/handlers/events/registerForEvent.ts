@@ -27,6 +27,7 @@ export async function registerForEvent(ctx: Context): Promise<Response> {
     eventId,
     personId: session.user.id,
     status: isWaitlisted ? 'waitlisted' : 'confirmed',
+    organizationId: event.organizationId,
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });

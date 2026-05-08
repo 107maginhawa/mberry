@@ -43,6 +43,7 @@ export async function castBallot(
     positionId: body.positionId,
     nomineeId: body.candidateId,
     voterId,
+    organizationId: election.organizationId,
   });
 
   await auditAction(ctx, {

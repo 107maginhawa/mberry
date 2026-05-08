@@ -34,6 +34,7 @@ export const announcements = pgTable('announcement', {
 
 export const announcementStats = pgTable('announcement_stats', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   announcementId: uuid('announcement_id').notNull().references(() => announcements.id, { onDelete: 'cascade' }),
   recipients: integer('recipients').notNull().default(0),
   inappViews: integer('inapp_views').notNull().default(0),
@@ -41,6 +42,7 @@ export const announcementStats = pgTable('announcement_stats', {
   emailSent: integer('email_sent').notNull().default(0),
   emailOpened: integer('email_opened').notNull().default(0),
 }, (table) => ({
+  orgIdx: index('ann_stats_org_idx').on(table.organizationId),
   announcementIdx: index('ann_stats_announcement_idx').on(table.announcementId),
 }));
 

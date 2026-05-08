@@ -58,6 +58,11 @@ export function createRateLimiter() {
   startCleanup();
 
   return async (ctx: Context, next: Next) => {
+    // Skip rate limiting in test environment to avoid false failures in integration tests
+    if (process.env['NODE_ENV'] === 'test') {
+      return next();
+    }
+
     // Skip rate limiting for auth routes (Better-Auth handles those)
     if (ctx.req.path.startsWith('/auth/')) {
       return next();

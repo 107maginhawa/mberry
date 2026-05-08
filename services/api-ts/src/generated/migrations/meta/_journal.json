@@ -134,6 +134,13 @@
       "when": 1778300000000,
       "tag": "0018_credential_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1778262686350,
+      "tag": "0019_p0-7-multi-tenant-scoping",
+      "breakpoints": true
     }
   ]
 }

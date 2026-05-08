@@ -53,6 +53,7 @@ export async function joinVideoCall(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const config = ctx.get('config');
+  const organizationId = ctx.get('orgId') as string;
 
   // Authorization uses Person ID directly (no profile lookups needed)
 
@@ -140,6 +141,7 @@ export async function joinVideoCall(
   for (const participantId of activeParticipants) {
     try {
       await notifs.createNotification({
+        organizationId,
         recipient: participantId,
         type: 'comms.video-call-joined',
         channel: 'in-app',

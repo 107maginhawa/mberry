@@ -49,7 +49,7 @@ export class ReviewRepository extends DatabaseRepository<Review, NewReview, Revi
   /**
    * Create a new review
    */
-  async createReview(data: CreateReviewRequest, reviewerId: string): Promise<Review> {
+  async createReview(data: CreateReviewRequest, reviewerId: string, organizationId: string): Promise<Review> {
     const newReview: NewReview = {
       context: data.context,
       reviewer: reviewerId,
@@ -57,6 +57,7 @@ export class ReviewRepository extends DatabaseRepository<Review, NewReview, Revi
       reviewedEntity: data.reviewedEntity ?? null,
       npsScore: data.npsScore,
       comment: data.comment ?? null,
+      organizationId,
       createdBy: reviewerId,
       updatedBy: reviewerId,
     };

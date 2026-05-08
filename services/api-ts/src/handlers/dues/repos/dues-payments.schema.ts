@@ -46,10 +46,12 @@ export const duesConfigs = pgTable('dues_org_config', {
 
 export const duesCategoryOverrides = pgTable('dues_category_override', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   duesConfigId: uuid('dues_config_id').notNull().references(() => duesConfigs.id, { onDelete: 'cascade' }),
   categoryId: uuid('category_id').notNull(),
   overrideAmount: integer('override_amount').notNull(),
 }, (table) => ({
+  orgIdx: index('dues_cat_override_org_idx').on(table.organizationId),
   configIdx: index('dues_cat_override_config_idx').on(table.duesConfigId),
   uniqueCatConfig: unique('dues_cat_override_unique').on(table.duesConfigId, table.categoryId),
 }));
@@ -94,17 +96,20 @@ export const duesPayments = pgTable('dues_payment', {
 
 export const duesFundAllocations = pgTable('dues_fund_allocation', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   paymentId: uuid('payment_id').notNull().references(() => duesPayments.id, { onDelete: 'cascade' }),
   fundId: uuid('fund_id').notNull().references(() => duesFunds.id),
   amount: integer('amount').notNull(),
   isReversal: boolean('is_reversal').notNull().default(false),
 }, (table) => ({
+  orgIdx: index('dues_fund_alloc_org_idx').on(table.organizationId),
   paymentIdx: index('dues_fund_alloc_payment_idx').on(table.paymentId),
   fundIdx: index('dues_fund_alloc_fund_idx').on(table.fundId),
 }));
 
 export const duesReminderSchedules = pgTable('dues_reminder_schedule', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   duesConfigId: uuid('dues_config_id').notNull().references(() => duesConfigs.id, { onDelete: 'cascade' }),
   daysOffset: integer('days_offset').notNull(),
   enabled: boolean('enabled').notNull().default(true),
@@ -113,6 +118,7 @@ export const duesReminderSchedules = pgTable('dues_reminder_schedule', {
   channelEmail: boolean('channel_email').notNull().default(true),
   isCustom: boolean('is_custom').notNull().default(false),
 }, (table) => ({
+  orgIdx: index('dues_reminder_org_idx').on(table.organizationId),
   configIdx: index('dues_reminder_config_idx').on(table.duesConfigId),
 }));
 

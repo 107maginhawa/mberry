@@ -136,6 +136,7 @@ async function seedRich() {
       await db.insert(eventRegistrations).values({
         eventId: evt.id,
         personId: allPersons[0]!.id,
+        organizationId: evt.organizationId,
         status: 'confirmed',
         registeredAt: new Date(),
       }).onConflictDoNothing();
@@ -164,6 +165,7 @@ async function seedRich() {
       for (const n of notifRows) {
         await db.insert(notifications).values({
           recipient: authUserId,
+          organizationId: org1.id,
           channel: 'in-app',
           consentValidated: true,
           sentAt: new Date(),
@@ -729,14 +731,14 @@ async function seedRich() {
         ? JSON.parse(election.positions) : election.positions;
 
       // Insert 2 nominees per position
-      const nomineeRows: { electionId: string; positionId: string; personId: string; nominatedBy: string; status: 'elected' | 'accepted' }[] = [];
+      const nomineeRows: { electionId: string; positionId: string; personId: string; nominatedBy: string; status: 'elected' | 'accepted'; organizationId: string }[] = [];
       for (let pi = 0; pi < Math.min(electionPositions.length, 5); pi++) {
         const pos = electionPositions[pi]!;
         const winnerMember = activeOrg1Members[10 + pi * 2];
         const runnerMember = activeOrg1Members[11 + pi * 2];
         if (winnerMember && runnerMember) {
-          nomineeRows.push({ electionId: election.id, positionId: pos.id, personId: winnerMember.personId, nominatedBy: activeOrg1Members[0]!.personId, status: 'elected' });
-          nomineeRows.push({ electionId: election.id, positionId: pos.id, personId: runnerMember.personId, nominatedBy: activeOrg1Members[1]!.personId, status: 'accepted' });
+          nomineeRows.push({ electionId: election.id, positionId: pos.id, personId: winnerMember.personId, nominatedBy: activeOrg1Members[0]!.personId, status: 'elected', organizationId: org1.id });
+          nomineeRows.push({ electionId: election.id, positionId: pos.id, personId: runnerMember.personId, nominatedBy: activeOrg1Members[1]!.personId, status: 'accepted', organizationId: org1.id });
         }
       }
 
@@ -746,7 +748,7 @@ async function seedRich() {
 
         // Insert votes: 15 voters, each votes on all positions
         const voters = activeOrg1Members.slice(0, 15);
-        const voteRows: { electionId: string; positionId: string; nomineeId: string; voterId: string }[] = [];
+        const voteRows: { electionId: string; positionId: string; nomineeId: string; voterId: string; organizationId: string }[] = [];
         for (const voter of voters) {
           for (let pi = 0; pi < Math.min(electionPositions.length, 5); pi++) {
             const pos = electionPositions[pi]!;
@@ -754,7 +756,7 @@ async function seedRich() {
             if (posNominees.length >= 2) {
               // 65% chance vote for winner (index 0), 35% for runner-up
               const nominee = Math.random() < 0.65 ? posNominees[0]! : posNominees[1]!;
-              voteRows.push({ electionId: election.id, positionId: pos.id, nomineeId: nominee.id, voterId: voter.personId });
+              voteRows.push({ electionId: election.id, positionId: pos.id, nomineeId: nominee.id, voterId: voter.personId, organizationId: org1.id });
             }
           }
         }

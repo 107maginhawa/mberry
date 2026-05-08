@@ -51,11 +51,11 @@ export class DuesRepository {
       .where(eq(duesCategoryOverrides.duesConfigId, duesConfigId));
   }
 
-  async replaceCategoryOverrides(duesConfigId: string, overrides: { categoryId: string; overrideAmount: number }[]) {
+  async replaceCategoryOverrides(duesConfigId: string, overrides: { categoryId: string; overrideAmount: number }[], organizationId: string) {
     await this.db.delete(duesCategoryOverrides).where(eq(duesCategoryOverrides.duesConfigId, duesConfigId));
     if (overrides.length > 0) {
       await this.db.insert(duesCategoryOverrides).values(
-        overrides.map((o) => ({ duesConfigId, ...o }))
+        overrides.map((o) => ({ duesConfigId, organizationId, ...o }))
       );
     }
   }
@@ -222,11 +222,11 @@ export class DuesRepository {
       .orderBy(duesReminderSchedules.daysOffset);
   }
 
-  async replaceReminderSchedules(duesConfigId: string, schedules: Omit<DuesReminderSchedule, 'id' | 'createdAt' | 'updatedAt' | 'version' | 'createdBy' | 'updatedBy' | 'duesConfigId'>[]) {
+  async replaceReminderSchedules(duesConfigId: string, schedules: Omit<DuesReminderSchedule, 'id' | 'createdAt' | 'updatedAt' | 'version' | 'createdBy' | 'updatedBy' | 'duesConfigId' | 'organizationId'>[], organizationId: string) {
     await this.db.delete(duesReminderSchedules).where(eq(duesReminderSchedules.duesConfigId, duesConfigId));
     if (schedules.length > 0) {
       await this.db.insert(duesReminderSchedules).values(
-        schedules.map((s) => ({ ...s, duesConfigId }))
+        schedules.map((s) => ({ ...s, duesConfigId, organizationId }))
       );
     }
   }

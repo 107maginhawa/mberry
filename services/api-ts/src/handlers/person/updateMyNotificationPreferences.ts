@@ -20,6 +20,7 @@ export async function updateMyNotificationPreferences(
 
   const db = ctx.get('database') as DatabaseInstance;
   const personId = session.user.id;
+  const organizationId = ctx.get('orgId') as string;
   const body = ctx.req.valid('json');
   const b = body as any;
 
@@ -52,7 +53,7 @@ export async function updateMyNotificationPreferences(
   } else {
     [row] = await db
       .insert(notificationPreferences)
-      .values({ personId, category: b.category, ...updates })
+      .values({ personId, category: b.category, organizationId, ...updates })
       .returning();
   }
 

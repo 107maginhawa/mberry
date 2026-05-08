@@ -48,6 +48,7 @@ export async function createTrainingEnrollment(
     trainingId,
     personId,
     status: 'enrolled',
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {

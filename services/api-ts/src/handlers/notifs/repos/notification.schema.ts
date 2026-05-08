@@ -48,8 +48,8 @@ export const notifications = pgTable('notification', {
   // Base entity fields (includes id, timestamps, version, audit fields)
   ...baseEntityFields,
   
-  // P1 multi-tenant scoping
-  organizationId: uuid('organization_id'),
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
 
   // Core notification fields from TypeSpec
   recipient: uuid('recipient_id').notNull(), // Person ID (foreign key)
@@ -105,6 +105,7 @@ export interface NotificationResponse {
 
 // Request type for creating notifications (used by other modules)
 export interface CreateNotificationRequest {
+  organizationId: string;
   recipient: string;
   type: 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message';
   channel: 'email' | 'push' | 'in-app';
@@ -119,6 +120,7 @@ export interface CreateNotificationRequest {
 
 // Filter interface for querying notifications
 export interface NotificationFilters {
+  organizationId?: string;
   recipient?: string;
   type?: string;
   channel?: string;

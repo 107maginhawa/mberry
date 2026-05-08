@@ -40,6 +40,7 @@ export async function promoteWaitlistEntry(
     eventId: entry.eventId,
     personId: entry.personId,
     status: 'confirmed',
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {

@@ -169,6 +169,7 @@ export async function sendChatMessage(
     for (const participantId of otherParticipants) {
       try {
         await notifs.createNotification({
+          organizationId,
           recipient: participantId,
           type: 'comms.video-call-started',
           channel: 'in-app',

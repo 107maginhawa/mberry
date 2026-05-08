@@ -14,13 +14,13 @@ export const notificationPreferences = pgTable(
   {
     ...baseEntityFields,
     personId: uuid('person_id').notNull(),
-    organizationId: uuid('organization_id'), // P1 multi-tenant scoping — nullable for backfill
+    organizationId: uuid('organization_id').notNull(), // Multi-tenant scoping (P0-7)
     category: varchar('category', { length: 50 }).notNull(), // dues, events, trainings, announcements, credits
     pushEnabled: boolean('push_enabled').notNull().default(true),
     emailEnabled: boolean('email_enabled').notNull().default(false),
   },
   (table) => ({
-    personCategoryIdx: uniqueIndex('notif_pref_person_category_idx').on(table.personId, table.category),
+    personCategoryOrgIdx: uniqueIndex('notif_pref_person_cat_org_idx').on(table.personId, table.category, table.organizationId),
     personIdx: index('notif_pref_person_idx').on(table.personId),
     orgIdx: index('notif_pref_org_idx').on(table.organizationId),
   }),

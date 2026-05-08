@@ -22,6 +22,9 @@ export const reviews = pgTable('review', {
   // Base entity fields (includes id, timestamps, version, audit fields)
   ...baseEntityFields,
 
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
+
   // Core review fields
   context: uuid('context_id')
     .notNull(), // Flexible reference (no FK constraint for maximum flexibility)
@@ -43,6 +46,7 @@ export const reviews = pgTable('review', {
 
 }, (table) => ({
   // Indexes for performance
+  orgIdx: index('reviews_org_idx').on(table.organizationId),
   contextIdx: index('reviews_context_idx').on(table.context),
   reviewerIdx: index('reviews_reviewer_idx').on(table.reviewer),
   reviewTypeIdx: index('reviews_review_type_idx').on(table.reviewType),

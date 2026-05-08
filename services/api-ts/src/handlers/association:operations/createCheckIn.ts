@@ -61,6 +61,7 @@ export async function createCheckIn(
     personId,
     method,
     checkedInBy: user.id,
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {

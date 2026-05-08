@@ -17,6 +17,9 @@ export async function enrollInCustomTraining(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
@@ -42,6 +45,7 @@ export async function enrollInCustomTraining(
     trainingId: params.trainingId,
     personId: user.id,
     status: 'enrolled',
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {

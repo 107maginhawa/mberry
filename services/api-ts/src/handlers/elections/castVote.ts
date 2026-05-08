@@ -33,6 +33,7 @@ export async function castVote(ctx: Context): Promise<Response> {
     positionId: body.positionId,
     nomineeId: body.nomineeId,
     voterId: session.user.id,
+    organizationId: election.organizationId,
   });
 
   return ctx.json({ data: vote }, 201);

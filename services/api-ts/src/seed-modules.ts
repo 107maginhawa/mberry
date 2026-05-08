@@ -190,6 +190,7 @@ async function seedModules() {
       await db.insert(eventRegistrations).values({
         eventId: upcomingEvent.id,
         personId: memberId,
+        organizationId: upcomingEvent.organizationId,
         status: 'confirmed',
       });
       console.log('    Registration: member registered for General Assembly');
@@ -259,6 +260,7 @@ async function seedModules() {
       await db.insert(trainingEnrollments).values({
         trainingId: upcomingTraining.id,
         personId: memberId,
+        organizationId: upcomingTraining.organizationId,
         status: 'enrolled',
       });
       console.log('    Enrollment: member enrolled in Endodontics Workshop');
@@ -270,6 +272,7 @@ async function seedModules() {
       await db.insert(trainingEnrollments).values({
         trainingId: pastTraining.id,
         personId: memberId,
+        organizationId: pastTraining.organizationId,
         status: 'completed',
         completedAt: pastTraining.endDate,
       });

@@ -78,7 +78,7 @@ export const auditLogEntries = pgTable('audit_log_entry', {
   outcome: auditOutcomeEnum('outcome').notNull(),
   
   // Multi-tenant scoping (P0-3: HIPAA compliance — every audit entry must be org-scoped)
-  organizationId: uuid('organization_id'),
+  organizationId: uuid('organization_id').notNull(),
 
   // Context information
   user: uuid('user'), // UUID reference to user
@@ -137,7 +137,7 @@ export interface CreateAuditLogRequest {
   category: AuditCategory;
   action: AuditAction;
   outcome: AuditOutcome;
-  organizationId?: string;
+  organizationId?: string; // Optional — repo defaults to SYSTEM_ORG_ID when absent
   user?: string;
   userType?: UserType;
   resourceType: string;

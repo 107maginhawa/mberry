@@ -78,8 +78,8 @@ export enum EmailTemplateTags {
 export const emailTemplates = pgTable('email_template', {
   ...baseEntityFields,
 
-  // P1 multi-tenant scoping
-  organizationId: uuid('organization_id'),
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
 
   // Human-readable template name
   name: varchar('name', { length: 255 }).notNull(),
@@ -134,8 +134,8 @@ export const emailTemplates = pgTable('email_template', {
 export const emailQueue = pgTable('email_queue', {
   ...baseEntityFields,
 
-  // P1 multi-tenant scoping
-  organizationId: uuid('organization_id'),
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
 
   // Direct template ID reference (alternative to templateTags)
   template: uuid('template').references(() => emailTemplates.id, { onDelete: 'set null' }),
@@ -256,6 +256,7 @@ export interface QueueEmailRequest {
   metadata?: Record<string, any>;
   priority?: number;
   scheduledAt?: Date;
+  organizationId?: string;
 }
 
 /**

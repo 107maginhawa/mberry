@@ -66,8 +66,8 @@ export const bookingEvents = pgTable('booking_event', {
   // Base entity fields (includes id, timestamps, version, audit fields)
   ...baseEntityFields,
 
-  // P1 multi-tenant scoping
-  organizationId: uuid('organization_id'),
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
 
   // Core event fields
   owner: uuid('owner_id')
@@ -156,8 +156,8 @@ export const timeSlots: any = pgTable('time_slot', {
   // Base entity fields
   ...baseEntityFields,
 
-  // P1 multi-tenant scoping
-  organizationId: uuid('organization_id'),
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
 
   // References (updated to use BookingEvent system)
   owner: uuid('owner_id')
@@ -218,8 +218,8 @@ export const bookings: any = pgTable('booking', {
   // Base entity fields
   ...baseEntityFields,
 
-  // P1 multi-tenant scoping
-  organizationId: uuid('organization_id'),
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
 
   // Core relationships (both use person IDs)
   client: uuid('client_id')
@@ -297,8 +297,8 @@ export const scheduleExceptions = pgTable('schedule_exception', {
   // Base entity fields
   ...baseEntityFields,
 
-  // P1 multi-tenant scoping
-  organizationId: uuid('organization_id'),
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
 
   // Core fields (updated for BookingEvent system)
   event: uuid('event_id')

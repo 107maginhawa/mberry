@@ -24,17 +24,19 @@ export async function createBookingEvent(
 ): Promise<Response> {
   // Get authenticated user (guaranteed by auth middleware)
   const user = ctx.get('user') as User;
-  
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
   // Get validated request body
   const body = ctx.req.valid('json') as BookingEventCreateRequest;
-  
+
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-  
+
   // Instantiate repository
   const repo = new BookingEventRepository(db, logger);
-  
+
   // Validate request
   const errors = repo.validateEventConfig(body);
   if (errors.length > 0) {
@@ -42,7 +44,7 @@ export async function createBookingEvent(
   }
 
   // Create booking event with smart defaults
-  const event = await repo.createWithSmartDefaults(user.id, body);
+  const event = await repo.createWithSmartDefaults(user.id, body, orgId);
 
   // Generate initial slots for this specific event only
   await regenerateEventSlots(db, event.id);

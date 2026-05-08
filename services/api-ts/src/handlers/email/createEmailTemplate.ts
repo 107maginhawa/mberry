@@ -52,10 +52,11 @@ export async function createEmailTemplate(
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-  
+  const organizationId = ctx.get('orgId') as string;
+
   // Instantiate repository
   const repo = new EmailTemplateRepository(db, logger);
-  
+
   // Create template - repository will handle validation and conflict checking
   const template = await repo.createTemplate({
     name: body.name,
@@ -70,6 +71,7 @@ export async function createEmailTemplate(
     replyToEmail: body.replyToEmail,
     replyToName: body.replyToName,
     status: body.status || 'draft',
+    organizationId,
     createdBy: user?.id,
     updatedBy: user?.id,
   });

@@ -32,7 +32,8 @@ export async function createReview(
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-  
+  const organizationId = ctx.get('orgId') as string;
+
   // Instantiate repository
   const repo = new ReviewRepository(db, logger);
   
@@ -56,7 +57,7 @@ export async function createReview(
   }
   
   // Create the review
-  const review = await repo.createReview(body, userId);
+  const review = await repo.createReview(body, userId, organizationId);
   
   // Log audit trail
   logger?.info({

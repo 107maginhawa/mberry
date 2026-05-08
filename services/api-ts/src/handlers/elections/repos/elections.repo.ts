@@ -31,7 +31,7 @@ export class ElectionsRepository {
     return this.db.select().from(electionNominees).where(eq(electionNominees.electionId, electionId));
   }
 
-  async addNominee(data: { electionId: string; positionId: string; personId: string; nominatedBy: string }) {
+  async addNominee(data: { electionId: string; positionId: string; personId: string; nominatedBy: string; organizationId: string }) {
     const [result] = await this.db.insert(electionNominees).values({ ...data, status: 'nominated' }).returning();
     return result!;
   }
@@ -41,7 +41,7 @@ export class ElectionsRepository {
     return result!;
   }
 
-  async castVote(data: { electionId: string; positionId: string; nomineeId: string; voterId: string }) {
+  async castVote(data: { electionId: string; positionId: string; nomineeId: string; voterId: string; organizationId: string }) {
     const [result] = await this.db.insert(electionVotes).values(data).returning();
     return result!;
   }

@@ -7,16 +7,26 @@
 
 ## Summary
 
-| Metric | Original Audit (Gate 0) | Verified (Gate 5) |
-|--------|------------------------|-------------------|
-| Schema files | 29 | 29 (28 handler + 1 better-auth) |
-| Total tables | 72 | **79** |
-| With `organizationId` | 46 (64%) | **35 (44%)** |
-| Without `organizationId` | 26 (36%) | **44 (56%)** |
+| Metric | Original Audit (Gate 0) | Verified (Gate 5) | **After P0-7 Fix** |
+|--------|------------------------|-------------------|---------------------|
+| Schema files | 29 | 29 (28 handler + 1 better-auth) | 29 |
+| Total tables | 72 | **79** | **79** |
+| With `organizationId` | 46 (64%) | **35 (44%)** | **66 (84%)** |
+| Without `organizationId` | 26 (36%) | **44 (56%)** | **13 (16%)** |
 
-**Why the discrepancy**: The original audit (1) missed 7 better-auth tables in its total, (2) counted some child tables as "scoped" if their parent had `organizationId`, and (3) missed tables from `membership.schema.ts`, `notification-preferences.schema.ts`, `privacy-settings.schema.ts`, and `booking.schema.ts`. This audit verifies each table's schema definition directly.
+**P0-7 Fix (2026-05-09)**: Added `organizationId` (notNull) to 31 tables across 4 waves:
+- Wave 1: Made 9 nullable organizationId columns notNull (audit, booking×4, email×2, notification, notification_preference)
+- Wave 2: Added organizationId to `review` table; created query-layer scoping helper for `person` table
+- Wave 3: Added organizationId to 13 child tables for defense-in-depth
+- Migration: `0019_p0-7-multi-tenant-scoping.sql`
+- Person table kept intentionally global (multi-org via membership JOIN helper in `core/org-scoped-persons.ts`)
 
-**Corrected breakdown of 44 unscoped tables**:
+**Remaining 13 unscoped tables are all intentionally global**:
+- **7 Better-Auth tables** — cross-org identity (user, session, account, verification, passkey, two_factor, apikey)
+- **5 Platform Admin tables** — system-wide (organization, association, platform_admin, feature_flag, impersonation_session)
+- **1 Person table** — global by design, org-scoped via membership JOIN
+
+**Previous corrected breakdown of 44 unscoped tables**:
 - **12 Intentionally Global** — no change needed (auth + platform tables)
 - **19 Needs `organizationId`** — direct scoping required (security risk)
 - **13 Child of Org-Scoped Parent** — add `organizationId` for defense-in-depth

@@ -36,7 +36,8 @@ export async function confirmBooking(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const auth = ctx.get('auth');
-  const notificationService = ctx.get('notifs');
+  const organizationId = ctx.get('orgId') as string;
+  const notificationService = ctx.get('notifs') as NotificationService;
   
   // Instantiate repository
   const repo = new BookingRepository(db, logger);
@@ -79,6 +80,7 @@ export async function confirmBooking(
     // Notification for client - booking confirmed
     // (automatically sends WebSocket notification via NotificationService)
     await notificationService.createNotification({
+      organizationId,
       recipient: booking.client,
       type: 'booking.confirmed',
       channel: 'in-app',
@@ -99,6 +101,7 @@ export async function confirmBooking(
     // Notification for host - confirmation acknowledgment
     // (automatically sends WebSocket notification via NotificationService)
     await notificationService.createNotification({
+      organizationId,
       recipient: user.id,
       type: 'booking.confirmed',
       channel: 'in-app',

@@ -7,7 +7,7 @@ import { eq, and, or, gte, lte, inArray, type SQL } from 'drizzle-orm';
 import { createHash } from 'crypto';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
-import { SYSTEM_USER_ID } from '@/core/constants';
+import { SYSTEM_USER_ID, SYSTEM_ORG_ID } from '@/core/constants';
 import { subDays, addYears } from 'date-fns';
 import {
   auditLogEntries,
@@ -129,6 +129,7 @@ export class AuditRepository extends DatabaseRepository<AuditLogEntry, NewAuditL
 
     const auditData: NewAuditLogEntry = {
       ...request,
+      organizationId: request.organizationId || SYSTEM_ORG_ID,
       integrityHash,
       retentionStatus: 'active',
       purgeAfter,

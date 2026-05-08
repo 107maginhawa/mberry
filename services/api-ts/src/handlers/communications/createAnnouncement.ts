@@ -33,7 +33,7 @@ export async function createAnnouncement(ctx: Context): Promise<Response> {
   });
 
   if (body.status === 'sent') {
-    await repo.createStats(announcement.id, body.recipientCount ?? 0);
+    await repo.createStats(announcement.id, body.recipientCount ?? 0, orgId);
   }
 
   return ctx.json({ data: announcement }, 201);

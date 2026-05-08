@@ -28,6 +28,7 @@ export async function enroll(ctx: Context): Promise<Response> {
     trainingId,
     personId: session.user.id,
     status: isWaitlisted ? 'cancelled' : 'enrolled',
+    organizationId: training.organizationId,
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });

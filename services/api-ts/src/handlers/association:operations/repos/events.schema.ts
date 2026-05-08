@@ -74,6 +74,7 @@ export const events = pgTable('event', {
 
 export const eventRegistrations = pgTable('event_registration', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   status: registrationStatusEnum('status').notNull().default('confirmed'),
@@ -81,30 +82,35 @@ export const eventRegistrations = pgTable('event_registration', {
   cancelledAt: timestamp('cancelled_at'),
   refundedAt: timestamp('refunded_at'),
 }, (table) => [
+  index('idx_event_reg_org').on(table.organizationId),
   index('idx_event_reg_event').on(table.eventId),
   index('idx_event_reg_person').on(table.personId),
 ]);
 
 export const checkIns = pgTable('check_in', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   method: checkInMethodEnum('method').notNull(),
   checkedInAt: timestamp('checked_in_at').notNull().defaultNow(),
   checkedInBy: uuid('checked_in_by'),
 }, (table) => [
+  index('idx_checkin_org').on(table.organizationId),
   index('idx_checkin_event').on(table.eventId),
   index('idx_checkin_person').on(table.personId),
 ]);
 
 export const waitlistEntries = pgTable('waitlist_entry', {
   ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   position: integer('position').notNull(),
   joinedAt: timestamp('joined_at').notNull().defaultNow(),
   promotedAt: timestamp('promoted_at'),
 }, (table) => [
+  index('idx_waitlist_org').on(table.organizationId),
   index('idx_waitlist_event').on(table.eventId),
 ]);
 

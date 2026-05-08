@@ -102,6 +102,7 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
 
     const queueItem = await this.createOne({
       id: emailId,
+      organizationId: request.organizationId ?? '',
       template: request.template || null,
       templateTags: request.templateTags || null,
       recipientEmail: request.recipient,
@@ -111,7 +112,7 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
       priority: request.priority || 5,
       scheduledAt: request.scheduledAt || null,
       status: 'pending',
-      attempts: 0
+      attempts: 0,
     });
 
     this.logger?.info({

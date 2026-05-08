@@ -36,6 +36,7 @@ export async function rejectBooking(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const auth = ctx.get('auth');
+  const organizationId = ctx.get('orgId') as string;
   const notificationService = ctx.get('notifs') as NotificationService;
   
   // Instantiate repository
@@ -113,6 +114,7 @@ export async function rejectBooking(
     // Notification for client - booking was rejected
     // (automatically sends WebSocket notification via NotificationService)
     await notificationService.createNotification({
+      organizationId,
       recipient: booking.client,
       type: 'booking.rejected',
       channel: 'in-app',
@@ -134,6 +136,7 @@ export async function rejectBooking(
     // Notification for host - rejection confirmation
     // (automatically sends WebSocket notification via NotificationService)
     await notificationService.createNotification({
+      organizationId,
       recipient: user.id,
       type: 'booking.rejected',
       channel: 'in-app',

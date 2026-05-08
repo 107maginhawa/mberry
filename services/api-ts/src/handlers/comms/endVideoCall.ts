@@ -40,6 +40,7 @@ export async function endVideoCall(
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
+  const organizationId = ctx.get('orgId') as string;
 
   // Authorization uses Person ID directly (no profile lookups needed)
 
@@ -112,6 +113,7 @@ export async function endVideoCall(
   for (const participantId of participantsInCall) {
     try {
       await notifs.createNotification({
+        organizationId,
         recipient: participantId,
         type: 'comms.video-call-ended',
         channel: 'in-app',

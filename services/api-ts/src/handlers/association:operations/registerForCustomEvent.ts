@@ -17,6 +17,9 @@ export async function registerForCustomEvent(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
@@ -40,6 +43,7 @@ export async function registerForCustomEvent(
         eventId: params.eventId,
         personId: user.id,
         position,
+        organizationId: orgId,
       });
 
       await auditAction(ctx, {
@@ -57,6 +61,7 @@ export async function registerForCustomEvent(
     eventId: params.eventId,
     personId: user.id,
     status: 'confirmed',
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {

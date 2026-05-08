@@ -31,11 +31,14 @@ export async function checkInCustomEvent(
   const personId = (body as any).personId || user.id;
   const method = (body as any).method || 'manual';
 
+  const orgId = ctx.get('orgId') || event.organizationId;
+
   const checkIn = await checkInRepo.createOne({
     eventId: params.eventId,
     personId,
     method,
     checkedInBy: user.id,
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {

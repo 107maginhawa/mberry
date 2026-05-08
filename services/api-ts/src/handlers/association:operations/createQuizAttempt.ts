@@ -49,6 +49,7 @@ export async function createQuizAttempt(
     maxScore,
     passed,
     answers: (body as any).answers,
+    organizationId: orgId,
   });
 
   await auditAction(ctx, {
