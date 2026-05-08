@@ -39,8 +39,8 @@
   - **Deps:** None
   - **Est:** 2-3 hours
   - **Plans:** 3 plans
-    - [ ] 11-01-PLAN.md -- Seed script + E2E config (3 officers, 4 positions, 4 terms)
-    - [ ] 11-02-PLAN.md -- apiAs() test helper (TDD)
+    - [x] 11-01-PLAN.md -- Seed script + E2E config (3 officers, 4 positions, 4 terms)
+    - [x] 11-02-PLAN.md -- apiAs() test helper (TDD)
     - [ ] 11-03-PLAN.md -- Seed user verification tests
 
 - [ ] **Phase 12: Backend Auth — Route Protection**
@@ -110,7 +110,7 @@
 | 8. Frontend Unit Tests | v1.0.0 | 3/3 | Complete | 2026-05-06 |
 | 9. Test Infrastructure Hardening | v1.0.0 | 2/2 | Complete | 2026-05-06 |
 | 10. Deploy Platform Decision | v1.0.0 | 1/1 | Complete | 2026-05-06 |
-| 11. Test Infrastructure & Seed Users | v1.1.0 | 0/3 | Not Started | -- |
+| 11. Test Infrastructure & Seed Users | v1.1.0 | 2/3 | In Progress|  |
 | 12. Backend Auth — Route Protection | v1.1.0 | 0/0 | Not Started | -- |
 | 13. Position-Based RBAC | v1.1.0 | 0/0 | Not Started | -- |
 | 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 0/0 | Not Started | -- |
