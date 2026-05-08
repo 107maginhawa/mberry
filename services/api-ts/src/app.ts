@@ -49,6 +49,7 @@ import { authMiddleware } from '@/middleware/auth';
 import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 import { officerAuthMiddleware } from '@/middleware/officer-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
+import { createRateLimiter } from '@/middleware/rate-limit';
 import { orgContextMiddleware } from '@/middleware/org-context';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -101,6 +102,9 @@ export function createApp(config: Config): App {
 
   // CORS - Required early for preflight
   app.use('*', createCorsMiddleware(config, logger));
+
+  // P1-5: Global rate limiting for custom endpoints (auth routes handled by Better-Auth)
+  app.use('*', createRateLimiter());
 
   // Register health check endpoints
   registerHealthRoutes(app as App);
