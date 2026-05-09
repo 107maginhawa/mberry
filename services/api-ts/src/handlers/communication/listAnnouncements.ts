@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import type { ListAnnouncementsQuery, ListAnnouncementsParams } from '@/generated/openapi/validators';
-import { CommunicationsRepository } from '../communications/repos/communications.repo';
+import { CommunicationsRepository } from './repos/communication.repo';
 
 /**
  * listAnnouncements

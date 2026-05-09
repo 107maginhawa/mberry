@@ -2,15 +2,18 @@
  * Repositories for communication module.
  */
 
-import { eq, and, gte, like, sql } from 'drizzle-orm';
+import { eq, and, gte, like, sql, desc, type SQL } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { Logger } from '@/types/logger';
+import type { DatabaseInstance } from '@/core/database';
 import {
   messageTemplates, messages, subscriptionTopics, personSubscriptions,
+  announcements, announcementStats,
   type NewMessageTemplate, type MessageTemplate,
   type NewMessage, type Message,
   type NewSubscriptionTopic, type SubscriptionTopic,
   type NewPersonSubscription, type PersonSubscription,
+  type Announcement, type NewAnnouncement, type AnnouncementStats,
 } from './communication.schema';
 
 export class MessageTemplateRepository {
@@ -202,5 +205,79 @@ export class PersonSubscriptionRepository {
 
   async delete(id: string): Promise<void> {
     await this.db.delete(personSubscriptions).where(eq(personSubscriptions.id, id));
+  }
+}
+
+export class CommunicationsRepository {
+  constructor(private db: DatabaseInstance) {}
+
+  async list(orgId: string, filters?: { status?: string; search?: string; limit?: number; offset?: number }) {
+    const conditions: SQL<unknown>[] = [eq(announcements.organizationId, orgId)];
+    if (filters?.status) conditions.push(eq(announcements.status, filters.status as any));
+    if (filters?.search) conditions.push(like(announcements.title, `%${filters.search}%`));
+
+    const [data, countResult] = await Promise.all([
+      this.db.select().from(announcements)
+        .where(and(...conditions))
+        .orderBy(desc(announcements.createdAt))
+        .limit(filters?.limit ?? 20)
+        .offset(filters?.offset ?? 0),
+      this.db.select({ count: sql<number>`count(*)::int` }).from(announcements).where(and(...conditions)),
+    ]);
+    return { data, total: countResult[0]?.count ?? 0 };
+  }
+
+  async get(id: string, orgId?: string): Promise<(Announcement & { stats?: AnnouncementStats }) | undefined> {
+    const conditions = orgId
+      ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
+      : eq(announcements.id, id);
+    const [announcement] = await this.db.select().from(announcements).where(conditions).limit(1);
+    if (!announcement) return undefined;
+    const [stats] = await this.db.select().from(announcementStats).where(eq(announcementStats.announcementId, id)).limit(1);
+    return { ...announcement, stats: stats ?? undefined };
+  }
+
+  async create(data: NewAnnouncement): Promise<Announcement> {
+    const [result] = await this.db.insert(announcements).values(data).returning();
+    return result!;
+  }
+
+  async updateStatus(id: string, status: string, extra?: Partial<Announcement>, orgId?: string): Promise<Announcement> {
+    const conditions = orgId
+      ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
+      : eq(announcements.id, id);
+    const [result] = await this.db.update(announcements)
+      .set({ status: status as any, ...extra, updatedAt: new Date() })
+      .where(conditions).returning();
+    return result!;
+  }
+
+  async update(id: string, data: Partial<Announcement>, orgId?: string): Promise<Announcement> {
+    const conditions = orgId
+      ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
+      : eq(announcements.id, id);
+    const [result] = await this.db.update(announcements)
+      .set({ ...data, updatedAt: new Date() })
+      .where(conditions).returning();
+    return result!;
+  }
+
+  async delete(id: string, orgId?: string): Promise<void> {
+    const conditions = orgId
+      ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
+      : eq(announcements.id, id);
+    await this.db.delete(announcements).where(conditions);
+  }
+
+  async createStats(announcementId: string, recipients: number, organizationId: string) {
+    await this.db.insert(announcementStats).values({ announcementId, recipients, organizationId });
+  }
+
+  async getStats(orgId: string) {
+    const [stats] = await this.db.select({
+      totalThisMonth: sql<number>`count(CASE WHEN ${announcements.publishedAt} >= date_trunc('month', NOW()) THEN 1 END)::int`,
+      totalRecipients: sql<number>`COALESCE(SUM(CASE WHEN ${announcements.status} = 'sent' THEN 1 ELSE 0 END), 0)::int`,
+    }).from(announcements).where(eq(announcements.organizationId, orgId));
+    return stats;
   }
 }

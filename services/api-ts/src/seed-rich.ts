@@ -27,7 +27,7 @@ import { persons } from './handlers/person/repos/person.schema';
 import { organizations } from './handlers/platformadmin/repos/platform-admin.schema';
 import { membershipApplications } from './handlers/association:member/repos/membership.schema';
 import { electionNominees, electionVotes } from './handlers/elections/repos/elections.schema';
-import { announcementStats } from './handlers/communications/repos/communications.schema';
+import { announcementStats } from './handlers/communication/repos/communication.schema';
 import { duesInvoices } from './handlers/association:member/repos/dues.schema';
 import { personPrivacySettings } from './handlers/person/repos/privacy-settings.schema';
 import { notificationPreferences } from './handlers/person/repos/notification-preferences.schema';
