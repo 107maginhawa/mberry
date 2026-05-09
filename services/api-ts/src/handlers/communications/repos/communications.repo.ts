@@ -21,8 +21,11 @@ export class CommunicationsRepository {
     return { data, total: countResult[0]?.count ?? 0 };
   }
 
-  async get(id: string): Promise<(Announcement & { stats?: AnnouncementStats }) | undefined> {
-    const [announcement] = await this.db.select().from(announcements).where(eq(announcements.id, id)).limit(1);
+  async get(id: string, orgId?: string): Promise<(Announcement & { stats?: AnnouncementStats }) | undefined> {
+    const conditions = orgId
+      ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
+      : eq(announcements.id, id);
+    const [announcement] = await this.db.select().from(announcements).where(conditions).limit(1);
     if (!announcement) return undefined;
     const [stats] = await this.db.select().from(announcementStats).where(eq(announcementStats.announcementId, id)).limit(1);
     return { ...announcement, stats: stats ?? undefined };
@@ -33,22 +36,31 @@ export class CommunicationsRepository {
     return result!;
   }
 
-  async updateStatus(id: string, status: string, extra?: Partial<Announcement>): Promise<Announcement> {
+  async updateStatus(id: string, status: string, extra?: Partial<Announcement>, orgId?: string): Promise<Announcement> {
+    const conditions = orgId
+      ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
+      : eq(announcements.id, id);
     const [result] = await this.db.update(announcements)
       .set({ status: status as any, ...extra, updatedAt: new Date() })
-      .where(eq(announcements.id, id)).returning();
+      .where(conditions).returning();
     return result!;
   }
 
-  async update(id: string, data: Partial<Announcement>): Promise<Announcement> {
+  async update(id: string, data: Partial<Announcement>, orgId?: string): Promise<Announcement> {
+    const conditions = orgId
+      ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
+      : eq(announcements.id, id);
     const [result] = await this.db.update(announcements)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(announcements.id, id)).returning();
+      .where(conditions).returning();
     return result!;
   }
 
-  async delete(id: string): Promise<void> {
-    await this.db.delete(announcements).where(eq(announcements.id, id));
+  async delete(id: string, orgId?: string): Promise<void> {
+    const conditions = orgId
+      ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
+      : eq(announcements.id, id);
+    await this.db.delete(announcements).where(conditions);
   }
 
   async createStats(announcementId: string, recipients: number, organizationId: string) {

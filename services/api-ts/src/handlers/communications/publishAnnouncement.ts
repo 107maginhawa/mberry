@@ -10,12 +10,13 @@ export async function publishAnnouncement(ctx: Context): Promise<Response> {
   if (denied) return denied;
 
   const db = ctx.get('database');
+  const orgId = ctx.get('orgId') as string;
   const id = ctx.req.param('id');
   const repo = new CommunicationsRepository(db);
 
-  const existing = await repo.get(id);
+  const existing = await repo.get(id, orgId);
   if (!existing) throw new NotFoundError('Announcement not found');
 
-  const updated = await repo.updateStatus(id, 'sent', { publishedAt: new Date() });
+  const updated = await repo.updateStatus(id, 'sent', { publishedAt: new Date() }, orgId);
   return ctx.json({ data: updated }, 200);
 }

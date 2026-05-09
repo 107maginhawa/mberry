@@ -18,8 +18,8 @@ communications.get('/announcements/detail/:id', getAnnouncement);
 
 // Write (officer-only)
 communications.post('/announcements/:orgId', officerAuth, createAnnouncement);
-communications.post('/announcements/:id/publish', publishAnnouncement);  // per-handler (no orgId param)
-communications.post('/announcements/:id/archive', archiveAnnouncement);  // per-handler
+communications.post('/announcements/:id/publish', officerAuth, publishAnnouncement);
+communications.post('/announcements/:id/archive', officerAuth, archiveAnnouncement);
 communications.patch('/announcements/:orgId/:id', officerAuth, updateAnnouncement);
 communications.delete('/announcements/:orgId/:id', officerAuth, deleteAnnouncement);
 
