@@ -14,6 +14,7 @@ import {
   index,
 } from 'drizzle-orm/pg-core';
 import { baseEntityFields } from '@/core/database.schema';
+import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
 
 // ---------------------------------------------------------------------------
 // Enumerations
@@ -40,7 +41,7 @@ export const renewalAlertStatusEnum = pgEnum('renewal_alert_status', [
 
 export const professionalLicenses = pgTable('professional_license', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   personId: uuid('person_id').notNull(),
   licenseType: varchar('license_type', { length: 100 }).notNull(),
   licenseNumber: varchar('license_number', { length: 100 }).notNull(),
@@ -61,7 +62,7 @@ export const professionalLicenses = pgTable('professional_license', {
 
 export const licenseRenewalAlerts = pgTable('license_renewal_alert', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   licenseId: uuid('license_id').notNull(),
   personId: uuid('person_id').notNull(),
   alertDate: date('alert_date').notNull(),
@@ -103,7 +104,7 @@ export const credentialStatusEnum = pgEnum('credential_status', [
 
 export const credentialTemplates = pgTable('credential_template', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   name: varchar('name', { length: 100 }).notNull(),
   type: credentialTypeEnum('type').notNull(),
   design: varchar('design', { length: 50000 }),
@@ -121,7 +122,7 @@ export const credentialTemplates = pgTable('credential_template', {
 
 export const digitalCredentials = pgTable('digital_credential', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   personId: uuid('person_id').notNull(),
   templateId: uuid('template_id').notNull(),
   membershipId: uuid('membership_id'),

@@ -15,6 +15,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { baseEntityFields } from '@/core/database.schema';
 import { persons } from '../../person/repos/person.schema';
+import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
 
 // Enums
 export const billingFrequencyEnum = pgEnum('billing_frequency', ['annual', 'quarterly']);
@@ -32,7 +33,7 @@ export const gatewayProviderEnum = pgEnum('gateway_provider', ['paymongo', 'stri
 // Tables
 export const duesConfigs = pgTable('dues_org_config', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   defaultAmount: integer('default_amount').notNull(),
   currency: varchar('currency', { length: 3 }).notNull().default('PHP'),
   billingFrequency: billingFrequencyEnum('billing_frequency').notNull().default('annual'),
@@ -46,7 +47,7 @@ export const duesConfigs = pgTable('dues_org_config', {
 
 export const duesCategoryOverrides = pgTable('dues_category_override', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   duesConfigId: uuid('dues_config_id').notNull().references(() => duesConfigs.id, { onDelete: 'cascade' }),
   categoryId: uuid('category_id').notNull(),
   overrideAmount: integer('override_amount').notNull(),
@@ -58,7 +59,7 @@ export const duesCategoryOverrides = pgTable('dues_category_override', {
 
 export const duesFunds = pgTable('dues_fund', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   name: varchar('name', { length: 100 }).notNull(),
   percentage: numeric('percentage', { precision: 5, scale: 2 }).notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
@@ -70,7 +71,7 @@ export const duesFunds = pgTable('dues_fund', {
 
 export const duesPayments = pgTable('dues_payment', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   personId: uuid('person_id').notNull().references(() => persons.id, { onDelete: 'cascade' }),
   invoiceId: uuid('invoice_id'),
   receiptNumber: varchar('receipt_number', { length: 50 }).notNull(),
@@ -96,7 +97,7 @@ export const duesPayments = pgTable('dues_payment', {
 
 export const duesFundAllocations = pgTable('dues_fund_allocation', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   paymentId: uuid('payment_id').notNull().references(() => duesPayments.id, { onDelete: 'cascade' }),
   fundId: uuid('fund_id').notNull().references(() => duesFunds.id),
   amount: integer('amount').notNull(),
@@ -109,7 +110,7 @@ export const duesFundAllocations = pgTable('dues_fund_allocation', {
 
 export const duesReminderSchedules = pgTable('dues_reminder_schedule', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   duesConfigId: uuid('dues_config_id').notNull().references(() => duesConfigs.id, { onDelete: 'cascade' }),
   daysOffset: integer('days_offset').notNull(),
   enabled: boolean('enabled').notNull().default(true),
@@ -124,7 +125,7 @@ export const duesReminderSchedules = pgTable('dues_reminder_schedule', {
 
 export const duesGatewayConfigs = pgTable('dues_gateway_config', {
   ...baseEntityFields,
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   provider: gatewayProviderEnum('provider').notNull(),
   publicKey: varchar('public_key', { length: 255 }).notNull(),
   encryptedSecret: text('encrypted_secret').notNull(),
