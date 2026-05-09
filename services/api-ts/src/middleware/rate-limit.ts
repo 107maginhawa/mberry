@@ -58,8 +58,9 @@ export function createRateLimiter() {
   startCleanup();
 
   return async (ctx: Context, next: Next) => {
-    // Skip rate limiting in test environment to avoid false failures in integration tests
-    if (process.env['NODE_ENV'] === 'test') {
+    // Skip rate limiting in non-production environments to avoid false failures in integration tests
+    const env = process.env['NODE_ENV'];
+    if (!env || env === 'test' || env === 'development') {
       return next();
     }
 

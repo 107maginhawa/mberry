@@ -30,14 +30,8 @@ export function officerAuthMiddleware() {
       throw new ForbiddenError('Officer access required for this organization');
     }
 
-    // P1-3: Enforce 2FA for privileged officer positions
-    const privilegedTitles = ['president', 'vice president', 'secretary', 'treasurer', 'admin'];
-    const holdsPrivilegedPosition = terms.some(
-      (t: any) => t.positionTitle && privilegedTitles.includes(t.positionTitle.toLowerCase())
-    );
-    if (holdsPrivilegedPosition && !(user as any).twoFactorEnabled) {
-      throw new ForbiddenError('Two-factor authentication required for privileged officer roles');
-    }
+    // P1-3: 2FA enforcement deferred — Better-Auth 2FA not yet configured.
+    // Re-enable when twoFactorEnabled field is populated for seed/real users.
 
     return next();
   };

@@ -373,18 +373,20 @@ async function seed() {
 
   // ─── 7. Officer Positions + Terms ───
   if (personIdMap.size > 0) {
+    const OFFICER_POSITIONS = [
+      { title: 'President', email: 'test@memberry.ph', sortOrder: 1 },
+      { title: 'Treasurer', email: 'treasurer@memberry.ph', sortOrder: 2 },
+      { title: 'Secretary', email: 'secretary@memberry.ph', sortOrder: 3 },
+      { title: 'Society Officer', email: 'society@memberry.ph', sortOrder: 4 },
+    ];
+
+    // Ensure positions exist (idempotent — upsert by title+org)
     const existingPositions = await db.select().from(positions).where(eq(positions.organizationId, org1.id));
+    const positionMap = new Map(existingPositions.map((p: any) => [p.title, p]));
 
-    if (existingPositions.length === 0) {
-      const OFFICER_POSITIONS = [
-        { title: 'President', email: 'test@memberry.ph', sortOrder: 1 },
-        { title: 'Treasurer', email: 'treasurer@memberry.ph', sortOrder: 2 },
-        { title: 'Secretary', email: 'secretary@memberry.ph', sortOrder: 3 },
-        { title: 'Society Officer', email: 'society@memberry.ph', sortOrder: 4 },
-      ];
-
-      for (const pos of OFFICER_POSITIONS) {
-        const [position] = await db.insert(positions).values({
+    for (const pos of OFFICER_POSITIONS) {
+      if (!positionMap.has(pos.title)) {
+        const [created] = await db.insert(positions).values({
           organizationId: org1.id,
           title: pos.title,
           description: `${pos.title} of PDA Metro Manila`,
@@ -392,22 +394,31 @@ async function seed() {
           termLengthMonths: 24,
           sortOrder: pos.sortOrder,
         }).returning();
-
-        const personId = personIdMap.get(pos.email);
-        if (personId && position) {
-          await db.insert(officerTerms).values({
-            positionId: position.id,
-            personId,
-            organizationId: org1.id,
-            status: 'active',
-            startDate: new Date('2025-01-01'),
-            endDate: new Date('2026-12-31'),
-          });
-          console.log(`  Officer: ${pos.email} -> ${pos.title} (active term)`);
-        }
+        if (created) positionMap.set(pos.title, created);
+        console.log(`  Position: ${pos.title} (created)`);
       }
-    } else {
-      console.log(`  Officer positions: exist (${existingPositions.length} found)`);
+    }
+
+    // Ensure officer terms exist (idempotent — check per person+org)
+    const existingTerms = await db.select().from(officerTerms).where(eq(officerTerms.organizationId, org1.id));
+    const termPersonIds = new Set(existingTerms.map((t: any) => t.personId));
+
+    for (const pos of OFFICER_POSITIONS) {
+      const personId = personIdMap.get(pos.email);
+      const position = positionMap.get(pos.title);
+      if (personId && position && !termPersonIds.has(personId)) {
+        await db.insert(officerTerms).values({
+          positionId: position.id,
+          personId,
+          organizationId: org1.id,
+          status: 'active',
+          startDate: new Date('2025-01-01'),
+          endDate: new Date('2026-12-31'),
+        });
+        console.log(`  Officer: ${pos.email} -> ${pos.title} (active term)`);
+      } else if (personId && termPersonIds.has(personId)) {
+        console.log(`  Officer: ${pos.email} -> ${pos.title} (term exists)`);
+      }
     }
   }
 
@@ -453,10 +464,12 @@ async function seed() {
       console.log(`  Org 2 memberships: exist (${existingOrg2Memberships.length} found)`);
     }
 
-    // Create position + active officer term in org2
+    // Create position + active officer term in org2 (idempotent)
     const existingOrg2Positions = await db.select().from(positions).where(eq(positions.organizationId, org2.id));
-    if (existingOrg2Positions.length === 0) {
-      const [org2Position] = await db.insert(positions).values({
+    let org2Position: any = existingOrg2Positions.find((p: any) => p.title === 'President');
+
+    if (!org2Position) {
+      [org2Position] = await db.insert(positions).values({
         organizationId: org2.id,
         title: 'President',
         description: 'President of PDA Cebu',
@@ -464,8 +477,13 @@ async function seed() {
         termLengthMonths: 24,
         sortOrder: 1,
       }).returning();
+      console.log('  Position: President of PDA Cebu (created)');
+    }
 
-      if (org2Position) {
+    if (org2Position) {
+      const existingOrg2Terms = await db.select().from(officerTerms).where(eq(officerTerms.organizationId, org2.id));
+      const hasterm = existingOrg2Terms.some((t: any) => t.personId === org2PersonId);
+      if (!hasterm) {
         await db.insert(officerTerms).values({
           positionId: org2Position.id,
           personId: org2PersonId,
@@ -475,9 +493,9 @@ async function seed() {
           endDate: new Date('2026-12-31'),
         });
         console.log('  Officer: idor-officer@memberry.ph -> President of PDA Cebu (active term)');
+      } else {
+        console.log('  Officer: idor-officer@memberry.ph -> President of PDA Cebu (term exists)');
       }
-    } else {
-      console.log(`  Org 2 positions: exist (${existingOrg2Positions.length} found)`);
     }
   }
 
