@@ -5,11 +5,17 @@ import { elections, electionNominees, electionVotes, type Election, type NewElec
 export class ElectionsRepository {
   constructor(private db: DatabaseInstance) {}
 
-  async list(orgId: string, filters?: { status?: string; type?: string }) {
+  async list(orgId: string, filters?: { status?: string; type?: string; limit?: number; offset?: number }) {
     const conditions: SQL<unknown>[] = [eq(elections.organizationId, orgId)];
     if (filters?.status) conditions.push(eq(elections.status, filters.status as any));
     if (filters?.type) conditions.push(eq(elections.type, filters.type as any));
-    return this.db.select().from(elections).where(and(...conditions)).orderBy(desc(elections.createdAt));
+    const limit = filters?.limit ?? 25;
+    const offset = filters?.offset ?? 0;
+    return this.db.select().from(elections)
+      .where(and(...conditions))
+      .orderBy(desc(elections.createdAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   async get(id: string): Promise<Election | undefined> {

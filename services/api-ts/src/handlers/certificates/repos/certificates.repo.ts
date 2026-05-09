@@ -5,10 +5,14 @@ import { certificates, type Certificate, type NewCertificate } from './certifica
 export class CertificatesRepository {
   constructor(private db: DatabaseInstance) {}
 
-  async listByPerson(personId: string) {
-    return this.db.select().from(certificates)
+  async listByPerson(personId: string, pagination?: { limit: number; offset: number }) {
+    const query = this.db.select().from(certificates)
       .where(eq(certificates.personId, personId))
       .orderBy(desc(certificates.issuedAt));
+    if (pagination) {
+      return query.limit(pagination.limit).offset(pagination.offset);
+    }
+    return query;
   }
 
   async get(id: string): Promise<Certificate | undefined> {

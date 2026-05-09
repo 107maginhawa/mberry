@@ -6,6 +6,10 @@ export async function listCertificates(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const repo = new CertificatesRepository(db);
-  const certs = await repo.listByPerson(session.user.id);
-  return ctx.json({ data: certs }, 200);
+
+  const limit = Math.min(parseInt(ctx.req.query('limit') ?? '25', 10), 100);
+  const offset = parseInt(ctx.req.query('offset') ?? '0', 10);
+
+  const certs = await repo.listByPerson(session.user.id, { limit, offset });
+  return ctx.json({ data: certs, meta: { limit, offset } }, 200);
 }
