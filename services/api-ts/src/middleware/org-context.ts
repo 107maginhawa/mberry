@@ -48,18 +48,23 @@ export function orgContextMiddleware() {
       return ctx.json({ error: 'Authentication required' }, 401);
     }
 
-    // Extract orgId from header, query params, path params, or URL path
-    // Path extraction needed because wildcard middleware can't access named route params
-    const uuidInPath = ctx.req.path.match(
-      /\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i
-    );
-    const orgId =
+    // Extract orgId from header, query params, or path params
+    let orgId =
       ctx.req.header('x-org-id') ??
       ctx.req.query('orgId') ??
       ctx.req.query('organizationId') ??
       ctx.req.param('organizationId') ??
-      uuidInPath?.[1] ??
       null;
+
+    // Fallback: extract from request body for mutation methods
+    if (!orgId && ['POST', 'PUT', 'PATCH'].includes(ctx.req.method)) {
+      try {
+        const body = await ctx.req.json();
+        orgId = body?.organizationId ?? body?.orgId ?? null;
+      } catch {
+        // Body not JSON or already consumed — continue without
+      }
+    }
 
     if (!orgId) {
       return ctx.json(

@@ -114,6 +114,7 @@ export function createApp(config: Config): App {
     '/association/member/ethics/public-complaints',
     '/association/member/ethics/public-complaint',
     '/association/member/directory/public',
+    '/association/member/directory/search', // covers /search/:personId/public
   ];
 
   // Auth middleware for all association routes EXCEPT public endpoints

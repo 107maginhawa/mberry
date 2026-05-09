@@ -82,7 +82,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       startDate: new Date(form.startDate),
       endDate: new Date(form.endDate),
       location: form.location || undefined,
-      registrationFee: BigInt(Math.round(parseFloat(form.registrationFee || '0') * 100)),
+      registrationFee: Math.round(parseFloat(form.registrationFee || '0') * 100),
       capacity: form.capacity ? parseInt(form.capacity, 10) : undefined,
       creditBearing: false,
     }

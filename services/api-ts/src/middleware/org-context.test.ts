@@ -14,12 +14,18 @@ function makeMockCtx(overrides: {
   orgId?: string | null;
   membershipRows?: any[];
   adminRows?: any[];
+  method?: string;
+  path?: string;
+  body?: Record<string, any> | null;
 } = {}) {
   const vars: Record<string, any> = {
     user: overrides.user === null ? undefined : (overrides.user ?? { id: 'user-1', role: 'user' }),
   };
 
   const headerOrgId = overrides.orgId === null ? null : (overrides.orgId ?? 'org-1');
+  const method = overrides.method ?? 'GET';
+  const path = overrides.path ?? '/test-path';
+  const body = overrides.body;
 
   // Build a chainable mock for Drizzle: db.select().from().where().limit()
   const membershipRows = overrides.membershipRows ?? [];
@@ -51,13 +57,16 @@ function makeMockCtx(overrides: {
     get: (key: string) => vars[key],
     set: (key: string, val: any) => { vars[key] = val; },
     req: {
-      path: '/test-path',
-      method: 'GET',
+      path,
+      method,
       header: (name: string) => name === 'x-org-id' ? headerOrgId : null,
       query: () => null,
       param: () => undefined,
+      json: body === null
+        ? () => Promise.reject(new Error('No body'))
+        : () => Promise.resolve(body ?? {}),
     },
-    json: (body: any, status: number) => ({ status, body }) as any as Response,
+    json: (b: any, status: number) => ({ status, body: b }) as any as Response,
   };
 
   const next = async () => { nextCalled = true; };
@@ -75,7 +84,7 @@ describe('orgContextMiddleware', () => {
   });
 
   test('returns 403 when no orgId provided', async () => {
-    const { ctx, next } = makeMockCtx({ orgId: null });
+    const { ctx, next } = makeMockCtx({ orgId: null, body: null });
     const response = await middleware(ctx as any, next) as any;
     expect(response.status).toBe(403);
     expect(response.body.error).toContain('Organization context required');
@@ -126,5 +135,84 @@ describe('orgContextMiddleware', () => {
     expect(isNextCalled()).toBe(true);
     expect(vars['orgMembership']?.role).toBe('admin');
     expect(vars['orgMembership']?.membershipId).toBe('platform-admin');
+  });
+
+  test('POST with organizationId in body resolves org context correctly', async () => {
+    const { ctx, next, vars, isNextCalled } = makeMockCtx({
+      orgId: null, // no x-org-id header
+      method: 'POST',
+      body: { organizationId: 'org-from-body', name: 'Test Event' },
+      membershipRows: [{
+        id: 'mem-2',
+        personId: 'user-1',
+        organizationId: 'org-from-body',
+        status: 'active',
+      }],
+      adminRows: [],
+    });
+
+    await middleware(ctx as any, next);
+
+    expect(isNextCalled()).toBe(true);
+    expect(vars['orgId']).toBe('org-from-body');
+  });
+
+  test('POST with orgId in body resolves org context correctly', async () => {
+    const { ctx, next, vars, isNextCalled } = makeMockCtx({
+      orgId: null,
+      method: 'POST',
+      body: { orgId: 'org-shortkey', title: 'Meeting' },
+      membershipRows: [{
+        id: 'mem-3',
+        personId: 'user-1',
+        organizationId: 'org-shortkey',
+        status: 'active',
+      }],
+      adminRows: [],
+    });
+
+    await middleware(ctx as any, next);
+
+    expect(isNextCalled()).toBe(true);
+    expect(vars['orgId']).toBe('org-shortkey');
+  });
+
+  test('GET does NOT extract orgId from body — returns 403 without header', async () => {
+    const { ctx, next } = makeMockCtx({
+      orgId: null,
+      method: 'GET',
+      body: { organizationId: 'org-in-body' }, // should be ignored for GET
+      membershipRows: [],
+      adminRows: [],
+    });
+
+    const response = await middleware(ctx as any, next) as any;
+    // GET should not attempt body extraction — orgId stays null → 403
+    expect(response.status).toBe(403);
+    expect(response.body.error).toContain('Organization context required');
+  });
+
+  test('nested route /association/events/:eventId/cancel resolves orgId from x-org-id header, not path param', async () => {
+    const eventId = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+    const { ctx, next, vars, isNextCalled } = makeMockCtx({
+      orgId: 'org-header', // x-org-id header
+      method: 'POST',
+      path: `/association/events/${eventId}/cancel`,
+      body: null,
+      membershipRows: [{
+        id: 'mem-4',
+        personId: 'user-1',
+        organizationId: 'org-header',
+        status: 'active',
+      }],
+      adminRows: [],
+    });
+
+    await middleware(ctx as any, next);
+
+    expect(isNextCalled()).toBe(true);
+    // Must be the header value, NOT the eventId UUID
+    expect(vars['orgId']).toBe('org-header');
+    expect(vars['orgId']).not.toBe(eventId);
   });
 });
