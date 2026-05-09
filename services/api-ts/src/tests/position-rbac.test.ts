@@ -16,6 +16,9 @@
 
 import { describe, test, expect, beforeAll } from 'bun:test';
 import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
+import { API_AVAILABLE } from '@/tests/helpers/api-available';
+
+const d = API_AVAILABLE ? describe : describe.skip;
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'; // pda-metro-manila from seed
 
@@ -26,6 +29,7 @@ let societyClient: ApiClient;
 let memberClient: ApiClient;
 
 beforeAll(async () => {
+  if (!API_AVAILABLE) return;
   presidentClient = await apiAs('test@memberry.ph');
   treasurerClient = await apiAs('treasurer@memberry.ph');
   secretaryClient = await apiAs('secretary@memberry.ph');
@@ -35,7 +39,7 @@ beforeAll(async () => {
 
 // ─── Treasurer Position Restrictions ──────────────────────────────────────────
 
-describe('Treasurer position restrictions', () => {
+d('Treasurer position restrictions', () => {
   test('Treasurer blocked: create event (POST /association/operations/events) returns 403', async () => {
     const res = await treasurerClient.post('/association/operations/events', {
       organizationId: ORG_ID,
@@ -102,7 +106,7 @@ describe('Treasurer position restrictions', () => {
 
 // ─── Secretary Position Restrictions ──────────────────────────────────────────
 
-describe('Secretary position restrictions', () => {
+d('Secretary position restrictions', () => {
   test('Secretary blocked: create dues payment (POST /association/member/dues-payments) returns 403', async () => {
     const res = await secretaryClient.post('/association/member/dues-payments', {
       organizationId: ORG_ID,
@@ -152,7 +156,7 @@ describe('Secretary position restrictions', () => {
 
 // ─── Society Officer Position Restrictions ─────────────────────────────────────
 
-describe('Society Officer position restrictions', () => {
+d('Society Officer position restrictions', () => {
   test('Society Officer blocked: create dues payment (POST /association/member/dues-payments) returns 403', async () => {
     const res = await societyClient.post('/association/member/dues-payments', {
       organizationId: ORG_ID,
@@ -200,7 +204,7 @@ describe('Society Officer position restrictions', () => {
 
 // ─── President Superuser Access ────────────────────────────────────────────────
 
-describe('President superuser access', () => {
+d('President superuser access', () => {
   test('President allowed: create dues payment (POST /association/member/dues-payments) returns non-403', async () => {
     const res = await presidentClient.post(`/association/member/dues-payments?organizationId=${ORG_ID}`, {
       organizationId: ORG_ID,
@@ -258,7 +262,7 @@ describe('President superuser access', () => {
 
 // ─── app.ts Position-Restricted Routes ────────────────────────────────────────
 
-describe('app.ts position-restricted routes', () => {
+d('app.ts position-restricted routes', () => {
   test('Treasurer blocked: GET /credit-compliance/:orgId returns 403', async () => {
     const res = await treasurerClient.get(`/credit-compliance/${ORG_ID}`);
     expect(res.status).toBe(403);
@@ -316,7 +320,7 @@ describe('app.ts position-restricted routes', () => {
 
 // ─── Member Regression ─────────────────────────────────────────────────────────
 
-describe('Member still blocked (regression)', () => {
+d('Member still blocked (regression)', () => {
   test('Member blocked: create event (POST /association/operations/events) returns 403', async () => {
     const res = await memberClient.post('/association/operations/events', {
       organizationId: ORG_ID,

@@ -24,6 +24,7 @@
 
 import { describe, test, expect, beforeAll } from 'bun:test';
 import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
+import { API_AVAILABLE } from '@/tests/helpers/api-available';
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'; // pda-metro-manila from seed
 
@@ -50,7 +51,9 @@ describe('Pitfall 2 documentation: orgContextMiddleware role limitation', () => 
 
 // ─── Mutation Routes Officer Protection Tests ─────────────────────────────────
 
-describe('Association mutation routes - officer protection (RED phase)', () => {
+const d = API_AVAILABLE ? describe : describe.skip;
+
+d('Association mutation routes - officer protection (RED phase)', () => {
   let memberClient: ApiClient;
 
   beforeAll(async () => {

@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll } from 'bun:test';
 import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
+import { API_AVAILABLE } from '@/tests/helpers/api-available';
 
 /**
  * Cross-org isolation (IDOR) tests.
@@ -21,7 +22,9 @@ import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
 
 const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'; // pda-metro-manila (hardcoded in seed)
 
-describe('Cross-org isolation (IDOR prevention)', () => {
+const d = API_AVAILABLE ? describe : describe.skip;
+
+d('Cross-org isolation (IDOR prevention)', () => {
   let orgAOfficer: ApiClient; // treasurer of org A (pda-metro-manila)
   let orgBOfficer: ApiClient; // president of org B (pda-cebu)
   let orgBId: string;

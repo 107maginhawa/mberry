@@ -1,5 +1,8 @@
 import { describe, test, expect } from 'bun:test';
 import { apiAs } from './helpers/api-as';
+import { API_AVAILABLE } from './helpers/api-available';
+
+const d = API_AVAILABLE ? describe : describe.skip;
 
 const ALL_USERS = [
   'test@memberry.ph',
@@ -16,7 +19,7 @@ const OFFICER_USERS = [
   { email: 'society@memberry.ph', position: 'Society Officer' },
 ];
 
-describe('Seed users', () => {
+d('Seed users', () => {
   describe('all 5 users can sign in', () => {
     for (const email of ALL_USERS) {
       test(`${email} can authenticate`, async () => {
