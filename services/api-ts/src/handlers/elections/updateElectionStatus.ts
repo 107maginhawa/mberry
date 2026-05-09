@@ -1,6 +1,15 @@
 import type { Context } from 'hono';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
+
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  draft: ['nominationsOpen', 'cancelled'],
+  nominationsOpen: ['votingOpen', 'cancelled'],
+  votingOpen: ['awaitingConfirmation', 'cancelled'],
+  awaitingConfirmation: ['published', 'cancelled'],
+  published: [],  // terminal state
+  cancelled: [],  // terminal state
+};
 
 export async function updateElectionStatus(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -10,6 +19,14 @@ export async function updateElectionStatus(ctx: Context): Promise<Response> {
 
   const existing = await repo.get(id);
   if (!existing) throw new NotFoundError('Election not found');
+
+  const allowed = VALID_TRANSITIONS[existing.status] ?? [];
+  if (!allowed.includes(body.status)) {
+    throw new BusinessLogicError(
+      `Cannot transition election from '${existing.status}' to '${body.status}'. Allowed: ${allowed.length > 0 ? allowed.join(', ') : 'none (terminal state)'}`,
+      'INVALID_ELECTION_TRANSITION',
+    );
+  }
 
   const extra: any = {};
   if (body.status === 'published') extra.publishedAt = new Date();

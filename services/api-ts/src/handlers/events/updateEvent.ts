@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { NotFoundError, ForbiddenError } from '@/core/errors';
+import { NotFoundError, ForbiddenError, BusinessLogicError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
 import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 import type { Session } from '@/types/auth';
@@ -17,6 +17,14 @@ export async function updateEvent(ctx: Context): Promise<Response> {
   const membership = await membershipRepo.getMember(existing.organizationId, session.user.id);
   if (!membership) throw new ForbiddenError('Access denied to this resource');
 
+  // Status can only be changed via dedicated endpoints (publish, cancel, complete)
+  if (body.status !== undefined) {
+    throw new BusinessLogicError(
+      'Status cannot be changed via update. Use publish, cancel, or complete endpoints.',
+      'STATUS_UPDATE_NOT_ALLOWED'
+    );
+  }
+
   // Map old field names to new schema columns; omit fields not in schema
   const {
     type: _type,
@@ -25,6 +33,7 @@ export async function updateEvent(ctx: Context): Promise<Response> {
     coverImage: _coverImage,
     qrEnabled: _qrEnabled,
     registrationEnabled: _registrationEnabled,
+    status: _status,
     startAt,
     endAt,
     fee,

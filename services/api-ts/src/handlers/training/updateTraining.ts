@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import type { Session } from '@/types/auth';
 
@@ -14,6 +14,14 @@ export async function updateTraining(ctx: Context): Promise<Response> {
   const existing = await repo.getByOrg(id, orgId);
   if (!existing) throw new NotFoundError('Training not found');
 
+  // Status can only be changed via dedicated endpoints (publish, cancel, complete)
+  if (body.status !== undefined) {
+    throw new BusinessLogicError(
+      'Status cannot be changed via update. Use publish, cancel, or complete endpoints.',
+      'STATUS_UPDATE_NOT_ALLOWED'
+    );
+  }
+
   // Strip fields not in new schema (keep regulatory fields for SO-8)
   const {
     type: _type,
@@ -24,6 +32,7 @@ export async function updateTraining(ctx: Context): Promise<Response> {
     creditValueLocked: _creditValueLocked,
     enrollmentMode: _enrollmentMode,
     visibility: _visibility,
+    status: _status,
     regulatoryApproval,
     regulatoryReference,
     regulatoryExpiresAt,

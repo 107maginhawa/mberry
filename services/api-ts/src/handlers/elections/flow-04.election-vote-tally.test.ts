@@ -137,7 +137,9 @@ describe('[FLOW-04] Election Vote → Tally → Winner', () => {
   test('publishing election sets publishedAt timestamp', async () => {
     let capturedUpdate: any = null;
 
+    // Must be in awaitingConfirmation to transition to published
     mocks = defaultStubs({
+      get: async () => ({ ...fakeElection, status: 'awaitingConfirmation' }),
       update: async (id: string, data: any) => {
         capturedUpdate = data;
         return { ...fakeElection, id, ...data };
@@ -155,9 +157,10 @@ describe('[FLOW-04] Election Vote → Tally → Winner', () => {
     expect(capturedUpdate.publishedAt).toBeInstanceOf(Date);
   });
 
-  test('closing election updates status without publishedAt', async () => {
+  test('transitioning to awaitingConfirmation updates status without publishedAt', async () => {
     let capturedUpdate: any = null;
 
+    // votingOpen → awaitingConfirmation is valid
     mocks = defaultStubs({
       update: async (id: string, data: any) => {
         capturedUpdate = data;
@@ -166,13 +169,13 @@ describe('[FLOW-04] Election Vote → Tally → Winner', () => {
     });
 
     const ctx = makeCtx({
-      _body: { status: 'closed' },
+      _body: { status: 'awaitingConfirmation' },
       _params: { id: ELECTION_ID },
     });
     const response = await updateElectionStatus(ctx);
 
     expect(response.status).toBe(200);
-    expect(capturedUpdate.status).toBe('closed');
+    expect(capturedUpdate.status).toBe('awaitingConfirmation');
     expect(capturedUpdate.publishedAt).toBeUndefined();
   });
 
