@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { NotFoundError, UnauthorizedError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { GetMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 
@@ -18,10 +18,16 @@ export async function getMembership(
 
   const { membershipId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
+  const orgId = ctx.get('orgId') as string | undefined;
   const repo = new MembershipRepository(db, ctx.get('logger'));
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+
+  // Org-scoping: verify record belongs to caller's org (or caller's own person)
+  if (orgId && membership.organizationId && membership.organizationId !== orgId) {
+    throw new ForbiddenError('Access denied to this membership');
+  }
 
   return ctx.json(membership, 200);
 }
