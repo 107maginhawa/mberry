@@ -744,7 +744,7 @@ namespace Association.Member.Membership {
     @operationId("listMemberships")
     @get
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-security-required-roles", #["association:admin", "association:member"])
     listMemberships(
       ...PaginationQuery,
       @query organizationId?: string,

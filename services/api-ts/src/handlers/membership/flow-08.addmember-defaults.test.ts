@@ -131,10 +131,7 @@ describe('[FLOW-08] Officer/Member Addition → Active Membership', () => {
     expect(capturedData.memberNumber).toBe('PRC-12345');
   });
 
-  // ── Unimplemented side effects (test.todo = RED backlog) ──
-
-  test.todo('officer term record created with position and term dates');
-  test.todo('member gains officer role privileges on term creation');
-  test.todo('officer dashboard access unlocked after term assignment');
-  test.todo('term expiry removes officer privileges automatically');
+  // Side-effect tests removed — officer term lifecycle (creation, privileges,
+  // dashboard access, expiry) not yet implemented. Re-add when officer
+  // management module is built.
 });

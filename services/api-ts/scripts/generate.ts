@@ -493,7 +493,9 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
       if (!operation.operationId) continue;
 
       const honoPath = path.replace(/{([^}]+)}/g, ':$1'); // Convert {id} to :id
-      const hasAuth = !!operation.security?.length;
+      // security: [{}] means NoAuth (public endpoint) — don't add auth middleware
+      const isNoAuth = operation.security?.length === 1 && Object.keys(operation.security[0]).length === 0;
+      const hasAuth = !!operation.security?.length && !isNoAuth;
       
       // Check if authentication is optional (contains both bearerAuth and empty object)
       const isOptionalAuth = hasAuth && operation.security?.some((sec: any) => 

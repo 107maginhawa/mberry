@@ -6,11 +6,25 @@
  * P1-1 FIX: Throws 400 if :orgId is missing from the route. Every route
  * that uses this middleware MUST include :orgId in the path. Routes without
  * :orgId should use per-handler authorization instead.
+ *
+ * P1-3 FIX: Enforces 2FA for privileged officer positions (President,
+ * Treasurer, Secretary). Users holding these positions must have 2FA
+ * enabled on their account.
  */
 
 import type { Context, Next } from 'hono';
 import { ForbiddenError, ValidationError } from '@/core/errors';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+
+/**
+ * Privileged positions that require 2FA (P1-3).
+ * These roles handle finances, governance, or official records.
+ */
+const PRIVILEGED_POSITIONS = new Set([
+  'president',
+  'treasurer',
+  'secretary',
+]);
 
 export function officerAuthMiddleware() {
   return async (ctx: Context, next: Next) => {
@@ -30,8 +44,18 @@ export function officerAuthMiddleware() {
       throw new ForbiddenError('Officer access required for this organization');
     }
 
-    // P1-3: 2FA enforcement deferred — Better-Auth 2FA not yet configured.
-    // Re-enable when twoFactorEnabled field is populated for seed/real users.
+    // P1-3: Enforce 2FA for privileged officer positions
+    const holdsPrivilegedPosition = terms.some(t => {
+      const title = t.positionTitle as string | undefined;
+      return title ? PRIVILEGED_POSITIONS.has(title.toLowerCase()) : false;
+    });
+
+    if (holdsPrivilegedPosition && !(user as any).twoFactorEnabled) {
+      throw new ForbiddenError(
+        'Two-factor authentication required for privileged officer positions (President, Treasurer, Secretary). ' +
+        'Please enable 2FA in your account settings.',
+      );
+    }
 
     return next();
   };

@@ -29,10 +29,19 @@ export function generateSlotsForEvent(config: SlotGenerationConfig): GeneratedSl
   // Convert event times to proper timezone
   const timezone = event.timezone;
   
+  // Clamp the iteration range to the event's validity window
+  const effectiveStart = event.effectiveFrom ? startOfDay(event.effectiveFrom) : startOfDay(startDate);
+  const effectiveEnd = event.effectiveTo ? startOfDay(event.effectiveTo) : endDate;
+
   // Iterate through each day in the range
   let currentDate = startOfDay(startDate);
-  
-  while (currentDate <= endDate) {
+
+  // Skip dates before effectiveFrom
+  if (isBefore(currentDate, effectiveStart)) {
+    currentDate = effectiveStart;
+  }
+
+  while (currentDate <= endDate && currentDate <= effectiveEnd) {
     // Check if this day of week is configured in dailyConfigs
     const dayOfWeek = currentDate.getDay();
     const dayKey = getDayKey(dayOfWeek);

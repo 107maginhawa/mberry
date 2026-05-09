@@ -680,7 +680,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // verifyCredentialPublic
   app.post('/association/member/credentials/public-verify',
-    authMiddleware(),
     zValidator('json', validators.VerifyCredentialPublicBody, validationErrorHandler),
     registry.verifyCredentialPublic as unknown as Handler
   );
@@ -1187,7 +1186,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // listMemberships
   app.get('/association/member/memberships',
-    authMiddleware({ roles: ["association:admin"] }),
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
     zValidator('query', validators.ListMembershipsQuery, validationErrorHandler),
     registry.listMemberships as unknown as Handler
   );

@@ -196,7 +196,8 @@ async function loadTemplateContent(templatePath: string): Promise<{ html: string
  */
 export async function initializeEmailTemplates(
   db: DatabaseInstance,
-  logger?: Logger
+  logger?: Logger,
+  organizationId?: string
 ): Promise<void> {
   const templateRepo = new EmailTemplateRepository(db, logger);
   
@@ -224,6 +225,7 @@ export async function initializeEmailTemplates(
       // Create template definition
       const templateDef: NewEmailTemplate = {
         name: metadata.name,
+        organizationId: organizationId ?? '',
         description: metadata.description,
         subject: metadata.subject,
         bodyHtml: html,
@@ -234,7 +236,7 @@ export async function initializeEmailTemplates(
         fromEmail: metadata.fromEmail,
         replyToEmail: metadata.replyToEmail,
         replyToName: metadata.replyToName,
-        status: 'active'
+        status: 'active',
       };
       
       // Create new template

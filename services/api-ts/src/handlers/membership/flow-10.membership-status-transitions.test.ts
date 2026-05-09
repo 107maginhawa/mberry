@@ -232,11 +232,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
     expect(capturedStatus).toBe('active');
   });
 
-  // ── Unimplemented side effects (test.todo = RED backlog) ──
-
-  test.todo('expired dues_expiry_date auto-transitions active → grace');
-  test.todo('grace period expiry auto-transitions grace → lapsed');
-  test.todo('member notified when status changes to grace');
-  test.todo('member notified when status changes to lapsed');
-  test.todo('severely lapsed member (>1 cycle) requires reapplication');
+  // Side-effect tests removed — auto-transition cron (active→grace→lapsed)
+  // and status change notifications not yet implemented. Re-add when
+  // membership lifecycle automation is built.
 });

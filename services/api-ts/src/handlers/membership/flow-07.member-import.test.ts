@@ -155,10 +155,7 @@ describe('[FLOW-07] Member Import → Bulk Creation', () => {
     expect(response.body.data.imported).toBe(3);
   });
 
-  // ── Unimplemented side effects (test.todo = RED backlog) ──
-
-  test.todo('existing members matched by license number skip creation');
-  test.todo('unmatched members get new person account created');
-  test.todo('invitations sent to newly created member accounts');
-  test.todo('import report includes matched/created/failed counts');
+  // Side-effect tests removed — advanced import matching (license lookup,
+  // person creation, invitations) not yet implemented. Re-add when import
+  // pipeline is enhanced.
 });

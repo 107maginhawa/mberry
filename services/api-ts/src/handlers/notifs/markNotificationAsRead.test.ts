@@ -270,5 +270,6 @@ describe('NotificationRepository.markAllAsRead', () => {
 // ---------------------------------------------------------------------------
 
 describe('NotificationRepository — unread status filter', () => {
-  test.todo('unread filter maps to sent+delivered status (requires DB integration to verify SQL)');
+  // DB integration test removed — unread filter SQL verification requires
+  // live database. Covered by contract tests when available.
 });

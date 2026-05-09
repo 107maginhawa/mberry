@@ -62,8 +62,8 @@ describe('Seed users', () => {
       // Member-role users can access /persons/me but should not have admin-only access
     });
 
-    test('officer users (non-president) are association:member role', async () => {
-      // treasurer, secretary, society users have association:member dbRole — not admin
+    test('officer users (non-president) have association:admin,association:member roles', async () => {
+      // treasurer, secretary, society users have association:admin,association:member dbRole
       for (const email of ['treasurer@memberry.ph', 'secretary@memberry.ph', 'society@memberry.ph']) {
         const client = await apiAs(email);
         const res = await client.get('/persons/me');

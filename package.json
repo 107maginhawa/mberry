@@ -23,10 +23,10 @@
     "lint": "bun run --filter '*' lint"
   },
   "lint-staged": {
-    "services/api-ts/**/*.{ts,tsx}": ["bunx eslint --fix --config services/api-ts/eslint.config.js"],
-    "apps/account/**/*.{ts,tsx}": ["bunx eslint --fix --config apps/account/eslint.config.js"],
-    "apps/memberry/**/*.{ts,tsx}": ["bunx eslint --fix --config apps/memberry/eslint.config.js"],
-    "apps/admin/**/*.{ts,tsx}": ["bunx eslint --fix --config apps/admin/eslint.config.js"]
+    "services/api-ts/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config services/api-ts/eslint.config.js"],
+    "apps/account/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/account/eslint.config.js"],
+    "apps/memberry/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/memberry/eslint.config.js"],
+    "apps/admin/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/admin/eslint.config.js"]
   },
   "engines": {
     "node": ">=18.0.0",

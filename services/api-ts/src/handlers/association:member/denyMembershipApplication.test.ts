@@ -168,7 +168,7 @@ describe('denyMembershipApplication', () => {
     });
 
     const ctx = makeCtx({
-      user: { id: 'officer-42', role: 'officer' },
+      user: { id: 'officer-42', role: 'officer', twoFactorEnabled: true },
       _params: { applicationId: 'app-1' },
       _body: { denialReason: 'Ineligible' },
     });

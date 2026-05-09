@@ -210,7 +210,8 @@ describe('Association mutation routes - officer protection (RED phase)', () => {
     expect(res.status).not.toBe(403);
   });
 
-  // TypeSpec spec currently requires association:admin for GET memberships.
-  // D-07 says members should have read-only access — needs TypeSpec update.
-  test.todo('member CAN GET /association/member/memberships (read-only access — blocked by TypeSpec roles)');
+  test('member CAN GET /association/member/memberships (read-only access)', async () => {
+    const res = await memberClient.get(`/association/member/memberships?organizationId=${ORG_ID}`);
+    expect(res.status).not.toBe(403);
+  });
 });

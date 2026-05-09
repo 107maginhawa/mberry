@@ -147,7 +147,7 @@ describe('approveMembershipApplication', () => {
     });
 
     const ctx = makeCtx({
-      user: { id: 'reviewer-99', role: 'officer' },
+      user: { id: 'reviewer-99', role: 'officer', twoFactorEnabled: true },
       _params: { applicationId: 'app-1' },
     });
 

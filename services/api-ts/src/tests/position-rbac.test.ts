@@ -286,11 +286,32 @@ describe('app.ts position-restricted routes', () => {
     expect(res.status).not.toBe(403);
   });
 
-  // Blocked: officers have association:member role, but generated routes require association:admin.
-  // Phase 13-03/13-04 must either upgrade officer roles (with handler-level org-scoping) or update TypeSpec.
-  test.todo('Treasurer allowed: POST /association/member/dues-payments (Treasurer domain) — blocked by TypeSpec role: association:admin');
-  test.todo('Secretary allowed: POST /association/member/roster-members (Secretary domain) — blocked by TypeSpec role: association:admin');
-  test.todo('Society Officer allowed: POST /association/operations/events (Society Officer domain) — blocked by TypeSpec role: association:admin');
+  test('Treasurer allowed: POST /association/member/dues-payments (Treasurer domain)', async () => {
+    const res = await treasurerClient.post(`/association/member/dues-payments?organizationId=${ORG_ID}`, {
+      organizationId: ORG_ID,
+      memberId: 'some-member-id',
+      amount: 1000,
+    });
+    expect(res.status).not.toBe(403);
+  });
+
+  test('Secretary allowed: POST /association/member/roster (Secretary domain)', async () => {
+    const res = await secretaryClient.post(`/association/member/roster?organizationId=${ORG_ID}`, {
+      organizationId: ORG_ID,
+      personId: 'some-person-id',
+    });
+    expect(res.status).not.toBe(403);
+  });
+
+  test('Society Officer allowed: POST /association/events (Society Officer domain)', async () => {
+    const res = await societyClient.post(`/association/events?organizationId=${ORG_ID}`, {
+      organizationId: ORG_ID,
+      title: 'Society event',
+      startDate: '2026-06-01T09:00:00Z',
+      endDate: '2026-06-01T17:00:00Z',
+    });
+    expect(res.status).not.toBe(403);
+  });
 });
 
 // ─── Member Regression ─────────────────────────────────────────────────────────

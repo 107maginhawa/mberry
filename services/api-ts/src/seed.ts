@@ -50,7 +50,7 @@ const TEST_USERS = [
     lastName: 'Reyes',
     specialization: 'Prosthodontics',
     licenseNumber: '0054321',
-    dbRole: 'association:member',
+    dbRole: 'association:admin,association:member',
   },
   {
     email: 'secretary@memberry.ph',
@@ -60,7 +60,7 @@ const TEST_USERS = [
     lastName: 'Lim',
     specialization: 'Pediatric Dentistry',
     licenseNumber: '0078901',
-    dbRole: 'association:member',
+    dbRole: 'association:admin,association:member',
   },
   {
     email: 'society@memberry.ph',
@@ -70,7 +70,7 @@ const TEST_USERS = [
     lastName: 'Tan',
     specialization: 'Endodontics',
     licenseNumber: '0098765',
-    dbRole: 'association:member',
+    dbRole: 'association:admin,association:member',
   },
   {
     email: 'idor-officer@memberry.ph',
@@ -80,7 +80,7 @@ const TEST_USERS = [
     lastName: 'Dizon',
     specialization: 'Oral Surgery',
     licenseNumber: '0011223',
-    dbRole: 'association:member',
+    dbRole: 'association:admin,association:member',
   },
 ];
 

@@ -18,6 +18,7 @@ import { EmailTemplateTags } from '@/handlers/email/repos/email.schema';
 import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
 import { PersonRepository } from '@/handlers/person/repos/person.repo';
 import * as schema from '@/generated/better-auth/schema';
+import { eq } from 'drizzle-orm';
 import { createTrustedOriginsList, determineCookieConfig } from '@/utils/cors';
 import { ac } from '@/utils/auth';
 import type { Config } from '@/core/config';
@@ -170,12 +171,55 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
               logger?.warn({ error: err, userId: user.id }, 'Failed to auto-create person on signup');
             }
           }
-        }
+        },
+        // P1-4: Invalidate all sessions when user role changes
+        // Forces re-authentication so session carries fresh role claims
+        update: {
+          after: async (user) => {
+            // role field present means it may have changed — invalidate sessions
+            // Slightly over-broad but safe: better to force re-auth than miss a change
+            if ('role' in user) {
+              try {
+                const deleted = await database
+                  .delete(schema.session)
+                  .where(eq(schema.session.userId, user.id))
+                  .returning({ id: schema.session.id });
+
+                if (deleted.length > 0) {
+                  logger?.info(
+                    { userId: user.id, sessionsRevoked: deleted.length, newRole: user['role'] },
+                    'P1-4: Sessions invalidated after role change',
+                  );
+
+                  // Audit the role change
+                  try {
+                    const auditRepo = new AuditRepository(database, logger);
+                    await auditRepo.logEvent({
+                      eventType: 'security',
+                      category: 'security',
+                      action: 'update',
+                      outcome: 'success',
+                      user: user.id,
+                      userType: 'system',
+                      resourceType: 'user',
+                      resource: user.id,
+                      description: `Role changed to "${user['role']}" — ${deleted.length} session(s) revoked`,
+                    });
+                  } catch (auditErr) {
+                    logger?.warn({ error: auditErr, userId: user.id }, 'Failed to audit role change');
+                  }
+                }
+              } catch (err) {
+                logger?.error({ error: err, userId: user.id }, 'P1-4: Failed to invalidate sessions on role change');
+              }
+            }
+          },
+        },
       },
       // P1-6: Audit auth events — log session creation (login) to audit trail
       session: {
         create: {
-          after: async (session) => {
+          after: async (session: { id: string; userId: string; ipAddress?: string | null; userAgent?: string | null }) => {
             try {
               const auditRepo = new AuditRepository(database, logger);
               await auditRepo.logEvent({
@@ -188,11 +232,31 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
                 resourceType: 'session',
                 resource: session.id,
                 description: 'User logged in — session created',
-                ipAddress: (session as any).ipAddress ?? undefined,
-                userAgent: (session as any).userAgent ?? undefined,
+                ipAddress: session.ipAddress ?? undefined,
+                userAgent: session.userAgent ?? undefined,
               });
             } catch (err) {
               logger?.warn({ error: err, userId: session.userId }, 'Failed to audit login event');
+            }
+          },
+        },
+        delete: {
+          after: async (session: { id: string; userId: string }) => {
+            try {
+              const auditRepo = new AuditRepository(database, logger);
+              await auditRepo.logEvent({
+                eventType: 'authentication',
+                category: 'security',
+                action: 'logout',
+                outcome: 'success',
+                user: session.userId,
+                userType: 'client',
+                resourceType: 'session',
+                resource: session.id,
+                description: 'User logged out — session deleted',
+              });
+            } catch (err) {
+              logger?.warn({ error: err, userId: session.userId }, 'Failed to audit logout event');
             }
           },
         },
@@ -301,7 +365,7 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
     session: {
       expiresIn: config.auth.sessionExpiresIn,
       storeSessionInDatabase: true,
-      cleanupAfter: '2d', // Clean up expired sessions after 2 days (tighter window)
+      // cleanupAfter not supported in this Better-Auth version — use DB-level TTL
     },
 
     // Account linking

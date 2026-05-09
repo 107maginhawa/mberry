@@ -125,7 +125,6 @@ describe('emailProcessorJob', () => {
     expect(debugCalls[0][0]).toMatchObject({ jobId: 'custom-job-id-999' });
   });
 
-  // Provider selection is a concern of EmailServiceImpl, not the job.
-  // The job is provider-agnostic — it just calls processPendingEmails().
-  test.todo('provider selection (smtp/postmark/onesignal) — responsibility of EmailService, not the job');
+  // Provider selection test removed — responsibility of EmailService
+  // implementation, not the processor job. Test at service layer.
 });

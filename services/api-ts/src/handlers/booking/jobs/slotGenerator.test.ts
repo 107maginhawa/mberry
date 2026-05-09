@@ -534,16 +534,37 @@ describe('Slot generation — schedule exception filtering', () => {
     }
   });
 
-  test.todo(
-    // Bug: generateSlotsForEvent (slotGeneration.ts utility) does NOT check effectiveFrom/effectiveTo.
-    // Only the job-internal generateSlotsFromEvent (slotGenerator.ts) enforces date boundaries.
-    // The exported utility generates slots for any date regardless of event validity window.
-    'generates no slots for dates before effectiveFrom'
-  );
+  test('generates no slots for dates before effectiveFrom', () => {
+    // Event is effective starting Wednesday 2026-06-03
+    const wednesday = new Date('2026-06-03T00:00:00.000Z');
+    const event = makeEvent({
+      effectiveFrom: wednesday,
+      dailyConfigs: makeDailyConfigs([DayOfWeek.mon, DayOfWeek.tue, DayOfWeek.wed]),
+    });
 
-  test.todo(
-    // Bug: same as above — effectiveTo enforcement is missing from the exported slotGeneration utility.
-    // The slotGenerator job's internal helper does enforce it, but that function is not exported.
-    'generates no slots for dates after effectiveTo'
-  );
+    // Request slots for Mon-Tue (before effectiveFrom)
+    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const tuesday = new Date('2026-06-02T00:00:00.000Z');
+
+    const slots = generateSlotsForEvent({ event, startDate: monday, endDate: tuesday });
+    expect(slots.length).toBe(0);
+  });
+
+  test('generates no slots for dates after effectiveTo', () => {
+    // Event is effective until Tuesday 2026-06-02
+    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const tuesday = new Date('2026-06-02T00:00:00.000Z');
+    const event = makeEvent({
+      effectiveFrom: monday,
+      effectiveTo: tuesday,
+      dailyConfigs: makeDailyConfigs([DayOfWeek.mon, DayOfWeek.tue, DayOfWeek.wed, DayOfWeek.thu, DayOfWeek.fri]),
+    });
+
+    // Request slots for Thu-Fri (after effectiveTo)
+    const thursday = new Date('2026-06-04T00:00:00.000Z');
+    const friday = new Date('2026-06-05T00:00:00.000Z');
+
+    const slots = generateSlotsForEvent({ event, startDate: thursday, endDate: friday });
+    expect(slots.length).toBe(0);
+  });
 });

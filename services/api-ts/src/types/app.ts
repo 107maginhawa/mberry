@@ -50,8 +50,9 @@ export type Variables = {
   // Platform admin (set by platformAdminAuthMiddleware on /admin/* routes)
   platformAdmin?: PlatformAdmin;
 
-  // Internal service authentication
+  // Internal service authentication (P1-2: typed + rotatable)
   internalServiceToken?: string;
+  internalServiceTokens?: string[];
   isInternalExpand?: boolean;
 };
 
@@ -136,4 +137,8 @@ export type App = Hono<{ Variables: Variables }> & {
   email: EmailService;
   ws: WebSocketService;
   billing: BillingService;
+  /** Active internal service token for outgoing expand requests (P1-2) */
+  internalServiceToken: string;
+  /** All valid internal service tokens for rotation (P1-2) */
+  internalServiceTokens: string[];
 };

@@ -182,7 +182,6 @@ describe('createReview', () => {
     expect(createReviewMethod).toHaveBeenCalledTimes(1);
   });
 
-  // NPS range 0-10 is enforced by DB CHECK constraint, not the handler.
-  // The handler does not validate this — marking as informational todo.
-  test.todo('throws ValidationError when npsScore is out of range (0-10) — enforced at DB level');
+  // npsScore range test removed — 0-10 constraint enforced by DB CHECK,
+  // not handler logic. Covered by schema validation.
 });

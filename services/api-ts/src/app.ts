@@ -25,9 +25,6 @@ import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
 import { registerDuesJobs } from '@/handlers/dues/jobs';
 
-// Communications handler
-import { communications } from '@/handlers/communications';
-
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
 import { registerRoutes as registerHealthRoutes } from '@/core/health';
@@ -59,8 +56,9 @@ import { orgContextMiddleware } from '@/middleware/org-context';
 export function createApp(config: Config): App {
   const app = new Hono<{ Variables: Variables }>();
 
-  // P1-2: Internal service token — use env var in production, random fallback for dev
-  const internalServiceToken = process.env['INTERNAL_SERVICE_TOKEN'] || crypto.randomUUID();
+  // P1-2: Internal service token — config-driven, supports rotation
+  const internalServiceToken = config.internalService.activeToken;
+  const internalServiceTokens = config.internalService.allTokens;
 
   // Create core dependencies with config
   const logger = createLogger(config);
@@ -76,7 +74,7 @@ export function createApp(config: Config): App {
   const billing = createBillingService(config.billing, database, logger);
 
   // Attach dependencies to the app instance early for access throughout
-  Object.assign(app, { database, logger, auth, storage, jobs, notifs, email, audit, ws, billing, internalServiceToken });
+  Object.assign(app, { database, logger, auth, storage, jobs, notifs, email, audit, ws, billing, internalServiceToken, internalServiceTokens });
 
   // Global middleware - order matters!
 
@@ -107,19 +105,33 @@ export function createApp(config: Config): App {
   // Register auth routes
   registerAuthRoutes(app as App);
 
-  // Auth middleware for communications (announcements — not yet in TypeSpec)
-  app.use('/communications/*', authMiddleware());
-
-  // Register communications route (not yet migrated to generated routes)
-  app.route('/communications', communications);
-
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
 
-  // Auth middleware for all association routes (sets user/session on context)
-  app.use('/association/*', authMiddleware());
-  // Org-context middleware for association routes (sets orgId from header/query)
-  app.use('/association/*', orgContextMiddleware());
+  // Public association endpoints that must NOT have auth middleware
+  const ASSOCIATION_PUBLIC_PATHS = [
+    '/association/member/credentials/public-verify',
+    '/association/member/ethics/public-complaints',
+    '/association/member/ethics/public-complaint',
+    '/association/member/directory/public',
+  ];
+
+  // Auth middleware for all association routes EXCEPT public endpoints
+  app.use('/association/*', async (c, next) => {
+    const path = new URL(c.req.url).pathname;
+    if (ASSOCIATION_PUBLIC_PATHS.some(p => path.startsWith(p))) {
+      return next();
+    }
+    return authMiddleware()(c, next);
+  });
+  // Org-context middleware for association routes EXCEPT public endpoints
+  app.use('/association/*', async (c, next) => {
+    const path = new URL(c.req.url).pathname;
+    if (ASSOCIATION_PUBLIC_PATHS.some(p => path.startsWith(p))) {
+      return next();
+    }
+    return orgContextMiddleware()(c, next);
+  });
 
   // Register API routes
   registerOpenAPIRoutes(app as any);

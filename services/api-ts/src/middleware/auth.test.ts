@@ -349,9 +349,10 @@ describe('authMiddleware', () => {
   // -------------------------------------------------------------------------
   describe('internal service-to-service token bypass', () => {
     const SECRET = 'super-secret-token';
+    const OLD_SECRET = 'old-rotated-token';
 
     it('skips user auth and calls next when internal token + expand context match', async () => {
-      const auth = makeAuth(null); // no session — should still pass
+      const auth = makeAuth(null);
       const ctx  = makeCtx({
         headers: {
           'X-Internal-Service-Token': SECRET,
@@ -359,12 +360,11 @@ describe('authMiddleware', () => {
         },
         contextValues: {
           auth,
-          internalServiceToken: SECRET,
+          internalServiceTokens: [SECRET],
         },
       });
 
-      const mw = authMiddleware({ required: true }); // would normally block unauthenticated
-
+      const mw = authMiddleware({ required: true });
       const { nextCalled, error } = await runMiddleware(mw, ctx);
 
       expect(error).toBeNull();
@@ -380,7 +380,7 @@ describe('authMiddleware', () => {
         },
         contextValues: {
           auth,
-          internalServiceToken: SECRET,
+          internalServiceTokens: [SECRET],
         },
       });
 
@@ -390,7 +390,7 @@ describe('authMiddleware', () => {
       expect(ctx._stored['isInternalExpand']).toBe(true);
     });
 
-    it('does NOT bypass when token does not match stored token', async () => {
+    it('does NOT bypass when token does not match any stored token', async () => {
       const auth = makeAuth(null);
       const ctx  = makeCtx({
         headers: {
@@ -399,14 +399,13 @@ describe('authMiddleware', () => {
         },
         contextValues: {
           auth,
-          internalServiceToken: SECRET,
+          internalServiceTokens: [SECRET],
         },
       });
 
       const mw = authMiddleware({ required: true });
       const { error } = await runMiddleware(mw, ctx);
 
-      // Falls through to normal auth → no session → UnauthorizedError
       expect(error).toBeInstanceOf(UnauthorizedError);
     });
 
@@ -415,11 +414,10 @@ describe('authMiddleware', () => {
       const ctx  = makeCtx({
         headers: {
           'X-Internal-Service-Token': SECRET,
-          // no X-Expand-Context
         },
         contextValues: {
           auth,
-          internalServiceToken: SECRET,
+          internalServiceTokens: [SECRET],
         },
       });
 
@@ -434,11 +432,89 @@ describe('authMiddleware', () => {
       const ctx  = makeCtx({
         headers: {
           'X-Expand-Context': 'true',
-          // no X-Internal-Service-Token
         },
         contextValues: {
           auth,
-          internalServiceToken: SECRET,
+          internalServiceTokens: [SECRET],
+        },
+      });
+
+      const mw = authMiddleware({ required: true });
+      const { error } = await runMiddleware(mw, ctx);
+
+      expect(error).toBeInstanceOf(UnauthorizedError);
+    });
+
+    // P1-2: Token rotation tests
+    it('accepts old rotated token during rotation window', async () => {
+      const auth = makeAuth(null);
+      const ctx  = makeCtx({
+        headers: {
+          'X-Internal-Service-Token': OLD_SECRET,
+          'X-Expand-Context': 'true',
+        },
+        contextValues: {
+          auth,
+          internalServiceTokens: [SECRET, OLD_SECRET], // new first, old still valid
+        },
+      });
+
+      const mw = authMiddleware({ required: true });
+      const { nextCalled, error } = await runMiddleware(mw, ctx);
+
+      expect(error).toBeNull();
+      expect(nextCalled).toBe(true);
+    });
+
+    it('accepts active token when multiple tokens configured', async () => {
+      const auth = makeAuth(null);
+      const ctx  = makeCtx({
+        headers: {
+          'X-Internal-Service-Token': SECRET,
+          'X-Expand-Context': 'true',
+        },
+        contextValues: {
+          auth,
+          internalServiceTokens: [SECRET, OLD_SECRET],
+        },
+      });
+
+      const mw = authMiddleware({ required: true });
+      const { nextCalled, error } = await runMiddleware(mw, ctx);
+
+      expect(error).toBeNull();
+      expect(nextCalled).toBe(true);
+    });
+
+    it('rejects token not in rotation list', async () => {
+      const auth = makeAuth(null);
+      const ctx  = makeCtx({
+        headers: {
+          'X-Internal-Service-Token': 'completely-unknown-token',
+          'X-Expand-Context': 'true',
+        },
+        contextValues: {
+          auth,
+          internalServiceTokens: [SECRET, OLD_SECRET],
+        },
+      });
+
+      const mw = authMiddleware({ required: true });
+      const { error } = await runMiddleware(mw, ctx);
+
+      expect(error).toBeInstanceOf(UnauthorizedError);
+    });
+
+    it('falls through to normal auth when token list is empty', async () => {
+      const auth = makeAuth(null);
+      const ctx  = makeCtx({
+        headers: {
+          'X-Internal-Service-Token': SECRET,
+          'X-Expand-Context': 'true',
+        },
+        contextValues: {
+          auth,
+          internalServiceTokens: [],
         },
       });
 

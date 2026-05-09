@@ -100,15 +100,19 @@ export function authMiddleware(options?: AuthMiddlewareOptions) {
 
   return async (ctx: Context<{ Variables: Variables }>, next: Next) => {
     // P1-2: Internal service-to-service expand requests with timing-safe comparison
+    // Supports token rotation: checks incoming token against ALL valid tokens
     const internalServiceToken = ctx.req.header('X-Internal-Service-Token');
     const isExpandContext = ctx.req.header('X-Expand-Context');
-    const storedToken = ctx.get('internalServiceToken');
+    const storedTokens = ctx.get('internalServiceTokens') || [];
 
-    if (internalServiceToken && isExpandContext && storedToken) {
-      // Timing-safe comparison to prevent token extraction via timing attacks
+    if (internalServiceToken && isExpandContext && storedTokens.length > 0) {
       const incomingHash = createHash('sha256').update(internalServiceToken).digest();
-      const storedHash = createHash('sha256').update(storedToken).digest();
-      const tokensMatch = timingSafeEqual(incomingHash, storedHash);
+
+      // Check against all rotated tokens (timing-safe for each)
+      const tokensMatch = storedTokens.some(storedToken => {
+        const storedHash = createHash('sha256').update(storedToken).digest();
+        return timingSafeEqual(incomingHash, storedHash);
+      });
 
       if (tokensMatch) {
         const logger = ctx.get('logger');
@@ -123,7 +127,7 @@ export function authMiddleware(options?: AuthMiddlewareOptions) {
         return;
       }
 
-      // Token mismatch — log as security event and fall through to normal auth
+      // No token matched — log as security event and fall through to normal auth
       const logger = ctx.get('logger');
       logger.warn({
         path: ctx.req.path,

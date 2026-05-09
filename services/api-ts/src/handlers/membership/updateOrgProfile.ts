@@ -1,17 +1,26 @@
 import type { Context } from 'hono';
 import { NotFoundError } from '@/core/errors';
 import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * updateOrgProfile
  *
  * Officer-accessible endpoint to update organization profile.
  * Route: PUT /membership/org-profile/:orgId
+ *
+ * Position-restricted: PRESIDENT only (D-03).
  */
 export async function updateOrgProfile(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const logger = ctx.get('logger');
   const orgId = ctx.req.param('orgId');
+
+  // Set orgId for requirePosition (officerAuthMiddleware doesn't set ctx orgId)
+  ctx.set('orgId', orgId);
+  const denied = await requirePosition(ctx as any, [POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
 
   const repo = new OrganizationRepository(db, logger);
   const existing = await repo.findById(orgId);

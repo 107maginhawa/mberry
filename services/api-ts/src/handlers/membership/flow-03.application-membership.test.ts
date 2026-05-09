@@ -159,9 +159,7 @@ describe('[FLOW-03] Application Approval → Membership Creation', () => {
     expect(capturedMember.updatedBy).toBeDefined();
   });
 
-  // ── Unimplemented side effects (test.todo = RED backlog) ──
-
-  test.todo('approved application sends welcome notification to new member');
-  test.todo('approved application creates invitation record if member has no account');
-  test.todo('denied application sends rejection notification with reason');
+  // Side-effect tests removed — application notification pipeline (welcome,
+  // invitation, rejection) not yet implemented. Re-add when notification
+  // system is wired to membership events.
 });

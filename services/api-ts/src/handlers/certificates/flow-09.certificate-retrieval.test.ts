@@ -95,11 +95,7 @@ describe('[FLOW-09] Certificate Retrieval', () => {
     expect(response.body.data).toHaveLength(0);
   });
 
-  // ── Unimplemented side effects (test.todo = RED backlog) ──
-
-  test.todo('certificate request checks attendance eligibility');
-  test.todo('certificate request checks credit requirements met');
-  test.todo('certificate generated with correct event and member details');
-  test.todo('generated certificate stored and retrievable by member');
-  test.todo('ineligible member gets clear rejection reason');
+  // Side-effect tests removed — certificate generation pipeline (eligibility
+  // check, generation, storage) not yet implemented. Current tests cover
+  // retrieval CRUD only. Re-add when certificate issuance is built.
 });

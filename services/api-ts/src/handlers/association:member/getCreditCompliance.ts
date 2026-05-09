@@ -4,6 +4,8 @@ import { UnauthorizedError } from '@/core/errors';
 import type { GetCreditComplianceParams } from '@/generated/openapi/validators';
 import { CreditEntryRepository } from './repos/credits.repo';
 import { getCycleForDate, summarizeCycle } from './utils/credit-cycle';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * getCreditCompliance
@@ -13,6 +15,8 @@ import { getCycleForDate, summarizeCycle } from './utils/credit-cycle';
  *
  * Returns compliance summary for the current user in a given org.
  * Query params: registrationDate, cyclePeriodYears (default 2), requiredCredits (default 40)
+ *
+ * Position-restricted: SOCIETY_OFFICER, PRESIDENT only (D-03).
  */
 export async function getCreditCompliance(
   ctx: ValidatedContext<never, never, GetCreditComplianceParams>
@@ -24,6 +28,11 @@ export async function getCreditCompliance(
   const logger = ctx.get('logger');
   const params = ctx.req.valid('param');
   const orgId = (params as any).orgId;
+
+  // Set orgId for requirePosition (route is not under /association/*, no org-context middleware)
+  ctx.set('orgId', orgId);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
   const personId = session.user.id;
 
   const registrationDateStr = ctx.req.query('registrationDate');

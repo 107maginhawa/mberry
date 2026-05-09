@@ -603,76 +603,90 @@
     "phase": 2,
     "module": "M12",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/elections/br-34.nomination-eligibility.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "coverage": "UNTESTED"
+    "coverage": "PARTIAL"
   },
   "BR-35": {
     "rule": "Feed Content Moderation",
     "phase": 2,
     "module": "M13",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/communications/br-35.feed-moderation.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "coverage": "UNTESTED"
+    "coverage": "PARTIAL"
   },
   "BR-36": {
     "rule": "National Dashboard Access",
     "phase": 2,
     "module": "M14",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/platformadmin/br-36.national-dashboard.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "coverage": "UNTESTED"
+    "coverage": "PARTIAL"
   },
   "BR-37": {
     "rule": "Job Posting Expiry",
     "phase": 2,
     "module": "M15",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/events/br-37.job-posting-expiry.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "coverage": "UNTESTED"
+    "coverage": "PARTIAL"
   },
   "BR-38": {
     "rule": "Marketplace Referral Disclosure",
     "phase": 3,
     "module": "M17",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/billing/br-38.marketplace-disclosure.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "coverage": "UNTESTED"
+    "coverage": "PARTIAL"
   },
   "BR-39": {
     "rule": "Committee Dissolution",
     "phase": 3,
     "module": "M19",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/membership/br-39.committee-dissolution.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "coverage": "UNTESTED"
+    "coverage": "PARTIAL"
   },
   "BR-40": {
     "rule": "Survey Anonymity",
     "phase": 3,
     "module": "M18",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/communications/br-40.survey-anonymity.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "coverage": "UNTESTED"
+    "coverage": "PARTIAL"
   }
 }

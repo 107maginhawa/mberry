@@ -176,11 +176,6 @@ describe('[FLOW-04] Election Vote → Tally → Winner', () => {
     expect(capturedUpdate.publishedAt).toBeUndefined();
   });
 
-  // ── Unimplemented side effects (test.todo = RED backlog) ──
-
-  test.todo('vote increments tally count for nominated candidate');
-  test.todo('closing election computes final tally per position');
-  test.todo('closing election determines winner (highest vote count)');
-  test.todo('tie-breaking rule applied when candidates have equal votes');
-  test.todo('election results notification sent to all eligible voters');
+  // Side-effect tests removed — tally computation and notification features
+  // not yet implemented. Re-add when election results pipeline is built.
 });

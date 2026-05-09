@@ -58,6 +58,14 @@ export interface Config {
   // Billing configuration
   billing: BillingConfig;
 
+  // Internal service-to-service authentication (P1-2)
+  internalService: {
+    /** Active token used for outgoing expand requests (first in list) */
+    activeToken: string;
+    /** All valid tokens — allows zero-downtime rotation */
+    allTokens: string[];
+  };
+
   // WebRTC configuration
   webrtc: {
     iceServers: IceServer[];
@@ -253,6 +261,16 @@ export function parseConfig(): Config {
         url: process.env['STRIPE_URL'], // For testing with mock Stripe service
       }
     },
+
+    // Internal service token (P1-2): comma-separated for rotation
+    // First token = active (outgoing), all tokens = valid (incoming)
+    internalService: (() => {
+      const raw = process.env['INTERNAL_SERVICE_TOKEN'];
+      const tokens = raw
+        ? raw.split(',').map(t => t.trim()).filter(Boolean)
+        : [crypto.randomUUID()]; // Dev fallback
+      return { activeToken: tokens[0]!, allTokens: tokens };
+    })(),
 
     // WebRTC configuration
     webrtc: {
