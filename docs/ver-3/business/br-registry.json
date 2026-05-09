@@ -604,12 +604,13 @@
     "module": "M12",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/elections/br-34.nomination-eligibility.test.ts"
+        "services/api-ts/src/handlers/elections/br-34.nomination-eligibility.test.ts",
+        "services/api-ts/src/handlers/elections/createNominee.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "coverage": "PARTIAL"
+    "coverage": "COMPLETE"
   },
   "BR-35": {
     "rule": "Feed Content Moderation",
@@ -622,7 +623,8 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "PARTIAL"
+    "coverage": "DEFERRED",
+    "deferredReason": "Module M13 (Feed/Social) not yet implemented — deferred to milestone v2.0"
   },
   "BR-36": {
     "rule": "National Dashboard Access",
@@ -635,7 +637,8 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "PARTIAL"
+    "coverage": "DEFERRED",
+    "deferredReason": "Module M14 (National Dashboard) not yet implemented — deferred to milestone v2.0"
   },
   "BR-37": {
     "rule": "Job Posting Expiry",
@@ -648,7 +651,8 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "PARTIAL"
+    "coverage": "DEFERRED",
+    "deferredReason": "Module M15 (Job Board) not yet implemented — deferred to milestone v2.0"
   },
   "BR-38": {
     "rule": "Marketplace Referral Disclosure",
@@ -661,7 +665,8 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "PARTIAL"
+    "coverage": "DEFERRED",
+    "deferredReason": "Module M17 (Marketplace) not yet implemented — deferred to milestone v2.0"
   },
   "BR-39": {
     "rule": "Committee Dissolution",
@@ -674,7 +679,8 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "PARTIAL"
+    "coverage": "DEFERRED",
+    "deferredReason": "Module M19 (Committees) not yet implemented — deferred to milestone v2.0"
   },
   "BR-40": {
     "rule": "Survey Anonymity",
@@ -687,6 +693,7 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "PARTIAL"
+    "coverage": "DEFERRED",
+    "deferredReason": "Module M18 (Surveys) not yet implemented — deferred to milestone v2.0"
   }
 }
