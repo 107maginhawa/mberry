@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Shield, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
 import { RequireRole } from '@/lib/role-gate'
+import { listAuditLogsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/audit/')({
   component: () => (
@@ -12,29 +13,6 @@ export const Route = createFileRoute('/audit/')({
   ),
 })
 
-interface AuditLogEntry {
-  id: string
-  eventType: string
-  category: string
-  action: string
-  outcome: string
-  user: string | null
-  userType: string
-  resourceType: string
-  resource: string
-  description: string
-  ipAddress: string | null
-  createdAt: string
-}
-
-interface AuditLogsResponse {
-  data: AuditLogEntry[]
-  pagination: {
-    total: number
-    limit: number
-    offset: number
-  }
-}
 
 const LIMIT = 25
 
@@ -46,24 +24,22 @@ function AuditPage() {
   const [userFilter, setUserFilter] = useState<string>('')
   const [page, setPage] = useState(0)
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['admin', 'audit-logs', action, resourceType, startDate, endDate, userFilter, page],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      params.set('limit', String(LIMIT))
-      params.set('offset', String(page * LIMIT))
-      if (action) params.set('action', action)
-      if (resourceType) params.set('resourceType', resourceType)
-      if (startDate) params.set('startDate', startDate)
-      if (endDate) params.set('endDate', endDate)
-      if (userFilter) params.set('user', userFilter)
-      const res = await fetch(`/api/audit/logs?${params}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch audit logs')
-      return res.json() as Promise<AuditLogsResponse>
-    },
-  })
+  const { data, isLoading, isError, error, refetch } = useQuery(
+    listAuditLogsOptions({
+      query: {
+        limit: LIMIT,
+        offset: page * LIMIT,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(action ? { action: action as any } : {}),
+        ...(resourceType ? { resourceType } : {}),
+        ...(startDate ? { startDate: startDate as unknown as Date } : {}),
+        ...(endDate ? { endDate: endDate as unknown as Date } : {}),
+        ...(userFilter ? { user: userFilter } : {}),
+      },
+    })
+  )
 
-  const total = data?.pagination?.total ?? 0
+  const total = data?.pagination?.totalCount ?? 0
   const totalPages = Math.ceil(total / LIMIT)
 
   return (
@@ -152,7 +128,7 @@ function AuditPage() {
 
       {/* Error state */}
       {isError && (
-        <p className="text-sm text-red-500 mb-4">Error: {(error as Error).message}</p>
+        <p className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load audit logs'}</p>
       )}
 
       {/* Summary line */}

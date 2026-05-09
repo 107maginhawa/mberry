@@ -19,6 +19,24 @@ const MEMBERRY_LOGIN_URL = import.meta.env.VITE_MEMBERRY_URL
   ? `${import.meta.env.VITE_MEMBERRY_URL}/auth/sign-in?redirect=admin`
   : 'http://localhost:3004/auth/sign-in?redirect=admin'
 
+function RootErrorComponent({ error }: { error: Error }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
+      <div className="rounded-lg border bg-card p-8 max-w-md w-full text-center">
+        <Shield className="w-10 h-10 text-red-500 mx-auto mb-4" />
+        <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
+        <p className="text-sm text-muted-foreground mb-6">{error?.message ?? 'An unexpected error occurred.'}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+        >
+          Reload page
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export const Route = createRootRouteWithContext<RouterContext>()({
   beforeLoad: ({ context }) => {
     if (!context.auth.user) {
@@ -27,6 +45,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       throw redirect({ to: '/' })
     }
   },
+  errorComponent: RootErrorComponent,
   component: RootComponent,
 })
 

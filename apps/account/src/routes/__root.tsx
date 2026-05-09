@@ -13,7 +13,25 @@ import { useAuthClient } from '@monobase/sdk-ts/react/auth'
 import { getPersonQueryKey } from '@monobase/sdk-ts/generated/react-query'
 import '@/styles/globals.css'
 
+function RootErrorComponent({ error }: { error: Error }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="rounded-lg border bg-card p-8 max-w-md w-full text-center">
+        <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
+        <p className="text-sm text-muted-foreground mb-6">{error?.message ?? 'An unexpected error occurred.'}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+        >
+          Reload page
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export const Route = createRootRouteWithContext<RouterContext>()({
+  errorComponent: RootErrorComponent,
   component: RootComponent,
 })
 

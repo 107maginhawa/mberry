@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Building, Plus } from 'lucide-react'
+import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/organizations/')({
   component: OrganizationsPage,
@@ -19,23 +20,13 @@ interface Organization {
   created_at?: string
 }
 
-interface OrganizationsResponse {
-  data: Organization[]
-  total?: number
-}
 
 function OrganizationsPage() {
-  const { data, isLoading, error } = useQuery<OrganizationsResponse>({
-    queryKey: ['admin', 'organizations'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/organizations?limit=50', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch organizations')
-      return res.json()
-    },
-  })
+  const { data, isLoading, error } = useQuery(listOrganizationsOptions({ query: { limit: 50 } }))
 
-  const organizations = data?.data ?? []
-  const total = data?.total ?? organizations.length
+  // Cast to local Organization interface which includes extended fields (associationName, type, memberCount)
+  const organizations = (data?.data ?? []) as unknown as Organization[]
+  const total = data?.pagination?.totalCount ?? organizations.length
   const activeCount = organizations.filter((o) => o.status === 'active').length
   const suspendedCount = organizations.filter((o) => o.status === 'suspended').length
 
@@ -78,7 +69,7 @@ function OrganizationsPage() {
       {/* Error state */}
       {error && (
         <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {error.message}
+          {error instanceof Error ? error.message : 'Failed to load organizations'}
         </div>
       )}
 

@@ -4,6 +4,12 @@ import { ShieldCheck, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { RequireRole } from '@/lib/role-gate'
+import {
+  listAdminsOptions,
+  listAdminsQueryKey,
+  inviteAdminMutation,
+  revokeAdminMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/operators/')({
   component: () => (
@@ -27,30 +33,20 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
   const [name, setName] = useState('')
   const [role, setRole] = useState('support')
 
+  const sdkInvite = inviteAdminMutation()
   const invite = useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/admin/admins', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, role }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as { message?: string }).message || 'Failed to invite admin')
-      }
-      return res.json()
-    },
+    mutationFn: sdkInvite.mutationFn,
     onSuccess: () => {
       toast.success('Admin invited successfully')
-      queryClient.invalidateQueries({ queryKey: ['admin', 'admins'] })
+      queryClient.invalidateQueries({ queryKey: listAdminsQueryKey() })
       setEmail('')
       setName('')
       setRole('support')
       onClose()
     },
-    onError: (err: Error) => {
-      toast.error(err.message)
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to invite admin'
+      toast.error(msg)
     },
   })
 
@@ -106,7 +102,7 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
               Cancel
             </button>
             <button
-              onClick={() => invite.mutate()}
+              onClick={() => invite.mutate({ body: { email, name, role: role as 'super' | 'support' | 'analyst' } })}
               disabled={!email || !name || invite.isPending}
               className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
@@ -124,31 +120,21 @@ function OperatorsPage() {
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
-  const { data: admins, isLoading, isError, error } = useQuery({
-    queryKey: ['admin', 'admins'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/admins', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch admins')
-      return res.json() as Promise<Admin[]>
-    },
-  })
+  const { data: sdkAdmins, isLoading, isError, error } = useQuery(listAdminsOptions())
+  // Cast to local Admin interface which includes lastActiveAt (not in SDK type but returned by API)
+  const admins = sdkAdmins as Admin[] | undefined
 
+  const sdkRevoke = revokeAdminMutation()
   const revoke = useMutation({
-    mutationFn: async (adminId: string) => {
-      const res = await fetch(`/api/admin/admins/${adminId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to revoke admin')
-      return res.json()
-    },
+    mutationFn: sdkRevoke.mutationFn,
     onSuccess: () => {
       toast.success('Admin access revoked')
-      queryClient.invalidateQueries({ queryKey: ['admin', 'admins'] })
+      queryClient.invalidateQueries({ queryKey: listAdminsQueryKey() })
       setRevokeTarget(null)
     },
-    onError: (err: Error) => {
-      toast.error(err.message)
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to revoke admin'
+      toast.error(msg)
       setRevokeTarget(null)
     },
   })
@@ -177,7 +163,7 @@ function OperatorsPage() {
       </div>
 
       {isError && (
-        <p className="text-sm text-red-500 mb-4">Error: {(error as Error).message}</p>
+        <p className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load operators'}</p>
       )}
 
       {/* Table */}
@@ -223,7 +209,7 @@ function OperatorsPage() {
                       <span className="inline-flex items-center gap-2 text-sm">
                         <span className="text-muted-foreground">Revoke?</span>
                         <button
-                          onClick={() => revoke.mutate(admin.id)}
+                          onClick={() => revoke.mutate({ path: { adminId: admin.id } })}
                           disabled={revoke.isPending}
                           className="px-2 py-1 rounded text-xs font-medium bg-red-500 text-white hover:bg-red-600"
                         >

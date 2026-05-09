@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Users, Search } from 'lucide-react'
 import { useState } from 'react'
+import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/members/')({
   component: MembersPage,
@@ -25,15 +26,8 @@ interface Member {
 function MembersPage() {
   const [search, setSearch] = useState('')
 
-  const { data: orgs } = useQuery({
-    queryKey: ['admin', 'organizations'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/organizations', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch organizations')
-      const json = await res.json()
-      return (json.data ?? json) as Organization[]
-    },
-  })
+  const { data: orgsData } = useQuery(listOrganizationsOptions({ query: { limit: 100 } }))
+  const orgs = orgsData?.data as Organization[] | undefined
 
   // Fetch members for each org via membership API
   const { data: allMembers = [], isLoading, isError, error } = useQuery({

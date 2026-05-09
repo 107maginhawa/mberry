@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Building, ArrowLeft, Pencil, Play, Pause, Archive } from 'lucide-react'
+import { getOrganizationOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/organizations/$organizationId')({
   component: OrganizationDetailPage,
@@ -29,14 +30,11 @@ interface Organization {
 function OrganizationDetailPage() {
   const { organizationId } = Route.useParams()
 
-  const { data: org, isLoading, error } = useQuery<Organization>({
-    queryKey: ['admin', 'organizations', organizationId],
-    queryFn: async () => {
-      const res = await fetch(`/api/admin/organizations/${organizationId}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch organization')
-      return res.json()
-    },
-  })
+  const { data: sdkOrg, isLoading, error } = useQuery(
+    getOrganizationOptions({ path: { organizationId } })
+  )
+  // Cast to local interface — SDK type doesn't include extended fields (members, associationName)
+  const org = sdkOrg as Organization | undefined
 
   const createdDate = org?.createdAt || org?.created_at
   const assocName = org?.associationName || org?.association?.name || '--'

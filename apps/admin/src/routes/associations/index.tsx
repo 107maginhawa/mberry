@@ -3,6 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Building2, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
+import {
+  listAssociationsOptions,
+  listAssociationsQueryKey,
+  createAssociationMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/associations/')({
   component: AssociationsPage,
@@ -19,10 +24,6 @@ interface Association {
   created_at?: string
 }
 
-interface AssociationsResponse {
-  data: Association[]
-  total?: number
-}
 
 function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient()
@@ -30,30 +31,20 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
   const [country, setCountry] = useState('')
   const [currency, setCurrency] = useState('')
 
+  const sdkCreateAssociation = createAssociationMutation()
   const createMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/admin/associations', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, country, currency }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || 'Failed to create association')
-      }
-      return res.json()
-    },
+    mutationFn: sdkCreateAssociation.mutationFn,
     onSuccess: () => {
       toast.success('Association created')
-      queryClient.invalidateQueries({ queryKey: ['admin', 'associations'] })
+      queryClient.invalidateQueries({ queryKey: listAssociationsQueryKey() })
       setName('')
       setCountry('')
       setCurrency('')
       onClose()
     },
-    onError: (err: Error) => {
-      toast.error(err.message)
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to create association'
+      toast.error(msg)
     },
   })
 
@@ -71,7 +62,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            createMutation.mutate()
+            createMutation.mutate({ body: { name, country, currency } })
           }}
           className="space-y-4"
         >
@@ -137,17 +128,11 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
 function AssociationsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const { data, isLoading, error } = useQuery<AssociationsResponse>({
-    queryKey: ['admin', 'associations'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/associations?limit=50', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch associations')
-      return res.json()
-    },
-  })
+  const { data, isLoading, error } = useQuery(listAssociationsOptions({ query: { limit: 50 } }))
 
-  const associations = data?.data ?? []
-  const total = data?.total ?? associations.length
+  // Cast to local Association interface which includes extended fields (status, memberCount, created_at)
+  const associations = (data?.data ?? []) as unknown as Association[]
+  const total = data?.pagination?.totalCount ?? associations.length
   const activeCount = associations.filter((a) => a.status === 'active').length
   const pendingCount = associations.filter((a) => a.status === 'pending').length
 
@@ -193,7 +178,7 @@ function AssociationsPage() {
       {/* Error state */}
       {error && (
         <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {error.message}
+          {error instanceof Error ? error.message : 'Failed to load associations'}
         </div>
       )}
 

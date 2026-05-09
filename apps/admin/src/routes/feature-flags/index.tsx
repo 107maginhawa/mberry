@@ -3,8 +3,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ToggleLeft, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-
 import { RequireRole } from '@/lib/role-gate'
+import {
+  listFeatureFlagsOptions,
+  listFeatureFlagsQueryKey,
+  setFeatureFlagMutation,
+  deleteFeatureFlagMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/feature-flags/')({
   component: () => (
@@ -39,34 +44,24 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
   const queryClient = useQueryClient()
   const [targetType, setTargetType] = useState('global')
   const [targetId, setTargetId] = useState('')
-  const [moduleName, setModuleName] = useState(moduleOptions[0])
+  const [moduleName, setModuleName] = useState<string>(moduleOptions[0] ?? 'person')
   const [enabled, setEnabled] = useState(true)
 
+  const sdkSetFlag = setFeatureFlagMutation()
   const create = useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/admin/feature-flags', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetType, targetId: targetId || undefined, moduleName, enabled }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as { message?: string }).message || 'Failed to create flag')
-      }
-      return res.json()
-    },
+    mutationFn: sdkSetFlag.mutationFn,
     onSuccess: () => {
       toast.success('Feature flag created')
-      queryClient.invalidateQueries({ queryKey: ['admin', 'feature-flags'] })
+      queryClient.invalidateQueries({ queryKey: listFeatureFlagsQueryKey() })
       setTargetType('global')
       setTargetId('')
-      setModuleName(moduleOptions[0])
+      setModuleName(moduleOptions[0] ?? 'person')
       setEnabled(true)
       onClose()
     },
-    onError: (err: Error) => {
-      toast.error(err.message)
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to create flag'
+      toast.error(msg)
     },
   })
 
@@ -138,7 +133,7 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
               Cancel
             </button>
             <button
-              onClick={() => create.mutate()}
+              onClick={() => create.mutate({ body: { targetType, targetId: (targetId || targetType) as string, moduleName, enabled } })}
               disabled={create.isPending || (targetType !== 'global' && !targetId)}
               className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
@@ -155,30 +150,18 @@ function FeatureFlagsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const { data: flags, isLoading, isError, error } = useQuery({
-    queryKey: ['admin', 'feature-flags'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/feature-flags', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch feature flags')
-      return res.json() as Promise<FeatureFlag[]>
-    },
-  })
+  const { data: flags, isLoading, isError, error } = useQuery(listFeatureFlagsOptions())
 
+  const sdkDeleteFlag = deleteFeatureFlagMutation()
   const deleteFlag = useMutation({
-    mutationFn: async (flagId: string) => {
-      const res = await fetch(`/api/admin/feature-flags/${flagId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to delete flag')
-      return res.json()
-    },
+    mutationFn: sdkDeleteFlag.mutationFn,
     onSuccess: () => {
       toast.success('Feature flag deleted')
-      queryClient.invalidateQueries({ queryKey: ['admin', 'feature-flags'] })
+      queryClient.invalidateQueries({ queryKey: listFeatureFlagsQueryKey() })
     },
-    onError: (err: Error) => {
-      toast.error(err.message)
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to delete flag'
+      toast.error(msg)
     },
   })
 
@@ -207,7 +190,7 @@ function FeatureFlagsPage() {
       </div>
 
       {isError && (
-        <p className="text-sm text-red-500 mb-4">Error: {(error as Error).message}</p>
+        <p className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load feature flags'}</p>
       )}
 
       <div className="rounded-lg border bg-card">
@@ -259,7 +242,7 @@ function FeatureFlagsPage() {
                   </td>
                   <td className="p-4 text-right">
                     <button
-                      onClick={() => deleteFlag.mutate(flag.id)}
+                      onClick={() => deleteFlag.mutate({ path: { flagId: flag.id } })}
                       disabled={deleteFlag.isPending}
                       className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
                       title="Delete flag"

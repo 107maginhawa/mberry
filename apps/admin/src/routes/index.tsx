@@ -2,47 +2,22 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { LayoutDashboard, Building2, Building, Users, ShieldCheck, UserCog, ToggleLeft, RefreshCw } from 'lucide-react'
 import { Button } from '@monobase/ui'
+import {
+  listAssociationsOptions,
+  listOrganizationsOptions,
+  listAdminsOptions,
+  listFeatureFlagsOptions,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
 })
 
 function useDashboardStats() {
-  const associations = useQuery({
-    queryKey: ['admin', 'associations'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/associations', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch associations')
-      return res.json() as Promise<unknown[]>
-    },
-  })
-
-  const organizations = useQuery({
-    queryKey: ['admin', 'organizations'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/organizations', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch organizations')
-      return res.json() as Promise<unknown[]>
-    },
-  })
-
-  const admins = useQuery({
-    queryKey: ['admin', 'admins'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/admins', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch admins')
-      return res.json() as Promise<unknown[]>
-    },
-  })
-
-  const flags = useQuery({
-    queryKey: ['admin', 'feature-flags'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/feature-flags', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch feature flags')
-      return res.json() as Promise<unknown[]>
-    },
-  })
+  const associations = useQuery(listAssociationsOptions({ query: { limit: 100 } }))
+  const organizations = useQuery(listOrganizationsOptions({ query: { limit: 100 } }))
+  const admins = useQuery(listAdminsOptions())
+  const flags = useQuery(listFeatureFlagsOptions())
 
   return { associations, organizations, admins, flags }
 }
@@ -91,13 +66,13 @@ function DashboardPage() {
       <div className="grid grid-cols-4 gap-6">
         <StatCard
           label="Associations"
-          value={Array.isArray(associations.data) ? associations.data.length : 0}
+          value={associations.data?.data?.length ?? 0}
           loading={associations.isLoading}
           error={associations.isError}
         />
         <StatCard
           label="Organizations"
-          value={Array.isArray(organizations.data) ? organizations.data.length : 0}
+          value={organizations.data?.data?.length ?? 0}
           loading={organizations.isLoading}
           error={organizations.isError}
         />

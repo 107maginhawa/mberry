@@ -4,6 +4,13 @@ import { Building2, ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import {
+  getAssociationOptions,
+  getAssociationQueryKey,
+  listAssociationsQueryKey,
+  updateAssociationMutation,
+  deleteAssociationMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/associations/$associationId')({
   component: AssociationDetailPage,
@@ -38,54 +45,38 @@ function AssociationDetailPage() {
   const [editCurrency, setEditCurrency] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const { data: association, isLoading, error } = useQuery<Association>({
-    queryKey: ['admin', 'associations', associationId],
-    queryFn: async () => {
-      const res = await fetch(`/api/admin/associations/${associationId}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch association')
-      return res.json()
-    },
-  })
+  const { data: sdkAssociation, isLoading, error } = useQuery(
+    getAssociationOptions({ path: { associationId } })
+  )
+  // Cast to local Association interface which includes extended fields (status, memberCount, created_at)
+  const association = sdkAssociation as unknown as Association | undefined
 
-  const updateMutation = useMutation({
-    mutationFn: async (body: { name: string; country: string; currency: string }) => {
-      const res = await fetch(`/api/admin/associations/${associationId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || 'Failed to update association')
-      }
-      return res.json()
-    },
+  const sdkUpdateAssociation = updateAssociationMutation()
+  const updateMut = useMutation({
+    mutationFn: sdkUpdateAssociation.mutationFn,
     onSuccess: () => {
       toast.success('Association updated')
-      queryClient.invalidateQueries({ queryKey: ['admin', 'associations', associationId] })
+      queryClient.invalidateQueries({ queryKey: getAssociationQueryKey({ path: { associationId } }) })
       setEditing(false)
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to update association'
+      toast.error(msg)
+    },
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`/api/admin/associations/${associationId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || 'Failed to delete association')
-      }
-    },
+  const sdkDeleteAssociation = deleteAssociationMutation()
+  const deleteMut = useMutation({
+    mutationFn: sdkDeleteAssociation.mutationFn,
     onSuccess: () => {
       toast.success('Association deleted')
-      queryClient.invalidateQueries({ queryKey: ['admin', 'associations'] })
+      queryClient.invalidateQueries({ queryKey: listAssociationsQueryKey() })
       navigate({ to: '/associations' })
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to delete association'
+      toast.error(msg)
+    },
   })
 
   const startEdit = () => {
@@ -111,7 +102,7 @@ function AssociationDetailPage() {
 
       {error && (
         <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {error.message}
+          {error instanceof Error ? error.message : 'Failed to load association'}
         </div>
       )}
 
@@ -164,7 +155,7 @@ function AssociationDetailPage() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault()
-                    updateMutation.mutate({ name: editName, country: editCountry, currency: editCurrency })
+                    updateMut.mutate({ path: { associationId }, body: { name: editName, country: editCountry, currency: editCurrency } })
                   }}
                   className="space-y-4"
                 >
@@ -212,10 +203,10 @@ function AssociationDetailPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={updateMutation.isPending}
+                      disabled={updateMut.isPending}
                       className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                     >
-                      {updateMutation.isPending ? 'Saving...' : 'Save'}
+                      {updateMut.isPending ? 'Saving...' : 'Save'}
                     </button>
                   </div>
                 </form>
@@ -239,11 +230,11 @@ function AssociationDetailPage() {
                     Cancel
                   </button>
                   <button
-                    onClick={() => deleteMutation.mutate()}
-                    disabled={deleteMutation.isPending}
+                    onClick={() => deleteMut.mutate({ path: { associationId } })}
+                    disabled={deleteMut.isPending}
                     className="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
                   >
-                    {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                    {deleteMut.isPending ? 'Deleting...' : 'Delete'}
                   </button>
                 </div>
               </div>
