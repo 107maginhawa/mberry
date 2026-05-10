@@ -51,7 +51,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   const applications = useQuery<{ pendingCount: number }>({
     queryKey: ['applications-summary', orgId],
     queryFn: async () => {
-      const json = await api.get<any>(`/api/membership/applications/${orgId}?status=pending`)
+      const json = await api.get<any>(`/api/membership/applications/${orgId}?status=submitted`)
       const apps = json.data ?? []
       return { pendingCount: apps.length }
     },

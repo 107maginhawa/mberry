@@ -48,13 +48,20 @@ export function orgContextMiddleware() {
       return ctx.json({ error: 'Authentication required' }, 401);
     }
 
-    // Extract orgId from header, query params, or path params
+    // Extract orgId from header, query params, path params, or URL path UUID
     let orgId =
       ctx.req.header('x-org-id') ??
       ctx.req.query('orgId') ??
       ctx.req.query('organizationId') ??
       ctx.req.param('organizationId') ??
       null;
+
+    // Fallback: extract UUID from URL path (for routes like /dues-reporting/:organizationId/dashboard
+    // where ctx.req.param() doesn't work in wildcard middleware)
+    if (!orgId) {
+      const uuidMatch = ctx.req.path.match(/\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+      if (uuidMatch) orgId = uuidMatch[1]!;
+    }
 
     // Fallback: extract from request body for mutation methods
     if (!orgId && ['POST', 'PUT', 'PATCH'].includes(ctx.req.method)) {

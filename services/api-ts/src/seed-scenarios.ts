@@ -367,7 +367,7 @@ async function seedPresident(
   }
 
   // Set admin role so president can access all association endpoints
-  await db.update(userTable).set({ role: 'admin,association:admin' } as any).where(eq(userTable.id, client.userId));
+  await db.update(userTable).set({ role: 'admin,association:admin,association:member,association:officer' } as any).where(eq(userTable.id, client.userId));
 
   console.log(`  ✓ Maria Santos — President, membership PDA-2025-001`);
   return client;
@@ -427,8 +427,8 @@ async function seedOfficer(
     } as any);
   }
 
-  // Set officer role
-  await db.update(userTable).set({ role: 'association:admin' } as any).where(eq(userTable.id, client.userId));
+  // Set officer role (needs member+officer+admin for all endpoint access)
+  await db.update(userTable).set({ role: 'association:admin,association:member,association:officer' } as any).where(eq(userTable.id, client.userId));
 
   // Create position + officer term via DB (requirePosition check blocks API)
   const existingPos = await db.select().from(positions)
