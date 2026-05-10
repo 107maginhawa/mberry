@@ -791,6 +791,47 @@ async function seedRelationalData(
 }
 
 // ═══════════════════════════════════════════════════════════════
+// Phase 9: Profile Photos (from randomuser.me)
+// ═══════════════════════════════════════════════════════════════
+
+async function seedProfilePhotos(db: ReturnType<typeof drizzle>, allPersonIds: string[], genders: Record<string, string>) {
+  console.log('  Profile photos...');
+
+  // Check if any person already has an avatar
+  const [sample] = await db.select({ id: persons.id, avatar: persons.avatar }).from(persons).limit(1);
+  if (sample?.avatar) {
+    console.log('    (photos already seeded, skipping)');
+    return;
+  }
+
+  try {
+    // Fetch photos from randomuser.me in batch
+    const count = Math.min(allPersonIds.length, 40);
+    const maleCount = Object.values(genders).filter(g => g === 'male').length;
+    const femaleCount = count - maleCount;
+
+    // Use deterministic portrait URLs (no API call needed, faster + no rate limit)
+    let maleIdx = 1;
+    let femaleIdx = 1;
+
+    for (const personId of allPersonIds) {
+      const gender = genders[personId] || 'male';
+      const folder = gender === 'female' ? 'women' : 'men';
+      const idx = gender === 'female' ? femaleIdx++ : maleIdx++;
+      const url = `https://randomuser.me/api/portraits/${folder}/${idx}.jpg`;
+
+      await db.update(persons)
+        .set({ avatar: { url } } as any)
+        .where(eq(persons.id, personId));
+    }
+
+    console.log(`    ✓ ${allPersonIds.length} profile photos assigned`);
+  } catch (err) {
+    console.log(`    ⚠ Photo seeding failed (non-blocking): ${(err as Error).message}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // IDOR Test Officer (org2) — required by route-protection-idor.test.ts
 // ═══════════════════════════════════════════════════════════════
 
@@ -925,6 +966,23 @@ async function main() {
   // Phase 8: Relational data (registrations, enrollments, payments)
   console.log('\nPhase 8: Relational data...');
   await seedRelationalData(db, orgId, president, memberClients);
+
+  // Phase 9: Profile photos
+  console.log('\nPhase 9: Profile photos...');
+  const allClients = [president, ...officerClients.slice(1), ...memberClients];
+  const genderMap: Record<string, string> = {};
+  // Officers
+  for (const o of OFFICERS) {
+    const c = allClients.find(c => c.email === o.email);
+    if (c) genderMap[c.personId] = ['Juan', 'Carlos'].includes(o.firstName) ? 'male' : 'female';
+  }
+  // Members
+  const femaleNames = ['Isabella', 'Patricia', 'Carmen', 'Teresa', 'Rosa', 'Lucia', 'Gabriela', 'Andrea', 'Valeria', 'Catalina', 'Mariana', 'Daniela', 'Claudia', 'Beatriz', 'Miguel'];
+  for (const m of MEMBERS) {
+    const c = allClients.find(c => c.email === m.email);
+    if (c) genderMap[c.personId] = femaleNames.includes(m.firstName) ? 'female' : 'male';
+  }
+  await seedProfilePhotos(db, allClients.filter(c => c.personId).map(c => c.personId), genderMap);
 
   // Summary
   const personCount = await db.select().from(persons);
