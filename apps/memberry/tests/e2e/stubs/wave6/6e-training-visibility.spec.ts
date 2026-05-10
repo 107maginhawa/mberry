@@ -1,5 +1,5 @@
 // Wave 6E: Training visibility (BR-16) — NOT YET IMPLEMENTED
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../helpers/test-fixture'
 
 test.describe('Wave 6E: Training Visibility BR-16 (NOT IMPLEMENTED)', () => {
   // BR-16: Training visibility toggle

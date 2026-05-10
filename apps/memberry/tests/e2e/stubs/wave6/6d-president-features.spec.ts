@@ -1,5 +1,5 @@
 // Wave 6D: President/Officer features — NOT YET IMPLEMENTED
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../helpers/test-fixture'
 
 test.describe('Wave 6D: President Features (NOT IMPLEMENTED)', () => {
   // CO-09: Officer transition/handover

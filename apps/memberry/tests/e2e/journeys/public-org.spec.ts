@@ -1,5 +1,5 @@
 // Business Rules: [BR-29]
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 
 test.describe('Public Org Page', () => {
   test('[BR-29] public org page loads without auth', async ({ page }) => {

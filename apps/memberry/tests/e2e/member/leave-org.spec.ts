@@ -1,6 +1,6 @@
 // M-27: Voluntary organization departure
 // Verifies the "Leave" button, confirmation dialog, and termination flow
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
 
 test.describe('M-27: Leave Organization', () => {

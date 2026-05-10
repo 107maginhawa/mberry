@@ -1,5 +1,5 @@
 // Wave 6C: Society Officer features — NOT YET IMPLEMENTED
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../helpers/test-fixture'
 
 test.describe('Wave 6C: Society Officer Features (NOT IMPLEMENTED)', () => {
   // SO-4: Training analytics dashboard

@@ -1,5 +1,5 @@
 // Wave 6B: Secretary features — NOT YET IMPLEMENTED
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../helpers/test-fixture'
 
 test.describe('Wave 6B: Secretary Features (NOT IMPLEMENTED)', () => {
   // CS-4: Meeting agenda distribution

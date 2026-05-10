@@ -1,6 +1,6 @@
 // M-16: Transfer membership between organizations
 // Verifies the transfer dialog UI, input validation, and form submission
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
 
 test.describe('M-16: Transfer Membership', () => {

@@ -1,5 +1,5 @@
 // BR-26: Session management
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
 
 test.describe('BR-26: Session Management', () => {
@@ -25,18 +25,15 @@ test.describe('BR-26: Session Management', () => {
     await page.goto('/my/settings')
     await page.waitForLoadState('networkidle')
 
-    // Click Security tab
+    // Security tab must exist — core settings feature
     const securityTab = page.getByRole('tab', { name: /security/i })
-    const hasTab = await securityTab.isVisible({ timeout: 10000 }).catch(() => false)
+    await expect(securityTab).toBeVisible({ timeout: 10000 })
 
-    if (hasTab) {
-      await securityTab.click()
-      await page.waitForTimeout(1000)
+    await securityTab.click()
+    await page.waitForTimeout(1000)
 
-      // Should show security settings
-      const hasSecurityContent = await page.getByText(/security|password|session/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-      expect(hasSecurityContent).toBeTruthy()
-    }
+    // Should show security settings content
+    await expect(page.getByText(/security|password|session/i).first()).toBeVisible({ timeout: 5000 })
   })
 
   test('unauthenticated access redirects to sign-in', async ({ page }) => {

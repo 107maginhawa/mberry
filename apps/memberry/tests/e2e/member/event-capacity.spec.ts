@@ -1,5 +1,5 @@
 // BR-27: Event capacity and registration limits
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'

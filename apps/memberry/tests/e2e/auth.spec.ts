@@ -1,5 +1,5 @@
 // Business Rules: [BR-21] [BR-24] [BR-25] [BR-26]
-import { test, expect } from '@playwright/test'
+import { test, expect } from './helpers/test-fixture'
 import { signIn } from './helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
 

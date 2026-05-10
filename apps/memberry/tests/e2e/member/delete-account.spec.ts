@@ -1,6 +1,6 @@
 // M-25: Account deletion
 // Verifies the delete account flow in Settings > General > Danger Zone
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
 
 test.describe('M-25: Delete Account', () => {

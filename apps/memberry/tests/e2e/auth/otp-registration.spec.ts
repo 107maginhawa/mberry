@@ -1,6 +1,6 @@
 // BR-25: OTP registration flow
 // Tests email verification during signup
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { isMailpitAvailable } from '../helpers/mailpit'
 
 let mailpitUp = false

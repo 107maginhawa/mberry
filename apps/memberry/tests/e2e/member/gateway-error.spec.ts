@@ -1,5 +1,5 @@
 // M-19: Payment gateway unavailable fallback
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
 
 test.describe('M-19: Gateway Error Handling', () => {

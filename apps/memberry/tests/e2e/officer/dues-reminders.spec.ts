@@ -1,5 +1,5 @@
 // CT-2: Batch dues reminders
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsTreasurer } from '../helpers/auth'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
@@ -27,20 +27,14 @@ test.describe('CT-2: Dues Reminders', () => {
     const apiPromise = page.waitForResponse(
       (resp) => resp.url().includes('dues') && resp.request().method() === 'POST',
       { timeout: 10000 },
-    ).catch(() => null)
+    )
 
     await sendBtn.click()
 
-    // Button should show loading state
-    const sendingVisible = await page.getByRole('button', { name: /sending/i }).isVisible({ timeout: 3000 }).catch(() => false)
-    // Either shows "Sending..." or completes quickly
-    expect(typeof sendingVisible).toBe('boolean')
-
     const response = await apiPromise
-    // API call was made (may succeed or fail depending on backend state)
-    if (response) {
-      expect([200, 201, 400, 404, 500]).toContain(response.status())
-    }
+    // Backend must respond — reject 5xx (server crash) but allow 4xx (validation/no overdue members)
+    expect(response).not.toBeNull()
+    expect(response.status()).toBeLessThan(500)
   })
 
   test('Send Reminders shows toast on completion', async ({ page }) => {

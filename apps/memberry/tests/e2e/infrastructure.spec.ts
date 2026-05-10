@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './helpers/test-fixture'
 import { isMailpitAvailable } from './helpers/mailpit'
 import { mockDate, getPageTime, daysFromNow, formatDate } from './helpers/clock'
 import { signInAsOfficer, signInAsMember, signInAsTreasurer, signInAsSecretary, signInAsSociety } from './helpers/auth'

@@ -1,6 +1,6 @@
 // Wave 6A: Member features — NOT YET IMPLEMENTED
 // These tests define the RED phase specs for features that need to be built
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../helpers/test-fixture'
 
 test.describe('Wave 6A: Member Features (NOT IMPLEMENTED)', () => {
   // M-18: Contact officer

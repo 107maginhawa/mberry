@@ -1,6 +1,6 @@
 // M-13: Password reset flow
 // Requires Mailpit running (docker compose up mailpit)
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { isMailpitAvailable, waitForMessage, extractLinksFromMessage, deleteAllMessages } from '../helpers/mailpit'
 
 let mailpitUp = false

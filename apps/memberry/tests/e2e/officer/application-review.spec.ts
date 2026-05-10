@@ -1,5 +1,5 @@
 // CO-07: Application review — view pending, approve/deny
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsOfficer } from '../helpers/auth'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'

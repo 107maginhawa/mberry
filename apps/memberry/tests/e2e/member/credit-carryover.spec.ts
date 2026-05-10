@@ -1,5 +1,5 @@
 // BR-12: Credit carry-over
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
 
 test.describe('BR-12: Credit Carry-Over', () => {
