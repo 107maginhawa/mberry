@@ -1,6 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { OfficerTermRepository } from './repos/governance.repo';
+import { positions } from './repos/governance.schema';
+import { persons } from '@/handlers/person/repos/person.schema';
+import { eq, inArray } from 'drizzle-orm';
 
 /**
  * listOfficerTerms
@@ -23,5 +26,27 @@ export async function listOfficerTerms(
 
   const terms = await repo.findByOrg(orgId);
 
-  return ctx.json({ items: terms });
+  // Enrich with position title + person name
+  const positionIds = [...new Set(terms.map((t: any) => t.positionId).filter(Boolean))];
+  const personIds = [...new Set(terms.map((t: any) => t.personId).filter(Boolean))];
+
+  const positionMap: Record<string, string> = {};
+  if (positionIds.length > 0) {
+    const posRows = await db.select({ id: positions.id, title: positions.title }).from(positions).where(inArray(positions.id, positionIds));
+    for (const p of posRows) positionMap[p.id] = p.title;
+  }
+
+  const personMap: Record<string, string> = {};
+  if (personIds.length > 0) {
+    const perRows = await db.select({ id: persons.id, firstName: persons.firstName, lastName: persons.lastName }).from(persons).where(inArray(persons.id, personIds));
+    for (const p of perRows) personMap[p.id] = `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim();
+  }
+
+  const enriched = terms.map((t: any) => ({
+    ...t,
+    positionTitle: positionMap[t.positionId] || 'Officer',
+    personName: personMap[t.personId] || 'Unknown',
+  }));
+
+  return ctx.json({ items: enriched });
 }

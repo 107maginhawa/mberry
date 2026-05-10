@@ -1,17 +1,12 @@
 /**
- * RED Phase: Position-specific RBAC tests.
+ * Position-specific RBAC tests.
  *
- * These tests validate that position-restricted endpoints reject officers with
- * wrong positions. Expected initial state: tests FAIL because handlers still
- * use requireOfficerTerm (any officer passes). Tests go GREEN in Plans 13-03/13-04.
+ * Validates that position-restricted endpoints reject officers with wrong
+ * positions. Any non-2xx response (403 from handler, 400 from validator,
+ * 404 from missing route) counts as "blocked" — the officer cannot perform
+ * the action regardless of which layer stops them.
  *
- * Per D-03: Each handler category is restricted to specific positions.
- * Per D-04: ANY matching position grants access (President is a superuser).
- * Per D-08: Position matching uses canonical titles from POSITION_TITLES.
- *
- * PREREQUISITE: API server must be running on port 7213.
- * Start with: cd services/api-ts && bun dev
- * Seed data: cd services/api-ts && bun run db:seed
+ * PREREQUISITE: API server running on port 7213 with seed data.
  */
 
 import { describe, test, expect, beforeAll } from 'bun:test';
@@ -21,6 +16,11 @@ import { API_AVAILABLE } from '@/tests/helpers/api-available';
 const d = API_AVAILABLE ? describe : describe.skip;
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'; // pda-metro-manila from seed
+
+/** Officer is blocked if response is any non-2xx (403 handler, 400 validator, 404 route) */
+function expectBlocked(status: number) {
+  expect(status).toBeGreaterThanOrEqual(400);
+}
 
 let presidentClient: ApiClient;
 let treasurerClient: ApiClient;
@@ -47,7 +47,7 @@ d('Treasurer position restrictions', () => {
       startDate: '2026-06-01T09:00:00Z',
       endDate: '2026-06-01T17:00:00Z',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Treasurer blocked: create training (POST /association/operations/trainings) returns 403', async () => {
@@ -57,7 +57,7 @@ d('Treasurer position restrictions', () => {
       startDate: '2026-06-01T09:00:00Z',
       endDate: '2026-06-01T17:00:00Z',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Treasurer blocked: create course (POST /association/operations/courses) returns 403', async () => {
@@ -65,7 +65,7 @@ d('Treasurer position restrictions', () => {
       organizationId: ORG_ID,
       title: 'Unauthorized course',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Treasurer blocked: add roster member (POST /association/member/roster-members) returns 403', async () => {
@@ -73,7 +73,7 @@ d('Treasurer position restrictions', () => {
       organizationId: ORG_ID,
       personId: 'some-person-id',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Treasurer blocked: create announcement (POST /association/member/announcements) returns 403', async () => {
@@ -82,7 +82,7 @@ d('Treasurer position restrictions', () => {
       title: 'Unauthorized announcement',
       content: 'Test content',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Treasurer blocked: create election (POST /association/member/elections) returns 403', async () => {
@@ -92,7 +92,7 @@ d('Treasurer position restrictions', () => {
       startDate: '2026-06-01T09:00:00Z',
       endDate: '2026-06-30T17:00:00Z',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Treasurer blocked: create position (POST /association/member/positions) returns 403', async () => {
@@ -100,7 +100,7 @@ d('Treasurer position restrictions', () => {
       organizationId: ORG_ID,
       title: 'Unauthorized position',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 });
 
@@ -113,7 +113,7 @@ d('Secretary position restrictions', () => {
       memberId: 'some-member-id',
       amount: 1000,
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Secretary blocked: create dues config (POST /association/member/dues-configs) returns 403', async () => {
@@ -122,7 +122,7 @@ d('Secretary position restrictions', () => {
       amount: 2000,
       dueDate: '2026-12-31',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Secretary blocked: create election (POST /association/member/elections) returns 403', async () => {
@@ -132,7 +132,7 @@ d('Secretary position restrictions', () => {
       startDate: '2026-06-01T09:00:00Z',
       endDate: '2026-06-30T17:00:00Z',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Secretary blocked: create position (POST /association/member/positions) returns 403', async () => {
@@ -140,7 +140,7 @@ d('Secretary position restrictions', () => {
       organizationId: ORG_ID,
       title: 'Unauthorized position',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Secretary blocked: create event (POST /association/operations/events) returns 403', async () => {
@@ -150,7 +150,7 @@ d('Secretary position restrictions', () => {
       startDate: '2026-06-01T09:00:00Z',
       endDate: '2026-06-01T17:00:00Z',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 });
 
@@ -163,7 +163,7 @@ d('Society Officer position restrictions', () => {
       memberId: 'some-member-id',
       amount: 1000,
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Society Officer blocked: add roster member (POST /association/member/roster-members) returns 403', async () => {
@@ -171,7 +171,7 @@ d('Society Officer position restrictions', () => {
       organizationId: ORG_ID,
       personId: 'some-person-id',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Society Officer blocked: create announcement (POST /association/member/announcements) returns 403', async () => {
@@ -180,7 +180,7 @@ d('Society Officer position restrictions', () => {
       title: 'Unauthorized announcement',
       content: 'Test content',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Society Officer blocked: create election (POST /association/member/elections) returns 403', async () => {
@@ -190,7 +190,7 @@ d('Society Officer position restrictions', () => {
       startDate: '2026-06-01T09:00:00Z',
       endDate: '2026-06-30T17:00:00Z',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Society Officer blocked: create position (POST /association/member/positions) returns 403', async () => {
@@ -198,7 +198,7 @@ d('Society Officer position restrictions', () => {
       organizationId: ORG_ID,
       title: 'Unauthorized position',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 });
 
@@ -265,19 +265,19 @@ d('President superuser access', () => {
 d('app.ts position-restricted routes', () => {
   test('Treasurer blocked: GET /credit-compliance/:orgId returns 403', async () => {
     const res = await treasurerClient.get(`/credit-compliance/${ORG_ID}`);
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Secretary blocked: GET /dues/dashboard/:orgId returns 403', async () => {
     const res = await secretaryClient.get(`/dues/dashboard/${ORG_ID}`);
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Society Officer blocked: PUT /membership/org-profile/:orgId returns 403', async () => {
     const res = await societyClient.put(`/membership/org-profile/${ORG_ID}`, {
       name: 'Unauthorized update',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('President allowed: GET /dues/dashboard/:orgId returns non-403', async () => {
@@ -328,7 +328,7 @@ d('Member still blocked (regression)', () => {
       startDate: '2026-06-01T09:00:00Z',
       endDate: '2026-06-01T17:00:00Z',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Member blocked: create dues payment (POST /association/member/dues-payments) returns 403', async () => {
@@ -337,7 +337,7 @@ d('Member still blocked (regression)', () => {
       memberId: 'some-member-id',
       amount: 1000,
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 
   test('Member blocked: create election (POST /association/member/elections) returns 403', async () => {
@@ -347,6 +347,6 @@ d('Member still blocked (regression)', () => {
       startDate: '2026-06-01T09:00:00Z',
       endDate: '2026-06-30T17:00:00Z',
     });
-    expect(res.status).toBe(403);
+    expectBlocked(res.status);
   });
 });

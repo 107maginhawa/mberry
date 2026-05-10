@@ -175,6 +175,8 @@ const OFFICERS = [
 ];
 
 const MEMBERS: { email: string; firstName: string; lastName: string; spec: string; license: string; status: 'active' | 'grace' | 'lapsed' }[] = [
+  // Legacy test user (referenced by 6+ test files — DO NOT REMOVE)
+  { email: 'member@memberry.ph', firstName: 'Miguel', lastName: 'Bautista', spec: 'General Dentistry', license: '0099999', status: 'active' },
   // 20 active
   { email: 'member01@memberry.ph', firstName: 'Isabella', lastName: 'Dela Cruz', spec: 'General Dentistry', license: '0100001', status: 'active' },
   { email: 'member02@memberry.ph', firstName: 'Luis', lastName: 'Ramos', spec: 'Oral Surgery', license: '0100002', status: 'active' },
@@ -278,7 +280,19 @@ async function bootstrapDB(db: ReturnType<typeof drizzle>) {
   }
   console.log(`  ✓ Categories: Regular, Associate`);
 
-  return { assocId: assoc!.id, orgId: org1!.id, org2Id: org2!.id, regularTierId: regularTier.id, associateTierId: associateTier.id };
+  // Org2 tier (needed for IDOR test officer)
+  const existingOrg2Tiers = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, org2!.id));
+  let org2RegularTier: any;
+  if (existingOrg2Tiers.length === 0) {
+    const [t] = await db.insert(membershipTiers).values([
+      { organizationId: org2!.id, name: 'Regular', code: 'REGULAR', annualFee: '3000', currency: 'PHP', benefits: ['Voting rights', 'CPD credits'], status: 'active', sortOrder: 1 },
+    ] as any).returning();
+    org2RegularTier = t;
+  } else {
+    org2RegularTier = existingOrg2Tiers[0];
+  }
+
+  return { assocId: assoc!.id, orgId: org1!.id, org2Id: org2!.id, regularTierId: regularTier.id, associateTierId: associateTier.id, org2RegularTierId: org2RegularTier.id };
 }
 
 async function verifyEmail(db: ReturnType<typeof drizzle>, email: string) {
@@ -681,6 +695,160 @@ async function seedCredits(db: ReturnType<typeof drizzle>, memberClients: SeedCl
 }
 
 // ═══════════════════════════════════════════════════════════════
+// Phase 8: Relational Data (registrations, enrollments, payments)
+// ═══════════════════════════════════════════════════════════════
+
+async function seedRelationalData(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+  president: SeedClient,
+  memberClients: SeedClient[],
+) {
+  console.log('  Relational data...');
+
+  // Get event and training IDs
+  const allEvents = await db.select({ id: events.id, title: events.title, status: events.status }).from(events);
+  const allTrainings = await db.select({ id: trainings.id, title: trainings.title, status: trainings.status }).from(trainings);
+
+  // Event registrations — register Maria + first 5 members for published events
+  const publishedEvents = allEvents.filter(e => e.status === 'published' || e.status === 'completed');
+  const existingRegs = await db.select().from(eventRegistrations).limit(1);
+  if (existingRegs.length === 0 && publishedEvents.length > 0) {
+    const registrants = [president.personId, ...memberClients.slice(0, 5).map(c => c.personId)];
+    for (const evt of publishedEvents) {
+      for (const personId of registrants) {
+        await db.insert(eventRegistrations).values({
+          organizationId: orgId, eventId: evt.id, personId,
+          status: 'confirmed', registeredAt: new Date(),
+        } as any);
+      }
+    }
+    console.log(`    ✓ Event registrations: ${registrants.length} people × ${publishedEvents.length} events`);
+  }
+
+  // Training enrollments — enroll Maria + first 3 members
+  const existingEnrollments = await db.select().from(trainingEnrollments).limit(1);
+  if (existingEnrollments.length === 0 && allTrainings.length > 0) {
+    const enrollees = [president.personId, ...memberClients.slice(0, 3).map(c => c.personId)];
+    for (const trn of allTrainings) {
+      for (const personId of enrollees) {
+        const isCompleted = trn.status === 'completed';
+        await db.insert(trainingEnrollments).values({
+          organizationId: orgId, trainingId: trn.id, personId,
+          status: isCompleted ? 'completed' : 'enrolled',
+          enrolledAt: new Date(),
+          completedAt: isCompleted ? new Date() : null,
+        } as any);
+      }
+    }
+    console.log(`    ✓ Training enrollments: ${enrollees.length} people × ${allTrainings.length} trainings`);
+  }
+
+  // Dues payments — 10 payments for first 10 active members
+  const existingPayments = await db.execute(sql`SELECT count(*) as c FROM dues_payment`);
+  const paymentCount = (existingPayments as any).rows?.[0]?.c ?? (existingPayments as any)[0]?.c ?? 0;
+  if (Number(paymentCount) === 0) {
+    const paymentMembers = memberClients.slice(0, 10);
+    for (let i = 0; i < paymentMembers.length; i++) {
+      const methods = ['gcash', 'bankTransfer', 'cash', 'online', 'check'];
+      await db.execute(sql`
+        INSERT INTO dues_payment (organization_id, person_id, receipt_number, amount, currency, payment_method, status, paid_at)
+        VALUES (${orgId}, ${paymentMembers[i]!.personId}, ${`RCP-2025-${String(i + 1).padStart(3, '0')}`}, 3000, 'PHP', ${methods[i % methods.length]}::dues_payment_method, 'completed'::dues_payment_status, ${new Date('2025-01-15')})
+      `);
+    }
+    console.log(`    ✓ Dues payments: 10 records`);
+  }
+
+  // Credits for Maria (president) — so her credits page isn't empty
+  await president.post('/persons/me/credit-entries', {
+    organizationId: orgId,
+    activityName: 'PDA Annual Convention 2025 (Attended)',
+    provider: 'PDA Metro Manila',
+    activityDate: '2025-03-15',
+    creditAmount: 8,
+    registrationDate: '2025-01-01',
+    cyclePeriodYears: 3,
+  });
+  await president.post('/persons/me/credit-entries', {
+    organizationId: orgId,
+    activityName: 'Advanced Implant Workshop (Completed)',
+    provider: 'PDA Training Center',
+    activityDate: '2025-02-02',
+    creditAmount: 16,
+    registrationDate: '2025-01-01',
+    cyclePeriodYears: 3,
+  });
+  await president.post('/persons/me/credit-entries', {
+    organizationId: orgId,
+    activityName: 'Leadership & Governance Seminar',
+    provider: 'PDA National',
+    activityDate: '2025-04-10',
+    creditAmount: 4,
+    registrationDate: '2025-01-01',
+    cyclePeriodYears: 3,
+  });
+  console.log(`    ✓ Maria credits: 3 entries (28 total credits)`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IDOR Test Officer (org2) — required by route-protection-idor.test.ts
+// ═══════════════════════════════════════════════════════════════
+
+async function seedIdorOfficer(db: ReturnType<typeof drizzle>, org2Id: string, tierId: string) {
+  const email = 'idor-officer@memberry.ph';
+  const client = new SeedClient(org2Id);
+  await client.signUp(email, 'IDOR Test Officer');
+  await verifyEmail(db, email);
+  await client.signIn(email);
+
+  await client.createPerson({
+    firstName: 'IDOR', lastName: 'Officer',
+    specialization: 'General Dentistry', licenseNumber: '0099998',
+    dateOfBirth: '1985-01-01', gender: 'male',
+  });
+
+  // Set role
+  await db.update(userTable).set({ role: 'association:admin' } as any).where(eq(userTable.id, client.userId));
+
+  // Membership in org2
+  const existingMbr = await db.select().from(memberships)
+    .where(eq(memberships.personId, client.personId)).limit(1);
+  if (existingMbr.length === 0) {
+    await db.insert(memberships).values({
+      organizationId: org2Id, personId: client.personId,
+      tierId, memberNumber: 'PDA-CEBU-001',
+      startDate: '2025-01-01', duesExpiryDate: '2025-12-31',
+      gracePeriodDays: 30, status: 'active', joinedAt: new Date(),
+    } as any);
+  }
+
+  // Position + officer term in org2
+  const existingPos = await db.select().from(positions)
+    .where(eq(positions.title, 'IDOR Officer')).limit(1);
+  let pos: any;
+  if (existingPos.length === 0) {
+    [pos] = await db.insert(positions).values({
+      organizationId: org2Id, title: 'IDOR Officer',
+      level: 'chapter', termLengthMonths: 12, sortOrder: 1,
+    } as any).returning();
+  } else {
+    pos = existingPos[0];
+  }
+
+  const existingTerm = await db.select().from(officerTerms)
+    .where(eq(officerTerms.personId, client.personId)).limit(1);
+  if (existingTerm.length === 0) {
+    await db.insert(officerTerms).values({
+      positionId: pos.id, personId: client.personId,
+      organizationId: org2Id, status: 'active',
+      startDate: new Date('2025-07-01'), endDate: new Date('2026-06-30'),
+    } as any);
+  }
+
+  console.log(`  ✓ IDOR Officer — org2 (pda-cebu), ${email}`);
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Main Orchestrator
 // ═══════════════════════════════════════════════════════════════
 
@@ -703,7 +871,7 @@ async function main() {
   const db = drizzle(pool);
 
   // Phase 0: DB Bootstrap
-  const { orgId, org2Id, regularTierId, associateTierId } = await bootstrapDB(db);
+  const { orgId, org2Id, regularTierId, associateTierId, org2RegularTierId } = await bootstrapDB(db);
 
   // Phase 1: President
   const president = await seedPresident(db, orgId, regularTierId);
@@ -736,6 +904,10 @@ async function main() {
     await seedApplicant(db, a, orgId, regularTierId, president);
   }
 
+  // Phase 4b: IDOR test user (org2 officer — referenced by route-protection-idor.test.ts)
+  console.log('\nPhase 4b: IDOR Officer (org2)...');
+  await seedIdorOfficer(db, org2Id, org2RegularTierId);
+
   // Phase 5: Activities (DB-based — requirePosition 2FA blocks API)
   console.log('\nPhase 5: Activities...');
   await seedEvents(db, orgId, president.personId);
@@ -749,6 +921,10 @@ async function main() {
   // Phase 7: Credits
   console.log('\nPhase 7: Credits...');
   await seedCredits(db, memberClients, orgId);
+
+  // Phase 8: Relational data (registrations, enrollments, payments)
+  console.log('\nPhase 8: Relational data...');
+  await seedRelationalData(db, orgId, president, memberClients);
 
   // Summary
   const personCount = await db.select().from(persons);

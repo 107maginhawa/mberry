@@ -42,7 +42,7 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
   const { data: officers = [], isLoading: loading } = useQuery({
     queryKey: ['officer-terms', orgId],
     queryFn: async () => {
-      const json = await api.get<any>(`/api/officer-terms/${orgId}`)
+      const json = await api.get<any>(`/api/association/member/officer-terms`, { 'x-org-id': orgId })
       const terms = json.data || json.items || []
       return terms
         .filter((t: any) => t.status === 'active')
