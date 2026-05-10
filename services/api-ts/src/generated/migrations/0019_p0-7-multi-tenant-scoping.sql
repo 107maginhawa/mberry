@@ -1,26 +1,26 @@
-CREATE TYPE "public"."credential_status" AS ENUM('active', 'suspended', 'revoked', 'expired');--> statement-breakpoint
-CREATE TYPE "public"."credential_template_status" AS ENUM('active', 'retired');--> statement-breakpoint
-CREATE TYPE "public"."credential_type" AS ENUM('memberCard', 'certificate', 'badge', 'license');--> statement-breakpoint
-CREATE TYPE "public"."license_status" AS ENUM('active', 'expired', 'suspended', 'revoked', 'pending');--> statement-breakpoint
-CREATE TYPE "public"."renewal_alert_status" AS ENUM('pending', 'sent', 'acknowledged', 'dismissed');--> statement-breakpoint
-CREATE TYPE "public"."event_type" AS ENUM('generalAssembly', 'inductionCeremony', 'fellowship', 'medicalMission', 'boardMeeting', 'committeeMeeting', 'fundraiser', 'other');--> statement-breakpoint
-CREATE TYPE "public"."event_visibility" AS ENUM('internal', 'network');--> statement-breakpoint
-CREATE TYPE "public"."announcement_status" AS ENUM('draft', 'scheduled', 'sent', 'scheduledFailed', 'archived');--> statement-breakpoint
-CREATE TYPE "public"."announcement_visibility" AS ENUM('internal', 'network');--> statement-breakpoint
-CREATE TYPE "public"."billing_frequency" AS ENUM('annual', 'quarterly');--> statement-breakpoint
-CREATE TYPE "public"."dues_payment_method" AS ENUM('online', 'cash', 'check', 'bankTransfer', 'gcash', 'other');--> statement-breakpoint
-CREATE TYPE "public"."dues_payment_status" AS ENUM('pending', 'completed', 'failed', 'refunded', 'partiallyRefunded', 'expired');--> statement-breakpoint
-CREATE TYPE "public"."gateway_provider" AS ENUM('paymongo', 'stripe');--> statement-breakpoint
-CREATE TYPE "public"."election_status" AS ENUM('draft', 'nominationsOpen', 'votingOpen', 'awaitingConfirmation', 'published', 'cancelled');--> statement-breakpoint
-CREATE TYPE "public"."election_type" AS ENUM('officer', 'bylaw');--> statement-breakpoint
-CREATE TYPE "public"."nominee_status" AS ENUM('nominated', 'accepted', 'declined', 'elected');--> statement-breakpoint
-CREATE TYPE "public"."voting_mode" AS ENUM('online', 'inPerson', 'hybrid');--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'credential_status') THEN CREATE TYPE "public"."credential_status" AS ENUM('active', 'suspended', 'revoked', 'expired'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'credential_template_status') THEN CREATE TYPE "public"."credential_template_status" AS ENUM('active', 'retired'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'credential_type') THEN CREATE TYPE "public"."credential_type" AS ENUM('memberCard', 'certificate', 'badge', 'license'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'license_status') THEN CREATE TYPE "public"."license_status" AS ENUM('active', 'expired', 'suspended', 'revoked', 'pending'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'renewal_alert_status') THEN CREATE TYPE "public"."renewal_alert_status" AS ENUM('pending', 'sent', 'acknowledged', 'dismissed'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'event_type') THEN CREATE TYPE "public"."event_type" AS ENUM('generalAssembly', 'inductionCeremony', 'fellowship', 'medicalMission', 'boardMeeting', 'committeeMeeting', 'fundraiser', 'other'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'event_visibility') THEN CREATE TYPE "public"."event_visibility" AS ENUM('internal', 'network'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'announcement_status') THEN CREATE TYPE "public"."announcement_status" AS ENUM('draft', 'scheduled', 'sent', 'scheduledFailed', 'archived'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'announcement_visibility') THEN CREATE TYPE "public"."announcement_visibility" AS ENUM('internal', 'network'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'billing_frequency') THEN CREATE TYPE "public"."billing_frequency" AS ENUM('annual', 'quarterly'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'dues_payment_method') THEN CREATE TYPE "public"."dues_payment_method" AS ENUM('online', 'cash', 'check', 'bankTransfer', 'gcash', 'other'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'dues_payment_status') THEN CREATE TYPE "public"."dues_payment_status" AS ENUM('pending', 'completed', 'failed', 'refunded', 'partiallyRefunded', 'expired'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gateway_provider') THEN CREATE TYPE "public"."gateway_provider" AS ENUM('paymongo', 'stripe'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'election_status') THEN CREATE TYPE "public"."election_status" AS ENUM('draft', 'nominationsOpen', 'votingOpen', 'awaitingConfirmation', 'published', 'cancelled'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'election_type') THEN CREATE TYPE "public"."election_type" AS ENUM('officer', 'bylaw'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'nominee_status') THEN CREATE TYPE "public"."nominee_status" AS ENUM('nominated', 'accepted', 'declined', 'elected'); END IF; END $$;--> statement-breakpoint
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'voting_mode') THEN CREATE TYPE "public"."voting_mode" AS ENUM('online', 'inPerson', 'hybrid'); END IF; END $$;--> statement-breakpoint
 ALTER TYPE "public"."audit_action" ADD VALUE 'delete-request';--> statement-breakpoint
 ALTER TYPE "public"."audit_action" ADD VALUE 'delete-cancel';--> statement-breakpoint
 ALTER TYPE "public"."audit_action" ADD VALUE 'anonymize';--> statement-breakpoint
 ALTER TYPE "public"."audit_action" ADD VALUE 'export';--> statement-breakpoint
 ALTER TYPE "public"."audit_event_type" ADD VALUE 'data-deletion' BEFORE 'system-config';--> statement-breakpoint
-CREATE TABLE "credential_template" (
+CREATE TABLE IF NOT EXISTS "credential_template" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE "credential_template" (
 	"status" "credential_template_status" DEFAULT 'active' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "digital_credential" (
+CREATE TABLE IF NOT EXISTS "digital_credential" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE "digital_credential" (
 	"revocation_reason" varchar(500)
 );
 --> statement-breakpoint
-CREATE TABLE "license_renewal_alert" (
+CREATE TABLE IF NOT EXISTS "license_renewal_alert" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE "license_renewal_alert" (
 	"status" "renewal_alert_status" NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "professional_license" (
+CREATE TABLE IF NOT EXISTS "professional_license" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE "professional_license" (
 	"verified_by" uuid
 );
 --> statement-breakpoint
-CREATE TABLE "certificate" (
+CREATE TABLE IF NOT EXISTS "certificate" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE "certificate" (
 	CONSTRAINT "certificate_training_person_unique" UNIQUE("training_id","person_id")
 );
 --> statement-breakpoint
-CREATE TABLE "announcement_stats" (
+CREATE TABLE IF NOT EXISTS "announcement_stats" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -126,7 +126,7 @@ CREATE TABLE "announcement_stats" (
 	"email_opened" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "announcement" (
+CREATE TABLE IF NOT EXISTS "announcement" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -147,7 +147,7 @@ CREATE TABLE "announcement" (
 	"published_at" timestamp
 );
 --> statement-breakpoint
-CREATE TABLE "dues_category_override" (
+CREATE TABLE IF NOT EXISTS "dues_category_override" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -161,7 +161,7 @@ CREATE TABLE "dues_category_override" (
 	CONSTRAINT "dues_cat_override_unique" UNIQUE("dues_config_id","category_id")
 );
 --> statement-breakpoint
-CREATE TABLE "dues_org_config" (
+CREATE TABLE IF NOT EXISTS "dues_org_config" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -178,7 +178,7 @@ CREATE TABLE "dues_org_config" (
 	CONSTRAINT "dues_config_org_unique" UNIQUE("organization_id")
 );
 --> statement-breakpoint
-CREATE TABLE "dues_fund_allocation" (
+CREATE TABLE IF NOT EXISTS "dues_fund_allocation" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -192,7 +192,7 @@ CREATE TABLE "dues_fund_allocation" (
 	"is_reversal" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "dues_fund" (
+CREATE TABLE IF NOT EXISTS "dues_fund" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -206,7 +206,7 @@ CREATE TABLE "dues_fund" (
 	"active" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "dues_gateway_config" (
+CREATE TABLE IF NOT EXISTS "dues_gateway_config" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -222,7 +222,7 @@ CREATE TABLE "dues_gateway_config" (
 	CONSTRAINT "dues_gateway_org_unique" UNIQUE("organization_id")
 );
 --> statement-breakpoint
-CREATE TABLE "dues_payment" (
+CREATE TABLE IF NOT EXISTS "dues_payment" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -248,7 +248,7 @@ CREATE TABLE "dues_payment" (
 	CONSTRAINT "dues_payment_receipt_unique" UNIQUE("receipt_number")
 );
 --> statement-breakpoint
-CREATE TABLE "dues_reminder_schedule" (
+CREATE TABLE IF NOT EXISTS "dues_reminder_schedule" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -265,7 +265,7 @@ CREATE TABLE "dues_reminder_schedule" (
 	"is_custom" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "election_nominee" (
+CREATE TABLE IF NOT EXISTS "election_nominee" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -280,7 +280,7 @@ CREATE TABLE "election_nominee" (
 	"status" "nominee_status" DEFAULT 'nominated' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "election_vote" (
+CREATE TABLE IF NOT EXISTS "election_vote" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -294,7 +294,7 @@ CREATE TABLE "election_vote" (
 	"voter_id" uuid NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "election" (
+CREATE TABLE IF NOT EXISTS "election" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -315,7 +315,7 @@ CREATE TABLE "election" (
 	"published_at" timestamp
 );
 --> statement-breakpoint
-CREATE TABLE "notification_preference" (
+CREATE TABLE IF NOT EXISTS "notification_preference" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -329,7 +329,7 @@ CREATE TABLE "notification_preference" (
 	"email_enabled" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "person_privacy_setting" (
+CREATE TABLE IF NOT EXISTS "person_privacy_setting" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -438,107 +438,107 @@ ALTER TABLE "election_nominee" ADD CONSTRAINT "election_nominee_nominated_by_per
 ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_election_id_election_id_fk" FOREIGN KEY ("election_id") REFERENCES "public"."election"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_nominee_id_election_nominee_id_fk" FOREIGN KEY ("nominee_id") REFERENCES "public"."election_nominee"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_voter_id_person_id_fk" FOREIGN KEY ("voter_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "idx_cred_template_org" ON "credential_template" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_cred_template_type" ON "credential_template" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "idx_cred_template_status" ON "credential_template" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "idx_dc_org" ON "digital_credential" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_dc_person" ON "digital_credential" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "idx_dc_template" ON "digital_credential" USING btree ("template_id");--> statement-breakpoint
-CREATE INDEX "idx_dc_status" ON "digital_credential" USING btree ("credential_dc_status");--> statement-breakpoint
-CREATE INDEX "idx_dc_credential_number" ON "digital_credential" USING btree ("credential_number");--> statement-breakpoint
-CREATE INDEX "idx_renewal_alert_org" ON "license_renewal_alert" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_renewal_alert_license" ON "license_renewal_alert" USING btree ("license_id");--> statement-breakpoint
-CREATE INDEX "idx_renewal_alert_person" ON "license_renewal_alert" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "idx_renewal_alert_status" ON "license_renewal_alert" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "idx_license_org" ON "professional_license" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_license_person" ON "professional_license" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "idx_license_status" ON "professional_license" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "idx_license_expiration" ON "professional_license" USING btree ("expiration_date");--> statement-breakpoint
-CREATE INDEX "certificate_org_idx" ON "certificate" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "certificate_person_idx" ON "certificate" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "certificate_training_idx" ON "certificate" USING btree ("training_id");--> statement-breakpoint
-CREATE INDEX "ann_stats_org_idx" ON "announcement_stats" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "ann_stats_announcement_idx" ON "announcement_stats" USING btree ("announcement_id");--> statement-breakpoint
-CREATE INDEX "announcement_org_idx" ON "announcement" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "announcement_status_idx" ON "announcement" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "announcement_org_status_idx" ON "announcement" USING btree ("organization_id","status");--> statement-breakpoint
-CREATE INDEX "dues_cat_override_org_idx" ON "dues_category_override" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_cat_override_config_idx" ON "dues_category_override" USING btree ("dues_config_id");--> statement-breakpoint
-CREATE INDEX "dues_config_org_idx" ON "dues_org_config" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_fund_alloc_org_idx" ON "dues_fund_allocation" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_fund_alloc_payment_idx" ON "dues_fund_allocation" USING btree ("payment_id");--> statement-breakpoint
-CREATE INDEX "dues_fund_alloc_fund_idx" ON "dues_fund_allocation" USING btree ("fund_id");--> statement-breakpoint
-CREATE INDEX "dues_fund_org_idx" ON "dues_fund" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_fund_org_sort_idx" ON "dues_fund" USING btree ("organization_id","sort_order");--> statement-breakpoint
-CREATE INDEX "dues_gateway_org_idx" ON "dues_gateway_config" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_payment_org_idx" ON "dues_payment" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_payment_person_idx" ON "dues_payment" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "dues_payment_status_idx" ON "dues_payment" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "dues_payment_org_person_idx" ON "dues_payment" USING btree ("organization_id","person_id");--> statement-breakpoint
-CREATE INDEX "dues_reminder_org_idx" ON "dues_reminder_schedule" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_reminder_config_idx" ON "dues_reminder_schedule" USING btree ("dues_config_id");--> statement-breakpoint
-CREATE INDEX "nominee_org_idx" ON "election_nominee" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "nominee_election_idx" ON "election_nominee" USING btree ("election_id");--> statement-breakpoint
-CREATE INDEX "nominee_person_idx" ON "election_nominee" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "vote_org_idx" ON "election_vote" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "vote_election_idx" ON "election_vote" USING btree ("election_id");--> statement-breakpoint
-CREATE INDEX "vote_voter_idx" ON "election_vote" USING btree ("voter_id");--> statement-breakpoint
-CREATE INDEX "vote_election_voter_idx" ON "election_vote" USING btree ("election_id","voter_id","position_id");--> statement-breakpoint
-CREATE INDEX "election_org_idx" ON "election" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "election_status_idx" ON "election" USING btree ("status");--> statement-breakpoint
-CREATE UNIQUE INDEX "notif_pref_person_cat_org_idx" ON "notification_preference" USING btree ("person_id","category","organization_id");--> statement-breakpoint
-CREATE INDEX "notif_pref_person_idx" ON "notification_preference" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "notif_pref_org_idx" ON "notification_preference" USING btree ("organization_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "privacy_person_org_idx" ON "person_privacy_setting" USING btree ("person_id","org_id");--> statement-breakpoint
-CREATE INDEX "privacy_person_idx" ON "person_privacy_setting" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "affiliation_transfer_org_status_idx" ON "affiliation_transfer" USING btree ("organization_id","status");--> statement-breakpoint
-CREATE INDEX "chapter_affiliation_org_person_idx" ON "chapter_affiliation" USING btree ("organization_id","person_id");--> statement-breakpoint
-CREATE INDEX "chapter_affiliation_org_chapter_idx" ON "chapter_affiliation" USING btree ("organization_id","chapter_id");--> statement-breakpoint
-CREATE INDEX "royalty_split_org_chapter_idx" ON "royalty_split" USING btree ("organization_id","chapter_id");--> statement-breakpoint
-CREATE INDEX "royalty_split_org_membership_idx" ON "royalty_split" USING btree ("organization_id","membership_id");--> statement-breakpoint
-CREATE INDEX "directory_profile_org_person_idx" ON "directory_profile" USING btree ("organization_id","person_id");--> statement-breakpoint
-CREATE INDEX "directory_profile_org_visibility_idx" ON "directory_profile" USING btree ("organization_id","visibility");--> statement-breakpoint
-CREATE INDEX "aging_bucket_org_idx" ON "aging_bucket" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_config_legacy_org_idx" ON "dues_config" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "dues_invoice_org_status_idx" ON "dues_invoice" USING btree ("organization_id","status");--> statement-breakpoint
-CREATE INDEX "dues_invoice_membership_idx" ON "dues_invoice" USING btree ("membership_id");--> statement-breakpoint
-CREATE INDEX "membership_app_org_status_idx" ON "membership_application" USING btree ("organization_id","status");--> statement-breakpoint
-CREATE INDEX "membership_category_org_idx" ON "membership_category" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "membership_tier_org_idx" ON "membership_tier" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "membership_tier_org_code_idx" ON "membership_tier" USING btree ("organization_id","code");--> statement-breakpoint
-CREATE INDEX "membership_org_person_idx" ON "membership" USING btree ("organization_id","person_id");--> statement-breakpoint
-CREATE INDEX "membership_org_status_idx" ON "membership" USING btree ("organization_id","status");--> statement-breakpoint
-CREATE INDEX "idx_checkin_org" ON "check_in" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_event_reg_org" ON "event_registration" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_waitlist_org" ON "waitlist_entry" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_course_enroll_org" ON "course_enrollment" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_quiz_org" ON "quiz_attempt" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_training_enroll_org" ON "training_enrollment" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "audit_organization_id_idx" ON "audit_log_entry" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "audit_org_event_idx" ON "audit_log_entry" USING btree ("organization_id","event_type");--> statement-breakpoint
-CREATE INDEX "invoice_line_items_org_idx" ON "invoice_line_item" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "invoices_org_idx" ON "invoice" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "merchant_accounts_org_idx" ON "merchant_account" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "booking_events_org_idx" ON "booking_event" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "bookings_org_idx" ON "booking" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "schedule_exceptions_org_idx" ON "schedule_exception" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "time_slots_org_idx" ON "time_slot" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "chat_messages_org_idx" ON "chat_message" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "chat_rooms_org_idx" ON "chat_room" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_msg_template_org" ON "message_template" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_message_org" ON "message" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_person_sub_org" ON "person_subscription" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_sub_topic_org" ON "subscription_topic" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_docaccess_org" ON "document_access_log" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_doctag_org" ON "document_tag" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_doc_owner" ON "document" USING btree ("owner_id");--> statement-breakpoint
-CREATE INDEX "email_queue_org_idx" ON "email_queue" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "email_template_org_idx" ON "email_template" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "notifications_org_idx" ON "notification" USING btree ("organization_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "idx_org_slug" ON "organization" USING btree ("slug");--> statement-breakpoint
-CREATE INDEX "reviews_org_idx" ON "review" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "stored_files_org_idx" ON "stored_file" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "stored_files_owner_idx" ON "stored_file" USING btree ("owner");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_cred_template_org" ON "credential_template" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_cred_template_type" ON "credential_template" USING btree ("type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_cred_template_status" ON "credential_template" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_dc_org" ON "digital_credential" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_dc_person" ON "digital_credential" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_dc_template" ON "digital_credential" USING btree ("template_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_dc_status" ON "digital_credential" USING btree ("credential_dc_status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_dc_credential_number" ON "digital_credential" USING btree ("credential_number");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_renewal_alert_org" ON "license_renewal_alert" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_renewal_alert_license" ON "license_renewal_alert" USING btree ("license_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_renewal_alert_person" ON "license_renewal_alert" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_renewal_alert_status" ON "license_renewal_alert" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_license_org" ON "professional_license" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_license_person" ON "professional_license" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_license_status" ON "professional_license" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_license_expiration" ON "professional_license" USING btree ("expiration_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "certificate_org_idx" ON "certificate" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "certificate_person_idx" ON "certificate" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "certificate_training_idx" ON "certificate" USING btree ("training_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "ann_stats_org_idx" ON "announcement_stats" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "ann_stats_announcement_idx" ON "announcement_stats" USING btree ("announcement_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "announcement_org_idx" ON "announcement" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "announcement_status_idx" ON "announcement" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "announcement_org_status_idx" ON "announcement" USING btree ("organization_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_cat_override_org_idx" ON "dues_category_override" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_cat_override_config_idx" ON "dues_category_override" USING btree ("dues_config_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_config_org_idx" ON "dues_org_config" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_fund_alloc_org_idx" ON "dues_fund_allocation" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_fund_alloc_payment_idx" ON "dues_fund_allocation" USING btree ("payment_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_fund_alloc_fund_idx" ON "dues_fund_allocation" USING btree ("fund_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_fund_org_idx" ON "dues_fund" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_fund_org_sort_idx" ON "dues_fund" USING btree ("organization_id","sort_order");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_gateway_org_idx" ON "dues_gateway_config" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_payment_org_idx" ON "dues_payment" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_payment_person_idx" ON "dues_payment" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_payment_status_idx" ON "dues_payment" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_payment_org_person_idx" ON "dues_payment" USING btree ("organization_id","person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_reminder_org_idx" ON "dues_reminder_schedule" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_reminder_config_idx" ON "dues_reminder_schedule" USING btree ("dues_config_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "nominee_org_idx" ON "election_nominee" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "nominee_election_idx" ON "election_nominee" USING btree ("election_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "nominee_person_idx" ON "election_nominee" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "vote_org_idx" ON "election_vote" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "vote_election_idx" ON "election_vote" USING btree ("election_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "vote_voter_idx" ON "election_vote" USING btree ("voter_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "vote_election_voter_idx" ON "election_vote" USING btree ("election_id","voter_id","position_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "election_org_idx" ON "election" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "election_status_idx" ON "election" USING btree ("status");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "notif_pref_person_cat_org_idx" ON "notification_preference" USING btree ("person_id","category","organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notif_pref_person_idx" ON "notification_preference" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notif_pref_org_idx" ON "notification_preference" USING btree ("organization_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "privacy_person_org_idx" ON "person_privacy_setting" USING btree ("person_id","org_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "privacy_person_idx" ON "person_privacy_setting" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "affiliation_transfer_org_status_idx" ON "affiliation_transfer" USING btree ("organization_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "chapter_affiliation_org_person_idx" ON "chapter_affiliation" USING btree ("organization_id","person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "chapter_affiliation_org_chapter_idx" ON "chapter_affiliation" USING btree ("organization_id","chapter_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "royalty_split_org_chapter_idx" ON "royalty_split" USING btree ("organization_id","chapter_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "royalty_split_org_membership_idx" ON "royalty_split" USING btree ("organization_id","membership_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "directory_profile_org_person_idx" ON "directory_profile" USING btree ("organization_id","person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "directory_profile_org_visibility_idx" ON "directory_profile" USING btree ("organization_id","visibility");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "aging_bucket_org_idx" ON "aging_bucket" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_config_legacy_org_idx" ON "dues_config" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_invoice_org_status_idx" ON "dues_invoice" USING btree ("organization_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dues_invoice_membership_idx" ON "dues_invoice" USING btree ("membership_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "membership_app_org_status_idx" ON "membership_application" USING btree ("organization_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "membership_category_org_idx" ON "membership_category" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "membership_tier_org_idx" ON "membership_tier" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "membership_tier_org_code_idx" ON "membership_tier" USING btree ("organization_id","code");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "membership_org_person_idx" ON "membership" USING btree ("organization_id","person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "membership_org_status_idx" ON "membership" USING btree ("organization_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_checkin_org" ON "check_in" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_event_reg_org" ON "event_registration" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_waitlist_org" ON "waitlist_entry" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_course_enroll_org" ON "course_enrollment" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_quiz_org" ON "quiz_attempt" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_training_enroll_org" ON "training_enrollment" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_organization_id_idx" ON "audit_log_entry" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_org_event_idx" ON "audit_log_entry" USING btree ("organization_id","event_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_line_items_org_idx" ON "invoice_line_item" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoices_org_idx" ON "invoice" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "merchant_accounts_org_idx" ON "merchant_account" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "booking_events_org_idx" ON "booking_event" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "bookings_org_idx" ON "booking" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "schedule_exceptions_org_idx" ON "schedule_exception" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "time_slots_org_idx" ON "time_slot" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "chat_messages_org_idx" ON "chat_message" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "chat_rooms_org_idx" ON "chat_room" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_msg_template_org" ON "message_template" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_message_org" ON "message" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_person_sub_org" ON "person_subscription" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_sub_topic_org" ON "subscription_topic" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_docaccess_org" ON "document_access_log" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_doctag_org" ON "document_tag" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_doc_owner" ON "document" USING btree ("owner_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "email_queue_org_idx" ON "email_queue" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "email_template_org_idx" ON "email_template" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notifications_org_idx" ON "notification" USING btree ("organization_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "idx_org_slug" ON "organization" USING btree ("slug");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "reviews_org_idx" ON "review" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "stored_files_org_idx" ON "stored_file" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "stored_files_owner_idx" ON "stored_file" USING btree ("owner");--> statement-breakpoint
 ALTER TABLE "credit_entry" DROP COLUMN "tenant_id";--> statement-breakpoint
 ALTER TABLE "aging_bucket" DROP COLUMN "tenant_id";--> statement-breakpoint
 ALTER TABLE "dues_config" DROP COLUMN "tenant_id";--> statement-breakpoint

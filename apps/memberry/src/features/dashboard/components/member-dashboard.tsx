@@ -47,7 +47,14 @@ export function MemberDashboard() {
     queryKey: ['my-memberships'],
     queryFn: async () => {
       const json = await api.get<any>('/api/persons/me/memberships')
-      return json.data ?? []
+      return (json.data ?? []).map((m: any) => ({
+        id: m.id,
+        orgId: m.organizationId,
+        orgName: m.orgName ?? m.organizationName ?? '',
+        status: m.status,
+        duesExpiryDate: m.duesExpiryDate,
+        memberNumber: m.memberNumber,
+      }))
     },
     retry: false,
   })
@@ -216,8 +223,9 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
     queryKey: ['officer-role', m.orgId],
     queryFn: async () => {
       const json = await api.get<any>(`/api/persons/me/officer-role/${m.orgId}`)
-      if (json?.data?.isOfficer) {
-        return { isOfficer: true, role: json.data.positions?.[0]?.title || 'Officer' }
+      const positions = Array.isArray(json?.data) ? json.data : []
+      if (positions.length > 0) {
+        return { isOfficer: true, role: positions[0]?.positionTitle || 'Officer' }
       }
       return { isOfficer: false, role: '' }
     },

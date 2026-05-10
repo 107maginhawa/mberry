@@ -3,6 +3,8 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { ListMembershipApplicationsQuery } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository } from './repos/membership.repo';
+import { persons } from '@/handlers/person/repos/person.schema';
+import { inArray } from 'drizzle-orm';
 
 /**
  * listMembershipApplications
@@ -32,15 +34,41 @@ export async function listMembershipApplications(
     { pagination: { offset, limit } },
   );
 
+  // Enrich with person names
+  const personIds = [...new Set(result.data.map((a: any) => a.personId).filter(Boolean))];
+  const personMap: Record<string, { firstName: string; lastName: string; email?: string }> = {};
+  if (personIds.length > 0) {
+    const personRows = await db
+      .select({ id: persons.id, firstName: persons.firstName, lastName: persons.lastName, contactInfo: persons.contactInfo })
+      .from(persons)
+      .where(inArray(persons.id, personIds));
+    for (const p of personRows) {
+      personMap[p.id] = {
+        firstName: p.firstName ?? '',
+        lastName: p.lastName ?? '',
+        email: (p.contactInfo as any)?.email ?? '',
+      };
+    }
+  }
+
+  const enriched = result.data.map((app: any) => {
+    const person = personMap[app.personId];
+    return {
+      ...app,
+      name: person ? `${person.firstName} ${person.lastName}`.trim() : undefined,
+      email: person?.email,
+    };
+  });
+
   const totalPages = Math.ceil(result.totalCount / limit);
   const currentPage = Math.floor(offset / limit) + 1;
 
   return ctx.json({
-    data: result.data,
+    data: enriched,
     pagination: {
       offset,
       limit,
-      count: result.data.length,
+      count: enriched.length,
       totalCount: result.totalCount,
       totalPages,
       currentPage,

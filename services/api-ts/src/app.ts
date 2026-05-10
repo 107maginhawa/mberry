@@ -161,9 +161,13 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   if (config.database.instance) {
     logger.debug('Skipping migrations: pre-built database instance was injected');
   } else {
-    logger.debug('Running database migrations...');
-    await runMigrations(database);
-    logger.debug('Database migrations completed successfully');
+    if (process.env['SKIP_MIGRATIONS'] === 'true') {
+      logger.debug('Skipping migrations: SKIP_MIGRATIONS=true');
+    } else {
+      logger.debug('Running database migrations...');
+      await runMigrations(database);
+      logger.debug('Database migrations completed successfully');
+    }
   }
 
   // Initialize email templates

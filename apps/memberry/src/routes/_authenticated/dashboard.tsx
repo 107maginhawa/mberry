@@ -193,8 +193,9 @@ function OrgCard({ membership: m }: { membership: any }) {
     queryFn: async () => {
       if (!orgId) return null
       const json = await api.get<any>(`/api/persons/me/officer-role/${orgId}`)
-      if (json?.data?.isOfficer) {
-        return json.data.positions?.[0]?.title || 'Officer'
+      const positions = Array.isArray(json?.data) ? json.data : []
+      if (positions.length > 0) {
+        return positions[0]?.positionTitle || 'Officer'
       }
       return null
     },
@@ -232,7 +233,8 @@ function OrgCard({ membership: m }: { membership: any }) {
       {officerRole && (
         <div className="mt-3 pt-3 border-t border-[var(--color-border-light)]">
           <Link
-            to={`/org/${orgId}/officer/dashboard` as any}
+            to="/org/$orgId/officer/dashboard"
+            params={{ orgId: orgId ?? '' }}
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] hover:underline"
           >
             <Shield size={13} />

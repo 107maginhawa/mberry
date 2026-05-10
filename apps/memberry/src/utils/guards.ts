@@ -57,13 +57,14 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
   }
 
   try {
-    const { data } = await api.get<{ data: { isOfficer: boolean; positions: Array<{ title: string; [key: string]: unknown }> } }>(`/api/persons/me/officer-role/${orgId}`)
-    if (!data.isOfficer) {
+    const json = await api.get<any>(`/api/persons/me/officer-role/${orgId}`)
+    const positions = Array.isArray(json?.data) ? json.data : []
+    if (positions.length === 0) {
       throw redirect({ to: '/dashboard' })
     }
-    return { officerPositions: data.positions, orgId }
+    return { officerPositions: positions.map((p: any) => ({ title: p.positionTitle, ...p })), orgId }
   } catch (err) {
-    if (err instanceof Error && 'to' in (err as any)) throw err
+    if (err && typeof err === 'object' && 'to' in err) throw err
     throw redirect({ to: '/dashboard' })
   }
 }

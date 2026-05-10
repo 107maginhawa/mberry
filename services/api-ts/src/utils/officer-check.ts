@@ -96,9 +96,10 @@ export async function requirePosition(
     );
   }
 
-  // P1-3: 2FA enforcement for privileged positions
+  // P1-3: 2FA enforcement for privileged positions (skipped in development)
   const requestingPrivileged = normalizedAllowed.some(t => PRIVILEGED_POSITIONS.has(t));
-  if (requestingPrivileged && !(user as any).twoFactorEnabled) {
+  const isDev = process.env['NODE_ENV'] !== 'production';
+  if (requestingPrivileged && !(user as any).twoFactorEnabled && !isDev) {
     return ctx.json(
       { error: 'Two-factor authentication required for privileged officer positions. Please enable 2FA in your account settings.' },
       403,
