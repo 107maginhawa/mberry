@@ -9,7 +9,7 @@ interface ElectionListProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  draft: { label: 'Draft', color: 'bg-muted text-muted-foreground', icon: FileText },
+  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', icon: FileText },
   nominations_open: { label: 'Nominations Open', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]', icon: Users },
   voting_open: { label: 'Voting Open', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: Vote },
   awaiting_confirmation: { label: 'Awaiting Confirmation', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', icon: Clock },

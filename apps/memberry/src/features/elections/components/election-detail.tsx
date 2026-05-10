@@ -16,7 +16,7 @@ interface ElectionDetailProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-muted text-muted-foreground',
+  draft: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
   nominations_open: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
   voting_open: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
   awaiting_confirmation: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
@@ -105,7 +105,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     return <div className="p-6 text-center text-destructive">Failed to load election</div>
   }
 
-  const election = data as any
+  const election = (data as any)?.data ?? data
   const nextAction = NEXT_ACTION[election.status as string]
   const positions: { id: string; title: string; sortOrder: number }[] = election.positions ?? []
   const nominees: any[] = election.nominees ?? []
@@ -187,10 +187,10 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
       {/* Timeline */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
         {[
-          { label: 'Nominations Open', value: election.nominationsOpenAt },
-          { label: 'Nominations Close', value: election.nominationsCloseAt },
-          { label: 'Voting Opens', value: election.votingOpenAt },
-          { label: 'Voting Closes', value: election.votingCloseAt },
+          { label: 'Nominations Open', value: election.nominationStart },
+          { label: 'Nominations Close', value: election.nominationEnd },
+          { label: 'Voting Opens', value: election.votingStart },
+          { label: 'Voting Closes', value: election.votingEnd },
         ].map((item) => (
           <div key={item.label} className="border rounded-lg p-3">
             <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
