@@ -1,6 +1,14 @@
 import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
-import { API_BASE, TEST_PASSWORD } from './test-config'
+import {
+  API_BASE,
+  TEST_PASSWORD,
+  SEED_OFFICER_EMAIL,
+  SEED_MEMBER_EMAIL,
+  SEED_TREASURER_EMAIL,
+  SEED_SECRETARY_EMAIL,
+  SEED_SOCIETY_EMAIL,
+} from './test-config'
 
 /**
  * Sign up a new user via the UI.
@@ -97,4 +105,39 @@ export async function signIn(page: Page, email: string, password: string) {
   // Wait for session + redirect
   await page.waitForTimeout(2000)
   await page.waitForLoadState('networkidle')
+}
+
+/**
+ * Sign in as the seeded officer (president/chapter officer).
+ */
+export async function signInAsOfficer(page: Page) {
+  await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+}
+
+/**
+ * Sign in as the seeded regular member.
+ */
+export async function signInAsMember(page: Page) {
+  await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
+}
+
+/**
+ * Sign in as the seeded treasurer.
+ */
+export async function signInAsTreasurer(page: Page) {
+  await signIn(page, SEED_TREASURER_EMAIL, TEST_PASSWORD)
+}
+
+/**
+ * Sign in as the seeded secretary.
+ */
+export async function signInAsSecretary(page: Page) {
+  await signIn(page, SEED_SECRETARY_EMAIL, TEST_PASSWORD)
+}
+
+/**
+ * Sign in as the seeded society-level officer.
+ */
+export async function signInAsSociety(page: Page) {
+  await signIn(page, SEED_SOCIETY_EMAIL, TEST_PASSWORD)
 }
