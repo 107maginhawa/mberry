@@ -108,7 +108,7 @@ function MyProfilePage() {
             <AvatarInitials
               name={formatPersonName(p?.firstName || '?', p?.lastName, p?.middleName)}
               size="lg"
-              photoUrl={p?.photoUrl}
+              photoUrl={(p as any)?.avatar?.url || p?.photoUrl}
             />
           </div>
           <h2 className="text-[20px] font-bold font-display mt-3 text-center md:text-left">
