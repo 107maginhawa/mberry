@@ -23,5 +23,20 @@ export async function getElection(
   const election = await repo.get(params.electionId);
   if (!election) throw new NotFoundError('Election');
 
-  return ctx.json({ data: election }, 200);
+  const nominees = await repo.listNominees(params.electionId);
+  const voterCount = await repo.getVoterCount(params.electionId);
+  const tallies = election.status === 'awaitingConfirmation' || election.status === 'published'
+    ? await repo.getVoteTallies(params.electionId) : [];
+
+  return ctx.json({ data: {
+    ...election,
+    // Map DB → TypeSpec field names for SDK transformer
+    nominationStart: election.nominationsOpenAt,
+    nominationEnd: election.nominationsCloseAt,
+    votingStart: election.votingOpenAt,
+    votingEnd: election.votingCloseAt,
+    nominees,
+    voterCount,
+    tallies,
+  } }, 200);
 }
