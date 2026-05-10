@@ -108,8 +108,7 @@ export function DataExport() {
             <p className="text-[13px] text-[var(--color-muted)] mt-1.5 leading-relaxed">
               Your export includes all personal data we hold about you: profile information,
               membership records, payment history, event registrations, training completions,
-              certificates, and notifications. The export is delivered as a ZIP archive
-              containing JSON and CSV files.
+              certificates, and notifications. The export is delivered as a JSON file.
             </p>
             <p className="text-[13px] text-[var(--color-muted)] mt-2">
               Exports are available for 7 days after generation. You can request one export every{' '}

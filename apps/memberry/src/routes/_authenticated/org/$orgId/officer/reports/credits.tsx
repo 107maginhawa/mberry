@@ -91,7 +91,7 @@ function CreditReport() {
             ) : (
               members.map((m: any) => {
                 const badge = STATUS_BADGE[m.compliance_status] ?? { label: 'Unknown', className: 'bg-gray-100 text-gray-800' }
-                const pct = Math.min(100, Math.round((m.earned / m.required) * 100))
+                const pct = m.required > 0 ? Math.min(100, Math.round((m.earned / m.required) * 100)) : 0
                 return (
                   <tr key={m.person_id} className="border-t hover:bg-muted/30">
                     <td className="p-3 font-medium">

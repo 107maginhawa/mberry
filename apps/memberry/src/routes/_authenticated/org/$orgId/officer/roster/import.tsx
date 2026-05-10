@@ -22,13 +22,58 @@ interface ParsedRow {
 }
 
 function parseCSV(text: string): { headers: string[]; rows: ParsedRow[] } {
-  const lines = text.trim().split('\n')
-  if (lines.length < 2) return { headers: [], rows: [] }
+  // Strip BOM if present
+  const clean = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text
 
-  const headers = lines[0]!.split(',').map((h) => h.trim().replace(/^"(.*)"$/, '$1'))
+  // Single-pass parser: handles quoted fields with embedded newlines, commas, and escaped quotes
+  const records: string[][] = []
+  let fields: string[] = []
+  let current = ''
+  let inQuotes = false
 
-  const rows = lines.slice(1).map((line) => {
-    const values = line.split(',').map((v) => v.trim().replace(/^"(.*)"$/, '$1'))
+  for (let i = 0; i < clean.length; i++) {
+    const ch = clean[i]!
+    if (inQuotes) {
+      if (ch === '"' && clean[i + 1] === '"') {
+        current += '"'
+        i++ // skip escaped quote
+      } else if (ch === '"') {
+        inQuotes = false
+      } else {
+        current += ch
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true
+      } else if (ch === ',') {
+        fields.push(current.trim())
+        current = ''
+      } else if (ch === '\r') {
+        // skip CR (handle both CRLF and bare CR)
+        continue
+      } else if (ch === '\n') {
+        fields.push(current.trim())
+        if (fields.some((f) => f !== '')) {
+          records.push(fields)
+        }
+        fields = []
+        current = ''
+      } else {
+        current += ch
+      }
+    }
+  }
+  // Final record (no trailing newline)
+  fields.push(current.trim())
+  if (fields.some((f) => f !== '')) {
+    records.push(fields)
+  }
+
+  if (records.length < 2) return { headers: [], rows: [] }
+
+  const headers = records[0]!
+
+  const rows = records.slice(1).map((values) => {
     const row: any = {}
     headers.forEach((h, i) => {
       const key = normalizeHeader(h)
@@ -101,7 +146,7 @@ function RosterImportPage() {
           memberNumber: r.memberNumber || r.licenseNumber || undefined,
         }))
 
-      const data: any = await (importMutOpts.mutationFn as Function)({
+      const data: any = await (importMutOpts.mutationFn as (...args: any[]) => any)({
         body: { organizationId: orgId, members },
       })
 

@@ -19,6 +19,7 @@ function mapTypeToCategory(type: string): NotifCategory {
   if (type === 'billing') return 'Payments'
   if (type.startsWith('booking.')) return 'Events'
   if (type.startsWith('comms.')) return 'Announcements'
+  if (type.startsWith('training.') || type === 'training') return 'Training'
   if (type === 'system' || type === 'security') return 'System'
   return 'System'
 }
