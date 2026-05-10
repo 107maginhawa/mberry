@@ -22,5 +22,5 @@ export async function listMembershipCategories(
 
   const categories = await repo.findMany({ organizationId: orgId });
 
-  return ctx.json({ items: categories });
+  return ctx.json({ data: categories });
 }
