@@ -4,6 +4,7 @@ import { UnauthorizedError } from '@/core/errors';
 import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 import { getCycleForDate } from '@/handlers/association:member/utils/credit-cycle';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
+import { associations, organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -24,12 +25,24 @@ export async function getMyCreditSummary(ctx: BaseContext): Promise<Response> {
   const logger = ctx.get('logger');
   const personId = session.user.id;
 
-  // Auto-lookup registrationDate from membership if not provided
+  // Auto-lookup registrationDate + requiredCredits from membership → org → association
   let registrationDateStr = ctx.req.query('registrationDate');
+  let requiredCredits = 60; // default
+  const [membership] = await db.select({
+    startDate: memberships.startDate,
+    organizationId: memberships.organizationId,
+  }).from(memberships).where(eq(memberships.personId, personId)).limit(1);
   if (!registrationDateStr) {
-    const [membership] = await db.select({ startDate: memberships.startDate })
-      .from(memberships).where(eq(memberships.personId, personId)).limit(1);
     registrationDateStr = membership?.startDate || '2025-01-01';
+  }
+  if (membership?.organizationId) {
+    const [org] = await db.select({ associationId: organizations.associationId })
+      .from(organizations).where(eq(organizations.id, membership.organizationId)).limit(1);
+    if (org?.associationId) {
+      const [assoc] = await db.select({ requiredCreditsPerCycle: associations.requiredCreditsPerCycle })
+        .from(associations).where(eq(associations.id, org.associationId)).limit(1);
+      if (assoc?.requiredCreditsPerCycle) requiredCredits = assoc.requiredCreditsPerCycle;
+    }
   }
   const registrationDate = new Date(registrationDateStr);
   const cyclePeriodYears = Number(ctx.req.query('cyclePeriodYears') ?? '3');
@@ -48,7 +61,9 @@ export async function getMyCreditSummary(ctx: BaseContext): Promise<Response> {
       cycleEnd: cycle.cycleEnd.toISOString(),
     },
     totalEarned,
-    totalCredits: totalEarned, // alias for frontend compat
+    totalCredits: totalEarned,
+    requiredCredits,
+    remaining: Math.max(0, requiredCredits - totalEarned),
     organizations: byOrg,
   }, 200);
 }

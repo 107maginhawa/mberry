@@ -28,6 +28,8 @@ function MyCredits() {
   })
 
   const totalCredits = summary?.totalCredits || 0
+  const requiredCredits = (summary as any)?.requiredCredits || 60
+  const remainingCredits = (summary as any)?.remaining ?? Math.max(0, requiredCredits - totalCredits)
   const entries = entriesResp?.data || []
   const loading = summaryLoading || entriesLoading
 
@@ -54,7 +56,7 @@ function MyCredits() {
         </div>
         <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4">
           <p className="text-[13px] text-[var(--color-muted)]">Required</p>
-          <p className="text-[24px] font-bold">40</p>
+          <p className="text-[24px] font-bold">{requiredCredits}</p>
         </div>
         <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4">
           <p className="text-[13px] text-[var(--color-muted)]">Carryover</p>
@@ -62,7 +64,7 @@ function MyCredits() {
         </div>
         <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4">
           <p className="text-[13px] text-[var(--color-muted)]">Remaining</p>
-          <p className="text-[24px] font-bold">{Math.max(0, 40 - totalCredits)}</p>
+          <p className="text-[24px] font-bold">{remainingCredits}</p>
         </div>
       </div>
 

@@ -753,7 +753,7 @@ async function seedRelationalData(
       const methods = ['gcash', 'bankTransfer', 'cash', 'online', 'check'];
       await db.execute(sql`
         INSERT INTO dues_payment (organization_id, person_id, receipt_number, amount, currency, payment_method, status, paid_at)
-        VALUES (${orgId}, ${paymentMembers[i]!.personId}, ${`RCP-2025-${String(i + 1).padStart(3, '0')}`}, 3000, 'PHP', ${methods[i % methods.length]}::dues_payment_method, 'completed'::dues_payment_status, ${new Date('2025-01-15')})
+        VALUES (${orgId}, ${paymentMembers[i]!.personId}, ${`RCP-2025-${String(i + 1).padStart(3, '0')}`}, 300000, 'PHP', ${methods[i % methods.length]}::dues_payment_method, 'completed'::dues_payment_status, ${new Date('2025-01-15')})
       `);
     }
     console.log(`    ✓ Dues payments: 10 records`);
