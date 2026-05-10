@@ -36,10 +36,10 @@ export async function listMembershipApplications(
 
   // Enrich with person names
   const personIds = [...new Set(result.data.map((a: any) => a.personId).filter(Boolean))];
-  const personMap: Record<string, { firstName: string; lastName: string; email?: string }> = {};
+  const personMap: Record<string, { firstName: string; lastName: string; email?: string; avatar?: any }> = {};
   if (personIds.length > 0) {
     const personRows = await db
-      .select({ id: persons.id, firstName: persons.firstName, lastName: persons.lastName, contactInfo: persons.contactInfo })
+      .select({ id: persons.id, firstName: persons.firstName, lastName: persons.lastName, contactInfo: persons.contactInfo, avatar: persons.avatar })
       .from(persons)
       .where(inArray(persons.id, personIds));
     for (const p of personRows) {
@@ -47,6 +47,7 @@ export async function listMembershipApplications(
         firstName: p.firstName ?? '',
         lastName: p.lastName ?? '',
         email: (p.contactInfo as any)?.email ?? '',
+        avatar: p.avatar ?? null,
       };
     }
   }
@@ -57,6 +58,7 @@ export async function listMembershipApplications(
       ...app,
       name: person ? `${person.firstName} ${person.lastName}`.trim() : undefined,
       email: person?.email,
+      avatar: person?.avatar,
     };
   });
 

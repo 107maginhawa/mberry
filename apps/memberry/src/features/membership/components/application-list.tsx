@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Check, ChevronDown, ChevronUp, ClipboardList, X } from 'lucide-react'
+import { AvatarInitials } from '@/components/patterns/avatar-initials'
 
 interface ApplicationListProps {
   orgId: string
@@ -227,6 +228,11 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
         type="button"
       >
         <div className="flex items-center gap-3 min-w-0">
+          <AvatarInitials
+            name={app.name ?? '?'}
+            size="sm"
+            photoUrl={app.avatar?.url}
+          />
           <div className="min-w-0">
             <div className="font-medium truncate">{app.name ?? app.personId ?? app.id}</div>
             <div className="text-xs text-muted-foreground truncate">{app.email ?? ''}</div>

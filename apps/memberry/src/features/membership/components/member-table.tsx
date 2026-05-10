@@ -13,6 +13,7 @@ import { Checkbox } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Search, Users } from 'lucide-react'
+import { AvatarInitials } from '@/components/patterns/avatar-initials'
 
 interface MemberTableProps {
   orgId: string
@@ -205,16 +206,25 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
                         />
                       </td>
                       <td className="px-3 py-2 text-body-sm">
-                        <Link
-                          to="/org/$orgId/officer/roster/$memberId"
-                          params={{ orgId, memberId: m.id }}
-                          className="font-medium text-primary hover:underline"
-                        >
-                          {m.name ?? m.personId ?? m.id}
-                        </Link>
-                        {m.email && (
-                          <div className="text-xs text-muted-foreground">{m.email}</div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <AvatarInitials
+                            name={m.name ?? '?'}
+                            size="sm"
+                            photoUrl={m.avatar?.url || m.photoUrl}
+                          />
+                          <div>
+                            <Link
+                              to="/org/$orgId/officer/roster/$memberId"
+                              params={{ orgId, memberId: m.id }}
+                              className="font-medium text-primary hover:underline"
+                            >
+                              {m.name ?? m.personId ?? m.id}
+                            </Link>
+                            {m.email && (
+                              <div className="text-xs text-muted-foreground">{m.email}</div>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       <td className="px-3 py-2 text-mono tabular-nums">{m.memberNumber ?? '—'}</td>
                       <td className="px-3 py-2 text-body-sm text-muted-foreground">{m.categoryName ?? m.categoryId ?? '—'}</td>
