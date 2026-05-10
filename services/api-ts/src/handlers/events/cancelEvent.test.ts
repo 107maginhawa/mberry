@@ -81,6 +81,28 @@ describe('cancelEvent', () => {
     expect(response.body.data.status).toBe('cancelled');
   });
 
+  test('throws EVENT_ALREADY_CANCELLED if event is already cancelled', async () => {
+    memberMocks = stubMembership();
+    mocks = stubRepo(EventsRepository, {
+      get: async () => ({ ...fakeEvent, status: 'cancelled' }),
+      update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
+    await expect(cancelEvent(ctx)).rejects.toMatchObject({ code: 'EVENT_ALREADY_CANCELLED' });
+  });
+
+  test('throws EVENT_COMPLETED if event is completed', async () => {
+    memberMocks = stubMembership();
+    mocks = stubRepo(EventsRepository, {
+      get: async () => ({ ...fakeEvent, status: 'completed' }),
+      update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { id: 'evt-1' } });
+    await expect(cancelEvent(ctx)).rejects.toMatchObject({ code: 'EVENT_COMPLETED' });
+  });
+
   test('throws NotFoundError for non-existent event', async () => {
     memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {

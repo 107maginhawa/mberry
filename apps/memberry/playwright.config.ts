@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.spec.ts',
+  testIgnore: ['**/stubs/**'],
 
   maxFailures: process.env.CI ? 0 : 1,
   fullyParallel: false,

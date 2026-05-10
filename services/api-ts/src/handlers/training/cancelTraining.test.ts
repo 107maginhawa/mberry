@@ -32,6 +32,26 @@ describe('cancelTraining', () => {
     expect(response.body.data.status).toBe('cancelled');
   });
 
+  test('throws TRAINING_ALREADY_CANCELLED if training is already cancelled', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => ({ ...fakeTraining, status: 'cancelled' }),
+      update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
+    await expect(cancelTraining(ctx)).rejects.toMatchObject({ code: 'TRAINING_ALREADY_CANCELLED' });
+  });
+
+  test('throws TRAINING_COMPLETED if training is completed', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => ({ ...fakeTraining, status: 'completed' }),
+      update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
+    await expect(cancelTraining(ctx)).rejects.toMatchObject({ code: 'TRAINING_COMPLETED' });
+  });
+
   test('throws NotFoundError when training does not exist', async () => {
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => undefined,

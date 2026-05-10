@@ -102,6 +102,36 @@ describe('updateTraining', () => {
     expect(capturedData.updatedBy).toBe('admin-1');
   });
 
+  test('throws STATUS_UPDATE_NOT_ALLOWED if status provided in body', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => fakeTraining,
+      update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', orgId: 'org-1' },
+      _body: { title: 'Updated', status: 'published' },
+    });
+
+    await expect(updateTraining(ctx)).rejects.toMatchObject({ code: 'STATUS_UPDATE_NOT_ALLOWED' });
+  });
+
+  test('does not pass status to repo when status not in body', async () => {
+    let capturedData: any = null;
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', orgId: 'org-1' },
+      _body: { title: 'Safe Update' },
+    });
+
+    await updateTraining(ctx);
+    expect(capturedData.status).toBeUndefined();
+  });
+
   test('crashes without session (no auth)', async () => {
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
