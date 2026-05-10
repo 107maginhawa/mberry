@@ -1,6 +1,7 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 import type { User, Session } from 'better-auth'
+import type { QueryClient } from '@tanstack/react-query'
 
 export interface RouterContext {
   auth: {
@@ -8,6 +9,7 @@ export interface RouterContext {
     session: Session | null
     person: any | null
   }
+  queryClient: QueryClient
 }
 
 export function createRouter() {
@@ -16,6 +18,7 @@ export function createRouter() {
     scrollRestoration: true,
     context: {
       auth: undefined!, // Provided by RouterProvider in main.tsx
+      queryClient: undefined!, // Provided by RouterProvider in main.tsx
     },
   })
 }

@@ -1,3 +1,4 @@
+import { QueryClient } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
 import { ApiProvider } from '@monobase/sdk-ts/react/provider'
 import { createRoot } from 'react-dom/client'
@@ -6,6 +7,9 @@ import { useSession } from '@monobase/sdk-ts/react/hooks/use-auth'
 import { createRouter } from './router'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`
+
+// Hoisted so router guards can use queryClient.ensureQueryData() for caching
+const queryClient = new QueryClient()
 const router = createRouter()
 
 /**
@@ -30,6 +34,7 @@ function InnerApp() {
       user: session?.user || null,
       person: null, // Fetched per-page, not in bootstrap
     },
+    queryClient,
   }
 
   return <RouterProvider router={router} context={context} />
@@ -37,7 +42,7 @@ function InnerApp() {
 
 function App() {
   return (
-    <ApiProvider apiBaseUrl={API_BASE_URL} notifier={toast}>
+    <ApiProvider apiBaseUrl={API_BASE_URL} queryClient={queryClient} notifier={toast}>
       <InnerApp />
     </ApiProvider>
   )

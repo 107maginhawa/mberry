@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getDuesConfigOptions,
@@ -48,18 +48,23 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   const [reminders, setReminders] = useState<ReminderRow[]>(DEFAULT_REMINDERS)
   const [hasChanges, setHasChanges] = useState(false)
 
-  // Config shape from hand-wired endpoint differs from TypeSpec DuesConfig — cast to any
-   
+  // Config shape from hand-wired endpoint differs from TypeSpec DuesConfig — cast to any.
+  // Stable select avoids new object ref on every render (prevents re-fetch loop).
+  const selectConfig = useCallback((res: any) => res?.data ?? res, [])
+
   const { data: config, isLoading } = useQuery({
     ...getDuesConfigOptions({ path: { duesConfigId: orgId } }) as any,
-    select: (res: any) => res?.data ?? res,
+    select: selectConfig,
   }) as { data: any; isLoading: boolean }
 
   const configAmount = config?.annualAmount ?? config?.defaultAmount
   const hasConfig = config && configAmount != null
 
+  // Track whether we've synced from server config to avoid re-running on every render
+  const syncedRef = useRef(false)
   useEffect(() => {
-    if (hasConfig) {
+    if (hasConfig && !syncedRef.current) {
+      syncedRef.current = true
       setDefaultAmount((Number(configAmount) / 100).toFixed(2))
       setCurrency(config.currency ?? 'PHP')
       setBillingFrequency(config.billingFrequency ?? 'annual')
@@ -70,8 +75,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
         setReminders(config.reminderSchedules)
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when config existence changes
-  }, [hasConfig])
+  }, [hasConfig, configAmount, config])
 
   const saveMutation = useMutation({
     ...updateDuesConfigMutation(),

@@ -8,7 +8,34 @@ import { ErrorBoundary } from "@/components/patterns/error-boundary"
 export const Route = createFileRoute("/_authenticated/org/$orgId/officer")({
   beforeLoad: requireOrgOfficer,
   component: OfficerLayout,
+  pendingComponent: OfficerPendingSkeleton,
 })
+
+function OfficerPendingSkeleton() {
+  return (
+    <div className="flex min-h-screen bg-[var(--color-bg)]">
+      {/* Sidebar skeleton */}
+      <div className="hidden md:flex w-[220px] flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)]">
+        <div className="p-4 space-y-3">
+          <div className="h-5 w-24 bg-[var(--color-border)] rounded animate-pulse" />
+          <div className="h-4 w-16 bg-[var(--color-border)] rounded animate-pulse" />
+        </div>
+        <div className="flex-1 p-3 space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-9 bg-[var(--color-border)] rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+      {/* Content skeleton */}
+      <div className="flex-1 p-7">
+        <div className="max-w-[1200px] mx-auto space-y-4">
+          <div className="h-8 w-48 bg-[var(--color-border)] rounded animate-pulse" />
+          <div className="h-64 bg-[var(--color-border)] rounded animate-pulse" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function OfficerLayout() {
   const routeContext = Route.useRouteContext() as AuthContext & OfficerContext
