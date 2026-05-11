@@ -48,4 +48,7 @@ function App() {
   )
 }
 
-createRoot(document.getElementById('root')!).render(<App />)
+const container = document.getElementById('root')!
+const root = (container as any).__root ?? createRoot(container)
+;(container as any).__root = root
+root.render(<App />)
