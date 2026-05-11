@@ -1,16 +1,24 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { getPersonOptions, listMyCustomEventsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import {
+  getPersonOptions,
+  listMyCustomEventsOptions,
+  listElectionsOptions,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { PageHeader } from '@/components/patterns/page-header'
-import { StatCard } from '@/components/patterns/stat-card'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
-import { Calendar, Award, UserPlus, Shield } from 'lucide-react'
-import { useState } from 'react'
+import { Calendar, Award, Shield, UserPlus, CreditCard, CircleDot } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { api } from '@/lib/api'
+
+import { AlertBanner } from '@/features/dashboard/components/alert-banner'
+import { ActionWidget, CreditRing } from '@/features/dashboard/components/action-widget'
+import { OrgAnnouncements } from '@/features/dashboard/components/org-announcements'
+import { CreditBreakdown } from '@/features/dashboard/components/credit-breakdown'
+import { QuickActions } from '@/features/dashboard/components/quick-actions'
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: DashboardPage,
@@ -47,41 +55,137 @@ function DashboardPage() {
       return items
         .filter((e: any) => new Date(e.startDate || e.start_date) >= now)
         .sort((a: any, b: any) => new Date(a.startDate || a.start_date).getTime() - new Date(b.startDate || b.start_date).getTime())
-        .slice(0, 3)
-    },
-    retry: false,
-  })
-
-  const creditsQuery = useQuery<number>({
-    queryKey: ['my-credit-summary'],
-    queryFn: async () => {
-      const res = await api.get<any>('/api/persons/me/credit-summary')
-      return res?.totalCredits ?? res?.data?.totalCredits ?? 0
-    },
-    retry: false,
-  })
-
-  const notifsQuery = useQuery<number>({
-    queryKey: ['my-unread-notif-count'],
-    queryFn: async () => {
-      const res = await api.get<any>('/api/notifs?limit=50&channel=in-app')
-      const items = res?.data || res?.items || []
-      return items.filter((n: any) => n.status !== 'read').length
+        .slice(0, 5)
     },
     retry: false,
   })
 
   const memberships = membershipsQuery.data ?? []
-  const membershipsLoading = membershipsQuery.isLoading
+
+  // Build org ID → name map (needed before queries that depend on org context)
+  const orgNames: Record<string, string> = {}
+  for (const m of memberships) {
+    const oid = m.orgId ?? m.organizationId
+    if (oid && m.orgName) orgNames[oid] = m.orgName
+  }
+  const orgIds = Object.keys(orgNames)
+  const firstOrgId = orgIds[0]
+
+  const creditSummaryQuery = useQuery({
+    queryKey: ['credit-summary'],
+    queryFn: () => api.get<{ totalCredits: number; requiredCredits: number; remaining: number }>('/api/persons/me/credit-summary'),
+    retry: false,
+  })
+
+  const invoicesQuery = useQuery({
+    queryKey: ['my-dues-invoices', orgIds],
+    queryFn: async () => {
+      const all: any[] = []
+      for (const oid of orgIds) {
+        try {
+          const res = await api.get<any>(`/api/association/member/dues-invoices?organizationId=${oid}&limit=10`)
+          const items = res?.data ?? []
+          all.push(...items)
+        } catch { /* member may not have admin access or org has no dues */ }
+      }
+      return { data: all }
+    },
+    retry: false,
+    enabled: orgIds.length > 0,
+  })
+
+  const electionsQuery = useQuery({
+    ...listElectionsOptions({ query: { limit: 10 } }),
+    retry: false,
+  })
+  const announcementsQuery = useQuery<any[]>({
+    queryKey: ['dashboard-announcements', firstOrgId],
+    queryFn: async () => {
+      if (!firstOrgId) return []
+      const res = await api.get<any>(`/api/communications/announcements/${firstOrgId}?status=sent&limit=5`)
+      return res?.data || []
+    },
+    retry: false,
+    enabled: !!firstOrgId,
+  })
+
+  // Fetch compliance for first org (API is per-org)
+  const complianceQuery = useQuery<any>({
+    queryKey: ['dashboard-compliance', firstOrgId],
+    queryFn: async () => {
+      if (!firstOrgId) return null
+      const res = await api.get<any>(`/api/credit-compliance/${firstOrgId}`)
+      return res
+    },
+    retry: false,
+    enabled: !!firstOrgId,
+  })
+
+  // Derived data
   const upcomingEvents = eventsQuery.data ?? []
-  const totalCredits = creditsQuery.data ?? 0
-  const unreadNotifCount = notifsQuery.data ?? 0
+  const creditData = creditSummaryQuery.data as any
+  const totalCredits = creditData?.totalCredits ?? creditData?.totalEarned ?? 0
+  const invoices: any[] = (invoicesQuery.data as any)?.data ?? []
+  const elections: any[] = (electionsQuery.data as any)?.data ?? []
+  const announcements = announcementsQuery.data ?? []
+
+  // Compliance — use snake_case fields matching API response
+  const complianceData = complianceQuery.data
+  const requiredCredits = complianceData?.summary?.requiredCredits ?? creditData?.requiredCredits ?? 0
+  const personId = person.data?.id
+  const myCompliance = complianceData?.data?.find?.((r: any) =>
+    (r.person_id === personId) || (r.personId === personId)
+  )
+  const myEarned = (myCompliance?.earned != null && myCompliance.earned > 0) ? myCompliance.earned : totalCredits
+  const myRequired = (myCompliance?.required != null && myCompliance.required > 0) ? myCompliance.required : requiredCredits
+
+  // Derive compliance status from snake_case field or compute
+  let complianceStatus: 'compliant' | 'atRisk' | 'nonCompliant' | undefined
+  if (myCompliance) {
+    const raw = myCompliance.compliance_status ?? myCompliance.complianceStatus
+    if (raw === 'compliant') complianceStatus = 'compliant'
+    else if (raw === 'at_risk' || raw === 'atRisk') complianceStatus = 'atRisk'
+    else if (raw === 'non_compliant' || raw === 'nonCompliant') complianceStatus = 'nonCompliant'
+  } else if (myRequired > 0) {
+    complianceStatus = myEarned >= myRequired ? 'compliant' : myEarned >= myRequired * 0.5 ? 'atRisk' : 'nonCompliant'
+  }
+
+  // Dues — aggregate across all orgs
+  const unpaidInvoices = invoices.filter((inv: any) => inv.status !== 'paid' && inv.status !== 'cancelled' && inv.status !== 'writtenOff')
+  const overdueInvoices = invoices.filter((inv: any) => inv.status === 'overdue')
+  const nextDueInvoice = unpaidInvoices[0]
+
+  // Smart org routing for quick actions: org with unpaid dues first, else first org
+  const duesOrgId = nextDueInvoice?.organizationId ?? undefined
+  const eventsOrgId = firstOrgId
 
   const { user } = Route.useRouteContext()
   const displayName = person.data?.firstName ?? user?.name?.split(' ')[0] ?? 'there'
 
+  // Next event
+  const nextEvent = upcomingEvents[0]
+  const nextEventDays = nextEvent
+    ? Math.ceil((new Date(nextEvent.startDate || nextEvent.start_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null
+
+  // CPD status label for merged widget
+  const cpdStatusLabel = complianceStatus === 'compliant'
+    ? 'Good Standing'
+    : complianceStatus === 'atRisk'
+      ? 'At Risk'
+      : complianceStatus === 'nonCompliant'
+        ? 'Needs Attention'
+        : undefined
+
   return (
-    <div>
+    <div className="space-y-6">
+      {/* Alert Banner */}
+      <AlertBanner
+        memberships={memberships}
+        invoices={invoices}
+        elections={elections}
+      />
+
       <PageHeader
         title={`${getGreeting()}, ${displayName}`}
         subtitle="Your membership health at a glance"
@@ -91,10 +195,10 @@ function DashboardPage() {
       {person.data && !person.data.specialization && (
         <Link
           to="/onboarding"
-          className="block rounded-[12px] border border-[var(--color-cream)] bg-[var(--color-cream-light)] p-4 mb-6 hover:border-[var(--color-cream-dark)] transition-colors"
+          className="block rounded-[12px] border border-[var(--color-cream)] bg-[var(--color-cream-light)] p-4 hover:border-[var(--color-cream-dark)] transition-colors"
         >
           <div className="flex items-center gap-3">
-            <UserPlus size={20} className="text-[var(--color-primary)] shrink-0" />
+            <UserPlus size={20} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
             <div>
               <p className="text-[14px] font-semibold">Complete your profile</p>
               <p className="text-[13px] font-medium text-[var(--color-muted)]">Add your specialization and preferences</p>
@@ -104,9 +208,9 @@ function DashboardPage() {
       )}
 
       {/* Org Membership Cards */}
-      <section className="mb-8">
+      <section>
         <h2 className="text-[16px] font-semibold font-display mb-4">Your Organizations</h2>
-        {membershipsLoading ? (
+        {membershipsQuery.isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CardSkeleton />
             <CardSkeleton />
@@ -120,73 +224,105 @@ function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {memberships.map((m: any) => (
-              <OrgCard key={m.id} membership={m} />
+              <OrgCard key={m.id} membership={m} invoices={invoices} />
             ))}
           </div>
         )}
       </section>
 
-      {/* Quick Stats */}
-      <section className="mb-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-          <StatCard label="Organizations" value={memberships.length} />
-          <StatCard label="CPD Credits" value={totalCredits} />
-          <StatCard label="Upcoming Events" value={upcomingEvents.length} />
-          <StatCard label="Notifications" value={unreadNotifCount} />
+      {/* Action Widgets — 3-col grid */}
+      <section>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Dues Status */}
+          <ActionWidget
+            icon={<CreditCard size={16} />}
+            label="Dues"
+            value={unpaidInvoices.length > 0 ? `₱${Number(nextDueInvoice?.totalAmount || 0).toLocaleString()}` : 'Paid'}
+            subtitle={unpaidInvoices.length > 0
+              ? `${overdueInvoices.length > 0 ? 'Overdue' : 'Due'} — ${nextDueInvoice?.invoiceNumber || ''}`
+              : 'All dues current'
+            }
+            status={unpaidInvoices.length > 0 ? (overdueInvoices.length > 0 ? 'error' : 'warning') : 'success'}
+            statusLabel={unpaidInvoices.length > 0 ? (overdueInvoices.length > 0 ? 'Overdue' : 'Payment due') : 'All paid'}
+            errorMessage={invoicesQuery.isError ? 'Unable to load dues status' : undefined}
+            action={duesOrgId
+              ? { label: unpaidInvoices.length > 0 ? 'Pay now' : 'View dues', to: '/org/$orgId/dues', params: { orgId: duesOrgId } }
+              : firstOrgId
+                ? { label: 'View dues', to: '/org/$orgId/dues', params: { orgId: firstOrgId } }
+                : undefined
+            }
+          />
+
+          {/* CPD Status — merged credits + compliance */}
+          <ActionWidget
+            icon={<Award size={16} />}
+            label="CPD Status"
+            value=""
+            status={complianceStatus === 'compliant' ? 'success' : complianceStatus === 'atRisk' ? 'warning' : complianceStatus === 'nonCompliant' ? 'error' : undefined}
+            statusLabel={cpdStatusLabel}
+            errorMessage={creditSummaryQuery.isError ? 'Unable to load credit data' : undefined}
+            action={{ label: 'View credits', to: '/my/credits' }}
+          >
+            <div className="flex items-center gap-3">
+              <CreditRing earned={myEarned} required={myRequired || myEarned} size={44} />
+              <div>
+                <p className="text-[20px] font-bold font-display text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {myEarned}
+                  {myRequired > 0 && (
+                    <span className="text-[13px] font-medium text-[var(--color-muted)]">/{myRequired}</span>
+                  )}
+                </p>
+                <p className="text-[11px] font-medium text-[var(--color-muted)]">
+                  {cpdStatusLabel
+                    ? cpdStatusLabel
+                    : myRequired > 0 && myEarned < myRequired
+                      ? `${myRequired - myEarned} more needed`
+                      : 'CPD credits'
+                  }
+                </p>
+              </div>
+            </div>
+          </ActionWidget>
+
+          {/* Next Event */}
+          <ActionWidget
+            icon={<Calendar size={16} />}
+            label="Next Event"
+            value={nextEvent ? (nextEvent.title || nextEvent.name) : 'None'}
+            subtitle={nextEventDays !== null
+              ? nextEventDays === 0 ? 'Today' : nextEventDays === 1 ? 'Tomorrow' : `In ${nextEventDays} days`
+              : 'No upcoming events'
+            }
+            status={nextEvent ? 'neutral' : undefined}
+            action={{ label: 'View events', to: '/my/events' }}
+          />
         </div>
       </section>
 
-      {/* Activity sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Calendar size={18} className="text-[var(--color-muted)]" />
-            <h3 className="text-[16px] font-semibold font-display">Upcoming Events</h3>
-          </div>
-          {upcomingEvents.length === 0 ? (
-            <EmptyState
-              headline="No upcoming events"
-              description="Events you register for will appear here"
-            />
-          ) : (
-            <div className="space-y-2">
-              {upcomingEvents.map((e: any, i: number) => (
-                <div key={`${e.id}-${i}`} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
-                  <div>
-                    <p className="text-[13px] font-semibold line-clamp-1">{e.title || e.name}</p>
-                    <p className="text-[12px] text-[var(--color-muted)]">
-                      {new Date(e.startDate || e.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+      {/* Quick Actions */}
+      <QuickActions
+        duesOrgId={duesOrgId}
+        eventsOrgId={eventsOrgId}
+      />
 
-        <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Award size={18} className="text-[var(--color-muted)]" />
-            <h3 className="text-[16px] font-semibold font-display">Credit Progress</h3>
-          </div>
-          {totalCredits === 0 ? (
-            <EmptyState
-              headline="No credits yet"
-              description="Complete trainings and events to earn CPD credits"
-            />
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-[32px] font-bold text-[var(--color-primary)]">{totalCredits}</p>
-              <p className="text-[13px] text-[var(--color-muted)]">total CPD credit hours</p>
-            </div>
-          )}
-        </section>
+      {/* Org News + Credit Progress */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <OrgAnnouncements
+          announcements={announcements}
+          orgNames={orgNames}
+          isError={announcementsQuery.isError}
+        />
+        <CreditBreakdown
+          totalCredits={totalCredits}
+          requiredCredits={requiredCredits}
+          isError={creditSummaryQuery.isError}
+        />
       </div>
     </div>
   )
 }
 
-function OrgCard({ membership: m }: { membership: any }) {
+function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[] }) {
   const orgId = m.orgId ?? m.organizationId
   const officerQuery = useQuery<string | null>({
     queryKey: ['officer-role', orgId],
@@ -205,6 +341,38 @@ function OrgCard({ membership: m }: { membership: any }) {
 
   const officerRole = officerQuery.data ?? null
 
+  // Calculate dues period progress
+  const now = new Date()
+  const expiryDate = m.duesExpiryDate ? new Date(m.duesExpiryDate) : null
+  const daysLeft = expiryDate ? Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : null
+
+  // Estimate period progress (assume 12-month cycle)
+  const periodMonths = 12
+  const periodProgress = expiryDate
+    ? Math.max(0, Math.min(1, 1 - (daysLeft ?? 0) / (periodMonths * 30.44)))
+    : 0
+
+  // Org-specific invoice status
+  const orgInvoices = invoices.filter((inv: any) => inv.organizationId === orgId)
+  const hasOrgUnpaid = orgInvoices.some((inv: any) => inv.status === 'overdue' || inv.status === 'sent' || inv.status === 'generated')
+
+  // Standing indicator
+  const standing: 'good' | 'warning' | 'poor' =
+    orgInvoices.some((inv: any) => inv.status === 'overdue') ? 'poor' :
+    hasOrgUnpaid ? 'warning' : 'good'
+
+  const standingColors = {
+    good: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    poor: 'bg-red-500',
+  }
+
+  const standingLabels = {
+    good: 'Good standing',
+    warning: 'Payment due',
+    poor: 'Overdue',
+  }
+
   return (
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
       <Link
@@ -216,7 +384,14 @@ function OrgCard({ membership: m }: { membership: any }) {
           <div className="flex items-center gap-3">
             <AvatarInitials name={m.orgName ?? 'Org'} size="md" />
             <div>
-              <p className="text-[14px] font-semibold">{m.orgName}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-[14px] font-semibold">{m.orgName}</p>
+                <span
+                  className={`w-2 h-2 rounded-full ${standingColors[standing]}`}
+                  role="img"
+                  aria-label={standingLabels[standing]}
+                />
+              </div>
               {m.memberNumber && (
                 <p className="text-[13px] font-medium text-[var(--color-muted)]">#{m.memberNumber}</p>
               )}
@@ -224,24 +399,68 @@ function OrgCard({ membership: m }: { membership: any }) {
           </div>
           <StatusBadge status={m.status ?? 'pending'} />
         </div>
-        {m.duesExpiryDate && (
-          <p className="text-[13px] font-medium text-[var(--color-muted)] mt-3">
-            Dues expire: {new Date(m.duesExpiryDate).toLocaleDateString()}
-          </p>
+
+        {/* Dues period progress bar */}
+        {expiryDate && (
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[12px] font-medium text-[var(--color-muted)]">
+                {daysLeft !== null && daysLeft > 0
+                  ? `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`
+                  : daysLeft !== null && daysLeft <= 0
+                    ? 'Expired'
+                    : ''
+                }
+              </p>
+              <p className="text-[11px] text-[var(--color-muted)]">
+                Expires {expiryDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-[var(--color-border-light)] overflow-hidden" role="progressbar" aria-valuenow={Math.round(periodProgress * 100)} aria-valuemin={0} aria-valuemax={100}>
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  (daysLeft ?? 0) <= 0 ? 'bg-red-500' :
+                  (daysLeft ?? 0) <= 30 ? 'bg-amber-500' : 'bg-emerald-500'
+                }`}
+                style={{ width: `${Math.min(100, periodProgress * 100)}%` }}
+              />
+            </div>
+          </div>
         )}
       </Link>
-      {officerRole && (
-        <div className="mt-3 pt-3 border-t border-[var(--color-border-light)]">
+
+      {/* Quick action row */}
+      <div className="mt-3 pt-3 border-t border-[var(--color-border-light)] flex items-center gap-2 flex-wrap">
+        {hasOrgUnpaid && orgId && (
+          <Link
+            to="/org/$orgId/dues"
+            params={{ orgId }}
+            className="inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
+          >
+            <CreditCard size={12} aria-hidden="true" />
+            Pay Dues
+          </Link>
+        )}
+        {orgId && (
+          <Link
+            to="/my/id-card"
+            className="inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:underline"
+          >
+            <CircleDot size={12} aria-hidden="true" />
+            ID Card
+          </Link>
+        )}
+        {officerRole && (
           <Link
             to="/org/$orgId/officer/dashboard"
             params={{ orgId: orgId ?? '' }}
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] hover:underline"
+            className="ml-auto inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
           >
-            <Shield size={13} />
+            <Shield size={12} aria-hidden="true" />
             {officerRole} Dashboard
           </Link>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

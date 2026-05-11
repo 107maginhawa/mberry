@@ -60,7 +60,7 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
 
   try {
     const json = await context.queryClient.ensureQueryData({
-      queryKey: ['officer-role', orgId],
+      queryKey: ['me-officer-role-raw', orgId],
       queryFn: () => api.get<any>(`/api/persons/me/officer-role/${orgId}`),
     })
     const positions = Array.isArray(json?.data) ? json.data : []

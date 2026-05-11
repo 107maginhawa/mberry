@@ -1,0 +1,67 @@
+import { Link } from '@tanstack/react-router'
+import { Award, BookOpen } from 'lucide-react'
+import { CreditRing } from './action-widget'
+import { EmptyState } from '@/components/patterns/empty-state'
+
+interface CreditBreakdownProps {
+  totalCredits: number
+  requiredCredits: number
+  isError?: boolean
+}
+
+export function CreditBreakdown({ totalCredits, requiredCredits, isError }: CreditBreakdownProps) {
+  const deficit = requiredCredits > 0 ? Math.max(0, requiredCredits - totalCredits) : 0
+
+  return (
+    <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Award size={18} className="text-[var(--color-muted)]" aria-hidden="true" />
+          <h3 className="text-[16px] font-semibold font-display">Credit Progress</h3>
+        </div>
+        <Link to="/my/credits" className="text-[12px] font-semibold text-[var(--color-primary)] hover:underline">
+          View transcript
+        </Link>
+      </div>
+
+      {isError ? (
+        <p className="text-[13px] text-red-600">Unable to load credit data</p>
+      ) : totalCredits === 0 ? (
+        <EmptyState
+          headline="No credits yet"
+          description="Complete trainings and events to earn CPD credits"
+        />
+      ) : (
+        <div>
+          <div className="flex items-center gap-4 mb-4">
+            <CreditRing earned={totalCredits} required={requiredCredits || totalCredits} size={64} />
+            <div>
+              <p className="text-[24px] font-bold font-display text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {totalCredits}
+                {requiredCredits > 0 && (
+                  <span className="text-[14px] font-medium text-[var(--color-muted)]">/{requiredCredits}</span>
+                )}
+              </p>
+              <p className="text-[12px] font-medium text-[var(--color-muted)]">
+                {deficit > 0
+                  ? `${deficit} more credit${deficit !== 1 ? 's' : ''} needed`
+                  : requiredCredits > 0
+                    ? 'Requirement met'
+                    : 'total CPD credits'
+                }
+              </p>
+            </div>
+          </div>
+
+          <Link
+            to="/my/training"
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
+          >
+            <BookOpen size={13} aria-hidden="true" />
+            Earn more credits
+          </Link>
+        </div>
+      )}
+    </section>
+  )
+}
