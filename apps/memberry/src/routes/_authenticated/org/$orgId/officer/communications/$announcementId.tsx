@@ -85,8 +85,8 @@ function AnnouncementDetailPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">{ann.title}</h1>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>
-              {ann.status}
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>
+              {ann.status.charAt(0).toUpperCase() + ann.status.slice(1).replace('_', ' ')}
             </span>
             <span>{ann.audienceType === 'all' ? 'All members' : 'Selected categories'}</span>
             {ann.channelPush && <span>· Push</span>}

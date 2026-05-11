@@ -48,13 +48,16 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
   const { data: statsData } = useQuery({
     queryKey: ['announcements-stats', orgId],
     queryFn: async () => {
-      const sentJson = await api.get<any>(`/api/communications/announcements/${orgId}?status=sent&limit=1`)
+      const sentJson = await api.get<any>(`/api/communications/announcements/${orgId}?status=sent&pageSize=1`)
       return { totalSent: sentJson.meta?.total ?? 0 }
     },
   })
 
   const announcements = data?.data ?? []
   const total = data?.meta?.total ?? 0
+  const hasAnyPush = announcements.some((a: any) => a.channelPush)
+  const hasAnyEmail = announcements.some((a: any) => a.channelEmail)
+  const channelLabels = [hasAnyPush && 'Push', hasAnyEmail && 'Email'].filter(Boolean).join(' + ') || '—'
 
   return (
     <div className="space-y-6">
@@ -65,12 +68,12 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
           <p className="text-2xl font-bold">{statsData?.totalSent ?? '—'}</p>
         </div>
         <div className="p-4 rounded-lg border bg-card">
-          <p className="text-sm text-muted-foreground">This Month</p>
+          <p className="text-sm text-muted-foreground">Total</p>
           <p className="text-2xl font-bold">{total}</p>
         </div>
         <div className="p-4 rounded-lg border bg-card col-span-2 lg:col-span-1">
-          <p className="text-sm text-muted-foreground">Channels</p>
-          <p className="text-2xl font-bold">Push + Email</p>
+          <p className="text-sm text-muted-foreground">Channels Used</p>
+          <p className="text-2xl font-bold">{channelLabels}</p>
         </div>
       </div>
 
@@ -132,8 +135,8 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
                 <span className="text-sm text-muted-foreground hidden sm:block">
                   {formatDate(ann.publishedAt ?? ann.scheduledAt ?? ann.createdAt)}
                 </span>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>
-                  {ann.status}
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>
+                  {ann.status.charAt(0).toUpperCase() + ann.status.slice(1).replace('_', ' ')}
                 </span>
               </div>
             </a>

@@ -2,6 +2,7 @@
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
 import { signIn } from '../helpers/auth'
+import { cleanupAnnouncements } from '../helpers/fixtures'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
@@ -15,7 +16,8 @@ test.describe('Communications Actions', () => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
 
     await expect(page.locator('main').getByText(/Communications/i)).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText(/Election|Dues|Reminder/i).first()).toBeVisible({ timeout: 5000 })
+    // At least one announcement row should be visible
+    await expect(page.locator('.divide-y a').first()).toBeVisible({ timeout: 5000 })
   })
 
   test('New Message button → compose form renders', async ({ page }) => {
@@ -52,14 +54,23 @@ test.describe('Communications Actions', () => {
 
   test('announcement detail shows content and action buttons', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
+    await page.waitForLoadState('networkidle')
 
-    // Click first announcement
-    const link = page.getByRole('link').filter({ hasText: /Election|Dues|Reminder/i }).first()
+    // Click first announcement in list
+    const link = page.locator('.divide-y a').first()
     await expect(link).toBeVisible({ timeout: 10000 })
     await link.click()
+    await page.waitForLoadState('networkidle')
 
-    // Should show content and action buttons
-    await expect(page.getByText(/Publish|Archive|Edit/).first()).toBeVisible({ timeout: 10000 })
+    // Should show action buttons (Publish Now for drafts, or Archive/Resend for sent)
+    await expect(
+      page.getByRole('button', { name: /Publish Now|Archive|Resend/i }).first()
+    ).toBeVisible({ timeout: 10000 })
+  })
+
+  test('cleanup: remove test announcements', async ({ page }) => {
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    await cleanupAnnouncements(page, ORG_ID, /^Action Test Announcement/)
   })
 })
 

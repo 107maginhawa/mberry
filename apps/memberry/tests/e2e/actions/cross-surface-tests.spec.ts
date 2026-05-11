@@ -2,6 +2,7 @@
 // Verifies data created in one view appears in another
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
+import { cleanupAnnouncements } from '../helpers/fixtures'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { expectVisibleOnPage } from '../helpers/persistence'
 
@@ -59,5 +60,11 @@ test.describe('Cross-Surface Consistency', () => {
       await page.waitForTimeout(1000)
     }
     await expect(page.getByText(title).first()).toBeVisible({ timeout: 10000 })
+  })
+
+  test('cleanup: remove cross-surface test announcements', async ({ page }) => {
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    await cleanupAnnouncements(page, ORG_ID, /^CrossSurface Ann/)
+    await cleanupAnnouncements(page, ORG_ID, /^CrossSurface Event/)
   })
 })

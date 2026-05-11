@@ -67,3 +67,27 @@ export async function cleanupTestData(page: Page, resources: { type: string; id:
     }, { ...resource, apiBase: API_BASE })
   }
 }
+
+/**
+ * Delete draft announcements matching a title pattern.
+ * Only deletes drafts (API only allows deleting drafts).
+ * Best-effort — does not fail tests if cleanup fails.
+ */
+export async function cleanupAnnouncements(page: Page, orgId: string, titlePattern: RegExp) {
+  await page.evaluate(async ({ orgId, pattern, apiBase }) => {
+    try {
+      const res = await fetch(`${apiBase}/communications/announcements/${orgId}?pageSize=100`, { credentials: 'include' })
+      if (!res.ok) return
+      const json = await res.json()
+      const rx = new RegExp(pattern)
+      for (const ann of json.data ?? []) {
+        if (rx.test(ann.title) && ann.status === 'draft') {
+          await fetch(`${apiBase}/communications/announcements/${ann.id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          }).catch(() => {})
+        }
+      }
+    } catch { /* best-effort */ }
+  }, { orgId, pattern: titlePattern.source, apiBase: API_BASE })
+}
