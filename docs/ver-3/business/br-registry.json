@@ -596,7 +596,7 @@
         "apps/memberry/tests/e2e/officer/elections.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "coverage": "PARTIAL"
   },
   "BR-34": {
     "rule": "Nomination Eligibility",
@@ -610,7 +610,7 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "COMPLETE"
+    "coverage": "PARTIAL"
   },
   "BR-35": {
     "rule": "Feed Content Moderation",

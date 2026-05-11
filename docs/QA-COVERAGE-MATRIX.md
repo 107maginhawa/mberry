@@ -29,7 +29,7 @@ Updated 2026-05-11. Cross-references routes, business rules, user journeys, and 
 | 21 | officer/officers | ✅ | ✅ | 5 tests (officers-admin) | BR-09 (roles) | CO-9 |
 | 22 | settings/dues | ✅ | ✅ | in settings.spec | BR-04 (dues amt) | CT-5 |
 | 23 | settings/funds | ✅ | ✅ | in settings.spec | BR-05 (allocation) | CT-5 |
-| 24 | settings/categories | ✅ | ✅ | in settings.spec | — | CS-1 |
+| 24 | settings/membership-categories | ✅ | ✅ | in settings.spec | — | CS-1 |
 | 25 | settings/gateway | ✅ | ✅ | in settings.spec | BR-30 (isolation) | CT-6 |
 | 26 | settings/chapters | ✅ | ✅ | in settings.spec | — | CO-11 |
 | 27 | settings/org | ✅ | ✅ | in settings.spec | BR-31 (SVG) | CO-10 |
@@ -54,7 +54,7 @@ Updated 2026-05-11. Cross-references routes, business rules, user journeys, and 
 | **BR-07** | Dues expiry extension | ✅ handler tests | ✅ payment-expiry.spec | OK |
 | **BR-08** | Refund policy | ✅ handler tests | ✅ payment-refund.spec | OK |
 | **BR-09** | Officer role assignment | ✅ handler tests | ✅ officers-admin | OK |
-| **BR-10** | Platform admin impersonation | ❌ | ❌ | **GAP** — not implemented (Phase 1 P0) |
+| **BR-10** | Platform admin impersonation | ✅ handler tests | ✅ admin-smoke.spec | OK — implemented (startImpersonation, endImpersonation, 30min expiry) |
 | **BR-11** | Credit cycle start | ✅ handler tests | ✅ credits.spec | OK |
 | **BR-12** | Credit carry-over | ✅ handler tests | ✅ credit-carryover.spec | OK |
 | **BR-13** | Auto vs manual credits | ✅ handler tests | ✅ credits.spec | OK |

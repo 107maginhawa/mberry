@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from '@tanstack/react-router'
+import { POSITION_NAV_CONFIG } from '@/config/position-nav'
 import {
   Menu, X, Bell,
   LayoutDashboard, Users, Inbox, Upload,
@@ -12,6 +13,7 @@ interface OfficerMobileNavProps {
   orgName?: string
   userName?: string
   role?: string
+  positions?: Array<{ title: string }>
 }
 
 interface NavSection {
@@ -19,7 +21,7 @@ interface NavSection {
   items: { to: string; label: string; icon: React.ComponentType<{ size?: number }> }[]
 }
 
-export function OfficerMobileNav({ orgName, userName, role }: OfficerMobileNavProps) {
+export function OfficerMobileNav({ orgName, userName, role, positions }: OfficerMobileNavProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { orgId } = useParams({ strict: false }) as { orgId: string }
   const base = `/org/${orgId}/officer`
@@ -57,6 +59,20 @@ export function OfficerMobileNav({ orgName, userName, role }: OfficerMobileNavPr
       { to: `${base}/settings/gateway`, label: 'Payment Gateway', icon: Settings },
     ]},
   ]
+
+  // Apply same position-based filtering as desktop sidebar
+  const allowedSections = new Set<string>()
+  allowedSections.add('') // Dashboard always visible
+  allowedSections.add('SETTINGS') // SETTINGS always visible
+  if (positions && positions.length > 0) {
+    for (const pos of positions) {
+      const allowed = POSITION_NAV_CONFIG[pos.title.trim().toLowerCase()] || []
+      allowed.forEach(s => allowedSections.add(s))
+    }
+  } else {
+    sections.forEach(s => allowedSections.add(s.label || ''))
+  }
+  const filteredSections = sections.filter(s => allowedSections.has(s.label || ''))
 
   return (
     <>
@@ -110,7 +126,7 @@ export function OfficerMobileNav({ orgName, userName, role }: OfficerMobileNavPr
 
             {/* Nav sections */}
             <nav className="flex-1 py-2 overflow-y-auto">
-              {sections.map((section, si) => (
+              {filteredSections.map((section, si) => (
                 <div key={si} className={si > 0 ? 'mt-2' : ''}>
                   {section.label && (
                     <div className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-white/40">
@@ -126,7 +142,7 @@ export function OfficerMobileNav({ orgName, userName, role }: OfficerMobileNavPr
                       activeProps={{
                         className: 'flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[17px]',
                       }}
-                      activeOptions={{ exact: true }}
+                      activeOptions={{ exact: false }}
                     >
                       <Icon size={18} />
                       {label}

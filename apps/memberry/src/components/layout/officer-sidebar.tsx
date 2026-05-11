@@ -101,11 +101,12 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
   ]
 
   const allowedSections = new Set<string>()
-  // Dashboard (no label) always visible
+  // Dashboard (no label) and SETTINGS always visible to all officers
   allowedSections.add('')
+  allowedSections.add('SETTINGS')
   if (positions && positions.length > 0) {
     for (const pos of positions) {
-      const allowed = POSITION_NAV_CONFIG[pos.title.toLowerCase()] || []
+      const allowed = POSITION_NAV_CONFIG[pos.title.trim().toLowerCase()] || []
       allowed.forEach(s => allowedSections.add(s))
     }
   } else {
@@ -150,7 +151,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
                   className:
                     "flex items-center gap-2.5 px-6 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[21px]",
                 }}
-                activeOptions={{ exact: true }}
+                activeOptions={{ exact: false }}
               >
                 <Icon size={18} className="shrink-0 opacity-70" />
                 {label}

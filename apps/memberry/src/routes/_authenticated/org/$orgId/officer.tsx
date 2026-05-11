@@ -56,6 +56,7 @@ function OfficerLayout() {
       <OfficerMobileNav
         userName={user?.name}
         role={primaryRole}
+        positions={positions}
       />
       <OfficerSidebar
         userEmail={user?.email}
