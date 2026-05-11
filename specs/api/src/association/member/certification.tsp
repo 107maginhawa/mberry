@@ -402,7 +402,7 @@ model CertifyRequest {
   certificationNumber: string;
 
   @doc("Date on which the certification expires")
-  expiresAt: plainDate;
+  expiresAt?: plainDate;
 }
 
 @doc("Request to create or update an accredited provider")
@@ -421,7 +421,7 @@ model AccreditedProviderRequest {
 model CreditCycleCreateRequest {
   personId: string;
   startDate: plainDate;
-  endDate: plainDate;
+  endDate?: plainDate;
   requiredCredits: float64;
   carryOverCredits?: float64;
 }

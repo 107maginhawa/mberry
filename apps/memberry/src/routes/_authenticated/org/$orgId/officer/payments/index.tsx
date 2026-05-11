@@ -4,6 +4,7 @@ import { generateDuesInvoicesForOrgMutation } from '@monobase/sdk-ts/generated/r
 import { Button } from '@monobase/ui'
 import { FinancialDashboard } from '@/features/dues/components/financial-dashboard'
 import { PaymentHistoryTable } from '@/features/dues/components/payment-history-table'
+import { PendingProofsList } from '@/features/dues/components/pending-proofs-list'
 import { Plus, Bell } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -54,6 +55,10 @@ function OfficerPaymentsPage() {
         </div>
       </div>
       <FinancialDashboard orgId={orgId} />
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Pending Payment Proofs</h2>
+        <PendingProofsList orgId={orgId} />
+      </section>
       <PaymentHistoryTable orgId={orgId} scope="org" />
     </div>
   )

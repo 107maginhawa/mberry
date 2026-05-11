@@ -324,7 +324,7 @@ model BenefitOfferCreateRequest {
   title: string;
 
   @doc("Offer description")
-  description: string;
+  description?: string;
 
   @doc("Discount type")
   discountType: DiscountType;

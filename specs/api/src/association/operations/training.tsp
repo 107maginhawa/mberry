@@ -469,7 +469,7 @@ model TrainingEnrollmentCreateRequest {
 @doc("Request body for marking a training enrollment as completed")
 model TrainingEnrollmentCompleteRequest {
   @doc("UTC timestamp of completion")
-  completedAt: utcDateTime;
+  completedAt?: utcDateTime;
 
   @doc("Whether to immediately award CE credit")
   awardCredit: boolean;

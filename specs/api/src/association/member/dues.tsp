@@ -389,6 +389,18 @@ enum DuesPaymentStatus {
   refunded: "refunded",
   partiallyRefunded: "partiallyRefunded",
   expired: "expired",
+
+  @doc("Payment proof submitted by member, awaiting officer review")
+  submitted: "submitted",
+
+  @doc("Payment proof is being reviewed by an officer")
+  underReview: "underReview",
+
+  @doc("Payment proof confirmed by officer — funds allocated, expiry extended")
+  confirmed: "confirmed",
+
+  @doc("Payment proof rejected by officer")
+  rejected: "rejected",
 }
 
 @doc("Payment gateway provider")
@@ -447,6 +459,16 @@ model DuesPayment extends BaseEntity {
   @doc("Amount already refunded in minor currency units")
   @minValue(0)
   refundedAmount: int64;
+
+  @doc("Breakdown of this payment's amount by fund (populated after settlement)")
+  fundAllocations?: DuesInvoiceAllocation[];
+
+  @doc("Proof of payment details (populated for proof-based submissions)")
+  proof?: DuesPaymentProof;
+
+  @doc("Reason for rejection by officer (populated when status is rejected)")
+  @maxLength(500)
+  rejectionReason?: string;
 }
 
 @doc("Request to record a manual dues payment")
@@ -581,21 +603,187 @@ model FinancialDashboard {
 
   @doc("Percentage of payments that have been completed (0–100)")
   collectionRate: int32;
+
+  @doc("Whether a payment gateway is configured for this organization")
+  gatewayConfigured: boolean;
+
+  @doc("Number of memberships expiring this month")
+  expiringThisMonth: int32;
+}
+
+enum DuesReportType {
+  collection: "collection",
+  fund_breakdown: "fund_breakdown",
+  dues_status: "dues_status",
+  aging: "aging",
 }
 
 @doc("Dues collection report entry grouped by month and payment method")
 model DuesReportEntry {
   @doc("Year-month string in YYYY-MM format")
-  month: string;
+  month?: string;
 
   @doc("Payment method for this group")
-  method: DuesPaymentMethod;
+  method?: DuesPaymentMethod;
 
   @doc("Number of payments in this group")
-  count: int32;
+  count?: int32;
 
   @doc("Total amount collected in this group (minor currency units)")
-  total: int64;
+  total?: int64;
+
+  @doc("Fund ID (fund_breakdown type)")
+  fundId?: string;
+
+  @doc("Fund name (fund_breakdown type)")
+  fundName?: string;
+
+  @doc("Fund percentage (fund_breakdown type)")
+  percentage?: float64;
+
+  @doc("Total allocated amount (fund_breakdown type)")
+  totalAllocated?: int64;
+
+  @doc("Total reversals amount (fund_breakdown type)")
+  totalReversals?: int64;
+
+  @doc("Net total after reversals (fund_breakdown type)")
+  netTotal?: int64;
+
+  @doc("Person ID (dues_status and aging types)")
+  personId?: string;
+
+  @doc("Total paid amount (dues_status type)")
+  totalPaid?: int64;
+
+  @doc("Last payment date (dues_status type)")
+  lastPaymentDate?: string;
+
+  @doc("Number of payments (dues_status type)")
+  paymentCount?: int32;
+
+  @doc("Payment amount (aging type)")
+  amount?: int64;
+
+  @doc("Days pending (aging type)")
+  daysPending?: int32;
+}
+
+@doc("Summary statistics for a dues report")
+model DuesReportSummary {
+  @doc("Total collected amount (collection type)")
+  totalCollected?: int64;
+
+  @doc("Number of rows (collection type)")
+  rowCount?: int32;
+
+  @doc("Number of funds (fund_breakdown type)")
+  fundCount?: int32;
+
+  @doc("Number of members (dues_status type)")
+  memberCount?: int32;
+
+  @doc("Number of overdue payments (aging type)")
+  totalOverdue?: int32;
+}
+
+@doc("Dues report response with data entries and summary")
+model DuesReportResponse {
+  @doc("Report data entries")
+  data: DuesReportEntry[];
+
+  @doc("Summary statistics")
+  summary: DuesReportSummary;
+
+  @doc("Report metadata")
+  meta: {
+    @doc("Report type")
+    type: DuesReportType;
+
+    @doc("Date range start")
+    from: string;
+
+    @doc("Date range end")
+    to: string;
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Proof Upload Models
+// ---------------------------------------------------------------------------
+
+@doc("Proof of payment attached to a dues payment submission")
+model DuesPaymentProof {
+  @doc("ID of the associated payment")
+  paymentId: string;
+
+  @doc("Storage key referencing the uploaded proof file")
+  @minLength(1)
+  @maxLength(500)
+  storageKey: string;
+
+  @doc("Original file name of the uploaded proof")
+  @minLength(1)
+  @maxLength(255)
+  fileName: string;
+
+  @doc("MIME type of the uploaded proof (image/jpeg, image/png, application/pdf)")
+  @minLength(1)
+  @maxLength(100)
+  mimeType: string;
+
+  @doc("Timestamp when the proof was uploaded")
+  uploadedAt: utcDateTime;
+}
+
+@doc("Request for a member to submit a dues payment with proof of transfer")
+model SubmitPaymentProofRequest {
+  @doc("ID of the invoice being paid")
+  invoiceId: string;
+
+  @doc("Payment amount in minor currency units")
+  @minValue(1)
+  amount: int64;
+
+  @doc("ISO 4217 currency code")
+  currency: string;
+
+  @doc("Payment method used (bankTransfer, gcash)")
+  paymentMethod: DuesPaymentMethod;
+
+  @doc("External reference number (e.g. GCash ref, bank transfer ref)")
+  @maxLength(100)
+  referenceNumber?: string;
+
+  @doc("Storage key of the uploaded proof file (from storage upload)")
+  @minLength(1)
+  @maxLength(500)
+  proofStorageKey: string;
+
+  @doc("Original file name of the proof")
+  @minLength(1)
+  @maxLength(255)
+  proofFileName: string;
+
+  @doc("MIME type of the proof file")
+  @minLength(1)
+  @maxLength(100)
+  proofMimeType: string;
+}
+
+@doc("Request for an officer to confirm a submitted payment proof")
+model ConfirmPaymentProofRequest {
+  @doc("Optional note from the officer")
+  @maxLength(500)
+  note?: string;
+}
+
+@doc("Request for an officer to reject a submitted payment proof")
+model RejectPaymentProofRequest {
+  @doc("Reason for rejection — shown to the member")
+  @minLength(1)
+  @maxLength(500)
+  reason: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -949,6 +1137,66 @@ namespace Association.Member.Dues {
       | ApiForbiddenResponse;
   }
 
+  @doc("Proof-based payment submission and officer review workflow")
+  interface DuesPaymentProofManagement {
+    @doc("Submit a dues payment with proof of transfer (member-facing).")
+    @operationId("submitPaymentProof")
+    @post
+    @route("/submit-proof")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:member"])
+    submitPaymentProof(
+      @body body: SubmitPaymentProofRequest
+    ): ApiCreatedResponse<DuesPayment>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiConflictResponse;
+
+    @doc("Confirm a submitted payment proof (officer-facing). Triggers fund allocation and expiry extension.")
+    @operationId("confirmPaymentProof")
+    @post
+    @route("/{paymentId}/confirm")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    confirmPaymentProof(
+      @path paymentId: string,
+      @body body: ConfirmPaymentProofRequest
+    ): ApiOkResponse<DuesPayment>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse
+      | ApiForbiddenResponse;
+
+    @doc("Reject a submitted payment proof (officer-facing).")
+    @operationId("rejectPaymentProof")
+    @post
+    @route("/{paymentId}/reject")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    rejectPaymentProof(
+      @path paymentId: string,
+      @body body: RejectPaymentProofRequest
+    ): ApiOkResponse<DuesPayment>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse
+      | ApiForbiddenResponse;
+
+    @doc("List pending payment proofs awaiting officer review for an organization.")
+    @operationId("listPendingProofs")
+    @get
+    @route("/pending-proofs")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    listPendingProofs(
+      ...PaginationQuery,
+      @query organizationId: string
+    ): ApiOkResponse<PaginatedResponse<DuesPayment>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+  }
+
   @doc("Configure, test, and disconnect the payment gateway for an organization")
   interface DuesGatewayManagement {
     @doc("Get the payment gateway configuration for an organization.")
@@ -1044,7 +1292,7 @@ namespace Association.Member.Dues {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
 
-    @doc("Generate a dues collection report for an organization.")
+    @doc("Generate a dues report for an organization. Type selects the report variant.")
     @operationId("generateDuesReport")
     @get
     @route("/{organizationId}/report")
@@ -1052,9 +1300,10 @@ namespace Association.Member.Dues {
     @extension("x-security-required-roles", #["association:admin"])
     generateDuesReport(
       @path organizationId: string,
+      @query type: DuesReportType,
       @query from?: utcDateTime,
       @query to?: utcDateTime
-    ): ApiOkResponse<PaginatedResponse<DuesReportEntry>>
+    ): ApiOkResponse<DuesReportResponse>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
   }

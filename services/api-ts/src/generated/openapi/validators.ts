@@ -2524,7 +2524,7 @@ export const BookingSchema = z.object({
 });
 
 export const BookingActionRequestSchema = z.object({
-  reason: z.string().max(500)
+  reason: z.string().max(500).optional()
 });
 
 export const BookingCreateRequestSchema = z.object({
@@ -2925,7 +2925,7 @@ export const CancelDeletionResponseSchema = z.object({
 });
 
 export const CancelEmailRequestSchema = z.object({
-  reason: z.string().max(500)
+  reason: z.string().max(500).optional()
 });
 
 export const CandidateSchema = z.object({
@@ -3525,6 +3525,10 @@ export const ConferenceUpdateSchema = z.object({
   capacity: z.number().int().gte(1).optional()
 });
 
+export const ConfirmPaymentProofRequestSchema = z.object({
+  note: z.string().max(500).optional()
+});
+
 export const ConflictErrorSchema = z.object({
   code: z.string(),
   message: z.string(),
@@ -3754,7 +3758,7 @@ export const CreateCreditEntryRequestSchema = z.object({
 });
 
 export const CreateLineItemRequestSchema = z.object({
-  description: z.string().max(500),
+  description: z.string().max(500).optional(),
   quantity: z.number().int().gte(1).optional(),
   unitPrice: z.number().int().gte(0),
   metadata: z.record(z.string(), z.unknown()).optional()
@@ -4550,12 +4554,21 @@ export const DuesPaymentSchema = z.object({
   currency: z.string().min(3).max(3),
   paymentMethod: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]),
   referenceNumber: z.string().max(100).optional(),
-  status: z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired"]),
+  status: z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired", "submitted", "underReview", "confirmed", "rejected"]),
   recordedBy: z.string().optional(),
   membershipExtendedFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   membershipExtendedTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   paidAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  refundedAmount: z.number().int().gte(0)
+  refundedAmount: z.number().int().gte(0),
+  fundAllocations: z.array(DuesInvoiceAllocationSchema).optional(),
+  proof: z.object({
+  paymentId: z.string(),
+  storageKey: z.string().min(1).max(500),
+  fileName: z.string().min(1).max(255),
+  mimeType: z.string().min(1).max(100),
+  uploadedAt: z.string().datetime().transform((str) => new Date(str))
+}).optional(),
+  rejectionReason: z.string().max(500).optional()
 });
 
 export const DuesPaymentListResponseSchema = z.object({
@@ -4574,7 +4587,23 @@ export const DuesPaymentListResponseSchema = z.object({
 
 export const DuesPaymentMethodSchema = z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]);
 
-export const DuesPaymentStatusSchema = z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired"]);
+export const DuesPaymentProofSchema = z.object({
+  paymentId: z.string(),
+  storageKey: z.string().min(1).max(500),
+  fileName: z.string().min(1).max(255),
+  mimeType: z.string().min(1).max(100),
+  uploadedAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const DuesPaymentProofUpdateSchema = z.object({
+  paymentId: z.string().optional(),
+  storageKey: z.string().min(1).max(500).optional(),
+  fileName: z.string().min(1).max(255).optional(),
+  mimeType: z.string().min(1).max(100).optional(),
+  uploadedAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const DuesPaymentStatusSchema = z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired", "submitted", "underReview", "confirmed", "rejected"]);
 
 export const DuesPaymentUpdateSchema = z.object({
   id: z.string().uuid().optional(),
@@ -4591,12 +4620,21 @@ export const DuesPaymentUpdateSchema = z.object({
   currency: z.string().min(3).max(3).optional(),
   paymentMethod: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]).optional(),
   referenceNumber: z.string().max(100).optional(),
-  status: z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired"]).optional(),
+  status: z.enum(["pending", "completed", "failed", "refunded", "partiallyRefunded", "expired", "submitted", "underReview", "confirmed", "rejected"]).optional(),
   recordedBy: z.string().optional(),
   membershipExtendedFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   membershipExtendedTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   paidAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  refundedAmount: z.number().int().gte(0).optional()
+  refundedAmount: z.number().int().gte(0).optional(),
+  fundAllocations: z.array(DuesInvoiceAllocationSchema).optional(),
+  proof: z.object({
+  paymentId: z.string().optional(),
+  storageKey: z.string().min(1).max(500).optional(),
+  fileName: z.string().min(1).max(255).optional(),
+  mimeType: z.string().min(1).max(100).optional(),
+  uploadedAt: z.string().datetime().transform((str) => new Date(str)).optional()
+}).optional(),
+  rejectionReason: z.string().max(500).optional()
 });
 
 export const DuesRefundRequestSchema = z.object({
@@ -4605,25 +4643,49 @@ export const DuesRefundRequestSchema = z.object({
 });
 
 export const DuesReportEntrySchema = z.object({
-  month: z.string(),
-  method: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]),
-  count: z.number().int(),
-  total: z.number().int()
+  month: z.string().optional(),
+  method: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]).optional(),
+  count: z.number().int().optional(),
+  total: z.number().int().optional(),
+  fundId: z.string().optional(),
+  fundName: z.string().optional(),
+  percentage: z.number().optional(),
+  totalAllocated: z.number().int().optional(),
+  totalReversals: z.number().int().optional(),
+  netTotal: z.number().int().optional(),
+  personId: z.string().optional(),
+  totalPaid: z.number().int().optional(),
+  lastPaymentDate: z.string().optional(),
+  paymentCount: z.number().int().optional(),
+  amount: z.number().int().optional(),
+  daysPending: z.number().int().optional()
 });
 
-export const DuesReportEntryListResponseSchema = z.object({
+export const DuesReportResponseSchema = z.object({
   data: z.array(DuesReportEntrySchema),
-  pagination: z.object({
-  offset: z.number().int(),
-  limit: z.number().int(),
-  count: z.number().int(),
-  totalCount: z.number().int(),
-  totalPages: z.number().int(),
-  currentPage: z.number().int(),
-  hasNextPage: z.boolean(),
-  hasPreviousPage: z.boolean()
+  summary: z.object({
+  totalCollected: z.number().int().optional(),
+  rowCount: z.number().int().optional(),
+  fundCount: z.number().int().optional(),
+  memberCount: z.number().int().optional(),
+  totalOverdue: z.number().int().optional()
+}),
+  meta: z.object({
+  type: z.enum(["collection", "fund_breakdown", "dues_status", "aging"]),
+  from: z.string(),
+  to: z.string()
 })
 });
+
+export const DuesReportSummarySchema = z.object({
+  totalCollected: z.number().int().optional(),
+  rowCount: z.number().int().optional(),
+  fundCount: z.number().int().optional(),
+  memberCount: z.number().int().optional(),
+  totalOverdue: z.number().int().optional()
+});
+
+export const DuesReportTypeSchema = z.enum(["collection", "fund_breakdown", "dues_status", "aging"]);
 
 export const DunningChannelSchema = z.enum(["email", "sms", "letter"]);
 
@@ -5042,7 +5104,7 @@ export const EventCreateRequestSchema = z.object({
   organizationId: z.string(),
   eventType: z.enum(["assembly", "seminar", "social", "networking", "fundraiser", "governance", "custom"]),
   startDate: z.string().datetime().transform((str) => new Date(str)),
-  endDate: z.string().datetime().transform((str) => new Date(str)),
+  endDate: z.string().datetime().transform((str) => new Date(str)).optional(),
   location: z.string().optional(),
   virtualUrl: z.string().optional(),
   capacity: z.number().int().gte(1).optional(),
@@ -5328,7 +5390,9 @@ export const FinancialDashboardSchema = z.object({
   pendingCount: z.number().int(),
   completedCount: z.number().int(),
   totalCount: z.number().int(),
-  collectionRate: z.number().int()
+  collectionRate: z.number().int(),
+  gatewayConfigured: z.boolean(),
+  expiringThisMonth: z.number().int()
 });
 
 export const FormConfigSchema = z.object({
@@ -6668,12 +6732,15 @@ export const OfficerTermRecordSchema = z.object({
   endDate: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
+export const TermStatusSchema = z.enum(["upcoming", "active", "completed", "resigned", "removed"]);
+
 export const OfficerTermRequestSchema = z.object({
   positionId: z.string(),
   personId: z.string(),
   organizationId: z.string(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  status: TermStatusSchema.optional(),
   appointedBy: z.string().optional()
 });
 
@@ -6683,6 +6750,7 @@ export const OfficerTermRequestUpdateSchema = z.object({
   organizationId: z.string().optional(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  status: TermStatusSchema.optional(),
   appointedBy: z.string().optional()
 });
 
@@ -7726,6 +7794,10 @@ export const RefundResponseSchema = z.object({
 
 export const RegistrationStatusSchema = z.enum(["registered", "waitlisted", "confirmed", "checked_in", "cancelled", "no_show", "refunded"]);
 
+export const RejectPaymentProofRequestSchema = z.object({
+  reason: z.string().min(1).max(500)
+});
+
 export const RenewalAlertStatusSchema = z.enum(["pending", "sent", "acknowledged", "dismissed"]);
 
 export const RenewalCycleSchema = z.object({
@@ -7861,7 +7933,7 @@ export const ReviewUpdateSchema = z.object({
 });
 
 export const RevokeCredentialRequestSchema = z.object({
-  reason: z.string().min(1).max(500)
+  reason: z.string().min(1).max(500).optional()
 });
 
 export const RosterMemberSchema = z.object({
@@ -8071,7 +8143,7 @@ export const ScheduleExceptionSchema = z.object({
   timezone: z.string(),
   startDatetime: z.string().datetime().transform((str) => new Date(str)),
   endDatetime: z.string().datetime().transform((str) => new Date(str)),
-  reason: z.string().max(500),
+  reason: z.string().max(500).optional(),
   recurring: z.boolean(),
   recurrencePattern: z.object({
   type: z.enum(["daily", "weekly", "monthly", "yearly"]),
@@ -8088,7 +8160,7 @@ export const ScheduleExceptionCreateRequestSchema = z.object({
   timezone: z.string().optional(),
   startDatetime: z.string().datetime().transform((str) => new Date(str)),
   endDatetime: z.string().datetime().transform((str) => new Date(str)),
-  reason: z.string().max(500),
+  reason: z.string().max(500).optional(),
   recurring: z.boolean().optional(),
   recurrencePattern: z.object({
   type: z.enum(["daily", "weekly", "monthly", "yearly"]),
@@ -8375,6 +8447,17 @@ export const StoredFileUpdateSchema = z.object({
 
 export const StrictUtcDateTimeSchema = z.string().datetime().transform((str) => new Date(str));
 
+export const SubmitPaymentProofRequestSchema = z.object({
+  invoiceId: z.string(),
+  amount: z.number().int().gte(1),
+  currency: z.string(),
+  paymentMethod: z.enum(["online", "cash", "check", "bankTransfer", "gcash", "other"]),
+  referenceNumber: z.string().max(100).optional(),
+  proofStorageKey: z.string().min(1).max(500),
+  proofFileName: z.string().min(1).max(255),
+  proofMimeType: z.string().min(1).max(100)
+});
+
 export const SuppressionListSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -8440,8 +8523,6 @@ export const TaxReceiptUpdateSchema = z.object({
   issuedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   issuedBy: z.string().optional()
 });
-
-export const TermStatusSchema = z.enum(["upcoming", "active", "completed", "resigned", "removed"]);
 
 export const TestTemplateRequestSchema = z.object({
   recipientEmail: z.string().email(),
@@ -8539,7 +8620,7 @@ export const TrainingEnrollmentSchema = z.object({
 });
 
 export const TrainingEnrollmentCompleteRequestSchema = z.object({
-  completedAt: z.string().datetime().transform((str) => new Date(str)),
+  completedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   awardCredit: z.boolean()
 });
 
@@ -10152,12 +10233,40 @@ export type RecordDuesPaymentBody = z.infer<typeof RecordDuesPaymentBody>;
 
 export const RecordDuesPaymentResponse = DuesPaymentSchema;
 
+export const ListPendingProofsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  organizationId: z.string(),
+});
+export type ListPendingProofsQuery = z.infer<typeof ListPendingProofsQuery>;
+
+export const ListPendingProofsResponse = DuesPaymentListResponseSchema;
+
+export const SubmitPaymentProofBody = SubmitPaymentProofRequestSchema;
+export type SubmitPaymentProofBody = z.infer<typeof SubmitPaymentProofBody>;
+
+export const SubmitPaymentProofResponse = DuesPaymentSchema;
+
 export const GetDuesPaymentParams = z.object({
   paymentId: z.string(),
 });
 export type GetDuesPaymentParams = z.infer<typeof GetDuesPaymentParams>;
 
 export const GetDuesPaymentResponse = DuesPaymentSchema;
+
+export const ConfirmPaymentProofParams = z.object({
+  paymentId: z.string(),
+});
+export type ConfirmPaymentProofParams = z.infer<typeof ConfirmPaymentProofParams>;
+
+export const ConfirmPaymentProofBody = ConfirmPaymentProofRequestSchema;
+export type ConfirmPaymentProofBody = z.infer<typeof ConfirmPaymentProofBody>;
+
+export const ConfirmPaymentProofResponse = DuesPaymentSchema;
 
 export const RefundDuesPaymentParams = z.object({
   paymentId: z.string(),
@@ -10168,6 +10277,16 @@ export const RefundDuesPaymentBody = DuesRefundRequestSchema;
 export type RefundDuesPaymentBody = z.infer<typeof RefundDuesPaymentBody>;
 
 export const RefundDuesPaymentResponse = DuesPaymentSchema;
+
+export const RejectPaymentProofParams = z.object({
+  paymentId: z.string(),
+});
+export type RejectPaymentProofParams = z.infer<typeof RejectPaymentProofParams>;
+
+export const RejectPaymentProofBody = RejectPaymentProofRequestSchema;
+export type RejectPaymentProofBody = z.infer<typeof RejectPaymentProofBody>;
+
+export const RejectPaymentProofResponse = DuesPaymentSchema;
 
 export const ListDuesFundsQuery = z.object({
   organizationId: z.string(),
@@ -10199,12 +10318,13 @@ export const GenerateDuesReportParams = z.object({
 export type GenerateDuesReportParams = z.infer<typeof GenerateDuesReportParams>;
 
 export const GenerateDuesReportQuery = z.object({
+  type: DuesReportTypeSchema,
   from: z.string().datetime().transform((str) => new Date(str)).optional(),
   to: z.string().datetime().transform((str) => new Date(str)).optional(),
 });
 export type GenerateDuesReportQuery = z.infer<typeof GenerateDuesReportQuery>;
 
-export const GenerateDuesReportResponse = DuesReportEntryListResponseSchema;
+export const GenerateDuesReportResponse = DuesReportResponseSchema;
 
 export const ListDunningEventsQuery = z.object({
   offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),

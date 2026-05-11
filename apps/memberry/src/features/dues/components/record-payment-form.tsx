@@ -144,7 +144,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
             <SelectContent>
               <SelectItem value="cash">Cash</SelectItem>
               <SelectItem value="check">Check</SelectItem>
-              <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+              <SelectItem value="bankTransfer">Bank Transfer</SelectItem>
               <SelectItem value="gcash">GCash</SelectItem>
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>

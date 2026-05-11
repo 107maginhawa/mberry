@@ -355,7 +355,7 @@ model RefundCreateRequest {
   amount: int64;
 
   @doc("Reason for the refund.")
-  reason: string;
+  reason?: string;
 }
 
 @doc("Request body to create a revenue recognition schedule.")

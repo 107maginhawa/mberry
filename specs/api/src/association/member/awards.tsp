@@ -422,7 +422,7 @@ model GrantDenyRequest {
   @doc("Reason for denial")
   @minLength(1)
   @maxLength(3000)
-  reason: string;
+  reason?: string;
 }
 
 @doc("Request to submit a grant application")

@@ -8178,7 +8178,7 @@ export type BookingActionRequest = {
     /**
      * Action reason - required for audit trail
      */
-    reason: string;
+    reason?: string;
 };
 
 /**
@@ -9460,7 +9460,7 @@ export type CancelEmailRequest = {
     /**
      * Reason for cancellation
      */
-    reason: string;
+    reason?: string;
 };
 
 /**
@@ -11466,6 +11466,16 @@ export type ConferenceUpdate = {
 };
 
 /**
+ * Request for an officer to confirm a submitted payment proof
+ */
+export type ConfirmPaymentProofRequest = {
+    /**
+     * Optional note from the officer
+     */
+    note?: string;
+};
+
+/**
  * Resource conflict error
  */
 export type ConflictError = {
@@ -12303,7 +12313,7 @@ export type CreateLineItemRequest = {
     /**
      * Item description
      */
-    description: string;
+    description?: string;
     /**
      * Quantity
      */
@@ -14403,6 +14413,36 @@ export type DuesConfigUpdateRequest = {
 };
 
 /**
+ * Aggregated dues dashboard statistics for an organisation
+ */
+export type DuesDashboardData = {
+    /**
+     * Total revenue collected in the current period
+     */
+    totalCollected: number;
+    /**
+     * Total outstanding (unpaid) dues amount
+     */
+    totalOutstanding: number;
+    /**
+     * Count of members with active (paid) dues
+     */
+    paidCount: number;
+    /**
+     * Count of members with unpaid dues
+     */
+    unpaidCount: number;
+    /**
+     * Count of members in the overdue grace period
+     */
+    overdueCount: number;
+    /**
+     * Number of upcoming activities/events for the org
+     */
+    upcomingActivities: number;
+};
+
+/**
  * A dues fund allocation pool for an organization
  */
 export type DuesFund = {
@@ -14842,7 +14882,7 @@ export type DuesPayment = {
     /**
      * Lifecycle status of this payment
      */
-    status: 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired';
+    status: 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired' | 'submitted' | 'underReview' | 'confirmed' | 'rejected';
     /**
      * ID of the staff member who recorded this payment
      */
@@ -14863,6 +14903,39 @@ export type DuesPayment = {
      * Amount already refunded in minor currency units
      */
     refundedAmount: bigint;
+    /**
+     * Breakdown of this payment's amount by fund (populated after settlement)
+     */
+    fundAllocations?: Array<DuesInvoiceAllocation>;
+    /**
+     * Proof of payment details (populated for proof-based submissions)
+     */
+    proof?: {
+        /**
+         * ID of the associated payment
+         */
+        paymentId: string;
+        /**
+         * Storage key referencing the uploaded proof file
+         */
+        storageKey: string;
+        /**
+         * Original file name of the uploaded proof
+         */
+        fileName: string;
+        /**
+         * MIME type of the uploaded proof (image/jpeg, image/png, application/pdf)
+         */
+        mimeType: string;
+        /**
+         * Timestamp when the proof was uploaded
+         */
+        uploadedAt: Date;
+    };
+    /**
+     * Reason for rejection by officer (populated when status is rejected)
+     */
+    rejectionReason?: string;
 };
 
 /**
@@ -14918,9 +14991,61 @@ export type DuesPaymentListResponse = {
 export type DuesPaymentMethod = 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
 
 /**
+ * Proof of payment attached to a dues payment submission
+ */
+export type DuesPaymentProof = {
+    /**
+     * ID of the associated payment
+     */
+    paymentId: string;
+    /**
+     * Storage key referencing the uploaded proof file
+     */
+    storageKey: string;
+    /**
+     * Original file name of the uploaded proof
+     */
+    fileName: string;
+    /**
+     * MIME type of the uploaded proof (image/jpeg, image/png, application/pdf)
+     */
+    mimeType: string;
+    /**
+     * Timestamp when the proof was uploaded
+     */
+    uploadedAt: Date;
+};
+
+/**
+ * Proof of payment attached to a dues payment submission
+ */
+export type DuesPaymentProofUpdate = {
+    /**
+     * ID of the associated payment
+     */
+    paymentId?: string;
+    /**
+     * Storage key referencing the uploaded proof file
+     */
+    storageKey?: string;
+    /**
+     * Original file name of the uploaded proof
+     */
+    fileName?: string;
+    /**
+     * MIME type of the uploaded proof (image/jpeg, image/png, application/pdf)
+     */
+    mimeType?: string;
+    /**
+     * Timestamp when the proof was uploaded
+     */
+    uploadedAt?: Date;
+};
+
+/**
  * Status of a dues payment
  */
-export type DuesPaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired';
+export type DuesPaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired' | 'submitted' | 'underReview' | 'confirmed' | 'rejected';
 
 /**
  * A recorded dues payment from a member
@@ -14985,7 +15110,7 @@ export type DuesPaymentUpdate = {
     /**
      * Lifecycle status of this payment
      */
-    status?: 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired';
+    status?: 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded' | 'expired' | 'submitted' | 'underReview' | 'confirmed' | 'rejected';
     /**
      * ID of the staff member who recorded this payment
      */
@@ -15006,6 +15131,39 @@ export type DuesPaymentUpdate = {
      * Amount already refunded in minor currency units
      */
     refundedAmount?: bigint;
+    /**
+     * Breakdown of this payment's amount by fund (populated after settlement)
+     */
+    fundAllocations?: Array<DuesInvoiceAllocation>;
+    /**
+     * Proof of payment details (populated for proof-based submissions)
+     */
+    proof?: {
+        /**
+         * ID of the associated payment
+         */
+        paymentId?: string;
+        /**
+         * Storage key referencing the uploaded proof file
+         */
+        storageKey?: string;
+        /**
+         * Original file name of the uploaded proof
+         */
+        fileName?: string;
+        /**
+         * MIME type of the uploaded proof (image/jpeg, image/png, application/pdf)
+         */
+        mimeType?: string;
+        /**
+         * Timestamp when the proof was uploaded
+         */
+        uploadedAt?: Date;
+    };
+    /**
+     * Reason for rejection by officer (populated when status is rejected)
+     */
+    rejectionReason?: string;
 };
 
 /**
@@ -15029,67 +15187,148 @@ export type DuesReportEntry = {
     /**
      * Year-month string in YYYY-MM format
      */
-    month: string;
+    month?: string;
     /**
      * Payment method for this group
      */
-    method: 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
+    method?: 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
     /**
      * Number of payments in this group
      */
-    count: number;
+    count?: number;
     /**
      * Total amount collected in this group (minor currency units)
      */
-    total: bigint;
+    total?: bigint;
+    /**
+     * Fund ID (fund_breakdown type)
+     */
+    fundId?: string;
+    /**
+     * Fund name (fund_breakdown type)
+     */
+    fundName?: string;
+    /**
+     * Fund percentage (fund_breakdown type)
+     */
+    percentage?: number;
+    /**
+     * Total allocated amount (fund_breakdown type)
+     */
+    totalAllocated?: bigint;
+    /**
+     * Total reversals amount (fund_breakdown type)
+     */
+    totalReversals?: bigint;
+    /**
+     * Net total after reversals (fund_breakdown type)
+     */
+    netTotal?: bigint;
+    /**
+     * Person ID (dues_status and aging types)
+     */
+    personId?: string;
+    /**
+     * Total paid amount (dues_status type)
+     */
+    totalPaid?: bigint;
+    /**
+     * Last payment date (dues_status type)
+     */
+    lastPaymentDate?: string;
+    /**
+     * Number of payments (dues_status type)
+     */
+    paymentCount?: number;
+    /**
+     * Payment amount (aging type)
+     */
+    amount?: bigint;
+    /**
+     * Days pending (aging type)
+     */
+    daysPending?: number;
 };
 
 /**
- * Offset-based paginated response with page navigation
+ * Dues report response with data entries and summary
  */
-export type DuesReportEntryListResponse = {
+export type DuesReportResponse = {
     /**
-     * Response data items
+     * Report data entries
      */
     data: Array<DuesReportEntry>;
     /**
-     * Pagination metadata
+     * Summary statistics
      */
-    pagination: {
+    summary: {
         /**
-         * Current offset
+         * Total collected amount (collection type)
          */
-        offset: number;
+        totalCollected?: bigint;
         /**
-         * Items per page
+         * Number of rows (collection type)
          */
-        limit: number;
+        rowCount?: number;
         /**
-         * Number of items in current page
+         * Number of funds (fund_breakdown type)
          */
-        count: number;
+        fundCount?: number;
         /**
-         * Total number of items
+         * Number of members (dues_status type)
          */
-        totalCount: number;
+        memberCount?: number;
         /**
-         * Total number of pages
+         * Number of overdue payments (aging type)
          */
-        totalPages: number;
+        totalOverdue?: number;
+    };
+    /**
+     * Report metadata
+     */
+    meta: {
         /**
-         * Current page number (1-based)
+         * Report type
          */
-        currentPage: number;
+        type: 'collection' | 'fund_breakdown' | 'dues_status' | 'aging';
         /**
-         * Whether there are more pages
+         * Date range start
          */
-        hasNextPage: boolean;
+        from: string;
         /**
-         * Whether there are previous pages
+         * Date range end
          */
-        hasPreviousPage: boolean;
+        to: string;
     };
 };
+
+/**
+ * Summary statistics for a dues report
+ */
+export type DuesReportSummary = {
+    /**
+     * Total collected amount (collection type)
+     */
+    totalCollected?: bigint;
+    /**
+     * Number of rows (collection type)
+     */
+    rowCount?: number;
+    /**
+     * Number of funds (fund_breakdown type)
+     */
+    fundCount?: number;
+    /**
+     * Number of members (dues_status type)
+     */
+    memberCount?: number;
+    /**
+     * Number of overdue payments (aging type)
+     */
+    totalOverdue?: number;
+};
+
+export type DuesReportType = 'collection' | 'fund_breakdown' | 'dues_status' | 'aging';
 
 /**
  * Channel through which a dunning communication is delivered
@@ -16496,7 +16735,7 @@ export type EventCreateRequest = {
     /**
      * End date and time
      */
-    endDate: Date;
+    endDate?: Date;
     /**
      * Physical location
      */
@@ -17505,6 +17744,14 @@ export type FinancialDashboard = {
      * Percentage of payments that have been completed (0–100)
      */
     collectionRate: number;
+    /**
+     * Whether a payment gateway is configured for this organization
+     */
+    gatewayConfigured: boolean;
+    /**
+     * Number of memberships expiring this month
+     */
+    expiringThisMonth: number;
 };
 
 /**
@@ -19914,6 +20161,44 @@ export type MeetingMinutesUpdate = {
 export type MeetingStatus = 'scheduled' | 'inProgress' | 'completed' | 'cancelled';
 
 /**
+ * A member record with joined person details for officer dashboards
+ */
+export type MemberSummary = {
+    /**
+     * Membership record ID
+     */
+    id: string;
+    /**
+     * Person ID
+     */
+    personId: string;
+    /**
+     * First name from the person record
+     */
+    firstName?: string;
+    /**
+     * Last name from the person record
+     */
+    lastName?: string;
+    /**
+     * Current membership status
+     */
+    status: string;
+    /**
+     * Member number assigned by the organisation
+     */
+    memberNumber?: string;
+    /**
+     * Date when dues expire
+     */
+    duesExpiryDate?: Date;
+    /**
+     * Membership category ID
+     */
+    categoryId?: string;
+};
+
+/**
  * Individual membership record linking a person to an organization and tier
  */
 export type Membership = {
@@ -20132,6 +20417,36 @@ export type MembershipApplicationListResponse = {
          */
         hasPreviousPage: boolean;
     };
+};
+
+/**
+ * A membership application record
+ */
+export type MembershipApplicationSummary = {
+    /**
+     * Application record ID
+     */
+    id: string;
+    /**
+     * Person ID of the applicant
+     */
+    personId: string;
+    /**
+     * Organisation the application is for
+     */
+    organizationId: string;
+    /**
+     * Application status
+     */
+    status: string;
+    /**
+     * Date the application was submitted
+     */
+    createdAt?: Date;
+    /**
+     * Date the application was last updated
+     */
+    updatedAt?: Date;
 };
 
 /**
@@ -20681,6 +20996,28 @@ export type MembershipUpdate = {
      * Internal note about this membership
      */
     note?: string;
+};
+
+/**
+ * Request body for updating an organisation profile
+ */
+export type MembershipUpdateOrgProfileRequest = {
+    /**
+     * Organisation display name
+     */
+    name?: string;
+    /**
+     * Contact email
+     */
+    contactEmail?: string;
+    /**
+     * Website URL
+     */
+    website?: string;
+    /**
+     * Geographic region
+     */
+    region?: string;
 };
 
 /**
@@ -21975,7 +22312,8 @@ export type OfficerTermRequest = {
     personId: string;
     organizationId: string;
     startDate: Date;
-    endDate: Date;
+    endDate?: Date;
+    status?: TermStatus;
     appointedBy?: string;
 };
 
@@ -21988,6 +22326,7 @@ export type OfficerTermRequestUpdate = {
     organizationId?: string;
     startDate?: Date;
     endDate?: Date;
+    status?: TermStatus;
     appointedBy?: string;
 };
 
@@ -22081,6 +22420,48 @@ export type OnboardingResponse = {
     metadata?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * Organisation profile as returned by the membership module
+ */
+export type OrgProfile = {
+    /**
+     * Organisation ID
+     */
+    id: string;
+    /**
+     * Organisation display name
+     */
+    name: string;
+    /**
+     * URL-safe slug
+     */
+    slug?: string;
+    /**
+     * Organisation type
+     */
+    orgType?: string;
+    /**
+     * Geographic region
+     */
+    region?: string;
+    /**
+     * Contact email
+     */
+    contactEmail?: string;
+    /**
+     * Website URL
+     */
+    website?: string;
+    /**
+     * Lifecycle status
+     */
+    status?: string;
+    /**
+     * Timestamp of last update
+     */
+    updatedAt?: Date;
 };
 
 /**
@@ -25610,6 +25991,16 @@ export type RefundResponse = {
 export type RegistrationStatus = 'registered' | 'waitlisted' | 'confirmed' | 'checked_in' | 'cancelled' | 'no_show' | 'refunded';
 
 /**
+ * Request for an officer to reject a submitted payment proof
+ */
+export type RejectPaymentProofRequest = {
+    /**
+     * Reason for rejection — shown to the member
+     */
+    reason: string;
+};
+
+/**
  * Status of a license renewal alert
  */
 export type RenewalAlertStatus = 'pending' | 'sent' | 'acknowledged' | 'dismissed';
@@ -26086,7 +26477,7 @@ export type RevokeCredentialRequest = {
     /**
      * Reason for revoking the credential
      */
-    reason: string;
+    reason?: string;
 };
 
 /**
@@ -26791,7 +27182,7 @@ export type ScheduleException = {
     /**
      * Reason for blocking
      */
-    reason: string;
+    reason?: string;
     /**
      * Whether this exception repeats
      */
@@ -26850,7 +27241,7 @@ export type ScheduleExceptionCreateRequest = {
     /**
      * Reason for blocking
      */
-    reason: string;
+    reason?: string;
     /**
      * Whether this exception repeats
      */
@@ -27865,6 +28256,44 @@ export type StoredFileUpdate = {
 export type StrictUtcDateTime = Date;
 
 /**
+ * Request for a member to submit a dues payment with proof of transfer
+ */
+export type SubmitPaymentProofRequest = {
+    /**
+     * ID of the invoice being paid
+     */
+    invoiceId: string;
+    /**
+     * Payment amount in minor currency units
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency: string;
+    /**
+     * Payment method used (bankTransfer, gcash)
+     */
+    paymentMethod: 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other';
+    /**
+     * External reference number (e.g. GCash ref, bank transfer ref)
+     */
+    referenceNumber?: string;
+    /**
+     * Storage key of the uploaded proof file (from storage upload)
+     */
+    proofStorageKey: string;
+    /**
+     * Original file name of the proof
+     */
+    proofFileName: string;
+    /**
+     * MIME type of the proof file
+     */
+    proofMimeType: string;
+};
+
+/**
  * A contact suppressed from receiving marketing communications
  */
 export type SuppressionList = {
@@ -28703,7 +29132,7 @@ export type TrainingEnrollmentCompleteRequest = {
     /**
      * UTC timestamp of completion
      */
-    completedAt: Date;
+    completedAt?: Date;
     /**
      * Whether to immediately award CE credit
      */
@@ -35709,6 +36138,98 @@ export type RecordDuesPaymentResponses = {
 
 export type RecordDuesPaymentResponse = RecordDuesPaymentResponses[keyof RecordDuesPaymentResponses];
 
+export type ListPendingProofsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        organizationId: string;
+    };
+    url: '/association/member/dues-payments/pending-proofs';
+};
+
+export type ListPendingProofsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListPendingProofsError = ListPendingProofsErrors[keyof ListPendingProofsErrors];
+
+export type ListPendingProofsResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesPaymentListResponse;
+};
+
+export type ListPendingProofsResponse = ListPendingProofsResponses[keyof ListPendingProofsResponses];
+
+export type SubmitPaymentProofData = {
+    body: SubmitPaymentProofRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/dues-payments/submit-proof';
+};
+
+export type SubmitPaymentProofErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type SubmitPaymentProofError = SubmitPaymentProofErrors[keyof SubmitPaymentProofErrors];
+
+export type SubmitPaymentProofResponses = {
+    /**
+     * Resource created response
+     */
+    201: DuesPayment;
+};
+
+export type SubmitPaymentProofResponse = SubmitPaymentProofResponses[keyof SubmitPaymentProofResponses];
+
 export type GetDuesPaymentData = {
     body?: never;
     path: {
@@ -35743,6 +36264,45 @@ export type GetDuesPaymentResponses = {
 };
 
 export type GetDuesPaymentResponse = GetDuesPaymentResponses[keyof GetDuesPaymentResponses];
+
+export type ConfirmPaymentProofData = {
+    body: ConfirmPaymentProofRequest;
+    path: {
+        paymentId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-payments/{paymentId}/confirm';
+};
+
+export type ConfirmPaymentProofErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type ConfirmPaymentProofError = ConfirmPaymentProofErrors[keyof ConfirmPaymentProofErrors];
+
+export type ConfirmPaymentProofResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesPayment;
+};
+
+export type ConfirmPaymentProofResponse = ConfirmPaymentProofResponses[keyof ConfirmPaymentProofResponses];
 
 export type RefundDuesPaymentData = {
     body: DuesRefundRequest;
@@ -35782,6 +36342,45 @@ export type RefundDuesPaymentResponses = {
 };
 
 export type RefundDuesPaymentResponse = RefundDuesPaymentResponses[keyof RefundDuesPaymentResponses];
+
+export type RejectPaymentProofData = {
+    body: RejectPaymentProofRequest;
+    path: {
+        paymentId: string;
+    };
+    query?: never;
+    url: '/association/member/dues-payments/{paymentId}/reject';
+};
+
+export type RejectPaymentProofErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RejectPaymentProofError = RejectPaymentProofErrors[keyof RejectPaymentProofErrors];
+
+export type RejectPaymentProofResponses = {
+    /**
+     * Success response with data
+     */
+    200: DuesPayment;
+};
+
+export type RejectPaymentProofResponse = RejectPaymentProofResponses[keyof RejectPaymentProofResponses];
 
 export type ListDuesFundsData = {
     body?: never;
@@ -35889,7 +36488,8 @@ export type GenerateDuesReportData = {
     path: {
         organizationId: string;
     };
-    query?: {
+    query: {
+        type: DuesReportType;
         from?: Date;
         to?: Date;
     };
@@ -35913,7 +36513,7 @@ export type GenerateDuesReportResponses = {
     /**
      * Success response with data
      */
-    200: DuesReportEntryListResponse;
+    200: DuesReportResponse;
 };
 
 export type GenerateDuesReportResponse = GenerateDuesReportResponses[keyof GenerateDuesReportResponses];
@@ -42871,6 +43471,42 @@ export type GetCreditComplianceResponses = {
 
 export type GetCreditComplianceResponse = GetCreditComplianceResponses[keyof GetCreditComplianceResponses];
 
+export type GetDuesDashboardData = {
+    body?: never;
+    path: {
+        /**
+         * Organisation ID
+         */
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/dues/dashboard/{orgId}';
+};
+
+export type GetDuesDashboardErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GetDuesDashboardError = GetDuesDashboardErrors[keyof GetDuesDashboardErrors];
+
+export type GetDuesDashboardResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: DuesDashboardData;
+    };
+};
+
+export type GetDuesDashboardResponse = GetDuesDashboardResponses[keyof GetDuesDashboardResponses];
+
 export type ListEmailQueueItemsData = {
     body?: never;
     path?: never;
@@ -43273,6 +43909,159 @@ export type TestEmailTemplateResponses = {
 };
 
 export type TestEmailTemplateResponse = TestEmailTemplateResponses[keyof TestEmailTemplateResponses];
+
+export type ListOrgApplicationsData = {
+    body?: never;
+    path: {
+        /**
+         * Organisation ID
+         */
+        orgId: Uuid;
+    };
+    query?: {
+        /**
+         * Filter by application status
+         */
+        status?: string;
+    };
+    url: '/membership/applications/{orgId}';
+};
+
+export type ListOrgApplicationsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListOrgApplicationsError = ListOrgApplicationsErrors[keyof ListOrgApplicationsErrors];
+
+export type ListOrgApplicationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<MembershipApplicationSummary>;
+    };
+};
+
+export type ListOrgApplicationsResponse = ListOrgApplicationsResponses[keyof ListOrgApplicationsResponses];
+
+export type ListOrgMembersData = {
+    body?: never;
+    path: {
+        /**
+         * Organisation ID
+         */
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/membership/members/{orgId}';
+};
+
+export type ListOrgMembersErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListOrgMembersError = ListOrgMembersErrors[keyof ListOrgMembersErrors];
+
+export type ListOrgMembersResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<MemberSummary>;
+    };
+};
+
+export type ListOrgMembersResponse = ListOrgMembersResponses[keyof ListOrgMembersResponses];
+
+export type GetOrgProfileData = {
+    body?: never;
+    path: {
+        /**
+         * Organisation ID
+         */
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/membership/org-profile/{orgId}';
+};
+
+export type GetOrgProfileErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetOrgProfileError = GetOrgProfileErrors[keyof GetOrgProfileErrors];
+
+export type GetOrgProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: OrgProfile;
+};
+
+export type GetOrgProfileResponse = GetOrgProfileResponses[keyof GetOrgProfileResponses];
+
+export type UpdateOrgProfileData = {
+    body: MembershipUpdateOrgProfileRequest;
+    path: {
+        /**
+         * Organisation ID
+         */
+        orgId: Uuid;
+    };
+    query?: never;
+    url: '/membership/org-profile/{orgId}';
+};
+
+export type UpdateOrgProfileErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateOrgProfileError = UpdateOrgProfileErrors[keyof UpdateOrgProfileErrors];
+
+export type UpdateOrgProfileResponses = {
+    /**
+     * Success response with data
+     */
+    200: OrgProfile;
+};
+
+export type UpdateOrgProfileResponse = UpdateOrgProfileResponses[keyof UpdateOrgProfileResponses];
 
 export type ListNotificationsData = {
     body?: never;

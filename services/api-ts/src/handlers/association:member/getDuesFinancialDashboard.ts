@@ -22,14 +22,18 @@ export async function getDuesFinancialDashboard(
 
   const stats = await repo.getDashboardStats(organizationId);
 
+  // Check gateway configuration
+  const gatewayConfig = await repo.getGatewayConfig(organizationId);
+
   // Ensure all numeric fields are plain numbers (not BigInt) for JSON serialization
   return ctx.json({
-    ...stats,
     totalCollected: Number(stats.totalCollected),
     totalOutstanding: Number(stats.totalOutstanding),
     pendingCount: Number(stats.pendingCount),
     completedCount: Number(stats.completedCount),
     totalCount: Number(stats.totalCount),
     collectionRate: Number(stats.collectionRate),
+    gatewayConfigured: !!gatewayConfig?.connected,
+    expiringThisMonth: 0, // TODO: implement with membership expiry query in Slice 3
   }, 200);
 }

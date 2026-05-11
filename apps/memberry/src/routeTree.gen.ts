@@ -32,6 +32,7 @@ import { Route as AuthenticatedMyCertificatesIndexRouteImport } from './routes/_
 import { Route as AuthenticatedOrgOrgIdOfficerRouteImport } from './routes/_authenticated/org/$orgId/officer'
 import { Route as AuthenticatedOrgOrgIdMembersRouteImport } from './routes/_authenticated/org/$orgId/members'
 import { Route as AuthenticatedOrgOrgIdHomeRouteImport } from './routes/_authenticated/org/$orgId/home'
+import { Route as AuthenticatedOrgOrgIdDuesRouteImport } from './routes/_authenticated/org/$orgId/dues'
 import { Route as AuthenticatedMyCreditsLogRouteImport } from './routes/_authenticated/my/credits/log'
 import { Route as AuthenticatedMyCertificatesCertificateIdRouteImport } from './routes/_authenticated/my/certificates/$certificateId'
 import { Route as AuthenticatedOrgOrgIdTrainingIndexRouteImport } from './routes/_authenticated/org/$orgId/training/index'
@@ -193,6 +194,12 @@ const AuthenticatedOrgOrgIdHomeRoute =
   AuthenticatedOrgOrgIdHomeRouteImport.update({
     id: '/org/$orgId/home',
     path: '/org/$orgId/home',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgOrgIdDuesRoute =
+  AuthenticatedOrgOrgIdDuesRouteImport.update({
+    id: '/org/$orgId/dues',
+    path: '/org/$orgId/dues',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedMyCreditsLogRoute =
@@ -456,6 +463,7 @@ export interface FileRoutesByFullPath {
   '/my/training': typeof AuthenticatedMyTrainingRoute
   '/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/org/$orgId/dues': typeof AuthenticatedOrgOrgIdDuesRoute
   '/org/$orgId/home': typeof AuthenticatedOrgOrgIdHomeRoute
   '/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
   '/org/$orgId/officer': typeof AuthenticatedOrgOrgIdOfficerRouteWithChildren
@@ -520,6 +528,7 @@ export interface FileRoutesByTo {
   '/my/training': typeof AuthenticatedMyTrainingRoute
   '/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/org/$orgId/dues': typeof AuthenticatedOrgOrgIdDuesRoute
   '/org/$orgId/home': typeof AuthenticatedOrgOrgIdHomeRoute
   '/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
   '/org/$orgId/officer': typeof AuthenticatedOrgOrgIdOfficerRouteWithChildren
@@ -583,6 +592,7 @@ export interface FileRoutesById {
   '/_authenticated/my/training': typeof AuthenticatedMyTrainingRoute
   '/_authenticated/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/_authenticated/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/_authenticated/org/$orgId/dues': typeof AuthenticatedOrgOrgIdDuesRoute
   '/_authenticated/org/$orgId/home': typeof AuthenticatedOrgOrgIdHomeRoute
   '/_authenticated/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
   '/_authenticated/org/$orgId/officer': typeof AuthenticatedOrgOrgIdOfficerRouteWithChildren
@@ -649,6 +659,7 @@ export interface FileRouteTypes {
     | '/my/training'
     | '/my/certificates/$certificateId'
     | '/my/credits/log'
+    | '/org/$orgId/dues'
     | '/org/$orgId/home'
     | '/org/$orgId/members'
     | '/org/$orgId/officer'
@@ -713,6 +724,7 @@ export interface FileRouteTypes {
     | '/my/training'
     | '/my/certificates/$certificateId'
     | '/my/credits/log'
+    | '/org/$orgId/dues'
     | '/org/$orgId/home'
     | '/org/$orgId/members'
     | '/org/$orgId/officer'
@@ -775,6 +787,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my/training'
     | '/_authenticated/my/certificates/$certificateId'
     | '/_authenticated/my/credits/log'
+    | '/_authenticated/org/$orgId/dues'
     | '/_authenticated/org/$orgId/home'
     | '/_authenticated/org/$orgId/members'
     | '/_authenticated/org/$orgId/officer'
@@ -992,6 +1005,13 @@ declare module '@tanstack/react-router' {
       path: '/org/$orgId/home'
       fullPath: '/org/$orgId/home'
       preLoaderRoute: typeof AuthenticatedOrgOrgIdHomeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/$orgId/dues': {
+      id: '/_authenticated/org/$orgId/dues'
+      path: '/org/$orgId/dues'
+      fullPath: '/org/$orgId/dues'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdDuesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/my/credits/log': {
@@ -1464,6 +1484,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMyTrainingRoute: typeof AuthenticatedMyTrainingRoute
   AuthenticatedMyCertificatesCertificateIdRoute: typeof AuthenticatedMyCertificatesCertificateIdRoute
   AuthenticatedMyCreditsLogRoute: typeof AuthenticatedMyCreditsLogRoute
+  AuthenticatedOrgOrgIdDuesRoute: typeof AuthenticatedOrgOrgIdDuesRoute
   AuthenticatedOrgOrgIdHomeRoute: typeof AuthenticatedOrgOrgIdHomeRoute
   AuthenticatedOrgOrgIdMembersRoute: typeof AuthenticatedOrgOrgIdMembersRoute
   AuthenticatedOrgOrgIdOfficerRoute: typeof AuthenticatedOrgOrgIdOfficerRouteWithChildren
@@ -1489,6 +1510,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMyCertificatesCertificateIdRoute:
     AuthenticatedMyCertificatesCertificateIdRoute,
   AuthenticatedMyCreditsLogRoute: AuthenticatedMyCreditsLogRoute,
+  AuthenticatedOrgOrgIdDuesRoute: AuthenticatedOrgOrgIdDuesRoute,
   AuthenticatedOrgOrgIdHomeRoute: AuthenticatedOrgOrgIdHomeRoute,
   AuthenticatedOrgOrgIdMembersRoute: AuthenticatedOrgOrgIdMembersRoute,
   AuthenticatedOrgOrgIdOfficerRoute:

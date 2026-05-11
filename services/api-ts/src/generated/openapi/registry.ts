@@ -162,8 +162,12 @@ import { deleteDuesInvoice } from '../../handlers/association:member/deleteDuesI
 import { markDuesInvoicePaid } from '../../handlers/association:member/markDuesInvoicePaid';
 import { listDuesPayments } from '../../handlers/association:member/listDuesPayments';
 import { recordDuesPayment } from '../../handlers/association:member/recordDuesPayment';
+import { listPendingProofs } from '../../handlers/association:member/listPendingProofs';
+import { submitPaymentProof } from '../../handlers/association:member/submitPaymentProof';
 import { getDuesPayment } from '../../handlers/association:member/getDuesPayment';
+import { confirmPaymentProof } from '../../handlers/association:member/confirmPaymentProof';
 import { refundDuesPayment } from '../../handlers/association:member/refundDuesPayment';
+import { rejectPaymentProof } from '../../handlers/association:member/rejectPaymentProof';
 import { listDuesFunds } from '../../handlers/association:member/listDuesFunds';
 import { upsertDuesFunds } from '../../handlers/association:member/upsertDuesFunds';
 import { getDuesFinancialDashboard } from '../../handlers/association:member/getDuesFinancialDashboard';
@@ -524,8 +528,12 @@ export const registry = {
   markDuesInvoicePaid,
   listDuesPayments,
   recordDuesPayment,
+  listPendingProofs,
+  submitPaymentProof,
   getDuesPayment,
+  confirmPaymentProof,
   refundDuesPayment,
+  rejectPaymentProof,
   listDuesFunds,
   upsertDuesFunds,
   getDuesFinancialDashboard,

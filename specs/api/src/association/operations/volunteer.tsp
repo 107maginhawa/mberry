@@ -375,7 +375,7 @@ model VolunteerOpportunityCreateRequest {
   organizationId: string;
 
   @doc("Description")
-  description: string;
+  description?: string;
 
   @doc("Skills required")
   skillsRequired?: string[];
@@ -473,7 +473,7 @@ model JobPostingCreateRequest {
   salary?: string;
 
   @doc("Full job description")
-  description: string;
+  description?: string;
 
   @doc("Requirements list")
   requirements?: string[];

@@ -361,7 +361,7 @@ model ConferenceCreateRequest {
   startDate: utcDateTime;
 
   @doc("UTC end date")
-  endDate: utcDateTime;
+  endDate?: utcDateTime;
 
   @doc("Venue name or address")
   venue?: string;
@@ -432,7 +432,7 @@ model SessionCreateRequest {
   startTime: utcDateTime;
 
   @doc("UTC end time")
-  endTime: utcDateTime;
+  endTime?: utcDateTime;
 
   @doc("Room assignment")
   room?: string;

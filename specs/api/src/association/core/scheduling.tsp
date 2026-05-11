@@ -180,7 +180,7 @@ model SlotCreateRequest {
   startTime: utcDateTime;
 
   @doc("UTC end time.")
-  endTime: utcDateTime;
+  endTime?: utcDateTime;
 
   @doc("Slot status.")
   status: SlotStatus;
@@ -216,10 +216,10 @@ model ScheduleBlockCreateRequest {
   startDate: plainDate;
 
   @doc("Last date of the block.")
-  endDate: plainDate;
+  endDate?: plainDate;
 
   @doc("Reason for blocking.")
-  reason: string;
+  reason?: string;
 
   @doc("All-day flag.")
   allDay: boolean;

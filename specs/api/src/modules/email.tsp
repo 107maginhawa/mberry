@@ -393,7 +393,7 @@ model TestTemplateResult {
 model CancelEmailRequest {
   @doc("Reason for cancellation")
   @maxLength(500)
-  reason: string;
+  reason?: string;
 }
 
 

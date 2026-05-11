@@ -23,7 +23,11 @@ function FinancialReportsPage() {
   const { data: reportData, isLoading } = useQuery({
     ...generateDuesReportOptions({
       path: { organizationId: orgId },
-      query: fromDate && toDate ? { from: new Date(fromDate), to: new Date(toDate) } : undefined,
+      query: {
+        type: (selectedType ?? 'collection') as 'collection' | 'fund_breakdown' | 'dues_status' | 'aging',
+        from: fromDate ? new Date(fromDate) : undefined,
+        to: toDate ? new Date(toDate) : undefined,
+      },
     }),
     enabled: shouldFetch && !!selectedType,
   })
@@ -59,8 +63,8 @@ function FinancialReportsPage() {
 
       <ReportResults
         type={selectedType ?? ''}
-        data={(reportData as any)?.data ?? null}
-        summary={(reportData as any)?.summary ?? null}
+        data={reportData?.data ?? null}
+        summary={reportData?.summary ?? null}
         isLoading={isLoading && shouldFetch}
       />
     </div>

@@ -528,7 +528,7 @@ model ConvertProspectRequest {
 model ProspectActivityCreateRequest {
   prospectId: string;
   activityType: ProspectActivityType;
-  description: string;
+  description?: string;
   performedBy: string;
   performedAt: utcDateTime;
 }
@@ -602,7 +602,7 @@ model TaxReceiptCreateRequest {
 @doc("Request to create or update a legislative issue")
 model LegislativeIssueRequest {
   title: string;
-  description: string;
+  description?: string;
   status: LegislativeIssueStatus;
   jurisdiction?: string;
   issueDate: plainDate;

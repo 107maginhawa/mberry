@@ -21,10 +21,40 @@ export async function generateDuesReport(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);
 
-  const from = query.from ?? new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-  const to = query.to ?? new Date();
+  const fromDate = query.from ?? new Date(new Date().getFullYear(), 0, 1);
+  const toDate = query.to ?? new Date();
+  const type = query.type;
 
-  const data = await repo.reportCollectionSummary(organizationId, from, to);
+  let data: any;
+  let summary: any = {};
 
-  return ctx.json({ data }, 200);
+  switch (type) {
+    case 'collection': {
+      data = await repo.reportCollectionSummary(organizationId, fromDate, toDate);
+      const totalCollected = data.reduce((sum: number, row: any) => sum + row.total, 0);
+      summary = { totalCollected, rowCount: data.length };
+      break;
+    }
+    case 'fund_breakdown': {
+      data = await repo.reportFundBreakdown(organizationId, fromDate, toDate);
+      summary = { fundCount: data.length };
+      break;
+    }
+    case 'dues_status': {
+      data = await repo.reportDuesStatus(organizationId, fromDate, toDate);
+      summary = { memberCount: data.length };
+      break;
+    }
+    case 'aging': {
+      data = await repo.reportAging(organizationId, fromDate, toDate);
+      summary = { totalOverdue: data.length };
+      break;
+    }
+  }
+
+  return ctx.json({
+    data,
+    summary,
+    meta: { type, from: fromDate.toISOString(), to: toDate.toISOString() },
+  }, 200);
 }

@@ -273,7 +273,11 @@ export class DuesRepository {
       .groupBy(duesFundAllocations.fundId, duesFunds.name, duesFunds.percentage);
   }
 
-  async reportDuesStatus(organizationId: string) {
+  async reportDuesStatus(organizationId: string, from?: Date, to?: Date) {
+    const conditions = [eq(duesPayments.organizationId, organizationId)];
+    if (from) conditions.push(gte(duesPayments.paidAt, from));
+    if (to) conditions.push(lte(duesPayments.paidAt, to));
+
     return this.db
       .select({
         personId: duesPayments.personId,
@@ -282,11 +286,18 @@ export class DuesRepository {
         paymentCount: sql<number>`count(*)::int`,
       })
       .from(duesPayments)
-      .where(eq(duesPayments.organizationId, organizationId))
+      .where(and(...conditions))
       .groupBy(duesPayments.personId);
   }
 
-  async reportAging(organizationId: string) {
+  async reportAging(organizationId: string, from?: Date, to?: Date) {
+    const conditions = [
+      eq(duesPayments.organizationId, organizationId),
+      eq(duesPayments.status, 'pending'),
+    ];
+    if (from) conditions.push(gte(duesPayments.createdAt, from));
+    if (to) conditions.push(lte(duesPayments.createdAt, to));
+
     return this.db
       .select({
         personId: duesPayments.personId,
@@ -295,10 +306,7 @@ export class DuesRepository {
         daysPending: sql<number>`EXTRACT(DAY FROM NOW() - ${duesPayments.createdAt})::int`,
       })
       .from(duesPayments)
-      .where(and(
-        eq(duesPayments.organizationId, organizationId),
-        eq(duesPayments.status, 'pending'),
-      ))
+      .where(and(...conditions))
       .orderBy(duesPayments.createdAt);
   }
 

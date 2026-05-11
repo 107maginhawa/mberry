@@ -901,11 +901,33 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.recordDuesPayment as unknown as Handler
   );
 
+  // listPendingProofs
+  app.get('/association/member/dues-payments/pending-proofs',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('query', validators.ListPendingProofsQuery, validationErrorHandler),
+    registry.listPendingProofs as unknown as Handler
+  );
+
+  // submitPaymentProof
+  app.post('/association/member/dues-payments/submit-proof',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('json', validators.SubmitPaymentProofBody, validationErrorHandler),
+    registry.submitPaymentProof as unknown as Handler
+  );
+
   // getDuesPayment
   app.get('/association/member/dues-payments/:paymentId',
     authMiddleware({ roles: ["association:admin", "association:member"] }),
     zValidator('param', validators.GetDuesPaymentParams, validationErrorHandler),
     registry.getDuesPayment as unknown as Handler
+  );
+
+  // confirmPaymentProof
+  app.post('/association/member/dues-payments/:paymentId/confirm',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.ConfirmPaymentProofParams, validationErrorHandler),
+    zValidator('json', validators.ConfirmPaymentProofBody, validationErrorHandler),
+    registry.confirmPaymentProof as unknown as Handler
   );
 
   // refundDuesPayment
@@ -914,6 +936,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('param', validators.RefundDuesPaymentParams, validationErrorHandler),
     zValidator('json', validators.RefundDuesPaymentBody, validationErrorHandler),
     registry.refundDuesPayment as unknown as Handler
+  );
+
+  // rejectPaymentProof
+  app.post('/association/member/dues-payments/:paymentId/reject',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.RejectPaymentProofParams, validationErrorHandler),
+    zValidator('json', validators.RejectPaymentProofBody, validationErrorHandler),
+    registry.rejectPaymentProof as unknown as Handler
   );
 
   // listDuesFunds

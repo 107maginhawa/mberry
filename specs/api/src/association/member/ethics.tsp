@@ -342,7 +342,7 @@ model EthicsComplaintCreateRequest {
   complainantId?: string;
   respondentId: string;
   category: ComplaintCategory;
-  description: string;
+  description?: string;
   confidential: boolean;
 }
 
@@ -373,7 +373,7 @@ model PeerReviewPanelRequest {
 model DisciplinaryActionRequest {
   complaintId: string;
   actionType: DisciplinaryActionType;
-  description: string;
+  description?: string;
   effectiveDate: plainDate;
   endDate?: plainDate;
   imposedBy: string;

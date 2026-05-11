@@ -258,7 +258,7 @@ model CreateInvoiceRequest {
 model CreateLineItemRequest {
   @doc("Item description")
   @maxLength(500)
-  description: string;
+  description?: string;
   
   @doc("Quantity")
   @minValue(1)

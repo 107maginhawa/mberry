@@ -542,7 +542,8 @@ model OfficerTermRequest {
   personId: string;
   organizationId: string;
   startDate: plainDate;
-  endDate: plainDate;
+  endDate?: plainDate;
+  status?: TermStatus;
   appointedBy?: string;
 }
 

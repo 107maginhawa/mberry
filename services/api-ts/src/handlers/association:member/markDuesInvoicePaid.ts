@@ -4,6 +4,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { MarkDuesInvoicePaidBody, MarkDuesInvoicePaidParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
+import { computeNewExpiry } from '@/handlers/dues/utils/expiry-extension';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -11,6 +12,9 @@ import { auditAction } from '@/utils/audit';
  *
  * Path: POST /association/member/dues-invoices/{invoiceId}/mark-paid
  * OperationId: markDuesInvoicePaid
+ *
+ * [BR-07] Uses computeNewExpiry() for correct billing-cycle-aware extension
+ * instead of hardcoded +1 year.
  */
 export async function markDuesInvoicePaid(
   ctx: ValidatedContext<MarkDuesInvoicePaidBody, never, MarkDuesInvoicePaidParams>
@@ -37,13 +41,18 @@ export async function markDuesInvoicePaid(
 
   const updatedInvoice = await invoiceRepo.markPaid(invoiceId, body.paymentId, new Date());
 
-  // Extend the membership's duesExpiryDate by 1 year from current expiry
+  // [BR-07] Extend dues_expiry_date using computeNewExpiry (not hardcoded +1 year)
   const membershipRepo = new MembershipRepository(db, logger);
   const membership = await membershipRepo.findOneById(invoice.membershipId);
-  if (membership && membership.duesExpiryDate) {
-    const currentExpiry = new Date(membership.duesExpiryDate);
-    currentExpiry.setFullYear(currentExpiry.getFullYear() + 1);
-    const newExpiryDate = currentExpiry.toISOString().split('T')[0];
+  if (membership) {
+    const currentExpiry = membership.duesExpiryDate
+      ? new Date(membership.duesExpiryDate)
+      : null;
+    const newExpiry = computeNewExpiry({
+      currentExpiry,
+      billingCycle: 'annual', // default — no billingCycle column yet
+    });
+    const newExpiryDate = newExpiry.toISOString().split('T')[0]!;
 
     await membershipRepo.updateOneById(invoice.membershipId, {
       duesExpiryDate: newExpiryDate,

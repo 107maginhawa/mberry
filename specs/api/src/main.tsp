@@ -292,6 +292,10 @@ namespace MonobaseAPI {
   interface AssocDuesPaymentManagement extends Association.Member.Dues.DuesPaymentManagement {}
 
   @tag("Association:Member")
+  @route("/association/member/dues-payments")
+  interface AssocDuesPaymentProofManagement extends Association.Member.Dues.DuesPaymentProofManagement {}
+
+  @tag("Association:Member")
   @route("/association/member/dues-gateway")
   interface AssocDuesGatewayManagement extends Association.Member.Dues.DuesGatewayManagement {}
 

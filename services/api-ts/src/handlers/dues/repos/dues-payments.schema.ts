@@ -25,7 +25,8 @@ export const duesPaymentMethodEnum = pgEnum('dues_payment_method', [
 ]);
 
 export const duesPaymentStatusEnum = pgEnum('dues_payment_status', [
-  'pending', 'completed', 'failed', 'refunded', 'partiallyRefunded', 'expired'
+  'pending', 'completed', 'failed', 'refunded', 'partiallyRefunded', 'expired',
+  'submitted', 'underReview', 'confirmed', 'rejected'
 ]);
 
 export const gatewayProviderEnum = pgEnum('gateway_provider', ['paymongo', 'stripe']);
@@ -86,6 +87,10 @@ export const duesPayments = pgTable('dues_payment', {
   paidAt: timestamp('paid_at'),
   expiredAt: timestamp('expired_at'),
   refundedAmount: integer('refunded_amount').notNull().default(0),
+  proofStorageKey: varchar('proof_storage_key', { length: 500 }),
+  proofFileName: varchar('proof_file_name', { length: 255 }),
+  proofMimeType: varchar('proof_mime_type', { length: 100 }),
+  rejectionReason: text('rejection_reason'),
   metadata: jsonb('metadata').$type<Record<string, unknown>>(),
 }, (table) => ({
   orgIdx: index('dues_payment_org_idx').on(table.organizationId),

@@ -361,7 +361,7 @@ model ScheduleException extends BaseEntity {
 
   @doc("Reason for blocking")
   @maxLength(500)
-  reason: string;
+  reason?: string;
 
   @doc("Whether this exception repeats")
   recurring: boolean;
@@ -597,7 +597,7 @@ model ScheduleExceptionCreateRequest {
 
   @doc("Reason for blocking")
   @maxLength(500)
-  reason: string;
+  reason?: string;
 
   @doc("Whether this exception repeats")
   recurring?: boolean;
@@ -653,7 +653,7 @@ model BookingCreateRequest {
 model BookingActionRequest {
   @doc("Action reason - required for audit trail")
   @maxLength(500)
-  reason: string;
+  reason?: string;
 }
 
 // ============================================================================

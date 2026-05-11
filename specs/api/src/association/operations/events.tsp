@@ -287,7 +287,7 @@ model EventCreateRequest {
   startDate: utcDateTime;
 
   @doc("End date and time")
-  endDate: utcDateTime;
+  endDate?: utcDateTime;
 
   @doc("Physical location")
   location?: string;

@@ -304,7 +304,7 @@ model RevokeCredentialRequest {
   @doc("Reason for revoking the credential")
   @minLength(1)
   @maxLength(500)
-  reason: string;
+  reason?: string;
 }
 
 @doc("Request to verify a digital credential")

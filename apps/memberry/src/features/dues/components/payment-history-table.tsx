@@ -17,7 +17,11 @@ const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
   failed: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
   refunded: 'bg-gray-100 text-gray-600',
-  partially_refunded: 'bg-gray-100 text-gray-600',
+  partiallyRefunded: 'bg-gray-100 text-gray-600',
+  submitted: 'bg-blue-100 text-blue-800',
+  underReview: 'bg-yellow-100 text-yellow-800',
+  confirmed: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  rejected: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
   expired: 'bg-orange-100 text-orange-800',
 }
 
@@ -25,7 +29,7 @@ const METHOD_LABELS: Record<string, string> = {
   online: 'Online',
   cash: 'Cash',
   check: 'Check',
-  bank_transfer: 'Bank Transfer',
+  bankTransfer: 'Bank Transfer',
   gcash: 'GCash',
   other: 'Other',
 }
@@ -73,7 +77,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
             <SelectItem value="online">Online</SelectItem>
             <SelectItem value="cash">Cash</SelectItem>
             <SelectItem value="check">Check</SelectItem>
-            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+            <SelectItem value="bankTransfer">Bank Transfer</SelectItem>
             <SelectItem value="gcash">GCash</SelectItem>
           </SelectContent>
         </Select>

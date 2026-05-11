@@ -16,7 +16,11 @@ const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
   failed: 'bg-red-100 text-red-800',
   refunded: 'bg-gray-100 text-gray-600',
-  partially_refunded: 'bg-gray-100 text-gray-600',
+  partiallyRefunded: 'bg-gray-100 text-gray-600',
+  submitted: 'bg-blue-100 text-blue-800',
+  underReview: 'bg-yellow-100 text-yellow-800',
+  confirmed: 'bg-green-100 text-green-800',
+  rejected: 'bg-red-100 text-red-800',
   expired: 'bg-orange-100 text-orange-800',
 }
 
@@ -83,7 +87,7 @@ function PaymentDetailPage() {
         </div>
       )}
 
-      {(payment.status === 'completed' || payment.status === 'partially_refunded') && maxRefundable > 0 && (
+      {(payment.status === 'completed' || payment.status === 'partiallyRefunded') && maxRefundable > 0 && (
         <RefundForm paymentId={paymentId} maxAmount={maxRefundable} currency={payment.currency} />
       )}
       {payment.status === 'refunded' && (
