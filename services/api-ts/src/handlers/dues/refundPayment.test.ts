@@ -261,6 +261,34 @@ describe('refundPayment [BR-08]', () => {
     expect(capturedReversals.every((r) => r.isReversal === true)).toBe(true);
   });
 
+  test('[BR-08] throws ValidationError for zero refund amount', async () => {
+    memberMocks = stubMembership();
+    mocks = stubRepo(DuesRepository, {
+      getPayment: async () => fakePayment,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'pay-1' },
+      _body: { amount: 0 },
+    });
+
+    await expect(refundPayment(ctx)).rejects.toThrow('Refund amount must be positive');
+  });
+
+  test('[BR-08] throws ValidationError for negative refund amount', async () => {
+    memberMocks = stubMembership();
+    mocks = stubRepo(DuesRepository, {
+      getPayment: async () => fakePayment,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'pay-1' },
+      _body: { amount: -500 },
+    });
+
+    await expect(refundPayment(ctx)).rejects.toThrow('Refund amount must be positive');
+  });
+
   test('[BR-08] records updatedBy as refunding officer', async () => {
     memberMocks = stubMembership();
     let capturedExtra: any = null;

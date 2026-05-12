@@ -18,6 +18,11 @@ export async function refundPayment(ctx: Context): Promise<Response> {
   if (!membership) throw new ForbiddenError('Access denied to this resource');
 
   const refundAmount = body.amount ?? payment.amount;
+
+  if (refundAmount <= 0) {
+    throw new ValidationError('Refund amount must be positive');
+  }
+
   const maxRefundable = payment.amount - payment.refundedAmount;
 
   if (refundAmount > maxRefundable) {
