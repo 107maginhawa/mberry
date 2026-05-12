@@ -33,7 +33,7 @@ describe('[BR-02] upsertDuesConfig', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { duesConfigId: 'org-1' },
       _body: { defaultAmount: 5000, currency: 'PHP' },
     });
 
@@ -50,7 +50,7 @@ describe('[BR-02] upsertDuesConfig', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { duesConfigId: 'org-1' },
       _body: {
         defaultAmount: 5000,
         categoryOverrides: [{ categoryId: 'cat-1', overrideAmount: 3000 }],
@@ -69,7 +69,7 @@ describe('[BR-02] upsertDuesConfig', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { duesConfigId: 'org-1' },
       _body: {
         defaultAmount: 5000,
         reminderSchedules: [{ daysOffset: -30, templateId: 'tpl-1' }],
@@ -88,7 +88,7 @@ describe('[BR-02] upsertDuesConfig', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { duesConfigId: 'org-1' },
       _body: { defaultAmount: 5000 },
     });
 
@@ -103,7 +103,7 @@ describe('[BR-02] upsertDuesConfig', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-route' },
+      _params: { duesConfigId: 'org-route' },
       _body: { defaultAmount: 5000, organizationId: 'org-body-ignored' },
     });
 

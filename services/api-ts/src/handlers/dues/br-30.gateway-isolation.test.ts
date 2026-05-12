@@ -74,7 +74,7 @@ describe('[BR-30] Payment Gateway Isolation', () => {
       },
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-A' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-A' } });
     const response = await getGatewayConfig(ctx);
 
     expect(response.status).toBe(200);
@@ -90,7 +90,7 @@ describe('[BR-30] Payment Gateway Isolation', () => {
       },
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-B' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-B' } });
     const response = await getGatewayConfig(ctx);
 
     expect(response.status).toBe(200);
@@ -102,7 +102,7 @@ describe('[BR-30] Payment Gateway Isolation', () => {
       getGatewayConfig: async () => undefined,
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-no-gateway' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-no-gateway' } });
     const response = await getGatewayConfig(ctx);
 
     expect(response.status).toBe(200);
@@ -137,7 +137,7 @@ describe('[BR-30] Payment Gateway Isolation', () => {
       getGatewayConfig: async () => orgAGateway,
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-A' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-A' } });
     const response = await getGatewayConfig(ctx);
 
     // Secret key must never be in the response

@@ -24,7 +24,7 @@ describe('listFunds', () => {
       listFunds: async () => fakeFunds,
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1' } });
+    const ctx = makeCtx({ _query: { organizationId: 'org-1' } });
     const response = await listFunds(ctx);
 
     expect(response.status).toBe(200);
@@ -37,7 +37,7 @@ describe('listFunds', () => {
       listFunds: async () => [],
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-empty' } });
+    const ctx = makeCtx({ _query: { organizationId: 'org-empty' } });
     const response = await listFunds(ctx);
 
     expect(response.status).toBe(200);
@@ -53,7 +53,7 @@ describe('listFunds', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _query: { organizationId: 'org-1' },
     });
 
     const response = await listFunds(ctx);
