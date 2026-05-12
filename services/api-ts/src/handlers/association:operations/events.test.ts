@@ -1,5 +1,6 @@
-import { describe, test, expect } from 'bun:test';
-import { makeCtx } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach } from 'bun:test';
+import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { EventRegistrationRepository, WaitlistEntryRepository } from './repos/events.repo';
 
 /**
  * Events Module Tests
@@ -209,6 +210,88 @@ describe('Waitlist', () => {
     expect(entry.promotedAt).not.toBeNull();
     const registration = { eventId: entry.eventId, personId: entry.personId, status: 'confirmed' };
     expect(registration.status).toBe('confirmed');
+  });
+});
+
+// ─── [BR-27] Waitlist Promotion on Cancellation ────────────
+
+describe('[BR-27] cancelEventRegistration — waitlist promotion', () => {
+  let regMocks: ReturnType<typeof stubRepo>;
+  let waitlistMocks: ReturnType<typeof stubRepo>;
+
+  const fakeConfirmedReg = {
+    id: 'reg-1',
+    eventId: 'evt-1',
+    personId: 'person-1',
+    organizationId: 'org-1',
+    status: 'confirmed',
+    cancelledAt: null,
+  };
+
+  const fakeWaitlistedReg = {
+    ...fakeConfirmedReg,
+    id: 'reg-2',
+    status: 'waitlisted',
+  };
+
+  afterEach(() => {
+    if (regMocks) Object.values(regMocks).forEach((m) => m.mockRestore());
+    if (waitlistMocks) Object.values(waitlistMocks).forEach((m) => m.mockRestore());
+  });
+
+  test('cancelling confirmed reg promotes next waitlisted entry', async () => {
+    let createdReg: any = null;
+    regMocks = stubRepo(EventRegistrationRepository, {
+      findOneById: async () => fakeConfirmedReg,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeConfirmedReg, ...data }),
+      createOne: async (data: any) => { createdReg = data; return { id: 'reg-new', ...data }; },
+    });
+    waitlistMocks = stubRepo(WaitlistEntryRepository, {
+      promoteNext: async () => ({ id: 'wl-1', eventId: 'evt-1', personId: 'person-2', position: 1, promotedAt: new Date() }),
+    });
+
+    const { cancelEventRegistration } = await import('./cancelEventRegistration');
+    const ctx = makeCtx({ _params: { registrationId: 'reg-1' } });
+    const response = await cancelEventRegistration(ctx);
+
+    expect(response.status).toBe(200);
+    expect(createdReg).not.toBeNull();
+    expect(createdReg.personId).toBe('person-2');
+    expect(createdReg.status).toBe('confirmed');
+    expect(createdReg.eventId).toBe('evt-1');
+  });
+
+  test('cancelling confirmed reg with empty waitlist — no error', async () => {
+    regMocks = stubRepo(EventRegistrationRepository, {
+      findOneById: async () => fakeConfirmedReg,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeConfirmedReg, ...data }),
+    });
+    waitlistMocks = stubRepo(WaitlistEntryRepository, {
+      promoteNext: async () => null,
+    });
+
+    const { cancelEventRegistration } = await import('./cancelEventRegistration');
+    const ctx = makeCtx({ _params: { registrationId: 'reg-1' } });
+    const response = await cancelEventRegistration(ctx);
+
+    expect(response.status).toBe(200);
+  });
+
+  test('cancelling waitlisted reg does NOT trigger promotion', async () => {
+    let promoteCalled = false;
+    regMocks = stubRepo(EventRegistrationRepository, {
+      findOneById: async () => fakeWaitlistedReg,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeWaitlistedReg, ...data }),
+    });
+    waitlistMocks = stubRepo(WaitlistEntryRepository, {
+      promoteNext: async () => { promoteCalled = true; return null; },
+    });
+
+    const { cancelEventRegistration } = await import('./cancelEventRegistration');
+    const ctx = makeCtx({ _params: { registrationId: 'reg-2' } });
+    await cancelEventRegistration(ctx);
+
+    expect(promoteCalled).toBe(false);
   });
 });
 

@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CancelEventRegistrationParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
-import { EventRegistrationRepository } from './repos/events.repo';
+import { EventRegistrationRepository, WaitlistEntryRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -33,6 +33,24 @@ export async function cancelEventRegistration(
     status: 'cancelled',
     cancelledAt: new Date(),
   } as any);
+
+  // [BR-27] Promote next waitlisted entry if a confirmed registration was cancelled
+  if (existing.status === 'confirmed') {
+    try {
+      const waitlistRepo = new WaitlistEntryRepository(db, logger);
+      const promoted = await waitlistRepo.promoteNext(existing.eventId);
+      if (promoted) {
+        await repo.createOne({
+          eventId: existing.eventId,
+          personId: (promoted as any).personId,
+          organizationId: existing.organizationId,
+          status: 'confirmed',
+        } as any);
+      }
+    } catch (err) {
+      logger?.warn({ error: err, eventId: existing.eventId }, 'Failed to promote waitlist entry after cancellation');
+    }
+  }
 
   await auditAction(ctx, {
     action: 'update',

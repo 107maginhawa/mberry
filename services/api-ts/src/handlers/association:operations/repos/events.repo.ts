@@ -177,9 +177,30 @@ export class WaitlistEntryRepository extends DatabaseRepository<
 
   /**
    * Get the next position number for a given event's waitlist.
+   * Uses MAX(position) + 1 to avoid gaps after deletions/promotions.
    */
   async nextPosition(eventId: string): Promise<number> {
     const entries = await this.findMany({ eventId } as WaitlistEntryFilters);
-    return entries.length + 1;
+    if (entries.length === 0) return 1;
+    return Math.max(...entries.map(e => (e as any).position ?? 0)) + 1;
+  }
+
+  /**
+   * Promote the next unpromoted waitlist entry (FIFO by position).
+   * Sets promotedAt timestamp. Returns the promoted entry or null if none.
+   */
+  async promoteNext(eventId: string): Promise<WaitlistEntry | null> {
+    const entries = await this.findMany({ eventId } as WaitlistEntryFilters);
+    const unpromoted = entries
+      .filter(e => !(e as any).promotedAt)
+      .sort((a, b) => ((a as any).position ?? 0) - ((b as any).position ?? 0));
+    if (unpromoted.length === 0) return null;
+    const next = unpromoted[0]!;
+    const [promoted] = await this.db
+      .update(waitlistEntries)
+      .set({ promotedAt: new Date(), updatedAt: new Date() } as any)
+      .where(eq(waitlistEntries.id, next.id))
+      .returning();
+    return promoted as WaitlistEntry;
   }
 }
