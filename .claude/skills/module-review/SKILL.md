@@ -107,6 +107,21 @@ grep -rn 'TODO\|FIXME\|placeholder\|lorem' apps/account/src/features/{module}/ 2
 grep -rn 'console\.log' apps/account/src/features/{module}/ 2>/dev/null
 ```
 
+### 7. Project Map Gaps
+
+Regenerate the project map and check for gaps related to this module:
+
+```bash
+bun docs/project-map/generate.ts
+```
+
+Read `docs/project-map/gaps.generated.md` and filter for gaps mentioning routes or BRs belonging to `{module}`. Report any P0/P1 gaps found.
+
+- [ ] No P0 journey gaps reference this module's routes
+- [ ] No P0/P1 BRs for this module show as `br-partial` or `br-no-coverage`
+
+P0 journey gaps are blocking. P1 gaps are warnings.
+
 ## Output
 
 Report in this format:
@@ -118,6 +133,7 @@ Report in this format:
 **Consistency**: PASS/FAIL — [details]
 **Test Coverage**: PASS/FAIL — [details]
 **BR Coverage**: PASS/FAIL — [N/M BRs covered]
+**Project Map**: PASS/WARN/FAIL — [P0/P1 gaps count]
 **Boilerplate**: PASS/FAIL — [details]
 
 ### Issues Found

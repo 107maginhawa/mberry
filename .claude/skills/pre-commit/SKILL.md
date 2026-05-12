@@ -51,6 +51,16 @@ bun run scripts/br-coverage.ts 2>/dev/null || true
 
 If P0/P1 BRs are MISSING, warn but do not block the commit. BR gaps are addressed in `/module-review` and `/ship`.
 
+### 0.7. Project Map Gaps (informational)
+
+Regenerate the project map and surface any P0 journey gaps:
+
+```bash
+bun docs/project-map/generate.ts 2>/dev/null || true
+```
+
+Then read `docs/project-map/gaps.generated.md` and warn about any **Critical (P0)** gaps. Do not block the commit — P0 gaps are addressed in `/module-review` and `/develop`.
+
 ### 1. Type Check API
 
 ```bash

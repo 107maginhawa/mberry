@@ -57,6 +57,17 @@ For each module, in dependency order, complete ALL of the following before start
 
 Do NOT proceed to the next module until all steps above pass for the current one.
 
+### Phase 3.5: Update Project Map
+
+After completing all module vertical passes:
+
+1. Check if new routes or features were added
+2. If yes, prompt user: "New routes added — update `docs/project-map/journeys.md` with journey steps for these routes?"
+3. Regenerate: `bun docs/project-map/generate.ts`
+4. Review `docs/project-map/gaps.generated.md` for any new P0 gaps introduced
+
+This keeps the project map current as features ship.
+
 ### Phase 4: Integration
 
 1. Run `/module-review` — final cross-module sweep
