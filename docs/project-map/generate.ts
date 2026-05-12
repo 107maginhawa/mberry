@@ -405,6 +405,9 @@ function generateGaps(
   }
 
   for (const journey of journeys) {
+    // Skip deferred journeys (e.g., routes in different apps)
+    if (journey.status === "deferred") continue;
+
     for (const step of journey.steps) {
       const matchedRoute = findMatchingRoute(step.route);
 

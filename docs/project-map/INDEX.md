@@ -8,11 +8,11 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Routes | 50/58 tested | 8 gaps |
+| Routes | 55/58 tested | 3 gaps |
 | Business Rules | 32/40 complete | 8 incomplete |
-| Personas | 4/6 mapped | 2 unmapped |
-| Journeys | 11 defined | — |
-| P0 Gaps | 3 | **3 CRITICAL** |
+| Personas | 6/6 mapped | PASS |
+| Journeys | 16 defined | — |
+| P0 Gaps | 0 | PASS |
 | P1 Gaps | 2 | 2 important |
 
 ## Quick Links

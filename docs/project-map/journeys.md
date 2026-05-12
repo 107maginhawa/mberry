@@ -105,3 +105,53 @@
 - BRs: BR-03, BR-22
 - Priority: P1
 - Status: mapped
+
+## Persona: Platform Administrator
+
+> Note: Platform Admin routes live in `apps/admin` (port 3003), not `apps/memberry`.
+> Journey routes below are scoped to the admin app and won't appear in memberry route maps.
+
+### J-PA01: Monitor platform health
+1. GET /admin → platform admin dashboard
+2. GET /admin/organizations → view all organizations
+3. GET /admin/users → view all platform users
+- BRs: BR-22
+- Priority: P2
+- Status: deferred (apps/admin scope)
+
+### J-PA02: Manage organizations
+1. GET /admin/organizations → list organizations
+2. GET /admin/organizations/$orgId → view org details and stats
+3. GET /admin/organizations/$orgId/settings → configure org-level settings
+- BRs: BR-22
+- Priority: P2
+- Status: deferred (apps/admin scope)
+
+## Persona: Society Officer (National/Regional)
+
+### J-SO01: Cross-chapter oversight
+1. GET /org/$orgId/officer/dashboard → national-level officer dashboard
+2. GET /org/$orgId/officer/roster → view cross-chapter member roster
+3. GET /org/$orgId/officer/reports/credits → view aggregated CPD compliance
+4. GET /org/$orgId/officer/reports/financial → view cross-chapter financial rollup
+- BRs: BR-01, BR-11, BR-32
+- Priority: P2
+- Status: mapped
+
+### J-SO02: Manage national events and training
+1. GET /org/$orgId/officer/events → manage national events
+2. GET /org/$orgId/officer/events/new → create national event
+3. GET /org/$orgId/officer/events/$eventId → monitor event registrations
+4. GET /org/$orgId/officer/events/$eventId/attendance → track attendance
+5. GET /org/$orgId/officer/training → manage CPD training programs
+- BRs: BR-15, BR-11, BR-27
+- Priority: P2
+- Status: mapped
+
+### J-SO03: National communications
+1. GET /org/$orgId/officer/communications → view all announcements
+2. GET /org/$orgId/officer/communications/new → send national announcement
+3. GET /org/$orgId/officer/communications/$announcementId → view delivery status
+- BRs: BR-28
+- Priority: P2
+- Status: mapped
