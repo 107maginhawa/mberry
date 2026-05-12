@@ -257,8 +257,9 @@ This document is the definitive reference for all platform business rules. It co
 
 - **Phase:** 1
 - **Module(s):** M08
-- **Description:** Events can have a maximum capacity configured. When capacity is reached, new registrations are added to a waitlist. Waitlisted members are notified automatically when a registered member cancels. Cancellations are allowed up to the cancellation deadline configured per event; the default deadline is 24 hours before the event start time.
+- **Description:** Events can have a maximum capacity configured. When capacity is reached, new registrations are added to a waitlist. When a confirmed registration is cancelled, the next waitlisted member is automatically promoted to confirmed (FIFO by position).
 - **Edge cases:** If a cancellation occurs after the deadline, the slot is not automatically offered to the waitlist. The officer must manually decide whether to accept the late cancellation and open the slot.
+- **Deferred (v1.2):** Automatic notification to promoted member (needs notifs module wiring). Configurable cancellation deadline per event (needs `cancellationDeadlineHours` schema field). Late-cancellation officer workflow.
 
 ---
 

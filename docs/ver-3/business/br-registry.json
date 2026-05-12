@@ -478,7 +478,8 @@
     "module": "M08",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/events/registerForEvent.test.ts"
+        "services/api-ts/src/handlers/events/registerForEvent.test.ts",
+        "services/api-ts/src/handlers/association:operations/events.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/events-flow.hurl"
@@ -489,7 +490,8 @@
         "apps/memberry/tests/e2e/officer/events.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "coverage": "PARTIAL",
+    "notes": "Capacity check + auto-waitlist + FIFO promotion on cancellation implemented. Deferred to v1.2: automatic notification to promoted member, configurable cancellation deadline (needs schema field), late-cancellation officer workflow."
   },
   "BR-28": {
     "rule": "Communication Deduplication",
