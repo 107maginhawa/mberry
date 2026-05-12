@@ -2,7 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { terminateMembership } from './terminateMembership';
 import { MembershipRepository } from './repos/membership.repo';
-import { NotFoundError, UnauthorizedError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -141,10 +141,26 @@ describe('terminateMembership', () => {
     expect(capturedId).toBe('mem-99');
   });
 
-  // ─── Any status can be terminated (no guard in handler) ──
+  // ─── [BR-03] Status guard: cannot terminate pending memberships ──
 
-  describe('terminates memberships regardless of status', () => {
-    const terminatableStatuses = ['active', 'suspended', 'grace', 'lapsed', 'pendingPayment'];
+  test('[BR-03] throws BusinessLogicError when terminating pendingPayment membership', async () => {
+    const pendingMembership = { ...fakeMembership, status: 'pendingPayment' };
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => pendingMembership,
+    });
+
+    const ctx = makeCtx({
+      _params: { membershipId: 'mem-1' },
+      _body: { terminationReason: 'Test' },
+    });
+
+    await expect(terminateMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+  });
+
+  // ─── Terminatable statuses (all except pendingPayment) ──
+
+  describe('terminates memberships with valid statuses', () => {
+    const terminatableStatuses = ['active', 'suspended', 'gracePeriod', 'lapsed', 'expired'];
 
     for (const status of terminatableStatuses) {
       test(`terminates membership with status '${status}'`, async () => {

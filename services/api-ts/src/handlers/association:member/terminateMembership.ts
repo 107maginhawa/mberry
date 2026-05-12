@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { NotFoundError, UnauthorizedError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { TerminateMembershipBody, TerminateMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
@@ -24,6 +24,13 @@ export async function terminateMembership(
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+
+  if (membership.status === 'pendingPayment') {
+    throw new BusinessLogicError(
+      'Cannot terminate a pending membership. Use deny instead.',
+      'CANNOT_TERMINATE_PENDING',
+    );
+  }
 
   const updated = await repo.updateOneById(membershipId, {
     status: 'terminated',
