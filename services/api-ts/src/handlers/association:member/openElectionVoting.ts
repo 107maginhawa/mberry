@@ -33,6 +33,31 @@ export async function openElectionVoting(
     throw new BusinessLogicError('Election must have at least one nominee before voting can open', 'NO_NOMINEES');
   }
 
+  // BR-33: Every position must have >= 2 candidates before voting opens
+  const positions: { id: string; title: string }[] = (existing as any).positions ?? [];
+  if (positions.length > 0) {
+    const countByPosition = new Map<string, number>();
+    for (const pos of positions) {
+      countByPosition.set(pos.id, 0);
+    }
+    for (const nom of nominees) {
+      countByPosition.set(nom.positionId, (countByPosition.get(nom.positionId) ?? 0) + 1);
+    }
+    const insufficient: string[] = [];
+    for (const pos of positions) {
+      const count = countByPosition.get(pos.id) ?? 0;
+      if (count < 2) {
+        insufficient.push(`${pos.title} (${count} candidate${count === 1 ? '' : 's'})`);
+      }
+    }
+    if (insufficient.length > 0) {
+      throw new BusinessLogicError(
+        `Each position must have at least 2 candidates. Insufficient: ${insufficient.join(', ')}`,
+        'INSUFFICIENT_CANDIDATES',
+      );
+    }
+  }
+
   const updated = await repo.update(params.electionId, {
     status: 'votingOpen',
     votingOpenAt: new Date(),
