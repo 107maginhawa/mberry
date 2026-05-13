@@ -72,7 +72,7 @@ export const bookingEvents = pgTable('booking_event', {
   // Core event fields
   owner: uuid('owner_id')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }), // Person who owns the event
+    .references(() => persons.id, { onDelete: 'restrict' }), // Person who owns the event
 
   context: text('context_id'), // Optional domain associations
 
@@ -163,7 +163,7 @@ export const timeSlots: any = pgTable('time_slot', {
   // References (updated to use BookingEvent system)
   owner: uuid('owner_id')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }), // Slot owner (person)
+    .references(() => persons.id, { onDelete: 'restrict' }), // Slot owner (person)
 
   event: uuid('event_id')
     .notNull()
@@ -228,11 +228,11 @@ export const bookings: any = pgTable('booking', {
   // Core relationships (both use person IDs)
   client: uuid('client_id')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }),
+    .references(() => persons.id, { onDelete: 'restrict' }),
 
   host: uuid('host_id')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }),
+    .references(() => persons.id, { onDelete: 'restrict' }),
   
   slot: uuid('slot_id')
     .notNull()
@@ -311,7 +311,7 @@ export const scheduleExceptions = pgTable('schedule_exception', {
 
   owner: uuid('owner_id')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }), // Exception owner (person)
+    .references(() => persons.id, { onDelete: 'restrict' }), // Exception owner (person)
 
   context: text('context_id'), // Optional context (inherited from event)
 

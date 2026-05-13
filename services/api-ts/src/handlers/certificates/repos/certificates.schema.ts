@@ -7,7 +7,7 @@ import { persons } from '../../person/repos/person.schema';
 export const certificates = pgTable('certificate', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull(),
-  personId: uuid('person_id').notNull().references(() => persons.id, { onDelete: 'cascade' }),
+  personId: uuid('person_id').notNull().references(() => persons.id, { onDelete: 'restrict' }),
   trainingId: uuid('training_id').notNull(),
   certificateNumber: varchar('certificate_number', { length: 50 }).notNull(),
   issuedAt: timestamp('issued_at').notNull().defaultNow(),

@@ -10,7 +10,7 @@
 
 import type { DatabaseInstance } from '@/core/database';
 import { eq, and, sql } from 'drizzle-orm';
-import { duesConfigs, duesReminderSchedules } from '../repos/dues-payments.schema';
+import { duesOrgConfigs, duesReminderSchedules } from '../repos/dues-payments.schema';
 import { duesReminderLogs } from '../../association:member/repos/dues.schema';
 import { memberships } from '../../association:member/repos/membership.schema';
 import { inArray } from 'drizzle-orm';
@@ -56,7 +56,7 @@ export async function processDuesReminders(ctx: ReminderContext): Promise<Remind
     // Get all configs with their reminder schedules
     const configs = await db
       .select()
-      .from(duesConfigs);
+      .from(duesOrgConfigs);
 
     for (const config of configs) {
       let schedules: any[];

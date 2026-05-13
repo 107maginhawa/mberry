@@ -4,6 +4,8 @@ import type { RefundEventRegistrationParams } from '@/generated/openapi/validato
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRegistrationRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * refundEventRegistration
@@ -16,6 +18,9 @@ export async function refundEventRegistration(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;

@@ -31,13 +31,13 @@ export const reviews = pgTable('review', {
 
   reviewer: uuid('reviewer_id')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }), // Person who submits review
+    .references(() => persons.id, { onDelete: 'restrict' }), // Person who submits review
 
   reviewType: varchar('review_type', { length: 50 })
     .notNull(), // Application-defined review type (no enum, flexible)
 
   reviewedEntity: uuid('reviewed_entity_id')
-    .references(() => persons.id, { onDelete: 'cascade' }), // Optional person being reviewed
+    .references(() => persons.id, { onDelete: 'restrict' }), // Optional person being reviewed
 
   npsScore: integer('nps_score')
     .notNull(), // NPS score (0-10)

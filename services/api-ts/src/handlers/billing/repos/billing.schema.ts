@@ -57,11 +57,11 @@ export const invoices = pgTable('invoice', {
   // Both customer and merchant are persons in monobase (industry-neutral)
   customer: uuid('customer')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }),
+    .references(() => persons.id, { onDelete: 'restrict' }),
 
   merchant: uuid('merchant')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }),
+    .references(() => persons.id, { onDelete: 'restrict' }),
 
   // Optional merchant account for payment processing
   merchantAccount: uuid('merchant_account')
@@ -141,7 +141,7 @@ export const merchantAccounts = pgTable('merchant_account', {
   // Person who owns this merchant account (TypeSpec: person)
   person: uuid('person')
     .notNull()
-    .references(() => persons.id, { onDelete: 'cascade' }),
+    .references(() => persons.id, { onDelete: 'restrict' }),
 
   // Whether account is active
   active: boolean('active').notNull().default(true),

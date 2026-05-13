@@ -16,7 +16,7 @@ import { eq, sql } from 'drizzle-orm';
 import { Pool } from 'pg';
 
 // Dues tables (new migration)
-import { duesConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues-payments.schema';
+import { duesOrgConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues-payments.schema';
 
 // Membership, Events, Training — OLD schemas (existing DB tables)
 import { membershipCategories } from './handlers/association:member/repos/membership.schema';
@@ -52,9 +52,9 @@ async function seedModules() {
   // ─── F2: Dues Config + Funds + Payments ───────────────────
   console.log('  F2: Dues & Payments...');
 
-  const existingConfig = await db.select().from(duesConfigs).where(eq(duesConfigs.organizationId, orgId)).limit(1);
+  const existingConfig = await db.select().from(duesOrgConfigs).where(eq(duesOrgConfigs.organizationId, orgId)).limit(1);
   if (existingConfig.length === 0) {
-    await db.insert(duesConfigs).values({
+    await db.insert(duesOrgConfigs).values({
       organizationId: orgId,
       defaultAmount: 150000, // PHP 1,500 (in centavos)
       currency: 'PHP',

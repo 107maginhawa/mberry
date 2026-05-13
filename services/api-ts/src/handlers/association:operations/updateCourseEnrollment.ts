@@ -4,6 +4,8 @@ import type { UpdateCourseEnrollmentBody, UpdateCourseEnrollmentParams } from '@
 import { NotFoundError } from '@/core/errors';
 import { CourseEnrollmentRepository } from './repos/training.repo';
 import { auditAction } from '@/utils/audit';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * updateCourseEnrollment
@@ -16,6 +18,9 @@ export async function updateCourseEnrollment(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');

@@ -1,15 +1,15 @@
 import { eq, and, desc, sql, gte, lte, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import {
-  duesConfigs,
+  duesOrgConfigs,
   duesCategoryOverrides,
   duesFunds,
   duesPayments,
   duesFundAllocations,
   duesReminderSchedules,
   duesGatewayConfigs,
-  type DuesConfig,
-  type NewDuesConfig,
+  type DuesOrgConfig,
+  type NewDuesOrgConfig,
   type DuesFund,
   type NewDuesPayment,
   type DuesPayment,
@@ -23,21 +23,21 @@ export class DuesRepository {
 
   // ─── Config ───────────────────────────────────────────
 
-  async getConfig(organizationId: string): Promise<DuesConfig | undefined> {
+  async getConfig(organizationId: string): Promise<DuesOrgConfig | undefined> {
     const [config] = await this.db
       .select()
-      .from(duesConfigs)
-      .where(eq(duesConfigs.organizationId, organizationId))
+      .from(duesOrgConfigs)
+      .where(eq(duesOrgConfigs.organizationId, organizationId))
       .limit(1);
     return config;
   }
 
-  async upsertConfig(organizationId: string, data: Omit<NewDuesConfig, 'organizationId'>): Promise<DuesConfig> {
+  async upsertConfig(organizationId: string, data: Omit<NewDuesOrgConfig, 'organizationId'>): Promise<DuesOrgConfig> {
     const [result] = await this.db
-      .insert(duesConfigs)
+      .insert(duesOrgConfigs)
       .values({ ...data, organizationId })
       .onConflictDoUpdate({
-        target: [duesConfigs.organizationId],
+        target: [duesOrgConfigs.organizationId],
         set: { ...data, updatedAt: new Date() },
       })
       .returning();

@@ -33,7 +33,7 @@ export const duesPaymentStatusEnum = pgEnum('dues_payment_status', [
 export const gatewayProviderEnum = pgEnum('gateway_provider', ['paymongo', 'stripe']);
 
 // Tables
-export const duesConfigs = pgTable('dues_org_config', {
+export const duesOrgConfigs = pgTable('dues_org_config', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   defaultAmount: integer('default_amount').notNull(),
@@ -50,7 +50,7 @@ export const duesConfigs = pgTable('dues_org_config', {
 export const duesCategoryOverrides = pgTable('dues_category_override', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull().references(() => organizations.id),
-  duesConfigId: uuid('dues_config_id').notNull().references(() => duesConfigs.id, { onDelete: 'cascade' }),
+  duesConfigId: uuid('dues_config_id').notNull().references(() => duesOrgConfigs.id, { onDelete: 'cascade' }),
   categoryId: uuid('category_id').notNull().references(() => membershipCategories.id),
   overrideAmount: integer('override_amount').notNull(),
 }, (table) => ({
@@ -74,7 +74,7 @@ export const duesFunds = pgTable('dues_fund', {
 export const duesPayments = pgTable('dues_payment', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull().references(() => organizations.id),
-  personId: uuid('person_id').notNull().references(() => persons.id, { onDelete: 'cascade' }),
+  personId: uuid('person_id').notNull().references(() => persons.id, { onDelete: 'restrict' }),
   invoiceId: uuid('invoice_id'),
   receiptNumber: varchar('receipt_number', { length: 50 }).notNull(),
   amount: integer('amount').notNull(),
@@ -117,7 +117,7 @@ export const duesFundAllocations = pgTable('dues_fund_allocation', {
 export const duesReminderSchedules = pgTable('dues_reminder_schedule', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull().references(() => organizations.id),
-  duesConfigId: uuid('dues_config_id').notNull().references(() => duesConfigs.id, { onDelete: 'cascade' }),
+  duesConfigId: uuid('dues_config_id').notNull().references(() => duesOrgConfigs.id, { onDelete: 'cascade' }),
   daysOffset: integer('days_offset').notNull(),
   enabled: boolean('enabled').notNull().default(true),
   channelInapp: boolean('channel_inapp').notNull().default(true),
@@ -143,8 +143,8 @@ export const duesGatewayConfigs = pgTable('dues_gateway_config', {
 }));
 
 // Type exports
-export type DuesConfig = typeof duesConfigs.$inferSelect;
-export type NewDuesConfig = typeof duesConfigs.$inferInsert;
+export type DuesOrgConfig = typeof duesOrgConfigs.$inferSelect;
+export type NewDuesOrgConfig = typeof duesOrgConfigs.$inferInsert;
 export type DuesFund = typeof duesFunds.$inferSelect;
 export type NewDuesFund = typeof duesFunds.$inferInsert;
 export type DuesPayment = typeof duesPayments.$inferSelect;
