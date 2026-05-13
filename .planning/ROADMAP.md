@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0.0 Foundation** — Phases 0-10 (shipped 2026-05-07)
-- 🔄 **v1.1.0 Auth & Permission Enforcement** — Phases 11-16 (TDD)
+- ✅ **v1.1.0 Auth & Permission Enforcement** — Phases 11-17 (shipped 2026-05-13)
 
 ## Phases
 
@@ -101,14 +101,15 @@
     - [x] 15-02-PLAN.md — Dunning template CRUD (schema + repo + 7 handlers)
     - [x] 15-03-PLAN.md — Integration verification (response shape + integration test)
 
-- [ ] **Phase 16: Mobile & Transfer Validation**
-  - RED: Transfer lifecycle E2E — member initiates, source approves, target approves
-  - RED: Mobile viewport tests (375x812) — dashboard, officer nav, payment form, event registration
-  - GREEN: Fix layout issues found
-  - GREEN: Validate existing transfer UI + API flow
-  - **Verify:** Core flows work on mobile. Transfer lifecycle completes.
+- [x] **Phase 16: Mobile & Transfer Validation** (completed 2026-05-13)
+  - RED→GREEN: Transfer lifecycle tests — 16 unit tests covering full state machine (create → approve → complete, deny, reverse order, invalid transitions)
+  - RED→GREEN: Mobile viewport tests (375×812) — 9 E2E tests across dashboard, officer nav, payments, org pages
+  - Added mobile Playwright project (Chromium with 375×812 viewport)
+  - **Verify:** 2181 API tests pass. 9 mobile E2E tests pass. No regressions.
   - **Deps:** Phase 14
-  - **Est:** 1-2 days
+  - **Plans:** 2 plans
+    - [x] 16-01-PLAN.md — Transfer lifecycle unit tests (16 tests, 6 handlers)
+    - [x] 16-02-PLAN.md — Mobile viewport E2E tests (9 tests, Playwright config)
 
 - [x] **Phase 17: Domain Design Remediation** (Codex-verified audit, completed 2026-05-13)
   - Wave 0.5: Fix 3 new Codex P1s (dues-config form, cross-org tier validation)
@@ -158,5 +159,5 @@
 | 13. Position-Based RBAC | v1.1.0 | 5/5 | Complete | 2026-05-13 |
 | 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 2/2 | Complete | 2026-05-13 |
 | 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 3/3 | Complete | 2026-05-13 |
-| 16. Mobile & Transfer Validation | v1.1.0 | 0/0 | Not Started | -- |
+| 16. Mobile & Transfer Validation | v1.1.0 | 2/2 | Complete | 2026-05-13 |
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |

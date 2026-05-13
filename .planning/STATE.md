@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0.0
-milestone_name: milestone
-status: executing
-stopped_at: Phase 14 COMPLETE — ready for Phase 15
-last_updated: "2026-05-13T15:30:00.000Z"
-last_activity: 2026-05-13 -- Phase 14 complete (2/2 plans, 19 E2E tests, 2148 API tests pass)
+milestone: v1.1.0
+milestone_name: Auth & Permission Enforcement
+status: complete
+stopped_at: v1.1.0 COMPLETE — all 7 phases shipped
+last_updated: "2026-05-13T18:00:00.000Z"
+last_activity: 2026-05-13 -- Phase 16 complete (2/2 plans, 16 transfer tests + 9 mobile E2E)
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 37
-  completed_plans: 31
-  percent: 84
+  total_phases: 7
+  completed_phases: 7
+  total_plans: 39
+  completed_plans: 39
+  percent: 100
 ---
 
 # Project State
@@ -21,24 +21,36 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-07)
 
 **Core value:** Members can manage their association membership, track continuing education credits, and stay current on dues — from any device, with minimal friction.
-**Current focus:** Phase 14 complete. Next: Phase 15 (Dues Reminder UI + BR Edge Cases).
+**Current focus:** v1.1.0 COMPLETE. Ready for v1.2.0 planning.
 
 ## Current Position
 
-Phase: 15 (Dues Reminder UI + BR Edge Cases) — NOT STARTED
-Status: Phases 11-14, 17 complete. 2148 API tests pass + 19 new E2E role boundary tests.
-Last activity: 2026-05-13 -- Phase 14 executed (role-boundaries.spec.ts + cross-org-isolation.spec.ts)
+Milestone: v1.1.0 Auth & Permission Enforcement — COMPLETE
+Status: All 7 phases (11-17) shipped. 2181 API tests + 9 mobile E2E tests pass.
+Last activity: 2026-05-13 -- Phase 16 executed (transfer lifecycle + mobile viewport)
 
-Progress: [████████░░] 84%
+Progress: [██████████] 100%
+
+## v1.1.0 Summary
+
+| Phase | Name | Plans | Tests Added |
+|-------|------|-------|-------------|
+| 11 | Test Infrastructure & Seed Users | 3/3 | Seed scripts, apiAs helper |
+| 12 | Backend Auth — Route Protection | 6/6 | ~35 officer auth tests |
+| 13 | Position-Based RBAC | 5/5 | Position middleware + tests |
+| 14 | Negative E2E Tests — Role Boundaries | 2/2 | 19 E2E role boundary tests |
+| 15 | Dues Reminder UI + BR Edge Cases | 3/3 | Dunning CRUD + reminder tests |
+| 16 | Mobile & Transfer Validation | 2/2 | 16 transfer + 9 mobile E2E |
+| 17 | Domain Design Remediation | 18/18 | BR invariant + constraint tests |
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 39
-- Timeline: 7 days (2026-05-01 → 2026-05-07)
-- Files changed: 1,334
-- Lines: +267,930 / -5,806
+- Total plans completed: 39 (v1.1.0)
+- Timeline: 6 days (2026-05-08 → 2026-05-13)
+- API test count: 2181 passing
+- Mobile E2E: 9 passing
 
 ## Accumulated Context
 
@@ -59,9 +71,13 @@ None — milestone complete.
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | backend | Roster API 500 on /association/member/roster — pre-existing handler param mismatch | open | 04-07 |
+| backend | TypeSpec 100% coverage (8 inline app.ts routes remain hand-wired) | deferred to v1.2.0 | 05-12 |
+| backend | Audit log filter bug (eventType/category params don't filter) | deferred to v1.2.0 | 05-12 |
+| backend | BR-35 through BR-40 | deferred to v1.2.0 | 05-13 |
+| architecture | P1-11 association:member mega-module split (171 handlers) | deferred to v1.2.0 | 05-12 |
 
 ## Session Continuity
 
-Last session: 2026-05-13T12:00:00.000Z
-Stopped at: ROADMAP sync complete, Phase 14 next
+Last session: 2026-05-13T18:00:00.000Z
+Stopped at: v1.1.0 COMPLETE — ready for v1.2.0 planning
 Resume file: .planning/ROADMAP.md
