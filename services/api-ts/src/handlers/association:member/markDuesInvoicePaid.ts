@@ -1,6 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, BusinessLogicError, ForbiddenError } from '@/core/errors';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 import type { MarkDuesInvoicePaidBody, MarkDuesInvoicePaidParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { membershipLifecycle } from './utils/membership-lifecycle';
@@ -18,6 +20,9 @@ import { auditAction } from '@/utils/audit';
 export async function markDuesInvoicePaid(
   ctx: ValidatedContext<MarkDuesInvoicePaidBody, never, MarkDuesInvoicePaidParams>
 ): Promise<Response> {
+  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
@@ -26,9 +31,11 @@ export async function markDuesInvoicePaid(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const invoiceRepo = new DuesInvoiceRepository(db, logger);
+  const orgId = ctx.get('organizationId') as string;
 
   const invoice = await invoiceRepo.findOneById(invoiceId);
   if (!invoice) throw new NotFoundError('DuesInvoice');
+  if (invoice.organizationId !== orgId) throw new ForbiddenError();
 
   const payableStatuses = ['generated', 'sent', 'overdue'];
   if (!payableStatuses.includes(invoice.status)) {

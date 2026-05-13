@@ -1,6 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, ForbiddenError } from '@/core/errors';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 import type { CreateDuesInvoiceBody } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { auditAction } from '@/utils/audit';
@@ -14,11 +16,14 @@ import { auditAction } from '@/utils/audit';
 export async function createDuesInvoice(
   ctx: ValidatedContext<CreateDuesInvoiceBody, never, never>
 ): Promise<Response> {
-  const user = ctx.get('user');
-  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
 
-  const orgId = ctx.get('organizationId');
-  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+  const session = ctx.get('session');
+  if (!session) throw new UnauthorizedError();
+
+  const orgId = ctx.get('organizationId') as string;
+  if (!orgId) throw new ForbiddenError();
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -30,7 +35,7 @@ export async function createDuesInvoice(
   const invoice = await repo.createOne({
     organizationId: orgId,
     membershipId: body.membershipId,
-    personId: body.personId || user.id,
+    personId: body.personId || session.user.id,
     invoiceNumber,
     periodStart: body.periodStart,
     periodEnd: body.periodEnd,

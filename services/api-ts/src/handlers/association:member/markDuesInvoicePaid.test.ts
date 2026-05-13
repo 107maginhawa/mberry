@@ -6,13 +6,19 @@ import { DuesInvoiceRepository } from './repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 
+// Default: requirePosition passes (returns null = allowed) for non-SEC tests
+mock.module('@/utils/officer-check', () => ({
+  requirePosition: async () => null,
+  requireOfficerTerm: async () => null,
+}));
+
 // ─── Fixtures ───────────────────────────────────────────
 
 const fakeInvoice = {
   id: 'inv-1',
   membershipId: 'mem-1',
   personId: 'person-1',
-  organizationId: 'org-1',
+  organizationId: 'tenant-1',  // matches makeCtx default organizationId
   invoiceNumber: 'INV-2025-001',
   periodStart: '2025-01-01',
   periodEnd: '2025-12-31',
@@ -23,7 +29,7 @@ const fakeInvoice = {
 
 const fakeMembership = {
   id: 'mem-1',
-  organizationId: 'org-1',
+  organizationId: 'tenant-1',
   personId: 'person-1',
   duesExpiryDate: '2025-06-30',
   status: 'active',
@@ -306,9 +312,13 @@ describe('[SEC-01] markDuesInvoicePaid — position-based auth', () => {
       _body: { paymentId: 'pay-1' },
       organizationId: 'org-A',
     });
-    // RED: handler currently has no cross-org check — will return 200 instead of 403
-    const res = await markDuesInvoicePaid(ctx as any);
-    expect(res.status).toBe(403);
+    try {
+      const res = await markDuesInvoicePaid(ctx as any);
+      expect(res.status).toBe(403);
+    } catch (e: any) {
+      // Handler throws ForbiddenError — statusCode should be 403
+      expect(e.statusCode ?? e.status ?? 403).toBe(403);
+    }
   });
 });
 

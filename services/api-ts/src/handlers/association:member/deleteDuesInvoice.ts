@@ -1,6 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 import type { DeleteDuesInvoiceParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { auditAction } from '@/utils/audit';
@@ -14,6 +16,9 @@ import { auditAction } from '@/utils/audit';
 export async function deleteDuesInvoice(
   ctx: ValidatedContext<never, never, DeleteDuesInvoiceParams>
 ): Promise<Response> {
+  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
@@ -23,6 +28,8 @@ export async function deleteDuesInvoice(
 
   const existing = await repo.findOneById(invoiceId);
   if (!existing) throw new NotFoundError('DuesInvoice');
+  const orgId = ctx.get('organizationId') as string;
+  if (existing.organizationId !== orgId) throw new ForbiddenError();
 
   await repo.deleteOneById(invoiceId);
 

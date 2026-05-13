@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { GenerateDuesInvoicesForOrgBody } from '@/generated/openapi/validators';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
@@ -30,13 +30,16 @@ export async function generateDuesInvoicesForOrg(
   if (!session) throw new UnauthorizedError();
 
   const body = ctx.req.valid('json');
+  const orgId = ctx.get('organizationId') as string;
+  if (body.organizationId !== orgId) throw new ForbiddenError();
+
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
 
   await auditAction(ctx, {
     action: 'create',
     resourceType: 'dues-invoice',
-    resourceId: body.organizationId,
+    resourceId: orgId,
     description: 'Bulk dues invoice generation triggered',
   });
 
@@ -44,7 +47,7 @@ export async function generateDuesInvoicesForOrg(
   const [config] = await db
     .select()
     .from(duesConfigs)
-    .where(eq(duesConfigs.organizationId, body.organizationId))
+    .where(eq(duesConfigs.organizationId, orgId))
     .limit(1);
 
   if (!config) {
@@ -70,7 +73,7 @@ export async function generateDuesInvoicesForOrg(
     .from(memberships)
     .where(
       and(
-        eq(memberships.organizationId, body.organizationId),
+        eq(memberships.organizationId, orgId),
         eq(memberships.status, 'active'),
       ),
     );
@@ -98,7 +101,7 @@ export async function generateDuesInvoicesForOrg(
     }
 
     invoiceCounter++;
-    const invoiceNumber = `INV-${body.organizationId.slice(0, 8)}-${Date.now()}-${invoiceCounter}`;
+    const invoiceNumber = `INV-${orgId.slice(0, 8)}-${Date.now()}-${invoiceCounter}`;
 
     // Generate the invoice
     const [invoice] = await db
@@ -106,7 +109,7 @@ export async function generateDuesInvoicesForOrg(
       .values({
         membershipId: member.id,
         personId: member.personId,
-        organizationId: body.organizationId,
+        organizationId: orgId,
         invoiceNumber,
         periodStart: body.periodStart,
         periodEnd: body.periodEnd,
