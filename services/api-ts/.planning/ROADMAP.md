@@ -113,5 +113,5 @@
 | 15. State Machine Guards | v1.1 | ✅ Done | 2026-05-10 |
 | 16. Pagination Expansion | v1.1 | ✅ Done | 2026-05-10 |
 | 17. Admin SDK Migration | v1.1 | ✅ Done | 2026-05-10 |
-| 18. BR Completion | v1.1 | ✅ Done | 2026-05-10 |
+| 18. BR Completion | 0/1 | Planned    |  |
 | 19. Comms Consolidation | v1.1 | ✅ Done | 2026-05-10 |
