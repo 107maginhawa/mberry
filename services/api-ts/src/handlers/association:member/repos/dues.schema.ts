@@ -4,7 +4,7 @@
  * Uses Drizzle ORM with PostgreSQL
  */
 
-import { pgTable, varchar, timestamp, date, jsonb, pgEnum, index, bigint, integer } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, timestamp, date, jsonb, pgEnum, index, bigint, integer, uuid, unique } from 'drizzle-orm/pg-core';
 import { baseEntityFields } from '@/core/database.schema';
 
 // ---------------------------------------------------------------------------
@@ -100,6 +100,30 @@ export const agingBuckets = pgTable('aging_bucket', {
   orgIdx: index('aging_bucket_org_idx').on(table.organizationId),
 }));
 
+/** Dues reminder log — tracks sent reminders for idempotency */
+export const duesReminderLogs = pgTable('dues_reminder_log', {
+  ...baseEntityFields,
+
+  organizationId: uuid('organization_id').notNull(),
+  personId: uuid('person_id').notNull(),
+  scheduleId: uuid('schedule_id'), // nullable for manual sends
+  duesConfigId: uuid('dues_config_id').notNull(),
+  periodKey: varchar('period_key', { length: 20 }).notNull(), // e.g. "2026", "2026-Q1"
+  daysOffset: integer('days_offset').notNull(),
+  channel: varchar('channel', { length: 20 }).notNull(), // "in-app", "email", "push"
+  notificationId: uuid('notification_id'), // nullable until notification created
+  sentAt: timestamp('sent_at').defaultNow().notNull(),
+}, (table) => ({
+  orgIdx: index('dues_reminder_log_org_idx').on(table.organizationId),
+  personIdx: index('dues_reminder_log_person_idx').on(table.personId),
+  idempotencyUniq: unique('dues_reminder_log_idempotency').on(
+    table.personId,
+    table.scheduleId,
+    table.periodKey,
+    table.daysOffset,
+  ),
+}));
+
 // ---------------------------------------------------------------------------
 // Type Exports
 // ---------------------------------------------------------------------------
@@ -112,3 +136,6 @@ export type NewDuesInvoice = typeof duesInvoices.$inferInsert;
 
 export type AgingBucket = typeof agingBuckets.$inferSelect;
 export type NewAgingBucket = typeof agingBuckets.$inferInsert;
+
+export type DuesReminderLog = typeof duesReminderLogs.$inferSelect;
+export type NewDuesReminderLog = typeof duesReminderLogs.$inferInsert;
