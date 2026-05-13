@@ -71,3 +71,59 @@ describe('DuesConfigForm payload shape (Phase 15 / Plan 00a)', () => {
     expect(Number.isInteger(payload.gracePeriodDays)).toBe(true)
   })
 })
+
+/**
+ * Phase 15 / Plan 00b — 404 on first-time dues config save.
+ *
+ * The form always calls updateDuesConfig (PATCH) even when the org has
+ * no existing config. Backend PATCH returns 404 for missing configs.
+ *
+ * Fix: check if config exists, POST for create, PATCH for update.
+ */
+import {
+  buildCreatePayload,
+  buildUpdatePayload,
+  chooseMutationAction,
+} from './dues-config-form.utils'
+
+describe('DuesConfigForm create-vs-update dispatch (Phase 15 / Plan 00b)', () => {
+  const orgId = 'org-123'
+  const formState = { defaultAmount: '500.00', gracePeriodDays: '30' }
+
+  test('chooseMutationAction returns "create" when config is null (no existing config)', () => {
+    expect(chooseMutationAction(null)).toBe('create')
+  })
+
+  test('chooseMutationAction returns "create" when config is undefined', () => {
+    expect(chooseMutationAction(undefined)).toBe('create')
+  })
+
+  test('chooseMutationAction returns "update" when config exists with annualAmount', () => {
+    expect(chooseMutationAction({ annualAmount: 50000, id: 'cfg-1' })).toBe('update')
+  })
+
+  test('chooseMutationAction returns "update" when config exists with defaultAmount', () => {
+    expect(chooseMutationAction({ defaultAmount: 50000, id: 'cfg-2' })).toBe('update')
+  })
+
+  test('buildCreatePayload includes organizationId and required create fields', () => {
+    const payload = buildCreatePayload(orgId, formState)
+    expect(payload).toHaveProperty('organizationId', orgId)
+    expect(payload).toHaveProperty('annualAmount', 50000)
+    expect(payload).toHaveProperty('gracePeriodDays', 30)
+    expect(payload).toHaveProperty('currency')
+  })
+
+  test('buildCreatePayload does NOT include path param (POST has no duesConfigId)', () => {
+    const payload = buildCreatePayload(orgId, formState)
+    expect(payload).not.toHaveProperty('duesConfigId')
+  })
+
+  test('buildUpdatePayload includes annualAmount and gracePeriodDays only', () => {
+    const payload = buildUpdatePayload(formState)
+    expect(payload).toHaveProperty('annualAmount', 50000)
+    expect(payload).toHaveProperty('gracePeriodDays', 30)
+    expect(payload).not.toHaveProperty('organizationId')
+    expect(payload).not.toHaveProperty('currency')
+  })
+})

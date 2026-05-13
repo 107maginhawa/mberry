@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getDuesConfigOptions,
   getDuesConfigQueryKey,
+  createDuesConfigMutation,
   updateDuesConfigMutation,
 } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@monobase/ui'
@@ -13,6 +14,7 @@ import { Switch } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
 import { parseCentsInput } from '../lib/money'
+import { chooseMutationAction, buildCreatePayload, buildUpdatePayload } from './dues-config-form.utils'
 
 interface DuesConfigFormProps {
   orgId: string
@@ -87,17 +89,29 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
     }
   }, [hasConfig, configAmount, config])
 
-  const saveMutation = useMutation({
-    ...updateDuesConfigMutation(),
+  const mutationCallbacks = {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: getDuesConfigQueryKey({ path: { duesConfigId: orgId } }) })
-      toast.success('Dues configuration updated', { description: 'Applies to future billing cycles.' })
+      toast.success('Dues configuration saved', { description: 'Applies to future billing cycles.' })
       setHasChanges(false)
     },
     onError: () => {
       toast.error('Failed to save', { description: 'Please try again.' })
     },
+  }
+
+  const createMutation = useMutation({
+    ...createDuesConfigMutation(),
+    ...mutationCallbacks,
   } as any)
+
+  const updateMutation = useMutation({
+    ...updateDuesConfigMutation(),
+    ...mutationCallbacks,
+  } as any)
+
+  const action = chooseMutationAction(config)
+  const saveMutation = action === 'create' ? createMutation : updateMutation
 
   const handleChange = () => setHasChanges(true)
 
@@ -184,7 +198,14 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
       </section>
 
       <div className="flex gap-3">
-        <Button onClick={() => (saveMutation as any).mutate({ path: { duesConfigId: orgId }, body: { annualAmount: parseCentsInput(defaultAmount), gracePeriodDays: parseInt(gracePeriodDays) } })} disabled={saveMutation.isPending || gracePeriodError || !defaultAmount}>
+        <Button onClick={() => {
+          const formState = { defaultAmount, gracePeriodDays }
+          if (action === 'create') {
+            ;(createMutation as any).mutate({ body: buildCreatePayload(orgId, formState, { currency }) })
+          } else {
+            ;(updateMutation as any).mutate({ path: { duesConfigId: orgId }, body: buildUpdatePayload(formState) })
+          }
+        }} disabled={saveMutation.isPending || gracePeriodError || !defaultAmount}>
           {saveMutation.isPending ? 'Saving...' : 'Save'}
         </Button>
         {hasChanges && <span className="text-xs text-[var(--color-muted)] self-center">Unsaved changes</span>}
