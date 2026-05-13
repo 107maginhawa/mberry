@@ -5,6 +5,7 @@ import type { DeleteCandidateParams } from '@/generated/openapi/validators';
 import { electionNominees } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * deleteCandidate
@@ -15,6 +16,9 @@ import { auditAction } from '@/utils/audit';
 export async function deleteCandidate(
   ctx: ValidatedContext<never, never, DeleteCandidateParams>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

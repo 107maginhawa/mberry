@@ -6,6 +6,7 @@ import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { elections } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * deleteElection
@@ -16,6 +17,9 @@ import { auditAction } from '@/utils/audit';
 export async function deleteElection(
   ctx: ValidatedContext<never, never, DeleteElectionParams>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

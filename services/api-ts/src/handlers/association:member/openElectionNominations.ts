@@ -4,6 +4,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { OpenElectionNominationsParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * openElectionNominations
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function openElectionNominations(
   ctx: ValidatedContext<never, never, OpenElectionNominationsParams>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

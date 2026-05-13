@@ -4,6 +4,7 @@ import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { UpdateElectionBody, UpdateElectionParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { auditAction } from '@/utils/audit';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * updateElection
@@ -14,6 +15,9 @@ import { auditAction } from '@/utils/audit';
 export async function updateElection(
   ctx: ValidatedContext<UpdateElectionBody, never, UpdateElectionParams>
 ): Promise<Response> {
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 

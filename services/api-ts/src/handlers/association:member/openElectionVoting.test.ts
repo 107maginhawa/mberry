@@ -2,6 +2,21 @@ import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { openElectionVoting } from './openElectionVoting';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
+import { OfficerTermRepository } from './repos/governance.repo';
+
+const officerTerm = {
+  id: 'term-1',
+  positionId: 'pos-president',
+  personId: 'user-1',
+  organizationId: 'org-1',
+  status: 'active',
+  startDate: new Date('2025-01-01'),
+  endDate: null,
+  notes: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  positionTitle: 'President',
+};
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -42,10 +57,16 @@ function makeNominee(positionId: string, personId: string) {
 describe('[BR-33] openElectionVoting — 2+ candidates per position', () => {
   beforeEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(OfficerTermRepository);
+    // Stub officer term for all tests — this file tests business logic, not auth
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [officerTerm],
+    });
   });
 
   afterEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('rejects when a position has only 1 candidate', async () => {
