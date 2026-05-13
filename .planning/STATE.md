@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.2.0
 milestone_name: Pilot Launch
-status: planning
-stopped_at: ""
-last_updated: "2026-05-13T20:00:00.000Z"
-last_activity: 2026-05-13 -- Milestone v1.2.0 started
+status: active
+stopped_at: "Phase 18"
+last_updated: "2026-05-13T21:00:00.000Z"
+last_activity: 2026-05-13 -- Roadmap created, Phase 18 is next
 progress:
-  total_phases: 0
+  total_phases: 8
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-13)
 
 **Core value:** Members can manage their association membership, track continuing education credits, and stay current on dues — from any device, with minimal friction.
-**Current focus:** v1.2.0 Pilot Launch — defining requirements.
+**Current focus:** v1.2.0 Pilot Launch — Phase 18: Dues Invoice Security Fix.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 18 — Dues Invoice Security Fix
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-13 — Milestone v1.2.0 started
+Status: Not started (ready to plan)
+Last activity: 2026-05-13 — Roadmap created for v1.2.0
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [░░░░░░░░░░] 0% (0/8 phases)
 
 ## Accumulated Context
 
@@ -50,14 +50,12 @@ None.
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| backend | Roster API 500 on /association/member/roster — pre-existing handler param mismatch | open | 04-07 |
-| backend | TypeSpec 100% coverage (8 inline app.ts routes remain hand-wired) | deferred to v1.2.0 | 05-12 |
-| backend | Audit log filter bug (eventType/category params don't filter) | deferred to v1.2.0 | 05-12 |
-| backend | BR-35 through BR-40 | deferred to v1.2.0 | 05-13 |
-| architecture | P1-11 association:member mega-module split (171 handlers) | deferred to v1.2.0 | 05-12 |
+| backend | TypeSpec 100% coverage (8 inline app.ts routes remain hand-wired) | deferred to v1.3.0 | 05-12 |
+| architecture | P1-11 association:member mega-module split (171 handlers) | deferred to v1.3.0 | 05-12 |
+| feature | Cross-org transfer workflow (TRN-01 through TRN-04) | deferred to v1.3.0 | 05-13 |
 
 ## Session Continuity
 
-Last session: 2026-05-13T18:00:00.000Z
-Stopped at: v1.1.0 COMPLETE — ready for v1.2.0 planning
+Last session: 2026-05-13T21:00:00.000Z
+Stopped at: Roadmap created — ready to plan Phase 18
 Resume file: .planning/ROADMAP.md

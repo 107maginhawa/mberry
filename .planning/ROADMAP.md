@@ -4,6 +4,7 @@
 
 - ✅ **v1.0.0 Foundation** — Phases 0-10 (shipped 2026-05-07)
 - ✅ **v1.1.0 Auth & Permission Enforcement** — Phases 11-17 (shipped 2026-05-13)
+- 🔄 **v1.2.0 Pilot Launch** — Phases 18-25 (in progress)
 
 ## Phases
 
@@ -23,6 +24,9 @@
 - [x] Phase 10: Deploy Platform Decision (1/1 plan) — completed 2026-05-06
 
 </details>
+
+<details>
+<summary>✅ v1.1.0 Auth & Permission Enforcement (Phases 11-17) — SHIPPED 2026-05-13</summary>
 
 ### v1.1.0 Auth & Permission Enforcement (TDD)
 
@@ -139,6 +143,116 @@
     - [x] 15-14-PLAN.md — Missing FK constraints
     - [x] 15-15-PLAN.md — Temporal CHECK + election position normalization
 
+</details>
+
+### v1.2.0 Pilot Launch (Phases 18-25)
+
+**Goal:** Ship all compliance-critical and officer-essential features to launch the first live pilot with a Philippine dental association.
+
+- [ ] **Phase 18: Dues Invoice Security Fix** — Enforce org-scoped RBAC on dues endpoints
+- [ ] **Phase 19: Account Deletion + Data Export** — PH DPA compliance (deletion, anonymization, export)
+- [ ] **Phase 20: Payment Flow** — Offline payment recording with receipts and concurrency safety
+- [ ] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation
+- [ ] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary
+- [ ] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion
+- [ ] **Phase 24: Quality Gap Closure** — Roster 500 fix, audit filter bug, BR-35 through BR-40
+- [ ] **Phase 25: Email/Notif Guards + Handler Tests** — Rate limiting, bounce suppression, deceased guard, unsubscribe
+
+## Phase Details
+
+### Phase 18: Dues Invoice Security Fix
+**Goal**: Dues invoice endpoints enforce org-scoped authorization so only chapter officers can mark invoices paid or query dues data for their own chapter
+**Depends on**: Nothing (first phase of v1.2.0 — critical security path)
+**Requirements**: SEC-01, SEC-02
+**Success Criteria** (what must be TRUE):
+  1. A member calling markDuesInvoicePaid receives 403 (officer role required)
+  2. An officer of Org A cannot mark invoices paid for Org B (chapter scope enforced)
+  3. Dues query endpoints return 403 when caller has no membership in the queried organization
+  4. Existing officer payment flows continue to work correctly (no regression)
+**Plans**: TBD
+
+### Phase 19: Account Deletion + Data Export
+**Goal**: Users can request deletion of their account (with 30-day grace and cancellation) and export all personal data as machine-readable JSON, satisfying Philippine Data Privacy Act requirements
+**Depends on**: Nothing (independent compliance work)
+**Requirements**: DPA-01, DPA-02, DPA-03, DPA-04, DPA-05, DPA-06
+**Success Criteria** (what must be TRUE):
+  1. Member can request account deletion from account settings; receives confirmation with 30-day notice
+  2. Member can cancel a pending deletion request before the 30-day window closes
+  3. After 30 days, scheduled job anonymizes PII in-place (name, email, phone replaced); financial records preserved
+  4. Member can download a JSON export covering profile, memberships, payments, training, certificates, and events
+  5. Audit log entries for anonymization writes do not capture PII in the before_state payload
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 20: Payment Flow
+**Goal**: Officers can record offline dues payments (GCash, bank transfer), generate member-viewable receipts, and the system prevents double-payment via optimistic locking
+**Depends on**: Phase 18 (needs RBAC fix before payment mutation endpoints are safe)
+**Requirements**: PAY-01, PAY-02, PAY-03
+**Success Criteria** (what must be TRUE):
+  1. Officer can record an offline payment against an open invoice specifying method and reference number
+  2. Recorded payment changes invoice status to paid and generates a receipt record
+  3. Member can view their own payment receipt; officer can view receipts for chapter members
+  4. Concurrent recording of payment on the same invoice by two officers results in exactly one success and one conflict error (no double-payment)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 21: Officer Daily Ops
+**Goal**: Officers have a functional chapter management dashboard — roster with dues/training status, bulk membership approvals with partial success, and status filters — all validated at per-record org scope
+**Depends on**: Phase 18 (RBAC fix ensures roster and bulk endpoints are secure)
+**Requirements**: OPS-01, OPS-02, OPS-03, OPS-04
+**Success Criteria** (what must be TRUE):
+  1. Officer can load chapter roster showing member name, dues status, and training credit summary in a single request (server-side JOIN, no N+1)
+  2. Officer can bulk approve a list of membership applications and receive a partial-success response identifying which succeeded and which failed
+  3. Bulk approval validates organization scope per record (an officer cannot approve applications outside their chapter even in a mixed-org batch)
+  4. Officer can filter roster by membership status, dues status, and training compliance and receive correctly filtered results
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 22: PRC CPD Compliance
+**Goal**: Training events and credit entries carry PRC accreditation metadata, officers can view per-member CPD compliance summaries, and an accredited providers registry tracks provider status and expiry
+**Depends on**: Nothing (independent of security and payment work)
+**Requirements**: PRC-01, PRC-02, PRC-03, PRC-04
+**Success Criteria** (what must be TRUE):
+  1. Training event creation accepts and stores PRC accreditation number and accredited provider reference
+  2. CPD credit entries store category, approval code, and verification status alongside the credit hours
+  3. Officer can view a compliance summary per member showing total credits earned vs required for the current CPD cycle
+  4. Accredited providers registry shows provider list with status (active/suspended/expired) and highlights providers with expiry within 30 days
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 23: Member Departure + Deceased
+**Goal**: Officers can record member resignation or death with proper status codes, and departed/deceased members are automatically excluded from dues billing and notification sends
+**Depends on**: Nothing (independent lifecycle work; email guards in Phase 25 will consume deceased flag)
+**Requirements**: LIF-01, LIF-02, LIF-03, LIF-04
+**Success Criteria** (what must be TRUE):
+  1. Officer can mark a member as resigned with a termination reason code; the membership record reflects status `resigned`
+  2. Officer can mark a member as deceased with a date of death; the membership record reflects status `deceased`
+  3. The membership status field uses an enum supporting resigned, deceased, expelled, and lapsed (not a boolean)
+  4. Departed and deceased members are excluded from dues invoice generation and bulk notification sends
+**Plans**: TBD
+
+### Phase 24: Quality Gap Closure
+**Goal**: Three pre-existing defects are resolved: the roster API 500, the audit log filter bug, and the deferred BR-35 through BR-40 business rules
+**Depends on**: Nothing (independent bug fixes and deferred rules)
+**Requirements**: QAL-01, QAL-02, QAL-03
+**Success Criteria** (what must be TRUE):
+  1. GET /association/member/roster returns 200 with data (no longer throws 500 on handler param mismatch)
+  2. Audit log queries with eventType and/or category params return only matching records (filter actually applied)
+  3. BR-35 through BR-40 are implemented with corresponding unit tests that pass
+**Plans**: TBD
+
+### Phase 25: Email/Notif Guards + Handler Tests
+**Goal**: Email infrastructure is hardened with rate limiting, bounce suppression, and a deceased/departed guard; remaining untested handlers have unit test coverage
+**Depends on**: Phase 23 (deceased flag must exist before the guard can check it)
+**Requirements**: EML-01, EML-02, EML-03, EML-04, EML-05
+**Success Criteria** (what must be TRUE):
+  1. Bulk email sends are rate-limited; transactional emails (password reset, receipt) bypass rate limits and deliver immediately
+  2. A hard bounce on any address suppresses that address from all future sends; the suppression list is queryable by officers
+  3. Sending email or push notification to a deceased or departed member is blocked at the send layer (not silently queued)
+  4. All email messages include a one-click unsubscribe header and a visible unsubscribe link; clicking either suppresses the address
+  5. All previously untested API handlers have unit test coverage with passing tests
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -154,10 +268,18 @@
 | 8. Frontend Unit Tests | v1.0.0 | 3/3 | Complete | 2026-05-06 |
 | 9. Test Infrastructure Hardening | v1.0.0 | 2/2 | Complete | 2026-05-06 |
 | 10. Deploy Platform Decision | v1.0.0 | 1/1 | Complete | 2026-05-06 |
-| 11. Test Infrastructure & Seed Users | v1.1.0 | 3/3 | Complete   | 2026-05-08 |
+| 11. Test Infrastructure & Seed Users | v1.1.0 | 3/3 | Complete | 2026-05-08 |
 | 12. Backend Auth — Route Protection | v1.1.0 | 6/6 | Complete | 2026-05-13 |
 | 13. Position-Based RBAC | v1.1.0 | 5/5 | Complete | 2026-05-13 |
 | 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 2/2 | Complete | 2026-05-13 |
 | 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 3/3 | Complete | 2026-05-13 |
 | 16. Mobile & Transfer Validation | v1.1.0 | 2/2 | Complete | 2026-05-13 |
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
+| 18. Dues Invoice Security Fix | v1.2.0 | 0/? | Not started | — |
+| 19. Account Deletion + Data Export | v1.2.0 | 0/? | Not started | — |
+| 20. Payment Flow | v1.2.0 | 0/? | Not started | — |
+| 21. Officer Daily Ops | v1.2.0 | 0/? | Not started | — |
+| 22. PRC CPD Compliance | v1.2.0 | 0/? | Not started | — |
+| 23. Member Departure + Deceased | v1.2.0 | 0/? | Not started | — |
+| 24. Quality Gap Closure | v1.2.0 | 0/? | Not started | — |
+| 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/? | Not started | — |

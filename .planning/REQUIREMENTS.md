@@ -5,7 +5,7 @@
 
 ## v1.2.0 Requirements
 
-Requirements for Pilot Launch. Each maps to roadmap phases 18-26.
+Requirements for Pilot Launch. Each maps to roadmap phases 18-25.
 
 ### Security
 
@@ -114,18 +114,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRC-02 | Phase 22 | Pending |
 | PRC-03 | Phase 22 | Pending |
 | PRC-04 | Phase 22 | Pending |
-| LIF-01 | Phase 24 | Pending |
-| LIF-02 | Phase 24 | Pending |
-| LIF-03 | Phase 24 | Pending |
-| LIF-04 | Phase 24 | Pending |
-| QAL-01 | Phase 25 | Pending |
-| QAL-02 | Phase 25 | Pending |
-| QAL-03 | Phase 25 | Pending |
-| EML-01 | Phase 26 | Pending |
-| EML-02 | Phase 26 | Pending |
-| EML-03 | Phase 26 | Pending |
-| EML-04 | Phase 26 | Pending |
-| EML-05 | Phase 26 | Pending |
+| LIF-01 | Phase 23 | Pending |
+| LIF-02 | Phase 23 | Pending |
+| LIF-03 | Phase 23 | Pending |
+| LIF-04 | Phase 23 | Pending |
+| QAL-01 | Phase 24 | Pending |
+| QAL-02 | Phase 24 | Pending |
+| QAL-03 | Phase 24 | Pending |
+| EML-01 | Phase 25 | Pending |
+| EML-02 | Phase 25 | Pending |
+| EML-03 | Phase 25 | Pending |
+| EML-04 | Phase 25 | Pending |
+| EML-05 | Phase 25 | Pending |
 
 **Coverage:**
 - v1.2.0 requirements: 31 total
@@ -134,4 +134,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-13*
-*Last updated: 2026-05-13 after initial definition*
+*Last updated: 2026-05-13 after roadmap creation (corrected phase numbers: LIF→23, QAL→24, EML→25)*
