@@ -150,7 +150,7 @@
 **Goal:** Ship all compliance-critical and officer-essential features to launch the first live pilot with a Philippine dental association.
 
 - [x] **Phase 18: Dues Invoice Security Fix** — Enforce org-scoped RBAC on dues endpoints (2026-05-14)
-- [ ] **Phase 19: Account Deletion + Data Export** — PH DPA compliance (deletion, anonymization, export)
+- [x] **Phase 19: Account Deletion + Data Export** — PH DPA compliance (deletion, anonymization, export) (completed 2026-05-13)
 - [ ] **Phase 20: Payment Flow** — Offline payment recording with receipts and concurrency safety
 - [ ] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation
 - [ ] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary
@@ -184,10 +184,10 @@ Plans:
   3. After 30 days, scheduled job anonymizes PII in-place (name, email, phone replaced); financial records preserved
   4. Member can download a JSON export covering profile, memberships, payments, training, certificates, and events
   5. Audit log entries for anonymization writes do not capture PII in the before_state payload
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 19-01-PLAN.md — Backend: deletion processor job, export gap fill (certs+events), anonymization fix, session cleanup, tests
-- [ ] 19-02-PLAN.md — Frontend: account deletion/export UI on settings page
+- [x] 19-01-PLAN.md — Backend: deletion processor job, export gap fill (certs+events), anonymization fix, session cleanup, tests
+- [x] 19-02-PLAN.md — Frontend: account deletion/export UI on settings page
 
 ### Phase 20: Payment Flow
 **Goal**: Officers can record offline dues payments (GCash, bank transfer), generate member-viewable receipts, and the system prevents double-payment via optimistic locking
@@ -281,7 +281,7 @@ Plans:
 | 16. Mobile & Transfer Validation | v1.1.0 | 2/2 | Complete | 2026-05-13 |
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
 | 18. Dues Invoice Security Fix | v1.2.0 | 2/2 | Complete | 2026-05-14 |
-| 19. Account Deletion + Data Export | v1.2.0 | 0/2 | Not started | — |
+| 19. Account Deletion + Data Export | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 20. Payment Flow | v1.2.0 | 0/? | Not started | — |
 | 21. Officer Daily Ops | v1.2.0 | 0/? | Not started | — |
 | 22. PRC CPD Compliance | v1.2.0 | 0/? | Not started | — |
