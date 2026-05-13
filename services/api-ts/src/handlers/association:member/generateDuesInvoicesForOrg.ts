@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { GenerateDuesInvoicesForOrgBody } from '@/generated/openapi/validators';
 import { auditAction } from '@/utils/audit';
@@ -29,7 +30,7 @@ export async function generateDuesInvoicesForOrg(
   if (!session) throw new UnauthorizedError();
 
   const body = ctx.req.valid('json');
-  const db = ctx.get('db');
+  const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
 
   await auditAction(ctx, {

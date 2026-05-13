@@ -204,6 +204,13 @@
       "when": 1778659400000,
       "tag": "0028_dues_reminder_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1778659906915,
+      "tag": "0029_dunning_tables",
+      "breakpoints": true
     }
   ]
 }

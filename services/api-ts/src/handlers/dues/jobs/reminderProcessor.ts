@@ -9,7 +9,7 @@
  */
 
 import type { DatabaseInstance } from '@/core/database';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { duesConfigs, duesReminderSchedules } from '../repos/dues-payments.schema';
 import { duesReminderLogs } from '../../association:member/repos/dues.schema';
 import { memberships } from '../../association:member/repos/membership.schema';
@@ -97,7 +97,7 @@ export async function processDuesReminders(ctx: ReminderContext): Promise<Remind
             .where(
               and(
                 eq(memberships.organizationId, config.organizationId),
-                eq(memberships.duesExpiryDate, targetDateStr),
+                sql`${memberships.duesExpiryDate}::date = ${targetDateStr}::date`,
                 inArray(memberships.status, ['active', 'gracePeriod']),
               ),
             );

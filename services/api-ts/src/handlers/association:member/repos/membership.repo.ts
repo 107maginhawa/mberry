@@ -3,7 +3,7 @@
  * Encapsulates all database operations for membership-related tables
  */
 
-import { eq, and, or, ilike, inArray, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, inArray, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
 import {
@@ -205,7 +205,7 @@ export class MembershipRepository extends DatabaseRepository<
   async findMembersExpiringOn(
     orgId: string,
     targetDate: string,
-  ): Promise<{ id: string; personId: string; organizationId: string; duesExpiryDate: Date }[]> {
+  ): Promise<{ id: string; personId: string; organizationId: string; duesExpiryDate: string | null }[]> {
     this.logger?.debug({ orgId, targetDate }, 'Finding members expiring on date');
 
     const records = await this.db
@@ -219,12 +219,12 @@ export class MembershipRepository extends DatabaseRepository<
       .where(
         and(
           eq(memberships.organizationId, orgId),
-          eq(memberships.duesExpiryDate, targetDate),
+          sql`${memberships.duesExpiryDate}::date = ${targetDate}::date`,
           inArray(memberships.status, ['active', 'gracePeriod']),
         ),
       );
 
-    return records as { id: string; personId: string; organizationId: string; duesExpiryDate: Date }[];
+    return records;
   }
 }
 

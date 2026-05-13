@@ -1,42 +1,44 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDunningTemplateBody, UpdateDunningTemplateParams } from '@/generated/openapi/validators';
+import { DunningTemplateRepository } from './repos/dunning.repo';
 
 /**
  * updateDunningTemplate
- * 
+ *
  * Path: PATCH /association/member/dunning/templates/{templateId}
  * OperationId: updateDunningTemplate
  */
 export async function updateDunningTemplate(
   ctx: ValidatedContext<UpdateDunningTemplateBody, never, UpdateDunningTemplateParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const orgId = ctx.get('orgId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
   const params = ctx.req.valid('param');
-  
-  // Extract validated request body
   const body = ctx.req.valid('json');
-  
-  // TODO: Implement business logic
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('updateDunningTemplate', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new DunningTemplateRepository(db, logger);
+
+  const existing = await repo.findOneById(params.templateId);
+  if (!existing || existing.organizationId !== orgId) {
+    return ctx.json({ error: 'Dunning template not found' }, 404);
+  }
+
+  const b = body as any;
+  const updateData: Record<string, any> = { updatedBy: user.id };
+  if (b['name'] !== undefined) updateData['name'] = b['name'];
+  if (b['daysAfterDue'] !== undefined) updateData['daysAfterDue'] = b['daysAfterDue'];
+  if (b['channel'] !== undefined) updateData['channel'] = b['channel'];
+  if (b['subject'] !== undefined) updateData['subject'] = b['subject'];
+  if (b['body'] !== undefined) updateData['body'] = b['body'];
+  if (b['status'] !== undefined) updateData['status'] = b['status'];
+
+  const updated = await repo.updateOneById(params.templateId, updateData);
+
+  return ctx.json(updated, 200);
 }
