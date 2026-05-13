@@ -17,7 +17,7 @@ HTTP 200
 POST {{api}}/auth/sign-out
 HTTP 200
 
-GET {{api}}/certificates/my
+GET {{api}}/association/member/certificates
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -31,5 +31,5 @@ HTTP 200
 
 # ── List my certificates ──────────────────────────────────
 
-GET {{api}}/certificates/my
+GET {{api}}/association/member/certificates
 HTTP 200

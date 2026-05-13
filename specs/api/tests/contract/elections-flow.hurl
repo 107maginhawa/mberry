@@ -18,7 +18,7 @@ HTTP 200
 POST {{api}}/auth/sign-out
 HTTP 200
 
-GET {{api}}/elections/list/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/member/elections
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -32,7 +32,7 @@ HTTP 200
 
 # ── List elections ────────────────────────────────────────
 
-GET {{api}}/elections/list/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/member/elections
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -40,7 +40,7 @@ jsonpath "$.data" isCollection
 
 # ── Create election ───────────────────────────────────────
 
-POST {{api}}/elections/create/ed8e3a96-8126-4341-be42-e6eb7940c562
+POST {{api}}/association/member/elections
 Content-Type: application/json
 {
   "title": "Contract Test Election {{suffix}}",
@@ -58,5 +58,5 @@ election_id: jsonpath "$.data.id"
 
 # ── Get election ──────────────────────────────────────────
 
-GET {{api}}/elections/detail/{{election_id}}
+GET {{api}}/association/member/elections/{{election_id}}
 HTTP 200

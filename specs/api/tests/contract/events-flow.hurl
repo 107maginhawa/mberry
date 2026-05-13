@@ -20,7 +20,7 @@ HTTP 200
 POST {{api}}/auth/sign-out
 HTTP 200
 
-GET {{api}}/events/list/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/events
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -34,7 +34,7 @@ HTTP 200
 
 # ── 1. List events ─────────────────────────────────────────
 
-GET {{api}}/events/list/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/events
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -42,7 +42,7 @@ jsonpath "$.data" isCollection
 
 # ── 2. Create event ────────────────────────────────────────
 
-POST {{api}}/events/create/ed8e3a96-8126-4341-be42-e6eb7940c562
+POST {{api}}/association/events
 Content-Type: application/json
 {
   "title": "Contract Test Event {{suffix}}",
@@ -59,20 +59,20 @@ event_id: jsonpath "$.data.id"
 
 # ── 3. Get event ───────────────────────────────────────────
 
-GET {{api}}/events/detail/{{event_id}}
+GET {{api}}/association/events/{{event_id}}
 HTTP 200
 
 
 # ── 4. My events (member view) ─────────────────────────────
 
-GET {{api}}/events/my
+GET {{api}}/association/event-lifecycle/my
 HTTP 200
 
 
 # ── 5. Check-in endpoint exists (BR-16) ───────────────────
 # POST without a valid event ID should return 404 or 400, not 500
 
-POST {{api}}/events/checkin/00000000-0000-0000-0000-000000000000
+POST {{api}}/association/event-lifecycle/00000000-0000-0000-0000-000000000000/check-in
 Content-Type: application/json
 {}
 HTTP *
@@ -83,5 +83,5 @@ status < 500
 # ── 6. Attendance list (BR-17) ─────────────────────────────
 # Use the event created in step 2
 
-GET {{api}}/events/attendance/{{event_id}}
+GET {{api}}/association/event-lifecycle/{{event_id}}/attendance
 HTTP 200

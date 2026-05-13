@@ -32,20 +32,20 @@ status < 500
 
 # ── 3. Officer endpoints should reject non-officer user ─────
 
-# Dues config (officer-only, has :organizationId)
-GET {{api}}/dues/config/ed8e3a96-8126-4341-be42-e6eb7940c562
+# Dues configs (officer-only)
+GET {{api}}/association/member/dues-configs
 HTTP 403
 
-# Dues funds (officer-only)
-GET {{api}}/dues/funds/ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP 403
+# ORPHANED: /dues/funds/{orgId} has no spec equivalent
+# GET {{api}}/dues/funds/ed8e3a96-8126-4341-be42-e6eb7940c562
+# HTTP 403
 
 # Financial dashboard (officer-only)
 GET {{api}}/dues/dashboard/ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 403
 
 # Create event (officer-only)
-POST {{api}}/events/create/ed8e3a96-8126-4341-be42-e6eb7940c562
+POST {{api}}/association/events
 Content-Type: application/json
 {
   "title": "Unauthorized Event",
@@ -59,7 +59,7 @@ GET {{api}}/membership/members/ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 403
 
 # Create training (officer-only)
-POST {{api}}/training/create/ed8e3a96-8126-4341-be42-e6eb7940c562
+POST {{api}}/association/training
 Content-Type: application/json
 {
   "title": "Unauthorized Training",
@@ -69,7 +69,7 @@ Content-Type: application/json
 HTTP 403
 
 # Create election (officer-only)
-POST {{api}}/elections/create/ed8e3a96-8126-4341-be42-e6eb7940c562
+POST {{api}}/association/member/elections
 Content-Type: application/json
 {
   "title": "Unauthorized Election"
@@ -97,7 +97,7 @@ Content-Type: application/json
 HTTP 200
 
 # Officer should get 200 on same endpoints
-GET {{api}}/dues/config/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/member/dues-configs
 HTTP 200
 
 GET {{api}}/dues/dashboard/ed8e3a96-8126-4341-be42-e6eb7940c562

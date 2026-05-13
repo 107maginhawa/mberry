@@ -21,7 +21,7 @@ HTTP 200
 POST {{api}}/auth/sign-out
 HTTP 200
 
-GET {{api}}/training/list/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/training
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -35,7 +35,7 @@ HTTP 200
 
 # ── 1. List trainings (credits are awarded on completion) ──
 
-GET {{api}}/training/list/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/training
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -43,5 +43,5 @@ jsonpath "$.data" isCollection
 
 # ── 2. My events (events can also award attendance credits) ─
 
-GET {{api}}/events/my
+GET {{api}}/association/event-lifecycle/my
 HTTP 200

@@ -29,7 +29,7 @@ GET {{api}}/membership/members/ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 401
 
 
-GET {{api}}/membership/categories/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/member/membership-categories/ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 401
 
 
@@ -46,7 +46,7 @@ HTTP 200
 
 # ── 1. List categories ─────────────────────────────────────
 
-GET {{api}}/membership/categories/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/member/membership-categories/ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -54,7 +54,7 @@ jsonpath "$.data" isCollection
 
 # ── 2. Upsert a new category ──────────────────────────────
 
-PUT {{api}}/membership/categories/ed8e3a96-8126-4341-be42-e6eb7940c562
+PUT {{api}}/association/member/membership-categories/ed8e3a96-8126-4341-be42-e6eb7940c562
 Content-Type: application/json
 {
   "name": "Contract Test Category {{suffix}}",

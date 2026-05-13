@@ -18,7 +18,7 @@ HTTP 200
 POST {{api}}/auth/sign-out
 HTTP 200
 
-GET {{api}}/training/list/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/training
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -32,7 +32,7 @@ HTTP 200
 
 # ── List trainings ────────────────────────────────────────
 
-GET {{api}}/training/list/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/training
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -40,7 +40,7 @@ jsonpath "$.data" isCollection
 
 # ── Create training ────────────────────────────────────────
 
-POST {{api}}/training/create/ed8e3a96-8126-4341-be42-e6eb7940c562
+POST {{api}}/association/training
 Content-Type: application/json
 {
   "title": "Contract Test Training {{suffix}}",
@@ -59,11 +59,11 @@ training_id: jsonpath "$.data.id"
 
 # ── Get training ──────────────────────────────────────────
 
-GET {{api}}/training/detail/{{training_id}}
+GET {{api}}/association/training/{{training_id}}
 HTTP 200
 
 
 # ── My trainings ──────────────────────────────────────────
 
-GET {{api}}/training/my
+GET {{api}}/association/training-lifecycle/my
 HTTP 200
