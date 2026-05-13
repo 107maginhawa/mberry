@@ -151,7 +151,7 @@
 
 - [x] **Phase 18: Dues Invoice Security Fix** — Enforce org-scoped RBAC on dues endpoints (2026-05-14)
 - [x] **Phase 19: Account Deletion + Data Export** — PH DPA compliance (deletion, anonymization, export) (completed 2026-05-13)
-- [ ] **Phase 20: Payment Flow** — Offline payment recording with receipts and concurrency safety
+- [x] **Phase 20: Payment Flow** — Offline payment recording with receipts and concurrency safety (completed 2026-05-13)
 - [ ] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation
 - [ ] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary
 - [ ] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion
@@ -198,10 +198,10 @@ Plans:
   2. Recorded payment changes invoice status to paid and generates a receipt record
   3. Member can view their own payment receipt; officer can view receipts for chapter members
   4. Concurrent recording of payment on the same invoice by two officers results in exactly one success and one conflict error (no double-payment)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 20-01-PLAN.md — Optimistic locking on markPaid + wire invoice linking in recordDuesPayment
-- [ ] 20-02-PLAN.md — Self-service personId enforcement in listDuesPayments
+- [x] 20-01-PLAN.md — Optimistic locking on markPaid + wire invoice linking in recordDuesPayment
+- [x] 20-02-PLAN.md — Self-service personId enforcement in listDuesPayments
 **UI hint**: yes
 
 ### Phase 21: Officer Daily Ops
@@ -285,7 +285,7 @@ Plans:
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
 | 18. Dues Invoice Security Fix | v1.2.0 | 2/2 | Complete | 2026-05-14 |
 | 19. Account Deletion + Data Export | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
-| 20. Payment Flow | v1.2.0 | 0/2 | Not started | — |
+| 20. Payment Flow | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 21. Officer Daily Ops | v1.2.0 | 0/? | Not started | — |
 | 22. PRC CPD Compliance | v1.2.0 | 0/? | Not started | — |
 | 23. Member Departure + Deceased | v1.2.0 | 0/? | Not started | — |
