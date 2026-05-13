@@ -83,11 +83,33 @@ export async function exportPersonData(
     logger?.warn({ error: e }, 'Could not fetch notifications for export');
   }
 
+  // Collect certificates
+  let certificates: any[] = [];
+  try {
+    const { certificates: certsTable } = await import('@/handlers/certificates/repos/certificates.schema');
+    const { eq } = await import('drizzle-orm');
+    certificates = await db.select().from(certsTable).where(eq(certsTable.personId, user.id));
+  } catch (e) {
+    logger?.warn({ error: e }, 'Could not fetch certificates for export');
+  }
+
+  // Collect event registrations
+  let events: any[] = [];
+  try {
+    const { eventRegistrations } = await import('@/handlers/association:operations/repos/events.schema');
+    const { eq } = await import('drizzle-orm');
+    events = await db.select().from(eventRegistrations).where(eq(eventRegistrations.personId, user.id));
+  } catch (e) {
+    logger?.warn({ error: e }, 'Could not fetch events for export');
+  }
+
   const categories = ['profile'];
   if (memberships.length > 0) categories.push('memberships');
   if (payments.length > 0) categories.push('payments');
   if (credits.length > 0) categories.push('credits');
   if (notifications.length > 0) categories.push('notifications');
+  if (certificates.length > 0) categories.push('certificates');
+  if (events.length > 0) categories.push('events');
 
   // Audit
   const audit = ctx.get('audit');
@@ -121,5 +143,7 @@ export async function exportPersonData(
     payments,
     credits,
     notifications,
+    certificates,
+    events,
   }, 200);
 }

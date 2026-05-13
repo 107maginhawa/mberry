@@ -17,6 +17,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { PersonRepository } from './repos/person.repo';
+import * as schema from '@/generated/better-auth/schema';
+import { eq } from 'drizzle-orm';
 
 export async function executeAccountDeletion(
   ctx: ValidatedContext<never, never, never>
@@ -45,12 +47,15 @@ export async function executeAccountDeletion(
     return ctx.json({ error: 'Grace period has not expired yet' }, 400);
   }
 
+  // Kill sessions first — before PII is scrubbed
+  await db.delete(schema.session).where(eq(schema.session.userId, personId));
+
   // Anonymize PII — keep the record but scrub all personal data
   await repo.updateOneById(personId, {
-    firstName: 'Deleted',
-    lastName: 'User',
+    firstName: 'DELETED',
+    lastName: 'DELETED',
     middleName: null,
-    contactInfo: null,
+    contactInfo: { email: 'deleted@deleted.invalid', phone: undefined },
     primaryAddress: null,
     avatar: null,
     licenseNumber: null,
