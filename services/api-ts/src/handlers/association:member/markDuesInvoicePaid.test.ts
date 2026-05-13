@@ -3,6 +3,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { markDuesInvoicePaid } from './markDuesInvoicePaid';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
+import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -27,17 +28,24 @@ const fakeMembership = {
   status: 'active',
 };
 
+/** Fake DB that passes tx through to callback (simulates transaction) */
+const txDb = {
+  transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
+};
+
 // ─── Tests ──────────────────────────────────────────────
 
 describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
   beforeEach(() => {
     restoreRepo(DuesInvoiceRepository);
     restoreRepo(MembershipRepository);
+    restoreRepo(DuesRepository);
   });
 
   afterEach(() => {
     restoreRepo(DuesInvoiceRepository);
     restoreRepo(MembershipRepository);
+    restoreRepo(DuesRepository);
   });
 
   test('uses computeNewExpiry — extends annual by 12 months from current expiry', async () => {
@@ -47,6 +55,7 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
       findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
       markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
     });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
       findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2025-12-31' }),
       updateOneById: async (_id: string, updates: any) => {
@@ -56,6 +65,7 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
@@ -75,6 +85,7 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
       findOneById: async () => ({ ...fakeInvoice, status: 'overdue' }),
       markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
     });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
       // Expiry > 1 year in past = severely lapsed
       findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2023-01-01' }),
@@ -85,6 +96,7 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
@@ -106,6 +118,7 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
       findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
       markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
     });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
       findOneById: async () => ({ ...fakeMembership, duesExpiryDate: null }),
       updateOneById: async (_id: string, updates: any) => {
@@ -115,6 +128,7 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
@@ -127,6 +141,101 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     expect(expiryDate.getFullYear()).toBeGreaterThanOrEqual(expectedYear);
   });
 
+  test('suspended member — extends expiry but does NOT reactivate [BR-03]', async () => {
+    let updatedStatus: string | undefined;
+
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
+      markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
+    });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
+    stubRepo(MembershipRepository, {
+      findOneById: async () => ({
+        ...fakeMembership,
+        status: 'suspended',
+        suspendedAt: new Date(),
+        duesExpiryDate: '2025-12-31',
+      }),
+      updateOneById: async (_id: string, updates: any) => {
+        updatedStatus = updates.status;
+        return fakeMembership;
+      },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
+    });
+
+    const response = await markDuesInvoicePaid(ctx);
+    expect(response.status).toBe(200);
+    // Must NOT blindly set status to 'active' — suspended requires officer action
+    expect(updatedStatus).not.toBe('active');
+  });
+
+  test('terminated member — extends expiry but does NOT reactivate [BR-03]', async () => {
+    let updatedStatus: string | undefined;
+
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
+      markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
+    });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
+    stubRepo(MembershipRepository, {
+      findOneById: async () => ({
+        ...fakeMembership,
+        status: 'terminated',
+        terminatedAt: new Date(),
+        duesExpiryDate: '2025-12-31',
+      }),
+      updateOneById: async (_id: string, updates: any) => {
+        updatedStatus = updates.status;
+        return fakeMembership;
+      },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
+    });
+
+    const response = await markDuesInvoicePaid(ctx);
+    expect(response.status).toBe(200);
+    expect(updatedStatus).not.toBe('active');
+  });
+
+  test('lapsed member — payment SHOULD reactivate [BR-03]', async () => {
+    let updatedStatus: string | undefined;
+
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'overdue' }),
+      markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
+    });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
+    stubRepo(MembershipRepository, {
+      findOneById: async () => ({
+        ...fakeMembership,
+        status: 'lapsed',
+        duesExpiryDate: '2023-01-01',
+      }),
+      updateOneById: async (_id: string, updates: any) => {
+        updatedStatus = updates.status;
+        return fakeMembership;
+      },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
+    });
+
+    await markDuesInvoicePaid(ctx);
+    expect(updatedStatus).toBe('active');
+  });
+
   test('skips extension when membership not found', async () => {
     let updateCalled = false;
 
@@ -134,12 +243,14 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
       findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
       markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
     });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
       findOneById: async () => undefined,
       updateOneById: async () => { updateCalled = true; return fakeMembership; },
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
@@ -147,5 +258,80 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     const response = await markDuesInvoicePaid(ctx);
     expect(response.status).toBe(200);
     expect(updateCalled).toBe(false);
+  });
+});
+
+describe('[Wave 1.2] markDuesInvoicePaid — transactional boundary', () => {
+  beforeEach(() => {
+    restoreRepo(DuesInvoiceRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(DuesRepository);
+  });
+
+  afterEach(() => {
+    restoreRepo(DuesInvoiceRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(DuesRepository);
+  });
+
+  test('wraps invoice mark-paid + membership update in db.transaction()', async () => {
+    let transactionCalled = false;
+
+    const txDb = {
+      transaction: async (fn: (tx: any) => Promise<any>) => {
+        transactionCalled = true;
+        return fn(txDb);
+      },
+    };
+
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
+      markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
+    });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
+    stubRepo(MembershipRepository, {
+      findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2025-12-31' }),
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
+    });
+
+    await markDuesInvoicePaid(ctx);
+    expect(transactionCalled).toBe(true);
+  });
+
+  test('rolls back invoice mark-paid when membership update fails', async () => {
+    let transactionCalled = false;
+
+    const txDb = {
+      transaction: async (fn: (tx: any) => Promise<any>) => {
+        transactionCalled = true;
+        return fn(txDb);
+      },
+    };
+
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
+      markPaid: async () => ({ ...fakeInvoice, status: 'paid' }),
+    });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
+    stubRepo(MembershipRepository, {
+      findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2025-12-31' }),
+      updateOneById: async () => { throw new Error('Membership update failed'); },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
+    });
+
+    // Error must propagate (DB would rollback both invoice + membership changes)
+    await expect(markDuesInvoicePaid(ctx)).rejects.toThrow('Membership update failed');
+    expect(transactionCalled).toBe(true);
   });
 });

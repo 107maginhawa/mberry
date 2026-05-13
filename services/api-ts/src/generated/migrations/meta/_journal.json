@@ -162,6 +162,20 @@
       "when": 1778489454255,
       "tag": "0022_plain_the_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1778639927083,
+      "tag": "0023_wandering_rattler",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1778654320502,
+      "tag": "0024_sad_ares",
+      "breakpoints": true
     }
   ]
 }

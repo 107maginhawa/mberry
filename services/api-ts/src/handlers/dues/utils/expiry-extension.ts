@@ -13,7 +13,7 @@
  * (from current expiry) still applies.
  */
 
-export type BillingCycle = 'annual' | 'quarterly' | 'custom';
+export type BillingCycle = 'annual' | 'quarterly' | 'semi-annual' | 'custom';
 
 export interface ExpiryExtensionInput {
   currentExpiry: Date | null;
@@ -25,6 +25,7 @@ export interface ExpiryExtensionInput {
 function getCycleMonths(cycle: BillingCycle, customMonths?: number): number {
   switch (cycle) {
     case 'annual': return 12;
+    case 'semi-annual': return 6;
     case 'quarterly': return 3;
     case 'custom': return customMonths ?? 12;
   }

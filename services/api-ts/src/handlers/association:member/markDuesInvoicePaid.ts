@@ -5,6 +5,8 @@ import type { MarkDuesInvoicePaidBody, MarkDuesInvoicePaidParams } from '@/gener
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { computeNewExpiry } from '@/handlers/dues/utils/expiry-extension';
+import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { toBillingCycle } from '@/handlers/dues/utils/settle-payment';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -39,26 +41,43 @@ export async function markDuesInvoicePaid(
     );
   }
 
-  const updatedInvoice = await invoiceRepo.markPaid(invoiceId, body.paymentId, new Date());
+  const updatedInvoice = await db.transaction(async (tx: DatabaseInstance) => {
+    const txInvoiceRepo = new DuesInvoiceRepository(tx, logger);
+    const txMembershipRepo = new MembershipRepository(tx, logger);
 
-  // [BR-07] Extend dues_expiry_date using computeNewExpiry (not hardcoded +1 year)
-  const membershipRepo = new MembershipRepository(db, logger);
-  const membership = await membershipRepo.findOneById(invoice.membershipId);
-  if (membership) {
-    const currentExpiry = membership.duesExpiryDate
-      ? new Date(membership.duesExpiryDate)
-      : null;
-    const newExpiry = computeNewExpiry({
-      currentExpiry,
-      billingCycle: 'annual', // default — no billingCycle column yet
-    });
-    const newExpiryDate = newExpiry.toISOString().split('T')[0]!;
+    const marked = await txInvoiceRepo.markPaid(invoiceId, body.paymentId, new Date());
 
-    await membershipRepo.updateOneById(invoice.membershipId, {
-      duesExpiryDate: newExpiryDate,
-      status: 'active',
-    } as any);
-  }
+    // [BR-07] Extend dues_expiry_date using computeNewExpiry with org billing frequency
+    const duesRepo = new DuesRepository(tx);
+    const duesConfig = await duesRepo.getConfig(invoice.organizationId);
+    const billingCycle = toBillingCycle(duesConfig?.billingFrequency);
+
+    const membership = await txMembershipRepo.findOneById(invoice.membershipId);
+    if (membership) {
+      const currentExpiry = membership.duesExpiryDate
+        ? new Date(membership.duesExpiryDate)
+        : null;
+      const newExpiry = computeNewExpiry({
+        currentExpiry,
+        billingCycle,
+      });
+      const newExpiryDate = newExpiry.toISOString().split('T')[0]!;
+
+      // [BR-03] Only reactivate if current status allows payment-driven transition.
+      // Suspended/terminated members must NOT be reactivated by payment — officer action required.
+      const paymentReactivatableStatuses = ['pendingPayment', 'active', 'gracePeriod', 'lapsed'];
+      const newStatus = paymentReactivatableStatuses.includes(membership.status)
+        ? 'active'
+        : membership.status;
+
+      await txMembershipRepo.updateOneById(invoice.membershipId, {
+        duesExpiryDate: newExpiryDate,
+        status: newStatus,
+      } as any);
+    }
+
+    return marked;
+  });
 
   await auditAction(ctx, {
     action: 'mark-paid',

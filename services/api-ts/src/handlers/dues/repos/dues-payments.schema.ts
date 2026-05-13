@@ -18,7 +18,7 @@ import { persons } from '../../person/repos/person.schema';
 import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
 
 // Enums
-export const billingFrequencyEnum = pgEnum('billing_frequency', ['annual', 'quarterly']);
+export const billingFrequencyEnum = pgEnum('billing_frequency', ['annual', 'semi-annual', 'quarterly']);
 
 export const duesPaymentMethodEnum = pgEnum('dues_payment_method', [
   'online', 'cash', 'check', 'bankTransfer', 'gcash', 'other'

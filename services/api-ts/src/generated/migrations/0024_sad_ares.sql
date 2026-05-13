@@ -1,0 +1,1 @@
+ALTER TYPE "public"."billing_frequency" ADD VALUE 'semi-annual' BEFORE 'quarterly';
