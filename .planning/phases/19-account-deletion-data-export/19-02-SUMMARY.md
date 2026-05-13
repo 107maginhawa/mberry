@@ -95,11 +95,16 @@ completed: 2026-05-13
 None - the UI wires directly to real SDK mutations. Deletion state comes from live person data.
 
 ## Issues Encountered
-- Pre-commit hook ran in main worktree context, causing task commit to land on `feature/phase0-foundation` instead of worktree branch. Cherry-picked `cb89b92` onto `worktree-agent-a563723f` as `b8cfb56`.
+- Pre-commit hook ran in main worktree context, causing task commit to land on `feature/phase0-foundation` instead of worktree branch. Cherry-picked onto worktree branch as `b8cfb56`.
 
 ## Threat Surface
 - T-19-07 (Spoofing): Mitigated — mutations use session identity; AlertDialog prevents accidental clicks
 - T-19-08 (Info Disclosure): Accepted — export returns authenticated user's own data only; no server-side storage
+
+## Self-Check: PASSED
+- SUMMARY.md exists at correct path
+- Commit b8cfb56 exists in git log
+- requestMyAccountDeletionMutation appears 2 times in account.tsx
 
 ## Next Phase Readiness
 - Human verification checkpoint pending (checkpoint:human-verify)
