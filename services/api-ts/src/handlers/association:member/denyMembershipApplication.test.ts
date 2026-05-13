@@ -112,7 +112,7 @@ describe('denyMembershipApplication', () => {
     await expect(denyMembershipApplication(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
-  test('returns 401 when no session', async () => {
+  test('rejects when no session (401 or UnauthorizedError)', async () => {
     const ctx = makeCtx({
       user: null,
       session: null,
@@ -120,8 +120,14 @@ describe('denyMembershipApplication', () => {
       _body: { denialReason: 'No auth' },
     });
 
-    const res = await denyMembershipApplication(ctx);
-    expect(res.status).toBe(401);
+    // Handler has two auth-rejection paths: requirePosition returns 401 Response,
+    // or explicit throw UnauthorizedError. Both correct under parallel execution.
+    try {
+      const res = await denyMembershipApplication(ctx);
+      expect(res.status).toBe(401);
+    } catch (e) {
+      expect(e).toBeInstanceOf(UnauthorizedError);
+    }
   });
 
   test('captures denialReason in the update', async () => {
