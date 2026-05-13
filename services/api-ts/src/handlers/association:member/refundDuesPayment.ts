@@ -3,8 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { RefundDuesPaymentBody, RefundDuesPaymentParams } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
-import { MembershipRepository } from './repos/membership.repo';
-import { computeMembershipStatus } from './utils/compute-membership-status';
+import { membershipLifecycle } from './utils/membership-lifecycle';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -45,25 +44,21 @@ export async function refundDuesPayment(
 
   const updated = await db.transaction(async (tx: DatabaseInstance) => {
     const txRepo = new DuesRepository(tx);
-    const membershipRepo = new MembershipRepository(tx);
 
-    // --- Reverse fund allocations ---
-    const allocations = await txRepo.getFundAllocations(paymentId);
-    const originalAllocations = allocations.filter((a: any) => !a.isReversal);
-
-    if (originalAllocations.length > 0) {
-      const refundRatio = refundAmount / payment.amount;
-      const reversals = originalAllocations.map((a: any) => ({
-        paymentId,
-        fundId: a.fundId,
-        amount: -Math.round(a.amount * refundRatio),
-        isReversal: true,
+    // Delegate fund reversal + membership expiry reset to lifecycle service
+    const refundResult = await membershipLifecycle.processRefund(tx, {
+      paymentId,
+      payment: {
+        amount: payment.amount,
         organizationId: payment.organizationId,
-      }));
-      await txRepo.createFundAllocations(reversals);
-    }
+        personId: payment.personId,
+        membershipExtendedFrom: payment.membershipExtendedFrom,
+      },
+      refundAmount,
+      isFullRefund,
+    });
 
-    // --- Update payment status ---
+    // Update payment status
     const newRefundedAmount = (payment.refundedAmount ?? 0) + refundAmount;
     const newStatus = newRefundedAmount >= payment.amount ? 'refunded' : 'partiallyRefunded';
 
@@ -71,29 +66,6 @@ export async function refundDuesPayment(
       refundedAmount: newRefundedAmount,
       refundReason: (body as any).reason,
     } as any);
-
-    // --- Reset membership expiry + recompute status ---
-    const memberships = await membershipRepo.findMany({
-      organizationId: payment.organizationId,
-      personId: payment.personId,
-    });
-    const membership = memberships[0];
-
-    if (membership && isFullRefund && payment.membershipExtendedFrom !== undefined) {
-      const restoredExpiry = payment.membershipExtendedFrom ?? null;
-
-      const newMembershipStatus = computeMembershipStatus({
-        duesExpiryDate: restoredExpiry,
-        gracePeriodDays: 30, // default grace period
-        suspendedAt: (membership as any).suspendedAt ?? null,
-        terminatedAt: (membership as any).terminatedAt ?? null,
-      });
-
-      await membershipRepo.updateOneById(membership.id, {
-        duesExpiryDate: restoredExpiry,
-        status: newMembershipStatus,
-      } as any);
-    }
 
     return updatedPayment;
   });
