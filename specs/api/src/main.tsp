@@ -33,6 +33,10 @@ import "./modules/platform-admin-custom.tsp";
 import "./modules/membership-custom.tsp";
 import "./modules/dues-custom.tsp";
 
+// Infrastructure endpoints
+import "./modules/health.tsp";
+import "./modules/feature-flags.tsp";
+
 // Association management specs
 import "./association/core/primitives.tsp";
 import "./association/core/engagement.tsp";
@@ -533,6 +537,17 @@ namespace MonobaseAPI {
 
   @tag("Dues")
   interface DuesCustomManagement extends DuesCustomModule.DuesCustomManagement {}
+
+  // =========================================================================
+  // Infrastructure Endpoints
+  // =========================================================================
+
+  @tag("System")
+  interface HealthChecks extends HealthModule.HealthManagement {}
+
+  @tag("System")
+  @route("/feature-flags")
+  interface FeatureFlagEndpoints extends FeatureFlagsModule.FeatureFlagManagement {}
 
 }
 
