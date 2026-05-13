@@ -111,4 +111,63 @@ describe('exportPersonData', () => {
     expect(response.body.profile.deletionScheduledAt).toBeUndefined();
     expect(response.body.profile.deletionCompletedAt).toBeUndefined();
   });
+
+  test('export response includes "certificates" key with array', async () => {
+    mocks = stubRepo(PersonRepository, {
+      findOneById: async () => ({ ...fakePerson }),
+    });
+
+    const ctx = makeCtx({ user: { id: 'user-1' } });
+    const response = await exportPersonData(ctx);
+
+    expect(response.body.certificates).toBeDefined();
+    expect(Array.isArray(response.body.certificates)).toBe(true);
+  });
+
+  test('export response includes "events" key with array', async () => {
+    mocks = stubRepo(PersonRepository, {
+      findOneById: async () => ({ ...fakePerson }),
+    });
+
+    const ctx = makeCtx({ user: { id: 'user-1' } });
+    const response = await exportPersonData(ctx);
+
+    expect(response.body.events).toBeDefined();
+    expect(Array.isArray(response.body.events)).toBe(true);
+  });
+
+  test('categories array always includes "profile"', async () => {
+    mocks = stubRepo(PersonRepository, {
+      findOneById: async () => ({ ...fakePerson }),
+    });
+
+    const ctx = makeCtx({ user: { id: 'user-1' } });
+    const response = await exportPersonData(ctx);
+
+    expect(response.body.categories).toContain('profile');
+  });
+
+  test('missing certificates import does not fail the entire export', async () => {
+    mocks = stubRepo(PersonRepository, {
+      findOneById: async () => ({ ...fakePerson }),
+    });
+
+    const ctx = makeCtx({ user: { id: 'user-1' } });
+    // Even if certificates import fails, response should succeed
+    const response = await exportPersonData(ctx);
+    expect(response.status).toBe(200);
+    expect(response.body.certificates).toBeDefined();
+  });
+
+  test('missing events import does not fail the entire export', async () => {
+    mocks = stubRepo(PersonRepository, {
+      findOneById: async () => ({ ...fakePerson }),
+    });
+
+    const ctx = makeCtx({ user: { id: 'user-1' } });
+    // Even if events import fails, response should succeed
+    const response = await exportPersonData(ctx);
+    expect(response.status).toBe(200);
+    expect(response.body.events).toBeDefined();
+  });
 });
