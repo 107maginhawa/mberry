@@ -33,7 +33,7 @@ export async function renewMembership(
   }
 
   // Extend from current expiry date, not today
-  const currentExpiry = new Date(membership.duesExpiryDate);
+  const currentExpiry = new Date(membership.duesExpiryDate ?? new Date());
   currentExpiry.setFullYear(currentExpiry.getFullYear() + 1);
   const newExpiryDate = currentExpiry.toISOString().split('T')[0];
 

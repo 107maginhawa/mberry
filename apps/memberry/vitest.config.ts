@@ -16,6 +16,17 @@ export default mergeConfig(
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}'],
       exclude: ['tests/e2e/**', 'node_modules/**'],
+      coverage: {
+        provider: 'v8',
+        include: ['src/**/*.{ts,tsx}'],
+        exclude: ['src/test/**', 'src/**/*.test.{ts,tsx}', 'src/routeTree.gen.ts'],
+        thresholds: {
+          statements: 67,
+          branches: 62,
+          functions: 58,
+          lines: 70,
+        },
+      },
     },
   })
 )

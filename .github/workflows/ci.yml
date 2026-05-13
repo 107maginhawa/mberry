@@ -23,6 +23,8 @@ jobs:
         run: bun run typecheck
       - name: Lint
         run: bun run lint
+      - name: Dependency audit
+        run: bunx audit-ci --moderate || true
 
   e2e:
     runs-on: ubuntu-latest
@@ -300,6 +302,19 @@ jobs:
         if: always()
         run: tail -500 /tmp/api.log || true
 
+  coverage-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [lint-typecheck, e2e]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: BR coverage regression check
+        run: bun run scripts/br-coverage.ts --ci
+
   unit-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -345,9 +360,59 @@ jobs:
         run: bun --filter @monobase/api-ts run generate
       - name: Run unit tests
         run: cd services/api-ts && bun test
-      - name: Run frontend unit tests
-        run: cd apps/memberry && bun run test
-      - name: Run account unit tests
-        run: cd apps/account && bun run test
+      - name: Run frontend unit tests (with coverage)
+        run: cd apps/memberry && bun run test -- --coverage
+      - name: Run account unit tests (with coverage)
+        run: cd apps/account && bun run test -- --coverage
       - name: Run SDK unit tests
         run: cd packages/sdk-ts && bun run test
+
+  new-code-gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Check new handlers have tests
+        run: bun run scripts/new-code-gate.ts --base origin/${{ github.base_ref }}
+
+  ci-gate:
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs:
+      - lint-typecheck
+      - unit-tests
+      - e2e
+      - contract
+      - build-api
+      - build-frontends
+      - coverage-gate
+    steps:
+      - name: Check all gates passed
+        run: |
+          echo "Gate results:"
+          echo "  lint-typecheck: ${{ needs.lint-typecheck.result }}"
+          echo "  unit-tests: ${{ needs.unit-tests.result }}"
+          echo "  e2e: ${{ needs.e2e.result }}"
+          echo "  contract: ${{ needs.contract.result }}"
+          echo "  build-api: ${{ needs.build-api.result }}"
+          echo "  build-frontends: ${{ needs.build-frontends.result }}"
+          echo "  coverage-gate: ${{ needs.coverage-gate.result }}"
+          if [[ "${{ needs.lint-typecheck.result }}" != "success" ]] || \
+             [[ "${{ needs.unit-tests.result }}" != "success" ]] || \
+             [[ "${{ needs.e2e.result }}" != "success" ]] || \
+             [[ "${{ needs.contract.result }}" != "success" ]] || \
+             [[ "${{ needs.build-api.result }}" != "success" ]] || \
+             [[ "${{ needs.build-frontends.result }}" != "success" ]] || \
+             [[ "${{ needs.coverage-gate.result }}" != "success" ]]; then
+            echo "::error::One or more CI gates failed"
+            exit 1
+          fi
+          echo "All gates passed"
