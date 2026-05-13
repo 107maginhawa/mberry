@@ -484,6 +484,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.listMembershipApplications as unknown as Handler
   );
 
+  // bulkApproveMembershipApplications
+  app.post('/association/member/applications/bulk-approve',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('json', validators.BulkApproveMembershipApplicationsBody, validationErrorHandler),
+    registry.bulkApproveMembershipApplications as unknown as Handler
+  );
+
   // getMembershipApplication
   app.get('/association/member/applications/:applicationId',
     authMiddleware({ roles: ["association:admin", "user:owner"] }),
@@ -2297,6 +2304,17 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.testEmailTemplate as unknown as Handler
   );
 
+  // listFeatureFlags
+  app.get('/feature-flags/feature-flags',
+    registry.listFeatureFlags as unknown as Handler
+  );
+
+  // liveness
+  app.get('/livez',
+    zValidator('query', validators.LivenessQuery, validationErrorHandler),
+    registry.liveness as unknown as Handler
+  );
+
   // listOrgApplications
   app.get('/membership/applications/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
@@ -2485,6 +2503,12 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   app.post('/read-all',
     authMiddleware({ roles: ["user"] }),
     registry.markAllNotificationsRead as unknown as Handler
+  );
+
+  // readiness
+  app.get('/readyz',
+    zValidator('query', validators.ReadinessQuery, validationErrorHandler),
+    registry.readiness as unknown as Handler
   );
 
   // createReview
