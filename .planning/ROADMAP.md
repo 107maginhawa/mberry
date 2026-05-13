@@ -198,7 +198,10 @@ Plans:
   2. Recorded payment changes invoice status to paid and generates a receipt record
   3. Member can view their own payment receipt; officer can view receipts for chapter members
   4. Concurrent recording of payment on the same invoice by two officers results in exactly one success and one conflict error (no double-payment)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Optimistic locking on markPaid + wire invoice linking in recordDuesPayment
+- [ ] 20-02-PLAN.md — Self-service personId enforcement in listDuesPayments
 **UI hint**: yes
 
 ### Phase 21: Officer Daily Ops
@@ -282,7 +285,7 @@ Plans:
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
 | 18. Dues Invoice Security Fix | v1.2.0 | 2/2 | Complete | 2026-05-14 |
 | 19. Account Deletion + Data Export | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
-| 20. Payment Flow | v1.2.0 | 0/? | Not started | — |
+| 20. Payment Flow | v1.2.0 | 0/2 | Not started | — |
 | 21. Officer Daily Ops | v1.2.0 | 0/? | Not started | — |
 | 22. PRC CPD Compliance | v1.2.0 | 0/? | Not started | — |
 | 23. Member Departure + Deceased | v1.2.0 | 0/? | Not started | — |
