@@ -2770,6 +2770,20 @@ export const BookmarkUpdateSchema = z.object({
   personId: z.string().optional()
 });
 
+export const BulkApproveApplicationsRequestSchema = z.object({
+  applicationIds: z.array(z.string())
+});
+
+export const BulkApproveFailureSchema = z.object({
+  id: z.string(),
+  reason: z.string()
+});
+
+export const BulkApproveApplicationsResponseSchema = z.object({
+  succeeded: z.array(z.string()),
+  failed: z.array(BulkApproveFailureSchema)
+});
+
 export const COIDisclosureSchema = z.object({
   category: z.enum(["financial", "board", "vendor", "employment", "family", "other"]),
   description: z.string().min(1).max(3000),
@@ -6698,6 +6712,76 @@ export const OfficerRoleResponseSchema = z.object({
 })
 });
 
+export const OfficerRosterMemberSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  personId: z.string(),
+  tierId: z.string(),
+  categoryId: z.string().optional(),
+  memberNumber: z.string().max(50).optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated"]),
+  joinedAt: z.string().datetime().transform((str) => new Date(str)),
+  gracePeriodDays: z.number().int().gte(0),
+  note: z.string().max(2000).optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  name: z.string().optional(),
+  email: z.string().optional(),
+  categoryName: z.string().optional(),
+  duesInvoiceStatus: z.string().optional(),
+  creditsEarned: z.number().int().gte(0),
+  trainingCompliant: z.boolean()
+});
+
+export const OfficerRosterMemberListResponseSchema = z.object({
+  data: z.array(OfficerRosterMemberSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const OfficerRosterMemberUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  personId: z.string().optional(),
+  tierId: z.string().optional(),
+  categoryId: z.string().optional(),
+  memberNumber: z.string().max(50).optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated"]).optional(),
+  joinedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  gracePeriodDays: z.number().int().gte(0).optional(),
+  note: z.string().max(2000).optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  name: z.string().optional(),
+  email: z.string().optional(),
+  categoryName: z.string().optional(),
+  duesInvoiceStatus: z.string().optional(),
+  creditsEarned: z.number().int().gte(0).optional(),
+  trainingCompliant: z.boolean().optional()
+});
+
 export const OfficerTermSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -7962,20 +8046,6 @@ export const RosterMemberSchema = z.object({
   joinedAt: z.string().datetime().transform((str) => new Date(str)),
   gracePeriodDays: z.number().int().gte(0),
   note: z.string().max(2000).optional()
-});
-
-export const RosterMemberListResponseSchema = z.object({
-  data: z.array(RosterMemberSchema),
-  pagination: z.object({
-  offset: z.number().int(),
-  limit: z.number().int(),
-  count: z.number().int(),
-  totalCount: z.number().int(),
-  totalPages: z.number().int(),
-  currentPage: z.number().int(),
-  hasNextPage: z.boolean(),
-  hasPreviousPage: z.boolean()
-})
 });
 
 export const RosterMemberUpdateSchema = z.object({
@@ -9740,6 +9810,11 @@ export type ListMembershipApplicationsQuery = z.infer<typeof ListMembershipAppli
 
 export const ListMembershipApplicationsResponse = MembershipApplicationListResponseSchema;
 
+export const BulkApproveMembershipApplicationsBody = BulkApproveApplicationsRequestSchema;
+export type BulkApproveMembershipApplicationsBody = z.infer<typeof BulkApproveMembershipApplicationsBody>;
+
+export const BulkApproveMembershipApplicationsResponse = BulkApproveApplicationsResponseSchema;
+
 export const GetMembershipApplicationParams = z.object({
   applicationId: z.string(),
 });
@@ -10811,10 +10886,12 @@ export const ListRosterMembersQuery = z.object({
   status: MembershipStatusSchema.optional(),
   categoryId: z.string().optional(),
   search: z.string().optional(),
+  duesStatus: z.string().optional(),
+  trainingCompliant: z.coerce.boolean().optional(),
 });
 export type ListRosterMembersQuery = z.infer<typeof ListRosterMembersQuery>;
 
-export const ListRosterMembersResponse = RosterMemberListResponseSchema;
+export const ListRosterMembersResponse = OfficerRosterMemberListResponseSchema;
 
 export const AddRosterMemberBody = AddMemberRequestSchema;
 export type AddRosterMemberBody = z.infer<typeof AddRosterMemberBody>;

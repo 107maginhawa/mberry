@@ -450,6 +450,58 @@ model RosterMember extends BaseEntity {
   note?: string;
 }
 
+@doc("Officer-enriched view of a roster member, including dues and training compliance data")
+model OfficerRosterMember extends RosterMember {
+  @doc("First name of the person (from person JOIN)")
+  firstName?: string;
+
+  @doc("Last name of the person (from person JOIN)")
+  lastName?: string;
+
+  @doc("Full name of the person (from person JOIN)")
+  name?: string;
+
+  @doc("Email address of the person (from person JOIN)")
+  email?: string;
+
+  @doc("Name of the membership category (from category JOIN)")
+  categoryName?: string;
+
+  @doc("Status of the latest dues invoice for this member; null if no invoice exists")
+  duesInvoiceStatus?: string;
+
+  @doc("Total CPD credits earned by this member in the current cycle")
+  @minValue(0)
+  creditsEarned: int32;
+
+  @doc("Whether the member meets the 40-credit CPD threshold for the current cycle")
+  trainingCompliant: boolean;
+}
+
+@doc("A single failure entry in a bulk approve operation")
+model BulkApproveFailure {
+  @doc("ID of the application that failed to approve")
+  id: string;
+
+  @doc("Human-readable reason for the failure")
+  reason: string;
+}
+
+@doc("Request body for bulk-approving membership applications")
+model BulkApproveApplicationsRequest {
+  @doc("IDs of applications to approve in a single batch")
+  applicationIds: string[];
+}
+
+@doc("Response from a bulk approve operation with partial-success semantics")
+model BulkApproveApplicationsResponse {
+  @doc("IDs of applications successfully approved")
+  succeeded: string[];
+
+  @doc("Applications that failed to approve, with reasons")
+  failed: BulkApproveFailure[];
+}
+
 @doc("Request to add a new member to the organization roster")
 model AddMemberRequest {
   @doc("ID of the person to add as a member")
@@ -916,6 +968,19 @@ namespace Association.Member.Membership {
       | ApiNotFoundResponse
       | ApiConflictResponse
       | ApiForbiddenResponse;
+
+    @doc("Bulk approve membership applications with partial-success semantics.")
+    @operationId("bulkApproveMembershipApplications")
+    @post
+    @route("/bulk-approve")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    bulkApproveMembershipApplications(
+      @body body: BulkApproveApplicationsRequest
+    ): ApiOkResponse<BulkApproveApplicationsResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
   }
 
   @doc("CRUD and search for institutional memberships")
@@ -1043,8 +1108,10 @@ namespace Association.Member.Membership {
       @query organizationId: string,
       @query status?: MembershipStatus,
       @query categoryId?: string,
-      @query search?: string
-    ): ApiOkResponse<PaginatedResponse<RosterMember>>
+      @query search?: string,
+      @query duesStatus?: string,
+      @query trainingCompliant?: boolean
+    ): ApiOkResponse<PaginatedResponse<OfficerRosterMember>>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
 

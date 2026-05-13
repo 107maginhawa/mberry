@@ -104,6 +104,7 @@ import { getAgingBucket } from '../../handlers/association:member/getAgingBucket
 import { recalculateAgingBucket } from '../../handlers/association:member/recalculateAgingBucket';
 import { createMembershipApplication } from '../../handlers/association:member/createMembershipApplication';
 import { listMembershipApplications } from '../../handlers/association:member/listMembershipApplications';
+import { bulkApproveMembershipApplications } from '../../handlers/association:member/bulkApproveMembershipApplications';
 import { getMembershipApplication } from '../../handlers/association:member/getMembershipApplication';
 import { updateMembershipApplication } from '../../handlers/association:member/updateMembershipApplication';
 import { deleteMembershipApplication } from '../../handlers/association:member/deleteMembershipApplication';
@@ -324,6 +325,9 @@ import { createEmailTemplate } from '../../handlers/email/createEmailTemplate';
 import { getEmailTemplate } from '../../handlers/email/getEmailTemplate';
 import { updateEmailTemplate } from '../../handlers/email/updateEmailTemplate';
 import { testEmailTemplate } from '../../handlers/email/testEmailTemplate';
+import { listFeatureFlags } from '../../handlers/system/listFeatureFlags';
+import { liveness } from '../../handlers/system/liveness';
+import { readiness } from '../../handlers/system/readiness';
 import { listOrgApplications } from '../../handlers/membership/listOrgApplications';
 import { listOrgMembers } from '../../handlers/membership/listOrgMembers';
 import { getOrgProfile } from '../../handlers/membership/getOrgProfile';
@@ -470,6 +474,7 @@ export const registry = {
   recalculateAgingBucket,
   createMembershipApplication,
   listMembershipApplications,
+  bulkApproveMembershipApplications,
   getMembershipApplication,
   updateMembershipApplication,
   deleteMembershipApplication,
@@ -704,6 +709,11 @@ export const registry = {
   getEmailTemplate,
   updateEmailTemplate,
   testEmailTemplate,
+
+  // System handlers
+  listFeatureFlags,
+  liveness,
+  readiness,
 
   // Membership handlers
   listOrgApplications,
