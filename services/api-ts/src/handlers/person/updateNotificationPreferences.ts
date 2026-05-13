@@ -27,7 +27,7 @@ export async function updateNotificationPreferences(ctx: HandlerContext): Promis
   }
 
   const db = ctx.get('database') as DatabaseInstance;
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
 
   const [existing] = await db
     .select()

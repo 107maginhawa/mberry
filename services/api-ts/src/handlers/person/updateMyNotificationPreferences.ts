@@ -20,7 +20,7 @@ export async function updateMyNotificationPreferences(
 
   const db = ctx.get('database') as DatabaseInstance;
   const personId = session.user.id;
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
   const body = ctx.req.valid('json');
   const b = body as any;
 

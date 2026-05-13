@@ -16,7 +16,7 @@ export async function listDuesInvoices(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
-  const orgId = ctx.get('orgId');
+  const orgId = ctx.get('organizationId');
   const query = ctx.req.valid('query') as any;
   const offset = Number(query.offset) || 0;
   const limit = Math.min(Number(query.limit) || 20, 100);

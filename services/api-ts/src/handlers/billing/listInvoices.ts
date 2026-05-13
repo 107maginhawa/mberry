@@ -47,7 +47,7 @@ export async function listInvoices(
   const { limit, offset } = parsePagination(query, { limit: 25, maxLimit: 100 });
 
   // Multi-tenant scoping (P0-7)
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
 
   // Build filters - map TypeSpec fields to current schema
   const filters: InvoiceFilters = {

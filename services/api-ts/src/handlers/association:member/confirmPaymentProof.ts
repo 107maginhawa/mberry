@@ -27,7 +27,7 @@ export async function confirmPaymentProof(
   if (!session) throw new UnauthorizedError();
 
   const { paymentId } = ctx.req.valid('param');
-  const orgId = ctx.get('orgId') as string;
+  const orgId = ctx.get('organizationId') as string;
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);
 

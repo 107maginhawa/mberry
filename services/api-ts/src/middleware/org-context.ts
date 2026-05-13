@@ -1,9 +1,9 @@
 /**
  * Org-context middleware for association routes.
  *
- * Mounted on `/association/*` — extracts orgId from the authenticated
+ * Mounted on `/association/*` — extracts organizationId from the authenticated
  * user's request, resolves their membership in that org, and sets
- * ctx.var.orgId and ctx.var.orgMembership.
+ * ctx.var.organizationId and ctx.var.orgMembership.
  *
  * Fails closed: if org context cannot be established, returns 403.
  */
@@ -90,11 +90,11 @@ export function orgContextMiddleware() {
       .limit(1);
 
     if (admin) {
-      ctx.set('orgId', orgId);
+      ctx.set('organizationId', orgId);
       ctx.set('orgMembership', {
         membershipId: 'platform-admin',
         personId: user.id,
-        orgId,
+        organizationId: orgId,
         role: 'admin',
         status: 'active',
       });
@@ -127,11 +127,11 @@ export function orgContextMiddleware() {
       );
     }
 
-    ctx.set('orgId', orgId);
+    ctx.set('organizationId', orgId);
     ctx.set('orgMembership', {
       membershipId: membership.id,
       personId: membership.personId,
-      orgId: membership.organizationId,
+      organizationId: membership.organizationId,
       role: 'member', // role granularity comes from governance module
       status: membership.status,
     });

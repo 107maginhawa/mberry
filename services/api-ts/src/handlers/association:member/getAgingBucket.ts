@@ -17,7 +17,7 @@ export async function getAgingBucket(
   if (!session) throw new UnauthorizedError();
 
   const { organizationId } = ctx.req.valid('param');
-  const orgId = ctx.get('orgId');
+  const orgId = ctx.get('organizationId');
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new AgingBucketRepository(db, ctx.get('logger'));
 

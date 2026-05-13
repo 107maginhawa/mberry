@@ -23,7 +23,7 @@ export async function importRosterMembers(
   if (!session) throw new UnauthorizedError();
 
   const body = ctx.req.valid('json');
-  const orgId = ctx.get('orgId') as string;
+  const orgId = ctx.get('organizationId') as string;
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new MembershipRepository(db, logger);

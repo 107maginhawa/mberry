@@ -29,7 +29,7 @@ export async function requireOfficerTerm(ctx: BaseContext): Promise<Response | n
     return ctx.json({ error: 'Authentication required' }, 401);
   }
 
-  const orgId = ctx.get('orgId');
+  const orgId = ctx.get('organizationId');
   if (!orgId) {
     return ctx.json({ error: 'Organization context required' }, 403);
   }
@@ -70,7 +70,7 @@ export async function requirePosition(
     return ctx.json({ error: 'Authentication required' }, 401);
   }
 
-  const orgId = ctx.get('orgId');
+  const orgId = ctx.get('organizationId');
   if (!orgId) {
     return ctx.json({ error: 'Organization context required' }, 403);
   }

@@ -44,7 +44,7 @@ export type Variables = {
   session?: Session;
 
   // Association org context (set by org-context middleware on /association/* routes)
-  orgId?: string;
+  organizationId?: string;
   orgMembership?: OrgMembership;
 
   // Platform admin (set by platformAdminAuthMiddleware on /admin/* routes)
@@ -98,7 +98,7 @@ export type ValidatedContext<
 export interface OrgMembership {
   membershipId: string;
   personId: string;
-  orgId: string;
+  organizationId: string;
   role: string;
   status: string;
 }

@@ -22,7 +22,7 @@ export async function listAuditLogs(
 ): Promise<Response> {
   // Get authenticated user and check authorization
   const user = ctx.get('user') as User;
-  const orgId = ctx.get('orgId') as string | undefined;
+  const orgId = ctx.get('organizationId') as string | undefined;
 
   // Get query parameters
   const query = ctx.req.valid('query') as AuditLogQueryParams;

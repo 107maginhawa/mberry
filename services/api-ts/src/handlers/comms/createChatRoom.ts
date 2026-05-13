@@ -58,7 +58,7 @@ export async function createChatRoom(
   const logger = ctx.get('logger');
 
   // Multi-tenant scoping (P0-7)
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
 
   // Business rule: user must be one of the participants or admins (using Person ID)
   // Check if the authenticated user's Person ID is in the participants or admins list

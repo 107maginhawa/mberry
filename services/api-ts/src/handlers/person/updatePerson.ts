@@ -96,7 +96,7 @@ export async function updatePerson(
         category: 'privacy',
         action: 'update',
         outcome: 'success',
-        organizationId: ctx.get('orgId'),
+        organizationId: ctx.get('organizationId'),
         user: user.id,
         userType: (user.role === 'user' ? 'client' : user.role || 'client') as 'client' | 'host' | 'admin' | 'system',
         resourceType: 'person',

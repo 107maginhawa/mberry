@@ -31,7 +31,7 @@ export async function getCreditCompliance(
   const orgId = (params as any).orgId;
 
   // Set orgId for requirePosition (route is not under /association/*, no org-context middleware)
-  ctx.set('orgId', orgId);
+  ctx.set('organizationId', orgId);
   const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 

@@ -28,7 +28,7 @@ export async function recordDuesPayment(
   if (!session) throw new UnauthorizedError();
 
   const body = ctx.req.valid('json');
-  const orgId = ctx.get('orgId') as string;
+  const orgId = ctx.get('organizationId') as string;
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);
 

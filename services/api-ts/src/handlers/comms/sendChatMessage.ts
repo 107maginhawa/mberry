@@ -55,7 +55,7 @@ export async function sendChatMessage(
   const logger = ctx.get('logger');
 
   // Multi-tenant scoping (P0-7): inherit orgId from room on message creation
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
 
   // Authorization uses Person ID directly (no profile lookups needed)
 

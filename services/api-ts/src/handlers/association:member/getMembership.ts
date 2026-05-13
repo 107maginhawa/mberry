@@ -18,7 +18,7 @@ export async function getMembership(
 
   const { membershipId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
-  const orgId = ctx.get('orgId') as string | undefined;
+  const orgId = ctx.get('organizationId') as string | undefined;
   const repo = new MembershipRepository(db, ctx.get('logger'));
 
   const membership = await repo.findOneById(membershipId);

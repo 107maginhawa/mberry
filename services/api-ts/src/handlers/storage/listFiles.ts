@@ -39,7 +39,7 @@ export async function listFiles(
   const filters = parseFilters(query, ['status', 'owner']) as Record<string, string>;
 
   // Multi-tenant scoping (P0-7)
-  filters['organizationId'] = ctx.get('orgId') as string;
+  filters['organizationId'] = ctx.get('organizationId') as string;
 
   // Get dependencies from context
   const logger = ctx.get('logger');
@@ -65,7 +65,7 @@ export async function listFiles(
         category: 'hipaa',
         action: 'read',
         outcome: 'success',
-        organizationId: ctx.get('orgId'),
+        organizationId: ctx.get('organizationId'),
         user: user.id,
         userType: (user.role === 'user' ? 'client' : user.role || 'client') as 'client' | 'host' | 'admin' | 'system',
         resourceType: 'file',

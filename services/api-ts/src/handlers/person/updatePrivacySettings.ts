@@ -10,7 +10,7 @@ import { memberships } from '@/handlers/association:member/repos/membership.sche
  * updatePrivacySettings
  *
  * Path: PATCH /persons/me/privacy
- * Body: { orgId, emailVisible?, phoneVisible?, photoVisible?, addressVisible? }
+ * Body: { organizationId, emailVisible?, phoneVisible?, photoVisible?, addressVisible? }
  *
  * Upserts privacy settings for the authenticated user in a given org.
  */
@@ -19,7 +19,7 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const body = await ctx.req.json().catch(() => null) as any;
-  if (!body?.orgId) {
+  if (!body?.organizationId) {
     throw new ValidationError('organizationId is required');
   }
 

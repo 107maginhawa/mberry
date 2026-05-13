@@ -24,7 +24,7 @@ export async function createBookingEvent(
 ): Promise<Response> {
   // Get authenticated user (guaranteed by auth middleware)
   const user = ctx.get('user') as User;
-  const orgId = ctx.get('orgId');
+  const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   // Get validated request body

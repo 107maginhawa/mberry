@@ -36,7 +36,7 @@ export async function rejectBooking(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const auth = ctx.get('auth');
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
   const notificationService = ctx.get('notifs') as NotificationService;
   
   // Instantiate repository

@@ -14,7 +14,7 @@ export async function getMembershipCategory(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const orgId = ctx.get('orgId');
+  const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const id = ctx.req.valid('param').membershipCategoryId;

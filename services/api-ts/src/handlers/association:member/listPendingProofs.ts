@@ -25,7 +25,7 @@ export async function listPendingProofs(
   if (!session) throw new UnauthorizedError();
 
   const query = ctx.req.valid('query');
-  const orgId = query.organizationId ?? (ctx.get('orgId') as string);
+  const orgId = query.organizationId ?? (ctx.get('organizationId') as string);
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);
 

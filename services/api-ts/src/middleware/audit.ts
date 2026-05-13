@@ -41,7 +41,7 @@ export function createAuditMiddleware() {
 
     const logger = ctx.get('logger');
     const user = ctx.get('user') as { id?: string } | undefined;
-    const orgId = ctx.get('orgId') as string | undefined;
+    const orgId = ctx.get('organizationId') as string | undefined;
 
     // Extract resource info from URL path
     const url = new URL(ctx.req.url);

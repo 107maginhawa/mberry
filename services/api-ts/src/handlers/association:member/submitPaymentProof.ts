@@ -25,7 +25,7 @@ export async function submitPaymentProof(
   if (!session) throw new UnauthorizedError();
 
   const body = ctx.req.valid('json');
-  const orgId = ctx.get('orgId') as string;
+  const orgId = ctx.get('organizationId') as string;
   const db = ctx.get('database') as DatabaseInstance;
   const personId = session.user.id;
 

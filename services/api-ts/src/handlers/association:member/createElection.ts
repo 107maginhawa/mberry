@@ -22,7 +22,7 @@ export async function createElection(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
-  const orgId = ctx.get('orgId');
+  const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');

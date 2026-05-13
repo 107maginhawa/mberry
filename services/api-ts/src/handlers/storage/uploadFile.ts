@@ -98,7 +98,7 @@ export async function uploadFile(
   }
 
   // Multi-tenant scoping (P0-7)
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
   
   // Create database record with "uploading" status
   let fileCreated = false;

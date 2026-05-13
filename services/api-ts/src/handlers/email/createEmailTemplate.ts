@@ -52,7 +52,7 @@ export async function createEmailTemplate(
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
 
   // Instantiate repository
   const repo = new EmailTemplateRepository(db, logger);

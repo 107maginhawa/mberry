@@ -52,7 +52,7 @@ export async function createInvoice(
   } = body;
 
   // Multi-tenant scoping (P0-7)
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
 
   logger.info({
     customer,

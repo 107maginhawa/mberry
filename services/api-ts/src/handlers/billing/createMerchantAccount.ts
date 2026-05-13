@@ -42,7 +42,7 @@ export async function createMerchantAccount(
   const { person: personId = user.id, refreshUrl, returnUrl, metadata } = body;
 
   // Multi-tenant scoping (P0-7)
-  const organizationId = ctx.get('orgId') as string;
+  const organizationId = ctx.get('organizationId') as string;
 
   logger.info({ personId, userId: user.id, organizationId }, 'Creating merchant account for person');
 

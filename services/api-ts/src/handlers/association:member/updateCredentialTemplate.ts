@@ -20,7 +20,7 @@ export async function updateCredentialTemplate(
   const { templateId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const orgId = ctx.get('orgId') as string | undefined;
+  const orgId = ctx.get('organizationId') as string | undefined;
   const repo = new CredentialTemplateRepository(db, ctx.get('logger'));
 
   const existing = await repo.findOneById(templateId);

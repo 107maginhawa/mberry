@@ -24,7 +24,7 @@ export async function auditAction(ctx: BaseContext, opts: AuditActionOpts): Prom
   if (!audit) return;
 
   const user = ctx.get('user');
-  const orgId = ctx.get('orgId');
+  const orgId = ctx.get('organizationId');
   const logger = ctx.get('logger');
 
   try {
