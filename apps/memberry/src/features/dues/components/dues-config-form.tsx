@@ -55,13 +55,23 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   const { data: config, isLoading } = useQuery({
     ...getDuesConfigOptions({ path: { duesConfigId: orgId } }) as any,
     select: selectConfig,
+    // 404 = org has no config yet (expected). Don't retry — show defaults immediately.
+    retry: false,
   }) as { data: any; isLoading: boolean }
 
   const configAmount = config?.annualAmount ?? config?.defaultAmount
   const hasConfig = config && configAmount != null
 
-  // Track whether we've synced from server config to avoid re-running on every render
+  // Track whether we've synced from server config to avoid re-running on every render.
+  // Reset when orgId changes so switching orgs resyncs the form.
   const syncedRef = useRef(false)
+  const prevOrgIdRef = useRef(orgId)
+  useEffect(() => {
+    if (prevOrgIdRef.current !== orgId) {
+      prevOrgIdRef.current = orgId
+      syncedRef.current = false
+    }
+  }, [orgId])
   useEffect(() => {
     if (hasConfig && !syncedRef.current) {
       syncedRef.current = true
@@ -174,7 +184,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
       </section>
 
       <div className="flex gap-3">
-        <Button onClick={() => (saveMutation as any).mutate({ path: { duesConfigId: orgId }, body: { defaultAmount: parseCentsInput(defaultAmount), currency, billingFrequency, dueDateMonth: billingFrequency === 'annual' ? parseInt(dueDateMonth) : null, dueDateDay: parseInt(dueDateDay), gracePeriodDays: parseInt(gracePeriodDays), reminderSchedules: reminders } })} disabled={saveMutation.isPending || gracePeriodError || !defaultAmount}>
+        <Button onClick={() => (saveMutation as any).mutate({ path: { duesConfigId: orgId }, body: { annualAmount: parseCentsInput(defaultAmount), gracePeriodDays: parseInt(gracePeriodDays) } })} disabled={saveMutation.isPending || gracePeriodError || !defaultAmount}>
           {saveMutation.isPending ? 'Saving...' : 'Save'}
         </Button>
         {hasChanges && <span className="text-xs text-[var(--color-muted)] self-center">Unsaved changes</span>}
