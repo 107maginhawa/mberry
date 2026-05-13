@@ -66,32 +66,32 @@ function CreditReport() {
       {/* Summary cards */}
       <StaggerGrid className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StaggerItem>
-          <GlassCard className="p-4">
-            <button onClick={() => setFilter('all')} className={`w-full text-left hover:bg-[var(--color-surface-warm)] rounded-lg ${filter === 'all' ? 'ring-2 ring-[var(--color-primary)]' : ''}`}>
+          <GlassCard className="p-2">
+            <button onClick={() => setFilter('all')} className={`w-full text-left p-2 hover:bg-[var(--color-surface-warm)] rounded-lg transition-shadow ${filter === 'all' ? 'ring-2 ring-[var(--color-primary)]' : ''}`}>
               <p className="text-[14px] text-[var(--color-muted)]">Total Tracked</p>
               <p className="text-[26px] font-display font-bold"><CountUp value={summary.total} /></p>
             </button>
           </GlassCard>
         </StaggerItem>
         <StaggerItem>
-          <GlassCard className="p-4">
-            <button onClick={() => setFilter('compliant')} className={`w-full text-left hover:bg-[var(--color-surface-warm)] rounded-lg ${filter === 'compliant' ? 'ring-2 ring-green-500' : ''}`}>
+          <GlassCard className="p-2">
+            <button onClick={() => setFilter('compliant')} className={`w-full text-left p-2 hover:bg-[var(--color-surface-warm)] rounded-lg transition-shadow ${filter === 'compliant' ? 'ring-2 ring-green-500' : ''}`}>
               <p className="text-[14px] text-[var(--color-muted)]">Compliant</p>
               <p className="text-[26px] font-display font-bold text-green-600"><CountUp value={summary.compliant} /></p>
             </button>
           </GlassCard>
         </StaggerItem>
         <StaggerItem>
-          <GlassCard className="p-4">
-            <button onClick={() => setFilter('at_risk')} className={`w-full text-left hover:bg-[var(--color-surface-warm)] rounded-lg ${filter === 'at_risk' ? 'ring-2 ring-yellow-500' : ''}`}>
+          <GlassCard className="p-2">
+            <button onClick={() => setFilter('at_risk')} className={`w-full text-left p-2 hover:bg-[var(--color-surface-warm)] rounded-lg transition-shadow ${filter === 'at_risk' ? 'ring-2 ring-yellow-500' : ''}`}>
               <p className="text-[14px] text-[var(--color-muted)]">At Risk</p>
               <p className="text-[26px] font-display font-bold text-yellow-600"><CountUp value={summary.atRisk} /></p>
             </button>
           </GlassCard>
         </StaggerItem>
         <StaggerItem>
-          <GlassCard className="p-4">
-            <button onClick={() => setFilter('non_compliant')} className={`w-full text-left hover:bg-[var(--color-surface-warm)] rounded-lg ${filter === 'non_compliant' ? 'ring-2 ring-red-500' : ''}`}>
+          <GlassCard className="p-2">
+            <button onClick={() => setFilter('non_compliant')} className={`w-full text-left p-2 hover:bg-[var(--color-surface-warm)] rounded-lg transition-shadow ${filter === 'non_compliant' ? 'ring-2 ring-red-500' : ''}`}>
               <p className="text-[14px] text-[var(--color-muted)]">Non-Compliant</p>
               <p className="text-[26px] font-display font-bold text-red-600"><CountUp value={summary.nonCompliant} /></p>
             </button>

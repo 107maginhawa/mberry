@@ -97,8 +97,8 @@
   - **Deps:** Phase 13
   - **Est:** 1-2 days
   - **Plans:** 3 plans
-    - [ ] 15-01-PLAN.md — Batch dues reminder backend (schema + processor + handler)
-    - [ ] 15-02-PLAN.md — Dunning template CRUD (schema + repo + 7 handlers)
+    - [x] 15-01-PLAN.md — Batch dues reminder backend (schema + processor + handler)
+    - [x] 15-02-PLAN.md — Dunning template CRUD (schema + repo + 7 handlers)
     - [ ] 15-03-PLAN.md — Integration verification (response shape + integration test)
 
 - [ ] **Phase 16: Mobile & Transfer Validation**

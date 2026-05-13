@@ -34,8 +34,10 @@ export async function getDuesConfig(
   }
 
   if (!config) {
-    // Return empty config rather than 404 — org may not have configured dues yet
-    return ctx.json({}, 200);
+    // Return 404 so the SDK creates an SdkError(404) which shouldRetry skips
+    // immediately — avoids the response transformer crashing on {}.annualAmount
+    // and triggering 3 retries with exponential backoff (7.5s total delay).
+    return ctx.json({ data: null }, 404);
   }
 
   // Map DB field names to TypeSpec schema names so the SDK response transformer

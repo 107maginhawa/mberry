@@ -2327,7 +2327,7 @@ describe('myHandler', () => {
 
 ### Registries
 
-- **BR Registry** (`testing/registry/br-registry.ts`): Maps business rules → test files. P0 gaps block CI.
+- **BR Registry** (`docs/ver-3/business/br-registry.json`): Maps business rules → test files with per-rule-class coverage requirements. Run `bun run scripts/br-coverage.ts` for the report.
 - **Flow Registry** (`testing/registry/flow-registry.ts`): Maps cross-module chains → integration tests.
 - Run `bun run test:registry` to check coverage. CI gates on P0 untested BRs.
 

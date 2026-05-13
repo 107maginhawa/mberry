@@ -1,6 +1,8 @@
-import { pgTable, uuid, varchar, integer, boolean, timestamp, text, pgEnum, index, uniqueIndex, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, integer, boolean, timestamp, text, pgEnum, index, uniqueIndex, jsonb, check } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { baseEntityFields } from '@/core/database.schema';
 import { persons } from '../../person/repos/person.schema';
+import { positions } from '../../association:member/repos/governance.schema';
 
 export const electionTypeEnum = pgEnum('election_type', ['officer', 'bylaw']);
 export const electionStatusEnum = pgEnum('election_status', ['draft', 'nominationsOpen', 'votingOpen', 'awaitingConfirmation', 'published', 'cancelled']);
@@ -24,13 +26,16 @@ export const elections = pgTable('election', {
 }, (table) => ({
   orgIdx: index('election_org_idx').on(table.organizationId),
   statusIdx: index('election_status_idx').on(table.status),
+  nominationsDateOrder: check('election_nominations_date_order', sql`${table.nominationsCloseAt} IS NULL OR ${table.nominationsOpenAt} IS NULL OR ${table.nominationsCloseAt} > ${table.nominationsOpenAt}`),
+  votingDateOrder: check('election_voting_date_order', sql`${table.votingCloseAt} IS NULL OR ${table.votingOpenAt} IS NULL OR ${table.votingCloseAt} > ${table.votingOpenAt}`),
+  nominationsBeforeVoting: check('election_nominations_before_voting', sql`${table.votingOpenAt} IS NULL OR ${table.nominationsCloseAt} IS NULL OR ${table.votingOpenAt} >= ${table.nominationsCloseAt}`),
 }));
 
 export const electionNominees = pgTable('election_nominee', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull(),
   electionId: uuid('election_id').notNull().references(() => elections.id, { onDelete: 'cascade' }),
-  positionId: varchar('position_id', { length: 50 }).notNull(),
+  positionId: uuid('position_id').notNull().references(() => positions.id),
   personId: uuid('person_id').notNull().references(() => persons.id),
   nominatedBy: uuid('nominated_by').references(() => persons.id),
   status: nomineeStatusEnum('status').notNull().default('nominated'),
@@ -44,7 +49,7 @@ export const electionVotes = pgTable('election_vote', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull(),
   electionId: uuid('election_id').notNull().references(() => elections.id, { onDelete: 'cascade' }),
-  positionId: varchar('position_id', { length: 50 }).notNull(),
+  positionId: uuid('position_id').notNull().references(() => positions.id),
   nomineeId: uuid('nominee_id').notNull().references(() => electionNominees.id),
   voterId: uuid('voter_id').notNull().references(() => persons.id),
 }, (table) => ({

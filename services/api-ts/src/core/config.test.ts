@@ -539,3 +539,97 @@ describe('edge cases', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Production startup validation (5.2)
+// ---------------------------------------------------------------------------
+
+describe('production config validation — fail fast on missing vars', () => {
+  test('throws when AUTH_SECRET missing in production', () => {
+    const restore = withEnv({
+      NODE_ENV: 'production',
+      AUTH_SECRET: undefined,
+      DATABASE_URL: 'postgres://prod:5432/db',
+      INTERNAL_SERVICE_TOKEN: 'tok',
+    });
+    try {
+      expect(() => parseConfig()).toThrow('AUTH_SECRET');
+    } finally {
+      restore();
+    }
+  });
+
+  test('throws when DATABASE_URL missing in production', () => {
+    const restore = withEnv({
+      NODE_ENV: 'production',
+      AUTH_SECRET: 'secret',
+      DATABASE_URL: undefined,
+      INTERNAL_SERVICE_TOKEN: 'tok',
+    });
+    try {
+      expect(() => parseConfig()).toThrow('DATABASE_URL');
+    } finally {
+      restore();
+    }
+  });
+
+  test('throws when INTERNAL_SERVICE_TOKEN missing in production', () => {
+    const restore = withEnv({
+      NODE_ENV: 'production',
+      AUTH_SECRET: 'secret',
+      DATABASE_URL: 'postgres://prod:5432/db',
+      INTERNAL_SERVICE_TOKEN: undefined,
+    });
+    try {
+      expect(() => parseConfig()).toThrow('INTERNAL_SERVICE_TOKEN');
+    } finally {
+      restore();
+    }
+  });
+
+  test('throws with ALL missing vars listed in one error', () => {
+    const restore = withEnv({
+      NODE_ENV: 'production',
+      AUTH_SECRET: undefined,
+      DATABASE_URL: undefined,
+      INTERNAL_SERVICE_TOKEN: undefined,
+    });
+    try {
+      expect(() => parseConfig()).toThrow(/AUTH_SECRET.*DATABASE_URL.*INTERNAL_SERVICE_TOKEN/);
+    } finally {
+      restore();
+    }
+  });
+
+  test('succeeds when all required vars present in production', () => {
+    const restore = withEnv({
+      NODE_ENV: 'production',
+      AUTH_SECRET: 'prod-secret',
+      DATABASE_URL: 'postgres://prod:5432/db',
+      INTERNAL_SERVICE_TOKEN: 'service-tok',
+      CORS_ORIGINS: 'https://app.example.com',
+      STORAGE_ACCESS_KEY_ID: 'real-key',
+    });
+    try {
+      const cfg = parseConfig();
+      expect(cfg.auth.secret).toBe('prod-secret');
+      expect(cfg.database.url).toBe('postgres://prod:5432/db');
+    } finally {
+      restore();
+    }
+  });
+
+  test('does NOT throw in development even without required vars', () => {
+    const restore = withEnv({
+      NODE_ENV: 'development',
+      AUTH_SECRET: undefined,
+      DATABASE_URL: undefined,
+      INTERNAL_SERVICE_TOKEN: undefined,
+    });
+    try {
+      expect(() => parseConfig()).not.toThrow();
+    } finally {
+      restore();
+    }
+  });
+});

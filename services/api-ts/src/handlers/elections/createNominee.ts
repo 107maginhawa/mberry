@@ -16,7 +16,7 @@ import { memberships } from '../association:member/repos/membership.schema';
 import type { Session } from '@/types/auth';
 
 const createNomineeSchema = z.object({
-  positionId: z.string().min(1, 'positionId is required'),
+  positionId: z.string().uuid('positionId must be a valid UUID'),
   personId: z.string().uuid('personId must be a valid UUID'),
   minMembershipMonths: z.number().int().min(1).default(6).optional(),
 });

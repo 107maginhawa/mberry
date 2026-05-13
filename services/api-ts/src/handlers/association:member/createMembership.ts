@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { NotFoundError, UnauthorizedError, ConflictError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError, ConflictError, BusinessLogicError } from '@/core/errors';
 import type { CreateMembershipBody } from '@/generated/openapi/validators';
 import { MembershipTierRepository, MembershipRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
@@ -31,9 +31,10 @@ export async function createMembership(
   const tierRepo = new MembershipTierRepository(db, logger);
   const membershipRepo = new MembershipRepository(db, logger);
 
-  // Validate tier exists
+  // Validate tier exists and belongs to this org
   const tier = await tierRepo.findOneById(body.tierId);
   if (!tier) throw new NotFoundError('Membership tier');
+  if (tier.organizationId !== orgId) throw new BusinessLogicError('Tier does not belong to this organization', 'TIER_ORG_MISMATCH');
 
   // Check no existing active membership for this person+org
   const existing = await membershipRepo.findByPersonAndOrg(body.personId, orgId);
@@ -43,9 +44,6 @@ export async function createMembership(
 
   const now = new Date();
   const today = now.toISOString().split('T')[0];
-  const oneYearLater = new Date(now);
-  oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-  const expiryDate = oneYearLater.toISOString().split('T')[0];
 
   const membership = await membershipRepo.createOne({
     organizationId: orgId,
@@ -54,7 +52,7 @@ export async function createMembership(
     categoryId: body.categoryId ?? null,
     memberNumber: body.memberNumber ?? null,
     startDate: (body.startDate || today) as string,
-    duesExpiryDate: (body.duesExpiryDate || expiryDate) as string,
+    duesExpiryDate: body.duesExpiryDate ?? null,
     gracePeriodDays: body.gracePeriodDays ?? 30,
     status: 'pendingPayment',
     joinedAt: now,

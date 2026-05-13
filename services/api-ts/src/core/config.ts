@@ -108,14 +108,38 @@ export function parseConfig(): Config {
   const serverHost = process.env['SERVER_HOST'] || '0.0.0.0';
   const publicUrl = process.env['SERVER_PUBLIC_URL'] || process.env['PUBLIC_URL'];
 
-  // Production guard: AUTH_SECRET is required in production
+  // Production guards: fail fast on missing critical vars
   const nodeEnv = process.env['NODE_ENV'] || 'development';
+  const isProduction = nodeEnv === 'production';
   const authSecret = process.env['AUTH_SECRET'];
-  if (nodeEnv === 'production' && !authSecret) {
-    throw new Error(
-      'AUTH_SECRET environment variable is required in production. ' +
-      'Generate one with: openssl rand -base64 32'
-    );
+
+  if (isProduction) {
+    const missing: string[] = [];
+    if (!authSecret) missing.push('AUTH_SECRET');
+    if (!process.env['DATABASE_URL']) missing.push('DATABASE_URL');
+    if (!process.env['INTERNAL_SERVICE_TOKEN']) missing.push('INTERNAL_SERVICE_TOKEN');
+
+    if (missing.length > 0) {
+      throw new Error(
+        `Missing required environment variables for production: ${missing.join(', ')}. ` +
+        'Set these before starting the server.'
+      );
+    }
+
+    // Warn on insecure defaults that slipped through
+    const warnings: string[] = [];
+    if (process.env['CORS_ORIGINS'] === '*' || !process.env['CORS_ORIGINS']) {
+      warnings.push('CORS_ORIGINS is wildcard — set explicit origins in production');
+    }
+    if (process.env['STORAGE_ACCESS_KEY_ID'] === 'minioadmin' || !process.env['STORAGE_ACCESS_KEY_ID']) {
+      warnings.push('STORAGE_ACCESS_KEY_ID uses default — set real credentials');
+    }
+    if (warnings.length > 0) {
+      // Use stderr directly since logger isn't initialized yet
+      for (const w of warnings) {
+        console.warn(`[config] WARNING: ${w}`);
+      }
+    }
   }
 
   // Parse versioned secrets for key rotation: "2:new-key,1:old-key"

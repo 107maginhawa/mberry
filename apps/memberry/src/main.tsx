@@ -1,6 +1,5 @@
-import { QueryClient } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
-import { ApiProvider } from '@monobase/sdk-ts/react/provider'
+import { ApiProvider, createDefaultQueryClient } from '@monobase/sdk-ts/react/provider'
 import { createRoot } from 'react-dom/client'
 import { toast } from 'sonner'
 import { useSession } from '@monobase/sdk-ts/react/hooks/use-auth'
@@ -8,8 +7,9 @@ import { createRouter } from './router'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`
 
-// Hoisted so router guards can use queryClient.ensureQueryData() for caching
-const queryClient = new QueryClient()
+// Hoisted so router guards can use queryClient.ensureQueryData() for caching.
+// Uses SDK defaults: staleTime 5min, gcTime 30min, smart retry (skips 4xx).
+const queryClient = createDefaultQueryClient(toast)
 const router = createRouter()
 
 /**

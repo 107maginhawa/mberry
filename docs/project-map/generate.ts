@@ -39,14 +39,35 @@ interface RouteInfo {
   e2eFiles: string[];
 }
 
+type RuleClass = "p0-security" | "p0-data" | "p0-auth" | "p1-business" | "p2-deferred";
+
 interface BrInfo {
   id: string;
   rule: string;
   phase: number;
   module: string;
-  coverage: string;
+  ruleClass: RuleClass;
+  coverage: string; // derived, not stored
   deferredReason?: string;
+  annotations?: string;
   tests: { backend: string[]; contract: string[]; e2e: string[] };
+}
+
+function deriveBrCoverage(ruleClass: RuleClass, tests: { backend: string[]; contract: string[]; e2e: string[] }): string {
+  if (ruleClass === "p2-deferred") {
+    return tests.backend.length > 0 ? "DEFERRED" : "UNTESTED";
+  }
+  const hasBackend = tests.backend.length > 0;
+  const hasContract = tests.contract.length > 0;
+  const hasE2e = tests.e2e.length > 0;
+  if (!hasBackend) return "UNTESTED";
+  switch (ruleClass) {
+    case "p0-security": return hasContract ? "COMPLETE" : "INCOMPLETE";
+    case "p0-data":
+    case "p0-auth": return (hasContract && hasE2e) ? "COMPLETE" : "INCOMPLETE";
+    case "p1-business": return (hasContract || hasE2e) ? "COMPLETE" : "INCOMPLETE";
+    default: return "INCOMPLETE";
+  }
 }
 
 interface JourneyStep {
@@ -248,19 +269,25 @@ function matchRoutesToTests(
 // ── 4. Parse BR registry ─────────────────────────────────────
 function parseBRs(): BrInfo[] {
   const raw = JSON.parse(readFileSync(BR_REGISTRY, "utf-8"));
-  return Object.entries(raw).map(([id, data]: [string, any]) => ({
-    id,
-    rule: data.rule,
-    phase: data.phase,
-    module: data.module,
-    coverage: data.coverage,
-    deferredReason: data.deferredReason,
-    tests: {
+  return Object.entries(raw).map(([id, data]: [string, any]) => {
+    const ruleClass: RuleClass = data.ruleClass ?? "p1-business";
+    const tests = {
       backend: data.tests?.backend ?? [],
       contract: data.tests?.contract ?? [],
       e2e: data.tests?.e2e ?? [],
-    },
-  }));
+    };
+    return {
+      id,
+      rule: data.rule,
+      phase: data.phase,
+      module: data.module,
+      ruleClass,
+      coverage: deriveBrCoverage(ruleClass, tests),
+      deferredReason: data.deferredReason,
+      annotations: data.annotations,
+      tests,
+    };
+  });
 }
 
 // ── 5. Parse personas ─────────────────────────────────────────
@@ -366,22 +393,34 @@ function generateGaps(
     }
   }
 
-  // BR coverage gaps
+  // BR coverage gaps (rule-class-based)
   for (const br of brs) {
     if (br.coverage === "DEFERRED") continue; // Skip deferred — not actionable now
-    if (br.tests.e2e.length === 0 && br.tests.backend.length === 0 && br.tests.contract.length === 0) {
+
+    if (br.coverage === "UNTESTED") {
       gaps.push({
         type: "br-no-coverage",
         target: br.id,
         detail: `${br.id} (${br.rule}) has no tests at any layer`,
         priority: "P0",
       });
-    } else if (br.coverage === "PARTIAL") {
+    } else if (br.coverage === "INCOMPLETE") {
+      const annotation = br.annotations ? ` — ${br.annotations}` : "";
       gaps.push({
         type: "br-partial",
         target: br.id,
-        detail: `${br.id} (${br.rule}) has partial coverage`,
-        priority: "P1",
+        detail: `${br.id} (${br.rule}) [${br.ruleClass}] is INCOMPLETE${annotation}`,
+        priority: br.ruleClass.startsWith("p0-") ? "P0" : "P1",
+      });
+    }
+
+    // Stub detection: BR has tests but annotations flag them as shallow
+    if (br.annotations && /stub|smoke|not.*verified|not.*tested/i.test(br.annotations) && br.coverage === "COMPLETE") {
+      gaps.push({
+        type: "br-stub-only",
+        target: br.id,
+        detail: `${br.id} (${br.rule}) meets layer requirements but has quality concerns: ${br.annotations}`,
+        priority: "P2",
       });
     }
   }
@@ -435,11 +474,11 @@ function generateGaps(
     // BR coverage for journey
     for (const brRef of journey.brs) {
       const br = brs.find((b) => b.id === brRef);
-      if (br && br.coverage !== "COMPLETE") {
+      if (br && br.coverage !== "COMPLETE" && br.coverage !== "DEFERRED") {
         gaps.push({
           type: "br-partial",
           target: `${journey.id} → ${brRef}`,
-          detail: `Journey ${journey.id} depends on ${brRef} (${br.rule}) which has ${br.coverage} coverage`,
+          detail: `Journey ${journey.id} depends on ${brRef} (${br.rule}) which is ${br.coverage}`,
           priority: journey.priority,
         });
       }

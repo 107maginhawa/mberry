@@ -17,7 +17,7 @@ import { ElectionsRepository } from './repos/elections.repo';
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 const NOMINEE_ID = '00000000-0000-4000-8000-000000000099';
-const POSITION_ID = 'president';
+const POSITION_ID = '00000000-0000-4000-8000-000000000001';
 const ORG_ID = 'org-1';
 const ELECTION_ID = 'election-1';
 

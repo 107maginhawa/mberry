@@ -71,7 +71,7 @@ function readToastMeta(meta: unknown): MutationToastMeta | undefined {
   return toast as MutationToastMeta
 }
 
-function createDefaultQueryClient(notifier?: SdkNotifier): QueryClient {
+export function createDefaultQueryClient(notifier?: SdkNotifier): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
