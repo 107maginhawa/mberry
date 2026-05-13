@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, boolean, timestamp, text, pgEnum, index, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, integer, boolean, timestamp, text, pgEnum, index, uniqueIndex, jsonb } from 'drizzle-orm/pg-core';
 import { baseEntityFields } from '@/core/database.schema';
 import { persons } from '../../person/repos/person.schema';
 
@@ -51,7 +51,7 @@ export const electionVotes = pgTable('election_vote', {
   orgIdx: index('vote_org_idx').on(table.organizationId),
   electionIdx: index('vote_election_idx').on(table.electionId),
   voterIdx: index('vote_voter_idx').on(table.voterId),
-  electionVoterIdx: index('vote_election_voter_idx').on(table.electionId, table.voterId, table.positionId),
+  electionVoterUniqueIdx: uniqueIndex('election_vote_unique').on(table.electionId, table.voterId, table.positionId),
 }));
 
 export type Election = typeof elections.$inferSelect;
