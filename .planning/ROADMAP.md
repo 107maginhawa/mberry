@@ -89,18 +89,17 @@
     - [x] 14-02-PLAN.md — Cross-org isolation E2E tests
 
 - [ ] **Phase 15: Dues Reminder UI + BR Edge Cases**
-  - RED: Batch dues reminder trigger — treasurer sends reminders to filtered members
-  - RED: Dunning template CRUD — treasurer creates/edits templates
-  - GREEN: Build reminder trigger UI, wire to existing dunning API
-  - RED: Dues expiry extension logic (BR-07) — extend from current expiry, not today
-  - RED: Fund allocation rounding (BR-05) — last fund absorbs remainder
-  - RED: Refund reversal (BR-08) — reverses expiry, status auto-recomputes
-  - RED: Membership state machine (BR-03) — valid transitions only, invalid silently rejected
-  - RED: Event registration limits (BR-27) — waitlist promotion, late cancellation
-  - GREEN: Verify/fix all BR logic
-  - **Verify:** All BR edge cases pass. Reminder UI works.
+  - Batch dues reminder trigger — replace TODO placeholders with real notification creation
+  - Dunning template CRUD — implement 7 handler stubs (schema + repo + handlers)
+  - Integration verification — response shape matching + integration test
+  - ~~BR-03, BR-05, BR-07, BR-08, BR-27~~ — already done in Phase 17
+  - **Verify:** Reminder processor creates notifications. Dunning CRUD works. All tests pass.
   - **Deps:** Phase 13
-  - **Est:** 2-3 days
+  - **Est:** 1-2 days
+  - **Plans:** 3 plans
+    - [ ] 15-01-PLAN.md — Batch dues reminder backend (schema + processor + handler)
+    - [ ] 15-02-PLAN.md — Dunning template CRUD (schema + repo + 7 handlers)
+    - [ ] 15-03-PLAN.md — Integration verification (response shape + integration test)
 
 - [ ] **Phase 16: Mobile & Transfer Validation**
   - RED: Transfer lifecycle E2E — member initiates, source approves, target approves
@@ -158,6 +157,6 @@
 | 12. Backend Auth — Route Protection | v1.1.0 | 6/6 | Complete | 2026-05-13 |
 | 13. Position-Based RBAC | v1.1.0 | 5/5 | Complete | 2026-05-13 |
 | 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 2/2 | Complete | 2026-05-13 |
-| 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 0/0 | Not Started | -- |
+| 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 0/3 | In Progress | -- |
 | 16. Mobile & Transfer Validation | v1.1.0 | 0/0 | Not Started | -- |
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
