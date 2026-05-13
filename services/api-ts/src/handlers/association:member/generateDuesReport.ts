@@ -20,9 +20,17 @@ export async function generateDuesReport(
 
   const { organizationId } = ctx.req.valid('param');
   const ctxOrgId = ctx.get('organizationId');
-  if (ctxOrgId && organizationId !== ctxOrgId) throw new ForbiddenError();
-
-  ctx.set('organizationId', organizationId);
+  // [CR-04] If middleware has already set an org context, the route param MUST
+  // match it — an attacker must not be able to override the verified org by
+  // supplying a different organizationId in the URL.
+  if (ctxOrgId) {
+    if (organizationId !== ctxOrgId) throw new ForbiddenError();
+  } else {
+    // No middleware-set orgId (e.g. this route is outside /association/*).
+    // Fall back to trusting the route param, which requirePosition will
+    // scope-check against the caller's officer record.
+    ctx.set('organizationId', organizationId);
+  }
   const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
