@@ -213,7 +213,12 @@ Plans:
   2. Officer can bulk approve a list of membership applications and receive a partial-success response identifying which succeeded and which failed
   3. Bulk approval validates organization scope per record (an officer cannot approve applications outside their chapter even in a mixed-org batch)
   4. Officer can filter roster by membership status, dues status, and training compliance and receive correctly filtered results
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 21-01-PLAN.md — TypeSpec models + codegen (OfficerRosterMember, BulkApprove, new query params)
+- [ ] 21-02-PLAN.md — Roster handler + repo extension with JOIN + DB-level filters
+- [ ] 21-03-PLAN.md — Bulk approve handler with per-record org scope validation
+- [ ] 21-04-PLAN.md — Frontend: roster dues/training columns + filters, bulk approve UI
 **UI hint**: yes
 
 ### Phase 22: PRC CPD Compliance
@@ -286,7 +291,7 @@ Plans:
 | 18. Dues Invoice Security Fix | v1.2.0 | 2/2 | Complete | 2026-05-14 |
 | 19. Account Deletion + Data Export | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 20. Payment Flow | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
-| 21. Officer Daily Ops | v1.2.0 | 0/? | Not started | — |
+| 21. Officer Daily Ops | v1.2.0 | 0/4 | Not started | — |
 | 22. PRC CPD Compliance | v1.2.0 | 0/? | Not started | — |
 | 23. Member Departure + Deceased | v1.2.0 | 0/? | Not started | — |
 | 24. Quality Gap Closure | v1.2.0 | 0/? | Not started | — |
