@@ -27,7 +27,8 @@ export async function certifyElection(
 
   // ─── President-only guard (BR-33) ────────────────────
   const officerRepo = new OfficerTermRepository(db);
-  const orgId = ctx.get('orgId') || ctx.get('organizationId');
+  const orgId = ctx.get('orgId') as string;
+  if (!user) throw new UnauthorizedError();
   const activeTerms = await officerRepo.findActiveByPersonAndOrg(user.id, orgId);
   const isPresident = activeTerms.some(
     (t: any) => t.positionTitle === 'President',
