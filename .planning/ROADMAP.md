@@ -184,8 +184,10 @@ Plans:
   3. After 30 days, scheduled job anonymizes PII in-place (name, email, phone replaced); financial records preserved
   4. Member can download a JSON export covering profile, memberships, payments, training, certificates, and events
   5. Audit log entries for anonymization writes do not capture PII in the before_state payload
-**Plans**: TBD
-**UI hint**: yes
+**Plans:** 2 plans
+Plans:
+- [ ] 19-01-PLAN.md — Backend: deletion processor job, export gap fill (certs+events), anonymization fix, session cleanup, tests
+- [ ] 19-02-PLAN.md — Frontend: account deletion/export UI on settings page
 
 ### Phase 20: Payment Flow
 **Goal**: Officers can record offline dues payments (GCash, bank transfer), generate member-viewable receipts, and the system prevents double-payment via optimistic locking
@@ -279,7 +281,7 @@ Plans:
 | 16. Mobile & Transfer Validation | v1.1.0 | 2/2 | Complete | 2026-05-13 |
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
 | 18. Dues Invoice Security Fix | v1.2.0 | 2/2 | Complete | 2026-05-14 |
-| 19. Account Deletion + Data Export | v1.2.0 | 0/? | Not started | — |
+| 19. Account Deletion + Data Export | v1.2.0 | 0/2 | Not started | — |
 | 20. Payment Flow | v1.2.0 | 0/? | Not started | — |
 | 21. Officer Daily Ops | v1.2.0 | 0/? | Not started | — |
 | 22. PRC CPD Compliance | v1.2.0 | 0/? | Not started | — |
