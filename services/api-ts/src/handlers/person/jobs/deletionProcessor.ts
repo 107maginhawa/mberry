@@ -69,7 +69,7 @@ export async function processDeletions(ctx: DeletionContext): Promise<DeletionRe
           firstName: 'DELETED',
           lastName: 'DELETED',
           middleName: null,
-          contactInfo: { email: 'deleted@deleted.invalid', phone: null },
+          contactInfo: { email: 'deleted@deleted.invalid', phone: undefined },
           primaryAddress: null,
           avatar: null,
           licenseNumber: null,

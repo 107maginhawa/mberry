@@ -198,7 +198,7 @@ describe('executeAccountDeletion', () => {
     expect(capturedUpdate.firstName).toBe('DELETED');
     expect(capturedUpdate.lastName).toBe('DELETED');
     expect(capturedUpdate.middleName).toBeNull();
-    expect(capturedUpdate.contactInfo).toEqual({ email: 'deleted@deleted.invalid', phone: null });
+    expect(capturedUpdate.contactInfo).toEqual({ email: 'deleted@deleted.invalid', phone: undefined });
     expect(capturedUpdate.primaryAddress).toBeNull();
     expect(capturedUpdate.avatar).toBeNull();
     expect(capturedUpdate.licenseNumber).toBeNull();

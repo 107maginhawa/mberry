@@ -167,7 +167,7 @@ describe('processDeletions', () => {
     await processDeletions({ db: db as any, logger: makeLogger() });
 
     const updateData = capturedSets[0];
-    expect(updateData.contactInfo).toEqual({ email: 'deleted@deleted.invalid', phone: null });
+    expect(updateData.contactInfo).toEqual({ email: 'deleted@deleted.invalid', phone: undefined });
   });
 
   test('nulls primaryAddress, avatar, dateOfBirth, licenseNumber, prcId, specialization', async () => {
@@ -280,7 +280,7 @@ describe('processDeletions', () => {
 
   test('continues processing remaining persons if one fails', async () => {
     let callCount = 0;
-    const persons = [
+    const testPersons = [
       { ...fakePersonPendingDeletion, id: 'person-1' },
       { ...fakePersonPendingDeletion, id: 'person-2' },
     ];
@@ -288,7 +288,7 @@ describe('processDeletions', () => {
     const db = {
       select: () => ({
         from: (t: any) => ({
-          where: async () => persons,
+          where: async () => testPersons,
         }),
       }),
       update: (t: any) => ({
@@ -304,11 +304,13 @@ describe('processDeletions', () => {
     };
 
     const logger = makeLogger();
-    // Should not throw — continues to next person
-    await expect(processDeletions({ db: db as any, logger })).resolves.not.toThrow();
+    // Should resolve (not throw) — errors are caught per-person
+    const result = await processDeletions({ db: db as any, logger });
 
-    // Second person should still have been processed
-    expect(callCount).toBeGreaterThanOrEqual(2);
+    // Second person should still have been attempted
+    expect(result.processed).toBe(2);
+    expect(result.errors).toBe(1);
+    expect(result.succeeded).toBe(1);
   });
 
   test('audit log details during anonymization do NOT contain PII (DPA-05)', async () => {
