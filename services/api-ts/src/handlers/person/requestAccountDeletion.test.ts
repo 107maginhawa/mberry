@@ -164,6 +164,12 @@ describe('cancelAccountDeletion', () => {
 
 // ─── executeAccountDeletion ─────────────────────────────────
 
+// Shared db mock for executeAccountDeletion tests — supports delete for session cleanup
+const execMockDb = {
+  transaction: async (fn: any) => fn({}),
+  delete: () => ({ where: async () => [] }),
+};
+
 describe('executeAccountDeletion', () => {
   let mocks: any;
 
@@ -185,14 +191,14 @@ describe('executeAccountDeletion', () => {
       },
     });
 
-    const ctx = makeCtx({ _params: { personId: 'user-1' } });
+    const ctx = makeCtx({ _params: { personId: 'user-1' }, database: execMockDb });
     const response = await executeAccountDeletion(ctx);
 
     expect(response.status).toBe(200);
-    expect(capturedUpdate.firstName).toBe('Deleted');
-    expect(capturedUpdate.lastName).toBe('User');
+    expect(capturedUpdate.firstName).toBe('DELETED');
+    expect(capturedUpdate.lastName).toBe('DELETED');
     expect(capturedUpdate.middleName).toBeNull();
-    expect(capturedUpdate.contactInfo).toBeNull();
+    expect(capturedUpdate.contactInfo).toEqual({ email: 'deleted@deleted.invalid', phone: null });
     expect(capturedUpdate.primaryAddress).toBeNull();
     expect(capturedUpdate.avatar).toBeNull();
     expect(capturedUpdate.licenseNumber).toBeNull();
@@ -217,14 +223,46 @@ describe('executeAccountDeletion', () => {
       },
     });
 
-    const ctx = makeCtx({ _params: { personId: 'user-1' } });
+    const ctx = makeCtx({ _params: { personId: 'user-1' }, database: execMockDb });
     await executeAccountDeletion(ctx);
 
     // Person record updated (anonymized), NOT deleted
     // ID preserved so payment records can still reference it
     expect(capturedUpdate).toBeDefined();
-    expect(capturedUpdate.firstName).toBe('Deleted');
+    expect(capturedUpdate.firstName).toBe('DELETED');
     // No delete call should have been made
+  });
+
+  test('audit details during executeAccountDeletion do not contain PII (DPA-05)', async () => {
+    const auditCalls: any[] = [];
+    const fakeAudit = {
+      logEvent: async (args: any) => {
+        auditCalls.push(args);
+      },
+    };
+
+    mocks = stubRepo(PersonRepository, {
+      findOneById: async () => ({
+        ...fakePerson,
+        deletionRequestedAt: new Date(Date.now() - THIRTY_DAYS_MS - 1000),
+        deletionScheduledAt: new Date(Date.now() - 1000),
+      }),
+      updateOneById: async (_id: string, data: any) => ({ ...fakePerson, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { personId: 'user-1' }, audit: fakeAudit, database: execMockDb });
+    await executeAccountDeletion(ctx);
+
+    expect(auditCalls.length).toBeGreaterThanOrEqual(1);
+    const details = auditCalls[0]?.details ?? {};
+    // Must NOT contain PII fields
+    expect(details.firstName).toBeUndefined();
+    expect(details.lastName).toBeUndefined();
+    expect(details.email).toBeUndefined();
+    expect(details.phone).toBeUndefined();
+    expect(details.contactInfo).toBeUndefined();
+    // Must only contain safe fields
+    expect(details.originalRequestDate).toBeDefined();
   });
 
   test('rejects if grace period not yet expired', async () => {
