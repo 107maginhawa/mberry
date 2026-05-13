@@ -15,7 +15,7 @@ export async function getPrivacySettings(ctx: HandlerContext): Promise<Response>
   const user = ctx.get('user') as User | undefined;
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const targetOrgId = ctx.req.query('orgId') ?? null;
+  const targetOrgId = ctx.req.query('organizationId') ?? ctx.req.query('orgId') ?? null;
 
   const db = ctx.get('database') as DatabaseInstance;
 
@@ -25,13 +25,13 @@ export async function getPrivacySettings(ctx: HandlerContext): Promise<Response>
       .from(personPrivacySettings)
       .where(and(
         eq(personPrivacySettings.personId, user.id),
-        eq(personPrivacySettings.orgId, targetOrgId),
+        eq(personPrivacySettings.organizationId, targetOrgId),
       ))
       .limit(1);
 
     return ctx.json(row ?? {
       personId: user.id,
-      orgId: targetOrgId,
+      organizationId: targetOrgId,
       emailVisible: false,
       phoneVisible: false,
       photoVisible: true,

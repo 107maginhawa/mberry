@@ -41,7 +41,7 @@ export async function createInvite(
   const { raw, hash } = generateInviteToken(secret);
 
   const invite = await inviteRepo.create({
-    orgId: orgId,
+    organizationId: orgId,
     personId: body.personId || null,
     tokenHash: hash,
     type: body.type || 'invite',

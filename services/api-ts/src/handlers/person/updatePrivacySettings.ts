@@ -20,7 +20,7 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
 
   const body = await ctx.req.json().catch(() => null) as any;
   if (!body?.orgId) {
-    throw new ValidationError('orgId is required');
+    throw new ValidationError('organizationId is required');
   }
 
   const db = ctx.get('database') as DatabaseInstance;
@@ -31,7 +31,7 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
     .from(memberships)
     .where(and(
       eq(memberships.personId, user.id),
-      eq(memberships.organizationId, body.orgId),
+      eq(memberships.organizationId, body.organizationId),
       inArray(memberships.status, ['active', 'gracePeriod']),
     ))
     .limit(1);
@@ -46,7 +46,7 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
     .from(personPrivacySettings)
     .where(and(
       eq(personPrivacySettings.personId, user.id),
-      eq(personPrivacySettings.orgId, body.orgId),
+      eq(personPrivacySettings.organizationId, body.organizationId),
     ))
     .limit(1);
 
@@ -70,7 +70,7 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
     .insert(personPrivacySettings)
     .values({
       personId: user.id,
-      orgId: body.orgId,
+      organizationId: body.organizationId,
       ...updates,
     })
     .returning();

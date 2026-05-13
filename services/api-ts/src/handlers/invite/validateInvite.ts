@@ -48,7 +48,7 @@ export async function validateInvite(
     return ctx.json({
       error: 'This invitation has expired',
       code: 'EXPIRED',
-      orgId: invite.orgId,
+      orgId: invite.organizationId,
     }, 410);
   }
 
@@ -56,7 +56,7 @@ export async function validateInvite(
   return ctx.json({
     valid: true,
     email: invite.email,
-    orgId: invite.orgId,
+    orgId: invite.organizationId,
     type: invite.type,
     metadata: invite.metadata,
     expiresAt: invite.expiresAt,

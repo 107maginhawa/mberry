@@ -33,11 +33,8 @@ export const invitationTokens = pgTable('invitation_token', {
   /** Person this invite is for (null for open invites) */
   personId: uuid('person_id'),
 
-  /** Organization the invite belongs to (legacy column) */
-  orgId: uuid('org_id').notNull(),
-
   /** Organization FK with referential integrity */
-  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
 
   /** HMAC hash of the token (never store raw token) */
   tokenHash: varchar('token_hash', { length: 128 }).notNull().unique(),
@@ -67,7 +64,6 @@ export const invitationTokens = pgTable('invitation_token', {
   message: varchar('message', { length: 1000 }),
 }, (table) => [
   index('idx_invite_token_hash').on(table.tokenHash),
-  index('idx_invite_org').on(table.orgId),
   index('idx_invite_organization_id').on(table.organizationId),
   index('idx_invite_email').on(table.email),
   index('idx_invite_status').on(table.status),

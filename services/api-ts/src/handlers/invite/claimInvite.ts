@@ -53,7 +53,7 @@ export async function claimInvite(
     action: 'complete',
     resourceType: 'invitation',
     resourceId: invite.id,
-    description: `Invitation claimed by user ${user.id} for org ${invite.orgId}`,
+    description: `Invitation claimed by user ${user.id} for org ${invite.organizationId}`,
   });
 
   // DEFERRED(M05): Create membership record for the user in the org.
@@ -61,7 +61,7 @@ export async function claimInvite(
 
   return ctx.json({
     claimed: true,
-    orgId: invite.orgId,
+    orgId: invite.organizationId,
     metadata: invite.metadata,
   });
 }

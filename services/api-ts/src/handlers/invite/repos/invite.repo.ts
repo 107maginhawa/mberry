@@ -37,7 +37,7 @@ export class InviteRepository {
       .where(
         and(
           eq(invitationTokens.email, email.toLowerCase()),
-          eq(invitationTokens.orgId, orgId),
+          eq(invitationTokens.organizationId, orgId),
           eq(invitationTokens.status, 'pending'),
           gt(invitationTokens.expiresAt, new Date()),
         )
@@ -89,7 +89,7 @@ export class InviteRepository {
   }
 
   async listByOrg(orgId: string, status?: string): Promise<InvitationToken[]> {
-    const conditions = [eq(invitationTokens.orgId, orgId)];
+    const conditions = [eq(invitationTokens.organizationId, orgId)];
     if (status) {
       conditions.push(eq(invitationTokens.status, status as typeof invitationTokens.status.enumValues[number]));
     }

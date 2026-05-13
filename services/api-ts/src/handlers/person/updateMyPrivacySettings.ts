@@ -24,7 +24,7 @@ export async function updateMyPrivacySettings(
   const body = ctx.req.valid('json');
   const b = body as any;
 
-  if (!b.orgId) throw new ValidationError('orgId is required');
+  if (!b.organizationId) throw new ValidationError('organizationId is required');
 
   // Verify membership
   const [membership] = await db
@@ -32,7 +32,7 @@ export async function updateMyPrivacySettings(
     .from(memberships)
     .where(and(
       eq(memberships.personId, personId),
-      eq(memberships.organizationId, b.orgId),
+      eq(memberships.organizationId, b.organizationId),
       inArray(memberships.status, ['active', 'gracePeriod']),
     ))
     .limit(1);
@@ -44,7 +44,7 @@ export async function updateMyPrivacySettings(
     .from(personPrivacySettings)
     .where(and(
       eq(personPrivacySettings.personId, personId),
-      eq(personPrivacySettings.orgId, b.orgId),
+      eq(personPrivacySettings.organizationId, b.organizationId),
     ))
     .limit(1);
 
@@ -65,7 +65,7 @@ export async function updateMyPrivacySettings(
   } else {
     [row] = await db
       .insert(personPrivacySettings)
-      .values({ personId, orgId: b.orgId, ...updates })
+      .values({ personId, organizationId: b.organizationId, ...updates })
       .returning();
   }
 
@@ -74,7 +74,7 @@ export async function updateMyPrivacySettings(
     resourceType: 'privacy-settings',
     resourceId: personId,
     description: 'Self-service privacy settings update',
-    details: { orgId: b.orgId },
+    details: { orgId: b.organizationId },
   });
 
   return ctx.json(row, existing ? 200 : 201);

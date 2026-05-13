@@ -15,14 +15,14 @@ export const personPrivacySettings = pgTable(
   {
     ...baseEntityFields,
     personId: uuid('person_id').notNull(),
-    orgId: uuid('org_id').notNull(),
+    organizationId: uuid('organization_id').notNull(),
     emailVisible: boolean('email_visible').notNull().default(false),
     phoneVisible: boolean('phone_visible').notNull().default(false),
     photoVisible: boolean('photo_visible').notNull().default(true),
     addressVisible: boolean('address_visible').notNull().default(false),
   },
   (table) => ({
-    personOrgIdx: uniqueIndex('privacy_person_org_idx').on(table.personId, table.orgId),
+    personOrgIdx: uniqueIndex('privacy_person_org_idx').on(table.personId, table.organizationId),
     personIdx: index('privacy_person_idx').on(table.personId),
   }),
 );

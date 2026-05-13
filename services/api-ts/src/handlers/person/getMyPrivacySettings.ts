@@ -20,7 +20,7 @@ export async function getMyPrivacySettings(
   const db = ctx.get('database') as DatabaseInstance;
   const personId = session.user.id;
   const query = ctx.req.valid('query');
-  const orgId = (query as any).orgId ?? null;
+  const orgId = (query as any).organizationId ?? (query as any).orgId ?? null;
 
   if (orgId) {
     const [row] = await db
@@ -28,13 +28,13 @@ export async function getMyPrivacySettings(
       .from(personPrivacySettings)
       .where(and(
         eq(personPrivacySettings.personId, personId),
-        eq(personPrivacySettings.orgId, orgId),
+        eq(personPrivacySettings.organizationId, orgId),
       ))
       .limit(1);
 
     return ctx.json(row ?? {
       personId,
-      orgId,
+      organizationId: orgId,
       emailVisible: false,
       phoneVisible: false,
       photoVisible: true,
