@@ -149,7 +149,7 @@
 
 **Goal:** Ship all compliance-critical and officer-essential features to launch the first live pilot with a Philippine dental association.
 
-- [ ] **Phase 18: Dues Invoice Security Fix** — Enforce org-scoped RBAC on dues endpoints
+- [x] **Phase 18: Dues Invoice Security Fix** — Enforce org-scoped RBAC on dues endpoints (2026-05-14)
 - [ ] **Phase 19: Account Deletion + Data Export** — PH DPA compliance (deletion, anonymization, export)
 - [ ] **Phase 20: Payment Flow** — Offline payment recording with receipts and concurrency safety
 - [ ] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation
@@ -169,10 +169,10 @@
   2. An officer of Org A cannot mark invoices paid for Org B (chapter scope enforced)
   3. Dues query endpoints return 403 when caller has no membership in the queried organization
   4. Existing officer payment flows continue to work correctly (no regression)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans executed
 Plans:
 - [x] 18-01-PLAN.md — RED: Security tests for mutation + read handler auth gaps
-- [ ] 18-02-PLAN.md — GREEN: Apply requirePosition + cross-org isolation to 11 handlers
+- [x] 18-02-PLAN.md — GREEN: Apply requirePosition + cross-org isolation to 11 handlers
 
 ### Phase 19: Account Deletion + Data Export
 **Goal**: Users can request deletion of their account (with 30-day grace and cancellation) and export all personal data as machine-readable JSON, satisfying Philippine Data Privacy Act requirements
@@ -278,7 +278,7 @@ Plans:
 | 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 3/3 | Complete | 2026-05-13 |
 | 16. Mobile & Transfer Validation | v1.1.0 | 2/2 | Complete | 2026-05-13 |
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
-| 18. Dues Invoice Security Fix | v1.2.0 | 1/2 | In Progress|  |
+| 18. Dues Invoice Security Fix | v1.2.0 | 2/2 | Complete | 2026-05-14 |
 | 19. Account Deletion + Data Export | v1.2.0 | 0/? | Not started | — |
 | 20. Payment Flow | v1.2.0 | 0/? | Not started | — |
 | 21. Officer Daily Ops | v1.2.0 | 0/? | Not started | — |
