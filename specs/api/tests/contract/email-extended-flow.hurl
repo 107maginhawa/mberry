@@ -60,6 +60,13 @@ HTTP 200
 queue_item_count: jsonpath "$.pagination.totalCount"
 
 
+# ── 4b. Get single queue item by ID ─────────────────────────
+# Uses placeholder UUID; returns 404 if not found — acceptable.
+
+GET {{api}}/email/queue/00000000-0000-0000-0000-000000000000
+HTTP *
+
+
 # ── 5. Cancel a queue item ──────────────────────────────────
 # Uses a placeholder UUID; real run needs a queued item.
 
