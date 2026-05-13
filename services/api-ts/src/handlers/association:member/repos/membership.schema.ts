@@ -15,10 +15,12 @@ import {
   jsonb,
   pgEnum,
   index,
+  uniqueIndex,
   text,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { baseEntityFields } from '@/core/database.schema';
+import { persons } from '../../person/repos/person.schema';
 
 // ---------------------------------------------------------------------------
 // Enumerations
@@ -109,16 +111,17 @@ export const memberships = pgTable(
     categoryId: uuid('category_id').references(() => membershipCategories.id),
     memberNumber: varchar('member_number', { length: 50 }),
     startDate: date('start_date').notNull(),
-    duesExpiryDate: date('dues_expiry_date').notNull(),
+    duesExpiryDate: date('dues_expiry_date'),
     gracePeriodDays: integer('grace_period_days').notNull().default(30),
     status: membershipStatusEnum('status').notNull().default('pendingPayment'),
     joinedAt: timestamp('joined_at').notNull(),
+    suspendedAt: timestamp('suspended_at'),
     terminatedAt: timestamp('terminated_at'),
     terminationReason: varchar('termination_reason', { length: 500 }),
     note: text('note'),
   },
   (table) => ({
-    orgPersonIdx: index('membership_org_person_idx').on(
+    orgPersonUniq: uniqueIndex('membership_org_person_unique').on(
       table.organizationId,
       table.personId,
     ),
@@ -142,7 +145,7 @@ export const membershipApplications = pgTable(
       .references(() => membershipTiers.id),
     applicationDate: date('application_date').notNull(),
     status: applicationStatusEnum('status').notNull().default('submitted'),
-    reviewedBy: uuid('reviewed_by'),
+    reviewedBy: uuid('reviewed_by').references(() => persons.id),
     reviewedAt: timestamp('reviewed_at'),
     denialReason: text('denial_reason'),
   },
