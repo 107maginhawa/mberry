@@ -333,9 +333,9 @@ describe('[BR-25] OTP rate limiting enforced per email address', () => {
   // enabled in auth.ts (rateLimit: { enabled, window, max }). These handler-level
   // integration tests are skipped because we cannot unit-test Better Auth internals.
 
-  test.skip('[BR-25] returns 429 after 3 failed OTP requests within 1 hour — Better Auth owns OTP rate limiting', () => {});
-
-  test.skip('[BR-25] rate limit resets after 1 hour window expires — Better Auth owns OTP rate limiting', () => {});
+  // INFRA: Better Auth owns OTP rate limiting internals — cannot unit-test without live auth server
+  test.todo('[BR-25] returns 429 after 3 failed OTP requests within 1 hour — Better Auth owns OTP rate limiting');
+  test.todo('[BR-25] rate limit resets after 1 hour window expires — Better Auth owns OTP rate limiting');
 
   test('[BR-25] rate limiter logic: rejects after threshold within window', () => {
     const MAX_REQUESTS = 3;

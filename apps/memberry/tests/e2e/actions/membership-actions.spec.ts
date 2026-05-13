@@ -95,4 +95,57 @@ test.describe('Membership Actions', () => {
     // Should show "No applications" not infinite skeleton
     await expect(page.getByText(/no applications/i)).toBeVisible({ timeout: 10000 })
   })
+
+  test('BR-01/BR-03: suspend action changes member status from Active to Suspended', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/roster`)
+    await expect(page.getByText('Juan Cruz')).toBeVisible({ timeout: 10000 })
+    await page.getByRole('link', { name: 'Juan Cruz' }).click()
+    await expect(page.getByText('Juan Cruz')).toBeVisible({ timeout: 10000 })
+
+    // Read current status
+    const statusBefore = await page.getByText(/^(Active|Suspended|Lapsed|Grace Period|Terminated)$/).first().textContent()
+
+    if (statusBefore === 'Active') {
+      // Click Suspend → confirm in dialog → verify status changed
+      const suspendBtn = page.getByRole('button', { name: /suspend member/i })
+      await expect(suspendBtn).toBeVisible({ timeout: 5000 })
+      await suspendBtn.click()
+
+      // Confirm dialog (if present)
+      const confirmBtn = page.getByRole('button', { name: /confirm|yes|suspend$/i }).first()
+      const hasConfirm = await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)
+      if (hasConfirm) await confirmBtn.click()
+
+      // Wait for status to update
+      await page.waitForTimeout(2000)
+
+      // Verify status changed to Suspended
+      const statusAfter = await page.getByText(/^(Active|Suspended|Lapsed|Grace Period|Terminated)$/).first().textContent()
+      expect(statusAfter).toBe('Suspended')
+
+      // Restore: Reinstate the member so test is idempotent
+      const reinstateBtn = page.getByRole('button', { name: /reinstate/i })
+      const hasReinstate = await reinstateBtn.isVisible({ timeout: 3000 }).catch(() => false)
+      if (hasReinstate) {
+        await reinstateBtn.click()
+        const confirmReinstateBtn = page.getByRole('button', { name: /confirm|yes|reinstate$/i }).first()
+        const hasConfirmReinstate = await confirmReinstateBtn.isVisible({ timeout: 3000 }).catch(() => false)
+        if (hasConfirmReinstate) await confirmReinstateBtn.click()
+        await page.waitForTimeout(2000)
+      }
+    } else if (statusBefore === 'Suspended') {
+      // Already suspended — verify Reinstate is available
+      const reinstateBtn = page.getByRole('button', { name: /reinstate/i })
+      await expect(reinstateBtn).toBeVisible({ timeout: 5000 })
+      await reinstateBtn.click()
+
+      const confirmBtn = page.getByRole('button', { name: /confirm|yes|reinstate$/i }).first()
+      const hasConfirm = await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)
+      if (hasConfirm) await confirmBtn.click()
+
+      await page.waitForTimeout(2000)
+      const statusAfter = await page.getByText(/^(Active|Suspended|Lapsed|Grace Period|Terminated)$/).first().textContent()
+      expect(statusAfter).toBe('Active')
+    }
+  })
 })

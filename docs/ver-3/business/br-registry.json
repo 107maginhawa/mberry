@@ -3,6 +3,7 @@
     "rule": "Membership Status Computation",
     "phase": 1,
     "module": "M05",
+    "ruleClass": "p0-data",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/membership.test.ts"
@@ -14,12 +15,13 @@
         "apps/memberry/tests/e2e/officer/roster.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "annotations": "E2E deepened: suspend/reinstate action verifies status transition (Active→Suspended→Active)"
   },
   "BR-02": {
     "rule": "Grace Period Default",
     "phase": 1,
     "module": "M05",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/dues.test.ts",
@@ -33,13 +35,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-03": {
     "rule": "Membership Transitions",
     "phase": 1,
     "module": "M05",
+    "ruleClass": "p0-data",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/updateMember.test.ts",
@@ -52,12 +54,13 @@
         "apps/memberry/tests/e2e/officer/roster.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "annotations": "E2E deepened: status-appropriate actions tested with real suspend/reinstate clicks"
   },
   "BR-04": {
     "rule": "Dues Amount per Org",
     "phase": 1,
     "module": "M06",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/getDuesConfig.test.ts"
@@ -70,13 +73,13 @@
         "apps/memberry/tests/e2e/officer/payments.spec.ts",
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-05": {
     "rule": "Fund Allocation",
     "phase": 1,
     "module": "M06",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/utils/fund-math.test.ts",
@@ -91,13 +94,13 @@
         "apps/memberry/tests/e2e/officer/payments.spec.ts",
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-06": {
     "rule": "Payment Recording",
     "phase": 1,
     "module": "M06",
+    "ruleClass": "p0-data",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/recordPayment.test.ts"
@@ -110,13 +113,13 @@
         "apps/memberry/tests/e2e/officer/payments.spec.ts",
         "apps/memberry/tests/e2e/member/payments.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-07": {
     "rule": "Dues Expiry Extension on Payment",
     "phase": 1,
     "module": "M06",
+    "ruleClass": "p0-data",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/utils/expiry-extension.test.ts",
@@ -130,13 +133,13 @@
         "apps/memberry/tests/e2e/journeys/dues-lifecycle.spec.ts",
         "apps/memberry/tests/e2e/member/payments.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-08": {
     "rule": "Refund Policy",
     "phase": 1,
     "module": "M06",
+    "ruleClass": "p0-data",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/refundPayment.test.ts"
@@ -147,13 +150,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/payments.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-09": {
     "rule": "Officer Role Assignment",
     "phase": 1,
     "module": "M04",
+    "ruleClass": "p0-data",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/governance.test.ts"
@@ -165,13 +168,13 @@
         "apps/memberry/tests/e2e/officer/guard-enforcement.spec.ts",
         "apps/memberry/tests/e2e/officer/nav-reachability.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-10": {
     "rule": "Platform Admin Impersonation",
     "phase": 1,
     "module": "M03",
+    "ruleClass": "p0-auth",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/platformadmin/platformadmin.test.ts",
@@ -183,13 +186,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-11": {
     "rule": "Credit Cycle Start",
     "phase": 1,
     "module": "M10",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/credits.test.ts"
@@ -200,13 +203,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/member/credits.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-12": {
     "rule": "Credit Carry-Over",
     "phase": 1,
     "module": "M10",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/credits.test.ts"
@@ -217,13 +220,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/member/credits.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-13": {
     "rule": "Auto vs Manual Credits",
     "phase": 1,
     "module": "M10",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/credits.test.ts",
@@ -236,13 +239,13 @@
         "apps/memberry/tests/e2e/member/credits.spec.ts",
         "apps/memberry/tests/e2e/member/training.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-14": {
     "rule": "Cross-Org Credit Aggregation",
     "phase": 1,
     "module": "M10",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/credits.test.ts"
@@ -253,13 +256,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/member/credits.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-15": {
     "rule": "Training vs Event Distinction",
     "phase": 1,
     "module": "M08",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/events/createEvent.test.ts",
@@ -276,13 +279,13 @@
         "apps/memberry/tests/e2e/officer/training.spec.ts",
         "apps/memberry/tests/e2e/officer/events.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-16": {
     "rule": "Activity Visibility",
     "phase": 1,
     "module": "M08",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
@@ -295,12 +298,13 @@
         "apps/memberry/tests/e2e/officer/events.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "annotations": "PARTIAL: training visibility feature partially unbuilt — updateTraining strips visibility field"
   },
   "BR-17": {
     "rule": "Attendance Confirmation",
     "phase": 1,
     "module": "M08",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/events/checkIn.test.ts"
@@ -311,13 +315,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/events.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-18": {
     "rule": "QR Code Authentication",
     "phase": 1,
     "module": "M11",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/credentials.test.ts"
@@ -329,12 +333,13 @@
         "apps/memberry/tests/e2e/member/certificates.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "annotations": "QR crypto/auth pending — duplicate scan detection tested only"
   },
   "BR-19": {
     "rule": "ID Card Generation",
     "phase": 1,
     "module": "M11",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/credentials.test.ts",
@@ -346,13 +351,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/member/certificates.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-20": {
     "rule": "Certificate Generation",
     "phase": 1,
     "module": "M11",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/certificates/listCertificates.test.ts",
@@ -366,13 +371,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/member/certificates.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-21": {
     "rule": "Multi-Org Member Account",
     "phase": 1,
     "module": "M01",
+    "ruleClass": "p0-data",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-21.multi-org.test.ts"
@@ -383,13 +388,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/auth.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-22": {
     "rule": "Member Matching on Import",
     "phase": 1,
     "module": "M01",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/importMembers.test.ts"
@@ -400,13 +405,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/roster.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-23": {
     "rule": "License Number Format",
     "phase": 1,
     "module": "M02",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
@@ -417,13 +422,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/roster.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-24": {
     "rule": "Invitation Expiry",
     "phase": 1,
     "module": "M01",
+    "ruleClass": "p0-auth",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/invite/invite.test.ts"
@@ -434,13 +439,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/auth.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-25": {
     "rule": "OTP Registration",
     "phase": 1,
     "module": "M01",
+    "ruleClass": "p0-auth",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
@@ -452,13 +457,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/auth.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-26": {
     "rule": "Session Management",
     "phase": 1,
     "module": "M01",
+    "ruleClass": "p0-auth",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
@@ -469,13 +474,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/auth.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-27": {
     "rule": "Event Registration Limits",
     "phase": 1,
     "module": "M08",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/events/registerForEvent.test.ts",
@@ -490,13 +495,13 @@
         "apps/memberry/tests/e2e/officer/events.spec.ts"
       ]
     },
-    "coverage": "PARTIAL",
     "notes": "Capacity check + auto-waitlist + FIFO promotion on cancellation implemented. Deferred to v1.2: automatic notification to promoted member, configurable cancellation deadline (needs schema field), late-cancellation officer workflow."
   },
   "BR-28": {
     "rule": "Communication Deduplication",
     "phase": 1,
     "module": "M07",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/communication/communication.test.ts",
@@ -509,12 +514,13 @@
         "apps/memberry/tests/e2e/officer/communications.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "annotations": "Dedup not directly verifiable in E2E — backend unit test is primary coverage"
   },
   "BR-29": {
     "rule": "Org Public Page",
     "phase": 1,
     "module": "M04",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/platformadmin/getOrganizationBySlug.test.ts",
@@ -526,13 +532,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/journeys/public-org.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-30": {
     "rule": "Payment Gateway Isolation",
     "phase": 1,
     "module": "M06",
+    "ruleClass": "p0-security",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/br-30.gateway-isolation.test.ts",
@@ -545,13 +551,13 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    },
-    "coverage": "COMPLETE"
+    }
   },
   "BR-31": {
     "rule": "SVG Upload Security",
     "phase": 1,
     "module": "M04",
+    "ruleClass": "p0-security",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/storage/uploadFile.test.ts"
@@ -563,12 +569,13 @@
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "annotations": "SVG sanitization not directly verifiable in E2E — backend unit test is primary coverage"
   },
   "BR-32": {
     "rule": "Financial Record Retention",
     "phase": 1,
     "module": "M06",
+    "ruleClass": "p0-data",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
@@ -580,12 +587,13 @@
         "apps/memberry/tests/e2e/officer/payments.spec.ts"
       ]
     },
-    "coverage": "COMPLETE"
+    "annotations": "Retention policy tested indirectly via BR-08 refund suite — no-hard-delete not explicitly asserted"
   },
   "BR-33": {
     "rule": "Election Integrity",
     "phase": 2,
     "module": "M12",
+    "ruleClass": "p0-security",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/elections/br-33.election-integrity.test.ts",
@@ -598,26 +606,30 @@
         "apps/memberry/tests/e2e/officer/elections.spec.ts"
       ]
     },
-    "coverage": "PARTIAL"
+    "annotations": "E2E deepened: status-restricts-voting test verifies Draft=no vote buttons, Closed=no vote buttons"
   },
   "BR-34": {
     "rule": "Nomination Eligibility",
     "phase": 2,
     "module": "M12",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/elections/br-34.nomination-eligibility.test.ts",
         "services/api-ts/src/handlers/elections/createNominee.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/nomination-eligibility.hurl"
+      ],
       "e2e": []
     },
-    "coverage": "PARTIAL"
+    "annotations": "Backend solid (10 unit tests). E2E has test.fixme stubs for ineligible/eligible nomination. Contract: auth-only stub."
   },
   "BR-35": {
     "rule": "Feed Content Moderation",
     "phase": 2,
     "module": "M13",
+    "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/communications/br-35.feed-moderation.test.ts"
@@ -625,13 +637,13 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "DEFERRED",
     "deferredReason": "Module M13 (Feed/Social) not yet implemented — deferred to milestone v2.0"
   },
   "BR-36": {
     "rule": "National Dashboard Access",
     "phase": 2,
     "module": "M14",
+    "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/platformadmin/br-36.national-dashboard.test.ts"
@@ -639,13 +651,13 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "DEFERRED",
     "deferredReason": "Module M14 (National Dashboard) not yet implemented — deferred to milestone v2.0"
   },
   "BR-37": {
     "rule": "Job Posting Expiry",
     "phase": 2,
     "module": "M15",
+    "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/events/br-37.job-posting-expiry.test.ts"
@@ -653,13 +665,13 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "DEFERRED",
     "deferredReason": "Module M15 (Job Board) not yet implemented — deferred to milestone v2.0"
   },
   "BR-38": {
     "rule": "Marketplace Referral Disclosure",
     "phase": 3,
     "module": "M17",
+    "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/billing/br-38.marketplace-disclosure.test.ts"
@@ -667,13 +679,13 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "DEFERRED",
     "deferredReason": "Module M17 (Marketplace) not yet implemented — deferred to milestone v2.0"
   },
   "BR-39": {
     "rule": "Committee Dissolution",
     "phase": 3,
     "module": "M19",
+    "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-39.committee-dissolution.test.ts"
@@ -681,13 +693,13 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "DEFERRED",
     "deferredReason": "Module M19 (Committees) not yet implemented — deferred to milestone v2.0"
   },
   "BR-40": {
     "rule": "Survey Anonymity",
     "phase": 3,
     "module": "M18",
+    "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/communications/br-40.survey-anonymity.test.ts"
@@ -695,7 +707,6 @@
       "contract": [],
       "e2e": []
     },
-    "coverage": "DEFERRED",
     "deferredReason": "Module M18 (Surveys) not yet implemented — deferred to milestone v2.0"
   }
 }

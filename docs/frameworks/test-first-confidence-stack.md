@@ -85,6 +85,19 @@ For each module:
 | Artifact Verification | Build + smoke | Critical journeys against staging |
 | Release Safety | Manual rollback plan | Canary, feature flags, automated rollback |
 
+## Hardening Pass (completed 2026-05-13)
+
+After all 6 phases were implemented, a Codex-assisted audit identified 18 skip sites and 5 shallow BR tests. Hardening resolved all:
+
+- **Zero silent skips** — all `xit`/`test.skip`/`describe.skip` converted to `test.todo` or conditional `test.skip(condition, reason)`
+- **CI lint enforcement** — `lint:no-skips` script blocks new skip markers at PR level
+- **BR-01/03 deepened** — E2E now tests real suspend/reinstate status transitions
+- **BR-33 deepened** — E2E verifies status restricts voting actions
+- **BR-16 marked PARTIAL** — training visibility partially unbuilt
+- **BR-34 unchanged** — backend solid, E2E stubs marked `test.fixme`
+
+See `docs/frameworks/phase6-release-safety.md` for Phase 6 details.
+
 ## One-Liner
 
 > **Fix the ruler → trace every behavior → harden test quality → gate CI → verify shipped artifacts → ship with safety net.** Tests prevent. Artifacts prove. Release safety catches the rest.

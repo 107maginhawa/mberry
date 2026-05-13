@@ -48,11 +48,8 @@ test.describe('Admin Associations CRUD', () => {
         currency: 'PHP',
       },
     })
-    // If creation failed with conflict, skip test gracefully
-    if (![201, 200].includes(createRes.status())) {
-      test.skip()
-      return
-    }
+    // If creation failed, bail — this test can't proceed without a valid association
+    expect([201, 200]).toContain(createRes.status())
 
     const createBody = await createRes.json()
     const assocId = createBody.data?.id ?? createBody.id

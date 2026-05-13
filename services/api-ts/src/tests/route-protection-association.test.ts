@@ -56,7 +56,8 @@ describe('Pitfall 2 documentation: orgContextMiddleware role limitation', () => 
 
 // ─── Mutation Routes Officer Protection Tests ─────────────────────────────────
 
-const d = API_AVAILABLE ? describe : describe.skip;
+// INFRA: requires live API server on port 7213 with seed data
+const d = API_AVAILABLE ? describe : describe.todo;
 
 d('Association mutation routes - officer protection (RED phase)', () => {
   let memberClient: ApiClient;

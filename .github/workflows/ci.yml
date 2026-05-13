@@ -23,6 +23,10 @@ jobs:
         run: bun run typecheck
       - name: Lint
         run: bun run lint
+      - name: Migration safety lint
+        run: bun run lint:migrations
+      - name: No silent test skips
+        run: bun run lint:no-skips
       - name: Dependency audit
         run: bunx audit-ci --moderate || true
 
@@ -186,14 +190,26 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           load: true
-      - name: Verify image starts
+      - name: Verify container health — /livez responds
         run: |
           docker run --rm -d --name api-health-test -p 7213:7213 \
-            -e DATABASE_URL=postgresql://fake \
-            -e AUTH_SECRET=test \
+            -e DATABASE_URL=postgresql://fake:5432/fake \
+            -e AUTH_SECRET=ci-health-test \
+            -e INTERNAL_SERVICE_TOKEN=ci-test-token \
             ghcr.io/${{ github.repository }}/api:${{ github.sha }}
-          sleep 2
+          # Poll /livez (liveness — no DB needed) for up to 15s
+          for i in $(seq 1 15); do
+            if curl -fsS http://localhost:7213/livez; then
+              echo "Container healthy — /livez 200"
+              docker stop api-health-test || true
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Container /livez never responded"
+          docker logs api-health-test || true
           docker stop api-health-test || true
+          exit 1
 
   build-frontends:
     runs-on: ubuntu-latest
@@ -231,6 +247,65 @@ jobs:
         with:
           name: frontend-account
           path: apps/account/dist/
+
+  artifact-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build-frontends]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Download frontend-memberry artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-memberry
+          path: apps/memberry/dist/
+      - name: Download frontend-admin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-admin
+          path: apps/admin/dist/
+      - name: Download frontend-account artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-account
+          path: apps/account/dist/
+      - name: Verify built artifacts exist and have content
+        run: |
+          for app in memberry admin account; do
+            INDEX="apps/$app/dist/index.html"
+            if [ ! -f "$INDEX" ]; then
+              echo "::error::Missing $INDEX in built artifact"
+              exit 1
+            fi
+            SIZE=$(wc -c < "$INDEX")
+            if [ "$SIZE" -lt 100 ]; then
+              echo "::error::$INDEX too small ($SIZE bytes) — build likely failed"
+              exit 1
+            fi
+            echo "$app: $INDEX ($SIZE bytes) ✓"
+          done
+      - name: Smoke test — built Memberry serves and contains app shell
+        run: |
+          cd apps/memberry
+          bun run preview --port 4173 &
+          PID=$!
+          for i in $(seq 1 15); do
+            curl -fsS http://localhost:4173 > /dev/null 2>&1 && break
+            sleep 1
+          done
+          # Verify HTML contains the app mount point
+          BODY=$(curl -sS http://localhost:4173)
+          echo "$BODY" | grep -q 'id="root"' || echo "$BODY" | grep -q 'id="app"' || {
+            echo "::error::Memberry built artifact missing app mount point"
+            kill $PID || true
+            exit 1
+          }
+          echo "Memberry artifact smoke ✓"
+          kill $PID || true
 
   contract:
     runs-on: ubuntu-latest
@@ -393,6 +468,7 @@ jobs:
       - contract
       - build-api
       - build-frontends
+      - artifact-smoke
       - coverage-gate
     steps:
       - name: Check all gates passed
@@ -404,6 +480,7 @@ jobs:
           echo "  contract: ${{ needs.contract.result }}"
           echo "  build-api: ${{ needs.build-api.result }}"
           echo "  build-frontends: ${{ needs.build-frontends.result }}"
+          echo "  artifact-smoke: ${{ needs.artifact-smoke.result }}"
           echo "  coverage-gate: ${{ needs.coverage-gate.result }}"
           if [[ "${{ needs.lint-typecheck.result }}" != "success" ]] || \
              [[ "${{ needs.unit-tests.result }}" != "success" ]] || \
@@ -411,6 +488,7 @@ jobs:
              [[ "${{ needs.contract.result }}" != "success" ]] || \
              [[ "${{ needs.build-api.result }}" != "success" ]] || \
              [[ "${{ needs.build-frontends.result }}" != "success" ]] || \
+             [[ "${{ needs.artifact-smoke.result }}" != "success" ]] || \
              [[ "${{ needs.coverage-gate.result }}" != "success" ]]; then
             echo "::error::One or more CI gates failed"
             exit 1

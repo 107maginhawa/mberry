@@ -84,4 +84,36 @@ test.describe('Officer Elections', () => {
     const hasPosition = await page.getByText(/president/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasPosition).toBe(true)
   })
+
+  test('BR-33: election integrity — status restricts voting actions', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/elections`)
+    await page.waitForLoadState('networkidle')
+
+    const electionLink = page.getByText(/2026 officer election/i).first()
+    await expect(electionLink).toBeVisible({ timeout: 10000 })
+    await electionLink.click()
+    await page.waitForLoadState('networkidle')
+
+    // Read election status
+    const statusBadge = page.getByText(/^(Draft|Open|Closed|Voting|Completed)$/i).first()
+    await expect(statusBadge).toBeVisible({ timeout: 10000 })
+    const status = await statusBadge.textContent()
+
+    if (status?.toLowerCase() === 'draft') {
+      // Draft elections should NOT show voting UI
+      const hasVoteBtn = await page.getByRole('button', { name: /cast vote|vote/i }).isVisible({ timeout: 3000 }).catch(() => false)
+      expect(hasVoteBtn).toBe(false)
+
+      // Draft elections should show "Open Voting" button for officers
+      const hasOpenVoting = await page.getByRole('button', { name: /open voting/i }).isVisible({ timeout: 3000 }).catch(() => false)
+      // Either shows Open Voting or shows the draft management UI
+      const hasDraftUI = await page.getByText(/nominees|add nominee|nominate/i).first().isVisible({ timeout: 3000 }).catch(() => false)
+      expect(hasOpenVoting || hasDraftUI).toBeTruthy()
+    } else if (status?.toLowerCase() === 'closed' || status?.toLowerCase() === 'completed') {
+      // Closed elections should show results, NOT voting buttons
+      const hasVoteBtn = await page.getByRole('button', { name: /cast vote|vote/i }).isVisible({ timeout: 3000 }).catch(() => false)
+      expect(hasVoteBtn).toBe(false)
+    }
+    // Voting/Open status: vote buttons may be visible — that's correct
+  })
 })

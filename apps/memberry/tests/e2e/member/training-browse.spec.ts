@@ -39,11 +39,7 @@ test.describe('Training Browse (/org/$orgId/training)', () => {
       return Array.isArray(items) && items.length > 0 ? items[0].id : null
     }, API_BASE)
 
-    if (!trainingId) {
-      // No trainings seeded — skip detail test
-      test.skip()
-      return
-    }
+    test.skip(!trainingId, 'No published trainings in seed data — seed training data first')
 
     await page.goto(`/org/${ORG_ID}/training/${trainingId}`)
     await page.waitForLoadState('networkidle')

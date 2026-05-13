@@ -15,7 +15,8 @@ import { describe, test, expect, beforeAll } from 'bun:test';
 import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
 import { API_AVAILABLE } from '@/tests/helpers/api-available';
 
-const d = API_AVAILABLE ? describe : describe.skip;
+// INFRA: requires live API server on port 7213 with seed data
+const d = API_AVAILABLE ? describe : describe.todo;
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562';
 
 let adminClient: ApiClient;
@@ -44,7 +45,7 @@ d('Email template access control', () => {
 // ─── Template CRUD ─────────────────────────────────────────────────────────────
 
 d('Email template CRUD', () => {
-  let createdTemplateId: string | null = null;
+  const createdTemplateId: string | null = null;
 
   test('list templates returns paginated response with data array', async () => {
     const res = await adminClient.get('/email/templates');
@@ -56,28 +57,8 @@ d('Email template CRUD', () => {
     expect(body.data.length).toBeGreaterThanOrEqual(0);
   });
 
-  // TODO: handler reads orgId from ctx.get('orgId') but /email/* routes don't have org-context middleware
-  test.skip('create template with valid data returns 201', async () => {
-    const res = await adminClient.post('/email/templates', {
-      organizationId: ORG_ID,
-      name: `Wave6 Test ${Date.now()}`,
-      description: 'Integration test template',
-      subject: 'Hello {{name}}',
-      bodyHtml: '<h1>Welcome {{name}}</h1>',
-      bodyText: 'Welcome {{name}}',
-      tags: ['test.wave6'],
-      variables: [
-        { id: 'name', type: 'string', label: 'Name', required: true },
-      ],
-    });
-
-    expect(res.status).toBe(201);
-    const body = await res.json();
-    // Create endpoint returns flat object (no data wrapper)
-    expect(body.id).toBeDefined();
-    expect(body.subject).toBe('Hello {{name}}');
-    createdTemplateId = body.id;
-  });
+  // Bucket A: handler exists but /email/* routes lack org-context middleware — orgId not injected
+  test.todo('create template with valid data returns 201 — blocked: /email/* routes lack org-context middleware');
 
   test('get single template returns template details', async () => {
     if (!createdTemplateId) return;

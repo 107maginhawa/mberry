@@ -12,7 +12,7 @@ test.describe('Admin Organizations CRUD', () => {
     const assocRes = await page.context().request.get(`${API_URL}/admin/associations?limit=1`)
     const assocBody = await assocRes.json()
     const associationId = assocBody.data?.[0]?.id
-    if (!associationId) { test.skip(); return }
+    test.skip(!associationId, 'No associations in seed data — run db:seed first')
 
     // POST to create a new organization
     const res = await page.context().request.post(`${API_URL}/admin/organizations`, {
@@ -58,7 +58,7 @@ test.describe('Admin Organizations CRUD', () => {
       const assocRes = await page.context().request.get(`${API_URL}/admin/associations?limit=1`)
       const assocBody = await assocRes.json()
       const associationId = assocBody.data?.[0]?.id
-      if (!associationId) { test.skip(); return }
+      test.skip(!associationId, 'No associations in seed data — run db:seed first')
 
       const createRes = await page.context().request.post(`${API_URL}/admin/organizations`, {
         data: {
@@ -83,11 +83,11 @@ test.describe('Admin Organizations CRUD', () => {
     const assocRes = await page.context().request.get(`${API_URL}/admin/associations?limit=1`)
     const assocBody = await assocRes.json()
     const associationId = assocBody.data?.[0]?.id
-    if (!associationId) { test.skip(); return }
+    test.skip(!associationId, 'No associations in seed data — run db:seed first')
 
     const uniqueName = `DeleteMe-${Date.now()}`
 
-    // POST to create a new org with a unique name
+    // POST to create a new org with a unique name (Bucket B: deleteOrganization handler may not exist)
     const createRes = await page.context().request.post(`${API_URL}/admin/organizations`, {
       data: {
         name: uniqueName,
@@ -95,11 +95,8 @@ test.describe('Admin Organizations CRUD', () => {
         associationId,
       },
     })
-    // If creation failed with conflict, skip this test gracefully
-    if (![201, 200].includes(createRes.status())) {
-      test.skip()
-      return
-    }
+    // If creation failed, bail — can't test delete without a valid org
+    expect([201, 200]).toContain(createRes.status())
 
     const createBody = await createRes.json()
     const orgId = createBody.data?.id ?? createBody.id

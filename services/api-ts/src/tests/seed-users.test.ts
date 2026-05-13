@@ -2,7 +2,8 @@ import { describe, test, expect } from 'bun:test';
 import { apiAs } from './helpers/api-as';
 import { API_AVAILABLE } from './helpers/api-available';
 
-const d = API_AVAILABLE ? describe : describe.skip;
+// INFRA: requires live API server on port 7213 with seed data
+const d = API_AVAILABLE ? describe : describe.todo;
 
 const ALL_USERS = [
   'test@memberry.ph',
