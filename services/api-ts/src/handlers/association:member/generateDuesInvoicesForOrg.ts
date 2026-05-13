@@ -78,52 +78,58 @@ export async function generateDuesInvoicesForOrg(
       ),
     );
 
-  const generatedInvoices: any[] = [];
-  let invoiceCounter = 0;
+  // [CR-03] Wrap the entire insert loop in a transaction so a mid-batch
+  // server crash cannot leave a partially-committed invoice set.
+  const generatedInvoices: any[] = await db.transaction(async (tx: DatabaseInstance) => {
+    const invoices: any[] = [];
+    let invoiceCounter = 0;
 
-  for (const member of activeMembers) {
-    // Check if invoice already exists for this member+period
-    const [existing] = await db
-      .select()
-      .from(duesInvoices)
-      .where(
-        and(
-          eq(duesInvoices.membershipId, member.id),
-          eq(duesInvoices.periodStart, body.periodStart),
-          eq(duesInvoices.periodEnd, body.periodEnd),
-        ),
-      )
-      .limit(1);
+    for (const member of activeMembers) {
+      // Check if invoice already exists for this member+period
+      const [existing] = await tx
+        .select()
+        .from(duesInvoices)
+        .where(
+          and(
+            eq(duesInvoices.membershipId, member.id),
+            eq(duesInvoices.periodStart, body.periodStart),
+            eq(duesInvoices.periodEnd, body.periodEnd),
+          ),
+        )
+        .limit(1);
 
-    if (existing) {
-      // Already generated — skip
-      continue;
+      if (existing) {
+        // Already generated — skip
+        continue;
+      }
+
+      invoiceCounter++;
+      const invoiceNumber = `INV-${orgId.slice(0, 8)}-${Date.now()}-${invoiceCounter}`;
+
+      // Generate the invoice
+      const [invoice] = await tx
+        .insert(duesInvoices)
+        .values({
+          membershipId: member.id,
+          personId: member.personId,
+          organizationId: orgId,
+          invoiceNumber,
+          periodStart: body.periodStart,
+          periodEnd: body.periodEnd,
+          totalAmount: config.annualAmount,
+          fundAllocations: (config.fundAllocations || []).map((fa: any) => ({
+            fundName: fa.fundName,
+            amount: Math.round(config.annualAmount * (fa.percentage / 100)),
+          })),
+          status: 'generated',
+        })
+        .returning();
+
+      invoices.push(invoice);
     }
 
-    invoiceCounter++;
-    const invoiceNumber = `INV-${orgId.slice(0, 8)}-${Date.now()}-${invoiceCounter}`;
-
-    // Generate the invoice
-    const [invoice] = await db
-      .insert(duesInvoices)
-      .values({
-        membershipId: member.id,
-        personId: member.personId,
-        organizationId: orgId,
-        invoiceNumber,
-        periodStart: body.periodStart,
-        periodEnd: body.periodEnd,
-        totalAmount: config.annualAmount,
-        fundAllocations: (config.fundAllocations || []).map((fa: any) => ({
-          fundName: fa.fundName,
-          amount: Math.round(config.annualAmount * (fa.percentage / 100)),
-        })),
-        status: 'generated',
-      })
-      .returning();
-
-    generatedInvoices.push(invoice);
-  }
+    return invoices;
+  });
 
   // 3. Trigger reminder processing for this org (fire-and-forget)
   processDuesReminders({ db, logger }).catch((err: any) => {
