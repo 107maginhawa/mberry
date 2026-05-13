@@ -3,7 +3,7 @@
  * Encapsulates all database operations for membership-related tables
  */
 
-import { eq, and, or, ilike, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, inArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
 import {
@@ -196,6 +196,35 @@ export class MembershipRepository extends DatabaseRepository<
       .where(eq(memberships.personId, personId));
 
     return records as Membership[];
+  }
+
+  /**
+   * Find members whose dues expiry date matches a target date.
+   * Used by reminder processor to find who needs reminders at a given offset.
+   */
+  async findMembersExpiringOn(
+    orgId: string,
+    targetDate: string,
+  ): Promise<{ id: string; personId: string; organizationId: string; duesExpiryDate: Date }[]> {
+    this.logger?.debug({ orgId, targetDate }, 'Finding members expiring on date');
+
+    const records = await this.db
+      .select({
+        id: memberships.id,
+        personId: memberships.personId,
+        organizationId: memberships.organizationId,
+        duesExpiryDate: memberships.duesExpiryDate,
+      })
+      .from(memberships)
+      .where(
+        and(
+          eq(memberships.organizationId, orgId),
+          eq(memberships.duesExpiryDate, targetDate),
+          inArray(memberships.status, ['active', 'gracePeriod']),
+        ),
+      );
+
+    return records as { id: string; personId: string; organizationId: string; duesExpiryDate: Date }[];
   }
 }
 
