@@ -159,6 +159,36 @@ jobs:
           echo "::error::Staging health check failed after 150s"
           exit 1
 
+      - name: Smoke test — staging
+        if: vars.STAGING_API_URL != ''
+        run: |
+          DEPLOY_URL="${{ vars.STAGING_API_URL }}"
+          FAILED=0
+
+          # 1. Liveness
+          curl -fsS "$DEPLOY_URL/livez" > /dev/null || { echo "::error::livez failed"; FAILED=1; }
+
+          # 2. Readiness (verbose — checks db, storage, jobs)
+          READYZ=$(curl -fsS "$DEPLOY_URL/readyz?verbose")
+          echo "readyz: $READYZ"
+          echo "$READYZ" | grep -q '"status":"pass"' || { echo "::error::readyz not passing"; FAILED=1; }
+
+          # 3. Auth endpoint responds (not 500)
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/api/auth/session")
+          echo "auth/session: HTTP $AUTH_STATUS"
+          [ "$AUTH_STATUS" -lt 500 ] || { echo "::error::auth endpoint 5xx"; FAILED=1; }
+
+          # 4. Feature flags endpoint (if available)
+          FF_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/feature-flags")
+          echo "feature-flags: HTTP $FF_STATUS"
+          [ "$FF_STATUS" -lt 500 ] || { echo "::warning::feature-flags endpoint 5xx"; }
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Staging smoke tests failed — do NOT deploy to production"
+            exit 1
+          fi
+          echo "Staging smoke tests passed ✓"
+
   deploy-production:
     if: github.event_name == 'workflow_dispatch' && inputs.environment == 'production'
     needs: [build]
@@ -226,6 +256,36 @@ jobs:
       - name: Smoke test — production
         if: vars.PRODUCTION_API_URL != ''
         run: |
-          # Verify key endpoints respond
-          curl -fsS "${{ vars.PRODUCTION_API_URL }}/livez" || exit 1
-          echo "Production smoke test passed"
+          DEPLOY_URL="${{ vars.PRODUCTION_API_URL }}"
+          FAILED=0
+
+          # 1. Liveness
+          curl -fsS "$DEPLOY_URL/livez" > /dev/null || { echo "::error::livez failed"; FAILED=1; }
+
+          # 2. Readiness (verbose — checks db, storage, jobs)
+          READYZ=$(curl -fsS "$DEPLOY_URL/readyz?verbose")
+          echo "readyz: $READYZ"
+          echo "$READYZ" | grep -q '"status":"pass"' || { echo "::error::readyz not passing"; FAILED=1; }
+
+          # 3. Auth endpoint responds (not 500)
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/api/auth/session")
+          echo "auth/session: HTTP $AUTH_STATUS"
+          [ "$AUTH_STATUS" -lt 500 ] || { echo "::error::auth endpoint 5xx"; FAILED=1; }
+
+          # 4. Feature flags endpoint
+          FF_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/feature-flags")
+          echo "feature-flags: HTTP $FF_STATUS"
+          [ "$FF_STATUS" -lt 500 ] || { echo "::warning::feature-flags endpoint 5xx"; }
+
+          # 5. Deploy marker — log commit SHA for rollback reference
+          echo "deployed_sha=${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Production Deploy ✓" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **SHA**: \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Rollback**: \`bun run rollback -- --env production --to-sha <previous-sha>\`" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Production smoke tests failed — consider rollback"
+            exit 1
+          fi
+          echo "Production smoke tests passed ✓"

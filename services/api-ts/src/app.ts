@@ -28,6 +28,7 @@ import { registerDuesJobs } from '@/handlers/dues/jobs';
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
 import { registerRoutes as registerHealthRoutes } from '@/core/health';
+import { registerRoutes as registerFeatureFlagRoutes } from '@/core/feature-flags';
 import { registerRoutes as registerAuthRoutes } from '@/core/auth';
 import { registerRoutes as registerDocsRoutes } from '@/core/openapi';
 import { registerRoutes as registerWebSocketRoutes } from '@/generated/websocket/registry';
@@ -102,11 +103,19 @@ export function createApp(config: Config): App {
   // Register health check endpoints
   registerHealthRoutes(app as App);
 
+  // Register feature flags endpoint (public, no auth)
+  registerFeatureFlagRoutes(app as App);
+
   // Register auth routes
   registerAuthRoutes(app as App);
 
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
+
+  // Org-context for email routes (admin creates templates per-org)
+  // Auth middleware sets user/session; orgContextMiddleware sets orgId from request
+  app.use('/email/*', authMiddleware());
+  app.use('/email/*', orgContextMiddleware());
 
   // Public association endpoints that must NOT have auth middleware
   const ASSOCIATION_PUBLIC_PATHS = [
