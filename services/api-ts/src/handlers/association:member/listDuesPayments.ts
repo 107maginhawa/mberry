@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { ListDuesPaymentsQuery } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * listDuesPayments
@@ -22,6 +23,13 @@ export async function listDuesPayments(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);
 
+  // PAY-02: non-officer callers can only see their own payments
+  const officerDenied = await requireOfficerTerm(ctx as any);
+  const isOfficer = officerDenied === null; // null = is officer
+  const effectivePersonId = isOfficer
+    ? query.personId          // officer: respect query param (org-scoped)
+    : session.user.id;       // member: force own personId
+
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 20;
   const offset = query.offset ?? (page - 1) * pageSize;
@@ -29,7 +37,7 @@ export async function listDuesPayments(
 
   const result = await repo.listPayments({
     organizationId: orgId,
-    personId: query.personId,
+    personId: effectivePersonId,
     status: query.status,
     limit,
     offset,
