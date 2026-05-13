@@ -1,5 +1,6 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { mock } from 'bun:test';
 import { markDuesInvoicePaid } from './markDuesInvoicePaid';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
@@ -258,6 +259,56 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     const response = await markDuesInvoicePaid(ctx);
     expect(response.status).toBe(200);
     expect(updateCalled).toBe(false);
+  });
+});
+
+// ─── SEC-01 Auth Guard Tests (RED phase — expect FAIL until Plan 02) ─────────
+
+describe('[SEC-01] markDuesInvoicePaid — position-based auth', () => {
+  let mocks: Record<string, { mockRestore: () => void }>;
+
+  afterEach(() => {
+    restoreRepo(DuesInvoiceRepository);
+    if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+  });
+
+  test('throws UnauthorizedError when no session', async () => {
+    const ctx = makeCtx({ _params: { invoiceId: 'inv-1' }, session: null, user: null });
+    await expect(markDuesInvoicePaid(ctx as any)).rejects.toThrow();
+  });
+
+  test('returns 403 when requirePosition denies (member role) [RED]', async () => {
+    mock.module('@/utils/officer-check', () => ({
+      requirePosition: async () => new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 }),
+    }));
+    mocks = stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ id: 'inv-1', organizationId: 'org-1', status: 'generated', membershipId: 'm-1' }),
+    });
+    const ctx = makeCtx({
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1' },
+      organizationId: 'org-1',
+    });
+    // RED: handler currently has no requirePosition call — will NOT return 403
+    const res = await markDuesInvoicePaid(ctx as any);
+    expect(res.status).toBe(403);
+  });
+
+  test('returns 403 when invoice belongs to different org (cross-org) [RED]', async () => {
+    mock.module('@/utils/officer-check', () => ({
+      requirePosition: async () => null,
+    }));
+    mocks = stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ id: 'inv-1', organizationId: 'org-B', status: 'generated', membershipId: 'm-1' }),
+    });
+    const ctx = makeCtx({
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1' },
+      organizationId: 'org-A',
+    });
+    // RED: handler currently has no cross-org check — will return 200 instead of 403
+    const res = await markDuesInvoicePaid(ctx as any);
+    expect(res.status).toBe(403);
   });
 });
 
