@@ -17,7 +17,7 @@ function makeMembership(overrides: Record<string, any> = {}) {
   return {
     id: 'mem-1',
     organizationId: 'org-1',
-    orgId: 'org-1',
+    organizationId: 'org-1',
     personId: 'person-1',
     tierId: 'tier-1',
     categoryId: 'cat-1',
@@ -53,7 +53,7 @@ function makeCategory(overrides: Record<string, any> = {}) {
   return {
     id: 'cat-1',
     organizationId: 'org-1',
-    orgId: 'org-1',
+    organizationId: 'org-1',
     name: 'Regular',
     description: 'Regular membership',
     applicableTiers: ['tier-1'],
@@ -70,7 +70,7 @@ function makeApplication(overrides: Record<string, any> = {}) {
   return {
     id: 'app-1',
     organizationId: 'org-1',
-    orgId: 'org-1',
+    organizationId: 'org-1',
     personId: 'person-1',
     tierId: 'tier-1',
     applicationDate: '2026-01-15',

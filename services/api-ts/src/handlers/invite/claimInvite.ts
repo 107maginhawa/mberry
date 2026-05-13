@@ -61,7 +61,7 @@ export async function claimInvite(
 
   return ctx.json({
     claimed: true,
-    orgId: invite.organizationId,
+    organizationId: invite.organizationId,
     metadata: invite.metadata,
   });
 }

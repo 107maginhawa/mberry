@@ -7,7 +7,6 @@ import { DuesInvoiceRepository } from './repos/dues.repo';
 
 const fakeInvoice = {
   id: 'inv-1',
-  organizationId: 'tenant-1',
   organizationId: 'org-1',
   membershipId: 'mem-1',
   status: 'generated' as const,
@@ -42,6 +41,7 @@ describe('recordManualPayment', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: {
         duesInvoiceId: 'inv-1',
         paymentMethod: 'cash',
@@ -67,6 +67,7 @@ describe('recordManualPayment', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: {
         duesInvoiceId: 'inv-1',
         paymentMethod: 'cash',
@@ -147,6 +148,7 @@ describe('recordManualPayment', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: { duesInvoiceId: 'inv-1', paymentMethod: 'cash' },
     });
 
@@ -163,6 +165,7 @@ describe('recordManualPayment', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: {
         duesInvoiceId: 'inv-1',
         paymentMethod: 'bankTransfer',
@@ -185,6 +188,7 @@ describe('recordManualPayment', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: {
         duesInvoiceId: 'inv-1',
         paymentMethod: 'check',

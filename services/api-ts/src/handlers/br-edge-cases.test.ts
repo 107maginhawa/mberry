@@ -104,8 +104,8 @@ describe('[BR-16] Changing visibility from network-wide to internal warns about 
     mocks = stubRepo(EventsRepository, {
       get: async () => ({
         id: 'evt-1',
-        organizationId: 'org-1',
-        organizationId: 'org-1',
+        orgId: 'org-1',
+        orgId: 'org-1',
         title: 'Network Event',
         status: 'published',
         createdBy: 'user-1',
@@ -141,7 +141,7 @@ describe('[BR-19] ID card generation blocked for lapsed/suspended members', () =
 
   test('[BR-19] returns 403 when member status is lapsed', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', orgId: 'tenant-1', status: 'lapsed' }),
+      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1', status: 'lapsed' }),
     });
     const tmplMocks = stubRepo(CredentialTemplateRepository, {
       findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
@@ -157,7 +157,7 @@ describe('[BR-19] ID card generation blocked for lapsed/suspended members', () =
 
   test('[BR-19] returns 403 when member status is suspended', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', orgId: 'tenant-1', status: 'suspended' }),
+      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1', status: 'suspended' }),
     });
     const tmplMocks = stubRepo(CredentialTemplateRepository, {
       findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
@@ -173,7 +173,7 @@ describe('[BR-19] ID card generation blocked for lapsed/suspended members', () =
 
   test('[BR-19] returns 200 when member status is active', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', orgId: 'tenant-1', status: 'active' }),
+      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1', status: 'active' }),
     });
     const tmplMocks = stubRepo(CredentialTemplateRepository, {
       findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
@@ -225,7 +225,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
       getByOrg: async () => ({
         id: 'train-1',
         organizationId: 'tenant-1',
-        organizationId: 'org-1',
+        orgId: 'org-1',
         title: 'Future Training',
         status: 'published',
         endDate: new Date('2099-12-31'),
@@ -246,7 +246,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
       getByOrg: async () => ({
         id: 'train-1',
         organizationId: 'tenant-1',
-        organizationId: 'org-1',
+        orgId: 'org-1',
         title: 'Cancelled Training',
         status: 'cancelled',
         endDate: new Date('2020-01-01'),
@@ -274,7 +274,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
       getByOrg: async () => ({
         id: 'train-1',
         organizationId: 'tenant-1',
-        organizationId: 'org-1',
+        orgId: 'org-1',
         title: 'Past Training',
         status: 'completed',
         endDate: new Date('2020-01-01'),

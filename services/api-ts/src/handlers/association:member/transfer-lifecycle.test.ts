@@ -71,7 +71,7 @@ describe('Transfer Lifecycle: create → source approve → target approve → c
 
     const ctx = makeCtx({
       _body: { personId: PERSON_ID, fromChapterId: FROM_CHAPTER, toChapterId: TO_CHAPTER },
-      orgId: ORG_ID,
+      organizationId: ORG_ID,
     });
     const res = await createAffiliationTransfer(ctx);
     expect(res.status).toBe(201);
@@ -276,7 +276,7 @@ describe('Transfer Invalid State Transitions', () => {
     const { createAffiliationTransfer } = await import('./createAffiliationTransfer');
 
     const ctx = makeCtx({
-      orgId: null,
+      organizationId: null,
       _body: { personId: PERSON_ID, fromChapterId: FROM_CHAPTER, toChapterId: TO_CHAPTER },
     });
     const res = await createAffiliationTransfer(ctx);

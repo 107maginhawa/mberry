@@ -8,7 +8,7 @@ import { MembershipRepository } from './repos/membership.repo';
 const fakeCategory = {
   id: 'cat-1',
   organizationId: 'org-1',
-  orgId: 'org-1',
+  organizationId: 'org-1',
   name: 'Regular',
   description: 'Regular members',
   applicableTiers: ['tier-1'],

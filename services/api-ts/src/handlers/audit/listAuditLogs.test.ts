@@ -75,7 +75,7 @@ describe('listAuditLogs', () => {
 
     const ctx = makeCtx({
       user: { id: 'user-1', role: 'admin' },
-      orgId: 'org-1',
+      organizationId: 'org-1',
       _query: {},
     });
 
@@ -102,7 +102,7 @@ describe('listAuditLogs', () => {
 
     const ctx = makeCtx({
       user: { id: 'user-1', role: 'admin' },
-      orgId: 'tenant-42',
+      organizationId: 'tenant-42',
       _query: {},
     });
 
@@ -121,7 +121,7 @@ describe('listAuditLogs', () => {
 
     const ctx = makeCtx({
       user: { id: 'user-1', role: 'admin' },
-      orgId: 'org-1',
+      organizationId: 'org-1',
       _query: {
         startDate: '2025-12-01T00:00:00.000Z',
         endDate: '2025-01-01T00:00:00.000Z',
@@ -147,7 +147,7 @@ describe('listAuditLogs', () => {
 
     const ctx = makeCtx({
       user: { id: 'admin-user', role: 'admin' },
-      orgId: 'org-1',
+      organizationId: 'org-1',
       _query: {},
     });
 
@@ -171,7 +171,7 @@ describe('listAuditLogs', () => {
 
     const ctx = makeCtx({
       user: { id: 'user-1', role: 'admin' },
-      orgId: 'org-1',
+      organizationId: 'org-1',
       _query: {
         startDate: '2025-01-01T00:00:00.000Z',
         endDate: '2025-12-31T23:59:59.000Z',
@@ -203,7 +203,7 @@ describe('listAuditLogs', () => {
 
     const ctx = makeCtx({
       user: { id: 'user-1', role: 'admin' },
-      orgId: 'org-1',
+      organizationId: 'org-1',
       _query: {},
     });
 
@@ -228,7 +228,7 @@ describe('listAuditLogs', () => {
 
     const ctx = makeCtx({
       user: { id: 'user-1', role: 'admin' },
-      orgId: 'org-1',
+      organizationId: 'org-1',
       _query: {},
     });
 
@@ -254,7 +254,7 @@ describe('listAuditLogs', () => {
 
     const ctx = makeCtx({
       user: { id: 'user-1', role: 'admin' },
-      orgId: 'org-1',
+      organizationId: 'org-1',
       _query: { limit: '10', offset: '20' },
     });
 

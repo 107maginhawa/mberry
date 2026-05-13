@@ -9,8 +9,7 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 
 const fakeApplication = {
   id: 'app-1',
-  organizationId: 'tenant-1',
-  orgId: 'org-1',
+  organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
   status: 'submitted',
@@ -232,7 +231,7 @@ describe('approveMembershipApplication', () => {
     await approveMembershipApplication(ctx);
     expect(capturedMembership.status).toBe('pendingPayment');
     expect(capturedMembership.personId).toBe('person-1');
-    expect(capturedMembership.organizationId).toBe('tenant-1');
+    expect(capturedMembership.organizationId).toBe('org-1');
     expect(capturedMembership.tierId).toBe('tier-1');
   });
 

@@ -39,7 +39,7 @@ describe('createBookingEvent', () => {
 
     const ctx = makeCtx({
       _body: {},
-      orgId: 'org-1',
+      organizationId: 'org-1',
     });
 
     await expect(createBookingEvent(ctx as any)).rejects.toThrow('Invalid booking event configuration');
@@ -58,7 +58,7 @@ describe('createBookingEvent', () => {
 
     const ctx = makeCtx({
       _body: { title: 'Consultation' },
-      orgId: 'org-1',
+      organizationId: 'org-1',
     });
 
     const res = await createBookingEvent(ctx as any);

@@ -712,7 +712,7 @@ describe('searchDocuments', () => {
     });
 
     const { searchDocuments } = await import('./searchDocuments');
-    const ctx = makeCtx({ _query: {} });
+    const ctx = makeCtx({ organizationId: ORG_ID, _query: {} });
     await searchDocuments(ctx);
     expect(capturedFilters.organizationId).toBe(ORG_ID);
   });

@@ -7,7 +7,7 @@ import { InviteRepository } from './repos/invite.repo';
 
 const fakeInvite = {
   id: 'invite-1',
-  orgId: 'tenant-1',
+  organizationId: 'tenant-1',
   personId: null,
   tokenHash: 'hashed-token-abc',
   type: 'invite',
@@ -200,7 +200,7 @@ describe('createInvite', () => {
     });
 
     await createInvite(ctx);
-    expect(capturedData.orgId).toBe('tenant-XYZ');
+    expect(capturedData.organizationId).toBe('tenant-XYZ');
   });
 
   test('persists optional fields: personId, message, metadata', async () => {

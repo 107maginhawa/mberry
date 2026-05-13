@@ -72,7 +72,7 @@ describe('sendMessage', () => {
     mocks = stubRepo(MessageRepository, {
       findById: async () => ({ ...DRAFT_MSG, status: 'sent' }),
     });
-    const ctx = makeCtx({ _params: { messageId: 'msg-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _params: { messageId: 'msg-1' } });
     await expect(sendMessage(ctx as any)).rejects.toThrow('Cannot send a message with status "sent"');
   });
 
@@ -82,7 +82,7 @@ describe('sendMessage', () => {
       update: async (_id: string, data: any) => ({ ...DRAFT_MSG, ...data }),
     });
 
-    const ctx = makeCtx({ _params: { messageId: 'msg-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _params: { messageId: 'msg-1' } });
     const res = await sendMessage(ctx as any);
     expect(res.status).toBe(200);
   });
@@ -93,7 +93,7 @@ describe('sendMessage', () => {
       update: async (_id: string, data: any) => ({ ...DRAFT_MSG, ...data }),
     });
 
-    const ctx = makeCtx({ _params: { messageId: 'msg-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _params: { messageId: 'msg-1' } });
     const res = await sendMessage(ctx as any);
     expect(res.status).toBe(200);
   });

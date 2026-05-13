@@ -36,7 +36,7 @@ describe('requireOfficerTerm', () => {
   });
 
   test('returns 403 when no org context', async () => {
-    const ctx = makeCtx({ orgId: null, organizationId: null });
+    const ctx = makeCtx({ organizationId: null, organizationId: null });
     const origGet = ctx.get.bind(ctx);
     ctx.get = (key: string) => key === 'orgId' ? null : origGet(key);
     const result = await requireOfficerTerm(ctx as any);

@@ -56,6 +56,7 @@ describe('[BR-01] createMembership — pendingPayment must have null duesExpiryD
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: {
         personId: 'person-1',
         tierId: 'tier-1',
@@ -86,6 +87,7 @@ describe('[BR-01] createMembership — pendingPayment must have null duesExpiryD
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: {
         personId: 'person-2',
         tierId: 'tier-1',
@@ -119,6 +121,7 @@ describe('[BR-01] createMembership — pendingPayment must have null duesExpiryD
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: {
         personId: 'person-3',
         tierId: 'tier-1',
@@ -186,6 +189,7 @@ describe('[CODEX-P1-3] createMembership — cross-org tier isolation', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: { personId: 'person-1', tierId: 'tier-1' },
     });
 

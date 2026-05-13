@@ -18,7 +18,7 @@ export async function updateOrgProfile(ctx: Context): Promise<Response> {
   const orgId = ctx.req.param('orgId');
 
   // Set orgId for requirePosition (officerAuthMiddleware doesn't set ctx orgId)
-  ctx.set('orgId', orgId);
+  (ctx as any).set('organizationId', orgId);
   const denied = await requirePosition(ctx as any, [POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 

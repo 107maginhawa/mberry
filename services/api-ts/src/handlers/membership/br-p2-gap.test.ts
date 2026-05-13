@@ -146,9 +146,9 @@ describe('[BR-28] Communication Deduplication', () => {
     // BR-28: "Each member receives at most one notification per notification event"
     const personId = 'person-1';
     const notifications = [
-      { personId, type: 'dues_reminder', orgId: 'org-1' },
-      { personId, type: 'dues_reminder', orgId: 'org-2' },
-      { personId, type: 'dues_reminder', orgId: 'org-3' },
+      { personId, type: 'dues_reminder', organizationId: 'org-1' },
+      { personId, type: 'dues_reminder', organizationId: 'org-2' },
+      { personId, type: 'dues_reminder', organizationId: 'org-3' },
     ];
 
     // Deduplicate by (personId, type)

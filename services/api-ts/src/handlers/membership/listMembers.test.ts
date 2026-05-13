@@ -8,7 +8,7 @@ import { MembershipRepository } from './repos/membership.repo';
 const fakeListResult = {
   data: [
     {
-      membership: { id: 'mem-1', orgId: 'org-1', status: 'active' },
+      membership: { id: 'mem-1', organizationId: 'org-1', status: 'active' },
       person: { id: 'p-1', firstName: 'Alice', lastName: 'Smith', avatar: null },
       category: { id: 'cat-1', name: 'Regular' },
     },

@@ -12,7 +12,7 @@ const TOKEN_HASH = hashToken(RAW_TOKEN, TEST_SECRET);
 
 const fakePendingInvite = {
   id: 'invite-1',
-  orgId: 'org-1',
+  organizationId: 'org-1',
   personId: null,
   tokenHash: TOKEN_HASH,
   type: 'invite',
@@ -55,7 +55,7 @@ describe('claimInvite', () => {
     const response = await claimInvite(ctx);
     // Handler calls ctx.json(body) with no status — mock returns undefined status.
     expect(response.body.claimed).toBe(true);
-    expect(response.body.orgId).toBe('org-1');
+    expect(response.body.organizationId).toBe('org-1');
     expect(response.body.metadata).toEqual({ role: 'member' });
   });
 

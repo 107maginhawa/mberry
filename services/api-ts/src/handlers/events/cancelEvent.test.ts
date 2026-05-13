@@ -23,7 +23,7 @@ describe('cancelEvent', () => {
   let memberMocks: ReturnType<typeof stubRepo>;
 
   const stubMembership = () => stubRepo(MembershipRepository, {
-    getMember: async () => ({ id: 'mem-1', personId: 'user-1', orgId: 'org-1', status: 'active' }),
+    getMember: async () => ({ id: 'mem-1', personId: 'user-1', organizationId: 'org-1', status: 'active' }),
   });
 
   afterEach(() => {

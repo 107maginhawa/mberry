@@ -7,11 +7,11 @@ import { MembershipRepository } from './repos/membership.repo';
 
 const fakeApplications = [
   {
-    application: { id: 'app-1', orgId: 'org-1', personId: 'p-1', status: 'submitted' },
+    application: { id: 'app-1', organizationId: 'org-1', personId: 'p-1', status: 'submitted' },
     person: { id: 'p-1', firstName: 'Alice', lastName: 'Smith' },
   },
   {
-    application: { id: 'app-2', orgId: 'org-1', personId: 'p-2', status: 'approved' },
+    application: { id: 'app-2', organizationId: 'org-1', personId: 'p-2', status: 'approved' },
     person: { id: 'p-2', firstName: 'Bob', lastName: 'Jones' },
   },
 ];

@@ -114,11 +114,11 @@ describe('orgContextMiddleware', () => {
     await middleware(ctx as any, next);
 
     expect(isNextCalled()).toBe(true);
-    expect(vars['orgId']).toBe('org-1');
+    expect(vars['organizationId']).toBe('org-1');
     expect(vars['orgMembership']).toEqual({
       membershipId: 'mem-1',
       personId: 'user-1',
-      orgId: 'org-1',
+      organizationId: 'org-1',
       role: 'member',
       status: 'active',
     });
@@ -154,14 +154,14 @@ describe('orgContextMiddleware', () => {
     await middleware(ctx as any, next);
 
     expect(isNextCalled()).toBe(true);
-    expect(vars['orgId']).toBe('org-from-body');
+    expect(vars['organizationId']).toBe('org-from-body');
   });
 
   test('POST with orgId in body resolves org context correctly', async () => {
     const { ctx, next, vars, isNextCalled } = makeMockCtx({
       orgId: null,
       method: 'POST',
-      body: { orgId: 'org-shortkey', title: 'Meeting' },
+      body: { organizationId: 'org-shortkey', title: 'Meeting' },
       membershipRows: [{
         id: 'mem-3',
         personId: 'user-1',
@@ -174,7 +174,7 @@ describe('orgContextMiddleware', () => {
     await middleware(ctx as any, next);
 
     expect(isNextCalled()).toBe(true);
-    expect(vars['orgId']).toBe('org-shortkey');
+    expect(vars['organizationId']).toBe('org-shortkey');
   });
 
   test('GET does NOT extract orgId from body — returns 403 without header', async () => {
@@ -212,7 +212,7 @@ describe('orgContextMiddleware', () => {
 
     expect(isNextCalled()).toBe(true);
     // Must be the header value, NOT the eventId UUID
-    expect(vars['orgId']).toBe('org-header');
-    expect(vars['orgId']).not.toBe(eventId);
+    expect(vars['organizationId']).toBe('org-header');
+    expect(vars['organizationId']).not.toBe(eventId);
   });
 });

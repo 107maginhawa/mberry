@@ -27,7 +27,7 @@ const fakeDb = {
 
 const baseInput = {
   db: fakeDb,
-  orgId: 'org-1',
+  organizationId: 'org-1',
   personId: 'person-1',
   paymentId: 'pay-1',
   amount: 5000,

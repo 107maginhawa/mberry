@@ -16,7 +16,7 @@ export interface TestUser {
   name: string;
   email: string;
   role: string;
-  orgId: string;
+  organizationId: string;
 }
 
 export function makeUser(overrides: Partial<TestUser> = {}): TestUser {
@@ -25,7 +25,7 @@ export function makeUser(overrides: Partial<TestUser> = {}): TestUser {
     name: 'Test User',
     email: 'test@example.com',
     role: 'user',
-    orgId: 'org-1',
+    organizationId: 'org-1',
     ...overrides,
   };
 }
@@ -46,18 +46,11 @@ export function makeCtx(overrides: Record<string, any> = {}) {
     user,
     session: user ? { id: 'session-1', userId: user.id, user } : null,
     organizationId: 'tenant-1',
-    orgId: 'org-1',
     database: { transaction: async (fn: any) => fn({}) },
     logger: null,
     audit: null,
     ...overrides,
   };
-
-  // Propagate organizationId to orgId for test context consistency
-  // Handlers check ctx.get('orgId'), so organizationId overrides must flow through
-  if ('organizationId' in overrides && !('orgId' in overrides)) {
-    vars['orgId'] = (overrides as any)['organizationId'];
-  }
 
   const jsonBody: any = overrides['_body'] || {};
   const paramValues: any = overrides['_params'] || {};
@@ -173,8 +166,8 @@ export async function expectForbidden(
   handler: (ctx: any) => Promise<Response>,
   ctxOverrides: Record<string, any> = {},
 ): Promise<void> {
-  const wrongOrgUser = makeUser({ orgId: 'wrong-org' });
-  const ctx = makeCtx({ user: wrongOrgUser, orgId: 'wrong-org', ...ctxOverrides });
+  const wrongOrgUser = makeUser({ organizationId: 'wrong-org' });
+  const ctx = makeCtx({ user: wrongOrgUser, organizationId: 'wrong-org', ...ctxOverrides });
   const response = await handler(ctx);
   if (response.status !== 403) {
     throw new Error(`Expected 403, got ${response.status}`);

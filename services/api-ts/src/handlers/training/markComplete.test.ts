@@ -6,8 +6,8 @@ import { CreditEntryRepository } from '../association:member/repos/credits.repo'
 
 const fakeTraining = {
   id: 'training-1',
-  organizationId: 'org-1',
-  organizationId: 'org-1',
+  orgId: 'org-1',
+  orgId: 'org-1',
   title: 'CPD Seminar',
   status: 'completed',
   capacity: 50,
@@ -17,7 +17,7 @@ const fakeTraining = {
 
 const fakeEnrollment = {
   id: 'enroll-1',
-  organizationId: 'org-1',
+  orgId: 'org-1',
   trainingId: 'training-1',
   personId: 'person-1',
   status: 'enrolled',

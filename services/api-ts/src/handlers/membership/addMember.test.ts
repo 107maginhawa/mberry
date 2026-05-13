@@ -8,7 +8,7 @@ import { MembershipRepository } from './repos/membership.repo';
 const fakeMember = {
   id: 'mem-1',
   organizationId: 'org-1',
-  orgId: 'org-1',
+  organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
   categoryId: 'cat-1',
@@ -49,7 +49,7 @@ describe('addMember', () => {
     const response = await addMember(ctx);
     expect(response.status).toBe(201);
     expect(response.body.data.personId).toBe('person-1');
-    expect(response.body.data.orgId).toBe('org-1');
+    expect(response.body.data.organizationId).toBe('org-1');
   });
 
   test('crashes without session (no auth)', async () => {

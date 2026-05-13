@@ -5,8 +5,8 @@ import { TrainingRepository } from './repos/training.repo';
 
 const fakeTraining = {
   id: 'training-1',
-  organizationId: 'org-1',
-  organizationId: 'org-1',
+  orgId: 'org-1',
+  orgId: 'org-1',
   title: 'CPD Seminar',
   status: 'published',
   startDate: new Date('2026-06-01'),

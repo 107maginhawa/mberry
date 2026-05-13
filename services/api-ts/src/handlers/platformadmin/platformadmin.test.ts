@@ -57,21 +57,21 @@ describe('platformadmin auth guards', () => {
 
   test('getOrganization returns 401 without session', async () => {
     const { getOrganization } = await import('./getOrganization');
-    const ctx = makeCtx({ session: null, _params: { organizationId: 'o-1' } });
+    const ctx = makeCtx({ session: null, _params: { orgId: 'o-1' } });
     const response = await getOrganization(ctx);
     expect(response.status).toBe(401);
   });
 
   test('updateOrganization returns 401 without session', async () => {
     const { updateOrganization } = await import('./updateOrganization');
-    const ctx = makeCtx({ session: null, _params: { organizationId: 'o-1' }, _body: {} });
+    const ctx = makeCtx({ session: null, _params: { orgId: 'o-1' }, _body: {} });
     const response = await updateOrganization(ctx);
     expect(response.status).toBe(401);
   });
 
   test('transitionOrgStatus returns 401 without session', async () => {
     const { transitionOrgStatus } = await import('./transitionOrgStatus');
-    const ctx = makeCtx({ session: null, _params: { organizationId: 'o-1' }, _body: { status: 'active' } });
+    const ctx = makeCtx({ session: null, _params: { orgId: 'o-1' }, _body: { status: 'active' } });
     const response = await transitionOrgStatus(ctx);
     expect(response.status).toBe(401);
   });

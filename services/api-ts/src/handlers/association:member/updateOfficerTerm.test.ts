@@ -8,7 +8,6 @@ import { NotFoundError } from '@/core/errors';
 
 const existingTerm = {
   id: 'term-1',
-  organizationId: 'tenant-1',
   positionId: 'pos-1',
   personId: 'person-1',
   organizationId: 'org-1',
@@ -40,6 +39,7 @@ describe('updateOfficerTerm', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { termId: 'term-1' },
       _body: { endDate: new Date('2025-12-31'), status: 'completed' },
     });
@@ -61,6 +61,7 @@ describe('updateOfficerTerm', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { termId: 'term-1' },
       _body: { notes: 'Updated note' },
     });
@@ -80,6 +81,7 @@ describe('updateOfficerTerm', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { termId: 'term-1' },
       _body: { notes: 'Term ended early' },
     });
@@ -140,6 +142,7 @@ describe('updateOfficerTerm', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       audit: null,
       _params: { termId: 'term-1' },
       _body: { notes: 'Audit no-op test' },

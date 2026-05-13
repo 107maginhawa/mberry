@@ -88,7 +88,7 @@ describe('Dunning Templates', () => {
     });
 
     const { getDunningTemplate } = await import('./getDunningTemplate');
-    const ctx = makeCtx({ _params: { templateId: 'tmpl-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _params: { templateId: 'tmpl-1' } });
     const response = await getDunningTemplate(ctx);
     expect(response.status).toBe(200);
 
@@ -178,6 +178,7 @@ describe('Dunning Templates', () => {
 
     const { updateDunningTemplate } = await import('./updateDunningTemplate');
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { templateId: 'tmpl-1' },
       _body: { name: 'Updated Notice', daysAfterDue: 45 },
     });
@@ -196,7 +197,7 @@ describe('Dunning Templates', () => {
     });
 
     const { deleteDunningTemplate } = await import('./deleteDunningTemplate');
-    const ctx = makeCtx({ _params: { templateId: 'tmpl-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _params: { templateId: 'tmpl-1' } });
     const response = await deleteDunningTemplate(ctx);
     expect(response.status).toBe(204);
   });

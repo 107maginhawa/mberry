@@ -20,6 +20,6 @@ describe('updatePrivacySettings', () => {
 
   test('throws ValidationError without orgId', async () => {
     const ctx = makeCtx({ _body: {} });
-    await expect(updatePrivacySettings(ctx)).rejects.toThrow('orgId is required');
+    await expect(updatePrivacySettings(ctx)).rejects.toThrow('organizationId is required');
   });
 });

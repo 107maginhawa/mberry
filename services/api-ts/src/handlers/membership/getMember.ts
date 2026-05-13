@@ -39,7 +39,7 @@ export async function getMember(ctx: Context): Promise<Response> {
       gracePeriodDays: m.gracePeriodDays || 30,
       joinedAt: m.joinedAt || m.createdAt || null,
       startDate: m.startDate || null,
-      orgId: m.orgId || m.organizationId || null,
+      organizationId: m.organizationId || null,
     },
   }, 200);
 }
