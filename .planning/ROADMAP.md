@@ -76,7 +76,7 @@
     - [x] 13-04-PLAN.md — Wire requirePosition to app.ts inline routes + verify GREEN
     - [x] 13-05-PLAN.md — Frontend sidebar position filtering
 
-- [ ] **Phase 14: Negative E2E Tests — Role Boundaries**
+- [x] **Phase 14: Negative E2E Tests — Role Boundaries** (completed 2026-05-13)
   - RED->GREEN: Member cannot access officer routes (6 tests)
   - RED->GREEN: Treasurer cannot create events/send announcements (5 tests)
   - RED->GREEN: Secretary cannot record payments/refunds/configure gateway (5 tests)
@@ -85,8 +85,8 @@
   - **Deps:** Phase 13
   - **Est:** 1-2 days
   - **Plans:** 2 plans
-    - [ ] 14-01-PLAN.md — Role boundary E2E tests (member, treasurer, secretary restrictions)
-    - [ ] 14-02-PLAN.md — Cross-org isolation E2E tests
+    - [x] 14-01-PLAN.md — Role boundary E2E tests (member, treasurer, secretary restrictions)
+    - [x] 14-02-PLAN.md — Cross-org isolation E2E tests
 
 - [ ] **Phase 15: Dues Reminder UI + BR Edge Cases**
   - RED: Batch dues reminder trigger — treasurer sends reminders to filtered members
@@ -157,7 +157,7 @@
 | 11. Test Infrastructure & Seed Users | v1.1.0 | 3/3 | Complete   | 2026-05-08 |
 | 12. Backend Auth — Route Protection | v1.1.0 | 6/6 | Complete | 2026-05-13 |
 | 13. Position-Based RBAC | v1.1.0 | 5/5 | Complete | 2026-05-13 |
-| 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 0/2 | Not Started | -- |
+| 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 2/2 | Complete | 2026-05-13 |
 | 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 0/0 | Not Started | -- |
 | 16. Mobile & Transfer Validation | v1.1.0 | 0/0 | Not Started | -- |
 | 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
