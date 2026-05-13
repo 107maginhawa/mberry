@@ -16,6 +16,8 @@ Thank you for your interest in contributing to Monobase! This guide will help yo
 - [Code Review Guidelines](#code-review-guidelines)
 - [Debugging Tips](#debugging-tips)
 - [Frontend Development Patterns](#frontend-development-patterns)
+- [Communication Module Guide](#communication-module-guide)
+- [Organization ID Convention](#organization-id-convention)
 - [Getting Help](#getting-help)
 - [Existing Codebase Adoption Rule](#existing-codebase-adoption-rule)
 
@@ -2198,6 +2200,38 @@ export function useFileUpload(options?: { maxFileSize?: number }) {
 - Easier testing (mock hooks, not API calls)
 - Clear separation of concerns
 - Better maintainability
+
+---
+
+## Communication Module Guide
+
+Three handler directories deal with messaging — here is the scope of each:
+
+| Directory | Scope | Key Features |
+|-----------|-------|-------------|
+| `handlers/comms/` | **Real-time peer chat + video** | WebSocket chat rooms, WebRTC video calls, typing indicators, ICE server config |
+| `handlers/communication/` | **Templated bulk messaging** | Message templates, subscription topics, scheduled/draft messages, per-person subscriptions |
+| `handlers/communications/` (hand-wired) | **Announcements** | Organization-wide announcements with read tracking |
+
+**When to use which:**
+- Building chat or video features → `comms/`
+- Building email/SMS campaigns, newsletters, or templated notifications → `communication/`
+- Building org-wide announcement feeds → `communications/`
+
+These overlap intentionally — consolidation is planned for v1.2.0.
+
+## Organization ID Convention
+
+The canonical field name is **`organizationId`** everywhere:
+- Database columns: `organization_id`
+- Drizzle schema fields: `organizationId`
+- TypeSpec models: `organizationId`
+- Context variable: `ctx.get('organizationId')`
+- API response bodies: `organizationId`
+
+**Input backward compatibility:** The org-context middleware still accepts `x-org-id` header and `orgId` query parameter as inputs. Internally, these resolve to `ctx.get('organizationId')`.
+
+**Do NOT use `orgId`** in new code — it is a legacy name retained only for input backward compatibility.
 
 ---
 
