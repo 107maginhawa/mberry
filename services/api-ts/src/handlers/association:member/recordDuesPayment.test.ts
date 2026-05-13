@@ -34,6 +34,11 @@ const fakeMembership = {
   status: 'active',
 };
 
+/** Fake DB that passes tx through to callback (simulates transaction) */
+const txDb = {
+  transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
+};
+
 // ─── Helpers ────────────────────────────────────────────
 
 function stubOfficerAccess() {
@@ -67,6 +72,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
       listFunds: async () => fakeFunds,
       createFundAllocations: async (allocs: any[]) => { capturedAllocations = allocs; },
       updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
@@ -77,6 +83,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -109,6 +116,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
       createPayment: async (data: any) => ({ ...fakePayment, ...data, amount: 10000 }),
+      getConfig: async () => undefined,
       listFunds: async () => thirdFunds,
       createFundAllocations: async (allocs: any[]) => { capturedAllocations = allocs; },
       updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
@@ -119,6 +127,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -142,6 +151,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
       listFunds: async () => [],
       createFundAllocations: async () => { allocCalled = true; },
       updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
@@ -152,6 +162,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -190,6 +201,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
       listFunds: async () => [],
       updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
     });
@@ -202,6 +214,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -223,6 +236,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
       listFunds: async () => [],
       updatePaymentStatus: async () => fakePayment,
     });
@@ -232,6 +246,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -251,6 +266,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 42,
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
       listFunds: async () => [],
       updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
     });
@@ -260,6 +276,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -299,6 +316,7 @@ describe('[BR-06] recordDuesPayment concurrent guard', () => {
       findRecentPaymentForPerson: async () => ({ id: 'recent-pay', amount: 5000 }),
       getNextReceiptSequence: async () => 1,
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
       listFunds: async () => [],
       updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
     });
@@ -308,6 +326,7 @@ describe('[BR-06] recordDuesPayment concurrent guard', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -328,6 +347,7 @@ describe('[BR-06] recordDuesPayment concurrent guard', () => {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
       listFunds: async () => [],
       updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
     });
@@ -337,6 +357,7 @@ describe('[BR-06] recordDuesPayment concurrent guard', () => {
     });
 
     const ctx = makeCtx({
+      database: txDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -350,5 +371,124 @@ describe('[BR-06] recordDuesPayment concurrent guard', () => {
     expect(response.status).toBe(201);
     const body = (response as any).body;
     expect(body.meta.concurrentWarning).toBe(false);
+  });
+});
+
+describe('recordDuesPayment transaction atomicity', () => {
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    restoreRepo(DuesRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+    officerMocks = stubOfficerAccess();
+  });
+
+  afterEach(() => {
+    Object.values(officerMocks).forEach((m) => m.mockRestore());
+    restoreRepo(DuesRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('rolls back payment when settlement fails — createPayment inside outer transaction', async () => {
+    /**
+     * This test verifies that createPayment and settlePayment both run inside
+     * a single outer db.transaction(). If createPayment runs outside a transaction
+     * (current bug), the payment persists even when settlement fails.
+     *
+     * Strategy: track the call order. If the handler wraps everything in
+     * db.transaction(), the sequence is: transaction → createPayment → settlePayment.
+     * If NOT wrapped, the sequence is: createPayment → transaction (from settlePayment).
+     */
+    const callOrder: string[] = [];
+
+    const rawDb = {
+      transaction: async (fn: (tx: any) => Promise<any>) => {
+        callOrder.push('transaction');
+        const txObj = { transaction: async (innerFn: (t: any) => Promise<any>) => {
+          callOrder.push('nested-transaction');
+          return innerFn(txObj);
+        }};
+        return fn(txObj);
+      },
+    };
+
+    stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => {
+        callOrder.push('createPayment');
+        return { ...fakePayment, ...data };
+      },
+      getConfig: async () => undefined,
+      listFunds: async () => { throw new Error('Settlement DB failure'); },
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [fakeMembership],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: rawDb,
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+      },
+    });
+
+    await expect(recordDuesPayment(ctx)).rejects.toThrow('Settlement DB failure');
+
+    // Verify transaction is opened BEFORE createPayment (atomicity guarantee)
+    const txIdx = callOrder.indexOf('transaction');
+    const createIdx = callOrder.indexOf('createPayment');
+    expect(txIdx).toBeGreaterThanOrEqual(0);
+    expect(createIdx).toBeGreaterThan(txIdx);
+  });
+
+  test('happy path: payment + settlement wrapped in single outer transaction', async () => {
+    let outerTxCallCount = 0;
+
+    const singleTxDb = {
+      transaction: async (fn: (tx: any) => Promise<any>) => {
+        outerTxCallCount++;
+        // Nested transactions just pass through (simulates savepoints)
+        const txObj = { transaction: async (innerFn: (t: any) => Promise<any>) => innerFn(txObj) };
+        return fn(txObj);
+      },
+    };
+
+    stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
+      listFunds: async () => fakeFunds,
+      createFundAllocations: async () => {},
+      updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [fakeMembership],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: singleTxDb,
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+      },
+    });
+
+    const response = await recordDuesPayment(ctx);
+    expect(response.status).toBe(201);
+    // Handler must call db.transaction() exactly once as the outer wrapper
+    expect(outerTxCallCount).toBe(1);
   });
 });

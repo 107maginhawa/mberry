@@ -32,7 +32,7 @@ export async function recordDuesPayment(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);
 
-  // [BR-06] Concurrent payment guard
+  // [BR-06] Concurrent payment guard (read-only, safe outside transaction)
   const recentPayment = await repo.findRecentPaymentForPerson(orgId, body.personId);
   const hasConcurrentWarning = !!recentPayment;
 
@@ -41,38 +41,48 @@ export async function recordDuesPayment(
   const sequence = await repo.getNextReceiptSequence(orgId, year);
   const receiptNumber = formatReceiptNumber('ORG', year, sequence);
 
-  const payment = await repo.createPayment({
-    organizationId: orgId,
-    personId: body.personId,
-    receiptNumber,
-    amount: body.amount,
-    currency: body.currency ?? 'PHP',
-    paymentMethod: body.paymentMethod,
-    referenceNumber: body.referenceNumber,
-    invoiceId: body.invoiceId,
-    status: 'completed',
-    recordedBy: session.user.id,
-    paidAt: new Date(),
-    createdBy: session.user.id,
-    updatedBy: session.user.id,
-  });
+  // Wrap payment creation + settlement in a single transaction so
+  // if settlement fails the payment row does not persist.
+  const { payment, settlement } = await db.transaction(async (txDb: DatabaseInstance) => {
+    const txRepo = new DuesRepository(txDb);
 
-  // [BR-06 + BR-07] Fund allocation + membership expiry extension
-  const settlement = await settlePayment({
-    db,
-    orgId,
-    personId: body.personId,
-    paymentId: payment.id,
-    amount: body.amount,
-  });
+    const pay = await txRepo.createPayment({
+      organizationId: orgId,
+      personId: body.personId,
+      receiptNumber,
+      amount: body.amount,
+      currency: body.currency ?? 'PHP',
+      paymentMethod: body.paymentMethod,
+      referenceNumber: body.referenceNumber,
+      invoiceId: body.invoiceId,
+      status: 'completed',
+      recordedBy: session.user.id,
+      paidAt: new Date(),
+      createdBy: session.user.id,
+      updatedBy: session.user.id,
+    });
 
-  // Update payment with extension dates
-  if (settlement.membershipExtendedTo) {
-    await repo.updatePaymentStatus(payment.id, 'completed', {
-      membershipExtendedFrom: settlement.membershipExtendedFrom,
-      membershipExtendedTo: settlement.membershipExtendedTo,
-    } as any);
-  }
+    // [BR-06 + BR-07] Fund allocation + membership expiry extension
+    // Pass txDb so settlePayment reuses the outer transaction.
+    const settle = await settlePayment({
+      db,
+      orgId,
+      personId: body.personId,
+      paymentId: pay.id,
+      amount: body.amount,
+      tx: txDb,
+    });
+
+    // Update payment with extension dates
+    if (settle.membershipExtendedTo) {
+      await txRepo.updatePaymentStatus(pay.id, 'completed', {
+        membershipExtendedFrom: settle.membershipExtendedFrom,
+        membershipExtendedTo: settle.membershipExtendedTo,
+      } as any);
+    }
+
+    return { payment: pay, settlement: settle };
+  });
 
   await auditAction(ctx, {
     action: 'create',
