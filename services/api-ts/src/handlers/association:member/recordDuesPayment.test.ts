@@ -4,6 +4,7 @@ import { recordDuesPayment } from './recordDuesPayment';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
+import { DuesInvoiceRepository } from './repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -490,5 +491,154 @@ describe('recordDuesPayment transaction atomicity', () => {
     expect(response.status).toBe(201);
     // Handler must call db.transaction() exactly once as the outer wrapper
     expect(outerTxCallCount).toBe(1);
+  });
+});
+
+describe('[PAY-01] invoice linking on payment recording', () => {
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  const fakeInvoice = {
+    id: 'inv-1',
+    membershipId: 'mem-1',
+    personId: 'person-1',
+    organizationId: 'tenant-1',  // matches makeCtx default organizationId
+    invoiceNumber: 'INV-2025-001',
+    periodStart: '2025-01-01',
+    periodEnd: '2025-12-31',
+    totalAmount: 5000,
+    status: 'sent',
+    version: 2,
+    generatedAt: new Date().toISOString(),
+  };
+
+  beforeEach(() => {
+    restoreRepo(DuesRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+    restoreRepo(DuesInvoiceRepository);
+    officerMocks = stubOfficerAccess();
+  });
+
+  afterEach(() => {
+    Object.values(officerMocks).forEach((m) => m.mockRestore());
+    restoreRepo(DuesRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+    restoreRepo(DuesInvoiceRepository);
+  });
+
+  test('when invoiceId provided, markPaid is called with correct invoiceId and version inside transaction', async () => {
+    let markPaidCalled = false;
+    let markPaidInvoiceId: string | undefined;
+    let markPaidVersion: number | undefined;
+
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => fakeInvoice,
+      markPaid: async (invoiceId: string, expectedVersion: number, paymentId: string, paidAt?: Date) => {
+        markPaidCalled = true;
+        markPaidInvoiceId = invoiceId;
+        markPaidVersion = expectedVersion;
+        return { ...fakeInvoice, status: 'paid', version: 3 };
+      },
+    });
+    stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
+      listFunds: async () => [],
+      updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [fakeMembership],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+        invoiceId: 'inv-1',
+      },
+    });
+
+    const response = await recordDuesPayment(ctx);
+    expect(response.status).toBe(201);
+    expect(markPaidCalled).toBe(true);
+    expect(markPaidInvoiceId).toBe('inv-1');
+    expect(markPaidVersion).toBe(2);
+  });
+
+  test('when invoiceId NOT provided, markPaid is NOT called', async () => {
+    let markPaidCalled = false;
+
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => fakeInvoice,
+      markPaid: async () => { markPaidCalled = true; return { ...fakeInvoice, status: 'paid' }; },
+    });
+    stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
+      listFunds: async () => [],
+      updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [fakeMembership],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+        // No invoiceId
+      },
+    });
+
+    const response = await recordDuesPayment(ctx);
+    expect(response.status).toBe(201);
+    expect(markPaidCalled).toBe(false);
+  });
+
+  test('when invoiceId has non-payable status, throws BusinessLogicError', async () => {
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'cancelled', version: 1, organizationId: 'tenant-1' }),
+      markPaid: async () => { throw new Error('should not be called'); },
+    });
+    stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
+      listFunds: async () => [],
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [fakeMembership],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _body: {
+        organizationId: 'tenant-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+        invoiceId: 'inv-1',
+      },
+    });
+
+    await expect(recordDuesPayment(ctx)).rejects.toThrow("Cannot pay invoice with status 'cancelled'");
   });
 });

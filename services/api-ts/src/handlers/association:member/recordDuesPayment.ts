@@ -1,8 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, ForbiddenError, BusinessLogicError } from '@/core/errors';
 import type { RecordDuesPaymentBody } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesInvoiceRepository } from './repos/dues.repo';
 import { formatReceiptNumber } from '@/handlers/dues/utils/receipt-number';
 import { settlePayment } from '@/handlers/dues/utils/settle-payment';
 import { auditAction } from '@/utils/audit';
@@ -41,6 +42,24 @@ export async function recordDuesPayment(
   const sequence = await repo.getNextReceiptSequence(orgId, year);
   const receiptNumber = formatReceiptNumber('ORG', year, sequence);
 
+  // [PAY-01][PAY-03] Pre-validate invoice outside transaction (read-only).
+  // Backend reads version from DB — never from client — to prevent lock bypass (T-20-02).
+  let invoiceForLocking: { version: number } | null = null;
+  if (body.invoiceId) {
+    const invoiceRepo = new DuesInvoiceRepository(db, ctx.get('logger'));
+    const invoice = await invoiceRepo.findOneById(body.invoiceId);
+    if (!invoice) throw new NotFoundError('DuesInvoice');
+    if (invoice.organizationId !== orgId) throw new ForbiddenError();  // T-20-03 cross-org guard
+    const payableStatuses = ['generated', 'sent', 'overdue'];
+    if (!payableStatuses.includes(invoice.status)) {
+      throw new BusinessLogicError(
+        `Cannot pay invoice with status '${invoice.status}'`,
+        'INVOICE_NOT_PAYABLE',
+      );
+    }
+    invoiceForLocking = { version: invoice.version };
+  }
+
   // Wrap payment creation + settlement in a single transaction so
   // if settlement fails the payment row does not persist.
   const { payment, settlement } = await db.transaction(async (txDb: DatabaseInstance) => {
@@ -61,6 +80,13 @@ export async function recordDuesPayment(
       createdBy: session.user.id,
       updatedBy: session.user.id,
     });
+
+    // [PAY-01] Mark linked invoice as paid atomically inside the same transaction.
+    // Uses optimistic lock (version read before transaction) to prevent double-payment [PAY-03].
+    if (body.invoiceId && invoiceForLocking) {
+      const txInvoiceRepo = new DuesInvoiceRepository(txDb, ctx.get('logger'));
+      await txInvoiceRepo.markPaid(body.invoiceId, invoiceForLocking.version, pay.id, new Date());
+    }
 
     // [BR-06 + BR-07] Fund allocation + membership expiry extension
     // Pass txDb so settlePayment reuses the outer transaction.
