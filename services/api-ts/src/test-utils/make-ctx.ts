@@ -47,7 +47,7 @@ export function makeCtx(overrides: Record<string, any> = {}) {
     session: user ? { id: 'session-1', userId: user.id, user } : null,
     organizationId: 'tenant-1',
     orgId: 'org-1',
-    database: {},
+    database: { transaction: async (fn: any) => fn({}) },
     logger: null,
     audit: null,
     ...overrides,
@@ -93,7 +93,7 @@ export function makeCtx(overrides: Record<string, any> = {}) {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 const pristinePrototypes = new WeakMap<Function, Map<string, (...args: any[]) => any>>();
 
-function ensurePristine<T extends new (...args: any[]) => any>(RepoClass: T) {
+export function ensurePristine<T extends new (...args: any[]) => any>(RepoClass: T) {
   if (!pristinePrototypes.has(RepoClass)) {
     const originals = new Map<string, (...args: any[]) => any>();
     for (const name of Object.getOwnPropertyNames(RepoClass.prototype)) {

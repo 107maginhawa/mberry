@@ -26,7 +26,6 @@ export async function approveMembershipApplication(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const appRepo = new MembershipApplicationRepository(db, logger);
-  const membershipRepo = new MembershipRepository(db, logger);
 
   const application = await appRepo.findOneById(applicationId);
   if (!application) throw new NotFoundError('Membership application');
@@ -41,28 +40,35 @@ export async function approveMembershipApplication(
 
   const now = new Date();
 
-  // Update the application status
-  const updatedApplication = await appRepo.updateOneById(applicationId, {
-    status: 'approved',
-    reviewedBy: session.user.id,
-    reviewedAt: now,
-  } as any);
+  // Wrap approval + membership creation in a transaction so a failed
+  // createOne() doesn't leave the application stuck in 'approved' with
+  // no membership record.
+  const updatedApplication = await db.transaction(async (tx: DatabaseInstance) => {
+    const txAppRepo = new MembershipApplicationRepository(tx, logger);
+    const txMembershipRepo = new MembershipRepository(tx, logger);
 
-  // Create a membership record from the application
-  const today = now.toISOString().split('T')[0];
-  const oneYearLater = new Date(now);
-  oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-  const expiryDate = oneYearLater.toISOString().split('T')[0];
+    // Update the application status
+    const updated = await txAppRepo.updateOneById(applicationId, {
+      status: 'approved',
+      reviewedBy: session.user.id,
+      reviewedAt: now,
+    } as any);
 
-  await membershipRepo.createOne({
-    organizationId: application.organizationId,
-    personId: application.personId,
-    tierId: application.tierId,
-    startDate: today as string,
-    duesExpiryDate: expiryDate as string,
-    status: 'pendingPayment' as any,
-    joinedAt: now,
-  } as any);
+    // Create a membership record — duesExpiryDate is null until payment settles (BR-01)
+    const today = now.toISOString().split('T')[0];
+
+    await txMembershipRepo.createOne({
+      organizationId: application.organizationId,
+      personId: application.personId,
+      tierId: application.tierId,
+      startDate: today as string,
+      duesExpiryDate: null,
+      status: 'pendingPayment' as any,
+      joinedAt: now,
+    } as any);
+
+    return updated;
+  });
 
   await auditAction(ctx, {
     action: 'approve',
