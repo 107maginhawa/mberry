@@ -20,11 +20,11 @@ import { auditAction } from '@/utils/audit';
 export async function markDuesInvoicePaid(
   ctx: ValidatedContext<MarkDuesInvoicePaidBody, never, MarkDuesInvoicePaidParams>
 ): Promise<Response> {
-  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
-
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
+
+  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
 
   const { invoiceId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
