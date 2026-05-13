@@ -16,6 +16,7 @@ import {
 import { baseEntityFields } from '@/core/database.schema';
 import { persons } from '../../person/repos/person.schema';
 import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import { membershipCategories } from '../../association:member/repos/membership.schema';
 
 // Enums
 export const billingFrequencyEnum = pgEnum('billing_frequency', ['annual', 'semi-annual', 'quarterly']);
@@ -50,7 +51,7 @@ export const duesCategoryOverrides = pgTable('dues_category_override', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   duesConfigId: uuid('dues_config_id').notNull().references(() => duesConfigs.id, { onDelete: 'cascade' }),
-  categoryId: uuid('category_id').notNull(),
+  categoryId: uuid('category_id').notNull().references(() => membershipCategories.id),
   overrideAmount: integer('override_amount').notNull(),
 }, (table) => ({
   orgIdx: index('dues_cat_override_org_idx').on(table.organizationId),

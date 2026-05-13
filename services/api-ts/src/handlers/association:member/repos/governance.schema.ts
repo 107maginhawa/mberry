@@ -12,7 +12,9 @@ import {
   uuid,
   pgEnum,
   index,
+  check,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { baseEntityFields } from '@/core/database.schema';
 
 export const positionLevelEnum = pgEnum('position_level', [
@@ -44,7 +46,7 @@ export const positions = pgTable('position', {
 
 export const officerTerms = pgTable('officer_term', {
   ...baseEntityFields,
-  positionId: uuid('position_id').notNull(),
+  positionId: uuid('position_id').notNull().references(() => positions.id),
   personId: uuid('person_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   status: termStatusEnum('status').notNull().default('upcoming'),
@@ -55,6 +57,7 @@ export const officerTerms = pgTable('officer_term', {
   index('idx_officer_term_org').on(table.organizationId),
   index('idx_officer_term_person').on(table.personId),
   index('idx_officer_term_position').on(table.positionId),
+  check('officer_term_date_order', sql`${table.endDate} IS NULL OR ${table.endDate} > ${table.startDate}`),
 ]);
 
 export type Position = typeof positions.$inferSelect;
