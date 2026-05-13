@@ -2,9 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Users, AlertTriangle, UserMinus, TrendingUp, CalendarDays, Bell, ClipboardList, UserX } from 'lucide-react'
 import { api } from '@/lib/api'
-import { StatCard } from '@/components/patterns/stat-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
+import { CountUp } from '@/components/motion/count-up'
+import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 
 interface OfficerDashboardProps {
   orgId: string
@@ -83,25 +85,44 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
       />
 
       {/* Metrics strip */}
-      <section className="grid grid-cols-2 md:grid-cols-5 gap-3.5 mb-8">
+      <section className="mb-8">
         {isLoading ? (
-          Array.from({ length: 5 }).map((_, i) => <CardSkeleton key={i} />)
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+            {Array.from({ length: 5 }).map((_, i) => <CardSkeleton key={i} />)}
+          </div>
         ) : (
-          <>
-            <StatCard label="Active Members" value={m?.activeCount ?? 0} />
-            <StatCard label="Grace Period" value={m?.graceCount ?? 0} />
-            <StatCard label="Lapsed" value={m?.lapsedCount ?? 0} />
-            <StatCard
-              label="Collection Rate"
-              value={`${collectionRate}%`}
-              change={
-                collectionRate > 0
-                  ? { value: `${collectionRate}% collected`, positive: collectionRate >= 70 }
-                  : undefined
-              }
-            />
-            <StatCard label="Upcoming Activities" value={upcomingActivities} />
-          </>
+          <StaggerGrid className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+            <StaggerItem>
+              <GlassCard className="p-4 text-center">
+                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Active Members</p>
+                <p className="text-[28px] font-bold font-display mt-1"><CountUp value={m?.activeCount ?? 0} /></p>
+              </GlassCard>
+            </StaggerItem>
+            <StaggerItem>
+              <GlassCard className="p-4 text-center">
+                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Grace Period</p>
+                <p className="text-[28px] font-bold font-display mt-1"><CountUp value={m?.graceCount ?? 0} /></p>
+              </GlassCard>
+            </StaggerItem>
+            <StaggerItem>
+              <GlassCard className="p-4 text-center">
+                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Lapsed</p>
+                <p className="text-[28px] font-bold font-display mt-1"><CountUp value={m?.lapsedCount ?? 0} /></p>
+              </GlassCard>
+            </StaggerItem>
+            <StaggerItem>
+              <GlassCard className="p-4 text-center">
+                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Collection Rate</p>
+                <p className="text-[28px] font-bold font-display mt-1"><CountUp value={collectionRate} suffix="%" /></p>
+              </GlassCard>
+            </StaggerItem>
+            <StaggerItem>
+              <GlassCard className="p-4 text-center">
+                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Upcoming Activities</p>
+                <p className="text-[28px] font-bold font-display mt-1"><CountUp value={upcomingActivities} /></p>
+              </GlassCard>
+            </StaggerItem>
+          </StaggerGrid>
         )}
       </section>
 
@@ -183,12 +204,12 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
       {/* Quick links */}
       <section className="mt-8">
         <h2 className="text-[16px] font-semibold font-display mb-3">Quick Links</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <QuickLink href={`/org/${orgId}/officer/roster`} icon={<Users size={16} />} label="Roster" />
-          <QuickLink href={`/org/${orgId}/officer/applications`} icon={<ClipboardList size={16} />} label="Applications" />
-          <QuickLink href={`/org/${orgId}/officer/payments`} icon={<TrendingUp size={16} />} label="Payments" />
-          <QuickLink href={`/org/${orgId}/officer/reports/financial`} icon={<CalendarDays size={16} />} label="Reports" />
-        </div>
+        <StaggerGrid className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StaggerItem><QuickLink href={`/org/${orgId}/officer/roster`} icon={<Users size={16} />} label="Roster" /></StaggerItem>
+          <StaggerItem><QuickLink href={`/org/${orgId}/officer/applications`} icon={<ClipboardList size={16} />} label="Applications" /></StaggerItem>
+          <StaggerItem><QuickLink href={`/org/${orgId}/officer/payments`} icon={<TrendingUp size={16} />} label="Payments" /></StaggerItem>
+          <StaggerItem><QuickLink href={`/org/${orgId}/officer/reports/financial`} icon={<CalendarDays size={16} />} label="Reports" /></StaggerItem>
+        </StaggerGrid>
       </section>
     </div>
   )

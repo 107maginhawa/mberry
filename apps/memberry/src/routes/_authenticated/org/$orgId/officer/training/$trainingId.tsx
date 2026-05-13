@@ -1,10 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { ArrowLeft, Calendar, MapPin, Users, Award, Edit2 } from 'lucide-react'
+import { Calendar, MapPin, Users, Award, Edit2 } from 'lucide-react'
 import { TrainingForm } from '@/features/training/components/training-form'
 import { CompletionTable } from '@/features/training/components/completion-table'
 import { getTrainingOptions } from '@monobase/sdk-ts/generated/react-query'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
+import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/training/$trainingId')({
   component: TrainingDetail,
@@ -44,17 +47,17 @@ function TrainingDetail() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4">
-        <div className="h-8 w-48 bg-muted/30 rounded animate-pulse" />
-        <div className="h-40 bg-muted/30 rounded-xl animate-pulse" />
+      <div className="space-y-4">
+        <div className="h-8 w-48 bg-[var(--color-surface-warm)] rounded animate-pulse" />
+        <ListSkeleton rows={4} />
       </div>
     )
   }
 
   if (error || !training) {
     return (
-      <div className="p-6">
-        <p className="text-destructive">Failed to load training.</p>
+      <div>
+        <p className="text-[var(--color-error)]">Failed to load training.</p>
       </div>
     )
   }
@@ -66,41 +69,38 @@ function TrainingDetail() {
   ]
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Breadcrumb */}
-      <div>
-        <a
-          href={`/org/${orgId}/officer/training`}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3"
-        >
-          <ArrowLeft className="w-4 h-4" /> Training
-        </a>
-
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">{training.title}</h1>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                {TYPE_LABELS[training.type] ?? training.type}
-              </span>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700'}`}>
-                {training.status.replace('_', ' ')}
-              </span>
-              {Number(training.creditAmount) > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                  <Award className="w-3 h-3" />
-                  {training.creditAmount} CPE
-                </span>
-              )}
-            </div>
-          </div>
+    <div className="space-y-6">
+      <PageHeader
+        title={training.title}
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Training', href: `/org/${orgId}/officer/training` },
+          { label: training.title },
+        ]}
+        actions={
           <button
             onClick={() => setTab('edit')}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm border rounded-lg hover:bg-muted shrink-0"
+            className="flex items-center gap-1.5 px-3 py-2 text-[14px] border rounded-[8px] hover:bg-[var(--color-surface-warm)] shrink-0"
           >
             <Edit2 className="w-4 h-4" /> Edit
           </button>
-        </div>
+        }
+      />
+
+      {/* Badges */}
+      <div className="flex flex-wrap gap-2">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+          {TYPE_LABELS[training.type] ?? training.type}
+        </span>
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium ${STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700'}`}>
+          {training.status.replace('_', ' ')}
+        </span>
+        {Number(training.creditAmount) > 0 && (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-amber-100 text-amber-700">
+            <Award className="w-3 h-3" />
+            {training.creditAmount} CPE
+          </span>
+        )}
       </div>
 
       {/* Tabs */}
@@ -109,10 +109,10 @@ function TrainingDetail() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`px-4 py-2 text-[14px] font-medium border-b-2 -mb-px transition-colors ${
               tab === t.key
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             {t.label}
@@ -126,50 +126,50 @@ function TrainingDetail() {
           {/* Main */}
           <div className="lg:col-span-2 space-y-4">
             {training.description && (
-              <div className="border rounded-xl p-5 bg-card">
-                <h2 className="font-semibold mb-2">About</h2>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{training.description}</p>
-              </div>
+              <GlassCard className="p-5">
+                <h2 className="font-display font-semibold mb-2">About</h2>
+                <p className="text-[14px] text-[var(--color-muted)] whitespace-pre-line">{training.description}</p>
+              </GlassCard>
             )}
 
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
-            <div className="border rounded-xl p-5 bg-card space-y-3 text-sm">
+            <GlassCard className="p-5 space-y-3 text-[14px]">
               <div className="flex items-start gap-2">
-                <Calendar className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                <Calendar className="w-4 h-4 mt-0.5 text-[var(--color-muted)] shrink-0" />
                 <div>
                   <p className="font-medium">Start</p>
-                  <p className="text-muted-foreground">{formatDate(training.startDate)}</p>
+                  <p className="text-[var(--color-muted)]">{formatDate(training.startDate)}</p>
                   {training.endDate && (
                     <>
                       <p className="font-medium mt-1">End</p>
-                      <p className="text-muted-foreground">{formatDate(training.endDate)}</p>
+                      <p className="text-[var(--color-muted)]">{formatDate(training.endDate)}</p>
                     </>
                   )}
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                <MapPin className="w-4 h-4 mt-0.5 text-[var(--color-muted)] shrink-0" />
                 <div>
                   <p className="font-medium">Location</p>
-                  <p className="text-muted-foreground">{training.location ?? 'TBA'}</p>
+                  <p className="text-[var(--color-muted)]">{training.location ?? 'TBA'}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
-                <Users className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                <Users className="w-4 h-4 mt-0.5 text-[var(--color-muted)] shrink-0" />
                 <div>
                   <p className="font-medium">Enrollment</p>
-                  <p className="text-muted-foreground">
+                  <p className="text-[var(--color-muted)]">
                     {training.enrollmentCount ?? 0} enrolled
                     {training.capacity ? ` / ${training.capacity} capacity` : ' (unlimited)'}
                   </p>
                 </div>
               </div>
-            </div>
+            </GlassCard>
           </div>
         </div>
       )}

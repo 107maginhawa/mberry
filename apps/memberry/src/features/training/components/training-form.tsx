@@ -73,7 +73,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
   const inputClass =
     'w-full text-sm border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-ring'
   const labelClass = 'block text-sm font-medium mb-1'
-  const sectionClass = 'border rounded-xl p-5 space-y-4 bg-card'
+  const sectionClass = 'border rounded-xl p-5 space-y-4 bg-[var(--color-surface)]'
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -89,7 +89,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         </div>
 
         <div>
-          <label className={labelClass}>Title <span className="text-destructive">*</span></label>
+          <label className={labelClass}>Title <span className="text-[var(--color-error)]">*</span></label>
           <input type="text" className={inputClass} placeholder="Training title" {...field('title')} />
         </div>
 
@@ -109,7 +109,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         <h2 className="font-semibold">Schedule</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Start Date & Time <span className="text-destructive">*</span></label>
+            <label className={labelClass}>Start Date & Time <span className="text-[var(--color-error)]">*</span></label>
             <input type="datetime-local" className={inputClass} {...field('startDate')} />
           </div>
           <div>
@@ -156,7 +156,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
           type="button"
           disabled={saveMutation.isPending || !form.title || !form.startDate}
           onClick={() => saveMutation.mutate('draft')}
-          className="px-4 py-2 text-sm border rounded-lg hover:bg-muted disabled:opacity-50"
+          className="px-4 py-2 text-sm border rounded-lg hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
         >
           {saveMutation.isPending ? 'Saving…' : 'Save Draft'}
         </button>
@@ -164,12 +164,12 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
           type="button"
           disabled={saveMutation.isPending || !form.title || !form.startDate}
           onClick={() => saveMutation.mutate('published')}
-          className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
+          className="px-4 py-2 text-sm bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
         >
           {saveMutation.isPending ? 'Publishing…' : 'Publish'}
         </button>
         {saveMutation.isError && (
-          <span className="text-sm text-destructive self-center">Failed to save. Try again.</span>
+          <span className="text-sm text-[var(--color-error)] self-center">Failed to save. Try again.</span>
         )}
       </div>
     </div>

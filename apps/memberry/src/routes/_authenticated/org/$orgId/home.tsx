@@ -2,8 +2,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { searchEventsOptions } from '@monobase/sdk-ts/generated/react-query'
-import { Skeleton } from '@monobase/ui'
 import { Megaphone, Calendar, MapPin, ArrowRight } from 'lucide-react'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
+import { EmptyState } from '@/components/patterns/empty-state'
+import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/home')({
   component: OrgHome,
@@ -37,67 +40,55 @@ function OrgHome() {
   const eventItems = (events as any)?.data ?? []
 
   return (
-    <div className="space-y-8 p-6">
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Organization Home
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-          Latest updates and upcoming events
-        </p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="Organization Home"
+        subtitle="Latest updates and upcoming events"
+        breadcrumbs={[
+          { label: 'Organization' },
+          { label: 'Home' },
+        ]}
+      />
 
       {/* Recent Announcements */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Megaphone className="w-5 h-5" />
-            Recent Announcements
-          </h2>
-        </div>
+        <h2 className="text-[16px] font-semibold font-display flex items-center gap-2">
+          <Megaphone className="w-5 h-5" />
+          Recent Announcements
+        </h2>
 
         {loadingAnnouncements ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 rounded-[12px]" />
-            ))}
-          </div>
+          <ListSkeleton rows={3} />
         ) : announcementsError ? (
-          <div
-            className="rounded-[12px] p-6 text-center text-destructive"
-            style={{ border: '1px solid var(--color-border-light)' }}
-          >
+          <GlassCard className="p-6 text-center text-[var(--color-error)]">
             Failed to load announcements.
-          </div>
+          </GlassCard>
         ) : announcementItems.length === 0 ? (
-          <div
-            className="rounded-[12px] p-8 text-center"
-            style={{ border: '1px solid var(--color-border-light)', color: 'var(--color-muted)' }}
-          >
-            No announcements yet.
-          </div>
+          <GlassCard className="p-0">
+            <EmptyState
+              icon={<Megaphone className="w-8 h-8" />}
+              headline="No announcements yet"
+              description="Check back soon for updates from your organization."
+            />
+          </GlassCard>
         ) : (
           <div className="space-y-3">
             {announcementItems.map((a: any) => (
-              <div
-                key={a.id}
-                className="rounded-[12px] p-4 space-y-1"
-                style={{ border: '1px solid var(--color-border-light)' }}
-              >
-                <h3 className="font-semibold" style={{ color: 'var(--color-text)' }}>
+              <GlassCard key={a.id} className="p-4 space-y-1">
+                <h3 className="font-semibold text-[var(--color-text)]">
                   {a.title ?? a.subject ?? 'Announcement'}
                 </h3>
                 {a.body && (
-                  <p className="text-sm line-clamp-2" style={{ color: 'var(--color-muted)' }}>
+                  <p className="text-sm line-clamp-2 text-[var(--color-muted)]">
                     {a.body}
                   </p>
                 )}
                 {a.sentAt && (
-                  <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                  <p className="text-xs text-[var(--color-muted)]">
                     {formatDate(a.sentAt)}
                   </p>
                 )}
-              </div>
+              </GlassCard>
             ))}
           </div>
         )}
@@ -106,14 +97,14 @@ function OrgHome() {
       {/* Upcoming Events */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
+          <h2 className="text-[16px] font-semibold font-display flex items-center gap-2">
             <Calendar className="w-5 h-5" />
             Upcoming Events
           </h2>
           <Link
             to="/org/$orgId/events"
             params={{ orgId }}
-            className="text-sm text-primary flex items-center gap-1 hover:underline"
+            className="text-sm text-[var(--color-primary)] flex items-center gap-1 hover:underline"
           >
             View all <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -121,24 +112,20 @@ function OrgHome() {
 
         {loadingEvents ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-28 rounded-[12px]" />
-            ))}
+            <ListSkeleton rows={4} />
           </div>
         ) : eventsError ? (
-          <div
-            className="rounded-[12px] p-6 text-center text-destructive"
-            style={{ border: '1px solid var(--color-border-light)' }}
-          >
+          <GlassCard className="p-6 text-center text-[var(--color-error)]">
             Failed to load events.
-          </div>
+          </GlassCard>
         ) : eventItems.length === 0 ? (
-          <div
-            className="rounded-[12px] p-8 text-center"
-            style={{ border: '1px solid var(--color-border-light)', color: 'var(--color-muted)' }}
-          >
-            No upcoming events. Check back soon!
-          </div>
+          <GlassCard className="p-0">
+            <EmptyState
+              icon={<Calendar className="w-8 h-8" />}
+              headline="No upcoming events"
+              description="Check back soon!"
+            />
+          </GlassCard>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {eventItems.map((event: any) => (
@@ -146,24 +133,25 @@ function OrgHome() {
                 key={event.id}
                 to="/org/$orgId/events/$eventId"
                 params={{ orgId, eventId: event.id }}
-                className="block rounded-[12px] p-4 space-y-2 hover:bg-muted/30 transition-colors"
-                style={{ border: '1px solid var(--color-border-light)' }}
+                className="block"
               >
-                <h3 className="font-semibold" style={{ color: 'var(--color-text)' }}>
-                  {event.title}
-                </h3>
-                <div className="space-y-1 text-sm" style={{ color: 'var(--color-muted)' }}>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 shrink-0" />
-                    <span>{formatDate(event.startDate)}</span>
-                  </div>
-                  {event.location && (
+                <GlassCard className="p-4 space-y-2">
+                  <h3 className="font-semibold text-[var(--color-text)]">
+                    {event.title}
+                  </h3>
+                  <div className="space-y-1 text-sm text-[var(--color-muted)]">
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span>{event.location}</span>
+                      <Calendar className="w-3.5 h-3.5 shrink-0" />
+                      <span>{formatDate(event.startDate)}</span>
                     </div>
-                  )}
-                </div>
+                    {event.location && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 shrink-0" />
+                        <span>{event.location}</span>
+                      </div>
+                    )}
+                  </div>
+                </GlassCard>
               </Link>
             ))}
           </div>

@@ -8,12 +8,14 @@ import {
 } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
-import { Skeleton } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Separator } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Check, ChevronDown, ChevronUp, ClipboardList, X } from 'lucide-react'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
+import { GlassCard } from '@/components/motion/glass-card'
+import { EmptyState } from '@/components/patterns/empty-state'
+import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 
 interface ApplicationListProps {
   orgId: string
@@ -125,7 +127,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
           </SelectContent>
         </Select>
         {!isLoading && (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-[var(--color-muted)]">
             {applications.length} result{applications.length !== 1 ? 's' : ''}
           </span>
         )}
@@ -147,18 +149,17 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
 
       {/* List */}
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full rounded-lg" />
-          ))}
-        </div>
+        <ListSkeleton rows={4} />
       ) : error ? (
-        <div className="p-10 text-center text-destructive">Failed to load applications. Please try again.</div>
+        <GlassCard className="p-10 text-center text-[var(--color-error)]">Failed to load applications. Please try again.</GlassCard>
       ) : applications.length === 0 ? (
-        <div className="p-14 flex flex-col items-center gap-3 text-muted-foreground border rounded-lg">
-          <ClipboardList className="h-10 w-10 opacity-30" />
-          <p className="text-sm">No applications found.</p>
-        </div>
+        <GlassCard className="p-0">
+          <EmptyState
+            icon={<ClipboardList className="w-8 h-8" />}
+            headline="No applications found"
+            description="Applications matching your filter will appear here."
+          />
+        </GlassCard>
       ) : (
         <div className="space-y-3">
           {applications.map((app: any) => (
@@ -220,10 +221,10 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <GlassCard className="overflow-hidden">
       {/* Card header */}
       <button
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--color-surface-elevated-hover)] transition-colors text-left"
         onClick={() => setExpanded((v) => !v)}
         type="button"
       >
@@ -235,7 +236,7 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
           />
           <div className="min-w-0">
             <div className="font-medium truncate">{app.name ?? app.personId ?? app.id}</div>
-            <div className="text-xs text-muted-foreground truncate">{app.email ?? ''}</div>
+            <div className="text-xs text-[var(--color-muted)] truncate">{app.email ?? ''}</div>
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0 ml-3">
@@ -243,30 +244,30 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
             <Badge variant="outline" className="hidden sm:inline-flex">{app.categoryName}</Badge>
           )}
           <Badge className={badge.className}>{badge.label}</Badge>
-          <span className="text-xs text-muted-foreground hidden sm:block">
+          <span className="text-xs text-[var(--color-muted)] hidden sm:block">
             {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : ''}
           </span>
-          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          {expanded ? <ChevronUp className="h-4 w-4 text-[var(--color-muted)]" /> : <ChevronDown className="h-4 w-4 text-[var(--color-muted)]" />}
         </div>
       </button>
 
       {/* Expanded content */}
       {expanded && (
-        <div className="px-4 pb-4 pt-1 space-y-4 border-t bg-muted/10">
+        <div className="px-4 pb-4 pt-1 space-y-4 border-t border-[var(--color-surface-border-glass)]">
           <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
             <div>
-              <p className="text-muted-foreground text-xs">Category</p>
+              <p className="text-[var(--color-muted)] text-xs">Category</p>
               <p className="font-medium">{app.categoryName ?? app.categoryId ?? '—'}</p>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs">Applied</p>
+              <p className="text-[var(--color-muted)] text-xs">Applied</p>
               <p className="font-medium">
                 {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : '—'}
               </p>
             </div>
             {app.memberNumber && (
               <div>
-                <p className="text-muted-foreground text-xs">Member #</p>
+                <p className="text-[var(--color-muted)] text-xs">Member #</p>
                 <p className="font-mono text-xs">{app.memberNumber}</p>
               </div>
             )}
@@ -274,7 +275,7 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
 
           {app.notes && (
             <div className="text-sm">
-              <p className="text-muted-foreground text-xs mb-1">Notes</p>
+              <p className="text-[var(--color-muted)] text-xs mb-1">Notes</p>
               <p className="text-sm">{app.notes}</p>
             </div>
           )}
@@ -329,6 +330,6 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
           )}
         </div>
       )}
-    </div>
+    </GlassCard>
   )
 }

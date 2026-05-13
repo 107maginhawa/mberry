@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@monobase/ui'
-import { Skeleton } from '@monobase/ui'
 import { Calendar, Award, DollarSign, Clock, BookOpen, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getTrainingOptions, enrollInCustomTrainingMutation } from '@monobase/sdk-ts/generated/react-query'
+import { PageHeader } from '@/components/patterns/page-header'
+import { CardSkeleton } from '@/components/patterns/skeleton-loader'
+import { GlassCard } from '@/components/motion/glass-card'
+import { CountUp } from '@/components/motion/count-up'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/training/$trainingId')({
   component: TrainingDetail,
@@ -35,7 +38,7 @@ function TrainingDetail() {
 
   const enrollMutOpts = enrollInCustomTrainingMutation()
   const enrollMutation = useMutation({
-    mutationFn: () => (enrollMutOpts.mutationFn as Function)({ path: { trainingId }, query: { organizationId: orgId } }),
+    mutationFn: () => (enrollMutOpts.mutationFn as (...args: any[]) => any)({ path: { trainingId }, query: { organizationId: orgId } }),
     onSuccess: () => {
       toast.success('Successfully enrolled in this training!')
       setEnrolled(true)
@@ -49,24 +52,33 @@ function TrainingDetail() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-6">
-        <Skeleton className="h-8 w-2/3 rounded-[12px]" />
-        <Skeleton className="h-4 w-1/2 rounded-[12px]" />
-        <Skeleton className="h-48 rounded-[12px]" />
-        <Skeleton className="h-12 w-40 rounded-[12px]" />
+      <div className="space-y-6 max-w-3xl">
+        <PageHeader
+          title=""
+          breadcrumbs={[
+            { label: 'Training', href: `/org/${orgId}/training` },
+            { label: 'Loading...' },
+          ]}
+        />
+        <CardSkeleton />
+        <CardSkeleton />
       </div>
     )
   }
 
   if (error || !training) {
     return (
-      <div className="p-6">
-        <div
-          className="rounded-[12px] p-8 text-center text-destructive"
-          style={{ border: '1px solid var(--color-border-light)' }}
-        >
-          Failed to load training details.
-        </div>
+      <div className="space-y-6 max-w-3xl">
+        <PageHeader
+          title="Training Not Found"
+          breadcrumbs={[
+            { label: 'Training', href: `/org/${orgId}/training` },
+            { label: 'Error' },
+          ]}
+        />
+        <GlassCard className="p-8 text-center">
+          <p className="text-[14px] text-[var(--color-muted)]">Failed to load training details.</p>
+        </GlassCard>
       </div>
     )
   }
@@ -75,61 +87,57 @@ function TrainingDetail() {
   const fee = training.fee ?? training.price
 
   return (
-    <div className="space-y-6 p-6 max-w-3xl">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          {training.title}
-        </h1>
-        <div className="flex items-center gap-2 flex-wrap">
-          {training.status && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              {training.status}
-            </span>
-          )}
-          {training.type && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground capitalize">
-              {training.type.replace('_', ' ')}
-            </span>
-          )}
-        </div>
-      </div>
+    <div className="space-y-6 max-w-3xl">
+      <PageHeader
+        title={training.title}
+        breadcrumbs={[
+          { label: 'Training', href: `/org/${orgId}/training` },
+          { label: training.title },
+        ]}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            {training.status && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                {training.status}
+              </span>
+            )}
+            {training.type && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
+                {training.type.replace('_', ' ')}
+              </span>
+            )}
+          </div>
+        }
+      />
 
       {/* Details card */}
-      <div
-        className="rounded-[12px] p-5 space-y-4"
-        style={{ border: '1px solid var(--color-border-light)' }}
-      >
+      <GlassCard className="p-5 space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex items-center gap-3">
-            <Calendar className="w-4 h-4 shrink-0" style={{ color: 'var(--color-muted)' }} />
+            <Calendar className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
             <div>
-              <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>Start Date</p>
-              <p className="text-sm" style={{ color: 'var(--color-text)' }}>
-                {formatDate(training.startDate)}
-              </p>
+              <p className="text-[12px] font-medium text-[var(--color-muted)]">Start Date</p>
+              <p className="text-[13px]">{formatDate(training.startDate)}</p>
             </div>
           </div>
 
           {training.endDate && (
             <div className="flex items-center gap-3">
-              <Clock className="w-4 h-4 shrink-0" style={{ color: 'var(--color-muted)' }} />
+              <Clock className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
               <div>
-                <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>End Date</p>
-                <p className="text-sm" style={{ color: 'var(--color-text)' }}>
-                  {formatDate(training.endDate)}
-                </p>
+                <p className="text-[12px] font-medium text-[var(--color-muted)]">End Date</p>
+                <p className="text-[13px]">{formatDate(training.endDate)}</p>
               </div>
             </div>
           )}
 
           {creditAmount != null && Number(creditAmount) > 0 && (
             <div className="flex items-center gap-3">
-              <Award className="w-4 h-4 shrink-0" style={{ color: 'var(--color-muted)' }} />
+              <Award className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
               <div>
-                <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>Credit Hours</p>
-                <p className="text-sm" style={{ color: 'var(--color-text)' }}>
-                  {creditAmount} CPE
+                <p className="text-[12px] font-medium text-[var(--color-muted)]">Credit Hours</p>
+                <p className="text-[13px] font-semibold text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <CountUp value={Number(creditAmount)} /> CPE
                 </p>
               </div>
             </div>
@@ -137,10 +145,10 @@ function TrainingDetail() {
 
           {fee != null && Number(fee) > 0 && (
             <div className="flex items-center gap-3">
-              <DollarSign className="w-4 h-4 shrink-0" style={{ color: 'var(--color-muted)' }} />
+              <DollarSign className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
               <div>
-                <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>Fee</p>
-                <p className="text-sm" style={{ color: 'var(--color-text)' }}>
+                <p className="text-[12px] font-medium text-[var(--color-muted)]">Fee</p>
+                <p className="text-[13px]">
                   PHP {Number(fee).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                 </p>
               </div>
@@ -149,37 +157,32 @@ function TrainingDetail() {
         </div>
 
         {training.provider && (
-          <div className="flex items-center gap-3">
-            <BookOpen className="w-4 h-4 shrink-0" style={{ color: 'var(--color-muted)' }} />
+          <div className="flex items-center gap-3 pt-2 border-t border-[var(--color-border-light)]">
+            <BookOpen className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
             <div>
-              <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>Provider</p>
-              <p className="text-sm" style={{ color: 'var(--color-text)' }}>{training.provider}</p>
+              <p className="text-[12px] font-medium text-[var(--color-muted)]">Provider</p>
+              <p className="text-[13px]">{training.provider}</p>
             </div>
           </div>
         )}
-      </div>
+      </GlassCard>
 
       {/* Description */}
       {training.description && (
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
-            About this Training
-          </h2>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--color-muted)' }}>
+        <GlassCard className="p-5 space-y-2">
+          <h2 className="text-h4 font-display">About this Training</h2>
+          <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[var(--color-muted)]">
             {training.description}
           </p>
-        </div>
+        </GlassCard>
       )}
 
       {/* Enroll */}
       <div className="pt-2">
         {enrolled ? (
-          <div
-            className="rounded-[12px] p-4 text-center text-sm font-medium"
-            style={{ border: '1px solid var(--color-border-light)', color: 'var(--color-text)' }}
-          >
-            You are enrolled in this training.
-          </div>
+          <GlassCard className="p-4 text-center">
+            <p className="text-[14px] font-medium">You are enrolled in this training.</p>
+          </GlassCard>
         ) : (
           <Button
             size="lg"

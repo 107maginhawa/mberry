@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { Award, BookOpen } from 'lucide-react'
 import { CreditRing } from './action-widget'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { GlassCard } from '@/components/motion/glass-card'
+import { CountUp } from '@/components/motion/count-up'
 
 interface CreditBreakdownProps {
   totalCredits: number
@@ -13,11 +15,11 @@ export function CreditBreakdown({ totalCredits, requiredCredits, isError }: Cred
   const deficit = requiredCredits > 0 ? Math.max(0, requiredCredits - totalCredits) : 0
 
   return (
-    <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+    <GlassCard className="p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Award size={18} className="text-[var(--color-muted)]" aria-hidden="true" />
-          <h3 className="text-[16px] font-semibold font-display">Credit Progress</h3>
+          <h3 className="text-h4">Credit Progress</h3>
         </div>
         <Link to="/my/credits" className="text-[12px] font-semibold text-[var(--color-primary)] hover:underline">
           View transcript
@@ -37,9 +39,9 @@ export function CreditBreakdown({ totalCredits, requiredCredits, isError }: Cred
             <CreditRing earned={totalCredits} required={requiredCredits || totalCredits} size={64} />
             <div>
               <p className="text-[24px] font-bold font-display text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {totalCredits}
+                <CountUp value={totalCredits} />
                 {requiredCredits > 0 && (
-                  <span className="text-[14px] font-medium text-[var(--color-muted)]">/{requiredCredits}</span>
+                  <span className="text-[14px] font-medium text-[var(--color-muted)]">/<CountUp value={requiredCredits} /></span>
                 )}
               </p>
               <p className="text-[12px] font-medium text-[var(--color-muted)]">
@@ -62,6 +64,6 @@ export function CreditBreakdown({ totalCredits, requiredCredits, isError }: Cred
           </Link>
         </div>
       )}
-    </section>
+    </GlassCard>
   )
 }

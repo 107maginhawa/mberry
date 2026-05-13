@@ -106,24 +106,24 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
               onClick={() => i < stepIndex && setStep(s.key)}
               className={`flex items-center gap-2 text-sm font-medium transition-colors ${
                 s.key === step
-                  ? 'text-primary'
+                  ? 'text-[var(--color-primary)]'
                   : i < stepIndex
-                  ? 'text-foreground cursor-pointer hover:text-primary'
-                  : 'text-muted-foreground cursor-default'
+                  ? 'text-[var(--color-text)] cursor-pointer hover:text-[var(--color-primary)]'
+                  : 'text-[var(--color-muted)] cursor-default'
               }`}
             >
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
                 s.key === step
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-[var(--color-primary)] text-white'
                   : i < stepIndex
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted text-muted-foreground'
+                  ? 'bg-[var(--color-text)] text-[var(--color-surface)]'
+                  : 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]'
               }`}>
                 {i + 1}
               </span>
               {s.label}
             </button>
-            {i < STEPS.length - 1 && <span className="text-muted-foreground">›</span>}
+            {i < STEPS.length - 1 && <span className="text-[var(--color-muted)]">›</span>}
           </div>
         ))}
       </div>
@@ -150,11 +150,11 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
                   type="button"
                   onClick={() => setField('type', t)}
                   className={`border rounded-lg p-3 text-left transition-colors ${
-                    form.type === t ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                    form.type === t ? 'border-[var(--color-primary)] bg-primary/5' : 'hover:bg-[var(--color-surface-warm)]'
                   }`}
                 >
                   <p className="font-medium capitalize">{t}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-[var(--color-muted)] mt-0.5">
                     {t === 'officer' ? 'Elect officers to positions' : 'Vote on bylaw amendments'}
                   </p>
                 </button>
@@ -171,7 +171,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
                   type="button"
                   onClick={() => setField('votingMode', m)}
                   className={`border rounded-lg p-2.5 text-sm text-center capitalize transition-colors ${
-                    form.votingMode === m ? 'border-primary bg-primary/5 font-medium' : 'hover:bg-muted/50'
+                    form.votingMode === m ? 'border-[var(--color-primary)] bg-primary/5 font-medium' : 'hover:bg-[var(--color-surface-warm)]'
                   }`}
                 >
                   {m.replace('_', '-')}
@@ -192,7 +192,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
                 onChange={(e) => setField('passageThreshold', e.target.value)}
                 placeholder="e.g. 67"
               />
-              <p className="text-xs text-muted-foreground">Percentage of votes needed to pass (e.g. 67 for two-thirds majority)</p>
+              <p className="text-xs text-[var(--color-muted)]">Percentage of votes needed to pass (e.g. 67 for two-thirds majority)</p>
             </div>
           )}
         </div>
@@ -203,7 +203,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium">Positions</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-[var(--color-muted)] mt-0.5">
               {form.type === 'officer' ? 'Add the officer positions to be elected' : 'Add the bylaw items to be voted on'}
             </p>
           </div>
@@ -211,7 +211,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
           <div className="space-y-2">
             {positions.map((pos, i) => (
               <div key={pos.id} className="flex items-center gap-2">
-                <GripVertical className="w-4 h-4 text-muted-foreground shrink-0 cursor-grab" />
+                <GripVertical className="w-4 h-4 text-[var(--color-muted)] shrink-0 cursor-grab" />
                 <Input
                   value={pos.title}
                   onChange={(e) => updatePositionTitle(pos.id, e.target.value)}
@@ -222,7 +222,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
                   type="button"
                   onClick={() => removePosition(pos.id)}
                   disabled={positions.length === 1}
-                  className="p-2 text-muted-foreground hover:text-destructive disabled:opacity-30 transition-colors"
+                  className="p-2 text-[var(--color-muted)] hover:text-[var(--color-error)] disabled:opacity-30 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -233,7 +233,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
           <button
             type="button"
             onClick={addPosition}
-            className="flex items-center gap-1.5 text-sm text-primary hover:underline"
+            className="flex items-center gap-1.5 text-sm text-[var(--color-primary)] hover:underline"
           >
             <Plus className="w-4 h-4" />
             Add position
@@ -244,7 +244,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
       {/* Step: Timeline */}
       {step === 'timeline' && (
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">All dates are optional. You can set them later.</p>
+          <p className="text-sm text-[var(--color-muted)]">All dates are optional. You can set them later.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -288,7 +288,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
       )}
 
       {error && (
-        <p className="text-sm text-destructive">{error}</p>
+        <p className="text-sm text-[var(--color-error)]">{error}</p>
       )}
 
       {/* Actions */}
@@ -296,7 +296,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
         >
           Cancel
         </button>
@@ -305,7 +305,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
             <button
               type="button"
               onClick={() => setStep(STEPS[stepIndex - 1]!.key)}
-              className="px-4 py-2 border rounded-md text-sm hover:bg-muted"
+              className="px-4 py-2 border rounded-md text-sm hover:bg-[var(--color-surface-warm)]"
             >
               Back
             </button>
@@ -315,7 +315,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
               type="button"
               onClick={() => setStep(STEPS[stepIndex + 1]!.key)}
               disabled={!canProceed()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+              className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
             >
               Next
             </button>
@@ -338,7 +338,7 @@ export function ElectionForm({ orgId, onSuccess, onCancel }: ElectionFormProps) 
                 })
               }}
               disabled={mutation.isPending || !form.title.trim()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+              className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
             >
               {mutation.isPending ? 'Saving...' : 'Save as Draft'}
             </button>

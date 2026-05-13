@@ -95,7 +95,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-12 px-4 md:px-6 bg-[var(--color-primary)] text-white md:bg-[var(--color-surface)] md:text-[var(--color-text)] md:border-b md:border-[var(--color-border-light)]">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-12 px-4 md:px-6 bg-[var(--color-primary)] text-white md:bg-[var(--color-nav-elevated)] md:backdrop-blur-[var(--nav-blur)] md:text-[var(--color-text)] md:border-b md:border-[var(--color-border-light)]">
       {/* Left: logo (mobile only) */}
       <div className="flex items-center gap-2 md:hidden">
         <div className="w-6 h-6 rounded-full bg-[var(--color-cream)] flex items-center justify-center">

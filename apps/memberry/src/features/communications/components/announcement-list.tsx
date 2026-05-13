@@ -19,7 +19,7 @@ const STATUS_TABS: { key: StatusTab; label: string }[] = [
 ]
 
 const STATUS_BADGE: Record<string, string> = {
-  draft: 'bg-muted text-muted-foreground',
+  draft: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
   scheduled: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
   sent: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
   scheduled_failed: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
@@ -63,17 +63,17 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
     <div className="space-y-6">
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="p-4 rounded-lg border bg-card">
-          <p className="text-sm text-muted-foreground">Total Sent</p>
-          <p className="text-2xl font-bold">{statsData?.totalSent ?? '—'}</p>
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
+          <p className="text-sm text-[var(--color-muted)]">Total Sent</p>
+          <p className="text-[26px] font-bold font-display">{statsData?.totalSent ?? '—'}</p>
         </div>
-        <div className="p-4 rounded-lg border bg-card">
-          <p className="text-sm text-muted-foreground">Total</p>
-          <p className="text-2xl font-bold">{total}</p>
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
+          <p className="text-sm text-[var(--color-muted)]">Total</p>
+          <p className="text-[26px] font-bold font-display">{total}</p>
         </div>
-        <div className="p-4 rounded-lg border bg-card col-span-2 lg:col-span-1">
-          <p className="text-sm text-muted-foreground">Channels Used</p>
-          <p className="text-2xl font-bold">{channelLabels}</p>
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)] col-span-2 lg:col-span-1">
+          <p className="text-sm text-[var(--color-muted)]">Channels Used</p>
+          <p className="text-[26px] font-bold font-display">{channelLabels}</p>
         </div>
       </div>
 
@@ -86,8 +86,8 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
               onClick={() => setActiveTab(tab.key)}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                 activeTab === tab.key
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-[var(--color-primary)] text-white'
+                  : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
               }`}
             >
               {tab.label}
@@ -110,7 +110,7 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
           ))}
         </div>
       ) : announcements.length === 0 ? (
-        <div className="border rounded-lg p-12 text-center text-muted-foreground">
+        <div className="border rounded-lg p-12 text-center text-[var(--color-muted)]">
           {activeTab === 'all' && !search
             ? 'No announcements yet. Send your first message to members.'
             : 'No announcements match your filters.'}
@@ -121,18 +121,18 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
             <a
               key={ann.id}
               href={`/org/${orgId}/officer/communications/${ann.id}`}
-              className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+              className="flex items-center justify-between p-4 hover:bg-[var(--color-surface-warm)] transition-colors"
             >
               <div className="min-w-0 flex-1">
                 <p className="font-medium truncate">{ann.title}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-[var(--color-muted)]">
                   {ann.audienceType === 'all' ? 'All members' : 'Selected categories'}
                   {ann.channelPush && ' · Push'}
                   {ann.channelEmail && ' · Email'}
                 </p>
               </div>
               <div className="flex items-center gap-4 ml-4 shrink-0">
-                <span className="text-sm text-muted-foreground hidden sm:block">
+                <span className="text-sm text-[var(--color-muted)] hidden sm:block">
                   {formatDate(ann.publishedAt ?? ann.scheduledAt ?? ann.createdAt)}
                 </span>
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>

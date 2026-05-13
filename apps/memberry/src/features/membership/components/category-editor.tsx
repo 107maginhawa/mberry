@@ -102,16 +102,16 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
             ))}
           </div>
         ) : error ? (
-          <div className="p-10 text-center text-destructive">Failed to load categories.</div>
+          <div className="p-10 text-center text-[var(--color-error)]">Failed to load categories.</div>
         ) : categories.length === 0 ? (
-          <div className="p-14 flex flex-col items-center gap-3 text-muted-foreground">
+          <div className="p-14 flex flex-col items-center gap-3 text-[var(--color-muted)]">
             <Layers className="h-10 w-10 opacity-30" />
             <p className="text-sm">No categories yet. Create one to get started.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-muted/50">
+              <thead className="bg-[var(--color-surface-warm)]">
                 <tr className="border-b text-left">
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium hidden sm:table-cell">Description</th>
@@ -124,9 +124,9 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
               </thead>
               <tbody className="divide-y">
                 {categories.map((cat: any) => (
-                  <tr key={cat.id} className="hover:bg-muted/20 transition-colors">
+                  <tr key={cat.id} className="hover:bg-[var(--color-surface-warm)] transition-colors">
                     <td className="px-4 py-3 font-medium">{cat.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground max-w-xs truncate hidden sm:table-cell">
+                    <td className="px-4 py-3 text-[var(--color-muted)] max-w-xs truncate hidden sm:table-cell">
                       {cat.description ?? '—'}
                     </td>
                     <td className="px-4 py-3 font-mono">
@@ -134,10 +134,10 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
                         ? `₱${(cat.duesAmount / 100).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
                         : '—'}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground capitalize hidden md:table-cell">
+                    <td className="px-4 py-3 text-[var(--color-muted)] capitalize hidden md:table-cell">
                       {cat.billingCycle ?? '—'}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                    <td className="px-4 py-3 text-[var(--color-muted)] hidden md:table-cell">
                       {cat.memberCount ?? 0}
                     </td>
                     <td className="px-4 py-3">
@@ -152,7 +152,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-muted-foreground hover:text-foreground"
+                          className="text-[var(--color-muted)] hover:text-[var(--color-text)]"
                           onClick={() => setConfirmDeactivate(cat.id)}
                         >
                           <ToggleLeft className="h-4 w-4 mr-1" />
@@ -176,7 +176,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label htmlFor="cat-name">Name <span className="text-destructive">*</span></Label>
+              <Label htmlFor="cat-name">Name <span className="text-[var(--color-error)]">*</span></Label>
               <Input
                 id="cat-name"
                 value={form.name}
@@ -195,7 +195,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="cat-dues">Dues Amount (₱) <span className="text-destructive">*</span></Label>
+                <Label htmlFor="cat-dues">Dues Amount (₱) <span className="text-[var(--color-error)]">*</span></Label>
                 <Input
                   id="cat-dues"
                   type="number"
@@ -249,7 +249,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
           <DialogHeader>
             <DialogTitle>Deactivate Category</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[var(--color-muted)]">
             Existing members in this category will not be affected, but new members cannot be assigned to it.
           </p>
           <DialogFooter>

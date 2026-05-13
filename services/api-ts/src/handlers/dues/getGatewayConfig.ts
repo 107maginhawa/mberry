@@ -3,7 +3,7 @@ import { DuesRepository } from './repos/dues.repo';
 
 export async function getGatewayConfig(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const repo = new DuesRepository(db);
 
   const config = await repo.getGatewayConfig(orgId);

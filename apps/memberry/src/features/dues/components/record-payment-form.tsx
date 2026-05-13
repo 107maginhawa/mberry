@@ -95,24 +95,24 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
             onChange={(e) => { setMemberSearch(e.target.value); setPersonId('') }}
             placeholder="Search by name or license number..."
           />
-          {searchingMembers && <p className="text-xs text-muted-foreground mt-1">Searching...</p>}
+          {searchingMembers && <p className="text-xs text-[var(--color-muted)] mt-1">Searching...</p>}
           {memberResults.length > 0 && !personId && (
             <div className="border rounded-md mt-1 max-h-40 overflow-y-auto bg-white relative z-50 shadow-lg">
               {memberResults.map((m) => (
                 <button
                   key={m.id}
                   type="button"
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-surface-warm)] transition-colors"
                   onClick={() => selectMember(m)}
                 >
                   <span className="font-medium">{m.memberNumber || m.personId}</span>
-                  {m.memberNumber && <span className="text-muted-foreground ml-2 text-xs font-mono">#{m.memberNumber}</span>}
+                  {m.memberNumber && <span className="text-[var(--color-muted)] ml-2 text-xs font-mono">#{m.memberNumber}</span>}
                 </button>
               ))}
             </div>
           )}
           {personId && (
-            <p className="text-xs text-muted-foreground mt-1">Selected: {memberSearch}</p>
+            <p className="text-xs text-[var(--color-muted)] mt-1">Selected: {memberSearch}</p>
           )}
         </div>
 
@@ -165,11 +165,11 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
         </Button>
       </form>
 
-      <div className="p-4 bg-muted/50 rounded-lg">
+      <div className="p-4 bg-[var(--color-surface-warm)] rounded-lg">
         {amountCents > 0 ? (
           <FundAllocationPreview amountCents={amountCents} funds={funds} />
         ) : (
-          <p className="text-sm text-muted-foreground">Enter an amount to see fund allocation.</p>
+          <p className="text-sm text-[var(--color-muted)]">Enter an amount to see fund allocation.</p>
         )}
       </div>
 

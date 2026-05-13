@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Calendar, MapPin, Users, MoreHorizontal } from 'lucide-react'
+import { GlassCard } from '@/components/motion/glass-card'
 
 interface EventCardProps {
   event: {
@@ -16,10 +17,11 @@ interface EventCardProps {
   onEdit?: (id: string) => void
   onCancel?: (id: string) => void
   onDuplicate?: (id: string) => void
+  linkBase?: string
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-muted text-muted-foreground',
+  draft: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
   published: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
   cancelled: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
 }
@@ -37,32 +39,32 @@ function getLocation(event: EventCardProps['event']) {
   return event.location ?? 'In-person'
 }
 
-export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: EventCardProps) {
+export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBase }: EventCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="border rounded-lg bg-card overflow-hidden hover:shadow-sm transition-shadow">
+    <GlassCard className="overflow-hidden">
       <div className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[event.status] ?? 'bg-muted text-muted-foreground'}`}>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[event.status] ?? 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]'}`}>
               {event.status}
             </span>
           </div>
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-1 rounded hover:bg-muted transition-colors"
+              className="p-1 rounded hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
               aria-label="Actions"
             >
-              <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+              <MoreHorizontal className="w-4 h-4 text-[var(--color-muted)]" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-7 z-10 w-36 border rounded-md bg-popover shadow-md text-sm">
+              <div className="absolute right-0 top-7 z-10 w-36 border border-[var(--color-surface-border-glass)] rounded-[8px] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] text-body-sm">
                 <a
-                  href={`/org/${orgId}/officer/events/${event.id}`}
-                  className="block px-3 py-2 hover:bg-muted"
+                  href={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}`}
+                  className="block px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)] rounded-t-[8px]"
                   onClick={() => setMenuOpen(false)}
                 >
                   View Details
@@ -70,7 +72,7 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: Event
                 {onEdit && (
                   <button
                     onClick={() => { onEdit(event.id); setMenuOpen(false) }}
-                    className="block w-full text-left px-3 py-2 hover:bg-muted"
+                    className="block w-full text-left px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)]"
                   >
                     Edit
                   </button>
@@ -78,7 +80,7 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: Event
                 {onDuplicate && (
                   <button
                     onClick={() => { onDuplicate(event.id); setMenuOpen(false) }}
-                    className="block w-full text-left px-3 py-2 hover:bg-muted"
+                    className="block w-full text-left px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)]"
                   >
                     Duplicate
                   </button>
@@ -86,7 +88,7 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: Event
                 {onCancel && event.status !== 'cancelled' && (
                   <button
                     onClick={() => { onCancel(event.id); setMenuOpen(false) }}
-                    className="block w-full text-left px-3 py-2 text-destructive hover:bg-muted"
+                    className="block w-full text-left px-3 py-2 text-[var(--color-error)] hover:bg-[var(--color-surface-elevated-hover)] rounded-b-[8px]"
                   >
                     Cancel
                   </button>
@@ -97,14 +99,14 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: Event
         </div>
 
         {/* Title */}
-        <a href={`/org/${orgId}/officer/events/${event.id}`} className="block">
-          <h3 className="font-semibold text-base leading-snug hover:text-primary transition-colors line-clamp-2">
+        <a href={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}`} className="block">
+          <h3 className="text-h4 font-semibold leading-snug hover:text-[var(--color-primary)] transition-colors line-clamp-2">
             {event.title}
           </h3>
         </a>
 
         {/* Meta */}
-        <div className="space-y-1.5 text-sm text-muted-foreground">
+        <div className="space-y-1.5 text-body-sm text-[var(--color-muted)]">
           <div className="flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5 shrink-0" />
             <span>{formatEventDate(event.startDate, event.endDate)}</span>
@@ -124,6 +126,6 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate }: Event
           )}
         </div>
       </div>
-    </div>
+    </GlassCard>
   )
 }

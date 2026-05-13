@@ -32,9 +32,9 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="border rounded-xl bg-card overflow-hidden hover:shadow-md transition-shadow relative">
+    <div className="border rounded-xl bg-[var(--color-surface)] overflow-hidden hover:shadow-md transition-shadow relative">
       {/* Accent strip */}
-      <div className="h-2 w-full bg-primary" />
+      <div className="h-2 w-full bg-[var(--color-primary)]" />
 
       <div className="p-4 space-y-3">
         {/* Header row */}
@@ -50,7 +50,7 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-1 rounded hover:bg-muted text-muted-foreground"
+              className="p-1 rounded hover:bg-[var(--color-surface-warm)] text-[var(--color-muted)]"
               aria-label="Actions"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -59,21 +59,21 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
               <div className="absolute right-0 top-7 z-10 w-36 bg-popover border rounded-lg shadow-md py-1 text-sm">
                 <a
                   href={`/org/${orgId}/officer/training/${training.id}`}
-                  className="block px-3 py-1.5 hover:bg-muted"
+                  className="block px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
                   onClick={() => setMenuOpen(false)}
                 >
                   Edit
                 </a>
                 {training.status !== 'cancelled' && (
                   <button
-                    className="w-full text-left px-3 py-1.5 hover:bg-muted text-destructive"
+                    className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] text-[var(--color-error)]"
                     onClick={() => { setMenuOpen(false); onCancel?.(training.id) }}
                   >
                     Cancel
                   </button>
                 )}
                 <button
-                  className="w-full text-left px-3 py-1.5 hover:bg-muted"
+                  className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
                   onClick={() => { setMenuOpen(false); onDuplicate?.(training) }}
                 >
                   Duplicate
@@ -85,7 +85,7 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-[var(--color-primary)]">
             {TYPE_LABELS[training.type] ?? training.type}
           </span>
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700'}`}>
@@ -100,7 +100,7 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
         </div>
 
         {/* Meta */}
-        <div className="space-y-1 text-xs text-muted-foreground">
+        <div className="space-y-1 text-xs text-[var(--color-muted)]">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 shrink-0" />
             <span>{formatDate(training.startDate)}{training.endDate ? ` – ${formatDate(training.endDate)}` : ''}</span>

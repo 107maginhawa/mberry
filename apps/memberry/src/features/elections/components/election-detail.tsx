@@ -34,7 +34,7 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const NOMINEE_STATUS_COLORS: Record<string, string> = {
-  nominated: 'bg-muted text-muted-foreground',
+  nominated: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
   accepted: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
   declined: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
   elected: 'bg-emerald-100 text-emerald-800',
@@ -102,7 +102,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
   }
 
   if (error || !data) {
-    return <div className="p-6 text-center text-destructive">Failed to load election</div>
+    return <div className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
   }
 
   const election = (data as any)?.data ?? data
@@ -138,16 +138,16 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[election.status] ?? ''}`}>
               {STATUS_LABELS[election.status] ?? election.status}
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground capitalize">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
               {election.type}
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground capitalize">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
               {election.votingMode?.replace('_', '-')}
             </span>
           </div>
-          <h1 className="text-2xl font-bold">{election.title}</h1>
+          <h1 className="text-[26px] font-bold font-display">{election.title}</h1>
           {election.type === 'bylaw' && election.passageThreshold && (
-            <p className="text-sm text-muted-foreground mt-1">Requires {election.passageThreshold}% majority to pass</p>
+            <p className="text-sm text-[var(--color-muted)] mt-1">Requires {election.passageThreshold}% majority to pass</p>
           )}
         </div>
 
@@ -156,17 +156,17 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
           <div>
             {confirmAction === nextAction.nextStatus ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Confirm?</span>
+                <span className="text-sm text-[var(--color-muted)]">Confirm?</span>
                 <button
                   onClick={() => handleStatusAdvance(nextAction.nextStatus)}
                   disabled={statusMutationPending}
-                  className="px-3 py-1.5 bg-primary text-primary-foreground rounded text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+                  className="px-3 py-1.5 bg-[var(--color-primary)] text-white rounded text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
                 >
                   {statusMutationPending ? 'Updating...' : 'Yes, proceed'}
                 </button>
                 <button
                   onClick={() => setConfirmAction(null)}
-                  className="px-3 py-1.5 border rounded text-sm hover:bg-muted"
+                  className="px-3 py-1.5 border rounded text-sm hover:bg-[var(--color-surface-warm)]"
                 >
                   Cancel
                 </button>
@@ -174,7 +174,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
             ) : (
               <button
                 onClick={() => setConfirmAction(nextAction.nextStatus)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)]"
               >
                 {nextAction.label}
                 <ArrowRight className="w-4 h-4" />
@@ -193,7 +193,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
           { label: 'Voting Closes', value: election.votingEnd },
         ].map((item) => (
           <div key={item.label} className="border rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
+            <p className="text-xs text-[var(--color-muted)] mb-1">{item.label}</p>
             <p className="font-medium text-xs">{formatDate(item.value)}</p>
           </div>
         ))}
@@ -202,7 +202,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
       {/* Voter turnout */}
       {totalVoters > 0 && (
         <div className="flex items-center gap-3 border rounded-lg p-4">
-          <Users className="w-5 h-5 text-muted-foreground" />
+          <Users className="w-5 h-5 text-[var(--color-muted)]" />
           <div>
             <p className="font-medium">{totalVoters} voter{totalVoters !== 1 ? 's' : ''} participated</p>
           </div>
@@ -227,16 +227,16 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
 
               return (
                 <div key={position.id} className="border rounded-lg overflow-hidden">
-                  <div className="px-4 py-3 bg-muted/30 border-b">
+                  <div className="px-4 py-3 bg-[var(--color-surface-warm)] border-b">
                     <p className="font-medium">{position.title}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-[var(--color-muted)]">
                       {posNominees.length} nominee{posNominees.length !== 1 ? 's' : ''}
                       {showTallies && totalPositionVotes > 0 && ` · ${totalPositionVotes} vote${totalPositionVotes !== 1 ? 's' : ''}`}
                     </p>
                   </div>
 
                   {posNominees.length === 0 ? (
-                    <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                    <div className="px-4 py-6 text-center text-sm text-[var(--color-muted)]">
                       No nominees yet
                     </div>
                   ) : (
@@ -251,20 +251,20 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 {isWinner && <Trophy className="w-4 h-4 text-emerald-600 shrink-0" />}
-                                <p className="font-mono text-xs truncate text-muted-foreground">{nominee.personId}</p>
+                                <p className="font-mono text-xs truncate text-[var(--color-muted)]">{nominee.personId}</p>
                                 <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${NOMINEE_STATUS_COLORS[nominee.status] ?? ''}`}>
                                   {nominee.status}
                                 </span>
                               </div>
                               {showTallies && totalPositionVotes > 0 && (
                                 <div className="mt-1.5 flex items-center gap-2">
-                                  <div className="flex-1 bg-muted rounded-full h-1.5 overflow-hidden">
+                                  <div className="flex-1 bg-[var(--color-surface-warm)] rounded-full h-1.5 overflow-hidden">
                                     <div
-                                      className={`h-full rounded-full transition-all ${isWinner ? 'bg-emerald-500' : 'bg-primary'}`}
+                                      className={`h-full rounded-full transition-all ${isWinner ? 'bg-emerald-500' : 'bg-[var(--color-primary)]'}`}
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="text-xs text-muted-foreground w-16 text-right">
+                                  <span className="text-xs text-[var(--color-muted)] w-16 text-right">
                                     {voteCount} ({pct}%)
                                   </span>
                                 </div>
@@ -280,7 +280,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
             })}
         </div>
       ) : (
-        <div className="border rounded-lg p-8 text-center text-muted-foreground text-sm">
+        <div className="border rounded-lg p-8 text-center text-[var(--color-muted)] text-sm">
           No positions defined yet
         </div>
       )}

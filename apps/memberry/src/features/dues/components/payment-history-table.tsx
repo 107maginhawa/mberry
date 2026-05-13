@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
 import { listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Badge } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Receipt } from 'lucide-react'
 import { formatCents } from '../lib/money'
+import { EmptyState } from '@/components/patterns/empty-state'
 
 interface PaymentHistoryTableProps {
   orgId?: string
@@ -84,9 +85,13 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
       </div>
 
       {isLoading ? (
-        <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+        <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg animate-shimmer" />)}</div>
       ) : payments.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">No payments match your filters.</p>
+        <EmptyState
+          icon={<Receipt className="w-10 h-10" />}
+          headline="No Payments Found"
+          description="No payments match your current filters. Try adjusting or clearing filters."
+        />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -101,7 +106,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
             </thead>
             <tbody>
               {payments.map((p: any, idx: number) => (
-                <tr key={p.id} className={`hover:bg-muted/50 cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
+                <tr key={p.id} className={`hover:bg-[var(--color-surface-warm)] cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
                   <td className="px-3 py-2 text-body-sm tabular-nums">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</td>
                   <td className="px-3 py-2 text-mono tabular-nums">{p.receiptNumber}</td>
                   <td className="px-3 py-2 text-mono tabular-nums">{formatCents(Number(p.amount), p.currency)}</td>
@@ -120,7 +125,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
 
       {total > limit && (
         <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">Showing {offset + 1}–{Math.min(offset + limit, total)} of {total}</span>
+          <span className="text-[var(--color-muted)]">Showing {offset + 1}–{Math.min(offset + limit, total)} of {total}</span>
           <div className="flex gap-2">
             <button onClick={() => setOffset(Math.max(0, offset - limit))} disabled={offset === 0} className="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
             <button onClick={() => setOffset(offset + limit)} disabled={offset + limit >= total} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>

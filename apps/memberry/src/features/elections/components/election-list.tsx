@@ -23,7 +23,7 @@ const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] ?? { label: status, color: 'bg-muted text-muted-foreground', icon: FileText }
+  const config = STATUS_CONFIG[status] ?? { label: status, color: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]', icon: FileText }
   return (
     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
       {status === 'voting_open' && <config.icon className="w-3 h-3" />}
@@ -33,7 +33,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function TypeBadge({ type }: { type: string }) {
-  const config = TYPE_CONFIG[type] ?? { label: type, color: 'bg-muted text-muted-foreground' }
+  const config = TYPE_CONFIG[type] ?? { label: type, color: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]' }
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${config.color}`}>
       {config.label}
@@ -71,10 +71,10 @@ export function ElectionList({ orgId }: ElectionListProps) {
           { label: 'Published', value: stats.published, icon: CheckCircle2 },
         ].map((s) => (
           <div key={s.label} className="border rounded-lg p-4 flex items-center gap-3">
-            <s.icon className="w-5 h-5 text-muted-foreground" />
+            <s.icon className="w-5 h-5 text-[var(--color-muted)]" />
             <div>
-              <p className="text-2xl font-bold">{isLoading ? '—' : s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
+              <p className="text-[26px] font-bold font-display">{isLoading ? '—' : s.value}</p>
+              <p className="text-xs text-[var(--color-muted)]">{s.label}</p>
             </div>
           </div>
         ))}
@@ -88,12 +88,12 @@ export function ElectionList({ orgId }: ElectionListProps) {
           ))}
         </div>
       ) : error ? (
-        <div className="border rounded-lg p-12 text-center text-destructive">Failed to load elections</div>
+        <div className="border rounded-lg p-12 text-center text-[var(--color-error)]">Failed to load elections</div>
       ) : elections.length === 0 ? (
         <div className="border rounded-lg p-16 text-center">
-          <Vote className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <Vote className="w-10 h-10 text-[var(--color-muted)] mx-auto mb-3" />
           <p className="font-medium">No elections yet</p>
-          <p className="text-sm text-muted-foreground mt-1">Create your first election to get started</p>
+          <p className="text-sm text-[var(--color-muted)] mt-1">Create your first election to get started</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -102,7 +102,7 @@ export function ElectionList({ orgId }: ElectionListProps) {
               key={election.id}
               to="/org/$orgId/officer/elections/$electionId"
               params={{ orgId, electionId: election.id }}
-              className="flex items-center gap-4 border rounded-lg p-4 hover:bg-muted/30 transition-colors group"
+              className="flex items-center gap-4 border rounded-lg p-4 hover:bg-[var(--color-surface-warm)] transition-colors group"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -110,7 +110,7 @@ export function ElectionList({ orgId }: ElectionListProps) {
                   <StatusBadge status={election.status} />
                 </div>
                 <p className="font-medium truncate">{election.title}</p>
-                <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-4 mt-1 text-xs text-[var(--color-muted)]">
                   {election.votingOpenAt && (
                     <span>Voting: {formatDate(election.votingOpenAt)}</span>
                   )}
@@ -122,7 +122,7 @@ export function ElectionList({ orgId }: ElectionListProps) {
                   )}
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+              <ChevronRight className="w-4 h-4 text-[var(--color-muted)] group-hover:text-[var(--color-text)] transition-colors shrink-0" />
             </Link>
           ))}
         </div>

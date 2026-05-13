@@ -19,6 +19,9 @@ import { ActionWidget, CreditRing } from '@/features/dashboard/components/action
 import { OrgAnnouncements } from '@/features/dashboard/components/org-announcements'
 import { CreditBreakdown } from '@/features/dashboard/components/credit-breakdown'
 import { QuickActions } from '@/features/dashboard/components/quick-actions'
+import { GlassCard } from '@/components/motion/glass-card'
+import { CountUp } from '@/components/motion/count-up'
+import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: DashboardPage,
@@ -195,7 +198,7 @@ function DashboardPage() {
       {person.data && !person.data.specialization && (
         <Link
           to="/onboarding"
-          className="block rounded-[12px] border border-[var(--color-cream)] bg-[var(--color-cream-light)] p-4 hover:border-[var(--color-cream-dark)] transition-colors"
+          className="block rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] p-4 hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
         >
           <div className="flex items-center gap-3">
             <UserPlus size={20} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
@@ -209,7 +212,7 @@ function DashboardPage() {
 
       {/* Org Membership Cards */}
       <section>
-        <h2 className="text-[16px] font-semibold font-display mb-4">Your Organizations</h2>
+        <h2 className="text-h4 mb-4">Your Organizations</h2>
         {membershipsQuery.isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CardSkeleton />
@@ -222,18 +225,20 @@ function DashboardPage() {
             action={{ label: 'Find Organizations', onClick: () => navigate({ to: '/my/organizations' }) }}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {memberships.map((m: any) => (
-              <OrgCard key={m.id} membership={m} invoices={invoices} />
+              <StaggerItem key={m.id}>
+                <OrgCard membership={m} invoices={invoices} />
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerGrid>
         )}
       </section>
 
-      {/* Action Widgets — 3-col grid */}
+      {/* Action Widgets */}
       <section>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Dues Status */}
+        <StaggerGrid className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <StaggerItem>
           <ActionWidget
             icon={<CreditCard size={16} />}
             label="Dues"
@@ -252,8 +257,10 @@ function DashboardPage() {
                 : undefined
             }
           />
+          </StaggerItem>
 
           {/* CPD Status — merged credits + compliance */}
+          <StaggerItem>
           <ActionWidget
             icon={<Award size={16} />}
             label="CPD Status"
@@ -267,9 +274,9 @@ function DashboardPage() {
               <CreditRing earned={myEarned} required={myRequired || myEarned} size={44} />
               <div>
                 <p className="text-[20px] font-bold font-display text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {myEarned}
+                  <CountUp value={myEarned} />
                   {myRequired > 0 && (
-                    <span className="text-[13px] font-medium text-[var(--color-muted)]">/{myRequired}</span>
+                    <span className="text-[13px] font-medium text-[var(--color-muted)]">/<CountUp value={myRequired} /></span>
                   )}
                 </p>
                 <p className="text-[11px] font-medium text-[var(--color-muted)]">
@@ -283,8 +290,10 @@ function DashboardPage() {
               </div>
             </div>
           </ActionWidget>
+          </StaggerItem>
 
           {/* Next Event */}
+          <StaggerItem>
           <ActionWidget
             icon={<Calendar size={16} />}
             label="Next Event"
@@ -296,7 +305,8 @@ function DashboardPage() {
             status={nextEvent ? 'neutral' : undefined}
             action={{ label: 'View events', to: '/my/events' }}
           />
-        </div>
+          </StaggerItem>
+        </StaggerGrid>
       </section>
 
       {/* Quick Actions */}
@@ -306,18 +316,22 @@ function DashboardPage() {
       />
 
       {/* Org News + Credit Progress */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <OrgAnnouncements
-          announcements={announcements}
-          orgNames={orgNames}
-          isError={announcementsQuery.isError}
-        />
-        <CreditBreakdown
-          totalCredits={totalCredits}
-          requiredCredits={requiredCredits}
-          isError={creditSummaryQuery.isError}
-        />
-      </div>
+      <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <StaggerItem>
+          <OrgAnnouncements
+            announcements={announcements}
+            orgNames={orgNames}
+            isError={announcementsQuery.isError}
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <CreditBreakdown
+            totalCredits={totalCredits}
+            requiredCredits={requiredCredits}
+            isError={creditSummaryQuery.isError}
+          />
+        </StaggerItem>
+      </StaggerGrid>
     </div>
   )
 }
@@ -374,7 +388,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
   }
 
   return (
-    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+    <GlassCard className="p-5">
       <Link
         to="/org/$orgId/home"
         params={{ orgId: orgId ?? '' }}
@@ -461,6 +475,6 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
           </Link>
         )}
       </div>
-    </div>
+    </GlassCard>
   )
 }

@@ -54,7 +54,7 @@ export function FundAllocationEditor({ funds, onChange, disabled }: FundAllocati
         <div key={i} className="flex items-center gap-2">
           <button
             type="button"
-            className="cursor-grab text-muted-foreground hover:text-foreground"
+            className="cursor-grab text-[var(--color-muted)] hover:text-[var(--color-text)]"
             onClick={() => { if (i > 0) moveFund(i, i - 1) }}
             disabled={disabled}
           >
@@ -78,7 +78,7 @@ export function FundAllocationEditor({ funds, onChange, disabled }: FundAllocati
               className="w-20"
               disabled={disabled}
             />
-            <span className="text-sm text-muted-foreground">%</span>
+            <span className="text-sm text-[var(--color-muted)]">%</span>
           </div>
           {funds.length > 1 && (
             <Button
@@ -87,7 +87,7 @@ export function FundAllocationEditor({ funds, onChange, disabled }: FundAllocati
               size="icon"
               onClick={() => removeFund(i)}
               disabled={disabled}
-              className="text-destructive hover:text-destructive"
+              className="text-[var(--color-error)] hover:text-[var(--color-error)]"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -96,12 +96,12 @@ export function FundAllocationEditor({ funds, onChange, disabled }: FundAllocati
       ))}
 
       {funds.length > 1 && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[var(--color-muted)]">
           Last fund absorbs rounding remainder to ensure exact totals.
         </p>
       )}
 
-      <div className={`text-sm font-medium ${isValid ? 'text-green-600' : 'text-destructive'}`}>
+      <div className={`text-sm font-medium ${isValid ? 'text-green-600' : 'text-[var(--color-error)]'}`}>
         Total: {total.toFixed(2)}%
         {!isValid && <span className="ml-2 font-normal">Must equal exactly 100%</span>}
       </div>

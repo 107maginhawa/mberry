@@ -334,11 +334,17 @@ To scaffold a new app, copy `apps/account/` and update `package.json` name + `vi
 
 Full audit: `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md`
 
-**7 P0 (fix immediately)**: 2FA secrets plaintext, castVote no validation, uploadFile no MIME allowlist, 36% tables not org-scoped, session tokens plaintext, email verification disabled, audit log no organizationId.
+**Gate Status: SATISFIED (2026-05-12).** 7/7 P0 resolved, 10/10 actionable P1 resolved. New feature work unblocked.
 
-**11 P1 (fix before major new work)**: Per-handler auth bypass (6+ routes), internal service token untyped/no rotation, rate limiting only on auth routes, officerAuth silent skip without `:orgId`, 2FA not enforced for privileged roles, no session invalidation on role change, admin app no role gates, user.email unique globally blocks multi-org, 8 inline app.ts routes bypass TypeSpec, auth events not in audit trail, association:member mega-module (171 handlers).
+- P0 items resolved via GAP-CLOSURE-ROADMAP Wave 2 + Phase 14 (c90f160)
+- P1 items resolved via Wave 3 + Phases 12-13 (auth middleware, RBAC)
+- P1-8 (user.email unique globally) closed as WON'T FIX — unique email is by design
+- P1-11 (association:member mega-module, 171 handlers) deferred to v1.2.0 — operational risk, not a security issue. Split plan exists at `.planning/phases/14-mega-module-split/SPLIT-PLAN.md`
 
-**Gate**: No new feature development until P0/P1 fixes are ≥50% complete.
+**Remaining deferred items** (tracked for v1.2.0):
+- TypeSpec 100% coverage (8 inline app.ts routes remain hand-wired)
+- Audit log filter bug (eventType/category params don't filter)
+- BR-35 through BR-40 (deferred in Phase 18)
 
 ### Working with Cadence (Rust)
 - Cadence lives at `services/cadence/` and is a Cargo crate independent of

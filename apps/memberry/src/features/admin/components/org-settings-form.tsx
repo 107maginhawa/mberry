@@ -309,7 +309,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
 
 function FieldValue({ value, placeholder = '—' }: { value: string; placeholder?: string }) {
   return (
-    <p className={`text-[14px] py-2 ${value ? 'text-foreground' : 'text-[var(--color-muted)]'}`}>
+    <p className={`text-[14px] py-2 ${value ? 'text-[var(--color-text)]' : 'text-[var(--color-muted)]'}`}>
       {value || placeholder}
     </p>
   )

@@ -17,11 +17,11 @@ export function ReportResults({ type, data, summary, isLoading }: ReportResultsP
   }
 
   if (!data) {
-    return <p className="text-center text-muted-foreground py-8">Select a report type and click Generate.</p>
+    return <p className="text-center text-[var(--color-muted)] py-8">Select a report type and click Generate.</p>
   }
 
   if (data.length === 0) {
-    return <p className="text-center text-muted-foreground py-8">No data found for the selected period and filters.</p>
+    return <p className="text-center text-[var(--color-muted)] py-8">No data found for the selected period and filters.</p>
   }
 
   const exportCSV = () => {
@@ -75,7 +75,7 @@ export function ReportResults({ type, data, summary, isLoading }: ReportResultsP
       <div className="overflow-x-auto">
         <table className="w-full text-sm border">
           <thead>
-            <tr className="border-b bg-muted/50">
+            <tr className="border-b bg-[var(--color-surface-warm)]">
               {type === 'collection' && <><th className="px-3 py-2 text-left">Month</th><th className="px-3 py-2 text-left">Method</th><th className="px-3 py-2 text-right">Count</th><th className="px-3 py-2 text-right">Total</th></>}
               {type === 'fund_breakdown' && <><th className="px-3 py-2 text-left">Fund</th><th className="px-3 py-2 text-right">%</th><th className="px-3 py-2 text-right">Allocated</th><th className="px-3 py-2 text-right">Reversals</th><th className="px-3 py-2 text-right">Net</th></>}
               {type === 'dues_status' && <><th className="px-3 py-2 text-left">Member</th><th className="px-3 py-2 text-right">Total Paid</th><th className="px-3 py-2 text-left">Last Payment</th><th className="px-3 py-2 text-right">Count</th></>}

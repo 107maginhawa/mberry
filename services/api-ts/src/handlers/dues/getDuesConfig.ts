@@ -3,7 +3,7 @@ import { DuesRepository } from './repos/dues.repo';
 
 export async function getDuesConfig(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('duesConfigId');
   const repo = new DuesRepository(db);
 
   const config = await repo.getConfig(orgId);

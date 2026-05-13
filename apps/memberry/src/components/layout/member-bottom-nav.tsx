@@ -10,7 +10,7 @@ const NAV_ITEMS = [
 
 export function MemberBottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-[68px] bg-[var(--color-surface)] border-t border-[var(--color-border-light)] flex items-center justify-around z-40">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-[68px] bg-[var(--color-nav-elevated)] backdrop-blur-[var(--nav-blur)] border-t border-[var(--color-border-light)] flex items-center justify-around z-40">
       {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
         <Link
           key={to}

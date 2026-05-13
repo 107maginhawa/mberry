@@ -1,4 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
 import { EventForm } from '@/features/events/components/event-form'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/events/new')({
@@ -10,19 +12,18 @@ function NewEvent() {
   const navigate = useNavigate()
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 p-6">
-      <div>
-        <a
-          href={`/org/${orgId}/officer/events`}
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Back to Events
-        </a>
-        <h1 className="text-2xl font-bold mt-2">Create Event</h1>
-        <p className="text-sm text-muted-foreground">Fill in the details for your new event</p>
-      </div>
+    <div className="max-w-3xl mx-auto space-y-6">
+      <PageHeader
+        title="Create Event"
+        subtitle="Fill in the details for your new event"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Events', href: `/org/${orgId}/officer/events` },
+          { label: 'New' },
+        ]}
+      />
 
-      <div className="border rounded-lg p-6">
+      <GlassCard className="p-6">
         <EventForm
           orgId={orgId}
           onSuccess={(event) => {
@@ -38,7 +39,7 @@ function NewEvent() {
             })
           }}
         />
-      </div>
+      </GlassCard>
     </div>
   )
 }

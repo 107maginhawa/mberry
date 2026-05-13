@@ -4,8 +4,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Button } from '@monobase/ui'
 import { Checkbox } from '@monobase/ui'
-import { Skeleton } from '@monobase/ui'
-import { ArrowLeft, Loader2, Users, UserCheck } from 'lucide-react'
+import { Loader2, Users, UserCheck } from 'lucide-react'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
+import { EmptyState } from '@/components/patterns/empty-state'
+import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { listCustomEventRegistrationsOptions, checkInCustomEventMutation } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute(
@@ -25,7 +28,7 @@ function EventAttendance() {
 
   const checkInMutOpts = checkInCustomEventMutation()
   const checkInMutation = useMutation({
-    mutationFn: (reg: any) => (checkInMutOpts.mutationFn as Function)({
+    mutationFn: (reg: any) => (checkInMutOpts.mutationFn as (...args: any[]) => any)({
       path: { eventId },
       body: { eventId, registrationId: reg.id, personId: reg.personId ?? reg.memberId, method: 'manual' as const },
     }),
@@ -47,59 +50,41 @@ function EventAttendance() {
   ).length
 
   return (
-    <div className="space-y-6 p-6">
-      <a
-        href={`/org/${orgId}/officer/events/${eventId}`}
-        className="inline-flex items-center gap-1.5 text-sm"
-        style={{ color: 'var(--color-muted)' }}
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Event
-      </a>
-
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Event Attendance
-          </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>
-            Mark members as present for this event
-          </p>
-        </div>
-        <div
-          className="flex items-center gap-2 px-3 py-2 rounded-lg border"
-          style={{ borderColor: 'var(--color-border-light)' }}
-        >
-          <UserCheck className="w-4 h-4" style={{ color: 'var(--color-muted)' }} />
-          <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
-            {presentCount} / {registrations.length} present
-          </span>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Event Attendance"
+        subtitle="Mark members as present for this event"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Events', href: `/org/${orgId}/officer/events` },
+          { label: 'Attendance' },
+        ]}
+        actions={
+          <GlassCard className="px-3 py-2">
+            <div className="flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-[var(--color-muted)]" />
+              <span className="text-[14px] font-medium">
+                {presentCount} / {registrations.length} present
+              </span>
+            </div>
+          </GlassCard>
+        }
+      />
 
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-md" />
-          ))}
-        </div>
+        <ListSkeleton rows={5} />
       ) : error ? (
-        <div className="p-6 text-center text-destructive">
+        <div className="p-6 text-center text-[var(--color-error)]">
           Failed to load registrations.
         </div>
       ) : registrations.length === 0 ? (
-        <div
-          className="border rounded-lg p-12 text-center"
-          style={{ borderColor: 'var(--color-border-light)', color: 'var(--color-muted)' }}
-        >
-          <Users className="w-8 h-8 mx-auto mb-3 opacity-40" />
-          <p className="font-medium">No registrations yet</p>
-          <p className="text-sm mt-1">Members who register for this event will appear here.</p>
-        </div>
+        <EmptyState
+          icon={<Users className="w-8 h-8" />}
+          headline="No registrations yet"
+          description="Members who register for this event will appear here."
+        />
       ) : (
-        <div
-          className="border rounded-lg overflow-hidden divide-y"
-          style={{ borderColor: 'var(--color-border-light)' }}
-        >
+        <GlassCard className="divide-y divide-[var(--color-border-light)]">
           {registrations.map((reg: any) => {
             const memberId = reg.memberId ?? reg.personId
             const isPresent = reg.checkedIn || checkedIn.has(memberId)
@@ -107,7 +92,7 @@ function EventAttendance() {
             return (
               <div
                 key={reg.id}
-                className="flex items-center justify-between px-4 py-3 hover:bg-muted/30"
+                className="flex items-center justify-between px-4 py-3 hover:bg-[var(--color-surface-warm)]/30"
               >
                 <div className="flex items-center gap-3">
                   <Checkbox
@@ -120,10 +105,10 @@ function EventAttendance() {
                     }}
                   />
                   <div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
+                    <p className="text-[14px] font-medium">
                       {reg.memberName ?? reg.personName ?? memberId}
                     </p>
-                    <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                    <p className="text-xs text-[var(--color-muted)]">
                       {reg.email ?? `ID: ${memberId}`}
                     </p>
                   </div>
@@ -152,7 +137,7 @@ function EventAttendance() {
               </div>
             )
           })}
-        </div>
+        </GlassCard>
       )}
     </div>
   )

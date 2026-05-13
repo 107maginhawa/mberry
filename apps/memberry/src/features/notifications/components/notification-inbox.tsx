@@ -1,8 +1,11 @@
 import { useState, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@monobase/ui'
-import { Bell, Megaphone, CreditCard, Calendar, BookOpen, Settings, CheckCheck, Loader2 } from 'lucide-react'
+import { Bell, Megaphone, CreditCard, Calendar, BookOpen, Settings, CheckCheck } from 'lucide-react'
 import { api } from '@/lib/api'
+import { GlassCard } from '@/components/motion/glass-card'
+import { EmptyState } from '@/components/patterns/empty-state'
+import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 
 type NotifCategory = 'All' | 'Announcements' | 'Payments' | 'Events' | 'Training' | 'System'
 
@@ -112,12 +115,7 @@ export function NotificationInbox() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20 text-[var(--color-muted)]">
-        <Loader2 size={24} className="animate-spin mr-2" />
-        Loading notifications...
-      </div>
-    )
+    return <ListSkeleton rows={6} />
   }
 
   return (
@@ -165,21 +163,23 @@ export function NotificationInbox() {
 
       {/* Notification list */}
       {grouped.length === 0 ? (
-        <div className="rounded-[12px] border border-[var(--color-border-light)] p-10 text-center text-[var(--color-muted)]">
-          {notifications.length === 0 ? 'No notifications yet' : 'No notifications in this category'}
-        </div>
+        <EmptyState
+          icon={<Bell size={40} />}
+          headline={notifications.length === 0 ? 'No notifications yet' : 'No notifications in this category'}
+          description={notifications.length === 0 ? 'You\'ll see updates from your organizations here' : 'Try selecting a different category'}
+        />
       ) : (
         <div className="space-y-6">
           {grouped.map(({ label, items }) => (
             <div key={label}>
-              <h3 className="text-[12px] font-bold uppercase tracking-wide text-[var(--color-muted)] mb-2 px-1">
+              <h3 className="text-[12px] font-bold font-display uppercase tracking-wide text-[var(--color-muted)] mb-2 px-1">
                 {label}
               </h3>
-              <div className="rounded-[12px] border border-[var(--color-border-light)] divide-y divide-[var(--color-border-light)] overflow-hidden">
+              <GlassCard className="divide-y divide-[var(--color-border-light)] overflow-hidden">
                 {items.map((n) => (
                   <NotifRow key={n.id} notification={n} onMarkRead={markRead} />
                 ))}
-              </div>
+              </GlassCard>
             </div>
           ))}
         </div>

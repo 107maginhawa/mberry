@@ -53,14 +53,14 @@ export function QuickActions({ duesOrgId, eventsOrgId }: QuickActionsProps) {
 
   return (
     <section>
-      <h3 className="text-[14px] font-semibold font-display text-[var(--color-muted)] mb-3">Quick Actions</h3>
+      <h3 className="text-h4 text-[var(--color-muted)] mb-3">Quick Actions</h3>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
         {actions.map((action) => (
           <Link
             key={action.label}
             to={action.to}
             params={action.params ?? {}}
-            className="flex flex-col items-center gap-1.5 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-3 hover:border-[var(--color-cream-dark)] hover:bg-[var(--color-cream-light)] transition-colors"
+            className="flex flex-col items-center gap-1.5 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-3 hover:bg-[var(--color-surface-elevated-hover)] hover:border-[var(--color-cream-dark)] transition-colors shadow-[var(--shadow-soft)]"
           >
             <span className="text-[var(--color-primary)]" aria-hidden="true">{action.icon}</span>
             <span className="text-[11px] font-semibold text-center">{action.label}</span>

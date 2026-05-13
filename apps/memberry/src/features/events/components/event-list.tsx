@@ -95,26 +95,26 @@ export function EventList({ orgId }: EventListProps) {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
+          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
             <Calendar className="w-4 h-4" />
             <p className="text-sm">Upcoming</p>
           </div>
-          <p className="text-2xl font-bold">{statsData?.upcoming ?? '—'}</p>
+          <p className="text-[26px] font-bold font-display">{statsData?.upcoming ?? '—'}</p>
         </div>
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
+          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
             <Clock className="w-4 h-4" />
             <p className="text-sm">Drafts</p>
           </div>
-          <p className="text-2xl font-bold">{statsData?.drafts ?? '—'}</p>
+          <p className="text-[26px] font-bold font-display">{statsData?.drafts ?? '—'}</p>
         </div>
-        <div className="p-4 rounded-lg border bg-card col-span-2 lg:col-span-1">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)] col-span-2 lg:col-span-1">
+          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
             <Users className="w-4 h-4" />
             <p className="text-sm">Showing</p>
           </div>
-          <p className="text-2xl font-bold">{total}</p>
+          <p className="text-[26px] font-bold font-display">{total}</p>
         </div>
       </div>
 
@@ -127,8 +127,8 @@ export function EventList({ orgId }: EventListProps) {
               onClick={() => setTab(t.key)}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                 tab === t.key
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-[var(--color-primary)] text-white'
+                  : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
               }`}
             >
               {t.label}
@@ -162,7 +162,7 @@ export function EventList({ orgId }: EventListProps) {
           ))}
         </div>
       ) : events.length === 0 ? (
-        <div className="border rounded-lg p-12 text-center text-muted-foreground">
+        <div className="border rounded-lg p-12 text-center text-[var(--color-muted)]">
           {search || typeFilter
             ? 'No events match your filters.'
             : tab === 'drafts'

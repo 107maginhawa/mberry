@@ -40,8 +40,8 @@ function PublicVerification() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center space-y-4">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-          <p className="text-muted-foreground">Verifying credential...</p>
+          <div className="animate-spin h-8 w-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full mx-auto" />
+          <p className="text-[var(--color-muted)]">Verifying credential...</p>
         </div>
       </div>
     )
@@ -52,8 +52,8 @@ function PublicVerification() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full border rounded-lg p-6 bg-white text-center space-y-4">
           <div className="text-4xl">❌</div>
-          <h1 className="text-xl font-bold text-destructive">Verification Failed</h1>
-          <p className="text-muted-foreground">{error}</p>
+          <h1 className="text-xl font-bold text-[var(--color-error)]">Verification Failed</h1>
+          <p className="text-[var(--color-muted)]">{error}</p>
         </div>
       </div>
     )
@@ -69,22 +69,22 @@ function PublicVerification() {
         </div>
         <div className="p-6 space-y-3 text-sm">
           {result?.memberName && (
-            <div className="flex justify-between"><span className="text-muted-foreground">Member</span><span className="font-medium">{result.memberName}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--color-muted)]">Member</span><span className="font-medium">{result.memberName}</span></div>
           )}
           {result?.organizationName && (
-            <div className="flex justify-between"><span className="text-muted-foreground">Organization</span><span className="font-medium">{result.organizationName}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--color-muted)]">Organization</span><span className="font-medium">{result.organizationName}</span></div>
           )}
           {result?.credentialType && (
-            <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span className="font-medium">{result.credentialType}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--color-muted)]">Type</span><span className="font-medium">{result.credentialType}</span></div>
           )}
           {result?.status && (
-            <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-medium">{result.status}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--color-muted)]">Status</span><span className="font-medium">{result.status}</span></div>
           )}
           {result?.issuedAt && (
-            <div className="flex justify-between"><span className="text-muted-foreground">Issued</span><span className="font-medium">{result.issuedAt}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--color-muted)]">Issued</span><span className="font-medium">{result.issuedAt}</span></div>
           )}
         </div>
-        <div className="border-t p-4 text-center text-xs text-muted-foreground">
+        <div className="border-t p-4 text-center text-xs text-[var(--color-muted)]">
           Verified by Memberry • memberry.ph
         </div>
       </div>

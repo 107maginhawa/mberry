@@ -2,10 +2,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getDuesPaymentOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Badge } from '@monobase/ui'
-import { Skeleton } from '@monobase/ui'
 import { formatCents } from '@/features/dues/lib/money'
 import { RefundForm } from '@/features/dues/components/refund-form'
-import { ArrowLeft } from 'lucide-react'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
+import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/payments/$paymentId')({
   component: PaymentDetailPage,
@@ -32,8 +33,8 @@ function PaymentDetailPage() {
     select: (d: any) => d?.data ?? d,
   })
 
-  if (isLoading) return <div className="p-6"><Skeleton className="h-64 w-full" /></div>
-  if (error || !data) return <div className="p-6 text-destructive">Payment not found.</div>
+  if (isLoading) return <div className="p-6 space-y-4"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>
+  if (error || !data) return <div className="p-6 text-[var(--color-error)]">Payment not found.</div>
 
   const payment = data
   const allocations = payment.fundAllocations ?? []
@@ -42,56 +43,63 @@ function PaymentDetailPage() {
   const maxRefundable = Number(payment.amount) - Number(payment.refundedAmount)
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
-      <Link to="/org/$orgId/officer/payments" params={{ orgId }} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to payments
-      </Link>
+    <div className="space-y-6 max-w-3xl">
+      <PageHeader
+        title={payment.receiptNumber}
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Payments', href: `/org/${orgId}/officer/payments` },
+          { label: payment.receiptNumber },
+        ]}
+        actions={<Badge className={STATUS_COLORS[payment.status] ?? ''}>{payment.status}</Badge>}
+      />
 
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold font-mono">{payment.receiptNumber}</h1>
-        <Badge className={STATUS_COLORS[payment.status] ?? ''}>{payment.status}</Badge>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div><span className="text-muted-foreground">Amount:</span> <span className="font-mono font-medium">{formatCents(payment.amount, payment.currency)}</span></div>
-        <div><span className="text-muted-foreground">Method:</span> {payment.paymentMethod}</div>
-        <div><span className="text-muted-foreground">Date:</span> {payment.paidAt ? new Date(payment.paidAt).toLocaleDateString() : '—'}</div>
-        <div><span className="text-muted-foreground">Reference:</span> {payment.referenceNumber || '—'}</div>
-      </div>
+      <GlassCard className="p-5">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div><span className="text-[var(--color-muted)]">Amount:</span> <span className="font-mono font-medium">{formatCents(payment.amount, payment.currency)}</span></div>
+          <div><span className="text-[var(--color-muted)]">Method:</span> {payment.paymentMethod}</div>
+          <div><span className="text-[var(--color-muted)]">Date:</span> {payment.paidAt ? new Date(payment.paidAt).toLocaleDateString() : '—'}</div>
+          <div><span className="text-[var(--color-muted)]">Reference:</span> {payment.referenceNumber || '—'}</div>
+        </div>
+      </GlassCard>
 
       {origAllocations.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium mb-2">Fund Allocation</h3>
-          <table className="w-full text-sm border">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-3 py-2 text-left">Fund</th>
-                <th className="px-3 py-2 text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {origAllocations.map((a: any) => (
-                <tr key={a.id} className="border-b">
-                  <td className="px-3 py-2">{a.fundId}</td>
-                  <td className="px-3 py-2 text-right font-mono">{formatCents(a.amount, payment.currency)}</td>
+        <GlassCard className="p-5">
+          <h3 className="text-[14px] font-semibold font-display mb-3">Fund Allocation</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--color-border-light)]">
+                  <th className="px-3 py-2 text-left text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Fund</th>
+                  <th className="px-3 py-2 text-right text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Amount</th>
                 </tr>
-              ))}
-              {reversals.map((a: any) => (
-                <tr key={a.id} className="border-b text-red-600">
-                  <td className="px-3 py-2">Refund reversal</td>
-                  <td className="px-3 py-2 text-right font-mono">{formatCents(a.amount, payment.currency)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {origAllocations.map((a: any) => (
+                  <tr key={a.id} className="border-b border-[var(--color-border-light)]">
+                    <td className="px-3 py-2">{a.fundId}</td>
+                    <td className="px-3 py-2 text-right font-mono">{formatCents(a.amount, payment.currency)}</td>
+                  </tr>
+                ))}
+                {reversals.map((a: any) => (
+                  <tr key={a.id} className="border-b border-[var(--color-border-light)] text-[var(--color-error)]">
+                    <td className="px-3 py-2">Refund reversal</td>
+                    <td className="px-3 py-2 text-right font-mono">{formatCents(a.amount, payment.currency)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
       )}
 
       {(payment.status === 'completed' || payment.status === 'partiallyRefunded') && maxRefundable > 0 && (
-        <RefundForm paymentId={paymentId} maxAmount={maxRefundable} currency={payment.currency} />
+        <GlassCard className="p-5">
+          <RefundForm paymentId={paymentId} maxAmount={maxRefundable} currency={payment.currency} />
+        </GlassCard>
       )}
       {payment.status === 'refunded' && (
-        <p className="text-sm text-muted-foreground">This payment has been fully refunded.</p>
+        <p className="text-sm text-[var(--color-muted)]">This payment has been fully refunded.</p>
       )}
     </div>
   )

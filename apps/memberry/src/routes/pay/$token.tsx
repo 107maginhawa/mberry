@@ -62,7 +62,7 @@ function PublicPaymentPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full" />
       </div>
     )
   }
@@ -71,8 +71,8 @@ function PublicPaymentPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full border rounded-lg p-6 bg-white text-center space-y-4">
-          <h1 className="text-xl font-bold text-destructive">Payment Link Invalid</h1>
-          <p className="text-muted-foreground">{error}</p>
+          <h1 className="text-xl font-bold text-[var(--color-error)]">Payment Link Invalid</h1>
+          <p className="text-[var(--color-muted)]">{error}</p>
         </div>
       </div>
     )
@@ -84,7 +84,7 @@ function PublicPaymentPage() {
         <div className="max-w-md w-full border rounded-lg p-6 bg-white text-center space-y-4">
           <div className="text-4xl">✅</div>
           <h1 className="text-xl font-bold">Already Paid</h1>
-          <p className="text-muted-foreground">This invoice has already been paid. Thank you!</p>
+          <p className="text-[var(--color-muted)]">This invoice has already been paid. Thank you!</p>
         </div>
       </div>
     )
@@ -95,7 +95,7 @@ function PublicPaymentPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="max-w-md w-full border rounded-lg bg-white overflow-hidden">
-        <div className="bg-primary p-6 text-primary-foreground text-center">
+        <div className="bg-[var(--color-primary)] p-6 text-white text-center">
           <p className="text-sm opacity-80">Amount Due</p>
           <p className="text-3xl font-bold mt-1">
             {formatAmount(invoice.amount, invoice.currency)}
@@ -104,30 +104,30 @@ function PublicPaymentPage() {
         <div className="p-6 space-y-4">
           {invoice.orgName && (
             <div className="text-sm">
-              <span className="text-muted-foreground">Organization:</span>{' '}
+              <span className="text-[var(--color-muted)]">Organization:</span>{' '}
               <span className="font-medium">{invoice.orgName}</span>
             </div>
           )}
           {invoice.memberName && (
             <div className="text-sm">
-              <span className="text-muted-foreground">Member:</span>{' '}
+              <span className="text-[var(--color-muted)]">Member:</span>{' '}
               <span className="font-medium">{invoice.memberName}</span>
             </div>
           )}
           {invoice.dueDate && (
             <div className="text-sm">
-              <span className="text-muted-foreground">Due Date:</span>{' '}
+              <span className="text-[var(--color-muted)]">Due Date:</span>{' '}
               <span className="font-medium">{new Date(invoice.dueDate).toLocaleDateString()}</span>
             </div>
           )}
           <button
             onClick={handlePay}
             disabled={paying}
-            className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50"
+            className="w-full px-4 py-3 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium disabled:opacity-50"
           >
             {paying ? 'Redirecting to payment...' : 'Pay Now'}
           </button>
-          <p className="text-xs text-center text-muted-foreground">
+          <p className="text-xs text-center text-[var(--color-muted)]">
             Secure payment via GCash, Maya, or card
           </p>
         </div>

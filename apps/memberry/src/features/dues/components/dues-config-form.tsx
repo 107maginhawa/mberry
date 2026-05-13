@@ -100,7 +100,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   return (
     <div className="space-y-8 max-w-2xl">
       {!hasConfig && (
-        <p className="text-sm text-muted-foreground">Set up your dues structure to start collecting membership dues.</p>
+        <p className="text-sm text-[var(--color-muted)]">Set up your dues structure to start collecting membership dues.</p>
       )}
 
       <section className="space-y-4">
@@ -154,8 +154,8 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
         <div>
           <Label>Grace Period (days)</Label>
           <Input type="number" min="0" max="365" value={gracePeriodDays} onChange={(e) => { setGracePeriodDays(e.target.value); handleChange() }} className="w-32" />
-          {gracePeriodError && <p className="text-xs text-destructive mt-1">Grace period must be 0–365 days.</p>}
-          <p className="text-xs text-muted-foreground mt-1">Members have this many days after due date before status changes to Lapsed.</p>
+          {gracePeriodError && <p className="text-xs text-[var(--color-error)] mt-1">Grace period must be 0–365 days.</p>}
+          <p className="text-xs text-[var(--color-muted)] mt-1">Members have this many days after due date before status changes to Lapsed.</p>
         </div>
       </section>
 
@@ -177,7 +177,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
         <Button onClick={() => (saveMutation as any).mutate({ path: { duesConfigId: orgId }, body: { defaultAmount: parseCentsInput(defaultAmount), currency, billingFrequency, dueDateMonth: billingFrequency === 'annual' ? parseInt(dueDateMonth) : null, dueDateDay: parseInt(dueDateDay), gracePeriodDays: parseInt(gracePeriodDays), reminderSchedules: reminders } })} disabled={saveMutation.isPending || gracePeriodError || !defaultAmount}>
           {saveMutation.isPending ? 'Saving...' : 'Save'}
         </Button>
-        {hasChanges && <span className="text-xs text-muted-foreground self-center">Unsaved changes</span>}
+        {hasChanges && <span className="text-xs text-[var(--color-muted)] self-center">Unsaved changes</span>}
       </div>
     </div>
   )

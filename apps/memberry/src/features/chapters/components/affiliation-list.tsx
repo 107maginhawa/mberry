@@ -13,13 +13,13 @@ export function AffiliationList({ orgId, tenantId }: AffiliationListProps) {
     }),
   })
 
-  if (isLoading) return <div className="p-6 text-center text-muted-foreground">Loading affiliations...</div>
-  if (error) return <div className="p-6 text-center text-destructive">Failed to load affiliations</div>
+  if (isLoading) return <div className="p-6 text-center text-[var(--color-muted)]">Loading affiliations...</div>
+  if (error) return <div className="p-6 text-center text-[var(--color-error)]">Failed to load affiliations</div>
 
   const affiliations = (data as any)?.data ?? []
 
   if (affiliations.length === 0) {
-    return <div className="p-6 text-center text-muted-foreground">No chapter affiliations.</div>
+    return <div className="p-6 text-center text-[var(--color-muted)]">No chapter affiliations.</div>
   }
 
   return (
@@ -36,7 +36,7 @@ export function AffiliationList({ orgId, tenantId }: AffiliationListProps) {
         </thead>
         <tbody>
           {affiliations.map((a: any) => (
-            <tr key={a.id} className="border-b hover:bg-muted/50">
+            <tr key={a.id} className="border-b hover:bg-[var(--color-surface-warm)]">
               <td className="px-4 py-3">{a.personId}</td>
               <td className="px-4 py-3">{a.chapterId}</td>
               <td className="px-4 py-3">{a.isPrimary ? 'Yes' : 'No'}</td>

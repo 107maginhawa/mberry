@@ -1,5 +1,6 @@
 import { Megaphone } from 'lucide-react'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { GlassCard } from '@/components/motion/glass-card'
 
 interface OrgAnnouncementsProps {
   announcements: Array<{ id: string; title: string; subject?: string; content?: string; createdAt?: string; organizationId?: string }>
@@ -21,10 +22,10 @@ function formatDate(dateStr: string): string {
 
 export function OrgAnnouncements({ announcements, orgNames, isError }: OrgAnnouncementsProps) {
   return (
-    <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+    <GlassCard className="p-5">
       <div className="flex items-center gap-2 mb-4">
         <Megaphone size={18} className="text-[var(--color-muted)]" aria-hidden="true" />
-        <h3 className="text-[16px] font-semibold font-display">Org News</h3>
+        <h3 className="text-h4">Org News</h3>
       </div>
 
       {isError ? (
@@ -66,6 +67,6 @@ export function OrgAnnouncements({ announcements, orgNames, isError }: OrgAnnoun
           ))}
         </div>
       )}
-    </section>
+    </GlassCard>
   )
 }

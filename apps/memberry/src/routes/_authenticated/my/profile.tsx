@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
 import { Shield, Lock, CreditCard, Download } from 'lucide-react'
 import { api } from '@/lib/api'
+import { GlassCard } from '@/components/motion/glass-card'
 
 export const Route = createFileRoute('/_authenticated/my/profile')({
   component: MyProfilePage,
@@ -129,7 +130,7 @@ function MyProfilePage() {
         {/* Right: Detail sections */}
         <div className="md:w-2/3 space-y-4">
           {/* Contact */}
-          <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+          <GlassCard className="p-5">
             <h3 className="text-[16px] font-semibold font-display mb-3">Contact</h3>
             <div className="space-y-2 text-[14px]">
               {p?.contactInfo?.email && (
@@ -157,11 +158,11 @@ function MyProfilePage() {
                 </div>
               )}
             </div>
-          </section>
+          </GlassCard>
 
           {/* Org Memberships */}
           {memberships.length > 0 && (
-            <section className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+            <GlassCard className="p-5">
               <h3 className="text-[16px] font-semibold font-display mb-3">Organizations</h3>
               <div className="space-y-2">
                 {memberships.map((m: any) => (
@@ -171,21 +172,21 @@ function MyProfilePage() {
                   </div>
                 ))}
               </div>
-            </section>
+            </GlassCard>
           )}
 
           {/* Quick Links */}
           <div className="grid grid-cols-2 gap-3">
-            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-[14px] font-semibold">
               <Shield size={18} className="text-[var(--color-muted)]" /> Privacy
             </Link>
-            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-[14px] font-semibold">
               <Lock size={18} className="text-[var(--color-muted)]" /> Security
             </Link>
-            <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+            <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-[14px] font-semibold">
               <CreditCard size={18} className="text-[var(--color-muted)]" /> ID Card
             </Link>
-            <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-4 hover:shadow-soft transition-shadow text-[14px] font-semibold">
+            <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-[14px] font-semibold">
               <Download size={18} className="text-[var(--color-muted)]" /> Data Export
             </Link>
           </div>
@@ -272,7 +273,7 @@ function ProfileEditForm({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {field('First Name', 'firstName')}
           {field('Last Name', 'lastName')}

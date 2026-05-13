@@ -92,7 +92,7 @@ function MyOrganizationsPage() {
           {memberships.map((m: any) => (
             <div
               key={m.id}
-              className="flex items-center gap-4 rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5 hover:shadow-soft transition-shadow"
+              className="flex items-center gap-4 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-5 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all"
             >
               <Link
                 to="/org/$orgId/members"

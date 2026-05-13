@@ -7,7 +7,10 @@ import { Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
-import { UserPlus, Trash2, Shield, Loader2 } from 'lucide-react'
+import { UserPlus, Trash2, Shield } from 'lucide-react'
+import { GlassCard } from '@/components/motion/glass-card'
+import { EmptyState } from '@/components/patterns/empty-state'
+import { TableSkeleton } from '@/components/patterns/skeleton-loader'
 
 interface OfficerManagementProps {
   orgId: string
@@ -76,12 +79,7 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20 text-[var(--color-muted)]">
-        <Loader2 size={24} className="animate-spin mr-2" />
-        Loading officers...
-      </div>
-    )
+    return <TableSkeleton rows={4} />
   }
 
   return (
@@ -97,7 +95,8 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
       </div>
 
       {/* Officer table */}
-      <div className="rounded-[12px] border border-[var(--color-border-light)] overflow-hidden">
+      <GlassCard className="overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-[14px]">
           <thead className="bg-[var(--color-surface-warm)]">
             <tr>
@@ -116,8 +115,12 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
           <tbody>
             {officers.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-5 py-10 text-center text-[var(--color-muted)]">
-                  No officers assigned yet
+                <td colSpan={4}>
+                  <EmptyState
+                    icon={<Shield className="w-8 h-8" />}
+                    headline="No officers assigned"
+                    description="Assign organization roles to get started."
+                  />
                 </td>
               </tr>
             ) : (
@@ -156,7 +159,8 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
             )}
           </tbody>
         </table>
-      </div>
+        </div>
+      </GlassCard>
 
       {/* Assign Role modal */}
       <AssignRoleModal

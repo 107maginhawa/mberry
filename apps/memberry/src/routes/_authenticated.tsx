@@ -1,9 +1,11 @@
-import { createFileRoute, Outlet, useMatches, Link } from "@tanstack/react-router"
+import { createFileRoute, Outlet, useMatches, Link, useLocation } from "@tanstack/react-router"
 import { requireAuth } from "@/utils/guards"
 import { MemberSidebar } from "@/components/layout/member-sidebar"
 import { MemberBottomNav } from "@/components/layout/member-bottom-nav"
 import { MemberHeader } from "@/components/layout/member-header"
 import { ErrorBoundary } from "@/components/patterns/error-boundary"
+import { AnimatePresence, motion } from "framer-motion"
+import { useSpringTransition } from "@/components/motion/use-spring-transition"
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: requireAuth,
@@ -25,6 +27,8 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   const { user } = Route.useRouteContext()
   const matches = useMatches()
+  const location = useLocation()
+  const springProps = useSpringTransition()
 
   // Officer routes render their own shell via the officer layout route.
   // Detect if we're inside an officer route to avoid double-wrapping.
@@ -35,16 +39,23 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)]">
+    <div className="flex min-h-screen">
       <MemberSidebar userEmail={user?.email} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MemberHeader userName={user?.name} />
         <main className="flex-1 overflow-auto pb-[68px] md:pb-0">
-          <div className="max-w-[1200px] mx-auto px-5 md:px-6 py-5 md:py-7">
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              {...springProps}
+            >
+              <div className="max-w-[1200px] mx-auto px-5 md:px-6 py-5 md:py-7">
+                <ErrorBoundary>
+                  <Outlet />
+                </ErrorBoundary>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
       <MemberBottomNav />

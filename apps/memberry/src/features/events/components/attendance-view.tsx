@@ -58,26 +58,26 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
+          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
             <UserCheck className="w-4 h-4" />
             <p className="text-sm">Total</p>
           </div>
-          <p className="text-2xl font-bold">{stats?.total ?? 0}</p>
+          <p className="text-[26px] font-bold font-display">{stats?.total ?? 0}</p>
         </div>
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
+          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
             <QrCode className="w-4 h-4" />
             <p className="text-sm">QR Scan</p>
           </div>
-          <p className="text-2xl font-bold">{stats?.qr ?? 0}</p>
+          <p className="text-[26px] font-bold font-display">{stats?.qr ?? 0}</p>
         </div>
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
+          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
             <Hand className="w-4 h-4" />
             <p className="text-sm">Manual</p>
           </div>
-          <p className="text-2xl font-bold">{stats?.manual ?? 0}</p>
+          <p className="text-[26px] font-bold font-display">{stats?.manual ?? 0}</p>
         </div>
       </div>
 
@@ -102,13 +102,13 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
           <button
             onClick={() => personIdInput.trim() && checkInMut.mutate({ path: { eventId }, body: { personId: personIdInput.trim(), method: 'manual' } as any })}
             disabled={!personIdInput.trim() || checkInMut.isPending}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50 hover:bg-primary/90"
+            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium disabled:opacity-50 hover:bg-[var(--color-primary-mid)]"
           >
             {checkInMut.isPending ? 'Checking in...' : 'Check In'}
           </button>
         </div>
         {checkInError && (
-          <p className="text-sm text-destructive">{checkInError}</p>
+          <p className="text-sm text-[var(--color-error)]">{checkInError}</p>
         )}
         {checkInSuccess && (
           <p className="text-sm text-green-600">Checked in successfully!</p>
@@ -118,7 +118,7 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
       {/* Search + list */}
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-[var(--color-muted)]" />
           <Input
             placeholder="Search by member ID..."
             value={search}
@@ -134,7 +134,7 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="border rounded-lg p-8 text-center text-muted-foreground">
+          <div className="border rounded-lg p-8 text-center text-[var(--color-muted)]">
             {search ? 'No attendance records match your search.' : 'No check-ins yet.'}
           </div>
         ) : (
@@ -143,7 +143,7 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
               <div key={record.id} className="flex items-center justify-between px-4 py-3">
                 <div>
                   <p className="text-sm font-medium">{record.personId}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-[var(--color-muted)]">
                     {formatTime(record.checkedInAt)}
                   </p>
                 </div>

@@ -20,12 +20,12 @@ export function ReportSelector({ selected, onSelect }: ReportSelectorProps) {
           key={type}
           onClick={() => onSelect(type)}
           className={`p-4 rounded-lg border text-left transition-colors ${
-            selected === type ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:bg-muted/50'
+            selected === type ? 'border-[var(--color-primary)] bg-primary/5 ring-1 ring-primary' : 'hover:bg-[var(--color-surface-warm)]'
           }`}
         >
-          <Icon className="h-5 w-5 mb-2 text-muted-foreground" />
+          <Icon className="h-5 w-5 mb-2 text-[var(--color-muted)]" />
           <p className="text-sm font-medium">{label}</p>
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="text-xs text-[var(--color-muted)] mt-1">{description}</p>
         </button>
       ))}
     </div>

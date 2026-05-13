@@ -13,7 +13,7 @@ function AuthPage() {
     <main className="h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-[#554B68]">Memberry</h1>
+          <h1 className="text-[26px] font-bold font-display text-[#554B68]">Memberry</h1>
         </div>
         <AuthView pathname={authView} callbackURL={callbackURL} />
       </div>

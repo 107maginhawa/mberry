@@ -106,12 +106,12 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       className="space-y-6"
     >
       {error && (
-        <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">{error}</div>
+        <div className="p-3 rounded-md bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">{error}</div>
       )}
 
       {/* Basic info */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">
           Basic Info
         </h3>
 
@@ -161,7 +161,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
       {/* Date & Time */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">
           Date &amp; Time
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -190,7 +190,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
       {/* Location */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">
           Location
         </h3>
         <div className="space-y-2">
@@ -206,7 +206,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
       {/* Registration */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">
           Registration
         </h3>
 
@@ -257,7 +257,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
           type="submit"
           onClick={() => set('status', 'draft')}
           disabled={mutation.isPending}
-          className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-muted disabled:opacity-50"
+          className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
         >
           {mutation.isPending ? 'Saving...' : 'Save Draft'}
         </button>
@@ -269,7 +269,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
             submitEvent('published')
           }}
           disabled={mutation.isPending}
-          className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+          className="px-4 py-2 rounded-md bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
         >
           {mutation.isPending ? 'Publishing...' : 'Publish'}
         </button>
@@ -277,7 +277,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+            className="px-4 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
           >
             Cancel
           </button>

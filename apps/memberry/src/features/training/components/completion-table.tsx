@@ -68,38 +68,38 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
     <div className="space-y-4">
       {/* Stats strip */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="border rounded-xl p-4 flex items-center gap-3 bg-card">
+        <div className="border rounded-xl p-4 flex items-center gap-3 bg-[var(--color-surface)]">
           <div className="p-2 rounded-lg bg-blue-100">
             <Users className="w-5 h-5 text-blue-600" />
           </div>
           <div>
             <p className="text-xl font-bold">{enrollmentCount}</p>
-            <p className="text-xs text-muted-foreground">Enrolled</p>
+            <p className="text-xs text-[var(--color-muted)]">Enrolled</p>
           </div>
         </div>
-        <div className="border rounded-xl p-4 flex items-center gap-3 bg-card">
+        <div className="border rounded-xl p-4 flex items-center gap-3 bg-[var(--color-surface)]">
           <div className="p-2 rounded-lg bg-green-100">
             <CheckCircle className="w-5 h-5 text-green-600" />
           </div>
           <div>
             <p className="text-xl font-bold">{attendance.completed}</p>
-            <p className="text-xs text-muted-foreground">Completed</p>
+            <p className="text-xs text-[var(--color-muted)]">Completed</p>
           </div>
         </div>
-        <div className="border rounded-xl p-4 flex items-center gap-3 bg-card">
+        <div className="border rounded-xl p-4 flex items-center gap-3 bg-[var(--color-surface)]">
           <div className="p-2 rounded-lg bg-amber-100">
             <Award className="w-5 h-5 text-amber-600" />
           </div>
           <div>
             <p className="text-xl font-bold">{attendance.totalCredits}</p>
-            <p className="text-xs text-muted-foreground">Credits Awarded</p>
+            <p className="text-xs text-[var(--color-muted)]">Credits Awarded</p>
           </div>
         </div>
       </div>
 
       {/* Bulk action bar */}
       {selected.size > 0 && (
-        <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-primary/5 border border-[var(--color-primary)]/20 rounded-lg">
           <span className="text-sm font-medium">{selected.size} selected</span>
           <button
             onClick={() => {
@@ -110,11 +110,11 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
               )
             }}
             disabled={markAllMutation.isPending}
-            className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md disabled:opacity-50"
+            className="px-3 py-1.5 text-sm bg-[var(--color-primary)] text-white rounded-md disabled:opacity-50"
           >
             {markAllMutation.isPending ? 'Marking…' : 'Mark All Complete'}
           </button>
-          <button onClick={() => setSelected(new Set())} className="text-sm text-muted-foreground hover:text-foreground">
+          <button onClick={() => setSelected(new Set())} className="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]">
             Clear
           </button>
         </div>
@@ -123,7 +123,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
       {/* Table */}
       <div className="border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50">
+          <thead className="bg-[var(--color-surface-warm)]">
             <tr>
               <th className="p-3 w-8">
                 <input
@@ -144,17 +144,17 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
           <tbody>
             {enrollmentsListQuery.isLoading ? (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-muted-foreground">Loading…</td>
+                <td colSpan={6} className="p-8 text-center text-[var(--color-muted)]">Loading…</td>
               </tr>
             ) : enrollments.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                <td colSpan={6} className="p-8 text-center text-[var(--color-muted)]">
                   No enrollments yet. Enrollment data will appear here once members sign up.
                 </td>
               </tr>
             ) : (
               enrollments.map((e: any) => (
-                <tr key={e.id} className="border-t hover:bg-muted/20">
+                <tr key={e.id} className="border-t hover:bg-[var(--color-surface-warm)]">
                   <td className="p-3">
                     <input
                       type="checkbox"
@@ -182,7 +182,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                         {new Date(e.completedAt).toLocaleDateString()}
                       </span>
                     ) : (
-                      <span className="text-muted-foreground text-xs">Pending</span>
+                      <span className="text-[var(--color-muted)] text-xs">Pending</span>
                     )}
                   </td>
                   <td className="p-3 text-xs">
@@ -196,7 +196,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                           markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: e.personId, creditAmount: Number(creditAmount) } } as any)
                         }}
                         disabled={markMutation.isPending && marking === e.personId}
-                        className="px-2 py-1 text-xs border rounded hover:bg-muted disabled:opacity-50"
+                        className="px-2 py-1 text-xs border rounded hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
                       >
                         {markMutation.isPending && marking === e.personId ? 'Marking…' : 'Mark Complete'}
                       </button>

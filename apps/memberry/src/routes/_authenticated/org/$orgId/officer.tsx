@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/org/$orgId/officer")({
 
 function OfficerPendingSkeleton() {
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)]">
+    <div className="flex min-h-screen">
       {/* Sidebar skeleton */}
       <div className="hidden md:flex w-[220px] flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)]">
         <div className="p-4 space-y-3">
@@ -52,7 +52,7 @@ function OfficerLayout() {
   }, [location.pathname])
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-[var(--color-bg)]">
+    <div className="flex flex-col md:flex-row min-h-screen">
       <OfficerMobileNav
         userName={user?.name}
         role={primaryRole}

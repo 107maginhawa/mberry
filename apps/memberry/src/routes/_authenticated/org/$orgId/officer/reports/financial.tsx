@@ -7,6 +7,8 @@ import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { ReportSelector } from '@/features/dues/components/report-selector'
 import { ReportResults } from '@/features/dues/components/report-results'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/reports/financial')({
   component: FinancialReportsPage,
@@ -39,26 +41,38 @@ function FinancialReportsPage() {
   const dateError = fromDate && toDate ? new Date(fromDate) > new Date(toDate) : false
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Financial Reports</h1>
+    <div className="space-y-6">
+      <PageHeader
+        title="Financial Reports"
+        subtitle="Generate and view dues collection reports"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Reports' },
+          { label: 'Financial' },
+        ]}
+      />
 
-      <ReportSelector selected={selectedType} onSelect={(type) => { setSelectedType(type); setShouldFetch(false) }} />
+      <GlassCard className="p-5">
+        <ReportSelector selected={selectedType} onSelect={(type) => { setSelectedType(type); setShouldFetch(false) }} />
+      </GlassCard>
 
       {selectedType && (
-        <div className="flex items-end gap-4 flex-wrap">
-          <div>
-            <Label>From</Label>
-            <Input type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); setShouldFetch(false) }} />
+        <GlassCard className="p-5">
+          <div className="flex items-end gap-4 flex-wrap">
+            <div>
+              <Label>From</Label>
+              <Input type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); setShouldFetch(false) }} />
+            </div>
+            <div>
+              <Label>To</Label>
+              <Input type="date" value={toDate} onChange={(e) => { setToDate(e.target.value); setShouldFetch(false) }} />
+            </div>
+            <Button onClick={handleGenerate} disabled={dateError || !selectedType}>
+              {shouldFetch && reportData ? 'Refresh' : 'Generate Report'}
+            </Button>
+            {dateError && <p className="text-xs text-[var(--color-error)]">End date must be after start date.</p>}
           </div>
-          <div>
-            <Label>To</Label>
-            <Input type="date" value={toDate} onChange={(e) => { setToDate(e.target.value); setShouldFetch(false) }} />
-          </div>
-          <Button onClick={handleGenerate} disabled={dateError || !selectedType}>
-            {shouldFetch && reportData ? 'Refresh' : 'Generate Report'}
-          </Button>
-          {dateError && <p className="text-xs text-destructive">End date must be after start date.</p>}
-        </div>
+        </GlassCard>
       )}
 
       <ReportResults

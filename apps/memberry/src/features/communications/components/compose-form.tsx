@@ -72,7 +72,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
   return (
     <div className="max-w-2xl space-y-6">
       {error && (
-        <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">{error}</div>
+        <div className="p-3 rounded-md bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">{error}</div>
       )}
 
       {/* Title */}
@@ -85,7 +85,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
         />
-        <p className="text-xs text-muted-foreground text-right">{title.length}/200</p>
+        <p className="text-xs text-[var(--color-muted)] text-right">{title.length}/200</p>
       </div>
 
       {/* Content */}
@@ -97,7 +97,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={8}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-[var(--color-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
         />
       </div>
 
@@ -112,8 +112,8 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
               onClick={() => setAudienceType(type)}
               className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors ${
                 audienceType === type
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-background hover:bg-muted'
+                  ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
+                  : 'bg-background hover:bg-[var(--color-surface-warm)]'
               }`}
             >
               {type === 'all' ? 'All Members' : 'By Category'}
@@ -129,14 +129,14 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">Push Notification</p>
-              <p className="text-xs text-muted-foreground">Send to member devices via OneSignal</p>
+              <p className="text-xs text-[var(--color-muted)]">Send to member devices via OneSignal</p>
             </div>
             <Switch checked={channelPush} onCheckedChange={setChannelPush} />
           </div>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">Email</p>
-              <p className="text-xs text-muted-foreground">Send via transactional email</p>
+              <p className="text-xs text-[var(--color-muted)]">Send via transactional email</p>
             </div>
             <Switch checked={channelEmail} onCheckedChange={setChannelEmail} />
           </div>
@@ -154,8 +154,8 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
               onClick={() => setVisibility(vis)}
               className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors ${
                 visibility === vis
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-background hover:bg-muted'
+                  ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
+                  : 'bg-background hover:bg-[var(--color-surface-warm)]'
               }`}
             >
               {vis === 'internal' ? 'Internal (Members Only)' : 'Network (Public)'}
@@ -173,7 +173,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
           value={scheduledAt}
           onChange={(e) => setScheduledAt(e.target.value)}
         />
-        <p className="text-xs text-muted-foreground">Leave empty to send immediately or save as draft</p>
+        <p className="text-xs text-[var(--color-muted)]">Leave empty to send immediately or save as draft</p>
       </div>
 
       {/* Actions */}
@@ -182,7 +182,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
           type="button"
           onClick={() => handleSubmit('sent')}
           disabled={mutation.isPending}
-          className="px-5 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+          className="px-5 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
         >
           {mutation.isPending ? 'Sending...' : 'Send Now'}
         </button>
@@ -200,7 +200,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
           type="button"
           onClick={() => handleSubmit('draft')}
           disabled={mutation.isPending}
-          className="px-5 py-2 border rounded-md text-sm font-medium hover:bg-muted disabled:opacity-50"
+          className="px-5 py-2 border rounded-md text-sm font-medium hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
         >
           Save Draft
         </button>
@@ -208,7 +208,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
           type="button"
           onClick={() => navigate({ to: `/org/${orgId}/officer/communications` })}
           disabled={mutation.isPending}
-          className="px-5 py-2 text-muted-foreground text-sm hover:text-foreground disabled:opacity-50"
+          className="px-5 py-2 text-[var(--color-muted)] text-sm hover:text-[var(--color-text)] disabled:opacity-50"
         >
           Cancel
         </button>

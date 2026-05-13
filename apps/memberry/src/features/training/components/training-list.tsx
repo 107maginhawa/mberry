@@ -73,7 +73,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
       label: 'Published',
       value: statsQuery.data?.published ?? '—',
       icon: BookOpen,
-      color: 'text-primary',
+      color: 'text-[var(--color-primary)]',
       bg: 'bg-primary/10',
     },
     {
@@ -104,13 +104,13 @@ export function TrainingList({ orgId }: TrainingListProps) {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((s) => (
-          <div key={s.label} className="border rounded-xl p-4 bg-card flex items-center gap-3">
+          <div key={s.label} className="border rounded-xl p-4 bg-[var(--color-surface)] flex items-center gap-3">
             <div className={`p-2 rounded-lg ${s.bg}`}>
               <s.icon className={`w-5 h-5 ${s.color}`} />
             </div>
             <div>
               <p className="text-xl font-bold">{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
+              <p className="text-xs text-[var(--color-muted)]">{s.label}</p>
             </div>
           </div>
         ))}
@@ -124,8 +124,8 @@ export function TrainingList({ orgId }: TrainingListProps) {
             onClick={() => setActiveTab(tab.key)}
             className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
               activeTab === tab.key
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             {tab.label}
@@ -136,7 +136,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
           <input
             type="text"
             placeholder="Search trainings..."
@@ -160,13 +160,13 @@ export function TrainingList({ orgId }: TrainingListProps) {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="border rounded-xl h-52 bg-muted/30 animate-pulse" />
+            <div key={i} className="border rounded-xl h-52 bg-[var(--color-surface-warm)] animate-pulse" />
           ))}
         </div>
       ) : trainings.length === 0 ? (
-        <div className="border rounded-xl p-12 text-center text-muted-foreground">
+        <div className="border rounded-xl p-12 text-center text-[var(--color-muted)]">
           No trainings found.{' '}
-          <a href={`/org/${orgId}/officer/training/new`} className="text-primary hover:underline">
+          <a href={`/org/${orgId}/officer/training/new`} className="text-[var(--color-primary)] hover:underline">
             Create one
           </a>
         </div>
@@ -184,7 +184,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
               />
             ))}
           </div>
-          <p className="text-xs text-muted-foreground text-right">{total} total</p>
+          <p className="text-xs text-[var(--color-muted)] text-right">{total} total</p>
         </>
       )}
     </div>

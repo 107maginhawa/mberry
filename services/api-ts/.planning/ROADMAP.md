@@ -27,16 +27,16 @@
 
 </details>
 
-### 🚧 v1.1 Stabilization (In Progress)
+### ✅ v1.1 Stabilization (SHIPPED 2026-05-12)
 
 **Milestone Goal:** Close audit findings, fix Codex-identified bugs, harden state machines, expand test coverage, standardize frontend patterns.
 
-- [ ] **Phase 14: P0/P1 Remediation + Codex Fixes** - Fix 4 Codex-verified bugs + close remaining P0/P1 items
-- [ ] **Phase 15: State Machine Guards** - Add transition validation to 5 unguarded state machines
-- [ ] **Phase 16: Pagination Expansion** - Apply OffsetPaginationParams to all list endpoints
-- [ ] **Phase 17: Admin App SDK Migration** - Replace raw fetch() with TanStack Query + error boundaries
-- [ ] **Phase 18: Business Rule Completion** - Complete remaining 7/40 business rules
-- [ ] **Phase 19: Communication Consolidation** - Merge 3 messaging modules into 2
+- [x] **Phase 14: P0/P1 Remediation + Codex Fixes** - Fix 4 Codex-verified bugs + close remaining P0/P1 items (c90f160)
+- [x] **Phase 15: State Machine Guards** - Add transition validation to 5 unguarded state machines (3b2cd99)
+- [x] **Phase 16: Pagination Expansion** - Apply OffsetPaginationParams to all list endpoints (6a75ded)
+- [x] **Phase 17: Admin App SDK Migration** - Replace raw fetch() with TanStack Query + error boundaries (03ec878)
+- [x] **Phase 18: Business Rule Completion** - BR-34 nomination eligibility implemented; BR-35-40 deferred (8912e5b)
+- [x] **Phase 19: Communication Consolidation** - Merge 3 messaging modules into 2 (41d43c7)
 
 ## Phase Details
 
@@ -107,11 +107,11 @@
 
 ## Progress
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 14. P0/P1 + Codex Fixes | v1.1 | 0/TBD | Not started | - |
-| 15. State Machine Guards | v1.1 | 0/TBD | Not started | - |
-| 16. Pagination Expansion | v1.1 | 0/TBD | Not started | - |
-| 17. Admin SDK Migration | v1.1 | 0/TBD | Not started | - |
-| 18. BR Completion | v1.1 | 0/TBD | Not started | - |
-| 19. Comms Consolidation | v1.1 | 0/TBD | Not started | - |
+| Phase | Milestone | Status | Completed |
+|-------|-----------|--------|-----------|
+| 14. P0/P1 + Codex Fixes | v1.1 | ✅ Done | 2026-05-10 |
+| 15. State Machine Guards | v1.1 | ✅ Done | 2026-05-10 |
+| 16. Pagination Expansion | v1.1 | ✅ Done | 2026-05-10 |
+| 17. Admin SDK Migration | v1.1 | ✅ Done | 2026-05-10 |
+| 18. BR Completion | v1.1 | ✅ Done | 2026-05-10 |
+| 19. Comms Consolidation | v1.1 | ✅ Done | 2026-05-10 |

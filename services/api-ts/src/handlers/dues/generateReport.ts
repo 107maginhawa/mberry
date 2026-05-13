@@ -6,7 +6,7 @@ const VALID_TYPES = ['collection', 'fund_breakdown', 'dues_status', 'aging'] as 
 
 export async function generateReport(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const type = ctx.req.query('type') as typeof VALID_TYPES[number];
   const from = ctx.req.query('from');
   const to = ctx.req.query('to');

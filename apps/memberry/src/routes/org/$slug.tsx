@@ -113,7 +113,7 @@ function PublicOrgProfile() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full" />
       </div>
     )
   }
@@ -123,7 +123,7 @@ function PublicOrgProfile() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full border rounded-lg p-8 bg-white text-center space-y-4">
           <h1 className="text-xl font-bold">Organization Not Found</h1>
-          <p className="text-muted-foreground">The organization you're looking for doesn't exist or is no longer active.</p>
+          <p className="text-[var(--color-muted)]">The organization you're looking for doesn't exist or is no longer active.</p>
         </div>
       </div>
     )
@@ -134,7 +134,7 @@ function PublicOrgProfile() {
       <div className="max-w-2xl mx-auto space-y-6 mt-8">
         <div className="border rounded-lg bg-white overflow-hidden">
           <div className="bg-[#554B68] p-8 text-white">
-            <h1 className="text-2xl font-bold">{org.name}</h1>
+            <h1 className="text-[26px] font-bold font-display">{org.name}</h1>
             {org.associationName && (
               <p className="text-sm opacity-80 mt-1">{org.associationName}</p>
             )}
@@ -144,32 +144,32 @@ function PublicOrgProfile() {
             <div className="grid gap-3 text-sm">
               {org.orgType && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Type</span>
+                  <span className="text-[var(--color-muted)]">Type</span>
                   <span className="font-medium capitalize">{org.orgType}</span>
                 </div>
               )}
               {org.region && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Region</span>
+                  <span className="text-[var(--color-muted)]">Region</span>
                   <span className="font-medium">{org.region}</span>
                 </div>
               )}
               {org.contactEmail && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Contact</span>
-                  <a href={`mailto:${org.contactEmail}`} className="font-medium text-primary hover:underline">
+                  <span className="text-[var(--color-muted)]">Contact</span>
+                  <a href={`mailto:${org.contactEmail}`} className="font-medium text-[var(--color-primary)] hover:underline">
                     {org.contactEmail}
                   </a>
                 </div>
               )}
               {org.memberCount != null && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Active Members</span>
+                  <span className="text-[var(--color-muted)]">Active Members</span>
                   <span className="font-medium">{org.memberCount}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Status</span>
+                <span className="text-[var(--color-muted)]">Status</span>
                 <span className="font-medium capitalize">{org.status}</span>
               </div>
             </div>
@@ -185,7 +185,7 @@ function PublicOrgProfile() {
           </button>
         </div>
 
-        <div className="text-center text-xs text-muted-foreground">
+        <div className="text-center text-xs text-[var(--color-muted)]">
           Powered by Memberry
         </div>
       </div>
@@ -196,13 +196,13 @@ function PublicOrgProfile() {
           <div className="fixed inset-0 bg-black/50" onClick={() => { if (!submitting) setApplyOpen(false) }} />
           <div className="relative bg-white rounded-lg border p-6 max-w-md w-full mx-4 shadow-lg">
             <h3 className="text-lg font-bold mb-1">Apply to Join {org.name}</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-[var(--color-muted)] mb-4">
               Your application will be reviewed by the organization's officers.
             </p>
 
             <form onSubmit={handleSubmitApplication} className="space-y-4">
               {tiersLoading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                <div className="flex items-center gap-2 text-sm text-[var(--color-muted)] py-2">
                   <div className="animate-spin h-4 w-4 border-2 border-[#554B68] border-t-transparent rounded-full" />
                   Loading membership tiers…
                 </div>
@@ -227,7 +227,7 @@ function PublicOrgProfile() {
                   </select>
                 </div>
               ) : tiers.length === 1 ? (
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-[var(--color-muted)]">
                   Tier: <span className="font-medium text-gray-900">{tiers[0].name}</span>
                   {tiers[0].annualFee != null && (
                     <span className="ml-1">— ₱{Number(tiers[0].annualFee)}/yr</span>
@@ -241,7 +241,7 @@ function PublicOrgProfile() {
 
               <div>
                 <label className="text-sm font-medium block mb-1.5" htmlFor="apply-message">
-                  Message <span className="text-muted-foreground font-normal">(optional)</span>
+                  Message <span className="text-[var(--color-muted)] font-normal">(optional)</span>
                 </label>
                 <textarea
                   id="apply-message"

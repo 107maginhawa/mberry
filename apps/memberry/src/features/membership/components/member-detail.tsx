@@ -12,7 +12,6 @@ import {
 } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
-import { Skeleton } from '@monobase/ui'
 import { Avatar, AvatarFallback } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
@@ -21,6 +20,9 @@ import { Separator } from '@monobase/ui'
 import { Alert, AlertDescription } from '@monobase/ui'
 import { toast } from 'sonner'
 import { AlertTriangle, ArrowLeft, CreditCard, Heart, Mail, Phone, RefreshCw, Shield, UserX } from 'lucide-react'
+import { GlassCard } from '@/components/motion/glass-card'
+import { PageHeader } from '@/components/patterns/page-header'
+import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
 
 interface MemberDetailProps {
   orgId: string
@@ -124,16 +126,8 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6 max-w-3xl">
-        <Skeleton className="h-8 w-48" />
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-16 w-16 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-        </div>
-        <Skeleton className="h-32 w-full" />
+      <div className="space-y-6 max-w-3xl">
+        <ProfileSkeleton />
       </div>
     )
   }
@@ -158,17 +152,15 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   const canMarkDeceased = status === 'active' || status === 'gracePeriod' || status === 'lapsed'
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
-      {/* Back link */}
-      <Link
-        to="/org/$orgId/officer/roster"
-        params={{ orgId }}
-        search={{ status: undefined, expiring: undefined }}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to roster
-      </Link>
+    <div className="space-y-6 max-w-3xl">
+      <PageHeader
+        title={member.name ?? 'Member Detail'}
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Roster', href: `/org/${orgId}/officer/roster` },
+          { label: member.name ?? 'Member' },
+        ]}
+      />
 
       {/* Status warning banner */}
       {banner && (
@@ -189,10 +181,10 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold truncate">{member.name ?? 'Unknown Member'}</h1>
+          <h1 className="text-[26px] font-bold font-display truncate">{member.name ?? 'Unknown Member'}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
             {member.memberNumber && (
-              <span className="font-mono text-xs text-muted-foreground border rounded px-1.5 py-0.5">
+              <span className="font-mono text-xs text-[var(--color-muted)] border rounded px-1.5 py-0.5">
                 {member.memberNumber}
               </span>
             )}
@@ -209,58 +201,56 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
       {/* Two column layout */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Contact info */}
-        <section className="space-y-3">
-          <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Contact</h2>
+        <GlassCard className="p-5 space-y-3">
+          <h2 className="font-semibold text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Contact</h2>
           {member.email && (
             <div className="flex items-center gap-2 text-sm">
-              <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+              <Mail className="h-4 w-4 text-[var(--color-muted)] shrink-0" />
               <a href={`mailto:${member.email}`} className="hover:underline truncate">{member.email}</a>
             </div>
           )}
           {member.phone && (
             <div className="flex items-center gap-2 text-sm">
-              <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+              <Phone className="h-4 w-4 text-[var(--color-muted)] shrink-0" />
               <span>{member.phone}</span>
             </div>
           )}
           {!member.email && !member.phone && (
-            <p className="text-sm text-muted-foreground">No contact info available.</p>
+            <p className="text-sm text-[var(--color-muted)]">No contact info available.</p>
           )}
-        </section>
+        </GlassCard>
 
         {/* Membership info */}
-        <section className="space-y-3">
-          <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Membership</h2>
+        <GlassCard className="p-5 space-y-3">
+          <h2 className="font-semibold text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Membership</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Category</dt>
+              <dt className="text-[var(--color-muted)]">Category</dt>
               <dd className="font-medium">{member.categoryName ?? '—'}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Joined</dt>
+              <dt className="text-[var(--color-muted)]">Joined</dt>
               <dd className="font-medium">
                 {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : '—'}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Dues Expiry</dt>
+              <dt className="text-[var(--color-muted)]">Dues Expiry</dt>
               <dd className="font-medium">
                 {member.duesExpiryDate ? new Date(member.duesExpiryDate).toLocaleDateString() : '—'}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Status</dt>
+              <dt className="text-[var(--color-muted)]">Status</dt>
               <dd><Badge className={badge.className}>{badge.label}</Badge></dd>
             </div>
           </dl>
-        </section>
+        </GlassCard>
       </div>
 
-      <Separator />
-
       {/* Actions panel */}
-      <section className="space-y-3">
-        <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Actions</h2>
+      <GlassCard className="p-5 space-y-3">
+        <h2 className="font-semibold text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" size="sm" onClick={() => setShowChangeCat(true)}>
             <Shield className="h-4 w-4 mr-2" />
@@ -291,7 +281,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <Button
               variant="outline"
               size="sm"
-              className="text-destructive border-destructive/50 hover:bg-destructive/10"
+              className="text-[var(--color-error)] border-[var(--color-error)]/50 hover:bg-[var(--color-error)]/10"
               onClick={() => setShowSuspend(true)}
             >
               <UserX className="h-4 w-4 mr-2" />
@@ -302,7 +292,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <Button
               variant="outline"
               size="sm"
-              className="text-muted-foreground border-muted-foreground/30 hover:bg-muted/50"
+              className="text-[var(--color-muted)] border-[var(--color-muted)]/30 hover:bg-[var(--color-surface-warm)]"
               onClick={() => setShowDeceased(true)}
             >
               <Heart className="h-4 w-4 mr-2" />
@@ -310,7 +300,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             </Button>
           )}
         </div>
-      </section>
+      </GlassCard>
 
       {/* Change Category dialog */}
       <Dialog open={showChangeCat} onOpenChange={setShowChangeCat}>
@@ -379,7 +369,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <DialogTitle>Mark Member as Deceased</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[var(--color-muted)]">
               This will terminate the membership with reason &quot;deceased&quot;. This action cannot be undone without manual reinstatement.
             </p>
           </div>
@@ -387,7 +377,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <Button variant="outline" onClick={() => setShowDeceased(false)}>Cancel</Button>
             <Button
               variant="outline"
-              className="text-muted-foreground border-muted-foreground/30 hover:bg-muted/50"
+              className="text-[var(--color-muted)] border-[var(--color-muted)]/30 hover:bg-[var(--color-surface-warm)]"
               onClick={() => (deceasedMutation as any).mutate({ path: { membershipId: member.id }, body: { terminationReason: 'deceased' } })}
               disabled={deceasedMutation.isPending}
             >

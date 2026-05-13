@@ -12,7 +12,7 @@ Memberry is a membership management tool used by healthcare professionals -- doc
 
 **Principles:**
 
-- **Trust through clarity.** Healthcare professionals expect precision. Every number, status, and label must be unambiguous. No decorative flourishes that could be mistaken for data.
+- **Trust through clarity.** Healthcare professionals expect precision. Every number, status, and label must be unambiguous. Subtle depth and translucency reinforce hierarchy. Animation serves comprehension (stagger reveals reading order, CountUp draws attention to changes). Decoration that could be mistaken for data is still prohibited.
 - **Security UX is intentional.** Authentication, org switching, and sensitive data actions (payments, member suspensions) use deliberate friction -- confirmation steps, clear destructive-action styling -- not just technical gates.
 - **Non-technical users.** Every action must be self-explanatory. Officers are elected volunteers, not software professionals. Labels describe what will happen, not system concepts.
 - **Empty states are features.** When there is no data, show a warm message, a primary call-to-action, and enough context so the user understands why the screen is empty and what to do next. Never show a blank page or a raw "No results" string.

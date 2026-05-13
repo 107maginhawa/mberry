@@ -1,0 +1,288 @@
+{
+  "generated": "2026-05-12T14:05:02.935Z",
+  "totalComponents": 46,
+  "tested": 3,
+  "untested": 43,
+  "coveragePercent": 7,
+  "components": [
+    {
+      "file": "apps/memberry/src/features/chapters/components/affiliation-list.tsx",
+      "feature": "chapters",
+      "name": "affiliation-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/financial-dashboard.tsx",
+      "feature": "dues",
+      "name": "financial-dashboard",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/refund-form.tsx",
+      "feature": "dues",
+      "name": "refund-form",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/payment-history-table.tsx",
+      "feature": "dues",
+      "name": "payment-history-table",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/dues-invoice-list.tsx",
+      "feature": "dues",
+      "name": "dues-invoice-list",
+      "hasTest": true,
+      "testFile": "apps/memberry/src/features/dues/components/dues-invoice-list.test.tsx"
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/report-results.tsx",
+      "feature": "dues",
+      "name": "report-results",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/record-payment-form.tsx",
+      "feature": "dues",
+      "name": "record-payment-form",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/proof-upload-form.tsx",
+      "feature": "dues",
+      "name": "proof-upload-form",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/pending-proofs-list.tsx",
+      "feature": "dues",
+      "name": "pending-proofs-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/fund-allocation-editor.tsx",
+      "feature": "dues",
+      "name": "fund-allocation-editor",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/report-selector.tsx",
+      "feature": "dues",
+      "name": "report-selector",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/dues-config-form.tsx",
+      "feature": "dues",
+      "name": "dues-config-form",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/gateway-setup.tsx",
+      "feature": "dues",
+      "name": "gateway-setup",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dues/components/fund-allocation-preview.tsx",
+      "feature": "dues",
+      "name": "fund-allocation-preview",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/training/components/training-form.tsx",
+      "feature": "training",
+      "name": "training-form",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/training/components/training-card.tsx",
+      "feature": "training",
+      "name": "training-card",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/training/components/completion-table.tsx",
+      "feature": "training",
+      "name": "completion-table",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/training/components/training-list.tsx",
+      "feature": "training",
+      "name": "training-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/admin/components/org-settings-form.tsx",
+      "feature": "admin",
+      "name": "org-settings-form",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/admin/components/officer-management.tsx",
+      "feature": "admin",
+      "name": "officer-management",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/admin/components/officer-dashboard.tsx",
+      "feature": "admin",
+      "name": "officer-dashboard",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/certificates/components/certificate-preview.tsx",
+      "feature": "certificates",
+      "name": "certificate-preview",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/certificates/components/certificate-list.tsx",
+      "feature": "certificates",
+      "name": "certificate-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/directory/components/directory-search.tsx",
+      "feature": "directory",
+      "name": "directory-search",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dashboard/components/quick-actions.tsx",
+      "feature": "dashboard",
+      "name": "quick-actions",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dashboard/components/member-dashboard.tsx",
+      "feature": "dashboard",
+      "name": "member-dashboard",
+      "hasTest": true,
+      "testFile": "apps/memberry/src/features/dashboard/components/member-dashboard.test.tsx"
+    },
+    {
+      "file": "apps/memberry/src/features/dashboard/components/action-widget.tsx",
+      "feature": "dashboard",
+      "name": "action-widget",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dashboard/components/alert-banner.tsx",
+      "feature": "dashboard",
+      "name": "alert-banner",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dashboard/components/org-announcements.tsx",
+      "feature": "dashboard",
+      "name": "org-announcements",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/dashboard/components/credit-breakdown.tsx",
+      "feature": "dashboard",
+      "name": "credit-breakdown",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/account/components/data-export.tsx",
+      "feature": "account",
+      "name": "data-export",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/events/components/event-card.tsx",
+      "feature": "events",
+      "name": "event-card",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/events/components/event-list.tsx",
+      "feature": "events",
+      "name": "event-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/events/components/event-form.tsx",
+      "feature": "events",
+      "name": "event-form",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/events/components/attendance-view.tsx",
+      "feature": "events",
+      "name": "attendance-view",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/notifications/components/notification-inbox.tsx",
+      "feature": "notifications",
+      "name": "notification-inbox",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/membership/components/membership-list.tsx",
+      "feature": "membership",
+      "name": "membership-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+      "feature": "membership",
+      "name": "member-detail",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/membership/components/category-editor.tsx",
+      "feature": "membership",
+      "name": "category-editor",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/membership/components/application-list.tsx",
+      "feature": "membership",
+      "name": "application-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/membership/components/member-table.tsx",
+      "feature": "membership",
+      "name": "member-table",
+      "hasTest": true,
+      "testFile": "apps/memberry/src/features/membership/components/member-table.test.tsx"
+    },
+    {
+      "file": "apps/memberry/src/features/communications/components/compose-form.tsx",
+      "feature": "communications",
+      "name": "compose-form",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/communications/components/announcement-list.tsx",
+      "feature": "communications",
+      "name": "announcement-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/elections/components/election-detail.tsx",
+      "feature": "elections",
+      "name": "election-detail",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/elections/components/election-list.tsx",
+      "feature": "elections",
+      "name": "election-list",
+      "hasTest": false
+    },
+    {
+      "file": "apps/memberry/src/features/elections/components/election-form.tsx",
+      "feature": "elections",
+      "name": "election-form",
+      "hasTest": false
+    }
+  ]
+}

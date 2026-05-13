@@ -4,7 +4,10 @@ import {
   listDuesInvoicesQueryKey,
   markDuesInvoicePaidMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { FileText } from 'lucide-react'
+import { Skeleton } from '@monobase/ui'
 import { formatCents } from '../lib/money'
+import { EmptyState } from '@/components/patterns/empty-state'
 
 interface DuesInvoiceListProps {
   orgId: string
@@ -37,13 +40,25 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
     },
   })
 
-  if (isLoading) return <div className="p-6 text-center text-muted-foreground">Loading invoices...</div>
-  if (error) return <div className="p-6 text-center text-destructive">Failed to load invoices</div>
+  if (isLoading) return (
+    <div className="space-y-2 p-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton key={i} className="h-12 w-full rounded-lg animate-shimmer" />
+      ))}
+    </div>
+  )
+  if (error) return <div className="p-6 text-center text-[var(--color-error)]">Failed to load invoices</div>
 
   const invoices = (data as any)?.data ?? []
 
   if (invoices.length === 0) {
-    return <div className="p-6 text-center text-muted-foreground">No invoices yet.</div>
+    return (
+      <EmptyState
+        icon={<FileText className="w-10 h-10" />}
+        headline="No Invoices Yet"
+        description="Invoices will appear here once the treasurer generates them for this organization."
+      />
+    )
   }
 
   return (
@@ -61,7 +76,7 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
         </thead>
         <tbody>
           {invoices.map((inv: any) => (
-            <tr key={inv.id} className="border-b hover:bg-muted/50">
+            <tr key={inv.id} className="border-b hover:bg-[var(--color-surface-warm)]">
               <td className="px-4 py-3 font-mono text-xs">{inv.invoiceNumber}</td>
               <td className="px-4 py-3">{inv.personId}</td>
               <td className="px-4 py-3 text-xs">

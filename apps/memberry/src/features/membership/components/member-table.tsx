@@ -117,7 +117,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-muted)]" />
           <Input
             className="pl-9"
             placeholder="Search by name, email or license..."
@@ -149,7 +149,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
 
       {/* Bulk action bar */}
       {selected.size > 0 && (
-        <div className="flex items-center gap-3 px-4 py-2 bg-muted/60 rounded-md text-sm">
+        <div className="flex items-center gap-3 px-4 py-2 bg-[var(--color-surface-warm)] rounded-md text-sm">
           <span className="font-medium">{selected.size} selected</span>
           <Button size="sm" variant="outline" onClick={() => setSelected(new Set())}>
             Clear
@@ -166,9 +166,9 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
             ))}
           </div>
         ) : error ? (
-          <div className="p-10 text-center text-destructive">Failed to load members. Please try again.</div>
+          <div className="p-10 text-center text-[var(--color-error)]">Failed to load members. Please try again.</div>
         ) : members.length === 0 ? (
-          <div className="p-14 flex flex-col items-center gap-3 text-muted-foreground">
+          <div className="p-14 flex flex-col items-center gap-3 text-[var(--color-muted)]">
             <Users className="h-10 w-10 opacity-30" />
             <p className="text-sm">No members found{debouncedSearch ? ` for "${debouncedSearch}"` : ''}.</p>
           </div>
@@ -197,7 +197,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
                   const status = m.status as MemberStatus
                   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
                   return (
-                    <tr key={m.id} className={`hover:bg-muted/30 transition-colors ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`}>
+                    <tr key={m.id} className={`hover:bg-[var(--color-surface-warm)] transition-colors ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`}>
                       <td className="px-3 py-2">
                         <Checkbox
                           checked={selected.has(m.id)}
@@ -216,25 +216,25 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
                             <Link
                               to="/org/$orgId/officer/roster/$memberId"
                               params={{ orgId, memberId: m.id }}
-                              className="font-medium text-primary hover:underline"
+                              className="font-medium text-[var(--color-primary)] hover:underline"
                             >
                               {m.name ?? m.personId ?? m.id}
                             </Link>
                             {m.email && (
-                              <div className="text-xs text-muted-foreground">{m.email}</div>
+                              <div className="text-xs text-[var(--color-muted)]">{m.email}</div>
                             )}
                           </div>
                         </div>
                       </td>
                       <td className="px-3 py-2 text-mono tabular-nums">{m.memberNumber ?? '—'}</td>
-                      <td className="px-3 py-2 text-body-sm text-muted-foreground">{m.categoryName ?? m.categoryId ?? '—'}</td>
+                      <td className="px-3 py-2 text-body-sm text-[var(--color-muted)]">{m.categoryName ?? m.categoryId ?? '—'}</td>
                       <td className="px-3 py-2">
                         <Badge className={badge.className}>{badge.label}</Badge>
                       </td>
-                      <td className="px-3 py-2 text-body-sm tabular-nums text-muted-foreground">
+                      <td className="px-3 py-2 text-body-sm tabular-nums text-[var(--color-muted)]">
                         {m.duesExpiryDate ? new Date(m.duesExpiryDate).toLocaleDateString() : '—'}
                       </td>
-                      <td className="px-3 py-2 text-body-sm text-muted-foreground">
+                      <td className="px-3 py-2 text-body-sm text-[var(--color-muted)]">
                         {m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '—'}
                       </td>
                     </tr>
@@ -248,7 +248,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center justify-between text-sm text-[var(--color-muted)]">
           <span>
             Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
           </span>

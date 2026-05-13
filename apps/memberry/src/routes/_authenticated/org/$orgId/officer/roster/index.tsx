@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
 import { api } from '@/lib/api'
 import { addRosterMemberMutation } from '@monobase/sdk-ts/generated/react-query'
+import { PageHeader } from '@/components/patterns/page-header'
 
 const STATUS_MAP: Record<string, string> = {
   active: 'active',
@@ -37,13 +38,20 @@ function RosterPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-[24px] font-display font-bold">Member Roster</h1>
-        <Button size="sm" onClick={() => setShowAdd(true)}>
-          <UserPlus size={14} className="mr-1.5" />
-          Add Member
-        </Button>
-      </div>
+      <PageHeader
+        title="Member Roster"
+        subtitle="View and manage organization members"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Roster' },
+        ]}
+        actions={
+          <Button size="sm" onClick={() => setShowAdd(true)}>
+            <UserPlus size={14} className="mr-1.5" />
+            Add Member
+          </Button>
+        }
+      />
       <MemberTable orgId={orgId} initialStatus={initialStatus} expiringDays={expiring} />
       <AddMemberDialog open={showAdd} onClose={() => setShowAdd(false)} orgId={orgId} />
     </div>
@@ -75,7 +83,7 @@ function AddMemberDialog({ open, onClose, orgId }: { open: boolean; onClose: () 
       const personId: string = personData.id || personData.data?.id
 
       // Then add membership via SDK hook
-      await (addMemberMutOpts.mutationFn as Function)({
+      await (addMemberMutOpts.mutationFn as (...args: any[]) => any)({
         body: {
           personId,
           tierId: 'default',

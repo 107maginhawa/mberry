@@ -1,7 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { ComposeForm } from '@/features/communications/components/compose-form'
 import { api } from '@/lib/api'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/communications/new')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -33,23 +35,19 @@ function NewAnnouncementPage() {
   } : undefined
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <Link
-          to="/org/$orgId/officer/communications"
-          params={{ orgId }}
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Back to Communications
-        </Link>
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold">{edit ? 'Edit Announcement' : 'New Announcement'}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {edit ? 'Update your draft announcement' : 'Compose and send a message to your members'}
-        </p>
-      </div>
-      <ComposeForm orgId={orgId} existingAnnouncement={existingAnnouncement} />
+    <div className="space-y-6">
+      <PageHeader
+        title={edit ? 'Edit Announcement' : 'New Announcement'}
+        subtitle={edit ? 'Update your draft announcement' : 'Compose and send a message to your members'}
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Communications', href: `/org/${orgId}/officer/communications` },
+          { label: edit ? 'Edit' : 'New' },
+        ]}
+      />
+      <GlassCard className="p-6">
+        <ComposeForm orgId={orgId} existingAnnouncement={existingAnnouncement} />
+      </GlassCard>
     </div>
   )
 }

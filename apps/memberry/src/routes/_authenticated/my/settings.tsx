@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
 import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/settings')({
@@ -99,7 +100,7 @@ function GeneralSection() {
   }
 
   return (
-    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+    <GlassCard className="p-6 space-y-4">
       <div>
         <h2 className="text-[16px] font-semibold font-display">General</h2>
         <p className="text-[14px] text-[var(--color-muted)] mt-1">Basic account settings</p>
@@ -178,7 +179,7 @@ function GeneralSection() {
           </>
         )}
       </div>
-    </div>
+    </GlassCard>
   )
 }
 
@@ -215,7 +216,7 @@ function NotificationPreferencesSection() {
   if (prefsQuery.isLoading) return <div className="text-[14px] text-[var(--color-muted)]">Loading preferences...</div>
 
   return (
-    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+    <GlassCard className="p-6 space-y-4">
       <div>
         <h2 className="text-[16px] font-semibold font-display">Notification Preferences</h2>
         <p className="text-[14px] text-[var(--color-muted)] mt-1">In-app notifications are always on. High-priority items always push.</p>
@@ -246,7 +247,7 @@ function NotificationPreferencesSection() {
           )
         })}
       </div>
-    </div>
+    </GlassCard>
   )
 }
 
@@ -300,17 +301,17 @@ function PrivacySection() {
 
   if (effectiveSettings.length === 0) {
     return (
-      <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+      <GlassCard className="p-6 space-y-4">
         <h2 className="text-[16px] font-semibold font-display">Privacy</h2>
         <p className="text-[14px] text-[var(--color-muted)]">
           Join an organization to configure privacy settings.
         </p>
-      </div>
+      </GlassCard>
     )
   }
 
   return (
-    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+    <GlassCard className="p-6 space-y-4">
       <div>
         <h2 className="text-[16px] font-semibold font-display">Privacy</h2>
         <p className="text-[14px] text-[var(--color-muted)] mt-1">
@@ -348,13 +349,13 @@ function PrivacySection() {
           </div>
         ))}
       </div>
-    </div>
+    </GlassCard>
   )
 }
 
 function AccountSection() {
   return (
-    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4">
+    <GlassCard className="p-6 space-y-4">
       <div>
         <h2 className="text-[16px] font-semibold font-display">Security</h2>
         <p className="text-[14px] text-[var(--color-muted)] mt-1">
@@ -367,7 +368,7 @@ function AccountSection() {
       >
         Open Account Settings
       </a>
-    </div>
+    </GlassCard>
   )
 }
 

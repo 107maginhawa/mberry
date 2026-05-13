@@ -7,6 +7,8 @@ import { Skeleton } from '@monobase/ui'
 import { Alert, AlertDescription } from '@monobase/ui'
 import { toast } from 'sonner'
 import { FundAllocationEditor } from '@/features/dues/components/fund-allocation-editor'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/settings/funds')({
   component: FundSettingsPage,
@@ -34,7 +36,7 @@ function FundSettingsPage() {
 
   const upsertMutOpts = upsertDuesFundsMutation()
   const saveMutation = useMutation<any, Error, void>({
-    mutationFn: () => (upsertMutOpts.mutationFn as Function)({
+    mutationFn: () => (upsertMutOpts.mutationFn as (...args: any[]) => any)({
       path: { organizationId: orgId },
       body: { funds: funds.map((f, i) => ({ name: f.name, percentage: f.percentage, sortOrder: i })) },
     }),
@@ -51,14 +53,27 @@ function FundSettingsPage() {
   const total = funds.reduce((sum, f) => sum + (parseFloat(f.percentage) || 0), 0)
   const isValid = Math.abs(total - 100) < 0.001
 
-  if (isLoading) return <div className="p-6"><Skeleton className="h-64 w-full max-w-2xl" /></div>
+  if (isLoading) return <div><Skeleton className="h-64 w-full max-w-2xl" /></div>
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Fund Allocation</h1>
-        {hasChanges && <span className="text-sm text-muted-foreground">Unsaved changes</span>}
-      </div>
+    <div className="space-y-6 max-w-2xl">
+      <PageHeader
+        title="Fund Allocation"
+        subtitle="Configure how dues are distributed"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Settings' },
+          { label: 'Funds' },
+        ]}
+        actions={
+          <div className="flex items-center gap-3">
+            {hasChanges && <span className="text-[14px] text-[var(--color-muted)]">Unsaved changes</span>}
+            <Button onClick={() => saveMutation.mutate()} disabled={!isValid || saveMutation.isPending || !hasChanges}>
+              {saveMutation.isPending ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+        }
+      />
 
       {fundsData && (fundsData as any[]).length > 0 && (
         <Alert>
@@ -68,20 +83,19 @@ function FundSettingsPage() {
         </Alert>
       )}
 
-      <FundAllocationEditor
-        funds={funds}
-        onChange={(updated) => { setFunds(updated); setHasChanges(true) }}
-        disabled={saveMutation.isPending}
-      />
+      <GlassCard className="p-6">
+        <FundAllocationEditor
+          funds={funds}
+          onChange={(updated) => { setFunds(updated); setHasChanges(true) }}
+          disabled={saveMutation.isPending}
+        />
 
-      <div className="flex gap-3">
-        <Button onClick={() => saveMutation.mutate()} disabled={!isValid || saveMutation.isPending || !hasChanges}>
-          {saveMutation.isPending ? 'Saving...' : 'Save'}
-        </Button>
-        <Button variant="outline" onClick={() => { if (fundsData && (fundsData as any[]).length > 0) { setFunds((fundsData as any[]).map((f: any) => ({ id: f.id, name: f.name, percentage: f.percentage }))) }; setHasChanges(false) }} disabled={!hasChanges}>
-          Cancel
-        </Button>
-      </div>
+        <div className="flex gap-3 mt-4">
+          <Button variant="outline" onClick={() => { if (fundsData && (fundsData as any[]).length > 0) { setFunds((fundsData as any[]).map((f: any) => ({ id: f.id, name: f.name, percentage: f.percentage }))) }; setHasChanges(false) }} disabled={!hasChanges}>
+            Cancel
+          </Button>
+        </div>
+      </GlassCard>
     </div>
   )
 }

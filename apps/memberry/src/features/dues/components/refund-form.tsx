@@ -64,7 +64,7 @@ export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) 
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
-        {amountError && <p className="text-xs text-destructive mt-1">{amountError}</p>}
+        {amountError && <p className="text-xs text-[var(--color-error)] mt-1">{amountError}</p>}
       </div>
       <div>
         <Label>Reason (required)</Label>

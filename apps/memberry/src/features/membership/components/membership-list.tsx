@@ -16,18 +16,18 @@ export function MembershipList({ orgId, tenantId }: MembershipListProps) {
   })
 
   if (isLoading) {
-    return <div className="p-6 text-center text-muted-foreground">Loading roster...</div>
+    return <div className="p-6 text-center text-[var(--color-muted)]">Loading roster...</div>
   }
 
   if (error) {
-    return <div className="p-6 text-center text-destructive">Failed to load roster</div>
+    return <div className="p-6 text-center text-[var(--color-error)]">Failed to load roster</div>
   }
 
   const memberships = (data as any)?.data ?? []
 
   if (memberships.length === 0) {
     return (
-      <div className="p-6 text-center text-muted-foreground">
+      <div className="p-6 text-center text-[var(--color-muted)]">
         No members yet. Start by creating membership tiers and inviting members.
       </div>
     )
@@ -48,7 +48,7 @@ export function MembershipList({ orgId, tenantId }: MembershipListProps) {
         </thead>
         <tbody>
           {memberships.map((m: any) => (
-            <tr key={m.id} className="border-b hover:bg-muted/50">
+            <tr key={m.id} className="border-b hover:bg-[var(--color-surface-warm)]">
               <td className="px-4 py-3 font-mono text-xs">{m.memberNumber || '—'}</td>
               <td className="px-4 py-3">{m.personId}</td>
               <td className="px-4 py-3">
@@ -58,7 +58,7 @@ export function MembershipList({ orgId, tenantId }: MembershipListProps) {
               <td className="px-4 py-3">{m.duesExpiryDate || '—'}</td>
               <td className="px-4 py-3">
                 {isRenewable(m.status) && (
-                  <button className="text-xs text-primary hover:underline">Renew</button>
+                  <button className="text-xs text-[var(--color-primary)] hover:underline">Renew</button>
                 )}
               </td>
             </tr>

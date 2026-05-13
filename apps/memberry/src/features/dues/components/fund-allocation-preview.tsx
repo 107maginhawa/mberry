@@ -9,7 +9,7 @@ interface FundAllocationPreviewProps {
 
 export function FundAllocationPreview({ amountCents, funds, currency = 'PHP' }: FundAllocationPreviewProps) {
   if (funds.length === 0) {
-    return <p className="text-sm text-muted-foreground">All payments go to the General Fund.</p>
+    return <p className="text-sm text-[var(--color-muted)]">All payments go to the General Fund.</p>
   }
 
   const allocations = allocateFunds(amountCents, funds)

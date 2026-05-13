@@ -76,11 +76,11 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
             <Wifi className="h-5 w-5 text-green-600" />
             <div>
               <Badge variant="secondary" className="bg-[var(--color-success-bg)] text-[var(--color-success)]">Connected</Badge>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-[var(--color-muted)] mt-1">
                 {config.provider === 'paymongo' ? 'PayMongo' : 'Stripe'} ····{config.publicKeyLast4}
               </p>
               {config.lastTestAt && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--color-muted)]">
                   Last tested: {new Date(config.lastTestAt).toLocaleDateString()}
                 </p>
               )}
@@ -123,7 +123,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
         <WifiOff className="h-5 w-5 text-red-500" />
         <div>
           <Badge variant="secondary" className="bg-[var(--color-error-bg)] text-[var(--color-error)]">Not Connected</Badge>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-[var(--color-muted)] mt-1">
             Connect a payment gateway to accept online payments.
           </p>
         </div>

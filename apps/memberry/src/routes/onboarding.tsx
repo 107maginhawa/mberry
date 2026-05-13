@@ -67,13 +67,13 @@ function MemberOnboarding() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-lg w-full border rounded-lg p-6 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Complete Your Profile</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-[26px] font-bold font-display">Complete Your Profile</h1>
+          <p className="text-sm text-[var(--color-muted)]">
             Step {step} of 2 — you can skip and come back later
           </p>
-          <div className="w-full bg-muted rounded-full h-2">
+          <div className="w-full bg-[var(--color-surface-warm)] rounded-full h-2">
             <div
-              className="bg-primary h-2 rounded-full transition-all"
+              className="bg-[var(--color-primary)] h-2 rounded-full transition-all"
               style={{ width: `${(step / 2) * 100}%` }}
             />
           </div>
@@ -82,7 +82,7 @@ function MemberOnboarding() {
         {step === 1 && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">Specialization</h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[var(--color-muted)]">
               What is your area of professional practice?
             </p>
             <input
@@ -95,13 +95,13 @@ function MemberOnboarding() {
             <div className="flex justify-between">
               <button
                 onClick={handleSkip}
-                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+                className="px-4 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
               >
                 Skip for now
               </button>
               <button
                 onClick={() => setStep(2)}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium"
+                className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium"
               >
                 Next
               </button>
@@ -112,7 +112,7 @@ function MemberOnboarding() {
         {step === 2 && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">Privacy Preferences</h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[var(--color-muted)]">
               Control how your information appears in the member directory.
             </p>
             <label className="flex items-center gap-3 p-3 border rounded-md cursor-pointer">
@@ -124,7 +124,7 @@ function MemberOnboarding() {
               />
               <div>
                 <p className="text-sm font-medium">Show in member directory</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--color-muted)]">
                   Other members can find your name and specialization
                 </p>
               </div>
@@ -132,21 +132,21 @@ function MemberOnboarding() {
             <div className="flex justify-between">
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+                className="px-4 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
               >
                 Back
               </button>
               <div className="flex gap-2">
                 <button
                   onClick={handleSkip}
-                  className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+                  className="px-4 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
                 >
                   Skip
                 </button>
                 <button
                   onClick={handleComplete}
                   disabled={updatePerson.isPending}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50"
+                  className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium disabled:opacity-50"
                 >
                   {updatePerson.isPending ? 'Saving...' : 'Complete'}
                 </button>

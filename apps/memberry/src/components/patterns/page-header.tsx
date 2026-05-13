@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Link } from "@tanstack/react-router"
 
 interface PageHeaderProps {
   title: string
@@ -11,14 +12,14 @@ export function PageHeader({ title, subtitle, breadcrumbs, actions }: PageHeader
   return (
     <div className="mb-6">
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-1.5 mb-2 text-[13px] font-medium text-[var(--color-muted)]">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 mb-2 text-[13px] font-medium text-[var(--color-muted)]">
           {breadcrumbs.map((crumb, i) => (
             <span key={i} className="flex items-center gap-1.5">
-              {i > 0 && <span>/</span>}
+              {i > 0 && <span aria-hidden="true">/</span>}
               {crumb.href ? (
-                <a href={crumb.href} className="hover:text-[var(--color-primary)] transition-colors">{crumb.label}</a>
+                <Link to={crumb.href} className="hover:text-[var(--color-primary)] transition-colors">{crumb.label}</Link>
               ) : (
-                <span className="text-[var(--color-text)] font-semibold">{crumb.label}</span>
+                <span aria-current="page" className="text-[var(--color-text)] font-semibold">{crumb.label}</span>
               )}
             </span>
           ))}

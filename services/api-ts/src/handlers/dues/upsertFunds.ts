@@ -4,7 +4,7 @@ import { DuesRepository } from './repos/dues.repo';
 
 export async function upsertFunds(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const body = await ctx.req.json();
   const repo = new DuesRepository(db);
 

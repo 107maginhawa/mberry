@@ -2,9 +2,11 @@ import { useState, useCallback } from 'react'
 import { createFileRoute, Link, useParams } from '@tanstack/react-router'
 import { Button } from '@monobase/ui'
 import { toast } from 'sonner'
-import { Upload, FileText, ArrowLeft, Check, AlertTriangle, Loader2 } from 'lucide-react'
+import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'
 import { importRosterMembersMutation } from '@monobase/sdk-ts/generated/react-query'
 import { ApiError } from '@/lib/api'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/roster/import',
@@ -162,23 +164,15 @@ function RosterImportPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link
-          to={`/org/${orgId}/officer/roster` as any}
-          className="p-1.5 rounded-lg hover:bg-[var(--color-surface-warm)] transition-colors"
-        >
-          <ArrowLeft size={18} className="text-[var(--color-muted)]" />
-        </Link>
-        <div>
-          <h1 className="text-[24px] font-display font-bold text-[var(--color-text)]">
-            Import Roster
-          </h1>
-          <p className="text-[14px] text-[var(--color-muted)]">
-            Upload a CSV file to add members in bulk
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Import Roster"
+        subtitle="Upload a CSV file to add members in bulk"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
+          { label: 'Roster', href: `/org/${orgId}/officer/roster` },
+          { label: 'Import' },
+        ]}
+      />
 
       {/* Result banner */}
       {result && (
@@ -192,27 +186,29 @@ function RosterImportPage() {
 
       {/* Upload area */}
       {!parsed && (
-        <div
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={handleDrop}
-          className="border-2 border-dashed border-[var(--color-border)] rounded-[12px] p-12 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors cursor-pointer"
-          onClick={() => document.getElementById('csv-input')?.click()}
-        >
-          <Upload size={32} className="mx-auto mb-3 text-[var(--color-muted)]" />
-          <p className="text-[14px] font-medium text-[var(--color-text)]">
-            Drop CSV file here or click to browse
-          </p>
-          <p className="text-[12px] text-[var(--color-muted)] mt-1">
-            Expected columns: First Name, Last Name, Email, License Number, Member Number
-          </p>
-          <input
-            id="csv-input"
-            type="file"
-            accept=".csv,text/csv"
-            className="hidden"
-            onChange={handleFileInput}
-          />
-        </div>
+        <GlassCard className="p-0">
+          <div
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+            className="border-2 border-dashed border-[var(--color-border)] rounded-[12px] p-12 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors cursor-pointer"
+            onClick={() => document.getElementById('csv-input')?.click()}
+          >
+            <Upload size={32} className="mx-auto mb-3 text-[var(--color-muted)]" />
+            <p className="text-[14px] font-medium text-[var(--color-text)]">
+              Drop CSV file here or click to browse
+            </p>
+            <p className="text-[12px] text-[var(--color-muted)] mt-1">
+              Expected columns: First Name, Last Name, Email, License Number, Member Number
+            </p>
+            <input
+              id="csv-input"
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleFileInput}
+            />
+          </div>
+        </GlassCard>
       )}
 
       {/* Preview table */}

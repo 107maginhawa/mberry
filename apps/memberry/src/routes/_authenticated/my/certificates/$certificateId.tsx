@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
+import { PageHeader } from '@/components/patterns/page-header'
 import { CertificatePreview } from '@/features/certificates/components/certificate-preview'
 
 export const Route = createFileRoute('/_authenticated/my/certificates/$certificateId')({
@@ -9,11 +10,14 @@ function CertificateDetail() {
   const { certificateId } = Route.useParams()
 
   return (
-    <div className="space-y-6 p-6">
-      <Link to="/my/certificates" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Back to Certificates
-      </Link>
-      <h1 className="text-2xl font-bold">Certificate</h1>
+    <div className="space-y-6">
+      <PageHeader
+        title="Certificate"
+        breadcrumbs={[
+          { label: 'Certificates', href: '/my/certificates' },
+          { label: 'Certificate' },
+        ]}
+      />
       <CertificatePreview certificateId={certificateId} />
     </div>
   )

@@ -5,6 +5,8 @@ import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
+import { PageHeader } from '@/components/patterns/page-header'
+import { GlassCard } from '@/components/motion/glass-card'
 
 export const Route = createFileRoute('/_authenticated/my/credits/log')({
   component: CreditLog,
@@ -44,52 +46,59 @@ function CreditLog() {
 
   return (
     <div className="space-y-6">
-      <a href="/my/credits" className="text-[13px] text-[var(--color-muted)] hover:text-[var(--color-text)]">← Back to Credits</a>
-      <h1 className="text-[24px] font-display font-bold">Log Manual Credit</h1>
-      <p className="text-[14px] text-[var(--color-muted)]">Self-report CPD credits from external activities (BR-13: no officer approval required)</p>
+      <PageHeader
+        title="Log Manual Credit"
+        subtitle="Self-report CPD credits from external activities (BR-13: no officer approval required)"
+        breadcrumbs={[
+          { label: 'Credits', href: '/my/credits' },
+          { label: 'Log Manual Credit' },
+        ]}
+      />
 
-      <form onSubmit={handleSubmit} className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6 space-y-4 max-w-lg">
-        <div className="space-y-1.5">
-          <Label>Activity Name *</Label>
-          <Input
-            value={activityName}
-            onChange={(e) => setActivityName(e.target.value)}
-            placeholder="e.g. Dental Photography Workshop"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+      <GlassCard className="p-6 max-w-lg">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Date *</Label>
+            <Label>Activity Name *</Label>
             <Input
-              type="date"
-              value={activityDate}
-              onChange={(e) => setActivityDate(e.target.value)}
+              value={activityName}
+              onChange={(e) => setActivityName(e.target.value)}
+              placeholder="e.g. Dental Photography Workshop"
             />
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Date *</Label>
+              <Input
+                type="date"
+                value={activityDate}
+                onChange={(e) => setActivityDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Credit Hours *</Label>
+              <Input
+                type="number"
+                min="0.5"
+                step="0.5"
+                value={creditAmount}
+                onChange={(e) => setCreditAmount(e.target.value)}
+                placeholder="e.g. 4"
+              />
+            </div>
+          </div>
           <div className="space-y-1.5">
-            <Label>Credit Hours *</Label>
+            <Label>Description (optional)</Label>
             <Input
-              type="number"
-              min="0.5"
-              step="0.5"
-              value={creditAmount}
-              onChange={(e) => setCreditAmount(e.target.value)}
-              placeholder="e.g. 4"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief description of the activity"
             />
           </div>
-        </div>
-        <div className="space-y-1.5">
-          <Label>Description (optional)</Label>
-          <Input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Brief description of the activity"
-          />
-        </div>
-        <Button type="submit" disabled={saving || !activityName.trim() || !creditAmount}>
-          {saving ? 'Saving...' : 'Add Credit Entry'}
-        </Button>
-      </form>
+          <Button type="submit" disabled={saving || !activityName.trim() || !creditAmount}>
+            {saving ? 'Saving...' : 'Add Credit Entry'}
+          </Button>
+        </form>
+      </GlassCard>
     </div>
   )
 }

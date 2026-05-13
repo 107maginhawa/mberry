@@ -3,6 +3,8 @@ import { Button } from '@monobase/ui'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { Download, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react'
+import { GlassCard } from '@/components/motion/glass-card'
+import { EmptyState } from '@/components/patterns/empty-state'
 
 type ExportStatus = 'Processing' | 'Ready' | 'Expired'
 
@@ -100,11 +102,11 @@ export function DataExport() {
   return (
     <div className="space-y-6">
       {/* Explanation */}
-      <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+      <GlassCard className="p-5">
         <div className="flex items-start gap-3">
           <FileText size={20} className="text-[var(--color-primary)] shrink-0 mt-0.5" />
           <div>
-            <h2 className="text-[15px] font-semibold">What's included in your export</h2>
+            <h2 className="text-[15px] font-semibold font-display">What's included in your export</h2>
             <p className="text-[13px] text-[var(--color-muted)] mt-1.5 leading-relaxed">
               Your export includes all personal data we hold about you: profile information,
               membership records, payment history, event registrations, training completions,
@@ -116,7 +118,7 @@ export function DataExport() {
             </p>
           </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Request button */}
       <div>
@@ -143,7 +145,8 @@ export function DataExport() {
       {exports.length > 0 && (
         <div>
           <h2 className="text-[15px] font-semibold mb-3">Previous Exports</h2>
-          <div className="rounded-[12px] border border-[var(--color-border-light)] overflow-hidden">
+          <GlassCard className="overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-[14px]">
               <thead className="bg-[var(--color-surface-warm)]">
                 <tr>
@@ -191,7 +194,8 @@ export function DataExport() {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+          </GlassCard>
         </div>
       )}
     </div>
