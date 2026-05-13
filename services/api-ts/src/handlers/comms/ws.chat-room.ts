@@ -21,7 +21,8 @@ import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
 
 /**
- * Message types for chat room WebSocket
+ * Message types for chat room WebSocket.
+ * Formal schema: specs/api/src/modules/comms.tsp — WebSocketEventType enum
  */
 type MessageType =
   | 'chat.message'
@@ -32,12 +33,13 @@ type MessageType =
   | 'ping';
 
 /**
- * WebRTC signaling message structure
+ * WebRTC signaling message structure.
+ * Formal schema: specs/api/src/modules/comms.tsp — VideoOfferPayload / VideoAnswerPayload / IceCandidatePayload
  */
 interface SignalMessage {
   type: 'video.offer' | 'video.answer' | 'video.ice-candidate';
   from: string;
-  data: any; // RTCSessionDescriptionInit | RTCIceCandidateInit from WebRTC API
+  data: unknown;
 }
 
 export const config: WebSocketHandler = {

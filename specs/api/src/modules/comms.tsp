@@ -501,3 +501,166 @@ namespace CommsModule {
 
   }
 }
+
+// ============================================================================
+// WEBSOCKET MESSAGE TYPES
+// ============================================================================
+// OpenAPI 3.0 does not natively support WebSocket schemas.
+// These models formally document the WebSocket protocol used by
+// GET /ws/comms/chat-rooms/:room (upgrade: websocket).
+// Clients and servers SHOULD use these types for message serialization.
+
+/**
+ * Envelope for all WebSocket messages sent to/from the server.
+ * Every frame is JSON-encoded with an `event` discriminator and typed `payload`.
+ */
+@doc("WebSocket message envelope for chat room real-time communication")
+@extension("x-websocket-endpoint", "/ws/comms/chat-rooms/{room}")
+model WebSocketMessageEnvelope {
+  @doc("Event discriminator — determines payload shape")
+  event: WebSocketEventType;
+
+  @doc("Event-specific payload (shape varies by event type)")
+  payload?: unknown;
+}
+
+/**
+ * All WebSocket event types exchanged over the chat room connection
+ */
+@doc("WebSocket event types for chat room communication")
+enum WebSocketEventType {
+  @doc("Chat text message sent by a participant")
+  chatMessage: "chat.message",
+
+  @doc("Typing indicator from a participant")
+  chatTyping: "chat.typing",
+
+  @doc("WebRTC session offer (caller → callee)")
+  videoOffer: "video.offer",
+
+  @doc("WebRTC session answer (callee → caller)")
+  videoAnswer: "video.answer",
+
+  @doc("WebRTC ICE candidate exchange")
+  videoIceCandidate: "video.ice-candidate",
+
+  @doc("Client heartbeat ping")
+  ping: "ping",
+
+  @doc("Server heartbeat pong response")
+  pong: "pong",
+
+  @doc("Server-sent connection confirmation")
+  connected: "connected",
+
+  @doc("Participant joined the room")
+  userJoined: "user.joined",
+
+  @doc("Participant left the room")
+  userLeft: "user.left",
+
+  @doc("Server-sent error before close")
+  error: "error",
+}
+
+/**
+ * Payload for chat.message events (client → server)
+ */
+@doc("Chat message payload sent by client")
+@extension("x-websocket-message-type", "chat.message")
+model ChatMessagePayload {
+  @doc("Message text content")
+  @maxLength(5000)
+  text: string;
+}
+
+/**
+ * Payload for chat.typing events (client → server, server → clients)
+ */
+@doc("Typing indicator payload")
+@extension("x-websocket-message-type", "chat.typing")
+model TypingIndicatorPayload {
+  @doc("Sender user ID (added by server on broadcast)")
+  from?: UUID;
+
+  @doc("Whether the user is currently typing")
+  isTyping: boolean;
+}
+
+/**
+ * Payload for video.offer events (WebRTC caller → server → callee)
+ */
+@doc("WebRTC session offer payload")
+@extension("x-websocket-message-type", "video.offer")
+model VideoOfferPayload {
+  @doc("Sender user ID (added by server on relay)")
+  from: UUID;
+
+  @doc("RTCSessionDescriptionInit — SDP offer")
+  data: unknown;
+}
+
+/**
+ * Payload for video.answer events (WebRTC callee → server → caller)
+ */
+@doc("WebRTC session answer payload")
+@extension("x-websocket-message-type", "video.answer")
+model VideoAnswerPayload {
+  @doc("Sender user ID (added by server on relay)")
+  from: UUID;
+
+  @doc("RTCSessionDescriptionInit — SDP answer")
+  data: unknown;
+}
+
+/**
+ * Payload for video.ice-candidate events (peer → server → peer)
+ */
+@doc("WebRTC ICE candidate payload")
+@extension("x-websocket-message-type", "video.ice-candidate")
+model IceCandidatePayload {
+  @doc("Sender user ID (added by server on relay)")
+  from: UUID;
+
+  @doc("RTCIceCandidateInit — ICE candidate")
+  data: unknown;
+}
+
+/**
+ * Payload for connected events (server → client on successful upgrade)
+ */
+@doc("Connection confirmation payload sent after successful WebSocket upgrade")
+@extension("x-websocket-message-type", "connected")
+model ConnectedPayload {
+  @doc("Chat room ID")
+  roomId: UUID;
+
+  @doc("Authenticated user ID")
+  userId: UUID;
+
+  @doc("Server timestamp of connection")
+  timestamp: utcDateTime;
+}
+
+/**
+ * Payload for user.joined / user.left events (server → clients)
+ */
+@doc("Presence event payload for join/leave notifications")
+@extension("x-websocket-message-type", "user.joined")
+model PresencePayload {
+  @doc("User who joined or left")
+  userId: UUID;
+
+  @doc("Event timestamp")
+  timestamp: utcDateTime;
+}
+
+/**
+ * Payload for error events (server → client before close)
+ */
+@doc("Error payload sent before WebSocket close")
+@extension("x-websocket-message-type", "error")
+model WebSocketErrorPayload {
+  @doc("Human-readable error message")
+  message: string;
+}
