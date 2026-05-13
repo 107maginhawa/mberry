@@ -44,7 +44,20 @@ Members can manage their association membership, track continuing education cred
 
 ### Active
 
-(None — next milestone requirements TBD via `/gsd-new-milestone`)
+#### Current Milestone: v1.2.0 Pilot Launch
+
+**Goal:** Ship all compliance-critical and officer-essential features to launch the first live pilot with a Philippine dental association.
+
+**Target features:**
+- Dues invoice security fix (auth bypass — critical path)
+- Account deletion + data export (PH DPA compliance)
+- Payment flow (core revenue)
+- Officer daily ops (membership approvals, roster, bulk actions)
+- PRC regulatory approval (CPD credit compliance)
+- Transfer + cross-org training (member mobility)
+- Member departure + deceased handling (lifecycle)
+- Quality gap closure (deferred tech debt)
+- Email/notification guards + handler tests (hardening)
 
 ### Out of Scope
 
@@ -57,12 +70,15 @@ Members can manage their association membership, track continuing education cred
 ## Context
 
 - **v1.0.0 shipped** — 11 phases, 39 plans, 36 requirements, 1,334 files, 7 days
+- **v1.1.0 shipped** — 7 phases (11-17), 39 plans, auth + RBAC + domain remediation, 6 days
+- **2181 API tests + 9 mobile E2E** passing after v1.1.0
 - **Three-app architecture:** account (cloud account), memberry (product), admin (ops)
 - **Unified data model:** Single canonical schema with organizationId (tenant_id eliminated)
 - **Full TypeSpec coverage:** All 6 custom modules + 9 base modules have spec definitions
 - **Shared UI:** @monobase/ui with 29 components, Ladle preview, used by all 3 apps
 - **CI/CD:** GitHub Actions → Railway (API) + Cloudflare Pages (frontends)
 - **Test coverage:** E2E (3 apps), unit (Vitest), contract (Hurl), pre-commit gates
+- **Codex audit completed** — verified real findings vs false positives, drives v1.2.0 prioritization
 
 ## Constraints
 
@@ -104,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-07 after v1.0.0 milestone*
+*Last updated: 2026-05-13 after v1.2.0 milestone initialization*

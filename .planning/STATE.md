@@ -1,56 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1.0
-milestone_name: Auth & Permission Enforcement
-status: complete
-stopped_at: v1.1.0 COMPLETE — all 7 phases shipped
-last_updated: "2026-05-13T18:00:00.000Z"
-last_activity: 2026-05-13 -- Phase 16 complete (2/2 plans, 16 transfer tests + 9 mobile E2E)
+milestone: v1.2.0
+milestone_name: Pilot Launch
+status: planning
+stopped_at: ""
+last_updated: "2026-05-13T20:00:00.000Z"
+last_activity: 2026-05-13 -- Milestone v1.2.0 started
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 39
-  completed_plans: 39
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-07)
+See: .planning/PROJECT.md (updated 2026-05-13)
 
 **Core value:** Members can manage their association membership, track continuing education credits, and stay current on dues — from any device, with minimal friction.
-**Current focus:** v1.1.0 COMPLETE. Ready for v1.2.0 planning.
+**Current focus:** v1.2.0 Pilot Launch — defining requirements.
 
 ## Current Position
 
-Milestone: v1.1.0 Auth & Permission Enforcement — COMPLETE
-Status: All 7 phases (11-17) shipped. 2181 API tests + 9 mobile E2E tests pass.
-Last activity: 2026-05-13 -- Phase 16 executed (transfer lifecycle + mobile viewport)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-13 — Milestone v1.2.0 started
 
-Progress: [██████████] 100%
-
-## v1.1.0 Summary
-
-| Phase | Name | Plans | Tests Added |
-|-------|------|-------|-------------|
-| 11 | Test Infrastructure & Seed Users | 3/3 | Seed scripts, apiAs helper |
-| 12 | Backend Auth — Route Protection | 6/6 | ~35 officer auth tests |
-| 13 | Position-Based RBAC | 5/5 | Position middleware + tests |
-| 14 | Negative E2E Tests — Role Boundaries | 2/2 | 19 E2E role boundary tests |
-| 15 | Dues Reminder UI + BR Edge Cases | 3/3 | Dunning CRUD + reminder tests |
-| 16 | Mobile & Transfer Validation | 2/2 | 16 transfer + 9 mobile E2E |
-| 17 | Domain Design Remediation | 18/18 | BR invariant + constraint tests |
-
-## Performance Metrics
-
-**Velocity:**
-
-- Total plans completed: 39 (v1.1.0)
-- Timeline: 6 days (2026-05-08 → 2026-05-13)
-- API test count: 2181 passing
-- Mobile E2E: 9 passing
+Progress: [░░░░░░░░░░] 0%
 
 ## Accumulated Context
 
@@ -64,7 +44,7 @@ None.
 
 ### Blockers/Concerns
 
-None — milestone complete.
+None.
 
 ## Deferred Items
 
