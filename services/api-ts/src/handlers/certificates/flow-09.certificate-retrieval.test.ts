@@ -44,7 +44,7 @@ describe('[FLOW-09] Certificate Retrieval', () => {
   test('getCertificate returns certificate by ID', async () => {
     mocks = defaultStubs();
 
-    const ctx = makeCtx({ _params: { id: 'cert-1' } });
+    const ctx = makeCtx({ _params: { id: 'cert-1' }, user: { id: PERSON, role: 'user' } });
     const response = await getCertificate(ctx);
 
     expect(response.status).toBe(200);

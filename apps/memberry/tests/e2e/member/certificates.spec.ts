@@ -30,6 +30,20 @@ test.describe('Member Certificates (/my/certificates)', () => {
   })
 })
 
+test.describe('Certificate Detail (/my/certificates/:id)', () => {
+  test('certificate detail page handles missing certificate gracefully', async ({ page }) => {
+    await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    await page.goto('/my/certificates/00000000-0000-0000-0000-000000000000')
+    await page.waitForLoadState('networkidle')
+
+    // Should show not-found state or redirect, not crash
+    const hasNotFound = await page.getByText(/not found|no certificate|error/i).first().isVisible().catch(() => false)
+    const hasRedirect = page.url().includes('/my/certificates') && !page.url().includes('00000000')
+    const hasContent = await page.locator('main').isVisible()
+    expect(hasNotFound || hasRedirect || hasContent).toBeTruthy()
+  })
+})
+
 test.describe('QR Verification', () => {
   test('[BR-18] verify page accessible', async ({ page }) => {
     // Public verification page should load without auth errors

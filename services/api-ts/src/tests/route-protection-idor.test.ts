@@ -78,6 +78,23 @@ d('Cross-org isolation (IDOR prevention)', () => {
     expect(res.status).toBe(403);
   });
 
+  // ── Report IDOR: cross-org report access blocked ───────────────────────
+
+  test('Org A officer gets 403 on Org B dues report (GET /association/member/dues-reporting/:orgBId/report)', async () => {
+    const res = await orgAOfficer.get(`/association/member/dues-reporting/${orgBId}/report?type=collection`);
+    expect([403, 401]).toContain(res.status);
+  });
+
+  test('Org B officer gets 403 on Org A dues report (GET /association/member/dues-reporting/:orgAId/report)', async () => {
+    const res = await orgBOfficer.get(`/association/member/dues-reporting/${ORG_A_ID}/report?type=collection`);
+    expect([403, 401]).toContain(res.status);
+  });
+
+  test('Org A officer gets 403 on Org B financial dashboard (GET /association/member/dues-reporting/:orgBId/dashboard)', async () => {
+    const res = await orgAOfficer.get(`/association/member/dues-reporting/${orgBId}/dashboard`);
+    expect([403, 401]).toContain(res.status);
+  });
+
   // ── Sanity checks: each officer CAN access their own org ────────────────
 
   test('Org A officer gets 200 on own roster (GET /membership/members/:orgAId)', async () => {

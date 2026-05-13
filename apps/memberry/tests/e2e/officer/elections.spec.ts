@@ -56,4 +56,32 @@ test.describe('Officer Elections', () => {
     const hasDraft = await page.getByText(/draft/i).first().isVisible().catch(() => false)
     expect(hasPositions || hasPresident || hasDraft).toBeTruthy()
   })
+
+  test('BR-33: election detail shows valid status (Draft/Open/Closed)', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/elections`)
+    await page.waitForLoadState('networkidle')
+
+    const electionLink = page.getByText(/2026 officer election/i).first()
+    await expect(electionLink).toBeVisible({ timeout: 10000 })
+    await electionLink.click()
+    await page.waitForLoadState('networkidle')
+
+    // BR-33: Election must show a valid status — not undefined or empty
+    const statusBadge = page.getByText(/^(Draft|Open|Closed|Voting|Completed)$/i).first()
+    await expect(statusBadge).toBeVisible({ timeout: 10000 })
+  })
+
+  test('BR-33: election detail shows position count', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/elections`)
+    await page.waitForLoadState('networkidle')
+
+    const electionLink = page.getByText(/2026 officer election/i).first()
+    await expect(electionLink).toBeVisible({ timeout: 10000 })
+    await electionLink.click()
+    await page.waitForLoadState('networkidle')
+
+    // BR-33: Should show at least one position (President is always in seeded data)
+    const hasPosition = await page.getByText(/president/i).first().isVisible({ timeout: 10000 }).catch(() => false)
+    expect(hasPosition).toBe(true)
+  })
 })

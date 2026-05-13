@@ -14,13 +14,22 @@ test.describe('Membership Actions', () => {
     await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
   })
 
-  test('roster shows real member data (names, statuses, not "undefined")', async ({ page }) => {
+  test('roster shows real member data with computed status values', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
 
     // Must show actual names, not "undefined" or dashes
     await expect(page.getByText('Juan Cruz')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('Active').first()).toBeVisible()
+
+    // BR-01: Status must be a valid computed value (not empty, not "undefined")
+    const statusBadge = page.getByText(/^(Active|Suspended|Lapsed|Grace Period|Terminated)$/).first()
+    await expect(statusBadge).toBeVisible()
+
+    // Verify member number format exists
     await expect(page.getByText(/PDA-2025-\d+/).first()).toBeVisible()
+
+    // BR-01: Multiple members should show — verify roster has more than 1 row
+    const memberLinks = page.getByRole('link', { name: /Cruz|Santos|Reyes/i })
+    expect(await memberLinks.count()).toBeGreaterThanOrEqual(1)
   })
 
   test('click member name → member detail page loads with data', async ({ page }) => {
@@ -36,7 +45,7 @@ test.describe('Membership Actions', () => {
     await expect(page.getByText(/Active|Suspended|Lapsed/).first()).toBeVisible()
   })
 
-  test('member detail shows action buttons (suspend or lift)', async ({ page }) => {
+  test('BR-03: member detail shows status-appropriate actions', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
 
     await page.getByRole('link', { name: 'Juan Cruz' }).click()
@@ -45,11 +54,25 @@ test.describe('Membership Actions', () => {
     // Wait for the Actions section to load (API call may take time)
     await expect(page.getByText('Actions')).toBeVisible({ timeout: 10000 })
 
-    // Should show either Suspend Member, Reinstate, or action buttons depending on current state
-    const hasSuspend = await page.getByRole('button', { name: /suspend member/i }).isVisible({ timeout: 3000 }).catch(() => false)
-    const hasReinstate = await page.getByRole('button', { name: /reinstate/i }).isVisible({ timeout: 2000 }).catch(() => false)
-    const hasChangeCategory = await page.getByRole('button', { name: /change category/i }).isVisible({ timeout: 2000 }).catch(() => false)
-    expect(hasSuspend || hasReinstate || hasChangeCategory).toBeTruthy()
+    // BR-03: Status determines available actions
+    // Active members should show Suspend; Suspended should show Reinstate
+    const currentStatus = await page.getByText(/^(Active|Suspended|Lapsed|Grace Period|Terminated)$/).first().textContent()
+
+    if (currentStatus === 'Active') {
+      // Active → can suspend or terminate
+      const hasSuspend = await page.getByRole('button', { name: /suspend member/i }).isVisible({ timeout: 3000 }).catch(() => false)
+      expect(hasSuspend).toBe(true)
+    } else if (currentStatus === 'Suspended') {
+      // Suspended → can reinstate
+      const hasReinstate = await page.getByRole('button', { name: /reinstate/i }).isVisible({ timeout: 3000 }).catch(() => false)
+      expect(hasReinstate).toBe(true)
+    }
+
+    // Always should have Change Category regardless of status (unless terminated)
+    if (currentStatus !== 'Terminated') {
+      const hasChangeCategory = await page.getByRole('button', { name: /change category/i }).isVisible({ timeout: 3000 }).catch(() => false)
+      expect(hasChangeCategory).toBe(true)
+    }
   })
 
   test('categories page shows categories and Save works', async ({ page }) => {

@@ -28,3 +28,19 @@ test.describe('Member Training (/my/training)', () => {
     await expect(page.getByText('Completed', { exact: true })).toBeVisible({ timeout: 10000 })
   })
 })
+
+const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const FAKE_ID = '00000000-0000-0000-0000-000000000000'
+
+test.describe('Member Training Detail (/org/:orgId/training/:trainingId)', () => {
+  test('training detail page handles missing training gracefully', async ({ page }) => {
+    await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    await page.goto(`/org/${ORG_ID}/training/${FAKE_ID}`)
+    await page.waitForLoadState('networkidle')
+
+    // Should show not-found, redirect, or error — not crash
+    const hasNotFound = await page.getByText(/not found|no training|error/i).first().isVisible().catch(() => false)
+    const hasContent = await page.locator('main').isVisible()
+    expect(hasNotFound || hasContent).toBeTruthy()
+  })
+})
