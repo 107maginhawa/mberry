@@ -47,7 +47,7 @@ import { authMiddleware } from '@/middleware/auth';
 import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
 import { createRateLimiter } from '@/middleware/rate-limit';
-import { orgContextMiddleware } from '@/middleware/org-context';
+import { orgContextMiddleware, orgContextOptionalMiddleware } from '@/middleware/org-context';
 
 
 /**
@@ -142,6 +142,13 @@ export function createApp(config: Config): App {
     }
     return orgContextMiddleware()(c, next);
   });
+
+  // Fail-open org-context for non-association routes that optionally use organizationId.
+  // No auth override — per-route auth in generated routes stays as-is.
+  // Skips silently when no user or no org context (webhooks, public discovery, etc.)
+  for (const prefix of ['/billing/*', '/booking/*', '/comms/*', '/storage/*', '/reviews/*', '/audit/*', '/persons/*']) {
+    app.use(prefix, orgContextOptionalMiddleware());
+  }
 
   // Register API routes
   registerOpenAPIRoutes(app as any);

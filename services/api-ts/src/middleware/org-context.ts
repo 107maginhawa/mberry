@@ -139,3 +139,104 @@ export function orgContextMiddleware() {
     await next();
   });
 }
+
+/**
+ * Fail-open org-context middleware for non-association routes.
+ *
+ * Same org extraction logic as orgContextMiddleware, but:
+ * - Skips silently if no user authenticated (unauthenticated routes like webhooks)
+ * - Skips silently if no org context found (not all requests need org)
+ * - Skips silently if membership check fails (handler decides access)
+ *
+ * Use on /billing/*, /booking/*, /comms/*, /storage/*, /reviews/*, /audit/*, /persons/*
+ * where org context is helpful but not mandatory.
+ */
+export function orgContextOptionalMiddleware() {
+  return createMiddleware<{ Variables: Variables }>(async (ctx, next): Promise<void | Response> => {
+    const user = ctx.get('user');
+    if (!user) {
+      await next();
+      return;
+    }
+
+    // Extract orgId from header, query params, path params, or URL path UUID
+    let orgId =
+      ctx.req.header('x-org-id') ??
+      ctx.req.query('orgId') ??
+      ctx.req.query('organizationId') ??
+      ctx.req.param('organizationId') ??
+      null;
+
+    if (!orgId) {
+      const uuidMatch = ctx.req.path.match(/\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+      if (uuidMatch) orgId = uuidMatch[1]!;
+    }
+
+    if (!orgId && ['POST', 'PUT', 'PATCH'].includes(ctx.req.method)) {
+      try {
+        const body = await ctx.req.json();
+        orgId = body?.organizationId ?? body?.orgId ?? null;
+      } catch {
+        // Body not JSON or already consumed
+      }
+    }
+
+    if (!orgId) {
+      await next();
+      return;
+    }
+
+    const db = ctx.get('database');
+
+    // Platform admin bypass
+    const [admin] = await db
+      .select({ id: platformAdmins.id })
+      .from(platformAdmins)
+      .where(eq(platformAdmins.userId, user.id))
+      .limit(1);
+
+    if (admin) {
+      ctx.set('organizationId', orgId);
+      ctx.set('orgMembership', {
+        membershipId: 'platform-admin',
+        personId: user.id,
+        organizationId: orgId,
+        role: 'admin',
+        status: 'active',
+      });
+      await next();
+      return;
+    }
+
+    // Check membership — skip silently if not a member
+    const [membership] = await db
+      .select({
+        id: memberships.id,
+        personId: memberships.personId,
+        organizationId: memberships.organizationId,
+        status: memberships.status,
+      })
+      .from(memberships)
+      .where(
+        and(
+          eq(memberships.personId, user.id),
+          eq(memberships.organizationId, orgId),
+          inArray(memberships.status, ['active', 'gracePeriod']),
+        )
+      )
+      .limit(1);
+
+    if (membership) {
+      ctx.set('organizationId', orgId);
+      ctx.set('orgMembership', {
+        membershipId: membership.id,
+        personId: membership.personId,
+        organizationId: membership.organizationId,
+        role: 'member',
+        status: membership.status,
+      });
+    }
+
+    await next();
+  });
+}
