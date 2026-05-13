@@ -8,14 +8,14 @@ import { POSITION_TITLES } from '@/utils/position-titles';
  * updateOrgProfile
  *
  * Officer-accessible endpoint to update organization profile.
- * Route: PUT /membership/org-profile/:orgId
+ * Route: PUT /membership/org-profile/:organizationId
  *
  * Position-restricted: PRESIDENT only (D-03).
  */
 export async function updateOrgProfile(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const logger = ctx.get('logger');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
 
   // Set orgId for requirePosition (officerAuthMiddleware doesn't set ctx orgId)
   (ctx as any).set('organizationId', orgId);

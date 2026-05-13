@@ -1,11 +1,11 @@
 /**
  * Officer authorization middleware.
  * Verifies the authenticated user has an active officer term for the org
- * specified by the :orgId route parameter. Returns 403 if not an officer.
+ * specified by the :organizationId route parameter. Returns 403 if not an officer.
  *
- * P1-1 FIX: Throws 400 if :orgId is missing from the route. Every route
- * that uses this middleware MUST include :orgId in the path. Routes without
- * :orgId should use per-handler authorization instead.
+ * P1-1 FIX: Throws 400 if :organizationId is missing from the route. Every route
+ * that uses this middleware MUST include :organizationId in the path. Routes without
+ * :organizationId should use per-handler authorization instead.
  *
  * P1-3 FIX: Enforces 2FA for privileged officer positions (President,
  * Treasurer, Secretary). Users holding these positions must have 2FA
@@ -31,9 +31,9 @@ export function officerAuthMiddleware() {
     const user = ctx.get('user');
     if (!user) throw new ForbiddenError('Authentication required');
 
-    const orgId = ctx.req.param('orgId');
+    const orgId = ctx.req.param('organizationId');
     if (!orgId) {
-      throw new ValidationError('Missing organization context — route must include :orgId parameter');
+      throw new ValidationError('Missing organization context — route must include :organizationId parameter');
     }
 
     const db = ctx.get('database');

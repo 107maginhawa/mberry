@@ -42,7 +42,7 @@ describe('[FLOW-08] Officer/Member Addition → Active Membership', () => {
 
     const ctx = makeCtx({
       _body: { personId: 'person-1', tierId: 'tier-regular' },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     const response = await addMember(ctx);
 
@@ -63,7 +63,7 @@ describe('[FLOW-08] Officer/Member Addition → Active Membership', () => {
 
     const ctx = makeCtx({
       _body: { personId: 'person-1', tierId: 'tier-regular' },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await addMember(ctx);
 
@@ -82,7 +82,7 @@ describe('[FLOW-08] Officer/Member Addition → Active Membership', () => {
 
     const ctx = makeCtx({
       _body: { personId: 'person-1', tierId: 'tier-regular', gracePeriodDays: 60 },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await addMember(ctx);
 
@@ -102,7 +102,7 @@ describe('[FLOW-08] Officer/Member Addition → Active Membership', () => {
     const before = new Date();
     const ctx = makeCtx({
       _body: { personId: 'person-1', tierId: 'tier-regular' },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await addMember(ctx);
     const after = new Date();
@@ -124,7 +124,7 @@ describe('[FLOW-08] Officer/Member Addition → Active Membership', () => {
 
     const ctx = makeCtx({
       _body: { personId: 'person-1', tierId: 'tier-regular', licenseNumber: 'PRC-12345' },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await addMember(ctx);
 

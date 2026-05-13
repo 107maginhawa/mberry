@@ -32,7 +32,7 @@ status < 500
 
 # ── 3. Officer endpoints should reject non-officer user ─────
 
-# Dues config (officer-only, has :orgId)
+# Dues config (officer-only, has :organizationId)
 GET {{api}}/dues/config/ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 403
 

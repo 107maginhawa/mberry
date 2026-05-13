@@ -51,7 +51,7 @@ describe('announcement auth guards', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { title: 'Test', body: 'Hello' },
     });
     await expect(createAnnouncement(ctx as any)).rejects.toThrow('Unauthorized');
@@ -72,7 +72,7 @@ describe('announcement auth guards', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _query: {},
     });
     await expect(listAnnouncements(ctx as any)).rejects.toThrow('Unauthorized');
@@ -138,7 +138,7 @@ describe('createAnnouncement', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { title: 'Test Announcement', body: 'Hello world' },
     });
     const res = await createAnnouncement(ctx as any);
@@ -156,7 +156,7 @@ describe('createAnnouncement', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { title: 'New', body: 'Content' },
     });
     await createAnnouncement(ctx as any);
@@ -217,7 +217,7 @@ describe('listAnnouncements', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _query: { page: '1', pageSize: '20' },
     });
     const res = await listAnnouncements(ctx as any);
@@ -235,7 +235,7 @@ describe('listAnnouncements', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _query: {},
     });
     await listAnnouncements(ctx as any);
@@ -254,7 +254,7 @@ describe('listAnnouncements', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _query: { status: 'draft', search: 'test', page: '2', pageSize: '10' },
     });
     await listAnnouncements(ctx as any);

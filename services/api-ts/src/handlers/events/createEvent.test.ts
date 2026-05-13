@@ -38,7 +38,7 @@ describe('[BR-15] createEvent', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Annual Conference',
         description: 'Yearly gathering',
@@ -62,7 +62,7 @@ describe('[BR-15] createEvent', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Test',
         startAt: '2026-07-01',
@@ -86,7 +86,7 @@ describe('[BR-15] createEvent', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Test',
         startDate: '2026-06-01',
@@ -106,7 +106,7 @@ describe('[BR-15] createEvent', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Test',
         startDate: '2026-06-01',
@@ -124,7 +124,7 @@ describe('[BR-15] createEvent', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Past Event',
         startDate: '2020-01-01',
@@ -143,7 +143,7 @@ describe('[BR-15] createEvent', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Bad Dates',
         startDate: '2026-06-10',
@@ -163,7 +163,7 @@ describe('[BR-15] createEvent', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Zero Cap',
         startDate: '2026-06-01',
@@ -185,7 +185,7 @@ describe('[BR-15] createEvent', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Test',
         startDate: '2026-06-01',

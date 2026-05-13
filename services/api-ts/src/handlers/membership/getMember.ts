@@ -4,7 +4,7 @@ import { MembershipRepository } from './repos/membership.repo';
 
 export async function getMember(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const memberId = ctx.req.param('memberId');
 
   const repo = new MembershipRepository(db);

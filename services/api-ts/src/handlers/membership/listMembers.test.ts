@@ -31,7 +31,7 @@ describe('listMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     const response = await listMembers(ctx);
@@ -49,7 +49,7 @@ describe('listMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-55' },
+      _params: { organizationId: 'org-55' },
     });
 
     await listMembers(ctx);
@@ -63,7 +63,7 @@ describe('listMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _query: { status: 'active', categoryId: 'cat-2', search: 'Alice', limit: '10', offset: '5' },
     });
 
@@ -82,7 +82,7 @@ describe('listMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     await listMembers(ctx);
@@ -96,7 +96,7 @@ describe('listMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     const response = await listMembers(ctx);

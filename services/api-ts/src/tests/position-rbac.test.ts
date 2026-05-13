@@ -264,29 +264,29 @@ d('President superuser access', () => {
 // ─── app.ts Position-Restricted Routes ────────────────────────────────────────
 
 d('app.ts position-restricted routes', () => {
-  test('Treasurer blocked: GET /credit-compliance/:orgId returns 403', async () => {
+  test('Treasurer blocked: GET /credit-compliance/:organizationId returns 403', async () => {
     const res = await treasurerClient.get(`/credit-compliance/${ORG_ID}`);
     expectBlocked(res.status);
   });
 
-  test('Secretary blocked: GET /dues/dashboard/:orgId returns 403', async () => {
+  test('Secretary blocked: GET /dues/dashboard/:organizationId returns 403', async () => {
     const res = await secretaryClient.get(`/dues/dashboard/${ORG_ID}`);
     expectBlocked(res.status);
   });
 
-  test('Society Officer blocked: PUT /membership/org-profile/:orgId returns 403', async () => {
+  test('Society Officer blocked: PUT /membership/org-profile/:organizationId returns 403', async () => {
     const res = await societyClient.put(`/membership/org-profile/${ORG_ID}`, {
       name: 'Unauthorized update',
     });
     expectBlocked(res.status);
   });
 
-  test('President allowed: GET /dues/dashboard/:orgId returns non-403', async () => {
+  test('President allowed: GET /dues/dashboard/:organizationId returns non-403', async () => {
     const res = await presidentClient.get(`/dues/dashboard/${ORG_ID}`);
     expect(res.status).not.toBe(403);
   });
 
-  test('President allowed: GET /credit-compliance/:orgId returns non-403', async () => {
+  test('President allowed: GET /credit-compliance/:organizationId returns non-403', async () => {
     const res = await presidentClient.get(`/credit-compliance/${ORG_ID}`);
     expect(res.status).not.toBe(403);
   });

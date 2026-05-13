@@ -24,7 +24,7 @@ describe('listElections', () => {
       list: async () => fakeElections,
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1' } });
     const response = await listElections(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data).toHaveLength(2);
@@ -36,7 +36,7 @@ describe('listElections', () => {
       list: async () => [],
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1' } });
     const response = await listElections(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data).toEqual([]);
@@ -48,7 +48,7 @@ describe('listElections', () => {
       list: async (orgId: string) => { capturedOrgId = orgId; return []; },
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-42' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-42' } });
     await listElections(ctx);
     expect(capturedOrgId).toBe('org-42');
   });

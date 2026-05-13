@@ -19,7 +19,7 @@ export async function listOfficerTermsSummary(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const params = ctx.req.valid('param');
-  const orgId = (params as any).orgId;
+  const orgId = (params as any).organizationId;
 
   const repo = new OfficerTermRepository(db, logger);
   const terms = await repo.findByOrg(orgId);

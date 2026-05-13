@@ -357,11 +357,11 @@ namespace PersonCustomModule {
     @doc("Check whether the authenticated user holds an active officer position in the specified organisation.")
     @operationId("getMyOfficerRole")
     @get
-    @route("/officer-role/{orgId}")
+    @route("/officer-role/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
     getMyOfficerRole(
-      @path @doc("Organisation ID to check officer status for") orgId: UUID
+      @path @doc("Organisation ID to check officer status for") organizationId: UUID
     ): ApiOkResponse<OfficerRoleResponse>
       | ApiUnauthorizedResponse
       | ApiBadRequestResponse;

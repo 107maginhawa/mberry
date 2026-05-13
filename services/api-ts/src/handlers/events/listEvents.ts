@@ -3,7 +3,7 @@ import { EventsRepository } from './repos/events.repo';
 
 export async function listEvents(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const repo = new EventsRepository(db);
   const result = await repo.list(orgId, {
     status: ctx.req.query('status') || undefined,

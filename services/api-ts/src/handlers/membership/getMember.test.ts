@@ -36,7 +36,7 @@ describe('getMember', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1', memberId: 'person-1' },
+      _params: { organizationId: 'org-1', memberId: 'person-1' },
     });
 
     const response = await getMember(ctx);
@@ -52,7 +52,7 @@ describe('getMember', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1', memberId: 'nonexistent' },
+      _params: { organizationId: 'org-1', memberId: 'nonexistent' },
     });
 
     await expect(getMember(ctx)).rejects.toBeInstanceOf(NotFoundError);
@@ -70,7 +70,7 @@ describe('getMember', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-42', memberId: 'person-99' },
+      _params: { organizationId: 'org-42', memberId: 'person-99' },
     });
 
     await getMember(ctx);

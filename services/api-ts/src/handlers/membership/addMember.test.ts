@@ -37,7 +37,7 @@ describe('addMember', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         personId: 'person-1',
         tierId: 'tier-1',
@@ -60,7 +60,7 @@ describe('addMember', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { personId: 'person-1', tierId: 'tier-1' },
     });
 
@@ -75,7 +75,7 @@ describe('addMember', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-99' },
+      _params: { organizationId: 'org-99' },
       _body: { personId: 'person-1', tierId: 'tier-1' },
     });
 
@@ -90,7 +90,7 @@ describe('addMember', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { personId: 'person-1', tierId: 'tier-1' },
     });
 
@@ -106,7 +106,7 @@ describe('addMember', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { personId: 'person-1', tierId: 'tier-1', licenseNumber: 'LIC-123' },
     });
 
@@ -122,7 +122,7 @@ describe('addMember', () => {
 
     const ctx = makeCtx({
       user: { id: 'admin-5', role: 'admin' },
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { personId: 'person-1', tierId: 'tier-1' },
     });
 

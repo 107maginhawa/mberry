@@ -234,7 +234,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
     });
 
     const ctx = makeCtx({
-      _params: { id: 'train-1', orgId: 'org-1' },
+      _params: { id: 'train-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -255,7 +255,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
     });
 
     const ctx = makeCtx({
-      _params: { id: 'train-1', orgId: 'org-1' },
+      _params: { id: 'train-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -290,7 +290,7 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
     Object.assign(mocks, creditMocks);
 
     const ctx = makeCtx({
-      _params: { id: 'train-1', orgId: 'org-1' },
+      _params: { id: 'train-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 

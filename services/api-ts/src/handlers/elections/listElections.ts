@@ -3,7 +3,7 @@ import { ElectionsRepository } from './repos/elections.repo';
 
 export async function listElections(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const repo = new ElectionsRepository(db);
 
   const limit = Math.min(parseInt(ctx.req.query('limit') ?? '25', 10), 100);

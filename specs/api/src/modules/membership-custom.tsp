@@ -123,11 +123,11 @@ namespace MembershipCustomModule {
     @doc("Get organisation profile for the specified org.")
     @operationId("getOrgProfile")
     @get
-    @route("/membership/org-profile/{orgId}")
+    @route("/membership/org-profile/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
     getOrgProfile(
-      @path @doc("Organisation ID") orgId: UUID
+      @path @doc("Organisation ID") organizationId: UUID
     ): ApiOkResponse<OrgProfile>
       | ApiUnauthorizedResponse
       | ApiNotFoundResponse;
@@ -135,11 +135,11 @@ namespace MembershipCustomModule {
     @doc("Update organisation profile (president only).")
     @operationId("updateOrgProfile")
     @put
-    @route("/membership/org-profile/{orgId}")
+    @route("/membership/org-profile/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
     updateOrgProfile(
-      @path @doc("Organisation ID") orgId: UUID,
+      @path @doc("Organisation ID") organizationId: UUID,
       @body updates: MembershipUpdateOrgProfileRequest
     ): ApiOkResponse<OrgProfile>
       | ApiBadRequestResponse
@@ -150,11 +150,11 @@ namespace MembershipCustomModule {
     @doc("List all members of an organisation with person details (officer dashboard).")
     @operationId("listOrgMembers")
     @get
-    @route("/membership/members/{orgId}")
+    @route("/membership/members/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
     listOrgMembers(
-      @path @doc("Organisation ID") orgId: UUID
+      @path @doc("Organisation ID") organizationId: UUID
     ): ApiOkResponse<{ data: MemberSummary[] }>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
@@ -162,11 +162,11 @@ namespace MembershipCustomModule {
     @doc("List membership applications for an organisation with optional status filter (officer dashboard).")
     @operationId("listOrgApplications")
     @get
-    @route("/membership/applications/{orgId}")
+    @route("/membership/applications/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
     listOrgApplications(
-      @path @doc("Organisation ID") orgId: UUID,
+      @path @doc("Organisation ID") organizationId: UUID,
       @query @doc("Filter by application status") status?: string
     ): ApiOkResponse<{ data: MembershipApplicationSummary[] }>
       | ApiUnauthorizedResponse

@@ -14,9 +14,9 @@ import { API_AVAILABLE } from '@/tests/helpers/api-available';
  * 2. Seed data applied (bun run db:seed)
  *
  * Security properties verified (STRIDE T-12-10 through T-12-13):
- * - Information Disclosure: GET /membership/members/:orgId blocked cross-org
- * - Information Disclosure: GET /dues/dashboard/:orgId blocked cross-org
- * - Information Disclosure: GET /membership/applications/:orgId blocked cross-org
+ * - Information Disclosure: GET /membership/members/:organizationId blocked cross-org
+ * - Information Disclosure: GET /dues/dashboard/:organizationId blocked cross-org
+ * - Information Disclosure: GET /membership/applications/:organizationId blocked cross-org
  * - Elevation of Privilege: officer cannot escalate access via orgId param manipulation
  */
 

@@ -10,15 +10,15 @@
  * the real app.ts inline routes.
  *
  * Routes under test (from TDD-AUTH-PLAN section 1.1):
- *   PUT  /membership/org-profile/:orgId  — officer only
- *   GET  /membership/members/:orgId      — officer only
- *   GET  /membership/applications/:orgId — officer only
- *   GET  /dues/dashboard/:orgId          — officer only
- *   GET  /credit-compliance/:orgId       — officer only
- *   GET  /officer-terms/:orgId           — officer only
+ *   PUT  /membership/org-profile/:organizationId  — officer only
+ *   GET  /membership/members/:organizationId      — officer only
+ *   GET  /membership/applications/:organizationId — officer only
+ *   GET  /dues/dashboard/:organizationId          — officer only
+ *   GET  /credit-compliance/:organizationId       — officer only
+ *   GET  /officer-terms/:organizationId           — officer only
  *
  * Read-only routes that stay member-accessible (D-07):
- *   GET  /membership/org-profile/:orgId  — member allowed
+ *   GET  /membership/org-profile/:organizationId  — member allowed
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -70,12 +70,12 @@ function addErrorHandler(app: Hono) {
 // ---------------------------------------------------------------------------
 
 const officerRoutes = [
-  { method: 'PUT', path: '/membership/org-profile/:orgId' },
-  { method: 'GET', path: '/membership/members/:orgId' },
-  { method: 'GET', path: '/membership/applications/:orgId' },
-  { method: 'GET', path: '/dues/dashboard/:orgId' },
-  { method: 'GET', path: '/credit-compliance/:orgId' },
-  { method: 'GET', path: '/officer-terms/:orgId' },
+  { method: 'PUT', path: '/membership/org-profile/:organizationId' },
+  { method: 'GET', path: '/membership/members/:organizationId' },
+  { method: 'GET', path: '/membership/applications/:organizationId' },
+  { method: 'GET', path: '/dues/dashboard/:organizationId' },
+  { method: 'GET', path: '/credit-compliance/:organizationId' },
+  { method: 'GET', path: '/officer-terms/:organizationId' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -91,15 +91,15 @@ function makeMemberApp() {
   const dummy = (ctx: any) => ctx.json({ ok: true });
 
   // Officer-only routes — auth + officer middleware (target wiring per Plan 03)
-  app.put('/membership/org-profile/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/membership/members/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/membership/applications/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/dues/dashboard/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/credit-compliance/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/officer-terms/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.put('/membership/org-profile/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/membership/members/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/membership/applications/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/dues/dashboard/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/credit-compliance/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/officer-terms/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
 
   // Member read-only route — auth only (D-07)
-  app.get('/membership/org-profile/:orgId', authMiddleware(), dummy);
+  app.get('/membership/org-profile/:organizationId', authMiddleware(), dummy);
 
   addErrorHandler(app);
   return app;
@@ -118,15 +118,15 @@ function makeOfficerApp() {
   const dummy = (ctx: any) => ctx.json({ ok: true });
 
   // Same wiring as member app
-  app.put('/membership/org-profile/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/membership/members/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/membership/applications/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/dues/dashboard/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/credit-compliance/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
-  app.get('/officer-terms/:orgId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.put('/membership/org-profile/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/membership/members/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/membership/applications/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/dues/dashboard/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/credit-compliance/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
+  app.get('/officer-terms/:organizationId', authMiddleware(), officerAuthMiddleware(), dummy);
 
   // Member read-only route — auth only (D-07)
-  app.get('/membership/org-profile/:orgId', authMiddleware(), dummy);
+  app.get('/membership/org-profile/:organizationId', authMiddleware(), dummy);
 
   addErrorHandler(app);
   return app;
@@ -151,7 +151,7 @@ describe('Hand-wired route officer protection — member gets 403', () => {
   });
 
   for (const route of officerRoutes) {
-    const concreteUrl = route.path.replace(':orgId', 'org-1');
+    const concreteUrl = route.path.replace(':organizationId', 'org-1');
     test(`${route.method} ${concreteUrl} returns 403 for member`, async () => {
       const req = new Request(`http://localhost${concreteUrl}`, { method: route.method });
       const res = await memberApp.request(req);
@@ -181,7 +181,7 @@ describe('Hand-wired route officer protection — officer gets 200', () => {
   });
 
   for (const route of officerRoutes) {
-    const concreteUrl = route.path.replace(':orgId', 'org-1');
+    const concreteUrl = route.path.replace(':organizationId', 'org-1');
     test(`${route.method} ${concreteUrl} returns 200 for officer`, async () => {
       const req = new Request(`http://localhost${concreteUrl}`, { method: route.method });
       const res = await officerApp.request(req);

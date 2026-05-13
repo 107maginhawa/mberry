@@ -33,7 +33,7 @@ describe('upsertCategory', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { name: 'Regular', description: 'Regular members', applicableTiers: ['tier-1'] },
     });
 
@@ -50,7 +50,7 @@ describe('upsertCategory', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { name: 'Regular', description: 'Test' },
     });
 
@@ -64,7 +64,7 @@ describe('upsertCategory', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-88' },
+      _params: { organizationId: 'org-88' },
       _body: { name: 'Test', description: 'Test category' },
     });
 
@@ -79,7 +79,7 @@ describe('upsertCategory', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { name: 'Minimal', description: 'No tiers' },
     });
 
@@ -95,7 +95,7 @@ describe('upsertCategory', () => {
 
     const ctx = makeCtx({
       user: { id: 'admin-9', role: 'admin' },
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { name: 'Premium', description: 'Premium members' },
     });
 

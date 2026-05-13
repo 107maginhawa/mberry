@@ -28,7 +28,7 @@ export async function listOrgMembers(
 
   const db = ctx.get('database') as DatabaseInstance;
   const params = ctx.req.valid('param');
-  const orgId = params.orgId;
+  const orgId = params.organizationId;
 
   // Org-scoping: verify user belongs to this org (or is platform admin)
   const [admin] = await db

@@ -49,7 +49,7 @@ describe('[FLOW-07] Member Import → Bulk Creation', () => {
           { personId: 'person-2', tierId: 'tier-senior', memberNumber: 'MEM-002' },
         ],
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     const response = await importMembers(ctx);
 
@@ -77,7 +77,7 @@ describe('[FLOW-07] Member Import → Bulk Creation', () => {
           { personId: 'person-1', tierId: 'tier-regular', licenseNumber: 'LIC-12345' },
         ],
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await importMembers(ctx);
 
@@ -98,7 +98,7 @@ describe('[FLOW-07] Member Import → Bulk Creation', () => {
       _body: {
         members: [{ personId: 'person-1', tierId: 'tier-regular' }],
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await importMembers(ctx);
 
@@ -128,7 +128,7 @@ describe('[FLOW-07] Member Import → Bulk Creation', () => {
           duesExpiryDate: '2026-06-01',
         }],
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await importMembers(ctx);
 
@@ -147,7 +147,7 @@ describe('[FLOW-07] Member Import → Bulk Creation', () => {
           { personId: 'p3', tierId: 't2' },
         ],
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     const response = await importMembers(ctx);
 

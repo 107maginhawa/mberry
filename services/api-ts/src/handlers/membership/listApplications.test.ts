@@ -31,7 +31,7 @@ describe('listApplications', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     const response = await listApplications(ctx);
@@ -51,7 +51,7 @@ describe('listApplications', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-22' },
+      _params: { organizationId: 'org-22' },
       _query: { status: 'submitted' },
     });
 
@@ -70,7 +70,7 @@ describe('listApplications', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     await listApplications(ctx);
@@ -83,7 +83,7 @@ describe('listApplications', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     const response = await listApplications(ctx);

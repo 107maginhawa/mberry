@@ -47,14 +47,14 @@ function makeProtectedApp() {
 
   // Register dummy handlers (we never reach these if auth works)
   const dummyHandler = (ctx: any) => ctx.json({ ok: true });
-  app.get('/dues/config/:orgId', dummyHandler);
+  app.get('/dues/config/:organizationId', dummyHandler);
   app.post('/dues/payments', dummyHandler);
-  app.get('/membership/members/:orgId', dummyHandler);
-  app.get('/communications/announcements/:orgId', dummyHandler);
+  app.get('/membership/members/:organizationId', dummyHandler);
+  app.get('/communications/announcements/:organizationId', dummyHandler);
   app.get('/certificates/my', dummyHandler);
-  app.get('/events/list/:orgId', dummyHandler);
-  app.get('/training/list/:orgId', dummyHandler);
-  app.get('/elections/list/:orgId', dummyHandler);
+  app.get('/events/list/:organizationId', dummyHandler);
+  app.get('/training/list/:organizationId', dummyHandler);
+  app.get('/elections/list/:organizationId', dummyHandler);
 
   // Error handler to convert thrown errors to JSON responses
   app.onError((err, ctx) => {

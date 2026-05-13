@@ -28,7 +28,7 @@ describe('getTraining', () => {
       getAttendanceStats: async () => ({ completed: 5, total: 15 }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { id: 'training-1', organizationId: 'org-1' } });
     const response = await getTraining(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data.id).toBe('training-1');
@@ -43,7 +43,7 @@ describe('getTraining', () => {
       getAttendanceStats: async () => ({ completed: 0, total: 0 }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'missing-id', orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { id: 'missing-id', organizationId: 'org-1' } });
     await expect(getTraining(ctx)).rejects.toThrow('Training not found');
   });
 
@@ -54,7 +54,7 @@ describe('getTraining', () => {
       getAttendanceStats: async () => ({ completed: 0, total: 0 }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'wrong-org' } });
+    const ctx = makeCtx({ _params: { id: 'training-1', organizationId: 'wrong-org' } });
     await expect(getTraining(ctx)).rejects.toThrow('Training not found');
   });
 

@@ -7,7 +7,7 @@ export async function updateTraining(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const id = ctx.req.param('id');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 

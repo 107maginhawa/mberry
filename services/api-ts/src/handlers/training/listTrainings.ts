@@ -3,7 +3,7 @@ import { TrainingRepository } from './repos/training.repo';
 
 export async function listTrainings(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const repo = new TrainingRepository(db);
   const result = await repo.list(orgId, {
     status: ctx.req.query('status') || undefined,

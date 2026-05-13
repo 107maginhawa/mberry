@@ -5,7 +5,7 @@ import type { Session } from '@/types/auth';
 export async function importMembers(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const body = await ctx.req.json();
 
   const members: Array<{

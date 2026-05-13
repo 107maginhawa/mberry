@@ -125,11 +125,11 @@ namespace Association.Member.Credits {
     @doc("Generate a CPD credit compliance report for all active members in the specified organisation. Officers only.")
     @operationId("getCreditCompliance")
     @get
-    @route("/{orgId}")
+    @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
     getCreditCompliance(
-      @path @doc("Organisation ID to generate the compliance report for") orgId: UUID
+      @path @doc("Organisation ID to generate the compliance report for") organizationId: UUID
     ): ApiOkResponse<CreditComplianceReport>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
@@ -140,11 +140,11 @@ namespace Association.Member.Credits {
     @doc("List all officer terms for the specified organisation (enriched with position title and person name).")
     @operationId("listOfficerTermsSummary")
     @get
-    @route("/{orgId}")
+    @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
     listOfficerTerms(
-      @path @doc("Organisation ID to list officer terms for") orgId: UUID
+      @path @doc("Organisation ID to list officer terms for") organizationId: UUID
     ): ApiOkResponse<{ data: OfficerTermRecord[] }>
       | ApiUnauthorizedResponse;
   }

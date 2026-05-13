@@ -30,7 +30,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { title: 'Updated Seminar' },
     });
 
@@ -46,7 +46,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'missing-id', orgId: 'org-1' },
+      _params: { id: 'missing-id', organizationId: 'org-1' },
       _body: { title: 'Test' },
     });
 
@@ -61,7 +61,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { startAt: '2026-07-01' },
     });
 
@@ -77,7 +77,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { fee: 7500 },
     });
 
@@ -94,7 +94,7 @@ describe('updateTraining', () => {
 
     const ctx = makeCtx({
       user: { id: 'admin-1', role: 'admin' },
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { title: 'Test' },
     });
 
@@ -109,7 +109,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { title: 'Updated', status: 'published' },
     });
 
@@ -124,7 +124,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { title: 'Safe Update' },
     });
 
@@ -141,7 +141,7 @@ describe('updateTraining', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { title: 'Test' },
     });
 
@@ -158,7 +158,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: {
         regulatoryApproval: 'prc_approved',
         regulatoryReference: 'PRC-CPD-2026-001',
@@ -179,7 +179,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: {
         regulatoryApproval: 'prc_approved',
         regulatoryExpiresAt: '2027-12-31',
@@ -199,7 +199,7 @@ describe('updateTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: {
         title: 'Updated With Approval',
         regulatoryApproval: 'pending_approval',

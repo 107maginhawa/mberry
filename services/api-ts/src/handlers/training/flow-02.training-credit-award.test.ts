@@ -83,7 +83,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
 
     const ctx = makeCtx({
       _body: { personId: PERSON },
-      _params: { id: TRAINING_ID, orgId: ORG },
+      _params: { id: TRAINING_ID, organizationId: ORG },
     });
     const response = await markComplete(ctx);
 
@@ -109,7 +109,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
 
     const ctx = makeCtx({
       _body: { personId: PERSON },
-      _params: { id: TRAINING_ID, orgId: ORG },
+      _params: { id: TRAINING_ID, organizationId: ORG },
     });
     const response = await markComplete(ctx);
 
@@ -129,7 +129,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
 
     const ctx = makeCtx({
       _body: { personId: PERSON },
-      _params: { id: TRAINING_ID, orgId: ORG },
+      _params: { id: TRAINING_ID, organizationId: ORG },
     });
     await markComplete(ctx);
 
@@ -149,7 +149,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
 
     const ctx = makeCtx({
       _body: { personId: PERSON },
-      _params: { id: TRAINING_ID, orgId: ORG },
+      _params: { id: TRAINING_ID, organizationId: ORG },
     });
     await markComplete(ctx);
 
@@ -166,7 +166,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
 
     const ctx = makeCtx({
       _body: { personId: PERSON },
-      _params: { id: TRAINING_ID, orgId: ORG },
+      _params: { id: TRAINING_ID, organizationId: ORG },
     });
 
     try {
@@ -188,7 +188,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
 
     const ctx = makeCtx({
       _body: { personId: PERSON },
-      _params: { id: TRAINING_ID, orgId: ORG },
+      _params: { id: TRAINING_ID, organizationId: ORG },
     });
 
     try {
@@ -207,7 +207,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
 
     const ctx = makeCtx({
       _body: { personId: PERSON },
-      _params: { id: TRAINING_ID, orgId: ORG },
+      _params: { id: TRAINING_ID, organizationId: ORG },
     });
     const response = await markComplete(ctx);
 

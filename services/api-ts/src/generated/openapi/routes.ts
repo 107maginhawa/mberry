@@ -2202,7 +2202,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   );
 
   // listAnnouncements
-  app.get('/communications/announcements/:orgId',
+  app.get('/communications/announcements/:organizationId',
     authMiddleware({ roles: ["association:member"] }),
     zValidator('param', validators.ListAnnouncementsParams, validationErrorHandler),
     zValidator('query', validators.ListAnnouncementsQuery, validationErrorHandler),
@@ -2210,7 +2210,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   );
 
   // createAnnouncement
-  app.post('/communications/announcements/:orgId',
+  app.post('/communications/announcements/:organizationId',
     authMiddleware({ roles: ["association:officer"] }),
     zValidator('param', validators.CreateAnnouncementParams, validationErrorHandler),
     zValidator('json', validators.CreateAnnouncementBody, validationErrorHandler),
@@ -2218,14 +2218,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   );
 
   // getCreditCompliance
-  app.get('/credit-compliance/:orgId',
+  app.get('/credit-compliance/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.GetCreditComplianceParams, validationErrorHandler),
     registry.getCreditCompliance as unknown as Handler
   );
 
   // getDuesDashboard
-  app.get('/dues/dashboard/:orgId',
+  app.get('/dues/dashboard/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.GetDuesDashboardParams, validationErrorHandler),
     registry.getDuesDashboard as unknown as Handler
@@ -2298,7 +2298,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   );
 
   // listOrgApplications
-  app.get('/membership/applications/:orgId',
+  app.get('/membership/applications/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.ListOrgApplicationsParams, validationErrorHandler),
     zValidator('query', validators.ListOrgApplicationsQuery, validationErrorHandler),
@@ -2306,21 +2306,21 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   );
 
   // listOrgMembers
-  app.get('/membership/members/:orgId',
+  app.get('/membership/members/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.ListOrgMembersParams, validationErrorHandler),
     registry.listOrgMembers as unknown as Handler
   );
 
   // getOrgProfile
-  app.get('/membership/org-profile/:orgId',
+  app.get('/membership/org-profile/:organizationId',
     authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.GetOrgProfileParams, validationErrorHandler),
     registry.getOrgProfile as unknown as Handler
   );
 
   // updateOrgProfile
-  app.put('/membership/org-profile/:orgId',
+  app.put('/membership/org-profile/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.UpdateOrgProfileParams, validationErrorHandler),
     zValidator('json', validators.UpdateOrgProfileBody, validationErrorHandler),
@@ -2356,7 +2356,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   );
 
   // listOfficerTermsSummary
-  app.get('/officer-terms/:orgId',
+  app.get('/officer-terms/:organizationId',
     authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.ListOfficerTermsSummaryParams, validationErrorHandler),
     registry.listOfficerTermsSummary as unknown as Handler
@@ -2440,7 +2440,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   );
 
   // getMyOfficerRole
-  app.get('/persons/me/officer-role/:orgId',
+  app.get('/persons/me/officer-role/:organizationId',
     authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.GetMyOfficerRoleParams, validationErrorHandler),
     registry.getMyOfficerRole as unknown as Handler

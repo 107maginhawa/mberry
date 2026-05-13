@@ -29,7 +29,7 @@ describe('[BR-22] importMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         members: [
           { personId: 'p-1', tierId: 'tier-1' },
@@ -49,7 +49,7 @@ describe('[BR-22] importMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { members: [] },
     });
 
@@ -66,7 +66,7 @@ describe('[BR-22] importMembers', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { members: [{ personId: 'p-1', tierId: 'tier-1' }] },
     });
 
@@ -80,7 +80,7 @@ describe('[BR-22] importMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-77' },
+      _params: { organizationId: 'org-77' },
       _body: {
         members: [
           { personId: 'p-1', tierId: 'tier-1' },
@@ -102,7 +102,7 @@ describe('[BR-22] importMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         members: [
           { personId: 'p-1', tierId: 'tier-1', licenseNumber: 'LIC-100' },
@@ -122,7 +122,7 @@ describe('[BR-22] importMembers', () => {
 
     const ctx = makeCtx({
       user: { id: 'importer-1', role: 'admin' },
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         members: [
           { personId: 'p-1', tierId: 'tier-1' },
@@ -145,7 +145,7 @@ describe('[BR-22] importMembers', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         members: [{ personId: 'p-1', tierId: 'tier-1' }],
       },

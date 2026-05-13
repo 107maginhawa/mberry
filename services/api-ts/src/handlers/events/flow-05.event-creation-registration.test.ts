@@ -49,7 +49,7 @@ describe('[FLOW-05] Event Creation → Registration Open', () => {
         registrationFee: 50000,
         eventType: 'conference',
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     const response = await createEvent(ctx);
 
@@ -78,7 +78,7 @@ describe('[FLOW-05] Event Creation → Registration Open', () => {
         creditBearing: true,
         creditAmount: 4,
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await createEvent(ctx);
 
@@ -102,7 +102,7 @@ describe('[FLOW-05] Event Creation → Registration Open', () => {
         startDate: '2026-09-15',
         endDate: '2026-09-15',
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await createEvent(ctx);
 
@@ -126,7 +126,7 @@ describe('[FLOW-05] Event Creation → Registration Open', () => {
         startDate: '2026-10-01',
         endDate: '2026-10-01',
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await createEvent(ctx);
 
@@ -150,7 +150,7 @@ describe('[FLOW-05] Event Creation → Registration Open', () => {
         startDate: '2026-11-01',
         endDate: '2026-11-01',
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await createEvent(ctx);
 
@@ -174,7 +174,7 @@ describe('[FLOW-05] Event Creation → Registration Open', () => {
         startAt: '2026-12-01T09:00:00Z',
         endAt: '2026-12-01T17:00:00Z',
       },
-      _params: { orgId: ORG },
+      _params: { organizationId: ORG },
     });
     await createEvent(ctx);
 

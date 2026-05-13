@@ -7,7 +7,7 @@ import { getCycleForDate } from '../association:member/utils/credit-cycle';
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const trainingId = ctx.req.param('id');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 

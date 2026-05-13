@@ -23,7 +23,7 @@ describe('getDuesDashboard', () => {
 
   test('throws UnauthorizedError without session', async () => {
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       session: null,
       user: null,
     });
@@ -42,7 +42,7 @@ describe('getDuesDashboard', () => {
 
     // Mock db.select chain for activity count
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       database: {
         select: () => ({
           from: () => ({

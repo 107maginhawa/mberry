@@ -25,7 +25,7 @@ describe('listCategories', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     const response = await listCategories(ctx);
@@ -40,7 +40,7 @@ describe('listCategories', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-33' },
+      _params: { organizationId: 'org-33' },
     });
 
     await listCategories(ctx);
@@ -53,7 +53,7 @@ describe('listCategories', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     const response = await listCategories(ctx);

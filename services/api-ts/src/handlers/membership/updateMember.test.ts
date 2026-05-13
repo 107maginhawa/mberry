@@ -47,7 +47,7 @@ describe('updateMember [BR-03]', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1', memberId: 'person-1' },
+      _params: { organizationId: 'org-1', memberId: 'person-1' },
       _body: { status: 'suspended' },
     });
 
@@ -64,7 +64,7 @@ describe('updateMember [BR-03]', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1', memberId: 'nonexistent' },
+      _params: { organizationId: 'org-1', memberId: 'nonexistent' },
       _body: { status: 'active' },
     });
 
@@ -80,7 +80,7 @@ describe('updateMember [BR-03]', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1', memberId: 'person-1' },
+      _params: { organizationId: 'org-1', memberId: 'person-1' },
       _body: { status: 'active' },
     });
 
@@ -95,7 +95,7 @@ describe('updateMember [BR-03]', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-55', memberId: 'person-1' },
+      _params: { organizationId: 'org-55', memberId: 'person-1' },
       _body: { status: 'active' },
     });
 
@@ -111,7 +111,7 @@ describe('updateMember [BR-03]', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1', memberId: 'person-1' },
+      _params: { organizationId: 'org-1', memberId: 'person-1' },
       _body: {}, // empty body - all values should fall back to existing
     });
 
@@ -129,7 +129,7 @@ describe('updateMember [BR-03]', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1', memberId: 'person-1' },
+      _params: { organizationId: 'org-1', memberId: 'person-1' },
       _body: { status: 'terminated', terminationReason: 'Non-compliance' },
     });
 
@@ -146,7 +146,7 @@ describe('updateMember [BR-03]', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1', memberId: 'person-1' },
+      _params: { organizationId: 'org-1', memberId: 'person-1' },
       _body: { licenseNumber: 'LIC-999' },
     });
 
@@ -163,7 +163,7 @@ describe('updateMember [BR-03]', () => {
 
     const ctx = makeCtx({
       user: { id: 'admin-3', role: 'admin' },
-      _params: { orgId: 'org-1', memberId: 'person-1' },
+      _params: { organizationId: 'org-1', memberId: 'person-1' },
       _body: { status: 'active' },
     });
 
@@ -199,7 +199,7 @@ describe('updateMember [BR-03]', () => {
         });
 
         const ctx = makeCtx({
-          _params: { orgId: 'org-1', memberId: 'person-1' },
+          _params: { organizationId: 'org-1', memberId: 'person-1' },
           _body: { status: to },
         });
 
@@ -220,7 +220,7 @@ describe('updateMember [BR-03]', () => {
       });
 
       const ctx = makeCtx({
-        _params: { orgId: 'org-1', memberId: 'person-1' },
+        _params: { organizationId: 'org-1', memberId: 'person-1' },
         _body: { status: 'active' },
       });
 
@@ -266,7 +266,7 @@ describe('updateMember [BR-03]', () => {
         });
 
         const ctx = makeCtx({
-          _params: { orgId: 'org-1', memberId: 'person-1' },
+          _params: { organizationId: 'org-1', memberId: 'person-1' },
           _body: { status: to },
         });
 

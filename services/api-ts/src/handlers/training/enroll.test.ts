@@ -42,7 +42,7 @@ describe('enroll', () => {
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     expect(response.body.data.status).toBe('enrolled');
@@ -58,7 +58,7 @@ describe('enroll', () => {
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     expect(capturedData.status).toBe('cancelled');
@@ -74,7 +74,7 @@ describe('enroll', () => {
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     expect(capturedData.status).toBe('enrolled');
@@ -88,7 +88,7 @@ describe('enroll', () => {
       enroll: async (data: any) => fakeEnrollment,
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'missing-id' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'missing-id' } });
     await expect(enroll(ctx)).rejects.toThrow('Training not found');
   });
 
@@ -100,7 +100,7 @@ describe('enroll', () => {
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     Object.values(mm).forEach(m => m.mockRestore());
@@ -114,7 +114,7 @@ describe('enroll', () => {
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
     expect(response.status).toBe(201);
     Object.values(mm).forEach(m => m.mockRestore());
@@ -130,7 +130,7 @@ describe('enroll', () => {
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'gracePeriod' }) });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Active membership required');
     Object.values(mm).forEach(m => m.mockRestore());
   });
@@ -143,7 +143,7 @@ describe('enroll', () => {
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'suspended' }) });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Active membership required');
     Object.values(mm).forEach(m => m.mockRestore());
   });
@@ -156,7 +156,7 @@ describe('enroll', () => {
     });
     const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => null });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Active membership required');
     Object.values(mm).forEach(m => m.mockRestore());
   });
@@ -168,7 +168,7 @@ describe('enroll', () => {
       enroll: async (data: any) => fakeEnrollment,
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'wrong-org', id: 'training-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'wrong-org', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Training not found');
   });
 
@@ -182,7 +182,7 @@ describe('enroll', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1', id: 'training-1' },
+      _params: { organizationId: 'org-1', id: 'training-1' },
     });
 
     await expect(enroll(ctx)).rejects.toThrow();

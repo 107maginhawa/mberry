@@ -50,11 +50,11 @@ namespace DuesCustomModule {
     @doc("Get aggregated dues dashboard statistics for an organisation (treasurer/president only).")
     @operationId("getDuesDashboard")
     @get
-    @route("/dues/dashboard/{orgId}")
+    @route("/dues/dashboard/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
     getDuesDashboard(
-      @path @doc("Organisation ID") orgId: UUID
+      @path @doc("Organisation ID") organizationId: UUID
     ): ApiOkResponse<{ data: DuesDashboardData }>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;

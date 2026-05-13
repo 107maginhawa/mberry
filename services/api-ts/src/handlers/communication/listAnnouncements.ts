@@ -26,7 +26,7 @@ export async function listAnnouncements(
   const pageSize = Number(query?.pageSize ?? 20);
   const offset = (page - 1) * pageSize;
 
-  const { data, total } = await repo.list(params.orgId, {
+  const { data, total } = await repo.list(params.organizationId, {
     status: query?.status as string | undefined,
     search: query?.search as string | undefined,
     limit: pageSize,

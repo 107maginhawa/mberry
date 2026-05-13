@@ -28,7 +28,7 @@ export async function getDuesDashboard(
 
   const db = ctx.get('database') as DatabaseInstance;
   const params = ctx.req.valid('param');
-  const orgId = params.orgId;
+  const orgId = params.organizationId;
 
   // Set orgId for requirePosition (route is not under /association/*, no org-context middleware)
   ctx.set('organizationId', orgId);

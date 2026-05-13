@@ -29,7 +29,7 @@ describe('transitionOrgStatus', () => {
   });
 
   test('returns 401 when no session', async () => {
-    const ctx = makeCtx({ session: null, _params: { orgId: 'org-1' }, _body: { status: 'active' } });
+    const ctx = makeCtx({ session: null, _params: { organizationId: 'org-1' }, _body: { status: 'active' } });
     const response = await transitionOrgStatus(ctx);
     expect(response.status).toBe(401);
   });
@@ -54,7 +54,7 @@ describe('transitionOrgStatus', () => {
       });
 
       const ctx = makeCtx({
-        _params: { orgId: 'org-1' },
+        _params: { organizationId: 'org-1' },
         _body: { status: to },
       });
 
@@ -79,7 +79,7 @@ describe('transitionOrgStatus', () => {
       });
 
       const ctx = makeCtx({
-        _params: { orgId: 'org-1' },
+        _params: { organizationId: 'org-1' },
         _body: { status: to },
       });
 
@@ -96,7 +96,7 @@ describe('transitionOrgStatus', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'nonexistent' },
+      _params: { organizationId: 'nonexistent' },
       _body: { status: 'active' },
     });
 
@@ -114,7 +114,7 @@ describe('transitionOrgStatus', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { status: 'active' },
     });
 
@@ -130,7 +130,7 @@ describe('transitionOrgStatus', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { status: 'active' },
     });
 
@@ -147,7 +147,7 @@ describe('transitionOrgStatus', () => {
 
     const ctx = makeCtx({
       audit: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: { status: 'active' },
     });
 

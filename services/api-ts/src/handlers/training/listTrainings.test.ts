@@ -25,7 +25,7 @@ describe('listTrainings', () => {
       list: async () => ({ data: [fakeTraining], total: 1 }),
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1' } });
     const response = await listTrainings(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data).toHaveLength(1);
@@ -37,7 +37,7 @@ describe('listTrainings', () => {
       list: async () => ({ data: [], total: 0 }),
     });
 
-    const ctx = makeCtx({ _params: { orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { organizationId: 'org-1' } });
     const response = await listTrainings(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data).toEqual([]);
@@ -54,7 +54,7 @@ describe('listTrainings', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _query: { status: 'published', search: 'CPD', limit: '10', offset: '5' },
     });
     await listTrainings(ctx);

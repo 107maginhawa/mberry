@@ -26,7 +26,7 @@ describe('cancelTraining', () => {
       update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { id: 'training-1', organizationId: 'org-1' } });
     const response = await cancelTraining(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data.status).toBe('cancelled');
@@ -38,7 +38,7 @@ describe('cancelTraining', () => {
       update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { id: 'training-1', organizationId: 'org-1' } });
     await expect(cancelTraining(ctx)).rejects.toMatchObject({ code: 'TRAINING_ALREADY_CANCELLED' });
   });
 
@@ -48,7 +48,7 @@ describe('cancelTraining', () => {
       update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { id: 'training-1', organizationId: 'org-1' } });
     await expect(cancelTraining(ctx)).rejects.toMatchObject({ code: 'TRAINING_COMPLETED' });
   });
 
@@ -58,7 +58,7 @@ describe('cancelTraining', () => {
       update: async () => fakeTraining,
     });
 
-    const ctx = makeCtx({ _params: { id: 'missing-id', orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { id: 'missing-id', organizationId: 'org-1' } });
     await expect(cancelTraining(ctx)).rejects.toThrow('Training not found');
   });
 
@@ -70,7 +70,7 @@ describe('cancelTraining', () => {
       update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
     });
 
-    const ctx = makeCtx({ _params: { id: 'training-1', orgId: 'org-1' } });
+    const ctx = makeCtx({ _params: { id: 'training-1', organizationId: 'org-1' } });
     const response = await cancelTraining(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data.status).toBe('cancelled');

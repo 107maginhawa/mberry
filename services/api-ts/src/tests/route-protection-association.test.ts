@@ -203,7 +203,7 @@ d('Association mutation routes - officer protection (RED phase)', () => {
 
   // ─── Communications mutations ──────────────────────────────────────────────
 
-  test('member blocked: create announcement (POST /communications/announcements/:orgId) returns 403', async () => {
+  test('member blocked: create announcement (POST /communications/announcements/:organizationId) returns 403', async () => {
     const res = await memberClient.post(`/communications/announcements/${ORG_ID}`, {
       subject: 'Test Announcement',
       body: 'Test body content',

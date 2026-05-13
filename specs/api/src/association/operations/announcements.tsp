@@ -150,11 +150,11 @@ namespace Association.Operations.Announcements {
     @doc("List announcements for an organisation. Accessible to association members.")
     @operationId("listAnnouncements")
     @get
-    @route("/communications/announcements/{orgId}")
+    @route("/communications/announcements/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:member"])
     listAnnouncements(
-      @path orgId: UUID,
+      @path organizationId: UUID,
       @query status?: AnnouncementStatus,
       @query search?: string,
       ...PaginationQuery
@@ -178,11 +178,11 @@ namespace Association.Operations.Announcements {
     @doc("Create a new announcement for an organisation. Requires officer role.")
     @operationId("createAnnouncement")
     @post
-    @route("/communications/announcements/{orgId}")
+    @route("/communications/announcements/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
     createAnnouncement(
-      @path orgId: UUID,
+      @path organizationId: UUID,
       @body body: AnnouncementCreateRequest
     ): ApiCreatedResponse<Announcement>
       | ApiBadRequestResponse

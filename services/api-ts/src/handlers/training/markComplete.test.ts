@@ -45,7 +45,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -63,7 +63,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'missing-id', orgId: 'org-1' },
+      _params: { id: 'missing-id', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -79,7 +79,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -95,7 +95,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -115,7 +115,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -142,7 +142,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -174,7 +174,7 @@ describe('markComplete', () => {
     });
 
     const ctx = makeCtx({
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 
@@ -193,7 +193,7 @@ describe('markComplete', () => {
       user: null,
       session: null,
       database: undefined,
-      _params: { id: 'training-1', orgId: 'org-1' },
+      _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
     });
 

@@ -65,7 +65,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { status: 'suspended' },
-      _params: { orgId: ORG, memberId: MEMBER_ID },
+      _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     const response = await updateMember(ctx);
 
@@ -85,7 +85,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { status: 'terminated', terminationReason: 'Violation' },
-      _params: { orgId: ORG, memberId: MEMBER_ID },
+      _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);
 
@@ -106,7 +106,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { status: 'active' },
-      _params: { orgId: ORG, memberId: MEMBER_ID },
+      _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);
 
@@ -125,7 +125,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { status: 'active' },
-      _params: { orgId: ORG, memberId: MEMBER_ID },
+      _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);
 
@@ -146,7 +146,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { status: 'lapsed' },
-      _params: { orgId: ORG, memberId: MEMBER_ID },
+      _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);
 
@@ -166,7 +166,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { status: 'terminated' },
-      _params: { orgId: ORG, memberId: MEMBER_ID },
+      _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);
 
@@ -185,7 +185,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { status: 'active' },
-      _params: { orgId: ORG, memberId: MEMBER_ID },
+      _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);
 
@@ -202,7 +202,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { status: 'suspended' },
-      _params: { orgId: ORG, memberId: 'nonexistent' },
+      _params: { organizationId: ORG, memberId: 'nonexistent' },
     });
 
     try {
@@ -225,7 +225,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
 
     const ctx = makeCtx({
       _body: { note: 'Updated contact info' },
-      _params: { orgId: ORG, memberId: MEMBER_ID },
+      _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);
 

@@ -13,8 +13,8 @@ export async function getMyOfficerRole(ctx: HandlerContext): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const orgId = ctx.req.param('orgId');
-  if (!orgId) return ctx.json({ error: 'orgId required' }, 400);
+  const orgId = ctx.req.param('organizationId');
+  if (!orgId) return ctx.json({ error: 'organizationId required' }, 400);
 
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new OfficerTermRepository(db, ctx.get('logger'));

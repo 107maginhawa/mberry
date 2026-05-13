@@ -36,7 +36,7 @@ describe('listEvents', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _query: {},
     });
 
@@ -52,7 +52,7 @@ describe('listEvents', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     const response = await listEvents(ctx);
@@ -71,7 +71,7 @@ describe('listEvents', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _query: { status: 'published', search: 'conf', limit: '10', offset: '5' },
     });
 
@@ -92,7 +92,7 @@ describe('listEvents', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
     });
 
     const response = await listEvents(ctx);

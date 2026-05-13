@@ -35,7 +35,7 @@ describe('[BR-15] createTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'CPD Seminar',
         description: 'Dental CPD',
@@ -64,7 +64,7 @@ describe('[BR-15] createTraining', () => {
 
     const ctx = makeCtx({
       user: { id: 'admin-1', role: 'admin' },
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Test',
         startAt: '2026-06-01',
@@ -84,7 +84,7 @@ describe('[BR-15] createTraining', () => {
     });
 
     const ctx = makeCtx({
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Test',
         startAt: '2026-06-01',
@@ -104,7 +104,7 @@ describe('[BR-15] createTraining', () => {
     const ctx = makeCtx({
       user: null,
       session: null,
-      _params: { orgId: 'org-1' },
+      _params: { organizationId: 'org-1' },
       _body: {
         title: 'Test',
         startAt: '2026-06-01',

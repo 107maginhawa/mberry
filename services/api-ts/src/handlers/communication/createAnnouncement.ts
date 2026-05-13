@@ -25,7 +25,7 @@ export async function createAnnouncement(
 
   const announcement = await repo.create({
     ...body,
-    organizationId: params.orgId,
+    organizationId: params.organizationId,
     authorId: session.user.id,
     status: 'draft',
   } as any);
@@ -35,7 +35,7 @@ export async function createAnnouncement(
     resourceType: 'announcement',
     resourceId: announcement.id,
     description: `Created announcement: ${announcement.title}`,
-    details: { orgId: params.orgId },
+    details: { orgId: params.organizationId },
   });
 
   return ctx.json({ data: announcement }, 201);

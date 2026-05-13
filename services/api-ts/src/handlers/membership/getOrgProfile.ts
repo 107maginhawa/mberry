@@ -6,12 +6,12 @@ import { OrganizationRepository } from '../platformadmin/repos/platform-admin.re
  * getOrgProfile
  *
  * Officer-accessible endpoint to read organization profile.
- * Route: GET /membership/org-profile/:orgId
+ * Route: GET /membership/org-profile/:organizationId
  */
 export async function getOrgProfile(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const logger = ctx.get('logger');
-  const orgId = ctx.req.param('orgId');
+  const orgId = ctx.req.param('organizationId');
 
   const repo = new OrganizationRepository(db, logger);
   const org = await repo.findById(orgId);

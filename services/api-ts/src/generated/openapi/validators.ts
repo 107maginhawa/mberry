@@ -5577,6 +5577,14 @@ export const GrantProgressReportUpdateSchema = z.object({
 
 export const GrantStatusSchema = z.enum(["draft", "submitted", "underReview", "approved", "denied", "funded", "completed", "withdrawn"]);
 
+export const HealthCheckResponseSchema = z.object({
+  status: z.enum(["pass", "fail"]),
+  timestamp: z.string(),
+  checks: z.record(z.string(), z.unknown())
+});
+
+export const HealthStatusSchema = z.enum(["pass", "fail"]);
+
 export const HumanReviewGateSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -11890,7 +11898,7 @@ export type PublishAnnouncementParams = z.infer<typeof PublishAnnouncementParams
 export const PublishAnnouncementResponse = AnnouncementSchema;
 
 export const ListAnnouncementsParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type ListAnnouncementsParams = z.infer<typeof ListAnnouncementsParams>;
 
@@ -11909,7 +11917,7 @@ export type ListAnnouncementsQuery = z.infer<typeof ListAnnouncementsQuery>;
 export const ListAnnouncementsResponse = AnnouncementListResponseSchema;
 
 export const CreateAnnouncementParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type CreateAnnouncementParams = z.infer<typeof CreateAnnouncementParams>;
 
@@ -11919,14 +11927,14 @@ export type CreateAnnouncementBody = z.infer<typeof CreateAnnouncementBody>;
 export const CreateAnnouncementResponse = AnnouncementSchema;
 
 export const GetCreditComplianceParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type GetCreditComplianceParams = z.infer<typeof GetCreditComplianceParams>;
 
 export const GetCreditComplianceResponse = CreditComplianceReportSchema;
 
 export const GetDuesDashboardParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type GetDuesDashboardParams = z.infer<typeof GetDuesDashboardParams>;
 
@@ -12022,8 +12030,15 @@ export type TestEmailTemplateBody = z.infer<typeof TestEmailTemplateBody>;
 
 export const TestEmailTemplateResponse = TestTemplateResultSchema;
 
+export const LivenessQuery = z.object({
+  verbose: z.string().optional(),
+});
+export type LivenessQuery = z.infer<typeof LivenessQuery>;
+
+export const LivenessResponse = HealthCheckResponseSchema;
+
 export const ListOrgApplicationsParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type ListOrgApplicationsParams = z.infer<typeof ListOrgApplicationsParams>;
 
@@ -12037,7 +12052,7 @@ export const ListOrgApplicationsResponse = z.object({
 });
 
 export const ListOrgMembersParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type ListOrgMembersParams = z.infer<typeof ListOrgMembersParams>;
 
@@ -12046,14 +12061,14 @@ export const ListOrgMembersResponse = z.object({
 });
 
 export const GetOrgProfileParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type GetOrgProfileParams = z.infer<typeof GetOrgProfileParams>;
 
 export const GetOrgProfileResponse = OrgProfileSchema;
 
 export const UpdateOrgProfileParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type UpdateOrgProfileParams = z.infer<typeof UpdateOrgProfileParams>;
 
@@ -12103,7 +12118,7 @@ export type MarkNotificationAsReadParams = z.infer<typeof MarkNotificationAsRead
 export const MarkNotificationAsReadResponse = NotificationSchema;
 
 export const ListOfficerTermsSummaryParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type ListOfficerTermsSummaryParams = z.infer<typeof ListOfficerTermsSummaryParams>;
 
@@ -12164,7 +12179,7 @@ export type UpdateMyNotificationPreferencesBody = z.infer<typeof UpdateMyNotific
 export const UpdateMyNotificationPreferencesResponse = z.array(NotificationPreferenceSchema);
 
 export const GetMyOfficerRoleParams = z.object({
-  orgId: UUIDSchema,
+  organizationId: UUIDSchema,
 });
 export type GetMyOfficerRoleParams = z.infer<typeof GetMyOfficerRoleParams>;
 
@@ -12207,6 +12222,13 @@ export type GetOrganizationBySlugParams = z.infer<typeof GetOrganizationBySlugPa
 export const GetOrganizationBySlugResponse = PublicOrganizationSchema;
 
 export const MarkAllNotificationsReadResponse = MarkAllReadResponseSchema;
+
+export const ReadinessQuery = z.object({
+  verbose: z.string().optional(),
+});
+export type ReadinessQuery = z.infer<typeof ReadinessQuery>;
+
+export const ReadinessResponse = HealthCheckResponseSchema;
 
 export const CreateReviewBody = CreateReviewRequestSchema;
 export type CreateReviewBody = z.infer<typeof CreateReviewBody>;
