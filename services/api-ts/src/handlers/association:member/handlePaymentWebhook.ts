@@ -52,7 +52,7 @@ export async function handlePaymentWebhook(
   }
 
   if (event.status === 'paid') {
-    await invoiceRepo.markPaid(invoice.id, event.gatewayEventId, new Date());
+    await invoiceRepo.markPaid(invoice.id, invoice.version, event.gatewayEventId, new Date());
 
     await auditAction(ctx, {
       action: 'mark-paid',

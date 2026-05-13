@@ -72,7 +72,10 @@ export async function confirmPaymentProof(
     const { DuesInvoiceRepository } = await import('./repos/dues.repo');
     const invoiceRepo = new DuesInvoiceRepository(db);
     try {
-      await invoiceRepo.markPaid(payment.invoiceId, payment.id, new Date());
+      const invoice = await invoiceRepo.findOneById(payment.invoiceId);
+      if (invoice) {
+        await invoiceRepo.markPaid(payment.invoiceId, invoice.version, payment.id, new Date());
+      }
     } catch {
       // Invoice may already be paid — non-fatal
     }

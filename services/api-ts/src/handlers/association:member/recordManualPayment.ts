@@ -33,9 +33,9 @@ export async function recordManualPayment(
     throw new ConflictError('This invoice has already been paid');
   }
 
-  // markPaid(invoiceId, paymentId, paidAt?)
+  // markPaid(invoiceId, expectedVersion, paymentId, paidAt?) — optimistic lock [PAY-03]
   const paymentRef = body.reference || `manual-${Date.now()}`;
-  await invoiceRepo.markPaid(invoice.id, paymentRef, new Date());
+  await invoiceRepo.markPaid(invoice.id, invoice.version, paymentRef, new Date());
 
   await auditAction(ctx, {
     action: 'mark-paid',
