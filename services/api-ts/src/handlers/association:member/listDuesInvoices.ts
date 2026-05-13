@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { ListDuesInvoicesQuery } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 
@@ -17,6 +17,7 @@ export async function listDuesInvoices(
   if (!session) throw new UnauthorizedError();
 
   const orgId = ctx.get('organizationId');
+  if (!orgId) throw new ForbiddenError();
   const query = ctx.req.valid('query') as any;
   const offset = Number(query.offset) || 0;
   const limit = Math.min(Number(query.limit) || 20, 100);

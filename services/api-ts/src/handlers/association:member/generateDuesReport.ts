@@ -1,6 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, ForbiddenError } from '@/core/errors';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 import type { GenerateDuesReportQuery, GenerateDuesReportParams } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 
@@ -17,6 +19,13 @@ export async function generateDuesReport(
   if (!session) throw new UnauthorizedError();
 
   const { organizationId } = ctx.req.valid('param');
+  const ctxOrgId = ctx.get('organizationId');
+  if (ctxOrgId && organizationId !== ctxOrgId) throw new ForbiddenError();
+
+  ctx.set('organizationId', organizationId);
+  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
+
   const query = ctx.req.valid('query');
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);

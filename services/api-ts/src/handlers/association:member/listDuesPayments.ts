@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { ListDuesPaymentsQuery } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 
@@ -17,6 +17,8 @@ export async function listDuesPayments(
   if (!session) throw new UnauthorizedError();
 
   const query = ctx.req.valid('query');
+  const orgId = ctx.get('organizationId');
+  if (!orgId) throw new ForbiddenError();
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);
 
@@ -26,7 +28,7 @@ export async function listDuesPayments(
   const limit = query.limit ?? pageSize;
 
   const result = await repo.listPayments({
-    organizationId: query.organizationId,
+    organizationId: orgId,
     personId: query.personId,
     status: query.status,
     limit,
