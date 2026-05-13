@@ -42,22 +42,21 @@
     --color-info-bg: #EDF2F8;
 
     /* Glass surface tokens (extends --color-surface family) */
-    --color-surface-elevated: rgba(255, 255, 255, 0.35);
-    --color-surface-elevated-hover: rgba(255, 255, 255, 0.50);
-    --surface-blur: 24px;
-    --color-surface-border-glass: rgba(255, 255, 255, 0.70);
-    --color-surface-border-glass-bottom: rgba(255, 255, 255, 0.20);
-    --color-nav-elevated: rgba(255, 255, 255, 0.45);
-    --nav-blur: 28px;
+    --color-surface-elevated: rgba(255, 255, 255, 0.45);
+    --color-surface-elevated-hover: rgba(255, 255, 255, 0.60);
+    --surface-blur: 20px;
+    --color-surface-border-glass: rgba(255, 255, 255, 0.65);
+    --color-nav-elevated: rgba(255, 255, 255, 0.55);
+    --nav-blur: 24px;
 
     /* Motion */
     --spring-bounce: 0.15;
     --spring-duration: 0.5s;
 
-    /* Shadows — specular top highlight + soft drop */
-    --shadow-soft: 0 2px 16px rgba(85, 75, 104, 0.10), 0 0.5px 0 rgba(255, 255, 255, 0.70) inset, 0 -0.5px 0 rgba(85, 75, 104, 0.05) inset;
-    --shadow-medium: 0 4px 24px rgba(85, 75, 104, 0.12), 0 0.5px 0 rgba(255, 255, 255, 0.65) inset, 0 -0.5px 0 rgba(85, 75, 104, 0.06) inset;
-    --shadow-deep: 0 8px 32px rgba(85, 75, 104, 0.16), 0 0.5px 0 rgba(255, 255, 255, 0.60) inset, 0 -0.5px 0 rgba(85, 75, 104, 0.08) inset;
+    /* Shadows */
+    --shadow-soft: 0 2px 16px rgba(85, 75, 104, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.50);
+    --shadow-medium: 0 4px 24px rgba(85, 75, 104, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.40);
+    --shadow-deep: 0 8px 32px rgba(85, 75, 104, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 
     /* Radius — DESIGN.md */
     --radius-sm: 8px;
@@ -69,7 +68,7 @@
     --radius: 12px;
     --background: var(--color-bg);
     --foreground: var(--color-text);
-    --card: var(--color-surface-elevated);
+    --card: var(--color-surface);
     --card-foreground: var(--color-text);
     --popover: var(--color-surface);
     --popover-foreground: var(--color-text);
@@ -108,12 +107,12 @@
     }
   }
 
-  /* Mobile: translucent with blur for glass feel */
+  /* Mobile: lighter translucency, keep blur for glass feel */
   @media (max-width: 768px) {
     :root {
-      --color-surface-elevated: rgba(255, 255, 255, 0.40);
-      --surface-blur: 20px;
-      --nav-blur: 22px;
+      --color-surface-elevated: rgba(255, 255, 255, 0.60);
+      --surface-blur: 14px;
+      --nav-blur: 16px;
     }
   }
 
@@ -152,19 +151,18 @@
     --color-info-bg: #1E222D;
 
     /* Glass surface tokens — dark */
-    --color-surface-elevated: rgba(45, 38, 53, 0.40);
-    --color-surface-elevated-hover: rgba(45, 38, 53, 0.55);
-    --color-surface-border-glass: rgba(255, 255, 255, 0.15);
-    --color-surface-border-glass-bottom: rgba(255, 255, 255, 0.05);
-    --color-nav-elevated: rgba(45, 38, 53, 0.50);
+    --color-surface-elevated: rgba(45, 38, 53, 0.55);
+    --color-surface-elevated-hover: rgba(45, 38, 53, 0.70);
+    --color-surface-border-glass: rgba(255, 255, 255, 0.12);
+    --color-nav-elevated: rgba(45, 38, 53, 0.65);
 
-    --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.30), 0 0.5px 0 rgba(255, 255, 255, 0.10) inset, 0 -0.5px 0 rgba(0, 0, 0, 0.15) inset;
-    --shadow-medium: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0.5px 0 rgba(255, 255, 255, 0.08) inset, 0 -0.5px 0 rgba(0, 0, 0, 0.12) inset;
-    --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.32), 0 0.5px 0 rgba(255, 255, 255, 0.06) inset, 0 -0.5px 0 rgba(0, 0, 0, 0.15) inset;
+    --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --shadow-medium: 0 4px 24px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
     --background: var(--color-bg);
     --foreground: var(--color-text);
-    --card: var(--color-surface-elevated);
+    --card: var(--color-surface);
     --card-foreground: var(--color-text);
     --popover: var(--color-surface);
     --popover-foreground: var(--color-text);
@@ -203,11 +201,10 @@
     color: var(--color-text);
     background-color: var(--color-bg);
     background-image:
-      radial-gradient(ellipse 90% 70% at 8% 3%, rgba(200, 180, 188, 0.55) 0%, transparent 55%),
-      radial-gradient(ellipse 80% 60% at 92% 15%, rgba(242, 222, 176, 0.60) 0%, transparent 55%),
-      radial-gradient(ellipse 70% 70% at 50% 75%, rgba(158, 136, 144, 0.35) 0%, transparent 55%),
-      radial-gradient(ellipse 60% 50% at 25% 45%, rgba(212, 186, 130, 0.30) 0%, transparent 55%),
-      radial-gradient(ellipse 40% 30% at 70% 55%, rgba(200, 170, 180, 0.25) 0%, transparent 50%);
+      radial-gradient(ellipse 80% 60% at 10% 5%, rgba(200, 180, 188, 0.45) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 20%, rgba(242, 222, 176, 0.50) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 50% 70%, rgba(158, 136, 144, 0.30) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 30% 50%, rgba(212, 186, 130, 0.25) 0%, transparent 60%);
     background-attachment: fixed;
     transition: background-color 300ms ease, color 300ms ease;
   }
