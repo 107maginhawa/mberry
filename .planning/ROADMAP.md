@@ -43,7 +43,7 @@
     - [x] 11-02-PLAN.md -- apiAs() test helper (TDD)
     - [x] 11-03-PLAN.md -- Seed user verification tests
 
-- [ ] **Phase 12: Backend Auth — Route Protection**
+- [x] **Phase 12: Backend Auth — Route Protection** (completed 2026-05-13)
   - RED: Write ~35 API tests asserting member gets 403 on officer endpoints
   - RED: Write cross-org isolation (IDOR) tests — officer of Org A blocked from Org B
   - GREEN: Add `officerAuthMiddleware()` to hand-wired `app.ts` routes (org profile, roster, applications, dues dashboard, payments, gateway)
@@ -53,14 +53,14 @@
   - **Deps:** Phase 11
   - **Est:** 2-3 days
   - **Plans:** 6 plans
-    - [ ] 12-01-PLAN.md — RED: hand-wired route officer protection tests
-    - [ ] 12-02-PLAN.md — RED: association mutation route officer protection tests
-    - [ ] 12-03-PLAN.md — GREEN: wire officerAuthMiddleware to app.ts + create requireOfficerTerm utility
-    - [ ] 12-03b-PLAN.md — GREEN: add requireOfficerTerm to association:operations handlers
-    - [ ] 12-03c-PLAN.md — GREEN: add requireOfficerTerm to association:member handlers
-    - [ ] 12-04-PLAN.md — Seed second org officer + IDOR tests
+    - [x] 12-01-PLAN.md — RED: hand-wired route officer protection tests
+    - [x] 12-02-PLAN.md — RED: association mutation route officer protection tests
+    - [x] 12-03-PLAN.md — GREEN: wire officerAuthMiddleware to app.ts + create requireOfficerTerm utility
+    - [x] 12-03b-PLAN.md — GREEN: add requireOfficerTerm to association:operations handlers
+    - [x] 12-03c-PLAN.md — GREEN: add requireOfficerTerm to association:member handlers
+    - [x] 12-04-PLAN.md — Seed second org officer + IDOR tests
 
-- [ ] **Phase 13: Position-Based RBAC**
+- [x] **Phase 13: Position-Based RBAC** (completed 2026-05-13)
   - RED: Write position-specific API tests (Treasurer-only, President-only, Secretary-allowed endpoints)
   - GREEN: Create `requirePosition(positions[])` middleware checking `officer_term` table
   - GREEN: Wire `requirePosition` to each route group per permission matrix
@@ -71,10 +71,10 @@
   - **Est:** 2-3 days
   - **Plans:** 5 plans
     - [x] 13-01-PLAN.md — RED tests + requirePosition utility + position titles constants
-    - [ ] 13-02-PLAN.md — Wire requirePosition to 16 member + communications handlers
-    - [ ] 13-03-PLAN.md — Wire requirePosition to 13 operations handlers
-    - [ ] 13-04-PLAN.md — Wire requirePosition to app.ts inline routes + verify GREEN
-    - [ ] 13-05-PLAN.md — Frontend sidebar position filtering
+    - [x] 13-02-PLAN.md — Wire requirePosition to 16 member + communications handlers
+    - [x] 13-03-PLAN.md — Wire requirePosition to 13 operations handlers
+    - [x] 13-04-PLAN.md — Wire requirePosition to app.ts inline routes + verify GREEN
+    - [x] 13-05-PLAN.md — Frontend sidebar position filtering
 
 - [ ] **Phase 14: Negative E2E Tests — Role Boundaries**
   - RED->GREEN: Member cannot access officer routes (6 tests)
@@ -108,6 +108,34 @@
   - **Deps:** Phase 14
   - **Est:** 1-2 days
 
+- [x] **Phase 17: Domain Design Remediation** (Codex-verified audit, completed 2026-05-13)
+  - Wave 0.5: Fix 3 new Codex P1s (dues-config form, cross-org tier validation)
+  - Wave 1: Fix payment/membership invariants (refund, transactions, lifecycle service, billingFrequency, dead code cleanup)
+  - Wave 2: Fix election invariants (BR-33, BR-34, voter validation, role enforcement)
+  - Wave 3: DB constraints (unique indexes, FKs, CHECK constraints, position normalization)
+  - **Verify:** All 2123+ tests pass per wave. No regressions.
+  - **Deps:** None (independent of auth phases)
+  - **Est:** 3-5 days
+  - **Plans:** 15 plans (00a-00c, 01-15)
+    - [x] 15-00a-PLAN.md — Dues config form payload fix
+    - [x] 15-00b-PLAN.md — Dues config create vs PATCH
+    - [x] 15-00c-PLAN.md — Cross-org tier validation
+    - [x] 15-01-PLAN.md — Fix live refund (BR-08)
+    - [x] 15-02-PLAN.md — approveMembershipApplication transaction
+    - [x] 15-03-PLAN.md — recordDuesPayment outer transaction
+    - [x] 15-04-PLAN.md — Lifecycle service
+    - [x] 15-05-PLAN.md — Consume billingFrequency
+    - [x] 15-06-PLAN.md — Delete dead handlers/dues/ files
+    - [x] 15-07-PLAN.md — BR-34 nomination eligibility
+    - [x] 15-08-PLAN.md — BR-33 two candidates per position
+    - [x] 15-09-PLAN.md — Voter/nominee/position validation
+    - [x] 15-10-PLAN.md — President-only certification
+    - [x] 15-11-PLAN.md — Role enforcement on election handlers
+    - [x] 15-12-PLAN.md — Unique (org, person) on memberships
+    - [x] 15-13-PLAN.md — Unique (election_id, voter_id, position_id) on votes
+    - [x] 15-14-PLAN.md — Missing FK constraints
+    - [x] 15-15-PLAN.md — Temporal CHECK + election position normalization
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -124,8 +152,9 @@
 | 9. Test Infrastructure Hardening | v1.0.0 | 2/2 | Complete | 2026-05-06 |
 | 10. Deploy Platform Decision | v1.0.0 | 1/1 | Complete | 2026-05-06 |
 | 11. Test Infrastructure & Seed Users | v1.1.0 | 3/3 | Complete   | 2026-05-08 |
-| 12. Backend Auth — Route Protection | v1.1.0 | 0/6 | Not Started | -- |
-| 13. Position-Based RBAC | v1.1.0 | 1/5 | In Progress|  |
+| 12. Backend Auth — Route Protection | v1.1.0 | 6/6 | Complete | 2026-05-13 |
+| 13. Position-Based RBAC | v1.1.0 | 5/5 | Complete | 2026-05-13 |
 | 14. Negative E2E Tests — Role Boundaries | v1.1.0 | 0/0 | Not Started | -- |
 | 15. Dues Reminder UI + BR Edge Cases | v1.1.0 | 0/0 | Not Started | -- |
 | 16. Mobile & Transfer Validation | v1.1.0 | 0/0 | Not Started | -- |
+| 17. Domain Design Remediation | v1.1.0 | 18/18 | Complete | 2026-05-13 |
