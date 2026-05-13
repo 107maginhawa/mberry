@@ -48,7 +48,7 @@ export async function markDuesInvoicePaid(
   const updatedInvoice = await db.transaction(async (tx: DatabaseInstance) => {
     const txInvoiceRepo = new DuesInvoiceRepository(tx, logger);
 
-    const marked = await txInvoiceRepo.markPaid(invoiceId, body.paymentId, new Date());
+    const marked = await txInvoiceRepo.markPaid(invoiceId, invoice.version, body.paymentId, new Date());
 
     // [BR-07] Extend dues_expiry_date using lifecycle service
     await membershipLifecycle.extendMembershipExpiry(tx, {

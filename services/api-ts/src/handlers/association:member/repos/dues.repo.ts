@@ -5,6 +5,7 @@
 
 import { eq, and, lt, notInArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { ConflictError } from '@/core/errors';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import {
   duesConfigs,
@@ -124,14 +125,17 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
   }
 
   /**
-   * Mark an invoice as paid with payment details
+   * Mark an invoice as paid with optimistic locking.
+   * [PAY-03] Uses WHERE version=N to prevent concurrent double-payment.
+   * Throws ConflictError(409) when the version does not match (0 rows affected).
    */
   async markPaid(
     invoiceId: string,
+    expectedVersion: number,
     paymentId: string,
     paidAt?: Date
   ): Promise<DuesInvoice> {
-    this.logger?.debug({ invoiceId, paymentId }, 'Marking invoice as paid');
+    this.logger?.debug({ invoiceId, paymentId, expectedVersion }, 'Marking invoice as paid');
 
     const [updated] = await this.db
       .update(duesInvoices)
@@ -140,12 +144,13 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
         paidAt: paidAt ?? new Date(),
         paymentId,
         updatedAt: new Date(),
+        version: expectedVersion + 1,
       })
-      .where(eq(duesInvoices.id, invoiceId))
+      .where(and(eq(duesInvoices.id, invoiceId), eq(duesInvoices.version, expectedVersion)))
       .returning();
 
     if (!updated) {
-      throw new Error(`Invoice with id ${invoiceId} not found`);
+      throw new ConflictError('Invoice was already paid or modified concurrently');
     }
 
     this.logger?.info({ invoiceId, paymentId }, 'Invoice marked as paid');

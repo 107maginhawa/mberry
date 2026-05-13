@@ -268,6 +268,93 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
   });
 });
 
+// ─── PAY-03 Optimistic Locking Tests ─────────────────────────────────────────
+
+describe('[PAY-03] optimistic locking on invoice', () => {
+  beforeEach(() => {
+    restoreRepo(DuesInvoiceRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(DuesRepository);
+  });
+
+  afterEach(() => {
+    restoreRepo(DuesInvoiceRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(DuesRepository);
+  });
+
+  test('throws ConflictError when markPaid is called with stale version (0 rows affected)', async () => {
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'sent', version: 3 }),
+      markPaid: async () => { throw new (await import('@/core/errors')).ConflictError('Invoice was already paid or modified concurrently'); },
+    });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
+    stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
+    });
+
+    await expect(markDuesInvoicePaid(ctx)).rejects.toThrow('Invoice was already paid or modified concurrently');
+  });
+
+  test('passes invoice.version to markPaid', async () => {
+    let capturedVersion: number | undefined;
+    let capturedExpectedVersion: number | undefined;
+
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'sent', version: 5 }),
+      markPaid: async (invoiceId: string, expectedVersion: number, paymentId: string, paidAt?: Date) => {
+        capturedVersion = 5;
+        capturedExpectedVersion = expectedVersion;
+        return { ...fakeInvoice, status: 'paid', version: 6 };
+      },
+    });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
+    stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
+    });
+
+    const response = await markDuesInvoicePaid(ctx);
+    expect(response.status).toBe(200);
+    expect(capturedExpectedVersion).toBe(5);
+    expect(capturedVersion).toBe(5);
+  });
+
+  test('successful markPaid with matching version returns 200', async () => {
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ ...fakeInvoice, status: 'sent', version: 2 }),
+      markPaid: async () => ({ ...fakeInvoice, status: 'paid', version: 3 }),
+    });
+    stubRepo(DuesRepository, { getConfig: async () => undefined });
+    stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { invoiceId: 'inv-1' },
+      _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
+    });
+
+    const response = await markDuesInvoicePaid(ctx);
+    expect(response.status).toBe(200);
+  });
+});
+
 // ─── SEC-01 Auth Guard Tests (RED phase — expect FAIL until Plan 02) ─────────
 
 describe('[SEC-01] markDuesInvoicePaid — position-based auth', () => {
