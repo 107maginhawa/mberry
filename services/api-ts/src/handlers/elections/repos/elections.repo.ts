@@ -47,6 +47,11 @@ export class ElectionsRepository {
     return result!;
   }
 
+  async getNominee(id: string): Promise<ElectionNominee | undefined> {
+    const [nominee] = await this.db.select().from(electionNominees).where(eq(electionNominees.id, id)).limit(1);
+    return nominee;
+  }
+
   async castVote(data: { electionId: string; positionId: string; nomineeId: string; voterId: string; organizationId: string }) {
     const [result] = await this.db.insert(electionVotes).values(data).returning();
     return result!;
