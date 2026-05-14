@@ -23,6 +23,10 @@ interface CreateCreditEntryBody {
   registrationDate: string;
   /** Cycle period in years */
   cyclePeriodYears?: number;
+  /** PRC CPD category (PRC-02) */
+  category?: 'General' | 'Major' | 'Self-Directed';
+  /** PRC approval code for verified credits (PRC-02) */
+  approvalCode?: string;
 }
 
 export async function createCreditEntry(
@@ -62,6 +66,9 @@ export async function createCreditEntry(
     cycleStart: cycle.cycleStart,
     cycleEnd: cycle.cycleEnd,
     supportingDocumentId: body.supportingDocumentId,
+    category: body.category,
+    approvalCode: body.approvalCode,
+    // verificationStatus defaults to 'pending' via schema default (T-22-06: never accept from client)
   });
 
   await auditAction(ctx, {

@@ -23,6 +23,8 @@ export async function createTraining(ctx: Context): Promise<Response> {
     creditBearing: body.creditBearing ?? false,
     creditAmount: body.creditAmount ?? body.creditValue ?? 0,
     status: body.status ?? 'draft',
+    prcAccreditationNumber: body.prcAccreditationNumber,
+    accreditedProviderId: body.accreditedProviderId,
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });
