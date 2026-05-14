@@ -103,7 +103,7 @@ export async function bulkApproveMembershipApplications(
 
   // Audit summary — one entry for the entire bulk operation
   await auditAction(ctx, {
-    action: 'bulk-approve',
+    action: 'approve',
     resourceType: 'membership-application',
     resourceId: 'bulk',
     description: `Bulk approved ${succeeded.length} application(s), ${failed.length} failed`,
