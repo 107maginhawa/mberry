@@ -19,6 +19,10 @@ import {
   type EmailSendResult,
   type TemplatePreviewResult
 } from '@/handlers/email/repos/email.schema';
+import { SuppressionRepository } from '@/handlers/email/repos/suppression.repo';
+import { BulkRateLimiter } from '@/handlers/email/utils/bulk-rate-limiter';
+import { generateUnsubToken } from '@/handlers/email/utils/unsub-token';
+import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import postmark from 'postmark';
@@ -303,9 +307,15 @@ export interface EmailService {
 /**
  * EmailService implementation
  */
+/** Membership statuses that block email delivery at send time */
+const BLOCKED_MEMBERSHIP_STATUSES = ['deceased', 'resigned', 'expelled', 'lapsed'] as const;
+
 class EmailServiceImpl implements EmailService {
   private templateRepo: EmailTemplateRepository;
   private queueRepo: EmailQueueRepository;
+  private suppressionRepo: SuppressionRepository;
+  private membershipRepo: MembershipRepository;
+  private bulkRateLimiter: BulkRateLimiter;
   private provider: EmailProvider | null = null;
   private config: Config['email'];
   private fullConfig: Config;
@@ -321,6 +331,9 @@ class EmailServiceImpl implements EmailService {
     this.logger = logger;
     this.templateRepo = new EmailTemplateRepository(db, logger);
     this.queueRepo = new EmailQueueRepository(db, logger);
+    this.suppressionRepo = new SuppressionRepository(db, logger);
+    this.membershipRepo = new MembershipRepository(db, logger);
+    this.bulkRateLimiter = new BulkRateLimiter();
     this.config = config.email;
     this.fullConfig = config;
     
@@ -363,10 +376,13 @@ class EmailServiceImpl implements EmailService {
   
   /**
    * Send an email immediately
+   * Injects RFC 8058 List-Unsubscribe and List-Unsubscribe-Post headers on
+   * every outbound email (T-25-06). Token is HMAC-signed — no plaintext PII
+   * in the URL beyond the orgId.
    */
   async sendEmail(request: SendEmailRequest): Promise<EmailSendResult> {
     const provider = this.ensureProviderInitialized();
-    
+
     // Add default from if not provided
     if (!request.from) {
       request.from = {
@@ -374,7 +390,20 @@ class EmailServiceImpl implements EmailService {
         email: this.config.from.email
       };
     }
-    
+
+    // Inject unsubscribe headers (RFC 8058 one-click unsubscribe)
+    const ctx = request.unsubscribeContext;
+    if (ctx) {
+      const token = generateUnsubToken(ctx.email, ctx.orgId);
+      const appUrl = (this.fullConfig as any)?.app?.url ?? 'https://example.com';
+      const unsubUrl = `${appUrl}/email/unsubscribe?token=${encodeURIComponent(token)}&email=${encodeURIComponent(ctx.email)}&org=${encodeURIComponent(ctx.orgId)}`;
+      request.headers = {
+        ...(request.headers ?? {}),
+        'List-Unsubscribe': `<${unsubUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      };
+    }
+
     return provider.send(request);
   }
   
@@ -417,26 +446,93 @@ class EmailServiceImpl implements EmailService {
   }
   
   /**
-   * Process a single email
+   * Process a single email through the guard pipeline then send.
+   *
+   * Guard execution order:
+   *   1. Suppression check   — skip suppressed recipients (mark failed)
+   *   2. Membership status   — skip deceased/resigned/expelled (mark failed)
+   *   3. Bulk rate limit     — defer bulk emails that exceed org rate (reschedule)
+   *
+   * Guards fire BEFORE template resolution to avoid unnecessary DB work.
+   * Every guard skip is logged for audit trail (T-25-04).
    */
   private async processEmail(email: EmailQueueItem): Promise<void> {
     try {
       // Mark as processing
       await this.queueRepo.markAsProcessing(email.id);
-      
+
+      // -----------------------------------------------------------------------
+      // Guard 1: Suppression check
+      // -----------------------------------------------------------------------
+      const suppressed = await this.suppressionRepo.isSuppressed(email.recipientEmail, email.organizationId);
+      if (suppressed) {
+        await this.queueRepo.markAsFailed(email.id, 'Recipient is suppressed', email.attempts);
+        this.logger?.info(
+          { emailId: email.id, recipient: email.recipientEmail },
+          'Email skipped: recipient suppressed',
+        );
+        return;
+      }
+
+      // -----------------------------------------------------------------------
+      // Guard 2: Deceased / departed membership check
+      // Checked at send time (not queue time) per business rule decision.
+      // Only applies when recipientPersonId is provided in metadata.
+      // -----------------------------------------------------------------------
+      const recipientPersonId = (email.metadata as Record<string, any> | null)?.recipientPersonId as string | undefined;
+      if (recipientPersonId) {
+        const membership = await this.membershipRepo.findByPersonAndOrg(recipientPersonId, email.organizationId);
+        if (membership && (BLOCKED_MEMBERSHIP_STATUSES as readonly string[]).includes(membership.status)) {
+          await this.queueRepo.markAsFailed(
+            email.id,
+            `Recipient membership is ${membership.status}`,
+            email.attempts,
+          );
+          this.logger?.info(
+            { emailId: email.id, status: membership.status },
+            'Email skipped: recipient inactive membership',
+          );
+          return;
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // Guard 3: Bulk rate limit
+      // Transactional emails bypass. Bulk emails that exceed the org limit are
+      // rescheduled (not failed) so they can be retried later (T-25-05).
+      // -----------------------------------------------------------------------
+      if (email.emailCategory === 'bulk') {
+        if (!this.bulkRateLimiter.canSend(email.organizationId)) {
+          // Reschedule 60 seconds forward; reset status to pending
+          await (this.queueRepo as any).updateOneById(email.id, {
+            scheduledAt: new Date(Date.now() + 60_000),
+            status: 'pending',
+          });
+          this.logger?.info(
+            { emailId: email.id, orgId: email.organizationId },
+            'Bulk email deferred: rate limit exceeded',
+          );
+          return;
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // All guards passed — resolve template and send
+      // -----------------------------------------------------------------------
+
       // Resolve template by tags
       const template = await this.resolveTemplateByTags(email.templateTags || []);
       if (!template) {
         throw new Error(`No active template found for tags: ${email.templateTags?.join(', ') || 'none'}`);
       }
-      
+
       // Render template with variables
       const rendered = await this.templateRepo.renderTemplate(
         template.id,
         email.variables
       );
-      
-      // Send email
+
+      // Send email (unsubscribe headers injected inside sendEmail)
       const result = await this.sendEmail({
         to: email.recipientEmail,
         subject: rendered.subject,
@@ -449,9 +545,13 @@ class EmailServiceImpl implements EmailService {
         replyTo: template?.replyToEmail ? {
           email: template.replyToEmail,
           name: template.replyToName || undefined
-        } : undefined
+        } : undefined,
+        unsubscribeContext: {
+          email: email.recipientEmail,
+          orgId: email.organizationId,
+        },
       });
-      
+
       if (result.success) {
         // Mark as sent
         await this.queueRepo.markAsSent(

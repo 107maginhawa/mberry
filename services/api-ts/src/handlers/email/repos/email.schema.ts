@@ -285,6 +285,13 @@ export interface SendEmailRequest {
     email?: string;
     name?: string;
   };
+  /** Additional email headers (e.g. List-Unsubscribe for RFC 8058 compliance) */
+  headers?: Record<string, string>;
+  /** Context for generating unsubscribe token (injected by processEmail) */
+  unsubscribeContext?: {
+    email: string;
+    orgId: string;
+  };
 }
 
 /**
