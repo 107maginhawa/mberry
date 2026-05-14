@@ -139,7 +139,7 @@ export class MembershipRepository {
             id: persons.id,
             firstName: persons.firstName,
             lastName: persons.lastName,
-            email: persons.email,
+            email: sql<string | null>`${persons.contactInfo}->>'email'`,
             avatar: persons.avatar,
           },
           category: { id: membershipCategories.id, name: membershipCategories.name },
