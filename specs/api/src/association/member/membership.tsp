@@ -42,6 +42,15 @@ enum MembershipStatus {
 
   @doc("Membership has been permanently terminated")
   terminated: "terminated",
+
+  @doc("Member has voluntarily resigned from the association")
+  resigned: "resigned",
+
+  @doc("Member is deceased; membership closed upon death notification")
+  deceased: "deceased",
+
+  @doc("Member has been expelled by the association")
+  expelled: "expelled",
 }
 
 @doc("Status of a membership application")
@@ -371,6 +380,23 @@ model MembershipTerminateRequest {
   @minLength(1)
   @maxLength(500)
   terminationReason: string;
+}
+
+@doc("Request to record a member's voluntary resignation")
+model MembershipResignRequest {
+  @doc("Reason for resignation")
+  @maxLength(500)
+  terminationReason?: string;
+}
+
+@doc("Request to record a member's death")
+model MembershipDeceasedRequest {
+  @doc("Date of death")
+  dateOfDeath: plainDate;
+
+  @doc("Optional notes")
+  @maxLength(500)
+  terminationReason?: string;
 }
 
 @doc("Request to create a membership application")
@@ -855,6 +881,36 @@ namespace Association.Member.Membership {
     terminateMembership(
       @path membershipId: string,
       @body body: MembershipTerminateRequest
+    ): ApiOkResponse<Membership>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse
+      | ApiForbiddenResponse;
+
+    @doc("Record a member's voluntary resignation.")
+    @operationId("resignMembership")
+    @post
+    @route("/{membershipId}/resign")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    resignMembership(
+      @path membershipId: string,
+      @body body: MembershipResignRequest
+    ): ApiOkResponse<Membership>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse
+      | ApiForbiddenResponse;
+
+    @doc("Record a member's death.")
+    @operationId("deceaseMembership")
+    @post
+    @route("/{membershipId}/deceased")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    deceaseMembership(
+      @path membershipId: string,
+      @body body: MembershipDeceasedRequest
     ): ApiOkResponse<Membership>
       | ApiBadRequestResponse
       | ApiNotFoundResponse

@@ -210,8 +210,10 @@ import { listMemberships } from '../../handlers/association:member/listMembershi
 import { getMembership } from '../../handlers/association:member/getMembership';
 import { updateMembership } from '../../handlers/association:member/updateMembership';
 import { deleteMembership } from '../../handlers/association:member/deleteMembership';
+import { deceaseMembership } from '../../handlers/association:member/deceaseMembership';
 import { reinstateMembership } from '../../handlers/association:member/reinstateMembership';
 import { renewMembership } from '../../handlers/association:member/renewMembership';
+import { resignMembership } from '../../handlers/association:member/resignMembership';
 import { terminateMembership } from '../../handlers/association:member/terminateMembership';
 import { createOfficerTerm } from '../../handlers/association:member/createOfficerTerm';
 import { listOfficerTerms } from '../../handlers/association:member/listOfficerTerms';
@@ -580,8 +582,10 @@ export const registry = {
   getMembership,
   updateMembership,
   deleteMembership,
+  deceaseMembership,
   reinstateMembership,
   renewMembership,
+  resignMembership,
   terminateMembership,
   createOfficerTerm,
   listOfficerTerms,

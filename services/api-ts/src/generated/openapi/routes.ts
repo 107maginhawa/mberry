@@ -1250,6 +1250,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.deleteMembership as unknown as Handler
   );
 
+  // deceaseMembership
+  app.post('/association/member/memberships/:membershipId/deceased',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.DeceaseMembershipParams, validationErrorHandler),
+    zValidator('json', validators.DeceaseMembershipBody, validationErrorHandler),
+    registry.deceaseMembership as unknown as Handler
+  );
+
   // reinstateMembership
   app.post('/association/member/memberships/:membershipId/reinstate',
     authMiddleware({ roles: ["association:admin"] }),
@@ -1262,6 +1270,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.RenewMembershipParams, validationErrorHandler),
     registry.renewMembership as unknown as Handler
+  );
+
+  // resignMembership
+  app.post('/association/member/memberships/:membershipId/resign',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.ResignMembershipParams, validationErrorHandler),
+    zValidator('json', validators.ResignMembershipBody, validationErrorHandler),
+    registry.resignMembership as unknown as Handler
   );
 
   // terminateMembership
