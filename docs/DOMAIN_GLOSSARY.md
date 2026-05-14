@@ -182,3 +182,97 @@ Exception: `nationalOrgId` is used in royalty split schemas for the national bod
 | **Locale** | Language + regional settings (e.g., `en-PH`, `fil-PH`). |
 | **Multi-currency** | Different currencies per association (PHP, SGD, etc.). Amounts display in the association's configured currency. |
 | **Regulatory Framework** | Country-specific compliance rules. Pluggable per association (DPA 2012, PDPA, GDPR). |
+
+---
+
+## DDD Classification
+
+All classifications below are **[INFERRED]** from codebase analysis (schema structure, handler relationships, event patterns). They have not been validated through a formal domain modeling exercise.
+
+| Entity | Classification | Aggregate Root? | Domain Events (past tense) | Bounded Context |
+|--------|---------------|----------------|---------------------------|-----------------|
+| Person | Entity | Yes — owns notification preferences, privacy settings | PersonCreated, PersonUpdated, PersonAnonymized | Identity |
+| Membership | Entity | Yes — owns applications, status history | MembershipApproved, MembershipSuspended, MembershipResigned, MembershipDeceased | Membership |
+| Organization | Entity | Yes — owns positions, officer terms, dues configs | OrganizationCreated | Platform Admin |
+| Association | Entity | Yes — owns organizations | AssociationCreated | Platform Admin |
+| Officer Term | Entity | No — child of Organization | OfficerTermCreated, OfficerTermExpired | Governance |
+| Credit Entry | Entity | No — child of Membership cycle | CreditAwarded, CreditVerified, CreditRejected | Training/CPD |
+| Dues Invoice | Entity | Yes — owns payment records | InvoiceGenerated, InvoicePaid, InvoiceCancelled | Billing |
+| Dues Payment | Entity | No — child of Dues Invoice | PaymentRecorded, PaymentConfirmed, PaymentRefunded | Billing |
+| Booking | Entity | Yes — owns time slots | BookingConfirmed, BookingCancelled, BookingNoShow | Scheduling |
+| Event | Entity | Yes — owns registrations, check-ins | EventPublished, EventCancelled, EventCompleted | Events |
+| Training | Entity | Yes — owns enrollments | TrainingPublished, TrainingCompleted | Training/CPD |
+| Election | Entity | Yes — owns nominations, ballots | ElectionOpened, ElectionPublished, ElectionCancelled | Governance |
+| Chat Room | Entity | Yes — owns messages | ChatRoomCreated, ChatRoomArchived | Communications |
+| Notification Preference | Value Object | No — owned by Person | — | Identity |
+| Privacy Settings | Value Object | No — owned by Person | — | Identity |
+| Address / Contact Info | Value Object | No — stored as JSONB on Person | — | Identity |
+| Credential Template | Entity | No — owned by Organization | CredentialTemplateCreated | Credentials |
+
+---
+
+## Bounded Contexts
+
+Eight bounded context candidates identified from codebase structure and domain relationships.
+
+### 1. Identity
+- **Modules/Entities:** Person, Notification Preference, Privacy Settings, Address/Contact Info
+- **Key Invariants:** One Person per email address globally. PII centralized — no other context stores name/email/phone directly.
+
+### 2. Membership
+- **Modules/Entities:** Membership, applications, status history, transfers, cross-org matching
+- **Key Invariants:** Membership status derived from `dues_expiry_date` (never stored as mutable field). Status is per-org, not global. A person can hold independent memberships across multiple organizations.
+
+### 3. Billing
+- **Modules/Entities:** Dues Config, Dues Invoice, Dues Payment, Fund Allocation, Royalty Split
+- **Key Invariants:** Fund allocation percentages must sum to 100% per org. Rounding remainder absorbed by last fund. Two-level payment architecture (platform gateway vs org gateway).
+
+### 4. Training/CPD
+- **Modules/Entities:** Training, Credit Entry, Accredited Provider, Credit Cycle, Credit Transcript
+- **Key Invariants:** AUTO credits generated only on confirmed attendance. Credit cycle duration configured per association (1, 2, or 3 years). Excess credits carry over to next cycle.
+
+### 5. Governance
+- **Modules/Entities:** Officer Term, Position, Election, Nomination, Ballot
+- **Key Invariants:** Officer terms are time-bounded. President/Treasurer/Secretary require 2FA. Only active officers can perform governance mutations.
+
+### 6. Events
+- **Modules/Entities:** Event, Registration, Check-in, Capacity Management
+- **Key Invariants:** Events are internal to an organization by default. Registration requires active membership status.
+
+### 7. Communications
+- **Modules/Entities:** Chat Room, Message, Video Call, Announcement, Message Template, Scheduled Message, Subscription Topic
+- **Key Invariants:** Real-time (comms) and async broadcast (communication) are separate subsystems. Announcements are one-to-many officer-authored posts.
+
+### 8. Platform Admin
+- **Modules/Entities:** Association, Organization, Feature Flag, Platform Administrator, Impersonation
+- **Key Invariants:** Platform Administrators are not affiliated with any association. Feature flags control module availability per org subscription tier.
+
+---
+
+## Anti-Corruption Layer Recommendations
+
+Three missing Anti-Corruption Layers (ACLs) identified during codebase audit. Currently, all modules import directly from each other via `@/handlers/` paths with no abstraction boundary. These are recommendations for future refactoring, not current state.
+
+### 1. Person <-> Membership
+
+**Current state:** The Person module directly imports membership repositories to check membership status when rendering person profiles.
+
+**Problem:** Changes to membership schema or status computation logic can break person module handlers unexpectedly.
+
+**Recommendation:** Introduce a shared interface or internal API for querying membership status from the person context. The person module should not depend on membership repository internals.
+
+### 2. Dues <-> Membership
+
+**Current state:** The Dues module directly imports `membership-lifecycle` utilities to transition membership status after payment confirmation.
+
+**Problem:** Tight coupling to the membership state machine. Changes to status transitions (e.g., adding a new status) require coordinated changes in the dues module.
+
+**Recommendation:** Dues should emit domain events (e.g., `InvoicePaid`) that the membership context subscribes to, rather than directly invoking membership state transitions.
+
+### 3. Email <-> Membership
+
+**Current state:** The Email module directly imports membership schema to check for deceased or suppressed members before sending.
+
+**Problem:** Email delivery logic is coupled to membership domain concepts. Adding new suppression reasons requires changes in the email module.
+
+**Recommendation:** Introduce a `DeliveryEligibility` interface that the email module queries. The membership context implements this interface, encapsulating suppression logic behind a stable contract.
