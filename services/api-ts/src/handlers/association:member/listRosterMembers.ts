@@ -39,16 +39,23 @@ export async function listRosterMembers(
   const offset = (page - 1) * pageSize;
 
   // OPS-01/OPS-04: Use enriched query with dues + training subqueries + DB-level filters
-  const result = await repo.listMembersWithOfficerStatus({
-    organizationId: query.organizationId,
-    status: query.status,
-    categoryId: query.categoryId,
-    search: query.q ?? query.search,
-    duesStatus: query.duesStatus,
-    trainingCompliant: query.trainingCompliant,
-    limit: pageSize,
-    offset,
-  });
+  let result: Awaited<ReturnType<typeof repo.listMembersWithOfficerStatus>>;
+  try {
+    result = await repo.listMembersWithOfficerStatus({
+      organizationId: query.organizationId,
+      status: query.status,
+      categoryId: query.categoryId,
+      search: query.q ?? query.search,
+      duesStatus: query.duesStatus,
+      trainingCompliant: query.trainingCompliant,
+      limit: pageSize,
+      offset,
+    });
+  } catch (err: any) {
+    const logger = ctx.get('logger' as any) as any;
+    logger?.error({ err, organizationId: query.organizationId }, 'Roster query failed');
+    return ctx.json({ error: 'Failed to load roster' }, 500);
+  }
 
   // Flatten nested { membership, person, category } + officer status fields
   const data = result.data.map((row: any) => {

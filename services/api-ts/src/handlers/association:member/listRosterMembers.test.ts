@@ -217,6 +217,23 @@ describe('listRosterMembers handler', () => {
     // or returns 401 response
   });
 
+  test('returns 500 with error message when repo throws (defensive error handling)', async () => {
+    stubRepo(MembershipRepository, {
+      listMembersWithOfficerStatus: async () => {
+        throw new Error('relation "credit_entry" does not exist');
+      },
+    });
+
+    const ctx = makeCtx({
+      _query: { organizationId: 'org-1', page: 1, pageSize: 20 },
+    });
+
+    const res = await listRosterMembers(ctx as any) as any;
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('Failed to load roster');
+  });
+
   test('returns 200 with duesInvoiceStatus, creditsEarned, trainingCompliant per row', async () => {
     const rosterRow = makeRosterRow();
     stubRepo(MembershipRepository, {

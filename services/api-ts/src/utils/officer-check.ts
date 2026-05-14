@@ -86,7 +86,7 @@ export async function requirePosition(
   // Case-insensitive position title matching (D-08)
   const normalizedAllowed = allowedTitles.map(t => t.toLowerCase());
   const hasMatch = terms.some(t =>
-    normalizedAllowed.includes((t.positionTitle as string).toLowerCase()),
+    normalizedAllowed.includes(((t.positionTitle as string) || '').toLowerCase()),
   );
 
   if (!hasMatch) {
