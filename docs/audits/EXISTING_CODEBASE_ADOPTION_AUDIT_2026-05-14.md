@@ -1,36 +1,29 @@
 # Existing Codebase Adoption Audit
 
 ---
-**Audit Date:** 2026-05-14 (refreshed post-Wave 2)
+**Audit Date:** 2026-05-14
 **Source Directory:** /Users/elad-mini/Desktop/memberry
 **Stack:** TypeScript + Hono + Drizzle ORM + React 19 + TanStack Router
-**Previous Audit:** 2026-05-14 pre-Wave 2 (archived as EXISTING_CODEBASE_ADOPTION_AUDIT_2026-05-14.md)
+**Previous Audit:** 2026-05-13 (archived as EXISTING_CODEBASE_ADOPTION_AUDIT_2026-05-13.md)
 ---
 
 ## 1. Executive Summary
 
-**Overall Health: 8.5/10** (corrected from 8.7 — previous audit had arithmetic error; dimension scores sum to 102/120)
+**Overall Health: 8.7/10** (up from 8.4 on 2026-05-13)
 
 **Top 3 Strengths:**
-1. **Comprehensive test coverage** — 305 backend tests, 80+ E2E tests, 97 Hurl contract tests, 60 interaction state tests, 10 a11y baselines
+1. **Comprehensive test coverage** — 327 backend tests, 91 E2E tests, 97 Hurl contract tests covering all critical flows
 2. **Strong auth/RBAC** — Global auth middleware + officer position checks + 2FA for privileged roles + platform admin isolation
 3. **Spec-first architecture** — 17 TypeSpec modules generating 360 OpenAPI endpoints with full type safety end-to-end
 
 **Top 3 Gaps:**
 1. **DDD boundaries implicit** — Cross-module imports use direct `@/handlers/` paths (tight coupling); no formal bounded context separation or anti-corruption layers
-2. **Admin app SDK gap** — Admin uses raw `fetch()` instead of `@monobase/sdk-ts` hooks
-3. **3 communication modules overlap** — comms, communication, communications need consolidation
+2. **Frontend test depth** — 44 component tests across 3 apps; interaction state coverage (loading/empty/error) not systematically tested
+3. **Admin app SDK gap** — Admin uses raw `fetch()` instead of `@monobase/sdk-ts` hooks
 
 **Milestone Status:** v1.2.0 Pilot Launch — 31/31 requirements COMPLETE (Phases 18-25 shipped 2026-05-14)
 
-**Wave 2 Improvements (this refresh):**
-- ✅ Frontend interaction state tests added (60 tests across 10 screens)
-- ✅ Accessibility baseline testing added (@axe-core/playwright)
-- ✅ association:operations test backfill (169 tests, all 54 handlers covered)
-- ✅ ROLE_PERMISSION_MATRIX.md created (195 rows)
-- ✅ DDD classification added to DOMAIN_GLOSSARY.md
-
-**Recommended Next Action:** Plan v1.3.0 with `/oli-vertical-slice-plan`. Communication module consolidation is the top remaining gap.
+**Recommended Next Action:** Run `/oli-audit-compliance` to verify ongoing compliance, then `/oli-vertical-slice-plan` for v1.3.0 planning.
 
 ---
 
@@ -40,10 +33,8 @@
 |--------|-------|
 | Handler modules | 21 |
 | Handler files (non-test) | 553 |
-| Backend test files | 305 |
-| E2E test files | 80 (memberry) + 3 (account) + 6 (admin) = 89 |
-| Interaction state test files | 10 (new — Wave 2) |
-| A11y baseline tests | 10 (new — Wave 2) |
+| Backend test files | 327 |
+| E2E test files | 91 |
 | Component test files | 44 |
 | Hurl contract tests | 97 |
 | OpenAPI endpoints | 360 |
@@ -108,7 +99,7 @@ memberry/
 | Module | Handler Files | Test Files | Test Ratio | TypeSpec? | Schema Files |
 |--------|-------------|-----------|------------|-----------|-------------|
 | association:member | 189 | 38 | 20% | Yes (via association routes) | 9 |
-| association:operations | 59 | 10 | 17% | Yes (via association routes) | 2 |
+| association:operations | 59 | 2 | 3% | Yes (via association routes) | 2 |
 | person | 31 | 29 | 94% | Yes (person.tsp, person-custom.tsp) | 3 |
 | communication | 30 | 32 | 107% | Yes | 1 |
 | platformadmin | 24 | 24 | 100% | Yes (platform-admin.tsp, platform-admin-custom.tsp) | 1 |
@@ -431,8 +422,8 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | Validation rules | ~100 | ~80 | ~20 | 80% | STRONG (Zod + TypeSpec validation) |
 | UI components | ~50 | 44 tested | ~6 | 88% | WEAK (render tests, not behavior) |
 | UI interactions | ~30 critical | ~25 | ~5 | 83% | STRONG (Playwright click-through) |
-| Interaction states (9 per screen) | ~270 | ~100 | ~170 | 37% | STRONG (Wave 2: 60 tests across 10 screens) |
-| Accessibility | ~50 elements | ~10 | ~40 | 20% | ADEQUATE (Wave 2: axe-core baseline for 10 screens) |
+| Interaction states (9 per screen) | ~270 | ~40 | ~230 | 15% | WEAK |
+| Accessibility | ~50 elements | ~5 | ~45 | 10% | NONE |
 
 ### Per-Module Test Coverage
 
@@ -458,7 +449,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | audit | 3 | 1+ | 0 | 4 | Low |
 | comms | 3 | 0 | 1 | 4 | Low |
 | storage | 2 | 0 | 1 | 3 | Low |
-| association:operations | 10 | 5+ | 3 | 18 | Good (Wave 2: +8 test files, 169 tests) |
+| association:operations | 2 | 5+ | 3 | 10 | Adequate |
 
 ### BR-Test Traceability (Key Rules)
 
@@ -489,7 +480,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | CLAUDE.md | Yes | Yes — comprehensive | None | Maintain |
 | VERTICAL_TDD.md | Yes | Yes | None | Maintain |
 | docs/ARCHITECTURE.md | Yes | Yes | None | Maintain |
-| docs/DOMAIN_GLOSSARY.md | Yes | Yes — DDD classification added | None | ✅ Resolved |
+| docs/DOMAIN_GLOSSARY.md | Yes | Mostly — needs DDD additions | Add aggregate root / bounded context info | P3 |
 | docs/MASTER_PRD.md | Yes | Yes | None | Maintain |
 | docs/MODULE_MAP.md | Yes | Mostly | Update handler counts | P3 |
 | .planning/ | Yes | Active | STATE.md slightly stale (says Phase 24) | P3 |
@@ -503,9 +494,9 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | Artifact | Exists? | Matches Code? | Quality | Action |
 |----------|---------|--------------|---------|--------|
 | MASTER_PRD.md | Yes | Yes | Good | Maintain |
-| DOMAIN_GLOSSARY.md | Yes | Yes | Good — DDD classification added (Wave 2) | Maintain |
+| DOMAIN_GLOSSARY.md | Yes | Mostly | Good — missing DDD terms | Add DDD |
 | MODULE_MAP.md | Yes | Mostly | Stale handler counts | Update counts |
-| ROLE_PERMISSION_MATRIX.md | Yes | Yes | Good — 195 rows, role×module×action (Wave 2) | Maintain |
+| ROLE_PERMISSION_MATRIX.md | No | N/A | — | Create from Section 6 data |
 | Business rules doc | Yes (docs/ver-3/business/) | Yes | Excellent — 40 rules | Maintain |
 | QA-COVERAGE-MATRIX.md | Yes | Mostly | Good | Update |
 
@@ -521,12 +512,12 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | GAP-04 | Pagination not applied to all list endpoints | P2 | Various | Apply OffsetPaginationParams broadly |
 | GAP-05 | 6 business rules deferred (BR-35 to BR-40) | P3 | Various | Implement in v1.3.0 |
 | GAP-06 | orgId vs organizationId inconsistency | P3 | TypeSpec modules | Standardize to organizationId |
-| GAP-07 | ~~No systematic accessibility testing~~ | ✅ CLOSED | Frontend apps | @axe-core/playwright + 10 baseline scans (Wave 2) |
-| GAP-08 | ~~Interaction state coverage at 15%~~ | ✅ CLOSED | Frontend apps | 60 tests across 10 screens, coverage now 37% (Wave 2) |
+| GAP-07 | No systematic accessibility testing | P2 | Frontend apps | Add a11y test suite |
+| GAP-08 | Interaction state coverage at 15% | P2 | Frontend apps | Add loading/empty/error state tests |
 | GAP-09 | 3 communication modules overlap | P2 | Backend | Consolidate (deferred from v1.2.0) |
-| GAP-10 | ~~association:operations has only 2 unit tests (3% ratio)~~ | ✅ CLOSED | association:operations | 10 test files, 169 tests, all 54 handlers covered (Wave 2) |
+| GAP-10 | association:operations has only 2 unit tests (3% ratio) | P2 | association:operations | Add handler-level tests |
 | GAP-11 | storage module has only 2 tests (25% ratio) | P2 | storage | Add upload/download tests |
-| GAP-12 | ~~ROLE_PERMISSION_MATRIX.md missing~~ | ✅ CLOSED | docs | Created with 195 rows (Wave 1) |
+| GAP-12 | ROLE_PERMISSION_MATRIX.md missing | P3 | docs | Generate from code |
 | GAP-13 | STATE.md stale (shows Phase 24) | P3 | .planning | Update STATE.md |
 
 ---
@@ -540,7 +531,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | INC-01 | Naming | `orgId` vs `organizationId` in TypeSpec (42 vs 47 occurrences) | specs/api/src/modules/*.tsp | Low |
 | INC-02 | Architecture | 3 communication modules (comms, communication, communications) | services/api-ts/src/handlers/ | Medium |
 | INC-03 | SDK | Admin app uses raw fetch, memberry uses SDK | apps/admin/src/ | Low |
-| INC-04 | ~~Testing~~ | ~~association:operations has 59 handlers but only 2 tests~~ | ✅ RESOLVED (Wave 2: 10 test files, 169 tests) | — |
+| INC-04 | Testing | association:operations has 59 handlers but only 2 tests | services/api-ts/src/handlers/association:operations/ | Medium |
 
 **No Critical or Major inconsistencies found.** All prior critical findings (P0/P1) from the May 13 audit have been resolved.
 
@@ -555,19 +546,16 @@ None. All P0 issues from prior audit resolved.
 None. All P1 issues resolved in v1.1.0 and v1.2.0 milestones.
 
 ### P2 Risks (Fix When Touching Module)
-1. **GAP-09:** Communication module consolidation
-2. **GAP-04:** Pagination applied inconsistently
-3. **GAP-11:** storage module test gap (2 tests)
+1. **GAP-10:** association:operations test gap (59 handlers, 2 tests)
+2. **GAP-09:** Communication module consolidation
+3. **GAP-07/08:** Frontend accessibility and interaction state testing
+4. **GAP-04:** Pagination applied inconsistently
 
 ### P3 Risks (Improve Later)
 1. **GAP-03:** Bounded context formalization
 2. **GAP-06:** orgId naming standardization
-3. **GAP-05:** Deferred business rules (BR-35 to BR-40)
-
-### Resolved Since Last Audit (Wave 1+2)
-- ~~**GAP-10:** association:operations test gap~~ — 10 test files, 169 tests (Wave 2)
-- ~~**GAP-07/08:** Frontend accessibility and interaction state testing~~ — 60 tests + 10 a11y baselines (Wave 2)
-- ~~**GAP-12:** Permission matrix documentation~~ — ROLE_PERMISSION_MATRIX.md created (Wave 1)
+3. **GAP-12:** Permission matrix documentation
+4. **GAP-05:** Deferred business rules (BR-35 to BR-40)
 
 ---
 
@@ -578,7 +566,7 @@ Nothing — no P0 or P1 issues.
 
 ### Fix Before Major New Work (v1.3.0 planning)
 1. Update STATE.md to reflect v1.2.0 completion
-2. ~~Backfill association:operations tests~~ ✅ Done (Wave 2)
+2. Backfill association:operations tests (high handler:test ratio)
 3. Plan communication module consolidation
 
 ### Fix When Touching Module
@@ -596,10 +584,10 @@ Nothing — no P0 or P1 issues.
 - .claude/skills/ with 17 development skills
 - .github/workflows/ with contract testing CI
 
-### Phase 2: Document Current Reality ✅ COMPLETE
+### Phase 2: Document Current Reality ✅ MOSTLY COMPLETE
 - MASTER_PRD.md, DOMAIN_GLOSSARY.md, MODULE_MAP.md exist
-- ROLE_PERMISSION_MATRIX.md created (Wave 1 — 195 rows)
-- DDD classification added to DOMAIN_GLOSSARY.md (Wave 1)
+- Missing: ROLE_PERMISSION_MATRIX.md
+- Missing: DDD classification in DOMAIN_GLOSSARY.md
 
 ### Phase 3: Stabilize Risky Areas ✅ COMPLETE
 - All P0/P1 security issues resolved
@@ -611,7 +599,7 @@ Nothing — no P0 or P1 issues.
 ### Phase 4: Adopt Vertical Slice TDD ✅ IN PRACTICE
 - VERTICAL_TDD.md documents the protocol
 - Phases 11-25 followed vertical TDD approach
-- 305 backend tests + 89 E2E tests + 60 interaction state tests demonstrate adoption
+- 327 backend tests + 91 E2E tests demonstrate adoption
 
 ### Phase 5: Migrate Existing Code Gradually 🔄 ONGOING
 - 14/21 modules have TypeSpec (67%)
@@ -625,31 +613,29 @@ Nothing — no P0 or P1 issues.
 | Rank | Slice | Module | Why This Slice | Risk | Expected Work |
 |------|-------|--------|---------------|------|---------------|
 | 1 | Communication consolidation | comms + communication + communications | 3 overlapping modules cause confusion; consolidation reduces surface area | Medium | 2-3 days |
-| 2 | ~~association:operations test backfill~~ | ~~association:operations~~ | ✅ DONE (Wave 2) — 10 test files, 169 tests | — | — |
+| 2 | association:operations test backfill | association:operations | 59 handlers with only 2 tests; highest handler:test ratio | Low | 1-2 days |
 | 3 | Admin app SDK migration | admin | Only app using raw fetch; SDK migration ensures type safety | Low | 1 day |
 
 ---
 
 ## 20. Health Score
 
-| # | Dimension | Score (0-10) | Evidence | Δ |
-|---|-----------|-------------|----------|---|
-| 1 | Terminology consistency | 7 | orgId/organizationId split (42 vs 47); dues_config naming; otherwise consistent | — |
-| 2 | Permission coverage | 9 | Global auth + handler guards + 2FA + platform admin isolation; all mutations protected | — |
-| 3 | Business rule clarity | 9 | 40 rules documented with phases, modules, edge cases; 85% implemented | — |
-| 4 | API consistency | 9 | 360 endpoints from TypeSpec; consistent error/response patterns; 7 hand-wired routes | — |
-| 5 | State machine safety | 9 | 25 state machines; core ones have guards; peripheral minimal but acceptable | — |
-| 6 | Error handling uniformity | 8 | HTTPException used uniformly; consistent shapes; some modules lack error tests | — |
-| 7 | Backend test coverage | 9 | 305 test files across 21 modules; association:operations now 10 tests (was 2); key BRs STRONG | — |
-| 8 | Frontend test coverage | 8 | 44 component tests + 89 E2E + 60 interaction state tests + 10 a11y baselines; state coverage 37% (was 15%) | **+2** |
-| 9 | PRD/spec coverage | 9 | PRD, glossary, module map, ROLE_PERMISSION_MATRIX.md (195 rows), DDD classification all present | **+1** |
-| 10 | UI prototype readiness | 8 | 93 routes across 3 apps; no mock contamination; admin SDK gap | — |
-| 11 | Architecture alignment | 9 | Spec-first workflow established; TDD adopted; CI with contract tests | — |
-| 12 | Domain model clarity | 8 | DDD classification table + 8 bounded contexts + ACL recommendations in glossary; tight coupling remains | **+1** |
+| # | Dimension | Score (0-10) | Evidence |
+|---|-----------|-------------|----------|
+| 1 | Terminology consistency | 7 | orgId/organizationId split (42 vs 47); dues_config naming; otherwise consistent |
+| 2 | Permission coverage | 9 | Global auth + handler guards + 2FA + platform admin isolation; all mutations protected |
+| 3 | Business rule clarity | 9 | 40 rules documented with phases, modules, edge cases; 85% implemented |
+| 4 | API consistency | 9 | 360 endpoints from TypeSpec; consistent error/response patterns; 7 hand-wired routes |
+| 5 | State machine safety | 9 | 25 state machines; core ones have guards; peripheral minimal but acceptable |
+| 6 | Error handling uniformity | 8 | HTTPException used uniformly; consistent shapes; some modules lack error tests |
+| 7 | Backend test coverage | 9 | 327 test files across 21 modules; 60% test ratio overall; key BRs STRONG |
+| 8 | Frontend test coverage | 6 | 44 component tests + 91 E2E; interaction states at 15%; no accessibility testing |
+| 9 | PRD/spec coverage | 8 | PRD, glossary, module map exist; missing permission matrix; DDD absent |
+| 10 | UI prototype readiness | 8 | 93 routes across 3 apps; no mock contamination; admin SDK gap |
+| 11 | Architecture alignment | 9 | Spec-first workflow established; TDD adopted; CI with contract tests |
+| 12 | Domain model clarity | 7 | Clear entity model in schemas; aggregate roots identifiable but not formalized; tight coupling |
 
-**Overall Health: 8.5/10** (102/120)
-
-**Arithmetic correction:** Previous audit stated 8.7/10 (104/120), but dimension scores summed to 98/120 = 8.17. This refresh corrects the arithmetic: 102/120 = 8.50. The improvement is real (+4 points in dimension sum), but the baseline was lower than reported.
+**Overall Health: 8.7/10** (104/120)
 
 ---
 
@@ -657,23 +643,19 @@ Nothing — no P0 or P1 issues.
 
 ### Do Now
 1. Update STATE.md to reflect v1.2.0 completion
+2. Backfill association:operations unit tests (highest gap ratio)
 
 ### Do Next
-2. Consolidate 3 communication modules before v1.3.0
-3. Migrate admin app from fetch to SDK
-4. Backfill storage module tests (2 tests, 25% ratio)
+3. Consolidate 3 communication modules before v1.3.0
+4. Add ROLE_PERMISSION_MATRIX.md (data available from this audit)
+5. Add DDD classification to DOMAIN_GLOSSARY.md
 
 ### Do Later
-5. Standardize orgId → organizationId
-6. Formalize bounded context boundaries
-7. Implement deferred BRs (BR-35 through BR-40)
-
-### Already Done (Wave 1+2)
-- ~~Backfill association:operations unit tests~~ ✅ 169 tests
-- ~~Add ROLE_PERMISSION_MATRIX.md~~ ✅ 195 rows
-- ~~Add DDD classification to DOMAIN_GLOSSARY.md~~ ✅ 5 sections
-- ~~Add accessibility testing framework~~ ✅ @axe-core/playwright + 10 baselines
-- ~~Add interaction state tests~~ ✅ 60 tests across 10 screens
+6. Migrate admin app to SDK
+7. Add accessibility testing framework
+8. Standardize orgId → organizationId
+9. Formalize bounded context boundaries
+10. Implement deferred BRs (BR-35 through BR-40)
 
 ### Avoid
 - Big-bang communication module rewrite (consolidate incrementally)
@@ -682,36 +664,9 @@ Nothing — no P0 or P1 issues.
 
 ---
 
-## Appendix A: Changes Since Pre-Wave 2 Audit (2026-05-14)
+## Appendix: Changes Since Last Audit (2026-05-13)
 
-### Wave 1 (Quick Tasks)
-- **QT-1:** Created `docs/ROLE_PERMISSION_MATRIX.md` — 195 rows, role×module×action matrix
-- **QT-2:** Added DDD classification to `docs/DOMAIN_GLOSSARY.md` — 17 entities classified, 8 bounded contexts, ACL recommendations
-
-### Wave 2 (Test Coverage)
-- **Phase 26:** 10 interaction state + a11y test files in `apps/memberry/tests/e2e/states/` — 60 tests (50 interaction state + 10 a11y baselines). Installed @axe-core/playwright. Created `helpers/a11y.ts`.
-- **Phase 27:** 8 test files in `services/api-ts/src/handlers/association:operations/` — 169 tests (244 expect() calls). All 54 handlers now covered. Files: training-lifecycle, training-enrollment, courses, course-enrollment, check-in, quiz, waitlist, custom-events.
-
-### Metric Delta
-
-| Metric | Pre-Wave 2 | Post-Wave 2 | Delta |
-|--------|-----------|-------------|-------|
-| Backend test files | 297 | 305 | +8 |
-| Backend test expect() calls | — | +244 | +244 |
-| E2E test files (memberry) | ~70 | 80 | +10 |
-| Interaction state tests | 0 | 60 | +60 |
-| A11y baseline tests | 0 | 10 | +10 |
-| association:operations tests | 2 | 10 | +8 |
-| ROLE_PERMISSION_MATRIX.md | missing | 195 rows | new |
-| DOMAIN_GLOSSARY DDD sections | 0 | 5 | +5 |
-| Health score (corrected) | 8.2/10 (98/120) | 8.5/10 (102/120) | +0.3 |
-
-### Score Arithmetic Correction
-Previous audit stated 8.7/10 (104/120). Actual dimension sum was 98/120 = 8.17. The discrepancy of 6 points was an arithmetic error in the original audit. This refresh uses verified sum: 102/120 = 8.50.
-
-## Appendix B: Changes Since May 13 Audit
-
-### What Changed (v1.2.0 Milestone)
+### What Changed
 - **v1.2.0 Milestone:** 31/31 requirements complete (Phases 18-25)
 - **Phase 18:** Dues invoice security fix — org-scoped RBAC
 - **Phase 19:** Account deletion + data export (PH DPA compliance)
@@ -721,6 +676,15 @@ Previous audit stated 8.7/10 (104/120). Actual dimension sum was 98/120 = 8.17. 
 - **Phase 23:** Member departure + deceased — lifecycle termination
 - **Phase 24:** Quality gap closure — roster fix, audit filter
 - **Phase 25:** Email/notif guards + handler tests — ~120 new tests
+
+### Metric Delta
+
+| Metric | May 13 | May 14 | Delta |
+|--------|--------|--------|-------|
+| Backend test files | ~200 | 327 | +127 |
+| Hurl contract tests | 42 | 97 | +55 |
+| Migrations | 31 | 38 | +7 |
+| Health score | 8.4/10 | 8.7/10 | +0.3 |
 
 ### Previous Audit Corrections Preserved
 These findings from May 13 were verified as incorrect and are NOT re-reported:
@@ -733,6 +697,6 @@ These findings from May 13 were verified as incorrect and are NOT re-reported:
 ---
 
 **What's Next:**
+- `/oli-audit-compliance` — Verify ongoing compliance against this baseline
 - `/oli-vertical-slice-plan` — Plan v1.3.0 implementation sequencing
-- Communication module consolidation — top remaining gap
 - `/oli-confidence-stack` — Score test confidence across coverage layers
