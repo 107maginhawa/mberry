@@ -8,6 +8,7 @@ import {
 } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
+import { Checkbox } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Separator } from '@monobase/ui'
 import { toast } from 'sonner'
@@ -32,6 +33,9 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
   waitlisted: { label: 'Waitlisted', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
 }
 
+// Approvable statuses for bulk approve
+const APPROVABLE_STATUSES: AppStatus[] = ['submitted', 'underReview']
+
 export function ApplicationList({ orgId }: ApplicationListProps) {
   const queryClient = useQueryClient()
   const [statusFilter, setStatusFilter] = useState<AppStatus>('submitted')
@@ -52,6 +56,11 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
     if (sortBy === 'name') return (a.name ?? a.personId ?? '').localeCompare(b.name ?? b.personId ?? '')
     return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
   })
+
+  // Applications that can be approved (submitted or underReview)
+  const approvableApplications = applications.filter((app) =>
+    APPROVABLE_STATUSES.includes(app.status as AppStatus)
+  )
 
   const invalidateApplications = () => {
     queryClient.invalidateQueries({
@@ -81,6 +90,41 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
     },
   })
 
+  // Bulk approve mutation — calls POST /api/association/member/applications/bulk-approve
+  // The SDK does not yet have a generated hook (endpoint added in plan 03 backend,
+  // codegen not re-run), so we call the API directly via the Vite proxy.
+  const bulkApprove = useMutation({
+    mutationFn: async ({ applicationIds }: { applicationIds: string[] }) => {
+      const response = await fetch('/api/association/member/applications/bulk-approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationIds }),
+        credentials: 'include',
+      })
+      if (!response.ok) {
+        throw new Error(`Bulk approve failed: ${response.status}`)
+      }
+      return response.json() as Promise<{ succeeded: string[]; failed: { id: string; reason: string }[] }>
+    },
+    onSuccess: (data) => {
+      const { succeeded, failed } = data
+      if (failed.length === 0) {
+        toast.success(`${succeeded.length} application${succeeded.length !== 1 ? 's' : ''} approved`)
+      } else if (succeeded.length === 0) {
+        toast.error(`All ${failed.length} approval${failed.length !== 1 ? 's' : ''} failed`)
+      } else {
+        toast.warning(`${succeeded.length} approved, ${failed.length} failed`)
+      }
+      // Show individual failure reasons for partial failures
+      failed.forEach((f) => toast.error(`${f.id.slice(0, 8)}...: ${f.reason}`))
+      setSelectedIds(new Set())
+      invalidateApplications()
+    },
+    onError: () => {
+      toast.error('Bulk approve failed', { description: 'Please try again.' })
+    },
+  })
+
   const reviewMutation = {
     mutate: ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
       if (status === 'approved') {
@@ -100,11 +144,37 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
     variables: approveMutation.variables ?? denyMutation.variables,
   }
 
+  // Select All toggle for approvable applications
+  const allApprovableSelected =
+    approvableApplications.length > 0 &&
+    approvableApplications.every((app) => selectedIds.has(app.id))
+
+  const toggleSelectAll = () => {
+    if (allApprovableSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(approvableApplications.map((app) => app.id)))
+    }
+  }
+
+  const canBulkApprove = APPROVABLE_STATUSES.includes(statusFilter)
+
   return (
     <div className="space-y-4">
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as AppStatus)}>
+        {/* Select All checkbox for bulk approve */}
+        {canBulkApprove && approvableApplications.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={allApprovableSelected}
+              onCheckedChange={toggleSelectAll}
+              aria-label="Select all approvable applications"
+            />
+            <span className="text-sm text-[var(--color-muted)]">All</span>
+          </div>
+        )}
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as AppStatus); setSelectedIds(new Set()) }}>
           <SelectTrigger className="w-44">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
@@ -131,18 +201,16 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
             {applications.length} result{applications.length !== 1 ? 's' : ''}
           </span>
         )}
-        {selectedIds.size > 0 && statusFilter === 'submitted' && (
+        {/* Bulk approve button — shown when applications are selected */}
+        {selectedIds.size > 0 && canBulkApprove && (
           <Button
             size="sm"
-            onClick={async () => {
-              for (const id of selectedIds) {
-                await reviewMutation.mutateAsync({ appId: id, status: 'approved' })
-              }
-              setSelectedIds(new Set())
-            }}
-            disabled={reviewMutation.isPending}
+            onClick={() => bulkApprove.mutate({ applicationIds: [...selectedIds] })}
+            disabled={bulkApprove.isPending}
           >
-            Approve {selectedIds.size} Selected
+            {bulkApprove.isPending
+              ? 'Approving...'
+              : `Approve ${selectedIds.size} Selected`}
           </Button>
         )}
       </div>
@@ -164,16 +232,16 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
         <div className="space-y-3">
           {applications.map((app: any) => (
             <div key={app.id} className="flex items-start gap-3">
-              {statusFilter === 'submitted' && (
-                <input
-                  type="checkbox"
+              {canBulkApprove && APPROVABLE_STATUSES.includes(app.status as AppStatus) && (
+                <Checkbox
                   checked={selectedIds.has(app.id)}
-                  onChange={(e) => {
+                  onCheckedChange={(checked) => {
                     const next = new Set(selectedIds)
-                    if (e.target.checked) { next.add(app.id) } else { next.delete(app.id) }
+                    if (checked) { next.add(app.id) } else { next.delete(app.id) }
                     setSelectedIds(next)
                   }}
-                  className="mt-5 h-4 w-4 rounded border-gray-300"
+                  className="mt-5"
+                  aria-label={`Select ${app.name ?? app.id}`}
                 />
               )}
               <div className="flex-1">
