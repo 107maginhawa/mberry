@@ -106,9 +106,9 @@
     - [x] 15-03-PLAN.md — Integration verification (response shape + integration test)
 
 - [x] **Phase 16: Mobile & Transfer Validation** (completed 2026-05-13)
-  - RED→GREEN: Transfer lifecycle tests — 16 unit tests covering full state machine (create → approve → complete, deny, reverse order, invalid transitions)
-  - RED→GREEN: Mobile viewport tests (375×812) — 9 E2E tests across dashboard, officer nav, payments, org pages
-  - Added mobile Playwright project (Chromium with 375×812 viewport)
+  - RED->GREEN: Transfer lifecycle tests — 16 unit tests covering full state machine (create -> approve -> complete, deny, reverse order, invalid transitions)
+  - RED->GREEN: Mobile viewport tests (375x812) — 9 E2E tests across dashboard, officer nav, payments, org pages
+  - Added mobile Playwright project (Chromium with 375x812 viewport)
   - **Verify:** 2181 API tests pass. 9 mobile E2E tests pass. No regressions.
   - **Deps:** Phase 14
   - **Plans:** 2 plans
@@ -247,7 +247,11 @@ Plans:
   2. Officer can mark a member as deceased with a date of death; the membership record reflects status `deceased`
   3. The membership status field uses an enum supporting resigned, deceased, expelled, and lapsed (not a boolean)
   4. Departed and deceased members are excluded from dues invoice generation and bulk notification sends
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 23-01-PLAN.md -- Schema + TypeSpec enum extension + codegen (resigned, deceased, expelled, dateOfDeath)
+- [ ] 23-02-PLAN.md -- resignMembership + deceaseMembership handlers with TDD
+- [ ] 23-03-PLAN.md -- Billing/notification exclusion guard tests (LIF-03)
 
 ### Phase 24: Quality Gap Closure
 **Goal**: Three pre-existing defects are resolved: the roster API 500, the audit log filter bug, and the deferred BR-35 through BR-40 business rules
@@ -298,6 +302,6 @@ Plans:
 | 20. Payment Flow | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 21. Officer Daily Ops | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
 | 22. PRC CPD Compliance | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
-| 23. Member Departure + Deceased | v1.2.0 | 0/? | Not started | — |
+| 23. Member Departure + Deceased | v1.2.0 | 0/3 | Not started | — |
 | 24. Quality Gap Closure | v1.2.0 | 0/? | Not started | — |
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/? | Not started | — |
