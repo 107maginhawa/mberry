@@ -126,7 +126,7 @@ export type NewAuditLogEntry = typeof auditLogEntries.$inferInsert;
 // Enum type exports for type safety
 export type AuditEventType = 'authentication' | 'data-access' | 'data-modification' | 'data-deletion' | 'system-config' | 'security' | 'compliance';
 export type AuditCategory = 'hipaa' | 'security' | 'privacy' | 'administrative' | 'clinical' | 'financial' | 'association';
-export type AuditAction = 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'delete-request' | 'delete-cancel' | 'anonymize' | 'export';
+export type AuditAction = 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'delete-request' | 'delete-cancel' | 'anonymize' | 'export' | 'resign' | 'deceased';
 export type AuditOutcome = 'success' | 'failure' | 'partial' | 'denied';
 export type AuditRetentionStatus = 'active' | 'archived' | 'pending-purge';
 export type UserType = 'client' | 'host' | 'admin' | 'system';
