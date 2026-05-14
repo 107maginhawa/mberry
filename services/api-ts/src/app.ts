@@ -50,6 +50,12 @@ import { createAuditMiddleware } from '@/middleware/audit';
 import { createRateLimiter } from '@/middleware/rate-limit';
 import { orgContextMiddleware, orgContextOptionalMiddleware } from '@/middleware/org-context';
 
+// PRC Accredited Providers (hand-wired, org-scoped)
+import { listAccreditedProviders } from '@/handlers/training/listAccreditedProviders';
+import { createAccreditedProvider } from '@/handlers/training/createAccreditedProvider';
+import { updateAccreditedProvider } from '@/handlers/training/updateAccreditedProvider';
+import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedProvider';
+
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -153,6 +159,12 @@ export function createApp(config: Config): App {
 
   // Register API routes
   registerOpenAPIRoutes(app as any);
+
+  // PRC Accredited Providers — hand-wired, org-scoped (no /api prefix per CLAUDE.md)
+  app.get('/accredited-providers/:organizationId', authMiddleware(), listAccreditedProviders);
+  app.post('/accredited-providers/:organizationId', authMiddleware(), createAccreditedProvider);
+  app.patch('/accredited-providers/:organizationId/:providerId', authMiddleware(), updateAccreditedProvider);
+  app.delete('/accredited-providers/:organizationId/:providerId', authMiddleware(), deleteAccreditedProvider);
 
   // Register WebSocket handlers
   registerWebSocketRoutes(app as App);
