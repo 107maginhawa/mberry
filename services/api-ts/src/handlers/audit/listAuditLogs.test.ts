@@ -240,6 +240,79 @@ describe('listAuditLogs', () => {
     expect(item.purgeAfter).toBeNull();
   });
 
+  test('forwards eventType filter to repository', async () => {
+    let capturedFilters: any = null;
+
+    stubRepo(AuditRepository, {
+      findMany: async (filters: any) => {
+        capturedFilters = filters;
+        return [];
+      },
+      count: async () => 0,
+      logEvent: async () => makeAuditEntry(),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'admin' },
+      organizationId: 'org-1',
+      _query: { eventType: 'data-access' },
+    });
+
+    await listAuditLogs(ctx as any);
+
+    expect(capturedFilters).toBeDefined();
+    expect(capturedFilters.eventType).toBe('data-access');
+  });
+
+  test('forwards category filter to repository', async () => {
+    let capturedFilters: any = null;
+
+    stubRepo(AuditRepository, {
+      findMany: async (filters: any) => {
+        capturedFilters = filters;
+        return [];
+      },
+      count: async () => 0,
+      logEvent: async () => makeAuditEntry(),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'admin' },
+      organizationId: 'org-1',
+      _query: { category: 'hipaa' },
+    });
+
+    await listAuditLogs(ctx as any);
+
+    expect(capturedFilters).toBeDefined();
+    expect(capturedFilters.category).toBe('hipaa');
+  });
+
+  test('forwards combined eventType + category filters to repository', async () => {
+    let capturedFilters: any = null;
+
+    stubRepo(AuditRepository, {
+      findMany: async (filters: any) => {
+        capturedFilters = filters;
+        return [];
+      },
+      count: async () => 0,
+      logEvent: async () => makeAuditEntry(),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'admin' },
+      organizationId: 'org-1',
+      _query: { eventType: 'data-modification', category: 'privacy' },
+    });
+
+    await listAuditLogs(ctx as any);
+
+    expect(capturedFilters).toBeDefined();
+    expect(capturedFilters.eventType).toBe('data-modification');
+    expect(capturedFilters.category).toBe('privacy');
+  });
+
   test('respects pagination query params', async () => {
     let capturedOptions: any = null;
 
