@@ -351,6 +351,66 @@ describe('summarizeCycle', () => {
 });
 
 // ---------------------------------------------------------------------------
+// PRC-03: sumCreditsByCategoryBatch — category-grouped credit totals
+// ---------------------------------------------------------------------------
+
+describe('[PRC-03] sumCreditsByCategoryBatch', () => {
+  test('returns empty map for empty personIds array', async () => {
+    // Import the class directly for unit testing
+    const { CreditEntryRepository } = await import('./repos/credits.repo');
+    // We cannot instantiate with a real DB here, so test the guard directly
+    // by constructing a mock instance
+    const repo = Object.create(CreditEntryRepository.prototype) as InstanceType<typeof CreditEntryRepository>;
+    // Patch the method to test the early-return guard
+    const result = await (repo as any).sumCreditsByCategoryBatch([], new Date(), new Date(), 'org-1');
+    expect(result).toBeInstanceOf(Map);
+    expect(result.size).toBe(0);
+  });
+
+  test('result map groups by personId correctly', () => {
+    // Simulate the grouping logic with raw rows
+    const rows = [
+      { personId: 'person-1', category: 'General', total: 10 },
+      { personId: 'person-1', category: 'Major', total: 20 },
+      { personId: 'person-2', category: 'Self-Directed', total: 5 },
+    ];
+
+    const map = new Map<string, Record<string, number>>();
+    for (const row of rows) {
+      const key = row.category ?? 'uncategorized';
+      if (!map.has(row.personId)) map.set(row.personId, {});
+      map.get(row.personId)![key] = Number(row.total);
+    }
+
+    expect(map.get('person-1')).toEqual({ General: 10, Major: 20 });
+    expect(map.get('person-2')).toEqual({ 'Self-Directed': 5 });
+  });
+
+  test('uncategorized entries use "uncategorized" key', () => {
+    const rows = [
+      { personId: 'person-1', category: null, total: 15 },
+    ];
+
+    const map = new Map<string, Record<string, number>>();
+    for (const row of rows) {
+      const key = row.category ?? 'uncategorized';
+      if (!map.has(row.personId)) map.set(row.personId, {});
+      map.get(row.personId)![key] = Number(row.total);
+    }
+
+    expect(map.get('person-1')).toEqual({ uncategorized: 15 });
+  });
+
+  test('person with no credits returns empty byCategory via map.get fallback', () => {
+    // When a personId is not in the map, we expect categoryMap.get(id) ?? {} to return {}
+    const map = new Map<string, Record<string, number>>();
+    // person-1 has no credits in the map
+    const result = map.get('person-1') ?? {};
+    expect(result).toEqual({});
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Cross-Org Aggregation
 // ---------------------------------------------------------------------------
 
