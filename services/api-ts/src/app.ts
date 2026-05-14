@@ -56,6 +56,10 @@ import { createAccreditedProvider } from '@/handlers/training/createAccreditedPr
 import { updateAccreditedProvider } from '@/handlers/training/updateAccreditedProvider';
 import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedProvider';
 
+// Email: public unsubscribe + officer suppression list (hand-wired)
+import { unsubscribeEmail } from '@/handlers/email/unsubscribeEmail';
+import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
+
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -119,10 +123,18 @@ export function createApp(config: Config): App {
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
 
+  // Public unsubscribe endpoint — registered BEFORE /email/* auth middleware
+  // RFC 8058: users click from email client without being logged in
+  app.get('/email/unsubscribe', unsubscribeEmail);
+  app.post('/email/unsubscribe', unsubscribeEmail);
+
   // Org-context for email routes (admin creates templates per-org)
   // Auth middleware sets user/session; orgContextMiddleware sets orgId from request
   app.use('/email/*', authMiddleware());
   app.use('/email/*', orgContextMiddleware());
+
+  // Officer-only suppression list (auth-protected, registered after auth middleware)
+  app.get('/email/suppressions', listEmailSuppressions);
 
   // Public association endpoints that must NOT have auth middleware
   const ASSOCIATION_PUBLIC_PATHS = [
