@@ -57,6 +57,10 @@ export const trainings = pgTable('training', {
   creditAmount: integer('credit_amount').default(0),
   status: trainingStatusEnum('status').notNull().default('draft'),
   publishedAt: timestamp('published_at'),
+  /** PRC accreditation number for this training */
+  prcAccreditationNumber: varchar('prc_accreditation_number', { length: 100 }),
+  /** Reference to the accredited provider (no DB FK — validated in handler) */
+  accreditedProviderId: uuid('accredited_provider_id'),
 }, (table) => [
   index('idx_training_org').on(table.organizationId),
   index('idx_training_status').on(table.status),
