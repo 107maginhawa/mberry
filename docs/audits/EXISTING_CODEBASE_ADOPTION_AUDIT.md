@@ -457,7 +457,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | certificates | 4 | 2+ | 0 | 6 | Low |
 | audit | 3 | 1+ | 0 | 4 | Low |
 | comms | 3 | 0 | 1 | 4 | Low |
-| storage | 2 | 0 | 1 | 3 | Low |
+| storage | 2 (46 cases) | 0 | 1 | 3 | Good (misreported — 46 test cases in 2 files) |
 | association:operations | 10 | 5+ | 3 | 18 | Good (Wave 2: +8 test files, 169 tests) |
 
 ### BR-Test Traceability (Key Rules)
@@ -525,7 +525,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | GAP-08 | ~~Interaction state coverage at 15%~~ | ✅ CLOSED | Frontend apps | 60 tests across 10 screens, coverage now 37% (Wave 2) |
 | GAP-09 | 3 communication modules overlap | P2 | Backend | Consolidate (deferred from v1.2.0) |
 | GAP-10 | ~~association:operations has only 2 unit tests (3% ratio)~~ | ✅ CLOSED | association:operations | 10 test files, 169 tests, all 54 handlers covered (Wave 2) |
-| GAP-11 | storage module has only 2 tests (25% ratio) | P2 | storage | Add upload/download tests |
+| GAP-11 | ~~storage module has only 2 tests (25% ratio)~~ | ✅ CLOSED | storage | False positive — 2 test FILES but 46 test CASES (75 assertions) covering all 6 handlers |
 | GAP-12 | ~~ROLE_PERMISSION_MATRIX.md missing~~ | ✅ CLOSED | docs | Created with 195 rows (Wave 1) |
 | GAP-13 | STATE.md stale (shows Phase 24) | P3 | .planning | Update STATE.md |
 
@@ -557,7 +557,7 @@ None. All P1 issues resolved in v1.1.0 and v1.2.0 milestones.
 ### P2 Risks (Fix When Touching Module)
 1. **GAP-09:** Communication module naming clarification
 2. ~~**GAP-04:** Pagination applied inconsistently~~ — ✅ CLOSED (false positive)
-3. **GAP-11:** storage module test gap (2 tests)
+3. ~~**GAP-11:** storage module test gap (2 tests)~~ — ✅ CLOSED (false positive: 46 test cases in 2 files)
 
 ### P3 Risks (Improve Later)
 1. **GAP-03:** Bounded context formalization
