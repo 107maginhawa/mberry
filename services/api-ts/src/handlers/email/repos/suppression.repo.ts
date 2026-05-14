@@ -6,7 +6,7 @@
 
 import { eq, and, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
-import { DatabaseRepository, type PaginationOptions, type PaginatedResult } from '@/core/database.repo';
+import { DatabaseRepository, type FindManyOptions, type PaginatedResult } from '@/core/database.repo';
 import {
   emailSuppressions,
   type EmailSuppression,
@@ -51,12 +51,12 @@ export class SuppressionRepository extends DatabaseRepository<
   async isSuppressed(email: string, orgId: string): Promise<boolean> {
     this.logger?.debug({ email, orgId }, 'Checking email suppression');
 
-    const result = await this.findMany(
+    const records = await this.findMany(
       { organizationId: orgId, email },
-      { offset: 0, limit: 1 },
+      { pagination: { offset: 0, limit: 1 } },
     );
 
-    return result.data.length > 0;
+    return records.length > 0;
   }
 
   /**
@@ -99,10 +99,10 @@ export class SuppressionRepository extends DatabaseRepository<
   /**
    * List all suppressed email addresses for an organization (paginated).
    */
-  async listByOrg(orgId: string, pagination?: PaginationOptions): Promise<PaginatedResult<EmailSuppression>> {
+  async listByOrg(orgId: string, options?: FindManyOptions): Promise<PaginatedResult<EmailSuppression>> {
     this.logger?.debug({ orgId }, 'Listing suppressions for org');
 
-    return this.findMany({ organizationId: orgId }, pagination);
+    return this.findManyWithPagination({ organizationId: orgId }, options);
   }
 
   /**

@@ -80,11 +80,10 @@ describe('SuppressionRepository', () => {
   describe('isSuppressed', () => {
     test('returns true for suppressed email in same org', async () => {
       const repo = makeRepo();
-      // Stub findMany to return one matching suppression
-      spyOn(repo, 'findMany' as any).mockResolvedValue({
-        data: [makeSuppression({ email: 'bounce@example.com', organizationId: 'org-1' })],
-        totalCount: 1,
-      });
+      // Stub findMany to return one matching suppression (array, not paginated)
+      spyOn(repo, 'findMany' as any).mockResolvedValue([
+        makeSuppression({ email: 'bounce@example.com', organizationId: 'org-1' }),
+      ]);
 
       const result = await repo.isSuppressed('bounce@example.com', 'org-1');
       expect(result).toBe(true);
@@ -92,7 +91,7 @@ describe('SuppressionRepository', () => {
 
     test('returns false for email not in suppression list', async () => {
       const repo = makeRepo();
-      spyOn(repo, 'findMany' as any).mockResolvedValue({ data: [], totalCount: 0 });
+      spyOn(repo, 'findMany' as any).mockResolvedValue([]);
 
       const result = await repo.isSuppressed('clean@example.com', 'org-1');
       expect(result).toBe(false);
@@ -101,7 +100,7 @@ describe('SuppressionRepository', () => {
     test('returns false for same email in different org (org-scoped)', async () => {
       const repo = makeRepo();
       // Email is suppressed in org-2 but we're querying org-1
-      spyOn(repo, 'findMany' as any).mockResolvedValue({ data: [], totalCount: 0 });
+      spyOn(repo, 'findMany' as any).mockResolvedValue([]);
 
       const result = await repo.isSuppressed('bounce@example.com', 'org-1');
       expect(result).toBe(false);
@@ -159,7 +158,7 @@ describe('SuppressionRepository', () => {
         makeSuppression({ organizationId: 'org-1', email: 'a@example.com' }),
         makeSuppression({ organizationId: 'org-1', email: 'b@example.com' }),
       ];
-      spyOn(repo, 'findMany' as any).mockResolvedValue({
+      spyOn(repo, 'findManyWithPagination' as any).mockResolvedValue({
         data: orgSuppressions,
         totalCount: 2,
       });
