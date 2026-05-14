@@ -13,6 +13,7 @@ import {
   BookOpen,
   Megaphone,
   Building,
+  Building2,
   Shield,
   Award,
   IdCard,
@@ -96,6 +97,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
         { to: `${base}/officers`, label: "Officers", icon: Shield },
         { to: `${base}/settings/membership-categories`, label: "Categories", icon: IdCard },
         { to: `${base}/settings/gateway`, label: "Payment Gateway", icon: Settings },
+        { to: `${base}/settings/providers`, label: "Providers", icon: Building2 },
       ],
     },
   ]
