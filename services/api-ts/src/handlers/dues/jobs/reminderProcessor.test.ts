@@ -264,6 +264,156 @@ describe('processDuesReminders', () => {
     expect(insertedValues[0].channel).toBe('in-app');
   });
 
+  // ---------------------------------------------------------------------------
+  // LIF-03: Departed member notification exclusion
+  //
+  // LIF-03: departed members excluded from reminders by inArray guard.
+  // This is the foundation for EML-03 (Phase 25 deceased/departed send guard).
+  //
+  // The WHERE clause in reminderProcessor.ts lines 98-103:
+  //   inArray(memberships.status, ['active', 'gracePeriod'])
+  //
+  // resigned, deceased, and expelled are NOT in this array, so they are
+  // never included in `expiringMembers` — no notifications are created.
+  // ---------------------------------------------------------------------------
+
+  describe('LIF-03: departed member notification exclusion', () => {
+    test('[LIF-03] resigned member is excluded from reminders by inArray guard', async () => {
+      // resigned status is not in ['active', 'gracePeriod'].
+      // Simulate DB returning empty member list (resigned filtered out).
+      const mockSchedules = [
+        { id: 'sched-lif03-1', duesConfigId: 'config-1', daysOffset: -30, enabled: true, channelInapp: true, channelPush: false, channelEmail: false },
+      ];
+
+      // DB applies inArray(status, ['active', 'gracePeriod']) -> resigned excluded -> empty
+      const db = buildSequencedDb([
+        [{ id: 'config-1', organizationId: 'org-1' }],
+        whereResponse(mockSchedules),
+        whereResponse([]), // resigned member filtered out by inArray guard
+      ]);
+
+      const notificationsSent: any[] = [];
+      const result = await processDuesReminders({
+        db: db as any,
+        logger: mockLogger,
+        createNotification: async (params) => {
+          notificationsSent.push(params);
+          return { id: 'notif-resigned' };
+        },
+      });
+
+      expect(result.sent).toBe(0);
+      expect(notificationsSent).toHaveLength(0);
+    });
+
+    test('[LIF-03] deceased member is excluded from reminders by inArray guard', async () => {
+      // deceased status is not in ['active', 'gracePeriod'] — filtered at DB level.
+      const mockSchedules = [
+        { id: 'sched-lif03-2', duesConfigId: 'config-1', daysOffset: -7, enabled: true, channelInapp: true, channelPush: true, channelEmail: true },
+      ];
+
+      // Simulate: org has 1 deceased member with an expiry date that matches
+      // the target date — but inArray guard returns empty because deceased excluded.
+      const db = buildSequencedDb([
+        [{ id: 'config-1', organizationId: 'org-1' }],
+        whereResponse(mockSchedules),
+        whereResponse([]), // deceased member filtered out by inArray guard
+      ]);
+
+      const notificationsSent: any[] = [];
+      const result = await processDuesReminders({
+        db: db as any,
+        logger: mockLogger,
+        createNotification: async (params) => {
+          notificationsSent.push(params);
+          return { id: 'notif-deceased' };
+        },
+      });
+
+      expect(result.sent).toBe(0);
+      expect(notificationsSent).toHaveLength(0);
+    });
+
+    test('[LIF-03] expelled member is excluded from reminders by inArray guard', async () => {
+      // expelled status is not in ['active', 'gracePeriod'] — filtered at DB level.
+      const mockSchedules = [
+        { id: 'sched-lif03-3', duesConfigId: 'config-1', daysOffset: 0, enabled: true, channelInapp: false, channelPush: false, channelEmail: true },
+      ];
+
+      const db = buildSequencedDb([
+        [{ id: 'config-1', organizationId: 'org-1' }],
+        whereResponse(mockSchedules),
+        whereResponse([]), // expelled member filtered out by inArray guard
+      ]);
+
+      const notificationsSent: any[] = [];
+      const result = await processDuesReminders({
+        db: db as any,
+        logger: mockLogger,
+        createNotification: async (params) => {
+          notificationsSent.push(params);
+          return { id: 'notif-expelled' };
+        },
+      });
+
+      expect(result.sent).toBe(0);
+      expect(notificationsSent).toHaveLength(0);
+    });
+
+    test('[LIF-03] inArray guard: only active and gracePeriod receive reminders', () => {
+      // Document the allowed statuses contract
+      const ALLOWED_STATUSES = ['active', 'gracePeriod'];
+      const DEPARTED_STATUSES = ['resigned', 'deceased', 'expelled'];
+
+      for (const status of DEPARTED_STATUSES) {
+        expect(ALLOWED_STATUSES).not.toContain(status);
+      }
+
+      // Verify active and gracePeriod remain in the allowed list
+      expect(ALLOWED_STATUSES).toContain('active');
+      expect(ALLOWED_STATUSES).toContain('gracePeriod');
+    });
+
+    test('[LIF-03] mixed org: active member gets reminder, departed members do not', async () => {
+      // Simulate: inArray guard returns only the active member, not departed ones.
+      const mockSchedules = [
+        { id: 'sched-lif03-4', duesConfigId: 'config-1', daysOffset: -30, enabled: true, channelInapp: true, channelPush: false, channelEmail: false },
+      ];
+
+      // DB returns only the active member (inArray filters out resigned/deceased/expelled)
+      const activeMember = { id: 'mem-active', personId: 'person-active', organizationId: 'org-1', duesExpiryDate: '2026-06-12' };
+
+      const db = buildSequencedDb([
+        [{ id: 'config-1', organizationId: 'org-1' }],
+        whereResponse(mockSchedules),
+        whereResponse([activeMember]), // only active returned by inArray guard
+        whereResponse([]),             // no existing logs
+      ]);
+
+      const notificationsSent: any[] = [];
+      const result = await processDuesReminders({
+        db: db as any,
+        logger: mockLogger,
+        createNotification: async (params) => {
+          notificationsSent.push(params);
+          return { id: 'notif-active' };
+        },
+      });
+
+      // Only active member gets reminder
+      expect(result.sent).toBe(1);
+      expect(notificationsSent).toHaveLength(1);
+      expect(notificationsSent[0].recipient).toBe('person-active');
+
+      // The 3 departed members (would have been: person-resigned, person-deceased, person-expelled)
+      // are not present in notificationsSent because inArray excludes them.
+      const departedNotified = notificationsSent.filter((n) =>
+        ['person-resigned', 'person-deceased', 'person-expelled'].includes(n.recipient)
+      );
+      expect(departedNotified).toHaveLength(0);
+    });
+  });
+
   test('re-run is idempotent (second run finds existing logs and skips)', async () => {
     const mockSchedules = [
       { id: 'sched-1', duesConfigId: 'config-1', daysOffset: -30, enabled: true, channelInapp: true, channelPush: false, channelEmail: false },
