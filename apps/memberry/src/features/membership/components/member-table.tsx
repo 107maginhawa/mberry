@@ -40,6 +40,14 @@ const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> =
   pendingPayment: { label: 'Pending', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
 }
 
+// Dues invoice status badge styling
+const DUES_STATUS_BADGE: Record<string, { label: string; className: string }> = {
+  paid: { label: 'Paid', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]' },
+  overdue: { label: 'Overdue', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)]' },
+  generated: { label: 'Generated', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
+  sent: { label: 'Sent', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
+}
+
 const PAGE_SIZE = 50
 
 export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableProps) {
@@ -47,6 +55,8 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusTab, setStatusTab] = useState(initialStatus ?? 'all')
   const [categoryId, setCategoryId] = useState('all')
+  const [duesStatusFilter, setDuesStatusFilter] = useState('all')
+  const [trainingFilter, setTrainingFilter] = useState('all')
   const [page, setPage] = useState(0)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
@@ -65,17 +75,22 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
 
   const categories = categoriesData?.data ?? []
 
+  // Build query params — duesStatus and trainingCompliant are supported by the API
+  // but not yet in the generated SDK types, so we cast to any to pass them through
+  const rosterQuery: any = {
+    organizationId: orgId,
+    limit: PAGE_SIZE,
+    offset: page * PAGE_SIZE,
+    ...(statusTab !== 'all' ? { status: statusTab } : {}),
+    ...(categoryId !== 'all' ? { categoryId } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+    ...(duesStatusFilter !== 'all' ? { duesStatus: duesStatusFilter } : {}),
+    ...(trainingFilter === 'compliant' ? { trainingCompliant: true } : {}),
+    ...(trainingFilter === 'non-compliant' ? { trainingCompliant: false } : {}),
+  }
+
   const { data, isLoading, error } = useQuery(
-    listRosterMembersOptions({
-      query: {
-        organizationId: orgId,
-        limit: PAGE_SIZE,
-        offset: page * PAGE_SIZE,
-        ...(statusTab !== 'all' ? { status: statusTab as any } : {}),
-        ...(categoryId !== 'all' ? { categoryId } : {}),
-        ...(debouncedSearch ? { search: debouncedSearch } : {}),
-      },
-    })
+    listRosterMembersOptions({ query: rosterQuery })
   )
 
   const rawMembers: any[] = data?.data ?? []
@@ -115,8 +130,8 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-muted)]" />
           <Input
             className="pl-9"
@@ -134,6 +149,30 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
             {categories.map((c: any) => (
               <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        {/* Dues Status filter */}
+        <Select value={duesStatusFilter} onValueChange={(v) => { setDuesStatusFilter(v); setPage(0) }}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Dues Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Dues</SelectItem>
+            <SelectItem value="paid">Paid</SelectItem>
+            <SelectItem value="overdue">Overdue</SelectItem>
+            <SelectItem value="generated">Generated</SelectItem>
+            <SelectItem value="sent">Sent</SelectItem>
+          </SelectContent>
+        </Select>
+        {/* Training compliance filter */}
+        <Select value={trainingFilter} onValueChange={(v) => { setTrainingFilter(v); setPage(0) }}>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="Training" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Training</SelectItem>
+            <SelectItem value="compliant">Compliant</SelectItem>
+            <SelectItem value="non-compliant">Non-Compliant</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -188,6 +227,8 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
                   <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">License #</th>
                   <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Category</th>
                   <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Status</th>
+                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Dues Status</th>
+                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Training</th>
                   <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Dues Expiry</th>
                   <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Joined</th>
                 </tr>
@@ -196,6 +237,10 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
                 {members.map((m: any, idx: number) => {
                   const status = m.status as MemberStatus
                   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
+                  const duesInvoiceStatus: string | null = m.duesInvoiceStatus ?? null
+                  const creditsEarned: number = m.creditsEarned ?? 0
+                  const trainingCompliant: boolean = m.trainingCompliant ?? false
+                  const duesBadge = duesInvoiceStatus ? DUES_STATUS_BADGE[duesInvoiceStatus] : null
                   return (
                     <tr key={m.id} className={`hover:bg-[var(--color-surface-warm)] transition-colors ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`}>
                       <td className="px-3 py-2">
@@ -230,6 +275,25 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
                       <td className="px-3 py-2 text-body-sm text-[var(--color-muted)]">{m.categoryName ?? m.categoryId ?? '—'}</td>
                       <td className="px-3 py-2">
                         <Badge className={badge.className}>{badge.label}</Badge>
+                      </td>
+                      {/* Dues Status column */}
+                      <td className="px-3 py-2">
+                        {duesBadge ? (
+                          <Badge className={duesBadge.className}>{duesBadge.label}</Badge>
+                        ) : (
+                          <span className="text-xs text-[var(--color-muted)]">No invoice</span>
+                        )}
+                      </td>
+                      {/* Training column */}
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs tabular-nums text-[var(--color-muted)]">{creditsEarned}</span>
+                          {trainingCompliant ? (
+                            <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)] text-xs">Compliant</Badge>
+                          ) : (
+                            <Badge className="bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)] text-xs">{creditsEarned}/40</Badge>
+                          )}
+                        </div>
                       </td>
                       <td className="px-3 py-2 text-body-sm tabular-nums text-[var(--color-muted)]">
                         {m.duesExpiryDate ? new Date(m.duesExpiryDate).toLocaleDateString() : '—'}
