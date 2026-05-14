@@ -523,7 +523,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | GAP-06 | orgId vs organizationId inconsistency | P3 | TypeSpec modules | Standardize to organizationId |
 | GAP-07 | ~~No systematic accessibility testing~~ | ✅ CLOSED | Frontend apps | @axe-core/playwright + 10 baseline scans (Wave 2) |
 | GAP-08 | ~~Interaction state coverage at 15%~~ | ✅ CLOSED | Frontend apps | 60 tests across 10 screens, coverage now 37% (Wave 2) |
-| GAP-09 | 3 communication modules overlap | P2 | Backend | Consolidate (deferred from v1.2.0) |
+| GAP-09 | ~~3 communication modules overlap~~ | ✅ CLOSED | Backend | Only 2 modules exist (not 3): `comms` = real-time video/chat (11 handlers), `communication` = async messaging/templates (28 handlers). No functional overlap. Naming clarified in docs. |
 | GAP-10 | ~~association:operations has only 2 unit tests (3% ratio)~~ | ✅ CLOSED | association:operations | 10 test files, 169 tests, all 54 handlers covered (Wave 2) |
 | GAP-11 | ~~storage module has only 2 tests (25% ratio)~~ | ✅ CLOSED | storage | False positive — 2 test FILES but 46 test CASES (75 assertions) covering all 6 handlers |
 | GAP-12 | ~~ROLE_PERMISSION_MATRIX.md missing~~ | ✅ CLOSED | docs | Created with 195 rows (Wave 1) |
@@ -538,7 +538,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | ID | Type | Description | Files | Impact |
 |----|------|-------------|-------|--------|
 | INC-01 | Naming | `orgId` vs `organizationId` in TypeSpec (42 vs 47 occurrences) | specs/api/src/modules/*.tsp | Low |
-| INC-02 | Architecture | 3 communication modules (comms, communication, communications) | services/api-ts/src/handlers/ | Medium |
+| INC-02 | ~~Architecture~~ | ~~3 communication modules~~ — actually 2: `comms` (video/chat) and `communication` (messaging). No overlap, intentional separation. | ✅ RESOLVED | — |
 | INC-03 | SDK | Admin app uses raw fetch, memberry uses SDK | apps/admin/src/ | Low |
 | INC-04 | ~~Testing~~ | ~~association:operations has 59 handlers but only 2 tests~~ | ✅ RESOLVED (Wave 2: 10 test files, 169 tests) | — |
 
@@ -555,7 +555,7 @@ None. All P0 issues from prior audit resolved.
 None. All P1 issues resolved in v1.1.0 and v1.2.0 milestones.
 
 ### P2 Risks (Fix When Touching Module)
-1. **GAP-09:** Communication module naming clarification
+1. ~~**GAP-09:** Communication module naming clarification~~ — ✅ CLOSED (2 modules, no overlap, documented)
 2. ~~**GAP-04:** Pagination applied inconsistently~~ — ✅ CLOSED (false positive)
 3. ~~**GAP-11:** storage module test gap (2 tests)~~ — ✅ CLOSED (false positive: 46 test cases in 2 files)
 
@@ -659,7 +659,7 @@ Nothing — no P0 or P1 issues.
 1. Update STATE.md to reflect v1.2.0 completion
 
 ### Do Next
-2. Consolidate 3 communication modules before v1.3.0
+2. ~~Consolidate 3 communication modules~~ ✅ Only 2 modules, no overlap — documented
 3. Migrate admin app from fetch to SDK
 4. Backfill storage module tests (2 tests, 25% ratio)
 
