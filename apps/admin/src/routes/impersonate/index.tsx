@@ -4,6 +4,8 @@ import { UserCog, Search, AlertTriangle, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { RequireRole } from '@/lib/role-gate'
+import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { startImpersonation as startImpersonationApi, endImpersonation as endImpersonationApi } from '@monobase/sdk-ts/generated/sdk.gen'
 
 export const Route = createFileRoute('/impersonate/')({
   component: () => (
@@ -39,14 +41,8 @@ function ImpersonatePage() {
   const [activeSession, setActiveSession] = useState<ImpersonationSession | null>(null)
   const queryClient = useQueryClient()
 
-  const { data: orgs, isLoading: orgsLoading } = useQuery({
-    queryKey: ['admin', 'organizations'],
-    queryFn: async () => {
-      const res = await fetch('/api/admin/organizations', { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch organizations')
-      return res.json() as Promise<Organization[]>
-    },
-  })
+  const { data: orgsData, isLoading: orgsLoading } = useQuery(listOrganizationsOptions({ query: { limit: 100 } }))
+  const orgs = orgsData?.data as Organization[] | undefined
 
   // Derive a flat member list from organizations for search
   const allMembers: Member[] = (orgs || []).flatMap((org) =>
@@ -66,17 +62,8 @@ function ImpersonatePage() {
 
   const startImpersonation = useMutation({
     mutationFn: async (targetUserId: string) => {
-      const res = await fetch('/api/admin/impersonate', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetUserId }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as { message?: string }).message || 'Failed to start impersonation')
-      }
-      return res.json() as Promise<ImpersonationSession>
+      const { data } = await startImpersonationApi({ body: { targetUserId } as any })
+      return data as unknown as ImpersonationSession
     },
     onSuccess: (session) => {
       toast.success('Impersonation session started')
@@ -88,14 +75,10 @@ function ImpersonatePage() {
     },
   })
 
-  const endImpersonation = useMutation({
+  const endImpersonationMut = useMutation({
     mutationFn: async (sessionId: string) => {
-      const res = await fetch(`/api/admin/impersonate/${sessionId}/end`, {
-        method: 'POST',
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to end impersonation')
-      return res.json()
+      const { data } = await endImpersonationApi({ path: { sessionId } })
+      return data
     },
     onSuccess: () => {
       toast.success('Impersonation session ended')
@@ -147,12 +130,12 @@ function ImpersonatePage() {
             </p>
           </div>
           <button
-            onClick={() => endImpersonation.mutate(activeSession.sessionId)}
-            disabled={endImpersonation.isPending}
+            onClick={() => endImpersonationMut.mutate(activeSession.sessionId)}
+            disabled={endImpersonationMut.isPending}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-yellow-600 text-white text-sm font-medium hover:bg-yellow-700 transition-colors"
           >
             <X className="w-4 h-4" />
-            {endImpersonation.isPending ? 'Ending...' : 'End Session'}
+            {endImpersonationMut.isPending ? 'Ending...' : 'End Session'}
           </button>
         </div>
       )}

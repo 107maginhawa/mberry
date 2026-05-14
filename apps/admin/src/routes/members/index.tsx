@@ -1,8 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueries } from '@tanstack/react-query'
 import { Users, Search } from 'lucide-react'
 import { useState } from 'react'
-import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import {
+  listOrganizationsOptions,
+  listRosterMembersOptions,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/members/')({
   component: MembersPage,
@@ -29,32 +32,28 @@ function MembersPage() {
   const { data: orgsData } = useQuery(listOrganizationsOptions({ query: { limit: 100 } }))
   const orgs = orgsData?.data as Organization[] | undefined
 
-  // Fetch members for each org via membership API
-  const { data: allMembers = [], isLoading, isError, error } = useQuery({
-    queryKey: ['admin', 'all-members', orgs?.map((o) => o.id)],
-    enabled: !!orgs && orgs.length > 0,
-    queryFn: async () => {
-      const results: Member[] = []
-      for (const org of orgs!) {
-        try {
-          const res = await fetch(`/api/membership/members/${org.id}?limit=9999`, { credentials: 'include' })
-          if (!res.ok) continue
-          const json = await res.json()
-          const members = json.data ?? []
-          for (const m of members) {
-            results.push({
-              id: m.id,
-              name: m.name || [m.firstName, m.lastName].filter(Boolean).join(' ') || m.memberNumber || m.id,
-              email: m.email || '',
-              role: m.categoryName || 'member',
-              status: m.status,
-              organizationName: org.name,
-            })
-          }
-        } catch { /* skip org on error */ }
-      }
-      return results
-    },
+  // Fetch members for each org via SDK
+  const rosterQueries = useQueries({
+    queries: (orgs ?? []).map((org) => ({
+      ...listRosterMembersOptions({ query: { limit: 9999, organizationId: org.id } }),
+      enabled: !!orgs && orgs.length > 0,
+    })),
+  })
+
+  const isLoading = rosterQueries.some((q) => q.isLoading)
+  const isError = rosterQueries.some((q) => q.isError)
+  const error = rosterQueries.find((q) => q.error)?.error as Error | undefined
+
+  const allMembers: Member[] = (orgs ?? []).flatMap((org, i) => {
+    const members = (rosterQueries[i]?.data as any)?.data ?? []
+    return members.map((m: any) => ({
+      id: m.id,
+      name: m.name || [m.firstName, m.lastName].filter(Boolean).join(' ') || m.memberNumber || m.id,
+      email: m.email || '',
+      role: m.categoryName || 'member',
+      status: m.status,
+      organizationName: org.name,
+    }))
   })
 
   const filteredMembers = search.length >= 2

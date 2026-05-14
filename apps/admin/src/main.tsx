@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { routeTree } from './routeTree.gen'
 import type { RouterContext } from './router'
 import { AdminUserContext } from './lib/role-gate'
+import { getAdminRole } from '@monobase/sdk-ts/generated/sdk.gen'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,11 +34,10 @@ function App() {
   const [auth, setAuth] = useState<RouterContext['auth']>({ user: null, loading: true })
 
   useEffect(() => {
-    fetch('/api/admin/me/role', { credentials: 'include' })
-      .then(async (res) => {
-        if (res.ok) {
-          const data = await res.json()
-          setAuth({ user: { email: data.email, name: data.name, role: data.role }, loading: false })
+    getAdminRole()
+      .then(({ data }) => {
+        if (data) {
+          setAuth({ user: { email: (data as any).email, name: (data as any).name, role: (data as any).role }, loading: false })
         } else {
           setAuth({ user: null, loading: false })
         }

@@ -402,10 +402,10 @@ All other routes are OpenAPI-generated from TypeSpec.
 
 | Pattern | Count |
 |---------|-------|
-| Raw `fetch()` calls | 7 |
-| `@monobase/sdk-ts` imports | 0 |
+| Raw `fetch()` calls | 0 (migrated from 5) |
+| `@monobase/sdk-ts` imports | 9+ |
 
-**Finding:** Admin app uses raw fetch exclusively. Should migrate to SDK hooks for consistency and type safety. Cosmetic/consistency issue, not a security risk.
+**Finding:** ✅ Admin app fully migrated to SDK. All routes use `@monobase/sdk-ts` generated hooks and functions.
 
 ### Mock Data Contamination
 
@@ -516,7 +516,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | Gap ID | Description | Priority | Affected Modules | Recommended Fix |
 |--------|------------|----------|-----------------|-----------------|
 | GAP-01 | ~~7 hand-wired routes in app.ts not covered by TypeSpec~~ | ✅ CLOSED | email, training (providers) | Intentional: email unsubscribe must precede auth middleware (RFC 8058); accredited providers are org-scoped training routes, not in provider.tsp. Middleware ordering requires hand-wiring. |
-| GAP-02 | Admin app uses raw fetch instead of SDK | P2 | admin | Migrate to @monobase/sdk-ts |
+| GAP-02 | ~~Admin app uses raw fetch instead of SDK~~ | ✅ CLOSED | admin | All 5 fetch calls migrated to SDK (getAdminRole, listOrganizations, startImpersonation, endImpersonation, listRosterMembers) |
 | GAP-03 | No formal bounded context boundaries | P3 | All (cross-module imports) | Introduce module interface layer |
 | GAP-04 | ~~Pagination not applied to all list endpoints~~ | ✅ CLOSED | Various | False positive — all 12 TypeSpec modules uniformly use `...PaginationQuery` spread pattern |
 | GAP-05 | 6 business rules deferred (BR-35 to BR-40) | P3 | Various | Implement in v1.3.0 |
@@ -539,7 +539,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 |----|------|-------------|-------|--------|
 | INC-01 | Naming | `orgId` vs `organizationId` in TypeSpec (42 vs 47 occurrences) | specs/api/src/modules/*.tsp | Low |
 | INC-02 | ~~Architecture~~ | ~~3 communication modules~~ — actually 2: `comms` (video/chat) and `communication` (messaging). No overlap, intentional separation. | ✅ RESOLVED | — |
-| INC-03 | SDK | Admin app uses raw fetch, memberry uses SDK | apps/admin/src/ | Low |
+| INC-03 | ~~SDK~~ | ~~Admin app uses raw fetch~~ — migrated to SDK | ✅ RESOLVED | — |
 | INC-04 | ~~Testing~~ | ~~association:operations has 59 handlers but only 2 tests~~ | ✅ RESOLVED (Wave 2: 10 test files, 169 tests) | — |
 
 **No Critical or Major inconsistencies found.** All prior critical findings (P0/P1) from the May 13 audit have been resolved.
@@ -660,7 +660,7 @@ Nothing — no P0 or P1 issues.
 
 ### Do Next
 2. ~~Consolidate 3 communication modules~~ ✅ Only 2 modules, no overlap — documented
-3. Migrate admin app from fetch to SDK
+3. ~~Migrate admin app from fetch to SDK~~ ✅ Done — all 5 fetch calls migrated
 4. Backfill storage module tests (2 tests, 25% ratio)
 
 ### Do Later
