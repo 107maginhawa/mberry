@@ -3,7 +3,7 @@
  * Encapsulates all database operations for the M10 credit tracking module
  */
 
-import { eq, and, between, sql, type SQL } from 'drizzle-orm';
+import { eq, and, between, inArray, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import {
@@ -93,6 +93,43 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
       .where(and(...conditions));
 
     return Number(result[0]?.total ?? 0);
+  }
+
+  /**
+   * Batch category aggregation: get credit totals grouped by CPD category for multiple persons.
+   * Returns a Map<personId, Record<category, total>> for efficient compliance reporting (PRC-03).
+   */
+  async sumCreditsByCategoryBatch(
+    personIds: string[],
+    cycleStart: Date,
+    cycleEnd: Date,
+    organizationId: string,
+  ): Promise<Map<string, Record<string, number>>> {
+    if (personIds.length === 0) return new Map();
+
+    const result = await this.db
+      .select({
+        personId: creditEntries.personId,
+        category: creditEntries.category,
+        total: sql<number>`coalesce(sum(${creditEntries.creditAmount}), 0)`,
+      })
+      .from(creditEntries)
+      .where(
+        and(
+          inArray(creditEntries.personId, personIds),
+          between(creditEntries.activityDate, cycleStart, cycleEnd),
+          eq(creditEntries.organizationId, organizationId),
+        ),
+      )
+      .groupBy(creditEntries.personId, creditEntries.category);
+
+    const map = new Map<string, Record<string, number>>();
+    for (const row of result) {
+      const key = row.category ?? 'uncategorized';
+      if (!map.has(row.personId)) map.set(row.personId, {});
+      map.get(row.personId)![key] = Number(row.total);
+    }
+    return map;
   }
 
   /**

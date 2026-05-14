@@ -50,6 +50,16 @@ export async function getCreditCompliance(
   // Calculate credits for each member (skip members without person record)
   const creditRepo = new CreditEntryRepository(db, logger);
   const validMembers = members.filter((m) => m.person !== null);
+
+  // Batch-fetch category breakdown for all members (avoids N+1) (PRC-03)
+  const personIds = validMembers.map((m) => m.person!.id);
+  const categoryMap = await creditRepo.sumCreditsByCategoryBatch(
+    personIds,
+    cycle.cycleStart,
+    cycle.cycleEnd,
+    orgId,
+  );
+
   const memberResults = await Promise.all(
     validMembers.map(async (m) => {
       const earned = await creditRepo.sumCreditsForCycle(
@@ -76,6 +86,7 @@ export async function getCreditCompliance(
         required: requiredCredits,
         remaining,
         compliance_status,
+        byCategory: categoryMap.get(m.person!.id) ?? {},
       };
     }),
   );
