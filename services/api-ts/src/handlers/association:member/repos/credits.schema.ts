@@ -22,6 +22,10 @@ export const creditEntryTypeEnum = pgEnum('credit_entry_type', [
   'manual', // Self-reported external activity
 ]);
 
+export const cpdCategoryEnum = pgEnum('credit_cpd_category', ['General', 'Major', 'Self-Directed']);
+
+export const verificationStatusEnum = pgEnum('credit_verification_status', ['pending', 'verified', 'rejected']);
+
 export const creditEntries = pgTable('credit_entry', {
   ...baseEntityFields,
   personId: uuid('person_id').notNull(),
@@ -43,6 +47,12 @@ export const creditEntries = pgTable('credit_entry', {
   cycleEnd: timestamp('cycle_end').notNull(),
   /** Supporting document ID (for manual entries) */
   supportingDocumentId: uuid('supporting_document_id'),
+  /** CPD category per PRC classification */
+  category: cpdCategoryEnum('category'),
+  /** PRC approval code for verified credits */
+  approvalCode: varchar('approval_code', { length: 100 }),
+  /** Verification status of this credit entry */
+  verificationStatus: verificationStatusEnum('verification_status').notNull().default('pending'),
 }, (table) => [
   index('idx_credit_person').on(table.personId),
   index('idx_credit_org').on(table.organizationId),
