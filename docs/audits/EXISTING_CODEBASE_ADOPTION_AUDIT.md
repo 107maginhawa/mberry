@@ -518,7 +518,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | GAP-01 | 7 hand-wired routes in app.ts not covered by TypeSpec | P2 | email, training (providers) | Add TypeSpec definitions |
 | GAP-02 | Admin app uses raw fetch instead of SDK | P2 | admin | Migrate to @monobase/sdk-ts |
 | GAP-03 | No formal bounded context boundaries | P3 | All (cross-module imports) | Introduce module interface layer |
-| GAP-04 | Pagination not applied to all list endpoints | P2 | Various | Apply OffsetPaginationParams broadly |
+| GAP-04 | ~~Pagination not applied to all list endpoints~~ | ✅ CLOSED | Various | False positive — all 12 TypeSpec modules uniformly use `...PaginationQuery` spread pattern |
 | GAP-05 | 6 business rules deferred (BR-35 to BR-40) | P3 | Various | Implement in v1.3.0 |
 | GAP-06 | orgId vs organizationId inconsistency | P3 | TypeSpec modules | Standardize to organizationId |
 | GAP-07 | ~~No systematic accessibility testing~~ | ✅ CLOSED | Frontend apps | @axe-core/playwright + 10 baseline scans (Wave 2) |
@@ -555,8 +555,8 @@ None. All P0 issues from prior audit resolved.
 None. All P1 issues resolved in v1.1.0 and v1.2.0 milestones.
 
 ### P2 Risks (Fix When Touching Module)
-1. **GAP-09:** Communication module consolidation
-2. **GAP-04:** Pagination applied inconsistently
+1. **GAP-09:** Communication module naming clarification
+2. ~~**GAP-04:** Pagination applied inconsistently~~ — ✅ CLOSED (false positive)
 3. **GAP-11:** storage module test gap (2 tests)
 
 ### P3 Risks (Improve Later)
