@@ -115,4 +115,50 @@ describe('[BR-15] createTraining', () => {
     // session.user.id is accessed for createdBy/updatedBy
     await expect(createTraining(ctx)).rejects.toThrow();
   });
+
+  // --- PRC-01: PRC accreditation fields ---
+
+  test('[PRC-01] stores prcAccreditationNumber and accreditedProviderId', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      create: async (data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-1' },
+      _body: {
+        title: 'PRC Training',
+        startAt: '2026-06-01',
+        endAt: '2026-06-02',
+        prcAccreditationNumber: 'PRC-CPD-2026-001',
+        accreditedProviderId: 'provider-uuid-1',
+      },
+    });
+
+    const response = await createTraining(ctx);
+    expect(response.status).toBe(201);
+    expect(capturedData.prcAccreditationNumber).toBe('PRC-CPD-2026-001');
+    expect(capturedData.accreditedProviderId).toBe('provider-uuid-1');
+  });
+
+  test('[PRC-01] backward compatible — works without PRC fields', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      create: async (data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-1' },
+      _body: {
+        title: 'Non-PRC Training',
+        startAt: '2026-06-01',
+        endAt: '2026-06-02',
+      },
+    });
+
+    const response = await createTraining(ctx);
+    expect(response.status).toBe(201);
+    expect(capturedData.prcAccreditationNumber).toBeUndefined();
+    expect(capturedData.accreditedProviderId).toBeUndefined();
+  });
 });

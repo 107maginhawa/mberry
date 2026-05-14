@@ -148,6 +148,42 @@ describe('updateTraining', () => {
     await expect(updateTraining(ctx)).rejects.toThrow();
   });
 
+  // --- PRC-01: PRC accreditation fields ---
+
+  test('[PRC-01] passes prcAccreditationNumber through to repo', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { prcAccreditationNumber: 'PRC-CPD-2026-001' },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(capturedData.prcAccreditationNumber).toBe('PRC-CPD-2026-001');
+  });
+
+  test('[PRC-01] passes accreditedProviderId through to repo', async () => {
+    let capturedData: any;
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => fakeTraining,
+      update: async (_id: string, data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { accreditedProviderId: 'provider-uuid-1' },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(capturedData.accreditedProviderId).toBe('provider-uuid-1');
+  });
+
   // --- SO-8: Regulatory approval maintenance ---
 
   test('[SO-8] updates regulatory approval status', async () => {
