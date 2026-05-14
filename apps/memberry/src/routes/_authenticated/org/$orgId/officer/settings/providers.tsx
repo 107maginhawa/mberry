@@ -111,7 +111,7 @@ function ProvidersPage() {
       name: p.name,
       accreditationNumber: p.accreditationNumber,
       status: p.status,
-      expiryDate: p.expiryDate ? p.expiryDate.split('T')[0] : '',
+      expiryDate: p.expiryDate ? (p.expiryDate.split('T')[0] ?? '') : '',
     })
     setEditingProvider(p)
   }
