@@ -276,7 +276,14 @@ Plans:
   3. Sending email or push notification to a deceased or departed member is blocked at the send layer (not silently queued)
   4. All email messages include a one-click unsubscribe header and a visible unsubscribe link; clicking either suppresses the address
   5. All previously untested API handlers have unit test coverage with passing tests
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [ ] 25-01-PLAN.md -- Schema extensions + suppression repo + unsub tokens + bulk rate limiter
+- [ ] 25-02-PLAN.md -- Processor guards (suppression, deceased, rate limit) + unsubscribe header injection
+- [ ] 25-03-PLAN.md -- Unsubscribe endpoint (RFC 8058) + list suppressions handler
+- [ ] 25-04-PLAN.md -- Handler tests: communication (27) + person (22)
+- [ ] 25-05-PLAN.md -- Handler tests: notifs (4) + platformadmin (17) + documents (15) + billing (11)
+- [ ] 25-06-PLAN.md -- Handler tests: training (5) + reviews (3) + events (1) + system (3) + booking (15) + membership (4) + invite (1)
 
 ## Progress
 
@@ -307,4 +314,4 @@ Plans:
 | 22. PRC CPD Compliance | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
 | 23. Member Departure + Deceased | v1.2.0 | 3/3 | Complete   | 2026-05-14 |
 | 24. Quality Gap Closure | v1.2.0 | 2/2 | Complete   | 2026-05-14 |
-| 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/? | Not started | — |
+| 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/6 | Not started | — |
