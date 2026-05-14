@@ -56,6 +56,12 @@ export const emailQueueStatusEnum = pgEnum('email_queue_status', [
 ]);
 
 /**
+ * Email category enum — distinguishes bulk marketing emails from transactional system emails
+ * Used to apply separate rate limiting and suppression rules for bulk sends
+ */
+export const emailCategoryEnum = pgEnum('email_category', ['bulk', 'transactional']);
+
+/**
  * Email provider enum
  */
 export const emailProviderEnum = pgEnum('email_provider', ['smtp', 'postmark', 'onesignal']);
@@ -193,6 +199,9 @@ export const emailQueue = pgTable('email_queue', {
   
   // Cancellation reason
   cancellationReason: text('cancellation_reason'),
+
+  // Email category: bulk = marketing/newsletter, transactional = system-generated
+  emailCategory: emailCategoryEnum('email_category').notNull().default('transactional'),
 }, (table) => ({
   // Index for org scoping
   orgIdx: index('email_queue_org_idx').on(table.organizationId),
@@ -257,6 +266,7 @@ export interface QueueEmailRequest {
   priority?: number;
   scheduledAt?: Date;
   organizationId?: string;
+  emailCategory?: 'bulk' | 'transactional';
 }
 
 /**

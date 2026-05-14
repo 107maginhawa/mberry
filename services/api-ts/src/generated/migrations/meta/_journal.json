@@ -260,6 +260,13 @@
       "when": 1778721452151,
       "tag": "0036_solid_lyja",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1778724268962,
+      "tag": "0037_last_infant_terrible",
+      "breakpoints": true
     }
   ]
 }

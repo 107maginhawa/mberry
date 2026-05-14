@@ -141,13 +141,10 @@ describe('SuppressionRepository', () => {
       // First call succeeds, second call also succeeds (upsert behavior)
       spyOn(repo, 'createOne' as any).mockResolvedValue(makeSuppression());
 
-      await expect(
-        repo.addSuppression({ orgId: 'org-1', email: 'dup@example.com', reason: 'unsubscribe' })
-      ).resolves.not.toThrow();
-
-      await expect(
-        repo.addSuppression({ orgId: 'org-1', email: 'dup@example.com', reason: 'unsubscribe' })
-      ).resolves.not.toThrow();
+      // Should not throw on first call
+      await repo.addSuppression({ orgId: 'org-1', email: 'dup@example.com', reason: 'unsubscribe' });
+      // Should not throw on second call (idempotent)
+      await repo.addSuppression({ orgId: 'org-1', email: 'dup@example.com', reason: 'unsubscribe' });
     });
   });
 
@@ -181,9 +178,7 @@ describe('SuppressionRepository', () => {
     test('deletes the row for org+email combination', async () => {
       const repo = makeRepo();
       // Should resolve without error
-      await expect(
-        repo.removeSuppression('org-1', 'bounce@example.com')
-      ).resolves.not.toThrow();
+      await repo.removeSuppression('org-1', 'bounce@example.com');
     });
   });
 });
