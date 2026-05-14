@@ -14,6 +14,7 @@ const fakeInvoice = {
   currency: 'PHP',
   periodStart: '2025-01-01',
   periodEnd: '2025-12-31',
+  version: 1,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -60,7 +61,7 @@ describe('recordManualPayment', () => {
     let capturedRef: string | null = null;
     mocks = stubRepo(DuesInvoiceRepository, {
       findOneById: async () => fakeInvoice,
-      markPaid: async (_id: string, ref: string) => {
+      markPaid: async (_id: string, _version: number, ref: string) => {
         capturedRef = ref;
         return { ...fakeMarkedPaid, paymentId: ref };
       },
@@ -181,7 +182,7 @@ describe('recordManualPayment', () => {
     let capturedRef: string | null = null;
     mocks = stubRepo(DuesInvoiceRepository, {
       findOneById: async () => fakeInvoice,
-      markPaid: async (_id: string, ref: string) => {
+      markPaid: async (_id: string, _version: number, ref: string) => {
         capturedRef = ref;
         return { ...fakeMarkedPaid, paymentId: ref };
       },
