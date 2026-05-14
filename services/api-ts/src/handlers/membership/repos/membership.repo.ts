@@ -1,4 +1,4 @@
-import { eq, and, or, like, ilike, desc, sql, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import {
   memberships,
@@ -55,6 +55,100 @@ export class MembershipRepository {
             avatar: persons.avatar,
           },
           category: { id: membershipCategories.id, name: membershipCategories.name },
+        })
+        .from(memberships)
+        .leftJoin(persons, eq(memberships.personId, persons.id))
+        .leftJoin(membershipCategories, eq(memberships.categoryId, membershipCategories.id))
+        .where(where)
+        .orderBy(desc(memberships.joinedAt))
+        .limit(filters.limit ?? 50)
+        .offset(filters.offset ?? 0),
+      this.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(memberships)
+        .leftJoin(persons, eq(memberships.personId, persons.id))
+        .where(where),
+    ]);
+
+    return { data, total: countResult[0]?.count ?? 0 };
+  }
+
+  /**
+   * listMembersWithOfficerStatus (OPS-01, OPS-04)
+   *
+   * Returns the chapter roster enriched with per-member dues status and training
+   * compliance in a single query — no N+1.
+   *
+   * - duesInvoiceStatus: latest invoice status from dues_invoice (correlated subquery)
+   * - creditsEarned: SUM(credit_amount) for the active training cycle (correlated subquery)
+   * - trainingCompliant: creditsEarned >= 40 (threshold per A1 assumption)
+   *
+   * Filters duesStatus and trainingCompliant are applied as WHERE clauses at DB level.
+   */
+  async listMembersWithOfficerStatus(filters: {
+    organizationId: string;
+    status?: string;
+    categoryId?: string;
+    search?: string;
+    duesStatus?: string;
+    trainingCompliant?: boolean;
+    limit?: number;
+    offset?: number;
+  }) {
+    const TRAINING_THRESHOLD = 40;
+
+    const conditions: SQL<unknown>[] = [
+      eq(memberships.organizationId, filters.organizationId),
+    ];
+
+    if (filters.status) conditions.push(eq(memberships.status, filters.status as any));
+    if (filters.categoryId) conditions.push(eq(memberships.categoryId, filters.categoryId));
+    if (filters.search) {
+      conditions.push(or(
+        ilike(persons.firstName, `%${filters.search}%`),
+        ilike(persons.lastName, `%${filters.search}%`),
+        ilike(memberships.memberNumber, `%${filters.search}%`),
+      )!);
+    }
+
+    // OPS-04: DB-level filter by latest dues invoice status
+    if (filters.duesStatus !== undefined) {
+      conditions.push(
+        sql`(SELECT status FROM dues_invoice WHERE membership_id = ${memberships.id} ORDER BY created_at DESC LIMIT 1) = ${filters.duesStatus}`,
+      );
+    }
+
+    // OPS-04: DB-level filter by training compliance
+    if (filters.trainingCompliant === true) {
+      conditions.push(
+        sql`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0) >= ${TRAINING_THRESHOLD}`,
+      );
+    } else if (filters.trainingCompliant === false) {
+      conditions.push(
+        sql`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0) < ${TRAINING_THRESHOLD}`,
+      );
+    }
+
+    const where = and(...conditions);
+
+    const [data, countResult] = await Promise.all([
+      this.db
+        .select({
+          membership: memberships,
+          person: {
+            id: persons.id,
+            firstName: persons.firstName,
+            lastName: persons.lastName,
+            email: persons.email,
+            avatar: persons.avatar,
+          },
+          category: { id: membershipCategories.id, name: membershipCategories.name },
+          // OPS-01: correlated subquery for latest invoice status (no N+1)
+          duesInvoiceStatus: sql<string | null>`(SELECT status FROM dues_invoice WHERE membership_id = ${memberships.id} ORDER BY created_at DESC LIMIT 1)`,
+          // OPS-01: correlated subquery for total training credits in active cycle (no N+1)
+          creditsEarned: sql<number>`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0)`,
+          // Computed compliance flag
+          trainingCompliant: sql<boolean>`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0) >= ${TRAINING_THRESHOLD}`,
         })
         .from(memberships)
         .leftJoin(persons, eq(memberships.personId, persons.id))
