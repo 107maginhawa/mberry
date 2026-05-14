@@ -632,7 +632,7 @@
     "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/communications/br-35.feed-moderation.test.ts"
+        "services/api-ts/src/handlers/communication/br-35.feed-moderation.test.ts"
       ],
       "contract": [],
       "e2e": []
@@ -702,7 +702,7 @@
     "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/communications/br-40.survey-anonymity.test.ts"
+        "services/api-ts/src/handlers/communication/br-40.survey-anonymity.test.ts"
       ],
       "contract": [],
       "e2e": []
