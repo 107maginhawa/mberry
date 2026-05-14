@@ -479,7 +479,7 @@ class EmailServiceImpl implements EmailService {
       // Checked at send time (not queue time) per business rule decision.
       // Only applies when recipientPersonId is provided in metadata.
       // -----------------------------------------------------------------------
-      const recipientPersonId = (email.metadata as Record<string, any> | null)?.recipientPersonId as string | undefined;
+      const recipientPersonId = (email.metadata as Record<string, any> | null)?.['recipientPersonId'] as string | undefined;
       if (recipientPersonId) {
         const membership = await this.membershipRepo.findByPersonAndOrg(recipientPersonId, email.organizationId);
         if (membership && (BLOCKED_MEMBERSHIP_STATUSES as readonly string[]).includes(membership.status)) {
