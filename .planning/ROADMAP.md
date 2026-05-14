@@ -230,7 +230,12 @@ Plans:
   2. CPD credit entries store category, approval code, and verification status alongside the credit hours
   3. Officer can view a compliance summary per member showing total credits earned vs required for the current CPD cycle
   4. Accredited providers registry shows provider list with status (active/suspended/expired) and highlights providers with expiry within 30 days
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 22-01-PLAN.md — Schema extensions (training PRC fields, credit entry CPD fields, accredited_provider table)
+- [ ] 22-02-PLAN.md — Accredited provider CRUD handlers + route registration + tests
+- [ ] 22-03-PLAN.md — Training/credit entry handler updates + compliance byCategory extension
+- [ ] 22-04-PLAN.md — Frontend: compliance category columns + provider registry page + sidebar
 **UI hint**: yes
 
 ### Phase 23: Member Departure + Deceased
@@ -292,7 +297,7 @@ Plans:
 | 19. Account Deletion + Data Export | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 20. Payment Flow | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 21. Officer Daily Ops | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
-| 22. PRC CPD Compliance | v1.2.0 | 0/? | Not started | — |
+| 22. PRC CPD Compliance | v1.2.0 | 0/4 | Not started | — |
 | 23. Member Departure + Deceased | v1.2.0 | 0/? | Not started | — |
 | 24. Quality Gap Closure | v1.2.0 | 0/? | Not started | — |
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/? | Not started | — |
