@@ -156,7 +156,7 @@
 - [x] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary (completed 2026-05-14)
 - [x] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion (completed 2026-05-14)
 - [x] **Phase 24: Quality Gap Closure** — Roster 500 fix, audit filter bug, BR-35 through BR-40 (completed 2026-05-14)
-- [ ] **Phase 25: Email/Notif Guards + Handler Tests** — Rate limiting, bounce suppression, deceased guard, unsubscribe
+- [x] **Phase 25: Email/Notif Guards + Handler Tests** — Rate limiting, bounce suppression, deceased guard, unsubscribe (completed 2026-05-14)
 
 ## Phase Details
 
@@ -276,14 +276,14 @@ Plans:
   3. Sending email or push notification to a deceased or departed member is blocked at the send layer (not silently queued)
   4. All email messages include a one-click unsubscribe header and a visible unsubscribe link; clicking either suppresses the address
   5. All previously untested API handlers have unit test coverage with passing tests
-**Plans:** 6 plans
+**Plans:** 6/6 plans complete
 Plans:
-- [ ] 25-01-PLAN.md -- Schema extensions + suppression repo + unsub tokens + bulk rate limiter
-- [ ] 25-02-PLAN.md -- Processor guards (suppression, deceased, rate limit) + unsubscribe header injection
-- [ ] 25-03-PLAN.md -- Unsubscribe endpoint (RFC 8058) + list suppressions handler
-- [ ] 25-04-PLAN.md -- Handler tests: communication (27) + person (22)
-- [ ] 25-05-PLAN.md -- Handler tests: notifs (4) + platformadmin (17) + documents (15) + billing (11)
-- [ ] 25-06-PLAN.md -- Handler tests: training (5) + reviews (3) + events (1) + system (3) + booking (15) + membership (4) + invite (1)
+- [x] 25-01-PLAN.md -- Schema extensions + suppression repo + unsub tokens + bulk rate limiter
+- [x] 25-02-PLAN.md -- Processor guards (suppression, deceased, rate limit) + unsubscribe header injection
+- [x] 25-03-PLAN.md -- Unsubscribe endpoint (RFC 8058) + list suppressions handler
+- [x] 25-04-PLAN.md -- Handler tests: communication (27) + person (22)
+- [x] 25-05-PLAN.md -- Handler tests: notifs (4) + platformadmin (17) + documents (15) + billing (11)
+- [x] 25-06-PLAN.md -- Handler tests: training (5) + reviews (3) + events (1) + system (3) + booking (15) + membership (4) + invite (1)
 
 ## Progress
 
@@ -314,4 +314,4 @@ Plans:
 | 22. PRC CPD Compliance | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
 | 23. Member Departure + Deceased | v1.2.0 | 3/3 | Complete   | 2026-05-14 |
 | 24. Quality Gap Closure | v1.2.0 | 2/2 | Complete   | 2026-05-14 |
-| 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/6 | Not started | — |
+| 25. Email/Notif Guards + Handler Tests | v1.2.0 | 6/6 | Complete   | 2026-05-14 |
