@@ -33,9 +33,8 @@ import "./modules/platform-admin-custom.tsp";
 import "./modules/membership-custom.tsp";
 import "./modules/dues-custom.tsp";
 
-// Infrastructure endpoints
-import "./modules/health.tsp";
-import "./modules/feature-flags.tsp";
+// Infrastructure endpoints (health.tsp and feature-flags.tsp removed — real
+// implementations live in core/health.ts and platformadmin/listFeatureFlags.ts)
 
 // Association management specs
 import "./association/core/primitives.tsp";
@@ -541,13 +540,8 @@ namespace MonobaseAPI {
   // =========================================================================
   // Infrastructure Endpoints
   // =========================================================================
-
-  @tag("System")
-  interface HealthChecks extends HealthModule.HealthManagement {}
-
-  @tag("System")
-  @route("/feature-flags")
-  interface FeatureFlagEndpoints extends FeatureFlagsModule.FeatureFlagManagement {}
+  // Health checks (/livez, /readyz) registered in core/health.ts (inline routes)
+  // Feature flags (/admin/feature-flags) registered in platformadmin module above
 
 }
 

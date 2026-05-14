@@ -53,6 +53,7 @@ import { Route as AuthenticatedOrgOrgIdOfficerElectionsIndexRouteImport } from '
 import { Route as AuthenticatedOrgOrgIdOfficerCommunicationsIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/communications/index'
 import { Route as AuthenticatedOrgOrgIdOfficerTrainingNewRouteImport } from './routes/_authenticated/org/$orgId/officer/training/new'
 import { Route as AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteImport } from './routes/_authenticated/org/$orgId/officer/training/$trainingId'
+import { Route as AuthenticatedOrgOrgIdOfficerSettingsProvidersRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/providers'
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsOrgRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/org'
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/membership-categories'
 import { Route as AuthenticatedOrgOrgIdOfficerSettingsGatewayRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/gateway'
@@ -322,6 +323,12 @@ const AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute =
     path: '/training/$trainingId',
     getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
   } as any)
+const AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute =
+  AuthenticatedOrgOrgIdOfficerSettingsProvidersRouteImport.update({
+    id: '/settings/providers',
+    path: '/settings/providers',
+    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+  } as any)
 const AuthenticatedOrgOrgIdOfficerSettingsOrgRoute =
   AuthenticatedOrgOrgIdOfficerSettingsOrgRouteImport.update({
     id: '/settings/org',
@@ -497,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
   '/org/$orgId/officer/settings/membership-categories': typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute
   '/org/$orgId/officer/settings/org': typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRoute
+  '/org/$orgId/officer/settings/providers': typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute
   '/org/$orgId/officer/training/$trainingId': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren
   '/org/$orgId/officer/training/new': typeof AuthenticatedOrgOrgIdOfficerTrainingNewRoute
   '/org/$orgId/officer/communications/': typeof AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute
@@ -559,6 +567,7 @@ export interface FileRoutesByTo {
   '/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
   '/org/$orgId/officer/settings/membership-categories': typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute
   '/org/$orgId/officer/settings/org': typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRoute
+  '/org/$orgId/officer/settings/providers': typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute
   '/org/$orgId/officer/training/$trainingId': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren
   '/org/$orgId/officer/training/new': typeof AuthenticatedOrgOrgIdOfficerTrainingNewRoute
   '/org/$orgId/officer/communications': typeof AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute
@@ -626,6 +635,7 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
   '/_authenticated/org/$orgId/officer/settings/membership-categories': typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute
   '/_authenticated/org/$orgId/officer/settings/org': typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRoute
+  '/_authenticated/org/$orgId/officer/settings/providers': typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute
   '/_authenticated/org/$orgId/officer/training/$trainingId': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren
   '/_authenticated/org/$orgId/officer/training/new': typeof AuthenticatedOrgOrgIdOfficerTrainingNewRoute
   '/_authenticated/org/$orgId/officer/communications/': typeof AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute
@@ -693,6 +703,7 @@ export interface FileRouteTypes {
     | '/org/$orgId/officer/settings/gateway'
     | '/org/$orgId/officer/settings/membership-categories'
     | '/org/$orgId/officer/settings/org'
+    | '/org/$orgId/officer/settings/providers'
     | '/org/$orgId/officer/training/$trainingId'
     | '/org/$orgId/officer/training/new'
     | '/org/$orgId/officer/communications/'
@@ -755,6 +766,7 @@ export interface FileRouteTypes {
     | '/org/$orgId/officer/settings/gateway'
     | '/org/$orgId/officer/settings/membership-categories'
     | '/org/$orgId/officer/settings/org'
+    | '/org/$orgId/officer/settings/providers'
     | '/org/$orgId/officer/training/$trainingId'
     | '/org/$orgId/officer/training/new'
     | '/org/$orgId/officer/communications'
@@ -821,6 +833,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/$orgId/officer/settings/gateway'
     | '/_authenticated/org/$orgId/officer/settings/membership-categories'
     | '/_authenticated/org/$orgId/officer/settings/org'
+    | '/_authenticated/org/$orgId/officer/settings/providers'
     | '/_authenticated/org/$orgId/officer/training/$trainingId'
     | '/_authenticated/org/$orgId/officer/training/new'
     | '/_authenticated/org/$orgId/officer/communications/'
@@ -1154,6 +1167,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteImport
       parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
     }
+    '/_authenticated/org/$orgId/officer/settings/providers': {
+      id: '/_authenticated/org/$orgId/officer/settings/providers'
+      path: '/settings/providers'
+      fullPath: '/org/$orgId/officer/settings/providers'
+      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+    }
     '/_authenticated/org/$orgId/officer/settings/org': {
       id: '/_authenticated/org/$orgId/officer/settings/org'
       path: '/settings/org'
@@ -1409,6 +1429,7 @@ interface AuthenticatedOrgOrgIdOfficerRouteChildren {
   AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
   AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute
   AuthenticatedOrgOrgIdOfficerSettingsOrgRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRoute
+  AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute
   AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren
   AuthenticatedOrgOrgIdOfficerTrainingNewRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingNewRoute
   AuthenticatedOrgOrgIdOfficerElectionsIndexRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsIndexRoute
@@ -1454,6 +1475,8 @@ const AuthenticatedOrgOrgIdOfficerRouteChildren: AuthenticatedOrgOrgIdOfficerRou
       AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute,
     AuthenticatedOrgOrgIdOfficerSettingsOrgRoute:
       AuthenticatedOrgOrgIdOfficerSettingsOrgRoute,
+    AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute:
+      AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute,
     AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute:
       AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren,
     AuthenticatedOrgOrgIdOfficerTrainingNewRoute:

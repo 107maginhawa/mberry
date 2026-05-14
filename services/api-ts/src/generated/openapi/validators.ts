@@ -5591,14 +5591,6 @@ export const GrantProgressReportUpdateSchema = z.object({
 
 export const GrantStatusSchema = z.enum(["draft", "submitted", "underReview", "approved", "denied", "funded", "completed", "withdrawn"]);
 
-export const HealthCheckResponseSchema = z.object({
-  status: z.enum(["pass", "fail"]),
-  timestamp: z.string(),
-  checks: z.record(z.string(), z.unknown())
-});
-
-export const HealthStatusSchema = z.enum(["pass", "fail"]);
-
 export const HumanReviewGateSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -12138,13 +12130,6 @@ export type TestEmailTemplateBody = z.infer<typeof TestEmailTemplateBody>;
 
 export const TestEmailTemplateResponse = TestTemplateResultSchema;
 
-export const LivenessQuery = z.object({
-  verbose: z.string().optional(),
-});
-export type LivenessQuery = z.infer<typeof LivenessQuery>;
-
-export const LivenessResponse = HealthCheckResponseSchema;
-
 export const ListOrgApplicationsParams = z.object({
   organizationId: UUIDSchema,
 });
@@ -12330,13 +12315,6 @@ export type GetOrganizationBySlugParams = z.infer<typeof GetOrganizationBySlugPa
 export const GetOrganizationBySlugResponse = PublicOrganizationSchema;
 
 export const MarkAllNotificationsReadResponse = MarkAllReadResponseSchema;
-
-export const ReadinessQuery = z.object({
-  verbose: z.string().optional(),
-});
-export type ReadinessQuery = z.infer<typeof ReadinessQuery>;
-
-export const ReadinessResponse = HealthCheckResponseSchema;
 
 export const CreateReviewBody = CreateReviewRequestSchema;
 export type CreateReviewBody = z.infer<typeof CreateReviewBody>;
