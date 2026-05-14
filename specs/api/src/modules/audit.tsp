@@ -200,6 +200,10 @@ namespace AuditModule {
         @query user?: UUID,
         @doc("Filter by action type (create, read, update, delete, login, logout)")
         @query action?: AuditAction,
+        @doc("Filter by event type")
+        @query eventType?: AuditEventType,
+        @doc("Filter by audit category")
+        @query category?: AuditCategory,
         @doc("Start date for filtering audit logs (inclusive)")
         @query startDate?: StrictUtcDateTime,
         @doc("End date for filtering audit logs (inclusive)")

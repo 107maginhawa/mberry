@@ -11524,6 +11524,8 @@ export const ListAuditLogsQuery = z.object({
   resource: UUIDSchema.optional(),
   user: UUIDSchema.optional(),
   action: AuditActionSchema.optional(),
+  eventType: AuditEventTypeSchema.optional(),
+  category: AuditCategorySchema.optional(),
   startDate: StrictUtcDateTimeSchema.optional(),
   endDate: StrictUtcDateTimeSchema.optional(),
   orderBy: SafeQueryStringSchema.optional(),

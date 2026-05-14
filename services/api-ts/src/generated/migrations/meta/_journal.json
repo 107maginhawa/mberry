@@ -253,6 +253,13 @@
       "when": 1778720954822,
       "tag": "0035_glossy_titanium_man",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1778721452151,
+      "tag": "0036_solid_lyja",
+      "breakpoints": true
     }
   ]
 }
