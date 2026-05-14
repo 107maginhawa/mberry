@@ -515,7 +515,7 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 
 | Gap ID | Description | Priority | Affected Modules | Recommended Fix |
 |--------|------------|----------|-----------------|-----------------|
-| GAP-01 | 7 hand-wired routes in app.ts not covered by TypeSpec | P2 | email, training (providers) | Add TypeSpec definitions |
+| GAP-01 | ~~7 hand-wired routes in app.ts not covered by TypeSpec~~ | ✅ CLOSED | email, training (providers) | Intentional: email unsubscribe must precede auth middleware (RFC 8058); accredited providers are org-scoped training routes, not in provider.tsp. Middleware ordering requires hand-wiring. |
 | GAP-02 | Admin app uses raw fetch instead of SDK | P2 | admin | Migrate to @monobase/sdk-ts |
 | GAP-03 | No formal bounded context boundaries | P3 | All (cross-module imports) | Introduce module interface layer |
 | GAP-04 | ~~Pagination not applied to all list endpoints~~ | ✅ CLOSED | Various | False positive — all 12 TypeSpec modules uniformly use `...PaginationQuery` spread pattern |

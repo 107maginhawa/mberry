@@ -50,13 +50,17 @@ import { createAuditMiddleware } from '@/middleware/audit';
 import { createRateLimiter } from '@/middleware/rate-limit';
 import { orgContextMiddleware, orgContextOptionalMiddleware } from '@/middleware/org-context';
 
-// PRC Accredited Providers (hand-wired, org-scoped)
+// PRC Accredited Providers — hand-wired because these are org-scoped training
+// routes (not in provider.tsp which covers healthcare provider profiles).
+// Registered after registerOpenAPIRoutes() with explicit authMiddleware().
 import { listAccreditedProviders } from '@/handlers/training/listAccreditedProviders';
 import { createAccreditedProvider } from '@/handlers/training/createAccreditedProvider';
 import { updateAccreditedProvider } from '@/handlers/training/updateAccreditedProvider';
 import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedProvider';
 
-// Email: public unsubscribe + officer suppression list (hand-wired)
+// Email: hand-wired for middleware ordering reasons.
+// - unsubscribeEmail: MUST be registered BEFORE /email/* auth middleware (RFC 8058 public access)
+// - listEmailSuppressions: registered AFTER /email/* auth middleware (officer-only)
 import { unsubscribeEmail } from '@/handlers/email/unsubscribeEmail';
 import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 
