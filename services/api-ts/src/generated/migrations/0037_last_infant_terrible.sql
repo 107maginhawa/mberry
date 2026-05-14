@@ -1,6 +1,12 @@
-CREATE TYPE "public"."email_category" AS ENUM('bulk', 'transactional');--> statement-breakpoint
-CREATE TYPE "public"."suppression_reason" AS ENUM('hard_bounce', 'unsubscribe', 'complaint', 'manual');--> statement-breakpoint
-CREATE TABLE "email_suppression" (
+DO $$ BEGIN
+CREATE TYPE "public"."email_category" AS ENUM('bulk', 'transactional');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+CREATE TYPE "public"."suppression_reason" AS ENUM('hard_bounce', 'unsubscribe', 'complaint', 'manual');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "email_suppression" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -16,6 +22,9 @@ CREATE TABLE "email_suppression" (
 	CONSTRAINT "email_suppression_org_email_unique" UNIQUE("organization_id","email")
 );
 --> statement-breakpoint
-ALTER TABLE "email_queue" ADD COLUMN "email_category" "email_category" DEFAULT 'transactional' NOT NULL;--> statement-breakpoint
-CREATE INDEX "email_suppression_org_email_idx" ON "email_suppression" USING btree ("organization_id","email");--> statement-breakpoint
-CREATE INDEX "email_suppression_email_idx" ON "email_suppression" USING btree ("email");
+DO $$ BEGIN
+ALTER TABLE "email_queue" ADD COLUMN "email_category" "email_category" DEFAULT 'transactional' NOT NULL;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "email_suppression_org_email_idx" ON "email_suppression" USING btree ("organization_id","email");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "email_suppression_email_idx" ON "email_suppression" USING btree ("email");
