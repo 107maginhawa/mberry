@@ -154,7 +154,7 @@
 - [x] **Phase 20: Payment Flow** — Offline payment recording with receipts and concurrency safety (completed 2026-05-13)
 - [x] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation (completed 2026-05-14)
 - [x] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary (completed 2026-05-14)
-- [ ] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion
+- [x] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion (completed 2026-05-14)
 - [ ] **Phase 24: Quality Gap Closure** — Roster 500 fix, audit filter bug, BR-35 through BR-40
 - [ ] **Phase 25: Email/Notif Guards + Handler Tests** — Rate limiting, bounce suppression, deceased guard, unsubscribe
 
@@ -247,11 +247,11 @@ Plans:
   2. Officer can mark a member as deceased with a date of death; the membership record reflects status `deceased`
   3. The membership status field uses an enum supporting resigned, deceased, expelled, and lapsed (not a boolean)
   4. Departed and deceased members are excluded from dues invoice generation and bulk notification sends
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 Plans:
-- [ ] 23-01-PLAN.md -- Schema + TypeSpec enum extension + codegen (resigned, deceased, expelled, dateOfDeath)
-- [ ] 23-02-PLAN.md -- resignMembership + deceaseMembership handlers with TDD
-- [ ] 23-03-PLAN.md -- Billing/notification exclusion guard tests (LIF-03)
+- [x] 23-01-PLAN.md -- Schema + TypeSpec enum extension + codegen (resigned, deceased, expelled, dateOfDeath)
+- [x] 23-02-PLAN.md -- resignMembership + deceaseMembership handlers with TDD
+- [x] 23-03-PLAN.md -- Billing/notification exclusion guard tests (LIF-03)
 
 ### Phase 24: Quality Gap Closure
 **Goal**: Three pre-existing defects are resolved: the roster API 500, the audit log filter bug, and the deferred BR-35 through BR-40 business rules
@@ -302,6 +302,6 @@ Plans:
 | 20. Payment Flow | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 21. Officer Daily Ops | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
 | 22. PRC CPD Compliance | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
-| 23. Member Departure + Deceased | v1.2.0 | 0/3 | Not started | — |
+| 23. Member Departure + Deceased | v1.2.0 | 3/3 | Complete   | 2026-05-14 |
 | 24. Quality Gap Closure | v1.2.0 | 0/? | Not started | — |
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/? | Not started | — |
