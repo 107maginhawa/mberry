@@ -155,7 +155,7 @@
 - [x] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation (completed 2026-05-14)
 - [x] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary (completed 2026-05-14)
 - [x] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion (completed 2026-05-14)
-- [ ] **Phase 24: Quality Gap Closure** — Roster 500 fix, audit filter bug, BR-35 through BR-40
+- [x] **Phase 24: Quality Gap Closure** — Roster 500 fix, audit filter bug, BR-35 through BR-40 (completed 2026-05-14)
 - [ ] **Phase 25: Email/Notif Guards + Handler Tests** — Rate limiting, bounce suppression, deceased guard, unsubscribe
 
 ## Phase Details
@@ -261,10 +261,10 @@ Plans:
   1. GET /association/member/roster returns 200 with data (no longer throws 500 on handler param mismatch)
   2. Audit log queries with eventType and/or category params return only matching records (filter actually applied)
   3. BR-35 through BR-40 are implemented with corresponding unit tests that pass
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 24-01-PLAN.md — Audit log filter fix (TypeSpec @query params + codegen + tests)
-- [ ] 24-02-PLAN.md — Roster 500 fix + BR-35/BR-40 registry path correction
+- [x] 24-01-PLAN.md — Audit log filter fix (TypeSpec @query params + codegen + tests)
+- [x] 24-02-PLAN.md — Roster 500 fix + BR-35/BR-40 registry path correction
 
 ### Phase 25: Email/Notif Guards + Handler Tests
 **Goal**: Email infrastructure is hardened with rate limiting, bounce suppression, and a deceased/departed guard; remaining untested handlers have unit test coverage
@@ -306,5 +306,5 @@ Plans:
 | 21. Officer Daily Ops | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
 | 22. PRC CPD Compliance | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
 | 23. Member Departure + Deceased | v1.2.0 | 3/3 | Complete   | 2026-05-14 |
-| 24. Quality Gap Closure | v1.2.0 | 0/2 | Not started | — |
+| 24. Quality Gap Closure | v1.2.0 | 2/2 | Complete   | 2026-05-14 |
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/? | Not started | — |
