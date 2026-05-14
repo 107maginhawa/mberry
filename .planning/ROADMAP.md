@@ -152,7 +152,7 @@
 - [x] **Phase 18: Dues Invoice Security Fix** — Enforce org-scoped RBAC on dues endpoints (2026-05-14)
 - [x] **Phase 19: Account Deletion + Data Export** — PH DPA compliance (deletion, anonymization, export) (completed 2026-05-13)
 - [x] **Phase 20: Payment Flow** — Offline payment recording with receipts and concurrency safety (completed 2026-05-13)
-- [ ] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation
+- [x] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation (completed 2026-05-14)
 - [ ] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary
 - [ ] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion
 - [ ] **Phase 24: Quality Gap Closure** — Roster 500 fix, audit filter bug, BR-35 through BR-40
@@ -213,12 +213,12 @@ Plans:
   2. Officer can bulk approve a list of membership applications and receive a partial-success response identifying which succeeded and which failed
   3. Bulk approval validates organization scope per record (an officer cannot approve applications outside their chapter even in a mixed-org batch)
   4. Officer can filter roster by membership status, dues status, and training compliance and receive correctly filtered results
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 Plans:
-- [ ] 21-01-PLAN.md — TypeSpec models + codegen (OfficerRosterMember, BulkApprove, new query params)
-- [ ] 21-02-PLAN.md — Roster handler + repo extension with JOIN + DB-level filters
-- [ ] 21-03-PLAN.md — Bulk approve handler with per-record org scope validation
-- [ ] 21-04-PLAN.md — Frontend: roster dues/training columns + filters, bulk approve UI
+- [x] 21-01-PLAN.md — TypeSpec models + codegen (OfficerRosterMember, BulkApprove, new query params)
+- [x] 21-02-PLAN.md — Roster handler + repo extension with JOIN + DB-level filters
+- [x] 21-03-PLAN.md — Bulk approve handler with per-record org scope validation
+- [x] 21-04-PLAN.md — Frontend: roster dues/training columns + filters, bulk approve UI
 **UI hint**: yes
 
 ### Phase 22: PRC CPD Compliance
@@ -291,7 +291,7 @@ Plans:
 | 18. Dues Invoice Security Fix | v1.2.0 | 2/2 | Complete | 2026-05-14 |
 | 19. Account Deletion + Data Export | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 20. Payment Flow | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
-| 21. Officer Daily Ops | v1.2.0 | 0/4 | Not started | — |
+| 21. Officer Daily Ops | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
 | 22. PRC CPD Compliance | v1.2.0 | 0/? | Not started | — |
 | 23. Member Departure + Deceased | v1.2.0 | 0/? | Not started | — |
 | 24. Quality Gap Closure | v1.2.0 | 0/? | Not started | — |
