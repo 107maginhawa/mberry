@@ -8,7 +8,7 @@
 import type { BaseContext } from '@/types/app';
 
 interface AuditActionOpts {
-  action: 'create' | 'update' | 'delete' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer';
+  action: 'create' | 'update' | 'delete' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'resign' | 'deceased';
   resourceType: string;
   resourceId: string;
   description: string;
