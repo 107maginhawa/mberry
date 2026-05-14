@@ -153,7 +153,7 @@
 - [x] **Phase 19: Account Deletion + Data Export** — PH DPA compliance (deletion, anonymization, export) (completed 2026-05-13)
 - [x] **Phase 20: Payment Flow** — Offline payment recording with receipts and concurrency safety (completed 2026-05-13)
 - [x] **Phase 21: Officer Daily Ops** — Roster, bulk approvals, filtering with scoped validation (completed 2026-05-14)
-- [ ] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary
+- [x] **Phase 22: PRC CPD Compliance** — Accreditation fields, credit categories, compliance summary (completed 2026-05-14)
 - [ ] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion
 - [ ] **Phase 24: Quality Gap Closure** — Roster 500 fix, audit filter bug, BR-35 through BR-40
 - [ ] **Phase 25: Email/Notif Guards + Handler Tests** — Rate limiting, bounce suppression, deceased guard, unsubscribe
@@ -230,12 +230,12 @@ Plans:
   2. CPD credit entries store category, approval code, and verification status alongside the credit hours
   3. Officer can view a compliance summary per member showing total credits earned vs required for the current CPD cycle
   4. Accredited providers registry shows provider list with status (active/suspended/expired) and highlights providers with expiry within 30 days
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 Plans:
-- [ ] 22-01-PLAN.md — Schema extensions (training PRC fields, credit entry CPD fields, accredited_provider table)
-- [ ] 22-02-PLAN.md — Accredited provider CRUD handlers + route registration + tests
-- [ ] 22-03-PLAN.md — Training/credit entry handler updates + compliance byCategory extension
-- [ ] 22-04-PLAN.md — Frontend: compliance category columns + provider registry page + sidebar
+- [x] 22-01-PLAN.md — Schema extensions (training PRC fields, credit entry CPD fields, accredited_provider table)
+- [x] 22-02-PLAN.md — Accredited provider CRUD handlers + route registration + tests
+- [x] 22-03-PLAN.md — Training/credit entry handler updates + compliance byCategory extension
+- [x] 22-04-PLAN.md — Frontend: compliance category columns + provider registry page + sidebar
 **UI hint**: yes
 
 ### Phase 23: Member Departure + Deceased
@@ -297,7 +297,7 @@ Plans:
 | 19. Account Deletion + Data Export | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 20. Payment Flow | v1.2.0 | 2/2 | Complete   | 2026-05-13 |
 | 21. Officer Daily Ops | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
-| 22. PRC CPD Compliance | v1.2.0 | 0/4 | Not started | — |
+| 22. PRC CPD Compliance | v1.2.0 | 4/4 | Complete   | 2026-05-14 |
 | 23. Member Departure + Deceased | v1.2.0 | 0/? | Not started | — |
 | 24. Quality Gap Closure | v1.2.0 | 0/? | Not started | — |
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 0/? | Not started | — |
