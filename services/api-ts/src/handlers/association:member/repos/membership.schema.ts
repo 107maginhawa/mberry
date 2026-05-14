@@ -41,6 +41,9 @@ export const membershipStatusEnum = pgEnum('membership_status', [
   'expired',
   'suspended',
   'terminated',
+  'resigned',    // LIF-04: voluntary departure
+  'deceased',    // LIF-04: member death
+  'expelled',    // LIF-04: disciplinary removal
 ]);
 
 /** Status of a membership application */
@@ -118,6 +121,7 @@ export const memberships = pgTable(
     suspendedAt: timestamp('suspended_at'),
     terminatedAt: timestamp('terminated_at'),
     terminationReason: varchar('termination_reason', { length: 500 }),
+    dateOfDeath: date('date_of_death'),               // LIF-04: recorded on deceased
     note: text('note'),
   },
   (table) => ({

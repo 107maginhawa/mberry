@@ -246,6 +246,13 @@
       "when": 1778719063369,
       "tag": "0034_lying_fixer",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1778720954822,
+      "tag": "0035_glossy_titanium_man",
+      "breakpoints": true
     }
   ]
 }
