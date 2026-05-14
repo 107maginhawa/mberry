@@ -3,18 +3,32 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { ListRosterMembersQuery } from '@/generated/openapi/validators';
 import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * listRosterMembers
  *
  * Path: GET /association/member/roster
  * OperationId: listRosterMembers
+ *
+ * OPS-01: Returns per-member dues status and training compliance in a single request.
+ * OPS-04: Supports DB-level filtering by duesStatus and trainingCompliant.
+ * T-21-02: Officer-gated — Secretary, President, or Society Officer only.
  */
 export async function listRosterMembers(
   ctx: ValidatedContext<never, ListRosterMembersQuery, never>
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
+
+  // T-21-02: Restrict access to officer positions
+  const denied = await requirePosition(ctx, [
+    POSITION_TITLES.SECRETARY,
+    POSITION_TITLES.PRESIDENT,
+    POSITION_TITLES.SOCIETY_OFFICER,
+  ]);
+  if (denied) return denied;
 
   const query = ctx.req.valid('query');
   const db = ctx.get('database') as DatabaseInstance;
@@ -24,16 +38,19 @@ export async function listRosterMembers(
   const pageSize = query.pageSize ?? 20;
   const offset = (page - 1) * pageSize;
 
-  const result = await repo.listMembers({
+  // OPS-01/OPS-04: Use enriched query with dues + training subqueries + DB-level filters
+  const result = await repo.listMembersWithOfficerStatus({
     organizationId: query.organizationId,
     status: query.status,
     categoryId: query.categoryId,
     search: query.q ?? query.search,
+    duesStatus: query.duesStatus,
+    trainingCompliant: query.trainingCompliant,
     limit: pageSize,
     offset,
   });
 
-  // Flatten nested { membership, person, category } for frontend
+  // Flatten nested { membership, person, category } + officer status fields
   const data = result.data.map((row: any) => {
     const m = row.membership || row;
     const p = row.person || {};
@@ -55,6 +72,10 @@ export async function listRosterMembers(
       joinedAt: m.joinedAt || m.createdAt || null,
       startDate: m.startDate || null,
       organizationId: m.organizationId || null,
+      // OPS-01: officer-status fields
+      duesInvoiceStatus: row.duesInvoiceStatus ?? null,
+      creditsEarned: row.creditsEarned ?? 0,
+      trainingCompliant: row.trainingCompliant ?? false,
     };
   });
 

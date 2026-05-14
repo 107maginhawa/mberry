@@ -227,14 +227,14 @@ describe('listRosterMembers handler', () => {
       _query: { organizationId: 'org-1', page: 1, pageSize: 20 },
     });
 
-    const res = await listRosterMembers(ctx as any);
-    const body = await res.json();
+    // makeCtx returns { status, body } from ctx.json() — not a real Response
+    const res = await listRosterMembers(ctx as any) as any;
 
     expect(res.status).toBe(200);
-    expect(body.data).toHaveLength(1);
-    expect(body.data[0].duesInvoiceStatus).toBe('paid');
-    expect(body.data[0].creditsEarned).toBe(45);
-    expect(body.data[0].trainingCompliant).toBe(true);
-    expect(body.data[0].email).toBe('jane@example.com');
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].duesInvoiceStatus).toBe('paid');
+    expect(res.body.data[0].creditsEarned).toBe(45);
+    expect(res.body.data[0].trainingCompliant).toBe(true);
+    expect(res.body.data[0].email).toBe('jane@example.com');
   });
 });
