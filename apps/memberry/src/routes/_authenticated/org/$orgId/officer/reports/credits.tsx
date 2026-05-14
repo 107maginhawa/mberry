@@ -25,10 +25,10 @@ function CreditReport() {
 
   const { data, isLoading } = useQuery<any>({
     queryKey: ['credit-compliance', orgId],
-    queryFn: () => api.get(`/api/credit-compliance/${orgId}`),
+    queryFn: () => api.get(`/api/credit-compliance/${orgId}?requiredCredits=45&cyclePeriodYears=3`),
   })
 
-  const summary = data?.summary ?? { compliant: 0, atRisk: 0, nonCompliant: 0, total: 0, requiredCredits: 40 }
+  const summary = data?.summary ?? { compliant: 0, atRisk: 0, nonCompliant: 0, total: 0, requiredCredits: 45 }
   const allMembers: any[] = data?.data ?? []
   const members = filter === 'all' ? allMembers : allMembers.filter((m: any) => m.compliance_status === filter)
 
@@ -99,6 +99,11 @@ function CreditReport() {
         </StaggerItem>
       </StaggerGrid>
 
+      {/* PRC note */}
+      <p className="text-xs text-muted-foreground">
+        PRC CPD Compliance: 45 units required per 3-year cycle (General + Major + Self-Directed)
+      </p>
+
       {/* Table */}
       <GlassCard>
         <div className="overflow-x-auto">
@@ -108,6 +113,9 @@ function CreditReport() {
                 <th className="text-left p-3 font-medium font-display">Member</th>
                 <th className="text-left p-3 font-medium font-display">ID</th>
                 <th className="text-right p-3 font-medium font-display">Earned</th>
+                <th className="text-right p-3 font-medium font-display text-muted-foreground">General</th>
+                <th className="text-right p-3 font-medium font-display text-muted-foreground">Major</th>
+                <th className="text-right p-3 font-medium font-display text-muted-foreground">Self-Directed</th>
                 <th className="text-right p-3 font-medium font-display">Required</th>
                 <th className="text-right p-3 font-medium font-display">Remaining</th>
                 <th className="text-left p-3 font-medium font-display">Status</th>
@@ -116,7 +124,7 @@ function CreditReport() {
             <tbody>
               {members.length === 0 ? (
                 <tr className="border-t">
-                  <td colSpan={6} className="p-8">
+                  <td colSpan={9} className="p-8">
                     <EmptyState headline="No members found" description="No members match this filter." />
                   </td>
                 </tr>
@@ -141,6 +149,9 @@ function CreditReport() {
                           <span>{m.earned}</span>
                         </div>
                       </td>
+                      <td className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.General ?? 0}</td>
+                      <td className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.Major ?? 0}</td>
+                      <td className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.['Self-Directed'] ?? 0}</td>
                       <td className="p-3 text-right text-[var(--color-muted)]">{m.required}</td>
                       <td className="p-3 text-right">{m.remaining}</td>
                       <td className="p-3">
