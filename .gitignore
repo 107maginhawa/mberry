@@ -4,6 +4,10 @@ node_modules/
 .pnp.js
 .yarn/install-state.gz
 
+# AI workflow artifacts
+.planning/
+.context/
+
 # Bun
 bun.lockb
 .bun/

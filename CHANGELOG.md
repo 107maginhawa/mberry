@@ -23,7 +23,7 @@ All notable changes to this project will be documented in this file.
 - **Full test pyramid** for custom modules: 1267 API unit tests, 7 contract test suites (Hurl), 20 E2E specs (Playwright)
 - **Shared test utilities**: make-ctx.ts with role helpers and repo stubs
 - **VERTICAL_TDD.md** development protocol documentation
-- **UPDATING.md** upgrade guide
+- Upgrade guide (removed — see CHANGELOG for version notes)
 
 ### Changed
 - Reorganized E2E tests into journeys/member/officer directory structure
