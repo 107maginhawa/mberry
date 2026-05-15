@@ -50,9 +50,9 @@ type Registry = Record<string, BrEntry>;
 // CI gate passes if only these are incomplete. Adding a new incomplete
 // BR without adding it here will fail CI (regression detection).
 const KNOWN_INCOMPLETE: Set<string> = new Set([
-  // p0-data: E2E tests are page smoke, not behavioral verification
-  "BR-01", // Membership Status — E2E doesn't verify transitions
-  "BR-03", // Membership Transitions — E2E doesn't verify state machine
+  // All cleared in v1.3.0 Phase 31:
+  // BR-01 removed: membership-actions.spec.ts verifies suspend→status change (behavioral, not smoke)
+  // BR-03 removed: membership-actions.spec.ts verifies status-appropriate actions per state
   // BR-32 removed: soft-delete explicitly asserted in deletionProcessor.test.ts (Phase 28)
   // BR-33 removed: handler-level tests cover all integrity rules (Phase 27-28)
   // BR-34 removed: handler-level tests + contract cover all eligibility rules (Phase 27-28)
