@@ -18,6 +18,7 @@
     "lint:no-skips": "bun scripts/lint-no-skips.ts",
     "rollback": "bash scripts/rollback.sh",
     "test:contract": "bun scripts/run-contract-tests.ts",
+    "test:br": "bun run scripts/br-coverage.ts",
     "test:contract:fuzz": "bun scripts/run-schemathesis.ts",
     "prepare": "husky",
     "test:registry": "bun run testing/registry/report.ts",
