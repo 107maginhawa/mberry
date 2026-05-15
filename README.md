@@ -1,14 +1,15 @@
-# Monobase Application Platform
+# Memberry
 
-A vertical-neutral monorepo template for SaaS products. Ships identity,
-billing, scheduling, communications, storage, and notification primitives
-that any product domain can compose into its own workflows. Built on Bun for
-~3× faster execution than Node.js.
+A healthcare Association Management System (AMS) built on the Monobase monorepo
+template. Manages membership, dues, events, training, credits, communications,
+and governance for healthcare professional associations. Built on Bun for ~3×
+faster execution than Node.js.
 
 ## Overview
 
-Monobase gives you a production-shaped starting point — not a finished app.
-Out of the box you get:
+Memberry ships three apps on top of the Monobase platform primitives (identity,
+billing, scheduling, communications, storage, notifications). Out of the box
+you get:
 
 - **Account app** - reference Vite + TanStack Router app with auth, profile,
   and settings flows; ships its own Radix-based component library inline

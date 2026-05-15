@@ -1,6 +1,6 @@
-# Contributing to Monobase Application Platform
+# Contributing to Memberry
 
-Thank you for your interest in contributing to Monobase! This guide will help you get started with development and understand our workflows.
+Welcome to the Memberry codebase. This guide covers development setup, workflows, and conventions. The project is built on the @monobase/ platform template.
 
 ## Table of Contents
 
