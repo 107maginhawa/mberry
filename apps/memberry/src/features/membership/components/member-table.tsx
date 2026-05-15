@@ -179,9 +179,9 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
 
       {/* Status tabs */}
       <Tabs value={statusTab} onValueChange={(v) => { setStatusTab(v); setPage(0) }}>
-        <TabsList className="flex-wrap h-auto">
+        <TabsList className="flex-wrap h-auto bg-[var(--color-surface-warm)]">
           {STATUS_TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+            <TabsTrigger key={tab.value} value={tab.value} className="text-[var(--color-text-secondary)] data-[state=active]:text-[var(--color-text)] data-[state=active]:bg-white">{tab.label}</TabsTrigger>
           ))}
         </TabsList>
       </Tabs>

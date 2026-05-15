@@ -105,12 +105,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
           <div className="absolute inset-y-0 left-0 w-[280px] bg-[var(--color-primary)] text-white flex flex-col animate-in slide-in-from-left duration-200">
             {/* Drawer header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.12]">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-[var(--color-cream)] flex items-center justify-center">
-                  <span className="text-[var(--color-primary)] font-display font-bold text-[11px]">M</span>
-                </div>
-                <span className="font-display text-[16px] font-bold">Memberry</span>
-              </div>
+              <img src="/memberry-logo-white.png" alt="Memberry" className="h-7 w-auto" />
               <button
                 onClick={() => setDrawerOpen(false)}
                 className="p-1 rounded-lg hover:bg-white/10"

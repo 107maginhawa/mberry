@@ -114,7 +114,7 @@ export class MembershipRepository {
     // OPS-04: DB-level filter by latest dues invoice status
     if (filters.duesStatus !== undefined) {
       conditions.push(
-        sql`(SELECT status FROM dues_invoice WHERE membership_id = ${memberships.id} ORDER BY created_at DESC LIMIT 1) = ${filters.duesStatus}`,
+        sql`(SELECT status FROM dues_invoice WHERE membership_id = ${memberships.id}::text ORDER BY created_at DESC LIMIT 1) = ${filters.duesStatus}`,
       );
     }
 
@@ -144,7 +144,7 @@ export class MembershipRepository {
           },
           category: { id: membershipCategories.id, name: membershipCategories.name },
           // OPS-01: correlated subquery for latest invoice status (no N+1)
-          duesInvoiceStatus: sql<string | null>`(SELECT status FROM dues_invoice WHERE membership_id = ${memberships.id} ORDER BY created_at DESC LIMIT 1)`,
+          duesInvoiceStatus: sql<string | null>`(SELECT status FROM dues_invoice WHERE membership_id = ${memberships.id}::text ORDER BY created_at DESC LIMIT 1)`,
           // OPS-01: correlated subquery for total training credits in active cycle (no N+1)
           creditsEarned: sql<number>`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0)`,
           // Computed compliance flag

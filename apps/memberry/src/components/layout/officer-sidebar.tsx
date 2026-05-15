@@ -121,13 +121,8 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
   return (
     <aside className="hidden md:flex w-[240px] bg-[var(--color-primary)] text-white flex-col shrink-0">
       {/* Logo + Org Name */}
-      <div className="px-6 py-5 border-b border-white/[0.12]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[var(--color-cream)] flex items-center justify-center">
-            <span className="text-[var(--color-primary)] font-display font-bold text-[14px]">M</span>
-          </div>
-          <span className="font-display text-[20px] font-bold text-white">Memberry</span>
-        </div>
+      <div className="px-4 py-3 border-b border-white/[0.12]">
+        <img src="/memberry-logo-white.png" alt="Memberry" className="h-10 w-auto" />
         {orgName && (
           <p className="mt-2 text-[12px] text-white/50 truncate" title={orgName}>
             {orgName}

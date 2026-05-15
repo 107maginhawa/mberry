@@ -16,13 +16,8 @@ export function MemberSidebar({ userEmail }: MemberSidebarProps) {
   return (
     <aside className="hidden md:flex w-[180px] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col shrink-0">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-[var(--color-border-light)]">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[var(--color-cream)] flex items-center justify-center">
-            <span className="text-[var(--color-primary)] font-display font-bold text-[12px]">M</span>
-          </div>
-          <span className="font-display text-[16px] font-bold text-[var(--color-text)]">Memberry</span>
-        </div>
+      <div className="px-4 py-3 border-b border-[var(--color-border-light)]">
+        <img src="/memberry-logo.png" alt="Memberry" className="h-10 w-auto" />
       </div>
 
       {/* Navigation */}
