@@ -170,7 +170,7 @@
 
 - [x] **Phase 26: CI Gaps + Infrastructure Fixes (T1)** — Wire test:registry to CI, fix meaningless assertions, add test:br script
 - [x] **Phase 27: Backend Handler Test Depth (T2)** — Rewrite pure-function stubs in elections/membership to use makeCtx+stubRepo
-- [ ] **Phase 28: BR Edge Cases + Integration Strategy (T3)** — Deepen BR-32/33/34, shrink KNOWN_INCOMPLETE from 5→2
+- [x] **Phase 28: BR Edge Cases + Integration Strategy (T3)** — Deepen BR-32/33/34, shrink KNOWN_INCOMPLETE from 5→2
 - [ ] **Phase 29: Frontend Components — Dues/Membership/Dashboard (T4)** — 21 new component tests, coverage 7%→50%
 - [ ] **Phase 30: Frontend Components — Remaining Modules (T5)** — 22 new component tests, coverage 50%→90%+
 - [ ] **Phase 31: E2E Behavioral Upgrade (T6)** — Upgrade shallow E2E to behavioral, close BR-01/BR-03, fill SO/Admin persona gaps
@@ -416,7 +416,7 @@ Plans: not yet planned
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 6/6 | Complete   | 2026-05-14 |
 | 26. CI Gaps + Infrastructure Fixes (T1) | v1.3.0 | 2/2 | Complete | 2026-05-15 |
 | 27. Backend Handler Test Depth (T2) | v1.3.0 | 1/1 | Complete | 2026-05-15 |
-| 28. BR Edge Cases + Integration Strategy (T3) | v1.3.0 | 0/0 | Not planned | — |
+| 28. BR Edge Cases + Integration Strategy (T3) | v1.3.0 | 1/1 | Complete | 2026-05-15 |
 | 29. Frontend Components — Dues/Membership/Dashboard (T4) | v1.3.0 | 0/0 | Not planned | — |
 | 30. Frontend Components — Remaining Modules (T5) | v1.3.0 | 0/0 | Not planned | — |
 | 31. E2E Behavioral Upgrade (T6) | v1.3.0 | 0/0 | Not planned | — |
