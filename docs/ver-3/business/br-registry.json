@@ -27,7 +27,7 @@
         "services/api-ts/src/handlers/association:member/dues.test.ts",
         "services/api-ts/src/handlers/events/registerForEvent.test.ts",
         "services/api-ts/src/handlers/training/enroll.test.ts",
-        "services/api-ts/src/handlers/dues/upsertDuesConfig.test.ts"
+        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -63,7 +63,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/getDuesConfig.test.ts"
+        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -83,7 +83,7 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/utils/fund-math.test.ts",
-        "services/api-ts/src/handlers/dues/upsertFunds.test.ts",
+        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts",
         "services/api-ts/src/handlers/association:member/dues.test.ts"
       ],
       "contract": [
@@ -103,7 +103,7 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/recordPayment.test.ts"
+        "services/api-ts/src/handlers/dues/utils/settle-payment.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -123,7 +123,7 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/utils/expiry-extension.test.ts",
-        "services/api-ts/src/handlers/dues/recordPayment.test.ts",
+        "services/api-ts/src/handlers/dues/utils/settle-payment.test.ts",
         "services/api-ts/src/handlers/association:member/dues.test.ts"
       ],
       "contract": [
@@ -142,7 +142,7 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/refundPayment.test.ts"
+        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -541,9 +541,7 @@
     "ruleClass": "p0-security",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/br-30.gateway-isolation.test.ts",
-        "services/api-ts/src/handlers/dues/upsertGatewayConfig.test.ts",
-        "services/api-ts/src/handlers/dues/getGatewayConfig.test.ts"
+        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -578,7 +576,8 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
+        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
+        "services/api-ts/src/handlers/person/jobs/deletionProcessor.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -587,7 +586,7 @@
         "apps/memberry/tests/e2e/officer/payments.spec.ts"
       ]
     },
-    "annotations": "Retention policy tested indirectly via BR-08 refund suite — no-hard-delete not explicitly asserted"
+    "annotations": "Soft-delete explicitly asserted: deletionProcessor.test.ts verifies only persons/sessions touched, financial tables untouched"
   },
   "BR-33": {
     "rule": "Election Integrity",

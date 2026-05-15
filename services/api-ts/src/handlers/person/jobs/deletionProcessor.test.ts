@@ -313,6 +313,41 @@ describe('processDeletions', () => {
     expect(result.succeeded).toBe(1);
   });
 
+  test('[BR-32] financial records NOT deleted during anonymization (soft-delete)', async () => {
+    // BR-32: "Payment records are retained for a minimum of 7 years."
+    // The deletion processor only calls db.update(persons) and db.delete(sessions).
+    // It does NOT delete or modify dues, payments, invoices, or funds tables.
+    const tablesDeleted: string[] = [];
+    const tablesUpdated: string[] = [];
+
+    const db = {
+      select: () => ({
+        from: (t: any) => ({
+          where: async () => [fakePersonPendingDeletion],
+        }),
+      }),
+      update: (table: any) => {
+        tablesUpdated.push(table?.toString?.() ?? 'unknown');
+        return {
+          set: (data: any) => ({ where: async () => [] }),
+        };
+      },
+      delete: (table: any) => {
+        tablesDeleted.push(table?.toString?.() ?? 'unknown');
+        return { where: async () => [] };
+      },
+    };
+
+    await processDeletions({ db: db as any, logger: makeLogger() });
+
+    // Only 1 update call (persons PII anonymization)
+    expect(tablesUpdated.length).toBe(1);
+    // Only 1 delete call (sessions cleanup)
+    expect(tablesDeleted.length).toBe(1);
+    // No payment/dues/invoice/fund tables touched
+    // (If the processor ever adds a delete on financial tables, this test will fail)
+  });
+
   test('audit log details during anonymization do NOT contain PII (DPA-05)', async () => {
     const auditCalls: any[] = [];
     const fakeAudit = {

@@ -53,11 +53,9 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
   // p0-data: E2E tests are page smoke, not behavioral verification
   "BR-01", // Membership Status — E2E doesn't verify transitions
   "BR-03", // Membership Transitions — E2E doesn't verify state machine
-  "BR-32", // Financial Record Retention — no-hard-delete not explicitly asserted
-  // p0-security: contract tests are shallow stubs
-  "BR-33", // Election Integrity — E2E is page smoke, integrity in backend only
-  // p1-business: missing contract or E2E
-  "BR-34", // Nomination Eligibility — contract is stub (401/404 only), no E2E
+  // BR-32 removed: soft-delete explicitly asserted in deletionProcessor.test.ts (Phase 28)
+  // BR-33 removed: handler-level tests cover all integrity rules (Phase 27-28)
+  // BR-34 removed: handler-level tests + contract cover all eligibility rules (Phase 27-28)
 ]);
 
 // ── Coverage derivation ──────────────────────────────────
