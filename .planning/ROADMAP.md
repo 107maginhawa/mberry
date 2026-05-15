@@ -4,7 +4,8 @@
 
 - ✅ **v1.0.0 Foundation** — Phases 0-10 (shipped 2026-05-07)
 - ✅ **v1.1.0 Auth & Permission Enforcement** — Phases 11-17 (shipped 2026-05-13)
-- 🔄 **v1.2.0 Pilot Launch** — Phases 18-25 (in progress)
+- ✅ **v1.2.0 Pilot Launch** — Phases 18-25 (shipped 2026-05-14)
+- 🔄 **v1.3.0 Test Confidence** — Phases 26-33 (in progress)
 
 ## Phases
 
@@ -145,7 +146,8 @@
 
 </details>
 
-### v1.2.0 Pilot Launch (Phases 18-25)
+<details>
+<summary>✅ v1.2.0 Pilot Launch (Phases 18-25) — SHIPPED 2026-05-14</summary>
 
 **Goal:** Ship all compliance-critical and officer-essential features to launch the first live pilot with a Philippine dental association.
 
@@ -157,6 +159,23 @@
 - [x] **Phase 23: Member Departure + Deceased** — Lifecycle termination status enum, billing exclusion (completed 2026-05-14)
 - [x] **Phase 24: Quality Gap Closure** — Roster 500 fix, audit filter bug, BR-35 through BR-40 (completed 2026-05-14)
 - [x] **Phase 25: Email/Notif Guards + Handler Tests** — Rate limiting, bounce suppression, deceased guard, unsubscribe (completed 2026-05-14)
+
+</details>
+
+### v1.3.0 Test Confidence (Phases 26-33)
+
+**Goal:** Close test coverage gaps identified by adversarial audit. Formalize the T1-T8 TDD backfill — fix CI gates, rewrite stub tests, add frontend component tests, upgrade E2E from existence-checks to behavioral, complete flow registry.
+
+**Reference:** `.claude/plans/spicy-sniffing-lynx.md` (full T1-T8 plan with agent-verified data)
+
+- [ ] **Phase 26: CI Gaps + Infrastructure Fixes (T1)** — Wire test:registry to CI, fix meaningless assertions, add test:br script
+- [ ] **Phase 27: Backend Handler Test Depth (T2)** — Rewrite pure-function stubs in elections/membership to use makeCtx+stubRepo
+- [ ] **Phase 28: BR Edge Cases + Integration Strategy (T3)** — Deepen BR-32/33/34, shrink KNOWN_INCOMPLETE from 5→2
+- [ ] **Phase 29: Frontend Components — Dues/Membership/Dashboard (T4)** — 21 new component tests, coverage 7%→50%
+- [ ] **Phase 30: Frontend Components — Remaining Modules (T5)** — 22 new component tests, coverage 50%→90%+
+- [ ] **Phase 31: E2E Behavioral Upgrade (T6)** — Upgrade shallow E2E to behavioral, close BR-01/BR-03, fill SO/Admin persona gaps
+- [ ] **Phase 32: Flow Registry Completion (T7)** — T7a: FLOW-03/09 tests. T7b: production logic for FLOW-04/07/08/10 (optional, may defer)
+- [ ] **Phase 33: Ratchet + Shallow-Test Lint (T8)** — Ratchet vitest thresholds, add shallow-test lint, update QA matrix
 
 ## Phase Details
 
@@ -285,6 +304,86 @@ Plans:
 - [x] 25-05-PLAN.md -- Handler tests: notifs (4) + platformadmin (17) + documents (15) + billing (11)
 - [x] 25-06-PLAN.md -- Handler tests: training (5) + reviews (3) + events (1) + system (3) + booking (15) + membership (4) + invite (1)
 
+### Phase 26: CI Gaps + Infrastructure Fixes (T1)
+**Goal**: All test quality gates are wired into CI — no regressions can slip through undetected
+**Depends on**: Nothing (first phase)
+**Success Criteria** (what must be TRUE):
+  1. `bun run test:registry` runs in CI coverage-gate job
+  2. No `expect(true).toBe(true)` non-sentinel assertions exist in codebase
+  3. Root package.json has `test:br` script for local BR coverage checks
+**Plans:** 2 plans
+Plans:
+- [ ] 26-01-PLAN.md — Fix meaningless assertions + add test:br script
+- [ ] 26-02-PLAN.md — Wire coverage-gate job into CI workflow
+
+### Phase 27: Backend Handler Test Depth (T2)
+**Goal**: Every handler test calls its real handler function — no pure-function stubs remain
+**Depends on**: Phase 26
+**Success Criteria** (what must be TRUE):
+  1. `br-33.election-integrity.test.ts` imports and calls real election handlers with makeCtx+stubRepo
+  2. `br-34.nomination-eligibility.test.ts` imports and calls real nomination handlers
+  3. `br-p2-gap.test.ts` calls real handlers instead of asserting on hardcoded objects
+  4. Zero tests define and assert on inline functions without importing production code
+Plans: not yet planned
+
+### Phase 28: BR Edge Cases + Integration Strategy (T3)
+**Goal**: BR-32/33/34 removed from KNOWN_INCOMPLETE — coverage depth matches their rule class requirements
+**Depends on**: Phase 27 (stubs must be rewritten before deepening)
+**Success Criteria** (what must be TRUE):
+  1. BR-32 has handler test asserting soft-delete behavior
+  2. BR-33 has tests for duplicate vote prevention and minimum candidate check
+  3. BR-34 has tests for deadline enforcement and ineligible member rejection
+  4. `bun run scripts/br-coverage.ts --ci` KNOWN_INCOMPLETE = 2 (only BR-01, BR-03)
+Plans: not yet planned
+
+### Phase 29: Frontend Components — Dues/Membership/Dashboard (T4)
+**Goal**: High-value frontend components have Vitest+RTL tests — coverage goes from 7% to ~50%
+**Depends on**: Nothing (parallel with T1-T3)
+**Success Criteria** (what must be TRUE):
+  1. 21 new `.test.tsx` files in dues/ (13), membership/ (5), dashboard/ (6) components
+  2. `cd apps/memberry && bun run test` passes
+  3. Component inventory shows ≥24/46 tested
+Plans: not yet planned
+
+### Phase 30: Frontend Components — Remaining Modules (T5)
+**Goal**: Frontend component coverage reaches 90%+
+**Depends on**: Phase 29 (build on factory/pattern established in T4)
+**Success Criteria** (what must be TRUE):
+  1. ~22 new `.test.tsx` files across training, events, elections, communications, etc.
+  2. Component inventory shows ≥43/46 tested
+  3. `cd apps/memberry && bun run test` passes
+Plans: not yet planned
+
+### Phase 31: E2E Behavioral Upgrade (T6)
+**Goal**: Key E2E tests verify real behavior, not just page presence. BR-01 and BR-03 close.
+**Depends on**: Phase 28 (BR-33/34 handler tests exist before E2E)
+**Success Criteria** (what must be TRUE):
+  1. BR-01 E2E verifies membership status transitions (active→expired, pending→active)
+  2. BR-03 E2E verifies renewal flow end-to-end (payment → status → confirmation)
+  3. `bun run scripts/br-coverage.ts --ci` KNOWN_INCOMPLETE = 0
+  4. Society Officer persona coverage ≥ 70%
+  5. 5-10 existing shallow specs upgraded with form interaction / network intercepts
+Plans: not yet planned
+
+### Phase 32: Flow Registry Completion (T7)
+**Goal**: Flow registry partial flows are resolved — either tested or explicitly deferred
+**Depends on**: Phase 28 (flow tests need handler depth)
+**Success Criteria** (what must be TRUE):
+  1. FLOW-03 (notification side effect) implemented and tested → status: covered
+  2. FLOW-09 gap investigated and resolved
+  3. FLOW-04/07/08/10 either implemented+tested or marked DEFERRED with rationale
+  4. `bun run test:registry` reflects updated flow coverage
+Plans: not yet planned
+
+### Phase 33: Ratchet + Shallow-Test Lint (T8)
+**Goal**: All coverage metrics are ratcheted — future regressions are impossible
+**Depends on**: Phases 30, 31, 32 (ratchet locks in gains from all prior work)
+**Success Criteria** (what must be TRUE):
+  1. Vitest thresholds in memberry + account configs match actual post-backfill coverage
+  2. `scripts/lint-shallow-tests.ts` exists and runs in CI (informational)
+  3. `docs/QA-COVERAGE-MATRIX.md` reflects final state
+Plans: not yet planned
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -315,3 +414,11 @@ Plans:
 | 23. Member Departure + Deceased | v1.2.0 | 3/3 | Complete   | 2026-05-14 |
 | 24. Quality Gap Closure | v1.2.0 | 2/2 | Complete   | 2026-05-14 |
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 6/6 | Complete   | 2026-05-14 |
+| 26. CI Gaps + Infrastructure Fixes (T1) | v1.3.0 | 0/2 | Planned | — |
+| 27. Backend Handler Test Depth (T2) | v1.3.0 | 0/0 | Not planned | — |
+| 28. BR Edge Cases + Integration Strategy (T3) | v1.3.0 | 0/0 | Not planned | — |
+| 29. Frontend Components — Dues/Membership/Dashboard (T4) | v1.3.0 | 0/0 | Not planned | — |
+| 30. Frontend Components — Remaining Modules (T5) | v1.3.0 | 0/0 | Not planned | — |
+| 31. E2E Behavioral Upgrade (T6) | v1.3.0 | 0/0 | Not planned | — |
+| 32. Flow Registry Completion (T7) | v1.3.0 | 0/0 | Not planned | — |
+| 33. Ratchet + Shallow-Test Lint (T8) | v1.3.0 | 0/0 | Not planned | — |
