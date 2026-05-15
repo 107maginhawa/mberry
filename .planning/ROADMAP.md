@@ -169,7 +169,7 @@
 **Reference:** `.claude/plans/spicy-sniffing-lynx.md` (full T1-T8 plan with agent-verified data)
 
 - [x] **Phase 26: CI Gaps + Infrastructure Fixes (T1)** — Wire test:registry to CI, fix meaningless assertions, add test:br script
-- [ ] **Phase 27: Backend Handler Test Depth (T2)** — Rewrite pure-function stubs in elections/membership to use makeCtx+stubRepo
+- [x] **Phase 27: Backend Handler Test Depth (T2)** — Rewrite pure-function stubs in elections/membership to use makeCtx+stubRepo
 - [ ] **Phase 28: BR Edge Cases + Integration Strategy (T3)** — Deepen BR-32/33/34, shrink KNOWN_INCOMPLETE from 5→2
 - [ ] **Phase 29: Frontend Components — Dues/Membership/Dashboard (T4)** — 21 new component tests, coverage 7%→50%
 - [ ] **Phase 30: Frontend Components — Remaining Modules (T5)** — 22 new component tests, coverage 50%→90%+
@@ -415,7 +415,7 @@ Plans: not yet planned
 | 24. Quality Gap Closure | v1.2.0 | 2/2 | Complete   | 2026-05-14 |
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 6/6 | Complete   | 2026-05-14 |
 | 26. CI Gaps + Infrastructure Fixes (T1) | v1.3.0 | 2/2 | Complete | 2026-05-15 |
-| 27. Backend Handler Test Depth (T2) | v1.3.0 | 0/0 | Not planned | — |
+| 27. Backend Handler Test Depth (T2) | v1.3.0 | 1/1 | Complete | 2026-05-15 |
 | 28. BR Edge Cases + Integration Strategy (T3) | v1.3.0 | 0/0 | Not planned | — |
 | 29. Frontend Components — Dues/Membership/Dashboard (T4) | v1.3.0 | 0/0 | Not planned | — |
 | 30. Frontend Components — Remaining Modules (T5) | v1.3.0 | 0/0 | Not planned | — |
