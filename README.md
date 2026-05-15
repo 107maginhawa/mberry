@@ -44,13 +44,16 @@ for the playbook to add a new impl/SDK in any language.
 ## Monorepo Structure
 
 ```
-monobase/
+memberry/
 ├── apps/                      # Frontend applications
-│   └── account/              # Reference app (Vite + TanStack Router)
-│       └── src-tauri/        # Tauri 2 desktop/mobile wrapper (Rust + QuickJS via api-ts-embedded + cadence)
+│   ├── account/              # Auth, profile, settings (port 3002)
+│   │   └── src-tauri/        # Tauri 2 desktop/mobile wrapper (Rust + QuickJS)
+│   ├── admin/                # Platform ops dashboard (port 3003)
+│   └── memberry/             # Product app — membership, dues, events (port 3004)
 ├── packages/                  # Shared libraries
 │   ├── eslint-config/        # Shared ESLint flat configs (base, react, next)
-│   ├── sdk-ts/               # Reference TypeScript SDK (generated from OpenAPI + hand-written client/flows)
+│   ├── sdk-ts/               # TypeScript SDK (generated from OpenAPI + hand-written client/flows)
+│   ├── ui/                   # Shared UI components (shadcn/ui primitives)
 │   └── typescript-config/    # Shared TypeScript configurations
 ├── services/                  # Backend services
 │   ├── api-ts/               # Reference TypeScript impl (Hono + Bun)
