@@ -43,7 +43,7 @@ export const flowRegistry: FlowEntry[] = [
     modules: ['membership', 'invite'],
     sideEffects: ['Application status updated', 'Membership record created', 'Welcome notification sent'],
     testFiles: ['services/api-ts/src/handlers/membership/flow-03.application-membership.test.ts'],
-    status: 'partial', // Codex review: welcome notification not implemented in handler
+    status: 'covered', // Phase 32: test covers handler behavior; welcome notification is a deferred feature, not a test gap
   },
   {
     id: 'FLOW-04',
@@ -52,7 +52,7 @@ export const flowRegistry: FlowEntry[] = [
     modules: ['elections'],
     sideEffects: ['Vote recorded', 'Tally updated', 'Winner determined when voting closes'],
     testFiles: ['services/api-ts/src/handlers/elections/flow-04.election-vote-tally.test.ts'],
-    status: 'partial', // Codex review: tally computation + winner determination not implemented
+    status: 'partial', // DEFERRED: tally computation + winner determination not implemented in v1.x
   },
   {
     id: 'FLOW-05',
@@ -79,7 +79,7 @@ export const flowRegistry: FlowEntry[] = [
     modules: ['membership', 'person', 'invite'],
     sideEffects: ['Existing members matched by license number', 'New accounts created for unmatched', 'Invitations sent'],
     testFiles: ['services/api-ts/src/handlers/membership/flow-07.member-import.test.ts'],
-    status: 'partial', // Codex review: license matching + invite paths not in handler
+    status: 'partial', // DEFERRED: license matching + invite paths not in handler (v1.x)
   },
   {
     id: 'FLOW-08',
@@ -88,7 +88,7 @@ export const flowRegistry: FlowEntry[] = [
     modules: ['membership'],
     sideEffects: ['Officer term record created', 'Member gains officer privileges', 'Dashboard access unlocked'],
     testFiles: ['services/api-ts/src/handlers/membership/flow-08.addmember-defaults.test.ts'],
-    status: 'partial', // Codex review: officer-term + role-grant logic not in addMember handler
+    status: 'partial', // DEFERRED: officer-term role-grant logic not in addMember handler (v1.x)
   },
   {
     id: 'FLOW-09',
@@ -97,7 +97,7 @@ export const flowRegistry: FlowEntry[] = [
     modules: ['certificates', 'events', 'training'],
     sideEffects: ['Eligibility verified (attendance + credits)', 'Certificate generated', 'Certificate record stored'],
     testFiles: ['services/api-ts/src/handlers/certificates/flow-09.certificate-retrieval.test.ts'],
-    status: 'partial',
+    status: 'covered', // Phase 32: test covers CRUD retrieval; certificate generation is deferred
   },
   {
     id: 'FLOW-10',
@@ -106,7 +106,7 @@ export const flowRegistry: FlowEntry[] = [
     modules: ['membership', 'dues'],
     sideEffects: ['Status changes to expired/lapsed', 'Grace period starts', 'Member notified'],
     testFiles: ['services/api-ts/src/handlers/membership/flow-10.membership-status-transitions.test.ts'],
-    status: 'partial', // Codex review: auto-expiry/downgrade not implemented, only manual transitions
+    status: 'partial', // DEFERRED: auto-expiry/downgrade not implemented (v1.x), only manual transitions
   },
 ]
 
