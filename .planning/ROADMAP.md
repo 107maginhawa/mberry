@@ -5,7 +5,7 @@
 - ✅ **v1.0.0 Foundation** — Phases 0-10 (shipped 2026-05-07)
 - ✅ **v1.1.0 Auth & Permission Enforcement** — Phases 11-17 (shipped 2026-05-13)
 - ✅ **v1.2.0 Pilot Launch** — Phases 18-25 (shipped 2026-05-14)
-- 🔄 **v1.3.0 Test Confidence** — Phases 26-33 (in progress)
+- ✅ **v1.3.0 Test Confidence** — Phases 26-33 (shipped 2026-05-15)
 
 ## Phases
 
@@ -173,9 +173,9 @@
 - [x] **Phase 28: BR Edge Cases + Integration Strategy (T3)** — Deepen BR-32/33/34, shrink KNOWN_INCOMPLETE from 5→2
 - [x] **Phase 29: Frontend Components — Dues/Membership/Dashboard (T4)** — 20 new component tests, coverage 24/46 (52%)
 - [x] **Phase 30: Frontend Components — Remaining Modules (T5)** — 22 new component tests, coverage 46/46 (100%)
-- [ ] **Phase 31: E2E Behavioral Upgrade (T6)** — Upgrade shallow E2E to behavioral, close BR-01/BR-03, fill SO/Admin persona gaps
-- [ ] **Phase 32: Flow Registry Completion (T7)** — T7a: FLOW-03/09 tests. T7b: production logic for FLOW-04/07/08/10 (optional, may defer)
-- [ ] **Phase 33: Ratchet + Shallow-Test Lint (T8)** — Ratchet vitest thresholds, add shallow-test lint, update QA matrix
+- [x] **Phase 31: E2E Behavioral Upgrade (T6)** — KNOWN_INCOMPLETE 2→0, upgraded shallow E2E specs
+- [x] **Phase 32: Flow Registry Completion (T7)** — FLOW-03/09 covered, FLOW-04/07/08/10 deferred (60% flow coverage)
+- [x] **Phase 33: Ratchet + Shallow-Test Lint (T8)** — Vitest thresholds ratcheted, lint:shallow in CI, QA matrix updated
 
 ## Phase Details
 
@@ -419,6 +419,6 @@ Plans: not yet planned
 | 28. BR Edge Cases + Integration Strategy (T3) | v1.3.0 | 1/1 | Complete | 2026-05-15 |
 | 29. Frontend Components — Dues/Membership/Dashboard (T4) | v1.3.0 | 3/3 | Complete | 2026-05-15 |
 | 30. Frontend Components — Remaining Modules (T5) | v1.3.0 | 3/3 | Complete | 2026-05-15 |
-| 31. E2E Behavioral Upgrade (T6) | v1.3.0 | 0/0 | Not planned | — |
-| 32. Flow Registry Completion (T7) | v1.3.0 | 0/0 | Not planned | — |
-| 33. Ratchet + Shallow-Test Lint (T8) | v1.3.0 | 0/0 | Not planned | — |
+| 31. E2E Behavioral Upgrade (T6) | v1.3.0 | 1/1 | Complete | 2026-05-15 |
+| 32. Flow Registry Completion (T7) | v1.3.0 | 1/1 | Complete | 2026-05-15 |
+| 33. Ratchet + Shallow-Test Lint (T8) | v1.3.0 | 1/1 | Complete | 2026-05-15 |
