@@ -182,42 +182,13 @@ When working with regulated data:
 - Never log sensitive personal information (PII) in plain text
 - Follow secure patterns in existing handlers
 
-## Critical Conventions (read before adding new modules)
+## Critical Conventions
 
-### Route Registration (backend)
-**Register custom handler routes WITHOUT `/api` prefix.** The Vite proxy in each app's `vite.config.ts` rewrites `/api/*` → `/*` before forwarding to the backend. OpenAPI-generated routes already follow this convention. Example:
-```typescript
-// CORRECT:
-app.route('/dues', dues);
-app.route('/events', eventsRouter);
-
-// WRONG (will 404 via Vite proxy):
-app.route('/api/dues', dues);
-```
-Frontend `fetch('/api/dues/...')` calls keep the `/api/` prefix — the proxy handles stripping it.
-
-### Toast System (frontend)
-**Use sonner, not shadcn useToast.** The app mounts sonner's `<Toaster>` in `__root.tsx`. Do NOT import from `@/hooks/use-toast`.
-```tsx
-// CORRECT:
-import { toast } from 'sonner'
-toast.success('Saved')
-toast.error('Failed')
-
-// WRONG (creates toasts in orphaned state store):
-import { useToast } from '@/hooks/use-toast'
-```
-
-### Auth Routes (frontend)
-Login route is `/auth/sign-in` (via `@daveyplate/better-auth-ui`), NOT `/login`. Form fields use `name="email"` and `name="password"` with `button[type="submit"]`.
-
-### Post-Implementation Checklist
-After adding new backend modules:
-1. Generate DB migrations: `cd services/api-ts && bun run db:generate`
-2. Restart API server (Hono doesn't hot-reload route registrations)
-3. Run seed data if applicable: `bun run db:seed-modules`
-4. Run E2E tests, not just unit tests
-5. Browse the app and verify pages render with data
+See [CONTRIBUTING.md#critical-conventions](./CONTRIBUTING.md#critical-conventions) for the full list. Key gotchas:
+- **No `/api` prefix** in backend route registration (Vite proxy strips it)
+- **Use `sonner`** for toasts, not shadcn `useToast`
+- **Auth route is `/auth/sign-in`**, not `/login`
+- **Restart API server** after adding new route registrations (no hot-reload)
 
 ## OpenAPI Specification
 
