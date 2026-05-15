@@ -20,7 +20,7 @@ class FakePgBoss {
   stopCalled = false;
   scheduledJobs: Array<{ name: string; pattern: string }> = [];
   createdQueues: string[] = [];
-  workers: Map<string, Function> = new Map();
+  workers: Map<string, (...args: unknown[]) => unknown> = new Map();
   sentJobs: Array<{ name: string; data: unknown }> = [];
   cancelledJobs: Array<{ queue: string; id: string }> = [];
   queueSizes: Map<string, number> = new Map();
@@ -41,7 +41,7 @@ class FakePgBoss {
     this.createdQueues.push(name);
   }
 
-  async work(name: string, _opts: unknown, handler: Function) {
+  async work(name: string, _opts: unknown, handler: (...args: unknown[]) => unknown) {
     this.workers.set(name, handler);
   }
 
@@ -176,12 +176,10 @@ describe('Job registration', () => {
     const handler1: JobHandler = async () => {};
     const handler2: JobHandler = async () => {};
 
-    // Should not throw
     scheduler.registerCron('dup-cron', '*/1 * * * *', handler1);
-    scheduler.registerCron('dup-cron', '*/2 * * * *', handler2);
-
-    // Just verify it did not throw (no assertion on internal state needed)
-    expect(true).toBe(true);
+    expect(() => {
+      scheduler.registerCron('dup-cron', '*/2 * * * *', handler2);
+    }).not.toThrow();
   });
 
   test('fast-interval (sub-minute) path does NOT create an intervalMinutes entry > 0', async () => {

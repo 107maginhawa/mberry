@@ -44,14 +44,7 @@ function expectBlocked(status: number) {
  * knows not to use requireOrgRole() as the sole officer check.
  */
 describe('Pitfall 2 documentation: orgContextMiddleware role limitation', () => {
-  test('DOCUMENTED: orgContextMiddleware always sets role=member for all authenticated members', () => {
-    // This is a documentation test — it always passes.
-    // The actual behavior is in middleware/org-context.ts which explicitly sets:
-    //   ctx.set('orgMembership', { ..., role: 'member' })
-    // for ALL org members regardless of their officer_term records.
-    // Officers are only distinguishable via the officer_term table query.
-    expect(true).toBe(true);
-  });
+  test.todo('Pitfall 2: orgContextMiddleware always sets role=member — verify handler-level officer checks query officer_term');
 });
 
 // ─── Mutation Routes Officer Protection Tests ─────────────────────────────────

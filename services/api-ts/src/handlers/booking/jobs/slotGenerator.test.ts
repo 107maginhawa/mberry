@@ -514,17 +514,9 @@ describe('regenerateEventSlots', () => {
 
     await regenerateEventSlots(db, 'event-active', monday);
 
-    // In isolation this always passes. In parallel execution, prototype pollution
-    // from other booking test files can replace findOneById between our mock and
-    // the actual call, causing the function to see a different event (or null)
-    // and early-return before reaching db.delete(). This is a known Bun parallel
-    // execution limitation — the real delete logic is verified in isolation.
-    if (!deleteWasCalled) {
-      // Verify the function at least completed without error
-      expect(true).toBe(true);
-    } else {
-      expect(deleteWasCalled).toBe(true);
-    }
+    // Known: Bun parallel execution can cause prototype pollution.
+    // If deleteWasCalled is false here, it's a test-infra issue, not a code bug.
+    expect(deleteWasCalled).toBe(true);
 
     restoreRepo(BookingEventRepository);
     restoreRepo(TimeSlotRepository);
