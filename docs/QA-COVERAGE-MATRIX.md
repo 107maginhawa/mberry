@@ -1,6 +1,6 @@
 # QA Coverage Matrix — Memberry
 
-Updated 2026-05-11. Cross-references routes, business rules, user journeys, and test coverage.
+Updated 2026-05-15 (v1.3.0 Phase 33 — Test Confidence milestone). Cross-references routes, business rules, user journeys, and test coverage.
 
 ## Route Matrix (30/30 passing)
 
@@ -45,9 +45,9 @@ Updated 2026-05-11. Cross-references routes, business rules, user journeys, and 
 
 | BR | Description | Unit Tests | E2E Tests | Status |
 |----|-------------|-----------|-----------|--------|
-| **BR-01** | Membership status computation | ✅ repo tests | ❌ no E2E | **GAP** — no E2E verifying status transitions on UI |
-| **BR-02** | Grace period (30 days) | ✅ repo tests | ❌ no E2E | **GAP** — grace period behavior not E2E tested |
-| **BR-03** | Membership state machine | ✅ repo tests | ❌ no E2E | **GAP** — transition rules not E2E tested |
+| **BR-01** | Membership status computation | ✅ repo + handler tests | ✅ membership-actions.spec (suspend→status change) | **CLOSED** (v1.3.0 Phase 31) |
+| **BR-02** | Grace period (30 days) | ✅ repo tests | ✅ dues-lifecycle.spec | ✅ |
+| **BR-03** | Membership state machine | ✅ repo + handler tests | ✅ membership-actions.spec (status-appropriate actions) | **CLOSED** (v1.3.0 Phase 31) |
 | **BR-04** | Dues amount per org | ✅ handler tests | ✅ settings.spec | OK |
 | **BR-05** | Fund allocation (sum=100%) | ✅ handler tests | ✅ settings.spec | OK |
 | **BR-06** | Payment recording | ✅ handler tests | ✅ dues-actions | OK |

@@ -132,3 +132,7 @@ jobs:
 
       - name: BR coverage gate
         run: bun run test:br --ci
+
+      - name: Shallow test lint (informational)
+        run: bun run lint:shallow --ci
+        continue-on-error: true
