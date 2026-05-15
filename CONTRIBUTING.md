@@ -28,7 +28,7 @@ Welcome to the Memberry codebase. This guide covers development setup, workflows
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd monobase
+cd memberry
 
 # Install dependencies
 bun install
@@ -120,8 +120,8 @@ Run `bun --filter '*' lint` from the repo root to lint every workspace.
 
 **API Service**:
 - `src/handlers/` - Route handlers organized by module
-- `src/db/` - Drizzle schema and database logic
-- `src/middleware/` - Express-style middleware
+- `src/handlers/*/repos/` - Drizzle schemas per module
+- `src/middleware/` - Hono middleware
 - `src/utils/` - Shared utilities
 
 **Per-app UI Layout**:
@@ -344,7 +344,7 @@ You should **only** edit these files:
 2. **Handler Implementations** (`src/handlers/{module}/*.ts`)
    - Business logic for each endpoint
 
-3. **Database Schemas** (`src/db/schema/*.ts`)
+3. **Database Schemas** (`src/handlers/{module}/repos/*.schema.ts`)
    - Drizzle schema definitions (migrations are auto-generated from these)
 
 4. **Repositories** (`src/handlers/{module}/repos/*.ts`)
@@ -1024,10 +1024,9 @@ services/api-ts/src/handlers/person/
 ├── getPerson.ts            # Handler: Get person by ID
 ├── updatePerson.ts         # Handler: Update person
 ├── deletePerson.ts         # Handler: Delete person
-├── repos/
-│   └── person.repo.ts      # Database repository
-└── utils/
-    └── validation.ts       # Person-specific validators
+└── repos/
+    ├── person.repo.ts      # Database repository
+    └── person.schema.ts    # Drizzle schema
 ```
 
 ### Module Implementation Pattern
@@ -1110,15 +1109,15 @@ export async function getClient(c: Context) {
 
 ### Consent Management Pattern
 
-All modules with sensitive data include JSONB consent fields:
+> **Note:** Consent management is planned but **not yet implemented** in the database schema. The pattern below shows the intended design for when it is added.
 
 ```typescript
-// Database schema
+// Planned schema pattern (not yet in codebase)
 export const clients = pgTable('clients', {
   id: uuid('id').defaultRandom().primaryKey(),
   person_id: uuid('person_id').references(() => persons.id),
   
-  // Consent fields (JSONB)
+  // Consent fields (JSONB) — planned
   data_processing_consent: jsonb('data_processing_consent').$type<{
     granted: boolean;
     granted_at: string;
@@ -1810,7 +1809,7 @@ Before requesting review:
 
 **Enable Debug Logging**:
 ```typescript
-// services/api-ts/src/utils/logger.ts
+// services/api-ts/src/core/logger.ts
 export const logger = pino({
   level: process.env.LOG_LEVEL || 'debug', // Set to 'debug'
 });
@@ -1838,8 +1837,8 @@ const db = drizzle(client, { logger: true });
 
 1. **Port Already in Use**:
 ```bash
-# Find process using port 4000
-lsof -i :4000
+# Find process using port 7213
+lsof -i :7213
 # Kill the process
 kill -9 <PID>
 ```
@@ -2249,15 +2248,11 @@ Three handler directories deal with messaging — here is the scope of each:
 | Directory | Scope | Key Features |
 |-----------|-------|-------------|
 | `handlers/comms/` | **Real-time peer chat + video** | WebSocket chat rooms, WebRTC video calls, typing indicators, ICE server config |
-| `handlers/communication/` | **Templated bulk messaging** | Message templates, subscription topics, scheduled/draft messages, per-person subscriptions |
-| `handlers/communications/` (hand-wired) | **Announcements** | Organization-wide announcements with read tracking |
+| `handlers/communication/` | **Templated bulk messaging + announcements** | Message templates, subscription topics, scheduled/draft messages, announcements with read tracking |
 
 **When to use which:**
 - Building chat or video features → `comms/`
-- Building email/SMS campaigns, newsletters, or templated notifications → `communication/`
-- Building org-wide announcement feeds → `communications/`
-
-These overlap intentionally — consolidation is planned for v1.2.0.
+- Building email/SMS campaigns, newsletters, templated notifications, or announcements → `communication/`
 
 ## Organization ID Convention
 
