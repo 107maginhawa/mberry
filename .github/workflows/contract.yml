@@ -111,3 +111,24 @@ jobs:
       - name: Stop the implementation
         if: always()
         run: kill "$(cat /tmp/api.pid)" || true
+
+  coverage-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+
+      - name: Install workspace deps
+        run: bun install --frozen-lockfile
+
+      - name: Test registry coverage
+        run: bun run test:registry
+
+      - name: BR coverage gate
+        run: bun run test:br --ci
