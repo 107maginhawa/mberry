@@ -178,7 +178,7 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/platformadmin/platformadmin.test.ts",
-        "services/api-ts/src/handlers/br-edge-cases.test.ts"
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/impersonation-flow.hurl"
@@ -289,7 +289,7 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
-        "services/api-ts/src/handlers/br-edge-cases.test.ts"
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/events-flow.hurl"
@@ -343,7 +343,7 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/credentials.test.ts",
-        "services/api-ts/src/handlers/br-edge-cases.test.ts"
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/credentials-flow.hurl"
@@ -363,7 +363,7 @@
         "services/api-ts/src/handlers/certificates/listCertificates.test.ts",
         "services/api-ts/src/handlers/certificates/getCertificate.test.ts",
         "services/api-ts/src/handlers/certificates/repos/certificates.repo.test.ts",
-        "services/api-ts/src/handlers/br-edge-cases.test.ts"
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/certificates-flow.hurl"
@@ -449,7 +449,7 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
-        "services/api-ts/src/handlers/br-edge-cases.test.ts"
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/auth-signup-signin.hurl"
@@ -524,7 +524,7 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/platformadmin/getOrganizationBySlug.test.ts",
-        "services/api-ts/src/handlers/br-edge-cases.test.ts"
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/public-flow.hurl"
