@@ -12,7 +12,7 @@ progress:
   percent: 0
 ---
 
-Last activity: 2026-05-15 - Completed 26-01 (meaningless assertions + test:br script)
+Last activity: 2026-05-15 - Completed 26-02 (coverage-gate CI job wired)
 
 ## Accumulated Context
 
