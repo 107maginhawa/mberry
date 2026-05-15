@@ -313,7 +313,7 @@ Plans:
   3. Root package.json has `test:br` script for local BR coverage checks
 **Plans:** 2 plans
 Plans:
-- [ ] 26-01-PLAN.md — Fix meaningless assertions + add test:br script
+- [x] 26-01-PLAN.md — Fix meaningless assertions + add test:br script
 - [ ] 26-02-PLAN.md — Wire coverage-gate job into CI workflow
 
 ### Phase 27: Backend Handler Test Depth (T2)
@@ -414,7 +414,7 @@ Plans: not yet planned
 | 23. Member Departure + Deceased | v1.2.0 | 3/3 | Complete   | 2026-05-14 |
 | 24. Quality Gap Closure | v1.2.0 | 2/2 | Complete   | 2026-05-14 |
 | 25. Email/Notif Guards + Handler Tests | v1.2.0 | 6/6 | Complete   | 2026-05-14 |
-| 26. CI Gaps + Infrastructure Fixes (T1) | v1.3.0 | 0/2 | Planned | — |
+| 26. CI Gaps + Infrastructure Fixes (T1) | v1.3.0 | 1/2 | In Progress | — |
 | 27. Backend Handler Test Depth (T2) | v1.3.0 | 0/0 | Not planned | — |
 | 28. BR Edge Cases + Integration Strategy (T3) | v1.3.0 | 0/0 | Not planned | — |
 | 29. Frontend Components — Dues/Membership/Dashboard (T4) | v1.3.0 | 0/0 | Not planned | — |
