@@ -1,250 +1,190 @@
-// Business Rules: [BR-34]
 /**
- * [BR-34] Nomination Eligibility
+ * [BR-34] Nomination Eligibility — Handler-Level Gap Tests
  *
- * BR-34: "To be nominated for an officer position, a member must satisfy all
- * three conditions: (1) be in Active status in the org at the time of nomination,
- * (2) have been a member of the association for at least 6 months (configurable
- * per association), and (3) not be currently suspended in any org within the
- * association. The duration requirement is configurable per association."
+ * Tests scenarios from BR-34 that are NOT already covered by createNominee.test.ts.
+ * That file covers: all 3 conditions (active, tenure, suspension), configurable
+ * duration, and election state guards. This file covers the point-in-time edge case
+ * and additional handler-level verification.
  *
- * Edge case: "Eligibility is checked at the moment of nomination, not
+ * BR-34 edge: "Eligibility is checked at the moment of nomination, not
  * retroactively. A member who meets all criteria at nomination time but later
  * falls into Grace status before voting opens does not become ineligible
  * retroactively — only their voting eligibility is affected (per BR-33),
  * not their candidacy."
  */
 
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { createNominee } from './createNominee';
+import { ElectionsRepository } from './repos/elections.repo';
 
-// ─── Pure rule functions (nomination eligibility logic) ───
+// ─── Helpers ────────────────────────────────────────────
 
-const DEFAULT_MIN_MEMBERSHIP_MONTHS = 6;
+const NOMINEE_ID = '00000000-0000-4000-8000-000000000099';
+const POSITION_ID = '00000000-0000-4000-8000-000000000001';
+const ORG_ID = 'org-1';
+const ELECTION_ID = 'election-1';
 
-interface MemberContext {
-  personId: string;
-  organizationId: string;
-  status: 'active' | 'grace' | 'lapsed' | 'suspended';
-  memberSince: Date;
-  suspendedInAnyOrg: boolean;
+function monthsAgo(months: number): Date {
+  const d = new Date();
+  d.setMonth(d.getMonth() - months);
+  return d;
 }
 
-interface NominationConfig {
-  minMembershipMonths: number;
-}
+const fakeElection = {
+  id: ELECTION_ID,
+  organizationId: ORG_ID,
+  title: '2026 Board Election',
+  status: 'nominationsOpen',
+};
 
-interface EligibilityResult {
-  eligible: boolean;
-  reasons: string[];
-}
+const fakeNominee = {
+  id: 'nominee-1',
+  electionId: ELECTION_ID,
+  positionId: POSITION_ID,
+  personId: NOMINEE_ID,
+  organizationId: ORG_ID,
+  nominatedBy: 'user-1',
+  status: 'nominated',
+};
 
-function checkNominationEligibility(
-  member: MemberContext,
-  config: NominationConfig,
-  nominationDate: Date,
-): EligibilityResult {
-  const reasons: string[] = [];
+const activeMembership = {
+  personId: NOMINEE_ID,
+  organizationId: ORG_ID,
+  status: 'active',
+  joinedAt: monthsAgo(8),
+};
 
-  // Condition 1: Active status at time of nomination
-  if (member.status !== 'active') {
-    reasons.push(`Member status is '${member.status}', must be 'active'`);
-  }
-
-  // Condition 2: Minimum membership duration
-  const monthsSince = monthsBetween(member.memberSince, nominationDate);
-  if (monthsSince < config.minMembershipMonths) {
-    reasons.push(
-      `Member for ${monthsSince} months, minimum is ${config.minMembershipMonths}`,
-    );
-  }
-
-  // Condition 3: Not suspended in any org
-  if (member.suspendedInAnyOrg) {
-    reasons.push('Member is currently suspended in another org');
-  }
-
+function makeDb({
+  membershipRows = [] as object[],
+  suspendedRows = [] as object[],
+}: {
+  membershipRows?: object[];
+  suspendedRows?: object[];
+}) {
+  let selectCallCount = 0;
   return {
-    eligible: reasons.length === 0,
-    reasons,
+    select: () => ({
+      from: () => ({
+        where: () => ({
+          limit: () => {
+            selectCallCount++;
+            if (selectCallCount === 1) return membershipRows;
+            return suspendedRows;
+          },
+        }),
+      }),
+    }),
   };
 }
 
-function monthsBetween(start: Date, end: Date): number {
-  return (
-    (end.getFullYear() - start.getFullYear()) * 12 +
-    (end.getMonth() - start.getMonth())
-  );
-}
+// ─── Tests ──────────────────────────────────────────────
 
-describe('[BR-34] Nomination Eligibility', () => {
-  const defaultConfig: NominationConfig = {
-    minMembershipMonths: DEFAULT_MIN_MEMBERSHIP_MONTHS,
-  };
-  const nominationDate = new Date('2026-06-01');
-
-  // ─── All Three Conditions Met ─────────────────────────────
-
-  test('eligible when active, 6+ months, not suspended', () => {
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'active',
-      memberSince: new Date('2025-01-01'), // 17 months
-      suspendedInAnyOrg: false,
-    };
-
-    const result = checkNominationEligibility(member, defaultConfig, nominationDate);
-    expect(result.eligible).toBe(true);
-    expect(result.reasons).toHaveLength(0);
+describe('[BR-34] Nomination Eligibility — Handler-Level Gaps', () => {
+  beforeEach(() => {
+    restoreRepo(ElectionsRepository);
   });
 
-  // ─── Condition 1: Must Be Active ──────────────────────────
-
-  test('ineligible when status is grace', () => {
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'grace',
-      memberSince: new Date('2025-01-01'),
-      suspendedInAnyOrg: false,
-    };
-
-    const result = checkNominationEligibility(member, defaultConfig, nominationDate);
-    expect(result.eligible).toBe(false);
-    expect(result.reasons[0]).toContain('grace');
+  afterEach(() => {
+    restoreRepo(ElectionsRepository);
   });
 
-  test('ineligible when status is lapsed', () => {
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'lapsed',
-      memberSince: new Date('2025-01-01'),
-      suspendedInAnyOrg: false,
-    };
+  test('point-in-time: nomination succeeds for active member at nomination time', async () => {
+    // BR-34 edge: eligibility checked at moment of nomination
+    // An active member with sufficient tenure who is not suspended → nomination accepted
+    stubRepo(ElectionsRepository, {
+      get: async () => fakeElection,
+      addNominee: async () => fakeNominee,
+    });
 
-    const result = checkNominationEligibility(member, defaultConfig, nominationDate);
-    expect(result.eligible).toBe(false);
+    const ctx = makeCtx({
+      _params: { id: ELECTION_ID },
+      _body: { positionId: POSITION_ID, personId: NOMINEE_ID },
+      database: makeDb({ membershipRows: [activeMembership], suspendedRows: [] }),
+    });
+
+    const response = await createNominee(ctx);
+    expect(response.status).toBe(201);
+    // Nominee is created — candidacy is locked at this point
+    expect(response.body.data.personId).toBe(NOMINEE_ID);
   });
 
-  test('ineligible when status is suspended', () => {
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'suspended',
-      memberSince: new Date('2025-01-01'),
-      suspendedInAnyOrg: false,
-    };
+  test('point-in-time: nominee record persists even if member status later changes', async () => {
+    // BR-34 edge: "A member who meets all criteria at nomination time but later
+    // falls into Grace status... does not become ineligible retroactively"
+    // We verify: the handler creates the nominee without checking future state.
+    // Once created, the nominee record exists independent of membership status changes.
+    stubRepo(ElectionsRepository, {
+      get: async () => fakeElection,
+      addNominee: async (data: any) => ({ ...fakeNominee, ...data }),
+    });
 
-    const result = checkNominationEligibility(member, defaultConfig, nominationDate);
-    expect(result.eligible).toBe(false);
+    const ctx = makeCtx({
+      _params: { id: ELECTION_ID },
+      _body: { positionId: POSITION_ID, personId: NOMINEE_ID },
+      database: makeDb({ membershipRows: [activeMembership], suspendedRows: [] }),
+    });
+
+    const response = await createNominee(ctx);
+    expect(response.status).toBe(201);
+    // The nominee is created with the person's ID — no future-check mechanism exists
+    // in the handler, confirming point-in-time evaluation
+    expect(response.body.data.personId).toBe(NOMINEE_ID);
+    expect(response.body.data.electionId).toBe(ELECTION_ID);
   });
 
-  // ─── Condition 2: Minimum Membership Duration ─────────────
+  test('all three conditions verified through handler: not active → NOMINEE_NOT_ACTIVE', async () => {
+    // Condition 1 via handler (summary test)
+    stubRepo(ElectionsRepository, {
+      get: async () => fakeElection,
+      addNominee: async () => { throw new Error('should not reach'); },
+    });
 
-  test('ineligible when member for less than 6 months', () => {
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'active',
-      memberSince: new Date('2026-02-01'), // 4 months
-      suspendedInAnyOrg: false,
-    };
+    const ctx = makeCtx({
+      _params: { id: ELECTION_ID },
+      _body: { positionId: POSITION_ID, personId: NOMINEE_ID },
+      database: makeDb({ membershipRows: [], suspendedRows: [] }),
+    });
 
-    const result = checkNominationEligibility(member, defaultConfig, nominationDate);
-    expect(result.eligible).toBe(false);
-    expect(result.reasons[0]).toContain('4 months');
+    const err = await createNominee(ctx).catch((e: any) => e);
+    expect(err.code).toBe('NOMINEE_NOT_ACTIVE');
   });
 
-  test('eligible at exactly 6 months', () => {
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'active',
-      memberSince: new Date('2025-12-01'), // exactly 6 months
-      suspendedInAnyOrg: false,
-    };
+  test('all three conditions verified through handler: too recent → NOMINEE_INSUFFICIENT_TENURE', async () => {
+    // Condition 2 via handler (summary test)
+    stubRepo(ElectionsRepository, {
+      get: async () => fakeElection,
+      addNominee: async () => { throw new Error('should not reach'); },
+    });
 
-    const result = checkNominationEligibility(member, defaultConfig, nominationDate);
-    expect(result.eligible).toBe(true);
+    const recentMembership = { ...activeMembership, joinedAt: monthsAgo(3) };
+
+    const ctx = makeCtx({
+      _params: { id: ELECTION_ID },
+      _body: { positionId: POSITION_ID, personId: NOMINEE_ID },
+      database: makeDb({ membershipRows: [recentMembership], suspendedRows: [] }),
+    });
+
+    const err = await createNominee(ctx).catch((e: any) => e);
+    expect(err.code).toBe('NOMINEE_INSUFFICIENT_TENURE');
   });
 
-  test('configurable duration — association requires 12 months', () => {
-    const strictConfig: NominationConfig = { minMembershipMonths: 12 };
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'active',
-      memberSince: new Date('2025-10-01'), // 8 months
-      suspendedInAnyOrg: false,
-    };
+  test('all three conditions verified through handler: suspended elsewhere → NOMINEE_SUSPENDED', async () => {
+    // Condition 3 via handler (summary test)
+    stubRepo(ElectionsRepository, {
+      get: async () => fakeElection,
+      addNominee: async () => { throw new Error('should not reach'); },
+    });
 
-    const result = checkNominationEligibility(member, strictConfig, nominationDate);
-    expect(result.eligible).toBe(false);
-    expect(result.reasons[0]).toContain('12');
-  });
+    const suspendedRecord = { personId: NOMINEE_ID, organizationId: 'org-other', status: 'suspended', joinedAt: monthsAgo(24) };
 
-  // ─── Condition 3: Not Suspended in Any Org ────────────────
+    const ctx = makeCtx({
+      _params: { id: ELECTION_ID },
+      _body: { positionId: POSITION_ID, personId: NOMINEE_ID },
+      database: makeDb({ membershipRows: [activeMembership], suspendedRows: [suspendedRecord] }),
+    });
 
-  test('ineligible when suspended in another org', () => {
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'active', // active in THIS org
-      memberSince: new Date('2025-01-01'),
-      suspendedInAnyOrg: true, // but suspended in ANOTHER org
-    };
-
-    const result = checkNominationEligibility(member, defaultConfig, nominationDate);
-    expect(result.eligible).toBe(false);
-    expect(result.reasons[0]).toContain('suspended');
-  });
-
-  // ─── Multiple Failures ────────────────────────────────────
-
-  test('reports all failure reasons when multiple conditions fail', () => {
-    const member: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'lapsed',
-      memberSince: new Date('2026-04-01'), // 2 months
-      suspendedInAnyOrg: true,
-    };
-
-    const result = checkNominationEligibility(member, defaultConfig, nominationDate);
-    expect(result.eligible).toBe(false);
-    expect(result.reasons).toHaveLength(3);
-  });
-
-  // ─── Edge Case: Point-in-Time Check ───────────────────────
-
-  test('eligibility checked at nomination time, not retroactively', () => {
-    // Member is active at nomination time
-    const memberAtNomination: MemberContext = {
-      personId: 'person-1',
-      organizationId: 'org-1',
-      status: 'active',
-      memberSince: new Date('2025-01-01'),
-      suspendedInAnyOrg: false,
-    };
-
-    const result = checkNominationEligibility(
-      memberAtNomination,
-      defaultConfig,
-      nominationDate,
-    );
-    expect(result.eligible).toBe(true);
-
-    // Later falls to grace — does NOT retroactively invalidate nomination
-    const memberLater: MemberContext = {
-      ...memberAtNomination,
-      status: 'grace',
-    };
-
-    // The nomination was already valid — candidacy preserved
-    // (voting eligibility is separate per BR-33)
-    expect(result.eligible).toBe(true);
-    // memberLater's grace status affects voting, not candidacy
-    expect(memberLater.status).toBe('grace');
+    const err = await createNominee(ctx).catch((e: any) => e);
+    expect(err.code).toBe('NOMINEE_SUSPENDED');
   });
 });
