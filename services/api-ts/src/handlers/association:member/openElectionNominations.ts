@@ -15,9 +15,6 @@ import { requireOfficerTerm } from '@/utils/officer-check';
 export async function openElectionNominations(
   ctx: ValidatedContext<never, never, OpenElectionNominationsParams>
 ): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx);
-  if (denied) return denied;
-
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
@@ -27,6 +24,12 @@ export async function openElectionNominations(
 
   const existing = await repo.get(params.electionId);
   if (!existing) throw new NotFoundError('Election');
+
+  // Fix org context — middleware may have picked up electionId UUID instead of orgId
+  ctx.set('organizationId', existing.organizationId);
+
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
 
   if (existing.status !== 'draft') {
     throw new BusinessLogicError('Only draft elections can open nominations', 'INVALID_STATUS_TRANSITION');

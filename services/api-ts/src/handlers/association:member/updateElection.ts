@@ -15,9 +15,6 @@ import { requireOfficerTerm } from '@/utils/officer-check';
 export async function updateElection(
   ctx: ValidatedContext<UpdateElectionBody, never, UpdateElectionParams>
 ): Promise<Response> {
-  const denied = await requireOfficerTerm(ctx);
-  if (denied) return denied;
-
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
@@ -29,7 +26,23 @@ export async function updateElection(
   const existing = await repo.get(params.electionId);
   if (!existing) throw new NotFoundError('Election');
 
-  const updated = await repo.update(params.electionId, body as any);
+  // Fix org context — middleware may have picked up electionId UUID instead of orgId
+  ctx.set('organizationId', existing.organizationId);
+
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
+  // Convert position strings to {id, title, sortOrder} objects if positions provided
+  const updateData = { ...body } as any;
+  if (Array.isArray(updateData.positions)) {
+    updateData.positions = updateData.positions.map((p: string, i: number) => ({
+      id: crypto.randomUUID(),
+      title: p,
+      sortOrder: i,
+    }));
+  }
+
+  const updated = await repo.update(params.electionId, updateData);
 
   await auditAction(ctx, {
     action: 'update',

@@ -25,9 +25,17 @@ export async function certifyElection(
   const db = ctx.get('database') as DatabaseInstance;
   const user = ctx.get('user');
 
+  // ─── Election lookup ─────────────────────────────────
+  const repo = new ElectionsRepository(db);
+  const existing = await repo.get(params.electionId);
+  if (!existing) throw new NotFoundError('Election');
+
+  // Fix org context — middleware may have picked up electionId UUID instead of orgId
+  ctx.set('organizationId', existing.organizationId);
+
   // ─── President-only guard (BR-33) ────────────────────
   const officerRepo = new OfficerTermRepository(db);
-  const orgId = ctx.get('organizationId') as string;
+  const orgId = existing.organizationId;
   if (!user) throw new UnauthorizedError();
   const activeTerms = await officerRepo.findActiveByPersonAndOrg(user.id, orgId);
   const isPresident = activeTerms.some(
@@ -36,11 +44,6 @@ export async function certifyElection(
   if (!isPresident) {
     throw new ForbiddenError('Only the President can certify elections');
   }
-
-  // ─── Election lookup ─────────────────────────────────
-  const repo = new ElectionsRepository(db);
-  const existing = await repo.get(params.electionId);
-  if (!existing) throw new NotFoundError('Election');
 
   // ─── State guard: must be awaitingConfirmation (BR-33) ─
   if (existing.status !== 'awaitingConfirmation') {

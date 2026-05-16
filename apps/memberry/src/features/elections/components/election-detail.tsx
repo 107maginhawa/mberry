@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Users, Vote, Trophy, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { Users, Vote, Trophy, ArrowRight, CheckCircle2, Plus, Trash2, Pencil } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
+import { toast } from 'sonner'
 import {
   getElectionOptions,
   listElectionsQueryKey,
   openElectionNominationsMutation,
   openElectionVotingMutation,
   certifyElectionMutation,
+  deleteCandidateMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { NomineePickerDialog } from './nominee-picker-dialog'
 
 interface ElectionDetailProps {
   electionId: string
@@ -58,6 +62,8 @@ function formatDate(iso: string | null | undefined) {
 export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
   const queryClient = useQueryClient()
   const [confirmAction, setConfirmAction] = useState<string | null>(null)
+  const [nominatePositionId, setNominatePositionId] = useState<string | null>(null)
+  const [confirmRemoveNominee, setConfirmRemoveNominee] = useState<string | null>(null)
 
   const { data, isLoading, error } = useQuery(
     getElectionOptions({ path: { electionId } }),
@@ -69,17 +75,25 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     setConfirmAction(null)
   }
 
+  const onStatusError = (err: Error) => {
+    toast.error(err.message || 'Failed to update election status')
+    setConfirmAction(null)
+  }
+
   const nominationsMutation = useMutation({
     mutationFn: openElectionNominationsMutation().mutationFn,
     onSuccess: onStatusSuccess,
+    onError: onStatusError,
   })
   const votingMutation = useMutation({
     mutationFn: openElectionVotingMutation().mutationFn,
     onSuccess: onStatusSuccess,
+    onError: onStatusError,
   })
   const certifyMut = useMutation({
     mutationFn: certifyElectionMutation().mutationFn,
     onSuccess: onStatusSuccess,
+    onError: onStatusError,
   })
 
   function handleStatusAdvance(nextStatus: string) {
@@ -88,6 +102,19 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     else if (nextStatus === 'voting_open') votingMutation.mutate(opts)
     else certifyMut.mutate(opts)
   }
+
+  const removeNomineeMut = useMutation({
+    mutationFn: deleteCandidateMutation().mutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getElectionOptions({ path: { electionId } }).queryKey })
+      queryClient.invalidateQueries({ queryKey: listElectionsQueryKey({ query: { organizationId: orgId } }) })
+      toast.success('Nominee removed')
+      setConfirmRemoveNominee(null)
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to remove nominee')
+    },
+  })
 
   const statusMutationPending = nominationsMutation.isPending || votingMutation.isPending || certifyMut.isPending
 
@@ -107,10 +134,14 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
 
   const election = (data as any)?.data ?? data
   const nextAction = NEXT_ACTION[election.status as string]
-  const positions: { id: string; title: string; sortOrder: number }[] = election.positions ?? []
+  const rawPositions: any[] = election.positions ?? []
+  const positions: { id: string; title: string; sortOrder: number }[] = rawPositions.map((p: any, i: number) =>
+    typeof p === 'string' ? { id: p, title: p, sortOrder: i } : { id: p.id ?? p, title: p.title ?? p.id ?? `Position ${i + 1}`, sortOrder: p.sortOrder ?? i },
+  )
   const nominees: any[] = election.nominees ?? []
   const tallies: { positionId: string; nomineeId: string; count: number }[] = election.tallies ?? []
   const showTallies = election.status === 'awaiting_confirmation' || election.status === 'published'
+  const canManageNominees = election.status === 'draft' || election.status === 'nominations_open'
 
   function getNomineesForPosition(positionId: string) {
     return nominees.filter((n) => n.positionId === positionId)
@@ -151,7 +182,18 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
           )}
         </div>
 
-        {/* Phase action */}
+        {/* Edit + Phase action */}
+        <div className="flex items-center gap-2">
+          {election.status === 'draft' && (
+            <Link
+              to="/org/$orgId/officer/elections/$electionId/edit"
+              params={{ orgId, electionId }}
+              className="flex items-center gap-1.5 px-3 py-2 border rounded-md text-sm hover:bg-[var(--color-surface-warm)] transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </Link>
+          )}
         {nextAction && election.status !== 'cancelled' && (
           <div>
             {confirmAction === nextAction.nextStatus ? (
@@ -182,6 +224,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
             )}
           </div>
         )}
+        </div>
       </div>
 
       {/* Timeline */}
@@ -227,12 +270,23 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
 
               return (
                 <div key={position.id} className="border rounded-lg overflow-hidden">
-                  <div className="px-4 py-3 bg-[var(--color-surface-warm)] border-b">
-                    <p className="font-medium">{position.title}</p>
-                    <p className="text-xs text-[var(--color-muted)]">
-                      {posNominees.length} nominee{posNominees.length !== 1 ? 's' : ''}
-                      {showTallies && totalPositionVotes > 0 && ` · ${totalPositionVotes} vote${totalPositionVotes !== 1 ? 's' : ''}`}
-                    </p>
+                  <div className="px-4 py-3 bg-[var(--color-surface-warm)] border-b flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{position.title}</p>
+                      <p className="text-xs text-[var(--color-muted)]">
+                        {posNominees.length} nominee{posNominees.length !== 1 ? 's' : ''}
+                        {showTallies && totalPositionVotes > 0 && ` · ${totalPositionVotes} vote${totalPositionVotes !== 1 ? 's' : ''}`}
+                      </p>
+                    </div>
+                    {canManageNominees && (
+                      <button
+                        onClick={() => setNominatePositionId(position.id)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add
+                      </button>
+                    )}
                   </div>
 
                   {posNominees.length === 0 ? (
@@ -270,6 +324,32 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
                                 </div>
                               )}
                             </div>
+                            {canManageNominees && (
+                              confirmRemoveNominee === nominee.id ? (
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    onClick={() => removeNomineeMut.mutate({ path: { candidateId: nominee.id } })}
+                                    disabled={removeNomineeMut.isPending}
+                                    className="px-2 py-1 text-xs font-medium text-white bg-[var(--color-error)] rounded hover:opacity-90 disabled:opacity-50"
+                                  >
+                                    {removeNomineeMut.isPending ? '...' : 'Remove'}
+                                  </button>
+                                  <button
+                                    onClick={() => setConfirmRemoveNominee(null)}
+                                    className="px-2 py-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-text)]"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setConfirmRemoveNominee(nominee.id)}
+                                  className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-error)] transition-colors shrink-0"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )
+                            )}
                           </div>
                         )
                       })}
@@ -291,6 +371,17 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           Results published on {formatDate(election.publishedAt)}
         </div>
+      )}
+
+      {/* Nominee picker dialog */}
+      {nominatePositionId && (
+        <NomineePickerDialog
+          orgId={orgId}
+          electionId={electionId}
+          positionId={nominatePositionId}
+          existingNomineePersonIds={nominees.filter((n) => n.positionId === nominatePositionId).map((n: any) => n.personId)}
+          onClose={() => setNominatePositionId(null)}
+        />
       )}
     </div>
   )

@@ -29,8 +29,16 @@ export async function createElection(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new ElectionsRepository(db);
 
+  // Convert position strings to {id, title, sortOrder} objects for JSONB storage
+  const positionObjects = (body.positions ?? []).map((p: string, i: number) => ({
+    id: crypto.randomUUID(),
+    title: p,
+    sortOrder: i,
+  }));
+
   const election = await repo.create({
     ...body,
+    positions: positionObjects,
     organizationId: orgId,
     status: 'draft',
   } as any);

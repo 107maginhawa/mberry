@@ -83,23 +83,29 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
     }
   }
 
-  // Check active elections — only where voting is actually open
+  // Check active elections — where voting is actually open
   const activeElections = elections.filter((e) => {
-    if (e.status !== 'active') return false
+    if (e.status !== 'active' && e.status !== 'voting_open') return false
     const votingStart = e.votingStart ? new Date(e.votingStart) : null
     const votingEnd = e.votingEnd ? new Date(e.votingEnd) : null
+    // For voting_open status, trust the status even without date range
+    if (e.status === 'voting_open') return true
     return votingStart && votingEnd && votingStart <= now && votingEnd > now
   })
   const topElection = activeElections[0]
-  if (topElection?.votingEnd) {
-    const votingEnd = new Date(topElection.votingEnd)
-    const daysLeft = Math.ceil((votingEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  if (topElection) {
+    const votingEnd = topElection.votingEnd ? new Date(topElection.votingEnd) : null
+    const daysLeft = votingEnd ? Math.ceil((votingEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : null
     alerts.push({
       priority: 4,
       variant: 'info',
       icon: <Vote size={16} />,
-      message: `Vote now — "${topElection.title}" closes in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`,
-      action: topElection.organizationId
+      message: daysLeft
+        ? `Vote now — "${topElection.title}" closes in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
+        : `Vote now — "${topElection.title}"`,
+      action: topElection.organizationId && topElection.id
+        ? { label: 'Vote', to: '/org/$orgId/elections/$electionId/vote', params: { orgId: topElection.organizationId, electionId: topElection.id } }
+        : topElection.organizationId
         ? { label: 'Vote', to: '/org/$orgId/elections', params: { orgId: topElection.organizationId } }
         : undefined,
     })
