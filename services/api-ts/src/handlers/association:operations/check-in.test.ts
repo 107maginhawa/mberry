@@ -52,7 +52,8 @@ describe('Check-in methods', () => {
   });
 
   test('default check-in method is manual', () => {
-    const method = undefined || 'manual';
+    const input: string | undefined = undefined;
+    const method = input || 'manual';
     expect(method).toBe('manual');
   });
 
