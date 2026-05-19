@@ -17,8 +17,8 @@ import path from 'path';
 
 /** Allowed MIME types for file upload */
 const ALLOWED_MIME_TYPES = new Set([
-  // Images
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+  // Images (SVG excluded — requires content sanitization to prevent XSS)
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
   // Documents
   'application/pdf',
   'application/msword',

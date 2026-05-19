@@ -182,4 +182,9 @@ describe('[BR-31] uploadFile', () => {
 
     expect((storage.generateUploadUrl as ReturnType<typeof mock>).mock.calls[0][1]).toBe('application/pdf');
   });
+
+  test('rejects SVG uploads — XSS vector without content sanitization', async () => {
+    const ctx = makeCtx({ body: makeBody({ mimeType: 'image/svg+xml', filename: 'icon.svg' }) });
+    await expect(uploadFile(ctx)).rejects.toBeInstanceOf(ValidationError);
+  });
 });
