@@ -8,19 +8,19 @@
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
-import { startImpersonation } from './platformadmin/startImpersonation';
-import { PlatformAdminRepository, ImpersonationSessionRepository } from './platformadmin/repos/platform-admin.repo';
-import { updateEvent } from './events/updateEvent';
-import { EventsRepository } from './events/repos/events.repo';
-import { getOrganizationBySlug } from './platformadmin/getOrganizationBySlug';
-import { OrganizationRepository, AssociationRepository } from './platformadmin/repos/platform-admin.repo';
-import { issueDigitalCredential } from './association:member/issueDigitalCredential';
-import { CredentialTemplateRepository, DigitalCredentialRepository } from './association:member/repos/credentials.repo';
-import { MembershipRepository } from './association:member/repos/membership.repo';
-import { MembershipRepository as CustomMembershipRepository } from './membership/repos/membership.repo';
-import { markComplete } from './training/markComplete';
-import { TrainingRepository } from './training/repos/training.repo';
-import { CreditEntryRepository } from './association:member/repos/credits.repo';
+import { startImpersonation } from '../platformadmin/startImpersonation';
+import { PlatformAdminRepository, ImpersonationSessionRepository } from '../platformadmin/repos/platform-admin.repo';
+import { updateEvent } from '../events/updateEvent';
+import { EventsRepository } from '../events/repos/events.repo';
+import { getOrganizationBySlug } from '../platformadmin/getOrganizationBySlug';
+import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
+import { issueDigitalCredential } from '../association:member/issueDigitalCredential';
+import { CredentialTemplateRepository, DigitalCredentialRepository } from '../association:member/repos/credentials.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { MembershipRepository as CustomMembershipRepository } from '../membership/repos/membership.repo';
+import { markComplete } from '../training/markComplete';
+import { TrainingRepository } from '../training/repos/training.repo';
+import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 
 // ─── [BR-10] Impersonation Audit Context ─────────────────
 

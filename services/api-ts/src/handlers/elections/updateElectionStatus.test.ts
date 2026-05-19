@@ -1,5 +1,5 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
 import { BusinessLogicError } from '@/core/errors';
@@ -18,8 +18,13 @@ const fakeElection = {
 describe('updateElectionStatus', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(ElectionsRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(ElectionsRepository);
   });
 
   test('updates status and returns 200', async () => {

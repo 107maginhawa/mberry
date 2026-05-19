@@ -1,7 +1,10 @@
 import { describe, test, expect } from 'bun:test';
 import { apiAs } from './api-as';
+import { API_AVAILABLE } from './api-available';
 
-describe('apiAs', () => {
+const d = API_AVAILABLE ? describe : describe.skip;
+
+d('apiAs', () => {
   test('returns authenticated client with HTTP methods', async () => {
     const client = await apiAs('test@memberry.ph');
     expect(typeof client.get).toBe('function');

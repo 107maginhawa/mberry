@@ -6,7 +6,7 @@
  */
 
 import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { createInvoice } from './createInvoice';
 import { finalizeInvoice } from './finalizeInvoice';
 import { captureInvoicePayment } from './captureInvoicePayment';
@@ -118,6 +118,9 @@ let merchantMocks: ReturnType<typeof stubRepo>;
 let personMocks: ReturnType<typeof stubRepo>;
 
 afterEach(() => {
+  restoreRepo(InvoiceRepository);
+  restoreRepo(MerchantAccountRepository);
+  restoreRepo(PersonRepository);
   if (invoiceMocks) Object.values(invoiceMocks).forEach((m) => m.mockRestore());
   if (merchantMocks) Object.values(merchantMocks).forEach((m) => m.mockRestore());
   if (personMocks) Object.values(personMocks).forEach((m) => m.mockRestore());

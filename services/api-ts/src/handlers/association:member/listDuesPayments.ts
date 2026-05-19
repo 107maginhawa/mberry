@@ -27,8 +27,8 @@ export async function listDuesPayments(
   const officerDenied = await requireOfficerTerm(ctx as any);
   const isOfficer = officerDenied === null; // null = is officer
   const effectivePersonId = isOfficer
-    ? (query.personId ?? session.user.id)  // officer: respect query param, default to own
-    : session.user.id;                     // member: force own personId
+    ? (query.personId ?? undefined)  // officer: respect query param, omit for all org payments
+    : session.user.id;              // member: force own personId
 
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 20;

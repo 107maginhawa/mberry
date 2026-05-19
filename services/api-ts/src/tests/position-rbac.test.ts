@@ -14,7 +14,7 @@ import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
 import { API_AVAILABLE } from '@/tests/helpers/api-available';
 
 // INFRA: requires live API server on port 7213 with seed data
-const d = API_AVAILABLE ? describe : describe.todo;
+const d = API_AVAILABLE ? describe : describe.skip;
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'; // pda-metro-manila from seed
 

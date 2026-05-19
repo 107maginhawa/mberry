@@ -102,12 +102,24 @@ export function ensurePristine<T extends new (...args: any[]) => any>(RepoClass:
 /**
  * Restore ALL prototype methods to their pristine (pre-stub) state.
  * Use in beforeEach() of repo unit tests to undo cross-file pollution.
+ *
+ * This also deletes any own properties that were added by stubRepo but
+ * were not originally on the prototype (i.e., inherited from a base class).
+ * Without this step, stubRepo'd methods like createOne (inherited from
+ * DatabaseRepository) would remain as own properties after restoreRepo.
  */
 export function restoreRepo<T extends new (...args: any[]) => any>(RepoClass: T) {
   const originals = pristinePrototypes.get(RepoClass);
   if (originals) {
+    // Restore methods that were originally present
     for (const [name, fn] of originals) {
       RepoClass.prototype[name] = fn;
+    }
+    // Delete any own properties added by stubRepo that weren't originally there
+    for (const name of Object.getOwnPropertyNames(RepoClass.prototype)) {
+      if (name !== 'constructor' && !originals.has(name)) {
+        delete RepoClass.prototype[name];
+      }
     }
   }
 }

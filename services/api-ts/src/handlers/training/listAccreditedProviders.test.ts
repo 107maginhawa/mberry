@@ -1,7 +1,7 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { mock } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { AccreditedProviderRepository } from './repos/accredited-provider.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { listAccreditedProviders } from './listAccreditedProviders';
 
 const fakeProviderWithExpiry = {
@@ -19,9 +19,13 @@ const fakeProviderWithExpiry = {
 describe('listAccreditedProviders', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -31,9 +35,9 @@ describe('listAccreditedProviders', () => {
   });
 
   test('returns provider list with expiringSoon flag and 200', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
     mocks = stubRepo(AccreditedProviderRepository, {
       listWithExpiry: async () => ({ data: [fakeProviderWithExpiry], total: 1 }),
     });
@@ -46,9 +50,9 @@ describe('listAccreditedProviders', () => {
   });
 
   test('passes status filter to repo', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
     let capturedStatus: string | null | undefined;
     mocks = stubRepo(AccreditedProviderRepository, {
       listWithExpiry: async (_orgId: string, status: string | null | undefined) => {
@@ -66,9 +70,9 @@ describe('listAccreditedProviders', () => {
   });
 
   test('returns 403 for non-officer', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async (ctx: any) => ctx.json({ error: 'Position access denied' }, 403),
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
     const ctx = makeCtx({ _params: { organizationId: 'org-1' } });
     const res = await listAccreditedProviders(ctx as any);
     expect(res.status).toBe(403);

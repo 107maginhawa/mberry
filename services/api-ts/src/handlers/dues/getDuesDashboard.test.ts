@@ -1,10 +1,8 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DuesRepository } from './repos/dues.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { getDuesDashboard } from './getDuesDashboard';
-
-// Mock requirePosition to isolate handler logic
-import { mock } from 'bun:test';
 
 const STATS = {
   totalCollected: '5000',
@@ -17,8 +15,13 @@ const STATS = {
 describe('getDuesDashboard', () => {
   let mocks: Record<string, { mockRestore: () => void }>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('throws UnauthorizedError without session', async () => {
@@ -35,10 +38,8 @@ describe('getDuesDashboard', () => {
       getDashboardStats: async () => STATS,
     });
 
-    // Mock requirePosition to allow access
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null, // null = no denial
-    }));
+    // Allow access: officer has active term
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
 
     // Mock db.select chain for activity count
     const ctx = makeCtx({

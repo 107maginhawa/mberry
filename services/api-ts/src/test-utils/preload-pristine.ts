@@ -20,6 +20,9 @@ import { BookingEventRepository } from '@/handlers/booking/repos/bookingEvent.re
 import { TimeSlotRepository } from '@/handlers/booking/repos/timeSlot.repo';
 import { ScheduleExceptionRepository } from '@/handlers/booking/repos/scheduleException.repo';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { InvoiceRepository, MerchantAccountRepository } from '@/handlers/billing/repos/billing.repo';
+import { ElectionsRepository } from '@/handlers/elections/repos/elections.repo';
+import { DocumentRepository, DocumentVersionRepository } from '@/handlers/documents/repos/documents.repo';
 
 for (const Repo of [
   MembershipApplicationRepository,
@@ -31,6 +34,11 @@ for (const Repo of [
   TimeSlotRepository,
   ScheduleExceptionRepository,
   DuesRepository,
+  InvoiceRepository,
+  MerchantAccountRepository,
+  ElectionsRepository,
+  DocumentRepository,
+  DocumentVersionRepository,
 ]) {
   ensurePristine(Repo);
 }

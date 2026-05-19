@@ -3,10 +3,10 @@
  * Covers: auth guard (401), CRUD operations, status filter, expiry flag, org isolation.
  */
 
-import { describe, test, expect, afterEach } from 'bun:test';
-import { mock } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { AccreditedProviderRepository } from './repos/accredited-provider.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { listAccreditedProviders } from './listAccreditedProviders';
 import { createAccreditedProvider } from './createAccreditedProvider';
 import { updateAccreditedProvider } from './updateAccreditedProvider';
@@ -30,19 +30,18 @@ const fakeProviderWithExpiry = {
   expiringSoon: false,
 };
 
-// Helper: mock requirePosition to allow access (null = allowed)
+// Helper: stub OfficerTermRepository to allow access (has active officer term)
 function mockOfficerAllow() {
-  mock.module('@/utils/officer-check', () => ({
-    requirePosition: async () => null,
-  }));
+  stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+  });
 }
 
-// Helper: mock requirePosition to deny access (403)
+// Helper: stub OfficerTermRepository to deny access (no active terms)
 function mockOfficerDeny() {
-  mock.module('@/utils/officer-check', () => ({
-    requirePosition: async (ctx: any) =>
-      ctx.json({ error: 'Position access denied' }, 403),
-  }));
+  stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [],
+  });
 }
 
 // ─── listAccreditedProviders ─────────────────────────────
@@ -50,9 +49,13 @@ function mockOfficerDeny() {
 describe('listAccreditedProviders', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -114,9 +117,13 @@ describe('listAccreditedProviders', () => {
 describe('createAccreditedProvider', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -184,9 +191,13 @@ describe('createAccreditedProvider', () => {
 describe('updateAccreditedProvider', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -238,9 +249,13 @@ describe('updateAccreditedProvider', () => {
 describe('deleteAccreditedProvider', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -309,9 +324,13 @@ describe('deleteAccreditedProvider', () => {
 describe('expiringSoon flag', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('expiringSoon=true for providers expiring within 30 days', async () => {

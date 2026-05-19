@@ -7,7 +7,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { listRosterMembers } from './listRosterMembers';
 import { OfficerTermRepository } from './repos/governance.repo';
 
@@ -202,7 +202,7 @@ describe('listRosterMembers handler', () => {
   });
 
   afterEach(() => {
-    // repos are auto-restored because stubRepo patches the prototype
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 when not authenticated', async () => {

@@ -11,7 +11,10 @@ describe('uploadNewDocumentVersion', () => {
   beforeEach(() => {
     restoreRepo(DocumentRepository);
     restoreRepo(DocumentVersionRepository);
-    stubRepo(DocumentRepository, { findOneById: async () => existingDoc });
+    stubRepo(DocumentRepository, {
+      findOneById: async () => existingDoc,
+      updateOneById: async () => existingDoc,
+    });
     stubRepo(DocumentVersionRepository, {
       getLatestVersionNumber: async () => 1,
       createOne: async () => newVersion,

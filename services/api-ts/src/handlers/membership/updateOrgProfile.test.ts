@@ -1,7 +1,7 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { mock } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { updateOrgProfile } from './updateOrgProfile';
 
 const fakeOrg = {
@@ -17,15 +17,17 @@ const fakeOrg = {
 describe('updateOrgProfile', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('updates org profile and returns 200 when president', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     mocks = stubRepo(OrganizationRepository, {
       findById: async () => fakeOrg,
       update: async (_id: string, updates: any) => ({ ...fakeOrg, ...updates }),
@@ -42,9 +44,7 @@ describe('updateOrgProfile', () => {
   });
 
   test('returns 403 for non-president officer', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async (ctx: any) => ctx.json({ error: 'President only' }, 403),
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
 
     const ctx = makeCtx({
       _params: { organizationId: 'org-1' },
@@ -56,9 +56,7 @@ describe('updateOrgProfile', () => {
   });
 
   test('throws NotFoundError when org does not exist', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     mocks = stubRepo(OrganizationRepository, {
       findById: async () => null,
       update: async () => null,
@@ -73,9 +71,7 @@ describe('updateOrgProfile', () => {
   });
 
   test('only updates allowed fields (name, contactEmail, region)', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     let capturedUpdates: any;
     mocks = stubRepo(OrganizationRepository, {
       findById: async () => fakeOrg,

@@ -5,9 +5,17 @@
  * No prototype mutation — isolation is guaranteed by local instance creation.
  */
 
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
 import { InvoiceRepository, MerchantAccountRepository } from './billing.repo';
 import type { Invoice, MerchantAccount, InvoiceLineItem } from './billing.schema';
+import { restoreRepo } from '@/test-utils/make-ctx';
+
+// Restore prototype methods before each test to undo any prototype pollution
+// from handler tests running in the same worker (stubRepo pollution).
+beforeEach(() => {
+  restoreRepo(InvoiceRepository);
+  restoreRepo(MerchantAccountRepository);
+});
 
 // ---------------------------------------------------------------------------
 // Fixtures

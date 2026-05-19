@@ -23,7 +23,7 @@ import { API_AVAILABLE } from '@/tests/helpers/api-available';
 const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'; // pda-metro-manila (hardcoded in seed)
 
 // INFRA: requires live API server on port 7213 with seed data
-const d = API_AVAILABLE ? describe : describe.todo;
+const d = API_AVAILABLE ? describe : describe.skip;
 
 d('Cross-org isolation (IDOR prevention)', () => {
   let orgAOfficer: ApiClient; // treasurer of org A (pda-metro-manila)

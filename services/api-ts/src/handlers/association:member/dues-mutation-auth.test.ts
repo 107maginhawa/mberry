@@ -5,24 +5,27 @@
  * org-scoped RBAC. All tests with [RED] in the name are expected to FAIL
  * against current handler code and PASS after Plan 02 applies fixes.
  */
-import { describe, test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { mock } from 'bun:test';
 import { createDuesInvoice } from './createDuesInvoice';
 import { updateDuesInvoice } from './updateDuesInvoice';
 import { deleteDuesInvoice } from './deleteDuesInvoice';
 import { generateDuesInvoicesForOrg } from './generateDuesInvoicesForOrg';
 import { DuesInvoiceRepository } from './repos/dues.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 describe('[SEC-01] createDuesInvoice — position-based auth', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     restoreRepo(DuesInvoiceRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 403 when requirePosition denies (member role) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 }),
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     const ctx = makeCtx({
       _body: {
         membershipId: 'mem-1',
@@ -39,14 +42,17 @@ describe('[SEC-01] createDuesInvoice — position-based auth', () => {
 });
 
 describe('[SEC-01] updateDuesInvoice — position-based auth + cross-org', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     restoreRepo(DuesInvoiceRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 403 when requirePosition denies (member role) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 }),
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     const ctx = makeCtx({
       _params: { invoiceId: 'inv-1' },
       _body: { totalAmount: 9999 },
@@ -58,9 +64,7 @@ describe('[SEC-01] updateDuesInvoice — position-based auth + cross-org', () =>
   });
 
   test('returns 403 when invoice belongs to different org (cross-org) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     stubRepo(DuesInvoiceRepository, {
       findOneById: async () => ({ id: 'inv-1', organizationId: 'org-B', status: 'generated', membershipId: 'm-1' }),
     });
@@ -79,14 +83,17 @@ describe('[SEC-01] updateDuesInvoice — position-based auth + cross-org', () =>
 });
 
 describe('[SEC-01] deleteDuesInvoice — position-based auth + cross-org', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     restoreRepo(DuesInvoiceRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 403 when requirePosition denies (member role) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 }),
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     const ctx = makeCtx({
       _params: { invoiceId: 'inv-1' },
       organizationId: 'org-1',
@@ -97,9 +104,7 @@ describe('[SEC-01] deleteDuesInvoice — position-based auth + cross-org', () =>
   });
 
   test('returns 403 when invoice belongs to different org (cross-org) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     stubRepo(DuesInvoiceRepository, {
       findOneById: async () => ({ id: 'inv-1', organizationId: 'org-B', status: 'generated', membershipId: 'm-1' }),
     });
@@ -117,10 +122,16 @@ describe('[SEC-01] deleteDuesInvoice — position-based auth + cross-org', () =>
 });
 
 describe('[SEC-01] generateDuesInvoicesForOrg — cross-org body param enforcement', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
+  afterEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   test('returns 403 when body.organizationId !== ctx.get("organizationId") [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     const ctx = makeCtx({
       _body: {
         organizationId: 'attacker-org',  // attacker supplies their own org

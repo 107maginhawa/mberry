@@ -3,7 +3,7 @@ import { apiAs } from './helpers/api-as';
 import { API_AVAILABLE } from './helpers/api-available';
 
 // INFRA: requires live API server on port 7213 with seed data
-const d = API_AVAILABLE ? describe : describe.todo;
+const d = API_AVAILABLE ? describe : describe.skip;
 
 const ALL_USERS = [
   'test@memberry.ph',

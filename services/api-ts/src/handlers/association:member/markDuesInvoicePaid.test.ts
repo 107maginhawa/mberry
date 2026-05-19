@@ -1,16 +1,10 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { mock } from 'bun:test';
 import { markDuesInvoicePaid } from './markDuesInvoicePaid';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
-
-// Default: requirePosition passes (returns null = allowed) for non-SEC tests
-mock.module('@/utils/officer-check', () => ({
-  requirePosition: async () => null,
-  requireOfficerTerm: async () => null,
-}));
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -44,12 +38,16 @@ const txDb = {
 
 describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
   beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(DuesInvoiceRepository);
     restoreRepo(MembershipRepository);
     restoreRepo(DuesRepository);
+    // Default: officer allowed
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
   });
 
   afterEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(DuesInvoiceRepository);
     restoreRepo(MembershipRepository);
     restoreRepo(DuesRepository);
@@ -272,12 +270,16 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
 
 describe('[PAY-03] optimistic locking on invoice', () => {
   beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(DuesInvoiceRepository);
     restoreRepo(MembershipRepository);
     restoreRepo(DuesRepository);
+    // Default: officer allowed
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
   });
 
   afterEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(DuesInvoiceRepository);
     restoreRepo(MembershipRepository);
     restoreRepo(DuesRepository);
@@ -358,11 +360,13 @@ describe('[PAY-03] optimistic locking on invoice', () => {
 // ─── SEC-01 Auth Guard Tests (RED phase — expect FAIL until Plan 02) ─────────
 
 describe('[SEC-01] markDuesInvoicePaid — position-based auth', () => {
-  let mocks: Record<string, { mockRestore: () => void }>;
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
 
   afterEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(DuesInvoiceRepository);
-    if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
   });
 
   test('throws UnauthorizedError when no session', async () => {
@@ -371,10 +375,8 @@ describe('[SEC-01] markDuesInvoicePaid — position-based auth', () => {
   });
 
   test('returns 403 when requirePosition denies (member role) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 }),
-    }));
-    mocks = stubRepo(DuesInvoiceRepository, {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
+    stubRepo(DuesInvoiceRepository, {
       findOneById: async () => ({ id: 'inv-1', organizationId: 'org-1', status: 'generated', membershipId: 'm-1' }),
     });
     const ctx = makeCtx({
@@ -388,10 +390,8 @@ describe('[SEC-01] markDuesInvoicePaid — position-based auth', () => {
   });
 
   test('returns 403 when invoice belongs to different org (cross-org) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
-    mocks = stubRepo(DuesInvoiceRepository, {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
+    stubRepo(DuesInvoiceRepository, {
       findOneById: async () => ({ id: 'inv-1', organizationId: 'org-B', status: 'generated', membershipId: 'm-1' }),
     });
     const ctx = makeCtx({
@@ -411,12 +411,16 @@ describe('[SEC-01] markDuesInvoicePaid — position-based auth', () => {
 
 describe('[Wave 1.2] markDuesInvoicePaid — transactional boundary', () => {
   beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(DuesInvoiceRepository);
     restoreRepo(MembershipRepository);
     restoreRepo(DuesRepository);
+    // Default: officer allowed
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
   });
 
   afterEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(DuesInvoiceRepository);
     restoreRepo(MembershipRepository);
     restoreRepo(DuesRepository);

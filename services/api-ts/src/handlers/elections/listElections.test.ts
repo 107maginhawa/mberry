@@ -1,5 +1,5 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { listElections } from './listElections';
 import { ElectionsRepository } from './repos/elections.repo';
 
@@ -15,8 +15,13 @@ const fakeElections = [
 describe('listElections', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(ElectionsRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(ElectionsRepository);
   });
 
   test('returns elections for the org', async () => {

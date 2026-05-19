@@ -1,13 +1,18 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { requireOfficerTerm, requirePosition } from './officer-check';
 
 describe('requireOfficerTerm', () => {
   let mocks: Record<string, { mockRestore: () => void }>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns null (allows) when officer has active term', async () => {
@@ -47,8 +52,13 @@ describe('requireOfficerTerm', () => {
 describe('requirePosition', () => {
   let mocks: Record<string, { mockRestore: () => void }>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('allows when officer has matching position', async () => {

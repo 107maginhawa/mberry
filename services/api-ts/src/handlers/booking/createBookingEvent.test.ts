@@ -1,8 +1,9 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { BookingEventRepository } from './repos/bookingEvent.repo';
+import { TimeSlotRepository } from './repos/timeSlot.repo';
+import { ScheduleExceptionRepository } from './repos/scheduleException.repo';
 import { createBookingEvent } from './createBookingEvent';
-import { mock } from 'bun:test';
 
 const EVENT = {
   id: 'event-1',
@@ -14,8 +15,17 @@ const EVENT = {
 describe('createBookingEvent', () => {
   let mocks: Record<string, { mockRestore: () => void }>;
 
+  beforeEach(() => {
+    restoreRepo(BookingEventRepository);
+    restoreRepo(TimeSlotRepository);
+    restoreRepo(ScheduleExceptionRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(BookingEventRepository);
+    restoreRepo(TimeSlotRepository);
+    restoreRepo(ScheduleExceptionRepository);
   });
 
   test('returns 403 without org context', async () => {
@@ -49,12 +59,9 @@ describe('createBookingEvent', () => {
     mocks = stubRepo(BookingEventRepository, {
       validateEventConfig: () => [],
       createWithSmartDefaults: async () => EVENT,
+      // regenerateEventSlots calls findOneById — return null so it exits early
+      findOneById: async () => null,
     });
-
-    // Mock slot generator
-    mock.module('./jobs/slotGenerator', () => ({
-      regenerateEventSlots: async () => {},
-    }));
 
     const ctx = makeCtx({
       _body: { title: 'Consultation' },

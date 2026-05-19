@@ -1,7 +1,7 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { mock } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { AccreditedProviderRepository } from './repos/accredited-provider.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { createAccreditedProvider } from './createAccreditedProvider';
 
 const fakeProvider = {
@@ -18,9 +18,13 @@ const fakeProvider = {
 describe('createAccreditedProvider', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -35,9 +39,9 @@ describe('createAccreditedProvider', () => {
   });
 
   test('creates provider and returns 201', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
     mocks = stubRepo(AccreditedProviderRepository, {
       createOne: async (data: any) => ({ ...fakeProvider, ...data }),
     });
@@ -54,9 +58,9 @@ describe('createAccreditedProvider', () => {
   });
 
   test('defaults status to active when not provided', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
     let capturedData: any;
     mocks = stubRepo(AccreditedProviderRepository, {
       createOne: async (data: any) => { capturedData = data; return { ...fakeProvider, ...data }; },
@@ -72,9 +76,9 @@ describe('createAccreditedProvider', () => {
   });
 
   test('returns 403 for non-officer', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async (ctx: any) => ctx.json({ error: 'Position access denied' }, 403),
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
     const ctx = makeCtx({
       _params: { organizationId: 'org-1' },
       _body: { name: 'PRC Academy', accreditationNumber: 'PRC-001' },

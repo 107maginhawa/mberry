@@ -1,7 +1,7 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { mock } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { AccreditedProviderRepository } from './repos/accredited-provider.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { deleteAccreditedProvider } from './deleteAccreditedProvider';
 
 const fakeProvider = {
@@ -18,9 +18,13 @@ const fakeProvider = {
 describe('deleteAccreditedProvider', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    mock.restore();
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -34,9 +38,9 @@ describe('deleteAccreditedProvider', () => {
   });
 
   test('deletes provider and returns 204', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
     let deleteCalled = false;
     mocks = stubRepo(AccreditedProviderRepository, {
       getByOrg: async () => fakeProvider,
@@ -53,9 +57,9 @@ describe('deleteAccreditedProvider', () => {
   });
 
   test('throws NotFoundError when provider not found in org', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
     mocks = stubRepo(AccreditedProviderRepository, {
       getByOrg: async () => undefined,
       delete: async () => {},
@@ -69,9 +73,9 @@ describe('deleteAccreditedProvider', () => {
   });
 
   test('returns 403 for non-officer', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async (ctx: any) => ctx.json({ error: 'Position access denied' }, 403),
-    }));
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
     const ctx = makeCtx({
       _params: { organizationId: 'org-1', providerId: 'provider-1' },
     });

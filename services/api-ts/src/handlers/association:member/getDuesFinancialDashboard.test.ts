@@ -5,10 +5,10 @@
  * and generateDuesReport handlers. Tests with [RED] are expected to FAIL now
  * (handlers lack requirePosition + cross-org checks) and PASS after Plan 02.
  */
-import { describe, test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { mock } from 'bun:test';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { getDuesFinancialDashboard } from './getDuesFinancialDashboard';
 import { generateDuesReport } from './generateDuesReport';
 
@@ -26,8 +26,13 @@ const STATS = {
 // ─── getDuesFinancialDashboard tests ───────────────────────────────────────
 
 describe('[SEC-02] getDuesFinancialDashboard — officer + org guard', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     restoreRepo(DuesRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('throws UnauthorizedError without session', async () => {
@@ -40,9 +45,7 @@ describe('[SEC-02] getDuesFinancialDashboard — officer + org guard', () => {
   });
 
   test('returns 403 when requirePosition denies (member role) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 }),
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     const ctx = makeCtx({
       _params: { organizationId: 'org-1' },
       organizationId: 'org-1',
@@ -53,9 +56,7 @@ describe('[SEC-02] getDuesFinancialDashboard — officer + org guard', () => {
   });
 
   test('returns 403 when route param organizationId !== ctx orgId (cross-org) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     const ctx = makeCtx({
       _params: { organizationId: 'org-B' },  // attacker supplies different org
       organizationId: 'org-A',               // middleware-set org from JWT
@@ -70,9 +71,7 @@ describe('[SEC-02] getDuesFinancialDashboard — officer + org guard', () => {
   });
 
   test('returns 200 when officer of correct org requests dashboard', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     stubRepo(DuesRepository, {
       getDashboardStats: async () => STATS,
       getGatewayConfig: async () => ({ connected: true }),
@@ -89,14 +88,17 @@ describe('[SEC-02] getDuesFinancialDashboard — officer + org guard', () => {
 // ─── generateDuesReport tests ──────────────────────────────────────────────
 
 describe('[SEC-02] generateDuesReport — officer + org guard', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     restoreRepo(DuesRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 403 when requirePosition denies (member role) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 }),
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     const ctx = makeCtx({
       _params: { organizationId: 'org-1' },
       _query: { type: 'collection' },
@@ -108,9 +110,7 @@ describe('[SEC-02] generateDuesReport — officer + org guard', () => {
   });
 
   test('returns 403 when route param organizationId !== ctx orgId (cross-org) [RED]', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     const ctx = makeCtx({
       _params: { organizationId: 'org-B' },
       _query: { type: 'collection' },
@@ -126,9 +126,7 @@ describe('[SEC-02] generateDuesReport — officer + org guard', () => {
   });
 
   test('returns 200 when officer of correct org requests report', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
     stubRepo(DuesRepository, {
       reportCollectionSummary: async () => [{ total: 5000 }],
     });

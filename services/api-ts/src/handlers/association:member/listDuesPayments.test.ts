@@ -7,22 +7,22 @@
  *
  * PAY-02: personId self-service enforcement — non-officers can only see their own payments.
  */
-import { describe, test, expect, afterEach, mock } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
-
-// Default mock: user is an officer (requireOfficerTerm returns null = allowed)
-// Individual tests override as needed via mock.module
-mock.module('@/utils/officer-check', () => ({
-  requireOfficerTerm: async () => null,
-  requirePosition: async () => null,
-}));
-
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { listDuesPayments } from './listDuesPayments';
 
 describe('[SEC-02] listDuesPayments — ctx orgId enforcement', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+    // Default: user is an officer (has active officer term)
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
+  });
+
   afterEach(() => {
     restoreRepo(DuesRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('throws UnauthorizedError without session', async () => {
@@ -85,17 +85,18 @@ describe('[SEC-02] listDuesPayments — ctx orgId enforcement', () => {
 });
 
 describe('[PAY-02] listDuesPayments — personId self-service enforcement', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+  });
+
   afterEach(() => {
     restoreRepo(DuesRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('[PAY-02] non-officer with different personId — forced to session.user.id', async () => {
-    // Override: non-officer (requireOfficerTerm returns a Response)
-    mock.module('@/utils/officer-check', () => ({
-      requireOfficerTerm: async () =>
-        ({ status: 403, body: { error: 'Officer access required' } } as any as Response),
-      requirePosition: async () => null,
-    }));
+    // Override: non-officer (no active officer terms)
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
 
     let capturedFilter: any;
     stubRepo(DuesRepository, {
@@ -122,11 +123,7 @@ describe('[PAY-02] listDuesPayments — personId self-service enforcement', () =
   });
 
   test('[PAY-02] non-officer with no personId — defaults to session.user.id', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requireOfficerTerm: async () =>
-        ({ status: 403, body: { error: 'Officer access required' } } as any as Response),
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
 
     let capturedFilter: any;
     stubRepo(DuesRepository, {
@@ -147,11 +144,8 @@ describe('[PAY-02] listDuesPayments — personId self-service enforcement', () =
   });
 
   test('[PAY-02] officer can query any personId within org', async () => {
-    // officer: requireOfficerTerm returns null
-    mock.module('@/utils/officer-check', () => ({
-      requireOfficerTerm: async () => null,
-      requirePosition: async () => null,
-    }));
+    // officer: has active officer term
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
 
     let capturedFilter: any;
     stubRepo(DuesRepository, {
@@ -177,10 +171,7 @@ describe('[PAY-02] listDuesPayments — personId self-service enforcement', () =
   });
 
   test('[PAY-02] officer with no personId — returns all org payments (personId undefined)', async () => {
-    mock.module('@/utils/officer-check', () => ({
-      requireOfficerTerm: async () => null,
-      requirePosition: async () => null,
-    }));
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
 
     let capturedFilter: any;
     stubRepo(DuesRepository, {
