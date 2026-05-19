@@ -1,6 +1,6 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
-import { importMembers } from './importMembers';
+import { importMembers, normalizeLicense, importMembersSchema } from './importMembers';
 import { MembershipRepository } from './repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
@@ -8,13 +8,12 @@ import { MembershipRepository } from './repos/membership.repo';
 const fakeMember = {
   id: 'mem-1',
   organizationId: 'org-1',
-  organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
   status: 'active',
 };
 
-// ─── Tests ──────────────────────────────────────────────
+// ─── Tests: Existing Import Behavior ────────────────────
 
 describe('[BR-22] importMembers', () => {
   let mocks: ReturnType<typeof stubRepo>;
@@ -23,7 +22,7 @@ describe('[BR-22] importMembers', () => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
   });
 
-  test('imports members and returns 201 with count', async () => {
+  test('imports members with personId and returns 201 with count', async () => {
     mocks = stubRepo(MembershipRepository, {
       bulkImportMembers: async (members: any[]) => members.map((m: any, i: number) => ({ ...fakeMember, id: `mem-${i}`, ...m })),
     });
@@ -154,119 +153,346 @@ describe('[BR-22] importMembers', () => {
     await importMembers(ctx);
     expect(captured[0].status).toBe('active');
   });
-});
 
-// -- [BR-22] Member Matching on Import — Gap Tests --
+  test('returns 400 on invalid payload', async () => {
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-1' },
+      _body: { members: [{ email: 'bad-email' }] },
+    });
 
-describe('[BR-22] Member Matching on Import', () => {
-  test('email match is case-insensitive', () => {
-    // BR-22: "email (exact, case-insensitive)"
-    const existingEmail = 'Jane.Doe@Example.COM';
-    const importEmail = 'jane.doe@example.com';
-
-    const isMatch = existingEmail.toLowerCase() === importEmail.toLowerCase();
-    expect(isMatch).toBe(true);
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(400);
   });
 
-  test('license number normalization strips spaces, dashes, leading zeros', () => {
-    // BR-22: "normalized: strip spaces, dashes, and leading zeros; case-insensitive"
-    function normalizeLicense(license: string): string {
-      return license
-        .toLowerCase()
-        .replace(/[\s-]/g, '')
-        .replace(/^0+/, '');
-    }
+  test('returns structured response with matched/created/flagged arrays', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      bulkImportMembers: async (members: any[]) => members.map((m: any, i: number) => ({ ...fakeMember, id: `mem-${i}`, ...m })),
+    });
 
-    // All should normalize to same value
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-1' },
+      _body: {
+        members: [{ personId: 'p-1', tierId: 'tier-1' }],
+      },
+    });
+
+    const response = await importMembers(ctx);
+    expect(response.body.data).toHaveProperty('matched');
+    expect(response.body.data).toHaveProperty('created');
+    expect(response.body.data).toHaveProperty('flagged');
+    expect(response.body.data).toHaveProperty('imported');
+  });
+});
+
+// ─── Tests: Zod Validation (V-08) ──────────────────────
+
+describe('[V-08] Import Validation Schema', () => {
+  test('accepts valid payload with personId', () => {
+    const result = importMembersSchema.safeParse({
+      members: [{ personId: 'p-1', tierId: 'tier-1' }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  test('accepts valid payload with email + license', () => {
+    const result = importMembersSchema.safeParse({
+      members: [{
+        email: 'jane@example.com',
+        licenseNumber: 'PRC-12345',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        tierId: 'tier-1',
+      }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  test('rejects invalid email format', () => {
+    const result = importMembersSchema.safeParse({
+      members: [{ email: 'not-an-email', tierId: 'tier-1' }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  test('rejects missing tierId', () => {
+    const result = importMembersSchema.safeParse({
+      members: [{ personId: 'p-1' }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  test('accepts empty members array', () => {
+    const result = importMembersSchema.safeParse({ members: [] });
+    expect(result.success).toBe(true);
+  });
+});
+
+// ─── Tests: License Normalization (BR-23) ───────────────
+
+describe('[BR-23] normalizeLicense', () => {
+  test('strips dashes and spaces, lowercases', () => {
     expect(normalizeLicense('PRC-12345')).toBe('prc12345');
     expect(normalizeLicense('PRC 12345')).toBe('prc12345');
     expect(normalizeLicense('prc12345')).toBe('prc12345');
+  });
 
-    // Leading zeros stripped
+  test('strips leading zeros', () => {
     expect(normalizeLicense('0012345')).toBe('12345');
   });
 
-  test('email matches A, license matches B → conflict flagged', () => {
-    // BR-22: "If the email matches Person A but the license number matches
-    // Person B: conflict. The record is flagged for human resolution."
-    const existingPersons = [
-      { id: 'person-a', email: 'jane@example.com', licenseNumber: 'PRC-11111' },
-      { id: 'person-b', email: 'john@example.com', licenseNumber: 'PRC-22222' },
-    ];
-
-    const importRow = { email: 'jane@example.com', licenseNumber: 'PRC-22222' };
-
-    const emailMatch = existingPersons.find(
-      p => p.email.toLowerCase() === importRow.email.toLowerCase()
-    );
-    const licenseMatch = existingPersons.find(
-      p => p.licenseNumber === importRow.licenseNumber
-    );
-
-    // Both match, but different people → conflict
-    expect(emailMatch?.id).toBe('person-a');
-    expect(licenseMatch?.id).toBe('person-b');
-    expect(emailMatch?.id).not.toBe(licenseMatch?.id);
-
-    const isConflict = emailMatch && licenseMatch && emailMatch.id !== licenseMatch.id;
-    expect(isConflict).toBe(true);
-  });
-
-  test('no match creates new account', () => {
-    // BR-22: "If no match is found, a new account is created."
-    const existingPersons = [
-      { id: 'person-a', email: 'jane@example.com', licenseNumber: 'PRC-11111' },
-    ];
-
-    const importRow = { email: 'unknown@example.com', licenseNumber: 'PRC-99999' };
-
-    const emailMatch = existingPersons.find(
-      p => p.email.toLowerCase() === importRow.email.toLowerCase()
-    );
-    const licenseMatch = existingPersons.find(
-      p => p.licenseNumber === importRow.licenseNumber
-    );
-
-    expect(emailMatch).toBeUndefined();
-    expect(licenseMatch).toBeUndefined();
-
-    // Should create new account
-    const shouldCreate = !emailMatch && !licenseMatch;
-    expect(shouldCreate).toBe(true);
-  });
-
-  test('name mismatch with field match flagged for manual review', () => {
-    // BR-22 edge: "A match where the names differ significantly should be
-    // flagged for manual review even if a single field matches."
-    const existingPerson = { id: 'person-a', email: 'jane@example.com', firstName: 'Maria', lastName: 'Cruz' };
-    const importRow = { email: 'jane@example.com', firstName: 'Jose', lastName: 'Santos' };
-
-    const emailMatches = existingPerson.email.toLowerCase() === importRow.email.toLowerCase();
-    expect(emailMatches).toBe(true);
-
-    const namesDiffer = existingPerson.firstName !== importRow.firstName
-      || existingPerson.lastName !== importRow.lastName;
-    expect(namesDiffer).toBe(true);
-
-    // Should flag for manual review
-    const needsReview = emailMatches && namesDiffer;
-    expect(needsReview).toBe(true);
-  });
-
-  test('single field match (email only) links to existing account', () => {
-    // When email matches and no license conflict, auto-link
-    const existingPerson = { id: 'person-a', email: 'jane@example.com', firstName: 'Jane', lastName: 'Doe' };
-    const importRow = { email: 'jane@example.com', firstName: 'Jane', lastName: 'Doe' };
-
-    const emailMatches = existingPerson.email.toLowerCase() === importRow.email.toLowerCase();
-    const namesMatch = existingPerson.firstName === importRow.firstName
-      && existingPerson.lastName === importRow.lastName;
-
-    expect(emailMatches).toBe(true);
-    expect(namesMatch).toBe(true);
-
-    // Should auto-link to existing person
-    const shouldAutoLink = emailMatches && namesMatch;
-    expect(shouldAutoLink).toBe(true);
+  test('handles combined transformations', () => {
+    expect(normalizeLicense('00-PRC 123')).toBe('prc123');
   });
 });
+
+// ─── Tests: Matching Logic (BR-22) ─────────────────────
+
+describe('[BR-22] Member Matching on Import', () => {
+  let mocks: ReturnType<typeof stubRepo>;
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+  });
+
+  // These tests exercise matching through the handler by providing a mock database
+  // that responds to the person lookup queries.
+
+  test('email match links to existing person (case-insensitive)', async () => {
+    // Simulate DB: person exists with email
+    const mockDb = createMockDb({
+      personByEmail: { id: 'person-a', firstName: 'Jane', lastName: 'Doe' },
+    });
+
+    mocks = stubRepo(MembershipRepository, {
+      bulkImportMembers: async (members: any[]) => members,
+    });
+
+    const ctx = makeCtx({
+      database: mockDb,
+      _params: { organizationId: 'org-1' },
+      _body: {
+        members: [{
+          email: 'Jane.Doe@Example.COM',
+          firstName: 'Jane',
+          lastName: 'Doe',
+          tierId: 'tier-1',
+        }],
+      },
+    });
+
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.data.matched.length).toBe(1);
+    expect(response.body.data.matched[0].personId).toBe('person-a');
+  });
+
+  test('email matches A, license matches B → conflict flagged', async () => {
+    const mockDb = createMockDb({
+      personByEmail: { id: 'person-a', firstName: 'Jane', lastName: 'Cruz' },
+      personByLicense: { id: 'person-b', firstName: 'John', lastName: 'Santos' },
+    });
+
+    mocks = stubRepo(MembershipRepository, {
+      bulkImportMembers: async () => [],
+    });
+
+    const ctx = makeCtx({
+      database: mockDb,
+      _params: { organizationId: 'org-1' },
+      _body: {
+        members: [{
+          email: 'jane@example.com',
+          licenseNumber: 'PRC-22222',
+          tierId: 'tier-1',
+        }],
+      },
+    });
+
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.data.flagged.length).toBe(1);
+    expect(response.body.data.flagged[0].reason).toBe('conflict');
+    expect(response.body.data.imported).toBe(0);
+  });
+
+  test('no match creates new account', async () => {
+    let insertedPerson: any = null;
+    const mockDb = createMockDb({
+      personByEmail: null,
+      personByLicense: null,
+      onInsertPerson: (values: any) => {
+        insertedPerson = values;
+        return { id: 'new-person-1', ...values };
+      },
+    });
+
+    mocks = stubRepo(MembershipRepository, {
+      bulkImportMembers: async (members: any[]) => members,
+    });
+
+    const ctx = makeCtx({
+      database: mockDb,
+      _params: { organizationId: 'org-1' },
+      _body: {
+        members: [{
+          email: 'unknown@example.com',
+          licenseNumber: 'PRC-99999',
+          firstName: 'New',
+          lastName: 'Person',
+          tierId: 'tier-1',
+        }],
+      },
+    });
+
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.data.created.length).toBe(1);
+    expect(response.body.data.created[0].personId).toBe('new-person-1');
+    expect(insertedPerson).toBeTruthy();
+  });
+
+  test('name mismatch with email match flagged for manual review', async () => {
+    const mockDb = createMockDb({
+      personByEmail: { id: 'person-a', firstName: 'Maria', lastName: 'Cruz' },
+    });
+
+    mocks = stubRepo(MembershipRepository, {
+      bulkImportMembers: async () => [],
+    });
+
+    const ctx = makeCtx({
+      database: mockDb,
+      _params: { organizationId: 'org-1' },
+      _body: {
+        members: [{
+          email: 'jane@example.com',
+          firstName: 'Jose',
+          lastName: 'Santos',
+          tierId: 'tier-1',
+        }],
+      },
+    });
+
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.data.flagged.length).toBe(1);
+    expect(response.body.data.flagged[0].reason).toBe('name-mismatch');
+  });
+
+  test('single field match (email) with matching name auto-links', async () => {
+    const mockDb = createMockDb({
+      personByEmail: { id: 'person-a', firstName: 'Jane', lastName: 'Doe' },
+    });
+
+    mocks = stubRepo(MembershipRepository, {
+      bulkImportMembers: async (members: any[]) => members,
+    });
+
+    const ctx = makeCtx({
+      database: mockDb,
+      _params: { organizationId: 'org-1' },
+      _body: {
+        members: [{
+          email: 'jane@example.com',
+          firstName: 'Jane',
+          lastName: 'Doe',
+          tierId: 'tier-1',
+        }],
+      },
+    });
+
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.data.matched.length).toBe(1);
+    expect(response.body.data.matched[0].personId).toBe('person-a');
+  });
+
+  test('license match with normalized comparison links person', async () => {
+    const mockDb = createMockDb({
+      personByLicense: { id: 'person-b', firstName: 'John', lastName: 'Smith' },
+    });
+
+    mocks = stubRepo(MembershipRepository, {
+      bulkImportMembers: async (members: any[]) => members,
+    });
+
+    const ctx = makeCtx({
+      database: mockDb,
+      _params: { organizationId: 'org-1' },
+      _body: {
+        members: [{
+          licenseNumber: 'PRC-12345',
+          firstName: 'John',
+          lastName: 'Smith',
+          tierId: 'tier-1',
+        }],
+      },
+    });
+
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.data.matched.length).toBe(1);
+    expect(response.body.data.matched[0].personId).toBe('person-b');
+  });
+});
+
+// ─── Mock DB Helper ────────────────────────────────────
+
+function createMockDb(opts: {
+  personByEmail?: { id: string; firstName: string; lastName: string } | null;
+  personByLicense?: { id: string; firstName: string; lastName: string } | null;
+  onInsertPerson?: (values: any) => any;
+} = {}) {
+  let selectCallCount = 0;
+
+  const chainable = (result: any[]) => {
+    const chain: any = {
+      select: () => chain,
+      from: () => chain,
+      where: (condition: any) => {
+        // Determine if this is an email or license query based on call order
+        // Email query fires first, license second (per handler implementation)
+        selectCallCount++;
+        const condStr = String(condition);
+
+        // Return email match for email queries, license match for license queries
+        if (condStr.includes('email') || selectCallCount % 2 === 1) {
+          return { limit: () => opts.personByEmail ? [opts.personByEmail] : [] };
+        }
+        return { limit: () => opts.personByLicense ? [opts.personByLicense] : [] };
+      },
+      limit: () => result,
+      returning: () => result,
+    };
+    return chain;
+  };
+
+  return {
+    select: (fields: any) => ({
+      from: (table: any) => ({
+        where: (condition: any) => {
+          selectCallCount++;
+          // Heuristic: first select per row = email, second = license
+          if (selectCallCount % 2 === 1 && opts.personByEmail !== undefined) {
+            return { limit: () => opts.personByEmail ? [opts.personByEmail] : [] };
+          }
+          if (opts.personByLicense !== undefined) {
+            return { limit: () => opts.personByLicense ? [opts.personByLicense] : [] };
+          }
+          return { limit: () => [] };
+        },
+      }),
+    }),
+    insert: (table: any) => ({
+      values: (data: any) => ({
+        returning: () => {
+          if (opts.onInsertPerson) {
+            return [opts.onInsertPerson(data)];
+          }
+          return [{ id: 'new-person-1', ...data }];
+        },
+      }),
+    }),
+    transaction: async (fn: any) => fn({}),
+  };
+}
