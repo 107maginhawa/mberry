@@ -69,7 +69,7 @@ describe('[BR-01] Membership Lifecycle', () => {
 
   test('[BR-01] renewable statuses are active, gracePeriod, lapsed', () => {
     const renewableStatuses = ['active', 'gracePeriod', 'lapsed'];
-    const nonRenewable = ['pendingPayment', 'expired', 'suspended', 'terminated'];
+    const nonRenewable = ['pendingPayment', 'expired', 'suspended', 'removed'];
 
     // Verify renewable set
     expect(renewableStatuses).toContain('active');
@@ -87,29 +87,29 @@ describe('[BR-01] Membership Lifecycle', () => {
     // Termination should record status, timestamp, and reason
     const membership = {
       status: 'active',
-      terminatedAt: null,
-      terminationReason: null,
+      removedAt: null,
+      removalReason: null,
     };
 
     // After termination:
-    const terminated = {
+    const removed = {
       ...membership,
-      status: 'terminated',
-      terminatedAt: new Date(),
-      terminationReason: 'Non-payment',
+      status: 'removed',
+      removedAt: new Date(),
+      removalReason: 'Non-payment',
     };
 
-    expect(terminated.status).toBe('terminated');
-    expect(terminated.terminatedAt).toBeInstanceOf(Date);
-    expect(terminated.terminationReason).toBe('Non-payment');
+    expect(removed.status).toBe('removed');
+    expect(removed.removedAt).toBeInstanceOf(Date);
+    expect(removed.removalReason).toBe('Non-payment');
   });
 
-  test('[BR-01] reinstateMembership only works on terminated/suspended', () => {
-    const reinstatableStatuses = ['terminated', 'suspended'];
+  test('[BR-01] reinstateMembership only works on removed/suspended', () => {
+    const reinstatableStatuses = ['removed', 'suspended'];
     const nonReinstatable = ['active', 'gracePeriod', 'lapsed', 'pendingPayment', 'expired'];
 
     for (const status of reinstatableStatuses) {
-      expect(['terminated', 'suspended']).toContain(status);
+      expect(['removed', 'suspended']).toContain(status);
     }
 
     for (const status of nonReinstatable) {
@@ -172,7 +172,7 @@ describe('[BR-01] Membership Status Computation', () => {
     // not initiated through updateMember. The VALID_TRANSITIONS map in
     // updateMember.ts does NOT include active→grace or grace→lapsed.
     const officerTransitions: Record<string, string[]> = {
-      active: ['suspended', 'terminated'],
+      active: ['suspended', 'removed'],
       grace: ['suspended'],
       lapsed: ['suspended', 'active'],
       suspended: ['active'],

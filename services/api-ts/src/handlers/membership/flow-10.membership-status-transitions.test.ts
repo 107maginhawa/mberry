@@ -22,8 +22,8 @@ function fakeMember(status: string) {
       tierId: 'tier-1',
       memberNumber: 'MEM-001',
       note: null,
-      terminatedAt: null,
-      terminationReason: null,
+      removedAt: null,
+      removalReason: null,
     },
     person: { id: 'person-1', firstName: 'Juan', lastName: 'Dela Cruz' },
   };
@@ -73,7 +73,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
     expect(capturedStatus).toBe('suspended');
   });
 
-  test('active → terminated: valid, sets terminatedAt', async () => {
+  test('active → removed: valid, sets removedAt', async () => {
     let capturedData: any = null;
 
     mocks = defaultStubs('active', {
@@ -84,14 +84,14 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
     });
 
     const ctx = makeCtx({
-      _body: { status: 'terminated', terminationReason: 'Violation' },
+      _body: { status: 'removed', removalReason: 'Violation' },
       _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);
 
-    expect(capturedData.status).toBe('terminated');
-    expect(capturedData.terminatedAt).toBeInstanceOf(Date);
-    expect(capturedData.terminationReason).toBe('Violation');
+    expect(capturedData.status).toBe('removed');
+    expect(capturedData.removedAt).toBeInstanceOf(Date);
+    expect(capturedData.removalReason).toBe('Violation');
   });
 
   test('lapsed → active: valid (reinstatement)', async () => {
@@ -154,7 +154,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
     expect(capturedStatus).toBe('active');
   });
 
-  test('lapsed → terminated: invalid, stays lapsed', async () => {
+  test('lapsed → removed: invalid, stays lapsed', async () => {
     let capturedStatus: string | null = null;
 
     mocks = defaultStubs('lapsed', {
@@ -165,7 +165,7 @@ describe('[FLOW-10] Membership Status Transitions (BR-03)', () => {
     });
 
     const ctx = makeCtx({
-      _body: { status: 'terminated' },
+      _body: { status: 'removed' },
       _params: { organizationId: ORG, memberId: MEMBER_ID },
     });
     await updateMember(ctx);

@@ -35,7 +35,7 @@ const fakeMembership = {
   duesExpiryDate: '2026-06-30',
   status: 'active',
   suspendedAt: null,
-  terminatedAt: null,
+  removedAt: null,
 };
 
 /** Fake DB that passes tx through to callback (simulates transaction) */
@@ -203,7 +203,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
         ...fakeMembership,
         duesExpiryDate: '2026-06-30',
         suspendedAt: null,
-        terminatedAt: null,
+        removedAt: null,
       }],
       updateOneById: async (_id: string, updates: any) => {
         updatedMembership = updates;

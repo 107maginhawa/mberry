@@ -17,8 +17,8 @@ const existingMember = {
     memberNumber: 'MEM-001',
     status: 'active',
     note: null,
-    terminatedAt: null,
-    terminationReason: null,
+    removedAt: null,
+    removalReason: null,
     updatedBy: 'user-1',
   },
   person: { id: 'person-1', firstName: 'Alice', lastName: 'Smith', avatar: null },
@@ -121,7 +121,7 @@ describe('updateMember [BR-03]', () => {
     expect(capturedUpdate.memberNumber).toBe('MEM-001');
   });
 
-  test('sets terminatedAt when status is terminated [BR-03]', async () => {
+  test('sets removedAt when status is removed [BR-03]', async () => {
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipRepository, {
       getMember: async () => existingMember, // status: 'active'
@@ -130,12 +130,12 @@ describe('updateMember [BR-03]', () => {
 
     const ctx = makeCtx({
       _params: { organizationId: 'org-1', memberId: 'person-1' },
-      _body: { status: 'terminated', terminationReason: 'Non-compliance' },
+      _body: { status: 'removed', removalReason: 'Non-compliance' },
     });
 
     await updateMember(ctx);
-    expect(capturedUpdate.terminatedAt).toBeInstanceOf(Date);
-    expect(capturedUpdate.terminationReason).toBe('Non-compliance');
+    expect(capturedUpdate.removedAt).toBeInstanceOf(Date);
+    expect(capturedUpdate.removalReason).toBe('Non-compliance');
   });
 
   test('uses licenseNumber as memberNumber fallback', async () => {
@@ -176,7 +176,7 @@ describe('updateMember [BR-03]', () => {
   describe('[BR-03] valid transitions', () => {
     const validTransitions: Array<[string, string]> = [
       ['active', 'suspended'],    // officer suspends
-      ['active', 'terminated'],   // president removes
+      ['active', 'removed'],   // president removes
       ['grace', 'suspended'],     // officer suspends grace member
       ['lapsed', 'suspended'],    // officer suspends lapsed member
       ['lapsed', 'active'],       // member pays dues (manual restore)
@@ -239,12 +239,12 @@ describe('updateMember [BR-03]', () => {
       ['active', 'grace', 'grace is automatic via expiry, not officer action'],
       ['grace', 'active', 'must pay dues or go through suspended→active'],
       ['grace', 'lapsed', 'lapsed is automatic via grace expiry'],
-      ['grace', 'terminated', 'only active members can be removed'],
+      ['grace', 'removed', 'only active members can be removed'],
       ['lapsed', 'grace', 'cannot go backwards to grace'],
-      ['lapsed', 'terminated', 'only active members can be removed'],
+      ['lapsed', 'removed', 'only active members can be removed'],
       ['suspended', 'grace', 'restore goes to active only'],
       ['suspended', 'lapsed', 'restore goes to active only'],
-      ['suspended', 'terminated', 'must restore before removing'],
+      ['suspended', 'removed', 'must restore before removing'],
       ['suspended', 'pending', 'cannot revert to pending'],
       ['pending', 'active', 'pending→active via reviewApplication only'],
       ['pending', 'suspended', 'must approve first'],

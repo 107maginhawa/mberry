@@ -265,14 +265,14 @@ export const membershipLifecycle = {
    */
   async recomputeStatus(
     _txDb: DatabaseInstance,
-    membership: { suspendedAt?: Date | null; terminatedAt?: Date | null },
+    membership: { suspendedAt?: Date | null; removedAt?: Date | null },
     duesExpiryDate: string | null,
   ): Promise<ComputedMembershipStatus> {
     return computeMembershipStatus({
       duesExpiryDate,
       gracePeriodDays: DEFAULT_GRACE_PERIOD_DAYS,
       suspendedAt: (membership as any).suspendedAt ?? null,
-      terminatedAt: (membership as any).terminatedAt ?? null,
+      removedAt: (membership as any).removedAt ?? null,
     });
   },
 };

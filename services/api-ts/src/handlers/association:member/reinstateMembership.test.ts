@@ -6,24 +6,24 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const terminatedMembership = {
+const removedMembership = {
   id: 'mem-1',
   organizationId: 'tenant-1',
   organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
-  status: 'terminated',
-  terminatedAt: new Date('2025-06-01'),
-  terminationReason: 'Non-payment',
+  status: 'removed',
+  removedAt: new Date('2025-06-01'),
+  removalReason: 'Non-payment',
   startDate: '2025-01-01',
   duesExpiryDate: '2026-01-01',
 };
 
 const suspendedMembership = {
-  ...terminatedMembership,
+  ...removedMembership,
   status: 'suspended',
-  terminatedAt: null,
-  terminationReason: null,
+  removedAt: null,
+  removalReason: null,
 };
 
 // ─── Tests ──────────────────────────────────────────────
@@ -35,10 +35,10 @@ describe('reinstateMembership', () => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
   });
 
-  test('reinstates a terminated membership and returns 200', async () => {
+  test('reinstates a removed membership and returns 200', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => terminatedMembership,
-      updateOneById: async (_id: string, data: any) => ({ ...terminatedMembership, ...data }),
+      findOneById: async () => removedMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...removedMembership, ...data }),
     });
 
     const ctx = makeCtx({
@@ -79,7 +79,7 @@ describe('reinstateMembership', () => {
 
   test('throws UnauthorizedError when no session', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => terminatedMembership,
+      findOneById: async () => removedMembership,
     });
 
     const ctx = makeCtx({
@@ -92,7 +92,7 @@ describe('reinstateMembership', () => {
   });
 
   test('throws BusinessLogicError when membership is already active', async () => {
-    const activeMembership = { ...terminatedMembership, status: 'active', terminatedAt: null, terminationReason: null };
+    const activeMembership = { ...removedMembership, status: 'active', removedAt: null, removalReason: null };
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => activeMembership,
     });
@@ -106,7 +106,7 @@ describe('reinstateMembership', () => {
 
   test('throws BusinessLogicError when membership is in grace status', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => ({ ...terminatedMembership, status: 'grace' }),
+      findOneById: async () => ({ ...removedMembership, status: 'grace' }),
     });
 
     const ctx = makeCtx({
@@ -118,7 +118,7 @@ describe('reinstateMembership', () => {
 
   test('throws BusinessLogicError when membership is lapsed', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => ({ ...terminatedMembership, status: 'lapsed' }),
+      findOneById: async () => ({ ...removedMembership, status: 'lapsed' }),
     });
 
     const ctx = makeCtx({
@@ -128,11 +128,11 @@ describe('reinstateMembership', () => {
     await expect(reinstateMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
-  test('clears terminatedAt and terminationReason on reinstatement', async () => {
+  test('clears removedAt and removalReason on reinstatement', async () => {
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => terminatedMembership,
-      updateOneById: async (_id: string, data: any) => { capturedUpdate = data; return { ...terminatedMembership, ...data }; },
+      findOneById: async () => removedMembership,
+      updateOneById: async (_id: string, data: any) => { capturedUpdate = data; return { ...removedMembership, ...data }; },
     });
 
     const ctx = makeCtx({
@@ -140,16 +140,16 @@ describe('reinstateMembership', () => {
     });
 
     await reinstateMembership(ctx);
-    expect(capturedUpdate.terminatedAt).toBeNull();
-    expect(capturedUpdate.terminationReason).toBeNull();
+    expect(capturedUpdate.removedAt).toBeNull();
+    expect(capturedUpdate.removalReason).toBeNull();
     expect(capturedUpdate.status).toBe('active');
   });
 
   test('scopes findOneById call to membershipId from route param', async () => {
     let capturedId: string | null = null;
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async (id: string) => { capturedId = id; return terminatedMembership; },
-      updateOneById: async (_id: string, data: any) => ({ ...terminatedMembership, ...data }),
+      findOneById: async (id: string) => { capturedId = id; return removedMembership; },
+      updateOneById: async (_id: string, data: any) => ({ ...removedMembership, ...data }),
     });
 
     const ctx = makeCtx({
@@ -163,11 +163,11 @@ describe('reinstateMembership', () => {
   // ─── [BR] Valid reinstatement paths ───────────────────
 
   describe('valid reinstatement statuses', () => {
-    const reinstatableStatuses = ['terminated', 'suspended'];
+    const reinstatableStatuses = ['removed', 'suspended'];
 
     for (const status of reinstatableStatuses) {
       test(`${status} → active succeeds`, async () => {
-        const memberWithStatus = { ...terminatedMembership, status };
+        const memberWithStatus = { ...removedMembership, status };
         let capturedStatus: string | null = null;
         mocks = stubRepo(MembershipRepository, {
           findOneById: async () => memberWithStatus,
@@ -196,7 +196,7 @@ describe('reinstateMembership', () => {
     for (const status of nonReinstatableStatuses) {
       test(`throws BusinessLogicError for status '${status}'`, async () => {
         mocks = stubRepo(MembershipRepository, {
-          findOneById: async () => ({ ...terminatedMembership, status }),
+          findOneById: async () => ({ ...removedMembership, status }),
         });
 
         const ctx = makeCtx({

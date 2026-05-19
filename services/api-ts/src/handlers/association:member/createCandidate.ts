@@ -54,7 +54,7 @@ export async function createCandidate(
     duesExpiryDate: membership.duesExpiryDate,
     gracePeriodDays: membership.gracePeriodDays,
     suspendedAt: membership.suspendedAt,
-    terminatedAt: membership.terminatedAt,
+    removedAt: membership.removedAt,
   });
 
   if (status !== 'active') {

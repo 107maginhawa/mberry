@@ -9,13 +9,13 @@ export type ComputedMembershipStatus =
   | 'gracePeriod'
   | 'lapsed'
   | 'suspended'
-  | 'terminated';
+  | 'removed';
 
 export interface MembershipStatusInput {
   duesExpiryDate: string | null;
   gracePeriodDays: number;
   suspendedAt: Date | null;
-  terminatedAt: Date | null;
+  removedAt: Date | null;
   /** True when membership was just created and no payment exists yet */
   isPendingPayment?: boolean;
 }
@@ -24,7 +24,7 @@ export interface MembershipStatusInput {
  * Compute membership status from expiry date and flags.
  *
  * Priority order:
- * 1. terminated (highest — irreversible officer action)
+ * 1. removed (highest — irreversible officer action)
  * 2. suspended (officer action, reversible)
  * 3. pendingPayment (initial state, no payment yet)
  * 4. active (null expiry = life/honorary, or expiry >= today)
@@ -36,7 +36,7 @@ export function computeMembershipStatus(
   now: Date = new Date(),
 ): ComputedMembershipStatus {
   // Officer overrides take precedence
-  if (input.terminatedAt) return 'terminated';
+  if (input.removedAt) return 'removed';
   if (input.suspendedAt) return 'suspended';
 
   // Pending payment — just created, no payment yet

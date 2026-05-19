@@ -38,7 +38,7 @@ export async function createMembership(
 
   // Check no existing active membership for this person+org
   const existing = await membershipRepo.findByPersonAndOrg(body.personId, orgId);
-  if (existing && !['terminated', 'expired'].includes(existing.status)) {
+  if (existing && !['removed', 'expired'].includes(existing.status)) {
     throw new ConflictError('An active membership already exists for this person in this organization');
   }
 

@@ -12,8 +12,8 @@ const fakeMembership = {
   personId: 'person-1',
   tierId: 'tier-1',
   status: 'active',
-  terminatedAt: null,
-  terminationReason: null,
+  removedAt: null,
+  removalReason: null,
   dateOfDeath: null,
   startDate: '2025-01-01',
   duesExpiryDate: '2026-01-01',
@@ -134,10 +134,10 @@ describe('resignMembership', () => {
     await expect(resignMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
-  test('throws BusinessLogicError when membership already terminated', async () => {
-    const terminatedMembership = { ...fakeMembership, status: 'terminated' };
+  test('throws BusinessLogicError when membership already removed', async () => {
+    const removedMembership = { ...fakeMembership, status: 'removed' };
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => terminatedMembership,
+      findOneById: async () => removedMembership,
     });
 
     const ctx = makeCtx({
@@ -149,8 +149,8 @@ describe('resignMembership', () => {
     await expect(resignMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
-  // Test 5: captures terminationReason in update when provided
-  test('captures terminationReason in update when provided', async () => {
+  // Test 5: captures removalReason in update when provided
+  test('captures removalReason in update when provided', async () => {
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => fakeMembership,
@@ -167,12 +167,12 @@ describe('resignMembership', () => {
     });
 
     await resignMembership(ctx);
-    expect(capturedUpdate.terminationReason).toBe('Relocating abroad');
+    expect(capturedUpdate.removalReason).toBe('Relocating abroad');
     expect(capturedUpdate.status).toBe('resigned');
   });
 
-  // Test 6: stores null terminationReason when not provided (optional field)
-  test('stores null terminationReason when not provided', async () => {
+  // Test 6: stores null removalReason when not provided (optional field)
+  test('stores null removalReason when not provided', async () => {
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => fakeMembership,
@@ -189,11 +189,11 @@ describe('resignMembership', () => {
     });
 
     await resignMembership(ctx);
-    expect(capturedUpdate.terminationReason).toBeNull();
+    expect(capturedUpdate.removalReason).toBeNull();
   });
 
-  // Test 7: sets terminatedAt to current timestamp
-  test('sets terminatedAt to current timestamp', async () => {
+  // Test 7: sets removedAt to current timestamp
+  test('sets removedAt to current timestamp', async () => {
     let capturedUpdate: any = null;
     const before = new Date();
     mocks = stubRepo(MembershipRepository, {
@@ -212,9 +212,9 @@ describe('resignMembership', () => {
 
     await resignMembership(ctx);
     const after = new Date();
-    expect(capturedUpdate.terminatedAt).toBeInstanceOf(Date);
-    expect(capturedUpdate.terminatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
-    expect(capturedUpdate.terminatedAt.getTime()).toBeLessThanOrEqual(after.getTime());
+    expect(capturedUpdate.removedAt).toBeInstanceOf(Date);
+    expect(capturedUpdate.removedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    expect(capturedUpdate.removedAt.getTime()).toBeLessThanOrEqual(after.getTime());
   });
 
   // Test 8: resigns memberships from any non-terminal status

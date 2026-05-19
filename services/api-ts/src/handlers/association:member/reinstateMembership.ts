@@ -24,18 +24,18 @@ export async function reinstateMembership(
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
 
-  const reinstatableStatuses = ['terminated', 'suspended'];
+  const reinstatableStatuses = ['removed', 'suspended'];
   if (!reinstatableStatuses.includes(membership.status)) {
     throw new BusinessLogicError(
-      `Cannot reinstate a membership with status '${membership.status}'. Must be terminated or suspended.`,
+      `Cannot reinstate a membership with status '${membership.status}'. Must be removed or suspended.`,
       'MEMBERSHIP_NOT_REINSTATABLE',
     );
   }
 
   const updated = await repo.updateOneById(membershipId, {
     status: 'active',
-    terminatedAt: null,
-    terminationReason: null,
+    removedAt: null,
+    removalReason: null,
   } as any);
 
   await auditAction(ctx, {

@@ -40,7 +40,7 @@ export const membershipStatusEnum = pgEnum('membership_status', [
   'lapsed',
   'expired',
   'suspended',
-  'terminated',
+  'removed',
   'resigned',    // LIF-04: voluntary departure
   'deceased',    // LIF-04: member death
   'expelled',    // LIF-04: disciplinary removal
@@ -119,8 +119,8 @@ export const memberships = pgTable(
     status: membershipStatusEnum('status').notNull().default('pendingPayment'),
     joinedAt: timestamp('joined_at').notNull(),
     suspendedAt: timestamp('suspended_at'),
-    terminatedAt: timestamp('terminated_at'),
-    terminationReason: varchar('termination_reason', { length: 500 }),
+    removedAt: timestamp('removed_at'),
+    removalReason: varchar('removal_reason', { length: 500 }),
     dateOfDeath: date('date_of_death'),               // LIF-04: recorded on deceased
     note: text('note'),
   },

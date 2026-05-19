@@ -7,7 +7,7 @@ import { duesInvoices } from './repos/dues.schema';
 import { auditAction } from '@/utils/audit';
 import { eq, and, notInArray } from 'drizzle-orm';
 
-const TERMINAL_STATUSES = ['resigned', 'deceased', 'expelled', 'terminated'];
+const TERMINAL_STATUSES = ['resigned', 'deceased', 'expelled', 'removed'];
 
 /**
  * deceaseMembership
@@ -41,9 +41,9 @@ export async function deceaseMembership(
     // Update membership status with dateOfDeath
     updated = await repo.updateOneById(membershipId, {
       status: 'deceased',
-      terminatedAt: new Date(),
+      removedAt: new Date(),
       dateOfDeath: body.dateOfDeath,
-      terminationReason: body.terminationReason ?? null,
+      removalReason: body.terminationReason ?? null,
     } as any);
 
     // Void open invoices in same transaction

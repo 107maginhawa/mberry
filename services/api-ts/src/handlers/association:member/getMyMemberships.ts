@@ -29,8 +29,8 @@ export async function getMyMemberships(ctx: HandlerContext): Promise<Response> {
       gracePeriodDays: memberships.gracePeriodDays,
       status: memberships.status,
       joinedAt: memberships.joinedAt,
-      terminatedAt: memberships.terminatedAt,
-      terminationReason: memberships.terminationReason,
+      removedAt: memberships.removedAt,
+      removalReason: memberships.removalReason,
       note: memberships.note,
       orgName: organizations.name,
     })

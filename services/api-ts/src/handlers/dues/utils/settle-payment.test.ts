@@ -17,7 +17,7 @@ const baseMembership = {
   status: 'active',
   joinedAt: new Date().toISOString(),
   suspendedAt: null,
-  terminatedAt: null,
+  removedAt: null,
 };
 
 /** Fake DB that passes `tx` through to the callback (simulates transaction) */
@@ -67,7 +67,7 @@ describe('[BR-03] settlePayment — status-aware reactivation', () => {
     expect(updatedStatus).not.toBe('active');
   });
 
-  test('terminated member — payment extends expiry but does NOT reactivate', async () => {
+  test('removed member — payment extends expiry but does NOT reactivate', async () => {
     let updatedStatus: string | undefined;
 
     stubRepo(DuesRepository, {
@@ -75,7 +75,7 @@ describe('[BR-03] settlePayment — status-aware reactivation', () => {
       getConfig: async () => undefined,
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'terminated', terminatedAt: new Date() }],
+      findMany: async () => [{ ...baseMembership, status: 'removed', removedAt: new Date() }],
       updateOneById: async (_id: string, updates: any) => {
         updatedStatus = updates.status;
         return baseMembership;

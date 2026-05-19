@@ -38,7 +38,7 @@ const fakeActiveMembership = {
   status: 'active' as const,
   joinedAt: new Date('2025-01-01'),
   suspendedAt: null,
-  terminatedAt: null,
+  removedAt: null,
   memberNumber: 'M-001',
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -133,9 +133,9 @@ describe('createCandidate — BR-34 nomination eligibility', () => {
     await expect(createCandidate(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
-  // ─── Terminated member rejected ───────────────────────
+  // ─── Removed member rejected ───────────────────────
 
-  test('rejects nomination when nominee membership is terminated', async () => {
+  test('rejects nomination when nominee membership is removed', async () => {
     stubRepo(ElectionsRepository, {
       get: async () => fakeElection,
       addNominee: async () => fakeNominee,
@@ -143,7 +143,7 @@ describe('createCandidate — BR-34 nomination eligibility', () => {
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => ({
         ...fakeActiveMembership,
-        terminatedAt: new Date('2026-04-01'),
+        removedAt: new Date('2026-04-01'),
       }),
     });
 

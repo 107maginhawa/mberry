@@ -12,8 +12,8 @@ const fakeMembership = {
   personId: 'person-1',
   tierId: 'tier-1',
   status: 'active',
-  terminatedAt: null,
-  terminationReason: null,
+  removedAt: null,
+  removalReason: null,
   dateOfDeath: null,
   startDate: '2025-01-01',
   duesExpiryDate: '2026-01-01',
@@ -119,10 +119,10 @@ describe('deceaseMembership', () => {
     await expect(deceaseMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
-  test('throws BusinessLogicError when membership already terminated', async () => {
-    const terminatedMembership = { ...fakeMembership, status: 'terminated' };
+  test('throws BusinessLogicError when membership already removed', async () => {
+    const removedMembership = { ...fakeMembership, status: 'removed' };
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => terminatedMembership,
+      findOneById: async () => removedMembership,
     });
 
     const ctx = makeCtx({
@@ -156,8 +156,8 @@ describe('deceaseMembership', () => {
     expect(capturedUpdate.status).toBe('deceased');
   });
 
-  // Test 6: captures terminationReason when provided
-  test('captures terminationReason when provided', async () => {
+  // Test 6: captures removalReason when provided
+  test('captures removalReason when provided', async () => {
     let capturedUpdate: any = null;
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => fakeMembership,
@@ -174,11 +174,11 @@ describe('deceaseMembership', () => {
     });
 
     await deceaseMembership(ctx);
-    expect(capturedUpdate.terminationReason).toBe('Passed away');
+    expect(capturedUpdate.removalReason).toBe('Passed away');
   });
 
-  // Test 7: sets terminatedAt to current timestamp
-  test('sets terminatedAt to current timestamp', async () => {
+  // Test 7: sets removedAt to current timestamp
+  test('sets removedAt to current timestamp', async () => {
     let capturedUpdate: any = null;
     const before = new Date();
     mocks = stubRepo(MembershipRepository, {
@@ -197,9 +197,9 @@ describe('deceaseMembership', () => {
 
     await deceaseMembership(ctx);
     const after = new Date();
-    expect(capturedUpdate.terminatedAt).toBeInstanceOf(Date);
-    expect(capturedUpdate.terminatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
-    expect(capturedUpdate.terminatedAt.getTime()).toBeLessThanOrEqual(after.getTime());
+    expect(capturedUpdate.removedAt).toBeInstanceOf(Date);
+    expect(capturedUpdate.removedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    expect(capturedUpdate.removedAt.getTime()).toBeLessThanOrEqual(after.getTime());
   });
 
   // Test 8: marks deceased from any non-terminal status

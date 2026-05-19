@@ -9,7 +9,7 @@ import type { Session } from '@/types/auth';
 // LAPSED → ACTIVE happens via payment recording (BR-07).
 // This map covers officer-initiated transitions through updateMember.
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  active: ['suspended', 'terminated'],
+  active: ['suspended', 'removed'],
   grace: ['suspended'],
   lapsed: ['suspended', 'active'],
   suspended: ['active'],
@@ -48,8 +48,8 @@ export async function updateMember(ctx: Context): Promise<Response> {
     status,
     memberNumber: body.memberNumber ?? body.licenseNumber ?? existing.membership.memberNumber,
     note: body.note ?? existing.membership.note,
-    terminatedAt: status === 'terminated' ? new Date() : existing.membership.terminatedAt,
-    terminationReason: body.terminationReason ?? existing.membership.terminationReason,
+    removedAt: status === 'removed' ? new Date() : existing.membership.removedAt,
+    removalReason: body.removalReason ?? existing.membership.removalReason,
     updatedBy: session.user.id,
   });
 

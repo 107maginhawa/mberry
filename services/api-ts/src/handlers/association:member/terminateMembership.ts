@@ -33,19 +33,19 @@ export async function terminateMembership(
   }
 
   const updated = await repo.updateOneById(membershipId, {
-    status: 'terminated',
-    terminatedAt: new Date(),
-    terminationReason: body.terminationReason ?? null,
+    status: 'removed',
+    removedAt: new Date(),
+    removalReason: body.terminationReason ?? null,
   } as any);
 
   await auditAction(ctx, {
     action: 'terminate',
     resourceType: 'membership',
     resourceId: membershipId,
-    description: 'Membership terminated',
+    description: 'Membership removed',
   });
 
-  // P1-4: Invalidate terminated member's sessions so they can't access org resources
+  // P1-4: Invalidate removed member's sessions so they can't access org resources
   try {
     const auth = ctx.get('auth');
     if (auth && membership.personId) {
@@ -56,7 +56,7 @@ export async function terminateMembership(
     }
   } catch (err) {
     const logger = ctx.get('logger');
-    logger?.warn({ error: err, personId: membership.personId }, 'Failed to revoke sessions after membership termination');
+    logger?.warn({ error: err, personId: membership.personId }, 'Failed to revoke sessions after membership removal');
   }
 
   return ctx.json(updated, 200);

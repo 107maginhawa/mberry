@@ -13,7 +13,7 @@ const fakeMembership = {
   personId: 'person-1',
   tierId: 'tier-1',
   status: 'active',
-  terminatedAt: null,
+  removedAt: null,
   terminationReason: null,
   startDate: '2025-01-01',
   duesExpiryDate: '2026-01-01',
@@ -41,7 +41,7 @@ describe('terminateMembership', () => {
 
     const response = await terminateMembership(ctx);
     expect(response.status).toBe(200);
-    expect(response.body.status).toBe('terminated');
+    expect(response.body.status).toBe('removed');
   });
 
   test('throws NotFoundError for non-existent membership', async () => {
@@ -85,8 +85,8 @@ describe('terminateMembership', () => {
     });
 
     await terminateMembership(ctx);
-    expect(capturedUpdate.terminationReason).toBe('Voluntary resignation');
-    expect(capturedUpdate.status).toBe('terminated');
+    expect(capturedUpdate.removalReason).toBe('Voluntary resignation');
+    expect(capturedUpdate.status).toBe('removed');
   });
 
   test('stores null terminationReason when not provided', async () => {
@@ -102,10 +102,10 @@ describe('terminateMembership', () => {
     });
 
     await terminateMembership(ctx);
-    expect(capturedUpdate.terminationReason).toBeNull();
+    expect(capturedUpdate.removalReason).toBeNull();
   });
 
-  test('sets terminatedAt to current timestamp', async () => {
+  test('sets removedAt to current timestamp', async () => {
     let capturedUpdate: any = null;
     const before = new Date();
     mocks = stubRepo(MembershipRepository, {
@@ -120,9 +120,9 @@ describe('terminateMembership', () => {
 
     await terminateMembership(ctx);
     const after = new Date();
-    expect(capturedUpdate.terminatedAt).toBeInstanceOf(Date);
-    expect(capturedUpdate.terminatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
-    expect(capturedUpdate.terminatedAt.getTime()).toBeLessThanOrEqual(after.getTime());
+    expect(capturedUpdate.removedAt).toBeInstanceOf(Date);
+    expect(capturedUpdate.removedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    expect(capturedUpdate.removedAt.getTime()).toBeLessThanOrEqual(after.getTime());
   });
 
   test('scopes findOneById call to membershipId from route param', async () => {
@@ -181,7 +181,7 @@ describe('terminateMembership', () => {
 
         const response = await terminateMembership(ctx);
         expect(response.status).toBe(200);
-        expect(capturedStatus).toBe('terminated');
+        expect(capturedStatus).toBe('removed');
       });
     }
   });

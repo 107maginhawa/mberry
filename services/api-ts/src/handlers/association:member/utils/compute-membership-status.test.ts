@@ -22,7 +22,7 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: '2026-06-01',
       gracePeriodDays: 30,
       suspendedAt: null,
-      terminatedAt: null,
+      removedAt: null,
     }, today);
     expect(status).toBe('active');
   });
@@ -32,7 +32,7 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: '2026-01-15',
       gracePeriodDays: 30,
       suspendedAt: null,
-      terminatedAt: null,
+      removedAt: null,
     }, today);
     expect(status).toBe('active');
   });
@@ -43,7 +43,7 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: '2026-01-05',
       gracePeriodDays: 30,
       suspendedAt: null,
-      terminatedAt: null,
+      removedAt: null,
     }, today);
     expect(status).toBe('gracePeriod');
   });
@@ -54,7 +54,7 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: '2025-11-16',
       gracePeriodDays: 30,
       suspendedAt: null,
-      terminatedAt: null,
+      removedAt: null,
     }, today);
     expect(status).toBe('lapsed');
   });
@@ -64,7 +64,7 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: null,
       gracePeriodDays: 30,
       suspendedAt: null,
-      terminatedAt: null,
+      removedAt: null,
     }, today);
     expect(status).toBe('active');
   });
@@ -74,29 +74,29 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: '2026-06-01', // future — would be active
       gracePeriodDays: 30,
       suspendedAt: new Date('2026-01-10'),
-      terminatedAt: null,
+      removedAt: null,
     }, today);
     expect(status).toBe('suspended');
   });
 
-  test('returns "terminated" when terminatedAt is set, regardless of expiry', () => {
+  test('returns "removed" when removedAt is set, regardless of expiry', () => {
     const status = computeMembershipStatus({
       duesExpiryDate: '2026-06-01',
       gracePeriodDays: 30,
       suspendedAt: null,
-      terminatedAt: new Date('2026-01-10'),
+      removedAt: new Date('2026-01-10'),
     }, today);
-    expect(status).toBe('terminated');
+    expect(status).toBe('removed');
   });
 
-  test('terminated takes precedence over suspended', () => {
+  test('removed takes precedence over suspended', () => {
     const status = computeMembershipStatus({
       duesExpiryDate: '2026-06-01',
       gracePeriodDays: 30,
       suspendedAt: new Date('2026-01-08'),
-      terminatedAt: new Date('2026-01-10'),
+      removedAt: new Date('2026-01-10'),
     }, today);
-    expect(status).toBe('terminated');
+    expect(status).toBe('removed');
   });
 
   test('gracePeriodDays=0 means no grace — goes straight to lapsed', () => {
@@ -105,7 +105,7 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: '2026-01-14',
       gracePeriodDays: 0,
       suspendedAt: null,
-      terminatedAt: null,
+      removedAt: null,
     }, today);
     expect(status).toBe('lapsed');
   });
@@ -117,7 +117,7 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: null,
       gracePeriodDays: 30,
       suspendedAt: null,
-      terminatedAt: null,
+      removedAt: null,
       isPendingPayment: true,
     }, today);
     expect(status).toBe('pendingPayment');
@@ -129,7 +129,7 @@ describe('[BR-01] computeMembershipStatus', () => {
       duesExpiryDate: '2099-01-01',
       gracePeriodDays: 30,
       suspendedAt: null,
-      terminatedAt: null,
+      removedAt: null,
     });
     expect(status).toBe('active');
   });
