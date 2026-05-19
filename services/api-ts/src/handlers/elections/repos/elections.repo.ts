@@ -74,4 +74,31 @@ export class ElectionsRepository {
     const [result] = await this.db.select({ count: sql<number>`count(DISTINCT ${electionVotes.voterId})::int` }).from(electionVotes).where(eq(electionVotes.electionId, electionId));
     return result?.count ?? 0;
   }
+
+  /** Count nominees per position for an election (for min-candidate validation) */
+  async countNomineesByPosition(electionId: string): Promise<Array<{ positionId: string; count: number }>> {
+    return this.db
+      .select({
+        positionId: electionNominees.positionId,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(electionNominees)
+      .where(and(
+        eq(electionNominees.electionId, electionId),
+        eq(electionNominees.status, 'nominated'),
+      ))
+      .groupBy(electionNominees.positionId);
+  }
+
+  /** Void all votes cast for a specific nominee (BR-33: removed candidate vote voiding) */
+  async voidVotesForNominee(electionId: string, nomineeId: string): Promise<number> {
+    const result = await this.db
+      .delete(electionVotes)
+      .where(and(
+        eq(electionVotes.electionId, electionId),
+        eq(electionVotes.nomineeId, nomineeId),
+      ))
+      .returning();
+    return result.length;
+  }
 }

@@ -28,6 +28,18 @@ export async function updateElectionStatus(ctx: Context): Promise<Response> {
     );
   }
 
+  // BR-33: Minimum 2 candidates per position before voting opens
+  if (body.status === 'votingOpen') {
+    const nomineeCounts = await repo.countNomineesByPosition(id);
+    const underMin = nomineeCounts.filter(p => p.count < 2);
+    if (underMin.length > 0) {
+      throw new BusinessLogicError(
+        `Cannot open voting: ${underMin.length} position(s) have fewer than 2 candidates. Use manual override or add more candidates.`,
+        'INSUFFICIENT_CANDIDATES',
+      );
+    }
+  }
+
   const extra: any = {};
   if (body.status === 'published') extra.publishedAt = new Date();
 

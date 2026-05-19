@@ -63,6 +63,7 @@ describe('updateElectionStatus', () => {
     let capturedData: any;
     mocks = stubRepo(ElectionsRepository, {
       get: async () => ({ ...fakeElection, status: 'nominationsOpen' }),
+      countNomineesByPosition: async () => [{ positionId: 'pos-1', count: 2 }],
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeElection, ...data }; },
     });
 
@@ -110,6 +111,7 @@ describe('updateElectionStatus', () => {
   test('valid: nominationsOpen → votingOpen succeeds', async () => {
     mocks = stubRepo(ElectionsRepository, {
       get: async () => ({ ...fakeElection, status: 'nominationsOpen' }),
+      countNomineesByPosition: async () => [{ positionId: 'pos-1', count: 2 }],
       update: async (_id: string, data: any) => ({ ...fakeElection, ...data }),
     });
 
