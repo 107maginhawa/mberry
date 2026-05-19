@@ -17,6 +17,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { PersonRepository } from './repos/person.repo';
+import { duesPayments } from '../dues/repos/dues-payments.schema';
 import * as schema from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
 
@@ -49,6 +50,13 @@ export async function executeAccountDeletion(
 
   // Kill sessions first — before PII is scrubbed
   await db.delete(schema.session).where(eq(schema.session.userId, personId));
+
+  // Anonymize payment proof files — retain amounts + dates for 7-year statutory hold (BR-32)
+  await db.update(duesPayments).set({
+    proofStorageKey: null,
+    proofFileName: null,
+    proofMimeType: null,
+  }).where(eq(duesPayments.personId, personId));
 
   // Anonymize PII — keep the record but scrub all personal data
   await repo.updateOneById(personId, {

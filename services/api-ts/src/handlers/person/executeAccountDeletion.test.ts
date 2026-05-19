@@ -49,6 +49,7 @@ describe('executeAccountDeletion', () => {
       delete: () => ({
         where: async () => undefined,
       }),
+      update: () => ({ set: () => ({ where: async () => [] }) }),
     };
     const ctx = makeCtx({ database: mockDb, _params: { personId: 'p-1' } });
     (ctx as any).req.param = (key: string) => key === 'personId' ? 'p-1' : '';

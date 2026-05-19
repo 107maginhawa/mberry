@@ -164,10 +164,11 @@ describe('cancelAccountDeletion', () => {
 
 // ─── executeAccountDeletion ─────────────────────────────────
 
-// Shared db mock for executeAccountDeletion tests — supports delete for session cleanup
+// Shared db mock for executeAccountDeletion tests — supports delete for session cleanup + update for payment anonymization
 const execMockDb = {
   transaction: async (fn: any) => fn({}),
   delete: () => ({ where: async () => [] }),
+  update: () => ({ set: () => ({ where: async () => [] }) }),
 };
 
 describe('executeAccountDeletion', () => {
