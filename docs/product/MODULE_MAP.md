@@ -2,7 +2,7 @@
 
 Compliance documentation artifact mapping Memberry's 19 business modules to their dependencies and corresponding handler implementations.
 
-**Canonical source:** [`docs/ver-3/business/modules/README.md`](ver-3/business/modules/README.md) contains the full module table, monetization tiers, phase rollout plan, and enable/disable behavior.
+**Canonical source:** [`docs/product/modules/README.md`](ver-3/business/modules/README.md) contains the full module table, monetization tiers, phase rollout plan, and enable/disable behavior.
 
 ## Dependency Diagram
 
@@ -158,4 +158,4 @@ graph TD
 
 ---
 
-*Generated 2026-05-13. Source of truth: `docs/ver-3/business/modules/README.md`.*
+*Generated 2026-05-13. Source of truth: `docs/product/modules/README.md`.*

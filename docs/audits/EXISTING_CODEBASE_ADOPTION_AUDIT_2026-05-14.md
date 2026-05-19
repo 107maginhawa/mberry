@@ -480,9 +480,9 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. M
 | CLAUDE.md | Yes | Yes — comprehensive | None | Maintain |
 | VERTICAL_TDD.md | Yes | Yes | None | Maintain |
 | docs/ARCHITECTURE.md | Yes | Yes | None | Maintain |
-| docs/DOMAIN_GLOSSARY.md | Yes | Mostly — needs DDD additions | Add aggregate root / bounded context info | P3 |
-| docs/MASTER_PRD.md | Yes | Yes | None | Maintain |
-| docs/MODULE_MAP.md | Yes | Mostly | Update handler counts | P3 |
+| docs/product/DOMAIN_GLOSSARY.md | Yes | Mostly — needs DDD additions | Add aggregate root / bounded context info | P3 |
+| docs/product/MASTER_PRD.md | Yes | Yes | None | Maintain |
+| docs/product/MODULE_MAP.md | Yes | Mostly | Update handler counts | P3 |
 | .planning/ | Yes | Active | STATE.md slightly stale (says Phase 24) | P3 |
 | .claude/skills/ | Yes | 17 skills active | None | Maintain |
 | .github/workflows/ | Yes | contract.yml active | None | Maintain |

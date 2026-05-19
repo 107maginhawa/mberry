@@ -17,6 +17,16 @@ Canonical terminology for the Memberry platform. All code, specs, PRDs, and docu
 
 ---
 
+## Officer Sub-Roles
+
+| Role | Scope | Primary Responsibilities |
+|------|-------|------------------------|
+| **President** | Org governance | Assigns officer roles, manages officer transitions, reviews reports, handles disciplinary actions |
+| **Treasurer** | Financial operations | Collects dues, records payments, manages payment gateway, generates financial reports, handles refunds |
+| **Secretary** | Member operations | Maintains roster, manages events, handles communications, processes applications and corrections |
+
+---
+
 ## Membership Terms
 
 | Term | Definition |
@@ -33,6 +43,50 @@ Canonical terminology for the Memberry platform. All code, specs, PRDs, and docu
 | **Dues Expiry Date** | Date when current dues payment expires. Membership status is derived from this value. |
 | **Cross-Org Membership** | A member belonging to multiple organizations simultaneously, with independent status in each. |
 | **Cross-Org Member Matching** | Linking a single account across organizations. Matches on email OR license number. Conflicts flagged for human resolution. |
+
+### Membership Lifecycle State Machine
+
+```
+                    [Officer imports or approves]
+                              ↓
+PENDING ──────────────────► ACTIVE
+                              │
+                    [dues_expiry_date passes]
+                              ↓
+                            GRACE  (configurable period, default 30 days)
+                              │
+                    [grace period passes]
+                              ↓
+                           LAPSED
+                              │
+                    [member pays dues]
+                              ↓
+                            ACTIVE
+                              
+                    [Officer action at any point]
+                              ↓
+                          SUSPENDED
+                              │
+                    [Officer action to restore]
+                              ↓
+                            ACTIVE
+
+                    [President action]
+                              ↓
+                           REMOVED (from org roster)
+```
+
+Valid transitions:
+- `PENDING → ACTIVE` (officer approves application)
+- `PENDING → REMOVED` (officer rejects application)
+- `ACTIVE → GRACE` (automatic, dues expired)
+- `GRACE → LAPSED` (automatic, grace period expired)
+- `LAPSED → ACTIVE` (member pays dues)
+- `ACTIVE → SUSPENDED` (officer action)
+- `GRACE → SUSPENDED` (officer action)
+- `LAPSED → SUSPENDED` (officer action)
+- `SUSPENDED → ACTIVE` (officer restores)
+- `ACTIVE → REMOVED` (president action)
 
 ---
 

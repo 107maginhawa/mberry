@@ -361,4 +361,4 @@ Weights: L1 (25%), L2 (30%), L3 (20%), L4 (25%)
 | No-skip lint | `scripts/lint-no-skips.ts` |
 | Shallow test lint | `scripts/lint-shallow-tests.ts` |
 | New code gate | `scripts/new-code-gate.ts` |
-| MASTER_PRD | `docs/MASTER_PRD.md` |
+| MASTER_PRD | `docs/product/MASTER_PRD.md` |

@@ -26,13 +26,13 @@
 
 | Artifact | Location | Status |
 |----------|----------|--------|
-| MASTER_PRD.md | `docs/MASTER_PRD.md` | Available, 40 BRs referenced |
+| MASTER_PRD.md | `docs/product/MASTER_PRD.md` | Available, 40 BRs referenced |
 | Business Rules (full) | `docs/ver-3/business/business-rules.md` | Available, BR-01 through BR-40 with edge cases |
-| Role Permission Matrix | `docs/ROLE_PERMISSION_MATRIX.md` | Available, 21 module matrices |
-| Domain Glossary | `docs/DOMAIN_GLOSSARY.md` | Available, 8 bounded contexts |
-| Per-module specs | `docs/ver-3/business/modules/m01-m19` | Available, 19 module specs |
+| Role Permission Matrix | `docs/product/ROLE_PERMISSION_MATRIX.md` | Available, 21 module matrices |
+| Domain Glossary | `docs/product/DOMAIN_GLOSSARY.md` | Available, 8 bounded contexts |
+| Per-module specs | `docs/product/modules/m01-m19` | Available, 19 module specs |
 | Architecture | `docs/ARCHITECTURE.md` | Available |
-| Module Map | `docs/MODULE_MAP.md` | Available |
+| Module Map | `docs/product/MODULE_MAP.md` | Available |
 | Handler source | `services/api-ts/src/handlers/` | 22 modules, 553 files audited |
 
 ### Deep-Dive Modules (6)

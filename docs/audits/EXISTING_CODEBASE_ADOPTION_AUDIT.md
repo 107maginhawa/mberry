@@ -593,10 +593,10 @@ Mock/placeholder references found in 25+ files across memberry and admin apps. A
 | CLAUDE.md | Yes | Yes -- documentation map, repo overview, business domain modules | None | Maintain |
 | VERTICAL_TDD.md | Yes | Yes | None | Maintain |
 | docs/ARCHITECTURE.md | Yes | Yes -- monorepo structure, ports, tech stack, deployment | None | Maintain |
-| docs/DOMAIN_GLOSSARY.md | Yes | Yes -- DDD classification, bounded contexts, comms disambiguation | None | Maintain |
-| docs/MASTER_PRD.md | Yes | Yes -- 4 module phases, personas, BRs, monetization | None | Maintain |
-| docs/MODULE_MAP.md | Yes | Mostly -- dependency diagram present | Update handler counts | P3 |
-| docs/ROLE_PERMISSION_MATRIX.md | Yes | Yes -- 195 rows, role x module x action | None | Maintain |
+| docs/product/DOMAIN_GLOSSARY.md | Yes | Yes -- DDD classification, bounded contexts, comms disambiguation | None | Maintain |
+| docs/product/MASTER_PRD.md | Yes | Yes -- 4 module phases, personas, BRs, monetization | None | Maintain |
+| docs/product/MODULE_MAP.md | Yes | Mostly -- dependency diagram present | Update handler counts | P3 |
+| docs/product/ROLE_PERMISSION_MATRIX.md | Yes | Yes -- 195 rows, role x module x action | None | Maintain |
 | .planning/ | Yes | Active | STATE.md slightly stale | P3 |
 | .github/workflows/ | Yes | contract.yml active | None | Maintain |
 

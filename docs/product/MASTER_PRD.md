@@ -289,12 +289,12 @@ NFR breaches in production are treated as P1 incidents with 24-hour resolution S
 | Executive Summary | `README.md`, `docs/ver-3/business/context.md` |
 | Vision and Scope | `docs/ver-3/business/context.md` (sections 4, 8) |
 | User Roles and Personas | `docs/ver-3/business/personas-and-roles.md` |
-| Module Requirements Matrix | `docs/ver-3/business/modules/README.md`, `CLAUDE.md` (handler listing) |
+| Module Requirements Matrix | `docs/product/modules/README.md`, `CLAUDE.md` (handler listing) |
 | Business Rules Summary | `docs/ver-3/business/business-rules.md` |
-| Rollout Phases | `.planning/ROADMAP.md`, `docs/ver-3/business/modules/README.md` (section 4) |
+| Rollout Phases | `.planning/ROADMAP.md`, `docs/product/modules/README.md` (section 4) |
 | Constraints and NFRs | `docs/ver-3/business/cross-cutting.md`, `docs/ver-3/business/metrics.md` (section 2.4) |
 | Success Metrics | `docs/ver-3/business/metrics.md` |
 
 ---
 
-*Compiled from Memberry PRD v3 source documents. For full specifications, refer to individual module docs at `docs/ver-3/business/modules/m01-m19`.*
+*Compiled from Memberry PRD v3 source documents. For full specifications, refer to individual module docs at `docs/product/modules/m01-m19`.*

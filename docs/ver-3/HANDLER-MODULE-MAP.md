@@ -4,7 +4,7 @@
 **Date:** 2026-05-08
 **Source:** `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` §4, §10; live codebase scan
 
-Maps the 22 handler directories in `services/api-ts/src/handlers/` to the 19 PRD modules defined in `docs/ver-3/business/modules/`.
+Maps the 22 handler directories in `services/api-ts/src/handlers/` to the 19 PRD modules defined in `docs/product/modules/`.
 
 ---
 
