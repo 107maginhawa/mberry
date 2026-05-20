@@ -323,7 +323,7 @@ export function createErrorHandler(config: Config) {
       
       zodError.issues.forEach((issue) => {
         if (issue.path.length > 0) {
-          const rec = issue as Record<string, unknown>;
+          const rec = issue as unknown as Record<string, unknown>;
           fieldErrors.push({
             field: issue.path.join('.'),
             value: 'received' in issue ? rec['received'] : undefined,
