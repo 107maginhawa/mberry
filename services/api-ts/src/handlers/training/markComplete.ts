@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { getCycleForDate } from '../association:member/utils/credit-cycle';
 
 export async function markComplete(ctx: Context): Promise<Response> {
@@ -46,7 +47,26 @@ export async function markComplete(ctx: Context): Promise<Response> {
       const existing = await creditRepo.findByTrainingAndPerson(training.id, body.personId);
       if (!existing) {
         const activityDate = training.endDate ?? new Date();
-        const cycle = getCycleForDate(activityDate, activityDate, 2);
+
+        // [V-12] Look up member registration date for cycle anchor
+        const memberRepo = new MembershipRepository(db);
+        const membership = await memberRepo.findByPersonAndOrg(
+          body.personId,
+          training.organizationId,
+        );
+
+        let registrationDate: Date;
+        if (membership?.startDate) {
+          registrationDate = new Date(membership.startDate);
+        } else {
+          // Fallback: use activity date if no membership found (edge case)
+          console.warn(
+            `[V-12] No membership found for person ${body.personId} in org ${training.organizationId}, falling back to activity date for cycle anchor`,
+          );
+          registrationDate = activityDate;
+        }
+
+        const cycle = getCycleForDate(registrationDate, activityDate, 2);
 
         await creditRepo.createOne({
           personId: body.personId,
