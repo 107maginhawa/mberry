@@ -6,6 +6,7 @@
 import Stripe from 'stripe';
 import type { Logger } from 'pino';
 import type { DatabaseInstance } from './database';
+import { maskEmail } from './logger';
 
 /**
  * Stripe configuration
@@ -120,7 +121,7 @@ export class BillingService {
   }> {
     try {
       const stripe = this.ensureStripeInitialized();
-      this.logger.info({ email: data.email, country: data.country }, 'Creating Stripe Connect account');
+      this.logger.info({ email: maskEmail(data.email), country: data.country }, 'Creating Stripe Connect account');
 
       const account = await stripe.accounts.create({
         type: 'express',

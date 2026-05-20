@@ -13,6 +13,7 @@ import type { App } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import type { EmailService } from '@/core/email';
+import { maskEmail } from '@/core/logger';
 import type { AuthInstance } from '@/utils/auth';
 import { EmailTemplateTags } from '@/handlers/email/repos/email.schema';
 import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
@@ -77,9 +78,9 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
             },
             priority: 1 // High priority for auth emails
           });
-          logger?.info({ userId: user.id, email: user.email }, 'Email verification queued');
+          logger?.info({ userId: user.id, email: maskEmail(user.email) }, 'Email verification queued');
         } catch (error) {
-          logger?.error({ error, userId: user.id, email: user.email }, 'Failed to queue email verification');
+          logger?.error({ error, userId: user.id, email: maskEmail(user.email) }, 'Failed to queue email verification');
           // Continue auth flow even if email fails (non-blocking)
         }
       },
@@ -106,9 +107,9 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
             },
             priority: 1 // High priority for auth emails
           });
-          logger?.info({ userId: user.id, email: user.email }, 'Password reset email sent');
+          logger?.info({ userId: user.id, email: maskEmail(user.email) }, 'Password reset email sent');
         } catch (error) {
-          logger?.error({ error, userId: user.id, email: user.email }, 'Failed to send password reset email');
+          logger?.error({ error, userId: user.id, email: maskEmail(user.email) }, 'Failed to send password reset email');
           // Continue auth flow even if email fails (non-blocking)
         }
       },
@@ -144,7 +145,7 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
               const newRole = existingRoles.join(',');
 
               if (logger) {
-                logger.info(`Auto-promoting new user ${user.email} to admin role during creation`);
+                logger.info(`Auto-promoting new user ${maskEmail(user.email)} to admin role during creation`);
               }
 
               // Return wrapped in data object - Better-Auth requirement
@@ -310,9 +311,9 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
               },
               priority: 1 // High priority for auth emails
             });
-            logger?.info({ email, type }, 'OTP verification email sent');
+            logger?.info({ email: maskEmail(email), type }, 'OTP verification email sent');
           } catch (error) {
-            logger?.error({ error, email, type }, 'Failed to send OTP verification email');
+            logger?.error({ error, email: maskEmail(email), type }, 'Failed to send OTP verification email');
             // Continue auth flow even if email fails (non-blocking)
           }
         },
@@ -342,9 +343,9 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
               },
               priority: 1 // High priority for auth emails
             });
-            logger?.info({ email }, 'Email change verification sent');
+            logger?.info({ email: maskEmail(email) }, 'Email change verification sent');
           } catch (error) {
-            logger?.error({ error, email }, 'Failed to send email magic link');
+            logger?.error({ error, email: maskEmail(email) }, 'Failed to send email magic link');
             // Continue auth flow even if email fails (non-blocking)
           }
         },
@@ -373,9 +374,9 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
               },
               priority: 1 // High priority for auth emails
             });
-            logger?.info({ userId: user.id, currentEmail: user.email, newEmail }, 'Email change verification sent');
+            logger?.info({ userId: user.id, currentEmail: maskEmail(user.email), newEmail: maskEmail(newEmail) }, 'Email change verification sent');
           } catch (error) {
-            logger?.error({ error, userId: user.id, currentEmail: user.email, newEmail }, 'Failed to send email change verification');
+            logger?.error({ error, userId: user.id, currentEmail: maskEmail(user.email), newEmail: maskEmail(newEmail) }, 'Failed to send email change verification');
             // Continue auth flow even if email fails (non-blocking)
           }
         },
@@ -450,7 +451,7 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
           if (!email || typeof email !== 'string') return;
 
           const count = recordFailedAttempt(email);
-          logger?.info({ email, failedAttempts: count }, 'Failed login attempt recorded');
+          logger?.info({ email: maskEmail(email), failedAttempts: count }, 'Failed login attempt recorded');
 
           if (count >= MAX_FAILED_ATTEMPTS) {
             await applyLockout(database, email, logger);
