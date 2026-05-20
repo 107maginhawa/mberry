@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
-import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { checkActiveMembership } from './utils/membership-check';
 import type { Session } from '@/types/auth';
 
 export async function registerForEvent(ctx: Context): Promise<Response> {
@@ -22,9 +22,8 @@ export async function registerForEvent(ctx: Context): Promise<Response> {
   }
 
   // [BR-02] Only active members can register for events
-  const membershipRepo = new MembershipRepository(db, ctx.get('logger'));
-  const membership = await membershipRepo.findByPersonAndOrg(session.user.id, event.organizationId);
-  if (!membership || membership.status !== 'active') {
+  const isActive = await checkActiveMembership(db, session.user.id, event.organizationId);
+  if (!isActive) {
     throw new BusinessLogicError('Active membership required to register for events');
   }
 
