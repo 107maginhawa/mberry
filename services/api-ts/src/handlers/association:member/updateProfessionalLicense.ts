@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { ProfessionalLicense } from './repos/credentials.schema';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { UpdateProfessionalLicenseBody, UpdateProfessionalLicenseParams } from '@/generated/openapi/validators';
@@ -29,7 +30,7 @@ export async function updateProfessionalLicense(
   const existing = await repo.findOneById(licenseId);
   if (!existing) throw new NotFoundError('ProfessionalLicense');
 
-  const updated = await repo.updateOneById(licenseId, body as any);
+  const updated = await repo.updateOneById(licenseId, body as Partial<ProfessionalLicense>);
 
   await auditAction(ctx, {
     action: 'update',

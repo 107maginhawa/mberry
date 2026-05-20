@@ -20,13 +20,13 @@ export async function listMyCertificates(
   const logger = ctx.get('logger');
   const personId = session.user.id;
   const query = ctx.req.valid('query');
-  const q = query as any;
+  const q = query as Record<string, unknown>;
 
   const repo = new DigitalCredentialRepository(db, logger);
   const certs = await repo.findMany({
     personId,
-    organizationId: q.organizationId,
-    status: q.status,
+    organizationId: q['organizationId'] as string | undefined,
+    status: q['status'] as string | undefined,
   });
 
   return ctx.json({ data: certs, total: certs.length }, 200);

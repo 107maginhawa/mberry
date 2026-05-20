@@ -24,10 +24,10 @@ export async function upsertDuesGatewayConfig(
 
   const [result] = await db
     .insert(duesGatewayConfigs)
-    .values({ ...body, organizationId } as any)
+    .values({ ...body, organizationId } as Record<string, unknown>)
     .onConflictDoUpdate({
       target: [duesGatewayConfigs.organizationId],
-      set: { ...body, updatedAt: new Date() } as any,
+      set: { ...body, updatedAt: new Date() } as Record<string, unknown>,
     })
     .returning();
 

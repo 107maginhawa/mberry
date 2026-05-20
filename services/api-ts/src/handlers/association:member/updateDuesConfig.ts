@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { DuesConfig } from './repos/dues.schema';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { UpdateDuesConfigBody, UpdateDuesConfigParams } from '@/generated/openapi/validators';
@@ -25,7 +26,7 @@ export async function updateDuesConfig(
   const existing = await repo.findOneById(duesConfigId);
   if (!existing) throw new NotFoundError('DuesConfig');
 
-  const updated = await repo.updateOneById(duesConfigId, body as any);
+  const updated = await repo.updateOneById(duesConfigId, body as Partial<DuesConfig>);
 
   await auditAction(ctx, {
     action: 'update',

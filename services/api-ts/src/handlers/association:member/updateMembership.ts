@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { Membership } from './repos/membership.schema';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { UpdateMembershipBody, UpdateMembershipParams } from '@/generated/openapi/validators';
@@ -30,7 +31,7 @@ export async function updateMembership(
   const existing = await repo.findOneById(membershipId);
   if (!existing) throw new NotFoundError('Membership');
 
-  const updated = await repo.updateOneById(membershipId, body as any);
+  const updated = await repo.updateOneById(membershipId, body as Partial<Membership>);
 
   await auditAction(ctx, {
     action: 'update',

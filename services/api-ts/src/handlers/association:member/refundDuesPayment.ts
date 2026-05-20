@@ -39,7 +39,8 @@ export async function refundDuesPayment(
     throw new BusinessLogicError('Payment already refunded', 'ALREADY_REFUNDED');
   }
 
-  const refundAmount = (body as any).amount ?? payment.amount;
+  const bodyRecord = body as Record<string, unknown>;
+  const refundAmount = (bodyRecord['amount'] as number) ?? payment.amount;
   const isFullRefund = refundAmount >= payment.amount;
 
   const updated = await db.transaction(async (tx: DatabaseInstance) => {
@@ -64,8 +65,8 @@ export async function refundDuesPayment(
 
     const updatedPayment = await txRepo.updatePaymentStatus(paymentId, newStatus, {
       refundedAmount: newRefundedAmount,
-      refundReason: (body as any).reason,
-    } as any);
+      refundReason: bodyRecord['reason'] as string,
+    } as Record<string, unknown>);
 
     return updatedPayment;
   });

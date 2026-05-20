@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { UpdateMembershipTierBody, UpdateMembershipTierParams } from '@/generated/openapi/validators';
 import { MembershipTierRepository } from './repos/membership.repo';
+import type { MembershipTier } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -25,7 +26,7 @@ export async function updateMembershipTier(
   const existing = await repo.findOneById(tierId);
   if (!existing) throw new NotFoundError('Membership tier');
 
-  const updated = await repo.updateOneById(tierId, body as any);
+  const updated = await repo.updateOneById(tierId, body as Partial<MembershipTier>);
 
   await auditAction(ctx, {
     action: 'update',

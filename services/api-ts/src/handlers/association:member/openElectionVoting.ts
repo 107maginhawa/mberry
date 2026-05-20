@@ -41,7 +41,7 @@ export async function openElectionVoting(
   }
 
   // BR-33: Every position must have >= 2 candidates before voting opens
-  const positions: { id: string; title: string }[] = (existing as any).positions ?? [];
+  const positions: { id: string; title: string }[] = (existing as Record<string, unknown>)['positions'] as { id: string; title: string }[] ?? [];
   if (positions.length > 0) {
     const countByPosition = new Map<string, number>();
     for (const pos of positions) {

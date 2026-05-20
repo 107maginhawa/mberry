@@ -18,6 +18,7 @@ export async function searchDirectory(
 
   const orgId = ctx.get('organizationId');
   const query = ctx.req.valid('query');
+  const { q } = query as { q?: string };
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
 
@@ -30,7 +31,7 @@ export async function searchDirectory(
     {
       organizationId: orgId,
       visibility: 'public',
-      q: (query as any).q,
+      q,
     },
     { pagination: { offset, limit } },
   );
@@ -39,7 +40,7 @@ export async function searchDirectory(
     {
       organizationId: orgId,
       visibility: 'memberOnly',
-      q: (query as any).q,
+      q,
     },
     { pagination: { offset: 0, limit: limit * 2 } },
   );

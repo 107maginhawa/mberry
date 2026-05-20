@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { CredentialTemplate } from './repos/credentials.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCredentialTemplateBody, UpdateCredentialTemplateParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
@@ -26,11 +27,12 @@ export async function updateCredentialTemplate(
   const existing = await repo.findOneById(templateId);
   if (!existing) throw new NotFoundError('Credential template');
 
-  if (orgId && (existing as any).organizationId && (existing as any).organizationId !== orgId) {
+  const existingRecord = existing as Record<string, unknown>;
+  if (orgId && existingRecord['organizationId'] && existingRecord['organizationId'] !== orgId) {
     throw new ForbiddenError('Access denied to this credential template');
   }
 
-  const updated = await repo.updateOneById(templateId, body as any);
+  const updated = await repo.updateOneById(templateId, body as Partial<CredentialTemplate>);
 
   await auditAction(ctx, {
     action: 'update',

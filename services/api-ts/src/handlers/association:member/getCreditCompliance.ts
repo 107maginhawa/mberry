@@ -28,7 +28,7 @@ export async function getCreditCompliance(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const params = ctx.req.valid('param');
-  const orgId = (params as any).organizationId;
+  const { organizationId: orgId } = params as { organizationId: string };
 
   // Set orgId for requirePosition (route is not under /association/*, no org-context middleware)
   ctx.set('organizationId', orgId);

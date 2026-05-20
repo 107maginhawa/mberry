@@ -27,8 +27,8 @@ export async function listAffiliationTransfers(
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
-      personId: (query as any).personId,
-      status: (query as any).status,
+      personId: (query as Record<string, unknown>)['personId'] as string | undefined,
+      status: (query as Record<string, unknown>)['status'] as string | undefined,
     },
     { pagination: { offset, limit } },
   );

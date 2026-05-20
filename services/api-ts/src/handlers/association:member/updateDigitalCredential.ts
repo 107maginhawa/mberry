@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { DigitalCredential } from './repos/credentials.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDigitalCredentialBody, UpdateDigitalCredentialParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
@@ -25,7 +26,7 @@ export async function updateDigitalCredential(
   const existing = await repo.findOneById(credentialId);
   if (!existing) throw new NotFoundError('Digital credential');
 
-  const updated = await repo.updateOneById(credentialId, body as any);
+  const updated = await repo.updateOneById(credentialId, body as Partial<DigitalCredential>);
 
   await auditAction(ctx, {
     action: 'update',

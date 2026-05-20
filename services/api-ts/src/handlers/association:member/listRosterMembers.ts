@@ -51,38 +51,38 @@ export async function listRosterMembers(
       limit: pageSize,
       offset,
     });
-  } catch (err: any) {
-    const logger = ctx.get('logger' as any) as any;
+  } catch (err: unknown) {
+    const logger = ctx.get('logger');
     logger?.error({ err, organizationId: query.organizationId }, 'Roster query failed');
     return ctx.json({ error: 'Failed to load roster' }, 500);
   }
 
   // Flatten nested { membership, person, category } + officer status fields
-  const data = result.data.map((row: any) => {
-    const m = row.membership || row;
-    const p = row.person || {};
-    const c = row.category || {};
+  const data = result.data.map((row: Record<string, unknown>) => {
+    const m = (row['membership'] || row) as Record<string, unknown>;
+    const p = (row['person'] || {}) as Record<string, unknown>;
+    const c = (row['category'] || {}) as Record<string, unknown>;
     return {
-      id: m.id,
-      personId: m.personId || p.id,
-      firstName: p.firstName || null,
-      lastName: p.lastName || null,
-      name: [p.firstName, p.lastName].filter(Boolean).join(' ') || null,
-      email: p.email || null,
-      avatar: p.avatar || null,
-      memberNumber: m.memberNumber || null,
-      categoryId: m.categoryId || null,
-      categoryName: c.name || null,
-      status: m.status || 'pending',
-      duesExpiryDate: m.duesExpiryDate || null,
-      gracePeriodDays: m.gracePeriodDays || 30,
-      joinedAt: m.joinedAt || m.createdAt || null,
-      startDate: m.startDate || null,
-      organizationId: m.organizationId || null,
+      id: m['id'],
+      personId: m['personId'] || p['id'],
+      firstName: p['firstName'] || null,
+      lastName: p['lastName'] || null,
+      name: [p['firstName'], p['lastName']].filter(Boolean).join(' ') || null,
+      email: p['email'] || null,
+      avatar: p['avatar'] || null,
+      memberNumber: m['memberNumber'] || null,
+      categoryId: m['categoryId'] || null,
+      categoryName: c['name'] || null,
+      status: m['status'] || 'pending',
+      duesExpiryDate: m['duesExpiryDate'] || null,
+      gracePeriodDays: m['gracePeriodDays'] || 30,
+      joinedAt: m['joinedAt'] || m['createdAt'] || null,
+      startDate: m['startDate'] || null,
+      organizationId: m['organizationId'] || null,
       // OPS-01: officer-status fields
-      duesInvoiceStatus: row.duesInvoiceStatus ?? null,
-      creditsEarned: row.creditsEarned ?? 0,
-      trainingCompliant: row.trainingCompliant ?? false,
+      duesInvoiceStatus: row['duesInvoiceStatus'] ?? null,
+      creditsEarned: row['creditsEarned'] ?? 0,
+      trainingCompliant: row['trainingCompliant'] ?? false,
     };
   });
 

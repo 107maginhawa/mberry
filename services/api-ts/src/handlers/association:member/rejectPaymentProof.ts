@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { RejectPaymentProofBody, RejectPaymentProofParams } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import type { DuesPayment } from '@/handlers/dues/repos/dues-payments.schema';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -51,7 +52,7 @@ export async function rejectPaymentProof(
   const updatedPayment = await repo.updatePaymentStatus(payment.id, 'rejected', {
     rejectionReason: body.reason,
     recordedBy: session.user.id,
-  } as any);
+  } as Partial<DuesPayment>);
 
   await auditAction(ctx, {
     action: 'deny',

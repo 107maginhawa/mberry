@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { RoyaltySplit } from './repos/chapters.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateRoyaltySplitBody, UpdateRoyaltySplitParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
@@ -26,8 +27,9 @@ export async function updateRoyaltySplit(
   if (!existing) throw new NotFoundError('Royalty split');
 
   // If split percentages are being updated, validate they sum to 100
-  const splitNational = (body as any).splitPercentNational ?? existing.splitPercentNational;
-  const splitChapter = (body as any).splitPercentChapter ?? existing.splitPercentChapter;
+  const bodyRecord = body as Record<string, unknown>;
+  const splitNational = (bodyRecord['splitPercentNational'] as number) ?? existing.splitPercentNational;
+  const splitChapter = (bodyRecord['splitPercentChapter'] as number) ?? existing.splitPercentChapter;
 
   if (Number(splitNational) + Number(splitChapter) !== 100) {
     throw new BusinessLogicError(
@@ -36,7 +38,7 @@ export async function updateRoyaltySplit(
     );
   }
 
-  const updated = await repo.updateOneById(royaltySplitId, body as any);
+  const updated = await repo.updateOneById(royaltySplitId, body as Partial<RoyaltySplit>);
 
   await auditAction(ctx, {
     action: 'update',

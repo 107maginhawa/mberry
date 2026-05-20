@@ -27,7 +27,7 @@ export async function listMemberships(
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
-      status: (query as any).status,
+      status: (query as Record<string, unknown>)['status'] as string | undefined,
     },
     { pagination: { offset, limit } },
   );

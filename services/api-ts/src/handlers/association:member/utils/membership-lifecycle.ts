@@ -16,6 +16,7 @@ import { MembershipRepository } from '@/handlers/association:member/repos/member
 import { allocateFunds } from '@/handlers/dues/utils/fund-math';
 import { computeNewExpiry, type BillingCycle } from '@/handlers/dues/utils/expiry-extension';
 import { computeMembershipStatus, type ComputedMembershipStatus } from './compute-membership-status';
+import type { Membership } from '../repos/membership.schema';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -151,7 +152,7 @@ export const membershipLifecycle = {
       await membershipRepo.updateOneById(membership.id, {
         duesExpiryDate: membershipExtendedTo,
         status: newStatus,
-      } as any);
+      } as Partial<Membership>);
     }
 
     return { fundAllocations, membershipExtendedFrom, membershipExtendedTo };
@@ -210,7 +211,7 @@ export const membershipLifecycle = {
         await membershipRepo.updateOneById(membership.id, {
           duesExpiryDate: restoredExpiry,
           status: recomputedStatus,
-        } as any);
+        } as Partial<Membership>);
       }
     }
 
@@ -271,8 +272,8 @@ export const membershipLifecycle = {
     return computeMembershipStatus({
       duesExpiryDate,
       gracePeriodDays: DEFAULT_GRACE_PERIOD_DAYS,
-      suspendedAt: (membership as any).suspendedAt ?? null,
-      removedAt: (membership as any).removedAt ?? null,
+      suspendedAt: membership.suspendedAt ?? null,
+      removedAt: membership.removedAt ?? null,
     });
   },
 };

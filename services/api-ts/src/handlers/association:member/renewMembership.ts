@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { RenewMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
+import type { Membership } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -40,7 +41,7 @@ export async function renewMembership(
   const updated = await repo.updateOneById(membershipId, {
     duesExpiryDate: newExpiryDate,
     status: 'active',
-  } as any);
+  } as Partial<Membership>);
 
   await auditAction(ctx, {
     action: 'renew',

@@ -77,7 +77,7 @@ export async function getCreditTranscriptPdf(
   const totalEarned = byOrg.reduce((sum, entry) => sum + entry.total, 0);
 
   // Get individual credit entries for the transcript detail
-  const entries = await (repo as any).listForPerson(user.id, {
+  const entries = await repo.listForPerson(user.id, {
     cycleStart: cycle.cycleStart,
     cycleEnd: cycle.cycleEnd,
   });
@@ -86,13 +86,13 @@ export async function getCreditTranscriptPdf(
   const summary = summarizeCycle(cycle, totalEarned, requiredCredits, carryover);
 
   // Map entries to transcript format
-  const transcriptEntries: TranscriptCreditEntry[] = (entries ?? []).map((e: any) => ({
+  const transcriptEntries: TranscriptCreditEntry[] = (entries ?? []).map((e) => ({
     activityName: e.activityName ?? 'Activity',
-    activityDate: new Date(e.activityDate),
+    activityDate: new Date(e.activityDate as unknown as string),
     creditAmount: Number(e.creditAmount),
     category: e.category ?? undefined,
     type: e.type ?? 'manual',
-    organizationName: e.organizationName ?? undefined,
+    organizationName: (e as Record<string, unknown>)['organizationName'] as string ?? undefined,
   }));
 
   const transcriptData: TranscriptData = {
@@ -104,7 +104,7 @@ export async function getCreditTranscriptPdf(
     entries: transcriptEntries,
     organizations: byOrg.map(o => ({
       organizationId: o.organizationId,
-      name: (o as any).organizationName ?? o.organizationId,
+      name: (o as Record<string, unknown>)['organizationName'] as string ?? o.organizationId,
       credits: o.total,
     })),
   };

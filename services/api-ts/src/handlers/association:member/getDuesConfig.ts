@@ -30,7 +30,7 @@ export async function getDuesConfig(
   if (!config) {
     // Frontend may pass orgId as the param — look up by org
     const duesRepo = new DuesRepository(db);
-    config = (await duesRepo.getConfig(duesConfigId)) as any;
+    config = (await duesRepo.getConfig(duesConfigId)) as typeof config;
   }
 
   if (!config) {
@@ -42,10 +42,10 @@ export async function getDuesConfig(
 
   // Map DB field names to TypeSpec schema names so the SDK response transformer
   // (which expects annualAmount, effectiveDate) doesn't crash on undefined fields.
-  const c = config as any;
+  const c = config as Record<string, unknown>;
   return ctx.json({
     ...c,
-    annualAmount: c.defaultAmount ?? c.annualAmount ?? 0,
-    effectiveDate: c.effectiveDate ?? c.createdAt ?? new Date().toISOString(),
+    annualAmount: (c['defaultAmount'] as number) ?? (c['annualAmount'] as number) ?? 0,
+    effectiveDate: (c['effectiveDate'] as string) ?? (c['createdAt'] as string) ?? new Date().toISOString(),
   }, 200);
 }

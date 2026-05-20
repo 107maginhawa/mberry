@@ -25,7 +25,8 @@ export async function listElections(
 
   const filters: { status?: string; type?: string } = {};
   if (query.status) filters.status = query.status;
-  if ((query as any).type) filters.type = (query as any).type;
+  const { type } = query as { type?: string };
+  if (type) filters.type = type;
 
   const items = await repo.list(orgId, filters);
 

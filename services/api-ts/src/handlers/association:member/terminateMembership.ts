@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { Membership } from './repos/membership.schema';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { TerminateMembershipBody, TerminateMembershipParams } from '@/generated/openapi/validators';
@@ -36,7 +37,7 @@ export async function terminateMembership(
     status: 'removed',
     removedAt: new Date(),
     removalReason: body.terminationReason ?? null,
-  } as any);
+  } as Partial<Membership>);
 
   await auditAction(ctx, {
     action: 'terminate',

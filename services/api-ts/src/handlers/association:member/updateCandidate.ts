@@ -36,16 +36,17 @@ export async function updateCandidate(
   if (!existing) throw new NotFoundError('Candidate');
 
   const repo = new ElectionsRepository(db);
+  const bodyRecord = body as Record<string, unknown>;
 
   // Use updateNomineeStatus if status is being updated
-  if ((body as any).status) {
-    const updated = await repo.updateNomineeStatus(params.candidateId, (body as any).status);
+  if (bodyRecord['status']) {
+    const updated = await repo.updateNomineeStatus(params.candidateId, bodyRecord['status'] as string);
 
     await auditAction(ctx, {
       action: 'update',
       resourceType: 'election-nominee',
       resourceId: params.candidateId,
-      description: `Nominee status updated to ${(body as any).status}`,
+      description: `Nominee status updated to ${bodyRecord['status'] as string}`,
     });
 
     return ctx.json({ data: updated }, 200);
@@ -54,7 +55,7 @@ export async function updateCandidate(
   // Generic field update
   const [updated] = await db
     .update(electionNominees)
-    .set({ ...(body as any), updatedAt: new Date() })
+    .set({ ...bodyRecord, updatedAt: new Date() } as Record<string, unknown>)
     .where(eq(electionNominees.id, params.candidateId))
     .returning();
 

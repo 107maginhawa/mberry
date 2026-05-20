@@ -20,7 +20,8 @@ export async function getDigitalCredential(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DigitalCredentialRepository(db, ctx.get('logger'));
 
-  const credential = await repo.findOneById((params as any).credentialId);
+  const { credentialId } = params as { credentialId: string };
+  const credential = await repo.findOneById(credentialId);
   if (!credential) throw new NotFoundError('Digital credential');
 
   return ctx.json(credential, 200);

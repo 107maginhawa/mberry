@@ -18,6 +18,7 @@ export async function listRoyaltySplits(
 
   const orgId = ctx.get('organizationId');
   const query = ctx.req.valid('query');
+  const { chapterId, membershipId } = query as { chapterId?: string; membershipId?: string };
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
 
@@ -27,8 +28,8 @@ export async function listRoyaltySplits(
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
-      chapterId: (query as any).chapterId,
-      membershipId: (query as any).membershipId,
+      chapterId,
+      membershipId,
     },
     { pagination: { offset, limit } },
   );

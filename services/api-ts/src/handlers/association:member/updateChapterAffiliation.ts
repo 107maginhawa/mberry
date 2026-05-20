@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateChapterAffiliationBody, UpdateChapterAffiliationParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { ChapterAffiliationRepository } from './repos/chapters.repo';
+import type { ChapterAffiliation } from './repos/chapters.schema';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -25,7 +26,7 @@ export async function updateChapterAffiliation(
   const existing = await repo.findOneById(affiliationId);
   if (!existing) throw new NotFoundError('Chapter affiliation');
 
-  const updated = await repo.updateOneById(affiliationId, body as any);
+  const updated = await repo.updateOneById(affiliationId, body as Partial<ChapterAffiliation>);
 
   await auditAction(ctx, {
     action: 'update',

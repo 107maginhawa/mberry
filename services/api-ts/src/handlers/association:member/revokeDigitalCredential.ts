@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { DigitalCredential } from './repos/credentials.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { RevokeDigitalCredentialBody, RevokeDigitalCredentialParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
@@ -36,7 +37,7 @@ export async function revokeDigitalCredential(
     status: 'revoked',
     revokedAt: new Date(),
     revocationReason: body.reason,
-  } as any);
+  } as Partial<DigitalCredential>);
 
   await auditAction(ctx, {
     action: 'update',

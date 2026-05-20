@@ -20,7 +20,8 @@ export async function getRoyaltySplit(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new RoyaltySplitRepository(db, ctx.get('logger'));
 
-  const royaltySplit = await repo.findOneById((params as any).royaltySplitId);
+  const { royaltySplitId } = params as { royaltySplitId: string };
+  const royaltySplit = await repo.findOneById(royaltySplitId);
   if (!royaltySplit) throw new NotFoundError('Royalty split');
 
   return ctx.json(royaltySplit, 200);

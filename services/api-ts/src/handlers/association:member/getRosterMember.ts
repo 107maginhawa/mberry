@@ -23,19 +23,20 @@ export async function getRosterMember(
   const row = await repo.getMemberById(memberId);
   if (!row) throw new NotFoundError('Roster member');
 
+  const rowRecord = row as Record<string, unknown>;
   const m = row.membership || row;
-  const p = (row as any).person || {};
-  const c = (row as any).category || {};
+  const p = (rowRecord['person'] || {}) as Record<string, unknown>;
+  const c = (rowRecord['category'] || {}) as Record<string, unknown>;
 
   return ctx.json({
     id: m.id,
-    personId: m.personId || p.id,
-    firstName: p.firstName || null,
-    lastName: p.lastName || null,
-    name: [p.firstName, p.lastName].filter(Boolean).join(' ') || null,
+    personId: m.personId || p['id'],
+    firstName: p['firstName'] || null,
+    lastName: p['lastName'] || null,
+    name: [p['firstName'], p['lastName']].filter(Boolean).join(' ') || null,
     memberNumber: m.memberNumber || null,
     categoryId: m.categoryId || null,
-    categoryName: c.name || null,
+    categoryName: c['name'] || null,
     status: m.status || 'pending',
     duesExpiryDate: m.duesExpiryDate || null,
     joinedAt: m.joinedAt || m.createdAt || null,

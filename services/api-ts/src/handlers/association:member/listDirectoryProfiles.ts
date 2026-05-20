@@ -18,6 +18,7 @@ export async function listDirectoryProfiles(
 
   const orgId = ctx.get('organizationId');
   const query = ctx.req.valid('query');
+  const { visibility } = query as { visibility?: string };
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
 
@@ -27,7 +28,7 @@ export async function listDirectoryProfiles(
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
-      visibility: (query as any).visibility,
+      visibility,
     },
     { pagination: { offset, limit } },
   );

@@ -19,7 +19,7 @@ export async function getCertificate(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const params = ctx.req.valid('param');
-  const certificateId = (params as any).certificateId;
+  const { certificateId } = params as { certificateId: string };
   const personId = session.user.id;
 
   const repo = new DigitalCredentialRepository(db, logger);

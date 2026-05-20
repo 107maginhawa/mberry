@@ -20,7 +20,8 @@ export async function getAffiliationTransfer(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new AffiliationTransferRepository(db, ctx.get('logger'));
 
-  const transfer = await repo.findOneById((params as any).transferId);
+  const { transferId } = params as { transferId: string };
+  const transfer = await repo.findOneById(transferId);
   if (!transfer) throw new NotFoundError('Affiliation transfer');
 
   return ctx.json(transfer, 200);

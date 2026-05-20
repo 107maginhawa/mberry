@@ -57,10 +57,12 @@ export class PayMongoAdapter implements GatewayAdapter {
       throw new ExternalServiceError(`PayMongo checkout failed: ${error}`, 'PayMongo', 'createCheckout');
     }
 
-    const data = await response.json() as any;
+    const data = await response.json() as Record<string, unknown>;
+    const dataObj = data['data'] as Record<string, unknown>;
+    const attrs = dataObj['attributes'] as Record<string, unknown>;
     return {
-      checkoutUrl: data.data.attributes.checkout_url,
-      sessionId: data.data.id,
+      checkoutUrl: attrs['checkout_url'] as string,
+      sessionId: dataObj['id'] as string,
     };
   }
 
@@ -109,7 +111,8 @@ export class PayMongoAdapter implements GatewayAdapter {
       throw new ExternalServiceError(`PayMongo status check failed: ${response.status}`, 'PayMongo', 'getPaymentStatus');
     }
 
-    const data = await response.json() as any;
+    // PayMongo API response has deeply nested structure — typed as any for external API parsing
+    const data = await response.json() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     const attrs = data.data.attributes;
     const payment = attrs.payments?.[0];
 

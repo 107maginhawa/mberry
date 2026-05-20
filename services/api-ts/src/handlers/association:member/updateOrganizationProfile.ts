@@ -32,7 +32,7 @@ export async function updateOrganizationProfile(
 
   const updated = await db
     .update(organizations)
-    .set({ ...body, updatedAt: new Date() } as any)
+    .set({ ...body, updatedAt: new Date() } as Record<string, unknown>)
     .where(eq(organizations.id, params.organizationId))
     .returning();
 

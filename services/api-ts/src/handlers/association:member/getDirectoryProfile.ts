@@ -20,7 +20,8 @@ export async function getDirectoryProfile(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DirectoryProfileRepository(db, ctx.get('logger'));
 
-  const profile = await repo.findOneById((params as any).profileId);
+  const { profileId } = params as { profileId: string };
+  const profile = await repo.findOneById(profileId);
   if (!profile) throw new NotFoundError('Directory profile');
 
   return ctx.json(profile, 200);

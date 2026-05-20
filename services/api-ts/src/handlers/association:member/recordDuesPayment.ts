@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, ForbiddenError, BusinessLogicError } from '@/core/errors';
 import type { RecordDuesPaymentBody } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import type { DuesPayment } from '@/handlers/dues/repos/dues-payments.schema';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { formatReceiptNumber } from '@/handlers/dues/utils/receipt-number';
 import { settlePayment } from '@/handlers/dues/utils/settle-payment';
@@ -104,7 +105,7 @@ export async function recordDuesPayment(
       await txRepo.updatePaymentStatus(pay.id, 'completed', {
         membershipExtendedFrom: settle.membershipExtendedFrom,
         membershipExtendedTo: settle.membershipExtendedTo,
-      } as any);
+      } as Partial<DuesPayment>);
     }
 
     return { payment: pay, settlement: settle };

@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { Membership } from './repos/membership.schema';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { ReinstateMembershipParams } from '@/generated/openapi/validators';
@@ -36,7 +37,7 @@ export async function reinstateMembership(
     status: 'active',
     removedAt: null,
     removalReason: null,
-  } as any);
+  } as Partial<Membership>);
 
   await auditAction(ctx, {
     action: 'reinstate',

@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { Membership } from './repos/membership.schema';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { ResignMembershipBody, ResignMembershipParams } from '@/generated/openapi/validators';
@@ -36,14 +37,14 @@ export async function resignMembership(
     );
   }
 
-  let updated: any;
-  await db.transaction(async (tx: any) => {
+  let updated!: Membership;
+  await db.transaction(async (tx: DatabaseInstance) => {
     // Update membership status
     updated = await repo.updateOneById(membershipId, {
       status: 'resigned',
       removedAt: new Date(),
       removalReason: body.terminationReason ?? null,
-    } as any);
+    } as Partial<Membership>);
 
     // Void open invoices in same transaction
     await (tx as any).update(duesInvoices)

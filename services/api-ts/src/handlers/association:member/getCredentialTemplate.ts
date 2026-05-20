@@ -20,7 +20,8 @@ export async function getCredentialTemplate(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new CredentialTemplateRepository(db, ctx.get('logger'));
 
-  const template = await repo.findOneById((params as any).templateId);
+  const { templateId } = params as { templateId: string };
+  const template = await repo.findOneById(templateId);
   if (!template) throw new NotFoundError('Credential template');
 
   return ctx.json(template, 200);

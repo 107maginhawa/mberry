@@ -5,6 +5,7 @@ import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import type { UpdateDuesInvoiceBody, UpdateDuesInvoiceParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
+import type { DuesInvoice } from './repos/dues.schema';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -32,7 +33,7 @@ export async function updateDuesInvoice(
   const orgId = ctx.get('organizationId') as string;
   if (existing.organizationId !== orgId) throw new ForbiddenError();
 
-  const updated = await repo.updateOneById(invoiceId, body as any);
+  const updated = await repo.updateOneById(invoiceId, body as Partial<DuesInvoice>);
 
   await auditAction(ctx, {
     action: 'update',

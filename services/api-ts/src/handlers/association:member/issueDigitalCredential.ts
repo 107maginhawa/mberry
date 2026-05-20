@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { IssueDigitalCredentialBody } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { CredentialTemplateRepository, DigitalCredentialRepository } from './repos/credentials.repo';
+import type { DigitalCredential } from './repos/credentials.schema';
 import { MembershipRepository } from './repos/membership.repo';
 import { createCredentialToken } from './utils/credential-token';
 import { auditAction } from '@/utils/audit';
@@ -87,7 +88,7 @@ export async function issueDigitalCredential(
   const updated = await credentialRepo.updateOneById(credential.id, {
     qrPayload: token,
     verificationUrl,
-  } as any);
+  } as Partial<DigitalCredential>);
 
   await auditAction(ctx, {
     action: 'create',

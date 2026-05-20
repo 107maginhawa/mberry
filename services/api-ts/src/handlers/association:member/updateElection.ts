@@ -33,9 +33,9 @@ export async function updateElection(
   if (denied) return denied;
 
   // Convert position strings to {id, title, sortOrder} objects if positions provided
-  const updateData = { ...body } as any;
-  if (Array.isArray(updateData.positions)) {
-    updateData.positions = updateData.positions.map((p: string, i: number) => ({
+  const updateData = { ...body } as Record<string, unknown>;
+  if (Array.isArray(updateData['positions'])) {
+    updateData['positions'] = (updateData['positions'] as string[]).map((p: string, i: number) => ({
       id: crypto.randomUUID(),
       title: p,
       sortOrder: i,

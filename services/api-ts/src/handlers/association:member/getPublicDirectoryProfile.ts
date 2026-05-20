@@ -15,6 +15,7 @@ export async function getPublicDirectoryProfile(
 ): Promise<Response> {
   // Optional authentication - public endpoint
   const params = ctx.req.valid('param');
+  const { personId } = params as { personId: string };
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DirectoryProfileRepository(db, ctx.get('logger'));
 
@@ -23,7 +24,7 @@ export async function getPublicDirectoryProfile(
   const orgId = ctx.get('organizationId');
 
   const profile = await repo.findOne({
-    personId: (params as any).personId,
+    personId,
     organizationId: orgId,
     visibility: 'public',
   });

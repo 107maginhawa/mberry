@@ -20,7 +20,8 @@ export async function getChapterAffiliation(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new ChapterAffiliationRepository(db, ctx.get('logger'));
 
-  const affiliation = await repo.findOneById((params as any).affiliationId);
+  const { affiliationId } = params as { affiliationId: string };
+  const affiliation = await repo.findOneById(affiliationId);
   if (!affiliation) throw new NotFoundError('Chapter affiliation');
 
   return ctx.json(affiliation, 200);

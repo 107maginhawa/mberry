@@ -1,4 +1,4 @@
-import type { ValidatedContext } from '@/types/app';
+import type { ValidatedContext, BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { ListDuesPaymentsQuery } from '@/generated/openapi/validators';
@@ -24,7 +24,7 @@ export async function listDuesPayments(
   const repo = new DuesRepository(db);
 
   // PAY-02: non-officer callers can only see their own payments
-  const officerDenied = await requireOfficerTerm(ctx as any);
+  const officerDenied = await requireOfficerTerm(ctx as unknown as BaseContext);
   const isOfficer = officerDenied === null; // null = is officer
   const effectivePersonId = isOfficer
     ? (query.personId ?? undefined)  // officer: respect query param, omit for all org payments

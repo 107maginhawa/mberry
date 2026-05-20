@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { Membership } from './repos/membership.schema';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateRosterMemberBody, UpdateRosterMemberParams } from '@/generated/openapi/validators';
@@ -26,7 +27,7 @@ export async function updateRosterMember(
   const existing = await repo.findOneById(params.memberId);
   if (!existing) throw new NotFoundError('Roster member');
 
-  const updated = await repo.updateOneById(params.memberId, body as any);
+  const updated = await repo.updateOneById(params.memberId, body as Partial<Membership>);
 
   await auditAction(ctx, {
     action: 'update',

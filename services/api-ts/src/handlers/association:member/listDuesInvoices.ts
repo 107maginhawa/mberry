@@ -18,9 +18,9 @@ export async function listDuesInvoices(
 
   const orgId = ctx.get('organizationId');
   if (!orgId) throw new ForbiddenError();
-  const query = ctx.req.valid('query') as any;
-  const offset = Number(query.offset) || 0;
-  const limit = Math.min(Number(query.limit) || 20, 100);
+  const query = ctx.req.valid('query') as Record<string, unknown>;
+  const offset = Number(query['offset']) || 0;
+  const limit = Math.min(Number(query['limit']) || 20, 100);
 
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesInvoiceRepository(db, ctx.get('logger'));
@@ -28,8 +28,8 @@ export async function listDuesInvoices(
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
-      membershipId: query.membershipId,
-      status: query.status,
+      membershipId: query['membershipId'] as string | undefined,
+      status: query['status'] as string | undefined,
     },
     { pagination: { offset, limit } },
   );

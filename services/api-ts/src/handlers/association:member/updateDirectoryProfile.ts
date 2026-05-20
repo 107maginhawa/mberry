@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { DirectoryProfile } from './repos/directory.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDirectoryProfileBody, UpdateDirectoryProfileParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
@@ -26,9 +27,9 @@ export async function updateDirectoryProfile(
   if (!existing) throw new NotFoundError('Directory profile');
 
   const updated = await repo.updateOneById(profileId, {
-    ...body as any,
+    ...body,
     lastUpdatedAt: new Date(),
-  });
+  } as Partial<DirectoryProfile>);
 
   await auditAction(ctx, {
     action: 'update',

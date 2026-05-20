@@ -18,6 +18,7 @@ export async function listChapterAffiliations(
 
   const orgId = ctx.get('organizationId');
   const query = ctx.req.valid('query');
+  const { personId, chapterId } = query as { personId?: string; chapterId?: string };
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
 
@@ -27,8 +28,8 @@ export async function listChapterAffiliations(
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
-      personId: (query as any).personId,
-      chapterId: (query as any).chapterId,
+      personId,
+      chapterId,
     },
     { pagination: { offset, limit } },
   );

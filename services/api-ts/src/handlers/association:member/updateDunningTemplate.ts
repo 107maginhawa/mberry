@@ -29,8 +29,8 @@ export async function updateDunningTemplate(
     return ctx.json({ error: 'Dunning template not found' }, 404);
   }
 
-  const b = body as any;
-  const updateData: Record<string, any> = { updatedBy: user.id };
+  const b = body as Record<string, unknown>;
+  const updateData: Record<string, unknown> = { updatedBy: user.id };
   if (b['name'] !== undefined) updateData['name'] = b['name'];
   if (b['daysAfterDue'] !== undefined) updateData['daysAfterDue'] = b['daysAfterDue'];
   if (b['channel'] !== undefined) updateData['channel'] = b['channel'];
