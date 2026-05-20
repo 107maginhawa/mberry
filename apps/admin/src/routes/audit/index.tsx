@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Shield, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
 import { listAuditLogsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
@@ -58,72 +59,68 @@ function AuditPage() {
       {/* Filter row */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         {/* Action select */}
-        <select
-          value={action}
-          onChange={(e) => { setAction(e.target.value); setPage(0) }}
-          className="px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          <option value="">All Actions</option>
-          <option value="create">create</option>
-          <option value="read">read</option>
-          <option value="update">update</option>
-          <option value="delete">delete</option>
-          <option value="login">login</option>
-          <option value="logout">logout</option>
-          <option value="approve">approve</option>
-          <option value="deny">deny</option>
-          <option value="renew">renew</option>
-          <option value="terminate">terminate</option>
-          <option value="reinstate">reinstate</option>
-          <option value="mark-paid">mark-paid</option>
-          <option value="complete">complete</option>
-          <option value="transfer">transfer</option>
-          <option value="anonymize">anonymize</option>
-          <option value="export">export</option>
-        </select>
+        <Select value={action || 'all'} onValueChange={(val) => { setAction(val === 'all' ? '' : val); setPage(0) }}>
+          <SelectTrigger className="w-[160px]"><SelectValue placeholder="All Actions" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Actions</SelectItem>
+            <SelectItem value="create">create</SelectItem>
+            <SelectItem value="read">read</SelectItem>
+            <SelectItem value="update">update</SelectItem>
+            <SelectItem value="delete">delete</SelectItem>
+            <SelectItem value="login">login</SelectItem>
+            <SelectItem value="logout">logout</SelectItem>
+            <SelectItem value="approve">approve</SelectItem>
+            <SelectItem value="deny">deny</SelectItem>
+            <SelectItem value="renew">renew</SelectItem>
+            <SelectItem value="terminate">terminate</SelectItem>
+            <SelectItem value="reinstate">reinstate</SelectItem>
+            <SelectItem value="mark-paid">mark-paid</SelectItem>
+            <SelectItem value="complete">complete</SelectItem>
+            <SelectItem value="transfer">transfer</SelectItem>
+            <SelectItem value="anonymize">anonymize</SelectItem>
+            <SelectItem value="export">export</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Resource Type text input */}
-        <input
+        <Input
           type="text"
           value={resourceType}
           onChange={(e) => { setResourceType(e.target.value); setPage(0) }}
           placeholder="Resource type (e.g., persons)"
-          className="px-3 py-2 rounded-md border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-auto"
         />
 
         {/* Start Date */}
-        <input
+        <Input
           type="date"
           value={startDate}
           onChange={(e) => { setStartDate(e.target.value); setPage(0) }}
-          className="px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-auto"
         />
 
         {/* End Date */}
-        <input
+        <Input
           type="date"
           value={endDate}
           onChange={(e) => { setEndDate(e.target.value); setPage(0) }}
-          className="px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-auto"
         />
 
         {/* User ID */}
-        <input
+        <Input
           type="text"
           value={userFilter}
           onChange={(e) => { setUserFilter(e.target.value); setPage(0) }}
           placeholder="User ID"
-          className="px-3 py-2 rounded-md border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-auto"
         />
 
         {/* Refresh button */}
-        <button
-          onClick={() => refetch()}
-          className="flex items-center gap-2 px-3 py-2 rounded-md border bg-background text-sm hover:bg-muted transition-colors"
-        >
+        <Button variant="outline" onClick={() => refetch()}>
           <RefreshCw className="w-4 h-4" />
           Refresh
-        </button>
+        </Button>
       </div>
 
       {/* Error state */}
@@ -203,23 +200,23 @@ function AuditPage() {
 
       {/* Pagination controls */}
       <div className="flex items-center justify-between mt-4">
-        <button
+        <Button
+          variant="outline"
           onClick={() => setPage((p) => Math.max(0, p - 1))}
           disabled={page === 0}
-          className="px-3 py-2 rounded-md border bg-background text-sm disabled:opacity-40 hover:bg-muted transition-colors disabled:cursor-not-allowed"
         >
           Previous
-        </button>
+        </Button>
         <span className="text-sm text-muted-foreground">
           Page {page + 1} of {totalPages || 1}
         </span>
-        <button
+        <Button
+          variant="outline"
           onClick={() => setPage((p) => p + 1)}
           disabled={(page + 1) * LIMIT >= total}
-          className="px-3 py-2 rounded-md border bg-background text-sm disabled:opacity-40 hover:bg-muted transition-colors disabled:cursor-not-allowed"
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   )

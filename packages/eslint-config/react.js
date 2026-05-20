@@ -31,6 +31,23 @@ export default tseslint.config(
       'react/prop-types': 'off',
       'react/no-unescaped-entities': 'warn',
       'react/no-unknown-property': ['warn', { ignore: ['cmdk-input-wrapper'] }],
+
+      // Enforce @monobase/ui primitives — prevent raw HTML form elements
+      'no-restricted-syntax': [
+        'warn',
+        {
+          selector: "JSXOpeningElement[name.name='select']",
+          message: 'Use <Select> from @monobase/ui instead of raw <select>.',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='textarea']",
+          message: 'Use <Textarea> from @monobase/ui instead of raw <textarea>.',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='label']",
+          message: 'Use <Label> from @monobase/ui instead of raw <label>.',
+        },
+      ],
     },
   },
 );

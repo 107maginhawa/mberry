@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ToggleLeft, Plus, Trash2, X } from 'lucide-react'
-import { Label } from '@monobase/ui'
+import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { RequireRole } from '@/lib/role-gate'
@@ -73,44 +73,41 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
       <div className="bg-card border rounded-lg shadow-lg w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Create Feature Flag</h2>
-          <button onClick={onClose} className="p-1 rounded hover:bg-muted" aria-label="Close">
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
         <div className="space-y-4">
           <div>
             <Label className="block text-sm font-medium mb-1">Module</Label>
-            <select
-              value={moduleName}
-              onChange={(e) => setModuleName(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              {moduleOptions.map((mod) => (
-                <option key={mod} value={mod}>{mod}</option>
-              ))}
-            </select>
+            <Select value={moduleName} onValueChange={setModuleName}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {moduleOptions.map((mod) => (
+                  <SelectItem key={mod} value={mod}>{mod}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label className="block text-sm font-medium mb-1">Target Type</Label>
-            <select
-              value={targetType}
-              onChange={(e) => setTargetType(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="global">Global</option>
-              <option value="association">Association</option>
-              <option value="organization">Organization</option>
-            </select>
+            <Select value={targetType} onValueChange={setTargetType}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="global">Global</SelectItem>
+                <SelectItem value="association">Association</SelectItem>
+                <SelectItem value="organization">Organization</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           {targetType !== 'global' && (
             <div>
               <Label className="block text-sm font-medium mb-1">Target ID</Label>
-              <input
+              <Input
                 type="text"
                 value={targetId}
                 onChange={(e) => setTargetId(e.target.value)}
                 placeholder={`${targetType} ID`}
-                className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
           )}
@@ -127,19 +124,15 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
             </button>
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-muted transition-colors"
-            >
+            <Button variant="outline" onClick={onClose}>
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => create.mutate({ body: { targetType, targetId: (targetId || targetType) as string, moduleName, enabled } })}
               disabled={create.isPending || (targetType !== 'global' && !targetId)}
-              className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               {create.isPending ? 'Creating...' : 'Create'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -181,13 +174,10 @@ function FeatureFlagsPage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setDialogOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
+        <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           Create Flag
-        </button>
+        </Button>
       </div>
 
       {isError && (
