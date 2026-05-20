@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CheckInCustomEventBody, CheckInCustomEventParams } from '@/generated/openapi/validators';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
@@ -37,6 +37,12 @@ export async function checkInCustomEvent(
   const method = (body as any).method || 'manual';
 
   const orgId = ctx.get('organizationId') || event.organizationId;
+
+  // Duplicate check-in prevention
+  const existing = await checkInRepo.findMany({ eventId: params.eventId, personId });
+  if (existing.length > 0) {
+    throw new BusinessLogicError('Person already checked in for this event', 'DUPLICATE_CHECK_IN');
+  }
 
   const checkIn = await checkInRepo.createOne({
     eventId: params.eventId,

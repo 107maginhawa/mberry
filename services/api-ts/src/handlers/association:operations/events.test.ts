@@ -410,6 +410,7 @@ describe('[AC-M08-001] createCheckIn — QR check-in requires authenticated scan
         findOneById: async () => fakeEvent,
       }),
       ...stubRepo(CheckInRepository, {
+        findMany: async () => [],
         createOne: async (data: any) => ({ ...fakeCheckIn, ...data }),
       }),
     };
@@ -435,6 +436,7 @@ describe('[AC-M08-001] createCheckIn — QR check-in requires authenticated scan
         findOneById: async () => fakeEvent,
       }),
       ...stubRepo(CheckInRepository, {
+        findMany: async () => [],
         createOne: async (data: any) => ({ ...fakeCheckIn, ...data }),
       }),
     };
@@ -462,6 +464,7 @@ describe('[AC-M08-001] createCheckIn — QR check-in requires authenticated scan
         findOneById: async () => fakeEvent,
       }),
       ...stubRepo(CheckInRepository, {
+        findMany: async () => [],
         createOne: async (data: any) => ({ ...fakeCheckIn, ...data }),
       }),
     };
@@ -481,6 +484,7 @@ describe('[AC-M08-001] createCheckIn — QR check-in requires authenticated scan
         findOneById: async () => null,
       }),
       ...stubRepo(CheckInRepository, {
+        findMany: async () => [],
         createOne: async (data: any) => fakeCheckIn,
       }),
     };
@@ -501,6 +505,7 @@ describe('[AC-M08-001] createCheckIn — QR check-in requires authenticated scan
         findOneById: async () => fakeEvent,
       }),
       ...stubRepo(CheckInRepository, {
+        findMany: async () => [],
         createOne: async (data: any) => { capturedData = data; return { ...fakeCheckIn, ...data }; },
       }),
     };

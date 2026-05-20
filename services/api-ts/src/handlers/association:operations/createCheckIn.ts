@@ -56,6 +56,12 @@ export async function createCheckIn(
   const event = await eventRepo.findOneById(eventId);
   if (!event) throw new NotFoundError('Event not found');
 
+  // Duplicate check-in prevention
+  const existing = await checkInRepo.findMany({ eventId, personId });
+  if (existing.length > 0) {
+    throw new BusinessLogicError('Person already checked in for this event', 'DUPLICATE_CHECK_IN');
+  }
+
   const checkIn = await checkInRepo.createOne({
     eventId,
     personId,
