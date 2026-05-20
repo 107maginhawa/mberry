@@ -68,11 +68,11 @@
 | V-10 | Grace period 0-90 not validated | membership | RESOLVED | Phase 34 (TypeSpec @maxValue(90)) |
 | V-11 | No payment recording handler (BR-06) | dues | RESOLVED | v1.2.0 Phase 20 |
 | V-12 | Credit cycle start uses activity date | training | OPEN | G2 |
-| V-13 | Credit carry-over 50% cap missing | training | OPEN | G2 |
-| V-14 | No license number normalization | membership | OPEN | G2 |
+| V-13 | Credit carry-over 50% cap missing | training | RESOLVED | Already implemented: calculateCarryover() in credit-cycle.ts |
+| V-14 | No license number normalization | membership | RESOLVED | Already implemented: normalizeLicense() in importMembers.ts |
 | V-15 | No concurrent session limits | auth | OPEN | G4 |
 | V-16 | Three comms modules need consolidation | communication | OPEN | G3 |
-| V-17 | memberNumber vs licenseNumber inconsistency | membership | OPEN | G2 |
+| V-17 | memberNumber vs licenseNumber inconsistency | membership | RESOLVED | Intentional: memberNumber=association ID, licenseNumber=PRC license |
 | V-18 | Cross-context import of MembershipRepository | events/training | OPEN | G3 |
 | V-19 | TypeSpec coverage ~60% | cross-cutting | OPEN | G3 |
 | V-20 | No input validation on body.status | membership | RESOLVED | Phase 34 (Zod updateMemberSchema) |
