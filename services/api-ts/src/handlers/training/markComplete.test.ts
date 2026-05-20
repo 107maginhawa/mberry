@@ -3,6 +3,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
 
 const fakeTraining = {
   id: 'training-1',
@@ -254,6 +255,204 @@ describe('markComplete', () => {
     });
 
     await expect(markComplete(ctx)).rejects.toThrow('has not ended yet');
+  });
+
+  // ─── [V-12] Credit cycle anchored to member registration date ──────
+
+  test('[V-12] credit cycle is anchored to member registration date, not activity date', async () => {
+    let creditCreated: any = null;
+
+    // Member registered Jan 2023, training ends Dec 2025
+    // Cycle should anchor to Jan 2023, NOT Dec 2025
+    const trainingWithLateEnd = {
+      ...fakeTraining,
+      endDate: new Date('2025-12-15'),
+      organizationId: 'org-1',
+    };
+
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => trainingWithLateEnd,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        status,
+      }),
+    });
+
+    const creditMock = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => { creditCreated = data; return { id: 'credit-1', ...data }; },
+      findByTrainingAndPerson: async () => null,
+    });
+
+    const memberMock = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1',
+        personId: 'person-1',
+        organizationId: 'org-1',
+        startDate: '2023-01-15',
+        status: 'active',
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    const response = await markComplete(ctx);
+    expect(response.status).toBe(201);
+    expect(creditCreated).not.toBeNull();
+
+    // Cycle start must be anchored to member registration (Jan 2023), not activity date (Dec 2025)
+    const cycleStartYear = creditCreated.cycleStart.getFullYear();
+    expect(cycleStartYear).toBe(2023);
+
+    // Activity date is Dec 2025, so if wrongly using activityDate as anchor, cycleStart would be 2025
+    expect(cycleStartYear).not.toBe(2025);
+
+    Object.values(creditMock).forEach((m) => m.mockRestore());
+    Object.values(memberMock).forEach((m) => m.mockRestore());
+  });
+
+  test('[V-12] two members get different cycles based on their registration dates', async () => {
+    const creditEntries: any[] = [];
+
+    const trainingDec2025 = {
+      ...fakeTraining,
+      endDate: new Date('2025-12-01'),
+      organizationId: 'org-1',
+    };
+
+    // First member: registered Jan 2022
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => trainingDec2025,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [{ ...fakeEnrollment, personId: 'person-A' }],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        personId: 'person-A',
+        status,
+      }),
+    });
+
+    const creditMock1 = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => { creditEntries.push({ ...data, person: 'A' }); return { id: 'c-1', ...data }; },
+      findByTrainingAndPerson: async () => null,
+    });
+
+    const memberMock1 = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-A',
+        personId: 'person-A',
+        organizationId: 'org-1',
+        startDate: '2022-01-01',
+        status: 'active',
+      }),
+    });
+
+    const ctx1 = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-A' },
+    });
+
+    await markComplete(ctx1);
+    Object.values(creditMock1).forEach((m) => m.mockRestore());
+    Object.values(memberMock1).forEach((m) => m.mockRestore());
+    Object.values(mocks).forEach((m) => m.mockRestore());
+
+    // Second member: registered Jul 2024
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => trainingDec2025,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [{ ...fakeEnrollment, personId: 'person-B' }],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        personId: 'person-B',
+        status,
+      }),
+    });
+
+    const creditMock2 = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => { creditEntries.push({ ...data, person: 'B' }); return { id: 'c-2', ...data }; },
+      findByTrainingAndPerson: async () => null,
+    });
+
+    const memberMock2 = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-B',
+        personId: 'person-B',
+        organizationId: 'org-1',
+        startDate: '2024-07-01',
+        status: 'active',
+      }),
+    });
+
+    const ctx2 = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-B' },
+    });
+
+    await markComplete(ctx2);
+    Object.values(creditMock2).forEach((m) => m.mockRestore());
+    Object.values(memberMock2).forEach((m) => m.mockRestore());
+
+    // Both should have credit entries
+    expect(creditEntries.length).toBe(2);
+    const entryA = creditEntries.find((e) => e.person === 'A');
+    const entryB = creditEntries.find((e) => e.person === 'B');
+
+    // Different registration dates → different cycle starts
+    expect(entryA!.cycleStart.getTime()).not.toBe(entryB!.cycleStart.getTime());
+
+    // A registered Jan 2022 → cycle anchored to 2022
+    expect(entryA!.cycleStart.getFullYear()).toBe(2022);
+    // B registered Jul 2024 → cycle anchored to 2024
+    expect(entryB!.cycleStart.getFullYear()).toBe(2024);
+  });
+
+  test('[V-12] falls back to activity date when no membership found', async () => {
+    let creditCreated: any = null;
+    const trainingDec2025 = {
+      ...fakeTraining,
+      endDate: new Date('2025-12-15'),
+      organizationId: 'org-1',
+    };
+
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => trainingDec2025,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        status,
+      }),
+    });
+
+    const creditMock = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => { creditCreated = data; return { id: 'credit-1', ...data }; },
+      findByTrainingAndPerson: async () => null,
+    });
+
+    // No membership found
+    const memberMock = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    const response = await markComplete(ctx);
+    expect(response.status).toBe(201);
+    expect(creditCreated).not.toBeNull();
+
+    // Falls back to activity date (Dec 2025)
+    expect(creditCreated.cycleStart.getFullYear()).toBe(2025);
+
+    Object.values(creditMock).forEach((m) => m.mockRestore());
+    Object.values(memberMock).forEach((m) => m.mockRestore());
   });
 
   test('crashes without session (no auth)', async () => {
