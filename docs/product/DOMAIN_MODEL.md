@@ -796,3 +796,376 @@ _None — person is the root identity aggregate._
 | 73 | `voting_mode` | online, inPerson, hybrid | `elections/repos/elections.schema.ts` |
 
 > **Note:** `template_status` is defined in two separate schema files (communication and email) with the same values. Two pgEnum definitions sharing the same name may cause migration conflicts — verify they use distinct DB enum names.
+
+---
+
+## DDD Analysis
+
+_Added 2026-05-20. Derived from handler directory structure, cross-module imports, schema foreign keys, and VALID_TRANSITIONS maps in code._
+
+---
+
+## 9. Bounded Contexts
+
+Eight bounded contexts aligned with handler directory clusters. Each context owns its schema files and exposes repositories as its public API.
+
+### Context Inventory
+
+| # | Context | Handler Dirs | Aggregate Root | Tables Owned |
+|---|---------|-------------|----------------|-------------|
+| 1 | **Identity** | `person/` | `person` | 3 |
+| 2 | **Membership** | `association:member/`, `membership/` | `membership` | 16 |
+| 3 | **Financial** | `dues/`, `billing/`, `association:member/repos/dues.schema.ts`, `association:member/repos/dunning.schema.ts` | `dues_payment` | 14 |
+| 4 | **Activities** | `association:operations/`, `events/`, `booking/`, `training/` | `event`, `booking_event`, `training` | 14 |
+| 5 | **Communication** | `communication/`, `comms/`, `email/`, `notifs/` | `announcement`, `chat_room`, `email_queue`, `notification` | 12 |
+| 6 | **Content** | `documents/`, `certificates/`, `storage/` | `document` | 6 |
+| 7 | **Governance** | `elections/` | `election` | 3 |
+| 8 | **Platform** | `platformadmin/`, `audit/`, `reviews/`, `invite/` | `organization` | 8 |
+
+### Context Definitions
+
+**1. Identity Context**
+- **Owning module:** `person/`
+- **Core entities:** `person`, `notification_preference`, `person_privacy_setting`
+- **External dependencies:** None (root context)
+- **Downstream consumers:** Every other context references `person.id` via UUID
+
+**2. Membership Context**
+- **Owning modules:** `association:member/`, `membership/`
+- **Core entities:** `membership`, `membership_tier`, `membership_category`, `membership_application`, `membership_status_history`, `chapter_affiliation`, `affiliation_transfer`, `royalty_split`, `professional_license`, `license_renewal_alert`, `credential_template`, `digital_credential`, `credit_entry`, `directory_profile`, `position`, `officer_term`
+- **External dependencies:** Identity (person), Platform (organization)
+- **Notes:** This is the mega-module (157+ handlers). Split plan exists at `.planning/phases/14-mega-module-split/SPLIT-PLAN.md`
+
+**3. Financial Context**
+- **Owning modules:** `dues/`, `billing/`
+- **Core entities:** `dues_payment`, `dues_org_config`, `dues_fund`, `dues_fund_allocation`, `dues_gateway_config`, `dues_reminder_schedule`, `dues_category_override`, `dues_payment_status_history`, `invoice`, `invoice_line_item`, `merchant_account`, `dues_config` (legacy), `dues_invoice` (legacy), `aging_bucket`, `dunning_template`, `dunning_event`, `dues_reminder_log`
+- **External dependencies:** Identity (person), Platform (organization), Membership (membership_category for dues_category_override)
+- **Notes:** Two subsystems coexist — legacy `dues_config`/`dues_invoice` in `association:member/repos/dues.schema.ts` and v2 payment system in `dues/repos/dues-payments.schema.ts`
+
+**4. Activities Context**
+- **Owning modules:** `association:operations/`, `events/`, `booking/`, `training/`
+- **Core entities:** `event`, `event_registration`, `check_in`, `waitlist_entry`, `training`, `training_enrollment`, `course`, `course_enrollment`, `quiz_attempt`, `accredited_provider`, `booking_event`, `time_slot`, `booking`, `schedule_exception`
+- **External dependencies:** Identity (person), Membership (for officer role checks via `OfficerTermRepository`)
+
+**5. Communication Context**
+- **Owning modules:** `communication/`, `comms/`, `email/`, `notifs/`
+- **Core entities:** `message_template`, `message`, `subscription_topic`, `person_subscription`, `announcement`, `announcement_stats`, `chat_room`, `chat_message`, `email_template`, `email_queue`, `email_suppression`, `notification`
+- **External dependencies:** Identity (person for announcements and recipients)
+
+**6. Content Context**
+- **Owning modules:** `documents/`, `certificates/`, `storage/`
+- **Core entities:** `document`, `document_version`, `document_tag`, `document_access_log`, `certificate`, `stored_file`
+- **External dependencies:** Identity (person for certificates), Activities (training for certificate issuance)
+
+**7. Governance Context**
+- **Owning module:** `elections/`
+- **Core entities:** `election`, `election_nominee`, `election_vote`
+- **External dependencies:** Identity (person), Membership (position)
+
+**8. Platform Context**
+- **Owning modules:** `platformadmin/`, `audit/`, `reviews/`, `invite/`
+- **Core entities:** `association`, `organization`, `feature_flag`, `platform_admin`, `impersonation_session`, `audit_log_entry`, `review`, `invitation_token`
+- **External dependencies:** Better-Auth `user` table (for audit_log_entry.archivedBy)
+
+### Context Map
+
+```mermaid
+graph TD
+    subgraph "Upstream (Shared Kernel)"
+        IDENTITY["Identity<br/>(person/)"]
+        PLATFORM["Platform<br/>(platformadmin/, audit/, invite/)"]
+    end
+
+    subgraph "Core Domain"
+        MEMBERSHIP["Membership<br/>(association:member/, membership/)"]
+        FINANCIAL["Financial<br/>(dues/, billing/)"]
+    end
+
+    subgraph "Supporting"
+        ACTIVITIES["Activities<br/>(association:operations/, events/, booking/, training/)"]
+        COMMUNICATION["Communication<br/>(communication/, comms/, email/, notifs/)"]
+        CONTENT["Content<br/>(documents/, certificates/, storage/)"]
+        GOVERNANCE["Governance<br/>(elections/)"]
+    end
+
+    IDENTITY -->|"person.id (UUID)"| MEMBERSHIP
+    IDENTITY -->|"person.id (UUID)"| FINANCIAL
+    IDENTITY -->|"person.id (UUID)"| ACTIVITIES
+    IDENTITY -->|"person.id (UUID)"| COMMUNICATION
+    IDENTITY -->|"person.id (UUID)"| CONTENT
+    IDENTITY -->|"person.id (UUID)"| GOVERNANCE
+
+    PLATFORM -->|"organization.id (UUID)"| MEMBERSHIP
+    PLATFORM -->|"organization.id (UUID)"| FINANCIAL
+    PLATFORM -->|"organization.id (UUID)"| ACTIVITIES
+    PLATFORM -->|"organization.id (UUID)"| COMMUNICATION
+
+    MEMBERSHIP -->|"membership_category.id"| FINANCIAL
+    MEMBERSHIP -->|"OfficerTermRepository"| ACTIVITIES
+    MEMBERSHIP <-->|"membershipLifecycle"| FINANCIAL
+
+    ACTIVITIES -->|"notification triggers"| COMMUNICATION
+    FINANCIAL -->|"dunning.escalation"| COMMUNICATION
+    MEMBERSHIP -->|"position.id"| GOVERNANCE
+```
+
+---
+
+## 10. Aggregate Roots
+
+Each bounded context has one or more aggregate roots — the entity that other entities within the aggregate reference via foreign key, and that external contexts reference by UUID.
+
+### Per-Context Aggregates
+
+**Identity Context:**
+- **`person`** — Root aggregate. No FK dependencies. All other contexts reference `person.id` as a UUID. File: `person/repos/person.schema.ts`
+
+**Membership Context:**
+- **`membership`** — Links person→org→tier. Referenced by `membership_status_history.membershipId`. One per person per org (unique constraint). File: `association:member/repos/membership.schema.ts`
+- **`position`** — Governance position definition. Referenced by `officer_term.positionId` and cross-context by `election_nominee.positionId`. File: `association:member/repos/governance.schema.ts`
+- **`membership_tier`** — Referenced by `membership.tierId` and `membership_application.tierId`. File: `association:member/repos/membership.schema.ts`
+
+**Financial Context:**
+- **`dues_payment`** — Central payment record. Referenced by `dues_fund_allocation.paymentId`, `dues_payment_status_history.paymentId`. File: `dues/repos/dues-payments.schema.ts`
+- **`dues_org_config`** — Org-level config root. Referenced by `dues_category_override.duesConfigId`, `dues_reminder_schedule.duesConfigId`. File: `dues/repos/dues-payments.schema.ts`
+- **`invoice`** — Billing aggregate root. Referenced by `invoice_line_item.invoice`. File: `billing/repos/billing.schema.ts`
+
+**Activities Context:**
+- **`event`** — Referenced by `event_registration`, `check_in`, `waitlist_entry` (all via organizationId/eventId pattern). File: `association:operations/repos/events.schema.ts`
+- **`booking_event`** — Referenced by `time_slot.event`, `schedule_exception`. File: `booking/repos/booking.schema.ts`
+- **`training`** — Referenced by `training_enrollment`, `certificate` (cross-context). File: `association:operations/repos/training.schema.ts`
+
+**Communication Context:**
+- **`announcement`** — Referenced by `announcement_stats.announcementId`. File: `communication/repos/communication.schema.ts`
+- **`chat_room`** — Referenced by `chat_message.roomId`. File: `comms/repos/comms.schema.ts`
+- **`email_template`** — Referenced by `email_queue.template`. File: `email/repos/email.schema.ts`
+- **`notification`** — Standalone aggregate (no child entities). File: `notifs/repos/notification.schema.ts`
+
+**Content Context:**
+- **`document`** — Referenced by `document_version`, `document_tag`, `document_access_log`. File: `documents/repos/documents.schema.ts`
+
+**Governance Context:**
+- **`election`** — Referenced by `election_nominee.electionId`, `election_vote.electionId` (both cascade on delete). File: `elections/repos/elections.schema.ts`
+
+**Platform Context:**
+- **`organization`** — Referenced by 10+ tables across Financial, Membership, and Communication contexts. The `association` table is its parent. File: `platformadmin/repos/platform-admin.schema.ts`
+
+---
+
+## 11. Domain Events
+
+Domain events are implemented as notification types in the `notification` table. The `notificationTypeEnum` in `notifs/repos/notification.schema.ts` defines the event catalog. Additional trigger functions in `notifs/notification-triggers.ts` wire cross-cutting events.
+
+### Event Catalog
+
+| Event Name | Producer Context | Consumer Context | Channel | Payload Shape | Source |
+|------------|-----------------|------------------|---------|---------------|--------|
+| `billing` | Financial | Communication | email/push/in-app | Generic billing notification | `notifs/repos/notification.schema.ts` enum |
+| `security` | Platform | Communication | email/push/in-app | Security alert | `notifs/repos/notification.schema.ts` enum |
+| `system` | Platform | Communication | email/push/in-app | System notification | `notifs/repos/notification.schema.ts` enum |
+| `booking.created` | Activities (Booking) | Communication | configurable | `{ recipient, relatedEntity: bookingId }` | `notifs/repos/notification.schema.ts` enum |
+| `booking.confirmed` | Activities (Booking) | Communication | configurable | `{ recipient, relatedEntity: bookingId }` | `notifs/repos/notification.schema.ts` enum |
+| `booking.rejected` | Activities (Booking) | Communication | configurable | `{ recipient, relatedEntity: bookingId }` | `notifs/repos/notification.schema.ts` enum |
+| `booking.cancelled` | Activities (Booking) | Communication | configurable | `{ recipient, relatedEntity: bookingId }` | `notifs/repos/notification.schema.ts` enum |
+| `booking.no-show-client` | Activities (Booking) | Communication | configurable | `{ recipient, relatedEntity: bookingId }` | `notifs/repos/notification.schema.ts` enum |
+| `booking.no-show-host` | Activities (Booking) | Communication | configurable | `{ recipient, relatedEntity: bookingId }` | `notifs/repos/notification.schema.ts` enum |
+| `comms.video-call-started` | Communication (Comms) | Communication (Notifs) | configurable | `{ recipient, relatedEntity: roomId }` | `notifs/repos/notification.schema.ts` enum |
+| `comms.video-call-joined` | Communication (Comms) | Communication (Notifs) | configurable | `{ recipient, relatedEntity: roomId }` | `notifs/repos/notification.schema.ts` enum |
+| `comms.video-call-left` | Communication (Comms) | Communication (Notifs) | configurable | `{ recipient, relatedEntity: roomId }` | `notifs/repos/notification.schema.ts` enum |
+| `comms.video-call-ended` | Communication (Comms) | Communication (Notifs) | configurable | `{ recipient, relatedEntity: roomId }` | `notifs/repos/notification.schema.ts` enum |
+| `comms.chat-message` | Communication (Comms) | Communication (Notifs) | configurable | `{ recipient, relatedEntity: roomId }` | `notifs/repos/notification.schema.ts` enum |
+| `waitlist.promoted` | Activities (Events) | Communication (Notifs) | in-app | `WaitlistPromotionContext { organizationId, personId, eventId, eventName, position }` | `notifs/notification-triggers.ts` GAP-003 |
+| `event.late-cancellation` | Activities (Events) | Communication (Notifs) | in-app | `LateCancellationContext { organizationId, cancellerId, organizerIds[], eventId, eventName, cancelledAt, eventStartsAt }` | `notifs/notification-triggers.ts` GAP-006 |
+| `dunning.escalation` | Financial (Dunning) | Communication (Notifs) | in-app | `DunningEscalationContext { organizationId, personId, membershipId, stage, daysOverdue, templateName }` | `notifs/notification-triggers.ts` GAP-012 |
+| `task.overdue` | Membership (Committees) | Communication (Notifs) | in-app | `TaskOverdueContext { organizationId, assigneeId, taskId, taskTitle, committeeName, daysOverdue }` | `notifs/notification-triggers.ts` GAP-017 |
+
+### Event Delivery Pattern
+
+All notification triggers follow a fire-and-forget pattern:
+
+```typescript
+// From notifs/notification-triggers.ts
+// Non-blocking: errors swallowed to avoid breaking the producer flow
+try {
+  await notifService.createNotification({
+    organizationId, recipient, type, channel: 'in-app',
+    title, message, relatedEntityType, relatedEntity,
+    consentValidated: true,
+  });
+} catch {
+  // Non-blocking
+}
+```
+
+### CreateNotificationRequest Interface
+
+Defined in `notifs/repos/notification.schema.ts`:
+
+```typescript
+interface CreateNotificationRequest {
+  organizationId: string;
+  recipient: string;          // person UUID
+  type: NotificationType;     // one of the 18 enum values above
+  channel: 'email' | 'push' | 'in-app';
+  title: string;
+  message: string;
+  scheduledAt?: Date;
+  relatedEntityType?: string; // e.g., 'event', 'booking', 'membership', 'task'
+  relatedEntity?: string;     // UUID of related entity
+  consentValidated?: boolean;
+  targetApp?: string;         // optional app tag for push filtering
+}
+```
+
+---
+
+## 12. Anti-Corruption Layers
+
+Cross-context dependencies analyzed from actual `import` statements in handler files (excluding tests and generated code).
+
+### Direct Cross-Context Imports (Coupling)
+
+| Consumer | Imports From | Import Type | Risk Level |
+|----------|-------------|-------------|------------|
+| `dues/refundPayment.ts` | `association:member/utils/membership-lifecycle` | Function call | **High** — Financial directly mutates Membership state |
+| `dues/utils/settle-payment.ts` | `association:member/utils/membership-lifecycle` | Function call | **High** — Same: payment settlement extends membership |
+| `dues/getDuesDashboard.ts` | `association:operations/repos/events.schema` | Schema import | Medium — reads Events schema for dashboard data |
+| `dues/repos/dues-payments.schema.ts` | `platformadmin/repos/platform-admin.schema` | FK reference | Low — standard org FK |
+| `person/getMyCreditSummary.ts` | `association:member/repos/credits.repo` | Repository call | Medium — Identity reads from Membership |
+| `person/createMyCreditEntry.ts` | `association:member/repos/credits.repo`, `utils/credit-cycle` | Repository + util | Medium — Identity writes to Membership |
+| `person/exportMyData.ts` | `association:member/repos/membership.repo`, `credits.repo` | Repository reads | Medium — GDPR export crosses contexts |
+| `person/getMyMemberships.ts` | `association:member/repos/membership.schema`, `platformadmin/repos/platform-admin.schema` | Schema reads | Low — read-only joins |
+| `membership/listOrgMembers.ts` | `association:member/repos/membership.schema`, `person/repos/person.schema`, `platformadmin/repos/platform-admin.schema` | Schema reads | Medium — 3-context join |
+| `membership/listOrgApplications.ts` | `association:member/repos/membership.schema`, `platformadmin/repos/platform-admin.schema` | Schema reads | Low |
+| `events/getEvent.ts`, `updateEvent.ts`, `cancelEvent.ts` | `membership/repos/membership.repo` | Repository call | Medium — Events checks membership for authorization |
+| `association:member/listDuesPayments.ts` | `dues/repos/dues.repo` | Repository call | Medium — Membership reads Financial |
+| `association:member/confirmPaymentProof.ts` | `dues/repos/dues.repo`, `dues/utils/settle-payment` | Repository + util | **High** — Membership triggers Financial settlement |
+| `association:member/getDuesConfig.ts` | `dues/repos/dues.repo` | Repository read | Low |
+| `association:member/getRosterMember.ts` | `membership/repos/membership.repo` | Repository call | Low — same context boundary ambiguity |
+| `documents/slice-023-*.test.ts` | `association:operations/utils/qr-checkin`, `association:member/utils/credential-token`, `certificates/repos/certificates.repo` | Test utility | Low — test-only |
+
+### Proper Boundaries (ID-Based References)
+
+These cross-context references use **UUID-only coupling** (correct DDD pattern):
+
+- All tables reference `person.id` via UUID FK — no direct schema imports needed at runtime
+- `organization.id` referenced via UUID FK in Financial, Membership, Communication schemas
+- `position.id` referenced via UUID FK in `election_nominee.positionId` (Governance → Membership)
+- `training.id` referenced via UUID in `certificate.trainingId` (Content → Activities)
+
+### High-Risk Coupling Assessment
+
+The **Financial ↔ Membership bidirectional coupling** is the most significant anti-corruption concern:
+
+1. **Financial → Membership:** `dues/utils/settle-payment.ts` and `dues/refundPayment.ts` import `membershipLifecycle` from `association:member/utils/membership-lifecycle.ts` to extend/reset membership expiry on payment/refund
+2. **Membership → Financial:** `association:member/confirmPaymentProof.ts` imports `settlePayment` from `dues/utils/settle-payment.ts`
+
+This creates a circular dependency chain: `dues → membership-lifecycle → dues (repos)`. Currently resolved via the `membershipLifecycle` service object in `association:member/utils/membership-lifecycle.ts` which acts as a **Shared Kernel** between the two contexts, but is owned by Membership.
+
+---
+
+## 13. State Machines
+
+Three explicit `VALID_TRANSITIONS` maps exist in handler code. One additional state machine is computed at query time (membership status).
+
+### 13a. Organization Lifecycle
+
+**Entity:** `organization`
+**Enum:** `org_lifecycle_status`
+**Source:** `platformadmin/transitionOrgStatus.ts`
+
+```
+trial ──────► active
+              │
+              ├──► suspended ──► active
+              │        │
+              │        └──► cancelled ──► active
+              │
+              └──► cancelled ──► active
+```
+
+| From | Allowed Targets | Guard |
+|------|----------------|-------|
+| `trial` | `active` | None |
+| `active` | `suspended`, `cancelled` | None |
+| `suspended` | `active`, `cancelled` | None |
+| `cancelled` | `active` | None |
+
+Error: `BusinessLogicError('INVALID_TRANSITION')` on disallowed transition.
+
+### 13b. Membership Status (Officer-Initiated)
+
+**Entity:** `membership`
+**Enum:** `membership_status` (subset used in transitions)
+**Source:** `membership/updateMember.ts`
+
+| From | Allowed Targets | Guard |
+|------|----------------|-------|
+| `active` | `suspended`, `removed` | Officer role required |
+| `grace` | `suspended` | Officer role required |
+| `lapsed` | `suspended`, `active` | Officer role required |
+| `suspended` | `active` | Officer role required |
+
+**Important caveats (from code comments):**
+- `pendingPayment → active/removed` handled by `reviewApplication`, not `updateMember`
+- `active → gracePeriod` and `gracePeriod → lapsed` are **automatic** (computed from `dues_expiry_date`)
+- `lapsed → active` also happens via payment recording (BR-07)
+- No-op transitions (`from === to`) are always valid
+
+### 13c. Membership Status (Computed — BR-01)
+
+**Entity:** `membership` (virtual — never stored as mutable field)
+**Source:** `association:member/utils/compute-membership-status.ts`
+
+This is **not** a traditional state machine. Status is computed at query time from `duesExpiryDate`, `suspendedAt`, `removedAt`, and `isPendingPayment` flags.
+
+**Priority order (highest wins):**
+
+| Priority | Status | Condition |
+|----------|--------|-----------|
+| 1 | `removed` | `removedAt` is set (irreversible officer action) |
+| 2 | `suspended` | `suspendedAt` is set (reversible officer action) |
+| 3 | `pendingPayment` | `isPendingPayment` flag true (initial state) |
+| 4 | `active` | `duesExpiryDate` is null (life/honorary) OR expiry >= today |
+| 5 | `gracePeriod` | Today is within `gracePeriodDays` after expiry |
+| 6 | `lapsed` | Grace period also expired |
+
+**Reactivatable statuses** (from `membership-lifecycle.ts`): `pendingPayment`, `active`, `gracePeriod`, `lapsed`
+
+### 13d. Election Status
+
+**Entity:** `election`
+**Enum:** `election_status`
+**Source:** `elections/updateElectionStatus.ts`
+
+```
+draft ──► nominationsOpen ──► votingOpen ──► awaitingConfirmation ──► published (terminal)
+  │              │                 │                   │
+  └──► cancelled └──► cancelled    └──► cancelled      └──► cancelled (terminal)
+```
+
+| From | Allowed Targets | Guard |
+|------|----------------|-------|
+| `draft` | `nominationsOpen`, `cancelled` | None |
+| `nominationsOpen` | `votingOpen`, `cancelled` | None |
+| `votingOpen` | `awaitingConfirmation`, `cancelled` | **BR-33:** Minimum 2 candidates per position |
+| `awaitingConfirmation` | `published`, `cancelled` | None |
+| `published` | _(none — terminal)_ | — |
+| `cancelled` | _(none — terminal)_ | — |
+
+Error: `BusinessLogicError('INVALID_ELECTION_TRANSITION')` on disallowed transition. `BusinessLogicError('INSUFFICIENT_CANDIDATES')` when BR-33 fails.
+
+### Enum-Only Status Fields (No Explicit Transition Map)
+
+These entities have status enums but no `VALID_TRANSITIONS` map in code — transitions are implicit in handler logic:
+
+| Entity | Enum | Values | Schema File |
+|--------|------|--------|-------------|
+| `booking` | `booking_status` | pending, confirmed, rejected, cancelled, completed, no_show_client, no_show_host | `booking/repos/booking.schema.ts` |
+| `event` | `event_status` | draft, published, cancelled, completed | `association:operations/repos/events.schema.ts` |
+| `training` | `training_status` | draft, published, cancelled, completed | `association:operations/repos/training.schema.ts` |
+| `dues_payment` | `dues_payment_status` | pending, completed, failed, refunded, partiallyRefunded, expired, submitted, underReview, confirmed, rejected | `dues/repos/dues-payments.schema.ts` |
+| `notification` | `notification_status` | queued, sent, delivered, read, failed, expired | `notifs/repos/notification.schema.ts` |
+| `email_queue` | `email_queue_status` | pending, processing, sent, failed, cancelled | `email/repos/email.schema.ts` |
+| `invitation_token` | `invite_status` | pending, claimed, expired, revoked | `invite/repos/invite.schema.ts` |
+| `affiliation_transfer` | `transfer_status` | requested, pendingSourceApproval, pendingTargetApproval, approved, denied, completed, cancelled | `association:member/repos/chapters.schema.ts` |
