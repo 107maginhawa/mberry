@@ -90,6 +90,50 @@ describe('listMembers', () => {
     expect(capturedFilters.offset).toBe(0);
   });
 
+  test('[BR-21] each query is scoped by organizationId from route param', async () => {
+    const capturedOrgIds: string[] = [];
+    mocks = stubRepo(MembershipRepository, {
+      listMembers: async (filters: any) => {
+        capturedOrgIds.push(filters.organizationId);
+        return { data: [], total: 0 };
+      },
+    });
+
+    // Call with org-A
+    const ctxA = makeCtx({ _params: { organizationId: 'org-A' } });
+    await listMembers(ctxA);
+    expect(capturedOrgIds[0]).toBe('org-A');
+
+    // Call with org-B — different org, different scope
+    const ctxB = makeCtx({ _params: { organizationId: 'org-B' } });
+    await listMembers(ctxB);
+    expect(capturedOrgIds[1]).toBe('org-B');
+  });
+
+  test('search completes under 200ms with stubbed repo', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      listMembers: async () => ({
+        data: Array.from({ length: 50 }, (_, i) => ({
+          membership: { id: `mem-${i}`, organizationId: 'org-1', status: 'active' },
+          person: { id: `p-${i}`, firstName: `Member`, lastName: `${i}`, avatar: null },
+          category: { id: 'cat-1', name: 'Regular' },
+        })),
+        total: 50,
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-1' },
+      _query: { search: 'Member', limit: '50' },
+    });
+
+    const start = performance.now();
+    await listMembers(ctx);
+    const elapsed = performance.now() - start;
+
+    expect(elapsed).toBeLessThan(200);
+  });
+
   test('returns empty list when no members', async () => {
     mocks = stubRepo(MembershipRepository, {
       listMembers: async () => ({ data: [], total: 0 }),

@@ -18,8 +18,13 @@ export async function getPublicDirectoryProfile(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DirectoryProfileRepository(db, ctx.get('logger'));
 
+  // BR-21: Scope by organizationId to prevent cross-org profile leakage.
+  // Without this, a personId from org-A could be returned when browsing org-B.
+  const orgId = ctx.get('organizationId');
+
   const profile = await repo.findOne({
     personId: (params as any).personId,
+    organizationId: orgId,
     visibility: 'public',
   });
 

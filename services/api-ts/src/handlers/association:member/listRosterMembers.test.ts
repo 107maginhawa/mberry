@@ -3,6 +3,8 @@
  *
  * OPS-01: Officer sees dues + training status in single roster request (no N+1)
  * OPS-04: Server-side DB-level filtering by duesStatus and trainingCompliant
+ * BR-21: Cross-org independence — roster scoped by organizationId
+ * Slice 012: stabilize member roster + directory
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -232,6 +234,57 @@ describe('listRosterMembers handler', () => {
 
     expect(res.status).toBe(500);
     expect(res.body.error).toBe('Failed to load roster');
+  });
+
+  test('[BR-21] roster query passes organizationId from query to repo', async () => {
+    let capturedOrgId: string | undefined;
+    stubRepo(MembershipRepository, {
+      listMembersWithOfficerStatus: async (filters: any) => {
+        capturedOrgId = filters.organizationId;
+        return { data: [], total: 0 };
+      },
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-isolated',
+      _query: { organizationId: 'org-isolated', page: 1, pageSize: 20 },
+    });
+
+    const res = await listRosterMembers(ctx as any) as any;
+
+    expect(res.status).toBe(200);
+    expect(capturedOrgId).toBe('org-isolated');
+  });
+
+  test('[BR-21] non-officer gets 403 (cross-org access denied)', async () => {
+    // Override the beforeEach officer stub to return no active terms
+    restoreRepo(OfficerTermRepository);
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [], // not an officer
+    });
+
+    const ctx = makeCtx({
+      _query: { organizationId: 'org-1', page: 1, pageSize: 20 },
+    });
+
+    const res = await listRosterMembers(ctx as any) as any;
+
+    expect(res.status).toBe(403);
+  });
+
+  test('[BR-21] officer with wrong position title gets 403', async () => {
+    restoreRepo(OfficerTermRepository);
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Auditor' }], // wrong title
+    });
+
+    const ctx = makeCtx({
+      _query: { organizationId: 'org-1', page: 1, pageSize: 20 },
+    });
+
+    const res = await listRosterMembers(ctx as any) as any;
+
+    expect(res.status).toBe(403);
   });
 
   test('returns 200 with duesInvoiceStatus, creditsEarned, trainingCompliant per row', async () => {
