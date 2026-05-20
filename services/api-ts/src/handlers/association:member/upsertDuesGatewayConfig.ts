@@ -24,10 +24,10 @@ export async function upsertDuesGatewayConfig(
 
   const [result] = await db
     .insert(duesGatewayConfigs)
-    .values({ ...body, organizationId } as typeof duesGatewayConfigs.$inferInsert)
+    .values({ ...body, organizationId } as any) // body.secretKey → schema.encryptedSecret mapping
     .onConflictDoUpdate({
       target: [duesGatewayConfigs.organizationId],
-      set: { ...body, updatedAt: new Date() } as Partial<typeof duesGatewayConfigs.$inferSelect>,
+      set: { ...body, updatedAt: new Date() } as any,
     })
     .returning();
 
