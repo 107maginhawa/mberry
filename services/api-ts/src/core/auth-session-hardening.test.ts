@@ -21,18 +21,27 @@ describe('AC-M01-001: OTP delivery', () => {
     expect(typeof authModule.createAuth).toBe('function');
   });
 
-  test('OTP email uses high priority (priority=1)', () => {
-    // Verify from the source that OTP sends are queued with priority 1
-    // This is a structural assertion — the emailOTP config in auth.ts
-    // sets priority: 1 for all OTP emails
-    const priority = 1;
-    expect(priority).toBe(1); // Auth emails are high-priority
+  test('OTP email uses high priority (priority=1)', async () => {
+    // BR: Auth emails must be high-priority — verify the source configures priority: 1
+    const fs = await import('fs');
+    const path = await import('path');
+    const authSource = fs.readFileSync(
+      path.resolve(import.meta.dir, './auth.ts'),
+      'utf-8',
+    );
+    // emailOTP section must set priority: 1
+    expect(authSource).toContain('priority: 1');
   });
 
-  test('OTP email includes expiration time of 5 minutes', () => {
-    // The emailOTP plugin in auth.ts sends expirationTime: 5
-    const expirationTime = 5;
-    expect(expirationTime).toBe(5);
+  test('OTP email includes expiration time of 5 minutes', async () => {
+    // BR: OTP codes expire in 5 minutes — verify auth.ts configures expirationTime: 5
+    const fs = await import('fs');
+    const path = await import('path');
+    const authSource = fs.readFileSync(
+      path.resolve(import.meta.dir, './auth.ts'),
+      'utf-8',
+    );
+    expect(authSource).toContain('expirationTime: 5');
   });
 });
 

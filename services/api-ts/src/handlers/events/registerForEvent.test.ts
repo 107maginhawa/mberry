@@ -10,7 +10,6 @@ import { MembershipRepository } from '../association:member/repos/membership.rep
 const fakeEvent = {
   id: 'evt-1',
   organizationId: 'org-1',
-  organizationId: 'org-1',
   title: 'Annual Conference',
   capacity: 100,
   status: 'published',
