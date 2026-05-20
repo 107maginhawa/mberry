@@ -115,7 +115,7 @@ Each association onboarded adds members to the verified professional network. Ph
 
 ### Implementation Status (API Handlers)
 
-The API service has 22 handler directories under `services/api-ts/src/handlers/`. TypeSpec coverage is approximately 60%. The following platform modules are implemented:
+The API service has 24 handler directories under `services/api-ts/src/handlers/`. TypeSpec coverage is approximately 60%. The following platform modules are implemented:
 
 | Handler Directory | TypeSpec | Notes |
 |-------------------|----------|-------|
@@ -132,7 +132,6 @@ The API service has 22 handler directories under `services/api-ts/src/handlers/`
 | training | No | CPD/CE credit tracking (10 handlers, hand-wired) |
 | elections | Yes | Voting, nominations (6 handlers) |
 | communication | Yes | Templates, queuing (28 handlers) |
-| communications | No | Announcements (8 handlers, hand-wired) |
 | comms | Yes | WebSocket: video, chat (11 handlers) |
 | documents | Yes | Document management (15 handlers) |
 | certificates | Yes | Certificate generation (3 handlers) |
@@ -141,6 +140,9 @@ The API service has 22 handler directories under `services/api-ts/src/handlers/`
 | audit | Yes | Compliance logging (1 handler) |
 | email | Yes | Transactional email (9 handlers) |
 | notifs | Mixed | Multi-channel notifications (5 handlers) |
+| advertising | No | Ad management (7 handlers, hand-wired) |
+| jobs | No | Job board (7 handlers, hand-wired) |
+| marketplace | No | Vendor marketplace (9 handlers, hand-wired) |
 
 ---
 

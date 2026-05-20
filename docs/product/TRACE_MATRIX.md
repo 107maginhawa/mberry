@@ -13,9 +13,9 @@
 | **Workflows (WF)** | 114 | -- |
 | **Modules (M)** | 19 | -- |
 | --- | --- | --- |
-| **BR COMPLETE chains** (spec+code+test) | 26 | 65% |
-| **BR PARTIAL chains** (spec+code OR spec+test) | 6 | 15% |
-| **BR ORPHAN nodes** (spec only) | 8 | 20% |
+| **BR COMPLETE chains** (spec+code+test) | 28 | 70% |
+| **BR PARTIAL chains** (spec+code OR spec+test) | 11 | 27.5% |
+| **BR ORPHAN nodes** (spec only) | 1 | 2.5% |
 | **AC COMPLETE chains** (spec+code+test) | 9 | 12.5% |
 | **AC PARTIAL chains** | 17 | 23.6% |
 | **AC ORPHAN nodes** | 46 | 63.9% |
