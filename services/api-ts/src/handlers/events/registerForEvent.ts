@@ -13,6 +13,14 @@ export async function registerForEvent(ctx: Context): Promise<Response> {
   const event = await repo.get(eventId);
   if (!event) throw new NotFoundError('Event not found');
 
+  // [M8-R1] Block direct registration for paid events — requires payment gateway
+  if (event.registrationFee && event.registrationFee > 0) {
+    throw new BusinessLogicError(
+      'Paid event requires payment before registration. Use the payment gateway.',
+      'PAYMENT_REQUIRED'
+    );
+  }
+
   // [BR-02] Only active members can register for events
   const membershipRepo = new MembershipRepository(db, ctx.get('logger'));
   const membership = await membershipRepo.findByPersonAndOrg(session.user.id, event.organizationId);
