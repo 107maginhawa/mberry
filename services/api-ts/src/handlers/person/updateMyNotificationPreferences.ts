@@ -22,10 +22,10 @@ export async function updateMyNotificationPreferences(
   const personId = session.user.id;
   const organizationId = ctx.get('organizationId') as string;
   const body = ctx.req.valid('json');
-  const b = body as any;
+  const b = body as Record<string, unknown>;
 
-  if (!b.category) throw new ValidationError('category is required');
-  if (!NOTIFICATION_CATEGORIES.includes(b.category)) {
+  if (!b['category']) throw new ValidationError('category is required');
+  if (!NOTIFICATION_CATEGORIES.includes(b['category'] as string)) {
     throw new ValidationError(`Invalid category. Must be one of: ${NOTIFICATION_CATEGORIES.join(', ')}`);
   }
 
@@ -34,13 +34,13 @@ export async function updateMyNotificationPreferences(
     .from(notificationPreferences)
     .where(and(
       eq(notificationPreferences.personId, personId),
-      eq(notificationPreferences.category, b.category),
+      eq(notificationPreferences.category, b['category'] as string),
     ))
     .limit(1);
 
   const updates = {
-    pushEnabled: b.pushEnabled ?? existing?.pushEnabled ?? true,
-    emailEnabled: b.emailEnabled ?? existing?.emailEnabled ?? false,
+    pushEnabled: (b['pushEnabled'] as boolean | undefined) ?? existing?.pushEnabled ?? true,
+    emailEnabled: (b['emailEnabled'] as boolean | undefined) ?? existing?.emailEnabled ?? false,
   };
 
   let row;
@@ -53,7 +53,7 @@ export async function updateMyNotificationPreferences(
   } else {
     [row] = await db
       .insert(notificationPreferences)
-      .values({ personId, category: b.category, organizationId, ...updates })
+      .values({ personId, category: b['category'] as string, organizationId, ...updates })
       .returning();
   }
 
@@ -61,8 +61,8 @@ export async function updateMyNotificationPreferences(
     action: 'update',
     resourceType: 'notification-preferences',
     resourceId: personId,
-    description: `Notification preference updated: ${b.category}`,
-    details: { category: b.category },
+    description: `Notification preference updated: ${b['category']}`,
+    details: { category: b['category'] as string },
   });
 
   return ctx.json(row, existing ? 200 : 201);

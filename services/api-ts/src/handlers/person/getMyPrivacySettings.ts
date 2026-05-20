@@ -20,7 +20,7 @@ export async function getMyPrivacySettings(
   const db = ctx.get('database') as DatabaseInstance;
   const personId = session.user.id;
   const query = ctx.req.valid('query');
-  const orgId = (query as any).organizationId ?? (query as any).orgId ?? null;
+  const orgId = query['orgId'] ?? null;
 
   if (orgId) {
     const [row] = await db

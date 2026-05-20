@@ -17,12 +17,12 @@ export async function updateNotificationPreferences(ctx: HandlerContext): Promis
   const user = ctx.get('user') as User | undefined;
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const body = await ctx.req.json().catch(() => null) as any;
-  if (!body?.category) {
+  const body = await ctx.req.json().catch(() => null) as Record<string, unknown> | null;
+  if (!body?.['category']) {
     throw new ValidationError('category is required');
   }
 
-  if (!NOTIFICATION_CATEGORIES.includes(body.category)) {
+  if (!NOTIFICATION_CATEGORIES.includes(body['category'] as string)) {
     throw new ValidationError(`Invalid category. Must be one of: ${NOTIFICATION_CATEGORIES.join(', ')}`);
   }
 
@@ -34,13 +34,13 @@ export async function updateNotificationPreferences(ctx: HandlerContext): Promis
     .from(notificationPreferences)
     .where(and(
       eq(notificationPreferences.personId, user.id),
-      eq(notificationPreferences.category, body.category),
+      eq(notificationPreferences.category, body['category'] as string),
     ))
     .limit(1);
 
   const updates = {
-    pushEnabled: body.pushEnabled ?? existing?.pushEnabled ?? true,
-    emailEnabled: body.emailEnabled ?? existing?.emailEnabled ?? false,
+    pushEnabled: (body['pushEnabled'] as boolean | undefined) ?? existing?.pushEnabled ?? true,
+    emailEnabled: (body['emailEnabled'] as boolean | undefined) ?? existing?.emailEnabled ?? false,
   };
 
   if (existing) {
@@ -56,7 +56,7 @@ export async function updateNotificationPreferences(ctx: HandlerContext): Promis
     .insert(notificationPreferences)
     .values({
       personId: user.id,
-      category: body.category,
+      category: body['category'] as string,
       organizationId,
       ...updates,
     })

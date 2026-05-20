@@ -107,7 +107,7 @@ export async function handleStripeWebhook(
         await handleTransferCreated(event, invoiceRepo, logger);
         break;
         
-      case 'transfer.failed' as any:
+      case 'transfer.failed' as any: // structural: Stripe type gap — transfer.failed not in Stripe.Event['type'] union
         await handleTransferFailed(event, invoiceRepo, logger);
         break;
       
@@ -201,7 +201,7 @@ async function handlePaymentIntentSucceeded(
       },
       channels: ['in-app', 'email'],
       priority: 'normal'
-    } as any);
+    } as Record<string, unknown>);
 
     logger.info(
       { invoiceId, paymentIntentId: paymentIntent.id, customerId: invoice.customer },
@@ -263,7 +263,7 @@ async function handlePaymentIntentFailed(
       },
       channels: ['in-app', 'email', 'sms'],
       priority: 'high'
-    } as any);
+    } as Record<string, unknown>);
 
     logger.info(
       { invoiceId, paymentIntentId: paymentIntent.id, customerId: invoice.customer },
@@ -350,7 +350,7 @@ async function handleChargeSucceeded(
   
   // Find invoice by payment intent ID in metadata
   // Note: This requires a custom query since we're searching in JSONB
-  const allInvoices = await (invoiceRepo as any).db
+  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
     .select()
     .from(invoices);
 
@@ -407,7 +407,7 @@ async function handleChargeSucceeded(
       },
       channels: ['in-app', 'email'],
       priority: 'normal'
-    } as any);
+    } as Record<string, unknown>);
 
     // Notification for provider - payment received
     await notificationService.createNotification({
@@ -425,7 +425,7 @@ async function handleChargeSucceeded(
       },
       channels: ['in-app', 'email'],
       priority: 'normal'
-    } as any);
+    } as Record<string, unknown>);
 
     logger.info(
       { invoiceId: invoice.id, chargeId: charge.id, customerId: invoice.customer, merchantId: invoice.merchant },
@@ -457,7 +457,7 @@ async function handleChargeFailed(
   }
   
   // Find invoice by payment intent ID in metadata
-  const allInvoices = await (invoiceRepo as any).db
+  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
     .select()
     .from(invoices);
 
@@ -498,7 +498,7 @@ async function handleChargeFailed(
       },
       channels: ['in-app', 'email'],
       priority: 'high'
-    } as any);
+    } as Record<string, unknown>);
 
     logger.info(
       { invoiceId: invoice.id, chargeId: charge.id, customerId: invoice.customer },
@@ -529,7 +529,7 @@ async function handleChargeRefunded(
   }
   
   // Find invoice by payment intent ID in metadata
-  const allInvoices = await (invoiceRepo as any).db
+  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
     .select()
     .from(invoices);
 
@@ -680,7 +680,7 @@ async function handleTransferCreated(
   const transfer = event.data.object as Stripe.Transfer;
   
   // Find invoice by transfer ID in metadata
-  const allInvoices = await (invoiceRepo as any).db
+  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
     .select()
     .from(invoices);
 
@@ -715,7 +715,7 @@ async function handleTransferFailed(
   const transfer = event.data.object as Stripe.Transfer;
   
   // Find invoice by transfer ID in metadata
-  const allInvoices = await (invoiceRepo as any).db
+  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
     .select()
     .from(invoices);
 
@@ -735,7 +735,7 @@ async function handleTransferFailed(
       { 
         invoiceId: invoice.id,
         transferId: transfer.id,
-        failureMessage: (transfer as any).failure_message 
+        failureMessage: (transfer as any).failure_message // structural: Stripe type gap — failure_message not in Stripe.Transfer type
       }, 
       'Transfer failed for invoice - requires manual review'
     );

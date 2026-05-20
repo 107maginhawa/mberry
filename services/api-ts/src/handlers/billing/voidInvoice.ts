@@ -197,7 +197,7 @@ export async function voidInvoice(
       currency: updatedInvoice.currency,
       paymentCaptureMethod: updatedInvoice.paymentCaptureMethod,
       paymentDueAt: updatedInvoice.paymentDueAt?.toISOString() ?? null,
-      lineItems: ((invoiceWithLineItems as any)?.lineItems || []).map((item: any) => ({
+      lineItems: ((invoiceWithLineItems as Record<string, unknown> | null)?.['lineItems'] as Array<Record<string, unknown>> || []).map((item: Record<string, unknown>) => ({
         description: item.description,
         quantity: item.quantity,
         unitPrice: item.unitPrice,

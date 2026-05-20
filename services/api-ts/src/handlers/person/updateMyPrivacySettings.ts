@@ -22,9 +22,9 @@ export async function updateMyPrivacySettings(
   const db = ctx.get('database') as DatabaseInstance;
   const personId = session.user.id;
   const body = ctx.req.valid('json');
-  const b = body as any;
+  const b = body as Record<string, unknown>;
 
-  if (!b.organizationId) throw new ValidationError('organizationId is required');
+  if (!b['organizationId']) throw new ValidationError('organizationId is required');
 
   // Verify membership
   const [membership] = await db
@@ -32,7 +32,7 @@ export async function updateMyPrivacySettings(
     .from(memberships)
     .where(and(
       eq(memberships.personId, personId),
-      eq(memberships.organizationId, b.organizationId),
+      eq(memberships.organizationId, b['organizationId'] as string),
       inArray(memberships.status, ['active', 'gracePeriod']),
     ))
     .limit(1);
@@ -44,15 +44,15 @@ export async function updateMyPrivacySettings(
     .from(personPrivacySettings)
     .where(and(
       eq(personPrivacySettings.personId, personId),
-      eq(personPrivacySettings.organizationId, b.organizationId),
+      eq(personPrivacySettings.organizationId, b['organizationId'] as string),
     ))
     .limit(1);
 
   const updates = {
-    emailVisible: b.emailVisible ?? existing?.emailVisible ?? false,
-    phoneVisible: b.phoneVisible ?? existing?.phoneVisible ?? false,
-    photoVisible: b.photoVisible ?? existing?.photoVisible ?? true,
-    addressVisible: b.addressVisible ?? existing?.addressVisible ?? false,
+    emailVisible: (b['emailVisible'] as boolean | undefined) ?? existing?.emailVisible ?? false,
+    phoneVisible: (b['phoneVisible'] as boolean | undefined) ?? existing?.phoneVisible ?? false,
+    photoVisible: (b['photoVisible'] as boolean | undefined) ?? existing?.photoVisible ?? true,
+    addressVisible: (b['addressVisible'] as boolean | undefined) ?? existing?.addressVisible ?? false,
   };
 
   let row;
@@ -65,7 +65,7 @@ export async function updateMyPrivacySettings(
   } else {
     [row] = await db
       .insert(personPrivacySettings)
-      .values({ personId, organizationId: b.organizationId, ...updates })
+      .values({ personId, organizationId: b['organizationId'] as string, ...updates })
       .returning();
   }
 
@@ -74,7 +74,7 @@ export async function updateMyPrivacySettings(
     resourceType: 'privacy-settings',
     resourceId: personId,
     description: 'Self-service privacy settings update',
-    details: { orgId: b.organizationId },
+    details: { orgId: b['organizationId'] as string },
   });
 
   return ctx.json(row, existing ? 200 : 201);

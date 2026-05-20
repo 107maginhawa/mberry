@@ -79,10 +79,10 @@ export async function updatePerson(
   if (body.avatar !== undefined) updateData.avatar = body.avatar;
   if (body.languagesSpoken !== undefined) updateData.languagesSpoken = body.languagesSpoken;
   if (body.timezone !== undefined) updateData.timezone = body.timezone;
-  if ((body as any).licenseNumber !== undefined) updateData.licenseNumber = (body as any).licenseNumber;
-  if ((body as any).specialization !== undefined) updateData.specialization = (body as any).specialization;
-  if ((body as any).prcId !== undefined) updateData.prcId = (body as any).prcId;
-  if ((body as any).preferredLanguage !== undefined) updateData.preferredLanguage = (body as any).preferredLanguage;
+  if ((body as Record<string, unknown>)['licenseNumber'] !== undefined) updateData.licenseNumber = (body as Record<string, unknown>)['licenseNumber'] as string;
+  if ((body as Record<string, unknown>)['specialization'] !== undefined) updateData.specialization = (body as Record<string, unknown>)['specialization'] as string;
+  if ((body as Record<string, unknown>)['prcId'] !== undefined) updateData.prcId = (body as Record<string, unknown>)['prcId'] as string;
+  if ((body as Record<string, unknown>)['preferredLanguage'] !== undefined) updateData.preferredLanguage = (body as Record<string, unknown>)['preferredLanguage'] as string;
 
   // Update person record
   const updatedPerson = await repo.updateOneById(personId, updateData);

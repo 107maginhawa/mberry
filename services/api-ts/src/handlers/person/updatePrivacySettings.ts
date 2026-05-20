@@ -18,8 +18,8 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
   const user = ctx.get('user') as User | undefined;
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const body = await ctx.req.json().catch(() => null) as any;
-  if (!body?.organizationId) {
+  const body = await ctx.req.json().catch(() => null) as Record<string, unknown> | null;
+  if (!body?.['organizationId']) {
     throw new ValidationError('organizationId is required');
   }
 
@@ -31,7 +31,7 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
     .from(memberships)
     .where(and(
       eq(memberships.personId, user.id),
-      eq(memberships.organizationId, body.organizationId),
+      eq(memberships.organizationId, body['organizationId'] as string),
       inArray(memberships.status, ['active', 'gracePeriod']),
     ))
     .limit(1);
@@ -46,15 +46,15 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
     .from(personPrivacySettings)
     .where(and(
       eq(personPrivacySettings.personId, user.id),
-      eq(personPrivacySettings.organizationId, body.organizationId),
+      eq(personPrivacySettings.organizationId, body['organizationId'] as string),
     ))
     .limit(1);
 
   const updates = {
-    emailVisible: body.emailVisible ?? existing?.emailVisible ?? false,
-    phoneVisible: body.phoneVisible ?? existing?.phoneVisible ?? false,
-    photoVisible: body.photoVisible ?? existing?.photoVisible ?? true,
-    addressVisible: body.addressVisible ?? existing?.addressVisible ?? false,
+    emailVisible: (body['emailVisible'] as boolean | undefined) ?? existing?.emailVisible ?? false,
+    phoneVisible: (body['phoneVisible'] as boolean | undefined) ?? existing?.phoneVisible ?? false,
+    photoVisible: (body['photoVisible'] as boolean | undefined) ?? existing?.photoVisible ?? true,
+    addressVisible: (body['addressVisible'] as boolean | undefined) ?? existing?.addressVisible ?? false,
   };
 
   if (existing) {
@@ -70,7 +70,7 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
     .insert(personPrivacySettings)
     .values({
       personId: user.id,
-      organizationId: body.organizationId,
+      organizationId: body['organizationId'] as string,
       ...updates,
     })
     .returning();

@@ -35,8 +35,8 @@ export async function updateInvoice(
   const user = session.user;
 
   // Extract validated parameters and body
-  const params = ctx.req.valid('param') as any;
-  const body = ctx.req.valid('json') as any;
+  const params = ctx.req.valid('param');
+  const body = ctx.req.valid('json');
 
   const invoiceId = params.invoice;
 
@@ -138,7 +138,7 @@ export async function updateInvoice(
     invoiceId,
     invoiceNumber: updatedInvoice.invoiceNumber,
     changes: Object.keys(updateData),
-    newAmount: (updatedInvoice as any).amount
+    newAmount: (updatedInvoice as Record<string, unknown>)['amount']
   }, 'Invoice updated successfully');
 
   // Fetch updated invoice with line items for complete response
@@ -158,7 +158,7 @@ export async function updateInvoice(
     currency: updatedInvoice.currency,
     paymentCaptureMethod: updatedInvoice.paymentCaptureMethod,
     paymentDueAt: updatedInvoice.paymentDueAt?.toISOString() || null,
-    lineItems: ((invoiceWithLineItems as any)?.lineItems || []).map((item: any) => ({
+    lineItems: ((invoiceWithLineItems as Record<string, unknown> | null)?.['lineItems'] as Array<Record<string, unknown>> || []).map((item: Record<string, unknown>) => ({
       description: item.description,
       quantity: item.quantity,
       unitPrice: item.unitPrice,

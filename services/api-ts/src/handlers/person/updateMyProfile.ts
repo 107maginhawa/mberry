@@ -27,7 +27,7 @@ export async function updateMyProfile(
   const existing = await repo.findOneById(personId);
   if (!existing) throw new NotFoundError('Person not found');
 
-  const b = body as any;
+  const b = body as Record<string, unknown>;
   const updateData: Record<string, unknown> = { updatedBy: personId };
   if (b['firstName'] !== undefined) updateData['firstName'] = b['firstName'];
   if (b['lastName'] !== undefined) updateData['lastName'] = b['lastName'];
@@ -44,7 +44,7 @@ export async function updateMyProfile(
   if (b['preferredLanguage'] !== undefined) updateData['preferredLanguage'] = b['preferredLanguage'];
   if (b['avatar'] !== undefined) updateData['avatar'] = b['avatar'];
 
-  const updated = await repo.updateOneById(personId, updateData as any);
+  const updated = await repo.updateOneById(personId, updateData as Record<string, unknown>);
 
   await auditAction(ctx, {
     action: 'update',

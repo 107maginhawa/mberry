@@ -31,7 +31,7 @@ export async function cancelMyAccountDeletion(ctx: BaseContext): Promise<Respons
     deletionRequestedAt: null,
     deletionScheduledAt: null,
     updatedBy: personId,
-  } as any);
+  } as Partial<typeof person>);
 
   await auditAction(ctx, {
     action: 'update',

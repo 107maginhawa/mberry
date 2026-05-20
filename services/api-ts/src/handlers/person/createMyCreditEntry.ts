@@ -23,38 +23,38 @@ export async function createMyCreditEntry(
   const body = ctx.req.valid('json');
   const personId = session.user.id;
 
-  const b = body as any;
+  const b = body as Record<string, unknown>;
 
-  if (!b.activityName || b.creditAmount <= 0) {
+  if (!b['activityName'] || (b['creditAmount'] as number) <= 0) {
     throw new ValidationError('activityName required and creditAmount must be positive');
   }
 
-  const activityDate = new Date(b.activityDate);
-  const registrationDate = new Date(b.registrationDate ?? activityDate.toISOString());
-  const cyclePeriodYears = b.cyclePeriodYears ?? 2;
+  const activityDate = new Date(b['activityDate'] as string);
+  const registrationDate = new Date((b['registrationDate'] as string) ?? activityDate.toISOString());
+  const cyclePeriodYears = (b['cyclePeriodYears'] as number) ?? 2;
 
   const cycle = getCycleForDate(registrationDate, activityDate, cyclePeriodYears);
 
   const repo = new CreditEntryRepository(db, logger);
 
   const entry = await repo.createOne({
-    organizationId: b.organizationId,
+    organizationId: b['organizationId'] as string,
     personId,
     type: 'manual',
-    activityName: b.activityName,
-    provider: b.provider,
+    activityName: b['activityName'] as string,
+    provider: b['provider'] as string,
     activityDate,
-    creditAmount: b.creditAmount,
+    creditAmount: b['creditAmount'] as number,
     cycleStart: cycle.cycleStart,
     cycleEnd: cycle.cycleEnd,
-    supportingDocumentId: b.supportingDocumentId,
+    supportingDocumentId: b['supportingDocumentId'] as string,
   });
 
   await auditAction(ctx, {
     action: 'create',
     resourceType: 'credit-entry',
     resourceId: entry.id,
-    description: `Self-service credit entry: ${b.activityName} (${b.creditAmount} credits)`,
+    description: `Self-service credit entry: ${b['activityName']} (${b['creditAmount']} credits)`,
   });
 
   return ctx.json(entry, 201);

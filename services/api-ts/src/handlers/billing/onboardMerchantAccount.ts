@@ -38,11 +38,11 @@ export async function onboardMerchantAccount(
   const user = session.user;
 
   // Extract validated parameters
-  const params = ctx.req.valid('param') as any;
-  const merchantAccountId = params.merchantAccount;
+  const params = ctx.req.valid('param');
+  const merchantAccountId = params['merchantAccount'];
 
   // Extract request body (redirect URLs)
-  const body = ctx.req.valid('json') as any;
+  const body = ctx.req.valid('json');
   const { refreshUrl, returnUrl } = body;
 
   logger.info({ merchantAccountId, userId: user.id, refreshUrl, returnUrl }, 'Getting merchant account onboarding URL');

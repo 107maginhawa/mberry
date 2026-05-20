@@ -20,7 +20,7 @@ export async function getMyOfficerRole(
   const logger = ctx.get('logger');
   const params = ctx.req.valid('param');
   const personId = session.user.id;
-  const orgId = (params as any).organizationId;
+  const orgId = params['organizationId'];
 
   const repo = new OfficerTermRepository(db, logger);
   const terms = await repo.findActiveByPersonAndOrg(personId, orgId);
