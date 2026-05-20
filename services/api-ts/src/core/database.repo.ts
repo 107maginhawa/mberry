@@ -5,8 +5,14 @@
 
 import { eq, and, sql, isNull, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
-import type { PgTable } from 'drizzle-orm/pg-core';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 import type { Logger } from '@/types/logger';
+
+/** Minimum column shape expected by base repository operations */
+interface BaseTableColumns {
+  id: PgColumn;
+  createdAt?: PgColumn;
+}
 
 /**
  * Pagination options interface
@@ -21,7 +27,7 @@ export interface PaginationOptions {
  */
 export interface FindManyOptions {
   pagination?: PaginationOptions;
-  orderBy?: any;
+  orderBy?: SQL;
 }
 
 /**
@@ -62,14 +68,14 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
 
     const [created] = await this.db
       .insert(this.table)
-      .values(data as any)
+      .values(data as Record<string, unknown>)
       .returning();
 
     if (!created) {
       throw new Error('Failed to create record');
     }
 
-    this.logger?.debug({ id: (created as any)['id'] }, 'Record created successfully');
+    this.logger?.debug({ id: (created as Record<string, unknown>)['id'] }, 'Record created successfully');
 
     return created as TEntity;
   }
@@ -83,7 +89,7 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
     const [record] = await this.db
       .select()
       .from(this.table)
-      .where(eq((this.table as any).id, id))
+      .where(eq((this.table as unknown as BaseTableColumns).id, id))
       .limit(1);
 
     this.logger?.debug({ id, found: !!record }, 'Record lookup completed');
@@ -128,8 +134,8 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
 
     const [updated] = await this.db
       .update(this.table)
-      .set(updateData as any)
-      .where(eq((this.table as any).id, id))
+      .set(updateData as Record<string, unknown>)
+      .where(eq((this.table as unknown as BaseTableColumns).id, id))
       .returning();
 
     if (!updated) {
@@ -150,7 +156,7 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
 
     await this.db
       .delete(this.table)
-      .where(eq((this.table as any).id, id));
+      .where(eq((this.table as unknown as BaseTableColumns).id, id));
 
     this.logger?.info({ id, actorId }, 'Record deleted successfully');
   }
@@ -206,8 +212,8 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
     // Apply ordering (default to createdAt if available)
     if (options?.orderBy) {
       query.orderBy(options.orderBy);
-    } else if ((this.table as any).createdAt) {
-      query.orderBy((this.table as any).createdAt);
+    } else if ((this.table as unknown as BaseTableColumns).createdAt) {
+      query.orderBy((this.table as unknown as BaseTableColumns).createdAt);
     }
 
     // Apply pagination
