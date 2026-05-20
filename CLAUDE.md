@@ -39,11 +39,11 @@ workspace.
   Note: `@monobase/api-spec` (consumed by SDK + apps for generated OpenAPI types) lives at `specs/api/`, not under `packages/`.
 - `scripts/run-contract-tests.ts` - Runs the Hurl contract suite against `$API_URL`
 - `.github/workflows/contract.yml` - CI: boots the impl, runs Hurl + Schemathesis
-- `.claude/skills/` - 17 Claude Code skills for end-to-end development workflow (commit, db-migrate, debug, dev-api, dev-app, develop, frontend-module, handler, module-review, prd, pre-commit, shadcn, test-api, test-contract, test-e2e, typecheck, typespec). Surface as `/skill-name` in Claude Code sessions.
+- `.claude/skills/` - 20 Claude Code skills for end-to-end development workflow (br-extract, commit, contract-scaffold, db-migrate, debug, dev-api, dev-app, develop, frontend-module, handler, module-review, persona-audit, prd, pre-commit, shadcn, test-api, test-contract, test-e2e, typecheck, typespec). Surface as `/skill-name` in Claude Code sessions.
 
 ## Business Domain Modules
 
-The API service has **22 handler directories** under `services/api-ts/src/handlers/`. ~60% have matching TypeSpec definitions; the remainder use hand-wired routes.
+The API service has **25 handler directories** under `services/api-ts/src/handlers/`. ~58% have matching TypeSpec definitions; the remainder use hand-wired routes or are dark (no OpenAPI).
 
 **Core Identity**:
 1. **person** — Central PII hub (25 handlers, TypeSpec)
@@ -278,10 +278,10 @@ cd apps/account && bun run test:e2e     # E2E tests
 - ✅ **packages/eslint-config/** - Shared ESLint flat configs
 - ✅ **apps/admin** - Platform ops dashboard (port 3003)
 - ✅ **apps/memberry** - Product app — membership, dues, events, training (port 3004)
-- ✅ **specs/api/tests/contract/** - Hurl contract suite (27 scenarios, 44 files)
-- ✅ **.claude/skills/** - 17 Claude Code skills for end-to-end development workflow
+- ✅ **specs/api/tests/contract/** - Hurl contract suite (97 .hurl files)
+- ✅ **.claude/skills/** - 20 Claude Code skills for end-to-end development workflow
 - ✅ **Authentication** via Better-Auth (integrated, not a separate module)
-- ✅ **22 handler directories** under `services/api-ts/src/handlers/` (~60% with TypeSpec coverage)
+- ✅ **25 handler directories** under `services/api-ts/src/handlers/` (~58% with TypeSpec coverage)
 
 ### Multi-App Architecture
 Production apps typically follow a 3-app pattern:

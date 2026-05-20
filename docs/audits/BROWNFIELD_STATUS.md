@@ -1,8 +1,9 @@
-<!-- oli-magic v1.1 | generated 2026-05-20 | cycle 2/3 -->
+<!-- oli-magic v1.2 | updated 2026-05-20 | cycle 2/3 -->
 # Brownfield Adoption Dashboard
 
 **Project:** Memberry Healthcare AMS
 **Generated:** 2026-05-20 by `/oli-magic` Cycle 2 (final)
+**Last Updated:** 2026-05-20 by `/oli-magic --update`
 **Rescue Cycle:** 2 of 3
 **Status:** GRADUATED
 
@@ -293,6 +294,20 @@ All three core metrics (Health 9.1, Compliance 9.8, Confidence 9.0) meet the >= 
 
 ---
 
+## Cleanup Candidates
+
+Detected after Cycle 2 completion. Review before deleting — these are suggestions, not commands.
+
+| File/Dir | Category | Reason | Safe to Remove? |
+|----------|----------|--------|-----------------|
+| `apps/memberry/src/test/setup.ts` | Empty stub | Contains only `import '@testing-library/jest-dom'` — no tests reference it | LIKELY |
+| `apps/account/public/OneSignalSDKWorker.js` | Duplicate | Identical copy exists in `dist/`; `public/` version is redundant | VERIFY — may be needed for dev server |
+| `services/api-ts/dist/server` (72MB) | Build artifact | Already in `.gitignore`, safe to `rm` locally | YES (regenerated on build) |
+
+**Not flagged:** `docker-compose.deps.yml` (referenced in dev workflow), `cadence.yml` (embedded by Tauri at compile-time), all test files with `.skip`/`.todo` (conditional, not permanently dead).
+
+---
+
 ## What's Next
 
 **Post-graduation (Cycle 3 — optional polish):**
@@ -306,3 +321,226 @@ All three core metrics (Health 9.1, Compliance 9.8, Confidence 9.0) meet the >= 
 - Upgrade `@hookform/resolvers` when Zod v4 native support ships
 - Add RadioGroup to `@monobase/ui`
 - 15 tautological tests remain in older files (non-blocking, tracked for cleanup)
+
+---
+
+## Step 10: Security Audit (OWASP Top 10)
+
+**Audit date:** 2026-05-20
+**Scope:** `services/api-ts/src/`, `apps/*/src/`
+
+### 10.1 Injection (A03:2021)
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| SEC-01 | P3 | Raw `sql` template literals in seed files (40+ usages) | `seed-scenarios.ts`, `seed-rich.ts`, `migration-verify.test.ts` | ACCEPTABLE — seed/test files only, not user-facing handlers |
+| SEC-02 | -- | No `eval()`, `exec()`, `execSync()` in production code | -- | PASS |
+| SEC-03 | -- | All handler queries use Drizzle ORM (parameterized) | `handlers/*/repos/*.ts` | PASS |
+
+**Verdict:** PASS. All production handler code uses Drizzle ORM's parameterized queries. Raw `sql` template literals exist only in seed/test files where inputs are developer-controlled constants, not user input. No `eval`/`exec` calls found.
+
+### 10.2 Broken Authentication (A07:2021)
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| SEC-04 | -- | Better-Auth with Drizzle adapter, proper plugins (emailOTP, twoFactor, passkey, bearer, apiKey, magicLink) | `core/auth.ts` | PASS |
+| SEC-05 | -- | Cookie attributes: `httpOnly: true`, `sameSite` config-driven, `secure` config-driven | `core/auth.ts:422-425`, `utils/cors.ts` | PASS |
+| SEC-06 | -- | Account lockout after 5 failed attempts, 15-min ban, audit logged | `core/account-lockout.ts` | PASS |
+| SEC-07 | -- | Session limit enforcement (concurrent session cap) | `core/session-limit.ts` | PASS |
+| SEC-08 | -- | Session hardening tests exist | `core/auth-session-hardening.test.ts` | PASS |
+| SEC-09 | P3 | Cookie `secure: false` when `allowLocalNetwork` without tunneling | `utils/cors.ts:determineCookieConfig()` | ACCEPTABLE — dev-only path, production uses strict mode |
+
+**Verdict:** PASS. Comprehensive auth stack with account lockout, session limits, 2FA, passkeys, and proper cookie configuration.
+
+### 10.3 Sensitive Data Exposure (A02:2021)
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| SEC-10 | P2 | Email logged in `billing.ts` (`logger.info({ email: data.email }`) | `core/billing.ts:123` | OPEN |
+| SEC-11 | P2 | Email logged in `auth.ts` (`logger.info(...user.email...)`) | `core/auth.ts:147` | OPEN |
+| SEC-12 | -- | No `console.log` in handler code | `handlers/**/*.ts` | PASS |
+| SEC-13 | -- | Only `.env.example` files committed (no real secrets) | `.env.example` files | PASS |
+| SEC-14 | -- | No hardcoded secrets/API keys in source | `services/api-ts/src/` | PASS |
+| SEC-15 | -- | Pino configured with req serializer (strips sensitive headers) | `core/logger.ts` | PASS |
+
+**Verdict:** YELLOW. Two P2 findings where user emails are logged at `info` level. Should redact or move to `debug` level with masking. No secrets in code, no PII in handler logs.
+
+### 10.4 XSS (A03:2021)
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| SEC-16 | -- | No `dangerouslySetInnerHTML` in any frontend app | `apps/*/src/**/*.tsx` | PASS |
+| SEC-17 | -- | React auto-escapes by default | -- | PASS |
+
+**Verdict:** PASS. No XSS vectors found. React's default escaping + no `dangerouslySetInnerHTML` usage.
+
+### 10.5 CSRF (A01:2021)
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| SEC-18 | P3 | No explicit CSRF middleware — relies on SameSite cookies + CORS origin validation | `middleware/security.ts` | ACCEPTABLE |
+
+**Verdict:** ACCEPTABLE. Better-Auth uses `SameSite` cookie policy (lax in strict mode, none for cross-origin). Combined with CORS origin validation, this provides adequate CSRF protection for a cookie-based SPA. Explicit CSRF tokens would add defense-in-depth but are not required given current architecture.
+
+### 10.6 SSRF (A10:2021)
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| SEC-19 | P3 | `fetch()` calls in handlers use hardcoded/config URLs only (Stripe, OneSignal) | `handlers/billing/`, `handlers/notifs/` | ACCEPTABLE |
+
+**Verdict:** PASS. No user-controlled URLs passed to server-side `fetch()`. All external calls target configured service endpoints (Stripe API, OneSignal API).
+
+### 10.7 Rate Limiting
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| SEC-20 | -- | Global rate limiter: 120 req/min reads, 30 req/min writes per IP | `middleware/rate-limit.ts` | PASS |
+| SEC-21 | -- | Better-Auth has own rate limiting for `/auth/*` routes | `generated/better-auth/schema.ts` | PASS |
+| SEC-22 | -- | Health/ready endpoints exempt from rate limiting | `middleware/rate-limit.ts:73` | PASS |
+| SEC-23 | P3 | In-memory rate limiter — resets on restart, not shared across instances | `middleware/rate-limit.ts` | ACCEPTABLE — single-instance deployment |
+
+**Verdict:** PASS. Rate limiting exists for both custom and auth routes. In-memory storage is adequate for current single-instance deployment but would need Redis/Valkey backing for horizontal scaling.
+
+### Security Audit Summary
+
+| OWASP Category | Score | Open Issues |
+|----------------|-------|-------------|
+| A01 Broken Access Control (CSRF) | 8/10 | P3: no explicit CSRF tokens |
+| A02 Sensitive Data Exposure | 7/10 | **P2: 2 email-in-logs findings** |
+| A03 Injection + XSS | 10/10 | None |
+| A07 Broken Auth | 9/10 | P3: insecure cookies in dev mode |
+| A09 Logging & Monitoring | 9/10 | Covered in Step 11 |
+| A10 SSRF | 10/10 | None |
+| Rate Limiting | 9/10 | P3: in-memory only |
+| **Overall Security Score** | **8.9/10** | **2 P2, 4 P3** |
+
+---
+
+## Step 11: Observability Audit
+
+### 11.1 Structured Logging
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| OBS-01 | -- | Pino configured with JSON output (production), pino-pretty (dev) | `core/logger.ts` | PASS |
+| OBS-02 | -- | Custom serializers for req/res/error | `core/logger.ts` | PASS |
+| OBS-03 | -- | Service tag in base: `{ service: 'api' }` | `core/logger.ts` | PASS |
+| OBS-04 | -- | Log level configurable via `config.logging.level` | `core/logger.ts` | PASS |
+
+**Verdict:** PASS. Pino properly configured with structured JSON, custom serializers, and configurable levels.
+
+### 11.2 Correlation IDs / Request Tracing
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| OBS-05 | -- | `X-Request-ID` middleware generates UUID per request | `middleware/request.ts:14-18` | PASS |
+| OBS-06 | -- | Request ID propagated to context (`ctx.set('requestId')`) | `middleware/request.ts:17` | PASS |
+| OBS-07 | -- | Request ID included in all error responses (`requestId` field) | `core/errors.ts:146`, `middleware/validation.ts:54` | PASS |
+| OBS-08 | -- | Request ID echoed back in response header | `middleware/request.ts:18` | PASS |
+| OBS-09 | -- | Request logger creates child logger with `requestId`, `method`, `path` | `middleware/request.ts:32` | PASS |
+| OBS-10 | -- | CORS exposes `X-Request-ID` header to clients | `middleware/security.ts:35` | PASS |
+
+**Verdict:** PASS. Full request tracing with correlation IDs across middleware, error responses, and response headers.
+
+### 11.3 Metrics
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| OBS-11 | -- | Response time logged per request (`duration` field in request logger) | `middleware/request.ts` | PASS |
+| OBS-12 | P3 | No Prometheus/StatsD metrics exporter | -- | ACCEPTABLE |
+| OBS-13 | -- | Job health metrics via pg-boss | `core/jobs.ts:573` | PASS |
+
+**Verdict:** ACCEPTABLE. Response times are logged per request. No dedicated metrics exporter (Prometheus/StatsD), but structured logs can be ingested by log aggregators for metrics derivation. Adequate for current scale.
+
+### 11.4 Health Checks
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| OBS-14 | -- | `/livez` — lightweight liveness probe (no external deps) | `core/health.ts` | PASS |
+| OBS-15 | -- | `/readyz` — readiness probe checking DB, storage, jobs | `core/health.ts:41` | PASS |
+| OBS-16 | -- | Verbose mode with `?verbose` query param, `application/health+json` content type | `core/health.ts:31,61` | PASS |
+| OBS-17 | -- | Health endpoints exempt from rate limiting | `middleware/rate-limit.ts:73` | PASS |
+| OBS-18 | -- | Comprehensive health tests exist | `core/health.test.ts` | PASS |
+
+**Verdict:** PASS. Kubernetes-compliant health probes with verbose mode, proper content types, and dependency checks.
+
+### Observability Audit Summary
+
+| Dimension | Score | Notes |
+|-----------|-------|-------|
+| Structured Logging | 10/10 | Pino, JSON, configurable levels |
+| Correlation IDs | 10/10 | Full request tracing pipeline |
+| Metrics | 7/10 | Response time in logs; no dedicated exporter |
+| Health Checks | 10/10 | K8s-compliant livez/readyz |
+| **Overall Observability Score** | **9.3/10** | |
+
+---
+
+## Step 12: Performance Anti-Patterns
+
+### 12.1 N+1 Query Patterns
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| PERF-01 | P2 | `bulkRecordPayments` iterates payments array with individual DB operations per row | `handlers/dues/bulkRecordPayments.ts:91` | OPEN — intentional partial-failure design but could batch successful rows |
+| PERF-02 | -- | `listOfficerTerms` batch-loads positions and persons with `inArray()` then maps in-memory | `handlers/association:member/listOfficerTerms.ts:35-42` | PASS — correct batch pattern |
+
+**Verdict:** YELLOW. One N+1-like pattern in bulk payments, but it's intentional (each row independently validated for partial success). Consider batching the successful inserts in a single transaction for throughput.
+
+### 12.2 Missing Indexes
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| PERF-03 | -- | Dues schemas have comprehensive indexes (org, person, status, composite) | `dues/repos/dues-payments.schema.ts` | PASS |
+| PERF-04 | P3 | Governance queries filter by `organizationId` — index exists on `positions` but verify on `officerTerms`, `transitionChecklists`, `disciplinaryActions` | `association:member/repos/governance.repo.ts` | VERIFY |
+
+**Verdict:** PASS with caveat. Dues module has thorough indexing. Governance sub-module should be verified for complete index coverage on all org-scoped queries.
+
+### 12.3 Unbounded Queries
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| PERF-05 | P2 | `governance.repo.ts` — 7 queries return `db.select().from(X).where(eq(X.organizationId, id))` without `.limit()` | `association:member/repos/governance.repo.ts:37,64,105,129,134,167,172` | OPEN |
+| PERF-06 | P2 | `communication.repo.ts` — `listTemplates()` and `listTemplatesByChannel()` return all templates for an org without `.limit()` | `communication/repos/communication.repo.ts:33,52` | OPEN |
+| PERF-07 | -- | `communication.repo.ts` — `listMessages()` properly uses `.limit(filters.limit ?? 20)` | `communication/repos/communication.repo.ts` | PASS |
+| PERF-08 | P3 | `listBallots.ts` — base query on `electionVotes` scoped by election but unbounded | `association:member/listBallots.ts:27` | ACCEPTABLE — election votes are naturally bounded per election |
+| PERF-09 | -- | `certificates.repo.ts` — query builds with `where` conditions, naturally bounded by person | `certificates/repos/certificates.repo.ts:9` | PASS |
+
+**Verdict:** YELLOW. Two modules have unbounded list queries that could return large result sets for orgs with many records. Add `.limit()` with pagination defaults.
+
+### 12.4 Sync Blocking
+
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| PERF-10 | -- | All handlers are `async` with `await` on DB operations | `handlers/**/*.ts` | PASS |
+| PERF-11 | -- | No `fs.readFileSync` or blocking I/O in handlers | `handlers/**/*.ts` | PASS |
+
+**Verdict:** PASS. No synchronous blocking patterns found in handler code.
+
+### Performance Audit Summary
+
+| Category | Score | Open Issues |
+|----------|-------|-------------|
+| N+1 Queries | 8/10 | P2: bulk payments individual inserts |
+| Index Coverage | 9/10 | P3: verify governance indexes |
+| Unbounded Queries | 7/10 | **P2: 9 unbounded list queries across 2 modules** |
+| Sync Blocking | 10/10 | None |
+| **Overall Performance Score** | **8.5/10** | **2 P2, 1 P3** |
+
+---
+
+## Steps 10-12 Combined Summary
+
+| Audit Area | Score | P0 | P1 | P2 | P3 |
+|------------|-------|----|----|----|----|
+| Security (OWASP) | 8.9/10 | 0 | 0 | 2 | 4 |
+| Observability | 9.3/10 | 0 | 0 | 0 | 1 |
+| Performance | 8.5/10 | 0 | 0 | 3 | 1 |
+| **Total** | **8.9/10** | **0** | **0** | **5** | **6** |
+
+### P2 Action Items (fix before production)
+
+1. **SEC-10/SEC-11** — Redact or mask emails in `billing.ts:123` and `auth.ts:147` log statements
+2. **PERF-01** — Consider batching successful payment inserts in `bulkRecordPayments.ts`
+3. **PERF-05** — Add `.limit()` to 7 governance repo queries in `governance.repo.ts`
+4. **PERF-06** — Add `.limit()` to `listTemplates()` and `listTemplatesByChannel()` in `communication.repo.ts`
