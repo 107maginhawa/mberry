@@ -71,10 +71,10 @@
 | V-13 | Credit carry-over 50% cap missing | training | RESOLVED | Already implemented: calculateCarryover() in credit-cycle.ts |
 | V-14 | No license number normalization | membership | RESOLVED | Already implemented: normalizeLicense() in importMembers.ts |
 | V-15 | No concurrent session limits | auth | OPEN | G4 |
-| V-16 | Three comms modules need consolidation | communication | OPEN | G3 |
+| V-16 | Three comms modules need consolidation | communication | RESOLVED | Phase 36 (COMMS-CONSOLIDATION.md — keep separate per transport) |
 | V-17 | memberNumber vs licenseNumber inconsistency | membership | RESOLVED | Intentional: memberNumber=association ID, licenseNumber=PRC license |
-| V-18 | Cross-context import of MembershipRepository | events/training | OPEN | G3 |
-| V-19 | TypeSpec coverage ~60% | cross-cutting | OPEN | G3 |
+| V-18 | Cross-context import of MembershipRepository | events/training | RESOLVED | Phase 36 (extracted to events/utils/membership-check.ts) |
+| V-19 | TypeSpec coverage ~60% | cross-cutting | DEFERRED | v2.0 — 5 modules need TypeSpec, too large for brownfield rescue |
 | V-20 | No input validation on body.status | membership | RESOLVED | Phase 34 (Zod updateMemberSchema) |
 | V-21 | Fund allocation 100% sum not validated | dues | RESOLVED | v1.1.0 Phase 17 |
 
@@ -99,10 +99,10 @@
 |------|-------|--------|---------|-----------|--------|-------------------|
 | G1 | 34 | S-001, S-002, S-003, S-012 | stabilize | NO (sequential) | Complete | No |
 | G2 | 35 | S-004, S-005, S-006, S-007 | refactor | YES | Complete | No |
-| G3 | 36 | S-008, S-009, S-010 | refactor | YES | Not Started | S-008 (cross-module) |
+| G3 | 36 | S-008, S-009, S-010 | refactor | YES | Complete | S-008 (cross-module) |
 | G4 | 37 | S-011, S-013 | new-feature | YES | Not Started | No |
 
-**Completion:** 2/4 waves complete
+**Completion:** 3/4 waves complete
 
 ---
 
