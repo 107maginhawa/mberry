@@ -40,8 +40,8 @@ enum MembershipStatus {
   @doc("Membership has been administratively suspended")
   suspended: "suspended",
 
-  @doc("Membership has been permanently terminated")
-  terminated: "terminated",
+  @doc("Membership has been permanently removed by an administrator")
+  removed: "removed",
 
   @doc("Member has voluntarily resigned from the association")
   resigned: "resigned",
@@ -204,12 +204,12 @@ model Membership extends BaseEntity {
   @doc("Timestamp when the person first joined the association")
   joinedAt: utcDateTime;
 
-  @doc("Timestamp of termination, if applicable")
-  terminatedAt?: utcDateTime;
+  @doc("Timestamp of removal, if applicable")
+  removedAt?: utcDateTime;
 
-  @doc("Reason provided for termination")
+  @doc("Reason provided for removal")
   @maxLength(500)
-  terminationReason?: string;
+  removalReason?: string;
 
   @doc("Internal note about this membership")
   @maxLength(2000)

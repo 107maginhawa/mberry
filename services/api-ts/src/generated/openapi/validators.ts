@@ -5661,7 +5661,7 @@ export const InstitutionalMembershipSchema = z.object({
   billingContactId: z.string().optional(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"])
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"])
 });
 
 export const InstitutionalMembershipCreateRequestSchema = z.object({
@@ -5716,7 +5716,7 @@ export const InstitutionalMembershipUpdateSchema = z.object({
   billingContactId: z.string().optional(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]).optional()
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]).optional()
 });
 
 export const InternalServerErrorSchema = z.object({
@@ -6144,10 +6144,10 @@ export const MembershipSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
   gracePeriodDays: z.number().int().gte(0),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]),
   joinedAt: z.string().datetime().transform((str) => new Date(str)),
-  terminatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  terminationReason: z.string().max(500).optional(),
+  removedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  removalReason: z.string().max(500).optional(),
   note: z.string().max(2000).optional()
 });
 
@@ -6299,7 +6299,7 @@ export const MembershipResignRequestSchema = z.object({
   terminationReason: z.string().max(500).optional()
 });
 
-export const MembershipStatusSchema = z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]);
+export const MembershipStatusSchema = z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]);
 
 export const MembershipTerminateRequestSchema = z.object({
   terminationReason: z.string().min(1).max(500)
@@ -6390,10 +6390,10 @@ export const MembershipUpdateSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   gracePeriodDays: z.number().int().gte(0).optional(),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]).optional(),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]).optional(),
   joinedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  terminatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  terminationReason: z.string().max(500).optional(),
+  removedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  removalReason: z.string().max(500).optional(),
   note: z.string().max(2000).optional()
 });
 
@@ -6727,7 +6727,7 @@ export const OfficerRosterMemberSchema = z.object({
   memberNumber: z.string().max(50).optional(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]),
   joinedAt: z.string().datetime().transform((str) => new Date(str)),
   gracePeriodDays: z.number().int().gte(0),
   note: z.string().max(2000).optional(),
@@ -6769,7 +6769,7 @@ export const OfficerRosterMemberUpdateSchema = z.object({
   memberNumber: z.string().max(50).optional(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]).optional(),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]).optional(),
   joinedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   gracePeriodDays: z.number().int().gte(0).optional(),
   note: z.string().max(2000).optional(),
@@ -8043,7 +8043,7 @@ export const RosterMemberSchema = z.object({
   memberNumber: z.string().max(50).optional(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]),
   joinedAt: z.string().datetime().transform((str) => new Date(str)),
   gracePeriodDays: z.number().int().gte(0),
   note: z.string().max(2000).optional()
@@ -8063,7 +8063,7 @@ export const RosterMemberUpdateSchema = z.object({
   memberNumber: z.string().max(50).optional(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]).optional(),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]).optional(),
   joinedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   gracePeriodDays: z.number().int().gte(0).optional(),
   note: z.string().max(2000).optional()
@@ -8819,7 +8819,7 @@ export const UpdateMemberRequestSchema = z.object({
   memberNumber: z.union([z.string().max(50), z.null()]).optional(),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   gracePeriodDays: z.number().int().gte(0).optional(),
-  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "terminated", "resigned", "deceased", "expelled"]).optional(),
+  status: z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]).optional(),
   note: z.union([z.string().max(2000), z.null()]).optional()
 });
 

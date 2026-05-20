@@ -1,11 +1,13 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
+import type { NotificationService } from '@/core/notifs';
 import type { PromoteWaitlistEntryParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { WaitlistEntryRepository, EventRegistrationRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { notifyWaitlistPromotion } from '@/handlers/notifs/notification-triggers';
 
 /**
  * promoteWaitlistEntry
@@ -34,11 +36,11 @@ export async function promoteWaitlistEntry(
   const waitlistRepo = new WaitlistEntryRepository(db, logger);
   const regRepo = new EventRegistrationRepository(db, logger);
 
-  const entry = await waitlistRepo.findOneById((params as any).entryId);
+  const entry = await waitlistRepo.findOneById(params.entryId);
   if (!entry) throw new NotFoundError('Waitlist entry not found');
 
   // Mark waitlist entry as promoted
-  await waitlistRepo.updateOneById(entry.id, { promotedAt: new Date() } as any);
+  await waitlistRepo.updateOneById(entry.id, { promotedAt: new Date() });
 
   // Create confirmed registration
   const registration = await regRepo.createOne({
@@ -54,6 +56,19 @@ export async function promoteWaitlistEntry(
     resourceId: entry.id,
     description: 'Waitlist entry promoted to confirmed registration',
   });
+
+  // GAP-003: Notify promoted member
+  const notifService = ctx.get('notifs') as NotificationService;
+  if (notifService) {
+    await notifyWaitlistPromotion(notifService, {
+      organizationId: orgId,
+      personId: entry.personId,
+      eventId: entry.eventId,
+      // eventName is not in WaitlistEntry schema — requires JOIN with event table
+      eventName: (entry as unknown as Record<string, unknown>)['eventName'] as string | undefined || 'Event',
+      position: entry.position || 0,
+    });
+  }
 
   return ctx.json(registration, 201);
 }

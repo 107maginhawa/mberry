@@ -179,7 +179,7 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     expect(updatedStatus).not.toBe('active');
   });
 
-  test('terminated member — extends expiry but does NOT reactivate [BR-03]', async () => {
+  test('removed member — extends expiry but does NOT reactivate [BR-03]', async () => {
     let updatedStatus: string | undefined;
 
     stubRepo(DuesInvoiceRepository, {
@@ -190,8 +190,8 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     stubRepo(MembershipRepository, {
       findOneById: async () => ({
         ...fakeMembership,
-        status: 'terminated',
-        terminatedAt: new Date(),
+        status: 'removed',
+        removedAt: new Date(),
         duesExpiryDate: '2025-12-31',
       }),
       updateOneById: async (_id: string, updates: any) => {

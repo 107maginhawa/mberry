@@ -499,7 +499,10 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
     const mapping: Record<string, string> = {
       'security': 'auth.password-reset',
       'system': 'auth.welcome',
-      // Add more mappings as needed
+      'waitlist.promoted': 'events.waitlist-promoted',
+      'event.late-cancellation': 'events.late-cancellation',
+      'dunning.escalation': 'dues.dunning-escalation',
+      'task.overdue': 'governance.task-overdue',
     };
     
     return mapping[type] || null;

@@ -23,7 +23,12 @@ export const notificationTypeEnum = pgEnum('notification_type', [
   'comms.video-call-joined',
   'comms.video-call-left',
   'comms.video-call-ended',
-  'comms.chat-message'
+  'comms.chat-message',
+  // Cross-cutting notifications (Slice 027)
+  'waitlist.promoted',         // GAP-003: Waitlist promotion
+  'event.late-cancellation',   // GAP-006: Late cancellation
+  'dunning.escalation',        // GAP-012: Dunning escalation
+  'task.overdue',              // GAP-017: Committee task overdue
 ]);
 
 // Notification channel enum - matches TypeSpec definition
@@ -107,7 +112,7 @@ export interface NotificationResponse {
 export interface CreateNotificationRequest {
   organizationId: string;
   recipient: string;
-  type: 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message';
+  type: 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message' | 'waitlist.promoted' | 'event.late-cancellation' | 'dunning.escalation' | 'task.overdue';
   channel: 'email' | 'push' | 'in-app';
   title: string;
   message: string;
