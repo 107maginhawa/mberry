@@ -16,6 +16,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { and, isNotNull, isNull, lt, sql, eq } from 'drizzle-orm';
 import { persons } from '../repos/person.schema';
 import * as schema from '@/generated/better-auth/schema';
+import { executeCascadeDeletion } from '../accountDeletionCascade';
 
 interface DeletionContext {
   db: DatabaseInstance;
@@ -61,6 +62,12 @@ export async function processDeletions(ctx: DeletionContext): Promise<DeletionRe
 
       // Kill sessions before PII scrub — T-19-05
       await db.delete(schema.session).where(eq(schema.session.userId, person.id));
+
+      // Cascade deletion across all modules (flow 6.6)
+      const cascadeResult = await executeCascadeDeletion({ db, personId: person.id, logger });
+      if (cascadeResult.errors > 0) {
+        logger?.warn({ personId: person.id, cascadeErrors: cascadeResult.errors }, 'Cascade completed with errors');
+      }
 
       // Anonymize PII
       await db

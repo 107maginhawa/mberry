@@ -159,13 +159,28 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
   }
 
   /**
+   * List credit entries for a person within a cycle window.
+   * Used for transcript PDF generation (Slice 043).
+   */
+  async listForPerson(
+    personId: string,
+    filters: { cycleStart?: Date; cycleEnd?: Date } = {},
+  ): Promise<CreditEntry[]> {
+    return this.findMany({
+      personId,
+      cycleStart: filters.cycleStart,
+      cycleEnd: filters.cycleEnd,
+    });
+  }
+
+  /**
    * Cross-org aggregation: get total credits grouped by organization for a person in a cycle.
    */
   async sumCreditsByOrg(
     personId: string,
     cycleStart: Date,
     cycleEnd: Date,
-  ): Promise<Array<{ organizationId: string; total: number }>> {
+  ): Promise<Array<{ organizationId: string; organizationName?: string; total: number }>> {
     this.logger?.debug({ personId, cycleStart, cycleEnd }, 'Summing credits by org');
 
     const result = await this.db

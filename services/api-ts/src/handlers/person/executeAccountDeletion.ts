@@ -20,6 +20,7 @@ import { PersonRepository } from './repos/person.repo';
 import { duesPayments } from '../dues/repos/dues-payments.schema';
 import * as schema from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
+import { executeCascadeDeletion } from './accountDeletionCascade';
 
 export async function executeAccountDeletion(
   ctx: ValidatedContext<never, never, never>
@@ -51,12 +52,11 @@ export async function executeAccountDeletion(
   // Kill sessions first — before PII is scrubbed
   await db.delete(schema.session).where(eq(schema.session.userId, personId));
 
-  // Anonymize payment proof files — retain amounts + dates for 7-year statutory hold (BR-32)
-  await db.update(duesPayments).set({
-    proofStorageKey: null,
-    proofFileName: null,
-    proofMimeType: null,
-  }).where(eq(duesPayments.personId, personId));
+  // Cascade deletion across all modules (flow 6.6)
+  const cascadeResult = await executeCascadeDeletion({ db, personId, logger });
+  if (cascadeResult.errors > 0) {
+    logger?.warn({ personId, cascadeErrors: cascadeResult.errors }, 'Cascade completed with errors');
+  }
 
   // Anonymize PII — keep the record but scrub all personal data
   await repo.updateOneById(personId, {
