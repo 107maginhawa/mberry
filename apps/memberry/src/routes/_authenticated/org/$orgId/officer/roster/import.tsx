@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { createFileRoute, Link, useParams } from '@tanstack/react-router'
-import { Button } from '@monobase/ui'
+import { Button, Input } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'
 import { importRosterMembersMutation } from '@monobase/sdk-ts/generated/react-query'
@@ -77,7 +77,7 @@ function parseCSV(text: string): { headers: string[]; rows: ParsedRow[] } {
   const headers = records[0]!
 
   const rows = records.slice(1).map((values) => {
-    const row: any = {}
+    const row: Record<string, string> = {}
     headers.forEach((h, i) => {
       const key = normalizeHeader(h)
       row[key] = values[i] || ''
@@ -149,14 +149,17 @@ function RosterImportPage() {
           memberNumber: r.memberNumber || r.licenseNumber || undefined,
         }))
 
-      const data: any = await (importMutOpts.mutationFn as (...args: any[]) => any)({
+      const data = await (importMutOpts.mutationFn as (...args: unknown[]) => Promise<{ imported?: number; data?: { imported?: number } }>)({
         body: { organizationId: orgId, members },
       })
 
-      setResult(data?.imported != null ? data : { imported: data?.data?.imported ?? 0 })
+      setResult({ imported: data?.imported ?? data?.data?.imported ?? 0 })
       toast.success(`Imported ${data?.imported ?? data?.data?.imported ?? 0} members`)
-    } catch (err: any) {
-      const msg = err instanceof ApiError ? ((err.body as any)?.message ?? 'Import failed') : (err.message || 'Import failed')
+    } catch (err: unknown) {
+      interface ApiErrorBody { message?: string; error?: string }
+      const msg = err instanceof ApiError
+        ? ((err.body as ApiErrorBody | null | undefined)?.message ?? 'Import failed')
+        : (err instanceof Error ? err.message : 'Import failed')
       toast.error(msg)
     } finally {
       setImporting(false)
@@ -201,7 +204,7 @@ function RosterImportPage() {
             <p className="text-[12px] text-[var(--color-muted)] mt-1">
               Expected columns: First Name, Last Name, Email, License Number, Member Number
             </p>
-            <input
+            <Input
               id="csv-input"
               type="file"
               accept=".csv,text/csv"

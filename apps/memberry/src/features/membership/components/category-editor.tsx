@@ -5,6 +5,31 @@ import {
   listMembershipCategoriesQueryKey,
   upsertMembershipCategoryMutation,
 } from '@monobase/sdk-ts/generated/react-query'
+import type { MembershipCategory } from '@monobase/sdk-ts/generated/types.gen'
+
+/** Hand-wired endpoint extends MembershipCategory with additional display fields */
+type MembershipCategoryRow = MembershipCategory & {
+  duesAmount?: number
+  billingCycle?: string
+  memberCount?: number
+  active?: boolean
+}
+
+/**
+ * Hand-wired endpoint body — superset of TypeSpec UpsertCategoryRequest.
+ * Extra fields (duesAmount, billingCycle, sortOrder, active, id) are accepted
+ * server-side but not yet reflected in the generated TypeSpec type.
+ */
+interface UpsertCategoryBody {
+  name?: string
+  description?: string
+  applicableTiers?: string[]
+  duesAmount?: number
+  billingCycle?: string
+  sortOrder?: number
+  active?: boolean
+  id?: string
+}
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
@@ -45,7 +70,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
     listMembershipCategoriesOptions({ query: { organizationId: orgId } })
   )
 
-  const categories: any[] = data?.data ?? []
+  const categories: MembershipCategoryRow[] = data?.data as MembershipCategoryRow[] ?? []
 
   const saveMutation = useMutation({
     ...upsertMembershipCategoryMutation(),
@@ -65,7 +90,8 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
 
   function handleAdd() {
     if (!form.name.trim() || !form.duesAmount) return
-    ;(saveMutation as any).mutate({
+    // Hand-wired endpoint accepts duesAmount/billingCycle/sortOrder/active not in TypeSpec UpsertCategoryRequest
+    saveMutation.mutate({
       path: { organizationId: orgId },
       body: {
         name: form.name.trim(),
@@ -74,12 +100,16 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
         billingCycle: form.billingCycle,
         sortOrder: parseInt(form.sortOrder) || 0,
         active: true,
-      },
+      } as UpsertCategoryBody as Parameters<typeof saveMutation.mutate>[0]['body'],
     })
   }
 
   function handleDeactivate(categoryId: string) {
-    ;(saveMutation as any).mutate({ path: { organizationId: orgId }, body: { id: categoryId, active: false } })
+    // Hand-wired endpoint accepts id + active fields not in TypeSpec body
+    saveMutation.mutate({
+      path: { organizationId: orgId },
+      body: { id: categoryId, active: false } as UpsertCategoryBody as Parameters<typeof saveMutation.mutate>[0]['body'],
+    })
   }
 
   const formValid = form.name.trim() && form.duesAmount && parseFloat(form.duesAmount) >= 0
@@ -103,7 +133,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
             ))}
           </div>
         ) : error ? (
-          <div className="p-10 text-center text-[var(--color-error)]">Failed to load categories.</div>
+          <div role="alert" aria-live="polite" className="p-10 text-center text-[var(--color-error)]">Failed to load categories.</div>
         ) : categories.length === 0 ? (
           <div className="p-14 flex flex-col items-center gap-3 text-[var(--color-muted)]">
             <Layers className="h-10 w-10 opacity-30" />
@@ -123,7 +153,7 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y">
-              {categories.map((cat: any) => (
+              {categories.map((cat: MembershipCategoryRow) => (
                 <TableRow key={cat.id} className="hover:bg-[var(--color-surface-warm)] transition-colors">
                   <TableCell className="px-4 py-3 font-medium">{cat.name}</TableCell>
                   <TableCell className="px-4 py-3 text-[var(--color-muted)] max-w-xs truncate hidden sm:table-cell">

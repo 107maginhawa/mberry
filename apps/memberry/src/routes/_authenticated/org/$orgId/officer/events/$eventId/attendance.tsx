@@ -26,27 +26,38 @@ function EventAttendance() {
     listCustomEventRegistrationsOptions({ path: { eventId } })
   )
 
+  interface EventRegistration {
+    id: string
+    personId?: string
+    memberId?: string
+    memberName?: string
+    personName?: string
+    email?: string
+    checkedIn?: boolean
+  }
+
   const checkInMutOpts = checkInCustomEventMutation()
-  const checkInMutation = useMutation({
-    mutationFn: (reg: any) => (checkInMutOpts.mutationFn as (...args: any[]) => any)({
+  const checkInMutation = useMutation<unknown, Error, EventRegistration>({
+    mutationFn: (reg) => (checkInMutOpts.mutationFn as (...args: unknown[]) => Promise<unknown>)({
       path: { eventId },
       body: { eventId, registrationId: reg.id, personId: reg.personId ?? reg.memberId, method: 'manual' as const },
     }),
-    onSuccess: (_data, reg: any) => {
+    onSuccess: (_data, reg) => {
       const memberId = reg.personId ?? reg.memberId
-      setCheckedIn((prev) => new Set(prev).add(memberId))
+      if (memberId) setCheckedIn((prev) => new Set(prev).add(memberId))
       queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] })
       queryClient.invalidateQueries({ queryKey: ['attendance', eventId] })
       toast.success('Member checked in successfully')
     },
-    onError: (err: any) => {
-      toast.error(err?.body?.message ?? err?.message ?? 'Check-in failed')
+    onError: (err) => {
+      const apiErr = err as { body?: { message?: string }; message?: string }
+      toast.error(apiErr?.body?.message ?? apiErr?.message ?? 'Check-in failed')
     },
   })
 
-  const registrations = (data as any)?.data ?? []
+  const registrations = (data?.data ?? []) as EventRegistration[]
   const presentCount = registrations.filter(
-    (r: any) => r.checkedIn || checkedIn.has(r.memberId ?? r.personId),
+    (r) => r.checkedIn || checkedIn.has(r.memberId ?? r.personId ?? ''),
   ).length
 
   return (
@@ -85,9 +96,9 @@ function EventAttendance() {
         />
       ) : (
         <GlassCard className="divide-y divide-[var(--color-border-light)]">
-          {registrations.map((reg: any) => {
+          {registrations.map((reg) => {
             const memberId = reg.memberId ?? reg.personId
-            const isPresent = reg.checkedIn || checkedIn.has(memberId)
+            const isPresent = reg.checkedIn || (memberId != null && checkedIn.has(memberId))
 
             return (
               <div
@@ -126,7 +137,7 @@ function EventAttendance() {
                       onClick={() => checkInMutation.mutate(reg)}
                     >
                       {checkInMutation.isPending &&
-                      (checkInMutation.variables as any)?.memberId === memberId ? (
+                      checkInMutation.variables?.memberId === memberId ? (
                         <Loader2 className="w-3 h-3 animate-spin" />
                       ) : (
                         'Mark Present'

@@ -93,7 +93,8 @@ export async function claimInviteToken(token: string): Promise<
     return { ok: true, data };
   } catch (err) {
     if (err instanceof ApiError) {
-      const body = err.body as any;
+      interface ApiErrorBody { message?: string; error?: string; statusCode?: number }
+      const body = err.body as ApiErrorBody | null | undefined;
       return { ok: false, error: body?.error || 'Failed to claim invitation' };
     }
     return { ok: false, error: 'Network error. Please check your connection.' };

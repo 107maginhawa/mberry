@@ -27,6 +27,20 @@ const ACTIVE_STATUSES = ['nominations_open', 'voting_open']
 
 type TabFilter = 'active' | 'completed' | 'all'
 
+/** Raw API response shape for elections (pre-SDK-transform fields). */
+interface ElectionRow {
+  id: string
+  title: string
+  status: string
+  type?: string
+  electionType?: string
+  positions?: string[]
+  votingStart?: string | Date
+  votingEnd?: string | Date
+  votingOpenAt?: string
+  votingCloseAt?: string
+}
+
 function formatDate(iso: string | null | undefined) {
   if (!iso) return null
   return new Date(iso).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -39,7 +53,7 @@ export function MemberElectionList({ orgId }: MemberElectionListProps) {
     listElectionsOptions({ query: { organizationId: orgId } }),
   )
 
-  const allElections = ((data?.data ?? []) as any[]).filter(
+  const allElections = ((data?.data as ElectionRow[] | undefined) ?? []).filter(
     (e) => MEMBER_VISIBLE.includes(e.status),
   )
 
@@ -88,7 +102,7 @@ export function MemberElectionList({ orgId }: MemberElectionListProps) {
         <div className="space-y-2">
           {elections.map((election) => {
             const statusCfg = STATUS_CONFIG[election.status]
-            const typeCfg = TYPE_CONFIG[election.type]
+            const typeCfg = TYPE_CONFIG[election.type ?? election.electionType ?? '']
             const StatusIcon = statusCfg?.icon ?? Vote
 
             return (
@@ -115,13 +129,13 @@ export function MemberElectionList({ orgId }: MemberElectionListProps) {
                   <p className="font-medium truncate">{election.title}</p>
                   <div className="flex items-center gap-4 mt-1 text-xs text-[var(--color-muted)]">
                     {election.votingStart && (
-                      <span>Voting: {formatDate(election.votingStart)}</span>
+                      <span>Voting: {formatDate(String(election.votingStart))}</span>
                     )}
                     {election.votingOpenAt && !election.votingStart && (
                       <span>Voting: {formatDate(election.votingOpenAt)}</span>
                     )}
-                    {election.positions?.length > 0 && (
-                      <span>{election.positions.length} position{election.positions.length !== 1 ? 's' : ''}</span>
+                    {(election.positions?.length ?? 0) > 0 && (
+                      <span>{election.positions!.length} position{election.positions!.length !== 1 ? 's' : ''}</span>
                     )}
                   </div>
                 </div>

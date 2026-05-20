@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { listDuesFundsOptions, upsertDuesFundsMutation } from '@monobase/sdk-ts/generated/react-query'
+import type { DuesFund } from '@monobase/sdk-ts/generated/types.gen'
 import { useState, useEffect } from 'react'
 import { Button } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
@@ -25,18 +26,18 @@ function FundSettingsPage() {
 
   const { data: fundsData, isLoading } = useQuery({
     ...listDuesFundsOptions({ query: { organizationId: orgId } }),
-    select: (d: any) => d?.data ?? [],
+    select: (d: { data?: DuesFund[] }) => d?.data ?? [],
   })
 
   useEffect(() => {
-    if (fundsData && (fundsData as any[]).length > 0) {
-      setFunds((fundsData as any[]).map((f: any) => ({ id: f.id, name: f.name, percentage: f.percentage })))
+    if (fundsData && fundsData.length > 0) {
+      setFunds(fundsData.map((f) => ({ id: f.id, name: f.name, percentage: String(f.percentage ?? '') })))
     }
   }, [fundsData])
 
   const upsertMutOpts = upsertDuesFundsMutation()
-  const saveMutation = useMutation<any, Error, void>({
-    mutationFn: () => (upsertMutOpts.mutationFn as (...args: any[]) => any)({
+  const saveMutation = useMutation<unknown, Error, void>({
+    mutationFn: () => (upsertMutOpts.mutationFn as (...args: unknown[]) => Promise<unknown>)({
       path: { organizationId: orgId },
       body: { funds: funds.map((f, i) => ({ name: f.name, percentage: f.percentage, sortOrder: i })) },
     }),
@@ -45,7 +46,7 @@ function FundSettingsPage() {
       toast.success('Fund allocation updated', { description: 'New allocation applies to future payments.' })
       setHasChanges(false)
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error('Failed to save', { description: err.message })
     },
   })
@@ -75,7 +76,7 @@ function FundSettingsPage() {
         }
       />
 
-      {fundsData && (fundsData as any[]).length > 0 && (
+      {fundsData && fundsData.length > 0 && (
         <Alert>
           <AlertDescription>
             Existing payment allocations will not be recalculated. Only future payments will use the new allocation.
@@ -91,7 +92,7 @@ function FundSettingsPage() {
         />
 
         <div className="flex gap-3 mt-4">
-          <Button variant="outline" onClick={() => { if (fundsData && (fundsData as any[]).length > 0) { setFunds((fundsData as any[]).map((f: any) => ({ id: f.id, name: f.name, percentage: f.percentage }))) }; setHasChanges(false) }} disabled={!hasChanges}>
+          <Button variant="outline" onClick={() => { if (fundsData && fundsData.length > 0) { setFunds(fundsData.map((f) => ({ id: f.id, name: f.name, percentage: String(f.percentage ?? '') }))) }; setHasChanges(false) }} disabled={!hasChanges}>
             Cancel
           </Button>
         </div>
