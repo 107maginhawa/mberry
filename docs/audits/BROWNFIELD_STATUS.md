@@ -1,11 +1,11 @@
-<!-- oli-magic v1.2 | updated 2026-05-20 | cycle 2/3 -->
+<!-- oli-magic v1.2 | updated 2026-05-20 | cycle 3/3 -->
 # Brownfield Adoption Dashboard
 
 **Project:** Memberry Healthcare AMS
-**Generated:** 2026-05-20 by `/oli-magic` Cycle 2 (final)
+**Generated:** 2026-05-20 by `/oli-magic` Cycle 3
 **Last Updated:** 2026-05-20 by `/oli-magic --update`
-**Rescue Cycle:** 2 of 3
-**Status:** GRADUATED
+**Rescue Cycle:** 3 of 3
+**Status:** IN PROGRESS
 
 ---
 
@@ -106,6 +106,118 @@ All Cycle 1 violations resolved:
 
 ---
 
+## Cycle 3 Status (IN PROGRESS)
+
+### Entry Conditions
+- Cycle 2: GRADUATED (2026-05-20) with Health 9.1, Compliance 9.8, Confidence 9.0
+- Wave 4 audit expanded from 15 to 19 dimensions (added Stub Density, Type Cast Density, Cross-Module Coupling, Raw SQL Leakage)
+- 11 new business rules discovered (BR-41 through BR-51)
+- 3 new handler modules discovered (advertising, marketplace, jobs)
+
+### Phase A: Stabilization (COMPLETE)
+
+Fixes applied during Cycle 3 stabilization:
+
+| Fix | Commit | Impact |
+|-----|--------|--------|
+| PII masking | 822f05f | `maskEmail()` applied to `auth.ts` and `billing.ts` log statements. `account-lockout.ts` still has 5 unmasked locations (V-09). |
+| Error handling migration | c24e1f0 | Reduced generic `throw new Error()` from 130+ to 7 (all repo/internal level, not handler-level). All handler errors use AppError subclasses. |
+| `.limit()` guards | f6b362c | Added pagination limits to governance and communication repo queries. 9 unbounded queries resolved. |
+| VALID_TRANSITIONS maps | -- | Added centralized transition maps to state machines lacking them. |
+| markForPurging wired | -- | GDPR compliance: `core/audit.ts:78` via `this.repo.purgeArchivedLogs.bind(this.repo)`. |
+| BR registry update | -- | Expanded from 40 to 51 BRs. 11 new rules (BR-41 through BR-51) documented and classified. |
+
+### Phase B: OLI Verification (COMPLETE)
+
+| Tool | Score | Key Findings |
+|------|-------|-------------|
+| **oli-trace** | 70.6% BR coverage | 203 nodes, 157 edges. 36 COMPLETE, 12 PARTIAL, 1 ORPHAN (BR-04), 2 GAP (BR-49, BR-51). |
+| **oli-confidence-stack** | 8.6/10 | 9,460 assertions, 93.2% strong. 4,265 backend pass, 362 frontend pass. 2 BRs untested (BR-49, BR-51). |
+| **oli-audit-compliance** | 9.2/10 | 0 P0, 0 P1 (all 4 previous P1s resolved). 10 P2, 8 P3 remaining. |
+
+### Cycle 3 Scorecard
+
+| Metric | Cycle 2 (final) | Cycle 3 (current) | Threshold | Status |
+|--------|-----------------|-------------------|-----------|--------|
+| Codebase Health | 9.1/10 | **8.2/10** | >= 9.0 | NOT MET |
+| Spec Compliance | 9.8/10 | **9.2/10** | >= 9.0 | MET |
+| Test Confidence | 9.0/10 | **8.6/10** | >= 9.0 | NOT MET |
+| P0 violations | 0 | 0 | 0 | MET |
+| P1 violations | 1 | 0 | 0 | MET |
+| TypeScript errors | 0 | 0 | 0 | MET |
+| Backend tests pass | 4,284 | 4,265 | 0 fail | MET |
+| Frontend tests pass | 362 | 362 | 0 fail | MET |
+| test.todo | -- | 21 | tracked | -- |
+
+**Why scores dropped:** Wave 4 audit expanded from 15 to 19 dimensions with stricter criteria. The 4 new dimensions (Stub Density 7, Type Cast Density 8, Cross-Module Coupling 6, Raw SQL Leakage 10) and re-scored existing dimensions (Error Handling 9->7, API Consistency 9->8) lowered the Health score. Confidence dropped because 11 new BRs (BR-41 through BR-51) expanded the denominator -- 2 have zero tests, 12 are WEAK (1 layer only).
+
+### Graduation Threshold Check
+
+| Metric | Current | Min Target | Status |
+|--------|---------|-----------|--------|
+| Codebase Health | 8.2 | >= 9.0 | **NOT MET (-0.8)** |
+| Spec Compliance | 9.2 | >= 9.0 | MET |
+| Test Confidence | 8.6 | >= 9.0 | **NOT MET (-0.4)** |
+
+**Graduation Status: NOT GRADUATED -- 2 of 3 metrics below threshold.**
+
+### Action Items to Reach Graduation
+
+**Health 8.2 -> 9.0 (need +15 points across 19 dimensions = 171/190):**
+
+| Dimension | Current | Target | Action | Effort |
+|-----------|---------|--------|--------|--------|
+| Error handling uniformity | 7 | 9 | Migrate remaining 7 generic throws to AppError subclasses | 1h |
+| Cross-module coupling | 6 | 8 | Document dependency direction rules; add lint guard for bidirectional imports | 2h |
+| Terminology consistency | 7 | 8 | Standardize remaining terminology conflicts | 1h |
+| Stub density | 7 | 8 | Resolve 8 P1 runtime stubs | 2h |
+| Domain model clarity | 7 | 8 | Add 18 missing tables to DOMAIN_MODEL.md | 1h |
+| API consistency | 8 | 9 | Expose advertising/marketplace/jobs via TypeSpec | 3h |
+
+**Confidence 8.6 -> 9.0 (need +0.4 weighted):**
+
+| Layer | Current | Target | Action | Effort |
+|-------|---------|--------|--------|--------|
+| L2 Traceability | 8.5 | 9.0 | Add tests for BR-49 (grace period) and BR-51 (timing-safe compare); add backend test for BR-47 | 2h |
+| L1 Coverage | 8.7 | 8.9 | Add tests for storage module (2/6 handlers tested) | 1h |
+| L3 Quality | 8.4 | 8.6 | Reduce weak assertion ratio from 6.8% to ~5% | 1h |
+
+### Cycle 3 Findings
+
+**Stabilization fixes applied:**
+- Error handling: 130+ generic throws reduced to 7 (internal/repo only)
+- PII masking: `maskEmail()` in auth.ts and billing.ts (account-lockout.ts still exposed -- V-09)
+- Query limits: `.limit()` added to governance and communication repos
+- State transitions: VALID_TRANSITIONS maps added to formalize state machine guards
+- GDPR: `markForPurging` wired in audit service
+- BR registry: expanded from 40 to 51 business rules
+
+**Remaining gaps:**
+- BR-49 (Active Status Includes Grace Period) -- zero tests at any layer
+- BR-51 (Service Token Timing-Safe Comparison) -- zero tests, p0-security severity
+- 3 dark modules (advertising, marketplace, jobs) -- handlers exist but no TypeSpec/OpenAPI exposure
+- `as any` count: 562 (regression from 439, driven by new module code)
+- account-lockout.ts: 5 locations with raw email PII in logs
+
+### Score Trajectory
+
+| Date | Health | Compliance | Confidence | Overall | Cycle |
+|------|--------|------------|------------|---------|-------|
+| 2026-05-13 | 8.2/10 | N/A | N/A | 8.2 | -- |
+| 2026-05-14 | 8.5/10 | N/A | N/A | 8.5 | -- |
+| 2026-05-19 | 8.7/10 | 7.4/10 | 8.4/10 | 7.4 | C1 |
+| 2026-05-20 | 8.7/10 | 8.1/10 | 8.4/10 | 8.1 | C1 (post-fix) |
+| 2026-05-20 | 9.1/10 | 8.1/10 | 8.4/10 | 8.1 | C2 (post-fix) |
+| 2026-05-20 | 9.1/10 | 8.9/10 | 8.5/10 | 8.5 | C2 (re-audited) |
+| 2026-05-20 | 9.1/10 | 9.8/10 | 9.0/10 | 9.0 | C2 (graduated) |
+| 2026-05-20 | **8.2/10** | **9.2/10** | **8.6/10** | **8.2** | **C3 (Wave 4, 19-dim)** |
+
+**Overall = min(Health, Compliance, Confidence)**
+
+**Note:** The apparent regression from C2 graduated (9.0) to C3 (8.2) is methodological, not a quality regression. Wave 4 expanded the audit from 15 to 19 dimensions and applied stricter scoring to error handling (9->7), API consistency (9->8), and state machine safety (9->8). The codebase improved during stabilization; the audit became more rigorous.
+
+---
+
 ## Wave Progress
 
 | Wave | Phase(s) | Slices | Type(s) | Parallel? | Status | Integration Test? |
@@ -132,50 +244,54 @@ Tier 3 (sequential):            Phase 44 <┘  (re-audit + fix survivors)
 
 ---
 
-## Score Matrix — Current vs Cycle 2 Target
+## Score Matrix — Current vs Cycle 3 Target
 
 ### Top-Level Metrics
 
-| Metric | Current | Target | Gap |
-|--------|---------|--------|-----|
-| Codebase Health | 9.1/10 | **9.3/10** | +0.2 |
-| Spec Compliance | 9.8/10 | **9.0/10** | MET |
-| Test Confidence | 9.0/10 | **9.0/10** | MET |
-| P0 open | 0 | 0 | -- |
-| P1 open | 1 | **0** | -1 |
-| P2 open | 23 | **≤2** | -21 |
+| Metric | Cycle 2 Final | Cycle 3 Current | Cycle 3 Target | Gap |
+|--------|---------------|-----------------|----------------|-----|
+| Codebase Health | 9.1/10 | **8.2/10** | **9.0/10** | -0.8 |
+| Spec Compliance | 9.8/10 | **9.2/10** | **9.0/10** | MET |
+| Test Confidence | 9.0/10 | **8.6/10** | **9.0/10** | -0.4 |
+| P0 open | 0 | 0 | 0 | -- |
+| P1 open | 1 | **0** | **0** | MET |
+| P2 open | 23 | **10** | **≤5** | -5 |
 
 ### Test Confidence Breakdown
 
-| Layer | Weight | Previous | Current | Notes |
-|-------|--------|----------|---------|-------|
-| L1 Coverage | 0.25 | 8.5 | **8.9** | +14 files, +15 tests (457 total files, 4284 tests) |
-| L2 Traceability | 0.30 | 8.8 | **9.0** | BR-34 COMPLETE (33/33 traceable) |
-| L3 Quality | 0.25 | 8.5 | **9.0** | 3 mega-tests split into 18, 10 shallow tests deepened, 3 tautological fixed |
-| L4 Release Gate | 0.20 | 9.0 | **9.2** | lint:shallow gated in CI (exit 1) |
-| **Weighted** | 1.00 | 8.4 | **9.0** | 0.25(8.9) + 0.30(9.0) + 0.25(9.0) + 0.20(9.2) = 9.015 |
+| Layer | Weight | Cycle 2 Final | Cycle 3 Current | Notes |
+|-------|--------|---------------|-----------------|-------|
+| L1 Coverage | 0.25 | 8.9 | **8.7** | 25/25 modules tested; advertising+jobs now 100%; storage+comms thin |
+| L2 Traceability | 0.30 | 9.0 | **8.5** | 51 BRs (up from 40); 2 untested (BR-49, BR-51); 12 WEAK |
+| L3 Quality | 0.25 | 9.0 | **8.4** | 93.2% strong assertions (up from 89%); 18.2 assertions/file |
+| L4 Release Gate | 0.20 | 9.2 | **9.0** | 8-gate CI pipeline; BR regression gate; new-code gate |
+| **Weighted** | 1.00 | 9.0 | **8.6** | 0.25(8.7) + 0.30(8.5) + 0.25(8.4) + 0.20(9.0) = 8.625 |
 
-### 15 Health Dimensions
+### 19 Health Dimensions (Wave 4)
 
-| # | Dimension | Before | After | Target | Status |
-|---|-----------|--------|-------|--------|--------|
-| 1 | Terminology consistency | **7** | **8** | 9 | +1 (terminated→removed done, orgId deferred) |
-| 2 | Permission coverage | 9 | 9 | 9 | -- |
-| 3 | Business rule clarity | 9 | 9 | 9 | -- |
-| 4 | API consistency | 9 | 9 | 9 | -- |
-| 5 | State machine safety | 9 | 9 | 9 | -- |
-| 6 | Error handling uniformity | 9 | 9 | 9 | -- |
-| 7 | Backend test coverage | **8** | **9** | 9 | MET (0 failures, 0 unexplained skips) |
-| 8 | Frontend test coverage | **8** | **9** | 9 | MET (362/0, all forms tested) |
-| 9 | PRD/spec coverage | 9 | 9 | 9 | -- |
-| 10 | UI prototype readiness | **8** | **9** | 9 | MET (21 raw HTML→@monobase/ui) |
-| 11 | Architecture alignment | 9 | 9 | 9 | -- |
-| 12 | Domain model clarity | 8 | 8 | 8 | Out of scope |
-| 13 | Security posture | 9 | 9 | 9 | -- |
-| 14 | Observability | 7 | 7 | 7 | Out of scope |
-| 15 | Performance safety | 7 | 7 | 7 | Out of scope |
+| # | Dimension | C2 Final | C3 Current | Target | Status |
+|---|-----------|----------|------------|--------|--------|
+| 1 | Terminology consistency | 8 | **7** | 9 | Regressed (orgId/organizationId split; 6 terminology conflicts) |
+| 2 | Permission coverage | 9 | **9** | 9 | MET |
+| 3 | Business rule clarity | 9 | **9** | 9 | MET (51 BRs, up from 40) |
+| 4 | API consistency | 9 | **8** | 9 | -1 (3 dark modules + 2 error path patterns) |
+| 5 | State machine safety | 9 | **8** | 9 | -1 (dues/booking lack centralized maps; 3 new modules unguarded) |
+| 6 | Error handling uniformity | 9 | **7** | 9 | -2 (130 generic throws + 325 direct c.json, post-stabilization: 7 remain) |
+| 7 | Backend test coverage | 9 | **9** | 9 | MET (407 files, 91% strong) |
+| 8 | Frontend test coverage | 9 | **8** | 9 | -1 (admin/account 0 component tests; state coverage 37%) |
+| 9 | PRD/spec coverage | 9 | **10** | 9 | +1 (19/19 module specs; full OLI pipeline) |
+| 10 | UI prototype readiness | 9 | **8** | 9 | -1 (97 routes but no mock contamination check) |
+| 11 | Architecture alignment | 9 | **9** | 9 | MET |
+| 12 | Domain model clarity | 8 | **7** | 8 | -1 (18 tables missing from DOMAIN_MODEL.md) |
+| 13 | Security posture | 9 | **9** | 9 | MET |
+| 14 | Observability | 7 | **9** | 9 | +2 (Pino structured; correlation IDs; K8s health) |
+| 15 | Performance safety | 7 | **8** | 8 | +1 (9 unbounded queries resolved) |
+| 16 | Stub density | -- | **7** | 8 | NEW (8 P1 runtime stubs; 15 P2 incomplete; 61 TODOs) |
+| 17 | Type cast density | -- | **8** | 8 | NEW (439 `as any` production, 2.3/file; 0 `@ts-ignore`) |
+| 18 | Cross-module coupling | -- | **6** | 8 | NEW (3 bidirectional pairs; association:member imported by 6+) |
+| 19 | Raw SQL leakage | -- | **10** | 9 | NEW (zero cross-module raw SQL) |
 
-**Result: 137/150 = 9.1/10** (up from 131/150 = 8.7/10). Terminology +1 but not +2 (orgId deferred).
+**Result: 156/190 = 8.2/10** (down from 137/150 = 9.1/10 due to 4 new dimensions + stricter re-scoring).
 
 ### Frontend Quality Metrics
 
@@ -230,7 +346,8 @@ Tier 3 (sequential):            Phase 44 <┘  (re-audit + fix survivors)
 | 2026-05-20 | 8.7/10 | 8.1/10 | 8.4/10 | 8.1 | C1 (post-fix) |
 | 2026-05-20 | 9.1/10 | 8.1/10 | 8.4/10 | 8.1 | C2 (post-fix) |
 | 2026-05-20 | 9.1/10 | 8.9/10 | 8.5/10 | 8.5 | C2 (re-audited) |
-| 2026-05-20 | 9.1/10 | **9.8/10** | **9.0/10** | **9.0** | C2 (final) |
+| 2026-05-20 | 9.1/10 | 9.8/10 | 9.0/10 | 9.0 | C2 (graduated) |
+| 2026-05-20 | **8.2/10** | **9.2/10** | **8.6/10** | **8.2** | **C3 (Wave 4, 19-dim)** |
 
 **Overall = min(Codebase, Compliance, Confidence)**
 
@@ -241,27 +358,26 @@ Tier 3 (sequential):            Phase 44 <┘  (re-audit + fix survivors)
 | Metric | Current | Min Target | Status |
 |--------|---------|-----------|--------|
 | P0 violations | 0 | 0 | MET |
-| P1 violations | **1** | 0 | NOT MET (1 remaining — BigInt serialization, non-blocking) |
-| Codebase health | 9.1 | >= 9.0 | MET |
-| Spec compliance | **9.8** | >= 9.0 | MET |
-| Test confidence | **9.0** | >= 9.0 | MET |
-| Unjustified as-any | 0 | 0 | MET |
+| P1 violations | 0 | 0 | MET |
+| Codebase health | **8.2** | >= 9.0 | **NOT MET** |
+| Spec compliance | **9.2** | >= 9.0 | MET |
+| Test confidence | **8.6** | >= 9.0 | **NOT MET** |
 | Test failures | 0 | 0 | MET |
 | TypeScript errors | 0 | 0 | MET |
-| Raw HTML violations | 0 | 0 | MET |
-| Forms with validation | 11/11 | -- | MET |
-| ARIA coverage (role=alert) | 51 | 15+ | MET |
+| Backend tests | 4,265 pass | 0 fail | MET |
+| Frontend tests | 362 pass | 0 fail | MET |
+| test.todo | 21 | tracked | -- |
 
-**Graduation Status: GRADUATED**
+**Graduation Status: NOT GRADUATED**
 
-All three core metrics (Health 9.1, Compliance 9.8, Confidence 9.0) meet the >= 9.0 threshold. One P1 remains (S-C2-031: BigInt serialization in record-payment-form.tsx) but it is a frontend-only data bug that does not affect backend compliance or test confidence scores. The brownfield rescue is complete.
+Two of three core metrics are below the >= 9.0 threshold. Health dropped from 9.1 to 8.2 due to Wave 4 expanding to 19 dimensions with stricter scoring. Confidence dropped from 9.0 to 8.6 due to 11 new BRs (51 total) with 2 untested (BR-49, BR-51) and 12 WEAK. Compliance improved trajectory continues (9.2, up from 8.9 before stabilization).
 
-**Confidence score calculation:**
-- L1 Coverage: 8.9 (457 files, 4284 tests, 9322 assertions, 0 failures)
-- L2 Traceability: 9.0 (BR-34 COMPLETE, 33/33 BRs traceable)
-- L3 Quality: 9.0 (mega-split done, shallow tests deepened, 3 tautological fixed)
-- L4 Release Gate: 9.2 (lint:shallow gated in CI)
-- Weighted: 0.25(8.9) + 0.30(9.0) + 0.25(9.0) + 0.20(9.2) = **9.015 -> 9.0**
+**Confidence score calculation (Cycle 3):**
+- L1 Coverage: 8.7 (25/25 modules tested; advertising+jobs at 100%; storage+comms thin)
+- L2 Traceability: 8.5 (51 BRs, 49/51 have tests, 34/51 all 3 layers, 2 untested)
+- L3 Quality: 8.4 (93.2% strong assertions, 18.2/file, 0 tautological)
+- L4 Release Gate: 9.0 (8-gate CI, BR regression gate, new-code gate)
+- Weighted: 0.25(8.7) + 0.30(8.5) + 0.25(8.4) + 0.20(9.0) = **8.625 -> 8.6**
 
 ### OLI Pipeline Scorecard — ALL 14 SKILLS
 
@@ -310,17 +426,18 @@ Detected after Cycle 2 completion. Review before deleting — these are suggesti
 
 ## What's Next
 
-**Post-graduation (Cycle 3 — optional polish):**
+**Cycle 3 graduation requirements (must-do):**
 
-1. **Fix remaining P1:** `record-payment-form.tsx:260` — `BigInt()` not JSON-serializable → convert to `Number()` or string for API payload
-2. **Frontend quality waves H1-H5** — 23 P2 items remain for full frontend polish
-3. **orgId/organizationId unification** (S-C2-029) — deferred, structural risk to route params
+1. **Health -> 9.0:** Fix error handling uniformity (7->9), reduce cross-module coupling (6->8), resolve 8 P1 runtime stubs, add 18 missing tables to DOMAIN_MODEL.md, expose dark modules via TypeSpec
+2. **Confidence -> 9.0:** Add tests for BR-49 (grace period) and BR-51 (timing-safe compare, p0-security), add backend test for BR-47 (banned users), add contract tests for BR-50 (election dates)
+3. **PII masking:** Fix V-09 -- `account-lockout.ts` has 5 unmasked email locations
 
-**Deferred (not blocking):**
+**Deferred (not blocking graduation):**
 - S-C2-029: orgId/organizationId unification (593 route params structural)
+- Frontend quality waves H1-H5 (23 P2 items for frontend polish)
+- `as any` reduction (562 total, growing)
 - Upgrade `@hookform/resolvers` when Zod v4 native support ships
-- Add RadioGroup to `@monobase/ui`
-- 15 tautological tests remain in older files (non-blocking, tracked for cleanup)
+- 55 `test.fixme()` E2E stubs (tracked for v2.0)
 
 ---
 
