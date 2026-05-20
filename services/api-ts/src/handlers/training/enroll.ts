@@ -14,6 +14,24 @@ export async function enroll(ctx: Context): Promise<Response> {
   const training = await repo.getByOrg(trainingId, orgId);
   if (!training) throw new NotFoundError('Training not found');
 
+  // [M9-R3] Block enrollment for completed trainings
+  if (training.status === 'completed') {
+    throw new BusinessLogicError('Cannot enroll: training is completed', 'TRAINING_COMPLETED');
+  }
+
+  // Block enrollment for cancelled trainings
+  if (training.status === 'cancelled') {
+    throw new BusinessLogicError('Cannot enroll: training is cancelled', 'TRAINING_CANCELLED');
+  }
+
+  // [M9-R2] Block enrollment in paid trainings without payment
+  if (training.registrationFee && training.registrationFee > 0) {
+    throw new BusinessLogicError(
+      'Paid training requires payment before enrollment. Use the payment gateway.',
+      'PAYMENT_REQUIRED'
+    );
+  }
+
   // [BR-02] Only active members can enroll in training
   const membershipRepo = new MembershipRepository(db, ctx.get('logger'));
   const membership = await membershipRepo.findByPersonAndOrg(session.user.id, training.organizationId);

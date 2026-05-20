@@ -184,6 +184,77 @@ describe('markComplete', () => {
     Object.values(creditMock).forEach((m) => m.mockRestore());
   });
 
+  // ─── [M9-R7] Duplicate credit prevention (idempotent) ──────
+
+  test('[M9-R7] already-completed enrollment prevents duplicate credit award', async () => {
+    let creditCallCount = 0;
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => fakeTraining,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [{
+        ...fakeEnrollment,
+        completedAt: new Date('2026-01-15'),
+      }],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        status,
+      }),
+    });
+
+    const creditMock = stubRepo(CreditEntryRepository, {
+      createOne: async () => { creditCallCount++; return {} as any; },
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    // Should throw before reaching credit creation
+    await expect(markComplete(ctx)).rejects.toThrow('Already marked as completed');
+    expect(creditCallCount).toBe(0);
+
+    Object.values(creditMock).forEach((m) => m.mockRestore());
+  });
+
+  // ─── [BR-20] Cancelled training blocks completion ──────────
+
+  test('[BR-20] cancelled training blocks markComplete', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => ({ ...fakeTraining, status: 'cancelled' }),
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async () => fakeEnrollment,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    await expect(markComplete(ctx)).rejects.toThrow('cancelled');
+  });
+
+  // ─── [BR-20] Future end date blocks completion ──────────
+
+  test('[BR-20] future end date blocks markComplete', async () => {
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 1);
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => ({ ...fakeTraining, status: 'published', endDate: futureDate }),
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async () => fakeEnrollment,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    await expect(markComplete(ctx)).rejects.toThrow('has not ended yet');
+  });
+
   test('crashes without session (no auth)', async () => {
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => { throw new Error('should not reach'); },

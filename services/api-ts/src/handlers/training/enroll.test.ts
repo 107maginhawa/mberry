@@ -92,9 +92,60 @@ describe('enroll', () => {
     await expect(enroll(ctx)).rejects.toThrow('Training not found');
   });
 
-  test('enrolls in cancelled training (no training status guard)', async () => {
+  // ─── [M9-R3] Enrollment lock on completed/cancelled training ──────
+
+  test('[M9-R3] blocks enrollment when training is completed', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => ({ ...fakeTraining, status: 'completed' }),
+      getEnrollmentCount: async () => 0,
+      enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
+    await expect(enroll(ctx)).rejects.toMatchObject({ code: 'TRAINING_COMPLETED' });
+  });
+
+  test('[M9-R3] blocks enrollment when training is cancelled', async () => {
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({ ...fakeTraining, status: 'cancelled' }),
+      getEnrollmentCount: async () => 0,
+      enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
+    await expect(enroll(ctx)).rejects.toMatchObject({ code: 'TRAINING_CANCELLED' });
+  });
+
+  // ─── [M9-R2] Paid training requires payment ──────────────────
+
+  test('[M9-R2] blocks enrollment in paid training without payment', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => ({ ...fakeTraining, registrationFee: 5000 }),
+      getEnrollmentCount: async () => 0,
+      enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
+    await expect(enroll(ctx)).rejects.toMatchObject({ code: 'PAYMENT_REQUIRED' });
+  });
+
+  test('[M9-R2] allows enrollment in free training (registrationFee=0)', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => ({ ...fakeTraining, registrationFee: 0 }),
+      getEnrollmentCount: async () => 0,
+      enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
+    });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
+
+    const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
+    const response = await enroll(ctx);
+    expect(response.status).toBe(201);
+    Object.values(mm).forEach(m => m.mockRestore());
+  });
+
+  test('[M9-R2] allows enrollment when registrationFee is null', async () => {
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => ({ ...fakeTraining, registrationFee: null }),
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
     });
