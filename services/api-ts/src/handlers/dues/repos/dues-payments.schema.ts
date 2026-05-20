@@ -88,6 +88,8 @@ export const duesPayments = pgTable('dues_payment', {
   paidAt: timestamp('paid_at'),
   expiredAt: timestamp('expired_at'),
   refundedAmount: integer('refunded_amount').notNull().default(0),
+  refundDate: timestamp('refund_date'),
+  refundReason: text('refund_reason'),
   proofStorageKey: varchar('proof_storage_key', { length: 500 }),
   proofFileName: varchar('proof_file_name', { length: 255 }),
   proofMimeType: varchar('proof_mime_type', { length: 100 }),
@@ -142,6 +144,31 @@ export const duesGatewayConfigs = pgTable('dues_gateway_config', {
   uniqueOrg: unique('dues_gateway_org_unique').on(table.organizationId),
 }));
 
+// Webhook retry status enum
+export const webhookRetryStatusEnum = pgEnum('webhook_retry_status', [
+  'processing', 'completed', 'pending_retry', 'dead_letter',
+]);
+
+// Webhook retry log table (slice 009, GAP-009)
+export const webhookRetryLogs = pgTable('webhook_retry_log', {
+  ...baseEntityFields,
+  idempotencyKey: varchar('idempotency_key', { length: 255 }).notNull(),
+  provider: varchar('provider', { length: 50 }).notNull(),
+  eventType: varchar('event_type', { length: 100 }).notNull(),
+  payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
+  status: webhookRetryStatusEnum('status').notNull().default('processing'),
+  retryCount: integer('retry_count').notNull().default(0),
+  lastRetryAt: timestamp('last_retry_at'),
+  nextRetryAt: timestamp('next_retry_at'),
+  lastError: text('last_error'),
+}, (table) => ({
+  idempotencyIdx: unique('webhook_retry_idempotency_unique').on(table.idempotencyKey),
+  orgIdx: index('webhook_retry_org_idx').on(table.organizationId),
+  statusIdx: index('webhook_retry_status_idx').on(table.status),
+  nextRetryIdx: index('webhook_retry_next_retry_idx').on(table.nextRetryAt),
+}));
+
 // Type exports
 export type DuesOrgConfig = typeof duesOrgConfigs.$inferSelect;
 export type NewDuesOrgConfig = typeof duesOrgConfigs.$inferInsert;
@@ -153,3 +180,5 @@ export type DuesFundAllocation = typeof duesFundAllocations.$inferSelect;
 export type NewDuesFundAllocation = typeof duesFundAllocations.$inferInsert;
 export type DuesReminderSchedule = typeof duesReminderSchedules.$inferSelect;
 export type DuesGatewayConfig = typeof duesGatewayConfigs.$inferSelect;
+export type WebhookRetryLog = typeof webhookRetryLogs.$inferSelect;
+export type NewWebhookRetryLog = typeof webhookRetryLogs.$inferInsert;

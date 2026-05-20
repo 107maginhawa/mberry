@@ -5,6 +5,9 @@ import { MembershipRepository } from './repos/membership.repo';
 import { persons } from '../person/repos/person.schema';
 import type { Session } from '@/types/auth';
 
+// Re-export CSV import utilities for unified API surface
+export { parseCSV, previewCSVImport, bulkCSVImport, validateImportRows } from './csvImport';
+
 // ─── Zod Validation Schema (V-08) ─────────────────────────
 
 export const importMemberRowSchema = z.object({
