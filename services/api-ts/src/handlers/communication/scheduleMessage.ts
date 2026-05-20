@@ -42,6 +42,13 @@ export async function scheduleMessage(
 
   const scheduledAt = new Date(body.scheduledAt as unknown as string);
 
+  if (scheduledAt.getTime() <= Date.now()) {
+    throw new BusinessLogicError(
+      'Scheduled time must be in the future',
+      'MESSAGE_SCHEDULE_PAST'
+    );
+  }
+
   const updated = await repo.update(params.messageId, {
     scheduledAt,
     status: 'scheduled',

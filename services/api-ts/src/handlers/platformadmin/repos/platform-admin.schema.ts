@@ -56,6 +56,10 @@ export const associations = pgTable('association', {
   creditCyclePeriod: integer('credit_cycle_period'),
   requiredCreditsPerCycle: integer('required_credits_per_cycle'),
   carryoverEnabled: boolean('carryover_enabled').default(false),
+  /** BR-11: configurable cycle start month (1-12). Null = registration-based. */
+  cycleStartMonth: integer('cycle_start_month'),
+  /** BR-11: configurable cycle start day (1-31). Defaults to 1 if month set. */
+  cycleStartDay: integer('cycle_start_day'),
   status: varchar('status', { length: 20 }).notNull().default('active'),
 }, (table) => [
   uniqueIndex('idx_association_name').on(table.name),

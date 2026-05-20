@@ -2,9 +2,12 @@ import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
 import {
   getCycleForDate,
+  getCycleForDateWithConfig,
   getCurrentCycle,
+  getCurrentCycleWithConfig,
   calculateCarryover,
   summarizeCycle,
+  type CreditCycleConfig,
 } from './utils/credit-cycle';
 
 /**
@@ -228,6 +231,176 @@ describe('[BR-11] Credit Cycle — per-member registration-based cycles', () => 
     const cycle = getCycleForDate(regDate, targetDate, 3);
 
     expect(cycle.cycleNumber).toBe(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// BR-11: Configurable Cycle Start Date (association-level)
+// ---------------------------------------------------------------------------
+
+describe('[BR-11] Configurable cycle start date per association', () => {
+  const julyCycleConfig: CreditCycleConfig = {
+    cyclePeriodYears: 1,
+    requiredCredits: 40,
+    carryoverEnabled: true,
+    cycleStartMonth: 7,
+    cycleStartDay: 1,
+  };
+
+  test('cycle starts on configured month/day (July 1)', () => {
+    const target = new Date('2025-09-15');
+    const cycle = getCycleForDateWithConfig(target, julyCycleConfig);
+
+    expect(cycle.cycleStart.getMonth()).toBe(6); // JS month 6 = July
+    expect(cycle.cycleStart.getDate()).toBe(1);
+    expect(cycle.cycleStart.getFullYear()).toBe(2025);
+  });
+
+  test('date before anchor falls into previous cycle year', () => {
+    const target = new Date('2025-03-15'); // before July 1
+    const cycle = getCycleForDateWithConfig(target, julyCycleConfig);
+
+    expect(cycle.cycleStart.getFullYear()).toBe(2024);
+    expect(cycle.cycleStart.getMonth()).toBe(6);
+    expect(cycle.cycleStart.getDate()).toBe(1);
+  });
+
+  test('cycle end is one period later minus 1ms', () => {
+    const target = new Date('2025-09-15');
+    const cycle = getCycleForDateWithConfig(target, julyCycleConfig);
+
+    // End should be June 30, 2026, 23:59:59.999
+    expect(cycle.cycleEnd.getFullYear()).toBe(2026);
+    expect(cycle.cycleEnd.getMonth()).toBe(5); // June
+    expect(cycle.cycleEnd.getDate()).toBe(30);
+  });
+
+  test('2-year cycle with April 1 start', () => {
+    const config: CreditCycleConfig = {
+      cyclePeriodYears: 2,
+      requiredCredits: 60,
+      carryoverEnabled: false,
+      cycleStartMonth: 4,
+      cycleStartDay: 1,
+    };
+    const target = new Date('2025-06-15');
+    const cycle = getCycleForDateWithConfig(target, config);
+
+    // 2-year cycles from epoch 2000: 2000, 2002, 2004, ..., 2024, 2026
+    // April 1 2024 <= June 15 2025 < April 1 2026
+    expect(cycle.cycleStart.getFullYear()).toBe(2024);
+    expect(cycle.cycleStart.getMonth()).toBe(3); // April
+    expect(cycle.cycleEnd.getFullYear()).toBe(2026);
+  });
+
+  test('3-year cycle boundaries are correct', () => {
+    const config: CreditCycleConfig = {
+      cyclePeriodYears: 3,
+      requiredCredits: 90,
+      carryoverEnabled: true,
+      cycleStartMonth: 1,
+      cycleStartDay: 1,
+    };
+    const target = new Date('2026-06-01');
+    const cycle = getCycleForDateWithConfig(target, config);
+
+    // 3-year cycles from 2000: 2000, 2003, 2006, ..., 2024, 2027
+    // Jan 1 2024 <= June 1 2026 < Jan 1 2027
+    // cycleEnd = Jan 1 2027 - 1ms = Dec 31 2026
+    expect(cycle.cycleStart.getFullYear()).toBe(2024);
+    expect(cycle.cycleEnd.getFullYear()).toBe(2026);
+    expect(cycle.cycleEnd.getMonth()).toBe(11); // December
+    expect(cycle.cycleEnd.getDate()).toBe(31);
+  });
+
+  test('falls back to registration-based when cycleStartMonth is null', () => {
+    const legacyConfig: CreditCycleConfig = {
+      cyclePeriodYears: 2,
+      requiredCredits: 40,
+      carryoverEnabled: false,
+      cycleStartMonth: null,
+    };
+    const regDate = new Date('2022-01-01');
+    const target = new Date('2024-06-01');
+    const cycle = getCycleForDateWithConfig(target, legacyConfig, regDate);
+
+    // Should match legacy getCycleForDate behavior
+    const legacy = getCycleForDate(regDate, target, 2);
+    expect(cycle.cycleNumber).toBe(legacy.cycleNumber);
+    expect(cycle.cycleStart.getTime()).toBe(legacy.cycleStart.getTime());
+    expect(cycle.cycleEnd.getTime()).toBe(legacy.cycleEnd.getTime());
+  });
+
+  test('throws when no cycleStartMonth and no registrationDate', () => {
+    const legacyConfig: CreditCycleConfig = {
+      cyclePeriodYears: 1,
+      requiredCredits: 40,
+      carryoverEnabled: false,
+      cycleStartMonth: null,
+    };
+    expect(() => getCycleForDateWithConfig(new Date(), legacyConfig)).toThrow(
+      'registrationDate required',
+    );
+  });
+
+  test('cycleStartDay defaults to 1 when not provided', () => {
+    const config: CreditCycleConfig = {
+      cyclePeriodYears: 1,
+      requiredCredits: 40,
+      carryoverEnabled: false,
+      cycleStartMonth: 10,
+      // cycleStartDay omitted
+    };
+    const target = new Date('2025-11-15');
+    const cycle = getCycleForDateWithConfig(target, config);
+
+    expect(cycle.cycleStart.getDate()).toBe(1);
+    expect(cycle.cycleStart.getMonth()).toBe(9); // October
+  });
+
+  test('custom start day (e.g. March 15)', () => {
+    const config: CreditCycleConfig = {
+      cyclePeriodYears: 1,
+      requiredCredits: 40,
+      carryoverEnabled: false,
+      cycleStartMonth: 3,
+      cycleStartDay: 15,
+    };
+    const target = new Date('2025-04-01');
+    const cycle = getCycleForDateWithConfig(target, config);
+
+    expect(cycle.cycleStart.getMonth()).toBe(2); // March
+    expect(cycle.cycleStart.getDate()).toBe(15);
+    expect(cycle.cycleStart.getFullYear()).toBe(2025);
+  });
+
+  test('getCurrentCycleWithConfig returns cycle containing now', () => {
+    const cycle = getCurrentCycleWithConfig(julyCycleConfig);
+    const now = new Date();
+    expect(cycle.cycleStart.getTime()).toBeLessThanOrEqual(now.getTime());
+    expect(cycle.cycleEnd.getTime()).toBeGreaterThanOrEqual(now.getTime());
+  });
+
+  test('carryover works with configurable cycle boundaries', () => {
+    // Simulate: earned 60 credits in cycle with 40 required, carryover enabled
+    const target = new Date('2025-09-15');
+    const cycle = getCycleForDateWithConfig(target, julyCycleConfig);
+    const carryover = calculateCarryover(60, 40, true);
+
+    // Cap at 50% of 40 = 20
+    expect(carryover).toBe(20);
+
+    // Next cycle with carryover
+    const nextTarget = new Date('2026-08-01');
+    const nextCycle = getCycleForDateWithConfig(nextTarget, julyCycleConfig);
+
+    // Cycles should be different
+    expect(nextCycle.cycleStart.getTime()).toBeGreaterThan(cycle.cycleStart.getTime());
+
+    // Summarize next cycle with carryover
+    const summary = summarizeCycle(nextCycle, 25, 40, carryover);
+    expect(summary.total).toBe(45); // 25 earned + 20 carryover
+    expect(summary.compliant).toBe(true);
   });
 });
 
