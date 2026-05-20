@@ -37,6 +37,8 @@ describe('createOfficerTerm [BR-09]', () => {
     mocks = stubRepo(OfficerTermRepository, {
       create: async () => createdTerm,
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+      findActiveByPosition: async () => undefined,
+      findActiveByPersonInOrg: async () => [],
     });
 
     const ctx = makeCtx({
@@ -63,6 +65,8 @@ describe('createOfficerTerm [BR-09]', () => {
         return { ...createdTerm, status: data.status };
       },
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+      findActiveByPosition: async () => undefined,
+      findActiveByPersonInOrg: async () => [],
     });
 
     const ctx = makeCtx({
@@ -87,6 +91,8 @@ describe('createOfficerTerm [BR-09]', () => {
         return { ...createdTerm, endDate: data.endDate };
       },
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+      findActiveByPosition: async () => undefined,
+      findActiveByPersonInOrg: async () => [],
     });
 
     const ctx = makeCtx({
@@ -111,6 +117,8 @@ describe('createOfficerTerm [BR-09]', () => {
         return { ...createdTerm, endDate: data.endDate };
       },
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+      findActiveByPosition: async () => undefined,
+      findActiveByPersonInOrg: async () => [],
     });
 
     const ctx = makeCtx({
@@ -134,6 +142,8 @@ describe('createOfficerTerm [BR-09]', () => {
         return { ...createdTerm, organizationId: data.organizationId };
       },
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+      findActiveByPosition: async () => undefined,
+      findActiveByPersonInOrg: async () => [],
     });
 
     const ctx = makeCtx({
@@ -208,6 +218,8 @@ describe('createOfficerTerm [BR-09]', () => {
     mocks = stubRepo(OfficerTermRepository, {
       create: async () => createdTerm,
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+      findActiveByPosition: async () => undefined,
+      findActiveByPersonInOrg: async () => [],
     });
 
     const ctx = makeCtx({

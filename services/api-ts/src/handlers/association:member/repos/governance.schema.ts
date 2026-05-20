@@ -60,7 +60,58 @@ export const officerTerms = pgTable('officer_term', {
   check('officer_term_date_order', sql`${table.endDate} IS NULL OR ${table.endDate} > ${table.startDate}`),
 ]);
 
+// ─── Transition Checklist (M4-R3) ────────────────────────
+
+export const transitionChecklistStatusEnum = pgEnum('transition_checklist_status', [
+  'pending',
+  'completed',
+]);
+
+export const transitionChecklists = pgTable('transition_checklist', {
+  ...baseEntityFields,
+  officerTermId: uuid('officer_term_id').notNull().references(() => officerTerms.id),
+  organizationId: uuid('organization_id').notNull(),
+  item: varchar('item', { length: 500 }).notNull(),
+  status: transitionChecklistStatusEnum('status').notNull().default('pending'),
+  completedAt: timestamp('completed_at'),
+  completedBy: uuid('completed_by'),
+  notes: text('notes'),
+}, (table) => [
+  index('idx_transition_checklist_term').on(table.officerTermId),
+  index('idx_transition_checklist_org').on(table.organizationId),
+]);
+
+// ─── Disciplinary Action (M4-R4) ─────────────────────────
+
+export const disciplinaryActionTypeEnum = pgEnum('disciplinary_action_type', [
+  'warning',
+  'suspension',
+  'removal',
+  'probation',
+]);
+
+export const disciplinaryActions = pgTable('disciplinary_action', {
+  ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
+  targetPersonId: uuid('target_person_id').notNull(),
+  issuedBy: uuid('issued_by').notNull(),
+  actionType: disciplinaryActionTypeEnum('action_type').notNull(),
+  reason: text('reason').notNull(), // M4-R4: mandatory reason
+  effectiveDate: timestamp('effective_date').notNull(),
+  expiresAt: timestamp('expires_at'),
+  notes: text('notes'),
+  // M4-R4: immutable — no update allowed after creation
+}, (table) => [
+  index('idx_disciplinary_action_org').on(table.organizationId),
+  index('idx_disciplinary_action_target').on(table.targetPersonId),
+  index('idx_disciplinary_action_issuer').on(table.issuedBy),
+]);
+
 export type Position = typeof positions.$inferSelect;
 export type NewPosition = typeof positions.$inferInsert;
 export type OfficerTerm = typeof officerTerms.$inferSelect;
 export type NewOfficerTerm = typeof officerTerms.$inferInsert;
+export type TransitionChecklist = typeof transitionChecklists.$inferSelect;
+export type NewTransitionChecklist = typeof transitionChecklists.$inferInsert;
+export type DisciplinaryAction = typeof disciplinaryActions.$inferSelect;
+export type NewDisciplinaryAction = typeof disciplinaryActions.$inferInsert;

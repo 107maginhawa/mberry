@@ -28,6 +28,24 @@ export async function createOfficerTerm(
   const logger = ctx.get('logger');
   const repo = new OfficerTermRepository(db, logger);
 
+  // M4-R1: One person per role — check no active holder exists for this position
+  const existingHolder = await repo.findActiveByPosition(body.positionId);
+  if (existingHolder) {
+    return ctx.json(
+      { error: 'Position already has an active officer. Remove the current officer before assigning a new one.' },
+      409,
+    );
+  }
+
+  // M4-R1: One role per person per org — check person doesn't already hold a role
+  const personActiveTerms = await repo.findActiveByPersonInOrg(body.personId, orgId);
+  if (personActiveTerms.length > 0) {
+    return ctx.json(
+      { error: 'Person already holds an active officer role in this organization.' },
+      409,
+    );
+  }
+
   const term = await repo.create({
     organizationId: orgId,
     positionId: body.positionId,
@@ -43,6 +61,7 @@ export async function createOfficerTerm(
     resourceType: 'officer-term',
     resourceId: term.id,
     description: 'Officer term created',
+    details: { positionId: body.positionId, personId: body.personId },
   });
 
   return ctx.json(term, 201);

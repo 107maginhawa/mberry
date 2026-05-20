@@ -36,6 +36,7 @@ describe('updateOfficerTerm', () => {
     mocks = stubRepo(OfficerTermRepository, {
       findById: async () => existingTerm,
       update: async (_id: string, data: any) => ({ ...existingTerm, ...data }),
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -58,6 +59,7 @@ describe('updateOfficerTerm', () => {
         capturedId = id;
         return { ...existingTerm, ...data };
       },
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -78,6 +80,7 @@ describe('updateOfficerTerm', () => {
         capturedData = data;
         return { ...existingTerm, ...data };
       },
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -96,6 +99,7 @@ describe('updateOfficerTerm', () => {
     mocks = stubRepo(OfficerTermRepository, {
       findById: async () => undefined,
       update: async () => existingTerm,
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
@@ -111,6 +115,7 @@ describe('updateOfficerTerm', () => {
     mocks = stubRepo(OfficerTermRepository, {
       findById: async () => termInOtherTenant,
       update: async () => termInOtherTenant,
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     // ctx uses organizationId: 'tenant-1' by default — mismatch should trigger NotFoundError
@@ -139,6 +144,7 @@ describe('updateOfficerTerm', () => {
     mocks = stubRepo(OfficerTermRepository, {
       findById: async () => existingTerm,
       update: async (_id: string, data: any) => ({ ...existingTerm, ...data }),
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
 
     const ctx = makeCtx({
