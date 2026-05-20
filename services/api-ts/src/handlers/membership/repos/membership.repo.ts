@@ -32,7 +32,7 @@ export class MembershipRepository {
       eq(memberships.organizationId, filters.organizationId),
     ];
 
-    if (filters.status) conditions.push(eq(memberships.status, filters.status as any));
+    if (filters.status) conditions.push(eq(memberships.status, filters.status as Membership['status']));
     if (filters.categoryId) conditions.push(eq(memberships.categoryId, filters.categoryId));
     if (filters.search) {
       conditions.push(or(
@@ -101,7 +101,7 @@ export class MembershipRepository {
       eq(memberships.organizationId, filters.organizationId),
     ];
 
-    if (filters.status) conditions.push(eq(memberships.status, filters.status as any));
+    if (filters.status) conditions.push(eq(memberships.status, filters.status as Membership['status']));
     if (filters.categoryId) conditions.push(eq(memberships.categoryId, filters.categoryId));
     if (filters.search) {
       conditions.push(or(
@@ -288,7 +288,7 @@ export class MembershipRepository {
     const conditions: SQL<unknown>[] = [
       eq(membershipApplications.organizationId, organizationId),
     ];
-    if (status) conditions.push(eq(membershipApplications.status, status as any));
+    if (status) conditions.push(eq(membershipApplications.status, status as MembershipApplication['status']));
 
     return this.db
       .select({
@@ -314,7 +314,7 @@ export class MembershipRepository {
     const [result] = await this.db
       .update(membershipApplications)
       .set({
-        status: status as any,
+        status: status as MembershipApplication['status'],
         reviewedBy: reviewerId,
         reviewedAt: new Date(),
         denialReason: status === 'denied' ? reason : undefined,

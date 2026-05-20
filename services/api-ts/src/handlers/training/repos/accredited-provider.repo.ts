@@ -34,7 +34,7 @@ export class AccreditedProviderRepository {
   ): Promise<{ data: AccreditedProviderWithExpiry[]; total: number }> {
     const conditions: SQL<unknown>[] = [eq(accreditedProviders.organizationId, orgId)];
     if (statusFilter) {
-      conditions.push(eq(accreditedProviders.status, statusFilter as any));
+      conditions.push(eq(accreditedProviders.status, statusFilter as AccreditedProvider['status']));
     }
 
     const where = and(...conditions);

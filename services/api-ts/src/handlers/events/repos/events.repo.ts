@@ -33,12 +33,12 @@ export class EventsRepository {
     if (filters?.status) {
       const statuses = filters.status.split(',').map(s => s.trim());
       if (statuses.length === 1) {
-        conditions.push(eq(events.status, statuses[0] as any));
+        conditions.push(eq(events.status, statuses[0] as Event['status']));
       } else {
-        conditions.push(inArray(events.status, statuses as any));
+        conditions.push(inArray(events.status, statuses as Event['status'][]));
       }
     }
-    if (filters?.type) conditions.push(eq(events.eventType, filters.type as any));
+    if (filters?.type) conditions.push(eq(events.eventType, filters.type as NonNullable<Event['eventType']>));
     if (filters?.search) conditions.push(like(events.title, `%${filters.search}%`));
     if (filters?.from) conditions.push(gte(events.startDate, filters.from));
     if (filters?.to) conditions.push(lte(events.startDate, filters.to));

@@ -72,7 +72,7 @@ export class OrganizationRepository {
 
   async findAll(status?: string): Promise<Organization[]> {
     if (status) {
-      return this.db.select().from(organizations).where(eq(organizations.status, status as any));
+      return this.db.select().from(organizations).where(eq(organizations.status, status as Organization['status']));
     }
     return this.db.select().from(organizations);
   }
@@ -170,7 +170,7 @@ export class PlatformAdminRepository {
   }
 
   async countByRole(role: string): Promise<number> {
-    const rows = await this.db.select().from(platformAdmins).where(eq(platformAdmins.role, role as any));
+    const rows = await this.db.select().from(platformAdmins).where(eq(platformAdmins.role, role as PlatformAdmin['role']));
     return rows.length;
   }
 }

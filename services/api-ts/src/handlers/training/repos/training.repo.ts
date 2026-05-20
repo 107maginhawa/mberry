@@ -24,7 +24,7 @@ export class TrainingRepository {
     const conditions: SQL<unknown>[] = [
       eq(trainings.organizationId, orgId),
     ];
-    if (filters?.status) conditions.push(eq(trainings.status, filters.status as any));
+    if (filters?.status) conditions.push(eq(trainings.status, filters.status as Training['status']));
     if (filters?.search) conditions.push(like(trainings.title, `%${filters.search}%`));
 
     const [data, countResult] = await Promise.all([
@@ -126,7 +126,7 @@ export class TrainingRepository {
   async updateEnrollmentStatus(id: string, status: string): Promise<TrainingEnrollment> {
     const [result] = await this.db
       .update(trainingEnrollments)
-      .set({ status: status as any, updatedAt: new Date() })
+      .set({ status: status as TrainingEnrollment['status'], updatedAt: new Date() })
       .where(eq(trainingEnrollments.id, id))
       .returning();
     return result!;

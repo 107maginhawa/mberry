@@ -60,14 +60,14 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
     }
 
     if (filters.type) {
-      conditions.push(eq(notifications.type, filters.type as any));
+      conditions.push(eq(notifications.type, filters.type as Notification['type']));
     }
 
     // Auto-filter to in-app notifications if no channel specified
     if (!filters.channel) {
       conditions.push(eq(notifications.channel, 'in-app'));
     } else {
-      conditions.push(eq(notifications.channel, filters.channel as any));
+      conditions.push(eq(notifications.channel, filters.channel as Notification['channel']));
     }
 
     // Handle special 'unread' status value
@@ -77,7 +77,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
         inArray(notifications.status, ['sent', 'delivered'])
       );
     } else if (filters.status) {
-      conditions.push(eq(notifications.status, filters.status as any));
+      conditions.push(eq(notifications.status, filters.status as Notification['status']));
     }
     
     if (filters.startDate) {
@@ -134,8 +134,8 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
     const notification = await this.createOne({
       organizationId: request.organizationId,
       recipient: request.recipient,
-      type: request.type as any,
-      channel: request.channel as any,
+      type: request.type as Notification['type'],
+      channel: request.channel as Notification['channel'],
       title: request.title,
       message: request.message,
       scheduledAt: request.scheduledAt || null,
@@ -250,7 +250,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
     ];
 
     if (type) {
-      conditions.push(eq(notifications.type, type as any));
+      conditions.push(eq(notifications.type, type as Notification['type']));
     }
     
     const result = await this.db

@@ -27,7 +27,7 @@ export interface PaginationOptions {
  */
 export interface FindManyOptions {
   pagination?: PaginationOptions;
-  orderBy?: SQL;
+  orderBy?: any; // eslint-disable-line @typescript-eslint/no-explicit-any -- callers pass heterogeneous shapes
 }
 
 /**
@@ -213,7 +213,7 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
     if (options?.orderBy) {
       query.orderBy(options.orderBy);
     } else if ((this.table as unknown as BaseTableColumns).createdAt) {
-      query.orderBy((this.table as unknown as BaseTableColumns).createdAt);
+      query.orderBy((this.table as unknown as BaseTableColumns).createdAt!);
     }
 
     // Apply pagination
