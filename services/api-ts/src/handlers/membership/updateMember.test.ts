@@ -2,7 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { updateMember } from './updateMember';
 import { MembershipRepository } from './repos/membership.repo';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, ValidationError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -276,5 +276,80 @@ describe('updateMember [BR-03]', () => {
         expect(capturedStatus).toBe(from); // status unchanged
       });
     }
+  });
+
+  // ─── [V-20] Input Validation — Invalid status values ──
+  describe('[V-20] body.status validation', () => {
+    test('rejects invalid status string "banana" with 400', async () => {
+      mocks = stubRepo(MembershipRepository, {
+        getMember: async () => existingMember,
+        updateMember: async (_id: string, data: any) => ({ ...existingMember.membership, ...data }),
+      });
+
+      const ctx = makeCtx({
+        _params: { organizationId: 'org-1', memberId: 'person-1' },
+        _body: { status: 'banana' },
+      });
+
+      await expect(updateMember(ctx)).rejects.toBeInstanceOf(ValidationError);
+    });
+
+    test('rejects empty string status with 400', async () => {
+      mocks = stubRepo(MembershipRepository, {
+        getMember: async () => existingMember,
+        updateMember: async (_id: string, data: any) => ({ ...existingMember.membership, ...data }),
+      });
+
+      const ctx = makeCtx({
+        _params: { organizationId: 'org-1', memberId: 'person-1' },
+        _body: { status: '' },
+      });
+
+      await expect(updateMember(ctx)).rejects.toBeInstanceOf(ValidationError);
+    });
+
+    test('rejects numeric status (type check) with 400', async () => {
+      mocks = stubRepo(MembershipRepository, {
+        getMember: async () => existingMember,
+        updateMember: async (_id: string, data: any) => ({ ...existingMember.membership, ...data }),
+      });
+
+      const ctx = makeCtx({
+        _params: { organizationId: 'org-1', memberId: 'person-1' },
+        _body: { status: 123 },
+      });
+
+      await expect(updateMember(ctx)).rejects.toBeInstanceOf(ValidationError);
+    });
+
+    test('accepts valid status "active" (200)', async () => {
+      mocks = stubRepo(MembershipRepository, {
+        getMember: async () => existingMember,
+        updateMember: async (_id: string, data: any) => ({ ...existingMember.membership, ...data }),
+      });
+
+      const ctx = makeCtx({
+        _params: { organizationId: 'org-1', memberId: 'person-1' },
+        _body: { status: 'active' },
+      });
+
+      const response = await updateMember(ctx);
+      expect(response.status).toBe(200);
+    });
+
+    test('accepts missing status (uses current, 200)', async () => {
+      mocks = stubRepo(MembershipRepository, {
+        getMember: async () => existingMember,
+        updateMember: async (_id: string, data: any) => ({ ...existingMember.membership, ...data }),
+      });
+
+      const ctx = makeCtx({
+        _params: { organizationId: 'org-1', memberId: 'person-1' },
+        _body: {},
+      });
+
+      const response = await updateMember(ctx);
+      expect(response.status).toBe(200);
+    });
   });
 });
