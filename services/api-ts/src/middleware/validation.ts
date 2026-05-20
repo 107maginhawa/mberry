@@ -30,7 +30,7 @@ export function validationErrorHandler(result: any, c: Context): Response | unde
       if (issue.path.length > 0) {
         fieldErrors.push({
           field: issue.path.join('.'),
-          value: 'received' in issue ? (issue as Record<string, unknown>).received : undefined,
+          value: 'received' in issue ? (issue as Record<string, unknown>)['received'] : undefined,
           code: issue.code,
           message: issue.message,
           context: 'fatal' in issue && issue.fatal !== undefined ? { fatal: issue.fatal } : undefined,
