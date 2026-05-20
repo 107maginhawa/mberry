@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Search, UserPlus } from 'lucide-react'
-import { Input } from '@monobase/ui'
+import { Button, Input } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
 import { listRosterMembersOptions } from '@monobase/sdk-ts/generated/react-query'
@@ -96,11 +96,12 @@ export function NomineePickerDialog({
             members.map((member: any) => {
               const name = [member.firstName, member.lastName].filter(Boolean).join(' ') || member.personId || member.id
               return (
-                <button
+                <Button
                   key={member.personId ?? member.id}
+                  variant="ghost"
                   onClick={() => handleSelect(member.personId ?? member.id)}
                   disabled={addMutation.isPending}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-[var(--color-surface-warm)] transition-colors disabled:opacity-50"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 h-auto justify-start"
                 >
                   <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-xs font-medium shrink-0">
                     {(member.firstName?.[0] ?? '?').toUpperCase()}
@@ -112,7 +113,7 @@ export function NomineePickerDialog({
                     )}
                   </div>
                   <UserPlus className="w-4 h-4 text-[var(--color-muted)] shrink-0" />
-                </button>
+                </Button>
               )
             })
           )}
@@ -120,12 +121,13 @@ export function NomineePickerDialog({
 
         {/* Footer */}
         <div className="p-3 border-t">
-          <button
+          <Button
+            variant="ghost"
             onClick={onClose}
-            className="w-full py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
+            className="w-full"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>

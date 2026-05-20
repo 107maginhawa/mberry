@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Badge } from '@monobase/ui'
+import { Badge, Button } from '@monobase/ui'
 import { getStatusLabel } from '@/features/membership/lib/membership-status'
 import { api } from '@/lib/api'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -123,9 +123,9 @@ function MyIdCard() {
           </GlassCard>
 
           <div className="text-center mt-6">
-            <button className="px-[22px] py-[10px] bg-[var(--color-primary)] text-white rounded-[8px] text-[14px] font-semibold hover:bg-[var(--color-primary-mid)] transition-colors duration-150" disabled>
+            <Button disabled>
               Download PDF
-            </button>
+            </Button>
           </div>
         </div>
       )}

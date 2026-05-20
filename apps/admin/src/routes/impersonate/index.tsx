@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserCog, Search, AlertTriangle, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
 import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { startImpersonation as startImpersonationApi, endImpersonation as endImpersonationApi } from '@monobase/sdk-ts/generated/sdk.gen'
@@ -129,14 +130,15 @@ function ImpersonatePage() {
               User: {activeSession.targetUserName || activeSession.targetUserId} | Started: {new Date(activeSession.startedAt).toLocaleTimeString()}
             </p>
           </div>
-          <button
+          <Button
+            variant="destructive"
             onClick={() => endImpersonationMut.mutate(activeSession.sessionId)}
             disabled={endImpersonationMut.isPending}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-yellow-600 text-white text-sm font-medium hover:bg-yellow-700 transition-colors"
+            className="bg-yellow-600 hover:bg-yellow-700"
           >
             <X className="w-4 h-4" />
             {endImpersonationMut.isPending ? 'Ending...' : 'End Session'}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -158,54 +160,54 @@ function ImpersonatePage() {
 
       {/* Results Table */}
       <div className="rounded-lg border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Name</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Email</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Organization</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Role</th>
-              <th className="text-right p-4 text-sm font-medium text-muted-foreground">Action</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-4 text-sm">Name</TableHead>
+              <TableHead className="p-4 text-sm">Email</TableHead>
+              <TableHead className="p-4 text-sm">Organization</TableHead>
+              <TableHead className="p-4 text-sm">Role</TableHead>
+              <TableHead className="text-right p-4 text-sm">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {search.length < 2 ? (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
                   Type at least 2 characters to search for a user.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : filteredMembers.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
                   No users found matching "{search}".
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               filteredMembers.map((member) => (
-                <tr key={member.id} className="border-b last:border-b-0">
-                  <td className="p-4 text-sm">{member.name}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{member.email}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{member.organizationName || '--'}</td>
-                  <td className="p-4">
+                <TableRow key={member.id}>
+                  <TableCell className="p-4 text-sm">{member.name}</TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">{member.email}</TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">{member.organizationName || '--'}</TableCell>
+                  <TableCell className="p-4">
                     <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-muted">
                       {member.role || 'member'}
                     </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button
+                  </TableCell>
+                  <TableCell className="p-4 text-right">
+                    <Button
+                      size="sm"
                       onClick={() => startImpersonation.mutate(member.id)}
                       disabled={startImpersonation.isPending || !!activeSession}
-                      className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                     >
                       {startImpersonation.isPending ? '...' : 'Impersonate'}
-                    </button>
-                  </td>
-                </tr>
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

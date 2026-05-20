@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Button } from '@monobase/ui'
 import { Calendar, MapPin, Users, Award, Edit2 } from 'lucide-react'
 import { TrainingForm } from '@/features/training/components/training-form'
 import { CompletionTable } from '@/features/training/components/completion-table'
@@ -78,12 +79,12 @@ function TrainingDetail() {
           { label: training.title },
         ]}
         actions={
-          <button
+          <Button
+            variant="outline"
             onClick={() => setTab('edit')}
-            className="flex items-center gap-1.5 px-3 py-2 text-[14px] border rounded-[8px] hover:bg-[var(--color-surface-warm)] shrink-0"
           >
-            <Edit2 className="w-4 h-4" /> Edit
-          </button>
+            <Edit2 className="w-4 h-4 mr-1.5" /> Edit
+          </Button>
         }
       />
 
@@ -106,17 +107,18 @@ function TrainingDetail() {
       {/* Tabs */}
       <div className="border-b flex gap-0">
         {tabs.map((t) => (
-          <button
+          <Button
             key={t.key}
+            variant="ghost"
             onClick={() => setTab(t.key)}
-            className={`px-4 py-2 text-[14px] font-medium border-b-2 -mb-px transition-colors ${
+            className={`px-4 py-2 text-[14px] font-medium border-b-2 -mb-px rounded-none ${
               tab === t.key
                 ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
                 : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             {t.label}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -149,14 +149,16 @@ export function Combobox({
                 className="flex items-center gap-1"
               >
                 {option?.label || val}
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={(e) => removeValue(val, e)}
-                  className="ml-1 hover:text-destructive"
+                  className="ml-1 h-auto w-auto p-0 hover:text-destructive"
                   aria-label={`Remove ${option?.label || val}`}
                 >
                   <X className="h-3 w-3" />
-                </button>
+                </Button>
               </Badge>
             )
           })}

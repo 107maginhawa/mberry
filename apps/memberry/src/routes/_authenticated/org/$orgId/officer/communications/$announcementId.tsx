@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Button } from '@monobase/ui'
 import { api } from '@/lib/api'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -148,34 +149,33 @@ function AnnouncementDetailPage() {
       {/* Actions */}
       <div className="flex gap-3 pt-2 border-t">
         {ann.status === 'draft' && (
-          <button
+          <Button
             type="button"
             onClick={() => publishMutation.mutate()}
             disabled={publishMutation.isPending}
-            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-[8px] text-[14px] font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
           >
             {publishMutation.isPending ? 'Publishing…' : 'Publish Now'}
-          </button>
+          </Button>
         )}
         {ann.status === 'sent' && (
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => publishMutation.mutate()}
             disabled={publishMutation.isPending}
-            className="px-4 py-2 border rounded-[8px] text-[14px] font-medium hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
           >
             Resend
-          </button>
+          </Button>
         )}
         {ann.status !== 'archived' && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={() => archiveMutation.mutate()}
             disabled={archiveMutation.isPending}
-            className="px-4 py-2 border rounded-[8px] text-[14px] font-medium text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
           >
             {archiveMutation.isPending ? 'Archiving…' : 'Archive'}
-          </button>
+          </Button>
         )}
         {ann.status === 'draft' && (
           <Link
@@ -188,16 +188,16 @@ function AnnouncementDetailPage() {
           </Link>
         )}
         {ann.status === 'draft' && (
-          <button
+          <Button
+            variant="destructive"
             onClick={async () => {
               if (!confirm('Delete this draft?')) return
               await api.delete(`/api/communications/announcements/${announcementId}`)
               navigate({ to: `/org/${orgId}/officer/communications` })
             }}
-            className="px-4 py-2 border border-red-200 rounded-[8px] text-[14px] font-medium text-red-600 hover:bg-red-50"
           >
             Delete
-          </button>
+          </Button>
         )}
       </div>
     </div>

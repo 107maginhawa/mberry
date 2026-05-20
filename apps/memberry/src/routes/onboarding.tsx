@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { Button } from '@monobase/ui'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   updatePersonMutation,
@@ -93,18 +94,17 @@ function MemberOnboarding() {
               className="w-full px-3 py-2 border rounded-md text-sm"
             />
             <div className="flex justify-between">
-              <button
+              <Button
+                variant="ghost"
                 onClick={handleSkip}
-                className="px-4 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
               >
                 Skip for now
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setStep(2)}
-                className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium"
               >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -115,6 +115,7 @@ function MemberOnboarding() {
             <p className="text-sm text-[var(--color-muted)]">
               Control how your information appears in the member directory.
             </p>
+            {/* eslint-disable-next-line no-restricted-syntax */}
             <label className="flex items-center gap-3 p-3 border rounded-md cursor-pointer">
               <input
                 type="checkbox"
@@ -130,26 +131,25 @@ function MemberOnboarding() {
               </div>
             </label>
             <div className="flex justify-between">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setStep(1)}
-                className="px-4 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
               >
                 Back
-              </button>
+              </Button>
               <div className="flex gap-2">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={handleSkip}
-                  className="px-4 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
                 >
                   Skip
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleComplete}
                   disabled={updatePerson.isPending}
-                  className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium disabled:opacity-50"
                 >
                   {updatePerson.isPending ? 'Saving...' : 'Complete'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

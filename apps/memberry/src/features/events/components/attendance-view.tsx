@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Input } from '@monobase/ui'
+import { Button, Input } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { UserCheck, QrCode, Hand, Search } from 'lucide-react'
 import {
@@ -99,13 +99,12 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
             }}
             className="flex-1"
           />
-          <button
+          <Button
             onClick={() => personIdInput.trim() && checkInMut.mutate({ path: { eventId }, body: { personId: personIdInput.trim(), method: 'manual' } as any })}
             disabled={!personIdInput.trim() || checkInMut.isPending}
-            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium disabled:opacity-50 hover:bg-[var(--color-primary-mid)]"
           >
             {checkInMut.isPending ? 'Checking in...' : 'Check In'}
-          </button>
+          </Button>
         </div>
         {checkInError && (
           <p className="text-sm text-[var(--color-error)]">{checkInError}</p>

@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { Users, Search } from 'lucide-react'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { useState } from 'react'
 import {
   listOrganizationsOptions,
@@ -103,43 +104,43 @@ function MembersPage() {
 
       {/* Table */}
       <div className="rounded-lg border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Name</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Email</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Organization</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Role</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-4 text-sm">Name</TableHead>
+              <TableHead className="p-4 text-sm">Email</TableHead>
+              <TableHead className="p-4 text-sm">Organization</TableHead>
+              <TableHead className="p-4 text-sm">Role</TableHead>
+              <TableHead className="p-4 text-sm">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {isLoading ? (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
                   Loading...
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : filteredMembers.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
                   {allMembers.length === 0
                     ? 'No members found across organizations.'
                     : `No members matching "${search}".`}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               filteredMembers.map((member) => (
-                <tr key={member.id} className="border-b last:border-b-0">
-                  <td className="p-4 text-sm">{member.name}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{member.email}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{member.organizationName || '--'}</td>
-                  <td className="p-4">
+                <TableRow key={member.id}>
+                  <TableCell className="p-4 text-sm">{member.name}</TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">{member.email}</TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">{member.organizationName || '--'}</TableCell>
+                  <TableCell className="p-4">
                     <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-muted">
                       {member.role || 'member'}
                     </span>
-                  </td>
-                  <td className="p-4">
+                  </TableCell>
+                  <TableCell className="p-4">
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
                       member.status === 'active' ? 'bg-green-500/10 text-green-600' :
                       member.status === 'suspended' ? 'bg-red-500/10 text-red-600' :
@@ -147,12 +148,12 @@ function MembersPage() {
                     }`}>
                       {member.status || 'active'}
                     </span>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Building2, ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-react'
-import { Label } from '@monobase/ui'
+import { Button, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
@@ -126,20 +126,14 @@ function AssociationDetailPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={startEdit}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md border text-sm font-medium hover:bg-accent transition-colors"
-              >
+              <Button variant="outline" onClick={startEdit}>
                 <Pencil className="w-4 h-4" />
                 Edit Association
-              </button>
-              <button
-                onClick={() => setConfirmDelete(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors"
-              >
+              </Button>
+              <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
                 <Trash2 className="w-4 h-4" />
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -149,9 +143,9 @@ function AssociationDetailPage() {
               <div className="bg-card border rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-h2">Edit Association</h2>
-                  <button onClick={() => setEditing(false)} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+                  <Button variant="ghost" size="icon" onClick={() => setEditing(false)} aria-label="Close">
                     <X className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
                 <form
                   onSubmit={(e) => {
@@ -195,20 +189,12 @@ function AssociationDetailPage() {
                     />
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setEditing(false)}
-                      className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-accent transition-colors"
-                    >
+                    <Button type="button" variant="outline" onClick={() => setEditing(false)}>
                       Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={updateMut.isPending}
-                      className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                    >
+                    </Button>
+                    <Button type="submit" disabled={updateMut.isPending}>
                       {updateMut.isPending ? 'Saving...' : 'Save'}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -224,19 +210,16 @@ function AssociationDetailPage() {
                   Are you sure you want to delete <strong>{association.name}</strong>? This action cannot be undone.
                 </p>
                 <div className="flex justify-end gap-2">
-                  <button
-                    onClick={() => setConfirmDelete(false)}
-                    className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-accent transition-colors"
-                  >
+                  <Button variant="outline" onClick={() => setConfirmDelete(false)}>
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="destructive"
                     onClick={() => deleteMut.mutate({ path: { associationId } })}
                     disabled={deleteMut.isPending}
-                    className="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
                   >
                     {deleteMut.isPending ? 'Deleting...' : 'Delete'}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -288,31 +271,31 @@ function AssociationDetailPage() {
           {/* Organizations within this association */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-h2">Organizations</h2>
-            <button className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-medium hover:bg-accent transition-colors">
+            <Button variant="outline" size="sm">
               <Plus className="w-4 h-4" />
               Add Organization
-            </button>
+            </Button>
           </div>
 
           <div className="rounded-lg border bg-card">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Name</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Type</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Members</th>
-                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="p-4 text-sm">Name</TableHead>
+                  <TableHead className="p-4 text-sm">Type</TableHead>
+                  <TableHead className="p-4 text-sm">Status</TableHead>
+                  <TableHead className="p-4 text-sm">Members</TableHead>
+                  <TableHead className="text-right p-4 text-sm">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
                     No organizations found for this association.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         </>
       )}

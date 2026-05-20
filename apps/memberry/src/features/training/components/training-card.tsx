@@ -1,5 +1,6 @@
 import { MoreHorizontal, Calendar, Users, Award, MapPin } from 'lucide-react'
 import { useState } from 'react'
+import { Button } from '@monobase/ui'
 
 const TYPE_LABELS: Record<string, string> = {
   seminar: 'Seminar',
@@ -48,13 +49,14 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
             </a>
           </div>
           <div className="relative">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-1 rounded hover:bg-[var(--color-surface-warm)] text-[var(--color-muted)]"
               aria-label="Actions"
             >
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
+              <MoreHorizontal className="w-4 h-4 text-[var(--color-muted)]" />
+            </Button>
             {menuOpen && (
               <div className="absolute right-0 top-7 z-10 w-36 bg-popover border rounded-lg shadow-md py-1 text-sm">
                 <a
@@ -65,19 +67,21 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
                   Edit
                 </a>
                 {training.status !== 'cancelled' && (
-                  <button
-                    className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] text-[var(--color-error)]"
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start px-3 py-1.5 text-[var(--color-error)]"
                     onClick={() => { setMenuOpen(false); onCancel?.(training.id) }}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 )}
-                <button
-                  className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-3 py-1.5"
                   onClick={() => { setMenuOpen(false); onDuplicate?.(training) }}
                 >
                   Duplicate
-                </button>
+                </Button>
               </div>
             )}
           </div>

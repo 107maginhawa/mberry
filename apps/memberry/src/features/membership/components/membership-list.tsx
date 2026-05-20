@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { listMembershipsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { getStatusLabel, getStatusColor, isRenewable, type MembershipStatus } from '../lib/membership-status'
 
 interface MembershipListProps {
@@ -34,38 +35,36 @@ export function MembershipList({ orgId, tenantId }: MembershipListProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left">
-            <th className="px-4 py-3 font-medium">Member #</th>
-            <th className="px-4 py-3 font-medium">Person</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium">Tier</th>
-            <th className="px-4 py-3 font-medium">Dues Expiry</th>
-            <th className="px-4 py-3 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {memberships.map((m: any) => (
-            <tr key={m.id} className="border-b hover:bg-[var(--color-surface-warm)]">
-              <td className="px-4 py-3 font-mono text-xs">{m.memberNumber || '—'}</td>
-              <td className="px-4 py-3">{m.personId}</td>
-              <td className="px-4 py-3">
-                <StatusBadge status={m.status} />
-              </td>
-              <td className="px-4 py-3">{m.tierId}</td>
-              <td className="px-4 py-3">{m.duesExpiryDate || '—'}</td>
-              <td className="px-4 py-3">
-                {isRenewable(m.status) && (
-                  <button className="text-xs text-[var(--color-primary)] hover:underline">Renew</button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table className="text-sm">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="px-4 py-3">Member #</TableHead>
+          <TableHead className="px-4 py-3">Person</TableHead>
+          <TableHead className="px-4 py-3">Status</TableHead>
+          <TableHead className="px-4 py-3">Tier</TableHead>
+          <TableHead className="px-4 py-3">Dues Expiry</TableHead>
+          <TableHead className="px-4 py-3">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {memberships.map((m: any) => (
+          <TableRow key={m.id} className="hover:bg-[var(--color-surface-warm)]">
+            <TableCell className="px-4 py-3 font-mono text-xs">{m.memberNumber || '—'}</TableCell>
+            <TableCell className="px-4 py-3">{m.personId}</TableCell>
+            <TableCell className="px-4 py-3">
+              <StatusBadge status={m.status} />
+            </TableCell>
+            <TableCell className="px-4 py-3">{m.tierId}</TableCell>
+            <TableCell className="px-4 py-3">{m.duesExpiryDate || '—'}</TableCell>
+            <TableCell className="px-4 py-3">
+              {isRenewable(m.status) && (
+                <Button variant="link" size="sm" className="text-xs text-[var(--color-primary)]">Renew</Button>
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   )
 }
 

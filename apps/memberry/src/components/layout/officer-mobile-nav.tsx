@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from '@tanstack/react-router'
+import { Button } from '@monobase/ui'
 import { POSITION_NAV_CONFIG } from '@/config/position-nav'
 import {
   Menu, X, Bell,
@@ -78,13 +79,15 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
     <>
       {/* Sticky header — 48px per spec */}
       <header className="md:hidden sticky top-0 z-40 flex items-center justify-between h-12 px-4 bg-[var(--color-primary)] text-white">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setDrawerOpen(true)}
-          className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+          className="p-1.5"
           aria-label="Open menu"
         >
           <Menu size={20} />
-        </button>
+        </Button>
         <span className="text-[14px] font-semibold truncate max-w-[200px]">
           {orgName || 'Organization'}
         </span>
@@ -106,13 +109,15 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
             {/* Drawer header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.12]">
               <img src="/memberry-logo-white.png" alt="Memberry" className="h-7 w-auto" />
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setDrawerOpen(false)}
-                className="p-1 rounded-lg hover:bg-white/10"
+                className="p-1"
                 aria-label="Close menu"
               >
                 <X size={18} />
-              </button>
+              </Button>
             </div>
 
             {orgName && (

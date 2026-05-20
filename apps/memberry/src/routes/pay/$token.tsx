@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Button } from '@monobase/ui'
 import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/pay/$token')({
@@ -120,13 +121,13 @@ function PublicPaymentPage() {
               <span className="font-medium">{new Date(invoice.dueDate).toLocaleDateString()}</span>
             </div>
           )}
-          <button
+          <Button
+            className="w-full"
             onClick={handlePay}
             disabled={paying}
-            className="w-full px-4 py-3 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium disabled:opacity-50"
           >
             {paying ? 'Redirecting to payment...' : 'Pay Now'}
-          </button>
+          </Button>
           <p className="text-xs text-center text-[var(--color-muted)]">
             Secure payment via GCash, Maya, or card
           </p>

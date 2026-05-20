@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { ReactNode } from "react"
+import { Button, Label } from "@monobase/ui"
 
 interface ConfirmDialogProps {
   open: boolean
@@ -36,9 +37,9 @@ export function ConfirmDialog({
 
         {variant === "irreversible" && confirmText && (
           <div className="mb-4">
-            <label className="text-[13px] font-medium text-[var(--color-muted)] block mb-1.5">
+            <Label className="text-[13px] font-medium text-[var(--color-muted)] block mb-1.5">
               Type <span className="font-mono font-semibold">{confirmText}</span> to confirm
-            </label>
+            </Label>
             <input
               type="text"
               value={typedText}
@@ -50,19 +51,19 @@ export function ConfirmDialog({
         )}
 
         <div className="flex justify-end gap-2">
-          <button
+          <Button
+            variant="outline"
             onClick={() => { setTypedText(""); onOpenChange(false) }}
-            className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="destructive"
             onClick={() => { onConfirm(); setTypedText(""); onOpenChange(false) }}
             disabled={!canConfirm}
-            className="px-[22px] py-[10px] rounded-[8px] bg-[var(--color-error)] text-white text-[14px] font-semibold hover:opacity-90 disabled:opacity-50 transition-colors duration-150"
           >
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

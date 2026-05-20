@@ -8,6 +8,7 @@ import { Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { TableSkeleton } from '@/components/patterns/skeleton-loader'
 import { toast } from 'sonner'
@@ -171,82 +172,80 @@ function ProvidersPage() {
       />
 
       <GlassCard>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[14px]">
-            <thead className="bg-[var(--color-surface-warm)]">
-              <tr>
-                <th className="text-left p-3 font-medium font-display">Name</th>
-                <th className="text-left p-3 font-medium font-display">Accreditation #</th>
-                <th className="text-left p-3 font-medium font-display">Status</th>
-                <th className="text-left p-3 font-medium font-display">Expiry Date</th>
-                <th className="text-right p-3 font-medium font-display">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {providers.length === 0 ? (
-                <tr className="border-t">
-                  <td colSpan={5} className="p-8">
-                    <EmptyState
-                      headline="No providers yet"
-                      description="Add your first PRC-accredited CPD provider."
-                    />
-                  </td>
-                </tr>
-              ) : (
-                providers.map((p) => {
-                  const badge = STATUS_BADGE[p.status] ?? { label: p.status, className: 'bg-gray-100 text-gray-800' }
-                  const days = daysUntil(p.expiryDate)
-                  return (
-                    <tr key={p.id} className="border-t hover:bg-[var(--color-surface-warm)]">
-                      <td className="p-3 font-medium">{p.name}</td>
-                      <td className="p-3 text-[var(--color-muted)]">{p.accreditationNumber}</td>
-                      <td className="p-3">
-                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${badge.className}`}>
-                          {badge.label}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {p.expiryDate ? (
-                            <span className="text-[var(--color-muted)]">
-                              {new Date(p.expiryDate).toLocaleDateString()}
-                            </span>
-                          ) : (
-                            <span className="text-[var(--color-muted)]">—</span>
-                          )}
-                          {p.expiringSoon && days !== null && (
-                            <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                              Expiring in {days}d
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditOpen(p)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeletingProvider(p)}
-                            className="text-[var(--color-error)] hover:text-[var(--color-error)]"
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table className="text-[14px]">
+          <TableHeader className="bg-[var(--color-surface-warm)]">
+            <TableRow>
+              <TableHead className="p-3 font-display">Name</TableHead>
+              <TableHead className="p-3 font-display">Accreditation #</TableHead>
+              <TableHead className="p-3 font-display">Status</TableHead>
+              <TableHead className="p-3 font-display">Expiry Date</TableHead>
+              <TableHead className="p-3 text-right font-display">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {providers.length === 0 ? (
+              <TableRow className="border-t">
+                <TableCell colSpan={5} className="p-8">
+                  <EmptyState
+                    headline="No providers yet"
+                    description="Add your first PRC-accredited CPD provider."
+                  />
+                </TableCell>
+              </TableRow>
+            ) : (
+              providers.map((p) => {
+                const badge = STATUS_BADGE[p.status] ?? { label: p.status, className: 'bg-gray-100 text-gray-800' }
+                const days = daysUntil(p.expiryDate)
+                return (
+                  <TableRow key={p.id} className="border-t hover:bg-[var(--color-surface-warm)]">
+                    <TableCell className="p-3 font-medium">{p.name}</TableCell>
+                    <TableCell className="p-3 text-[var(--color-muted)]">{p.accreditationNumber}</TableCell>
+                    <TableCell className="p-3">
+                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${badge.className}`}>
+                        {badge.label}
+                      </span>
+                    </TableCell>
+                    <TableCell className="p-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {p.expiryDate ? (
+                          <span className="text-[var(--color-muted)]">
+                            {new Date(p.expiryDate).toLocaleDateString()}
+                          </span>
+                        ) : (
+                          <span className="text-[var(--color-muted)]">—</span>
+                        )}
+                        {p.expiringSoon && days !== null && (
+                          <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Expiring in {days}d
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="p-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditOpen(p)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingProvider(p)}
+                          className="text-[var(--color-error)] hover:text-[var(--color-error)]"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
+            )}
+          </TableBody>
+        </Table>
       </GlassCard>
 
       {/* Create / Edit Dialog */}

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Building2, Plus, X } from 'lucide-react'
-import { Label } from '@monobase/ui'
+import { Button, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import {
@@ -56,9 +56,9 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
       <div className="bg-card border rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-h2">Create Association</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
         <form
           onSubmit={(e) => {
@@ -105,20 +105,12 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-accent transition-colors"
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending}
-              className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={createMutation.isPending}>
               {createMutation.isPending ? 'Creating...' : 'Create'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
@@ -151,13 +143,10 @@ function AssociationsPage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setDialogOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
+        <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           Create Association
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
@@ -185,34 +174,34 @@ function AssociationsPage() {
 
       {/* Table */}
       <div className="rounded-lg border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Name</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Country</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Members</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Created</th>
-              <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-4 text-sm">Name</TableHead>
+              <TableHead className="p-4 text-sm">Country</TableHead>
+              <TableHead className="p-4 text-sm">Status</TableHead>
+              <TableHead className="p-4 text-sm">Members</TableHead>
+              <TableHead className="p-4 text-sm">Created</TableHead>
+              <TableHead className="text-right p-4 text-sm">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {isLoading ? (
-              <tr>
-                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
                   Loading...
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : associations.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
                   No associations found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               associations.map((assoc) => (
-                <tr key={assoc.id} className="border-b last:border-b-0 hover:bg-muted/50">
-                  <td className="p-4 text-sm font-medium">
+                <TableRow key={assoc.id}>
+                  <TableCell className="p-4 text-sm font-medium">
                     <Link
                       to="/associations/$associationId"
                       params={{ associationId: assoc.id }}
@@ -220,9 +209,9 @@ function AssociationsPage() {
                     >
                       {assoc.name}
                     </Link>
-                  </td>
-                  <td className="p-4 text-sm text-muted-foreground">{assoc.country}</td>
-                  <td className="p-4 text-sm">
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">{assoc.country}</TableCell>
+                  <TableCell className="p-4 text-sm">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                       assoc.status === 'active'
                         ? 'bg-green-100 text-green-700'
@@ -232,14 +221,14 @@ function AssociationsPage() {
                     }`}>
                       {assoc.status ?? 'unknown'}
                     </span>
-                  </td>
-                  <td className="p-4 text-sm text-muted-foreground">{assoc.memberCount ?? '--'}</td>
-                  <td className="p-4 text-sm text-muted-foreground">
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">{assoc.memberCount ?? '--'}</TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">
                     {(assoc.createdAt || assoc.created_at)
                       ? new Date(assoc.createdAt || assoc.created_at!).toLocaleDateString()
                       : '--'}
-                  </td>
-                  <td className="p-4 text-sm text-right">
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-right">
                     <Link
                       to="/associations/$associationId"
                       params={{ associationId: assoc.id }}
@@ -247,12 +236,12 @@ function AssociationsPage() {
                     >
                       View
                     </Link>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <CreateAssociationDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />

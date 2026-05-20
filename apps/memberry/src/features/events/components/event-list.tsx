@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Input } from '@monobase/ui'
+import { Button, Input } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { EventCard } from './event-card'
@@ -123,17 +123,14 @@ export function EventList({ orgId }: EventListProps) {
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex gap-1 border rounded-md p-1">
           {STATUS_TABS.map((t) => (
-            <button
+            <Button
               key={t.key}
+              variant={tab === t.key ? 'default' : 'ghost'}
+              size="sm"
               onClick={() => setTab(t.key)}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                tab === t.key
-                  ? 'bg-[var(--color-primary)] text-white'
-                  : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
-              }`}
             >
               {t.label}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="flex gap-2 w-full sm:w-auto">

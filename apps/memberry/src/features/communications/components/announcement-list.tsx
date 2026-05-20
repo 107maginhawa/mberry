@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@monobase/ui'
+import { Button, Skeleton } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { api } from '@/lib/api'
 
@@ -81,17 +81,14 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex gap-1 border rounded-md p-1">
           {STATUS_TABS.map((tab) => (
-            <button
+            <Button
               key={tab.key}
+              variant={activeTab === tab.key ? 'default' : 'ghost'}
+              size="sm"
               onClick={() => setActiveTab(tab.key)}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-[var(--color-primary)] text-white'
-                  : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
-              }`}
             >
               {tab.label}
-            </button>
+            </Button>
           ))}
         </div>
         <Input

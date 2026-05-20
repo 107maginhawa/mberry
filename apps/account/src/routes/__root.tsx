@@ -5,6 +5,7 @@ import {
   Link,
   Outlet,
 } from '@tanstack/react-router'
+import { Button } from '@monobase/ui'
 import { useQueryClient } from '@tanstack/react-query'
 import type { RouterContext } from '@/router'
 import { AuthUIProviderTanstack } from '@daveyplate/better-auth-ui/tanstack'
@@ -19,12 +20,11 @@ function RootErrorComponent({ error }: { error: Error }) {
       <div className="rounded-lg border bg-card p-8 max-w-md w-full text-center">
         <h1 className="text-h3 mb-2">Something went wrong</h1>
         <p className="text-sm text-muted-foreground mb-6">{error?.message ?? 'An unexpected error occurred.'}</p>
-        <button
+        <Button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
         >
           Reload page
-        </button>
+        </Button>
       </div>
     </div>
   )

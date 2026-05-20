@@ -99,15 +99,16 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
           {memberResults.length > 0 && !personId && (
             <div className="border rounded-md mt-1 max-h-40 overflow-y-auto bg-white relative z-50 shadow-lg">
               {memberResults.map((m) => (
-                <button
+                <Button
                   key={m.id}
                   type="button"
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-surface-warm)] transition-colors"
+                  variant="ghost"
+                  className="w-full justify-start px-3 py-2 text-sm"
                   onClick={() => selectMember(m)}
                 >
                   <span className="font-medium">{m.memberNumber || m.personId}</span>
                   {m.memberNumber && <span className="text-[var(--color-muted)] ml-2 text-xs font-mono">#{m.memberNumber}</span>}
-                </button>
+                </Button>
               ))}
             </div>
           )}

@@ -52,14 +52,17 @@ export function FundAllocationEditor({ funds, onChange, disabled }: FundAllocati
 
       {funds.map((fund, i) => (
         <div key={i} className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
-            className="cursor-grab text-[var(--color-muted)] hover:text-[var(--color-text)]"
+            variant="ghost"
+            size="icon"
+            className="cursor-grab"
             onClick={() => { if (i > 0) moveFund(i, i - 1) }}
             disabled={disabled}
+            aria-label="Move fund up"
           >
             <GripVertical className="h-4 w-4" />
-          </button>
+          </Button>
           <Input
             value={fund.name}
             onChange={(e) => updateFund(i, 'name', e.target.value)}

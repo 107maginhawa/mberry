@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
@@ -96,55 +97,54 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
 
       {/* Officer table */}
       <GlassCard className="overflow-hidden">
-        <div className="overflow-x-auto">
-        <table className="w-full text-[14px]">
-          <thead className="bg-[var(--color-surface-warm)]">
-            <tr>
-              <th className="text-left px-5 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">
+        <Table className="text-[14px]">
+          <TableHeader className="bg-[var(--color-surface-warm)]">
+            <TableRow>
+              <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide">
                 Role
-              </th>
-              <th className="text-left px-5 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">
+              </TableHead>
+              <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide">
                 Name
-              </th>
-              <th className="text-left px-5 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide hidden md:table-cell">
+              </TableHead>
+              <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide hidden md:table-cell">
                 Assigned Date
-              </th>
-              <th className="px-5 py-3 w-16"></th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="px-5 py-3 w-16"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {officers.length === 0 ? (
-              <tr>
-                <td colSpan={4}>
+              <TableRow>
+                <TableCell colSpan={4}>
                   <EmptyState
                     icon={<Shield className="w-8 h-8" />}
                     headline="No officers assigned"
                     description="Assign organization roles to get started."
                   />
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               officers.map((o) => (
-                <tr
+                <TableRow
                   key={o.id}
                   className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-surface-warm)] transition-colors"
                 >
-                  <td className="px-5 py-3.5">
+                  <TableCell className="px-5 py-3.5">
                     <span className="inline-flex items-center gap-1.5">
                       <Shield size={13} className="text-[var(--color-primary)] shrink-0" />
                       <span className="font-semibold">{o.role}</span>
                     </span>
-                  </td>
-                  <td className="px-5 py-3.5">
+                  </TableCell>
+                  <TableCell className="px-5 py-3.5">
                     <div>
                       <p className="font-medium">{o.name}</p>
                       {o.email && <p className="text-[12px] text-[var(--color-muted)]">{o.email}</p>}
                     </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-[var(--color-muted)] hidden md:table-cell">
+                  </TableCell>
+                  <TableCell className="px-5 py-3.5 text-[var(--color-muted)] hidden md:table-cell">
                     {o.assignedDate ? new Date(o.assignedDate).toLocaleDateString() : '—'}
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
+                  </TableCell>
+                  <TableCell className="px-5 py-3.5 text-right">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -153,13 +153,12 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
                     >
                       <Trash2 size={14} />
                     </Button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
-        </div>
+          </TableBody>
+        </Table>
       </GlassCard>
 
       {/* Assign Role modal */}
@@ -326,15 +325,16 @@ function AssignRoleModal({
             {memberResults.length > 0 && !selectedMember && (
               <div className="border border-[var(--color-border-light)] rounded-md max-h-40 overflow-y-auto">
                 {memberResults.map((m) => (
-                  <button
+                  <Button
                     key={m.id}
                     type="button"
-                    className="w-full text-left px-3 py-2 text-[14px] hover:bg-[var(--color-surface-warm)] transition-colors"
+                    variant="ghost"
+                    className="w-full justify-start px-3 py-2 text-[14px]"
                     onClick={() => handleSelectMember(m)}
                   >
                     <span className="font-medium">{m.name}</span>
                     {m.email && <span className="text-[var(--color-muted)] ml-2 text-[12px]">{m.email}</span>}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}

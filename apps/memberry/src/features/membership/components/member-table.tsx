@@ -9,6 +9,7 @@ import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Checkbox } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
@@ -212,101 +213,99 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
             <p className="text-sm">No members found{debouncedSearch ? ` for "${debouncedSearch}"` : ''}.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[var(--color-surface-warm)] border-b text-left">
-                  <th className="px-3 py-2.5 w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      onCheckedChange={toggleSelectAll}
-                      aria-label="Select all"
-                    />
-                  </th>
-                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Name</th>
-                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">License #</th>
-                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Category</th>
-                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Status</th>
-                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Dues Status</th>
-                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Training</th>
-                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Dues Expiry</th>
-                  <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Joined</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {members.map((m: any, idx: number) => {
-                  const status = m.status as MemberStatus
-                  const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
-                  const duesInvoiceStatus: string | null = m.duesInvoiceStatus ?? null
-                  const creditsEarned: number = m.creditsEarned ?? 0
-                  const trainingCompliant: boolean = m.trainingCompliant ?? false
-                  const duesBadge = duesInvoiceStatus ? DUES_STATUS_BADGE[duesInvoiceStatus] : null
-                  return (
-                    <tr key={m.id} className={`hover:bg-[var(--color-surface-warm)] transition-colors ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`}>
-                      <td className="px-3 py-2">
-                        <Checkbox
-                          checked={selected.has(m.id)}
-                          onCheckedChange={() => toggleSelect(m.id)}
-                          aria-label={`Select ${m.name ?? m.id}`}
+          <Table className="text-sm">
+            <TableHeader>
+              <TableRow className="bg-[var(--color-surface-warm)]">
+                <TableHead className="px-3 py-2.5 w-10">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={toggleSelectAll}
+                    aria-label="Select all"
+                  />
+                </TableHead>
+                <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Name</TableHead>
+                <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">License #</TableHead>
+                <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Category</TableHead>
+                <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Status</TableHead>
+                <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Dues Status</TableHead>
+                <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Training</TableHead>
+                <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Dues Expiry</TableHead>
+                <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Joined</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y">
+              {members.map((m: any, idx: number) => {
+                const status = m.status as MemberStatus
+                const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
+                const duesInvoiceStatus: string | null = m.duesInvoiceStatus ?? null
+                const creditsEarned: number = m.creditsEarned ?? 0
+                const trainingCompliant: boolean = m.trainingCompliant ?? false
+                const duesBadge = duesInvoiceStatus ? DUES_STATUS_BADGE[duesInvoiceStatus] : null
+                return (
+                  <TableRow key={m.id} className={`hover:bg-[var(--color-surface-warm)] transition-colors ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`}>
+                    <TableCell className="px-3 py-2">
+                      <Checkbox
+                        checked={selected.has(m.id)}
+                        onCheckedChange={() => toggleSelect(m.id)}
+                        aria-label={`Select ${m.name ?? m.id}`}
+                      />
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-body-sm">
+                      <div className="flex items-center gap-2">
+                        <AvatarInitials
+                          name={m.name ?? '?'}
+                          size="sm"
+                          photoUrl={m.avatar?.url || m.photoUrl}
                         />
-                      </td>
-                      <td className="px-3 py-2 text-body-sm">
-                        <div className="flex items-center gap-2">
-                          <AvatarInitials
-                            name={m.name ?? '?'}
-                            size="sm"
-                            photoUrl={m.avatar?.url || m.photoUrl}
-                          />
-                          <div>
-                            <Link
-                              to="/org/$orgId/officer/roster/$memberId"
-                              params={{ orgId, memberId: m.id }}
-                              className="font-medium text-[var(--color-primary)] hover:underline"
-                            >
-                              {m.name ?? m.personId ?? m.id}
-                            </Link>
-                            {m.email && (
-                              <div className="text-xs text-[var(--color-muted)]">{m.email}</div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 text-mono tabular-nums">{m.memberNumber ?? '—'}</td>
-                      <td className="px-3 py-2 text-body-sm text-[var(--color-muted)]">{m.categoryName ?? m.categoryId ?? '—'}</td>
-                      <td className="px-3 py-2">
-                        <Badge className={badge.className}>{badge.label}</Badge>
-                      </td>
-                      {/* Dues Status column */}
-                      <td className="px-3 py-2">
-                        {duesBadge ? (
-                          <Badge className={duesBadge.className}>{duesBadge.label}</Badge>
-                        ) : (
-                          <span className="text-xs text-[var(--color-muted)]">No invoice</span>
-                        )}
-                      </td>
-                      {/* Training column */}
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs tabular-nums text-[var(--color-muted)]">{creditsEarned}</span>
-                          {trainingCompliant ? (
-                            <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)] text-xs">Compliant</Badge>
-                          ) : (
-                            <Badge className="bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)] text-xs">{creditsEarned}/40</Badge>
+                        <div>
+                          <Link
+                            to="/org/$orgId/officer/roster/$memberId"
+                            params={{ orgId, memberId: m.id }}
+                            className="font-medium text-[var(--color-primary)] hover:underline"
+                          >
+                            {m.name ?? m.personId ?? m.id}
+                          </Link>
+                          {m.email && (
+                            <div className="text-xs text-[var(--color-muted)]">{m.email}</div>
                           )}
                         </div>
-                      </td>
-                      <td className="px-3 py-2 text-body-sm tabular-nums text-[var(--color-muted)]">
-                        {m.duesExpiryDate ? new Date(m.duesExpiryDate).toLocaleDateString() : '—'}
-                      </td>
-                      <td className="px-3 py-2 text-body-sm text-[var(--color-muted)]">
-                        {m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '—'}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-mono tabular-nums">{m.memberNumber ?? '—'}</TableCell>
+                    <TableCell className="px-3 py-2 text-body-sm text-[var(--color-muted)]">{m.categoryName ?? m.categoryId ?? '—'}</TableCell>
+                    <TableCell className="px-3 py-2">
+                      <Badge className={badge.className}>{badge.label}</Badge>
+                    </TableCell>
+                    {/* Dues Status column */}
+                    <TableCell className="px-3 py-2">
+                      {duesBadge ? (
+                        <Badge className={duesBadge.className}>{duesBadge.label}</Badge>
+                      ) : (
+                        <span className="text-xs text-[var(--color-muted)]">No invoice</span>
+                      )}
+                    </TableCell>
+                    {/* Training column */}
+                    <TableCell className="px-3 py-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs tabular-nums text-[var(--color-muted)]">{creditsEarned}</span>
+                        {trainingCompliant ? (
+                          <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)] text-xs">Compliant</Badge>
+                        ) : (
+                          <Badge className="bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)] text-xs">{creditsEarned}/40</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-body-sm tabular-nums text-[var(--color-muted)]">
+                      {m.duesExpiryDate ? new Date(m.duesExpiryDate).toLocaleDateString() : '—'}
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-body-sm text-[var(--color-muted)]">
+                      {m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '—'}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
         )}
       </div>
 

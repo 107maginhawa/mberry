@@ -8,6 +8,7 @@ import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { TableSkeleton, CardSkeleton } from '@/components/patterns/skeleton-loader'
+import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/reports/credits')({
   component: CreditReport,
@@ -67,34 +68,34 @@ function CreditReport() {
       <StaggerGrid className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StaggerItem>
           <GlassCard className="p-2">
-            <button onClick={() => setFilter('all')} className={`w-full text-left p-2 hover:bg-[var(--color-surface-warm)] rounded-lg transition-shadow ${filter === 'all' ? 'ring-2 ring-[var(--color-primary)]' : ''}`}>
+            <Button variant="ghost" onClick={() => setFilter('all')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'all' ? 'ring-2 ring-[var(--color-primary)]' : ''}`}>
               <p className="text-[14px] text-[var(--color-muted)]">Total Tracked</p>
               <p className="text-[26px] font-display font-bold"><CountUp value={summary.total} /></p>
-            </button>
+            </Button>
           </GlassCard>
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-2">
-            <button onClick={() => setFilter('compliant')} className={`w-full text-left p-2 hover:bg-[var(--color-surface-warm)] rounded-lg transition-shadow ${filter === 'compliant' ? 'ring-2 ring-green-500' : ''}`}>
+            <Button variant="ghost" onClick={() => setFilter('compliant')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'compliant' ? 'ring-2 ring-green-500' : ''}`}>
               <p className="text-[14px] text-[var(--color-muted)]">Compliant</p>
               <p className="text-[26px] font-display font-bold text-green-600"><CountUp value={summary.compliant} /></p>
-            </button>
+            </Button>
           </GlassCard>
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-2">
-            <button onClick={() => setFilter('at_risk')} className={`w-full text-left p-2 hover:bg-[var(--color-surface-warm)] rounded-lg transition-shadow ${filter === 'at_risk' ? 'ring-2 ring-yellow-500' : ''}`}>
+            <Button variant="ghost" onClick={() => setFilter('at_risk')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'at_risk' ? 'ring-2 ring-yellow-500' : ''}`}>
               <p className="text-[14px] text-[var(--color-muted)]">At Risk</p>
               <p className="text-[26px] font-display font-bold text-yellow-600"><CountUp value={summary.atRisk} /></p>
-            </button>
+            </Button>
           </GlassCard>
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-2">
-            <button onClick={() => setFilter('non_compliant')} className={`w-full text-left p-2 hover:bg-[var(--color-surface-warm)] rounded-lg transition-shadow ${filter === 'non_compliant' ? 'ring-2 ring-red-500' : ''}`}>
+            <Button variant="ghost" onClick={() => setFilter('non_compliant')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'non_compliant' ? 'ring-2 ring-red-500' : ''}`}>
               <p className="text-[14px] text-[var(--color-muted)]">Non-Compliant</p>
               <p className="text-[26px] font-display font-bold text-red-600"><CountUp value={summary.nonCompliant} /></p>
-            </button>
+            </Button>
           </GlassCard>
         </StaggerItem>
       </StaggerGrid>
@@ -106,66 +107,64 @@ function CreditReport() {
 
       {/* Table */}
       <GlassCard>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[14px]">
-            <thead className="bg-[var(--color-surface-warm)]">
-              <tr>
-                <th className="text-left p-3 font-medium font-display">Member</th>
-                <th className="text-left p-3 font-medium font-display">ID</th>
-                <th className="text-right p-3 font-medium font-display">Earned</th>
-                <th className="text-right p-3 font-medium font-display text-muted-foreground">General</th>
-                <th className="text-right p-3 font-medium font-display text-muted-foreground">Major</th>
-                <th className="text-right p-3 font-medium font-display text-muted-foreground">Self-Directed</th>
-                <th className="text-right p-3 font-medium font-display">Required</th>
-                <th className="text-right p-3 font-medium font-display">Remaining</th>
-                <th className="text-left p-3 font-medium font-display">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.length === 0 ? (
-                <tr className="border-t">
-                  <td colSpan={9} className="p-8">
-                    <EmptyState headline="No members found" description="No members match this filter." />
-                  </td>
-                </tr>
-              ) : (
-                members.map((m: any) => {
-                  const badge = STATUS_BADGE[m.compliance_status] ?? { label: 'Unknown', className: 'bg-gray-100 text-gray-800' }
-                  const pct = m.required > 0 ? Math.min(100, Math.round((m.earned / m.required) * 100)) : 0
-                  return (
-                    <tr key={m.person_id} className="border-t hover:bg-[var(--color-surface-warm)]">
-                      <td className="p-3 font-medium">
-                        {[m.first_name, m.last_name].filter(Boolean).join(' ') || 'Unknown'}
-                      </td>
-                      <td className="p-3 text-[var(--color-muted)]">{m.member_number ?? '—'}</td>
-                      <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <div className="w-16 h-1.5 rounded-full bg-[var(--color-surface-warm)] overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${pct >= 100 ? 'bg-green-500' : pct >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                          <span>{m.earned}</span>
+        <Table className="text-[14px]">
+          <TableHeader className="bg-[var(--color-surface-warm)]">
+            <TableRow>
+              <TableHead className="p-3 font-display">Member</TableHead>
+              <TableHead className="p-3 font-display">ID</TableHead>
+              <TableHead className="p-3 text-right font-display">Earned</TableHead>
+              <TableHead className="p-3 text-right font-display text-muted-foreground">General</TableHead>
+              <TableHead className="p-3 text-right font-display text-muted-foreground">Major</TableHead>
+              <TableHead className="p-3 text-right font-display text-muted-foreground">Self-Directed</TableHead>
+              <TableHead className="p-3 text-right font-display">Required</TableHead>
+              <TableHead className="p-3 text-right font-display">Remaining</TableHead>
+              <TableHead className="p-3 font-display">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {members.length === 0 ? (
+              <TableRow className="border-t">
+                <TableCell colSpan={9} className="p-8">
+                  <EmptyState headline="No members found" description="No members match this filter." />
+                </TableCell>
+              </TableRow>
+            ) : (
+              members.map((m: any) => {
+                const badge = STATUS_BADGE[m.compliance_status] ?? { label: 'Unknown', className: 'bg-gray-100 text-gray-800' }
+                const pct = m.required > 0 ? Math.min(100, Math.round((m.earned / m.required) * 100)) : 0
+                return (
+                  <TableRow key={m.person_id} className="border-t hover:bg-[var(--color-surface-warm)]">
+                    <TableCell className="p-3 font-medium">
+                      {[m.first_name, m.last_name].filter(Boolean).join(' ') || 'Unknown'}
+                    </TableCell>
+                    <TableCell className="p-3 text-[var(--color-muted)]">{m.member_number ?? '—'}</TableCell>
+                    <TableCell className="p-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="w-16 h-1.5 rounded-full bg-[var(--color-surface-warm)] overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${pct >= 100 ? 'bg-green-500' : pct >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                            style={{ width: `${pct}%` }}
+                          />
                         </div>
-                      </td>
-                      <td className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.General ?? 0}</td>
-                      <td className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.Major ?? 0}</td>
-                      <td className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.['Self-Directed'] ?? 0}</td>
-                      <td className="p-3 text-right text-[var(--color-muted)]">{m.required}</td>
-                      <td className="p-3 text-right">{m.remaining}</td>
-                      <td className="p-3">
-                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${badge.className}`}>
-                          {badge.label}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                        <span>{m.earned}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.General ?? 0}</TableCell>
+                    <TableCell className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.Major ?? 0}</TableCell>
+                    <TableCell className="p-3 text-right text-sm text-muted-foreground">{m.byCategory?.['Self-Directed'] ?? 0}</TableCell>
+                    <TableCell className="p-3 text-right text-[var(--color-muted)]">{m.required}</TableCell>
+                    <TableCell className="p-3 text-right">{m.remaining}</TableCell>
+                    <TableCell className="p-3">
+                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${badge.className}`}>
+                        {badge.label}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
+            )}
+          </TableBody>
+        </Table>
       </GlassCard>
 
       {members.length > 0 && (

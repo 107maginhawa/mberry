@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Building, Plus } from 'lucide-react'
+import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/organizations/')({
@@ -44,10 +45,10 @@ function OrganizationsPage() {
             </p>
           </div>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+        <Button>
           <Plus className="w-4 h-4" />
           Create Organization
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
@@ -75,36 +76,36 @@ function OrganizationsPage() {
 
       {/* Table */}
       <div className="rounded-lg border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Name</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Association</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Type</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Members</th>
-              <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-4 text-sm">Name</TableHead>
+              <TableHead className="p-4 text-sm">Association</TableHead>
+              <TableHead className="p-4 text-sm">Type</TableHead>
+              <TableHead className="p-4 text-sm">Status</TableHead>
+              <TableHead className="p-4 text-sm">Members</TableHead>
+              <TableHead className="text-right p-4 text-sm">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {isLoading ? (
-              <tr>
-                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
                   Loading...
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : organizations.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
                   No organizations found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               organizations.map((org) => {
                 const assocName = org.associationName || org.association?.name || '--'
                 return (
-                  <tr key={org.id} className="border-b last:border-b-0 hover:bg-muted/50">
-                    <td className="p-4 text-sm font-medium">
+                  <TableRow key={org.id}>
+                    <TableCell className="p-4 text-sm font-medium">
                       <Link
                         to="/organizations/$organizationId"
                         params={{ organizationId: org.id }}
@@ -112,10 +113,10 @@ function OrganizationsPage() {
                       >
                         {org.name}
                       </Link>
-                    </td>
-                    <td className="p-4 text-sm text-muted-foreground">{assocName}</td>
-                    <td className="p-4 text-sm text-muted-foreground">{org.type ?? '--'}</td>
-                    <td className="p-4 text-sm">
+                    </TableCell>
+                    <TableCell className="p-4 text-sm text-muted-foreground">{assocName}</TableCell>
+                    <TableCell className="p-4 text-sm text-muted-foreground">{org.type ?? '--'}</TableCell>
+                    <TableCell className="p-4 text-sm">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                         org.status === 'active'
                           ? 'bg-green-100 text-green-700'
@@ -125,9 +126,9 @@ function OrganizationsPage() {
                       }`}>
                         {org.status ?? 'unknown'}
                       </span>
-                    </td>
-                    <td className="p-4 text-sm text-muted-foreground">{org.memberCount ?? '--'}</td>
-                    <td className="p-4 text-sm text-right">
+                    </TableCell>
+                    <TableCell className="p-4 text-sm text-muted-foreground">{org.memberCount ?? '--'}</TableCell>
+                    <TableCell className="p-4 text-sm text-right">
                       <Link
                         to="/organizations/$organizationId"
                         params={{ organizationId: org.id }}
@@ -135,13 +136,13 @@ function OrganizationsPage() {
                       >
                         View
                       </Link>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )
               })
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

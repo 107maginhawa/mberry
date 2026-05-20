@@ -9,6 +9,7 @@ import { CardSkeleton, TableSkeleton } from '@/components/patterns/skeleton-load
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 
 export const Route = createFileRoute('/_authenticated/my/training')({
   component: MyTraining,
@@ -112,31 +113,30 @@ function MyTraining() {
         />
       ) : (
         <GlassCard className="overflow-hidden">
-          <div className="overflow-x-auto">
-          <table className="w-full text-[13px] min-w-[700px]">
-            <thead className="bg-[var(--color-surface-warm)]">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Training</th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Type</th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Date</th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Credits</th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Enrollment</th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Status</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="text-[13px] min-w-[700px]">
+            <TableHeader className="bg-[var(--color-surface-warm)]">
+              <TableRow>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Training</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Type</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Date</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Credits</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Enrollment</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {items.map((item) => (
-                <tr key={item.enrollment.id} className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-surface-elevated-hover)] transition-colors">
-                  <td className="px-4 py-3">
+                <TableRow key={item.enrollment.id} className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-surface-elevated-hover)] transition-colors">
+                  <TableCell className="px-4 py-3">
                     <p className="font-medium line-clamp-1">{item.training.title}</p>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--color-muted)] capitalize">
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-[var(--color-muted)] capitalize">
                     {item.training.type?.replace('_', ' ')}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--color-muted)]">
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-[var(--color-muted)]">
                     {formatDate(item.training.startDate)}
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
                     {Number(item.training.creditAmount) > 0 ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
                         <Award className="w-3 h-3" />
@@ -145,22 +145,21 @@ function MyTraining() {
                     ) : (
                       <span className="text-[var(--color-muted)]">—</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_STYLES[item.enrollment.status] ?? 'bg-gray-100 text-gray-700'}`}>
                       {item.enrollment.status.replace('_', ' ')}
                     </span>
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${TRAINING_STATUS_STYLES[item.training.status] ?? 'bg-gray-100 text-gray-700'}`}>
                       {item.training.status.replace('_', ' ')}
                     </span>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-          </div>
+            </TableBody>
+          </Table>
         </GlassCard>
       )}
 

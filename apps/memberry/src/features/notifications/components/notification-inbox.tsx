@@ -146,18 +146,16 @@ export function NotificationInbox() {
       {/* Category filter chips */}
       <div className="flex flex-wrap gap-2">
         {CATEGORIES.map((cat) => (
-          <button
+          <Button
             key={cat}
+            variant={activeCategory === cat ? 'default' : 'outline'}
+            size="sm"
             onClick={() => setActiveCategory(cat)}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13px] font-semibold transition-colors ${
-              activeCategory === cat
-                ? 'bg-[var(--color-primary)] text-white'
-                : 'bg-[var(--color-surface)] border border-[var(--color-border-light)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
-            }`}
+            className="rounded-full gap-1.5"
           >
             {CATEGORY_ICONS[cat]}
             {cat}
-          </button>
+          </Button>
         ))}
       </div>
 

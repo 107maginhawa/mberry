@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Building, ArrowLeft, Pencil, Play, Pause, Archive } from 'lucide-react'
+import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { getOrganizationOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/organizations/$organizationId')({
@@ -74,10 +75,10 @@ function OrganizationDetailPage() {
                 </p>
               </div>
             </div>
-            <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md border text-sm font-medium hover:bg-accent transition-colors">
+            <Button variant="outline">
               <Pencil className="w-4 h-4" />
               Edit Organization
-            </button>
+            </Button>
           </div>
 
           {/* Detail Card */}
@@ -127,48 +128,48 @@ function OrganizationDetailPage() {
           <div className="rounded-lg border bg-card p-6 mb-8">
             <h2 className="text-h2 mb-4">Lifecycle Controls</h2>
             <div className="flex items-center gap-3">
-              <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors">
+              <Button className="bg-green-600 hover:bg-green-700">
                 <Play className="w-4 h-4" />
                 Activate
-              </button>
-              <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-yellow-600 text-white text-sm font-medium hover:bg-yellow-700 transition-colors">
+              </Button>
+              <Button className="bg-yellow-600 hover:bg-yellow-700">
                 <Pause className="w-4 h-4" />
                 Suspend
-              </button>
-              <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors">
+              </Button>
+              <Button variant="destructive">
                 <Archive className="w-4 h-4" />
                 Archive
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* Members sub-table */}
           <h2 className="text-h2 mb-4">Members</h2>
           <div className="rounded-lg border bg-card">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Name</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Email</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Role</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="p-4 text-sm">Name</TableHead>
+                  <TableHead className="p-4 text-sm">Email</TableHead>
+                  <TableHead className="p-4 text-sm">Role</TableHead>
+                  <TableHead className="p-4 text-sm">Status</TableHead>
+                  <TableHead className="text-right p-4 text-sm">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {members.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                  <TableRow>
+                    <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
                       No members found for this organization.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   members.map((member) => (
-                    <tr key={member.id} className="border-b last:border-b-0 hover:bg-muted/50">
-                      <td className="p-4 text-sm font-medium">{member.name ?? '--'}</td>
-                      <td className="p-4 text-sm text-muted-foreground">{member.email ?? '--'}</td>
-                      <td className="p-4 text-sm text-muted-foreground">{member.role ?? '--'}</td>
-                      <td className="p-4 text-sm">
+                    <TableRow key={member.id}>
+                      <TableCell className="p-4 text-sm font-medium">{member.name ?? '--'}</TableCell>
+                      <TableCell className="p-4 text-sm text-muted-foreground">{member.email ?? '--'}</TableCell>
+                      <TableCell className="p-4 text-sm text-muted-foreground">{member.role ?? '--'}</TableCell>
+                      <TableCell className="p-4 text-sm">
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                           member.status === 'active'
                             ? 'bg-green-100 text-green-700'
@@ -176,13 +177,13 @@ function OrganizationDetailPage() {
                         }`}>
                           {member.status ?? 'unknown'}
                         </span>
-                      </td>
-                      <td className="p-4 text-sm text-right text-muted-foreground">--</td>
-                    </tr>
+                      </TableCell>
+                      <TableCell className="p-4 text-sm text-right text-muted-foreground">--</TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </>
       )}

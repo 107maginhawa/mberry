@@ -292,8 +292,9 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
   return (
     <GlassCard className="overflow-hidden">
       {/* Card header */}
-      <button
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--color-surface-elevated-hover)] transition-colors text-left"
+      <Button
+        variant="ghost"
+        className="w-full flex items-center justify-between px-4 py-3 h-auto text-left"
         onClick={() => setExpanded((v) => !v)}
         type="button"
       >
@@ -318,7 +319,7 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
           </span>
           {expanded ? <ChevronUp className="h-4 w-4 text-[var(--color-muted)]" /> : <ChevronDown className="h-4 w-4 text-[var(--color-muted)]" />}
         </div>
-      </button>
+      </Button>
 
       {/* Expanded content */}
       {expanded && (

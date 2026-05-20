@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Users, Vote, Trophy, ArrowRight, CheckCircle2, Plus, Trash2, Pencil } from 'lucide-react'
-import { Skeleton } from '@monobase/ui'
+import { Button, Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
 import {
   getElectionOptions,
@@ -199,28 +199,28 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
             {confirmAction === nextAction.nextStatus ? (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[var(--color-muted)]">Confirm?</span>
-                <button
+                <Button
+                  size="sm"
                   onClick={() => handleStatusAdvance(nextAction.nextStatus)}
                   disabled={statusMutationPending}
-                  className="px-3 py-1.5 bg-[var(--color-primary)] text-white rounded text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
                 >
                   {statusMutationPending ? 'Updating...' : 'Yes, proceed'}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setConfirmAction(null)}
-                  className="px-3 py-1.5 border rounded text-sm hover:bg-[var(--color-surface-warm)]"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             ) : (
-              <button
+              <Button
                 onClick={() => setConfirmAction(nextAction.nextStatus)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)]"
               >
                 {nextAction.label}
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
             )}
           </div>
         )}
@@ -279,13 +279,15 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
                       </p>
                     </div>
                     {canManageNominees && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setNominatePositionId(position.id)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded transition-colors"
+                        className="text-[var(--color-primary)]"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Plus className="w-3.5 h-3.5 mr-1" />
                         Add
-                      </button>
+                      </Button>
                     )}
                   </div>
 
@@ -327,27 +329,32 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
                             {canManageNominees && (
                               confirmRemoveNominee === nominee.id ? (
                                 <div className="flex items-center gap-1.5 shrink-0">
-                                  <button
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
                                     onClick={() => removeNomineeMut.mutate({ path: { candidateId: nominee.id } })}
                                     disabled={removeNomineeMut.isPending}
-                                    className="px-2 py-1 text-xs font-medium text-white bg-[var(--color-error)] rounded hover:opacity-90 disabled:opacity-50"
                                   >
                                     {removeNomineeMut.isPending ? '...' : 'Remove'}
-                                  </button>
-                                  <button
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => setConfirmRemoveNominee(null)}
-                                    className="px-2 py-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-text)]"
                                   >
                                     Cancel
-                                  </button>
+                                  </Button>
                                 </div>
                               ) : (
-                                <button
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                   onClick={() => setConfirmRemoveNominee(nominee.id)}
-                                  className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-error)] transition-colors shrink-0"
+                                  className="shrink-0 text-[var(--color-muted)] hover:text-[var(--color-error)]"
+                                  aria-label="Remove nominee"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+                                </Button>
                               )
                             )}
                           </div>

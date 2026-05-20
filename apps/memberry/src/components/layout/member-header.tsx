@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { Button } from '@monobase/ui'
 import { Bell, ChevronDown } from 'lucide-react'
 import { api } from '@/lib/api'
 
@@ -113,9 +114,10 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
         {/* Org context pill / switcher */}
         {currentOrg && (
           <div className="relative" ref={dropdownRef}>
-            <button
+            <Button
+              variant="ghost"
               onClick={() => hasMultipleOrgs ? setDropdownOpen(!dropdownOpen) : navigate({ to: `/org/${currentOrg.organizationId}/members` })}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-white/15 md:bg-[var(--color-surface-warm)] md:border md:border-[var(--color-border-light)] md:text-[var(--color-text)] transition-colors hover:bg-white/25 md:hover:bg-[var(--color-surface-warm)]"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-white/15 md:bg-[var(--color-surface-warm)] md:border md:border-[var(--color-border-light)] md:text-[var(--color-text)] hover:bg-white/25 md:hover:bg-[var(--color-surface-warm)]"
             >
               <span
                 className={`w-2 h-2 rounded-full ${STATUS_DOT[currentOrg.membershipStatus || 'active'] || STATUS_DOT.active}`}
@@ -124,17 +126,18 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
                 {currentOrg.organizationName || currentOrg.membershipNumber || 'Org'}
               </span>
               {hasMultipleOrgs && <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />}
-            </button>
+            </Button>
 
             {/* Dropdown */}
             {dropdownOpen && hasMultipleOrgs && (
               <div className="absolute right-0 top-full mt-1 w-[280px] bg-[var(--color-surface)] border border-[var(--color-border-light)] rounded-[12px] shadow-lg overflow-hidden z-50">
                 <div className="py-1">
                   {orgs.map((org) => (
-                    <button
+                    <Button
                       key={org.organizationId}
+                      variant="ghost"
                       onClick={() => selectOrg(org)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[var(--color-surface-warm)] transition-colors ${
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left ${
                         org.organizationId === selectedOrgId ? 'bg-[var(--color-surface-warm)]' : ''
                       }`}
                     >
@@ -153,7 +156,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
                       {org.organizationId === selectedOrgId && (
                         <span className="text-[var(--color-primary)] text-[11px] font-semibold shrink-0">Current</span>
                       )}
-                    </button>
+                    </Button>
                   ))}
                 </div>
                 <div className="border-t border-[var(--color-border-light)]">

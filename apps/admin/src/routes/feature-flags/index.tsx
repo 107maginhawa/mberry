@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ToggleLeft, Plus, Trash2, X } from 'lucide-react'
-import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { RequireRole } from '@/lib/role-gate'
@@ -113,15 +113,16 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
           )}
           <div className="flex items-center gap-2">
             <Label className="text-sm font-medium">Enabled</Label>
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setEnabled(!enabled)}
               className={`w-10 h-6 rounded-full flex items-center px-1 transition-colors ${
                 enabled ? 'bg-green-500 justify-end' : 'bg-muted justify-start'
               }`}
             >
               <div className="w-4 h-4 rounded-full bg-white shadow" />
-            </button>
+            </Button>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={onClose}>
@@ -185,42 +186,42 @@ function FeatureFlagsPage() {
       )}
 
       <div className="rounded-lg border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Module</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Target Type</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Target ID</th>
-              <th className="text-center p-4 text-sm font-medium text-muted-foreground">Enabled</th>
-              <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-4 text-sm">Module</TableHead>
+              <TableHead className="p-4 text-sm">Target Type</TableHead>
+              <TableHead className="p-4 text-sm">Target ID</TableHead>
+              <TableHead className="text-center p-4 text-sm">Enabled</TableHead>
+              <TableHead className="text-right p-4 text-sm">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {isLoading ? (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
                   Loading...
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : !flags || flags.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
                   No feature flags configured.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               flags.map((flag) => (
-                <tr key={flag.id} className="border-b last:border-b-0">
-                  <td className="p-4 text-sm font-medium">{flag.moduleName}</td>
-                  <td className="p-4">
+                <TableRow key={flag.id}>
+                  <TableCell className="p-4 text-sm font-medium">{flag.moduleName}</TableCell>
+                  <TableCell className="p-4">
                     <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-muted">
                       {flag.targetType}
                     </span>
-                  </td>
-                  <td className="p-4 text-sm text-muted-foreground">
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">
                     {flag.targetId || '--'}
-                  </td>
-                  <td className="p-4">
+                  </TableCell>
+                  <TableCell className="p-4">
                     <div className="flex justify-center">
                       <div
                         className={`w-10 h-6 rounded-full flex items-center px-1 ${
@@ -230,23 +231,24 @@ function FeatureFlagsPage() {
                         <div className="w-4 h-4 rounded-full bg-white shadow" />
                       </div>
                     </div>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button
+                  </TableCell>
+                  <TableCell className="p-4 text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => deleteFlag.mutate({ path: { flagId: flag.id } })}
                       disabled={deleteFlag.isPending}
-                      className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
-                      title="Delete flag"
+                      className="hover:bg-red-500/10 text-muted-foreground hover:text-red-500"
                       aria-label="Delete flag"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <CreateFlagDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />

@@ -209,22 +209,20 @@ function MyEvents() {
 
       {/* Toggle */}
       <GlassCard className="flex gap-1 p-1 w-fit">
-        <button
+        <Button
+          variant={!showPast ? 'default' : 'ghost'}
+          size="sm"
           onClick={() => setShowPast(false)}
-          className={`px-3 py-1.5 rounded-[8px] text-body-sm font-semibold transition-colors ${
-            !showPast ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
-          }`}
         >
           Upcoming
-        </button>
-        <button
+        </Button>
+        <Button
+          variant={showPast ? 'default' : 'ghost'}
+          size="sm"
           onClick={() => setShowPast(true)}
-          className={`px-3 py-1.5 rounded-[8px] text-body-sm font-semibold transition-colors ${
-            showPast ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
-          }`}
         >
           All
-        </button>
+        </Button>
       </GlassCard>
 
       {/* List */}

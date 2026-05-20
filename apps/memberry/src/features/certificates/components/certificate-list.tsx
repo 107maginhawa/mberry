@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { GlassCard } from '@/components/motion/glass-card'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
+import { Link } from '@tanstack/react-router'
 import { Award } from 'lucide-react'
 
 function formatDate(iso: string | null | undefined) {
@@ -45,7 +46,7 @@ export function CertificateList() {
     <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {certificates.map((cert: any) => (
         <StaggerItem key={cert.id}>
-          <a href={`/my/certificates/${cert.id}`} className="block">
+          <Link to={`/my/certificates/${cert.id}` as any} className="block">
             <GlassCard className="p-5 space-y-3 hover:bg-[var(--color-surface-elevated-hover)] transition-colors">
               {/* Header accent */}
               <div className="h-1.5 w-16 rounded-full bg-[var(--color-primary)]" />
@@ -65,7 +66,7 @@ export function CertificateList() {
                 Issued {formatDate(cert.issuedAt)}
               </div>
             </GlassCard>
-          </a>
+          </Link>
         </StaggerItem>
       ))}
     </StaggerGrid>

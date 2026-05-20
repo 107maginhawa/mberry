@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Button } from '@monobase/ui'
 import { Calendar, MapPin, Users, MoreHorizontal } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { GlassCard } from '@/components/motion/glass-card'
 
 interface EventCardProps {
@@ -53,13 +55,14 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
             </span>
           </div>
           <div className="relative">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-1 rounded hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
               aria-label="Actions"
             >
               <MoreHorizontal className="w-4 h-4 text-[var(--color-muted)]" />
-            </button>
+            </Button>
             {menuOpen && (
               <div className="absolute right-0 top-7 z-10 w-36 border border-[var(--color-surface-border-glass)] rounded-[8px] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] text-body-sm">
                 <a
@@ -70,28 +73,31 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
                   View Details
                 </a>
                 {onEdit && (
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={() => { onEdit(event.id); setMenuOpen(false) }}
-                    className="block w-full text-left px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)]"
+                    className="w-full justify-start px-3 py-2"
                   >
                     Edit
-                  </button>
+                  </Button>
                 )}
                 {onDuplicate && (
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={() => { onDuplicate(event.id); setMenuOpen(false) }}
-                    className="block w-full text-left px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)]"
+                    className="w-full justify-start px-3 py-2"
                   >
                     Duplicate
-                  </button>
+                  </Button>
                 )}
                 {onCancel && event.status !== 'cancelled' && (
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={() => { onCancel(event.id); setMenuOpen(false) }}
-                    className="block w-full text-left px-3 py-2 text-[var(--color-error)] hover:bg-[var(--color-surface-elevated-hover)] rounded-b-[8px]"
+                    className="w-full justify-start px-3 py-2 text-[var(--color-error)]"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -99,11 +105,11 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
         </div>
 
         {/* Title */}
-        <a href={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}`} className="block">
+        <Link to={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}` as any} className="block">
           <h3 className="text-h4 leading-snug hover:text-[var(--color-primary)] transition-colors line-clamp-2">
             {event.title}
           </h3>
-        </a>
+        </Link>
 
         {/* Meta */}
         <div className="space-y-1.5 text-body-sm text-[var(--color-muted)]">

@@ -1,5 +1,6 @@
 import { Badge } from '@monobase/ui'
 import { Button } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { formatCents } from '../lib/money'
 import { Download } from 'lucide-react'
@@ -72,28 +73,26 @@ export function ReportResults({ type, data, summary, isLoading }: ReportResultsP
       </div>
 
       {/* Results table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border">
-          <thead>
-            <tr className="border-b bg-[var(--color-surface-warm)]">
-              {type === 'collection' && <><th className="px-3 py-2 text-left">Month</th><th className="px-3 py-2 text-left">Method</th><th className="px-3 py-2 text-right">Count</th><th className="px-3 py-2 text-right">Total</th></>}
-              {type === 'fund_breakdown' && <><th className="px-3 py-2 text-left">Fund</th><th className="px-3 py-2 text-right">%</th><th className="px-3 py-2 text-right">Allocated</th><th className="px-3 py-2 text-right">Reversals</th><th className="px-3 py-2 text-right">Net</th></>}
-              {type === 'dues_status' && <><th className="px-3 py-2 text-left">Member</th><th className="px-3 py-2 text-right">Total Paid</th><th className="px-3 py-2 text-left">Last Payment</th><th className="px-3 py-2 text-right">Count</th></>}
-              {type === 'aging' && <><th className="px-3 py-2 text-left">Member</th><th className="px-3 py-2 text-right">Amount</th><th className="px-3 py-2 text-right">Days Overdue</th><th className="px-3 py-2 text-left">Bucket</th></>}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row: any, i: number) => (
-              <tr key={i} className="border-b">
-                {type === 'collection' && <><td className="px-3 py-2">{row.month}</td><td className="px-3 py-2">{row.method}</td><td className="px-3 py-2 text-right">{row.count}</td><td className="px-3 py-2 text-right font-mono">{formatCents(row.total)}</td></>}
-                {type === 'fund_breakdown' && <><td className="px-3 py-2">{row.fundName}</td><td className="px-3 py-2 text-right">{row.percentage}%</td><td className="px-3 py-2 text-right font-mono">{formatCents(row.totalAllocated)}</td><td className="px-3 py-2 text-right font-mono text-red-600">{formatCents(row.totalReversals)}</td><td className="px-3 py-2 text-right font-mono font-medium">{formatCents(row.netTotal)}</td></>}
-                {type === 'dues_status' && <><td className="px-3 py-2 font-mono text-xs">{row.personId}</td><td className="px-3 py-2 text-right font-mono">{formatCents(row.totalPaid)}</td><td className="px-3 py-2">{row.lastPaymentDate ? new Date(row.lastPaymentDate).toLocaleDateString() : '—'}</td><td className="px-3 py-2 text-right">{row.paymentCount}</td></>}
-                {type === 'aging' && <><td className="px-3 py-2 font-mono text-xs">{row.personId}</td><td className="px-3 py-2 text-right font-mono">{formatCents(row.amount)}</td><td className="px-3 py-2 text-right">{row.daysPending}</td><td className="px-3 py-2"><Badge variant="secondary">{row.daysPending <= 30 ? '1-30' : row.daysPending <= 60 ? '31-60' : row.daysPending <= 90 ? '61-90' : '90+'}</Badge></td></>}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table className="text-sm border">
+        <TableHeader>
+          <TableRow className="bg-[var(--color-surface-warm)]">
+            {type === 'collection' && <><TableHead className="px-3 py-2">Month</TableHead><TableHead className="px-3 py-2">Method</TableHead><TableHead className="px-3 py-2 text-right">Count</TableHead><TableHead className="px-3 py-2 text-right">Total</TableHead></>}
+            {type === 'fund_breakdown' && <><TableHead className="px-3 py-2">Fund</TableHead><TableHead className="px-3 py-2 text-right">%</TableHead><TableHead className="px-3 py-2 text-right">Allocated</TableHead><TableHead className="px-3 py-2 text-right">Reversals</TableHead><TableHead className="px-3 py-2 text-right">Net</TableHead></>}
+            {type === 'dues_status' && <><TableHead className="px-3 py-2">Member</TableHead><TableHead className="px-3 py-2 text-right">Total Paid</TableHead><TableHead className="px-3 py-2">Last Payment</TableHead><TableHead className="px-3 py-2 text-right">Count</TableHead></>}
+            {type === 'aging' && <><TableHead className="px-3 py-2">Member</TableHead><TableHead className="px-3 py-2 text-right">Amount</TableHead><TableHead className="px-3 py-2 text-right">Days Overdue</TableHead><TableHead className="px-3 py-2">Bucket</TableHead></>}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((row: any, i: number) => (
+            <TableRow key={i}>
+              {type === 'collection' && <><TableCell className="px-3 py-2">{row.month}</TableCell><TableCell className="px-3 py-2">{row.method}</TableCell><TableCell className="px-3 py-2 text-right">{row.count}</TableCell><TableCell className="px-3 py-2 text-right font-mono">{formatCents(row.total)}</TableCell></>}
+              {type === 'fund_breakdown' && <><TableCell className="px-3 py-2">{row.fundName}</TableCell><TableCell className="px-3 py-2 text-right">{row.percentage}%</TableCell><TableCell className="px-3 py-2 text-right font-mono">{formatCents(row.totalAllocated)}</TableCell><TableCell className="px-3 py-2 text-right font-mono text-red-600">{formatCents(row.totalReversals)}</TableCell><TableCell className="px-3 py-2 text-right font-mono font-medium">{formatCents(row.netTotal)}</TableCell></>}
+              {type === 'dues_status' && <><TableCell className="px-3 py-2 font-mono text-xs">{row.personId}</TableCell><TableCell className="px-3 py-2 text-right font-mono">{formatCents(row.totalPaid)}</TableCell><TableCell className="px-3 py-2">{row.lastPaymentDate ? new Date(row.lastPaymentDate).toLocaleDateString() : '—'}</TableCell><TableCell className="px-3 py-2 text-right">{row.paymentCount}</TableCell></>}
+              {type === 'aging' && <><TableCell className="px-3 py-2 font-mono text-xs">{row.personId}</TableCell><TableCell className="px-3 py-2 text-right font-mono">{formatCents(row.amount)}</TableCell><TableCell className="px-3 py-2 text-right">{row.daysPending}</TableCell><TableCell className="px-3 py-2"><Badge variant="secondary">{row.daysPending <= 30 ? '1-30' : row.daysPending <= 60 ? '31-60' : row.daysPending <= 90 ? '61-90' : '90+'}</Badge></TableCell></>}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }

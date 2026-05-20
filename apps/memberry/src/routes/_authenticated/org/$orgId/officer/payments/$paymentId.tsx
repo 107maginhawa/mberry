@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getDuesPaymentOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Badge } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { formatCents } from '@/features/dues/lib/money'
 import { RefundForm } from '@/features/dues/components/refund-form'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -66,30 +67,28 @@ function PaymentDetailPage() {
       {origAllocations.length > 0 && (
         <GlassCard className="p-5">
           <h3 className="text-h4 mb-3">Fund Allocation</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--color-border-light)]">
-                  <th className="px-3 py-2 text-left text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Fund</th>
-                  <th className="px-3 py-2 text-right text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {origAllocations.map((a: any) => (
-                  <tr key={a.id} className="border-b border-[var(--color-border-light)]">
-                    <td className="px-3 py-2">{a.fundId}</td>
-                    <td className="px-3 py-2 text-right font-mono">{formatCents(a.amount, payment.currency)}</td>
-                  </tr>
-                ))}
-                {reversals.map((a: any) => (
-                  <tr key={a.id} className="border-b border-[var(--color-border-light)] text-[var(--color-error)]">
-                    <td className="px-3 py-2">Refund reversal</td>
-                    <td className="px-3 py-2 text-right font-mono">{formatCents(a.amount, payment.currency)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table className="text-sm">
+            <TableHeader>
+              <TableRow className="border-b border-[var(--color-border-light)]">
+                <TableHead className="px-3 py-2 text-[12px] uppercase tracking-wide">Fund</TableHead>
+                <TableHead className="px-3 py-2 text-right text-[12px] uppercase tracking-wide">Amount</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {origAllocations.map((a: any) => (
+                <TableRow key={a.id} className="border-b border-[var(--color-border-light)]">
+                  <TableCell className="px-3 py-2">{a.fundId}</TableCell>
+                  <TableCell className="px-3 py-2 text-right font-mono">{formatCents(a.amount, payment.currency)}</TableCell>
+                </TableRow>
+              ))}
+              {reversals.map((a: any) => (
+                <TableRow key={a.id} className="border-b border-[var(--color-border-light)] text-[var(--color-error)]">
+                  <TableCell className="px-3 py-2">Refund reversal</TableCell>
+                  <TableCell className="px-3 py-2 text-right font-mono">{formatCents(a.amount, payment.currency)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </GlassCard>
       )}
 

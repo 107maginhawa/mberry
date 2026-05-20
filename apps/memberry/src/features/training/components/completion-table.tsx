@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { CheckCircle, Users, Award } from 'lucide-react'
 import { Checkbox } from '@monobase/ui'
 import { Button } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import {
   listCustomTrainingEnrollmentsOptions,
   listCustomTrainingEnrollmentsQueryKey,
@@ -124,47 +125,47 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
 
       {/* Table */}
       <div className="border rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-[var(--color-surface-warm)]">
-            <tr>
-              <th className="p-3 w-8">
+        <Table className="text-sm">
+          <TableHeader className="bg-[var(--color-surface-warm)]">
+            <TableRow>
+              <TableHead className="p-3 w-8">
                 <Checkbox
                   checked={allSelected}
                   onCheckedChange={toggleAll}
                   disabled={enrollments.length === 0}
                 />
-              </th>
-              <th className="text-left p-3 font-medium">Member</th>
-              <th className="text-left p-3 font-medium">Enrollment Status</th>
-              <th className="text-left p-3 font-medium">Completion</th>
-              <th className="text-left p-3 font-medium">Credits</th>
-              <th className="p-3 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3">Member</TableHead>
+              <TableHead className="p-3">Enrollment Status</TableHead>
+              <TableHead className="p-3">Completion</TableHead>
+              <TableHead className="p-3">Credits</TableHead>
+              <TableHead className="p-3">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {enrollmentsListQuery.isLoading ? (
-              <tr>
-                <td colSpan={6} className="p-8 text-center text-[var(--color-muted)]">Loading…</td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={6} className="p-8 text-center text-[var(--color-muted)]">Loading…</TableCell>
+              </TableRow>
             ) : enrollments.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-8 text-center text-[var(--color-muted)]">
+              <TableRow>
+                <TableCell colSpan={6} className="p-8 text-center text-[var(--color-muted)]">
                   No enrollments yet. Enrollment data will appear here once members sign up.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               enrollments.map((e: any) => (
-                <tr key={e.id} className="border-t hover:bg-[var(--color-surface-warm)]">
-                  <td className="p-3">
+                <TableRow key={e.id} className="border-t hover:bg-[var(--color-surface-warm)]">
+                  <TableCell className="p-3">
                     <Checkbox
                       checked={selected.has(e.personId)}
                       onCheckedChange={() => toggleOne(e.personId)}
                     />
-                  </td>
-                  <td className="p-3">
+                  </TableCell>
+                  <TableCell className="p-3">
                     <span className="font-medium">{e.personId.slice(0, 8)}…</span>
-                  </td>
-                  <td className="p-3">
+                  </TableCell>
+                  <TableCell className="p-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                       e.status === 'enrolled' ? 'bg-green-100 text-green-700' :
                       e.status === 'waitlisted' ? 'bg-yellow-100 text-yellow-700' :
@@ -172,8 +173,8 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                     }`}>
                       {e.status.replace('_', ' ')}
                     </span>
-                  </td>
-                  <td className="p-3">
+                  </TableCell>
+                  <TableCell className="p-3">
                     {e.completedAt ? (
                       <span className="inline-flex items-center gap-1 text-green-700 text-xs">
                         <CheckCircle className="w-3.5 h-3.5" />
@@ -182,11 +183,11 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                     ) : (
                       <span className="text-[var(--color-muted)] text-xs">Pending</span>
                     )}
-                  </td>
-                  <td className="p-3 text-xs">
+                  </TableCell>
+                  <TableCell className="p-3 text-xs">
                     {e.completedAt ? `${creditAmount} CPE` : '—'}
-                  </td>
-                  <td className="p-3 text-center">
+                  </TableCell>
+                  <TableCell className="p-3 text-center">
                     {!e.completedAt && (
                       <Button
                         variant="outline"
@@ -200,12 +201,12 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                         {markMutation.isPending && marking === e.personId ? 'Marking…' : 'Mark Complete'}
                       </Button>
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

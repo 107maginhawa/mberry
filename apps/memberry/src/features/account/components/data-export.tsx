@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { Download, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react'
@@ -146,39 +147,38 @@ export function DataExport() {
         <div>
           <h2 className="text-h4 mb-3">Previous Exports</h2>
           <GlassCard className="overflow-hidden">
-            <div className="overflow-x-auto">
-            <table className="w-full text-[14px]">
-              <thead className="bg-[var(--color-surface-warm)]">
-                <tr>
-                  <th className="text-left px-5 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">
+            <Table className="text-[14px]">
+              <TableHeader className="bg-[var(--color-surface-warm)]">
+                <TableRow>
+                  <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide">
                     Date
-                  </th>
-                  <th className="text-left px-5 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">
+                  </TableHead>
+                  <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide">
                     Status
-                  </th>
-                  <th className="px-5 py-3 w-24"></th>
-                </tr>
-              </thead>
-              <tbody>
+                  </TableHead>
+                  <TableHead className="px-5 py-3 w-24"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {exports.map((e) => {
                   const config = STATUS_CONFIG[e.status]
                   return (
-                    <tr
+                    <TableRow
                       key={e.id}
                       className="border-t border-[var(--color-border-light)]"
                     >
-                      <td className="px-5 py-3.5 text-[var(--color-muted)]">
+                      <TableCell className="px-5 py-3.5 text-[var(--color-muted)]">
                         {new Date(e.requestedAt).toLocaleString()}
-                      </td>
-                      <td className="px-5 py-3.5">
+                      </TableCell>
+                      <TableCell className="px-5 py-3.5">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold ${config.className}`}
                         >
                           {config.icon}
                           {config.label}
                         </span>
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
+                      </TableCell>
+                      <TableCell className="px-5 py-3.5 text-right">
                         {e.status === 'Ready' && e.downloadUrl ? (
                           <a
                             href={e.downloadUrl}
@@ -188,13 +188,12 @@ export function DataExport() {
                             Download
                           </a>
                         ) : null}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )
                 })}
-              </tbody>
-            </table>
-            </div>
+              </TableBody>
+            </Table>
           </GlassCard>
         </div>
       )}

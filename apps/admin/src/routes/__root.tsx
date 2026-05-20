@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Shield,
 } from 'lucide-react'
+import { Button } from '@monobase/ui'
 import type { RouterContext } from '@/router'
 import { ROUTE_ROLES, useAdminUser } from '@/lib/role-gate'
 import '@/styles/globals.css'
@@ -26,12 +27,9 @@ function RootErrorComponent({ error }: { error: Error }) {
         <Shield className="w-10 h-10 text-red-500 mx-auto mb-4" />
         <h1 className="text-h1 mb-2">Something went wrong</h1>
         <p className="text-sm text-muted-foreground mb-6">{error?.message ?? 'An unexpected error occurred.'}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
+        <Button onClick={() => window.location.reload()}>
           Reload page
-        </button>
+        </Button>
       </div>
     </div>
   )

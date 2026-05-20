@@ -8,6 +8,7 @@ import { TableSkeleton } from '@/components/patterns/skeleton-loader'
 import { EventForm } from '@/features/events/components/event-form'
 import { AttendanceView } from '@/features/events/components/attendance-view'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'
+import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { getEventOptions, listCustomEventRegistrationsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/events/$eventId')({
@@ -62,39 +63,37 @@ function RegistrationsTab({ eventId, orgId }: { eventId: string; orgId: string }
 
   return (
     <GlassCard className="overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-[14px]">
-          <thead className="bg-[var(--color-surface-warm)]/50">
-            <tr>
-              <th className="text-left p-3 font-medium">Member</th>
-              <th className="text-left p-3 font-medium">Status</th>
-              <th className="text-left p-3 font-medium">Registered At</th>
-              <th className="text-left p-3 font-medium">Payment</th>
-            </tr>
-          </thead>
-          <tbody>
-            {registrations.map((reg: any) => (
-              <tr key={reg.id} className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-surface-warm)]/30">
-                <td className="p-3 font-mono text-xs">{reg.personId}</td>
-                <td className="p-3">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    reg.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                    reg.status === 'waitlisted' ? 'bg-yellow-100 text-yellow-800' :
-                    reg.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
-                    {reg.status}
-                  </span>
-                </td>
-                <td className="p-3 text-[var(--color-muted)]">
-                  {new Date(reg.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
-                </td>
-                <td className="p-3 text-[var(--color-muted)]">{reg.paymentStatus ?? '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table className="text-[14px]">
+        <TableHeader className="bg-[var(--color-surface-warm)]/50">
+          <TableRow>
+            <TableHead className="p-3">Member</TableHead>
+            <TableHead className="p-3">Status</TableHead>
+            <TableHead className="p-3">Registered At</TableHead>
+            <TableHead className="p-3">Payment</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {registrations.map((reg: any) => (
+            <TableRow key={reg.id} className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-surface-warm)]/30">
+              <TableCell className="p-3 font-mono text-xs">{reg.personId}</TableCell>
+              <TableCell className="p-3">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                  reg.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                  reg.status === 'waitlisted' ? 'bg-yellow-100 text-yellow-800' :
+                  reg.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {reg.status}
+                </span>
+              </TableCell>
+              <TableCell className="p-3 text-[var(--color-muted)]">
+                {new Date(reg.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </TableCell>
+              <TableCell className="p-3 text-[var(--color-muted)]">{reg.paymentStatus ?? '—'}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </GlassCard>
   )
 }
@@ -134,12 +133,12 @@ function EventDetail() {
                   {event.status}
                 </span>
                 {!editMode && event.status !== 'cancelled' && (
-                  <button
+                  <Button
+                    variant="outline"
                     onClick={() => { setEditMode(true); setTab('details') }}
-                    className="px-4 py-2 border border-[var(--color-border-light)] rounded-[8px] text-[14px] font-medium hover:bg-[var(--color-surface-warm)]"
                   >
                     Edit
-                  </button>
+                  </Button>
                 )}
               </div>
             }
@@ -148,10 +147,11 @@ function EventDetail() {
           {/* Tabs */}
           <div className="flex gap-1 border-b border-[var(--color-border-light)]">
             {TABS.map((t) => (
-              <button
+              <Button
                 key={t.key}
+                variant="ghost"
                 onClick={() => { setTab(t.key); setEditMode(false) }}
-                className={`px-4 py-2.5 text-[14px] font-medium border-b-2 -mb-px transition-colors ${
+                className={`px-4 py-2.5 text-[14px] font-medium border-b-2 -mb-px rounded-none ${
                   tab === t.key
                     ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
                     : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-text)]'
@@ -168,7 +168,7 @@ function EventDetail() {
                     {event.attendance.total}
                   </span>
                 )}
-              </button>
+              </Button>
             ))}
           </div>
 

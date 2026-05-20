@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Button } from '@monobase/ui'
 
 interface EmptyStateProps {
   icon?: ReactNode
@@ -16,12 +17,12 @@ export function EmptyState({ icon, headline, description, action }: EmptyStatePr
         <p className="text-[14px] text-[var(--color-muted)] mt-2 max-w-[400px]">{description}</p>
       )}
       {action && (
-        <button
+        <Button
           onClick={action.onClick}
-          className="mt-4 px-[22px] py-[10px] rounded-[8px] bg-[var(--color-primary)] text-white text-[14px] font-semibold hover:bg-[var(--color-primary-mid)] transition-colors duration-150"
+          className="mt-4"
         >
           {action.label}
-        </button>
+        </Button>
       )}
     </div>
   )

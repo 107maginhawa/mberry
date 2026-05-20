@@ -1,3 +1,4 @@
+import { Button } from '@monobase/ui'
 import { BarChart3, PieChart, List, Clock } from 'lucide-react'
 
 interface ReportSelectorProps {
@@ -16,17 +17,18 @@ export function ReportSelector({ selected, onSelect }: ReportSelectorProps) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {REPORTS.map(({ type, label, icon: Icon, description }) => (
-        <button
+        <Button
           key={type}
+          variant={selected === type ? 'outline' : 'ghost'}
           onClick={() => onSelect(type)}
-          className={`p-4 rounded-lg border text-left transition-colors ${
-            selected === type ? 'border-[var(--color-primary)] bg-primary/5 ring-1 ring-primary' : 'hover:bg-[var(--color-surface-warm)]'
+          className={`p-4 h-auto flex-col items-start text-left ${
+            selected === type ? 'border-[var(--color-primary)] bg-primary/5 ring-1 ring-primary' : ''
           }`}
         >
           <Icon className="h-5 w-5 mb-2 text-[var(--color-muted)]" />
           <p className="text-sm font-medium">{label}</p>
-          <p className="text-xs text-[var(--color-muted)] mt-1">{description}</p>
-        </button>
+          <p className="text-xs text-[var(--color-muted)] mt-1 font-normal">{description}</p>
+        </Button>
       ))}
     </div>
   )

@@ -7,6 +7,7 @@ import { CardSkeleton, TableSkeleton } from '@/components/patterns/skeleton-load
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Award } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/my/credits/')({
@@ -103,30 +104,28 @@ function MyCredits() {
         />
       ) : (
         <GlassCard className="overflow-hidden">
-          <div className="overflow-x-auto">
-          <table className="w-full text-[13px] min-w-[500px]">
-            <thead className="bg-[var(--color-surface-warm)]">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Activity</th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Date</th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Type</th>
-                <th className="text-right px-4 py-3 font-semibold text-[var(--color-muted)] text-[12px] uppercase tracking-wide">Credits</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="text-[13px] min-w-[500px]">
+            <TableHeader className="bg-[var(--color-surface-warm)]">
+              <TableRow>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Activity</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Date</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Type</TableHead>
+                <TableHead className="px-4 py-3 text-right font-semibold text-[12px] uppercase tracking-wide">Credits</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {entries.map((e) => (
-                <tr key={e.id} className="border-t border-[var(--color-border-light)]">
-                  <td className="px-4 py-3 font-medium">{e.activityName || 'Training'}</td>
-                  <td className="px-4 py-3 text-[var(--color-muted)]">
+                <TableRow key={e.id} className="border-t border-[var(--color-border-light)]">
+                  <TableCell className="px-4 py-3 font-medium">{e.activityName || 'Training'}</TableCell>
+                  <TableCell className="px-4 py-3 text-[var(--color-muted)]">
                     {e.activityDate ? new Date(e.activityDate).toLocaleDateString() : '—'}
-                  </td>
-                  <td className="px-4 py-3 capitalize">{e.type || 'auto'}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-[var(--color-primary)]">{e.creditAmount}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="px-4 py-3 capitalize">{e.type || 'auto'}</TableCell>
+                  <TableCell className="px-4 py-3 text-right font-semibold text-[var(--color-primary)]">{e.creditAmount}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-          </div>
+            </TableBody>
+          </Table>
         </GlassCard>
       )}
     </div>

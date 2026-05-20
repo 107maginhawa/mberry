@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Badge } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Receipt } from 'lucide-react'
 import { formatCents } from '../lib/money'
@@ -93,34 +94,32 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
           description="No payments match your current filters. Try adjusting or clearing filters."
         />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-[var(--color-surface-warm)] border-b text-left">
-                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Date</th>
-                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Receipt #</th>
-                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Amount</th>
-                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Method</th>
-                <th className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map((p: any, idx: number) => (
-                <tr key={p.id} className={`hover:bg-[var(--color-surface-warm)] cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
-                  <td className="px-3 py-2 text-body-sm tabular-nums">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</td>
-                  <td className="px-3 py-2 text-mono tabular-nums">{p.receiptNumber}</td>
-                  <td className="px-3 py-2 text-mono tabular-nums">{formatCents(Number(p.amount), p.currency)}</td>
-                  <td className="px-3 py-2 text-body-sm">{METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}</td>
-                  <td className="px-3 py-2">
-                    <Badge variant="secondary" className={STATUS_COLORS[p.status] ?? ''}>
-                      {p.status}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table className="text-sm">
+          <TableHeader>
+            <TableRow className="bg-[var(--color-surface-warm)]">
+              <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Date</TableHead>
+              <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Receipt #</TableHead>
+              <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Amount</TableHead>
+              <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Method</TableHead>
+              <TableHead className="px-3 py-2.5 text-caption text-[var(--color-text-secondary)]">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {payments.map((p: any, idx: number) => (
+              <TableRow key={p.id} className={`hover:bg-[var(--color-surface-warm)] cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
+                <TableCell className="px-3 py-2 text-body-sm tabular-nums">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</TableCell>
+                <TableCell className="px-3 py-2 text-mono tabular-nums">{p.receiptNumber}</TableCell>
+                <TableCell className="px-3 py-2 text-mono tabular-nums">{formatCents(Number(p.amount), p.currency)}</TableCell>
+                <TableCell className="px-3 py-2 text-body-sm">{METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}</TableCell>
+                <TableCell className="px-3 py-2">
+                  <Badge variant="secondary" className={STATUS_COLORS[p.status] ?? ''}>
+                    {p.status}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       {total > limit && (

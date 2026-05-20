@@ -69,12 +69,12 @@ function MyOrganizationsPage() {
         title="Organizations"
         subtitle="Your memberships across all organizations"
         actions={
-          <button
+          <Button
+            variant="outline"
             onClick={() => toast.info('Organization discovery coming soon')}
-            className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
           >
             Find Organizations
-          </button>
+          </Button>
         }
       />
 
@@ -117,29 +117,31 @@ function MyOrganizationsPage() {
               <div className="flex items-center gap-3 shrink-0">
                 <StatusBadge status={m.status ?? 'pending'} />
                 {(m.status === 'grace' || m.status === 'lapsed' || m.status === 'gracePeriod') && (
-                  <button
+                  <Button
+                    size="sm"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
-                    className="px-4 py-[7px] rounded-[8px] bg-[var(--color-primary)] text-white text-[13px] font-semibold hover:bg-[var(--color-primary-mid)] transition-colors duration-150"
                   >
                     Pay Dues
-                  </button>
+                  </Button>
                 )}
                 {m.status !== 'terminated' && (
                   <>
-                    <button
+                    <Button
+                      variant="outline"
+                      size="icon"
                       onClick={() => setTransferTarget({ membershipId: m.id, orgId: normalizeOrgId(m), orgName: m.orgName ?? 'this organization' })}
-                      className="px-3 py-[7px] rounded-[8px] border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors duration-150"
-                      title="Transfer membership"
+                      aria-label="Transfer membership"
                     >
                       <ArrowRightLeft size={14} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setLeaveTarget({ membershipId: m.id, orgName: m.orgName ?? 'this organization', orgId: normalizeOrgId(m) })}
-                      className="px-3 py-[7px] rounded-[8px] border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-muted)] hover:border-red-300 hover:text-red-600 hover:bg-red-50 transition-colors duration-150"
-                      title="Leave organization"
+                      className="hover:border-red-300 hover:text-red-600 hover:bg-red-50"
                     >
                       Leave
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>

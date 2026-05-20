@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { Button } from '@monobase/ui'
 import {
   validateInviteToken,
   claimInviteToken,
@@ -114,13 +115,13 @@ function InvitePage() {
           </div>
         )}
 
-        <button
-          className="w-full px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium disabled:opacity-50"
+        <Button
+          className="w-full"
           onClick={handleClaim}
           disabled={claiming}
         >
           {claiming ? 'Accepting...' : 'Accept Invitation'}
-        </button>
+        </Button>
       </div>
     </div>
   )

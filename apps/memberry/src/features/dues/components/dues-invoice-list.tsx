@@ -5,7 +5,8 @@ import {
   markDuesInvoicePaidMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { FileText } from 'lucide-react'
-import { Skeleton } from '@monobase/ui'
+import { Button, Skeleton } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { formatCents } from '../lib/money'
 import { EmptyState } from '@/components/patterns/empty-state'
 
@@ -62,53 +63,53 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left">
-            <th className="px-4 py-3 font-medium">Invoice #</th>
-            <th className="px-4 py-3 font-medium">Member</th>
-            <th className="px-4 py-3 font-medium">Period</th>
-            <th className="px-4 py-3 font-medium">Amount</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {invoices.map((inv: any) => (
-            <tr key={inv.id} className="border-b hover:bg-[var(--color-surface-warm)]">
-              <td className="px-4 py-3 font-mono text-xs">{inv.invoiceNumber}</td>
-              <td className="px-4 py-3">{inv.personId}</td>
-              <td className="px-4 py-3 text-xs">
-                {inv.periodStart instanceof Date ? inv.periodStart.toLocaleDateString() : inv.periodStart} — {inv.periodEnd instanceof Date ? inv.periodEnd.toLocaleDateString() : inv.periodEnd}
-              </td>
-              <td className="px-4 py-3 font-mono">
-                {formatCents(Number(inv.totalAmount))}
-              </td>
-              <td className="px-4 py-3">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGES[inv.status] || STATUS_BADGES.generated}`}>
-                  {inv.status}
-                </span>
-              </td>
-              <td className="px-4 py-3">
-                {['generated', 'sent', 'overdue'].includes(inv.status) && (
-                  <button
-                    onClick={() => markPaidMutation.mutate({
-                      path: { invoiceId: inv.id },
-                      body: { paymentId: `manual-${Date.now()}` },
-                      headers: { 'x-org-id': tenantId },
-                    } as any)}
-                    disabled={markPaidMutation.isPending}
-                    className="text-xs text-green-700 hover:underline disabled:opacity-50"
-                  >
-                    Mark Paid
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table className="text-sm">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="px-4 py-3">Invoice #</TableHead>
+          <TableHead className="px-4 py-3">Member</TableHead>
+          <TableHead className="px-4 py-3">Period</TableHead>
+          <TableHead className="px-4 py-3">Amount</TableHead>
+          <TableHead className="px-4 py-3">Status</TableHead>
+          <TableHead className="px-4 py-3">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {invoices.map((inv: any) => (
+          <TableRow key={inv.id} className="hover:bg-[var(--color-surface-warm)]">
+            <TableCell className="px-4 py-3 font-mono text-xs">{inv.invoiceNumber}</TableCell>
+            <TableCell className="px-4 py-3">{inv.personId}</TableCell>
+            <TableCell className="px-4 py-3 text-xs">
+              {inv.periodStart instanceof Date ? inv.periodStart.toLocaleDateString() : inv.periodStart} — {inv.periodEnd instanceof Date ? inv.periodEnd.toLocaleDateString() : inv.periodEnd}
+            </TableCell>
+            <TableCell className="px-4 py-3 font-mono">
+              {formatCents(Number(inv.totalAmount))}
+            </TableCell>
+            <TableCell className="px-4 py-3">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGES[inv.status] || STATUS_BADGES.generated}`}>
+                {inv.status}
+              </span>
+            </TableCell>
+            <TableCell className="px-4 py-3">
+              {['generated', 'sent', 'overdue'].includes(inv.status) && (
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => markPaidMutation.mutate({
+                    path: { invoiceId: inv.id },
+                    body: { paymentId: `manual-${Date.now()}` },
+                    headers: { 'x-org-id': tenantId },
+                  } as any)}
+                  disabled={markPaidMutation.isPending}
+                  className="text-xs text-green-700"
+                >
+                  Mark Paid
+                </Button>
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   )
 }

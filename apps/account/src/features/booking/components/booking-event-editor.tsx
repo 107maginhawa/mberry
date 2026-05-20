@@ -139,13 +139,14 @@ export function BookingEventEditor({ existing }: BookingEventEditorProps) {
             <Label>Location types</Label>
             <div className="flex gap-4">
               {LOCATION_OPTIONS.map((loc) => (
-                <label key={loc} className="flex items-center gap-2 capitalize">
+                <div key={loc} className="flex items-center gap-2 capitalize">
                   <Checkbox
+                    id={`location-${loc}`}
                     checked={state.locationTypes.includes(loc)}
                     onCheckedChange={() => toggleLocation(loc)}
                   />
-                  {loc}
-                </label>
+                  <Label htmlFor={`location-${loc}`}>{loc}</Label>
+                </div>
               ))}
             </div>
           </div>

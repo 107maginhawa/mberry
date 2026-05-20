@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
-import { Input } from '@monobase/ui'
+import { Button, Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import {
   createElectionMutation,
@@ -134,10 +134,11 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
       <div className="flex items-center gap-2">
         {STEPS.map((s, i) => (
           <div key={s.key} className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => i < stepIndex && setStep(s.key)}
-              className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2 text-sm font-medium ${
                 s.key === step
                   ? 'text-[var(--color-primary)]'
                   : i < stepIndex
@@ -155,7 +156,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
                 {i + 1}
               </span>
               {s.label}
-            </button>
+            </Button>
             {i < STEPS.length - 1 && <span className="text-[var(--color-muted)]">›</span>}
           </div>
         ))}
@@ -178,19 +179,20 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
             <Label>Type</Label>
             <div className="grid grid-cols-2 gap-3">
               {(['officer', 'bylaw'] as const).map((t) => (
-                <button
+                <Button
                   key={t}
                   type="button"
+                  variant={form.type === t ? 'outline' : 'ghost'}
                   onClick={() => setField('type', t)}
-                  className={`border rounded-lg p-3 text-left transition-colors ${
-                    form.type === t ? 'border-[var(--color-primary)] bg-primary/5' : 'hover:bg-[var(--color-surface-warm)]'
+                  className={`h-auto p-3 flex-col items-start text-left ${
+                    form.type === t ? 'border-[var(--color-primary)] bg-primary/5' : ''
                   }`}
                 >
                   <p className="font-medium capitalize">{t}</p>
-                  <p className="text-xs text-[var(--color-muted)] mt-0.5">
+                  <p className="text-xs text-[var(--color-muted)] mt-0.5 font-normal">
                     {t === 'officer' ? 'Elect officers to positions' : 'Vote on bylaw amendments'}
                   </p>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -199,16 +201,17 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
             <Label>Voting Mode</Label>
             <div className="grid grid-cols-3 gap-2">
               {(['online', 'in_person', 'hybrid'] as const).map((m) => (
-                <button
+                <Button
                   key={m}
                   type="button"
+                  variant={form.votingMode === m ? 'outline' : 'ghost'}
                   onClick={() => setField('votingMode', m)}
-                  className={`border rounded-lg p-2.5 text-sm text-center capitalize transition-colors ${
-                    form.votingMode === m ? 'border-[var(--color-primary)] bg-primary/5 font-medium' : 'hover:bg-[var(--color-surface-warm)]'
+                  className={`p-2.5 text-sm capitalize ${
+                    form.votingMode === m ? 'border-[var(--color-primary)] bg-primary/5 font-medium' : ''
                   }`}
                 >
                   {m.replace('_', '-')}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -251,26 +254,30 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
                   placeholder={form.type === 'officer' ? `e.g. President` : `e.g. Amendment ${i + 1}`}
                   className="flex-1"
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => removePosition(pos.id)}
                   disabled={positions.length === 1}
-                  className="p-2 text-[var(--color-muted)] hover:text-[var(--color-error)] disabled:opacity-30 transition-colors"
+                  className="text-[var(--color-muted)] hover:text-[var(--color-error)]"
+                  aria-label="Remove position"
                 >
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="link"
             onClick={addPosition}
-            className="flex items-center gap-1.5 text-sm text-[var(--color-primary)] hover:underline"
+            className="text-[var(--color-primary)]"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 mr-1.5" />
             Add position
-          </button>
+          </Button>
         </div>
       )}
 
@@ -326,34 +333,33 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-2 border-t">
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={onCancel}
-          className="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
         >
           Cancel
-        </button>
+        </Button>
         <div className="flex items-center gap-2">
           {stepIndex > 0 && (
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setStep(STEPS[stepIndex - 1]!.key)}
-              className="px-4 py-2 border rounded-md text-sm hover:bg-[var(--color-surface-warm)]"
             >
               Back
-            </button>
+            </Button>
           )}
           {stepIndex < STEPS.length - 1 ? (
-            <button
+            <Button
               type="button"
               onClick={() => setStep(STEPS[stepIndex + 1]!.key)}
               disabled={!canProceed()}
-              className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
             >
               Next
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
               onClick={() => {
                 const body = {
@@ -374,10 +380,9 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
                 }
               }}
               disabled={mutation.isPending || !form.title.trim()}
-              className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
             >
               {mutation.isPending ? 'Saving...' : isEdit ? 'Save Changes' : 'Save as Draft'}
-            </button>
+            </Button>
           )}
         </div>
       </div>

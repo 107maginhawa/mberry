@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
+import { Button, Label } from '@monobase/ui'
 import { Shield, Lock, CreditCard, Download } from 'lucide-react'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -92,12 +93,9 @@ function MyProfilePage() {
         title="Profile"
         subtitle="Your professional identity"
         actions={
-          <button
-            onClick={() => setEditing(true)}
-            className="px-[22px] py-[10px] rounded-[8px] bg-[var(--color-primary)] text-white text-[14px] font-semibold hover:bg-[var(--color-primary-mid)] transition-colors duration-150"
-          >
+          <Button onClick={() => setEditing(true)}>
             Edit Profile
-          </button>
+          </Button>
         }
       />
 
@@ -242,7 +240,7 @@ function ProfileEditForm({
 
   const field = (label: string, key: keyof typeof form, opts?: { placeholder?: string }) => (
     <div>
-      <label className="block text-[13px] font-semibold text-[var(--color-text-secondary)] mb-1.5">{label}</label>
+      <Label className="block text-[13px] font-semibold text-[var(--color-text-secondary)] mb-1.5">{label}</Label>
       <input
         type="text"
         value={form[key]}
@@ -258,12 +256,9 @@ function ProfileEditForm({
       <PageHeader
         title="Edit Profile"
         actions={
-          <button
-            onClick={onCancel}
-            className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
-          >
+          <Button variant="outline" onClick={onCancel}>
             Cancel
-          </button>
+          </Button>
         }
       />
 
@@ -295,20 +290,19 @@ function ProfileEditForm({
         {field('Preferred Language', 'preferredLanguage', { placeholder: 'en' })}
 
         <div className="flex justify-end gap-3 pt-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onCancel}
-            className="px-[22px] py-[10px] rounded-[8px] border-[1.5px] border-[var(--color-border)] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             disabled={onSave.isPending || !form.firstName}
-            className="px-[22px] py-[10px] rounded-[8px] bg-[var(--color-primary)] text-white text-[14px] font-semibold hover:bg-[var(--color-primary-mid)] disabled:opacity-50 transition-colors duration-150"
           >
             {onSave.isPending ? 'Saving...' : 'Save Changes'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

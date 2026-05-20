@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Input } from '@monobase/ui'
+import { Button, Input } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Link } from '@tanstack/react-router'
 import { BookOpen, Users, Award, Search, SlidersHorizontal } from 'lucide-react'
 import { TrainingCard } from './training-card'
 import {
@@ -121,17 +122,18 @@ export function TrainingList({ orgId }: TrainingListProps) {
       {/* Tabs */}
       <div className="border-b flex gap-0">
         {TABS.map((tab) => (
-          <button
+          <Button
             key={tab.key}
+            variant="ghost"
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px rounded-none ${
               activeTab === tab.key
                 ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
                 : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -169,9 +171,9 @@ export function TrainingList({ orgId }: TrainingListProps) {
       ) : trainings.length === 0 ? (
         <div className="border rounded-xl p-12 text-center text-[var(--color-muted)]">
           No trainings found.{' '}
-          <a href={`/org/${orgId}/officer/training/new`} className="text-[var(--color-primary)] hover:underline">
+          <Link to={`/org/${orgId}/officer/training/new` as any} className="text-[var(--color-primary)] hover:underline">
             Create one
-          </a>
+          </Link>
         </div>
       ) : (
         <>

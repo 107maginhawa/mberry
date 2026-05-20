@@ -10,6 +10,7 @@ import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
@@ -109,62 +110,60 @@ export function CategoryEditor({ orgId }: CategoryEditorProps) {
             <p className="text-sm">No categories yet. Create one to get started.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-[var(--color-surface-warm)]">
-                <tr className="border-b text-left">
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium hidden sm:table-cell">Description</th>
-                  <th className="px-4 py-3 font-medium">Dues</th>
-                  <th className="px-4 py-3 font-medium hidden md:table-cell">Cycle</th>
-                  <th className="px-4 py-3 font-medium hidden md:table-cell">Members</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {categories.map((cat: any) => (
-                  <tr key={cat.id} className="hover:bg-[var(--color-surface-warm)] transition-colors">
-                    <td className="px-4 py-3 font-medium">{cat.name}</td>
-                    <td className="px-4 py-3 text-[var(--color-muted)] max-w-xs truncate hidden sm:table-cell">
-                      {cat.description ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 font-mono">
-                      {cat.duesAmount != null
-                        ? `₱${(cat.duesAmount / 100).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
-                        : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-muted)] capitalize hidden md:table-cell">
-                      {cat.billingCycle ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-muted)] hidden md:table-cell">
-                      {cat.memberCount ?? 0}
-                    </td>
-                    <td className="px-4 py-3">
-                      {cat.active !== false ? (
-                        <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]">Active</Badge>
-                      ) : (
-                        <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">Inactive</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {cat.active !== false && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-[var(--color-muted)] hover:text-[var(--color-text)]"
-                          onClick={() => setConfirmDeactivate(cat.id)}
-                        >
-                          <ToggleLeft className="h-4 w-4 mr-1" />
-                          Deactivate
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table className="text-sm">
+            <TableHeader className="bg-[var(--color-surface-warm)]">
+              <TableRow>
+                <TableHead className="px-4 py-3">Name</TableHead>
+                <TableHead className="px-4 py-3 hidden sm:table-cell">Description</TableHead>
+                <TableHead className="px-4 py-3">Dues</TableHead>
+                <TableHead className="px-4 py-3 hidden md:table-cell">Cycle</TableHead>
+                <TableHead className="px-4 py-3 hidden md:table-cell">Members</TableHead>
+                <TableHead className="px-4 py-3">Status</TableHead>
+                <TableHead className="px-4 py-3">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y">
+              {categories.map((cat: any) => (
+                <TableRow key={cat.id} className="hover:bg-[var(--color-surface-warm)] transition-colors">
+                  <TableCell className="px-4 py-3 font-medium">{cat.name}</TableCell>
+                  <TableCell className="px-4 py-3 text-[var(--color-muted)] max-w-xs truncate hidden sm:table-cell">
+                    {cat.description ?? '—'}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 font-mono">
+                    {cat.duesAmount != null
+                      ? `₱${(cat.duesAmount / 100).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                      : '—'}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-[var(--color-muted)] capitalize hidden md:table-cell">
+                    {cat.billingCycle ?? '—'}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-[var(--color-muted)] hidden md:table-cell">
+                    {cat.memberCount ?? 0}
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    {cat.active !== false ? (
+                      <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]">Active</Badge>
+                    ) : (
+                      <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">Inactive</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    {cat.active !== false && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-[var(--color-muted)] hover:text-[var(--color-text)]"
+                        onClick={() => setConfirmDeactivate(cat.id)}
+                      >
+                        <ToggleLeft className="h-4 w-4 mr-1" />
+                        Deactivate
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </div>
 

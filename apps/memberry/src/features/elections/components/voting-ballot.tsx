@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Vote, CheckCircle2, AlertCircle } from 'lucide-react'
-import { Skeleton } from '@monobase/ui'
+import { Button, Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
 import {
   getElectionOptions,
@@ -75,12 +75,12 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
         <p className="text-sm text-[var(--color-muted)]">
           {election.status === 'published' ? 'This election has ended and results are published.' : 'Voting has not started yet.'}
         </p>
-        <button
+        <Button
+          variant="link"
           onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
-          className="text-sm text-[var(--color-primary)] hover:underline"
         >
           ← Back to election
-        </button>
+        </Button>
       </div>
     )
   }
@@ -92,12 +92,12 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
         <CheckCircle2 className="w-10 h-10 text-[var(--color-success)] mx-auto" />
         <p className="font-medium">You have already voted</p>
         <p className="text-sm text-[var(--color-muted)]">Your vote has been recorded. You cannot vote again.</p>
-        <button
+        <Button
+          variant="link"
           onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
-          className="text-sm text-[var(--color-primary)] hover:underline"
         >
           ← View election details
-        </button>
+        </Button>
       </div>
     )
   }
@@ -181,6 +181,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
                   {posNominees.map((nominee) => {
                     const isSelected = selected === nominee.id
                     return (
+                      // eslint-disable-next-line no-restricted-syntax
                       <label
                         key={nominee.id}
                         className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[var(--color-surface-warm)] transition-colors ${isSelected ? 'bg-[var(--color-primary)]/5' : ''}`}
@@ -226,20 +227,19 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-2 border-t">
-        <button
+        <Button
+          variant="ghost"
           onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
-          className="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleSubmit}
           disabled={!allPositionsSelected || submitting}
-          className="flex items-center gap-2 px-6 py-2.5 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50 transition-colors"
         >
-          <Vote className="w-4 h-4" />
+          <Vote className="w-4 h-4 mr-2" />
           {submitting ? 'Submitting...' : 'Submit Ballot'}
-        </button>
+        </Button>
       </div>
     </div>
   )

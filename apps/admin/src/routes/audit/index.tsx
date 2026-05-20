@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Shield, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
 import { listAuditLogsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
@@ -137,38 +137,38 @@ function AuditPage() {
 
       {/* Table */}
       <div className="rounded-lg border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Timestamp</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Action</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Resource Type</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Resource ID</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">User</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Outcome</th>
-              <th className="text-left p-4 text-sm font-medium text-muted-foreground">Description</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-4 text-sm">Timestamp</TableHead>
+              <TableHead className="p-4 text-sm">Action</TableHead>
+              <TableHead className="p-4 text-sm">Resource Type</TableHead>
+              <TableHead className="p-4 text-sm">Resource ID</TableHead>
+              <TableHead className="p-4 text-sm">User</TableHead>
+              <TableHead className="p-4 text-sm">Outcome</TableHead>
+              <TableHead className="p-4 text-sm">Description</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {isLoading ? (
-              <tr>
-                <td colSpan={7} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={7} className="p-8 text-center text-muted-foreground">
                   Loading...
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (data?.data ?? []).length === 0 ? (
-              <tr>
-                <td colSpan={7} className="p-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={7} className="p-8 text-center text-muted-foreground">
                   No audit events found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               (data?.data ?? []).map((entry) => (
-                <tr key={entry.id} className="border-b last:border-b-0">
-                  <td className="p-4 text-sm text-muted-foreground whitespace-nowrap">
+                <TableRow key={entry.id}>
+                  <TableCell className="p-4 text-sm text-muted-foreground whitespace-nowrap">
                     {new Date(entry.createdAt).toLocaleString()}
-                  </td>
-                  <td className="p-4">
+                  </TableCell>
+                  <TableCell className="p-4">
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
                       entry.action === 'create' ? 'bg-green-500/10 text-green-600' :
                       entry.action === 'update' ? 'bg-blue-500/10 text-blue-600' :
@@ -177,11 +177,11 @@ function AuditPage() {
                     }`}>
                       {entry.action}
                     </span>
-                  </td>
-                  <td className="p-4 text-sm text-muted-foreground">{entry.resourceType}</td>
-                  <td className="p-4 text-sm text-muted-foreground font-mono text-xs">{entry.resource}</td>
-                  <td className="p-4 text-sm text-muted-foreground font-mono text-xs">{entry.user ?? '--'}</td>
-                  <td className="p-4">
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">{entry.resourceType}</TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground font-mono text-xs">{entry.resource}</TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground font-mono text-xs">{entry.user ?? '--'}</TableCell>
+                  <TableCell className="p-4">
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
                       entry.outcome === 'success' ? 'bg-green-500/10 text-green-600' :
                       entry.outcome === 'failure' ? 'bg-red-500/10 text-red-600' :
@@ -189,13 +189,13 @@ function AuditPage() {
                     }`}>
                       {entry.outcome}
                     </span>
-                  </td>
-                  <td className="p-4 text-sm text-muted-foreground max-w-[200px] truncate">{entry.description}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground max-w-[200px] truncate">{entry.description}</TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination controls */}

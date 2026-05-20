@@ -7,6 +7,7 @@ import { importRosterMembersMutation } from '@monobase/sdk-ts/generated/react-qu
 import { ApiError } from '@/lib/api'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/roster/import',
@@ -251,31 +252,31 @@ function RosterImportPage() {
           )}
 
           {/* Preview table — show first 20 rows */}
-          <div className="rounded-[12px] border border-[var(--color-border-light)] overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead className="bg-[var(--color-surface-warm)]">
-                <tr>
-                  <th className="text-left px-4 py-2.5 font-semibold text-[var(--color-muted)] text-[11px] uppercase tracking-wide">#</th>
+          <div className="rounded-[12px] border border-[var(--color-border-light)] overflow-hidden">
+            <Table className="text-[13px]">
+              <TableHeader className="bg-[var(--color-surface-warm)]">
+                <TableRow>
+                  <TableHead className="px-4 py-2.5 font-semibold text-[11px] uppercase tracking-wide">#</TableHead>
                   {parsed.headers.map((h) => (
-                    <th key={h} className="text-left px-4 py-2.5 font-semibold text-[var(--color-muted)] text-[11px] uppercase tracking-wide">
+                    <TableHead key={h} className="px-4 py-2.5 font-semibold text-[11px] uppercase tracking-wide">
                       {h}
-                    </th>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {parsed.rows.slice(0, 20).map((row, i) => (
-                  <tr key={i} className="border-t border-[var(--color-border-light)]">
-                    <td className="px-4 py-2 text-[var(--color-muted)]">{i + 1}</td>
+                  <TableRow key={i} className="border-t border-[var(--color-border-light)]">
+                    <TableCell className="px-4 py-2 text-[var(--color-muted)]">{i + 1}</TableCell>
                     {parsed.headers.map((h) => (
-                      <td key={h} className="px-4 py-2 text-[var(--color-text)]">
+                      <TableCell key={h} className="px-4 py-2 text-[var(--color-text)]">
                         {row[normalizeHeader(h)] || '—'}
-                      </td>
+                      </TableCell>
                     ))}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
             {parsed.rows.length > 20 && (
               <div className="px-4 py-2 text-[12px] text-[var(--color-muted)] bg-[var(--color-surface-warm)] border-t border-[var(--color-border-light)]">
                 Showing 20 of {parsed.rows.length} rows

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { getCertificateOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { Button } from '@monobase/ui'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 
@@ -104,20 +105,19 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button
+        <Button
           type="button"
           onClick={handleDownloadPdf}
-          className="px-[18px] py-[9px] bg-[var(--color-primary)] text-white rounded-[8px] text-[13px] font-semibold hover:bg-[var(--color-primary-mid)] transition-colors"
         >
           Download PDF
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={handleShareVerification}
-          className="px-[18px] py-[9px] border border-[var(--color-border-light)] rounded-[8px] text-[13px] font-semibold hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
         >
           Copy Verification Link
-        </button>
+        </Button>
       </div>
     </div>
   )

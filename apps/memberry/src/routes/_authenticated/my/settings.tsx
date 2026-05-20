@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
+import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Label } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { api } from '@/lib/api'
@@ -128,13 +129,15 @@ function GeneralSection() {
               <strong>{new Date(deletionPending).toLocaleDateString()}</strong>.
               You can cancel before then.
             </p>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleCancel}
               disabled={cancelling}
-              className="mt-3 px-4 py-[7px] rounded-[8px] border border-[var(--color-border)] bg-white text-[13px] font-semibold hover:bg-[var(--color-surface-warm)] transition-colors duration-150"
+              className="mt-3"
             >
               {cancelling ? 'Cancelling...' : 'Cancel Deletion'}
-            </button>
+            </Button>
           </div>
         ) : showConfirm ? (
           <div className="mt-3 rounded-[8px] border border-[var(--color-error-bg)] bg-[var(--color-error-bg)] p-4 space-y-3">
@@ -151,19 +154,21 @@ function GeneralSection() {
               placeholder="DELETE"
             />
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={handleDelete}
                 disabled={confirmText !== 'DELETE' || deleting}
-                className="px-4 py-[7px] rounded-[8px] bg-[var(--color-error)] text-white text-[13px] font-semibold hover:opacity-90 transition-colors duration-150 disabled:opacity-50"
               >
                 {deleting ? 'Requesting...' : 'Confirm Delete'}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => { setShowConfirm(false); setConfirmText('') }}
-                className="px-4 py-[7px] rounded-[8px] border border-[var(--color-border)] text-[13px] font-semibold"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
@@ -171,12 +176,14 @@ function GeneralSection() {
             <p className="text-[13px] text-[var(--color-muted)] mt-1">
               Account deletion is permanent. Your data will be anonymized after a 30-day grace period.
             </p>
-            <button
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={() => setShowConfirm(true)}
-              className="mt-3 px-4 py-[7px] rounded-[8px] bg-[var(--color-error)] text-white text-[13px] font-semibold hover:opacity-90 transition-colors duration-150"
+              className="mt-3"
             >
               Delete Account
-            </button>
+            </Button>
           </>
         )}
       </div>
@@ -384,8 +391,8 @@ function ToggleSwitch({
   onChange: (value: boolean) => void
 }) {
   return (
-    <label className="flex items-center gap-2 cursor-pointer select-none">
-      <span className="text-[13px] text-[var(--color-muted)]">{label}</span>
+    <div className="flex items-center gap-2 cursor-pointer select-none">
+      <Label className="text-[13px] text-[var(--color-muted)] cursor-pointer">{label}</Label>
       <button
         type="button"
         role="switch"
@@ -401,6 +408,6 @@ function ToggleSwitch({
           }`}
         />
       </button>
-    </label>
+    </div>
   )
 }
