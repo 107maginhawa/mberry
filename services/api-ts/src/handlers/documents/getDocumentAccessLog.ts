@@ -25,7 +25,7 @@ export async function getDocumentAccessLog(
 
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-  const documentId = (params as any).documentId;
+  const documentId = params.documentId;
 
   // Verify document exists
   const docRepo = new DocumentRepository(db, logger);

@@ -20,8 +20,8 @@ export async function getDocumentVersion(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DocumentVersionRepository(db, ctx.get('logger'));
 
-  const version = await repo.findOneById((params as any).versionId);
-  if (!version || version.documentId !== (params as any).documentId) {
+  const version = await repo.findOneById(params.versionId);
+  if (!version || version.documentId !== params.documentId) {
     throw new NotFoundError('Document version');
   }
 

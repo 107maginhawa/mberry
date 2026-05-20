@@ -48,8 +48,8 @@ export async function refundPayment(
   const payment = await repo.getPayment(paymentId);
   if (!payment) throw new NotFoundError('Dues payment');
 
-  const requestedAmount: number | null = (body as any).amount ?? null;
-  const reason: string = (body as any).reason ?? '';
+  const requestedAmount: number | null = (body as Record<string, unknown>)['amount'] as number | null ?? null;
+  const reason: string = ((body as Record<string, unknown>)['reason'] as string) ?? '';
 
   // [BR-08] Validate refund eligibility
   const eligibility = validateRefundEligibility({
@@ -101,7 +101,7 @@ export async function refundPayment(
       refundedAmount: newRefundedAmount,
       refundDate: now,
       refundReason: reason,
-    } as any);
+    });
 
     return updatedPayment;
   });

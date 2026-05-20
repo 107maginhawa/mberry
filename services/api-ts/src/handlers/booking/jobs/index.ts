@@ -26,7 +26,7 @@ export function registerBookingJobs(scheduler: JobScheduler, notificationService
       ...context,
       notificationService
     };
-    await confirmationTimerJob(extendedContext as any);
+    await confirmationTimerJob(extendedContext as typeof context & { notificationService: NotificationService });
   });
 
   // Slot cleanup job - runs daily at 3 AM

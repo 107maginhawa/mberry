@@ -27,8 +27,9 @@ export async function searchQuizAttempts(
   const offset = Number(query.offset) || 0;
 
   const filters: Record<string, unknown> = {};
-  if (query.courseId) filters.courseId = query.courseId;
-  if (query.personId) filters.personId = query.personId;
+  const q = query as Record<string, unknown>;
+  if (q['courseId']) filters['courseId'] = q['courseId'];
+  if (q['personId']) filters['personId'] = q['personId'];
 
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);

@@ -22,7 +22,7 @@ export async function updateNotificationPreferences(ctx: HandlerContext): Promis
     throw new ValidationError('category is required');
   }
 
-  if (!NOTIFICATION_CATEGORIES.includes(body['category'] as string)) {
+  if (!NOTIFICATION_CATEGORIES.includes(body['category'] as typeof NOTIFICATION_CATEGORIES[number])) {
     throw new ValidationError(`Invalid category. Must be one of: ${NOTIFICATION_CATEGORIES.join(', ')}`);
   }
 

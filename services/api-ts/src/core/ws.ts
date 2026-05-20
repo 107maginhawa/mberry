@@ -122,10 +122,10 @@ export class WebSocketService {
 
     let sent = 0;
     let excluded = 0;
-    const excludeId = excludeWs ? (excludeWs.raw as any).__wsId : null;
+    const excludeId = excludeWs ? (excludeWs.raw as unknown as Record<string, unknown>)['__wsId'] : null; // structural: Hono WebSocket internal
 
     connections.forEach(ws => {
-      const wsId = (ws.raw as any).__wsId;
+      const wsId = (ws.raw as unknown as Record<string, unknown>)['__wsId']; // structural: Hono WebSocket internal
       // Skip the excluded connection (sender) using unique ID
       if (excludeId && wsId === excludeId) {
         excluded++;

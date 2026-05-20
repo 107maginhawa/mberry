@@ -68,7 +68,7 @@ export async function certifyElection(ctx: Context): Promise<Response> {
       await termRepo.update(outgoing.id, {
         status: 'completed',
         endDate: new Date(),
-      } as any);
+      });
       termsEnded++;
 
       // 3b. Generate transition checklist for outgoing officer
@@ -78,7 +78,7 @@ export async function certifyElection(ctx: Context): Promise<Response> {
           organizationId: election.organizationId,
           item,
           status: 'pending',
-        } as any);
+        });
         checklistsGenerated++;
       }
     }
@@ -91,7 +91,7 @@ export async function certifyElection(ctx: Context): Promise<Response> {
       status: 'active',
       startDate: new Date(),
       notes: `Elected via election ${election.id}`,
-    } as any);
+    });
     termsCreated++;
   }
 
@@ -99,7 +99,7 @@ export async function certifyElection(ctx: Context): Promise<Response> {
   const updated = await electionRepo.update(id, {
     status: 'published',
     publishedAt: new Date(),
-  } as any);
+  });
 
   return ctx.json({
     data: {

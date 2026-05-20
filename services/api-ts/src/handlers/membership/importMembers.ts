@@ -1,4 +1,4 @@
-import type { Context } from 'hono';
+import type { BaseContext } from '@/types/app';
 import { z } from 'zod';
 import { eq, ilike, or, sql } from 'drizzle-orm';
 import { MembershipRepository } from './repos/membership.repo';
@@ -50,10 +50,10 @@ interface FlaggedMember {
 
 // ─── Handler ───────────────────────────────────────────────
 
-export async function importMembers(ctx: Context): Promise<Response> {
+export async function importMembers(ctx: BaseContext): Promise<Response> {
   // Position-restricted: PRESIDENT or SECRETARY only (BR-25)
-  (ctx as any).set('organizationId', ctx.req.param('organizationId'));
-  const denied = await requirePosition(ctx as any, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
+  ctx.set('organizationId', ctx.req.param('organizationId'));
+  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
   if (denied) return denied;
 
   const db = ctx.get('database');

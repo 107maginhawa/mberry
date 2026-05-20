@@ -57,7 +57,7 @@ export async function listOrgApplications(
 
   const conditions = [eq(membershipApplications.organizationId, orgId)];
   if (query.status) {
-    conditions.push(eq(membershipApplications.status, query.status as any));
+    conditions.push(eq(membershipApplications.status, query.status as typeof membershipApplications.status.enumValues[number]));
   }
 
   const rows = await db

@@ -20,7 +20,7 @@ export async function getDocumentTag(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DocumentTagRepository(db, ctx.get('logger'));
 
-  const tag = await repo.findOneById((params as any).tagId);
+  const tag = await repo.findOneById(params.tagId);
   if (!tag) throw new NotFoundError('Document tag');
 
   return ctx.json(tag, 200);

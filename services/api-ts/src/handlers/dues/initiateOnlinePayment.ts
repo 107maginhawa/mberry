@@ -62,13 +62,13 @@ export async function initiateOnlinePayment(
     referenceNumber: null,
     status: 'pending',
     recordedBy: user.id,
-    paidAt: null as any,
+    paidAt: null as unknown as Date,
     createdBy: session?.user?.id ?? user.id,
     updatedBy: session?.user?.id ?? user.id,
   });
 
   // Build redirect URL — gateway-specific
-  const provider = (gatewayConfig as any).provider ?? 'stripe';
+  const provider = (gatewayConfig as Record<string, unknown>)['provider'] as string ?? 'stripe';
   const successUrl = body.successUrl ?? `${body.baseUrl ?? ''}/payments/success?paymentId=${payment.id}`;
   const cancelUrl = body.cancelUrl ?? `${body.baseUrl ?? ''}/payments/cancel?paymentId=${payment.id}`;
 

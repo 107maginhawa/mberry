@@ -469,7 +469,7 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
         if (logger) {
           const logFn = logger[level as keyof typeof logger];
           if (typeof logFn === 'function') {
-            (logFn as any).call(logger, message, ...args);
+            (logFn as (...a: unknown[]) => void).call(logger, message, ...args);
           }
         }
       },

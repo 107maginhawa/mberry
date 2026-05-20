@@ -22,8 +22,9 @@ export async function listMyCustomTrainings(
   const enrollRepo = new TrainingEnrollmentRepository(db, logger);
 
   const filters: { personId: string; status?: string } = { personId: user.id };
-  if (query.status) {
-    filters.status = query.status;
+  const q = query as Record<string, unknown>;
+  if (q['status']) {
+    filters.status = q['status'] as string;
   }
 
   const enrollments = await enrollRepo.findMany(filters);

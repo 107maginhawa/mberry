@@ -20,7 +20,7 @@ export async function getDocument(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DocumentRepository(db, ctx.get('logger'));
 
-  const document = await repo.findOneById((params as any).documentId);
+  const document = await repo.findOneById(params.documentId);
   if (!document) throw new NotFoundError('Document');
 
   return ctx.json(document, 200);

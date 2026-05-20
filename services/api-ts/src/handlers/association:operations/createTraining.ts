@@ -36,7 +36,7 @@ export async function createTraining(
     instructorName: body.instructor,
     location: body.location,
     startDate: body.startDate, // Zod already transforms to Date
-    endDate: body.endDate,
+    endDate: body.endDate!,
     capacity: body.capacity,
     registrationFee: body.registrationFee,
     creditAmount: body.creditAmount,

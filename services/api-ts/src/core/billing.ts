@@ -343,7 +343,7 @@ export class BillingService {
       const paymentIntent = await stripe.paymentIntents.capture(
         paymentIntentId,
         { metadata },
-        { stripeAccount: connectedAccountId } as any
+        { stripeAccount: connectedAccountId } as Record<string, unknown> // structural: Stripe RequestOptions type gap
       );
 
       const chargeId = typeof paymentIntent.latest_charge === 'string' 

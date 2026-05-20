@@ -30,7 +30,7 @@ export async function archiveDocument(
     throw new BusinessLogicError('Document is already archived', 'ALREADY_ARCHIVED');
   }
 
-  const updated = await repo.updateOneById(documentId, { status: 'archived' } as any);
+  const updated = await repo.updateOneById(documentId, { status: 'archived' });
 
   await auditAction(ctx, {
     action: 'update',

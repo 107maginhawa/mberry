@@ -48,7 +48,7 @@ export async function listEmailSuppressions(c: Context): Promise<Response> {
     action: 'list_email_suppressions',
     userId: user.id,
     orgId,
-    resultCount: Array.isArray(result) ? result.length : (result as any).data?.length ?? 0,
+    resultCount: Array.isArray(result) ? result.length : (result as unknown as Record<string, unknown>)['data'] ? ((result as unknown as Record<string, unknown>)['data'] as unknown[]).length : 0,
   }, 'Email suppressions listed');
 
   // Support both array result (legacy) and paginated result

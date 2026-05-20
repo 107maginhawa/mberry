@@ -25,7 +25,7 @@ export async function listDocumentVersions(
   const repo = new DocumentVersionRepository(db, ctx.get('logger'));
 
   const result = await repo.findManyWithPagination(
-    { documentId: (params as any).documentId },
+    { documentId: params.documentId },
     { pagination: { offset, limit } },
   );
 

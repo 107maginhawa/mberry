@@ -111,17 +111,20 @@ export class PayMongoAdapter implements GatewayAdapter {
       throw new ExternalServiceError(`PayMongo status check failed: ${response.status}`, 'PayMongo', 'getPaymentStatus');
     }
 
-    // PayMongo API response has deeply nested structure — typed as any for external API parsing
-    const data = await response.json() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    // structural: PayMongo external API — deeply nested untyped response
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // structural: PayMongo external API — deeply nested untyped response
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: { data: { attributes: Record<string, any> } } = await response.json() as any;
     const attrs = data.data.attributes;
-    const payment = attrs.payments?.[0];
+    const payment = attrs['payments']?.[0];
 
     return {
-      status: mapPayMongoStatus(attrs.payment_intent?.attributes?.status || attrs.status),
+      status: mapPayMongoStatus(attrs['payment_intent']?.attributes?.status || attrs['status']),
       gatewayEventId: payment?.id || sessionId,
       paidAt: payment?.attributes?.paid_at ? new Date(payment.attributes.paid_at * 1000) : undefined,
-      amount: attrs.line_items?.[0]?.amount || 0,
-      currency: attrs.line_items?.[0]?.currency || 'PHP',
+      amount: attrs['line_items']?.[0]?.amount || 0,
+      currency: attrs['line_items']?.[0]?.currency || 'PHP',
     };
   }
 }

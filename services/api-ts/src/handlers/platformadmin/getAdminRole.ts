@@ -19,7 +19,7 @@ export async function getAdminRole(
   }
 
   return ctx.json(
-    { role: (admin as any).role, email: (admin as any).email, name: (admin as any).name },
+    { role: admin.role, email: admin.email, name: admin.name },
     200
   );
 }

@@ -47,7 +47,7 @@ export async function resignMembership(
     } as Partial<Membership>);
 
     // Void open invoices in same transaction
-    await (tx as any).update(duesInvoices)
+    await (tx as any).update(duesInvoices) // structural: Drizzle transaction gap
       .set({ status: 'cancelled' })
       .where(
         and(
@@ -68,7 +68,7 @@ export async function resignMembership(
   try {
     const auth = ctx.get('auth');
     if (auth && membership.personId) {
-      await (auth.api as any).revokeUserSessions({
+      await (auth.api as any).revokeUserSessions({ // structural: Better-Auth gap
         body: { userId: membership.personId },
         headers: ctx.req.raw.headers,
       });

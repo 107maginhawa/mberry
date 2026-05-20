@@ -127,11 +127,11 @@ function mergeSchemas(base: any, override: any): any {
       // Merge properties objects
       merged.properties = {
         ...merged.properties,
-        ...value as any
+        ...(value as Record<string, unknown>)
       };
     } else if (key === 'required' && merged.required) {
       // Concatenate and deduplicate required arrays
-      const combined = [...(merged.required || []), ...(value as any[] || [])];
+      const combined = [...(merged.required || []), ...(value as string[] || [])];
       merged.required = [...new Set(combined)];
     } else {
       // For other fields, override wins

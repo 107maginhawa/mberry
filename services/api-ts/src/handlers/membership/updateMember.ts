@@ -65,7 +65,7 @@ export async function updateMember(ctx: Context): Promise<Response> {
   const updated = await repo.updateMember(existing.membership.id, {
     categoryId: body.categoryId ?? existing.membership.categoryId,
     tierId: body.tierId ?? existing.membership.tierId,
-    status: status as any,
+    status: (status === 'grace' ? 'gracePeriod' : status) as Exclude<typeof status, 'grace'>,
     memberNumber: body.memberNumber ?? body.licenseNumber ?? existing.membership.memberNumber,
     note: body.note ?? existing.membership.note,
     removedAt: status === 'removed' ? new Date() : existing.membership.removedAt,

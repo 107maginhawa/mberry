@@ -25,7 +25,7 @@ export async function updateDocument(
   const existing = await repo.findOneById(documentId);
   if (!existing) throw new NotFoundError('Document');
 
-  const updated = await repo.updateOneById(documentId, body as any);
+  const updated = await repo.updateOneById(documentId, body as Record<string, unknown>);
 
   await auditAction(ctx, {
     action: 'update',

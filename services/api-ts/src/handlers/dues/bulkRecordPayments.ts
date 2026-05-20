@@ -99,7 +99,7 @@ export async function bulkRecordPayments(
           receiptNumber,
           amount: row.amount,
           currency: row.currency ?? 'PHP',
-          paymentMethod: row.paymentMethod as any,
+          paymentMethod: row.paymentMethod as 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'online' | 'other',
           referenceNumber: row.referenceNumber ?? null,
           status: 'completed',
           recordedBy,
@@ -122,7 +122,7 @@ export async function bulkRecordPayments(
           await txRepo.updatePaymentStatus(pay.id, 'completed', {
             membershipExtendedFrom: settle.membershipExtendedFrom,
             membershipExtendedTo: settle.membershipExtendedTo,
-          } as any);
+          });
         }
 
         return { payment: pay };

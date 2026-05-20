@@ -25,7 +25,7 @@ export async function updateMyNotificationPreferences(
   const b = body as Record<string, unknown>;
 
   if (!b['category']) throw new ValidationError('category is required');
-  if (!NOTIFICATION_CATEGORIES.includes(b['category'] as string)) {
+  if (!NOTIFICATION_CATEGORIES.includes(b['category'] as typeof NOTIFICATION_CATEGORIES[number])) {
     throw new ValidationError(`Invalid category. Must be one of: ${NOTIFICATION_CATEGORIES.join(', ')}`);
   }
 

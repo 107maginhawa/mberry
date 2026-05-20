@@ -35,7 +35,7 @@ export async function createEvent(
     description: body.description,
     location: body.location,
     startDate: body.startDate,
-    endDate: body.endDate,
+    endDate: body.endDate!,
     capacity: body.capacity,
     registrationFee: body.registrationFee,
     status: 'draft',

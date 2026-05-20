@@ -25,7 +25,7 @@ export async function updateDocumentTag(
   const existing = await repo.findOneById(tagId);
   if (!existing) throw new NotFoundError('Document tag');
 
-  const updated = await repo.updateOneById(tagId, body as any);
+  const updated = await repo.updateOneById(tagId, body as Record<string, unknown>);
 
   await auditAction(ctx, {
     action: 'update',

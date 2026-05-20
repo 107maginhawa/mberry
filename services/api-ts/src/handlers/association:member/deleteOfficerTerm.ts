@@ -49,7 +49,7 @@ export async function deleteOfficerTerm(
   try {
     const auth = ctx.get('auth');
     if (auth && existing.personId) {
-      await (auth.api as any).revokeUserSessions({
+      await (auth.api as any).revokeUserSessions({ // structural: Better-Auth gap
         body: { userId: existing.personId },
         headers: ctx.req.raw.headers,
       });

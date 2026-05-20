@@ -74,7 +74,7 @@ export async function recordManualPayment(
       await txRepo.updatePaymentStatus(pay.id, 'completed', {
         membershipExtendedFrom: settle.membershipExtendedFrom,
         membershipExtendedTo: settle.membershipExtendedTo,
-      } as any);
+      });
     }
 
     return { payment: pay, settlement: settle };

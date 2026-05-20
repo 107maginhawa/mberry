@@ -49,7 +49,7 @@ export async function uploadNewDocumentVersion(
   });
 
   // Update document's currentVersionId
-  await docRepo.updateOneById(documentId, { currentVersionId: version.id } as any);
+  await docRepo.updateOneById(documentId, { currentVersionId: version.id });
 
   await auditAction(ctx, {
     action: 'create',

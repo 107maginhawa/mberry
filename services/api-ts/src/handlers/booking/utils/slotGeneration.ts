@@ -117,10 +117,10 @@ function generateSlotsForDay(params: {
     
     // Check minimum booking hours constraint
     const now = new Date();
-    const minBookingTime = addMinutes(now, ((event as any).minBookingHours || 0) * 60);
-    
+    const minBookingTime = addMinutes(now, (((event as Record<string, unknown>)['minBookingHours'] as number) || 0) * 60);
+
     // Check advance booking constraint
-    const maxBookingDate = addDays(now, (event as any).advanceBookingDays || 365);
+    const maxBookingDate = addDays(now, ((event as Record<string, unknown>)['advanceBookingDays'] as number) || 365);
     if (isAfter(date, maxBookingDate)) {
       continue; // Beyond advance booking window
     }

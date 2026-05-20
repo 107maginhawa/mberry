@@ -24,10 +24,10 @@ export async function upsertDuesGatewayConfig(
 
   const [result] = await db
     .insert(duesGatewayConfigs)
-    .values({ ...body, organizationId } as any) // body.secretKey → schema.encryptedSecret mapping
+    .values({ ...body, organizationId } as any) // structural: Drizzle insert type gap
     .onConflictDoUpdate({
       target: [duesGatewayConfigs.organizationId],
-      set: { ...body, updatedAt: new Date() } as any,
+      set: { ...body, updatedAt: new Date() } as Record<string, unknown>,
     })
     .returning();
 

@@ -28,8 +28,9 @@ export async function listCustomTrainingEnrollments(
   if (!training) throw new NotFoundError('Training not found');
 
   const filters: { trainingId: string; status?: string } = { trainingId: params.trainingId };
-  if (query.status) {
-    filters.status = query.status;
+  const q = query as Record<string, unknown>;
+  if (q['status']) {
+    filters.status = q['status'] as string;
   }
 
   const enrollments = await enrollRepo.findMany(filters);

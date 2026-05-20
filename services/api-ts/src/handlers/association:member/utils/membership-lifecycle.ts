@@ -255,7 +255,7 @@ export const membershipLifecycle = {
     await membershipRepo.updateOneById(params.membershipId, {
       duesExpiryDate: newExpiryDate,
       status: newStatus,
-    } as any);
+    });
 
     return { extendedTo: newExpiryDate };
   },

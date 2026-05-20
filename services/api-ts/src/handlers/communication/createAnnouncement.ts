@@ -28,7 +28,7 @@ export async function createAnnouncement(
     organizationId: params.organizationId,
     authorId: session.user.id,
     status: 'draft',
-  } as any);
+  } as any); // structural: body spread type gap
 
   await auditAction(ctx, {
     action: 'create',

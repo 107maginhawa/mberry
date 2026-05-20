@@ -37,7 +37,8 @@ export async function getOrganizationBySlug(
     const result = await db.execute(
       sql`SELECT count(*)::int as count FROM membership WHERE org_id = ${org.id} AND status = 'active'`
     );
-    memberCount = (result as any)?.rows?.[0]?.count ?? (result as any)?.[0]?.count ?? 0;
+    const resultObj = result as unknown as Record<string, unknown>;
+    memberCount = ((resultObj['rows'] as Record<string, unknown>[] | undefined)?.[0]?.['count'] as number) ?? ((result as unknown as Record<string, unknown>[])?.[0]?.['count'] as number) ?? 0;
   } catch {
     // Table may not exist or have different name — graceful fallback
     memberCount = 0;

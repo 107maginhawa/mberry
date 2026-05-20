@@ -38,7 +38,7 @@ export async function listVendors(ctx: ValidatedContext<never, any, never>): Pro
   });
 
   return ctx.json({
-    data: Array.isArray(data) ? data : (data as any).data ?? data,
+    data: Array.isArray(data) ? data : (data as Record<string, unknown>)['data'] ?? data,
     pagination: { limit, offset },
   }, 200);
 }

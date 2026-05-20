@@ -27,7 +27,7 @@ export async function generatePaymentReceipt(
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const params = ctx.req.valid('param');
-  const paymentId = (params as any).paymentId;
+  const paymentId = (params as Record<string, string>)['paymentId']!;
 
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);

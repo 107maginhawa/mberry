@@ -180,7 +180,7 @@ export function createApp(config: Config): App {
   }
 
   // Register API routes
-  registerOpenAPIRoutes(app as any);
+  registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
 
   // PRC Accredited Providers — hand-wired, org-scoped (no /api prefix per CLAUDE.md)
   app.get('/accredited-providers/:organizationId', authMiddleware(), listAccreditedProviders);

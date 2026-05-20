@@ -37,8 +37,9 @@ export async function createQuizAttempt(
   const course = await courseRepo.findOneById(courseId);
   if (!course) throw new NotFoundError('Course not found');
 
-  const score = Number(body.score) || 0;
-  const maxScore = Number(body.maxScore) || 100;
+  const bodyRecord = body as Record<string, unknown>;
+  const score = Number(bodyRecord['score']) || 0;
+  const maxScore = Number(bodyRecord['maxScore']) || 100;
   const PASS_THRESHOLD = 0.7;
   const passed = maxScore > 0 ? (score / maxScore) >= PASS_THRESHOLD : false;
 

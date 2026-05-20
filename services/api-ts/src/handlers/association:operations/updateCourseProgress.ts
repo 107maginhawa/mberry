@@ -40,9 +40,9 @@ export async function updateCourseProgress(
 
   // Auto-complete when progress reaches 100%
   if (progress >= 100) {
-    updates.completedAt = new Date();
-    updates.status = 'completed';
-    updates.progress = 100;
+    updates['completedAt'] = new Date();
+    updates['status'] = 'completed';
+    updates['progress'] = 100;
   }
 
   const updated = await repo.updateOneById(enrollment.id, updates);
@@ -51,7 +51,7 @@ export async function updateCourseProgress(
     action: 'update',
     resourceType: 'course-enrollment',
     resourceId: updated.id,
-    description: `Course progress updated to ${updates.progress}%`,
+    description: `Course progress updated to ${updates['progress']}%`,
   });
 
   return ctx.json(updated, 200);

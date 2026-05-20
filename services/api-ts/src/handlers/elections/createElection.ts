@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm';
 import type { Session } from '@/types/auth';
 
 export async function createElection(ctx: Context): Promise<Response> {
-  const db = ctx.get('database') as any;
+  const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId');
   const body = await ctx.req.json();
@@ -30,7 +30,7 @@ export async function createElection(ctx: Context): Promise<Response> {
         ${session.user.id}
       ) RETURNING *
     `);
-    const rows = (result as any)?.rows || result;
+    const rows = (result as Record<string, unknown>)['rows'] as unknown[] || result;
     return ctx.json({ data: rows[0] || result }, 201);
   } catch (err: any) {
     return ctx.json({ error: err.message || 'Failed to create election' }, 500);

@@ -108,7 +108,7 @@ export const config: WebSocketHandler = {
     const wsService = ctx.get('ws');
     const logger = ctx.get('logger');
 
-    const wsId = (ws.raw as any).__wsId;
+    const wsId = (ws.raw as unknown as Record<string, unknown>)['__wsId']; // structural: Hono WebSocket internal
     logger.debug({ userId: user.id, roomId, wsId, messageType: message.type }, 'Processing WebSocket message');
 
     const { type, data } = message as { type: MessageType; data: any };

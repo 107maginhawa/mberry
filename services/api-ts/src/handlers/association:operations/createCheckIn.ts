@@ -36,13 +36,14 @@ export async function createCheckIn(
   const eventRepo = new EventRepository(db, logger);
 
   let eventId = body.eventId;
-  const method: 'qr' | 'manual' = body.method || 'manual';
+  const method: 'qr' | 'manual' = (body.method || 'manual') as 'qr' | 'manual';
   const personId = body.personId || user.id;
 
   // QR token verification
-  if (method === 'qr' && body.qrToken) {
+  const bodyRecord = body as Record<string, unknown>;
+  if (method === 'qr' && bodyRecord['qrToken']) {
     const secret = process.env['QR_SECRET'] || 'default-qr-secret';
-    const payload = verifyQrToken(body.qrToken, secret);
+    const payload = verifyQrToken(bodyRecord['qrToken'] as string, secret);
     if (!payload) {
       throw new BusinessLogicError('Invalid or expired QR token', 'INVALID_QR_TOKEN');
     }

@@ -395,7 +395,7 @@ class EmailServiceImpl implements EmailService {
     const ctx = request.unsubscribeContext;
     if (ctx) {
       const token = generateUnsubToken(ctx.email, ctx.orgId);
-      const appUrl = (this.fullConfig as any)?.app?.url ?? 'https://example.com';
+      const appUrl = ((this.fullConfig as unknown as Record<string, unknown>)?.['app'] as Record<string, unknown>)?.['url'] as string ?? 'https://example.com';
       const unsubUrl = `${appUrl}/email/unsubscribe?token=${encodeURIComponent(token)}&email=${encodeURIComponent(ctx.email)}&org=${encodeURIComponent(ctx.orgId)}`;
       request.headers = {
         ...(request.headers ?? {}),
@@ -504,7 +504,7 @@ class EmailServiceImpl implements EmailService {
       if (email.emailCategory === 'bulk') {
         if (!this.bulkRateLimiter.canSend(email.organizationId)) {
           // Reschedule 60 seconds forward; reset status to pending
-          await (this.queueRepo as any).updateOneById(email.id, {
+          await (this.queueRepo as unknown as { updateOneById: (id: string, data: Record<string, unknown>) => Promise<unknown> }).updateOneById(email.id, { // structural: protected member access
             scheduledAt: new Date(Date.now() + 60_000),
             status: 'pending',
           });

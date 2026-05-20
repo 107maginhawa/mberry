@@ -47,7 +47,7 @@ export async function checkInCustomEvent(
   const checkIn = await checkInRepo.createOne({
     eventId: params.eventId,
     personId,
-    method,
+    method: method as string as 'manual' | 'qr',
     checkedInBy: user.id,
     organizationId: orgId,
   });

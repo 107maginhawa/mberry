@@ -26,8 +26,9 @@ export async function searchEvents(
   const offset = Number(query.offset) || 0;
 
   const filters: Record<string, unknown> = {};
-  if (orgId) filters.organizationId = orgId;
-  if (query.status) filters.status = query.status;
+  if (orgId) filters['organizationId'] = orgId;
+  const q = query as Record<string, unknown>;
+  if (q['status']) filters['status'] = q['status'];
 
   const results = await repo.findMany(filters, {
     pagination: { limit, offset },

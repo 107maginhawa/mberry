@@ -27,8 +27,9 @@ export async function searchCheckIns(
   const offset = Number(query.offset) || 0;
 
   const filters: Record<string, unknown> = {};
-  if (query.eventId) filters.eventId = query.eventId;
-  if (query.personId) filters.personId = query.personId;
+  const q = query as Record<string, unknown>;
+  if (q['eventId']) filters['eventId'] = q['eventId'];
+  if (q['personId']) filters['personId'] = q['personId'];
 
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);

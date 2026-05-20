@@ -50,12 +50,12 @@ export async function listEmailQueueItems(
   
   if (query.status) {
     if (Array.isArray(query.status)) {
-      filters.status = query.status as any[];
+      filters.status = query.status as EmailQueueFilters['status'];
     } else if (query.status.includes(',')) {
       // Parse CSV format: "pending,processing,sent"
-      filters.status = query.status.split(',').map(s => s.trim()) as any[];
+      filters.status = query.status.split(',').map(s => s.trim()) as EmailQueueFilters['status'];
     } else {
-      filters.status = query.status as any;
+      filters.status = query.status as EmailQueueFilters['status'];
     }
   }
   

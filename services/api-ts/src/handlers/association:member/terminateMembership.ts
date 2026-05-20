@@ -50,7 +50,7 @@ export async function terminateMembership(
   try {
     const auth = ctx.get('auth');
     if (auth && membership.personId) {
-      await (auth.api as any).revokeUserSessions({
+      await (auth.api as any).revokeUserSessions({ // structural: Better-Auth gap
         body: { userId: membership.personId },
         headers: ctx.req.raw.headers,
       });

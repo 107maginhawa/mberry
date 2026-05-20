@@ -15,6 +15,24 @@
 import openapiSpec from '@monobase/api-spec/openapi.json';
 import type { Context } from 'hono';
 
+/** Typed subset of the OpenAPI spec used by expand logic */
+interface OpenAPISpec {
+  components: {
+    schemas: Record<string, {
+      properties?: Record<string, {
+        'x-expandable-field'?: { opId?: string };
+        anyOf?: Array<{ $ref?: string }>;
+        [key: string]: unknown;
+      }>;
+      required?: string[];
+      [key: string]: unknown;
+    }>;
+  };
+  paths: Record<string, Record<string, { operationId?: string; [key: string]: unknown }>>;
+}
+
+const spec = openapiSpec as unknown as OpenAPISpec;
+
 const MAX_EXPAND_DEPTH = 4; // Stripe's limit
 
 interface ExpandPath {
@@ -132,14 +150,15 @@ export async function applyExpands<T>(
   if (Array.isArray(data)) {
     return Promise.all(
       data.map(item => applyExpands(item, expandPaths, schemaName, ctx, currentDepth))
-    ) as any;
+    ) as unknown as Promise<T>;
   }
 
   // Handle paginated responses (has 'data' array property)
-  if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as any).data)) {
-    const paginatedData = data as any;
-    paginatedData.data = await Promise.all(
-      paginatedData.data.map((item: any) =>
+  if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as Record<string, unknown>)['data'])) {
+    const paginatedData = data as Record<string, unknown>;
+    const items = paginatedData['data'] as unknown[];
+    paginatedData['data'] = await Promise.all(
+      items.map((item: unknown) =>
         applyExpands(item, expandPaths, schemaName, ctx, currentDepth)
       )
     );
@@ -152,7 +171,7 @@ export async function applyExpands<T>(
   }
 
   // Get schema metadata from OpenAPI spec
-  const schema = (openapiSpec as any).components.schemas[schemaName];
+  const schema = spec.components.schemas[schemaName];
   if (!schema) {
     logger.warn({ schemaName }, 'Schema not found in OpenAPI spec');
     return data;
@@ -173,7 +192,7 @@ export async function applyExpands<T>(
     }
 
     await expandField(
-      data as any,
+      data as Record<string, unknown>,
       fieldName,
       remainingPaths,
       schema,
@@ -188,11 +207,11 @@ export async function applyExpands<T>(
 /**
  * Infer expandable fields from schema properties
  */
-function getExpandableFields(schema: any): string[] {
+function getExpandableFields(schema: OpenAPISpec['components']['schemas'][string]): string[] {
   const expandableFields: string[] = [];
 
   for (const [fieldName, property] of Object.entries(schema.properties || {})) {
-    if ((property as any)['x-expandable-field']?.opId) {
+    if (property['x-expandable-field']?.opId) {
       expandableFields.push(fieldName);
     }
   }
@@ -204,9 +223,9 @@ function getExpandableFields(schema: any): string[] {
  * Find route by operation ID in OpenAPI spec
  */
 function findRouteByOperationId(operationId: string): { path: string; method: string } | null {
-  for (const [path, methods] of Object.entries((openapiSpec as any).paths)) {
-    for (const [method, operation] of Object.entries(methods as any)) {
-      if ((operation as any).operationId === operationId) {
+  for (const [path, methods] of Object.entries(spec.paths)) {
+    for (const [method, operation] of Object.entries(methods)) {
+      if (operation.operationId === operationId) {
         return { path, method: method.toUpperCase() };
       }
     }
@@ -218,10 +237,10 @@ function findRouteByOperationId(operationId: string): { path: string; method: st
  * Expand a single field in the data object
  */
 async function expandField(
-  data: any,
+  data: Record<string, unknown>,
   fieldName: string,
   remainingPaths: ExpandPath[],
-  schema: any,
+  schema: OpenAPISpec['components']['schemas'][string],
   ctx: Context,
   currentDepth: number
 ): Promise<void> {
@@ -233,7 +252,7 @@ async function expandField(
   if (!expandMetadata?.opId) return;
 
   // Extract target schema from anyOf pattern
-  const targetSchemaRef = property.anyOf?.find((item: any) => item.$ref)?.$ref;
+  const targetSchemaRef = property.anyOf?.find((item) => item.$ref)?.$ref;
   if (!targetSchemaRef) return;
 
   const targetSchema = targetSchemaRef.split('/').pop();

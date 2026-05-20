@@ -35,7 +35,7 @@ export async function getDuesDashboard(
   const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
-  const repo = new DuesRepository(db as any);
+  const repo = new DuesRepository(db);
   const stats = await repo.getDashboardStats(orgId);
 
   const [activityCount] = await db

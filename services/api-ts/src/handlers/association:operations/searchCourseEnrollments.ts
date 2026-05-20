@@ -27,9 +27,10 @@ export async function searchCourseEnrollments(
   const offset = Number(query.offset) || 0;
 
   const filters: Record<string, unknown> = {};
-  if (query.courseId) filters.courseId = query.courseId;
-  if (query.personId) filters.personId = query.personId;
-  if (query.status) filters.status = query.status;
+  const q = query as Record<string, unknown>;
+  if (q['courseId']) filters['courseId'] = q['courseId'];
+  if (q['personId']) filters['personId'] = q['personId'];
+  if (q['status']) filters['status'] = q['status'];
 
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);

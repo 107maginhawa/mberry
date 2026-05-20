@@ -179,7 +179,7 @@ export async function checkDatabaseConnection(
  */
 export async function closeDatabaseConnection(dbInstance: DatabaseInstance): Promise<void> {
   // Access the underlying pg.Pool and close it
-  const pool = (dbInstance as any).$client;
+  const pool = (dbInstance as unknown as Record<string, unknown>)['$client'] as { end?: () => Promise<void> }; // structural: Drizzle internal $client
   if (pool && typeof pool.end === 'function') {
     await pool.end();
   }

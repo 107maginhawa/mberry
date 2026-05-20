@@ -30,7 +30,7 @@ export async function getDuesConfig(
   if (!config) {
     // Frontend may pass orgId as the param — look up by org
     const duesRepo = new DuesRepository(db);
-    config = (await duesRepo.getConfig(duesConfigId)) as any; // Different schema shape than DuesConfig
+    config = (await duesRepo.getConfig(duesConfigId)) as unknown as typeof config; // structural: Different schema shape than DuesConfig
   }
 
   if (!config) {

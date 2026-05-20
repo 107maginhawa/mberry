@@ -104,7 +104,7 @@ class PgBossScheduler implements JobScheduler {
     this.logger = logger;
     
     // Extract the underlying pg.Pool from Drizzle
-    const pool = (db as any).$client;
+    const pool = (db as unknown as Record<string, unknown>)['$client']; // structural: Drizzle internal $client
     if (!pool) {
       throw new Error('Unable to access pg.Pool from Drizzle instance');
     }
@@ -112,13 +112,13 @@ class PgBossScheduler implements JobScheduler {
     // Create an adapter that pg-boss expects
     const pgBossDb = {
       executeSql: async (text: string, values?: any[]) => {
-        return await pool.query(text, values);
+        return await (pool as any).query(text, values);
       }
     };
-    
+
     // Initialize pg-boss with the adapter
     this.boss = new PgBoss({
-      db: pgBossDb as any,
+      db: pgBossDb as any, // structural: pg-boss adapter interface gap
       
       // pg-boss configuration
       schema: 'pgboss', // Isolate pg-boss tables in their own schema

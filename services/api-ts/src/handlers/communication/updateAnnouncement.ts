@@ -29,7 +29,7 @@ export async function updateAnnouncement(
     throw new BusinessLogicError('Only draft announcements can be updated', 'ANNOUNCEMENT_NOT_DRAFT');
   }
 
-  const updated = await repo.update(params.id, body as any);
+  const updated = await repo.update(params.id, body as Record<string, unknown>);
 
   await auditAction(ctx, {
     action: 'update',
