@@ -67,7 +67,7 @@
 |----|-------------|--------|--------|------|
 | V-10 | Grace period 0-90 not validated | membership | RESOLVED | Phase 34 (TypeSpec @maxValue(90)) |
 | V-11 | No payment recording handler (BR-06) | dues | RESOLVED | v1.2.0 Phase 20 |
-| V-12 | Credit cycle start uses activity date | training | OPEN | G2 |
+| V-12 | Credit cycle start uses activity date | training | RESOLVED | Phase 35 (markComplete now uses member registrationDate) |
 | V-13 | Credit carry-over 50% cap missing | training | RESOLVED | Already implemented: calculateCarryover() in credit-cycle.ts |
 | V-14 | No license number normalization | membership | RESOLVED | Already implemented: normalizeLicense() in importMembers.ts |
 | V-15 | No concurrent session limits | auth | OPEN | G4 |
@@ -98,11 +98,11 @@
 | Wave | Phase | Slices | Type(s) | Parallel? | Status | Integration Test? |
 |------|-------|--------|---------|-----------|--------|-------------------|
 | G1 | 34 | S-001, S-002, S-003, S-012 | stabilize | NO (sequential) | Complete | No |
-| G2 | 35 | S-004, S-005, S-006, S-007 | refactor | YES | Not Started | No |
+| G2 | 35 | S-004, S-005, S-006, S-007 | refactor | YES | Complete | No |
 | G3 | 36 | S-008, S-009, S-010 | refactor | YES | Not Started | S-008 (cross-module) |
 | G4 | 37 | S-011, S-013 | new-feature | YES | Not Started | No |
 
-**Completion:** 1/4 waves complete
+**Completion:** 2/4 waves complete
 
 ---
 
