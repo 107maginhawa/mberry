@@ -30,6 +30,7 @@ import { registerMembershipJobs } from '@/handlers/membership/jobs';
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
 import { registerRoutes as registerHealthRoutes } from '@/core/health';
+import { registerMetricsMiddleware, registerMetricsRoute } from '@/core/metrics';
 import { registerRoutes as registerFeatureFlagRoutes } from '@/core/feature-flags';
 import { registerRoutes as registerAuthRoutes } from '@/core/auth';
 import { registerRoutes as registerDocsRoutes } from '@/core/openapi';
@@ -116,8 +117,12 @@ export function createApp(config: Config): App {
   // P1-5: Global rate limiting for custom endpoints (auth routes handled by Better-Auth)
   app.use('*', createRateLimiter());
 
-  // Register health check endpoints
+  // Register metrics middleware (before routes, after app creation)
+  registerMetricsMiddleware(app as App);
+
+  // Register health check + metrics endpoints
   registerHealthRoutes(app as App);
+  registerMetricsRoute(app as App);
 
   // Register feature flags endpoint (public, no auth)
   registerFeatureFlagRoutes(app as App);

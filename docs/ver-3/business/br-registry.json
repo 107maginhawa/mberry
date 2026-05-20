@@ -834,11 +834,13 @@
     "module": "M01",
     "ruleClass": "p1-business",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/utils/org-auth.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Wave 4 discovery. requireActiveStatus() allows both 'active' and 'grace'. No dedicated test — gap."
+    "annotations": "Wave 4 discovery. requireActiveStatus() allows both 'active' and 'grace'. 6 test cases: active passes, grace passes, suspended/lapsed/expired/missing all fail with 403."
   },
   "BR-50": {
     "rule": "Election Date Ordering DB Constraints",
@@ -860,10 +862,12 @@
     "module": "M01",
     "ruleClass": "p0-security",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/middleware/auth.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts."
+    "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts. 4 test cases cover: valid token bypass, missing header, mismatch logging, context flag."
   }
 }
