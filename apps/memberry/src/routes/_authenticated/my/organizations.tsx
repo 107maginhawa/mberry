@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api, ApiError } from '@/lib/api'
+import type { ApiErrorBody } from '@/types/api'
 import { PageHeader } from '@/components/patterns/page-header'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
@@ -49,7 +50,7 @@ function MyOrganizationsPage() {
           { 'x-org-id': leaveTarget.orgId },
         )
       } catch (err) {
-        const body = err instanceof ApiError ? err.body as any : {}
+        const body = err instanceof ApiError ? err.body as unknown as ApiErrorBody : {}
         toast.error(body?.error ?? 'Failed to leave organization. Please try again.')
         return
       }
@@ -207,7 +208,7 @@ function MyOrganizationsPage() {
                       { 'x-org-id': transferTarget.orgId },
                     )
                   } catch (err) {
-                    const body = err instanceof ApiError ? err.body as any : {}
+                    const body = err instanceof ApiError ? err.body as unknown as ApiErrorBody : {}
                     toast.error(body?.error ?? 'Transfer request failed')
                     return
                   }

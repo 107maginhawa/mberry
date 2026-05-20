@@ -9,8 +9,8 @@ interface EventCardProps {
     id: string
     title: string
     status: string
-    startDate: string
-    endDate: string
+    startDate: string | Date
+    endDate: string | Date
     location?: string | null
     registrationCount?: number
     capacity?: number | null
@@ -28,7 +28,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
 }
 
-function formatEventDate(startDate: string, endDate: string) {
+function formatEventDate(startDate: string | Date, endDate: string | Date) {
   const start = new Date(startDate)
   const end = new Date(endDate)
   const dateStr = start.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -105,7 +105,8 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
         </div>
 
         {/* Title */}
-        <Link to={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}` as any} className="block">
+        <Link
+          to={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}` as any /* eslint-disable-line @typescript-eslint/no-explicit-any */} className="block">
           <h3 className="text-h4 leading-snug hover:text-[var(--color-primary)] transition-colors line-clamp-2">
             {event.title}
           </h3>

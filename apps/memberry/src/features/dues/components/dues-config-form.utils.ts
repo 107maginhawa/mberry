@@ -25,11 +25,11 @@ export function buildCreatePayload(
   return {
     organizationId: orgId,
     tierId: extras?.tierId ?? orgId, // default tier = org
-    annualAmount: parseCentsInput(formState.defaultAmount),
+    annualAmount: BigInt(parseCentsInput(formState.defaultAmount)),
     currency: extras?.currency ?? 'PHP',
     gracePeriodDays: parseInt(formState.gracePeriodDays),
-    fundAllocations: [],
-    effectiveDate: new Date().toISOString(),
+    fundAllocations: [] as [],
+    effectiveDate: new Date(),
     status: 'active' as const,
   }
 }
@@ -43,7 +43,7 @@ export function buildUpdatePayload(formState: {
   gracePeriodDays: string
 }) {
   return {
-    annualAmount: parseCentsInput(formState.defaultAmount),
+    annualAmount: BigInt(parseCentsInput(formState.defaultAmount)),
     gracePeriodDays: parseInt(formState.gracePeriodDays),
   }
 }

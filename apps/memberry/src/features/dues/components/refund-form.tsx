@@ -95,7 +95,7 @@ export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) 
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => (refundMutation as any).mutate({ path: { paymentId }, body: { amount: amountCents, reason } })} disabled={refundMutation.isPending}>
+            <Button variant="destructive" onClick={() => refundMutation.mutate({ path: { paymentId }, body: { amount: BigInt(amountCents), reason } })} disabled={refundMutation.isPending}>
               {refundMutation.isPending ? 'Processing...' : 'Confirm Refund'}
             </Button>
           </DialogFooter>

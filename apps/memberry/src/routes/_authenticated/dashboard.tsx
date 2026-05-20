@@ -76,11 +76,11 @@ function DashboardPage() {
 
   const creditSummaryQuery = useQuery({
     queryKey: ['credit-summary'],
-    queryFn: () => api.get<{ totalCredits: number; requiredCredits: number; remaining: number }>('/api/persons/me/credit-summary'),
+    queryFn: () => api.get<{ totalCredits?: number; totalEarned?: number; requiredCredits?: number; remaining?: number }>('/api/persons/me/credit-summary'),
     retry: false,
   })
 
-  const invoicesQuery = useQuery({
+  const invoicesQuery = useQuery<{ data: any[] }>({
     queryKey: ['my-dues-invoices', orgIds],
     queryFn: async () => {
       const all: any[] = []
@@ -126,10 +126,10 @@ function DashboardPage() {
 
   // Derived data
   const upcomingEvents = eventsQuery.data ?? []
-  const creditData = creditSummaryQuery.data as any
+  const creditData = creditSummaryQuery.data
   const totalCredits = creditData?.totalCredits ?? creditData?.totalEarned ?? 0
-  const invoices: any[] = (invoicesQuery.data as any)?.data ?? []
-  const elections: any[] = (electionsQuery.data as any)?.data ?? []
+  const invoices: any[] = invoicesQuery.data?.data ?? []
+  const elections = (electionsQuery.data?.data ?? []) as unknown as Array<{ id?: string; title?: string; status?: string; votingStart?: string; votingEnd?: string; organizationId?: string }>
   const announcements = announcementsQuery.data ?? []
 
   // Compliance — use snake_case fields matching API response

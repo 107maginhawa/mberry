@@ -37,7 +37,7 @@ function OrgHome() {
   )
 
   const announcementItems = announcements?.data ?? []
-  const eventItems = (events as any)?.data ?? []
+  const eventItems = events?.data ?? []
 
   return (
     <div className="space-y-8">

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { Certificate } from '@monobase/sdk-ts/generated/types.gen'
 import { useOrgContext } from '@/hooks/useOrgContext'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
@@ -8,7 +9,7 @@ import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { Link } from '@tanstack/react-router'
 import { Award } from 'lucide-react'
 
-function formatDate(iso: string | null | undefined) {
+function formatDate(iso: string | Date | null | undefined) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })
 }
@@ -20,7 +21,7 @@ export function CertificateList() {
     enabled: !!orgId,
   })
 
-  const certificates = (data?.data ?? []) as any[]
+  const certificates: Certificate[] = data?.data ?? []
 
   if (isLoading) {
     return (
@@ -44,9 +45,9 @@ export function CertificateList() {
 
   return (
     <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {certificates.map((cert: any) => (
+      {certificates.map((cert) => (
         <StaggerItem key={cert.id}>
-          <Link to={`/my/certificates/${cert.id}` as any} className="block">
+          <Link to="/my/certificates/$certificateId" params={{ certificateId: cert.id }} className="block">
             <GlassCard className="p-5 space-y-3 hover:bg-[var(--color-surface-elevated-hover)] transition-colors">
               {/* Header accent */}
               <div className="h-1.5 w-16 rounded-full bg-[var(--color-primary)]" />

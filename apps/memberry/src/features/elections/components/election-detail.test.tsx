@@ -95,16 +95,14 @@ describe('ElectionDetail', () => {
       queryKey: ['election', 'elec-1'],
       queryFn: () =>
         Promise.resolve({
-          data: {
-            id: 'elec-1',
-            title: '2025 Board Election',
-            status: 'draft',
-            type: 'officer',
-            votingMode: 'online',
-            positions: [],
-            nominees: [],
-            tallies: [],
-          },
+          id: 'elec-1',
+          title: '2025 Board Election',
+          status: 'draft',
+          type: 'officer',
+          votingMode: 'online',
+          positions: [],
+          nominees: [],
+          tallies: [],
         }),
     })
 
@@ -124,16 +122,14 @@ describe('ElectionDetail', () => {
       queryKey: ['election', 'elec-1'],
       queryFn: () =>
         Promise.resolve({
-          data: {
-            id: 'elec-1',
-            title: '2025 Board Election',
-            status: 'draft',
-            type: 'officer',
-            votingMode: 'online',
-            positions: [],
-            nominees: [],
-            tallies: [],
-          },
+          id: 'elec-1',
+          title: '2025 Board Election',
+          status: 'draft',
+          type: 'officer',
+          votingMode: 'online',
+          positions: [],
+          nominees: [],
+          tallies: [],
         }),
     })
 
@@ -149,7 +145,6 @@ describe('ElectionDetail', () => {
       queryKey: ['election', 'elec-1'],
       queryFn: () =>
         Promise.resolve({
-          data: {
             id: 'elec-1',
             title: 'Election',
             status: 'nominations_open',
@@ -160,7 +155,6 @@ describe('ElectionDetail', () => {
               { id: 'nom-1', positionId: 'pos-1', personId: 'person-abc123', status: 'nominated' },
             ],
             tallies: [],
-          },
         }),
     })
 
@@ -180,7 +174,6 @@ describe('ElectionDetail', () => {
       queryKey: ['election', 'elec-1'],
       queryFn: () =>
         Promise.resolve({
-          data: {
             id: 'elec-1',
             title: 'Election',
             status: 'draft',
@@ -189,7 +182,6 @@ describe('ElectionDetail', () => {
             positions: [],
             nominees: [],
             tallies: [],
-          },
         }),
     })
 
@@ -205,7 +197,6 @@ describe('ElectionDetail', () => {
       queryKey: ['election', 'elec-1'],
       queryFn: () =>
         Promise.resolve({
-          data: {
             id: 'elec-1',
             title: 'Election',
             status: 'published',
@@ -215,7 +206,6 @@ describe('ElectionDetail', () => {
             positions: [],
             nominees: [],
             tallies: [],
-          },
         }),
     })
 
@@ -231,7 +221,6 @@ describe('ElectionDetail', () => {
       queryKey: ['election', 'elec-1'],
       queryFn: () =>
         Promise.resolve({
-          data: {
             id: 'elec-1',
             title: 'Election',
             status: 'draft',
@@ -244,7 +233,6 @@ describe('ElectionDetail', () => {
             positions: [],
             nominees: [],
             tallies: [],
-          },
         }),
     })
 

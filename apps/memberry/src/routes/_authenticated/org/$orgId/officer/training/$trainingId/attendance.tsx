@@ -48,7 +48,7 @@ function TrainingAttendance() {
     },
   })
 
-  const enrollments = (data as any)?.data ?? []
+  const enrollments = data?.data ?? []
   const presentCount = enrollments.filter(
     (e: any) => e.checkedIn || checkedIn.has(e.memberId ?? e.personId),
   ).length

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { listChapterAffiliationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { ChapterAffiliation } from '@monobase/sdk-ts/generated/types.gen'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 
 interface AffiliationListProps {
@@ -15,9 +16,9 @@ export function AffiliationList({ orgId, tenantId }: AffiliationListProps) {
   })
 
   if (isLoading) return <div className="p-6 text-center text-[var(--color-muted)]">Loading affiliations...</div>
-  if (error) return <div className="p-6 text-center text-[var(--color-error)]">Failed to load affiliations</div>
+  if (error) return <div role="alert" aria-live="polite" className="p-6 text-center text-[var(--color-error)]">Failed to load affiliations</div>
 
-  const affiliations = (data as any)?.data ?? []
+  const affiliations: ChapterAffiliation[] = data?.data ?? []
 
   if (affiliations.length === 0) {
     return <div className="p-6 text-center text-[var(--color-muted)]">No chapter affiliations.</div>

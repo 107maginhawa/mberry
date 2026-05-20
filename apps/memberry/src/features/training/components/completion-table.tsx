@@ -9,6 +9,16 @@ import {
   listCustomTrainingEnrollmentsQueryKey,
   completeCustomTrainingMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { TrainingEnrollment, TrainingEnrollmentCompleteRequest } from '@monobase/sdk-ts/generated/types.gen'
+
+/**
+ * Handler accepts personId + creditAmount for direct completion without a prior enrollment record.
+ * These fields are not in the base TrainingEnrollmentCompleteRequest — extend locally.
+ */
+interface CompleteTrainingByPersonBody extends TrainingEnrollmentCompleteRequest {
+  personId: string
+  creditAmount: number
+}
 
 interface CompletionTableProps {
   orgId: string
@@ -42,9 +52,9 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
     },
   })
 
-  const enrollments = (enrollmentsListQuery.data?.data ?? []) as any[]
+  const enrollments: TrainingEnrollment[] = enrollmentsListQuery.data?.data ?? []
   const enrollmentCount = enrollmentsListQuery.data?.pagination?.totalCount ?? enrollments.length
-  const attendance = { completed: enrollments.filter((e: any) => e.completedAt).length, totalCredits: 0 }
+  const attendance = { completed: enrollments.filter((e) => e.completedAt).length, totalCredits: 0 }
 
   // enrollments already derived above
   const allIds = enrollments.map((e) => e.personId)
@@ -110,7 +120,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
               const ids = [...selected]
               // Fire one mutation per person (SDK doesn't support bulk)
               ids.forEach(pid =>
-                markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: pid, creditAmount: Number(creditAmount) } } as any)
+                markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: pid, creditAmount: Number(creditAmount) } as unknown as CompleteTrainingByPersonBody })
               )
             }}
             disabled={markAllMutation.isPending}
@@ -194,7 +204,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                         size="sm"
                         onClick={() => {
                           setMarking(e.personId)
-                          markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: e.personId, creditAmount: Number(creditAmount) } } as any)
+                          markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: e.personId, creditAmount: Number(creditAmount) } as unknown as CompleteTrainingByPersonBody })
                         }}
                         disabled={markMutation.isPending && marking === e.personId}
                       >

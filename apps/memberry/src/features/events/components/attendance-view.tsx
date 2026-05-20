@@ -8,6 +8,16 @@ import {
   listCustomEventAttendanceQueryKey,
   checkInCustomEventMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { CheckIn, CheckInCreateRequest } from '@monobase/sdk-ts/generated/types.gen'
+
+/**
+ * Handler accepts personId for manual check-in without a prior registration record.
+ * The generated CheckInCreateRequest requires registrationId; extend locally for this case.
+ */
+interface CheckInByPersonBody extends Omit<CheckInCreateRequest, 'registrationId' | 'method'> {
+  personId: string
+  method: 'manual' | 'qr_code' | 'badge'
+}
 
 interface AttendanceViewProps {
   eventId: string
@@ -45,11 +55,23 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
     },
   })
 
-  const attendance = (data?.data ?? []) as any[]
-  const stats = data?.pagination as any
+  const attendance: CheckIn[] = data?.data ?? []
+  // Compute stats from attendance data (pagination doesn't include check-in method counts)
+  const stats = {
+    total: attendance.length,
+    qr: attendance.filter((a) => a.method === 'qr_code').length,
+    manual: attendance.filter((a) => a.method === 'manual').length,
+  }
+
+  // Handler accepts personId for manual check-in (no prior registration required)
+  const doCheckIn = (personId: string) =>
+    checkInMut.mutate({
+      path: { eventId },
+      body: { personId, method: 'manual' } as unknown as CheckInCreateRequest,
+    })
 
   const filtered = search
-    ? attendance.filter((a: any) =>
+    ? attendance.filter((a) =>
         a.personId.toLowerCase().includes(search.toLowerCase()),
       )
     : attendance
@@ -94,20 +116,20 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && personIdInput.trim()) {
-                checkInMut.mutate({ path: { eventId }, body: { personId: personIdInput.trim(), method: 'manual' } as any })
+                doCheckIn(personIdInput.trim())
               }
             }}
             className="flex-1"
           />
           <Button
-            onClick={() => personIdInput.trim() && checkInMut.mutate({ path: { eventId }, body: { personId: personIdInput.trim(), method: 'manual' } as any })}
+            onClick={() => personIdInput.trim() && doCheckIn(personIdInput.trim())}
             disabled={!personIdInput.trim() || checkInMut.isPending}
           >
             {checkInMut.isPending ? 'Checking in...' : 'Check In'}
           </Button>
         </div>
         {checkInError && (
-          <p className="text-sm text-[var(--color-error)]">{checkInError}</p>
+          <p role="alert" aria-live="polite" className="text-sm text-[var(--color-error)]">{checkInError}</p>
         )}
         {checkInSuccess && (
           <p className="text-sm text-green-600">Checked in successfully!</p>

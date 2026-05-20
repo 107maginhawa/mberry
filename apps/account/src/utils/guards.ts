@@ -27,6 +27,7 @@ export type {
  * Redirects to sign-in if not authenticated
  * Returns user object to route context
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TanStack Router location type is complex and varies per route
 export async function requireAuth({ context, location }: { context: RouterContext; location?: any }) {
   if (!context.auth.user) {
     throw redirect({
@@ -64,7 +65,7 @@ export async function requireGuest({ context }: { context: RouterContext }) {
 export async function requirePerson({ context }: { context: RouterContext }) {
   if (!context.auth.person) {
     throw redirect({
-      to: '/onboarding' as any,
+      to: '/onboarding',
     })
   }
   return { person: context.auth.person }
@@ -120,7 +121,9 @@ export async function requireNotEmailVerified({ context }: { context: RouterCont
  * @example
  * beforeLoad: composeGuards(requireAuth, requirePerson)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- guard functions have heterogeneous signatures from TanStack Router
 export function composeGuards(...guards: Array<(opts: any) => Promise<any> | any>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (opts: any) => {
     let result = {}
     for (const guard of guards) {

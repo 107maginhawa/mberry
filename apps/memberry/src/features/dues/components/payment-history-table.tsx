@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
-import { Badge } from '@monobase/ui'
+import type { DuesPaymentStatus, DuesPayment } from '@monobase/sdk-ts/generated/types.gen'
+import { Badge, Button } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
@@ -37,7 +38,7 @@ const METHOD_LABELS: Record<string, string> = {
 }
 
 export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) {
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<DuesPaymentStatus | 'all'>('all')
   const [methodFilter, setMethodFilter] = useState<string>('all')
   const [offset, setOffset] = useState(0)
   const limit = 25
@@ -46,7 +47,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
     ...listDuesPaymentsOptions({
       query: {
         ...(orgId ? { organizationId: orgId } : {}),
-        ...(statusFilter !== 'all' ? { status: statusFilter as any } : {}),
+        ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
         limit,
         offset,
       },
@@ -61,7 +62,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
   return (
     <div className="space-y-4">
       <div className="flex gap-3 flex-wrap">
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setOffset(0) }}>
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as DuesPaymentStatus | 'all'); setOffset(0) }}>
           <SelectTrigger className="w-40"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
@@ -105,7 +106,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
             </TableRow>
           </TableHeader>
           <TableBody>
-            {payments.map((p: any, idx: number) => (
+            {payments.map((p: DuesPayment, idx: number) => (
               <TableRow key={p.id} className={`hover:bg-[var(--color-surface-warm)] cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
                 <TableCell className="px-3 py-2 text-body-sm tabular-nums">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</TableCell>
                 <TableCell className="px-3 py-2 text-mono tabular-nums">{p.receiptNumber}</TableCell>
@@ -126,8 +127,8 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
         <div className="flex justify-between items-center text-sm">
           <span className="text-[var(--color-muted)]">Showing {offset + 1}–{Math.min(offset + limit, total)} of {total}</span>
           <div className="flex gap-2">
-            <button onClick={() => setOffset(Math.max(0, offset - limit))} disabled={offset === 0} className="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
-            <button onClick={() => setOffset(offset + limit)} disabled={offset + limit >= total} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+            <Button variant="outline" size="sm" onClick={() => setOffset(Math.max(0, offset - limit))} disabled={offset === 0}>Previous</Button>
+            <Button variant="outline" size="sm" onClick={() => setOffset(offset + limit)} disabled={offset + limit >= total}>Next</Button>
           </div>
         </div>
       )}

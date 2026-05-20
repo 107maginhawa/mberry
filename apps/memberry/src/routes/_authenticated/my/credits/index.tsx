@@ -23,10 +23,16 @@ interface CreditEntry {
   creditAmount: number
 }
 
+interface CreditSummary {
+  totalCredits: number
+  requiredCredits?: number
+  remaining?: number
+}
+
 function MyCredits() {
   const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['credit-summary'],
-    queryFn: () => api.get<{ totalCredits: number }>('/api/persons/me/credit-summary'),
+    queryFn: () => api.get<CreditSummary>('/api/persons/me/credit-summary'),
   })
 
   const { data: entriesResp, isLoading: entriesLoading } = useQuery({
@@ -35,8 +41,8 @@ function MyCredits() {
   })
 
   const totalCredits = summary?.totalCredits || 0
-  const requiredCredits = (summary as any)?.requiredCredits || 60
-  const remainingCredits = (summary as any)?.remaining ?? Math.max(0, requiredCredits - totalCredits)
+  const requiredCredits = summary?.requiredCredits || 60
+  const remainingCredits = summary?.remaining ?? Math.max(0, requiredCredits - totalCredits)
   const entries = entriesResp?.data || []
   const navigate = useNavigate()
   const loading = summaryLoading || entriesLoading

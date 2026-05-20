@@ -4,15 +4,27 @@ import { Vote, Users, CheckCircle2, Clock, FileText, Ban, ChevronRight } from 'l
 import { Skeleton } from '@monobase/ui'
 import { listElectionsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
+// The elections API returns DB rows with different fields than the OpenAPI Election type.
+// This local interface reflects the actual shape returned by the handler.
+interface ElectionRow {
+  id: string
+  title: string
+  type: 'officer' | 'bylaw'
+  status: 'draft' | 'nominationsOpen' | 'votingOpen' | 'awaitingConfirmation' | 'published' | 'cancelled'
+  votingOpenAt?: string | null
+  passageThreshold?: number | null
+  positions?: Array<{ id: string; title: string; sortOrder: number }> | null
+}
+
 interface ElectionListProps {
   orgId: string
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   draft: { label: 'Draft', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', icon: FileText },
-  nominations_open: { label: 'Nominations Open', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]', icon: Users },
-  voting_open: { label: 'Voting Open', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: Vote },
-  awaiting_confirmation: { label: 'Awaiting Confirmation', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', icon: Clock },
+  nominationsOpen: { label: 'Nominations Open', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]', icon: Users },
+  votingOpen: { label: 'Voting Open', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: Vote },
+  awaitingConfirmation: { label: 'Awaiting Confirmation', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', icon: Clock },
   published: { label: 'Results Published', color: 'bg-emerald-100 text-emerald-800', icon: CheckCircle2 },
   cancelled: { label: 'Cancelled', color: 'bg-[var(--color-error-bg)] text-[var(--color-error)]', icon: Ban },
 }
@@ -26,7 +38,7 @@ function StatusBadge({ status }: { status: string }) {
   const config = STATUS_CONFIG[status] ?? { label: status, color: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]', icon: FileText }
   return (
     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-      {status === 'voting_open' && <config.icon className="w-3 h-3" />}
+      {status === 'votingOpen' && <config.icon className="w-3 h-3" />}
       {config.label}
     </span>
   )
@@ -51,11 +63,11 @@ export function ElectionList({ orgId }: ElectionListProps) {
     listElectionsOptions({ query: { organizationId: orgId } }),
   )
 
-  const elections = (data?.data ?? []) as any[]
+  const elections = (data?.data ?? []) as unknown as ElectionRow[]
 
   const stats = {
     total: elections.length,
-    active: elections.filter((e) => e.status === 'voting_open' || e.status === 'nominations_open').length,
+    active: elections.filter((e) => e.status === 'votingOpen' || e.status === 'nominationsOpen').length,
     draft: elections.filter((e) => e.status === 'draft').length,
     published: elections.filter((e) => e.status === 'published').length,
   }
@@ -114,8 +126,8 @@ export function ElectionList({ orgId }: ElectionListProps) {
                   {election.votingOpenAt && (
                     <span>Voting: {formatDate(election.votingOpenAt)}</span>
                   )}
-                  {election.positions?.length > 0 && (
-                    <span>{election.positions.length} position{election.positions.length !== 1 ? 's' : ''}</span>
+                  {(election.positions?.length ?? 0) > 0 && (
+                    <span>{election.positions!.length} position{election.positions!.length !== 1 ? 's' : ''}</span>
                   )}
                   {election.type === 'bylaw' && election.passageThreshold && (
                     <span>{election.passageThreshold}% threshold</span>

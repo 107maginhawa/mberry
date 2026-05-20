@@ -49,6 +49,7 @@ function App() {
 }
 
 const container = document.getElementById('root')!
-const root = (container as any).__root ?? createRoot(container)
-;(container as any).__root = root
+// HMR root caching — HTMLElement doesn't have __root in typedefs
+const root = (container as any).__root ?? createRoot(container) // eslint-disable-line @typescript-eslint/no-explicit-any
+;(container as any).__root = root // eslint-disable-line @typescript-eslint/no-explicit-any
 root.render(<App />)

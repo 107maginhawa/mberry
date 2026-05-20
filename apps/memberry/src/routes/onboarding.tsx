@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Button } from '@monobase/ui'
+import { Button, Checkbox, Input } from '@monobase/ui'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   updatePersonMutation,
@@ -47,7 +47,7 @@ function MemberOnboarding() {
           body: {
             firstName: 'Member',
             specialization: specialization || undefined,
-          } as any,
+          },
         })
       }
       await queryClient.invalidateQueries({
@@ -86,7 +86,7 @@ function MemberOnboarding() {
             <p className="text-sm text-[var(--color-muted)]">
               What is your area of professional practice?
             </p>
-            <input
+            <Input
               type="text"
               value={specialization}
               onChange={(e) => setSpecialization(e.target.value)}
@@ -117,10 +117,9 @@ function MemberOnboarding() {
             </p>
             {/* eslint-disable-next-line no-restricted-syntax */}
             <label className="flex items-center gap-3 p-3 border rounded-md cursor-pointer">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={privacyDirectoryVisible}
-                onChange={(e) => setPrivacyDirectoryVisible(e.target.checked)}
+                onCheckedChange={(val) => setPrivacyDirectoryVisible(val === true)}
                 className="h-4 w-4"
               />
               <div>

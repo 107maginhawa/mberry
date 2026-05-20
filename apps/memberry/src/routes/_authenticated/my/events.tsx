@@ -10,6 +10,7 @@ import {
   cancelEventRegistrationMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { GlassCard } from '@/components/motion/glass-card'
+import type { ApiListResponse } from '@/types/api'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -174,10 +175,11 @@ function MyEvents() {
     listMyCustomEventsOptions()
   )
 
-  const allItems: Array<{ registration: any; event: any }> = (data as any)?.data ?? []
+  interface MyEventItem { registration: { id: string; status?: string }; event: { id: string; startDate: string; title?: string; organizationName?: string } }
+  const allItems: MyEventItem[] = (data as unknown as ApiListResponse<MyEventItem>)?.data ?? []
   const now = new Date()
-  const upcoming = allItems.filter((item: any) => new Date(item.event.startDate) >= now)
-  const past = allItems.filter((item: any) => new Date(item.event.startDate) < now)
+  const upcoming = allItems.filter((item) => new Date(item.event.startDate) >= now)
+  const past = allItems.filter((item) => new Date(item.event.startDate) < now)
   const displayed = showPast ? allItems : upcoming
 
   return (
@@ -255,7 +257,7 @@ function MyEvents() {
         </GlassCard>
       ) : (
         <StaggerGrid className="grid gap-4 sm:grid-cols-2">
-          {displayed.map((item: any) => (
+          {displayed.map((item) => (
             <StaggerItem key={item.registration.id}>
               <EventRegistrationCard item={item} />
             </StaggerItem>

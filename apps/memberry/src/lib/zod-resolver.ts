@@ -14,6 +14,5 @@ export function zodResolver<T extends FieldValues>(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Resolver<T, any> {
 	// biome-ignore lint/suspicious/noExplicitAny: Zod v4 / @hookform/resolvers type mismatch — intentional boundary cast
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return _zodResolver(schema as any) as Resolver<T, any>;
+	return _zodResolver(schema as any) as Resolver<T, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }

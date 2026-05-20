@@ -14,6 +14,25 @@ export const Route = createFileRoute('/_authenticated/org/$orgId/training/$train
   component: TrainingDetail,
 })
 
+/** Runtime training shape from API (SDK returns unknown for GetTraining) */
+interface RuntimeTraining {
+  id?: string
+  title?: string
+  status?: string
+  type?: string
+  description?: string
+  creditAmount?: number | string
+  credits?: number | string
+  fee?: number | string
+  price?: number | string
+  startDate?: string | null
+  endDate?: string | null
+  location?: string | null
+  capacity?: number | null
+  provider?: string | null
+  [key: string]: unknown
+}
+
 function formatDate(iso: string | null | undefined) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-PH', {
@@ -33,7 +52,7 @@ function TrainingDetail() {
 
   const { data: training, isLoading, error } = useQuery({
     ...getTrainingOptions({ path: { trainingId } }),
-    select: (d) => (d as any)?.data ?? d,
+    select: (d) => ((d as RuntimeTraining)?.data ?? d) as RuntimeTraining,
   })
 
   const enrollMutOpts = enrollInCustomTrainingMutation()
@@ -89,10 +108,10 @@ function TrainingDetail() {
   return (
     <div className="space-y-6 max-w-3xl">
       <PageHeader
-        title={training.title}
+        title={training.title ?? ''}
         breadcrumbs={[
           { label: 'Training', href: `/org/${orgId}/training` },
-          { label: training.title },
+          { label: training.title ?? '' },
         ]}
         actions={
           <div className="flex items-center gap-2 flex-wrap">

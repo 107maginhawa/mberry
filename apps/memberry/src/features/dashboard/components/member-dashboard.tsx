@@ -259,7 +259,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
       <div className="flex items-center gap-2 mt-4">
         {isOfficer && (
           <Link
-            to={`/org/${m.orgId}/officer/dashboard` as any}
+            to={`/org/${m.orgId}/officer/dashboard` as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white px-4 py-1.5 rounded-[8px] transition-colors"
           >
             <Shield size={13} />
@@ -297,7 +297,7 @@ function SectionHeading({
       </h2>
       {linkTo && (
         <Link
-          to={linkTo as any}
+          to={linkTo as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
           className="flex items-center gap-0.5 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
         >
           View all <ChevronRight size={13} />

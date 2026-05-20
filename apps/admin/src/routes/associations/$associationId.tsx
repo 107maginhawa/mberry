@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Building2, ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-react'
-import { Button, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { Button, Input, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
@@ -156,7 +156,7 @@ function AssociationDetailPage() {
                 >
                   <div>
                     <Label className="block text-sm font-medium mb-1">Name</Label>
-                    <input
+                    <Input
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
@@ -166,7 +166,7 @@ function AssociationDetailPage() {
                   </div>
                   <div>
                     <Label className="block text-sm font-medium mb-1">Country (2-letter code)</Label>
-                    <input
+                    <Input
                       type="text"
                       value={editCountry}
                       onChange={(e) => setEditCountry(e.target.value.toUpperCase())}
@@ -178,7 +178,7 @@ function AssociationDetailPage() {
                   </div>
                   <div>
                     <Label className="block text-sm font-medium mb-1">Currency (3-letter code)</Label>
-                    <input
+                    <Input
                       type="text"
                       value={editCurrency}
                       onChange={(e) => setEditCurrency(e.target.value.toUpperCase())}

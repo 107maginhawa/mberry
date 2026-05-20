@@ -1,12 +1,22 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { Users, Search } from 'lucide-react'
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { Input, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { useState } from 'react'
 import {
   listOrganizationsOptions,
   listRosterMembersOptions,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { RosterMember } from '@monobase/sdk-ts/generated/types.gen'
+
+// API returns RosterMember enriched with person fields via server JOIN
+// These fields are not in the base RosterMember type
+interface EnrichedRosterMember extends RosterMember {
+  firstName?: string
+  lastName?: string
+  email?: string
+  categoryName?: string
+}
 
 export const Route = createFileRoute('/members/')({
   component: MembersPage,
@@ -46,10 +56,11 @@ function MembersPage() {
   const error = rosterQueries.find((q) => q.error)?.error as Error | undefined
 
   const allMembers: Member[] = (orgs ?? []).flatMap((org, i) => {
-    const members = (rosterQueries[i]?.data as any)?.data ?? []
-    return members.map((m: any) => ({
+    const rosterData = rosterQueries[i]?.data as { data?: EnrichedRosterMember[] } | undefined
+    const members: EnrichedRosterMember[] = rosterData?.data ?? []
+    return members.map((m) => ({
       id: m.id,
-      name: m.name || [m.firstName, m.lastName].filter(Boolean).join(' ') || m.memberNumber || m.id,
+      name: [m.firstName, m.lastName].filter(Boolean).join(' ') || m.memberNumber || m.id,
       email: m.email || '',
       role: m.categoryName || 'member',
       status: m.status,
@@ -81,7 +92,7 @@ function MembersPage() {
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
+        <Input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -91,7 +102,7 @@ function MembersPage() {
       </div>
 
       {isError && (
-        <p className="text-sm text-red-500 mb-4">Error: {(error as Error).message}</p>
+        <p role="alert" aria-live="polite" className="text-sm text-red-500 mb-4">Error: {(error as Error).message}</p>
       )}
 
       {/* Summary */}

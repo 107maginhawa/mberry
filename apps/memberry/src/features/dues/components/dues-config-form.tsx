@@ -116,7 +116,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
 
   const { data: config, isLoading } = useQuery({
     ...getDuesConfigOptions(
-      { path: { duesConfigId: orgId }, headers: { 'x-org-id': orgId } } as GetDuesConfigDataWithHeaders
+      { path: { duesConfigId: orgId }, headers: { 'x-org-id': orgId } } as unknown as GetDuesConfigDataWithHeaders
     ),
     select: selectConfig,
     // 404 = org has no config yet (expected). Don't retry — show defaults immediately.
@@ -146,7 +146,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   const onMutationSuccess = () => {
     queryClient.invalidateQueries({
       queryKey: getDuesConfigQueryKey(
-        { path: { duesConfigId: orgId }, headers: { 'x-org-id': orgId } } as GetDuesConfigDataWithHeaders
+        { path: { duesConfigId: orgId }, headers: { 'x-org-id': orgId } } as unknown as GetDuesConfigDataWithHeaders
       ),
     })
     toast.success('Dues configuration saved', { description: 'Applies to future billing cycles.' })

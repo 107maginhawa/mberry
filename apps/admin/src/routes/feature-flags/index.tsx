@@ -182,7 +182,7 @@ function FeatureFlagsPage() {
       </div>
 
       {isError && (
-        <p className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load feature flags'}</p>
+        <p role="alert" aria-live="polite" className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load feature flags'}</p>
       )}
 
       <div className="rounded-lg border bg-card">

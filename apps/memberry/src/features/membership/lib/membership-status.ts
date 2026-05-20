@@ -12,7 +12,7 @@ export type MembershipStatus =
   | 'lapsed'
   | 'expired'
   | 'suspended'
-  | 'terminated';
+  | 'removed';
 
 const STATUS_LABELS: Record<MembershipStatus, string> = {
   pendingPayment: 'Pending Payment',
@@ -21,7 +21,7 @@ const STATUS_LABELS: Record<MembershipStatus, string> = {
   lapsed: 'Lapsed',
   expired: 'Expired',
   suspended: 'Suspended',
-  terminated: 'Terminated',
+  removed: 'Removed',
 };
 
 const STATUS_COLORS: Record<MembershipStatus, string> = {
@@ -31,11 +31,11 @@ const STATUS_COLORS: Record<MembershipStatus, string> = {
   lapsed: 'orange',
   expired: 'orange',
   suspended: 'red',
-  terminated: 'red',
+  removed: 'red',
 };
 
 const RENEWABLE_STATUSES: MembershipStatus[] = ['active', 'gracePeriod', 'lapsed'];
-const REINSTATABLE_STATUSES: MembershipStatus[] = ['terminated', 'suspended'];
+const REINSTATABLE_STATUSES: MembershipStatus[] = ['removed', 'suspended'];
 
 export function getStatusLabel(status: MembershipStatus): string {
   return STATUS_LABELS[status] ?? status;

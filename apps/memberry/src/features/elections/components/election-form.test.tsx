@@ -6,21 +6,33 @@ import { ElectionForm } from './election-form'
 
 vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
   createElectionMutation: vi.fn(),
+  updateElectionMutation: vi.fn(),
   listElectionsQueryKey: vi.fn(() => ['elections']),
+  getElectionOptions: vi.fn(() => ({ queryKey: ['election'], queryFn: vi.fn() })),
 }))
 
 vi.mock('@monobase/ui', () => ({
   Input: (props: any) => <input {...props} />,
   Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
+  Button: ({ children, onClick, type, disabled, variant, className }: any) => (
+    <button onClick={onClick} type={type ?? 'button'} disabled={disabled} className={className} data-variant={variant}>
+      {children}
+    </button>
+  ),
 }))
 
-import { createElectionMutation } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import {
+  createElectionMutation,
+  updateElectionMutation,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 const mockCreateMutation = createElectionMutation as ReturnType<typeof vi.fn>
+const mockUpdateMutation = updateElectionMutation as ReturnType<typeof vi.fn>
 
 describe('ElectionForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockCreateMutation.mockReturnValue({ mutationFn: vi.fn().mockResolvedValue({}) })
+    mockUpdateMutation.mockReturnValue({ mutationFn: vi.fn().mockResolvedValue({}) })
   })
 
   test('renders step indicator with 3 steps', () => {

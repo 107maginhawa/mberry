@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Award, Calendar, BookOpen, CheckCircle } from 'lucide-react'
 import { listMyCustomTrainingsOptions, searchTrainingsOptions } from '@monobase/sdk-ts/generated/react-query'
+import type { ApiListResponse } from '@/types/api'
 import { useOrgContext } from '@/hooks/useOrgContext'
 import { PageHeader } from '@/components/patterns/page-header'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -51,7 +52,8 @@ function MyTraining() {
     enabled: !!orgId,
   })
 
-  const rawItems: Array<{ enrollment: any; training: any }> = (data as any)?.data ?? []
+  interface TrainingItem { enrollment: { id: string; status: string }; training: { id: string; title: string; type?: string; startDate?: string; creditAmount?: number; status: string } }
+  const rawItems: TrainingItem[] = (data as unknown as ApiListResponse<TrainingItem>)?.data ?? []
   const items = rawItems.filter((i) => i.training && i.enrollment)
 
   const totalCredits = items.reduce((acc, item) => {
@@ -164,12 +166,12 @@ function MyTraining() {
       )}
 
       {/* Network-wide available trainings (SO-9: cross-org promotion) */}
-      {((availableData as any)?.data ?? []).length > 0 && (
+      {((availableData as unknown as ApiListResponse<{ id: string; title?: string; type?: string; startDate?: string; startAt?: string; creditAmount?: number; creditValue?: number }>)?.data ?? []).length > 0 && (
         <section>
           <h2 className="text-h4 mb-3">Available Trainings</h2>
           <p className="text-[13px] text-[var(--color-muted)] mb-4">Network-wide trainings from across all organizations</p>
           <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {((availableData as any)?.data ?? []).slice(0, 6).map((t: any) => (
+            {((availableData as unknown as ApiListResponse<{ id: string; title?: string; type?: string; startDate?: string; startAt?: string; creditAmount?: number; creditValue?: number }>)?.data ?? []).slice(0, 6).map((t) => (
               <StaggerItem key={t.id}>
                 <GlassCard className="p-4 hover:bg-[var(--color-surface-elevated-hover)] transition-colors">
                   <p className="font-semibold text-[14px] line-clamp-1">{t.title}</p>

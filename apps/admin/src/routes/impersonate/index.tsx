@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserCog, Search, AlertTriangle, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { Button, Input, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
 import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { startImpersonation as startImpersonationApi, endImpersonation as endImpersonationApi } from '@monobase/sdk-ts/generated/sdk.gen'
@@ -63,7 +63,7 @@ function ImpersonatePage() {
 
   const startImpersonation = useMutation({
     mutationFn: async (targetUserId: string) => {
-      const { data } = await startImpersonationApi({ body: { targetUserId } as any })
+      const { data } = await startImpersonationApi({ body: { targetUserId } })
       return data as unknown as ImpersonationSession
     },
     onSuccess: (session) => {
@@ -145,7 +145,7 @@ function ImpersonatePage() {
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
+        <Input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}

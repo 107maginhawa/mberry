@@ -25,7 +25,7 @@ function OrgTraining() {
     enabled: !!orgId,
   })
 
-  const trainings = ((data as any)?.data ?? []) as any[]
+  const trainings = (data?.data ?? []) as unknown[]
 
   return (
     <div className="space-y-6">

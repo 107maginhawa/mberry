@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   listPendingProofsOptions,
+  listPendingProofsQueryKey,
+  listDuesPaymentsQueryKey,
   confirmPaymentProofMutation,
   rejectPaymentProofMutation,
 } from '@monobase/sdk-ts/generated/react-query'
@@ -25,7 +27,7 @@ export function PendingProofsList({ orgId }: PendingProofsListProps) {
   const [rejectReason, setRejectReason] = useState('')
 
   const { data, isLoading, error } = useQuery({
-    ...listPendingProofsOptions({ query: { organizationId: orgId } }),
+    ...listPendingProofsOptions({ query: { organizationId: orgId }, headers: { 'x-org-id': orgId } }),
     select: (d: any) => d?.data ?? [],
   })
 
@@ -34,8 +36,8 @@ export function PendingProofsList({ orgId }: PendingProofsListProps) {
     ...confirmMutOpts,
     onSuccess: () => {
       toast.success('Payment confirmed')
-      queryClient.invalidateQueries({ queryKey: ['listPendingProofs'] })
-      queryClient.invalidateQueries({ queryKey: ['listDuesPayments'] })
+      queryClient.invalidateQueries({ queryKey: listPendingProofsQueryKey({ query: { organizationId: orgId }, headers: { 'x-org-id': orgId } }) })
+      queryClient.invalidateQueries({ queryKey: listDuesPaymentsQueryKey({ headers: { 'x-org-id': orgId } }) })
     },
     onError: (err: any) => {
       toast.error(err?.body?.error ?? 'Confirmation failed')
@@ -49,8 +51,8 @@ export function PendingProofsList({ orgId }: PendingProofsListProps) {
       toast.success('Payment rejected')
       setRejectingId(null)
       setRejectReason('')
-      queryClient.invalidateQueries({ queryKey: ['listPendingProofs'] })
-      queryClient.invalidateQueries({ queryKey: ['listDuesPayments'] })
+      queryClient.invalidateQueries({ queryKey: listPendingProofsQueryKey({ query: { organizationId: orgId }, headers: { 'x-org-id': orgId } }) })
+      queryClient.invalidateQueries({ queryKey: listDuesPaymentsQueryKey({ headers: { 'x-org-id': orgId } }) })
     },
     onError: (err: any) => {
       toast.error(err?.body?.error ?? 'Rejection failed')
@@ -58,7 +60,7 @@ export function PendingProofsList({ orgId }: PendingProofsListProps) {
   })
 
   function handleConfirm(paymentId: string) {
-    confirmMutation.mutate({ path: { paymentId }, body: {} })
+    confirmMutation.mutate({ path: { paymentId }, body: {}, headers: { 'x-org-id': orgId } })
   }
 
   function handleReject(paymentId: string) {
@@ -69,6 +71,7 @@ export function PendingProofsList({ orgId }: PendingProofsListProps) {
     rejectMutation.mutate({
       path: { paymentId },
       body: { reason: rejectReason.trim() },
+      headers: { 'x-org-id': orgId },
     })
   }
 
@@ -78,7 +81,7 @@ export function PendingProofsList({ orgId }: PendingProofsListProps) {
 
   if (error) {
     return (
-      <div className="text-sm text-[var(--color-error)] p-4 rounded-xl border border-destructive/20">
+      <div role="alert" aria-live="polite" className="text-sm text-[var(--color-error)] p-4 rounded-xl border border-destructive/20">
         Failed to load pending proofs.
       </div>
     )

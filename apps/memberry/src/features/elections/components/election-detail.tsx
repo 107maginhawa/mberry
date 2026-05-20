@@ -12,7 +12,33 @@ import {
   certifyElectionMutation,
   deleteCandidateMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { OpenElectionNominationsData, OpenElectionVotingData, CertifyElectionData } from '@monobase/sdk-ts/generated/types.gen'
+import type { Options } from '@monobase/sdk-ts/generated/sdk.gen'
 import { NomineePickerDialog } from './nominee-picker-dialog'
+
+/** Runtime election shape from API (SDK Election type has Date fields; runtime uses strings + extra fields) */
+interface RuntimeElection {
+  id: string
+  title: string
+  status: string
+  type?: string
+  votingMode?: string
+  passageThreshold?: number | string
+  voterCount?: number
+  positions?: unknown[]
+  nominees?: unknown[]
+  tallies?: { positionId: string; nomineeId: string; count: number }[]
+  publishedAt?: string | null
+  nominationStart?: string | null
+  nominationEnd?: string | null
+  nominationsOpenAt?: string | null
+  nominationsCloseAt?: string | null
+  votingStart?: string | null
+  votingEnd?: string | null
+  votingOpenAt?: string | null
+  votingCloseAt?: string | null
+  organizationId?: string
+}
 
 interface ElectionDetailProps {
   electionId: string
@@ -97,10 +123,10 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
   })
 
   function handleStatusAdvance(nextStatus: string) {
-    const opts = { path: { electionId } } as any
-    if (nextStatus === 'nominations_open') nominationsMutation.mutate(opts)
-    else if (nextStatus === 'voting_open') votingMutation.mutate(opts)
-    else certifyMut.mutate(opts)
+    const electionPath = { path: { electionId } }
+    if (nextStatus === 'nominations_open') nominationsMutation.mutate(electionPath as Options<OpenElectionNominationsData>)
+    else if (nextStatus === 'voting_open') votingMutation.mutate(electionPath as Options<OpenElectionVotingData>)
+    else certifyMut.mutate(electionPath as Options<CertifyElectionData>)
   }
 
   const removeNomineeMut = useMutation({
@@ -129,10 +155,11 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
   }
 
   if (error || !data) {
-    return <div className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
+    return <div role="alert" aria-live="polite" className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
   }
 
-  const election = (data as any)?.data ?? data
+  // SDK Election type has Date fields; runtime response has string dates + extra fields — use local RuntimeElection
+  const election = data as unknown as RuntimeElection
   const nextAction = NEXT_ACTION[election.status as string]
   const rawPositions: any[] = election.positions ?? []
   const positions: { id: string; title: string; sortOrder: number }[] = rawPositions.map((p: any, i: number) =>

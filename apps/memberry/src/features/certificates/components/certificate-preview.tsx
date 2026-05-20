@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { getCertificateOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { Certificate } from '@monobase/sdk-ts/generated/types.gen'
 import { Button } from '@monobase/ui'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
@@ -8,7 +9,7 @@ interface CertificatePreviewProps {
   certificateId: string
 }
 
-function formatDate(iso: string | null | undefined) {
+function formatDate(iso: string | Date | null | undefined) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })
 }
@@ -18,7 +19,7 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
     getCertificateOptions({ path: { certificateId } }),
   )
 
-  const cert = data as any
+  const cert = data as Certificate | undefined
 
   if (isLoading) {
     return (

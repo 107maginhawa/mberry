@@ -1,6 +1,6 @@
 import { useState } from "react"
 import type { ReactNode } from "react"
-import { Button, Label } from "@monobase/ui"
+import { Button, Input, Label } from "@monobase/ui"
 
 interface ConfirmDialogProps {
   open: boolean
@@ -40,7 +40,7 @@ export function ConfirmDialog({
             <Label className="text-[13px] font-medium text-[var(--color-muted)] block mb-1.5">
               Type <span className="font-mono font-semibold">{confirmText}</span> to confirm
             </Label>
-            <input
+            <Input
               type="text"
               value={typedText}
               onChange={(e) => setTypedText(e.target.value)}

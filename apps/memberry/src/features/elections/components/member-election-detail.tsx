@@ -5,6 +5,29 @@ import { Skeleton } from '@monobase/ui'
 import { getElectionOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { api } from '@/lib/api'
 
+/** Runtime election shape from API (SDK Election type has Date fields; runtime uses strings + extra fields) */
+interface RuntimeElection {
+  id: string
+  title: string
+  status: string
+  type?: string
+  passageThreshold?: number | string
+  voterCount?: number
+  positions?: unknown[]
+  nominees?: unknown[]
+  tallies?: { positionId: string; nomineeId: string; count: number }[]
+  publishedAt?: string | null
+  nominationStart?: string | null
+  nominationEnd?: string | null
+  nominationsOpenAt?: string | null
+  nominationsCloseAt?: string | null
+  votingStart?: string | null
+  votingEnd?: string | null
+  votingOpenAt?: string | null
+  votingCloseAt?: string | null
+  organizationId?: string
+}
+
 interface MemberElectionDetailProps {
   electionId: string
   orgId: string
@@ -60,10 +83,11 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
   }
 
   if (error || !data) {
-    return <div className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
+    return <div role="alert" aria-live="polite" className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
   }
 
-  const election = (data as any)?.data ?? data
+  // SDK Election type has Date fields; runtime response has string dates + extra fields — use local RuntimeElection
+  const election = data as unknown as RuntimeElection
   const rawPositions: any[] = election.positions ?? []
   const positions: { id: string; title: string; sortOrder: number }[] = rawPositions.map((p: any, i: number) =>
     typeof p === 'string' ? { id: p, title: p, sortOrder: i } : { id: p.id ?? p, title: p.title ?? p.id ?? `Position ${i + 1}`, sortOrder: p.sortOrder ?? i },

@@ -15,7 +15,7 @@ describe('[BR-01] getStatusLabel', () => {
     expect(getStatusLabel('lapsed')).toBe('Lapsed');
     expect(getStatusLabel('expired')).toBe('Expired');
     expect(getStatusLabel('suspended')).toBe('Suspended');
-    expect(getStatusLabel('terminated')).toBe('Terminated');
+    expect(getStatusLabel('removed')).toBe('Removed');
   });
 
   test('returns raw value for unknown status', () => {
@@ -32,8 +32,8 @@ describe('[BR-01] getStatusColor', () => {
     expect(getStatusColor('gracePeriod')).toBe('yellow');
   });
 
-  test('terminated/suspended are red', () => {
-    expect(getStatusColor('terminated')).toBe('red');
+  test('removed/suspended are red [BR-03]', () => {
+    expect(getStatusColor('removed')).toBe('red');
     expect(getStatusColor('suspended')).toBe('red');
   });
 
@@ -58,13 +58,13 @@ describe('[BR-01] isRenewable', () => {
     expect(isRenewable('pendingPayment')).toBe(false);
     expect(isRenewable('expired')).toBe(false);
     expect(isRenewable('suspended')).toBe(false);
-    expect(isRenewable('terminated')).toBe(false);
+    expect(isRenewable('removed')).toBe(false);
   });
 });
 
 describe('[BR-01] isReinstatable', () => {
-  test('terminated and suspended are reinstatable', () => {
-    expect(isReinstatable('terminated')).toBe(true);
+  test('removed and suspended are reinstatable [BR-03]', () => {
+    expect(isReinstatable('removed')).toBe(true);
     expect(isReinstatable('suspended')).toBe(true);
   });
 

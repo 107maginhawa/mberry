@@ -3,6 +3,16 @@ import { listMembershipsOptions } from '@monobase/sdk-ts/generated/@tanstack/rea
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { getStatusLabel, getStatusColor, isRenewable, type MembershipStatus } from '../lib/membership-status'
 
+/** Hand-wired shape returned by listMemberships (MembershipListResponse.data is Array<unknown>) */
+interface MembershipRow {
+  id: string
+  memberNumber?: string
+  personId: string
+  status: MembershipStatus
+  tierId?: string
+  duesExpiryDate?: string
+}
+
 interface MembershipListProps {
   orgId: string
   tenantId: string
@@ -21,10 +31,10 @@ export function MembershipList({ orgId, tenantId }: MembershipListProps) {
   }
 
   if (error) {
-    return <div className="p-6 text-center text-[var(--color-error)]">Failed to load roster</div>
+    return <div role="alert" aria-live="polite" className="p-6 text-center text-[var(--color-error)]">Failed to load roster</div>
   }
 
-  const memberships = (data as any)?.data ?? []
+  const memberships = (data?.data ?? []) as MembershipRow[]
 
   if (memberships.length === 0) {
     return (
@@ -47,7 +57,7 @@ export function MembershipList({ orgId, tenantId }: MembershipListProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {memberships.map((m: any) => (
+        {memberships.map((m: MembershipRow) => (
           <TableRow key={m.id} className="hover:bg-[var(--color-surface-warm)]">
             <TableCell className="px-4 py-3 font-mono text-xs">{m.memberNumber || '—'}</TableCell>
             <TableCell className="px-4 py-3">{m.personId}</TableCell>

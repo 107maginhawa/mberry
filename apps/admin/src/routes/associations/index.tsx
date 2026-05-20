@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Building2, Plus, X } from 'lucide-react'
-import { Button, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { Button, Input, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import {
@@ -69,7 +69,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
         >
           <div>
             <Label className="block text-sm font-medium mb-1">Name</Label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -80,7 +80,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
           </div>
           <div>
             <Label className="block text-sm font-medium mb-1">Country (2-letter code)</Label>
-            <input
+            <Input
               type="text"
               value={country}
               onChange={(e) => setCountry(e.target.value.toUpperCase())}
@@ -93,7 +93,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
           </div>
           <div>
             <Label className="block text-sm font-medium mb-1">Currency (3-letter code)</Label>
-            <input
+            <Input
               type="text"
               value={currency}
               onChange={(e) => setCurrency(e.target.value.toUpperCase())}

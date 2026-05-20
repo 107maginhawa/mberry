@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Badge, Button } from '@monobase/ui'
 import { getStatusLabel } from '@/features/membership/lib/membership-status'
+import type { MembershipStatus } from '@/features/membership/lib/membership-status'
 import { api } from '@/lib/api'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -61,7 +62,7 @@ function MyIdCard() {
   const orgName = membership?.organizationName ?? membership?.orgName ?? membership?.memberNumber ?? '—'
   const category = membership?.categoryName ?? membership?.categoryId ?? '—'
   const status = membership?.status ?? '—'
-  const statusLabel = typeof status === 'string' && status !== '—' ? getStatusLabel(status as any) : '—'
+  const statusLabel = typeof status === 'string' && status !== '—' ? getStatusLabel(status as MembershipStatus) : '—'
   const STATUS_BADGE_COLORS: Record<string, string> = {
     active: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
     gracePeriod: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',

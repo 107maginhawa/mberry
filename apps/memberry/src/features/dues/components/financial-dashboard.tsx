@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'
+import type { FinancialDashboard, GetDuesFinancialDashboardData } from '@monobase/sdk-ts/generated/types.gen'
 import { Skeleton } from '@monobase/ui'
 import { AlertTriangle, CreditCard, Settings } from 'lucide-react'
 import { formatCents } from '../lib/money'
@@ -8,14 +9,22 @@ import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 
+/** SDK path type omits `headers`; extend locally until TypeSpec coverage is updated. */
+type GetDuesFinancialDashboardDataWithHeaders = GetDuesFinancialDashboardData & {
+  headers?: Record<string, string>
+}
+
 interface FinancialDashboardProps {
   orgId: string
 }
 
 export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
-  // Cast to any: TypeSpec FinancialDashboard type differs from hand-wired endpoint shape
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, isLoading } = useQuery(getDuesFinancialDashboardOptions({ path: { organizationId: orgId } }) as any) as { data: any; isLoading: boolean }
+  const { data, isLoading, error } = useQuery(
+    getDuesFinancialDashboardOptions(
+      { path: { organizationId: orgId }, headers: { 'x-org-id': orgId } } as unknown as GetDuesFinancialDashboardDataWithHeaders
+    )
+  )
+  const dashboard = data as FinancialDashboard | undefined
 
   if (isLoading) {
     return (
@@ -27,12 +36,20 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
     )
   }
 
-  const collectionRate = data?.collectionRate ?? 0
-  const totalCollected = Number(data?.totalCollected ?? 0)
-  const totalOutstanding = Number(data?.totalOutstanding ?? 0)
-  const pendingCount = data?.pendingCount ?? 0
-  const expiringCount = data?.expiringThisMonth ?? 0
-  const hasGateway = data?.gatewayConfigured ?? false
+  if (error) {
+    return (
+      <div role="alert" aria-live="polite" className="text-sm text-[var(--color-error)] p-4 rounded-xl border border-destructive/20">
+        Failed to load dashboard.
+      </div>
+    )
+  }
+
+  const collectionRate = dashboard?.collectionRate ?? 0
+  const totalCollected = Number(dashboard?.totalCollected ?? 0)
+  const totalOutstanding = Number(dashboard?.totalOutstanding ?? 0)
+  const pendingCount = dashboard?.pendingCount ?? 0
+  const expiringCount = dashboard?.expiringThisMonth ?? 0
+  const hasGateway = dashboard?.gatewayConfigured ?? false
 
   const rateColor = collectionRate > 80 ? 'text-green-600' : collectionRate > 50 ? 'text-yellow-600' : 'text-red-600'
 

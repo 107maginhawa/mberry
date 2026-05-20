@@ -70,6 +70,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   })
 
   const isLoading = members.isLoading || dues.isLoading || applications.isLoading
+  const hasError = members.error || dues.error || applications.error
 
   const m = members.data
   const d = dues.data
@@ -83,6 +84,12 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
         title="Officer Dashboard"
         subtitle="Membership health and action items at a glance"
       />
+
+      {hasError && (
+        <div role="alert" aria-live="polite" className="text-sm text-[var(--color-error)] p-4 rounded-xl border border-destructive/20 mb-6">
+          Some dashboard data failed to load. Showing partial results.
+        </div>
+      )}
 
       {/* Metrics strip */}
       <section className="mb-8">
@@ -239,7 +246,8 @@ function ActionCard({
 }) {
   return (
     <Link
-      to={href as any}
+      // Dynamic hrefs cannot be statically typed against TanStack Router's route registry
+      to={href as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
       className={`block rounded-[12px] border p-4 hover:shadow-soft transition-shadow ${VARIANT_STYLES[variant]}`}
     >
       <div className="flex items-start gap-3">
@@ -257,7 +265,8 @@ function ActionCard({
 function QuickLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
   return (
     <Link
-      to={href as any}
+      // Dynamic hrefs cannot be statically typed against TanStack Router's route registry
+      to={href as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
       className="flex items-center gap-2 rounded-[10px] border border-[var(--color-border-light)] bg-[var(--color-surface)] px-4 py-3 text-[13px] font-semibold hover:shadow-soft transition-shadow"
     >
       <span className="text-[var(--color-muted)]">{icon}</span>

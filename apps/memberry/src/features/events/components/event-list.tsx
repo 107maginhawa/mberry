@@ -10,6 +10,7 @@ import {
   searchEventsQueryKey,
   cancelEventMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { Event, EventStatus, EventType } from '@monobase/sdk-ts/generated/types.gen'
 
 interface EventListProps {
   orgId: string
@@ -45,10 +46,10 @@ function tabToApiParams(tab: StatusTab): Record<string, string> {
   }
 }
 
-function filterEventsByTab(events: any[], tab: StatusTab): any[] {
+function filterEventsByTab(events: Event[], tab: StatusTab): Event[] {
   const now = new Date()
-  if (tab === 'upcoming') return events.filter(e => new Date(e.startDate || e.start_date) >= now)
-  if (tab === 'past') return events.filter(e => new Date(e.startDate || e.start_date) < now)
+  if (tab === 'upcoming') return events.filter(e => new Date(e.startDate as string | Date) >= now)
+  if (tab === 'past') return events.filter(e => new Date(e.startDate as string | Date) < now)
   return events
 }
 
@@ -59,23 +60,24 @@ export function EventList({ orgId }: EventListProps) {
   const [search, setSearch] = useState('')
 
   const tabParams = tabToApiParams(tab)
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, error } = useQuery(
     searchEventsOptions({
       query: {
         organizationId: orgId,
-        status: tabParams.status as any,
-        eventType: (typeFilter !== 'all' ? typeFilter : undefined) as any,
+        status: tabParams.status as EventStatus,
+        eventType: (typeFilter !== 'all' ? typeFilter as EventType : undefined),
         q: search || undefined,
         limit: 50,
       },
+      headers: { 'x-org-id': orgId },
     }),
   )
 
   const { data: upcomingData } = useQuery(
-    searchEventsOptions({ query: { organizationId: orgId, status: 'published' as any, limit: 1 } }),
+    searchEventsOptions({ query: { organizationId: orgId, status: 'published' as EventStatus, limit: 1 }, headers: { 'x-org-id': orgId } }),
   )
   const { data: draftsData } = useQuery(
-    searchEventsOptions({ query: { organizationId: orgId, status: 'draft' as any, limit: 1 } }),
+    searchEventsOptions({ query: { organizationId: orgId, status: 'draft' as EventStatus, limit: 1 }, headers: { 'x-org-id': orgId } }),
   )
   const statsData = {
     upcoming: upcomingData?.pagination?.totalCount ?? 0,
@@ -89,8 +91,16 @@ export function EventList({ orgId }: EventListProps) {
     },
   })
 
-  const events = filterEventsByTab((data?.data ?? []) as any[], tab)
+  const events = filterEventsByTab(data?.data ?? [], tab)
   const total = events.length
+
+  if (error) {
+    return (
+      <div role="alert" aria-live="polite" className="text-sm text-[var(--color-error)] p-4 rounded-xl border border-destructive/20">
+        Failed to load events.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -170,13 +180,13 @@ export function EventList({ orgId }: EventListProps) {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((event: any) => (
+          {events.map((event) => (
             <EventCard
               key={event.id}
               event={event}
               orgId={orgId}
               onCancel={(id) => {
-                if (confirm('Cancel this event?')) doCancel.mutate({ path: { eventId: id } })
+                if (confirm('Cancel this event?')) doCancel.mutate({ path: { eventId: id }, headers: { 'x-org-id': orgId } })
               }}
             />
           ))}

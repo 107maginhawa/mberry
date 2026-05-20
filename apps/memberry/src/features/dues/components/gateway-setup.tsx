@@ -7,6 +7,12 @@ import {
   testDuesGatewayConnectionMutation,
   disconnectDuesGatewayMutation,
 } from '@monobase/sdk-ts/generated/react-query'
+import type { GatewayConfig } from '@monobase/sdk-ts/generated/types.gen'
+
+/** Hand-wired endpoint extends GatewayConfig with masked key display field */
+type GatewayConfigDetail = GatewayConfig & {
+  publicKeyLast4?: string
+}
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
@@ -31,9 +37,8 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
   const [testResult, setTestResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null)
   const [showDisconnect, setShowDisconnect] = useState(false)
 
-  // Cast to any: TypeSpec GatewayConfig type differs from hand-wired endpoint shape
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: config, isLoading } = useQuery(getDuesGatewayConfigOptions({ path: { organizationId: orgId } }) as any) as { data: any; isLoading: boolean }
+  const { data: rawConfig, isLoading } = useQuery(getDuesGatewayConfigOptions({ path: { organizationId: orgId } }))
+  const config = rawConfig as GatewayConfigDetail | undefined
 
   const testMutation = useMutation({
     ...testDuesGatewayConnectionMutation(),

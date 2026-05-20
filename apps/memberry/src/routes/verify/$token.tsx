@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api, ApiError } from '@/lib/api'
+import type { ApiErrorBody } from '@/types/api'
 
 export const Route = createFileRoute('/verify/$token')({
   component: PublicVerification,
@@ -23,8 +24,8 @@ function PublicVerification() {
         }
         return { result: data, error: null }
       } catch (err) {
-        if (err instanceof ApiError && err.body && typeof err.body === 'object' && 'error' in (err.body as any)) {
-          return { result: null, error: (err.body as any).error }
+        if (err instanceof ApiError && err.body && typeof err.body === 'object' && 'error' in (err.body as ApiErrorBody)) {
+          return { result: null, error: (err.body as ApiErrorBody).error }
         }
         return { result: null, error: 'Unable to verify. Please try again.' }
       }

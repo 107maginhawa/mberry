@@ -11,6 +11,23 @@ import { Calendar, MapPin, Users, Clock } from 'lucide-react'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { getEventOptions, listCustomEventRegistrationsOptions } from '@monobase/sdk-ts/generated/react-query'
 
+/** Runtime event shape from API (SDK Event type has Date fields; runtime uses string dates + extra fields) */
+interface RuntimeEvent {
+  id: string
+  title: string
+  status: string
+  eventType?: string | null
+  description?: string | null
+  startDate: string
+  endDate: string
+  location?: string | null
+  registrationFee?: number | null
+  capacity?: number | null
+  visibility?: string | null
+  registrationCount?: number | null
+  attendance?: { total?: number } | null
+}
+
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/events/$eventId')({
   component: EventDetail,
 })
@@ -45,7 +62,7 @@ function RegistrationsTab({ eventId, orgId }: { eventId: string; orgId: string }
     listCustomEventRegistrationsOptions({ path: { eventId }, headers: { 'x-org-id': orgId } })
   )
 
-  const registrations = (data as any)?.data ?? []
+  const registrations = data?.data ?? []
 
   if (isLoading) {
     return <TableSkeleton rows={5} cols={4} />
@@ -107,7 +124,8 @@ function EventDetail() {
     getEventOptions({ path: { eventId }, headers: { 'x-org-id': orgId } })
   )
 
-  const event = (data as any)?.data ?? data
+  // SDK Event type has Date fields; runtime response uses string dates + extra fields — use local RuntimeEvent
+  const event = data as unknown as RuntimeEvent | undefined
 
   return (
     <div className="space-y-6">

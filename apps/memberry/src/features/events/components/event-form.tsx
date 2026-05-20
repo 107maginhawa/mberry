@@ -113,7 +113,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       startDate: new Date(data.startDate),
       endDate: new Date(data.endDate),
       location: data.location || undefined,
-      registrationFee: Math.round((data.registrationFee ?? 0) * 100),
+      registrationFee: BigInt(Math.round((data.registrationFee ?? 0) * 100)),
       capacity: data.capacity && !Number.isNaN(data.capacity) ? data.capacity : undefined,
       creditBearing: false,
     }

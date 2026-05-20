@@ -1,13 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getPersonOptions, updatePersonMutation, createPersonMutation } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { Person } from '@monobase/sdk-ts/generated/types.gen'
 import { formatPersonName, formatLicenseDisplay } from '@/features/profile/lib/profile-display'
+import { zodResolver } from '@/lib/zod-resolver'
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { PageHeader } from '@/components/patterns/page-header'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
-import { Button, Label } from '@monobase/ui'
+import { Button, Input, Label } from '@monobase/ui'
 import { Shield, Lock, CreditCard, Download } from 'lucide-react'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -15,6 +19,15 @@ import { GlassCard } from '@/components/motion/glass-card'
 export const Route = createFileRoute('/_authenticated/my/profile')({
   component: MyProfilePage,
 })
+
+interface MembershipItem {
+  id: string
+  organizationId?: string
+  organizationName?: string
+  status?: string
+  memberNumber?: string
+  duesExpiryDate?: string
+}
 
 function MyProfilePage() {
   const queryClient = useQueryClient()
@@ -51,8 +64,8 @@ function MyProfilePage() {
   const { data: memberships = [] } = useQuery({
     queryKey: ['my-memberships'],
     queryFn: async () => {
-      const res = await api.get<any>('/api/persons/me/memberships')
-      return (res?.data || []) as any[]
+      const res = await api.get<{ data: MembershipItem[] }>('/api/persons/me/memberships')
+      return res?.data || []
     },
   })
 
@@ -81,7 +94,7 @@ function MyProfilePage() {
     )
   }
 
-  const p = person as any
+  const p = person
 
   if (editing) {
     return <ProfileEditForm person={p} onCancel={() => { setEditing(false); setError(null) }} onSave={mutation} error={error} />
@@ -107,7 +120,7 @@ function MyProfilePage() {
             <AvatarInitials
               name={formatPersonName(p?.firstName || '?', p?.lastName, p?.middleName)}
               size="lg"
-              photoUrl={(p as any)?.avatar?.url || p?.photoUrl}
+                photoUrl={p?.avatar?.url || (p as unknown as { photoUrl?: string })?.photoUrl}
             />
           </div>
           <h2 className="text-h3 mt-3 text-center md:text-left">
@@ -194,6 +207,20 @@ function MyProfilePage() {
   )
 }
 
+const profileEditSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().optional(),
+  middleName: z.string().optional(),
+  specialization: z.string().optional(),
+  licenseNumber: z.string().optional(),
+  prcId: z.string().optional(),
+  phone: z.string().optional(),
+  timezone: z.string().optional(),
+  preferredLanguage: z.string().optional(),
+})
+
+type ProfileEditFormData = z.infer<typeof profileEditSchema>
+
 function ProfileEditForm({
   person,
   onCancel,
@@ -205,51 +232,75 @@ function ProfileEditForm({
   onSave: any
   error: string | null
 }) {
-  const [form, setForm] = useState({
-    firstName: person?.firstName || '',
-    lastName: person?.lastName || '',
-    middleName: person?.middleName || '',
-    specialization: person?.specialization || '',
-    licenseNumber: person?.licenseNumber || '',
-    prcId: person?.prcId || '',
-    phone: person?.contactInfo?.phone || '',
-    timezone: person?.timezone || '',
-    preferredLanguage: person?.preferredLanguage || '',
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProfileEditFormData>({
+    resolver: zodResolver(profileEditSchema),
+    defaultValues: {
+      firstName: person?.firstName || '',
+      lastName: person?.lastName || '',
+      middleName: person?.middleName || '',
+      specialization: person?.specialization || '',
+      licenseNumber: person?.licenseNumber || '',
+      prcId: person?.prcId || '',
+      phone: person?.contactInfo?.phone || '',
+      timezone: person?.timezone || '',
+      preferredLanguage: person?.preferredLanguage || '',
+    },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  function onSubmit(data: ProfileEditFormData) {
     onSave.mutate({
       path: { person: person?.id || 'me' },
       body: {
-        firstName: form.firstName,
-        lastName: form.lastName || null,
-        middleName: form.middleName || null,
-        specialization: form.specialization || null,
-        licenseNumber: form.licenseNumber || null,
-        prcId: form.prcId || null,
+        firstName: data.firstName,
+        lastName: data.lastName || null,
+        middleName: data.middleName || null,
+        specialization: data.specialization || null,
+        licenseNumber: data.licenseNumber || null,
+        prcId: data.prcId || null,
         contactInfo: {
           email: person?.contactInfo?.email,
-          phone: form.phone || undefined,
+          phone: data.phone || undefined,
         },
-        timezone: form.timezone || null,
-        preferredLanguage: form.preferredLanguage || null,
+        timezone: data.timezone || null,
+        preferredLanguage: data.preferredLanguage || null,
       },
     })
   }
 
-  const field = (label: string, key: keyof typeof form, opts?: { placeholder?: string }) => (
-    <div>
-      <Label className="block text-[13px] font-semibold text-[var(--color-text-secondary)] mb-1.5">{label}</Label>
-      <input
-        type="text"
-        value={form[key]}
-        onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))}
-        placeholder={opts?.placeholder}
-        className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-[14px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
-      />
-    </div>
-  )
+  function field(
+    label: string,
+    name: keyof ProfileEditFormData,
+    opts?: { placeholder?: string }
+  ) {
+    const errMsg = errors[name]?.message
+    return (
+      <div>
+        <Label
+          htmlFor={name}
+          className="block text-[13px] font-semibold text-[var(--color-text-secondary)] mb-1.5"
+        >
+          {label}
+        </Label>
+        <Input
+          id={name}
+          type="text"
+          placeholder={opts?.placeholder}
+          className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-[14px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
+          aria-describedby={errMsg ? `${name}-error` : undefined}
+          {...register(name)}
+        />
+        {errMsg && (
+          <p id={`${name}-error`} role="alert" className="text-xs text-[var(--color-error)] mt-1">
+            {errMsg}
+          </p>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -263,12 +314,12 @@ function ProfileEditForm({
       />
 
       {error && (
-        <div className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-[14px] mb-4">
+        <div role="alert" aria-live="polite" className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-[14px] mb-4">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-6 space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {field('First Name', 'firstName')}
           {field('Last Name', 'lastName')}
@@ -299,7 +350,7 @@ function ProfileEditForm({
           </Button>
           <Button
             type="submit"
-            disabled={onSave.isPending || !form.firstName}
+            disabled={onSave.isPending}
           >
             {onSave.isPending ? 'Saving...' : 'Save Changes'}
           </Button>

@@ -6,6 +6,22 @@ import {
   approveMembershipApplicationMutation,
   denyMembershipApplicationMutation,
 } from '@monobase/sdk-ts/generated/react-query'
+import type { ApplicationStatus, MembershipApplication } from '@monobase/sdk-ts/generated/types.gen'
+
+/**
+ * Hand-wired endpoint enriches MembershipApplication with display fields
+ * not in the TypeSpec (name, email, categoryName, appliedAt, avatar).
+ */
+type ApplicationRow = MembershipApplication & {
+  name?: string
+  email?: string
+  categoryName?: string
+  categoryId?: string
+  appliedAt?: string | Date
+  memberNumber?: string
+  notes?: string
+  avatar?: { url: string }
+}
 import { Button } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
 import { Checkbox } from '@monobase/ui'
@@ -47,15 +63,15 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
     listMembershipApplicationsOptions({
       query: {
         organizationId: orgId,
-        ...(statusFilter !== 'all' ? { status: statusFilter as any } : {}),
+        ...(statusFilter !== 'all' ? { status: statusFilter as ApplicationStatus } : {}),
       },
     })
   )
 
-  const rawApplications: any[] = data?.data ?? []
-  const applications = [...rawApplications].sort((a, b) => {
+  const rawApplications: ApplicationRow[] = data?.data as ApplicationRow[] ?? []
+  const applications = [...rawApplications].sort((a: ApplicationRow, b: ApplicationRow) => {
     if (sortBy === 'name') return (a.name ?? a.personId ?? '').localeCompare(b.name ?? b.personId ?? '')
-    return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+    return new Date(b.appliedAt ?? b.applicationDate ?? 0).getTime() - new Date(a.appliedAt ?? a.applicationDate ?? 0).getTime()
   })
 
   // Applications that can be approved (submitted or underReview)
@@ -231,7 +247,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
         </GlassCard>
       ) : (
         <div className="space-y-3">
-          {applications.map((app: any) => (
+          {applications.map((app: ApplicationRow) => (
             <div key={app.id} className="flex items-start gap-3">
               {canBulkApprove && APPROVABLE_STATUSES.includes(app.status as AppStatus) && (
                 <Checkbox
@@ -263,7 +279,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
 }
 
 interface ApplicationCardProps {
-  app: any
+  app: ApplicationRow
   onReview: (status: string, reason?: string) => void
   isPending: boolean
 }

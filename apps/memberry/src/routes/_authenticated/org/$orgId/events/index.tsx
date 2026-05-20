@@ -12,6 +12,8 @@ import { EmptyState } from '@/components/patterns/empty-state'
 import {
   searchEventsOptions,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { Event, EventStatus, EventType } from '@monobase/sdk-ts/generated/types.gen'
+import type { ApiListResponse } from '@/types/api'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/events/')({
   component: OrgEvents,
@@ -38,18 +40,21 @@ function OrgEvents() {
     searchEventsOptions({
       query: {
         organizationId: orgId,
-        status: 'published' as any,
-        eventType: (typeFilter !== 'all' ? typeFilter : undefined) as any,
+        status: 'published' as EventStatus,
+        eventType: (typeFilter !== 'all' ? typeFilter : undefined) as EventType | undefined,
         q: search || undefined,
         limit: 50,
       },
     }),
   )
 
-  const events = ((data as any)?.data ?? []) as any[]
+  const events: Event[] = (data as unknown as ApiListResponse<Event>)?.data ?? []
   // Filter to upcoming only (start date >= now)
   const now = new Date()
-  const upcoming = events.filter((e: any) => new Date(e.startDate || e.start_date) >= now)
+  const upcoming = events.filter((e) => {
+    const raw = e as unknown as { startDate?: string; start_date?: string }
+    return new Date(raw.startDate ?? raw.start_date ?? 0) >= now
+  })
 
   return (
     <div className="space-y-6 p-6">
@@ -103,7 +108,7 @@ function OrgEvents() {
         </GlassCard>
       ) : (
         <StaggerGrid className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {upcoming.map((event: any) => (
+          {upcoming.map((event) => (
             <StaggerItem key={event.id}>
               <EventCard
                 event={event}

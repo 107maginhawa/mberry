@@ -10,6 +10,23 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 
+/** Runtime training shape from API (SDK returns unknown for GetTraining) */
+interface RuntimeTraining {
+  id?: string
+  title?: string
+  status?: string
+  type?: string
+  description?: string
+  creditAmount?: number | string
+  startDate?: string | null
+  endDate?: string | null
+  location?: string | null
+  capacity?: number | null
+  enrollmentCount?: number
+  attendance?: { completed?: number }
+  [key: string]: unknown
+}
+
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/training/$trainingId')({
   component: TrainingDetail,
 })
@@ -44,7 +61,8 @@ function TrainingDetail() {
     getTrainingOptions({ path: { trainingId } })
   )
 
-  const training = (data as any)?.data ?? data
+  // SDK GetTraining returns unknown; runtime response may wrap in .data
+  const training = ((data as RuntimeTraining | undefined)?.data ?? data) as RuntimeTraining | undefined
 
   if (isLoading) {
     return (
@@ -72,11 +90,11 @@ function TrainingDetail() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={training.title}
+        title={training.title ?? ''}
         breadcrumbs={[
           { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
           { label: 'Training', href: `/org/${orgId}/officer/training` },
-          { label: training.title },
+          { label: training.title ?? '' },
         ]}
         actions={
           <Button
@@ -91,10 +109,10 @@ function TrainingDetail() {
       {/* Badges */}
       <div className="flex flex-wrap gap-2">
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-          {TYPE_LABELS[training.type] ?? training.type}
+          {training.type ? (TYPE_LABELS[training.type] ?? training.type) : null}
         </span>
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium ${STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700'}`}>
-          {training.status.replace('_', ' ')}
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium ${training.status ? (STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700') : 'bg-gray-100 text-gray-700'}`}>
+          {training.status?.replace('_', ' ')}
         </span>
         {Number(training.creditAmount) > 0 && (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-amber-100 text-amber-700">
@@ -177,7 +195,7 @@ function TrainingDetail() {
       )}
 
       {tab === 'attendance' && (
-        <CompletionTable orgId={orgId} trainingId={trainingId} creditAmount={training.creditAmount} />
+        <CompletionTable orgId={orgId} trainingId={trainingId} creditAmount={training.creditAmount ?? 0} />
       )}
 
       {tab === 'edit' && (

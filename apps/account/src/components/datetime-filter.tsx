@@ -43,7 +43,7 @@ export function DateTimeFilter({ value, onChange, className }: DateTimeFilterPro
   }
 
   return (
-    <Select value={getDisplayValue()} onValueChange={(val) => onChange(val as any)}>
+    <Select value={getDisplayValue()} onValueChange={(val) => onChange(val as DateTimeFilterValue)}>
       <SelectTrigger className={className}>
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4" />

@@ -39,9 +39,9 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
     capacity: initial?.capacity ?? '',
   })
 
-  const set = (key: string, val: any) => setForm((f) => ({ ...f, [key]: val }))
+  const set = (key: string, val: unknown) => setForm((f) => ({ ...f, [key]: val }))
   const field = (key: string) => ({
-    value: (form as any)[key],
+    value: (form as Record<string, unknown>)[key] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       set(key, e.target.value),
   })
@@ -71,7 +71,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['trainings', orgId] })
-      navigate({ to: `/org/${orgId}/officer/training/${data.data.id}` as any })
+      navigate({ to: '/org/$orgId/officer/training/$trainingId', params: { orgId, trainingId: (data.data as { id: string }).id } })
     },
   })
 

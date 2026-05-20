@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
 import { listAuditLogsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { AuditAction } from '@monobase/sdk-ts/generated/types.gen'
 
 export const Route = createFileRoute('/audit/')({
   component: () => (
@@ -30,8 +31,8 @@ function AuditPage() {
       query: {
         limit: LIMIT,
         offset: page * LIMIT,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...(action ? { action: action as any } : {}),
+        // action is a free-text filter; cast to AuditAction for SDK type alignment
+        ...(action ? { action: action as AuditAction } : {}),
         ...(resourceType ? { resourceType } : {}),
         ...(startDate ? { startDate: startDate as unknown as Date } : {}),
         ...(endDate ? { endDate: endDate as unknown as Date } : {}),
@@ -125,7 +126,7 @@ function AuditPage() {
 
       {/* Error state */}
       {isError && (
-        <p className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load audit logs'}</p>
+        <p role="alert" aria-live="polite" className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load audit logs'}</p>
       )}
 
       {/* Summary line */}

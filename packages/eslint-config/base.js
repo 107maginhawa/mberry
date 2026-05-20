@@ -13,6 +13,8 @@ export default tseslint.config(
       '**/coverage/**',
       '**/*.d.ts',
       '**/generated/**',
+      '**/routeTree.gen.ts',
+      '**/*.gen.ts',
     ],
   },
   js.configs.recommended,

@@ -10,6 +10,12 @@ import {
   searchTrainingsQueryKey,
   cancelCustomTrainingMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { Training, TrainingStatus, TrainingType } from '@monobase/sdk-ts/generated/types.gen'
+
+/** Server returns enrollment count as an aggregated field not present in the base Training type. */
+interface TrainingWithCount extends Training {
+  enrollmentCount?: number
+}
 
 const TABS = [
   { key: 'published', label: 'Upcoming' },
@@ -39,22 +45,24 @@ export function TrainingList({ orgId }: TrainingListProps) {
   const statusMap: Record<string, string> = { published: 'published', past: 'completed', draft: 'draft' }
   const apiStatus = statusMap[activeTab]
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, error } = useQuery(
     searchTrainingsOptions({
       query: {
         organizationId: orgId,
-        status: apiStatus as any || undefined,
-        type: (typeFilter !== 'all' ? typeFilter : undefined) as any,
+        status: (apiStatus as TrainingStatus) || undefined,
+        // UI offers broader type labels than the generated TrainingType union; cast to align
+        type: (typeFilter !== 'all' ? typeFilter : undefined) as TrainingType | undefined,
         q: search || undefined,
       },
+      headers: { 'x-org-id': orgId },
     }),
   )
 
   const { data: pubData } = useQuery(
-    searchTrainingsOptions({ query: { organizationId: orgId, status: 'published' as any, limit: 1 } }),
+    searchTrainingsOptions({ query: { organizationId: orgId, status: 'published' as TrainingStatus, limit: 1 }, headers: { 'x-org-id': orgId } }),
   )
   const { data: draftData } = useQuery(
-    searchTrainingsOptions({ query: { organizationId: orgId, status: 'draft' as any, limit: 1 } }),
+    searchTrainingsOptions({ query: { organizationId: orgId, status: 'draft' as TrainingStatus, limit: 1 }, headers: { 'x-org-id': orgId } }),
   )
   const statsQuery = {
     data: {
@@ -68,7 +76,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: searchTrainingsQueryKey({ query: { organizationId: orgId } }) }),
   })
 
-  const trainings = (data?.data ?? []) as any[]
+  const trainings = (data?.data ?? []) as unknown as TrainingWithCount[]
   const total = data?.pagination?.totalCount ?? 0
 
   const statCards = [
@@ -88,19 +96,27 @@ export function TrainingList({ orgId }: TrainingListProps) {
     },
     {
       label: 'Enrollments',
-      value: trainings.reduce((acc: number, t: any) => acc + (t.enrollmentCount ?? 0), 0),
+      value: trainings.reduce((acc: number, t) => acc + (t.enrollmentCount ?? 0), 0),
       icon: Users,
       color: 'text-blue-600',
       bg: 'bg-blue-100',
     },
     {
       label: 'CPE Credits Offered',
-      value: trainings.reduce((acc: number, t: any) => acc + Number(t.creditAmount ?? 0), 0).toFixed(1),
+      value: trainings.reduce((acc: number, t) => acc + Number(t.creditAmount ?? 0), 0).toFixed(1),
       icon: Award,
       color: 'text-amber-600',
       bg: 'bg-amber-100',
     },
   ]
+
+  if (error) {
+    return (
+      <div role="alert" aria-live="polite" className="text-sm text-[var(--color-error)] p-4 rounded-xl border border-destructive/20">
+        Failed to load trainings.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -171,20 +187,20 @@ export function TrainingList({ orgId }: TrainingListProps) {
       ) : trainings.length === 0 ? (
         <div className="border rounded-xl p-12 text-center text-[var(--color-muted)]">
           No trainings found.{' '}
-          <Link to={`/org/${orgId}/officer/training/new` as any} className="text-[var(--color-primary)] hover:underline">
+          <Link to="/org/$orgId/officer/training/new" params={{ orgId }} className="text-[var(--color-primary)] hover:underline">
             Create one
           </Link>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {trainings.map((t: any) => (
+            {trainings.map((t) => (
               <TrainingCard
                 key={t.id}
                 training={t}
                 orgId={orgId}
                 onCancel={(id) => {
-                  if (confirm('Cancel this training?')) cancelMutation.mutate({ path: { trainingId: id }, query: { organizationId: orgId } })
+                  if (confirm('Cancel this training?')) cancelMutation.mutate({ path: { trainingId: id }, query: { organizationId: orgId }, headers: { 'x-org-id': orgId } })
                 }}
               />
             ))}

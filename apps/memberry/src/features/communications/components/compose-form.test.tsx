@@ -12,10 +12,9 @@ vi.mock('@tanstack/react-router', () => ({
 
 // Mock @monobase/ui
 vi.mock('@monobase/ui', () => ({
-  Input: ({ id, value, onChange, placeholder, type, maxLength, className }: any) => (
-    <input id={id} value={value} onChange={onChange} placeholder={placeholder} type={type} maxLength={maxLength} className={className} />
-  ),
+  Input: ({ children, ...rest }: any) => <input {...rest} />,
   Label: ({ children, htmlFor }: any) => <label htmlFor={htmlFor}>{children}</label>,
+  Textarea: ({ children, ...rest }: any) => <textarea {...rest} />,
   Switch: ({ checked, onCheckedChange }: any) => (
     <button
       role="switch"
@@ -24,6 +23,11 @@ vi.mock('@monobase/ui', () => ({
       data-testid="switch"
     >
       {checked ? 'ON' : 'OFF'}
+    </button>
+  ),
+  Button: ({ children, onClick, type, disabled, variant, className }: any) => (
+    <button onClick={onClick} type={type} disabled={disabled} className={className} data-variant={variant}>
+      {children}
     </button>
   ),
 }))

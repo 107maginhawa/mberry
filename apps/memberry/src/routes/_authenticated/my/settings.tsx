@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
+import { Button, Input, Switch, Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -146,7 +146,7 @@ function GeneralSection() {
               Your personal data will be anonymized. Financial records are retained per law.
             </p>
             <p className="text-[13px] font-semibold">Type DELETE to confirm:</p>
-            <input
+            <Input
               type="text"
               value={confirmText}
               onChange={e => setConfirmText(e.target.value)}
@@ -393,21 +393,10 @@ function ToggleSwitch({
   return (
     <div className="flex items-center gap-2 cursor-pointer select-none">
       <Label className="text-[13px] text-[var(--color-muted)] cursor-pointer">{label}</Label>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${
-          checked ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'
-        }`}
-      >
-        <span
-          className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${
-            checked ? 'translate-x-4' : 'translate-x-0'
-          }`}
-        />
-      </button>
+      <Switch
+        checked={checked}
+        onCheckedChange={onChange}
+      />
     </div>
   )
 }

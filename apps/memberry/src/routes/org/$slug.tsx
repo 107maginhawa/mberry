@@ -1,12 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@/lib/zod-resolver'
+import { z } from 'zod'
 import { toast } from 'sonner'
 import { Button } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { api, ApiError } from '@/lib/api'
+import type { ApiErrorBody } from '@/types/api'
 
 export const Route = createFileRoute('/org/$slug')({
   component: PublicOrgProfile,
@@ -36,10 +40,22 @@ function PublicOrgProfile() {
   const [tiers, setTiers] = useState<any[]>([])
   const [tiersLoading, setTiersLoading] = useState(false)
   const [selectedTierId, setSelectedTierId] = useState('')
-  const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [personId, setPersonId] = useState<string | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
+
+  const applySchema = z.object({
+    tierId: z.string().optional(),
+    message: z.string().max(500, 'Message must be 500 characters or fewer').optional(),
+  })
+  type ApplyFormData = z.infer<typeof applySchema>
+
+  const { register: applyRegister, handleSubmit: applyHandleSubmit, watch: applyWatch, reset: applyReset, formState: { errors: applyErrors } } = useForm<ApplyFormData>({
+    resolver: zodResolver(applySchema),
+    defaultValues: { tierId: '', message: '' },
+  })
+
+  const messageValue = applyWatch('message') ?? ''
 
   async function handleApplyClick() {
     // Check auth first
@@ -70,8 +86,7 @@ function PublicOrgProfile() {
     }
   }
 
-  async function handleSubmitApplication(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleSubmitApplication(_data: ApplyFormData) {
     if (!selectedTierId && tiers.length > 0) {
       toast.error('Please select a membership tier')
       return
@@ -92,8 +107,8 @@ function PublicOrgProfile() {
 
       toast.success('Application submitted! The organization will review it shortly.')
       setApplyOpen(false)
-      setMessage('')
       setSelectedTierId('')
+      applyReset()
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
@@ -105,7 +120,7 @@ function PublicOrgProfile() {
           setApplyOpen(false)
           return
         }
-        toast.error((err.body as any)?.error ?? 'Failed to submit application. Please try again.')
+        toast.error((err.body as unknown as ApiErrorBody)?.error ?? 'Failed to submit application. Please try again.')
       } else {
         toast.error('Something went wrong. Please try again.')
       }
@@ -201,7 +216,7 @@ function PublicOrgProfile() {
               Your application will be reviewed by the organization's officers.
             </p>
 
-            <form onSubmit={handleSubmitApplication} className="space-y-4">
+            <form onSubmit={applyHandleSubmit(handleSubmitApplication)} className="space-y-4">
               {tiersLoading ? (
                 <div className="flex items-center gap-2 text-sm text-[var(--color-muted)] py-2">
                   <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
@@ -244,13 +259,18 @@ function PublicOrgProfile() {
                 </Label>
                 <Textarea
                   id="apply-message"
-                  value={message}
-                  onChange={e => setMessage(e.target.value)}
                   placeholder="Introduce yourself or share why you'd like to join..."
                   rows={3}
                   maxLength={500}
                   className="resize-none"
+                  aria-describedby={applyErrors.message ? 'apply-message-error' : undefined}
+                  {...applyRegister('message')}
                 />
+                {applyErrors.message && (
+                  <p id="apply-message-error" role="alert" className="text-xs text-[var(--color-error)]">
+                    {applyErrors.message.message}
+                  </p>
+                )}
               </div>
 
               <div className="flex justify-end gap-2 pt-1">

@@ -71,7 +71,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
   }, [search])
 
   const { data: categoriesData } = useQuery(
-    listMembershipCategoriesOptions({ query: { organizationId: orgId } })
+    listMembershipCategoriesOptions({ query: { organizationId: orgId }, headers: { 'x-org-id': orgId } })
   )
 
   const categories = categoriesData?.data ?? []
@@ -91,7 +91,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
   }
 
   const { data, isLoading, error } = useQuery(
-    listRosterMembersOptions({ query: rosterQuery })
+    listRosterMembersOptions({ query: rosterQuery, headers: { 'x-org-id': orgId } })
   )
 
   const rawMembers: any[] = data?.data ?? []
@@ -206,7 +206,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
             ))}
           </div>
         ) : error ? (
-          <div className="p-10 text-center text-[var(--color-error)]">Failed to load members. Please try again.</div>
+          <div role="alert" aria-live="polite" className="p-10 text-center text-[var(--color-error)]">Failed to load members. Please try again.</div>
         ) : members.length === 0 ? (
           <div className="p-14 flex flex-col items-center gap-3 text-[var(--color-muted)]">
             <Users className="h-10 w-10 opacity-30" />

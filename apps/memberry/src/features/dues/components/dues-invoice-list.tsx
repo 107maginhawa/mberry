@@ -4,6 +4,7 @@ import {
   listDuesInvoicesQueryKey,
   markDuesInvoicePaidMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { DuesInvoice } from '@monobase/sdk-ts/generated/types.gen'
 import { FileText } from 'lucide-react'
 import { Button, Skeleton } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
@@ -48,9 +49,9 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
       ))}
     </div>
   )
-  if (error) return <div className="p-6 text-center text-[var(--color-error)]">Failed to load invoices</div>
+  if (error) return <div role="alert" aria-live="polite" className="p-6 text-center text-[var(--color-error)]">Failed to load invoices</div>
 
-  const invoices = (data as any)?.data ?? []
+  const invoices: DuesInvoice[] = data?.data ?? []
 
   if (invoices.length === 0) {
     return (
@@ -75,7 +76,7 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {invoices.map((inv: any) => (
+        {invoices.map((inv: DuesInvoice) => (
           <TableRow key={inv.id} className="hover:bg-[var(--color-surface-warm)]">
             <TableCell className="px-4 py-3 font-mono text-xs">{inv.invoiceNumber}</TableCell>
             <TableCell className="px-4 py-3">{inv.personId}</TableCell>
@@ -97,9 +98,9 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
                   size="sm"
                   onClick={() => markPaidMutation.mutate({
                     path: { invoiceId: inv.id },
-                    body: { paymentId: `manual-${Date.now()}` },
+                    body: { paymentId: `manual-${Date.now()}`, paidAt: new Date() },
                     headers: { 'x-org-id': tenantId },
-                  } as any)}
+                  })}
                   disabled={markPaidMutation.isPending}
                   className="text-xs text-green-700"
                 >

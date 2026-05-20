@@ -6,6 +6,25 @@ import { ElectionForm } from '@/features/elections/components/election-form'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 
+/** Runtime election shape from API (SDK Election type has Date fields; runtime uses strings + extra fields) */
+interface RuntimeElection {
+  id: string
+  title: string
+  status: string
+  type?: string
+  votingMode?: string
+  passageThreshold?: number | string
+  positions?: unknown[]
+  nominationStart?: string | null
+  nominationEnd?: string | null
+  nominationsOpenAt?: string | null
+  nominationsCloseAt?: string | null
+  votingStart?: string | null
+  votingEnd?: string | null
+  votingOpenAt?: string | null
+  votingCloseAt?: string | null
+}
+
 export const Route = createFileRoute('/_authenticated/org/$orgId/officer/elections/$electionId/edit')({
   component: EditElection,
 })
@@ -23,7 +42,8 @@ function EditElection() {
     getElectionOptions({ path: { electionId } }),
   )
 
-  const election = (data as any)?.data ?? data
+  // SDK Election type has Date fields; runtime response has string dates + extra fields — use local RuntimeElection
+  const election = data as unknown as RuntimeElection
 
   if (isLoading) {
     return (

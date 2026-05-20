@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import type { ApiListResponse } from '@/types/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@monobase/ui'
 import { Calendar, MapPin, Users, Clock, Loader2 } from 'lucide-react'
@@ -20,7 +21,12 @@ export const Route = createFileRoute('/_authenticated/org/$orgId/events/$eventId
   component: EventDetail,
 })
 
-function formatDateTime(iso: string | null | undefined) {
+/** Extended event shape — API may return registeredCount beyond the base Event type */
+interface EventWithCounts {
+  registeredCount?: number
+}
+
+function formatDateTime(iso: string | Date | null | undefined) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-PH', {
     weekday: 'long',
@@ -39,13 +45,13 @@ function EventDetail() {
   // Fetch event details
   const { data: event, isLoading, error } = useQuery({
     ...getEventOptions({ path: { eventId }, headers: { 'x-org-id': orgId } }),
-    select: (d) => (d as any)?.data ?? d,
+    select: (d) => (d as unknown as { data?: typeof d })?.data ?? d,
   })
 
   // Derive registration state from server (survives reload)
   const { data: myEventsData } = useQuery(listMyCustomEventsOptions())
-  const myReg = ((myEventsData as any)?.data ?? []).find(
-    (r: any) => r.event?.id === eventId || r.eventId === eventId
+  const myReg = ((myEventsData as unknown as ApiListResponse<{ id?: string; regId?: string; event?: { id: string }; eventId?: string; registration?: { id?: string; status: string } }>)?.data ?? []).find(
+    (r) => r.event?.id === eventId || r.eventId === eventId
   )
   const registered = !!myReg
   const registrationStatus = myReg?.registration?.status
@@ -115,7 +121,7 @@ function EventDetail() {
   }
 
   const capacity = event.capacity
-  const spotsUsed = (event as any).registeredCount ?? 0
+  const spotsUsed = (event as unknown as EventWithCounts).registeredCount ?? 0
   const spotsRemaining = capacity != null ? Math.max(0, capacity - spotsUsed) : null
   const isFull = spotsRemaining != null && spotsRemaining <= 0
 

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { DirectoryProfile } from '@monobase/sdk-ts/generated/types.gen'
 import { Users } from 'lucide-react'
+import { Input } from '@monobase/ui'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
@@ -21,11 +23,11 @@ export function DirectorySearch({ orgId, tenantId }: DirectorySearchProps) {
     }),
   })
 
-  const profiles = (data as any)?.data ?? []
+  const profiles: DirectoryProfile[] = data?.data ?? []
 
   return (
     <div className="space-y-4">
-      <input
+      <Input
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}

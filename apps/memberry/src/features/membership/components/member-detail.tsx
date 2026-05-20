@@ -10,6 +10,18 @@ import {
   reinstateMembershipMutation,
   terminateMembershipMutation,
 } from '@monobase/sdk-ts/generated/react-query'
+import type { RosterMember, MembershipCategory } from '@monobase/sdk-ts/generated/types.gen'
+
+/**
+ * Hand-wired endpoint enriches RosterMember with person data and display fields.
+ */
+type RosterMemberDetail = RosterMember & {
+  name?: string
+  email?: string
+  phone?: string
+  categoryName?: string
+  suspendedReason?: string
+}
 import { Button } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
 import { Avatar, AvatarFallback } from '@monobase/ui'
@@ -30,7 +42,7 @@ interface MemberDetailProps {
   memberId: string
 }
 
-type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment' | 'terminated'
+type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment' | 'removed'
 
 const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> = {
   active: { label: 'Active', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]' },
@@ -38,7 +50,7 @@ const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> =
   lapsed: { label: 'Lapsed', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)]' },
   suspended: { label: 'Suspended', className: 'bg-gray-100 text-gray-800 hover:bg-gray-100' },
   pendingPayment: { label: 'Pending Payment', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
-  terminated: { label: 'Terminated', className: 'bg-gray-200 text-gray-700 hover:bg-gray-200' },
+  removed: { label: 'Removed', className: 'bg-gray-200 text-gray-700 hover:bg-gray-200' },
 }
 
 const STATUS_BANNER: Partial<Record<MemberStatus, { message: string; className: string }>> = {
@@ -54,8 +66,8 @@ const STATUS_BANNER: Partial<Record<MemberStatus, { message: string; className: 
     message: 'Membership is currently suspended.',
     className: 'border-gray-300 bg-gray-50 text-gray-800',
   },
-  terminated: {
-    message: 'Membership has been terminated.',
+  removed: {
+    message: 'Membership has been removed.',
     className: 'border-gray-300 bg-gray-50 text-gray-700',
   },
 }
@@ -74,15 +86,17 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   const [newCategoryId, setNewCategoryId] = useState('')
   const [suspendReason, setSuspendReason] = useState('')
 
-  // Cast to any: TypeSpec RosterMember type differs from hand-wired endpoint shape
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, isLoading, error } = useQuery(getRosterMemberOptions({ path: { memberId }, query: { organizationId: orgId } }) as any) as { data: any; isLoading: boolean; error: unknown }
+  // Hand-wired endpoint enriches RosterMember with person data fields (name, email, phone, etc.)
+  const { data: rawData, isLoading, error } = useQuery(
+    getRosterMemberOptions({ path: { memberId }, query: { organizationId: orgId } })
+  )
+  const data = rawData as RosterMemberDetail | undefined
 
   const { data: categoriesData } = useQuery(
     listMembershipCategoriesOptions({ query: { organizationId: orgId } })
   )
 
-  const categories: any[] = categoriesData?.data ?? []
+  const categories: MembershipCategory[] = categoriesData?.data ?? []
 
   const invalidateMember = () => {
     queryClient.invalidateQueries({ queryKey: getRosterMemberQueryKey({ path: { memberId }, query: { organizationId: orgId } }) })
@@ -148,8 +162,8 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
   const banner = STATUS_BANNER[status]
   const isSuspended = status === 'suspended'
-  const isTerminated = status === 'terminated'
-  const canReinstate = isSuspended || isTerminated
+  const isRemoved = status === 'removed'
+  const canReinstate = isSuspended || isRemoved
   const canMarkDeceased = status === 'active' || status === 'gracePeriod' || status === 'lapsed'
 
   return (
@@ -278,7 +292,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
               {reinstateMutation.isPending ? 'Reinstating...' : 'Reinstate'}
             </Button>
           )}
-          {!canReinstate && !isTerminated && (
+          {!canReinstate && !isRemoved && (
             <Button
               variant="outline"
               size="sm"
@@ -316,7 +330,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((c: any) => (
+                {categories.map((c: MembershipCategory) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -325,7 +339,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowChangeCat(false)}>Cancel</Button>
             <Button
-              onClick={() => (updateMutation as any).mutate({ path: { memberId }, body: { categoryId: newCategoryId } })}
+              onClick={() => updateMutation.mutate({ path: { memberId }, body: { categoryId: newCategoryId } })}
               disabled={!newCategoryId || updateMutation.isPending}
             >
               {updateMutation.isPending ? 'Saving...' : 'Save'}
@@ -354,7 +368,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <Button variant="outline" onClick={() => setShowSuspend(false)}>Cancel</Button>
             <Button
               variant="destructive"
-              onClick={() => (updateMutation as any).mutate({ path: { memberId }, body: { status: 'suspended', suspendedReason: suspendReason } })}
+              onClick={() => updateMutation.mutate({ path: { memberId }, body: { status: 'suspended', note: suspendReason } })}
               disabled={!suspendReason.trim() || updateMutation.isPending}
             >
               {updateMutation.isPending ? 'Suspending...' : 'Suspend'}
@@ -379,7 +393,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <Button
               variant="outline"
               className="text-[var(--color-muted)] border-[var(--color-muted)]/30 hover:bg-[var(--color-surface-warm)]"
-              onClick={() => (deceasedMutation as any).mutate({ path: { membershipId: member.id }, body: { terminationReason: 'deceased' } })}
+              onClick={() => deceasedMutation.mutate({ path: { membershipId: member.id }, body: { terminationReason: 'deceased' } })}
               disabled={deceasedMutation.isPending}
             >
               {deceasedMutation.isPending ? 'Saving...' : 'Confirm'}

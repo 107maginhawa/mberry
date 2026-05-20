@@ -3,9 +3,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRoot } from 'react-dom/client'
 import { useEffect, useState } from 'react'
 import { routeTree } from './routeTree.gen'
-import type { RouterContext } from './router'
+import type { RouterContext, AdminUser } from './router'
 import { AdminUserContext } from './lib/role-gate'
 import { getAdminRole } from '@monobase/sdk-ts/generated/sdk.gen'
+import type { AdminRoleResponse } from '@monobase/sdk-ts/generated/types.gen'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,7 +38,8 @@ function App() {
     getAdminRole()
       .then(({ data }) => {
         if (data) {
-          setAuth({ user: { email: (data as any).email, name: (data as any).name, role: (data as any).role }, loading: false })
+          const adminData = data as AdminRoleResponse
+          setAuth({ user: { email: adminData.email, name: adminData.name, role: adminData.role as AdminUser['role'] }, loading: false })
         } else {
           setAuth({ user: null, loading: false })
         }
