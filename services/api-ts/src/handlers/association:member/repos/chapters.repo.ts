@@ -151,7 +151,7 @@ export class AffiliationTransferRepository extends DatabaseRepository<
     }
 
     if (filters.status) {
-      conditions.push(eq(affiliationTransfers.status, filters.status as any)); // SAFE: Drizzle enum narrowing
+      conditions.push(eq(affiliationTransfers.status, filters.status as AffiliationTransfer['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;

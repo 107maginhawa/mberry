@@ -39,7 +39,7 @@ export class OrderRepository extends DatabaseRepository<
       conditions.push(eq(marketplaceOrders.listingId, filters.listingId));
     }
     if (filters.status) {
-      conditions.push(eq(marketplaceOrders.status, filters.status as any));
+      conditions.push(eq(marketplaceOrders.status, filters.status as MarketplaceOrder['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;

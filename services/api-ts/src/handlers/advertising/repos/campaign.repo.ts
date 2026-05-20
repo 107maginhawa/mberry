@@ -27,10 +27,10 @@ export class CampaignRepository extends DatabaseRepository<Campaign, NewCampaign
       conditions.push(eq(campaigns.advertiserId, filters.advertiserId));
     }
     if (filters.status) {
-      conditions.push(eq(campaigns.status, filters.status as any));
+      conditions.push(eq(campaigns.status, filters.status as Campaign['status']));
     }
     if (filters.adSlot) {
-      conditions.push(eq(campaigns.adSlot, filters.adSlot as any));
+      conditions.push(eq(campaigns.adSlot, filters.adSlot as Campaign['adSlot']));
     }
     return conditions.length > 0 ? and(...conditions) : undefined;
   }

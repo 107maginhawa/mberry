@@ -26,10 +26,10 @@ export class VendorRepository extends DatabaseRepository<Vendor, NewVendor, Vend
       conditions.push(eq(vendors.organizationId, filters.organizationId));
     }
     if (filters.category) {
-      conditions.push(eq(vendors.category, filters.category as any));
+      conditions.push(eq(vendors.category, filters.category as Vendor['category']));
     }
     if (filters.verificationStatus) {
-      conditions.push(eq(vendors.verificationStatus, filters.verificationStatus as any));
+      conditions.push(eq(vendors.verificationStatus, filters.verificationStatus as Vendor['verificationStatus']));
     }
     if (filters.contactEmail) {
       conditions.push(eq(vendors.contactEmail, filters.contactEmail));

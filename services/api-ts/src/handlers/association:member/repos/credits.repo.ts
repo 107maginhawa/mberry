@@ -239,7 +239,7 @@ export class ProfessionalLicenseRepository extends DatabaseRepository<
     }
 
     if (filters.status) {
-      conditions.push(eq(professionalLicenses.status, filters.status as any));
+      conditions.push(eq(professionalLicenses.status, filters.status as ProfessionalLicense['status']));
     }
 
     if (filters.jurisdiction) {
@@ -288,7 +288,7 @@ export class LicenseRenewalAlertRepository extends DatabaseRepository<
     }
 
     if (filters.status) {
-      conditions.push(eq(licenseRenewalAlerts.status, filters.status as any));
+      conditions.push(eq(licenseRenewalAlerts.status, filters.status as LicenseRenewalAlert['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;

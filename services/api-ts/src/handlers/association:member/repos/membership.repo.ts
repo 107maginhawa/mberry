@@ -76,7 +76,7 @@ export class MembershipTierRepository extends DatabaseRepository<
     }
 
     if (filters.status) {
-      conditions.push(eq(membershipTiers.status, filters.status as any)); // SAFE: Drizzle enum narrowing
+      conditions.push(eq(membershipTiers.status, filters.status as MembershipTier['status']));
     }
 
     if (filters.name) {
@@ -148,7 +148,7 @@ export class MembershipRepository extends DatabaseRepository<
     }
 
     if (filters.status) {
-      conditions.push(eq(memberships.status, filters.status as any)); // SAFE: Drizzle enum narrowing
+      conditions.push(eq(memberships.status, filters.status as Membership['status']));
     }
 
     if (filters.tierId) {
@@ -262,7 +262,7 @@ export class MembershipApplicationRepository extends DatabaseRepository<
 
     if (filters.status) {
       conditions.push(
-        eq(membershipApplications.status, filters.status as any), // SAFE: Drizzle enum narrowing
+        eq(membershipApplications.status, filters.status as MembershipApplication['status']),
       );
     }
 

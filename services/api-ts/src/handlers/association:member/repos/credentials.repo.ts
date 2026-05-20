@@ -45,11 +45,11 @@ export class CredentialTemplateRepository extends DatabaseRepository<
     }
 
     if (filters.type) {
-      conditions.push(eq(credentialTemplates.type, filters.type as any));
+      conditions.push(eq(credentialTemplates.type, filters.type as CredentialTemplate['type']));
     }
 
     if (filters.status) {
-      conditions.push(eq(credentialTemplates.status, filters.status as any));
+      conditions.push(eq(credentialTemplates.status, filters.status as CredentialTemplate['status']));
     }
 
     if (filters.q) {
@@ -99,7 +99,7 @@ export class DigitalCredentialRepository extends DatabaseRepository<
     }
 
     if (filters.status) {
-      conditions.push(eq(digitalCredentials.status, filters.status as any));
+      conditions.push(eq(digitalCredentials.status, filters.status as DigitalCredential['status']));
     }
 
     if (filters.q) {

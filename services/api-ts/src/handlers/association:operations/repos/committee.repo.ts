@@ -90,7 +90,7 @@ export class CommitteeRepository {
   async updateMemberRole(memberId: string, role: string): Promise<CommitteeMember> {
     const [result] = await this.db
       .update(committeeMembers)
-      .set({ role: role as any, updatedAt: new Date() })
+      .set({ role: role as CommitteeMember['role'], updatedAt: new Date() })
       .where(eq(committeeMembers.id, memberId))
       .returning();
     return result!;

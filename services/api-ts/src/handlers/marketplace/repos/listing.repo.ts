@@ -33,7 +33,7 @@ export class ListingRepository extends DatabaseRepository<
       conditions.push(eq(marketplaceListings.vendorId, filters.vendorId));
     }
     if (filters.status) {
-      conditions.push(eq(marketplaceListings.status, filters.status as any));
+      conditions.push(eq(marketplaceListings.status, filters.status as MarketplaceListing['status']));
     }
     if (filters.categoryTag) {
       conditions.push(

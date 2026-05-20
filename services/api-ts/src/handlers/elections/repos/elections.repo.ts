@@ -7,8 +7,8 @@ export class ElectionsRepository {
 
   async list(orgId: string, filters?: { status?: string; type?: string; limit?: number; offset?: number }) {
     const conditions: SQL<unknown>[] = [eq(elections.organizationId, orgId)];
-    if (filters?.status) conditions.push(eq(elections.status, filters.status as any));
-    if (filters?.type) conditions.push(eq(elections.type, filters.type as any));
+    if (filters?.status) conditions.push(eq(elections.status, filters.status as Election['status']));
+    if (filters?.type) conditions.push(eq(elections.type, filters.type as Election['type']));
     const limit = filters?.limit ?? 25;
     const offset = filters?.offset ?? 0;
     return this.db.select().from(elections)
@@ -43,7 +43,7 @@ export class ElectionsRepository {
   }
 
   async updateNomineeStatus(id: string, status: string) {
-    const [result] = await this.db.update(electionNominees).set({ status: status as any, updatedAt: new Date() }).where(eq(electionNominees.id, id)).returning();
+    const [result] = await this.db.update(electionNominees).set({ status: status as ElectionNominee['status'], updatedAt: new Date() }).where(eq(electionNominees.id, id)).returning();
     return result!;
   }
 

@@ -28,7 +28,7 @@ export class CreativeRepository extends DatabaseRepository<Creative, NewCreative
       conditions.push(eq(creatives.campaignId, filters.campaignId));
     }
     if (filters.status) {
-      conditions.push(eq(creatives.status, filters.status as any));
+      conditions.push(eq(creatives.status, filters.status as Creative['status']));
     }
     return conditions.length > 0 ? and(...conditions) : undefined;
   }

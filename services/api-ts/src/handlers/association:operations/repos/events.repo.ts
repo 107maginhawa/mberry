@@ -43,7 +43,7 @@ export class EventRepository extends DatabaseRepository<Event, NewEvent, EventFi
       conditions.push(eq(events.organizationId, filters.organizationId));
     }
     if (filters.status) {
-      conditions.push(eq(events.status, filters.status as any));
+      conditions.push(eq(events.status, filters.status as Event['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
@@ -108,7 +108,7 @@ export class EventRegistrationRepository extends DatabaseRepository<
       conditions.push(eq(eventRegistrations.personId, filters.personId));
     }
     if (filters.status) {
-      conditions.push(eq(eventRegistrations.status, filters.status as any));
+      conditions.push(eq(eventRegistrations.status, filters.status as EventRegistration['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
@@ -183,7 +183,7 @@ export class WaitlistEntryRepository extends DatabaseRepository<
   async nextPosition(eventId: string): Promise<number> {
     const entries = await this.findMany({ eventId } as WaitlistEntryFilters);
     if (entries.length === 0) return 1;
-    return Math.max(...entries.map(e => (e as any).position ?? 0)) + 1;
+    return Math.max(...entries.map(e => e.position ?? 0)) + 1;
   }
 
   /**
@@ -193,13 +193,13 @@ export class WaitlistEntryRepository extends DatabaseRepository<
   async promoteNext(eventId: string): Promise<WaitlistEntry | null> {
     const entries = await this.findMany({ eventId } as WaitlistEntryFilters);
     const unpromoted = entries
-      .filter(e => !(e as any).promotedAt)
-      .sort((a, b) => ((a as any).position ?? 0) - ((b as any).position ?? 0));
+      .filter(e => !e.promotedAt)
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
     if (unpromoted.length === 0) return null;
     const next = unpromoted[0]!;
     const [promoted] = await this.db
       .update(waitlistEntries)
-      .set({ promotedAt: new Date(), updatedAt: new Date() } as any)
+      .set({ promotedAt: new Date(), updatedAt: new Date() } as Partial<WaitlistEntry>)
       .where(eq(waitlistEntries.id, next.id))
       .returning();
     return promoted as WaitlistEntry;

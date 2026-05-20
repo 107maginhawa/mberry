@@ -113,8 +113,8 @@ export class DuesRepository {
 
     if (filters.organizationId) conditions.push(eq(duesPayments.organizationId, filters.organizationId));
     if (filters.personId) conditions.push(eq(duesPayments.personId, filters.personId));
-    if (filters.status) conditions.push(eq(duesPayments.status, filters.status as any));
-    if (filters.method) conditions.push(eq(duesPayments.paymentMethod, filters.method as any));
+    if (filters.status) conditions.push(eq(duesPayments.status, filters.status as DuesPayment['status']));
+    if (filters.method) conditions.push(eq(duesPayments.paymentMethod, filters.method as DuesPayment['paymentMethod']));
     if (filters.fromDate) conditions.push(gte(duesPayments.paidAt, filters.fromDate));
     if (filters.toDate) conditions.push(lte(duesPayments.paidAt, filters.toDate));
 
@@ -154,7 +154,7 @@ export class DuesRepository {
   async updatePaymentStatus(id: string, status: string, extra?: Partial<DuesPayment>): Promise<DuesPayment> {
     const [result] = await this.db
       .update(duesPayments)
-      .set({ status: status as any, ...extra, updatedAt: new Date() })
+      .set({ status: status as DuesPayment['status'], ...extra, updatedAt: new Date() })
       .where(eq(duesPayments.id, id))
       .returning();
     return result!;

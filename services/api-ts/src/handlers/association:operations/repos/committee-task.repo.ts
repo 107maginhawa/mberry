@@ -48,7 +48,7 @@ export class CommitteeTaskRepository {
 
   async updateStatus(id: string, status: string, completedBy?: string): Promise<CommitteeTask> {
     const updates: Partial<CommitteeTask> = {
-      status: status as any,
+      status: status as CommitteeTask['status'],
       updatedAt: new Date(),
     };
     if (status === 'completed') {

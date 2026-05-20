@@ -43,9 +43,9 @@ export class MessageTemplateRepository {
     offset?: number;
   }): Promise<MessageTemplate[]> {
     const conditions = [eq(messageTemplates.organizationId, organizationId)];
-    if (filters.channel) conditions.push(eq(messageTemplates.channel, filters.channel as any));
+    if (filters.channel) conditions.push(eq(messageTemplates.channel, filters.channel as MessageTemplate['channel']));
     if (filters.category) conditions.push(eq(messageTemplates.category, filters.category));
-    if (filters.status) conditions.push(eq(messageTemplates.status, filters.status as any));
+    if (filters.status) conditions.push(eq(messageTemplates.status, filters.status as MessageTemplate['status']));
     if (filters.isTransactional !== undefined) conditions.push(eq(messageTemplates.isTransactional, filters.isTransactional));
     if (filters.q) conditions.push(like(messageTemplates.name, `%${filters.q}%`));
 
@@ -91,9 +91,9 @@ export class MessageRepository {
     offset?: number;
   }): Promise<Message[]> {
     const conditions = [eq(messages.organizationId, organizationId)];
-    if (filters.channel) conditions.push(eq(messages.channel, filters.channel as any));
+    if (filters.channel) conditions.push(eq(messages.channel, filters.channel as Message['channel']));
     if (filters.senderId) conditions.push(eq(messages.senderId, filters.senderId));
-    if (filters.status) conditions.push(eq(messages.status, filters.status as any));
+    if (filters.status) conditions.push(eq(messages.status, filters.status as Message['status']));
     if (filters.scheduledAfter) conditions.push(gte(messages.scheduledAt, filters.scheduledAfter));
 
     return this.db.select().from(messages)
@@ -112,7 +112,7 @@ export class MessageRepository {
     const rows = await this.db.select().from(messages)
       .where(and(
         eq(messages.organizationId, organizationId),
-        eq(messages.channel, channel as any),
+        eq(messages.channel, channel as Message['channel']),
         eq(messages.status, 'sent'),
         gte(messages.sentAt, startOfDay),
       ))
@@ -213,7 +213,7 @@ export class CommunicationsRepository {
 
   async list(orgId: string, filters?: { status?: string; search?: string; limit?: number; offset?: number }) {
     const conditions: SQL<unknown>[] = [eq(announcements.organizationId, orgId)];
-    if (filters?.status) conditions.push(eq(announcements.status, filters.status as any));
+    if (filters?.status) conditions.push(eq(announcements.status, filters.status as Announcement['status']));
     if (filters?.search) conditions.push(like(announcements.title, `%${filters.search}%`));
 
     const [data, countResult] = await Promise.all([
@@ -247,7 +247,7 @@ export class CommunicationsRepository {
       ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))
       : eq(announcements.id, id);
     const [result] = await this.db.update(announcements)
-      .set({ status: status as any, ...extra, updatedAt: new Date() })
+      .set({ status: status as Announcement['status'], ...extra, updatedAt: new Date() })
       .where(conditions).returning();
     return result!;
   }

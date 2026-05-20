@@ -30,10 +30,10 @@ export class JobPostingRepository {
       conditions.push(eq(jobPostings.organizationId, filters.organizationId));
     }
     if (filters?.status) {
-      conditions.push(eq(jobPostings.status, filters.status as any));
+      conditions.push(eq(jobPostings.status, filters.status as JobPosting['status']));
     }
     if (filters?.type) {
-      conditions.push(eq(jobPostings.type, filters.type as any));
+      conditions.push(eq(jobPostings.type, filters.type as JobPosting['type']));
     }
     if (filters?.search) {
       conditions.push(like(jobPostings.title, `%${filters.search}%`));
@@ -139,7 +139,7 @@ export class JobApplicationRepository {
       conditions.push(eq(jobApplications.personId, filters.personId));
     }
     if (filters?.status) {
-      conditions.push(eq(jobApplications.status, filters.status as any));
+      conditions.push(eq(jobApplications.status, filters.status as JobApplication['status']));
     }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;

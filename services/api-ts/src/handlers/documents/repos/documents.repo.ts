@@ -70,7 +70,7 @@ export class DocumentRepository extends DatabaseRepository<
     }
 
     if (filters.status) {
-      conditions.push(eq(documents.status, filters.status as any));
+      conditions.push(eq(documents.status, filters.status as Document['status']));
     }
 
     if (filters.q) {

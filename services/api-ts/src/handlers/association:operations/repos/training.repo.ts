@@ -46,7 +46,7 @@ export class TrainingRepository extends DatabaseRepository<Training, NewTraining
       conditions.push(eq(trainings.organizationId, filters.organizationId));
     }
     if (filters.status) {
-      conditions.push(eq(trainings.status, filters.status as any));
+      conditions.push(eq(trainings.status, filters.status as Training['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
@@ -94,7 +94,7 @@ export class TrainingEnrollmentRepository extends DatabaseRepository<
       conditions.push(eq(trainingEnrollments.personId, filters.personId));
     }
     if (filters.status) {
-      conditions.push(eq(trainingEnrollments.status, filters.status as any));
+      conditions.push(eq(trainingEnrollments.status, filters.status as TrainingEnrollment['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
@@ -123,7 +123,7 @@ export class CourseRepository extends DatabaseRepository<Course, NewCourse, Cour
       conditions.push(eq(courses.organizationId, filters.organizationId));
     }
     if (filters.status) {
-      conditions.push(eq(courses.status, filters.status as any));
+      conditions.push(eq(courses.status, filters.status as Course['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
@@ -160,7 +160,7 @@ export class CourseEnrollmentRepository extends DatabaseRepository<
       conditions.push(eq(courseEnrollments.personId, filters.personId));
     }
     if (filters.status) {
-      conditions.push(eq(courseEnrollments.status, filters.status as any));
+      conditions.push(eq(courseEnrollments.status, filters.status as CourseEnrollment['status']));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
