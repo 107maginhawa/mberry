@@ -6,6 +6,7 @@
 import { eq, and, sql, isNull, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import type { PgTable } from 'drizzle-orm/pg-core';
+import type { Logger } from '@/types/logger';
 
 /**
  * Pagination options interface
@@ -42,7 +43,7 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
   constructor(
     protected db: DatabaseInstance,
     protected table: PgTable,
-    protected logger?: any
+    protected logger?: Logger
   ) {}
 
   /**

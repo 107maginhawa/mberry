@@ -4,10 +4,13 @@
  */
 
 import type { Context } from 'hono';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { HTTPException } from 'hono/http-exception';
 import type { Config } from '@/core/config';
-import type { App } from '@/types/app';
+import type { App, Variables } from '@/types/app';
 import { ZodError } from 'zod';
+
+type AppContext = Context<{ Variables: Variables }>;
 
 export class AppError extends Error {
   constructor(
@@ -133,9 +136,9 @@ function applySecurity(obj: Record<string, any>, config?: Config): Record<string
  * Helper to create base error fields for all error responses
  * Applies security filtering based on configuration
  */
-function createBaseErrorFields(c: Context, err: { message: string; code?: string }, statusCode: number, config?: Config) {
+function createBaseErrorFields(c: AppContext, err: { message: string; code?: string }, statusCode: number, config?: Config) {
   const timestamp = new Date().toISOString();
-  const requestId = c.get('requestId' as any) || c.req.header('X-Request-ID') || crypto.randomUUID();
+  const requestId = c.get('requestId') || c.req.header('X-Request-ID') || crypto.randomUUID();
   
   const isProduction = process.env.NODE_ENV === 'production';
   const isDebugMode = config?.logging?.level === 'debug';
@@ -157,11 +160,11 @@ function createBaseErrorFields(c: Context, err: { message: string; code?: string
  * Returns responses matching TypeSpec error models
  */
 export function createErrorHandler(config: Config) {
-  return (err: Error, c: Context) => {
+  return (err: Error, c: AppContext) => {
     // Get logger from context (injected by dependency middleware)
-    const logger = c.get('logger' as any);
+    const logger = c.get('logger');
     const timestamp = new Date().toISOString();
-    const requestId = c.get('requestId' as any) || c.req.header('X-Request-ID') || crypto.randomUUID();
+    const requestId = c.get('requestId') || c.req.header('X-Request-ID') || crypto.randomUUID();
     
     // Create a child logger with request context
     const log = logger?.child({
@@ -184,7 +187,7 @@ export function createErrorHandler(config: Config) {
         ...createBaseErrorFields(c, { message: err.message, code: err.name || 'HTTP_ERROR' }, err.status, config),
       };
 
-      return c.json(applySecurity(errorResponse, config), err.status as any);
+      return c.json(applySecurity(errorResponse, config), err.status as ContentfulStatusCode);
     }
 
     // Handle custom application errors (AppError, RateLimitError, etc.)
@@ -212,7 +215,7 @@ export function createErrorHandler(config: Config) {
           windowSize: 60, // 60 seconds window
         };
 
-        return c.json(applySecurity(rateLimitResponse, config), err.statusCode as any);
+        return c.json(applySecurity(rateLimitResponse, config), err.statusCode as ContentfulStatusCode);
       }
 
       // Handle AuthenticationError with specialized TypeSpec model
@@ -223,7 +226,7 @@ export function createErrorHandler(config: Config) {
           supportedSchemes: err.details?.supportedSchemes,
         };
 
-        return c.json(applySecurity(authResponse, config), err.statusCode as any);
+        return c.json(applySecurity(authResponse, config), err.statusCode as ContentfulStatusCode);
       }
 
       // Handle AuthorizationError with specialized TypeSpec model  
@@ -235,7 +238,7 @@ export function createErrorHandler(config: Config) {
           resource: err.details?.resource,
         };
 
-        return c.json(applySecurity(authzResponse, config), err.statusCode as any);
+        return c.json(applySecurity(authzResponse, config), err.statusCode as ContentfulStatusCode);
       }
 
       // Handle HipaaComplianceError with specialized TypeSpec model
@@ -248,7 +251,7 @@ export function createErrorHandler(config: Config) {
           remediationRequired: err.details?.remediationRequired,
         };
 
-        return c.json(applySecurity(hipaaResponse, config), err.statusCode as any);
+        return c.json(applySecurity(hipaaResponse, config), err.statusCode as ContentfulStatusCode);
       }
 
       // Handle TimeoutError with specialized TypeSpec model
@@ -260,7 +263,7 @@ export function createErrorHandler(config: Config) {
           retryable: err.details?.retryable,
         };
 
-        return c.json(applySecurity(timeoutResponse, config), err.statusCode as any);
+        return c.json(applySecurity(timeoutResponse, config), err.statusCode as ContentfulStatusCode);
       }
 
       // Handle ExternalServiceError with specialized TypeSpec model
@@ -279,7 +282,7 @@ export function createErrorHandler(config: Config) {
           retryAfter: err.details?.retryAfter,
         };
 
-        return c.json(applySecurity(externalServiceResponse, config), err.statusCode as any);
+        return c.json(applySecurity(externalServiceResponse, config), err.statusCode as ContentfulStatusCode);
       }
 
       // Handle NotFoundError with specialized TypeSpec model
@@ -291,7 +294,7 @@ export function createErrorHandler(config: Config) {
           suggestions: err.details?.suggestions,
         };
 
-        return c.json(applySecurity(notFoundResponse, config), err.statusCode as any);
+        return c.json(applySecurity(notFoundResponse, config), err.statusCode as ContentfulStatusCode);
       }
 
       // Handle other AppError types with base ErrorDetail model
@@ -300,7 +303,7 @@ export function createErrorHandler(config: Config) {
         details: err.details,
       };
 
-      return c.json(applySecurity(errorResponse, config), err.statusCode as any);
+      return c.json(applySecurity(errorResponse, config), err.statusCode as ContentfulStatusCode);
     }
 
     // Handle Zod validation errors with detailed field information
@@ -318,14 +321,15 @@ export function createErrorHandler(config: Config) {
       
       const globalErrors: string[] = [];
       
-      zodError.issues.forEach((issue: any) => {
+      zodError.issues.forEach((issue) => {
         if (issue.path.length > 0) {
+          const rec = issue as Record<string, unknown>;
           fieldErrors.push({
             field: issue.path.join('.'),
-            value: 'received' in issue ? (issue as any).received : undefined,
+            value: 'received' in issue ? rec['received'] : undefined,
             code: issue.code,
             message: issue.message,
-            context: issue.fatal !== undefined ? { fatal: issue.fatal } : undefined,
+            context: 'fatal' in issue ? { fatal: rec['fatal'] as boolean } : undefined,
           });
         } else {
           globalErrors.push(issue.message);
@@ -364,7 +368,7 @@ export function createErrorHandler(config: Config) {
     // Handle Postgres encoding errors (e.g. null bytes in input). pg
     // wraps these in DrizzleQueryError; we map to 400 because the input
     // is fundamentally invalid rather than the server being broken.
-    const pgCode = (err as any)?.cause?.code ?? (err as any)?.code;
+    const pgCode = (err as Error & { cause?: { code?: string }; code?: string })?.cause?.code ?? (err as Error & { code?: string })?.code;
     if (pgCode === '22021') {
       log?.warn({ error: { message: err.message, pgCode } }, 'Postgres encoding error');
       const validationResponse = {
@@ -374,8 +378,8 @@ export function createErrorHandler(config: Config) {
     }
 
     // Handle errors with statusCode property (but not HTTPException or AppError)
-    if ('statusCode' in err && typeof (err as any).statusCode === 'number') {
-      const statusCode = (err as any).statusCode;
+    if ('statusCode' in err && typeof (err as { statusCode: unknown }).statusCode === 'number') {
+      const statusCode = (err as { statusCode: number }).statusCode;
       
       log?.warn({
         error: {
@@ -389,7 +393,7 @@ export function createErrorHandler(config: Config) {
         ...createBaseErrorFields(c, { message: err.message, code: err.name || 'ERROR' }, statusCode, config),
       };
 
-      return c.json(applySecurity(errorResponse, config), statusCode as any);
+      return c.json(applySecurity(errorResponse, config), statusCode as ContentfulStatusCode);
     }
 
     // Handle unknown/unexpected errors
