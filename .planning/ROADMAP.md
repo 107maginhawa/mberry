@@ -187,7 +187,7 @@
 - [x] **Phase 34: Wave G1 — Stabilization** — Membership input validation, grace period bounds, election test gaps (3/3 plans, completed 2026-05-20)
 - [x] **Phase 35: Wave G2 — Training Refactor** — Credit cycle start date fix in markComplete (1/1 plan, completed 2026-05-20)
 - [x] **Phase 36: Wave G3 — Architecture Cleanup** — Cross-context decoupling, comms consolidation doc (2/2 plans, completed 2026-05-20)
-- [ ] **Phase 37: Wave G4 — New Capabilities** — Concurrent session limits, Phase 2/3 BR stubs (parallel)
+- [ ] **Phase 37: Wave G4 — New Capabilities** — Concurrent session limits via Better-Auth (1 plan; P3 items tracked in BROWNFIELD_STATUS.md)
 
 ## Phase Details
 
@@ -521,4 +521,4 @@ Plans: not yet planned
 | 34. Wave G1 — Stabilization | v1.4.0 | 3/3 | Complete | 2026-05-20 |
 | 35. Wave G2 — Training Refactor | v1.4.0 | 1/1 | Complete | 2026-05-20 |
 | 36. Wave G3 — Architecture Cleanup | v1.4.0 | 2/2 | Complete | 2026-05-20 |
-| 37. Wave G4 — New Capabilities | v1.4.0 | 0/? | Not Started | -- |
+| 37. Wave G4 — New Capabilities | v1.4.0 | 0/1 | Not Started | -- |
