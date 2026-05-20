@@ -93,6 +93,13 @@ export async function refundInvoicePayment(
     throw new ConflictError('Invoice has already been refunded');
   }
 
+  if (!stripePaymentIntentId) {
+    throw new BusinessLogicError(
+      'No payment intent found for this invoice',
+      'PAYMENT_INTENT_MISSING'
+    );
+  }
+
   if (!stripeChargeId) {
     throw new BusinessLogicError(
       'No charge found for this invoice',
@@ -130,7 +137,7 @@ export async function refundInvoicePayment(
   try {
     // Create refund with Stripe
     const refundResult = await billing.createRefund({
-      paymentIntentId: stripePaymentIntentId,
+      paymentIntentId: stripePaymentIntentId!,
       amount: refundAmountCents,
       reason: reason as 'requested_by_customer' | 'duplicate' | 'fraudulent' | undefined,
       connectedAccountId: stripeAccountId,
