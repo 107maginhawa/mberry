@@ -42,6 +42,7 @@ export async function updateMyProfile(
   if (b['specialization'] !== undefined) updateData['specialization'] = b['specialization'];
   if (b['prcId'] !== undefined) updateData['prcId'] = b['prcId'];
   if (b['preferredLanguage'] !== undefined) updateData['preferredLanguage'] = b['preferredLanguage'];
+  if (b['avatar'] !== undefined) updateData['avatar'] = b['avatar'];
 
   const updated = await repo.updateOneById(personId, updateData as any);
 
