@@ -3,6 +3,8 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CompleteTrainingEnrollmentBody, CompleteTrainingEnrollmentParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingEnrollmentRepository, TrainingRepository } from './repos/training.repo';
+import { CreditEntryRepository } from '../association:member/repos/credits.repo';
+import { getCycleForDate } from '../association:member/utils/credit-cycle';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -15,7 +17,8 @@ import { POSITION_TITLES } from '@/utils/position-titles';
  *
  * Business rules:
  * - Set completedAt, status to completed
- * - Auto-credit if the training is creditBearing
+ * - [AC-M09-001] Auto-credit if the training is creditBearing
+ * - [AC-M10-002] No duplicate AUTO credits for same training+person
  */
 export async function completeTrainingEnrollment(
   ctx: ValidatedContext<CompleteTrainingEnrollmentBody, never, CompleteTrainingEnrollmentParams>
@@ -51,7 +54,37 @@ export async function completeTrainingEnrollment(
   } as any);
 
   const training = await trainingRepo.findOneById(enrollment.trainingId);
-  const creditAwarded = training?.creditBearing ? training.creditAmount : 0;
+  let creditAwarded = 0;
+
+  // [AC-M09-001] Auto-create credit entry for credit-bearing trainings
+  // [AC-M10-002] Duplicate guard via findByTrainingAndPerson
+  if (training?.creditBearing && training.creditAmount && training.creditAmount > 0) {
+    creditAwarded = training.creditAmount;
+    try {
+      const creditRepo = new CreditEntryRepository(db, logger);
+      const existing = await creditRepo.findByTrainingAndPerson(training.id, enrollment.personId);
+
+      if (!existing) {
+        const activityDate = training.endDate ?? new Date();
+        const cycle = getCycleForDate(activityDate, activityDate, 2);
+
+        await creditRepo.createOne({
+          personId: enrollment.personId,
+          organizationId: training.organizationId,
+          type: 'auto',
+          trainingId: training.id,
+          activityName: training.title,
+          provider: training.organizationId,
+          activityDate,
+          creditAmount: training.creditAmount,
+          cycleStart: cycle.cycleStart,
+          cycleEnd: cycle.cycleEnd,
+        });
+      }
+    } catch {
+      // Credit creation failure should not block enrollment completion
+    }
+  }
 
   await auditAction(ctx, {
     action: 'complete',

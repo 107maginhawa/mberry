@@ -67,6 +67,32 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
     return conditions.length > 0 ? and(...conditions) : undefined;
   }
 
+
+  /**
+   * Find an existing auto credit entry for a specific training+person combination.
+   * Used to prevent duplicate AUTO credits (AC-M10-002).
+   */
+  async findByTrainingAndPerson(
+    trainingId: string,
+    personId: string,
+  ): Promise<CreditEntry | null> {
+    this.logger?.debug({ trainingId, personId }, 'Checking for existing auto credit');
+
+    const [existing] = await this.db
+      .select()
+      .from(creditEntries)
+      .where(
+        and(
+          eq(creditEntries.trainingId, trainingId),
+          eq(creditEntries.personId, personId),
+          eq(creditEntries.type, 'auto'),
+        ),
+      )
+      .limit(1);
+
+    return existing ?? null;
+  }
+
   /**
    * Sum credit amounts for a person within a cycle, optionally filtered by org.
    */

@@ -37,24 +37,30 @@ export async function markComplete(ctx: Context): Promise<Response> {
   const updated = await repo.updateEnrollmentStatus(personEnrollment.id, 'completed');
 
   // [BR-13] Auto-create credit entry for credit-bearing trainings
+  // [AC-M10-002] Check for existing auto credit to prevent duplicates
   if (training.creditAmount && training.creditAmount > 0) {
     try {
       const creditRepo = new CreditEntryRepository(db);
-      const activityDate = training.endDate ?? new Date();
-      const cycle = getCycleForDate(activityDate, activityDate, 2);
 
-      await creditRepo.createOne({
-        personId: body.personId,
-        organizationId: training.organizationId,
-        type: 'auto',
-        trainingId: training.id,
-        activityName: training.title,
-        provider: training.organizationId,
-        activityDate,
-        creditAmount: training.creditAmount,
-        cycleStart: cycle.cycleStart,
-        cycleEnd: cycle.cycleEnd,
-      });
+      // Duplicate guard: skip if auto credit already exists for this training+person
+      const existing = await creditRepo.findByTrainingAndPerson(training.id, body.personId);
+      if (!existing) {
+        const activityDate = training.endDate ?? new Date();
+        const cycle = getCycleForDate(activityDate, activityDate, 2);
+
+        await creditRepo.createOne({
+          personId: body.personId,
+          organizationId: training.organizationId,
+          type: 'auto',
+          trainingId: training.id,
+          activityName: training.title,
+          provider: training.organizationId,
+          activityDate,
+          creditAmount: training.creditAmount,
+          cycleStart: cycle.cycleStart,
+          cycleEnd: cycle.cycleEnd,
+        });
+      }
     } catch {
       // Credit creation failure should not block marking complete
     }

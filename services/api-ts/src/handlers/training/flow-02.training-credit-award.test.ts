@@ -50,6 +50,7 @@ function defaultTrainingStubs(overrides: Record<string, (...args: any[]) => any>
 function defaultCreditStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
   return stubRepo(CreditEntryRepository, {
     createOne: async (data: any) => ({ id: 'credit-1', ...data }),
+    findByTrainingAndPerson: async () => null,
     ...overrides,
   });
 }

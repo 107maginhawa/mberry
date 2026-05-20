@@ -139,6 +139,7 @@ describe('markComplete', () => {
     // Also stub credit repo
     const creditMock = stubRepo(CreditEntryRepository, {
       createOne: async (data: any) => { creditCreated = data; return { id: 'credit-1', ...data }; },
+      findByTrainingAndPerson: async () => null,
     });
 
     const ctx = makeCtx({
