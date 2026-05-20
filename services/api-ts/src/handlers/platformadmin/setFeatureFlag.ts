@@ -35,5 +35,11 @@ export async function setFeatureFlag(
     description: `Feature flag "${body.moduleName}" ${body.enabled ? 'enabled' : 'disabled'} for ${body.targetType}:${body.targetId}`,
   });
 
-  return ctx.json(flag, 200);
+  // AC-M03-002: Include warning when disabling a feature flag
+  const response: Record<string, unknown> = { ...flag };
+  if (!body.enabled) {
+    response['warning'] = `Disabling "${body.moduleName}" will remove access for ${body.targetType}:${body.targetId}. This takes effect immediately.`;
+  }
+
+  return ctx.json(response, 200);
 }

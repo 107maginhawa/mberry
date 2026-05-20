@@ -37,4 +37,22 @@ describe('setFeatureFlag', () => {
     const res = await setFeatureFlag(ctx);
     expect((res as any).body?.enabled).toBe(false);
   });
+
+  // AC-M03-002: disable warning
+  test('returns warning when disabling a feature flag', async () => {
+    const disabledFlag = { ...fakeFlag, enabled: false };
+    restoreRepo(FeatureFlagRepository);
+    stubRepo(FeatureFlagRepository, { upsert: async () => disabledFlag });
+    const ctx = makeCtx({ _body: { targetType: 'org', targetId: 'org-1', moduleName: 'billing', enabled: false } });
+    const res = await setFeatureFlag(ctx);
+    expect((res as any).body?.warning).toContain('Disabling');
+    expect((res as any).body?.warning).toContain('billing');
+    expect((res as any).body?.warning).toContain('immediately');
+  });
+
+  test('does not return warning when enabling a feature flag', async () => {
+    const ctx = makeCtx({ _body: { targetType: 'org', targetId: 'org-1', moduleName: 'billing', enabled: true } });
+    const res = await setFeatureFlag(ctx);
+    expect((res as any).body?.warning).toBeUndefined();
+  });
 });

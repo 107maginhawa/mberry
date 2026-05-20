@@ -1,7 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateAdminBody, UpdateAdminParams } from '@/generated/openapi/validators';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
 
@@ -26,6 +26,21 @@ export async function updateAdmin(
   const existing = await repo.findById(adminId);
   if (!existing) {
     throw new NotFoundError('Admin not found');
+  }
+
+  // AC-M03-004: Cannot demote the last super admin
+  if (
+    existing.role === 'super' &&
+    body.role &&
+    body.role !== 'super'
+  ) {
+    const superCount = await repo.countByRole('super');
+    if (superCount <= 1) {
+      throw new BusinessLogicError(
+        'Cannot demote the last super admin',
+        'LAST_SUPER_ADMIN',
+      );
+    }
   }
 
   const updated = await repo.update(adminId, body);
