@@ -16,6 +16,35 @@ interface VotingBallotProps {
   userId?: string
 }
 
+interface PositionRecord {
+  id: string
+  title: string
+  sortOrder: number
+}
+
+interface NomineeRecord {
+  id: string
+  personId: string
+  positionId: string
+  status: string
+  bio?: string
+  platform?: string
+}
+
+interface BallotRecord {
+  id: string
+  voterId: string
+  positionId: string
+  nomineeId: string
+}
+
+interface ElectionData {
+  title: string
+  status: string
+  positions?: (string | PositionRecord)[]
+  nominees?: NomineeRecord[]
+}
+
 const NOMINEE_STATUS_COLORS: Record<string, string> = {
   nominated: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
   accepted: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
@@ -36,7 +65,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
   // Check existing votes
   const { data: ballotData } = useQuery({
     queryKey: ['my-ballots', electionId],
-    queryFn: () => api.get<any>(`/api/association/member/ballots?electionId=${electionId}`),
+    queryFn: () => api.get<{ data: BallotRecord[] }>(`/api/association/member/ballots?electionId=${electionId}`),
     enabled: !!electionId,
   })
 
@@ -51,19 +80,19 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
   }
 
   if (error || !data) {
-    return <div className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
+    return <div role="alert" aria-live="polite" className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
   }
 
-  const election = (data as any)?.data ?? data
-  const rawPositions: any[] = election.positions ?? []
-  const positions: { id: string; title: string; sortOrder: number }[] = rawPositions.map((p: any, i: number) =>
-    typeof p === 'string' ? { id: p, title: p, sortOrder: i } : { id: p.id ?? p, title: p.title ?? p.id ?? `Position ${i + 1}`, sortOrder: p.sortOrder ?? i },
+  const election = ((data as unknown as { data: ElectionData })?.data ?? data) as ElectionData
+  const rawPositions = election.positions ?? []
+  const positions: PositionRecord[] = rawPositions.map((p, i) =>
+    typeof p === 'string' ? { id: p, title: p, sortOrder: i } : { id: p.id, title: p.title, sortOrder: p.sortOrder ?? i },
   )
-  const nominees: any[] = election.nominees ?? []
+  const nominees: NomineeRecord[] = election.nominees ?? []
 
   // Check if already voted
-  const allBallots: any[] = ballotData?.data ?? ballotData ?? []
-  const myBallots = userId ? allBallots.filter((b: any) => b.voterId === userId) : allBallots
+  const allBallots: BallotRecord[] = ballotData?.data ?? []
+  const myBallots = userId ? allBallots.filter((b) => b.voterId === userId) : allBallots
   const hasVoted = myBallots.length > 0
 
   // Guard: not voting_open
@@ -135,8 +164,8 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
 
       toast.success('Your votes have been cast!')
       navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })
-    } catch (err: any) {
-      setSubmitError(err.message || 'Failed to cast vote. Please try again.')
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to cast vote. Please try again.')
       toast.error('Failed to cast vote')
     } finally {
       setSubmitting(false)
@@ -186,6 +215,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
                         key={nominee.id}
                         className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[var(--color-surface-warm)] transition-colors ${isSelected ? 'bg-[var(--color-primary)]/5' : ''}`}
                       >
+                        {/* eslint-disable-next-line no-restricted-syntax -- radio input has no @monobase/ui equivalent; RadioGroup not available */}
                         <input
                           type="radio"
                           name={`position-${position.id}`}
@@ -219,8 +249,8 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
 
       {/* Submit error */}
       {submitError && (
-        <div className="flex items-center gap-2 text-sm text-[var(--color-error)] bg-[var(--color-error-bg)] rounded-lg p-3">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div role="alert" aria-live="polite" className="flex items-center gap-2 text-sm text-[var(--color-error)] bg-[var(--color-error-bg)] rounded-lg p-3">
+          <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
           {submitError}
         </div>
       )}

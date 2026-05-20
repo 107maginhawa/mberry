@@ -36,7 +36,15 @@ export default tseslint.config(
 
       // Enforce @monobase/ui primitives — prevent raw HTML form elements
       'no-restricted-syntax': [
-        'warn',
+        'error',
+        {
+          selector: "JSXOpeningElement[name.name='button']",
+          message: 'Use <Button> from @monobase/ui instead of raw <button>.',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='input']",
+          message: 'Use <Input> from @monobase/ui instead of raw <input>.',
+        },
         {
           selector: "JSXOpeningElement[name.name='select']",
           message: 'Use <Select> from @monobase/ui instead of raw <select>.',
