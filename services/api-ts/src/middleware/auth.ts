@@ -149,13 +149,13 @@ export function authMiddleware(options?: AuthMiddlewareOptions) {
 
     if (session) {
       // Reject banned/suspended users
-      if ((session.user as any).banned) {
+      if ((session.user as User).banned) {
         throw new ForbiddenError('Account is suspended');
       }
 
       // Add user and session to context
       // Convert Better-Auth types to our internal types
-      const userRole = (session.user as any).role || 'user';
+      const userRole = (session.user as User).role || 'user';
 
       const user: User = {
         ...session.user,

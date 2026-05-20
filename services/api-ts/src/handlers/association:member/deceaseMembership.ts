@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { DeceaseMembershipBody, DeceaseMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
+import type { Membership } from './repos/membership.schema';
 import { duesInvoices } from './repos/dues.schema';
 import { auditAction } from '@/utils/audit';
 import { eq, and, notInArray } from 'drizzle-orm';
@@ -36,15 +37,15 @@ export async function deceaseMembership(
     );
   }
 
-  let updated: any;
-  await db.transaction(async (tx: any) => {
+  let updated!: Membership;
+  await db.transaction(async (tx: DatabaseInstance) => {
     // Update membership status with dateOfDeath
     updated = await repo.updateOneById(membershipId, {
       status: 'deceased',
       removedAt: new Date(),
       dateOfDeath: body.dateOfDeath,
       removalReason: body.terminationReason ?? null,
-    } as any);
+    } as Partial<Membership>);
 
     // Void open invoices in same transaction
     await (tx as any).update(duesInvoices)

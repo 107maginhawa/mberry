@@ -21,6 +21,8 @@ export type AdminLevel = 'super' | 'admin' | 'support';
  */
 export interface User extends BetterAuthUser {
   role: UserRole | string;
+  banned?: boolean;
+  twoFactorEnabled?: boolean;
 }
 
 /**

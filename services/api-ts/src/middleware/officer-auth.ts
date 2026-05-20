@@ -50,7 +50,7 @@ export function officerAuthMiddleware() {
       return title ? PRIVILEGED_POSITIONS.has(title.toLowerCase()) : false;
     });
 
-    if (holdsPrivilegedPosition && !(user as any).twoFactorEnabled) {
+    if (holdsPrivilegedPosition && !user.twoFactorEnabled) {
       throw new ForbiddenError(
         'Two-factor authentication required for privileged officer positions (President, Treasurer, Secretary). ' +
         'Please enable 2FA in your account settings.',
