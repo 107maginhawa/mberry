@@ -7,15 +7,16 @@
 
 | Metric | Count | % |
 |--------|-------|---|
-| **Total traceable items** | 246 | -- |
-| **Business Rules (BR)** | 40 | -- |
+| **Total traceable items** | 257 | -- |
+| **Business Rules (BR)** | 51 | -- |
 | **Acceptance Criteria (AC)** | 72 | -- |
 | **Workflows (WF)** | 114 | -- |
 | **Modules (M)** | 19 | -- |
 | --- | --- | --- |
-| **BR COMPLETE chains** (spec+code+test) | 28 | 70% |
-| **BR PARTIAL chains** (spec+code OR spec+test) | 11 | 27.5% |
-| **BR ORPHAN nodes** (spec only) | 1 | 2.5% |
+| **BR COMPLETE chains** (spec+code+test) | 36 | 70.6% |
+| **BR PARTIAL chains** (spec+code OR spec+test) | 12 | 23.5% |
+| **BR ORPHAN nodes** (spec only) | 1 | 2.0% |
+| **BR GAP nodes** (no test) | 2 | 3.9% |
 | **AC COMPLETE chains** (spec+code+test) | 9 | 12.5% |
 | **AC PARTIAL chains** | 17 | 23.6% |
 | **AC ORPHAN nodes** | 46 | 63.9% |
@@ -65,12 +66,24 @@
 | BR-38 | MASTER_PRD, WORKFLOW_MAP | `verifyVendor.ts`, `createListing.ts` | `vendor-crud.test.ts`, `listing-order.test.ts`, `verifyVendor.test.ts` | WF-098 | COMPLETE |
 | BR-39 | MASTER_PRD, WORKFLOW_MAP | NONE | `committees.test.ts`, `br-39.committee-dissolution.test.ts` | WF-108 | PARTIAL (test only) |
 | BR-40 | MASTER_PRD, WORKFLOW_MAP | NONE | `surveys-polls.test.ts`, `br-40.survey-anonymity.test.ts` | WF-101, WF-102 | PARTIAL (test only) |
+| BR-41 | br-registry.json (Wave 4) | `updateElectionStatus.ts` | `updateElectionStatus.test.ts`, `elections-flow.hurl`, `elections.spec.ts` | -- | COMPLETE (no WF link) |
+| BR-42 | br-registry.json (Wave 4) | `castVote.ts` | `castVote.test.ts`, `elections-flow.hurl` | -- | COMPLETE (no WF link) |
+| BR-43 | br-registry.json (Wave 4) | `castVote.ts` | `castVote.test.ts`, `elections.spec.ts` | -- | COMPLETE (no WF link) |
+| BR-44 | br-registry.json (Wave 4) | `certifyElection.ts` | `certifyElection.test.ts` | -- | COMPLETE (no WF link) |
+| BR-45 | br-registry.json (Wave 4) | `createMyCreditEntry.ts` | `createMyCreditEntry.test.ts` | -- | COMPLETE (no WF link) |
+| BR-46 | br-registry.json (Wave 4) | `credit-cycle.ts` | `credit-cycle.test.ts` | -- | COMPLETE (no WF link) |
+| BR-47 | br-registry.json (Wave 4) | `middleware/auth.ts` | `auth.spec.ts` (e2e only) | -- | PARTIAL (e2e only) |
+| BR-48 | br-registry.json (Wave 4) | `bulkRecordPayments.ts` | `bulkRecordPayments.test.ts` | -- | COMPLETE (no WF link) |
+| BR-49 | br-registry.json (Wave 4) | `requireActiveStatus()` | NONE | -- | **GAP (no test)** |
+| BR-50 | br-registry.json (Wave 4) | `createElection.ts` (DB constraint) | `createElection.test.ts` | -- | COMPLETE (no WF link) |
+| BR-51 | br-registry.json (Wave 4) | `middleware/auth.ts` | NONE | -- | **GAP (no test)** |
 
 ### BR Summary
 
-- **COMPLETE** (spec + code + test): BR-01, BR-02, BR-03, BR-05, BR-06, BR-07, BR-08, BR-09, BR-11, BR-12, BR-13, BR-16, BR-17, BR-19, BR-20, BR-21, BR-22, BR-23, BR-25, BR-27, BR-28, BR-29, BR-30, BR-32, BR-33, BR-34, BR-37, BR-38 = **28 (70%)**
-- **PARTIAL** (test-only, no production code referencing BR): BR-10, BR-14, BR-15, BR-18, BR-24, BR-26, BR-31, BR-35, BR-36, BR-39, BR-40 = **11 (27.5%)**
-- **ORPHAN** (spec only, no code or test): BR-04 = **1 (2.5%)**
+- **COMPLETE** (spec + code + test): BR-01, BR-02, BR-03, BR-05, BR-06, BR-07, BR-08, BR-09, BR-11, BR-12, BR-13, BR-16, BR-17, BR-19, BR-20, BR-21, BR-22, BR-23, BR-25, BR-27, BR-28, BR-29, BR-30, BR-32, BR-33, BR-34, BR-37, BR-38, BR-41, BR-42, BR-43, BR-44, BR-45, BR-46, BR-48, BR-50 = **36 (70.6%)**
+- **PARTIAL** (test-only or missing backend test): BR-10, BR-14, BR-15, BR-18, BR-24, BR-26, BR-31, BR-35, BR-36, BR-39, BR-40, BR-47 = **12 (23.5%)**
+- **ORPHAN** (spec only, no code or test): BR-04 = **1 (2.0%)**
+- **GAP** (no test at all): BR-49, BR-51 = **2 (3.9%)**
 
 ## Workflow Trace
 
@@ -268,7 +281,7 @@ These have spec and test but NO production code referencing the BR ID (test-only
 
 ## Key Findings
 
-1. **BR traceability is strong**: 70% COMPLETE chains, only 1 true orphan (BR-04). The remaining 27.5% are PARTIAL, mostly test-only (behavior tested but code lacks explicit BR annotation).
+1. **BR traceability is strong**: 70.6% COMPLETE chains (36/51), 1 true orphan (BR-04), 2 gaps with no tests (BR-49, BR-51). Wave 4 added BR-41 through BR-51 (11 new BRs). The 23.5% PARTIAL are mostly test-only (behavior tested but code lacks explicit BR annotation).
 
 2. **WF traceability is zero**: All 114 workflow IDs exist only in spec docs. This is a structural gap -- workflows are design artifacts without implementation-layer tracing. Not necessarily a defect, but means WF-level regression detection requires manual mapping.
 

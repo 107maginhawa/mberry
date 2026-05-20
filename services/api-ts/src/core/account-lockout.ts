@@ -11,6 +11,7 @@
 
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
+import { maskEmail } from '@/core/logger';
 import * as schema from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
 import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
@@ -115,7 +116,7 @@ export async function applyLockout(
       })
       .where(eq(schema.user.email, email));
 
-    logger?.warn({ email, banExpires }, 'AC-M01-005: Account locked after failed login attempts');
+    logger?.warn({ email: maskEmail(email), banExpires }, 'AC-M01-005: Account locked after failed login attempts');
 
     // Audit log the lockout event
     try {
@@ -131,10 +132,10 @@ export async function applyLockout(
         description: `Account locked for 15 minutes after ${MAX_FAILED_ATTEMPTS} failed login attempts`,
       });
     } catch (auditErr) {
-      logger?.warn({ error: auditErr, email }, 'Failed to audit lockout event');
+      logger?.warn({ error: auditErr, email: maskEmail(email) }, 'Failed to audit lockout event');
     }
   } catch (err) {
-    logger?.error({ error: err, email }, 'Failed to apply account lockout');
+    logger?.error({ error: err, email: maskEmail(email) }, 'Failed to apply account lockout');
   }
 }
 
@@ -158,9 +159,9 @@ export async function clearLockout(
       .where(eq(schema.user.email, email));
 
     clearFailedAttempts(email);
-    logger?.info({ email }, 'Account lockout cleared');
+    logger?.info({ email: maskEmail(email) }, 'Account lockout cleared');
   } catch (err) {
-    logger?.error({ error: err, email }, 'Failed to clear account lockout');
+    logger?.error({ error: err, email: maskEmail(email) }, 'Failed to clear account lockout');
   }
 }
 
