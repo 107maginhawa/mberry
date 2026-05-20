@@ -50,6 +50,7 @@ export interface AuthConfig {
   rateLimitEnabled?: boolean;
   rateLimitWindow?: number; // seconds
   rateLimitMax?: number; // max attempts
+  sessionLimit?: number; // max concurrent sessions per user (default 5, V-15)
   requireEmailVerification?: boolean; // default true — set false only for local dev
   adminEmails?: string[]; // emails to automatically promote to admin
   cookieSameSite?: 'strict' | 'lax' | 'none';

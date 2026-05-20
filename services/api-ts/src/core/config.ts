@@ -208,6 +208,7 @@ export function parseConfig(): Config {
       rateLimitEnabled: parseBool(process.env['AUTH_RATE_LIMIT_ENABLED'], true),
       rateLimitWindow: parseIntValue(process.env['AUTH_RATE_LIMIT_WINDOW'], 60), // 1 minute
       rateLimitMax: parseIntValue(process.env['AUTH_RATE_LIMIT_MAX'], 10), // 10 attempts
+      sessionLimit: parseIntValue(process.env['SESSION_LIMIT'], 5), // V-15: max concurrent sessions per user
       requireEmailVerification: parseBool(process.env['AUTH_REQUIRE_EMAIL_VERIFICATION'], true),
       adminEmails: parseList(process.env['AUTH_ADMIN_EMAILS'], []),
       cookieSameSite: (process.env['AUTH_COOKIE_SAMESITE'] as 'strict' | 'lax' | 'none') || undefined,

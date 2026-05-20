@@ -29,6 +29,7 @@ import {
   applyLockout,
   MAX_FAILED_ATTEMPTS,
 } from '@/core/account-lockout';
+import { enforceSessionLimit, DEFAULT_SESSION_LIMIT } from '@/core/session-limit';
 
 // Re-export auth instance type for type safety
 // AuthInstance type re-exported for convenience
@@ -258,6 +259,14 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
               });
             } catch (err) {
               logger?.warn({ error: err, userId: session.userId }, 'Failed to audit login event');
+            }
+
+            // V-15: Enforce concurrent session limit — revoke oldest sessions
+            try {
+              const limit = config.auth.sessionLimit ?? DEFAULT_SESSION_LIMIT;
+              await enforceSessionLimit(database, session.userId, limit, logger);
+            } catch (err) {
+              logger?.warn({ error: err, userId: session.userId }, 'V-15: Failed to enforce session limit');
             }
           },
         },
