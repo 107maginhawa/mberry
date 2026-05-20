@@ -1,5 +1,19 @@
 import { eq, and, desc, sql, gte, lte, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+
+/** Valid dues payment status transitions — used by handlers for guard logic. */
+export const VALID_PAYMENT_TRANSITIONS: Record<string, string[]> = {
+  pending: ['completed', 'failed', 'expired'],
+  submitted: ['underReview', 'confirmed', 'rejected'],
+  underReview: ['confirmed', 'rejected'],
+  confirmed: ['completed', 'refunded', 'partiallyRefunded'],
+  completed: ['refunded', 'partiallyRefunded'],
+  partiallyRefunded: ['refunded'],
+  failed: ['pending'],       // retry
+  rejected: ['pending'],     // resubmit
+  refunded: [],              // terminal
+  expired: [],               // terminal
+};
 import {
   duesOrgConfigs,
   duesCategoryOverrides,

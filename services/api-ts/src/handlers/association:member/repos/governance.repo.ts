@@ -34,7 +34,7 @@ export class PositionRepository {
   }
 
   async findByOrg(organizationId: string): Promise<Position[]> {
-    return this.db.select().from(positions).where(eq(positions.organizationId, organizationId));
+    return this.db.select().from(positions).where(eq(positions.organizationId, organizationId)).limit(100);
   }
 
   async update(id: string, data: Partial<Position>): Promise<Position | undefined> {
@@ -61,7 +61,7 @@ export class OfficerTermRepository {
   }
 
   async findByOrg(organizationId: string): Promise<OfficerTerm[]> {
-    return this.db.select().from(officerTerms).where(eq(officerTerms.organizationId, organizationId));
+    return this.db.select().from(officerTerms).where(eq(officerTerms.organizationId, organizationId)).limit(100);
   }
 
   async findActiveByPosition(positionId: string): Promise<OfficerTerm | undefined> {
@@ -165,12 +165,12 @@ export class DisciplinaryActionRepository {
 
   async findByOrg(organizationId: string): Promise<DisciplinaryAction[]> {
     return this.db.select().from(disciplinaryActions)
-      .where(eq(disciplinaryActions.organizationId, organizationId));
+      .where(eq(disciplinaryActions.organizationId, organizationId)).limit(100);
   }
 
   async findByPerson(personId: string): Promise<DisciplinaryAction[]> {
     return this.db.select().from(disciplinaryActions)
-      .where(eq(disciplinaryActions.targetPersonId, personId));
+      .where(eq(disciplinaryActions.targetPersonId, personId)).limit(100);
   }
 
   // M4-R4: No update method — disciplinary actions are immutable after creation

@@ -6,6 +6,28 @@
 import { eq, and, or, gte, lte, inArray, isNull, desc, asc, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
+import { BusinessLogicError } from '@/core/errors';
+
+/** Valid booking status transitions — used by handlers for guard logic. */
+export const VALID_BOOKING_TRANSITIONS: Record<string, string[]> = {
+  pending: ['confirmed', 'rejected', 'cancelled'],
+  confirmed: ['completed', 'cancelled', 'no_show_client', 'no_show_host'],
+  rejected: [],              // terminal
+  cancelled: [],             // terminal
+  completed: [],             // terminal
+  no_show_client: [],        // terminal
+  no_show_host: [],          // terminal
+};
+
+export function validateBookingTransition(current: string, target: string): void {
+  const allowed = VALID_BOOKING_TRANSITIONS[current] ?? [];
+  if (!allowed.includes(target)) {
+    throw new BusinessLogicError(
+      `Invalid booking status transition from '${current}' to '${target}'`,
+      'INVALID_BOOKING_TRANSITION',
+    );
+  }
+}
 import {
   bookings,
   timeSlots,
@@ -272,7 +294,7 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
     this.logger?.debug({ bookingId, markedBy }, 'Marking booking as no-show');
 
     const status = markedBy === 'client' ? 'no_show_client' : 'no_show_host';
-    
+
     const updated = await this.updateOneById(bookingId, {
       status,
       noShowMarkedBy: markedBy,

@@ -707,5 +707,163 @@
       "e2e": []
     },
     "deferredReason": "Module M18 (Surveys) not yet implemented — deferred to milestone v2.0"
+  },
+  "BR-41": {
+    "rule": "Election State Machine Transitions",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/updateElectionStatus.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/elections-flow.hurl"
+      ],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/elections.spec.ts"
+      ]
+    },
+    "annotations": "Wave 4 discovery. VALID_TRANSITIONS map enforces: draft→nominationsOpen→votingOpen→awaitingConfirmation→published. Cancelled reachable from any non-terminal."
+  },
+  "BR-42": {
+    "rule": "One Vote Per Person Per Position",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/castVote.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/elections-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. ConflictError on duplicate vote."
+  },
+  "BR-43": {
+    "rule": "Voting Only When Status Is votingOpen",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/castVote.test.ts"
+      ],
+      "contract": [],
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/elections.spec.ts"
+      ]
+    },
+    "annotations": "Wave 4 discovery. Guard checks election.status === 'votingOpen'."
+  },
+  "BR-44": {
+    "rule": "Election Certification Cross-Module Effects",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/certifyElection.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. Certification ends outgoing officer terms, creates new terms, generates transition checklists."
+  },
+  "BR-45": {
+    "rule": "Credit Entry Requires ActivityName and Positive Amount",
+    "phase": 1,
+    "module": "M10",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/person/createMyCreditEntry.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. Validates activityName non-empty and creditAmount > 0."
+  },
+  "BR-46": {
+    "rule": "Credit Cycle Auto-Computed",
+    "phase": 1,
+    "module": "M10",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:member/utils/credit-cycle.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. Cycle computed from registrationDate + activityDate + cyclePeriodYears."
+  },
+  "BR-47": {
+    "rule": "Banned Users Rejected at Auth Middleware",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p0-auth",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": [
+        "apps/memberry/tests/e2e/auth.spec.ts"
+      ]
+    },
+    "annotations": "Wave 4 discovery. session.user.banned check in middleware/auth.ts."
+  },
+  "BR-48": {
+    "rule": "Bulk Payment Batch Size Limit",
+    "phase": 1,
+    "module": "M06",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/dues/bulkRecordPayments.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. MAX_BATCH_SIZE constant limits bulk payment operations."
+  },
+  "BR-49": {
+    "rule": "Active Status Includes Grace Period",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. requireActiveStatus() allows both 'active' and 'grace'. No dedicated test — gap."
+  },
+  "BR-50": {
+    "rule": "Election Date Ordering DB Constraints",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/createElection.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. CHECK constraints enforce: nominations close > open, voting close > open, voting open >= nominations close."
+  },
+  "BR-51": {
+    "rule": "Internal Service Token Timing-Safe Comparison",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts."
   }
 }

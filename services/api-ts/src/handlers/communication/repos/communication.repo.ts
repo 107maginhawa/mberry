@@ -30,7 +30,7 @@ export class MessageTemplateRepository {
   }
 
   async findByOrg(organizationId: string): Promise<MessageTemplate[]> {
-    return this.db.select().from(messageTemplates).where(eq(messageTemplates.organizationId, organizationId));
+    return this.db.select().from(messageTemplates).where(eq(messageTemplates.organizationId, organizationId)).limit(100);
   }
 
   async search(organizationId: string, filters: {
@@ -79,7 +79,7 @@ export class MessageRepository {
   }
 
   async findByOrg(organizationId: string): Promise<Message[]> {
-    return this.db.select().from(messages).where(eq(messages.organizationId, organizationId));
+    return this.db.select().from(messages).where(eq(messages.organizationId, organizationId)).limit(100);
   }
 
   async search(organizationId: string, filters: {
@@ -148,7 +148,7 @@ export class SubscriptionTopicRepository {
   }
 
   async findByOrg(organizationId: string): Promise<SubscriptionTopic[]> {
-    return this.db.select().from(subscriptionTopics).where(eq(subscriptionTopics.organizationId, organizationId));
+    return this.db.select().from(subscriptionTopics).where(eq(subscriptionTopics.organizationId, organizationId)).limit(100);
   }
 
   async update(id: string, data: Partial<SubscriptionTopic>): Promise<SubscriptionTopic | undefined> {

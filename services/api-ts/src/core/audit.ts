@@ -42,9 +42,9 @@ export interface AuditService {
   /**
    * Mark expired logs for purging (maintenance task)
    * Called periodically to identify logs exceeding retention period
-   * TODO: Not yet implemented
+   * Delegates to repository's purgeArchivedLogs which marks archived→pending-purge→deleted
    */
-  markForPurging?(): Promise<number>;
+  markForPurging(): Promise<number>;
   
   
   /**
@@ -75,8 +75,7 @@ class AuditServiceImpl implements AuditService {
     this.logEvent = this.repo.logEvent.bind(this.repo);
     this.verifyIntegrity = this.repo.verifyIntegrity.bind(this.repo);
     this.archiveOldLogs = this.repo.archiveOldLogs.bind(this.repo);
-    // TODO: markForPurging method not implemented in repository yet
-    // this.markForPurging = this.repo.markForPurging.bind(this.repo);
+    this.markForPurging = this.repo.purgeArchivedLogs.bind(this.repo);
     this.getAuditStatistics = this.repo.getAuditStatistics.bind(this.repo);
   }
   
@@ -84,7 +83,7 @@ class AuditServiceImpl implements AuditService {
   logEvent: AuditService['logEvent'];
   verifyIntegrity: AuditService['verifyIntegrity'];
   archiveOldLogs: AuditService['archiveOldLogs'];
-  markForPurging?: AuditService['markForPurging'];
+  markForPurging: AuditService['markForPurging'];
   getAuditStatistics: AuditService['getAuditStatistics'];
 }
 
