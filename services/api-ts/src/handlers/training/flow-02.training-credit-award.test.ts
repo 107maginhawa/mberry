@@ -6,6 +6,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -55,26 +56,43 @@ function defaultCreditStubs(overrides: Record<string, (...args: any[]) => any> =
   });
 }
 
+function defaultMembershipStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
+  return stubRepo(MembershipRepository, {
+    findByPersonAndOrg: async () => ({
+      id: 'mem-1',
+      personId: PERSON,
+      organizationId: ORG,
+      startDate: '2024-01-01',
+      status: 'active',
+    }),
+    ...overrides,
+  });
+}
+
 // ─── Tests ──────────────────────────────────────────────
 
 describe('[FLOW-02] Training Completion → Credit Award', () => {
   let trainingMocks: ReturnType<typeof stubRepo>;
   let creditMocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
 
   beforeEach(() => {
     restoreRepo(TrainingRepository);
     restoreRepo(CreditEntryRepository);
+    restoreRepo(MembershipRepository);
   });
 
   afterEach(() => {
     if (trainingMocks) Object.values(trainingMocks).forEach((m) => m.mockRestore());
     if (creditMocks) Object.values(creditMocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('completing credit-bearing training creates credit entry', async () => {
     let capturedCredit: any = null;
 
     trainingMocks = defaultTrainingStubs();
+    memberMocks = defaultMembershipStubs();
     creditMocks = defaultCreditStubs({
       createOne: async (data: any) => {
         capturedCredit = data;
@@ -141,6 +159,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
     let capturedCredit: any = null;
 
     trainingMocks = defaultTrainingStubs();
+    memberMocks = defaultMembershipStubs();
     creditMocks = defaultCreditStubs({
       createOne: async (data: any) => {
         capturedCredit = data;
@@ -202,6 +221,7 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
 
   test('credit creation failure does not block completion', async () => {
     trainingMocks = defaultTrainingStubs();
+    memberMocks = defaultMembershipStubs();
     creditMocks = defaultCreditStubs({
       createOne: async () => { throw new Error('DB write failed'); },
     });

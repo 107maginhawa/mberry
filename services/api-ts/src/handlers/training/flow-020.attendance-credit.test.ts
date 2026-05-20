@@ -15,6 +15,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -58,26 +59,43 @@ function stubTraining(overrides: Record<string, (...args: any[]) => any> = {}) {
   });
 }
 
+function stubMembership(overrides: Record<string, (...args: any[]) => any> = {}) {
+  return stubRepo(MembershipRepository, {
+    findByPersonAndOrg: async () => ({
+      id: 'mem-1',
+      personId: PERSON,
+      organizationId: ORG,
+      startDate: '2024-01-01',
+      status: 'active',
+    }),
+    ...overrides,
+  });
+}
+
 // ─── AC-M09-001: Auto-credit on attendance confirmation ─
 
 describe('[AC-M09-001] Auto-credit on attendance confirmation', () => {
   let trainingMocks: ReturnType<typeof stubRepo>;
   let creditMocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
 
   beforeEach(() => {
     restoreRepo(TrainingRepository);
     restoreRepo(CreditEntryRepository);
+    restoreRepo(MembershipRepository);
   });
 
   afterEach(() => {
     if (trainingMocks) Object.values(trainingMocks).forEach((m) => m.mockRestore());
     if (creditMocks) Object.values(creditMocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('markComplete creates credit_entry with type=auto when training is credit-bearing', async () => {
     let capturedCredit: any = null;
 
     trainingMocks = stubTraining();
+    memberMocks = stubMembership();
     creditMocks = stubRepo(CreditEntryRepository, {
       createOne: async (data: any) => {
         capturedCredit = data;
@@ -125,6 +143,7 @@ describe('[AC-M09-001] Auto-credit on attendance confirmation', () => {
     let capturedCredit: any = null;
 
     trainingMocks = stubTraining();
+    memberMocks = stubMembership();
     creditMocks = stubRepo(CreditEntryRepository, {
       createOne: async (data: any) => {
         capturedCredit = data;
@@ -150,15 +169,18 @@ describe('[AC-M09-001] Auto-credit on attendance confirmation', () => {
 describe('[AC-M10-002] No duplicate AUTO credits', () => {
   let trainingMocks: ReturnType<typeof stubRepo>;
   let creditMocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
 
   beforeEach(() => {
     restoreRepo(TrainingRepository);
     restoreRepo(CreditEntryRepository);
+    restoreRepo(MembershipRepository);
   });
 
   afterEach(() => {
     if (trainingMocks) Object.values(trainingMocks).forEach((m) => m.mockRestore());
     if (creditMocks) Object.values(creditMocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('skips credit creation when auto credit already exists for same training+person', async () => {
@@ -191,6 +213,7 @@ describe('[AC-M10-002] No duplicate AUTO credits', () => {
     let creditCreateCalled = false;
 
     trainingMocks = stubTraining();
+    memberMocks = stubMembership();
     creditMocks = stubRepo(CreditEntryRepository, {
       createOne: async (data: any) => { creditCreateCalled = true; return { id: 'new-credit', ...data }; },
       findByTrainingAndPerson: async () => null, // No existing
@@ -235,21 +258,25 @@ describe('[AC-M10-002] No duplicate AUTO credits', () => {
 describe('[FLOW-6.3] Attendance → Credit Entry → Certificate eligibility', () => {
   let trainingMocks: ReturnType<typeof stubRepo>;
   let creditMocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
 
   beforeEach(() => {
     restoreRepo(TrainingRepository);
     restoreRepo(CreditEntryRepository);
+    restoreRepo(MembershipRepository);
   });
 
   afterEach(() => {
     if (trainingMocks) Object.values(trainingMocks).forEach((m) => m.mockRestore());
     if (creditMocks) Object.values(creditMocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('credit entry links to training via trainingId for certificate verification', async () => {
     let capturedCredit: any = null;
 
     trainingMocks = stubTraining();
+    memberMocks = stubMembership();
     creditMocks = stubRepo(CreditEntryRepository, {
       createOne: async (data: any) => {
         capturedCredit = data;
@@ -272,6 +299,7 @@ describe('[FLOW-6.3] Attendance → Credit Entry → Certificate eligibility', (
 
   test('credit creation failure does not block attendance confirmation', async () => {
     trainingMocks = stubTraining();
+    memberMocks = stubMembership();
     creditMocks = stubRepo(CreditEntryRepository, {
       createOne: async () => { throw new Error('DB write failed'); },
       findByTrainingAndPerson: async () => null,
