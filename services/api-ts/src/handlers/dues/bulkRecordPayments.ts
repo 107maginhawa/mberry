@@ -99,7 +99,7 @@ export async function bulkRecordPayments(
           receiptNumber,
           amount: row.amount,
           currency: row.currency ?? 'PHP',
-          paymentMethod: row.paymentMethod as 'other' | 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash',
+          paymentMethod: row.paymentMethod as any,
           referenceNumber: row.referenceNumber ?? null,
           status: 'completed',
           recordedBy,
