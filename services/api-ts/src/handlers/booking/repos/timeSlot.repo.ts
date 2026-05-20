@@ -287,7 +287,7 @@ export class TimeSlotRepository extends DatabaseRepository<TimeSlot, NewTimeSlot
           .onConflictDoNothing({
             target: [timeSlots.event, timeSlots.startTime]
           })
-          .returning() as any[];
+          .returning() as TimeSlot[];
 
         created.push(...batchCreated);
         duplicates += (batch.length - batchCreated.length);

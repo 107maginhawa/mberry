@@ -227,8 +227,8 @@ export interface BookingEventFilters {
     if (updates.dailyConfigs) {
       processedUpdates.dailyConfigs = this.processAndValidateDailyConfigs(updates.dailyConfigs);
     }
-    if ((updates as any).effectiveFrom !== undefined && (updates as any).effectiveFrom) {
-      processedUpdates.effectiveFrom = new Date((updates as any).effectiveFrom);
+    if (updates.effectiveFrom !== undefined && updates.effectiveFrom) {
+      processedUpdates.effectiveFrom = new Date(updates.effectiveFrom);
     }
     if (updates.effectiveTo !== undefined) {
       processedUpdates.effectiveTo = updates.effectiveTo ? new Date(updates.effectiveTo) : null;

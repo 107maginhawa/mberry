@@ -80,7 +80,7 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
       conditions.push(lte(emailQueue.createdAt, filters.dateTo));
     }
     
-    return conditions.length > 0 ? and(...conditions as any) : undefined;
+    return conditions.length > 0 ? and(...conditions) : undefined;
   }
   
   /**
@@ -343,7 +343,7 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
           eq(emailQueue.status, 'pending'),
           sql`${emailQueue.scheduledAt} IS NOT NULL`,
           gte(emailQueue.scheduledAt, new Date())
-        ) as any
+        )
       );
     
     stats.scheduled = Number(scheduledCount?.count || 0);
@@ -368,7 +368,7 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
         and(
           eq(emailQueue.status, 'sent'),
           sql`${emailQueue.sentAt} IS NOT NULL`
-        ) as any
+        )
       )
       .limit(100); // Sample last 100 sent emails
     

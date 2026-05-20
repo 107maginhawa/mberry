@@ -149,7 +149,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
       // Store targetApp for later use when sending push notifications
       ...(request.targetApp && {
         data: { targetApp: request.targetApp }
-      } as any),
+      } as Record<string, unknown>),
     });
 
     this.logger?.info({
@@ -349,7 +349,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
     switch (notification.channel) {
       case 'email': {
         // Use email service to queue the email
-        const emailService = (globalThis as any).app?.email;
+        const emailService = (globalThis as unknown as Record<string, Record<string, unknown>>).app?.email;
         if (emailService) {
           // Map notification type to email template tag
           const templateTag = this.mapNotificationToEmailTemplate(notification.type);
@@ -358,10 +358,10 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
             // Get recipient email from person repository
             const person = await this.personRepo.findOneById(notification.recipient);
             
-            if (person && (person as any).email) {
+            if (person && (person as Record<string, unknown>).email) {
               await emailService.queueEmail({
                 templateTags: [templateTag],
-                recipient: (person as any).email,
+                recipient: (person as Record<string, unknown>).email as string,
                 variables: {
                   title: notification.title,
                   message: notification.message,
@@ -405,7 +405,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
             };
 
             // Optional: Filter by app tag if targetApp is specified
-            const targetApp = (notification as any).data?.targetApp;
+            const targetApp = (notification as Record<string, Record<string, string>>).data?.targetApp;
             if (targetApp) {
               oneSignalNotification.filters = [
                 { field: 'tag', key: 'app', relation: '=', value: targetApp }
@@ -435,7 +435,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
               this.logger?.info({
                 notificationId: notification.id,
                 oneSignalId: result.id,
-                recipients: (result as any).recipients
+                recipients: (result as Record<string, unknown>).recipients
               }, 'Push notification sent via OneSignal');
 
               // CR-03 fix: notifications schema has no metadata/deliveredAt columns.
@@ -444,7 +444,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
               await this.updateOneById(notification.id, {
                 status: 'delivered',
                 sentAt: new Date(),
-              } as any);
+              } as Record<string, unknown>);
             } else {
               this.logger?.warn({
                 notificationId: notification.id,

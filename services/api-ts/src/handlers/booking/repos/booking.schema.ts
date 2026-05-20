@@ -477,6 +477,7 @@ export interface BookingEventCreateRequest {
   formConfig?: FormConfig | null; // Can be null to clear - matches TypeSpec
   billingConfig?: BillingConfig | null; // Can be null to clear - matches TypeSpec
   status?: 'draft' | 'active' | 'paused' | 'archived';
+  effectiveFrom?: string; // Reschedule effective start date
   effectiveTo?: string | null; // Can be null to clear - matches TypeSpec
   dailyConfigs?: Record<DayOfWeek, DailyConfig>; // Optional: partial update supported
 }
