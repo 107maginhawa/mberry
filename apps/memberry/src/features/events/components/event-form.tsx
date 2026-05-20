@@ -47,7 +47,7 @@ interface EventFormProps {
     visibility?: string | null
     status: string
   }
-  onSuccess?: (event: unknown) => void
+  onSuccess?: (event: { id: string }) => void
   onCancel?: () => void
 }
 
@@ -85,7 +85,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
   const createMutOpts = createEventMutation()
   const createMut = useMutation({
     mutationFn: createMutOpts.mutationFn,
-    onSuccess: (data: unknown) => {
+    onSuccess: (data: { id: string }) => {
       queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
       onSuccess?.(data)
     },
@@ -94,7 +94,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
   const updateMutOpts = updateEventMutation()
   const updateMut = useMutation({
     mutationFn: updateMutOpts.mutationFn,
-    onSuccess: (data: unknown) => {
+    onSuccess: (data: { id: string }) => {
       queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
       onSuccess?.(data)
     },

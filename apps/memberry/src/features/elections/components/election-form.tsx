@@ -49,7 +49,7 @@ interface ElectionFormProps {
   orgId: string
   electionId?: string
   initialData?: ElectionInitialData
-  onSuccess?: (election: unknown) => void
+  onSuccess?: (election: { id: string }) => void
   onCancel?: () => void
 }
 
@@ -121,7 +121,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
 
   const createMut = useMutation({
     mutationFn: createElectionMutation().mutationFn,
-    onSuccess: (data: unknown) => {
+    onSuccess: (data: { id: string }) => {
       queryClient.invalidateQueries({ queryKey: listElectionsQueryKey({ query: { organizationId: orgId } }) })
       onSuccess?.(data)
     },
@@ -132,7 +132,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
 
   const updateMut = useMutation({
     mutationFn: updateElectionMutation().mutationFn,
-    onSuccess: (data: unknown) => {
+    onSuccess: (data: { id: string }) => {
       queryClient.invalidateQueries({ queryKey: listElectionsQueryKey({ query: { organizationId: orgId } }) })
       if (electionId) {
         queryClient.invalidateQueries({ queryKey: getElectionOptions({ path: { electionId } }).queryKey })
