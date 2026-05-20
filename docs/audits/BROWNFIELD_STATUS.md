@@ -74,7 +74,7 @@
 | V-16 | Three comms modules need consolidation | communication | RESOLVED | Phase 36 (COMMS-CONSOLIDATION.md — keep separate per transport) |
 | V-17 | memberNumber vs licenseNumber inconsistency | membership | RESOLVED | Intentional: memberNumber=association ID, licenseNumber=PRC license |
 | V-18 | Cross-context import of MembershipRepository | events/training | RESOLVED | Phase 36 (extracted to events/utils/membership-check.ts) |
-| V-19 | TypeSpec coverage ~60% | cross-cutting | DEFERRED | v2.0 — 5 modules need TypeSpec, too large for brownfield rescue |
+| V-19 | TypeSpec coverage ~60% | cross-cutting | RESOLVED | All 5 modules already have TypeSpec (training at association/operations/training.tsp; others confirmed via codegen). Compliance report checked wrong path. |
 | V-20 | No input validation on body.status | membership | RESOLVED | Phase 34 (Zod updateMemberSchema) |
 | V-21 | Fund allocation 100% sum not validated | dues | RESOLVED | v1.1.0 Phase 17 |
 
