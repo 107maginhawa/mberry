@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DenyAffiliationTransferBody, DenyAffiliationTransferParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { AffiliationTransferRepository } from './repos/chapters.repo';
+import type { AffiliationTransfer } from './repos/chapters.schema';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -33,7 +34,7 @@ export async function denyAffiliationTransfer(
 
   const updated = await repo.updateOneById(transferId, {
     status: 'denied',
-  } as any);
+  } as Partial<AffiliationTransfer>);
 
   await auditAction(ctx, {
     action: 'deny',

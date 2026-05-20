@@ -3,6 +3,7 @@ import type { CreateMembershipTierBody } from '@/generated/openapi/validators';
 import type { DatabaseInstance } from '@/core/database';
 import { ConflictError } from '@/core/errors';
 import { MembershipTierRepository } from './repos/membership.repo';
+import type { MembershipTier } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -40,7 +41,7 @@ export async function createMembershipTier(
     currency: body.currency,
     benefits: body.benefits || null,
     maxMembers: body.maxMembers ?? null,
-    status: body.status as any,
+    status: body.status as MembershipTier['status'],
     createdBy: user.id,
   });
 

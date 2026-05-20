@@ -3,6 +3,7 @@ import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import type { ImportRosterMembersBody } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
+import type { NewMembership } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -34,7 +35,7 @@ export async function importRosterMembers(
 
   for (let i = 0; i < body.members.length; i++) {
     try {
-      await repo.createOne({ ...body.members[i], organizationId: orgId } as any);
+      await repo.createOne({ ...body.members[i], organizationId: orgId } as NewMembership);
       imported++;
     } catch (err) {
       failed++;

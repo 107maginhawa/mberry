@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import type { AcknowledgeLicenseRenewalAlertParams } from '@/generated/openapi/validators';
 import { LicenseRenewalAlertRepository } from './repos/credits.repo';
+import type { LicenseRenewalAlert } from './repos/credentials.schema';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -34,7 +35,7 @@ export async function acknowledgeLicenseRenewalAlert(
 
   const updated = await repo.updateOneById(alertId, {
     status: 'acknowledged',
-  } as any);
+  } as Partial<LicenseRenewalAlert>);
 
   await auditAction(ctx, {
     action: 'update',

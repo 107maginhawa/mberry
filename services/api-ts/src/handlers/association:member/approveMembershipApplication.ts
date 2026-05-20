@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { ApproveMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository, MembershipRepository } from './repos/membership.repo';
+import type { MembershipApplication, NewMembership } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -52,7 +53,7 @@ export async function approveMembershipApplication(
       status: 'approved',
       reviewedBy: session.user.id,
       reviewedAt: now,
-    } as any);
+    } as Partial<MembershipApplication>);
 
     // Create a membership record — duesExpiryDate is null until payment settles (BR-01)
     const today = now.toISOString().split('T')[0];
@@ -63,9 +64,9 @@ export async function approveMembershipApplication(
       tierId: application.tierId,
       startDate: today as string,
       duesExpiryDate: null,
-      status: 'pendingPayment' as any,
+      status: 'pendingPayment',
       joinedAt: now,
-    } as any);
+    } as NewMembership);
 
     return updated;
   });

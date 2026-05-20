@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { CreateElectionBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
+import type { NewElection } from '../elections/repos/elections.schema';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -41,7 +42,7 @@ export async function createElection(
     positions: positionObjects,
     organizationId: orgId,
     status: 'draft',
-  } as any);
+  } as NewElection);
 
   await auditAction(ctx, {
     action: 'create',

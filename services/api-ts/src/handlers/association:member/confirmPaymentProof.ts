@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { ConfirmPaymentProofBody, ConfirmPaymentProofParams } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import type { DuesPayment } from '@/handlers/dues/repos/dues-payments.schema';
 import { settlePayment } from '@/handlers/dues/utils/settle-payment';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
@@ -65,7 +66,7 @@ export async function confirmPaymentProof(
     recordedBy: session.user.id,
     membershipExtendedFrom: settlement.membershipExtendedFrom,
     membershipExtendedTo: settlement.membershipExtendedTo,
-  } as any);
+  } as Partial<DuesPayment>);
 
   // Mark linked invoice as paid if present
   if (payment.invoiceId) {

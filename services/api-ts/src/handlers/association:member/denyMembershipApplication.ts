@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { DenyMembershipApplicationBody, DenyMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository } from './repos/membership.repo';
+import type { MembershipApplication } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -43,7 +44,7 @@ export async function denyMembershipApplication(
     reviewedBy: session.user.id,
     reviewedAt: new Date(),
     denialReason: body.denialReason ?? null,
-  } as any);
+  } as Partial<MembershipApplication>);
 
   await auditAction(ctx, {
     action: 'deny',

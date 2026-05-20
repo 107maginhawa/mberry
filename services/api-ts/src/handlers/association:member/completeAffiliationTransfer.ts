@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CompleteAffiliationTransferParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { ChapterAffiliationRepository, AffiliationTransferRepository } from './repos/chapters.repo';
+import type { AffiliationTransfer, ChapterAffiliation } from './repos/chapters.schema';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -37,7 +38,7 @@ export async function completeAffiliationTransfer(
   const updatedTransfer = await transferRepo.updateOneById(transferId, {
     status: 'completed',
     completedAt: new Date(),
-  } as any);
+  } as Partial<AffiliationTransfer>);
 
   // Find the source affiliation and mark it as transferred
   const sourceAffiliations = await affiliationRepo.findMany({
@@ -50,7 +51,7 @@ export async function completeAffiliationTransfer(
   if (sourceAffiliations.length > 0) {
     await affiliationRepo.updateOneById(sourceAffiliations[0]!.id, {
       status: 'transferred',
-    } as any);
+    } as Partial<ChapterAffiliation>);
   }
 
   // Create new affiliation in the target chapter

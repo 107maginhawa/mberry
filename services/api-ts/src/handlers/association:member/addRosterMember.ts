@@ -3,6 +3,7 @@ import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import type { AddRosterMemberBody } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
+import type { NewMembership } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -28,7 +29,7 @@ export async function addRosterMember(
   const logger = ctx.get('logger');
   const repo = new MembershipRepository(db, logger);
 
-  const member = await repo.createOne({ ...body, organizationId: orgId } as any);
+  const member = await repo.createOne({ ...body, organizationId: orgId } as NewMembership);
 
   await auditAction(ctx, {
     action: 'create',
