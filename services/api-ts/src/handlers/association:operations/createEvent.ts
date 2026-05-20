@@ -30,17 +30,14 @@ export async function createEvent(
   const repo = new EventRepository(db, logger);
 
   const event = await repo.createOne({
-    organizationId: (body as any).organizationId || orgId,
-    title: (body as any).title,
-    description: (body as any).description,
-    location: (body as any).location,
-    startDate: new Date((body as any).startDate),
-    endDate: new Date((body as any).endDate),
-    capacity: (body as any).capacity,
-    registrationFee: (body as any).registrationFee,
-    currency: (body as any).currency,
-    creditBearing: (body as any).creditBearing,
-    creditAmount: (body as any).creditAmount,
+    organizationId: body.organizationId || orgId,
+    title: body.title,
+    description: body.description,
+    location: body.location,
+    startDate: body.startDate,
+    endDate: body.endDate,
+    capacity: body.capacity,
+    registrationFee: body.registrationFee,
     status: 'draft',
   });
 

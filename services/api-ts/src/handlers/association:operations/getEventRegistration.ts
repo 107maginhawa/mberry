@@ -21,7 +21,7 @@ export async function getEventRegistration(
   const logger = ctx.get('logger');
   const repo = new EventRegistrationRepository(db, logger);
 
-  const registration = await repo.findOneById((params as any).registrationId);
+  const registration = await repo.findOneById(params.registrationId);
   if (!registration) throw new NotFoundError('Event registration not found');
 
   return ctx.json(registration, 200);

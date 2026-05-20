@@ -30,19 +30,16 @@ export async function createTraining(
   const repo = new TrainingRepository(db, logger);
 
   const training = await repo.createOne({
-    organizationId: (body as any).organizationId || orgId,
-    title: (body as any).title,
-    description: (body as any).description,
-    instructorName: (body as any).instructorName,
-    instructorId: (body as any).instructorId,
-    location: (body as any).location,
-    startDate: new Date((body as any).startDate),
-    endDate: new Date((body as any).endDate),
-    capacity: (body as any).capacity,
-    registrationFee: (body as any).registrationFee,
-    currency: (body as any).currency,
-    creditBearing: (body as any).creditBearing,
-    creditAmount: (body as any).creditAmount,
+    organizationId: body.organizationId || orgId,
+    title: body.title,
+    description: body.description,
+    instructorName: body.instructor,
+    location: body.location,
+    startDate: body.startDate, // Zod already transforms to Date
+    endDate: body.endDate,
+    capacity: body.capacity,
+    registrationFee: body.registrationFee,
+    creditAmount: body.creditAmount,
     status: 'draft',
   });
 

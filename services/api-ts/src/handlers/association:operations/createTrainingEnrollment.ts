@@ -27,8 +27,8 @@ export async function createTrainingEnrollment(
   const trainingRepo = new TrainingRepository(db, logger);
   const enrollRepo = new TrainingEnrollmentRepository(db, logger);
 
-  const trainingId = (body as any).trainingId;
-  const personId = (body as any).personId || user.id;
+  const trainingId = body.trainingId;
+  const personId = body.personId || user.id;
 
   const training = await trainingRepo.findOneById(trainingId);
   if (!training) throw new NotFoundError('Training not found');

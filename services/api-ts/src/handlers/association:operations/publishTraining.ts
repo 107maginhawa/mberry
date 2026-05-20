@@ -27,14 +27,14 @@ export async function publishTraining(
   const logger = ctx.get('logger');
   const repo = new TrainingRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).trainingId);
+  const existing = await repo.findOneById(params.trainingId);
   if (!existing) throw new NotFoundError('Training not found');
 
   if (existing.status !== 'draft') {
     throw new BusinessLogicError('Only draft trainings can be published', 'INVALID_STATUS');
   }
 
-  const published = await repo.publish((params as any).trainingId);
+  const published = await repo.publish(params.trainingId);
 
   await auditAction(ctx, {
     action: 'update',

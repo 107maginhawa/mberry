@@ -21,7 +21,7 @@ export async function getEvent(
   const logger = ctx.get('logger');
   const repo = new EventRepository(db, logger);
 
-  const event = await repo.findOneById((params as any).eventId);
+  const event = await repo.findOneById(params.eventId);
   if (!event) throw new NotFoundError('Event not found');
 
   return ctx.json(event, 200);

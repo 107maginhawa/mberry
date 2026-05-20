@@ -31,14 +31,12 @@ export async function updateEvent(
   const logger = ctx.get('logger');
   const repo = new EventRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).eventId);
+  const existing = await repo.findOneById(params.eventId);
   if (!existing) throw new NotFoundError('Event not found');
 
-  const updates: any = { ...body };
-  if (updates.startDate) updates.startDate = new Date(updates.startDate);
-  if (updates.endDate) updates.endDate = new Date(updates.endDate);
+  const updates: Record<string, unknown> = { ...body };
 
-  const updated = await repo.updateOneById((params as any).eventId, updates);
+  const updated = await repo.updateOneById(params.eventId, updates);
 
   await auditAction(ctx, {
     action: 'update',

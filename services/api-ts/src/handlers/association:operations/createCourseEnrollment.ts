@@ -27,8 +27,8 @@ export async function createCourseEnrollment(
   const courseRepo = new CourseRepository(db, logger);
   const enrollRepo = new CourseEnrollmentRepository(db, logger);
 
-  const courseId = (body as any).courseId;
-  const personId = (body as any).personId || user.id;
+  const courseId = body.courseId;
+  const personId = body.personId || user.id;
 
   const course = await courseRepo.findOneById(courseId);
   if (!course) throw new NotFoundError('Course not found');

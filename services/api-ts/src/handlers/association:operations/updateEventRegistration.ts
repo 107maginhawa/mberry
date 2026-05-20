@@ -28,10 +28,10 @@ export async function updateEventRegistration(
   const logger = ctx.get('logger');
   const repo = new EventRegistrationRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).registrationId);
+  const existing = await repo.findOneById(params.registrationId);
   if (!existing) throw new NotFoundError('Event registration not found');
 
-  const updated = await repo.updateOneById((params as any).registrationId, body as any);
+  const updated = await repo.updateOneById(params.registrationId, body as Record<string, unknown>);
 
   await auditAction(ctx, {
     action: 'update',

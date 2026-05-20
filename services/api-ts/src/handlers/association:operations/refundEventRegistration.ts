@@ -27,17 +27,17 @@ export async function refundEventRegistration(
   const logger = ctx.get('logger');
   const repo = new EventRegistrationRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).registrationId);
+  const existing = await repo.findOneById(params.registrationId);
   if (!existing) throw new NotFoundError('Event registration not found');
 
   if (existing.status === 'refunded') {
     throw new BusinessLogicError('Registration is already refunded', 'ALREADY_REFUNDED');
   }
 
-  const refunded = await repo.updateOneById((params as any).registrationId, {
+  const refunded = await repo.updateOneById(params.registrationId, {
     status: 'refunded',
     refundedAt: new Date(),
-  } as any);
+  } as Record<string, unknown>);
 
   await auditAction(ctx, {
     action: 'update',

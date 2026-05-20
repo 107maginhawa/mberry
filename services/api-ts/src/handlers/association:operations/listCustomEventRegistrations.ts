@@ -28,8 +28,8 @@ export async function listCustomEventRegistrations(
   if (!event) throw new NotFoundError('Event not found');
 
   const filters: { eventId: string; status?: string } = { eventId: params.eventId };
-  if ((query as any)?.status) {
-    filters.status = (query as any).status;
+  if (query.status) {
+    filters.status = query.status;
   }
 
   const registrations = await regRepo.findMany(filters);

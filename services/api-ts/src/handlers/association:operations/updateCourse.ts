@@ -28,10 +28,10 @@ export async function updateCourse(
   const logger = ctx.get('logger');
   const repo = new CourseRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).courseId);
+  const existing = await repo.findOneById(params.courseId);
   if (!existing) throw new NotFoundError('Course not found');
 
-  const updated = await repo.updateOneById((params as any).courseId, body as any);
+  const updated = await repo.updateOneById(params.courseId, body as Record<string, unknown>);
 
   await auditAction(ctx, {
     action: 'update',

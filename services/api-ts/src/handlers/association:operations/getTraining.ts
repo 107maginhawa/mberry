@@ -21,7 +21,7 @@ export async function getTraining(
   const logger = ctx.get('logger');
   const repo = new TrainingRepository(db, logger);
 
-  const training = await repo.findOneById((params as any).trainingId);
+  const training = await repo.findOneById(params.trainingId);
   if (!training) throw new NotFoundError('Training not found');
 
   return ctx.json(training, 200);

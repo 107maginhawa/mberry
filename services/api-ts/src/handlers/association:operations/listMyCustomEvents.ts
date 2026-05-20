@@ -17,15 +17,15 @@ export async function listMyCustomEvents(
   ctx: ValidatedContext<never, ListMyCustomEventsQuery, never>
 ): Promise<Response> {
   // Get session directly (route lacks auth middleware)
-  const auth = ctx.get('auth' as any);
-  const session = auth ? await auth.api.getSession({ headers: ctx.req.raw.headers }) : null;
+  const auth = ctx.get('auth' as 'database');
+  const session = auth ? await (auth as unknown as { api: { getSession: (opts: { headers: Headers }) => Promise<{ user: { id: string } } | null> } }).api.getSession({ headers: ctx.req.raw.headers }) : null;
   if (!session?.user) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const userId = session.user.id;
   const query = ctx.req.valid('query');
   const db = ctx.get('database') as DatabaseInstance;
-  const limit = Number((query as any)?.limit) || 20;
-  const offset = Number((query as any)?.offset) || 0;
+  const limit = Number(query.limit) || 20;
+  const offset = Number(query.offset) || 0;
 
   const rows = await db
     .select({

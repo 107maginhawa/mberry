@@ -23,13 +23,13 @@ export async function searchTrainingEnrollments(
   const logger = ctx.get('logger');
   const repo = new TrainingEnrollmentRepository(db, logger);
 
-  const limit = Number((query as any)?.limit) || 20;
-  const offset = Number((query as any)?.offset) || 0;
+  const limit = Number(query.limit) || 20;
+  const offset = Number(query.offset) || 0;
 
-  const filters: any = {};
-  if ((query as any)?.trainingId) filters.trainingId = (query as any).trainingId;
-  if ((query as any)?.personId) filters.personId = (query as any).personId;
-  if ((query as any)?.status) filters.status = (query as any).status;
+  const filters: Record<string, unknown> = {};
+  if (query.trainingId) filters.trainingId = query.trainingId;
+  if (query.personId) filters.personId = query.personId;
+  if (query.status) filters.status = query.status;
 
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);

@@ -32,8 +32,8 @@ export async function createEventRegistration(
   const regRepo = new EventRegistrationRepository(db, logger);
   const waitlistRepo = new WaitlistEntryRepository(db, logger);
 
-  const eventId = (body as any).eventId;
-  const personId = (body as any).personId || user.id;
+  const eventId = body.eventId;
+  const personId = body.personId || user.id;
 
   const event = await eventRepo.findOneById(eventId);
   if (!event) throw new NotFoundError('Event not found');

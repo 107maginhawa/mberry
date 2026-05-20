@@ -37,7 +37,7 @@ export async function completeTrainingEnrollment(
   const enrollRepo = new TrainingEnrollmentRepository(db, logger);
   const trainingRepo = new TrainingRepository(db, logger);
 
-  const enrollment = await enrollRepo.findOneById((params as any).enrollmentId);
+  const enrollment = await enrollRepo.findOneById(params.enrollmentId);
   if (!enrollment) throw new NotFoundError('Training enrollment not found');
 
   if (enrollment.status === 'completed') {
@@ -51,7 +51,7 @@ export async function completeTrainingEnrollment(
   const completed = await enrollRepo.updateOneById(enrollment.id, {
     status: 'completed',
     completedAt: new Date(),
-  } as any);
+  } as Record<string, unknown>);
 
   const training = await trainingRepo.findOneById(enrollment.trainingId);
   let creditAwarded = 0;

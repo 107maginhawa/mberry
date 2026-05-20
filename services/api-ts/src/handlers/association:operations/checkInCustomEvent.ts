@@ -33,8 +33,8 @@ export async function checkInCustomEvent(
   const event = await eventRepo.findOneById(params.eventId);
   if (!event) throw new NotFoundError('Event not found');
 
-  const personId = (body as any).personId || user.id;
-  const method = (body as any).method || 'manual';
+  const personId = body.personId || user.id;
+  const method = body.method || 'manual';
 
   const orgId = ctx.get('organizationId') || event.organizationId;
 

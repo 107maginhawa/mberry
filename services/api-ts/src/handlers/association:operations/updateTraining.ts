@@ -31,14 +31,12 @@ export async function updateTraining(
   const logger = ctx.get('logger');
   const repo = new TrainingRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).trainingId);
+  const existing = await repo.findOneById(params.trainingId);
   if (!existing) throw new NotFoundError('Training not found');
 
-  const updates: any = { ...body };
-  if (updates.startDate) updates.startDate = new Date(updates.startDate);
-  if (updates.endDate) updates.endDate = new Date(updates.endDate);
+  const updates: Record<string, unknown> = { ...body };
 
-  const updated = await repo.updateOneById((params as any).trainingId, updates);
+  const updated = await repo.updateOneById(params.trainingId, updates);
 
   await auditAction(ctx, {
     action: 'update',

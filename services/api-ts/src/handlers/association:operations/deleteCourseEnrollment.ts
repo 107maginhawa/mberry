@@ -27,15 +27,15 @@ export async function deleteCourseEnrollment(
   const logger = ctx.get('logger');
   const repo = new CourseEnrollmentRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).enrollmentId);
+  const existing = await repo.findOneById(params.enrollmentId);
   if (!existing) throw new NotFoundError('Course enrollment not found');
 
-  await repo.deleteOneById((params as any).enrollmentId, user.id);
+  await repo.deleteOneById(params.enrollmentId, user.id);
 
   await auditAction(ctx, {
     action: 'delete',
     resourceType: 'course-enrollment',
-    resourceId: (params as any).enrollmentId,
+    resourceId: params.enrollmentId,
     description: 'Course enrollment deleted',
   });
 

@@ -21,7 +21,7 @@ export async function getCourse(
   const logger = ctx.get('logger');
   const repo = new CourseRepository(db, logger);
 
-  const course = await repo.findOneById((params as any).courseId);
+  const course = await repo.findOneById(params.courseId);
   if (!course) throw new NotFoundError('Course not found');
 
   return ctx.json(course, 200);

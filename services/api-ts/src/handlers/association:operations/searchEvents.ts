@@ -16,18 +16,18 @@ export async function searchEvents(
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const query = ctx.req.valid('query');
-  const orgId = (query as any)?.organizationId;
+  const orgId = query.organizationId;
 
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new EventRepository(db, logger);
 
-  const limit = Number((query as any)?.limit) || 20;
-  const offset = Number((query as any)?.offset) || 0;
+  const limit = Number(query.limit) || 20;
+  const offset = Number(query.offset) || 0;
 
-  const filters: any = {};
+  const filters: Record<string, unknown> = {};
   if (orgId) filters.organizationId = orgId;
-  if ((query as any)?.status) filters.status = (query as any).status;
+  if (query.status) filters.status = query.status;
 
   const results = await repo.findMany(filters, {
     pagination: { limit, offset },

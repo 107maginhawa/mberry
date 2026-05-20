@@ -28,15 +28,15 @@ export async function updateCourseProgress(
   const logger = ctx.get('logger');
   const repo = new CourseEnrollmentRepository(db, logger);
 
-  const enrollment = await repo.findOneById((params as any).enrollmentId);
+  const enrollment = await repo.findOneById(params.enrollmentId);
   if (!enrollment) throw new NotFoundError('Course enrollment not found');
 
   if (enrollment.status !== 'enrolled') {
     throw new BusinessLogicError('Progress can only be updated for enrolled enrollments', 'INVALID_STATUS');
   }
 
-  const progress = (body as any).progress;
-  const updates: any = { progress };
+  const progress = body.progress;
+  const updates: Record<string, unknown> = { progress };
 
   // Auto-complete when progress reaches 100%
   if (progress >= 100) {

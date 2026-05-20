@@ -31,14 +31,14 @@ export async function createQuizAttempt(
   const courseRepo = new CourseRepository(db, logger);
   const quizRepo = new QuizAttemptRepository(db, logger);
 
-  const courseId = (body as any).courseId;
-  const personId = (body as any).personId || user.id;
+  const courseId = body.courseId;
+  const personId = body.personId || user.id;
 
   const course = await courseRepo.findOneById(courseId);
   if (!course) throw new NotFoundError('Course not found');
 
-  const score = Number((body as any).score) || 0;
-  const maxScore = Number((body as any).maxScore) || 100;
+  const score = Number(body.score) || 0;
+  const maxScore = Number(body.maxScore) || 100;
   const PASS_THRESHOLD = 0.7;
   const passed = maxScore > 0 ? (score / maxScore) >= PASS_THRESHOLD : false;
 
@@ -48,7 +48,7 @@ export async function createQuizAttempt(
     score,
     maxScore,
     passed,
-    answers: (body as any).answers,
+    answers: body.answers,
     organizationId: orgId,
   });
 

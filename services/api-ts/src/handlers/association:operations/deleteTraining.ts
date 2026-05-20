@@ -27,15 +27,15 @@ export async function deleteTraining(
   const logger = ctx.get('logger');
   const repo = new TrainingRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).trainingId);
+  const existing = await repo.findOneById(params.trainingId);
   if (!existing) throw new NotFoundError('Training not found');
 
-  await repo.deleteOneById((params as any).trainingId, user.id);
+  await repo.deleteOneById(params.trainingId, user.id);
 
   await auditAction(ctx, {
     action: 'delete',
     resourceType: 'training',
-    resourceId: (params as any).trainingId,
+    resourceId: params.trainingId,
     description: 'Training deleted',
   });
 

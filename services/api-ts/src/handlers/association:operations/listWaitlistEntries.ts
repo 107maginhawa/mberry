@@ -24,10 +24,10 @@ export async function listWaitlistEntries(
   const logger = ctx.get('logger');
   const repo = new WaitlistEntryRepository(db, logger);
 
-  const limit = Number((query as any)?.limit) || 20;
-  const offset = Number((query as any)?.offset) || 0;
+  const limit = Number(query.limit) || 20;
+  const offset = Number(query.offset) || 0;
 
-  const filters: any = { eventId: (params as any).eventId };
+  const filters: Record<string, unknown> = { eventId: params.eventId };
 
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);

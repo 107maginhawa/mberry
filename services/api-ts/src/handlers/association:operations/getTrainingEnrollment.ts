@@ -21,7 +21,7 @@ export async function getTrainingEnrollment(
   const logger = ctx.get('logger');
   const repo = new TrainingEnrollmentRepository(db, logger);
 
-  const enrollment = await repo.findOneById((params as any).enrollmentId);
+  const enrollment = await repo.findOneById(params.enrollmentId);
   if (!enrollment) throw new NotFoundError('Training enrollment not found');
 
   return ctx.json(enrollment, 200);

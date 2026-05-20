@@ -27,14 +27,14 @@ export async function publishEvent(
   const logger = ctx.get('logger');
   const repo = new EventRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).eventId);
+  const existing = await repo.findOneById(params.eventId);
   if (!existing) throw new NotFoundError('Event not found');
 
   if (existing.status !== 'draft') {
     throw new BusinessLogicError('Only draft events can be published', 'INVALID_STATUS');
   }
 
-  const published = await repo.publish((params as any).eventId);
+  const published = await repo.publish(params.eventId);
 
   await auditAction(ctx, {
     action: 'update',

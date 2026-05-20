@@ -27,14 +27,14 @@ export async function cancelEvent(
   const logger = ctx.get('logger');
   const repo = new EventRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).eventId);
+  const existing = await repo.findOneById(params.eventId);
   if (!existing) throw new NotFoundError('Event not found');
 
   if (existing.status !== 'draft' && existing.status !== 'published') {
     throw new BusinessLogicError('Only draft or published events can be cancelled', 'INVALID_STATUS');
   }
 
-  const cancelled = await repo.cancel((params as any).eventId);
+  const cancelled = await repo.cancel(params.eventId);
 
   await auditAction(ctx, {
     action: 'update',

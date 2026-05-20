@@ -31,9 +31,9 @@ export async function createCourse(
 
   const course = await repo.createOne({
     organizationId: orgId,
-    title: (body as any).title,
-    description: (body as any).description,
-    creditAmount: (body as any).creditAmount,
+    title: body.title,
+    description: body.description,
+    creditAmount: body.creditAmount,
     status: 'draft',
   });
 

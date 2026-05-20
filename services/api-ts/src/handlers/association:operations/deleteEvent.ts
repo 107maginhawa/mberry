@@ -27,15 +27,15 @@ export async function deleteEvent(
   const logger = ctx.get('logger');
   const repo = new EventRepository(db, logger);
 
-  const existing = await repo.findOneById((params as any).eventId);
+  const existing = await repo.findOneById(params.eventId);
   if (!existing) throw new NotFoundError('Event not found');
 
-  await repo.deleteOneById((params as any).eventId, user.id);
+  await repo.deleteOneById(params.eventId, user.id);
 
   await auditAction(ctx, {
     action: 'delete',
     resourceType: 'event',
-    resourceId: (params as any).eventId,
+    resourceId: params.eventId,
     description: 'Event deleted',
   });
 

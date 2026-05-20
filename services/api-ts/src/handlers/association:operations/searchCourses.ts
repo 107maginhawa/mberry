@@ -23,11 +23,11 @@ export async function searchCourses(
   const logger = ctx.get('logger');
   const repo = new CourseRepository(db, logger);
 
-  const limit = Number((query as any)?.limit) || 20;
-  const offset = Number((query as any)?.offset) || 0;
+  const limit = Number(query.limit) || 20;
+  const offset = Number(query.offset) || 0;
 
-  const filters: any = { organizationId: orgId };
-  if ((query as any)?.status) filters.status = (query as any).status;
+  const filters: Record<string, unknown> = { organizationId: orgId };
+  if (query.status) filters.status = query.status;
 
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);
