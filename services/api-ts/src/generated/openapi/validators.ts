@@ -4379,7 +4379,7 @@ export const DuesConfigSchema = z.object({
   tierId: z.string(),
   annualAmount: z.number().int().gte(0),
   currency: z.string().min(3).max(3),
-  gracePeriodDays: z.number().int().gte(0),
+  gracePeriodDays: z.number().int().gte(0).lte(90),
   fundAllocations: z.array(FundAllocationSchema),
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
   status: z.enum(["active", "retired"])
@@ -4392,7 +4392,7 @@ export const DuesConfigCreateRequestSchema = z.object({
   tierId: z.string(),
   annualAmount: z.number().int(),
   currency: z.string(),
-  gracePeriodDays: z.number().int(),
+  gracePeriodDays: z.number().int().gte(0).lte(90),
   fundAllocations: z.array(FundAllocationSchema),
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
   status: DuesConfigStatusSchema
@@ -4423,7 +4423,7 @@ export const DuesConfigUpdateSchema = z.object({
   tierId: z.string().optional(),
   annualAmount: z.number().int().gte(0).optional(),
   currency: z.string().min(3).max(3).optional(),
-  gracePeriodDays: z.number().int().gte(0).optional(),
+  gracePeriodDays: z.number().int().gte(0).lte(90).optional(),
   fundAllocations: z.array(FundAllocationSchema).optional(),
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   status: z.enum(["active", "retired"]).optional()
@@ -4431,7 +4431,7 @@ export const DuesConfigUpdateSchema = z.object({
 
 export const DuesConfigUpdateRequestSchema = z.object({
   annualAmount: z.number().int().optional(),
-  gracePeriodDays: z.number().int().optional(),
+  gracePeriodDays: z.number().int().gte(0).lte(90).optional(),
   fundAllocations: z.array(FundAllocationSchema).optional(),
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   status: DuesConfigStatusSchema.optional()

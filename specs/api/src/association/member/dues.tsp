@@ -127,6 +127,7 @@ model DuesConfig extends BaseEntity {
 
   @doc("Number of days after the due date before membership lapses")
   @minValue(0)
+  @maxValue(90)
   gracePeriodDays: int32;
 
   @doc("Fund allocation rules — percentages must sum to 100")
@@ -289,6 +290,8 @@ model DuesConfigCreateRequest {
   tierId: string;
   annualAmount: int64;
   currency: string;
+  @minValue(0)
+  @maxValue(90)
   gracePeriodDays: int32;
   fundAllocations: FundAllocation[];
   effectiveDate: plainDate;
@@ -298,6 +301,8 @@ model DuesConfigCreateRequest {
 @doc("Request to update a dues configuration")
 model DuesConfigUpdateRequest {
   annualAmount?: int64;
+  @minValue(0)
+  @maxValue(90)
   gracePeriodDays?: int32;
   fundAllocations?: FundAllocation[];
   effectiveDate?: plainDate;
