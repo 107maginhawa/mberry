@@ -194,7 +194,53 @@ export const invoiceLineItems = pgTable('invoice_line_item', {
   invoiceIdx: index('invoice_line_items_invoice_idx').on(table.invoice),
 }));
 
+// Billing Configs — per-org gateway credentials with encrypted storage (BR-30)
+export const gatewayProviderEnum = pgEnum('gateway_provider', [
+  'stripe',
+  'paymongo',
+]);
+
+export const billingConfigs = pgTable(
+  'billing_config',
+  {
+    ...baseEntityFields,
+
+    // One config per org (BR-30: credential isolation)
+    organizationId: uuid('organization_id').notNull(),
+
+    // Gateway provider
+    provider: gatewayProviderEnum('provider').notNull().default('stripe'),
+
+    // Encrypted secret key (AES-256-GCM)
+    encryptedSecretKey: text('encrypted_secret_key').notNull(),
+
+    // Encrypted webhook secret (AES-256-GCM)
+    encryptedWebhookSecret: text('encrypted_webhook_secret'),
+
+    // Test mode flag — isolates sandbox from live credentials
+    testMode: boolean('test_mode').notNull().default(true),
+
+    // Optional custom API URL (for dev/test environments)
+    apiUrl: text('api_url'),
+
+    // Whether this config is active
+    active: boolean('active').notNull().default(true),
+  },
+  (table) => ({
+    orgIdx: index('billing_configs_org_idx').on(table.organizationId),
+    // One active config per org per provider per mode
+    uniqueOrgProviderMode: unique('billing_configs_org_provider_mode_unique').on(
+      table.organizationId,
+      table.provider,
+      table.testMode
+    ),
+  })
+);
+
 // Type exports for TypeScript
+export type BillingConfig = typeof billingConfigs.$inferSelect;
+export type NewBillingConfig = typeof billingConfigs.$inferInsert;
+
 export type Invoice = typeof invoices.$inferSelect;
 export type NewInvoice = typeof invoices.$inferInsert;
 
@@ -328,5 +374,12 @@ export interface InvoiceFilters {
 export interface MerchantAccountFilters {
   organizationId?: string;
   person?: string;
+  active?: boolean;
+}
+
+export interface BillingConfigFilters {
+  organizationId?: string;
+  provider?: 'stripe' | 'paymongo';
+  testMode?: boolean;
   active?: boolean;
 }

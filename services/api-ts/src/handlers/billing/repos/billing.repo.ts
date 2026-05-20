@@ -10,16 +10,20 @@ import {
   invoices,
   invoiceLineItems,
   merchantAccounts,
+  billingConfigs,
   type Invoice,
   type NewInvoice,
   type InvoiceLineItem,
   type NewInvoiceLineItem,
   type MerchantAccount,
   type NewMerchantAccount,
+  type BillingConfig,
+  type NewBillingConfig,
   type InvoiceWithLineItems,
   type MerchantAccountWithPerson,
   type InvoiceFilters,
-  type MerchantAccountFilters
+  type MerchantAccountFilters,
+  type BillingConfigFilters,
 } from './billing.schema';
 
 // Re-export InvoiceFilters for handler use
@@ -362,5 +366,65 @@ export class MerchantAccountRepository extends DatabaseRepository<MerchantAccoun
     }, 'Merchant account metadata updated');
 
     return updated;
+  }
+}
+
+/**
+ * BillingConfig Repository — per-org gateway credential management (BR-30)
+ */
+export class BillingConfigRepository extends DatabaseRepository<
+  BillingConfig,
+  NewBillingConfig,
+  BillingConfigFilters
+> {
+  constructor(db: DatabaseInstance, logger?: any) {
+    super(db, billingConfigs, logger);
+  }
+
+  protected buildWhereConditions(filters?: BillingConfigFilters): SQL<unknown> | undefined {
+    if (!filters) return undefined;
+    const conditions = [];
+
+    if (filters.organizationId) {
+      conditions.push(eq(billingConfigs.organizationId, filters.organizationId));
+    }
+    if (filters.provider) {
+      conditions.push(eq(billingConfigs.provider, filters.provider));
+    }
+    if (filters.testMode !== undefined) {
+      conditions.push(eq(billingConfigs.testMode, filters.testMode));
+    }
+    if (filters.active !== undefined) {
+      conditions.push(eq(billingConfigs.active, filters.active));
+    }
+
+    return conditions.length > 0 ? and(...conditions) : undefined;
+  }
+
+  /**
+   * Find the active billing config for an organization + provider + mode.
+   * BR-30: always filter by organizationId to prevent cross-org leakage.
+   */
+  async findActiveConfig(
+    organizationId: string,
+    provider: 'stripe' | 'paymongo' = 'stripe',
+    testMode: boolean = true
+  ): Promise<BillingConfig | null> {
+    this.logger?.debug({ organizationId, provider, testMode }, 'Finding active billing config');
+
+    const result = await this.db
+      .select()
+      .from(billingConfigs)
+      .where(
+        and(
+          eq(billingConfigs.organizationId, organizationId),
+          eq(billingConfigs.provider, provider),
+          eq(billingConfigs.testMode, testMode),
+          eq(billingConfigs.active, true)
+        )
+      )
+      .limit(1);
+
+    return result.length > 0 && result[0] ? result[0] : null;
   }
 }
