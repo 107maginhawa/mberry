@@ -1,6 +1,7 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
-import { EventRegistrationRepository, WaitlistEntryRepository } from './repos/events.repo';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { EventRepository, EventRegistrationRepository, CheckInRepository, WaitlistEntryRepository } from './repos/events.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 /**
  * Events Module Tests
@@ -323,5 +324,708 @@ describe('QR Check-In Utility', () => {
     const { verifyQrToken } = await import('./utils/qr-checkin');
     expect(verifyQrToken('not-a-valid-token', 'secret')).toBeNull();
     expect(verifyQrToken('a.b.c', 'secret')).toBeNull();
+  });
+
+  test('verifyQrToken rejects expired token (>24h)', async () => {
+    const { verifyQrToken } = await import('./utils/qr-checkin');
+    const { createHmac } = await import('crypto');
+    // Manually craft an expired token (25 hours old)
+    const payload = { eventId: 'evt-1', type: 'event', issuedAt: Date.now() - 25 * 60 * 60 * 1000 };
+    const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    const sig = createHmac('sha256', 'test-secret').update(encoded).digest('base64url');
+    const expiredToken = `${encoded}.${sig}`;
+    expect(verifyQrToken(expiredToken, 'test-secret')).toBeNull();
+  });
+});
+
+// ─── [AC-M08-001] QR Check-In Security ──────────────────────
+
+describe('[AC-M08-001] createCheckIn — QR check-in requires authenticated scanner + valid event', () => {
+  let mocks: Record<string, { mockRestore: () => void }>;
+  let officerMocks: Record<string, { mockRestore: () => void }>;
+
+  const fakeEvent = {
+    id: 'evt-1',
+    organizationId: 'org-1',
+    title: 'Conference',
+    status: 'published',
+  };
+
+  const fakeCheckIn = {
+    id: 'ci-1',
+    eventId: 'evt-1',
+    personId: 'person-1',
+    method: 'manual',
+    checkedInBy: 'user-1',
+    organizationId: 'org-1',
+  };
+
+  beforeEach(() => {
+    restoreRepo(EventRepository);
+    restoreRepo(CheckInRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach(m => m.mockRestore());
+    restoreRepo(EventRepository);
+    restoreRepo(CheckInRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('returns 401 without authenticated user', async () => {
+    const { createCheckIn } = await import('./createCheckIn');
+    const ctx = makeCtx({ user: null });
+    const response = await createCheckIn(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  test('returns 403 without organization context', async () => {
+    const { createCheckIn } = await import('./createCheckIn');
+    const ctx = makeCtx({ organizationId: null });
+    const response = await createCheckIn(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('requires officer position (scanner must be authenticated officer)', async () => {
+    // requirePosition returns a 403 response when user lacks officer role
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+    const { createCheckIn } = await import('./createCheckIn');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', method: 'manual', personId: 'person-1' },
+    });
+    const response = await createCheckIn(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('manual check-in succeeds for authenticated officer with valid event', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => fakeEvent,
+      }),
+      ...stubRepo(CheckInRepository, {
+        createOne: async (data: any) => ({ ...fakeCheckIn, ...data }),
+      }),
+    };
+    const { createCheckIn } = await import('./createCheckIn');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', method: 'manual', personId: 'person-1' },
+    });
+    const response = await createCheckIn(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.eventId).toBe('evt-1');
+  });
+
+  test('QR check-in verifies token and extracts eventId', async () => {
+    const { generateQrToken } = await import('./utils/qr-checkin');
+    const secret = 'test-qr-secret';
+    const token = generateQrToken('evt-1', 'event', secret);
+
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => fakeEvent,
+      }),
+      ...stubRepo(CheckInRepository, {
+        createOne: async (data: any) => ({ ...fakeCheckIn, ...data }),
+      }),
+    };
+
+    // Set QR_SECRET env for handler
+    const origSecret = process.env['QR_SECRET'];
+    process.env['QR_SECRET'] = secret;
+
+    const { createCheckIn } = await import('./createCheckIn');
+    const ctx = makeCtx({
+      _body: { method: 'qr', qrToken: token, personId: 'person-1' },
+    });
+    const response = await createCheckIn(ctx);
+    expect(response.status).toBe(201);
+
+    process.env['QR_SECRET'] = origSecret;
+  });
+
+  test('QR check-in rejects invalid/tampered token', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => fakeEvent,
+      }),
+      ...stubRepo(CheckInRepository, {
+        createOne: async (data: any) => ({ ...fakeCheckIn, ...data }),
+      }),
+    };
+    const { createCheckIn } = await import('./createCheckIn');
+    const ctx = makeCtx({
+      _body: { method: 'qr', qrToken: 'tampered.token', personId: 'person-1' },
+    });
+    await expect(createCheckIn(ctx)).rejects.toThrow('Invalid or expired QR token');
+  });
+
+  test('check-in throws NotFoundError for non-existent event', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => null,
+      }),
+      ...stubRepo(CheckInRepository, {
+        createOne: async (data: any) => fakeCheckIn,
+      }),
+    };
+    const { createCheckIn } = await import('./createCheckIn');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-missing', method: 'manual', personId: 'person-1' },
+    });
+    await expect(createCheckIn(ctx)).rejects.toThrow('Event not found');
+  });
+
+  test('checkedInBy is set from authenticated user, not body', async () => {
+    let capturedData: any = null;
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => fakeEvent,
+      }),
+      ...stubRepo(CheckInRepository, {
+        createOne: async (data: any) => { capturedData = data; return { ...fakeCheckIn, ...data }; },
+      }),
+    };
+    const { createCheckIn } = await import('./createCheckIn');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', method: 'manual', personId: 'person-1' },
+    });
+    await createCheckIn(ctx);
+    // checkedInBy comes from ctx user (user-1), not from body
+    expect(capturedData.checkedInBy).toBe('user-1');
+  });
+});
+
+// ─── [AC-M08-002] Capacity Management ──────────────────────
+
+describe('[AC-M08-002] createEventRegistration — capacity management', () => {
+  let mocks: Record<string, { mockRestore: () => void }>;
+
+  const publishedEvent = {
+    id: 'evt-1',
+    organizationId: 'org-1',
+    title: 'Conference',
+    status: 'published',
+    capacity: 50,
+  };
+
+  const fakeRegistration = {
+    id: 'reg-1',
+    eventId: 'evt-1',
+    personId: 'user-1',
+    status: 'confirmed',
+    organizationId: 'org-1',
+  };
+
+  const fakeWaitlistEntry = {
+    id: 'wl-1',
+    eventId: 'evt-1',
+    personId: 'user-1',
+    position: 1,
+    organizationId: 'org-1',
+  };
+
+  beforeEach(() => {
+    restoreRepo(EventRepository);
+    restoreRepo(EventRegistrationRepository);
+    restoreRepo(WaitlistEntryRepository);
+  });
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(EventRepository);
+    restoreRepo(EventRegistrationRepository);
+    restoreRepo(WaitlistEntryRepository);
+  });
+
+  test('returns 401 without authenticated user', async () => {
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({ user: null });
+    const response = await createEventRegistration(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  test('returns 403 without organization context', async () => {
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({ organizationId: null });
+    const response = await createEventRegistration(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('rejects registration for non-published event (draft)', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => ({ ...publishedEvent, status: 'draft' }),
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 0,
+        createOne: async (data: any) => fakeRegistration,
+      }),
+    };
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', personId: 'user-1' },
+    });
+    await expect(createEventRegistration(ctx)).rejects.toThrow('Registrations are only accepted for published events');
+  });
+
+  test('rejects registration for cancelled event', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => ({ ...publishedEvent, status: 'cancelled' }),
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 0,
+        createOne: async (data: any) => fakeRegistration,
+      }),
+    };
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', personId: 'user-1' },
+    });
+    await expect(createEventRegistration(ctx)).rejects.toThrow('Registrations are only accepted for published events');
+  });
+
+  test('confirms registration when under capacity', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => publishedEvent,
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 30,
+        createOne: async (data: any) => ({ ...fakeRegistration, ...data }),
+      }),
+      ...stubRepo(WaitlistEntryRepository, {
+        nextPosition: async () => 1,
+        createOne: async (data: any) => fakeWaitlistEntry,
+      }),
+    };
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', personId: 'user-1' },
+    });
+    const response = await createEventRegistration(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.status).toBe('confirmed');
+  });
+
+  test('auto-waitlists when at capacity', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => publishedEvent,
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 50, // at capacity
+        createOne: async (data: any) => ({ ...fakeRegistration, ...data }),
+      }),
+      ...stubRepo(WaitlistEntryRepository, {
+        nextPosition: async () => 3,
+        createOne: async (data: any) => ({ ...fakeWaitlistEntry, ...data, position: 3 }),
+      }),
+    };
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', personId: 'user-1' },
+    });
+    const response = await createEventRegistration(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.waitlisted).toBe(true);
+  });
+
+  test('auto-waitlists when over capacity', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => publishedEvent,
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 60, // over capacity
+        createOne: async (data: any) => ({ ...fakeRegistration, ...data }),
+      }),
+      ...stubRepo(WaitlistEntryRepository, {
+        nextPosition: async () => 11,
+        createOne: async (data: any) => ({ ...fakeWaitlistEntry, ...data, position: 11 }),
+      }),
+    };
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', personId: 'user-1' },
+    });
+    const response = await createEventRegistration(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.waitlisted).toBe(true);
+  });
+
+  test('confirms when event has no capacity limit (null)', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => ({ ...publishedEvent, capacity: null }),
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 999,
+        createOne: async (data: any) => ({ ...fakeRegistration, ...data }),
+      }),
+      ...stubRepo(WaitlistEntryRepository, {
+        nextPosition: async () => 1,
+        createOne: async (data: any) => fakeWaitlistEntry,
+      }),
+    };
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-1', personId: 'user-1' },
+    });
+    const response = await createEventRegistration(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.status).toBe('confirmed');
+  });
+
+  test('throws NotFoundError for non-existent event', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => null,
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 0,
+        createOne: async (data: any) => fakeRegistration,
+      }),
+    };
+    const { createEventRegistration } = await import('./createEventRegistration');
+    const ctx = makeCtx({
+      _body: { eventId: 'evt-missing', personId: 'user-1' },
+    });
+    await expect(createEventRegistration(ctx)).rejects.toThrow('Event not found');
+  });
+});
+
+// ─── Event Status Transitions ──────────────────────────────
+
+describe('publishEvent — status transitions (draft→published)', () => {
+  let mocks: Record<string, { mockRestore: () => void }>;
+  let officerMocks: Record<string, { mockRestore: () => void }>;
+
+  const draftEvent = {
+    id: 'evt-1',
+    organizationId: 'org-1',
+    title: 'Conference',
+    status: 'draft',
+  };
+
+  beforeEach(() => {
+    restoreRepo(EventRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach(m => m.mockRestore());
+    restoreRepo(EventRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('publishes draft event successfully', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => draftEvent,
+      publish: async () => ({ ...draftEvent, status: 'published', publishedAt: new Date() }),
+    });
+    const { publishEvent } = await import('./publishEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    const response = await publishEvent(ctx);
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('published');
+  });
+
+  test('rejects publishing already-published event', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => ({ ...draftEvent, status: 'published' }),
+    });
+    const { publishEvent } = await import('./publishEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    await expect(publishEvent(ctx)).rejects.toThrow('Only draft events can be published');
+  });
+
+  test('rejects publishing cancelled event', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => ({ ...draftEvent, status: 'cancelled' }),
+    });
+    const { publishEvent } = await import('./publishEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    await expect(publishEvent(ctx)).rejects.toThrow('Only draft events can be published');
+  });
+
+  test('rejects publishing completed event', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => ({ ...draftEvent, status: 'completed' }),
+    });
+    const { publishEvent } = await import('./publishEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    await expect(publishEvent(ctx)).rejects.toThrow('Only draft events can be published');
+  });
+
+  test('requires officer position to publish', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+    const { publishEvent } = await import('./publishEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    const response = await publishEvent(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('throws NotFoundError for non-existent event', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => null,
+    });
+    const { publishEvent } = await import('./publishEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-missing' } });
+    await expect(publishEvent(ctx)).rejects.toThrow('Event not found');
+  });
+});
+
+describe('cancelEvent — status transitions (draft/published→cancelled)', () => {
+  let mocks: Record<string, { mockRestore: () => void }>;
+  let officerMocks: Record<string, { mockRestore: () => void }>;
+
+  const publishedEvent = {
+    id: 'evt-1',
+    organizationId: 'org-1',
+    title: 'Conference',
+    status: 'published',
+  };
+
+  beforeEach(() => {
+    restoreRepo(EventRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach(m => m.mockRestore());
+    restoreRepo(EventRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('cancels published event successfully', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => publishedEvent,
+      cancel: async () => ({ ...publishedEvent, status: 'cancelled' }),
+    });
+    const { cancelEvent } = await import('./cancelEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    const response = await cancelEvent(ctx);
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('cancelled');
+  });
+
+  test('cancels draft event successfully', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => ({ ...publishedEvent, status: 'draft' }),
+      cancel: async () => ({ ...publishedEvent, status: 'cancelled' }),
+    });
+    const { cancelEvent } = await import('./cancelEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    const response = await cancelEvent(ctx);
+    expect(response.status).toBe(200);
+  });
+
+  test('rejects cancelling completed event', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => ({ ...publishedEvent, status: 'completed' }),
+    });
+    const { cancelEvent } = await import('./cancelEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    await expect(cancelEvent(ctx)).rejects.toThrow('Only draft or published events can be cancelled');
+  });
+
+  test('rejects cancelling already-cancelled event', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => ({ ...publishedEvent, status: 'cancelled' }),
+    });
+    const { cancelEvent } = await import('./cancelEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    await expect(cancelEvent(ctx)).rejects.toThrow('Only draft or published events can be cancelled');
+  });
+
+  test('requires officer position to cancel', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+    const { cancelEvent } = await import('./cancelEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    const response = await cancelEvent(ctx);
+    expect(response.status).toBe(403);
+  });
+});
+
+// ─── Officer Permission: createEvent ───────────────────────
+
+describe('createEvent — officer permission gate', () => {
+  let mocks: Record<string, { mockRestore: () => void }>;
+  let officerMocks: Record<string, { mockRestore: () => void }>;
+
+  beforeEach(() => {
+    restoreRepo(EventRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach(m => m.mockRestore());
+    restoreRepo(EventRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('officers can create events with draft status', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    mocks = stubRepo(EventRepository, {
+      createOne: async (data: any) => ({ id: 'evt-new', ...data }),
+    });
+    const { createEvent } = await import('./createEvent');
+    const ctx = makeCtx({
+      _body: {
+        title: 'New Event',
+        startDate: '2026-06-01',
+        endDate: '2026-06-02',
+        capacity: 100,
+      },
+    });
+    const response = await createEvent(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.status).toBe('draft');
+  });
+
+  test('non-officers cannot create events', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+    const { createEvent } = await import('./createEvent');
+    const ctx = makeCtx({
+      _body: { title: 'Test', startDate: '2026-06-01', endDate: '2026-06-02' },
+    });
+    const response = await createEvent(ctx);
+    expect(response.status).toBe(403);
+  });
+});
+
+// ─── registerForCustomEvent — capacity + published guard ────
+
+describe('registerForCustomEvent — capacity + published guard', () => {
+  let mocks: Record<string, { mockRestore: () => void }>;
+
+  const publishedEvent = {
+    id: 'evt-1',
+    organizationId: 'org-1',
+    title: 'Conference',
+    status: 'published',
+    capacity: 20,
+  };
+
+  beforeEach(() => {
+    restoreRepo(EventRepository);
+    restoreRepo(EventRegistrationRepository);
+    restoreRepo(WaitlistEntryRepository);
+  });
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(EventRepository);
+    restoreRepo(EventRegistrationRepository);
+    restoreRepo(WaitlistEntryRepository);
+  });
+
+  test('confirms registration under capacity', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => publishedEvent,
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 10,
+        createOne: async (data: any) => ({ id: 'reg-1', ...data }),
+      }),
+      ...stubRepo(WaitlistEntryRepository, {
+        nextPosition: async () => 1,
+        createOne: async (data: any) => ({ id: 'wl-1', ...data }),
+      }),
+    };
+    const { registerForCustomEvent } = await import('./registerForCustomEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    const response = await registerForCustomEvent(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.status).toBe('confirmed');
+  });
+
+  test('auto-waitlists at capacity', async () => {
+    mocks = {
+      ...stubRepo(EventRepository, {
+        findOneById: async () => publishedEvent,
+      }),
+      ...stubRepo(EventRegistrationRepository, {
+        count: async () => 20,
+        createOne: async (data: any) => ({ id: 'reg-1', ...data }),
+      }),
+      ...stubRepo(WaitlistEntryRepository, {
+        nextPosition: async () => 5,
+        createOne: async (data: any) => ({ id: 'wl-1', ...data, position: 5 }),
+      }),
+    };
+    const { registerForCustomEvent } = await import('./registerForCustomEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    const response = await registerForCustomEvent(ctx);
+    expect(response.status).toBe(201);
+    expect(response.body.waitlisted).toBe(true);
+  });
+
+  test('rejects registration for draft event', async () => {
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => ({ ...publishedEvent, status: 'draft' }),
+    });
+    const { registerForCustomEvent } = await import('./registerForCustomEvent');
+    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
+    await expect(registerForCustomEvent(ctx)).rejects.toThrow('Registrations are only accepted for published events');
   });
 });
