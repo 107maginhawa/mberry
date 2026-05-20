@@ -19,13 +19,13 @@
 | `host` | System-wide | Application-level role for service providers |
 | `admin` | System-wide | System administrator |
 
-### Platform Admin Levels (types/auth.ts — AdminLevel)
+### Platform Admin Levels (platform_admin table — admin_role enum)
 
 | Role | Scope | Description |
 |------|-------|-------------|
 | `super` | Platform | Highest platform privilege; full system access |
-| `admin` | Platform | Platform administrator |
-| `support` | Platform | Platform support staff |
+| `support` | Platform | Platform support staff — can impersonate, view data, respond to tickets |
+| `analyst` | Platform | Read-only analytics access; cannot modify data or impersonate |
 
 ### Organization-Scoped Roles (utils/org-auth.ts — ROLE_HIERARCHY)
 

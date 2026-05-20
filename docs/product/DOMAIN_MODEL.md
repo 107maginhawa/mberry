@@ -72,7 +72,7 @@ All tables inherit 6 base entity fields from `core/database.schema.ts`:
 _None — person is the root identity aggregate._
 
 ### Module Mapping
-- `person` → M02 (Person Management)
+- `person` → M02 (Member Profile)
 - `notification_preference` → M02
 - `person_privacy_setting` → M02
 
@@ -106,7 +106,7 @@ _None — person is the root identity aggregate._
 | Enum | Values |
 |------|--------|
 | `tier_status` | `active`, `retired` |
-| `membership_status` | `pendingPayment`, `active`, `gracePeriod`, `lapsed`, `expired`, `suspended`, `terminated`, `resigned`, `deceased`, `expelled` |
+| `membership_status` | `pendingPayment`, `active`, `gracePeriod`, `lapsed`, `expired`, `suspended`, `removed`, `resigned`, `deceased`, `expelled` |
 | `application_status` | `submitted`, `underReview`, `approved`, `denied`, `waitlisted` |
 | `affiliation_status` | `active`, `transferred`, `withdrawn` |
 | `transfer_status` | `requested`, `pendingSourceApproval`, `pendingTargetApproval`, `approved`, `denied`, `completed`, `cancelled` |
@@ -140,13 +140,13 @@ _None — person is the root identity aggregate._
 - `membership_status_history`: Check constraint on `officer_term` — `endDate > startDate`
 
 ### Module Mapping
-- `membership_tier`, `membership_category`, `membership`, `membership_application` → M03 (Membership)
-- `membership_status_history` → M03
-- `chapter_affiliation`, `affiliation_transfer`, `royalty_split` → M04 (Chapters)
-- `professional_license`, `license_renewal_alert`, `credential_template`, `digital_credential` → M05 (Credentials)
-- `credit_entry` → M10 (Credits/CPD)
-- `directory_profile` → M06 (Directory)
-- `position`, `officer_term` → M07 (Governance)
+- `membership_tier`, `membership_category`, `membership`, `membership_application` → M05 (Membership)
+- `membership_status_history` → M05
+- `chapter_affiliation`, `affiliation_transfer`, `royalty_split` → M04 (Org Admin)
+- `professional_license`, `license_renewal_alert`, `credential_template`, `digital_credential` → M11 (Documents & Credentials)
+- `credit_entry` → M10 (Credit Tracking)
+- `directory_profile` → M04 (Org Admin — member directory)
+- `position`, `officer_term` → M04 (Org Admin — governance positions)
 
 ---
 
@@ -264,10 +264,10 @@ _None — person is the root identity aggregate._
 | `dunning_delivery_status` | `pending`, `sent`, `delivered`, `failed` |
 
 ### Module Mapping
-- `invoice`, `invoice_line_item`, `merchant_account` → M16 (Billing)
-- `dues_config`, `dues_invoice`, `aging_bucket`, `dues_reminder_log` → M08 (Dues — legacy)
-- `dues_org_config`, `dues_category_override`, `dues_fund`, `dues_payment`, `dues_fund_allocation`, `dues_reminder_schedule`, `dues_gateway_config`, `dues_payment_status_history` → M08 (Dues — v2)
-- `dunning_template`, `dunning_event` → M09 (Dunning)
+- `invoice`, `invoice_line_item`, `merchant_account` → M06 (Dues & Payments — Billing subsystem)
+- `dues_config`, `dues_invoice`, `aging_bucket`, `dues_reminder_log` → M06 (Dues & Payments — legacy config)
+- `dues_org_config`, `dues_category_override`, `dues_fund`, `dues_payment`, `dues_fund_allocation`, `dues_reminder_schedule`, `dues_gateway_config`, `dues_payment_status_history` → M06 (Dues & Payments — v2)
+- `dunning_template`, `dunning_event` → M06 (Dues & Payments — dunning subsystem)
 
 ---
 
@@ -353,10 +353,10 @@ _None — person is the root identity aggregate._
 - `schedule_exception`: endDatetime > startDatetime, reason length <= 500
 
 ### Module Mapping
-- `event`, `event_registration`, `check_in`, `waitlist_entry` → M12 (Events)
-- `training`, `training_enrollment`, `course`, `course_enrollment`, `quiz_attempt` → M13 (Training)
-- `accredited_provider` → M13
-- `booking_event`, `time_slot`, `booking`, `schedule_exception` → M17 (Booking)
+- `event`, `event_registration`, `check_in`, `waitlist_entry` → M08 (Events)
+- `training`, `training_enrollment`, `course`, `course_enrollment`, `quiz_attempt` → M09 (Training)
+- `accredited_provider` → M09
+- `booking_event`, `time_slot`, `booking`, `schedule_exception` → M08 (Events — Booking subsystem)
 
 ---
 
@@ -450,10 +450,10 @@ _None — person is the root identity aggregate._
 | `notification_status` | `queued`, `sent`, `delivered`, `read`, `failed`, `expired` |
 
 ### Module Mapping
-- `message_template`, `message`, `subscription_topic`, `person_subscription`, `announcement`, `announcement_stats` → M14 (Communication)
-- `chat_room`, `chat_message` → M15 (Comms/Chat)
-- `email_template`, `email_queue`, `email_suppression` → M18 (Email)
-- `notification` → M02 (Notifications)
+- `message_template`, `message`, `subscription_topic`, `person_subscription`, `announcement`, `announcement_stats` → M07 (Communications)
+- `chat_room`, `chat_message` → M07 (Communications — real-time comms subsystem)
+- `email_template`, `email_queue`, `email_suppression` → M07 (Communications — email subsystem)
+- `notification` → M07 (Communications — notifications subsystem)
 
 ---
 
@@ -485,9 +485,9 @@ _None — person is the root identity aggregate._
 - `certificate`: `certificateNumber` unique; `(trainingId, personId)` unique — one cert per person per training
 
 ### Module Mapping
-- `document`, `document_version`, `document_tag`, `document_access_log` → M11 (Documents)
-- `certificate` → M13 (Training — certificate issuance)
-- `stored_file` → M19 (Storage)
+- `document`, `document_version`, `document_tag`, `document_access_log` → M11 (Documents & Credentials)
+- `certificate` → M11 (Documents & Credentials — certificate issuance)
+- `stored_file` → M11 (Documents & Credentials — Storage subsystem)
 
 ---
 
@@ -528,7 +528,7 @@ _None — person is the root identity aggregate._
 - `election`: nominationsCloseAt > nominationsOpenAt, votingCloseAt > votingOpenAt, votingOpenAt >= nominationsCloseAt
 
 ### Module Mapping
-- `election`, `election_nominee`, `election_vote` → M07 (Governance/Elections)
+- `election`, `election_nominee`, `election_vote` → M12 (Elections & Governance)
 
 ---
 
@@ -581,10 +581,10 @@ _None — person is the root identity aggregate._
 - `review`: npsScore 0-10, comment length <= 1000, reviewType length <= 50
 
 ### Module Mapping
-- `association`, `organization`, `feature_flag`, `platform_admin`, `impersonation_session` → M01 (Platform Admin)
-- `audit_log_entry` → M19 (Audit)
-- `review` → M17 (Reviews)
-- `invitation_token` → M01 (Invite)
+- `association`, `organization`, `feature_flag`, `platform_admin`, `impersonation_session` → M03 (Platform Admin)
+- `audit_log_entry` → M03 (Platform Admin — audit subsystem, cross-cutting)
+- `review` → M03 (Platform Admin — NPS reviews)
+- `invitation_token` → M04 (Org Admin — member invite/import)
 
 ---
 
@@ -593,44 +593,44 @@ _None — person is the root identity aggregate._
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
 │   PERSON    │────►│  MEMBERSHIP  │────►│    DUES     │
-│   (M02)     │     │    (M03)     │     │   (M08)     │
+│   (M02)     │     │    (M05)     │     │   (M06)     │
 └──────┬──────┘     └──────┬───────┘     └──────┬──────┘
        │                   │                     │
        │            ┌──────┴───────┐      ┌──────┴──────┐
-       │            │   CHAPTERS   │      │  DUNNING    │
-       │            │    (M04)     │      │   (M09)     │
+       │            │   ORG ADMIN  │      │  DUNNING    │
+       │            │    (M04)     │      │   (M06)     │
        │            └──────────────┘      └─────────────┘
        │
        ├──────────►┌──────────────┐     ┌─────────────┐
        │           │   BILLING    │     │   BOOKING   │
-       │           │    (M16)     │◄────│   (M17)     │
+       │           │    (M06)     │◄────│   (M08)     │
        │           └──────────────┘     └─────────────┘
        │
        ├──────────►┌──────────────┐     ┌─────────────┐
        │           │  CREDENTIALS │     │   CREDITS   │
-       │           │    (M05)     │     │   (M10)     │
+       │           │    (M11)     │     │   (M10)     │
        │           └──────────────┘     └─────────────┘
        │
        ├──────────►┌──────────────┐
        │           │  ELECTIONS   │
-       │           │    (M07)     │
+       │           │    (M12)     │
        │           └──────────────┘
        │
        ├──────────►┌──────────────┐     ┌─────────────┐
        │           │    COMMS     │     │    EMAIL    │
-       │           │    (M15)     │     │   (M18)     │
+       │           │    (M07)     │     │   (M07)     │
        │           └──────────────┘     └─────────────┘
        │
        └──────────►┌──────────────┐
                    │   REVIEWS    │
-                   │    (M17)     │
+                   │    (M03)     │
                    └──────────────┘
 
 ┌──────────────────────────────────────────────────────┐
-│              PLATFORM ADMIN (M01)                     │
+│              PLATFORM ADMIN (M03)                     │
 │  association → organization → feature_flag            │
 │  platform_admin, impersonation_session                │
-│  invitation_token, audit_log_entry                    │
+│  invitation_token (M04), audit_log_entry              │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -638,84 +638,84 @@ _None — person is the root identity aggregate._
 
 | # | Table | Context | Module | Schema File |
 |---|-------|---------|--------|-------------|
-| 1 | `accredited_provider` | Activities | M13 | `training/repos/accredited-provider.schema.ts` |
+| 1 | `accredited_provider` | Activities | M09 | `training/repos/accredited-provider.schema.ts` |
 | 2 | `affiliation_transfer` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
-| 3 | `aging_bucket` | Financial | M08 | `association:member/repos/dues.schema.ts` |
-| 4 | `announcement` | Communication | M14 | `communication/repos/communication.schema.ts` |
-| 5 | `announcement_stats` | Communication | M14 | `communication/repos/communication.schema.ts` |
-| 6 | `association` | Platform | M01 | `platformadmin/repos/platform-admin.schema.ts` |
-| 7 | `audit_log_entry` | Platform | M19 | `audit/repos/audit.schema.ts` |
-| 8 | `booking` | Activities | M17 | `booking/repos/booking.schema.ts` |
-| 9 | `booking_event` | Activities | M17 | `booking/repos/booking.schema.ts` |
-| 10 | `certificate` | Content | M13 | `certificates/repos/certificates.schema.ts` |
+| 3 | `aging_bucket` | Financial | M06 | `association:member/repos/dues.schema.ts` |
+| 4 | `announcement` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 5 | `announcement_stats` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 6 | `association` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 7 | `audit_log_entry` | Platform | M03 | `audit/repos/audit.schema.ts` |
+| 8 | `booking` | Activities | M08 | `booking/repos/booking.schema.ts` |
+| 9 | `booking_event` | Activities | M08 | `booking/repos/booking.schema.ts` |
+| 10 | `certificate` | Content | M11 | `certificates/repos/certificates.schema.ts` |
 | 11 | `chapter_affiliation` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
-| 12 | `chat_message` | Communication | M15 | `comms/repos/comms.schema.ts` |
-| 13 | `chat_room` | Communication | M15 | `comms/repos/comms.schema.ts` |
-| 14 | `check_in` | Activities | M12 | `association:operations/repos/events.schema.ts` |
-| 15 | `course` | Activities | M13 | `association:operations/repos/training.schema.ts` |
-| 16 | `course_enrollment` | Activities | M13 | `association:operations/repos/training.schema.ts` |
-| 17 | `credential_template` | Membership | M05 | `association:member/repos/credentials.schema.ts` |
+| 12 | `chat_message` | Communication | M07 | `comms/repos/comms.schema.ts` |
+| 13 | `chat_room` | Communication | M07 | `comms/repos/comms.schema.ts` |
+| 14 | `check_in` | Activities | M08 | `association:operations/repos/events.schema.ts` |
+| 15 | `course` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 16 | `course_enrollment` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 17 | `credential_template` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
 | 18 | `credit_entry` | Membership | M10 | `association:member/repos/credits.schema.ts` |
-| 19 | `digital_credential` | Membership | M05 | `association:member/repos/credentials.schema.ts` |
-| 20 | `directory_profile` | Membership | M06 | `association:member/repos/directory.schema.ts` |
+| 19 | `digital_credential` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
+| 20 | `directory_profile` | Membership | M04 | `association:member/repos/directory.schema.ts` |
 | 21 | `document` | Content | M11 | `documents/repos/documents.schema.ts` |
 | 22 | `document_access_log` | Content | M11 | `documents/repos/documents.schema.ts` |
 | 23 | `document_tag` | Content | M11 | `documents/repos/documents.schema.ts` |
 | 24 | `document_version` | Content | M11 | `documents/repos/documents.schema.ts` |
-| 25 | `dues_category_override` | Financial | M08 | `dues/repos/dues-payments.schema.ts` |
-| 26 | `dues_config` | Financial | M08 | `association:member/repos/dues.schema.ts` |
-| 27 | `dues_fund` | Financial | M08 | `dues/repos/dues-payments.schema.ts` |
-| 28 | `dues_fund_allocation` | Financial | M08 | `dues/repos/dues-payments.schema.ts` |
-| 29 | `dues_gateway_config` | Financial | M08 | `dues/repos/dues-payments.schema.ts` |
-| 30 | `dues_invoice` | Financial | M08 | `association:member/repos/dues.schema.ts` |
-| 31 | `dues_org_config` | Financial | M08 | `dues/repos/dues-payments.schema.ts` |
-| 32 | `dues_payment` | Financial | M08 | `dues/repos/dues-payments.schema.ts` |
-| 33 | `dues_payment_status_history` | Financial | M08 | `dues/repos/dues-status-history.schema.ts` |
-| 34 | `dues_reminder_log` | Financial | M08 | `association:member/repos/dues.schema.ts` |
-| 35 | `dues_reminder_schedule` | Financial | M08 | `dues/repos/dues-payments.schema.ts` |
-| 36 | `dunning_event` | Financial | M09 | `association:member/repos/dunning.schema.ts` |
-| 37 | `dunning_template` | Financial | M09 | `association:member/repos/dunning.schema.ts` |
-| 38 | `election` | Governance | M07 | `elections/repos/elections.schema.ts` |
-| 39 | `election_nominee` | Governance | M07 | `elections/repos/elections.schema.ts` |
-| 40 | `election_vote` | Governance | M07 | `elections/repos/elections.schema.ts` |
-| 41 | `email_queue` | Communication | M18 | `email/repos/email.schema.ts` |
-| 42 | `email_suppression` | Communication | M18 | `email/repos/suppression.schema.ts` |
-| 43 | `email_template` | Communication | M18 | `email/repos/email.schema.ts` |
-| 44 | `event` | Activities | M12 | `association:operations/repos/events.schema.ts` |
-| 45 | `event_registration` | Activities | M12 | `association:operations/repos/events.schema.ts` |
-| 46 | `feature_flag` | Platform | M01 | `platformadmin/repos/platform-admin.schema.ts` |
-| 47 | `impersonation_session` | Platform | M01 | `platformadmin/repos/platform-admin.schema.ts` |
-| 48 | `invitation_token` | Platform | M01 | `invite/repos/invite.schema.ts` |
-| 49 | `invoice` | Financial | M16 | `billing/repos/billing.schema.ts` |
-| 50 | `invoice_line_item` | Financial | M16 | `billing/repos/billing.schema.ts` |
-| 51 | `license_renewal_alert` | Membership | M05 | `association:member/repos/credentials.schema.ts` |
-| 52 | `membership` | Membership | M03 | `association:member/repos/membership.schema.ts` |
-| 53 | `membership_application` | Membership | M03 | `association:member/repos/membership.schema.ts` |
-| 54 | `membership_category` | Membership | M03 | `association:member/repos/membership.schema.ts` |
-| 55 | `membership_status_history` | Membership | M03 | `association:member/repos/status-history.schema.ts` |
-| 56 | `membership_tier` | Membership | M03 | `association:member/repos/membership.schema.ts` |
-| 57 | `merchant_account` | Financial | M16 | `billing/repos/billing.schema.ts` |
-| 58 | `message` | Communication | M14 | `communication/repos/communication.schema.ts` |
-| 59 | `message_template` | Communication | M14 | `communication/repos/communication.schema.ts` |
-| 60 | `notification` | Communication | M02 | `notifs/repos/notification.schema.ts` |
+| 25 | `dues_category_override` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 26 | `dues_config` | Financial | M06 | `association:member/repos/dues.schema.ts` |
+| 27 | `dues_fund` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 28 | `dues_fund_allocation` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 29 | `dues_gateway_config` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 30 | `dues_invoice` | Financial | M06 | `association:member/repos/dues.schema.ts` |
+| 31 | `dues_org_config` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 32 | `dues_payment` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 33 | `dues_payment_status_history` | Financial | M06 | `dues/repos/dues-status-history.schema.ts` |
+| 34 | `dues_reminder_log` | Financial | M06 | `association:member/repos/dues.schema.ts` |
+| 35 | `dues_reminder_schedule` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 36 | `dunning_event` | Financial | M06 | `association:member/repos/dunning.schema.ts` |
+| 37 | `dunning_template` | Financial | M06 | `association:member/repos/dunning.schema.ts` |
+| 38 | `election` | Governance | M12 | `elections/repos/elections.schema.ts` |
+| 39 | `election_nominee` | Governance | M12 | `elections/repos/elections.schema.ts` |
+| 40 | `election_vote` | Governance | M12 | `elections/repos/elections.schema.ts` |
+| 41 | `email_queue` | Communication | M07 | `email/repos/email.schema.ts` |
+| 42 | `email_suppression` | Communication | M07 | `email/repos/suppression.schema.ts` |
+| 43 | `email_template` | Communication | M07 | `email/repos/email.schema.ts` |
+| 44 | `event` | Activities | M08 | `association:operations/repos/events.schema.ts` |
+| 45 | `event_registration` | Activities | M08 | `association:operations/repos/events.schema.ts` |
+| 46 | `feature_flag` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 47 | `impersonation_session` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 48 | `invitation_token` | Platform | M04 | `invite/repos/invite.schema.ts` |
+| 49 | `invoice` | Financial | M06 | `billing/repos/billing.schema.ts` |
+| 50 | `invoice_line_item` | Financial | M06 | `billing/repos/billing.schema.ts` |
+| 51 | `license_renewal_alert` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
+| 52 | `membership` | Membership | M05 | `association:member/repos/membership.schema.ts` |
+| 53 | `membership_application` | Membership | M05 | `association:member/repos/membership.schema.ts` |
+| 54 | `membership_category` | Membership | M05 | `association:member/repos/membership.schema.ts` |
+| 55 | `membership_status_history` | Membership | M05 | `association:member/repos/status-history.schema.ts` |
+| 56 | `membership_tier` | Membership | M05 | `association:member/repos/membership.schema.ts` |
+| 57 | `merchant_account` | Financial | M06 | `billing/repos/billing.schema.ts` |
+| 58 | `message` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 59 | `message_template` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 60 | `notification` | Communication | M07 | `notifs/repos/notification.schema.ts` |
 | 61 | `notification_preference` | Identity | M02 | `person/repos/notification-preferences.schema.ts` |
-| 62 | `officer_term` | Membership | M07 | `association:member/repos/governance.schema.ts` |
-| 63 | `organization` | Platform | M01 | `platformadmin/repos/platform-admin.schema.ts` |
+| 62 | `officer_term` | Membership | M04 | `association:member/repos/governance.schema.ts` |
+| 63 | `organization` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
 | 64 | `person` | Identity | M02 | `person/repos/person.schema.ts` |
 | 65 | `person_privacy_setting` | Identity | M02 | `person/repos/privacy-settings.schema.ts` |
-| 66 | `person_subscription` | Communication | M14 | `communication/repos/communication.schema.ts` |
-| 67 | `platform_admin` | Platform | M01 | `platformadmin/repos/platform-admin.schema.ts` |
-| 68 | `position` | Membership | M07 | `association:member/repos/governance.schema.ts` |
-| 69 | `professional_license` | Membership | M05 | `association:member/repos/credentials.schema.ts` |
-| 70 | `quiz_attempt` | Activities | M13 | `association:operations/repos/training.schema.ts` |
-| 71 | `review` | Platform | M17 | `reviews/repos/review.schema.ts` |
+| 66 | `person_subscription` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 67 | `platform_admin` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 68 | `position` | Membership | M04 | `association:member/repos/governance.schema.ts` |
+| 69 | `professional_license` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
+| 70 | `quiz_attempt` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 71 | `review` | Platform | M03 | `reviews/repos/review.schema.ts` |
 | 72 | `royalty_split` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
-| 73 | `schedule_exception` | Activities | M17 | `booking/repos/booking.schema.ts` |
-| 74 | `stored_file` | Content | M19 | `storage/repos/file.schema.ts` |
-| 75 | `subscription_topic` | Communication | M14 | `communication/repos/communication.schema.ts` |
-| 76 | `training` | Activities | M13 | `association:operations/repos/training.schema.ts` |
-| 77 | `training_enrollment` | Activities | M13 | `association:operations/repos/training.schema.ts` |
-| 78 | `waitlist_entry` | Activities | M12 | `association:operations/repos/events.schema.ts` |
+| 73 | `schedule_exception` | Activities | M08 | `booking/repos/booking.schema.ts` |
+| 74 | `stored_file` | Content | M11 | `storage/repos/file.schema.ts` |
+| 75 | `subscription_topic` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 76 | `training` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 77 | `training_enrollment` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 78 | `waitlist_entry` | Activities | M08 | `association:operations/repos/events.schema.ts` |
 
 ## Complete Enum Index (alphabetical)
 
@@ -769,7 +769,7 @@ _None — person is the root identity aggregate._
 | 46 | `invite_type` | claim, invite | `invite/repos/invite.schema.ts` |
 | 47 | `invoice_status` | draft, open, paid, void, uncollectible | `billing/repos/billing.schema.ts` |
 | 48 | `location_type` | video, phone, in-person | `booking/repos/booking.schema.ts` |
-| 49 | `membership_status` | pendingPayment, active, gracePeriod, lapsed, expired, suspended, terminated, resigned, deceased, expelled | `association:member/repos/membership.schema.ts` |
+| 49 | `membership_status` | pendingPayment, active, gracePeriod, lapsed, expired, suspended, removed, resigned, deceased, expelled | `association:member/repos/membership.schema.ts` |
 | 50 | `message_status` | draft, scheduled, sending, sent, cancelled, failed | `communication/repos/communication.schema.ts` |
 | 51 | `message_type` | text, system, video_call | `comms/repos/comms.schema.ts` |
 | 52 | `nominee_status` | nominated, accepted, declined, elected | `elections/repos/elections.schema.ts` |

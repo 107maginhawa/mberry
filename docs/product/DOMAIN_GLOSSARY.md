@@ -35,9 +35,13 @@ Canonical terminology for the Memberry platform. All code, specs, PRDs, and docu
 | **Active** | Dues are current. Full access to org features. |
 | **Grace** | Dues expired but within the configurable grace period (default 30 days). Read-only access. |
 | **Lapsed** | Dues expired beyond grace period. No access to org features. Still on roster. |
+| **Expired** | Dues have lapsed and the membership period has fully expired without renewal. Terminal state requiring re-application or officer reinstatement. Distinct from Lapsed (which is recoverable via payment). |
 | **Pending** | Application submitted, not yet approved. |
 | **Suspended** | Explicitly suspended by an officer. Requires officer action to restore. Distinct from Lapsed. |
-| **Removed** | Removed from org roster by President action. |
+| **Removed** | Removed from org roster by President action. Formerly called `terminated` — renamed to `removed` in Phase 39 to better reflect the action. |
+| **Resigned** | Member voluntarily departed the organization. Terminal state. Set by officer after receiving formal resignation. |
+| **Deceased** | Member record marked deceased. Terminal state. Preserves record for historical/audit purposes while blocking access. |
+| **Expelled** | Member removed via formal disciplinary process. Terminal state. Distinct from Removed (which is administrative) — Expelled requires a disciplinary record. |
 | **Membership Category** | Classification within an org (e.g., Regular, Associate, Life, Student, Honorary). Configured per org. |
 | **Dues** | Annual or periodic payment required to maintain active membership. |
 | **Dues Expiry Date** | Date when current dues payment expires. Membership status is derived from this value. |
@@ -81,12 +85,22 @@ Valid transitions:
 - `PENDING → REMOVED` (officer rejects application)
 - `ACTIVE → GRACE` (automatic, dues expired)
 - `GRACE → LAPSED` (automatic, grace period expired)
+- `LAPSED → EXPIRED` (automatic, no payment after extended lapse — configurable threshold)
 - `LAPSED → ACTIVE` (member pays dues)
 - `ACTIVE → SUSPENDED` (officer action)
 - `GRACE → SUSPENDED` (officer action)
 - `LAPSED → SUSPENDED` (officer action)
 - `SUSPENDED → ACTIVE` (officer restores)
-- `ACTIVE → REMOVED` (president action)
+- `ACTIVE → REMOVED` (president administrative removal)
+- `ACTIVE → RESIGNED` (officer records voluntary resignation)
+- `GRACE → RESIGNED` (officer records voluntary resignation)
+- `LAPSED → RESIGNED` (officer records voluntary resignation)
+- `* → DECEASED` (officer marks member as deceased; any non-terminal state)
+- `ACTIVE → EXPELLED` (president action after disciplinary process)
+- `SUSPENDED → EXPELLED` (president action after disciplinary process)
+
+Terminal states (no outward transitions): `EXPIRED`, `RESIGNED`, `DECEASED`, `EXPELLED`
+Re-entry path from terminal states: new membership application required (back to `PENDING`).
 
 ---
 

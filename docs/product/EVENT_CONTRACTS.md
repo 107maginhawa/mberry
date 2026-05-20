@@ -372,7 +372,7 @@ interface DeletionResult {
 
 | Enum | DB name | Values |
 |------|---------|--------|
-| `notificationTypeEnum` | `notification_type` | `billing`, `security`, `system`, `booking.created`, `booking.confirmed`, `booking.rejected`, `booking.cancelled`, `booking.no-show-client`, `booking.no-show-host` |
+| `notificationTypeEnum` | `notification_type` | `billing`, `security`, `system`, `booking.created`, `booking.confirmed`, `booking.rejected`, `booking.cancelled`, `booking.no-show-client`, `booking.no-show-host`, `comms.video-call-started`, `comms.video-call-joined`, `comms.video-call-left`, `comms.video-call-ended`, `comms.chat-message`, `waitlist.promoted`, `event.late-cancellation`, `dunning.escalation`, `task.overdue` |
 | `notificationChannelEnum` | `notification_channel` | `email`, `push`, `in-app` |
 | `notificationStatusEnum` | `notification_status` | `queued`, `sent`, `delivered`, `read`, `failed`, `expired` |
 

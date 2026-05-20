@@ -111,11 +111,17 @@ Same as CS-2 above. This is the officer-facing journey for the CSV import capabi
 |---|---|---|
 | BR-01 | Membership Status Computation | Status (Active/Grace/Lapsed) computed from `dues_expiry_date` + org grace period at every read. Never stored as mutable field. Life members (null or sentinel `dues_expiry_date`) always return Active. |
 | BR-02 | Grace Period Default | Per-org setting (0-90 days, default 30). Determines duration of Grace status after expiry. |
-| BR-04 | Dues Amount per Org | Categories configured per org. Cannot delete categories with assigned members (deactivate only). |
+| BR-03 | Membership Transitions | Only documented state machine transitions are valid. Invalid transitions are rejected silently. |
 | BR-21 | Multi-Org Member Account | One account, multiple org-memberships. Each independent. |
 | BR-22 | Member Matching on Import | Match by email (case-insensitive) or license number (normalized). Ambiguous matches flagged for human review. |
 
+> **Note:** BR-04 (Dues Amount per Org) is owned by M06 (Dues & Payments). This module applies MR-01 below for membership category lifecycle — do not reference BR-04 here.
+
 ### Module-Specific Rules
+
+**MR-01 (M05): Membership Category Lifecycle**
+
+Membership categories (Regular, Associate, Life, Student, Honorary) are configured per org. A category with one or more assigned members cannot be deleted — it must be deactivated instead. Deactivated categories are hidden from the "create membership" flow but remain visible on existing member records.
 
 **M5-R1: Membership State Machine**
 
@@ -147,19 +153,30 @@ Valid states and transitions:
     Officer override (any state except Pending):
         --> Suspended (officer action, requires reason)
         --> Removed (officer action, requires reason)
+
+    Terminal states (no further transitions):
+        --> Expired (automatic, extended non-renewal)
+        --> Resigned (officer records voluntary departure)
+        --> Deceased (officer marks member deceased)
+        --> Expelled (president, after disciplinary process)
 ```
 
 Valid transitions:
 - **Pending -> Active:** Application approved (or import with direct add)
 - **Active -> Grace:** `dues_expiry_date` passes (computed, not stored)
 - **Grace -> Lapsed:** Grace period expires (computed, not stored)
+- **Lapsed -> Expired:** Extended non-renewal beyond configurable threshold (stored override)
 - **Lapsed -> Active:** Member pays dues (reinstatement)
 - **Any (except Pending) -> Suspended:** Officer disciplinary action (M04)
 - **Suspended -> Active:** Officer lifts suspension
-- **Any -> Removed:** Officer removes member (M04)
+- **Any -> Removed:** Officer removes member (M04) — administrative removal
+- **Any non-terminal -> Resigned:** Officer records voluntary resignation
+- **Any non-terminal -> Deceased:** Officer marks member deceased
+- **Active / Suspended -> Expelled:** President after formal disciplinary process
 
 States that are computed (not stored): Active, Grace, Lapsed.
-States that are stored as overrides: Pending, Suspended, Removed.
+States that are stored as overrides: Pending, Suspended, Removed, Expired, Resigned, Deceased, Expelled.
+Terminal states (re-entry requires new application): Expired, Resigned, Deceased, Expelled.
 
 **M5-R2: Cross-Org Member Matching Normalization**
 
