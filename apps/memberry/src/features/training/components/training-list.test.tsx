@@ -3,6 +3,30 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { TrainingList } from './training-list'
 
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, params, className }: any) => {
+    const href = to?.replace('$orgId', params?.orgId || '').replace('$trainingId', params?.trainingId || '')
+    return <a href={href} className={className}>{children}</a>
+  },
+  useNavigate: () => vi.fn(),
+}))
+
+vi.mock('@monobase/ui', () => ({
+  Button: ({ children, onClick, disabled, className, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} className={className} {...props}>{children}</button>
+  ),
+  Input: ({ value, onChange, placeholder, className, ...props }: any) => (
+    <input value={value} onChange={onChange} placeholder={placeholder} className={className} {...props} />
+  ),
+  Select: ({ children, value, onValueChange }: any) => (
+    <div data-testid="select" data-value={value}>{children}</div>
+  ),
+  SelectContent: ({ children }: any) => <div>{children}</div>,
+  SelectItem: ({ children, value }: any) => <div data-value={value}>{children}</div>,
+  SelectTrigger: ({ children, className }: any) => <div className={className}>{children}</div>,
+  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
+}))
+
 vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
   searchTrainingsOptions: vi.fn(),
   searchTrainingsQueryKey: vi.fn(() => ['trainings']),
@@ -123,6 +147,7 @@ describe('TrainingList', () => {
     renderWithProviders(<TrainingList orgId="org-1" />)
 
     expect(screen.getByPlaceholderText('Search trainings...')).toBeInTheDocument()
-    expect(screen.getByText('All Types')).toBeInTheDocument()
+    // "All Types" appears in SelectValue placeholder and SelectItem — use getAllByText
+    expect(screen.getAllByText('All Types').length).toBeGreaterThanOrEqual(1)
   })
 })

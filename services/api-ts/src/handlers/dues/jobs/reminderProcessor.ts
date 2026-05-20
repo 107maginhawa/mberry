@@ -27,6 +27,8 @@ interface ReminderContext {
     title: string;
     message: string;
   }) => Promise<{ id: string }>;
+  /** Optional suppression check — returns true if member should be skipped */
+  checkSuppression?: (personId: string, organizationId: string) => Promise<boolean>;
 }
 
 export interface ReminderResult {
@@ -118,6 +120,28 @@ export async function processDuesReminders(ctx: ReminderContext): Promise<Remind
           if (schedule.channelPush) channels.push('push');
 
           for (const member of expiringMembers) {
+            // 1b. Check suppression — skip suppressed members entirely
+            if (ctx.checkSuppression) {
+              try {
+                const isSuppressed = await ctx.checkSuppression(member.personId, config.organizationId);
+                if (isSuppressed) {
+                  result.skipped++;
+                  logger?.debug({
+                    msg: 'Member suppressed, skipping all channels',
+                    personId: member.personId,
+                    orgId: config.organizationId,
+                  });
+                  continue;
+                }
+              } catch (suppressErr) {
+                logger?.warn({
+                  msg: 'Suppression check failed, proceeding with reminder',
+                  err: suppressErr,
+                  personId: member.personId,
+                });
+              }
+            }
+
             for (const channel of channels) {
               try {
                 // 2. Check idempotency — has this reminder already been sent?

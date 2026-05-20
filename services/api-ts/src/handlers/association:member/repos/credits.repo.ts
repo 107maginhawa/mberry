@@ -50,10 +50,6 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
       conditions.push(eq(creditEntries.personId, filters.personId));
     }
 
-    if (filters.organizationId) {
-      conditions.push(eq(creditEntries.organizationId, filters.organizationId));
-    }
-
     if (filters.type) {
       conditions.push(eq(creditEntries.type, filters.type));
     }

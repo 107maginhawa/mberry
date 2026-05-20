@@ -3,6 +3,15 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { CertificateList } from './certificate-list'
 
+// Mock TanStack Router (requires RouterProvider without mock)
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, params, className }: any) => {
+    const href = to?.replace('$certificateId', params?.certificateId || '')
+    return <a href={href} className={className}>{children}</a>
+  },
+  useNavigate: () => vi.fn(),
+}))
+
 // Mock SDK hooks
 vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
   listMyCertificatesOptions: vi.fn(),

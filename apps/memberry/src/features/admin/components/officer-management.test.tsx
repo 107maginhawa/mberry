@@ -27,6 +27,12 @@ vi.mock('@monobase/ui', () => ({
   DialogHeader: ({ children }: any) => <div>{children}</div>,
   DialogTitle: ({ children }: any) => <h2>{children}</h2>,
   DialogFooter: ({ children }: any) => <div>{children}</div>,
+  Table: ({ children, className }: any) => <table className={className}>{children}</table>,
+  TableHeader: ({ children, className }: any) => <thead className={className}>{children}</thead>,
+  TableBody: ({ children }: any) => <tbody>{children}</tbody>,
+  TableRow: ({ children, className }: any) => <tr className={className}>{children}</tr>,
+  TableHead: ({ children, className }: any) => <th className={className}>{children}</th>,
+  TableCell: ({ children, className, colSpan }: any) => <td className={className} colSpan={colSpan}>{children}</td>,
 }))
 
 // Mock motion/pattern components

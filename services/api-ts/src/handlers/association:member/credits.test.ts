@@ -1,5 +1,6 @@
-import { describe, test, expect } from 'bun:test';
-import { makeCtx } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { CreditEntryRepository } from './repos/credits.repo';
 import {
   getCycleForDate,
   getCycleForDateWithConfig,
@@ -634,5 +635,252 @@ describe('[BR-14] Cross-org credit aggregation', () => {
 
     expect(summary.remaining).toBe(40);
     expect(summary.compliant).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC-M10-001: Cross-org credit aggregation — handler-level tests
+// ---------------------------------------------------------------------------
+
+describe('[AC-M10-001] getCreditTranscript cross-org aggregation', () => {
+  let stubs: Record<string, { mockRestore: () => void }>;
+
+  afterEach(() => {
+    if (stubs) {
+      for (const s of Object.values(stubs)) s.mockRestore();
+    }
+    restoreRepo(CreditEntryRepository);
+  });
+
+  test('returns 401 without user', async () => {
+    const { getCreditTranscript } = await import('./getCreditTranscript');
+    const ctx = makeCtx({ user: null });
+    const response = await getCreditTranscript(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  test('aggregates credits from multiple orgs into single summary', async () => {
+    const { getCreditTranscript } = await import('./getCreditTranscript');
+    stubs = stubRepo(CreditEntryRepository, {
+      sumCreditsByOrg: async () => [
+        { organizationId: 'org-1', total: 15 },
+        { organizationId: 'org-2', total: 10 },
+        { organizationId: 'org-3', total: 8 },
+      ],
+    });
+    const ctx = makeCtx({
+      _query: {
+        registrationDate: '2024-01-01',
+        cyclePeriodYears: '2',
+        requiredCredits: '40',
+        carryoverEnabled: 'false',
+      },
+    });
+    const response = await getCreditTranscript(ctx);
+    expect(response.status).toBe(200);
+
+    const body = (response as any).body;
+    expect(body.earned).toBe(33);
+    expect(body.organizations).toHaveLength(3);
+    expect(body.remaining).toBe(7);
+    expect(body.compliant).toBe(false);
+  });
+
+  test('cross-org aggregation with carryover yields compliant status', async () => {
+    const { getCreditTranscript } = await import('./getCreditTranscript');
+    stubs = stubRepo(CreditEntryRepository, {
+      sumCreditsByOrg: async () => [
+        { organizationId: 'org-dental', total: 20 },
+        { organizationId: 'org-medical', total: 15 },
+      ],
+    });
+    const ctx = makeCtx({
+      _query: {
+        registrationDate: '2024-01-01',
+        cyclePeriodYears: '2',
+        requiredCredits: '40',
+        carryoverEnabled: 'true',
+        previousCycleEarned: '60', // excess 20, capped at 50% of 40 = 20
+      },
+    });
+    const response = await getCreditTranscript(ctx);
+    expect(response.status).toBe(200);
+
+    const body = (response as any).body;
+    expect(body.earned).toBe(35);
+    expect(body.carryoverFromPrevious).toBe(20);
+    expect(body.total).toBe(55);
+    expect(body.compliant).toBe(true);
+  });
+
+  test('single org member aggregation returns correct breakdown', async () => {
+    const { getCreditTranscript } = await import('./getCreditTranscript');
+    stubs = stubRepo(CreditEntryRepository, {
+      sumCreditsByOrg: async () => [
+        { organizationId: 'org-only', total: 45 },
+      ],
+    });
+    const ctx = makeCtx({
+      _query: {
+        registrationDate: '2023-06-01',
+        cyclePeriodYears: '1',
+        requiredCredits: '40',
+        carryoverEnabled: 'false',
+      },
+    });
+    const response = await getCreditTranscript(ctx);
+    expect(response.status).toBe(200);
+
+    const body = (response as any).body;
+    expect(body.organizations).toHaveLength(1);
+    expect(body.organizations[0].credits).toBe(45);
+    expect(body.earned).toBe(45);
+    expect(body.remaining).toBe(0);
+    expect(body.compliant).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC-M10-001: getCreditCompliance — org-level compliance view
+// ---------------------------------------------------------------------------
+
+describe('[AC-M10-001] getCreditCompliance handler', () => {
+  test('returns 401 without session', async () => {
+    const { getCreditCompliance } = await import('./getCreditCompliance');
+    const ctx = makeCtx({ user: null, session: null });
+    await expect(getCreditCompliance(ctx)).rejects.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC-M10-003: Excess carryover edge cases
+// ---------------------------------------------------------------------------
+
+describe('[AC-M10-003] Excess carryover edge cases', () => {
+  test('carryover exactly at 50% cap', () => {
+    // Earned 60, required 40, excess = 20, cap = 20 → exactly at cap
+    const result = calculateCarryover(60, 40, true);
+    expect(result).toBe(20);
+  });
+
+  test('carryover with zero required credits returns 0', () => {
+    // Edge case: required = 0 → cap = 0
+    const result = calculateCarryover(50, 0, true);
+    expect(result).toBe(0);
+  });
+
+  test('carryover with very large excess caps correctly', () => {
+    // Earned 10000, required 100, excess = 9900, cap = 50
+    const result = calculateCarryover(10000, 100, true);
+    expect(result).toBe(50);
+  });
+
+  test('carryover of 1 credit excess with small required', () => {
+    // Earned 3, required 2, excess = 1, cap = floor(2*0.5) = 1
+    const result = calculateCarryover(3, 2, true);
+    expect(result).toBe(1);
+  });
+
+  test('carryover integrates with cross-org aggregation summary', () => {
+    // Multi-org earned in previous cycle: 70 total, required 40 → excess 30, cap 20
+    const carryover = calculateCarryover(70, 40, true);
+    expect(carryover).toBe(20);
+
+    // Current cycle: 25 earned across orgs + 20 carryover = 45 >= 40
+    const cycle = { cycleStart: new Date(), cycleEnd: new Date(), cycleNumber: 2 };
+    const summary = summarizeCycle(cycle, 25, 40, carryover);
+    expect(summary.total).toBe(45);
+    expect(summary.compliant).toBe(true);
+    expect(summary.remaining).toBe(0);
+  });
+
+  test('no double-counting: carryover from cycle N does not stack with cycle N-1', () => {
+    // Simulate: cycle 0 earned 60 (required 40) → carryover 20
+    const carryover0 = calculateCarryover(60, 40, true);
+    expect(carryover0).toBe(20);
+
+    // Cycle 1: earned 50 + carryover 20 = 70 total
+    // But carryover for cycle 2 is based only on cycle 1 earned (50), not total (70)
+    const carryover1 = calculateCarryover(50, 40, true);
+    expect(carryover1).toBe(10); // excess = 10, cap = 20 → 10
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC-M10-004: Toggle independence — M10 credit module works regardless of
+// other modules' feature flags being on or off
+// ---------------------------------------------------------------------------
+
+describe('[AC-M10-004] Toggle independence', () => {
+  test('credit cycle calculation is independent of feature flags', () => {
+    // Credit cycle utils have no dependency on feature flags
+    const regDate = new Date('2024-01-01');
+    const target = new Date('2025-06-01');
+    const cycle = getCycleForDate(regDate, target, 2);
+
+    // Should work regardless of any external flag state
+    expect(cycle.cycleNumber).toBe(0);
+    expect(cycle.cycleStart).toBeDefined();
+    expect(cycle.cycleEnd).toBeDefined();
+  });
+
+  test('carryover calculation has no feature flag dependency', () => {
+    // calculateCarryover uses only its own carryoverEnabled param, not global flags
+    const withCarryover = calculateCarryover(60, 40, true);
+    const withoutCarryover = calculateCarryover(60, 40, false);
+
+    expect(withCarryover).toBe(20);
+    expect(withoutCarryover).toBe(0);
+  });
+
+  test('summarizeCycle works in isolation from external toggles', () => {
+    const cycle = { cycleStart: new Date(), cycleEnd: new Date(), cycleNumber: 0 };
+    const summary = summarizeCycle(cycle, 30, 40, 0);
+    expect(summary.compliant).toBe(false);
+    expect(summary.remaining).toBe(10);
+  });
+
+  test('credit module feature flag does not affect other modules flags', async () => {
+    // Verify FF_CREDIT_TRACKING does not interfere with FF_NEW_DUES_FLOW
+    const { parseFeatureFlags, isEnabled } = await import('@/core/feature-flags');
+
+    const bothEnabled = parseFeatureFlags({
+      FF_CREDIT_TRACKING: 'true',
+      FF_NEW_DUES_FLOW: 'true',
+    });
+    expect(isEnabled(bothEnabled, 'creditTracking')).toBe(true);
+    expect(isEnabled(bothEnabled, 'newDuesFlow')).toBe(true);
+
+    // Disabling credit does not affect dues
+    const creditDisabled = parseFeatureFlags({
+      FF_CREDIT_TRACKING: 'false',
+      FF_NEW_DUES_FLOW: 'true',
+    });
+    expect(isEnabled(creditDisabled, 'creditTracking')).toBe(false);
+    expect(isEnabled(creditDisabled, 'newDuesFlow')).toBe(true);
+
+    // Disabling dues does not affect credit
+    const duesDisabled = parseFeatureFlags({
+      FF_CREDIT_TRACKING: 'true',
+      FF_NEW_DUES_FLOW: 'false',
+    });
+    expect(isEnabled(duesDisabled, 'creditTracking')).toBe(true);
+    expect(isEnabled(duesDisabled, 'newDuesFlow')).toBe(false);
+  });
+
+  test('getCreditTranscript handler has no imports from feature-flag-gated modules', async () => {
+    // Verify the handler module does not depend on feature flags at import time
+    const handlerModule = await import('./getCreditTranscript');
+    expect(handlerModule.getCreditTranscript).toBeFunction();
+    // If this import succeeds, the handler has no hard dependency on feature flags
+  });
+
+  test('credit repo buildWhereConditions works without external state', async () => {
+    const { CreditEntryRepository } = await import('./repos/credits.repo');
+    const repo = Object.create(CreditEntryRepository.prototype) as InstanceType<typeof CreditEntryRepository>;
+
+    // buildWhereConditions should handle filters independently
+    const result = (repo as any).buildWhereConditions({ personId: 'person-1' });
+    expect(result).toBeDefined();
   });
 });

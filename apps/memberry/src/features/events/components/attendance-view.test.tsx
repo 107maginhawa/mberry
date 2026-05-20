@@ -12,6 +12,9 @@ vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
 vi.mock('@monobase/ui', () => ({
   Input: (props: any) => <input {...props} />,
   Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
+  Button: ({ children, onClick, disabled, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
+  ),
 }))
 
 import {

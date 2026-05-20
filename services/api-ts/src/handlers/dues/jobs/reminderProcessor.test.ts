@@ -414,6 +414,163 @@ describe('processDuesReminders', () => {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // GAP-012: Suppressed member exclusion
+  // ---------------------------------------------------------------------------
+
+  describe('GAP-012: suppressed member exclusion', () => {
+    test('skips suppressed member when checkSuppression returns true', async () => {
+      const mockSchedules = [
+        { id: 'sched-sup-1', duesConfigId: 'config-1', daysOffset: -30, enabled: true, channelInapp: true, channelPush: false, channelEmail: true },
+      ];
+      const mockMembers = [
+        { id: 'mem-1', personId: 'person-suppressed', organizationId: 'org-1', duesExpiryDate: '2026-06-12' },
+      ];
+
+      const db = buildSequencedDb([
+        [{ id: 'config-1', organizationId: 'org-1' }],
+        whereResponse(mockSchedules),
+        whereResponse(mockMembers),
+      ]);
+
+      const notificationsSent: any[] = [];
+      const result = await processDuesReminders({
+        db: db as any,
+        logger: mockLogger,
+        checkSuppression: async () => true,
+        createNotification: async (params) => {
+          notificationsSent.push(params);
+          return { id: 'notif-sup' };
+        },
+      });
+
+      expect(result.skipped).toBe(1);
+      expect(result.sent).toBe(0);
+      expect(notificationsSent).toHaveLength(0);
+    });
+
+    test('sends to non-suppressed member when checkSuppression returns false', async () => {
+      const mockSchedules = [
+        { id: 'sched-sup-2', duesConfigId: 'config-1', daysOffset: -30, enabled: true, channelInapp: true, channelPush: false, channelEmail: false },
+      ];
+      const mockMembers = [
+        { id: 'mem-1', personId: 'person-ok', organizationId: 'org-1', duesExpiryDate: '2026-06-12' },
+      ];
+
+      const insertedValues: any[] = [];
+      const db = buildSequencedDb([
+        [{ id: 'config-1', organizationId: 'org-1' }],
+        whereResponse(mockSchedules),
+        whereResponse(mockMembers),
+        whereResponse([]), // no existing logs
+      ], (val) => insertedValues.push(val));
+
+      const result = await processDuesReminders({
+        db: db as any,
+        logger: mockLogger,
+        checkSuppression: async () => false,
+        createNotification: async () => ({ id: 'notif-ok' }),
+      });
+
+      expect(result.sent).toBe(1);
+      expect(result.skipped).toBe(0);
+    });
+
+    test('proceeds with reminder if checkSuppression throws (fail-open)', async () => {
+      const mockSchedules = [
+        { id: 'sched-sup-3', duesConfigId: 'config-1', daysOffset: -7, enabled: true, channelInapp: true, channelPush: false, channelEmail: false },
+      ];
+      const mockMembers = [
+        { id: 'mem-1', personId: 'person-err', organizationId: 'org-1', duesExpiryDate: '2026-06-12' },
+      ];
+
+      const insertedValues: any[] = [];
+      const db = buildSequencedDb([
+        [{ id: 'config-1', organizationId: 'org-1' }],
+        whereResponse(mockSchedules),
+        whereResponse(mockMembers),
+        whereResponse([]), // no existing logs
+      ], (val) => insertedValues.push(val));
+
+      const result = await processDuesReminders({
+        db: db as any,
+        logger: mockLogger,
+        checkSuppression: async () => { throw new Error('suppression service down'); },
+        createNotification: async () => ({ id: 'notif-err' }),
+      });
+
+      // Should still send — fail-open on suppression check error
+      expect(result.sent).toBe(1);
+    });
+
+    test('mixed: suppressed and non-suppressed members in same org', async () => {
+      const mockSchedules = [
+        { id: 'sched-sup-4', duesConfigId: 'config-1', daysOffset: -30, enabled: true, channelInapp: true, channelPush: false, channelEmail: false },
+      ];
+      const mockMembers = [
+        { id: 'mem-1', personId: 'person-ok', organizationId: 'org-1', duesExpiryDate: '2026-06-12' },
+        { id: 'mem-2', personId: 'person-suppressed', organizationId: 'org-1', duesExpiryDate: '2026-06-12' },
+      ];
+
+      const insertedValues: any[] = [];
+      const db = buildSequencedDb([
+        [{ id: 'config-1', organizationId: 'org-1' }],
+        whereResponse(mockSchedules),
+        whereResponse(mockMembers),
+        whereResponse([]), // no existing logs for person-ok
+      ], (val) => insertedValues.push(val));
+
+      const suppressedSet = new Set(['person-suppressed']);
+      const result = await processDuesReminders({
+        db: db as any,
+        logger: mockLogger,
+        checkSuppression: async (personId) => suppressedSet.has(personId),
+        createNotification: async () => ({ id: 'notif-mixed' }),
+      });
+
+      expect(result.sent).toBe(1);
+      expect(result.skipped).toBe(1);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Multi-channel notification tests
+  // ---------------------------------------------------------------------------
+
+  test('sends notifications to all enabled channels', async () => {
+    const mockSchedules = [
+      { id: 'sched-mc-1', duesConfigId: 'config-1', daysOffset: -7, enabled: true, channelInapp: true, channelPush: true, channelEmail: true },
+    ];
+    const mockMembers = [
+      { id: 'mem-1', personId: 'person-1', organizationId: 'org-1', duesExpiryDate: '2026-06-12' },
+    ];
+
+    const insertedValues: any[] = [];
+    // Need 3 log checks (one per channel) all returning empty
+    const db = buildSequencedDb([
+      [{ id: 'config-1', organizationId: 'org-1' }],
+      whereResponse(mockSchedules),
+      whereResponse(mockMembers),
+      whereResponse([]), // no existing log for in-app
+      whereResponse([]), // no existing log for email
+      whereResponse([]), // no existing log for push
+    ], (val) => insertedValues.push(val));
+
+    const notificationsSent: any[] = [];
+    const result = await processDuesReminders({
+      db: db as any,
+      logger: mockLogger,
+      createNotification: async (params) => {
+        notificationsSent.push(params);
+        return { id: 'notif-mc-' + params.channel };
+      },
+    });
+
+    expect(result.sent).toBe(3);
+    const channels = notificationsSent.map(n => n.channel).sort();
+    expect(channels).toEqual(['email', 'in-app', 'push']);
+  });
+
   test('re-run is idempotent (second run finds existing logs and skips)', async () => {
     const mockSchedules = [
       { id: 'sched-1', duesConfigId: 'config-1', daysOffset: -30, enabled: true, channelInapp: true, channelPush: false, channelEmail: false },

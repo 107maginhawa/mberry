@@ -12,6 +12,16 @@ vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
 vi.mock('@monobase/ui', () => ({
   Input: (props: any) => <input {...props} />,
   Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
+  Button: ({ children, onClick, disabled, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
+  ),
+  Select: ({ children, value, onValueChange: _onValueChange }: any) => (
+    <div data-testid="select" data-value={value}>{children}</div>
+  ),
+  SelectContent: ({ children }: any) => <div>{children}</div>,
+  SelectItem: ({ children, value }: any) => <div data-value={value}>{children}</div>,
+  SelectTrigger: ({ children }: any) => <div>{children}</div>,
+  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
 }))
 
 vi.mock('./event-card', () => ({
@@ -120,6 +130,7 @@ describe('EventList', () => {
     renderWithProviders(<EventList orgId="org-1" />)
 
     expect(screen.getByPlaceholderText('Search events...')).toBeInTheDocument()
-    expect(screen.getByText('All Types')).toBeInTheDocument()
+    // "All Types" appears in SelectValue placeholder and SelectItem — use getAllByText
+    expect(screen.getAllByText('All Types').length).toBeGreaterThanOrEqual(1)
   })
 })

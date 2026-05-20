@@ -28,6 +28,8 @@ export default tseslint.config(
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
+      // Escalate to error for React apps — all as any must be explicitly justified
+      '@typescript-eslint/no-explicit-any': 'error',
       'react/prop-types': 'off',
       'react/no-unescaped-entities': 'warn',
       'react/no-unknown-property': ['warn', { ignore: ['cmdk-input-wrapper'] }],
@@ -48,6 +50,14 @@ export default tseslint.config(
           message: 'Use <Label> from @monobase/ui instead of raw <label>.',
         },
       ],
+    },
+  },
+  // Test files: relax no-explicit-any (vi.mock factories use any for prop type signatures)
+  // This override must come AFTER the main config to take precedence.
+  {
+    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 );

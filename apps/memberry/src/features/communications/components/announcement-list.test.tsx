@@ -9,6 +9,9 @@ vi.mock('@monobase/ui', () => ({
   Input: ({ value, onChange, placeholder, className }: any) => (
     <input value={value} onChange={onChange} placeholder={placeholder} className={className} />
   ),
+  Button: ({ children, onClick, disabled, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
+  ),
 }))
 
 // Mock api

@@ -9,10 +9,33 @@ vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
   openElectionNominationsMutation: vi.fn(),
   openElectionVotingMutation: vi.fn(),
   certifyElectionMutation: vi.fn(),
+  deleteCandidateMutation: vi.fn(),
+}))
+
+vi.mock('./nominee-picker-dialog', () => ({
+  NomineePickerDialog: ({ onClose }: any) => (
+    <div data-testid="nominee-picker-dialog">
+      <button onClick={onClose}>Close</button>
+    </div>
+  ),
+}))
+
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, params, className }: any) => {
+    const href = to?.replace('$orgId', params?.orgId || '').replace('$electionId', params?.electionId || '')
+    return <a href={href} className={className}>{children}</a>
+  },
+}))
+
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
 }))
 
 vi.mock('@monobase/ui', () => ({
   Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
+  Button: ({ children, onClick, disabled, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
+  ),
 }))
 
 import {
@@ -20,17 +43,20 @@ import {
   openElectionNominationsMutation,
   openElectionVotingMutation,
   certifyElectionMutation,
+  deleteCandidateMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 const mockGetElection = getElectionOptions as ReturnType<typeof vi.fn>
 const mockNominations = openElectionNominationsMutation as ReturnType<typeof vi.fn>
 const mockVoting = openElectionVotingMutation as ReturnType<typeof vi.fn>
 const mockCertify = certifyElectionMutation as ReturnType<typeof vi.fn>
+const mockDeleteCandidate = deleteCandidateMutation as ReturnType<typeof vi.fn>
 
 function setupMutations() {
   mockNominations.mockReturnValue({ mutationFn: vi.fn().mockResolvedValue({}) })
   mockVoting.mockReturnValue({ mutationFn: vi.fn().mockResolvedValue({}) })
   mockCertify.mockReturnValue({ mutationFn: vi.fn().mockResolvedValue({}) })
+  mockDeleteCandidate.mockReturnValue({ mutationFn: vi.fn().mockResolvedValue({}) })
 }
 
 describe('ElectionDetail', () => {

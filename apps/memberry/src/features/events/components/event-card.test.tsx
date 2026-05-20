@@ -8,6 +8,16 @@ vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className }: any) => <div className={className}>{children}</div>,
 }))
 
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, className }: any) => <a href={String(to)} className={className}>{children}</a>,
+}))
+
+vi.mock('@monobase/ui', () => ({
+  Button: ({ children, onClick, disabled, className, 'aria-label': ariaLabel, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} className={className} aria-label={ariaLabel} {...props}>{children}</button>
+  ),
+}))
+
 describe('EventCard', () => {
   const baseEvent = {
     id: 'evt-1',

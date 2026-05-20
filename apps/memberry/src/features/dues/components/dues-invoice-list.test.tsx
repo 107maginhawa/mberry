@@ -3,6 +3,30 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { DuesInvoiceList } from './dues-invoice-list'
 
+// Mock @monobase/ui
+vi.mock('@monobase/ui', () => ({
+  Button: ({ children, onClick, disabled, className, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} className={className} {...props}>{children}</button>
+  ),
+  Skeleton: ({ className }: any) => <div data-testid="skeleton" className={className} />,
+  Table: ({ children, className }: any) => <table className={className}>{children}</table>,
+  TableHeader: ({ children }: any) => <thead>{children}</thead>,
+  TableBody: ({ children }: any) => <tbody>{children}</tbody>,
+  TableRow: ({ children, className }: any) => <tr className={className}>{children}</tr>,
+  TableHead: ({ children, className }: any) => <th className={className}>{children}</th>,
+  TableCell: ({ children, className }: any) => <td className={className}>{children}</td>,
+}))
+
+// Mock EmptyState
+vi.mock('@/components/patterns/empty-state', () => ({
+  EmptyState: ({ headline, description }: any) => (
+    <div data-testid="empty-state">
+      <p>{headline}</p>
+      <p>{description}</p>
+    </div>
+  ),
+}))
+
 // Mock the SDK generated hooks
 vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
   listDuesInvoicesOptions: vi.fn(),
@@ -38,7 +62,9 @@ describe('DuesInvoiceList', () => {
 
     renderWithProviders(<DuesInvoiceList orgId="org-1" tenantId="tenant-1" />)
 
-    expect(screen.getByText('Loading invoices...')).toBeInTheDocument()
+    // Loading state renders Skeleton components
+    const skeletons = screen.getAllByTestId('skeleton')
+    expect(skeletons.length).toBeGreaterThan(0)
   })
 
   test('shows error state when query fails', async () => {
@@ -63,7 +89,8 @@ describe('DuesInvoiceList', () => {
     renderWithProviders(<DuesInvoiceList orgId="org-1" tenantId="tenant-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('No invoices yet.')).toBeInTheDocument()
+      // EmptyState headline
+      expect(screen.getByText('No Invoices Yet')).toBeInTheDocument()
     })
   })
 

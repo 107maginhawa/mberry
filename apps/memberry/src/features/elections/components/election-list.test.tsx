@@ -75,7 +75,7 @@ describe('ElectionList', () => {
             {
               id: 'elec-1',
               title: '2025 Board Election',
-              status: 'voting_open',
+              status: 'votingOpen',
               type: 'officer',
               votingOpenAt: '2025-06-15T00:00:00Z',
               positions: [{ id: 'p1' }, { id: 'p2' }],
@@ -120,7 +120,7 @@ describe('ElectionList', () => {
       queryFn: () =>
         Promise.resolve({
           data: [
-            { id: 'e1', title: 'A', status: 'voting_open', type: 'officer', positions: [] },
+            { id: 'e1', title: 'A', status: 'votingOpen', type: 'officer', positions: [] },
             { id: 'e2', title: 'B', status: 'draft', type: 'officer', positions: [] },
             { id: 'e3', title: 'C', status: 'published', type: 'officer', positions: [] },
           ],

@@ -18,14 +18,35 @@ import { API_AVAILABLE } from '@/tests/helpers/api-available';
 // INFRA: requires live API server on port 7213 with seed data
 const d = API_AVAILABLE ? describe : describe.skip;
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562';
+const API_URL = process.env['API_URL'] || 'http://localhost:7213';
 
 let adminClient: ApiClient;
 let memberClient: ApiClient;
 
+// Wrapper that adds x-org-id header to all requests (required by orgContextMiddleware)
+function withOrgContext(client: ApiClient, orgId: string): ApiClient {
+  const wrap = (method: string) => (path: string, body?: unknown): Promise<Response> => {
+    const headers: Record<string, string> = {
+      Cookie: client.cookie,
+      'x-org-id': orgId,
+    };
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    return fetch(`${API_URL}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  };
+  return { ...client, get: wrap('GET'), post: wrap('POST'), put: wrap('PUT'), patch: wrap('PATCH'), delete: wrap('DELETE') };
+}
+
 beforeAll(async () => {
   if (!API_AVAILABLE) return;
-  adminClient = await apiAs('test@memberry.ph');   // President + admin
-  memberClient = await apiAs('member@memberry.ph'); // Regular member
+  const rawAdmin = await apiAs('test@memberry.ph');   // President + admin
+  const rawMember = await apiAs('member@memberry.ph'); // Regular member
+  // Email routes require org-context middleware; wrap clients with x-org-id header
+  adminClient = withOrgContext(rawAdmin, ORG_ID);
+  memberClient = withOrgContext(rawMember, ORG_ID);
 });
 
 // ─── Template Access Control ───────────────────────────────────────────────────
