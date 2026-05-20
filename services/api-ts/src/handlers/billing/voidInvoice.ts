@@ -9,6 +9,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { VoidInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
+import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
 
 /**
@@ -100,7 +101,7 @@ export async function voidInvoice(
   }
 
   // Extract Stripe IDs and provider decision from metadata
-  const invoiceMetadata = invoice.metadata as any;
+  const invoiceMetadata = invoice.metadata as InvoiceMetadata;
   const providerDecision = invoiceMetadata?.providerDecision;
   const stripePaymentIntentId = invoiceMetadata?.stripePaymentIntentId;
 
@@ -125,7 +126,7 @@ export async function voidInvoice(
     });
   }
   
-  const metadata = merchantAccount.metadata as any;
+  const metadata = merchantAccount.metadata as MerchantMetadata;
   if (!metadata?.stripeAccountId) {
     throw new BusinessLogicError(
       'Provider Stripe account not found',
@@ -176,8 +177,8 @@ export async function voidInvoice(
     // Return the full invoice as defined in TypeSpec
     // Expose safe metadata fields for client use
     const safeMetadata = updatedInvoice.metadata ? {
-      stripePaymentIntentId: (updatedInvoice.metadata as any)?.stripePaymentIntentId,
-      providerDecision: (updatedInvoice.metadata as any)?.providerDecision,
+      stripePaymentIntentId: (updatedInvoice.metadata as InvoiceMetadata)?.stripePaymentIntentId,
+      providerDecision: (updatedInvoice.metadata as InvoiceMetadata)?.providerDecision,
     } : null;
 
     // Fetch with line items for complete response

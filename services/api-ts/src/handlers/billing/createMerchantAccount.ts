@@ -15,6 +15,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { CreateMerchantAccountBody } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { MerchantAccountRepository } from './repos/billing.repo';
+import type { MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
 
 /**
@@ -80,7 +81,7 @@ export async function createMerchantAccount(
   // Check if person already has a merchant account
   const existingAccount = await merchantAccountRepo.findByPerson(personId);
   if (existingAccount) {
-    const metadata = existingAccount.metadata as any;
+    const metadata = existingAccount.metadata as MerchantMetadata;
     logger.warn({ personId, existingAccountId: metadata?.stripeAccountId },
       'Person already has a merchant account');
 

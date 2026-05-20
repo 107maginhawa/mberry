@@ -6,6 +6,7 @@ import {
 } from '@/core/errors';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import { invoices } from './repos/billing.schema';
+import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { eq } from 'drizzle-orm';
 import type Stripe from 'stripe';
 
@@ -354,7 +355,7 @@ async function handleChargeSucceeded(
     .from(invoices);
 
   const invoice = allInvoices.find((inv: any) => {
-    const metadata = inv.metadata as any;
+    const metadata = inv.metadata as InvoiceMetadata;
     return metadata?.stripePaymentIntentId === paymentIntentId;
   });
 
@@ -461,7 +462,7 @@ async function handleChargeFailed(
     .from(invoices);
 
   const invoice = allInvoices.find((inv: any) => {
-    const metadata = inv.metadata as any;
+    const metadata = inv.metadata as InvoiceMetadata;
     return metadata?.stripePaymentIntentId === paymentIntentId;
   });
 
@@ -533,7 +534,7 @@ async function handleChargeRefunded(
     .from(invoices);
 
   const invoice = allInvoices.find((inv: any) => {
-    const metadata = inv.metadata as any;
+    const metadata = inv.metadata as InvoiceMetadata;
     return metadata?.stripePaymentIntentId === paymentIntentId;
   });
 
@@ -606,7 +607,7 @@ async function handleAccountUpdated(
   const onboardingComplete = !account.requirements?.currently_due?.length;
 
   // Update metadata JSONB field
-  const metadata = merchantAccount.metadata as any;
+  const metadata = merchantAccount.metadata as MerchantMetadata;
   await merchantAccountRepo.updateOneById(merchantAccount.id, {
     metadata: {
       ...metadata,
@@ -650,7 +651,7 @@ async function handleAccountDeauthorized(
   }
 
   // Update metadata JSONB field with deauthorization status
-  const metadata = merchantAccount.metadata as any;
+  const metadata = merchantAccount.metadata as MerchantMetadata;
   await merchantAccountRepo.updateOneById(merchantAccount.id, {
     active: false,
     metadata: {
@@ -684,10 +685,10 @@ async function handleTransferCreated(
     .from(invoices);
 
   const foundInvoices = allInvoices.filter((inv: any) => {
-    const metadata = inv.metadata as any;
+    const metadata = inv.metadata as InvoiceMetadata;
     return metadata?.stripeTransferId === transfer.id;
   });
-  
+
   if (!foundInvoices || foundInvoices.length === 0) {
     logger.info({ transferId: transfer.id }, 'Transfer created but no associated invoice found');
     return;
@@ -719,7 +720,7 @@ async function handleTransferFailed(
     .from(invoices);
 
   const foundInvoices = allInvoices.filter((inv: any) => {
-    const metadata = inv.metadata as any;
+    const metadata = inv.metadata as InvoiceMetadata;
     return metadata?.stripeTransferId === transfer.id;
   });
 

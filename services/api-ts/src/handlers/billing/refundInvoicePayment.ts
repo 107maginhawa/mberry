@@ -9,6 +9,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { RefundInvoicePaymentBody, RefundInvoicePaymentParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
+import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
 
 /**
@@ -82,7 +83,7 @@ export async function refundInvoicePayment(
   }
 
   // Extract Stripe IDs and refund info from metadata
-  const invoiceMetadata = invoice.metadata as any;
+  const invoiceMetadata = invoice.metadata as InvoiceMetadata;
   const stripePaymentIntentId = invoiceMetadata?.stripePaymentIntentId;
   const stripeChargeId = invoiceMetadata?.stripeChargeId;
   const refundAmount = invoiceMetadata?.refundAmount;
@@ -117,7 +118,7 @@ export async function refundInvoicePayment(
     });
   }
   
-  const metadata = merchantAccount.metadata as any;
+  const metadata = merchantAccount.metadata as MerchantMetadata;
   const stripeAccountId = metadata?.stripeAccountId as string;
   if (!stripeAccountId) {
     throw new BusinessLogicError(

@@ -257,6 +257,29 @@ export type CaptureMethod = 'automatic' | 'manual';
 export type CurrencyCode = string; // 3-letter ISO 4217 currency code
 export type CurrencyAmount = number; // Amount in cents
 
+// Typed metadata shapes for JSONB columns
+export interface InvoiceMetadata extends Record<string, unknown> {
+  stripePaymentIntentId?: string;
+  stripeChargeId?: string;
+  stripeTransferId?: string;
+  stripeRefundId?: string;
+  providerDecision?: string;
+  amount?: number;
+  currency?: string;
+  paymentIntentId?: string;
+  refundAmount?: string;
+  refundStatus?: string;
+  refundedAt?: string;
+}
+
+export interface MerchantMetadata extends Record<string, unknown> {
+  stripeAccountId?: string;
+  stripeAccountStatus?: string;
+  stripeOnboardingUrl?: string;
+  onboardingComplete?: boolean;
+  deauthorizedAt?: string;
+}
+
 // TypeSpec-compliant interfaces
 
 // Invoice line item (TypeSpec: InvoiceLineItem)

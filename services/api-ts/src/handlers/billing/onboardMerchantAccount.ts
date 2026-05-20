@@ -15,6 +15,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { OnboardMerchantAccountBody, OnboardMerchantAccountParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { MerchantAccountRepository } from './repos/billing.repo';
+import type { MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
 
 /**
@@ -75,7 +76,7 @@ export async function onboardMerchantAccount(
 
   try {
     // Extract Stripe account data from metadata
-    const metadata = merchantAccount.metadata as any;
+    const metadata = merchantAccount.metadata as MerchantMetadata;
     let stripeAccountId = metadata?.stripeAccountId;
 
     // Handle missing Stripe account (imported accounts or misconfiguration)

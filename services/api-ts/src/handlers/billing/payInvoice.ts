@@ -9,6 +9,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { PayInvoiceBody, PayInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
+import type { MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
 // Customer and merchant are both persons in monobase
 
@@ -102,7 +103,7 @@ export async function payInvoice(
     });
   }
   
-  const merchantMetadata = merchantAccount.metadata as any;
+  const merchantMetadata = merchantAccount.metadata as MerchantMetadata;
   if (!merchantMetadata?.stripeAccountId || !merchantMetadata?.onboardingComplete) {
     throw new BusinessLogicError(
       'Provider has not completed billing setup',
