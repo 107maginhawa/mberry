@@ -6,7 +6,7 @@
 - ✅ **v1.1.0 Auth & Permission Enforcement** — Phases 11-17 (shipped 2026-05-13)
 - ✅ **v1.2.0 Pilot Launch** — Phases 18-25 (shipped 2026-05-14)
 - ✅ **v1.3.0 Test Confidence** — Phases 26-33 (shipped 2026-05-15)
-- 🔄 **v1.4.0 Brownfield Rescue Cycle 1** — Phases 34-37 (planned 2026-05-20)
+- ✅ **v1.4.0 Brownfield Rescue Cycle 1** — Phases 34-37 (shipped 2026-05-20)
 
 ## Phases
 
@@ -187,7 +187,7 @@
 - [x] **Phase 34: Wave G1 — Stabilization** — Membership input validation, grace period bounds, election test gaps (3/3 plans, completed 2026-05-20)
 - [x] **Phase 35: Wave G2 — Training Refactor** — Credit cycle start date fix in markComplete (1/1 plan, completed 2026-05-20)
 - [x] **Phase 36: Wave G3 — Architecture Cleanup** — Cross-context decoupling, comms consolidation doc (2/2 plans, completed 2026-05-20)
-- [ ] **Phase 37: Wave G4 — New Capabilities** — Concurrent session limits via Better-Auth (1 plan; P3 items tracked in BROWNFIELD_STATUS.md)
+- [x] **Phase 37: Wave G4 — New Capabilities** — Concurrent session limits (1/1 plan, completed 2026-05-20)
 
 ## Phase Details
 
@@ -521,4 +521,4 @@ Plans: not yet planned
 | 34. Wave G1 — Stabilization | v1.4.0 | 3/3 | Complete | 2026-05-20 |
 | 35. Wave G2 — Training Refactor | v1.4.0 | 1/1 | Complete | 2026-05-20 |
 | 36. Wave G3 — Architecture Cleanup | v1.4.0 | 2/2 | Complete | 2026-05-20 |
-| 37. Wave G4 — New Capabilities | v1.4.0 | 0/1 | Not Started | -- |
+| 37. Wave G4 — New Capabilities | v1.4.0 | 1/1 | Complete | 2026-05-20 |
