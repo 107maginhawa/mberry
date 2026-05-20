@@ -3,7 +3,7 @@
  * Handles all notification operations including creation, delivery, and status management
  */
 
-import { eq, and, or, gte, lte, inArray, isNull, desc, type SQL } from 'drizzle-orm';
+import { eq, and, or, gte, lte, inArray, isNull, desc, count, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions, type PaginatedResult } from '@/core/database.repo';
 import {
@@ -276,8 +276,8 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
   async getUnreadCount(recipientId: string): Promise<number> {
     this.logger?.debug({ recipientId }, 'Getting unread notification count');
     
-    const result = await this.db
-      .select({ count: notifications.id })
+    const [result] = await this.db
+      .select({ count: count() })
       .from(notifications)
       .where(
         and(
@@ -285,8 +285,8 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
           inArray(notifications.status, ['sent', 'delivered'])
         )
       );
-    
-    return result.length;
+
+    return result?.count ?? 0;
   }
 
   /**

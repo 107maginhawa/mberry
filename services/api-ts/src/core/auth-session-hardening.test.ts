@@ -162,28 +162,50 @@ describe('AC-M01-005: Lockout integration with auth', () => {
 // ---------------------------------------------------------------------------
 
 describe('auth config hardening', () => {
-  test('session config stores sessions in database', () => {
-    // auth.ts sets storeSessionInDatabase: true
-    expect(true).toBe(true);
+  test('session config stores sessions in database', async () => {
+    // Verify auth.ts source contains storeSessionInDatabase: true
+    const fs = await import('fs');
+    const path = await import('path');
+    const authSource = fs.readFileSync(
+      path.resolve(import.meta.dir, './auth.ts'),
+      'utf-8',
+    );
+    expect(authSource).toContain('storeSessionInDatabase: true');
   });
 
-  test('cookies are httpOnly by default', () => {
-    // auth.ts advanced.defaultCookieAttributes.httpOnly = true
-    expect(true).toBe(true);
+  test('cookies are httpOnly by default', async () => {
+    // Verify auth.ts source sets httpOnly: true in defaultCookieAttributes
+    const fs = await import('fs');
+    const path = await import('path');
+    const authSource = fs.readFileSync(
+      path.resolve(import.meta.dir, './auth.ts'),
+      'utf-8',
+    );
+    expect(authSource).toContain('httpOnly: true');
   });
 
   test('rate limiting is configurable via auth config', async () => {
-    const { AuthConfig } = await import('@/types/auth').then(m => m);
-    // AuthConfig interface has rateLimitEnabled, rateLimitWindow, rateLimitMax
-    // Type-level verification — if this file compiles, the fields exist
-    expect(true).toBe(true);
+    // Verify auth.ts wires all three rate-limit fields from config
+    const fs = await import('fs');
+    const path = await import('path');
+    const authSource = fs.readFileSync(
+      path.resolve(import.meta.dir, './auth.ts'),
+      'utf-8',
+    );
+    expect(authSource).toContain('rateLimitEnabled');
+    expect(authSource).toContain('rateLimitWindow');
+    expect(authSource).toContain('rateLimitMax');
   });
 
-  test('password has min length 8 and max length 128', () => {
-    // auth.ts: minPasswordLength: 8, maxPasswordLength: 128
-    const minLength = 8;
-    const maxLength = 128;
-    expect(minLength).toBe(8);
-    expect(maxLength).toBe(128);
+  test('password has min length 8 and max length 128', async () => {
+    // Verify auth.ts source sets the password length constraints
+    const fs = await import('fs');
+    const path = await import('path');
+    const authSource = fs.readFileSync(
+      path.resolve(import.meta.dir, './auth.ts'),
+      'utf-8',
+    );
+    expect(authSource).toContain('minPasswordLength: 8');
+    expect(authSource).toContain('maxPasswordLength: 128');
   });
 });

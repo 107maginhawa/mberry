@@ -1,88 +1,121 @@
 # Test Confidence Stack Report
 
 **Project:** Memberry (monobase monorepo)
-**Date:** 2026-05-19
-**Auditor:** oli-confidence-stack (automated)
+**Date:** 2026-05-20
+**Previous:** 2026-05-19
+**Auditor:** oli-confidence-stack v2
 **Stack:** TypeScript + Hono + Drizzle ORM + Bun test + Vitest + Playwright
 
 ---
 
 ## Executive Summary
 
-| Metric | Value |
-|--------|-------|
-| **Overall Confidence Score** | **8.4 / 10** |
-| Layer 1: Coverage Integrity | 8.5 / 10 |
-| Layer 2: Behavior Traceability | 8.8 / 10 |
-| Layer 3: Test Quality | 7.8 / 10 |
-| Layer 4: Release Gate Readiness | 9.0 / 10 |
+| Metric | Previous (May 19) | Current (May 20) | Delta |
+|--------|-------------------|-------------------|-------|
+| **Overall Confidence Score** | **8.4 / 10** | **8.5 / 10** | +0.1 |
+| Layer 1: Coverage Integrity (25%) | 8.5 / 10 | 8.6 / 10 | +0.1 |
+| Layer 2: Behavior Traceability (30%) | 8.8 / 10 | 8.8 / 10 | -- |
+| Layer 3: Test Quality (25%) | 7.8 / 10 | 7.9 / 10 | +0.1 |
+| Layer 4: Release Gate Readiness (20%) | 9.0 / 10 | 9.0 / 10 | -- |
 
-**Verdict:** High confidence. All 21 handler modules have tests. 100% of 40 business rules have at least backend test coverage. CI pipeline enforces 8 parallel gates including BR regression checks. Primary gaps are in assertion granularity for some modules and 6 deferred Phase 2/3 BRs with stub-only E2E coverage.
+**Verdict:** High confidence, stable. Test inventory grew by 52 backend test files and 92 frontend component assertions since previous report. 25 handler modules now covered (up from 21). 100% of 40 BRs have backend test coverage. CI enforces 8+ parallel gates. Primary gaps remain in assertion granularity for some modules and 6 deferred Phase 2/3 BRs with stub-only coverage.
 
 ---
 
 ## Test Inventory
 
-| Test Type | File Count | Notes |
-|-----------|-----------|-------|
-| Backend unit/integration | 336 | Bun test, co-located with handlers |
-| E2E (Playwright) | 101 | 3 apps: memberry, admin, account |
-| Contract (Hurl) | 97 | Spec-first, against live API |
-| Component (.test.tsx) | 55 | Frontend component tests |
-| **Total test files** | **589** | |
-| **Total assertions** | **6,883** | grep of `expect(` calls |
+| Test Type | Previous | Current | Delta | Notes |
+|-----------|----------|---------|-------|-------|
+| Backend unit/integration | 336 | 388 | +52 | Bun test, co-located with handlers |
+| Frontend component (Vitest) | 55 | 86 | +31 | memberry (54) + account (32) |
+| E2E Playwright | 101 | 101 | -- | memberry (92) + admin (6) + account (3) |
+| Contract (Hurl) | 97 | 97 | -- | Spec-first, against live API |
+| **Total test files** | **589** | **672** | **+83** | |
+| **Total assertions** | **6,883** | **8,545** | **+1,662** | All `expect()` calls across all types |
+
+### Assertion Breakdown
+
+| Source | Count |
+|--------|-------|
+| Backend `expect()` | 5,451 |
+| Memberry component `expect()` | 746 |
+| Account component `expect()` | 565 |
+| Memberry E2E `expect()` | 656 |
+| Admin E2E `expect()` | 53 |
+| Account E2E `expect()` | 37 |
+| Hurl assertions (HTTP + jsonpath) | 1,037 |
+| **Total** | **8,545** |
 
 ### Deferred/Incomplete Tests
 
-| Type | Count |
-|------|-------|
-| `test.todo()` | 24 |
-| `test.skip()` (conditional) | 7 |
-| `test.fixme()` (E2E stubs) | 59 |
-| **Total deferred** | **90** |
+| Type | Previous | Current | Delta |
+|------|----------|---------|-------|
+| `test.todo()` | 24 | 21 | -3 |
+| `test.skip()` / conditional skip | 7 | 8 | +1 |
+| `test.fixme()` (E2E stubs) | 59 | 59 | -- |
+| **Total deferred** | **90** | **88** | **-2** |
 
 ---
 
-## Layer 1: Coverage Integrity (8.5/10)
+## Layer 1: Coverage Integrity (8.6/10)
 
 ### Handler Module Test Coverage
 
-All 21 handler modules have test files. No modules with 0 tests.
+25 handler modules now tracked (up from 21 -- added advertising, marketplace, jobs, __tests__).
 
-| Module | Test Files | Assessment |
-|--------|-----------|------------|
-| association:member | 38 | Excellent |
-| communication | 32 | Excellent |
-| person | 29 | Excellent |
-| platformadmin | 24 | Excellent |
-| booking | 23 | Excellent |
-| membership | 21 | Very Good |
-| billing | 20 | Very Good |
-| documents | 17 | Good |
-| email | 17 | Good |
-| training | 16 | Good |
-| events | 13 | Good |
-| association:operations | 10 | Adequate |
-| elections | 10 | Adequate |
-| dues | 7 | Adequate (utility tests deep) |
-| notifs | 6 | Adequate |
-| reviews | 5 | Adequate |
-| certificates | 4 | Adequate |
-| invite | 4 | Adequate |
-| comms | 3 | Minimal |
-| audit | 3 | Minimal |
-| storage | 2 | Minimal |
-| __tests__ (shared) | 1 | BR edge cases |
+| Module | Handlers | Tests | Ratio | Assessment |
+|--------|----------|-------|-------|------------|
+| association:member | 166 | 44 | 27% | Good (mega-module, many CRUD) |
+| communication | 28 | 35 | 125% | Excellent |
+| person | 27 | 32 | 119% | Excellent |
+| platformadmin | 21 | 24 | 114% | Excellent |
+| booking | 19 | 24 | 126% | Excellent |
+| membership | 14 | 23 | 164% | Excellent |
+| billing | 16 | 21 | 131% | Excellent |
+| documents | 15 | 18 | 120% | Excellent |
+| training | 13 | 18 | 138% | Excellent |
+| email | 11 | 17 | 155% | Excellent |
+| events | 10 | 16 | 160% | Excellent |
+| dues | 6 | 16 | 267% | Excellent (deep util tests) |
+| elections | 7 | 15 | 214% | Excellent |
+| association:operations | 54 | 12 | 22% | Thin -- large module |
+| comms | 11 | 5 | 45% | Thin |
+| notifs | 6 | 7 | 117% | Good |
+| reviews | 4 | 5 | 125% | Good |
+| certificates | 4 | 7 | 175% | Excellent |
+| invite | 3 | 4 | 133% | Good |
+| audit | 1 | 4 | 400% | Good |
+| storage | 6 | 2 | 33% | **Thin** |
+| advertising | 7 | 1 | 14% | **Minimal** |
+| marketplace | 9 | 1 | 11% | **Minimal** |
+| jobs | 7 | 1 | 14% | **Minimal** |
+| __tests__ (shared) | 0 | 1 | -- | BR edge cases |
 
-### Coverage Gaps
+### Modules Below 50% Test-to-Handler Ratio
 
-- **comms** (3 tests), **audit** (3 tests), **storage** (2 tests): Low file counts. These modules may have simpler interfaces but should be verified against endpoint inventory.
-- New code gate script (`scripts/new-code-gate.ts`) enforces that new/modified handler files must have corresponding test files on PRs. This is a strong structural safeguard.
+| Module | Handlers | Tests | Ratio | Risk |
+|--------|----------|-------|-------|------|
+| **marketplace** | 9 | 1 | 11% | HIGH -- 9 handlers, 1 mega test file |
+| **advertising** | 7 | 1 | 14% | HIGH -- 7 handlers, 1 mega test file |
+| **jobs** | 7 | 1 | 14% | HIGH -- 7 handlers, 1 mega test file |
+| **association:operations** | 54 | 12 | 22% | MEDIUM -- mega-module |
+| **association:member** | 166 | 44 | 27% | MEDIUM -- mega-module |
+| **storage** | 6 | 2 | 33% | MEDIUM |
+| **comms** | 11 | 5 | 45% | LOW |
 
-### Strengths
-- 100% module coverage (21/21 handler modules have tests)
-- Co-located test pattern (tests sit next to handlers) aids discoverability
-- Separate test files for repos, utils, and jobs within modules (e.g., `dues/utils/fund-math.test.ts`, `booking/jobs/slotGenerator.test.ts`)
+Note: advertising and marketplace modules each have 1 comprehensive test file covering all handlers. The new-code-gate only enforces tests for *new/modified* handlers on PRs, so existing untested handlers are grandfathered.
+
+### Coverage Gaps (changed from previous)
+
+- **NEW:** `advertising` (1 test / 7 handlers), `marketplace` (1 test / 9 handlers), `jobs` (1 test / 7 handlers) -- new modules with single mega-test files. Good coverage of business rules but thin per-handler isolation.
+- **UNCHANGED:** `storage` (2 tests / 6 handlers) -- still thin.
+- **IMPROVED:** `association:member` grew from 38 to 44 test files.
+
+### Strengths (unchanged)
+- 25/25 modules have at least 1 test file (100% module coverage)
+- Co-located test pattern aids discoverability
+- New code gate script enforces test-first on PRs
+- Separate test files for repos, utils, and jobs within modules
 
 ---
 
@@ -90,132 +123,121 @@ All 21 handler modules have test files. No modules with 0 tests.
 
 ### BR Coverage Summary
 
-| Metric | Count | Percentage |
-|--------|-------|------------|
-| Total business rules | 40 | - |
+| Metric | Previous | Current | Delta |
+|--------|----------|---------|-------|
+| Total business rules | 40 | 40 | -- |
+| STRONG (>=2 test refs) | 34 | 34 | -- |
+| WEAK (1 test ref only) | 6 | 6 | -- |
+| NONE (0 test refs) | 0 | 0 | -- |
+| Coverage (any test) | 100% | 100% | -- |
+
+### Layer-Level Coverage
+
+| Layer | Count | % |
+|-------|-------|---|
 | With backend tests | 40 | 100% |
 | With contract tests | 34 | 85% |
 | With E2E tests | 33 | 83% |
-| All 3 layers (backend + contract + E2E) | 33 | 83% |
-| COMPLETE (all required layers) | 33 | 83% |
-| PARTIAL (missing some layers) | 1 | 2.5% |
-| DEFERRED (Phase 2/3, not yet implemented) | 6 | 15% |
-| UNTESTED | 0 | 0% |
+| All 3 layers | 33 | 83% |
 
-### BR Coverage Matrix
+### BR Status Matrix
 
-| BR | Rule | Class | Backend | Contract | E2E | Status |
-|----|------|-------|---------|----------|-----|--------|
-| BR-01 | Membership Status Computation | p0-data | 1 | 1 | 1 | COMPLETE |
-| BR-02 | Grace Period Default | p1-business | 4 | 1 | 1 | COMPLETE |
-| BR-03 | Membership Transitions | p0-data | 2 | 1 | 1 | COMPLETE |
-| BR-04 | Dues Amount per Org | p1-business | 1 | 1 | 3 | COMPLETE |
-| BR-05 | Fund Allocation | p1-business | 3 | 1 | 3 | COMPLETE |
-| BR-06 | Payment Recording | p0-data | 1 | 1 | 3 | COMPLETE |
-| BR-07 | Dues Expiry Extension | p0-data | 3 | 1 | 2 | COMPLETE |
-| BR-08 | Refund Policy | p0-data | 1 | 1 | 1 | COMPLETE |
-| BR-09 | Officer Role Assignment | p0-data | 1 | 1 | 2 | COMPLETE |
-| BR-10 | Platform Admin Impersonation | p0-auth | 2 | 1 | 1 | COMPLETE |
-| BR-11 | Credit Cycle Start | p1-business | 1 | 1 | 1 | COMPLETE |
-| BR-12 | Credit Carry-Over | p1-business | 1 | 1 | 1 | COMPLETE |
-| BR-13 | Auto vs Manual Credits | p1-business | 2 | 1 | 2 | COMPLETE |
-| BR-14 | Cross-Org Credit Aggregation | p1-business | 1 | 1 | 1 | COMPLETE |
-| BR-15 | Training vs Event Distinction | p1-business | 2 | 2 | 5 | COMPLETE |
-| BR-16 | Activity Visibility | p1-business | 2 | 1 | 1 | COMPLETE |
-| BR-17 | Attendance Confirmation | p1-business | 1 | 1 | 1 | COMPLETE |
-| BR-18 | QR Code Authentication | p1-business | 1 | 1 | 1 | COMPLETE |
-| BR-19 | ID Card Generation | p1-business | 2 | 1 | 1 | COMPLETE |
-| BR-20 | Certificate Generation | p1-business | 4 | 1 | 1 | COMPLETE |
-| BR-21 | Multi-Org Member Account | p0-data | 1 | 1 | 1 | COMPLETE |
-| BR-22 | Member Matching on Import | p1-business | 1 | 1 | 1 | COMPLETE |
-| BR-23 | License Number Format | p1-business | 1 | 1 | 1 | COMPLETE |
-| BR-24 | Invitation Expiry | p0-auth | 1 | 1 | 1 | COMPLETE |
-| BR-25 | OTP Registration | p0-auth | 2 | 1 | 1 | COMPLETE |
-| BR-26 | Session Management | p0-auth | 1 | 1 | 1 | COMPLETE |
-| BR-27 | Event Registration Limits | p1-business | 2 | 1 | 3 | COMPLETE |
-| BR-28 | Communication Deduplication | p1-business | 2 | 1 | 1 | COMPLETE |
-| BR-29 | Org Public Page | p1-business | 2 | 1 | 1 | COMPLETE |
-| BR-30 | Payment Gateway Isolation | p0-security | 1 | 1 | 1 | COMPLETE |
-| BR-31 | SVG Upload Security | p0-security | 1 | 1 | 1 | COMPLETE |
-| BR-32 | Financial Record Retention | p0-data | 2 | 1 | 1 | COMPLETE |
-| BR-33 | Election Integrity | p0-security | 2 | 1 | 1 | COMPLETE |
-| BR-34 | Nomination Eligibility | p1-business | 2 | 1 | 0 | **PARTIAL** |
-| BR-35 | Feed Content Moderation | p2-deferred | 1 | 0 | 0 | DEFERRED |
-| BR-36 | National Dashboard Access | p2-deferred | 1 | 0 | 0 | DEFERRED |
-| BR-37 | Job Posting Expiry | p2-deferred | 1 | 0 | 0 | DEFERRED |
-| BR-38 | Marketplace Referral Disclosure | p2-deferred | 1 | 0 | 0 | DEFERRED |
-| BR-39 | Committee Dissolution | p2-deferred | 1 | 0 | 0 | DEFERRED |
-| BR-40 | Survey Anonymity | p2-deferred | 1 | 0 | 0 | DEFERRED |
+| Status | Count | BRs |
+|--------|-------|-----|
+| COMPLETE (all required layers) | 33 | BR-01 through BR-33 |
+| PARTIAL (missing some layers) | 1 | BR-34 (Nomination Eligibility -- no E2E) |
+| DEFERRED (Phase 2/3) | 6 | BR-35 through BR-40 |
+| UNTESTED | 0 | -- |
 
-### Key BR Observations
+### WEAK BRs (backend-only, no contract or E2E)
 
-1. **BR-34 (Nomination Eligibility)** is the only implemented rule with incomplete coverage -- missing E2E tests. Has backend (2 files) + contract (1 file) but no E2E verification.
-2. **BR-35 through BR-40** are legitimately deferred (Phase 2/3 modules not yet built). Each has E2E stubs with `test.fixme()` placeholders documenting expected behavior.
-3. **br-registry.json** serves as the source of truth with per-rule test mappings, rule classifications (p0-security, p0-data, p0-auth, p1-business, p2-deferred), and annotations.
-4. **`test:br` CI script** runs `scripts/br-coverage.ts --ci` as a regression gate -- any new incomplete BR not in the allowlist fails CI.
+| BR | Rule | Classification |
+|----|------|---------------|
+| BR-35 | Feed Content Moderation | p2-deferred |
+| BR-36 | National Dashboard Access | p2-deferred |
+| BR-37 | Job Posting Expiry | p2-deferred |
+| BR-38 | Marketplace Referral Disclosure | p2-deferred |
+| BR-39 | Committee Dissolution | p2-deferred |
+| BR-40 | Survey Anonymity | p2-deferred |
 
-### Strengths
-- Formal BR registry (`docs/ver-3/business/br-registry.json`) with structured test mappings per layer
-- BR references embedded in test describe blocks (e.g., `[BR-03]`, `[BR-20]`)
-- Dedicated `br-edge-cases.test.ts` and `br-p2-gap.test.ts` for edge case and gap documentation
-- CI regression gate prevents BR coverage from silently degrading
+All WEAK items are deferred Phase 2/3 features -- acceptable for current release.
+
+### Observations (unchanged from previous)
+- BR registry (`docs/ver-3/business/br-registry.json`) is the source of truth
+- BR references embedded in test describe blocks (`[BR-03]`, `[BR-20]`)
+- CI regression gate via `scripts/br-coverage.ts --ci` prevents silent degradation
 
 ---
 
-## Layer 3: Test Quality (7.8/10)
+## Layer 3: Test Quality (7.9/10)
 
-### Assertion Pattern Analysis
+### Sampled Test Files (8 files this cycle)
 
-| Pattern | Count | % of Total | Quality |
-|---------|-------|-----------|---------|
-| `toEqual` / `toBe` / `toStrictEqual` | 5,057 | 73.4% | Strong (exact value checks) |
-| Status code checks (`toBe(2xx/4xx/5xx)`) | 1,150 | 16.7% | Strong (API contract verification) |
-| `toThrow` / `rejects` | 649 | 9.4% | Strong (error path testing) |
-| `toContain` / `toMatch` / `toHaveProperty` | 401 | 5.8% | Medium (partial matching) |
-| `toBeTruthy` / `toBeDefined` / `toBeFalsy` | 281 | 4.1% | Weak (existence-only checks) |
-| `expect.any` / `objectContaining` | 3 | <0.1% | Flexible matchers |
+**1. `dues/utils/fund-math.test.ts`** -- Grade: A
+- Pure function tests for allocateFunds, validateFundSplits, isWithinRetentionPeriod
+- Boundary cases: zero amount, 1 cent, odd percentage splits, remainder absorption
+- 80+ lines of exact value assertions with `toEqual`
 
-**Assertion Quality Ratio:** 89.5% strong assertions vs 4.1% weak. This is excellent.
+**2. `dues/repos/dues.repo.test.ts`** -- Grade: A-
+- Repository method tests with hand-crafted DB stubs
+- Prototype isolation pattern for parallel test safety (restoreRepo)
+- Factory functions for test data (makeConfig, makeFund)
+- Minor: uses `any` types in factory overrides
 
-### Test Pattern Quality (sampled 5 files)
+**3. `events/registerForEvent.test.ts`** -- Grade: B+
+- Tests happy path + capacity + membership checks
+- BUG FOUND: duplicate `organizationId` key in fixture (lines 12-13) -- second value wins, first silently lost. Not a runtime bug here but indicates copy-paste sloppiness.
+- Good: verifies response body shape (status, eventId)
 
-**settle-payment.test.ts** (dues/utils)
-- Tests BR-03 status-aware reactivation with suspended and terminated member states
-- Captures mutation data via callback closures to verify repo calls
-- Uses transaction simulation with `fakeDb.transaction`
-- Grade: A -- tests business logic edge cases with exact value assertions
+**4. `notifs/notification-triggers.test.ts`** -- Grade: A-
+- NEW file testing GAP-003/006/012/017 notification wiring
+- Mock notification service with captured calls array
+- Tests channel, type, and relatedEntity fields
+- Good: tests preference enforcement
 
-**confirmBooking.test.ts** (booking)
-- Tests state transition (pending -> confirmed) with ownership enforcement
-- Tests NotFoundError and ForbiddenError paths
-- Mock notification/websocket services verified
-- Grade: A -- happy + error paths covered
+**5. `advertising/*.test.ts`** (mega file) -- Grade: B
+- Single file covering all 7 handlers with proper business rule references (M16-R1 through R6)
+- Good: error path testing (ValidationError, NotFoundError, BusinessLogicError)
+- Weak: single file -- if one handler's test breaks, hard to isolate
 
-**getPerson.test.ts** (person)
-- Tests owner access (200) and forbidden access patterns
-- Uses `rejects.toThrow('Access denied')` for auth boundary
-- Grade: B+ -- could add more edge cases (missing person, partial fields)
+**6. `marketplace/*.test.ts`** (mega file) -- Grade: B
+- Similar pattern to advertising: 1 file, 9 handlers
+- Tests vendor verification gate (BR-38), membership requirement (M17-R1)
+- Weak: same single-file isolation concern
 
-**br-edge-cases.test.ts** (shared)
-- Pure function tests encoding business rules (e.g., `canGenerateIdCard`, `canIssueCertificate`)
-- Tests BR-10 impersonation with role guard, BR-19 status guard, BR-20 certificate blocking
-- Grade: A -- directly maps BRs to testable functions
+**7. `memberry/features/dues/components/dues-config-form.test.ts`** -- Grade: A
+- Tests critical bug fix (Phase 15 silent data loss)
+- Verifies payload shape contract against backend schema
+- Tests field renaming (defaultAmount -> annualAmount)
 
-**br-p2-gap.test.ts** (membership)
-- Honest gap documentation using `test.todo()` for deferred rules
-- Where handlers exist, real handler calls with `makeCtx` + `stubRepo`
-- Grade: B+ -- transparent about gaps, not hiding them
+**8. `memberry/features/dues/components/record-payment-form.test.tsx`** -- Grade: B+
+- Component rendering tests with mock SDK hooks
+- Tests form field presence, disabled state, placeholder text
+- Could verify form submission behavior (only tests render)
 
-### Weaknesses
-- 281 `toBeTruthy`/`toBeDefined` assertions could be tightened to exact value checks
-- Some handler tests verify only status code without checking response body shape
-- `expect.objectContaining` used only 3 times -- more structural assertions could reduce brittleness
+### Anti-Pattern Scan
 
-### Anti-patterns NOT Found (good)
-- No `expect(true).toBe(true)` (always-true assertions)
-- No `expect(result).toBeDefined()` as sole assertion on complex objects (the 281 weak assertions are mostly in simpler checks)
-- No test files without any `expect()` calls
-- `lint:shallow` script (`scripts/lint-shallow-tests.ts`) actively catches shallow test patterns
+| Pattern | Count | Severity |
+|---------|-------|----------|
+| `expect(true).toBe(true)` (tautological) | 3 | WARNING -- in `auth-session-hardening.test.ts` |
+| `expect(true).toBe(false)` (unreachable guard) | 7 | OK -- used as "should not reach" in catch blocks |
+| Test files with 0 assertions | 1 | OK -- `empty-response-guard.test.ts` uses throw-based assertion |
+| Duplicate object keys in fixtures | 1 | WARNING -- `registerForEvent.test.ts` line 12-13 |
+
+### Tautological Tests Detail
+
+`services/api-ts/src/core/auth-session-hardening.test.ts` lines 167, 172, 179:
+Three tests assert `expect(true).toBe(true)` with comments like "auth.ts sets storeSessionInDatabase: true". These tests verify nothing at runtime -- they're documentation disguised as tests. The lint:shallow script should catch these but currently exits 0 (informational only).
+
+### Quality Metrics
+
+| Metric | Value |
+|--------|-------|
+| Assertions per test file (backend) | 14.0 |
+| Assertions per test file (frontend) | 13.8 (memberry), 17.7 (account) |
+| Strong assertion ratio | ~89% (toEqual/toBe/toThrow) |
+| Weak assertion ratio | ~4% (toBeTruthy/toBeDefined) |
+| Error path test coverage | Present in all sampled files |
 
 ---
 
@@ -223,126 +245,111 @@ All 21 handler modules have test files. No modules with 0 tests.
 
 ### CI Pipeline (`.github/workflows/ci.yml`)
 
-The CI pipeline runs on every push to `main` and every PR, with **8 parallel gate jobs** that must all pass:
-
 | Gate | What It Checks | Status |
 |------|---------------|--------|
-| `lint-typecheck` | TypeScript typecheck, ESLint, migration safety lint, no-silent-skips, dependency audit | In CI |
+| `lint-typecheck` | TypeScript typecheck, ESLint, migration safety, no-silent-skips, SDK freshness, dep audit | In CI |
 | `unit-tests` | Backend (bun test), frontend (memberry + account + SDK, with coverage) | In CI |
-| `e2e` | Playwright E2E for memberry app + admin app (with real API, Postgres, MinIO) | In CI |
-| `contract` | Hurl contract tests + optional Schemathesis fuzzing against live API | In CI |
-| `build-api` | Docker image build + container health check (`/livez`) | In CI |
-| `build-frontends` | Vite builds for memberry, admin, account apps | In CI |
+| `e2e` | Playwright E2E for memberry + admin (real Postgres, MinIO) | In CI |
+| `contract` | Hurl contract tests + Schemathesis fuzzing | In CI |
+| `build-api` | Docker image build + container health check | In CI |
+| `build-frontends` | Vite builds for all 3 apps | In CI |
 | `artifact-smoke` | Build artifact verification | In CI |
-| `coverage-gate` | BR coverage regression check (`scripts/br-coverage.ts --ci`) | In CI |
+| `coverage-gate` | BR coverage regression (`scripts/br-coverage.ts --ci`) | In CI |
+| `new-code-gate` | New handler files must have tests | PR-only |
+| `ci-gate` | Aggregator -- ALL above must pass | Required |
 
-Additionally on PRs:
-| Gate | What It Checks | Status |
-|------|---------------|--------|
-| `new-code-gate` | New handler files must have corresponding test files | PR-only |
+### Pre-Commit Hooks
 
-### CI Gate Architecture
-
-```
-ci-gate (final):
-  needs: [lint-typecheck, unit-tests, e2e, contract, build-api, build-frontends, artifact-smoke, coverage-gate]
-  -> ALL must succeed or CI fails
-```
-
-### Pre-commit Hooks (Husky + lint-staged)
-- ESLint auto-fix on staged `.ts`/`.tsx` files for all 4 apps (api-ts, memberry, account, admin)
+| Hook | What It Does |
+|------|-------------|
+| `bun run typecheck` | Full workspace typecheck before commit |
+| `bunx lint-staged` | ESLint auto-fix on staged files (4 app configs) |
 
 ### Custom Quality Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `lint:no-skips` | Prevents silent `test.skip()` / `xit()` from entering codebase |
-| `lint:shallow` | Catches shallow test assertions |
-| `lint:migrations` | Migration safety checks |
-| `test:br` | BR coverage report with regression detection |
-| `test:contract` | Hurl contract test runner |
-| `test:contract:fuzz` | Schemathesis schema fuzzing |
-| `test:registry` | Test registry report |
-| `test:inventory` | Endpoint, screen, and component inventory generation |
+| Script | Purpose | CI? |
+|--------|---------|-----|
+| `scripts/br-coverage.ts` | BR regression gate | Yes |
+| `scripts/lint-no-skips.ts` | Prevent silent test.skip() | Yes |
+| `scripts/lint-shallow-tests.ts` | Catch shallow assertions | No (informational) |
+| `scripts/migration-safety.ts` | Migration destructiveness checks | Yes |
+| `scripts/new-code-gate.ts` | New handlers must have tests | Yes (PR) |
 
-### Deployment Pipeline (`.github/workflows/deploy.yml`)
-- Staging + production deployment via Railway (API) and Cloudflare Pages (frontends)
-- Post-deploy health checks and smoke tests
-- Contract tests run against staging before production promotion
-
-### Strengths
-- 8-gate CI with explicit `ci-gate` aggregator that fails on any individual gate failure
-- BR coverage regression gate prevents silent coverage loss
-- New code gate ensures test-first for new handlers
-- No-skips lint prevents silent test suppression
-- Shallow test lint catches weak assertions
-- Full infrastructure in CI (Postgres, MinIO) for realistic integration testing
-- Separate contract workflow for spec-first verification
-
-### Weaknesses
-- No explicit test timeout enforcement per-test (only job-level timeouts)
-- No flaky test detection/retry mechanism visible in CI config
-- No mutation testing (would catch tests that pass regardless of code changes)
+### Weaknesses (unchanged)
+- No explicit per-test timeout enforcement (only job-level)
+- No flaky test detection/retry mechanism in CI
+- No mutation testing
+- `lint:shallow` exits 0 always -- should fail CI on tautological assertions
 
 ---
 
 ## Top Gaps and Risk Areas
 
 ### Priority 1 (Address Now)
-1. **BR-34 missing E2E** -- Nomination Eligibility has backend + contract but no E2E test. Add a Playwright spec for the nomination flow.
-2. **Low-coverage modules** -- `storage` (2 tests), `audit` (3 tests), `comms` (3 tests) need coverage review against their endpoint inventory.
+1. **3 tautological tests in auth-session-hardening.test.ts** -- `expect(true).toBe(true)` tests provide zero signal. Replace with actual config assertions or delete.
+2. **BR-34 (Nomination Eligibility) still missing E2E** -- Has backend + contract but no Playwright spec.
+3. **Low per-handler test isolation** -- advertising (1:7), marketplace (1:9), jobs (1:7) use single mega-test files. A failure in one handler's test section won't produce a clear handler-level signal.
 
 ### Priority 2 (Address Soon)
-3. **59 `test.fixme()` stubs** -- All in E2E stubs for Phase 2/3 features. These are honest gaps but represent deferred validation debt. Track as part of v2.0 milestone planning.
-4. **281 weak assertions** -- Tighten `toBeTruthy`/`toBeDefined` to exact value checks where the expected value is knowable.
-5. **No flaky test detection** -- Add retry logic or flaky test tagging in CI to improve signal-to-noise ratio.
+4. **association:operations** has 54 handlers but only 12 test files (22% ratio) -- second-largest module after association:member.
+5. **storage** remains at 2 tests for 6 handlers.
+6. **59 `test.fixme()` E2E stubs** -- Track as v2.0 debt.
+7. **Duplicate object key** in `registerForEvent.test.ts` line 12-13 (`organizationId` appears twice) -- harmless here but indicates copy-paste risk.
 
 ### Priority 3 (Nice to Have)
-6. **Mutation testing** -- Consider Stryker.js to verify test suite effectiveness (tests that always pass are caught by lint:shallow, but mutation testing goes deeper).
-7. **Per-test timeout enforcement** -- Add test-level timeouts to catch hanging tests early.
-8. **24 `test.todo()` items** -- Some are legitimate Better-Auth config items that can't be unit-tested; others (like BR-16 activity visibility defaults) should be tracked for implementation.
+8. **lint:shallow should fail CI** on tautological `expect(true).toBe(true)` patterns.
+9. **Mutation testing** -- Stryker.js for deeper effectiveness validation.
+10. **Flaky test detection** -- Add retry/tagging in CI config.
 
 ---
 
 ## Scoring Methodology
 
-### Layer 1: Coverage Integrity (8.5/10)
-- 21/21 modules have tests (+3)
+### Layer 1: Coverage Integrity (8.6/10) [was 8.5]
+- 25/25 modules have tests (+3)
 - Co-located test pattern (+1)
 - New code gate enforces test-first (+1)
-- Some modules thin (storage: 2, audit: 3) (-1.5)
+- 52 new backend test files since last report (+0.3)
+- 31 new frontend component test files (+0.2)
+- advertising/marketplace/jobs thin (1 file each) (-1.0)
+- association:operations thin (22% ratio) (-0.5)
+- storage still thin (-0.4)
 
-### Layer 2: Behavior Traceability (8.8/10)
+### Layer 2: Behavior Traceability (8.8/10) [unchanged]
 - 40/40 BRs have backend tests (+3)
 - 33/40 have all 3 layers (+2)
 - Formal BR registry with CI gate (+2)
 - BR references in test names (+1)
 - 1 partial (BR-34), 6 deferred (-1.2)
 
-### Layer 3: Test Quality (7.8/10)
-- 89.5% strong assertions (+3)
-- Error path testing (649 toThrow/rejects) (+1.5)
+### Layer 3: Test Quality (7.9/10) [was 7.8]
+- ~89% strong assertions (+3)
+- Error path testing (toThrow/rejects) in all sampled files (+1.5)
 - Business rule edge cases well-tested (+1)
-- lint:shallow catches weak patterns (+0.5)
-- 281 weak assertions remain (-0.7)
-- Some status-code-only tests (-0.5)
+- lint:shallow catches some weak patterns (+0.5)
+- NEW: notification trigger tests with captured mock calls (+0.2)
+- NEW: payload shape contract tests (dues-config-form) (+0.2)
+- 3 tautological tests remain (-0.3)
+- 1 test file with duplicate fixture key (-0.1)
 - No mutation testing (-1)
 
-### Layer 4: Release Gate Readiness (9.0/10)
-- 8-gate CI pipeline (+3)
+### Layer 4: Release Gate Readiness (9.0/10) [unchanged]
+- 8-gate CI pipeline with aggregator (+3)
 - BR regression gate (+1.5)
-- Full infrastructure in CI (+1)
+- Full infrastructure in CI (Postgres, MinIO) (+1)
 - New code gate for PRs (+1)
 - No-skip and shallow lints (+1)
+- Pre-commit hooks (typecheck + lint-staged) (+0.5)
 - No flaky detection (-0.5)
-- No mutation testing (-0.5)
-- Pre-commit hooks present (+0.5)
+- lint:shallow informational-only (-0.5)
 
-### Weighted Overall: 8.4/10
-Weights: L1 (25%), L2 (30%), L3 (20%), L4 (25%)
-= (8.5 * 0.25) + (8.8 * 0.30) + (7.8 * 0.20) + (9.0 * 0.25)
-= 2.125 + 2.640 + 1.560 + 2.250
-= **8.575** (rounded to 8.4 accounting for qualitative risk adjustment on deferred tests)
+### Weighted Overall: 8.5/10
+Weights: L1 (25%), L2 (30%), L3 (25%), L4 (20%)
+= (8.6 * 0.25) + (8.8 * 0.30) + (7.9 * 0.25) + (9.0 * 0.20)
+= 2.150 + 2.640 + 1.975 + 1.800
+= **8.565** (rounded to 8.5)
+
+Previous: 8.4. Delta: +0.1.
 
 ---
 
@@ -355,10 +362,13 @@ Weights: L1 (25%), L2 (30%), L3 (20%), L4 (25%)
 | BR edge case tests | `services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts` |
 | BR P2 gap tests | `services/api-ts/src/handlers/membership/br-p2-gap.test.ts` |
 | CI pipeline | `.github/workflows/ci.yml` |
+| Contract CI | `.github/workflows/contract.yml` |
 | Contract tests | `specs/api/tests/contract/` |
 | E2E stubs (deferred) | `apps/memberry/tests/e2e/stubs/` |
 | BR coverage script | `scripts/br-coverage.ts` |
 | No-skip lint | `scripts/lint-no-skips.ts` |
 | Shallow test lint | `scripts/lint-shallow-tests.ts` |
 | New code gate | `scripts/new-code-gate.ts` |
-| MASTER_PRD | `docs/product/MASTER_PRD.md` |
+| Migration safety | `scripts/migration-safety.ts` |
+| Tautological tests | `services/api-ts/src/core/auth-session-hardening.test.ts:167-179` |
+| Duplicate fixture key | `services/api-ts/src/handlers/events/registerForEvent.test.ts:12-13` |

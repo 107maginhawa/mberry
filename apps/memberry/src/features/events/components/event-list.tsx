@@ -11,6 +11,7 @@ import {
   cancelEventMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import type { Event, EventStatus, EventType } from '@monobase/sdk-ts/generated/types.gen'
+import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 
 interface EventListProps {
   orgId: string
@@ -58,6 +59,7 @@ export function EventList({ orgId }: EventListProps) {
   const [tab, setTab] = useState<StatusTab>('upcoming')
   const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [cancelEventId, setCancelEventId] = useState<string | null>(null)
 
   const tabParams = tabToApiParams(tab)
   const { data, isLoading, error } = useQuery(
@@ -185,13 +187,24 @@ export function EventList({ orgId }: EventListProps) {
               key={event.id}
               event={event}
               orgId={orgId}
-              onCancel={(id) => {
-                if (confirm('Cancel this event?')) doCancel.mutate({ path: { eventId: id }, headers: { 'x-org-id': orgId } })
-              }}
+              onCancel={(id) => setCancelEventId(id)}
             />
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={cancelEventId !== null}
+        onOpenChange={(open) => { if (!open) setCancelEventId(null) }}
+        title="Cancel Event"
+        description="Are you sure you want to cancel this event? This will notify all registered attendees."
+        confirmLabel="Cancel Event"
+        variant="destructive"
+        onConfirm={() => {
+          if (cancelEventId) doCancel.mutate({ path: { eventId: cancelEventId }, headers: { 'x-org-id': orgId } })
+          setCancelEventId(null)
+        }}
+      />
     </div>
   )
 }

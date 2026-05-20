@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { NotificationService } from '@/core/notifs';
 import type { CancelEventRegistrationParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
-import { EventRegistrationRepository, WaitlistEntryRepository } from './repos/events.repo';
+import { EventRegistrationRepository, WaitlistEntryRepository, EventRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
 import { notifyLateCancellation } from '@/handlers/notifs/notification-triggers';
 
@@ -63,25 +63,27 @@ export async function cancelEventRegistration(
 
   // GAP-006: Notify organizers of late cancellation (within 24h of event)
   const notifService = ctx.get('notifs') as NotificationService;
-  // These fields (eventStartsAt, eventName, createdBy) are not in EventRegistration schema —
-  // they would require a JOIN with the event table. Using unknown cast as a safe intermediate
-  // until a proper enriched repo query is added.
-  const existingEnriched = existing as unknown as Record<string, unknown>;
-  const eventStartsAt = existingEnriched['eventStartsAt'] as string | undefined
-    || existingEnriched['startDate'] as string | undefined;
-  if (notifService && eventStartsAt) {
-    const hoursUntilEvent = (new Date(eventStartsAt).getTime() - Date.now()) / (1000 * 60 * 60);
-    if (hoursUntilEvent <= 24) {
-      const orgId = ctx.get('organizationId') || existing.organizationId;
-      await notifyLateCancellation(notifService, {
-        organizationId: orgId,
-        cancellerId: user.id,
-        organizerIds: [(existingEnriched['createdBy'] as string | undefined) || user.id], // Organizer fallback
-        eventId: existing.eventId,
-        eventName: (existingEnriched['eventName'] as string | undefined) || 'Event',
-        cancelledAt: new Date(),
-        eventStartsAt: new Date(eventStartsAt),
-      });
+  if (notifService && existing.eventId) {
+    try {
+      const eventRepo = new EventRepository(db, logger);
+      const event = await eventRepo.findOneById(existing.eventId);
+      if (event) {
+        const hoursUntilEvent = (event.startDate.getTime() - Date.now()) / (1000 * 60 * 60);
+        if (hoursUntilEvent <= 24) {
+          const orgId = ctx.get('organizationId') || existing.organizationId;
+          await notifyLateCancellation(notifService, {
+            organizationId: orgId,
+            cancellerId: user.id,
+            organizerIds: [user.id], // TODO: resolve actual organizer from event.createdBy once schema supports it
+            eventId: existing.eventId,
+            eventName: event.title,
+            cancelledAt: new Date(),
+            eventStartsAt: event.startDate,
+          });
+        }
+      }
+    } catch (err) {
+      logger?.warn({ error: err, eventId: existing.eventId }, 'Failed to send late cancellation notification');
     }
   }
 

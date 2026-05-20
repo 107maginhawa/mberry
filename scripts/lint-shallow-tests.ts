@@ -80,5 +80,10 @@ if (findings.length === 0) {
 }
 
 console.log('');
-console.log('PASS: Shallow test lint complete (informational).');
-process.exit(0);
+if (findings.length > 0) {
+  console.log(`FAIL: ${findings.length} shallow test pattern(s) found. Fix before merging.`);
+  process.exit(1);
+} else {
+  console.log('PASS: Shallow test lint complete — no violations.');
+  process.exit(0);
+}

@@ -215,38 +215,56 @@ Tier 3 (sequential):            Phase 44 <┘  (re-audit + fix survivors)
 | 2026-05-19 | 8.7/10 | 7.4/10 | 8.4/10 | 7.4 | C1 |
 | 2026-05-20 | 8.7/10 | 8.1/10 | 8.4/10 | 8.1 | C1 (post-fix) |
 | 2026-05-20 | 9.1/10 | 8.1/10 | 8.4/10 | 8.1 | C2 (post-fix) |
+| 2026-05-20 | 9.1/10 | **8.9/10** | **8.5/10** | **8.5** | C2 (re-audited) |
 
 **Overall = min(Codebase, Compliance, Confidence)**
-
-> Compliance and Confidence scores need re-audit (`/oli-audit-compliance --all` + `/oli-confidence-stack`) to reflect Cycle 2 improvements. Codebase health score updated from dimension improvements.
 
 ---
 
 ## Graduation Threshold Check
 
-| Metric | Current | Threshold | Cycle 2 Target | Status |
-|--------|---------|-----------|----------------|--------|
-| P0 violations open | 0 | 0 | 0 | MET |
-| P1 violations open | 0 | 0 | 0 | MET |
-| Codebase health | 9.1 | -- | >= 9.0 | MET |
+| Metric | Current | Min Target | Max Feasible | Status |
+|--------|---------|-----------|-------------|--------|
+| P0 violations | 0 | 0 | 0 | MET |
+| P1 violations | **4** | 0 | 0 | NOT MET |
+| Codebase health | 9.1 | >= 9.0 | 9.5 | MET |
+| Spec compliance | **8.9** | >= 9.0 | 9.5 | NOT MET (fix 4 P1s → 9.3+) |
+| Test confidence | **8.5** | >= 9.0 | 9.2 | NOT MET (fix tautological + coverage gaps → 9.0+) |
 | Unjustified as-any | 0 | 0 | 0 | MET |
 | Test failures | 0 | 0 | 0 | MET |
 | TypeScript errors | 0 | 0 | 0 | MET |
+
+**Scoring policy: minimum 9.0, push to max feasible.**
+
+Max feasible estimates:
+- Compliance 9.5: fix 4 P1s (→9.3), fix 6 P2s (→9.5). Remaining P2s are terminology/style.
+- Confidence 9.2: fix tautological tests (+0.2), improve assoc:operations coverage (+0.3), gate lint:shallow in CI (+0.2). Layer 3 capped by brownfield test patterns.
+- Codebase health 9.5: orgId unification would add +0.2, but deferred (route param risk).
 | Raw HTML violations | 0 | 0 | 0 | MET |
 | Forms with validation | 11/11 | -- | 11/11 | MET |
 | ARIA coverage (role=alert) | 51 | 15+ | 15+ | MET |
 
-**Graduation Status: GRADUATED**
+**Graduation Status: CONDITIONAL — 4 P1 violations remain**
 
-All Cycle 2 targets met. Compliance/confidence formal re-audit pending but all underlying metrics are green.
+Codebase health (9.1) and type safety (0 unjustified) targets MET. But fresh re-audit found 4 new P1s and compliance (8.9) is just short of 9.0 target. Test confidence (8.5) needs improvement.
 
 ---
 
 ## What's Next
 
-**GRADUATED.** Cycle 2 complete. Remaining items for future work:
+**Fix 4 P1 violations to reach full graduation:**
 
-- S-C2-029: orgId/organizationId unification (deferred — 593 route params are structural)
-- Compliance/confidence formal re-audit: `/oli-audit-compliance --all` + `/oli-confidence-stack` + `/oli-magic --update`
-- Upgrade `@hookform/resolvers` when Zod v4 native support ships (eliminates 12 justified wrapper casts)
-- Add RadioGroup to `@monobase/ui` (eliminates last raw HTML element)
+1. `member-table.tsx:294` — hardcoded `/40` credit requirement → make dynamic per association
+2. `cancelEventRegistration.ts:69-79` — GAP-006 late cancellation notification reads non-existent fields
+3. `notification.repo.ts:289` — `getUnreadCount` fetches all rows → use SQL COUNT
+4. `record-payment-form.tsx:260` — `BigInt()` not JSON-serializable → convert to number for API
+
+**Then:**
+- Fix 3 tautological tests in `auth-session-hardening.test.ts` (confidence gap)
+- Improve association:operations test ratio (22% → 50%+)
+- Re-audit to confirm compliance ≥ 9.0 and confidence ≥ 9.0
+
+**Deferred (not blocking):**
+- S-C2-029: orgId/organizationId unification (593 route params structural)
+- Upgrade `@hookform/resolvers` when Zod v4 native support ships
+- Add RadioGroup to `@monobase/ui`

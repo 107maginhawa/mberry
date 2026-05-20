@@ -27,6 +27,8 @@ jobs:
         run: bun run lint:migrations
       - name: No silent test skips
         run: bun run lint:no-skips
+      - name: Shallow test assertion lint
+        run: bun run lint:shallow --ci
       - name: Check SDK freshness
         run: |
           bun --filter @monobase/sdk-ts run generate

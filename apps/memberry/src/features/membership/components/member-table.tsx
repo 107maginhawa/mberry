@@ -5,6 +5,7 @@ import {
   listRosterMembersOptions,
   listMembershipCategoriesOptions,
 } from '@monobase/sdk-ts/generated/react-query'
+import type { MembershipStatus } from '@monobase/sdk-ts/generated/types.gen'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
@@ -16,13 +17,18 @@ import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Search, Users } from 'lucide-react'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 
+// TODO: Replace with dynamic value from association config (requiredCredits field)
+// once the org config API exposes CPD/CE credit requirements per membership tier.
+const DEFAULT_REQUIRED_CREDITS = 40
+
 interface MemberTableProps {
   orgId: string
   initialStatus?: string
   expiringDays?: number
+  requiredCredits?: number
 }
 
-type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment'
+type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pending' | 'removed'
 
 const STATUS_TABS = [
   { value: 'all', label: 'All' },
@@ -30,15 +36,17 @@ const STATUS_TABS = [
   { value: 'gracePeriod', label: 'Grace' },
   { value: 'lapsed', label: 'Lapsed' },
   { value: 'suspended', label: 'Suspended' },
-  { value: 'pendingPayment', label: 'Pending' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'removed', label: 'Removed' },
 ]
 
 const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> = {
   active: { label: 'Active', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]' },
-  gracePeriod: { label: 'Grace', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
+  gracePeriod: { label: 'Grace Period', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] hover:bg-[var(--color-warning-bg)]' },
   lapsed: { label: 'Lapsed', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)]' },
   suspended: { label: 'Suspended', className: 'bg-gray-100 text-gray-800 hover:bg-gray-100' },
-  pendingPayment: { label: 'Pending', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
+  pending: { label: 'Pending', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
+  removed: { label: 'Removed', className: 'bg-gray-100 text-gray-500 hover:bg-gray-100' },
 }
 
 // Dues invoice status badge styling
@@ -51,7 +59,7 @@ const DUES_STATUS_BADGE: Record<string, { label: string; className: string }> = 
 
 const PAGE_SIZE = 50
 
-export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableProps) {
+export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredits = DEFAULT_REQUIRED_CREDITS }: MemberTableProps) {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusTab, setStatusTab] = useState(initialStatus ?? 'all')
@@ -77,12 +85,24 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
   const categories = categoriesData?.data ?? []
 
   // Build query params — duesStatus and trainingCompliant are supported by the API
-  // but not yet in the generated SDK types, so we cast to any to pass them through
-  const rosterQuery: any = {
+  // but not yet reflected in the generated SDK type; extend locally to preserve type safety.
+  interface RosterQueryOptions {
+    organizationId: string
+    limit: number
+    offset: number
+    status?: MembershipStatus
+    categoryId?: string
+    search?: string
+    /** Extended param not yet in generated SDK types — supported by API */
+    duesStatus?: string
+    /** Extended param not yet in generated SDK types — supported by API */
+    trainingCompliant?: boolean
+  }
+  const rosterQuery: RosterQueryOptions = {
     organizationId: orgId,
     limit: PAGE_SIZE,
     offset: page * PAGE_SIZE,
-    ...(statusTab !== 'all' ? { status: statusTab } : {}),
+    ...(statusTab !== 'all' ? { status: statusTab as MembershipStatus } : {}),
     ...(categoryId !== 'all' ? { categoryId } : {}),
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
     ...(duesStatusFilter !== 'all' ? { duesStatus: duesStatusFilter } : {}),
@@ -236,7 +256,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
             <TableBody className="divide-y">
               {members.map((m: any, idx: number) => {
                 const status = m.status as MemberStatus
-                const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pendingPayment
+                const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pending
                 const duesInvoiceStatus: string | null = m.duesInvoiceStatus ?? null
                 const creditsEarned: number = m.creditsEarned ?? 0
                 const trainingCompliant: boolean = m.trainingCompliant ?? false
@@ -291,7 +311,7 @@ export function MemberTable({ orgId, initialStatus, expiringDays }: MemberTableP
                         {trainingCompliant ? (
                           <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)] text-xs">Compliant</Badge>
                         ) : (
-                          <Badge className="bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)] text-xs">{creditsEarned}/40</Badge>
+                          <Badge className="bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)] text-xs">{creditsEarned}/{requiredCredits}</Badge>
                         )}
                       </div>
                     </TableCell>

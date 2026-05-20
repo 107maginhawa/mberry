@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Button, Input } from '@monobase/ui'
+import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Link } from '@tanstack/react-router'
 import { BookOpen, Users, Award, Search, SlidersHorizontal } from 'lucide-react'
@@ -40,6 +41,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
   const [activeTab, setActiveTab] = useState('published')
   const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [cancelTrainingId, setCancelTrainingId] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
   const statusMap: Record<string, string> = { published: 'published', past: 'completed', draft: 'draft' }
@@ -199,15 +201,26 @@ export function TrainingList({ orgId }: TrainingListProps) {
                 key={t.id}
                 training={t}
                 orgId={orgId}
-                onCancel={(id) => {
-                  if (confirm('Cancel this training?')) cancelMutation.mutate({ path: { trainingId: id }, query: { organizationId: orgId }, headers: { 'x-org-id': orgId } })
-                }}
+                onCancel={(id) => setCancelTrainingId(id)}
               />
             ))}
           </div>
           <p className="text-xs text-[var(--color-muted)] text-right">{total} total</p>
         </>
       )}
+
+      <ConfirmDialog
+        open={cancelTrainingId !== null}
+        onOpenChange={(open) => { if (!open) setCancelTrainingId(null) }}
+        title="Cancel Training"
+        description="Are you sure you want to cancel this training? Enrolled members will be notified."
+        confirmLabel="Cancel Training"
+        variant="destructive"
+        onConfirm={() => {
+          if (cancelTrainingId) cancelMutation.mutate({ path: { trainingId: cancelTrainingId }, query: { organizationId: orgId }, headers: { 'x-org-id': orgId } })
+          setCancelTrainingId(null)
+        }}
+      />
     </div>
   )
 }

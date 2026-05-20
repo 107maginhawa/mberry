@@ -1,7 +1,8 @@
-import { describe, test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { importMembers, normalizeLicense, importMembersSchema } from './importMembers';
 import { MembershipRepository } from './repos/membership.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -17,9 +18,18 @@ const fakeMember = {
 
 describe('[BR-22] importMembers', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    // Stub officer check to allow PRESIDENT through by default
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('imports members with personId and returns 201 with count', async () => {
@@ -57,11 +67,8 @@ describe('[BR-22] importMembers', () => {
     expect(response.body.data.imported).toBe(0);
   });
 
-  test('crashes without session (no auth)', async () => {
-    mocks = stubRepo(MembershipRepository, {
-      bulkImportMembers: async () => [],
-    });
-
+  test('returns 401 without session (no auth)', async () => {
+    // requirePosition short-circuits with 401 when no user on context
     const ctx = makeCtx({
       user: null,
       session: null,
@@ -69,7 +76,8 @@ describe('[BR-22] importMembers', () => {
       _body: { members: [{ personId: 'p-1', tierId: 'tier-1' }] },
     });
 
-    await expect(importMembers(ctx)).rejects.toThrow();
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(401);
   });
 
   test('scopes all members to orgId from route param', async () => {
@@ -152,6 +160,22 @@ describe('[BR-22] importMembers', () => {
 
     await importMembers(ctx);
     expect(captured[0].status).toBe('active');
+  });
+
+  test('returns 403 when caller lacks officer position', async () => {
+    // Override: non-officer (empty terms) should be denied
+    Object.values(officerMocks).forEach((m) => m.mockRestore());
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-1' },
+      _body: { members: [{ personId: 'p-1', tierId: 'tier-1' }] },
+    });
+
+    const response = await importMembers(ctx);
+    expect(response.status).toBe(403);
   });
 
   test('returns 400 on invalid payload', async () => {
@@ -249,9 +273,17 @@ describe('[BR-23] normalizeLicense', () => {
 
 describe('[BR-22] Member Matching on Import', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   // These tests exercise matching through the handler by providing a mock database

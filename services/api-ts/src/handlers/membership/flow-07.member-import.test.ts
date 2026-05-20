@@ -4,6 +4,7 @@ import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { importMembers } from './importMembers';
 import { MembershipRepository } from './repos/membership.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -23,13 +24,18 @@ function defaultStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
 
 describe('[FLOW-07] Member Import → Bulk Creation', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
 
   beforeEach(() => {
     restoreRepo(MembershipRepository);
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('imports multiple members with correct org and defaults', async () => {

@@ -4,6 +4,8 @@ import { eq, ilike, or, sql } from 'drizzle-orm';
 import { MembershipRepository } from './repos/membership.repo';
 import { persons } from '../person/repos/person.schema';
 import type { Session } from '@/types/auth';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 // Re-export CSV import utilities for unified API surface
 export { parseCSV, previewCSVImport, bulkCSVImport, validateImportRows } from './csvImport';
@@ -49,6 +51,11 @@ interface FlaggedMember {
 // ─── Handler ───────────────────────────────────────────────
 
 export async function importMembers(ctx: Context): Promise<Response> {
+  // Position-restricted: PRESIDENT or SECRETARY only (BR-25)
+  (ctx as any).set('organizationId', ctx.req.param('organizationId'));
+  const denied = await requirePosition(ctx as any, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
+  if (denied) return denied;
+
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId');

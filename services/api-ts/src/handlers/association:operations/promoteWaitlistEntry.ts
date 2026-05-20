@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { NotificationService } from '@/core/notifs';
 import type { PromoteWaitlistEntryParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
-import { WaitlistEntryRepository, EventRegistrationRepository } from './repos/events.repo';
+import { WaitlistEntryRepository, EventRegistrationRepository, EventRepository } from './repos/events.repo';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -60,12 +60,13 @@ export async function promoteWaitlistEntry(
   // GAP-003: Notify promoted member
   const notifService = ctx.get('notifs') as NotificationService;
   if (notifService) {
+    const eventRepo = new EventRepository(db, logger);
+    const event = await eventRepo.findOneById(entry.eventId);
     await notifyWaitlistPromotion(notifService, {
       organizationId: orgId,
       personId: entry.personId,
       eventId: entry.eventId,
-      // eventName is not in WaitlistEntry schema — requires JOIN with event table
-      eventName: (entry as unknown as Record<string, unknown>)['eventName'] as string | undefined || 'Event',
+      eventName: event?.title ?? 'Event',
       position: entry.position || 0,
     });
   }

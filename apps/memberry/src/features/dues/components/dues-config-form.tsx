@@ -57,7 +57,7 @@ const duesConfigSchema = z.object({
     .number({ error: 'Grace period is required' })
     .int('Grace period must be a whole number')
     .min(0, 'Grace period must be 0 or more days')
-    .max(365, 'Grace period must be 365 days or fewer'),
+    .max(90, 'Grace period must be 90 days or fewer'),
 })
 
 type DuesConfigFormData = z.infer<typeof duesConfigSchema>
@@ -269,7 +269,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
               id="gracePeriodDays"
               type="number"
               min="0"
-              max="365"
+              max="90"
               className="w-32"
               aria-describedby={errors.gracePeriodDays ? 'gracePeriodDays-error' : 'gracePeriodDays-hint'}
               {...register('gracePeriodDays', { valueAsNumber: true, onChange: () => setHasChanges(true) })}
@@ -279,7 +279,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
                 {errors.gracePeriodDays.message}
               </p>
             )}
-            <p id="gracePeriodDays-hint" className="text-xs text-[var(--color-muted)] mt-1">Members have this many days after due date before status changes to Lapsed.</p>
+            <p id="gracePeriodDays-hint" className="text-xs text-[var(--color-muted)] mt-1">Members have this many days after due date before status changes to Lapsed (0–90 days).</p>
           </div>
         </section>
 
