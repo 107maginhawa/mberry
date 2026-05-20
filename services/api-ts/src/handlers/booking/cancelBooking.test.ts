@@ -57,6 +57,9 @@ describe('cancelBooking', () => {
     const ctx = makeBookingCtx();
     const res = await cancelBooking(ctx);
     expect(res.status).toBe(200);
+    expect((res as any).body.id).toBe('booking-1');
+    expect((res as any).body.status).toBe('cancelled');
+    expect((res as any).body.cancelledAt).toBeDefined();
   });
 
   test('throws ValidationError when reason is empty', async () => {

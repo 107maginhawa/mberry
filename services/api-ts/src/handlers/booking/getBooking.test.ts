@@ -39,6 +39,9 @@ describe('getBooking', () => {
 
     const res = await getBooking(ctx as any);
     expect(res.status).toBe(200);
+    expect((res as any).body.id).toBe('booking-1');
+    expect((res as any).body.status).toBe('pending');
+    expect((res as any).body.locationType).toBe('video');
   });
 
   test('throws NotFoundError when booking does not exist', async () => {

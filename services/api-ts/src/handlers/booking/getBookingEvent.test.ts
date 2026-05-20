@@ -34,6 +34,9 @@ describe('getBookingEvent', () => {
 
     const res = await getBookingEvent(ctx as any);
     expect(res.status).toBe(200);
+    expect((res as any).body.id).toBe('event-1');
+    expect((res as any).body.title).toBe('Dental Consultation');
+    expect((res as any).body.status).toBe('active');
   });
 
   test('throws NotFoundError when event does not exist', async () => {
@@ -80,5 +83,7 @@ describe('getBookingEvent', () => {
 
     const res = await getBookingEvent(ctx as any);
     expect(res.status).toBe(200);
+    expect((res as any).body.id).toBe('event-1');
+    expect((res as any).body.owner).toBe('user-1');
   });
 });

@@ -100,6 +100,9 @@ describe('rejectBooking', () => {
 
     const res = await rejectBooking(ctx as any);
     expect(res.status).toBe(200);
+    expect((res as any).body.id).toBe('booking-1');
+    expect((res as any).body.status).toBe('rejected');
+    expect((res as any).body.cancelledAt).toBeDefined();
   });
 
   test('throws BusinessLogicError when booking is not pending', async () => {

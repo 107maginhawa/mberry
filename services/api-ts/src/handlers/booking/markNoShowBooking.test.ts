@@ -95,5 +95,8 @@ describe('markNoShowBooking', () => {
 
     const res = await markNoShowBooking(ctx as any);
     expect(res.status).toBe(200);
+    expect((res as any).body.id).toBe('booking-1');
+    expect((res as any).body.status).toBe('no_show_host');
+    expect((res as any).body.noShowMarkedAt).toBeDefined();
   });
 });

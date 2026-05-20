@@ -45,6 +45,9 @@ describe('listEventSlots', () => {
 
     const res = await listEventSlots(ctx as any);
     expect(res.status).toBe(200);
+    expect((res as any).body).toHaveLength(1);
+    expect((res as any).body[0].id).toBe('slot-1');
+    expect((res as any).body[0].status).toBe('available');
   });
 
   test('throws NotFoundError when event does not exist', async () => {

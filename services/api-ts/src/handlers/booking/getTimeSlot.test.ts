@@ -35,6 +35,9 @@ describe('getTimeSlot', () => {
 
     const res = await getTimeSlot(ctx as any);
     expect(res.status).toBe(200);
+    expect((res as any).body.id).toBe('slot-1');
+    expect((res as any).body.status).toBe('available');
+    expect((res as any).body.event).toBe('event-1');
   });
 
   test('throws NotFoundError when slot does not exist', async () => {

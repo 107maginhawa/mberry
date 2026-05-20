@@ -57,6 +57,9 @@ describe('updateBookingEvent', () => {
 
     const res = await updateBookingEvent(ctx);
     expect(res.status).toBe(200);
+    expect(res.body.id).toBe('event-1');
+    expect(res.body.title).toBe('Updated Consultation');
+    expect(res.body.status).toBe('active');
   });
 
   test('returns 404 when event does not exist', async () => {

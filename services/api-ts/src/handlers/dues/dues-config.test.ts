@@ -100,6 +100,10 @@ describe('Dues config permission enforcement', () => {
 
     const res = await getDuesDashboard(ctx as any);
     expect(res.status).toBe(200);
+    const body = res.body as any;
+    expect(body.data.totalCollected).toBe(50000);
+    expect(body.data.totalOutstanding).toBe(10000);
+    expect(body.data.upcomingActivities).toBe(0);
   });
 
   test('President can access dues dashboard', async () => {
@@ -129,6 +133,10 @@ describe('Dues config permission enforcement', () => {
 
     const res = await getDuesDashboard(ctx as any);
     expect(res.status).toBe(200);
+    const body = res.body as any;
+    expect(body.data.totalCollected).toBe(30000);
+    expect(body.data.totalOutstanding).toBe(5000);
+    expect(body.data.upcomingActivities).toBe(1);
   });
 
   test('unauthenticated request throws', async () => {
