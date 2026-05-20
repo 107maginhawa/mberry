@@ -234,7 +234,6 @@ describe('updateMember [BR-03]', () => {
 
   describe('[BR-03] invalid transitions silently rejected', () => {
     const invalidTransitions: Array<[string, string, string]> = [
-      ['active', 'pending', 'cannot revert to pending'],
       ['active', 'lapsed', 'cannot skip to lapsed'],
       ['active', 'grace', 'grace is automatic via expiry, not officer action'],
       ['grace', 'active', 'must pay dues or go through suspended→active'],
@@ -245,7 +244,6 @@ describe('updateMember [BR-03]', () => {
       ['suspended', 'grace', 'restore goes to active only'],
       ['suspended', 'lapsed', 'restore goes to active only'],
       ['suspended', 'removed', 'must restore before removing'],
-      ['suspended', 'pending', 'cannot revert to pending'],
       ['pending', 'active', 'pending→active via reviewApplication only'],
       ['pending', 'suspended', 'must approve first'],
     ];
@@ -274,6 +272,34 @@ describe('updateMember [BR-03]', () => {
         // [BR-03] Invalid transitions: no error, no state change
         expect(response.status).toBe(200);
         expect(capturedStatus).toBe(from); // status unchanged
+      });
+    }
+
+    // [V-20] "pending" is not a settable status via updateMember — Zod rejects it
+    // [V-20] "pending" as a target status is not in the valid enum — Zod rejects it
+    const pendingTransitions: Array<[string, string, string]> = [
+      ['active', 'pending', 'cannot revert to pending'],
+      ['suspended', 'pending', 'cannot revert to pending'],
+    ];
+
+    for (const [from, to, reason] of pendingTransitions) {
+      test(`${from} → ${to} rejected as validation error (${reason})`, async () => {
+        const memberWithStatus = {
+          ...existingMember,
+          membership: { ...existingMember.membership, status: from },
+        };
+        mocks = stubRepo(MembershipRepository, {
+          getMember: async () => memberWithStatus,
+          updateMember: async (_id: string, data: any) => ({ ...memberWithStatus.membership, ...data }),
+        });
+
+        const ctx = makeCtx({
+          _params: { organizationId: 'org-1', memberId: 'person-1' },
+          _body: { status: to },
+        });
+
+        // [V-20] "pending" is not in the valid status enum — returns 400
+        await expect(updateMember(ctx)).rejects.toBeInstanceOf(ValidationError);
       });
     }
   });

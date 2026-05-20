@@ -1,7 +1,21 @@
 import type { Context } from 'hono';
-import { NotFoundError } from '@/core/errors';
+import { z } from 'zod';
+import { NotFoundError, ValidationError } from '@/core/errors';
 import { MembershipRepository } from './repos/membership.repo';
 import type { Session } from '@/types/auth';
+
+// [V-20] Zod schema for updateMember request body
+const VALID_STATUSES = ['active', 'suspended', 'removed', 'grace', 'lapsed'] as const;
+
+const updateMemberSchema = z.object({
+  status: z.enum(VALID_STATUSES).optional(),
+  categoryId: z.string().optional(),
+  tierId: z.string().optional(),
+  memberNumber: z.string().optional(),
+  licenseNumber: z.string().optional(),
+  note: z.string().nullable().optional(),
+  removalReason: z.string().nullable().optional(),
+}).passthrough();
 
 // [BR-03] Valid membership state transitions.
 // PENDING → ACTIVE/REMOVED handled by reviewApplication, not here.
@@ -25,7 +39,13 @@ export async function updateMember(ctx: Context): Promise<Response> {
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId');
   const memberId = ctx.req.param('memberId');
-  const body = await ctx.req.json();
+  const rawBody = await ctx.req.json();
+  const parseResult = updateMemberSchema.safeParse(rawBody);
+  if (!parseResult.success) {
+    const messages = parseResult.error?.issues?.map(e => e.message).join(', ') ?? 'Invalid input';
+    throw new ValidationError(messages);
+  }
+  const body = parseResult.data;
 
   const repo = new MembershipRepository(db);
   let existing = await repo.getMember(orgId, memberId);
@@ -45,7 +65,7 @@ export async function updateMember(ctx: Context): Promise<Response> {
   const updated = await repo.updateMember(existing.membership.id, {
     categoryId: body.categoryId ?? existing.membership.categoryId,
     tierId: body.tierId ?? existing.membership.tierId,
-    status,
+    status: status as any,
     memberNumber: body.memberNumber ?? body.licenseNumber ?? existing.membership.memberNumber,
     note: body.note ?? existing.membership.note,
     removedAt: status === 'removed' ? new Date() : existing.membership.removedAt,
