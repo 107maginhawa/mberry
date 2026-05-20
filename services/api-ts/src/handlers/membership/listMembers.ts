@@ -1,5 +1,6 @@
 import type { Context } from 'hono';
 import { MembershipRepository } from './repos/membership.repo';
+import { computeMembershipStatus } from '@/handlers/association:member/utils/compute-membership-status';
 
 export async function listMembers(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -18,6 +19,15 @@ export async function listMembers(ctx: Context): Promise<Response> {
     const m = row.membership || row;
     const p = row.person || {};
     const c = row.category || {};
+    // [BR-01] Status is always computed on read from dues_expiry_date + grace_period_days
+    const computedStatus = computeMembershipStatus({
+      duesExpiryDate: m.duesExpiryDate ?? null,
+      gracePeriodDays: m.gracePeriodDays ?? 30,
+      suspendedAt: m.suspendedAt ?? null,
+      removedAt: m.removedAt ?? null,
+      isPendingPayment: m.status === 'pendingPayment',
+    });
+
     return {
       id: m.id,
       personId: m.personId || p.id,
@@ -30,7 +40,7 @@ export async function listMembers(ctx: Context): Promise<Response> {
       memberNumber: m.memberNumber || null,
       categoryId: m.categoryId || null,
       categoryName: c.name || null,
-      status: m.status || 'pending',
+      status: computedStatus,
       duesExpiryDate: m.duesExpiryDate || null,
       gracePeriodDays: m.gracePeriodDays || 30,
       joinedAt: m.joinedAt || m.createdAt || null,

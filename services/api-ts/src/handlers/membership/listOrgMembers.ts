@@ -6,6 +6,7 @@ import { memberships } from '@/handlers/association:member/repos/membership.sche
 import { persons } from '@/handlers/person/repos/person.schema';
 import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { eq, and, inArray } from 'drizzle-orm';
+import { computeMembershipStatus } from '@/handlers/association:member/utils/compute-membership-status';
 
 /**
  * listOrgMembers
@@ -64,11 +65,32 @@ export async function listOrgMembers(
       status: memberships.status,
       memberNumber: memberships.memberNumber,
       duesExpiryDate: memberships.duesExpiryDate,
+      gracePeriodDays: memberships.gracePeriodDays,
+      suspendedAt: memberships.suspendedAt,
+      removedAt: memberships.removedAt,
       categoryId: memberships.categoryId,
     })
     .from(memberships)
     .innerJoin(persons, eq(memberships.personId, persons.id))
     .where(eq(memberships.organizationId, orgId));
 
-  return ctx.json({ data: rows }, 200);
+  // [BR-01] Status is always computed on read from dues_expiry_date + grace_period_days
+  const enriched = rows.map((row) => ({
+    id: row.id,
+    personId: row.personId,
+    firstName: row.firstName,
+    lastName: row.lastName,
+    status: computeMembershipStatus({
+      duesExpiryDate: row.duesExpiryDate,
+      gracePeriodDays: row.gracePeriodDays ?? 30,
+      suspendedAt: row.suspendedAt,
+      removedAt: row.removedAt,
+      isPendingPayment: row.status === 'pendingPayment',
+    }),
+    memberNumber: row.memberNumber,
+    duesExpiryDate: row.duesExpiryDate,
+    categoryId: row.categoryId,
+  }));
+
+  return ctx.json({ data: enriched }, 200);
 }
