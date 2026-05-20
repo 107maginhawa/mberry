@@ -170,7 +170,7 @@ function TrainingDetail() {
       {/* Description */}
       {training.description && (
         <GlassCard className="p-5 space-y-2">
-          <h2 className="text-h4 font-display">About this Training</h2>
+          <h2 className="text-h4">About this Training</h2>
           <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[var(--color-muted)]">
             {training.description}
           </p>

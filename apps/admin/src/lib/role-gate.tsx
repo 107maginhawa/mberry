@@ -34,7 +34,7 @@ export function RequireRole({
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-muted-foreground">
         <ShieldAlert className="w-12 h-12" />
-        <h2 className="text-lg font-semibold text-foreground">Access Denied</h2>
+        <h2 className="text-h2 text-foreground">Access Denied</h2>
         <p className="text-sm">
           This page requires one of the following roles:{' '}
           <span className="font-medium text-foreground">{allowed.join(', ')}</span>

@@ -55,7 +55,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
       <div className="bg-card border rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Create Association</h2>
+          <h2 className="text-h2">Create Association</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
             <X className="w-4 h-4" />
           </button>
@@ -143,7 +143,7 @@ function AssociationsPage() {
         <div className="flex items-center gap-3">
           <Building2 className="w-6 h-6 text-muted-foreground" />
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">
+            <h1 className="text-h1 text-foreground">
               Associations
             </h1>
             <p className="text-sm text-muted-foreground mt-1">

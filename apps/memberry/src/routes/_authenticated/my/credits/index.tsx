@@ -91,7 +91,7 @@ function MyCredits() {
       </StaggerGrid>
 
       <div className="flex justify-between items-center">
-        <h2 className="text-h4 font-display">Credit Log</h2>
+        <h2 className="text-h4">Credit Log</h2>
       </div>
 
       {entries.length === 0 ? (

@@ -167,7 +167,7 @@ function MyTraining() {
       {/* Network-wide available trainings (SO-9: cross-org promotion) */}
       {((availableData as any)?.data ?? []).length > 0 && (
         <section>
-          <h2 className="text-h4 font-display mb-3">Available Trainings</h2>
+          <h2 className="text-h4 mb-3">Available Trainings</h2>
           <p className="text-[13px] text-[var(--color-muted)] mb-4">Network-wide trainings from across all organizations</p>
           <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {((availableData as any)?.data ?? []).slice(0, 6).map((t: any) => (

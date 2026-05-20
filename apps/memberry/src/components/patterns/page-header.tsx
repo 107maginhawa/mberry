@@ -27,7 +27,7 @@ export function PageHeader({ title, subtitle, breadcrumbs, actions }: PageHeader
       )}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[26px] font-bold font-display leading-[1.2]">{title}</h1>
+          <h1 className="text-h2">{title}</h1>
           {subtitle && <p className="text-[14px] text-[var(--color-muted)] mt-1">{subtitle}</p>}
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}

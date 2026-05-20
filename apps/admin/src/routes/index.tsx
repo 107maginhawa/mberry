@@ -51,7 +51,7 @@ function DashboardPage() {
     <div className="p-8">
       <div className="flex items-center gap-3 mb-8">
         <LayoutDashboard className="w-6 h-6 text-muted-foreground" />
-        <h1 className="text-2xl font-semibold text-foreground">
+        <h1 className="text-h1 text-foreground">
           Platform Admin
         </h1>
       </div>
@@ -91,7 +91,7 @@ function DashboardPage() {
       </div>
 
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
+        <h2 className="text-h2 text-foreground mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 gap-4">
           {quickActions.map((action) => (
             <Link

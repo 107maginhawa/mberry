@@ -67,7 +67,7 @@ export function NomineePickerDialog({
       >
         {/* Header */}
         <div className="p-4 border-b">
-          <h3 className="font-semibold text-sm">Add Nominee</h3>
+          <h3 className="text-h4">Add Nominee</h3>
           <div className="relative mt-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
             <Input

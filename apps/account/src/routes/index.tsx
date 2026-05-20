@@ -77,7 +77,7 @@ function HomePage() {
             <Shield className="w-3 h-3 mr-1" />
             Secure Service Platform
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h1 className="text-h1 text-foreground mb-4">
             Your Complete Service Management Platform
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -107,7 +107,7 @@ function HomePage() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+            <h2 className="text-h2 text-foreground mb-4">
               Service Management Made Simple
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

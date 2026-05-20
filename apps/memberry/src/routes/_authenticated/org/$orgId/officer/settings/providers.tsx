@@ -253,7 +253,7 @@ function ProvidersPage() {
       {(showCreateDialog || editingProvider) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
-            <h2 className="text-lg font-display font-semibold mb-4">
+            <h2 className="text-h3 mb-4">
               {editingProvider ? 'Edit Provider' : 'New Provider'}
             </h2>
             <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -322,7 +322,7 @@ function ProvidersPage() {
       {deletingProvider && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
-            <h2 className="text-lg font-display font-semibold mb-2">Delete Provider</h2>
+            <h2 className="text-h3 mb-2">Delete Provider</h2>
             <p className="text-sm text-[var(--color-muted)] mb-4">
               Are you sure you want to delete <strong>{deletingProvider.name}</strong>? This cannot be undone.
             </p>

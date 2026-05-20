@@ -81,7 +81,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
     <div className="space-y-6 max-w-3xl">
       {/* Core info */}
       <div className={sectionClass}>
-        <h2 className="font-semibold flex items-center gap-2"><Info className="w-4 h-4" /> Basic Info</h2>
+        <h2 className="text-h4 flex items-center gap-2"><Info className="w-4 h-4" /> Basic Info</h2>
 
         <div>
           <Label>Type</Label>
@@ -110,7 +110,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
 
       {/* Schedule */}
       <div className={sectionClass}>
-        <h2 className="font-semibold">Schedule</h2>
+        <h2 className="text-h4">Schedule</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label>Start Date & Time <span className="text-[var(--color-error)]">*</span></Label>
@@ -125,7 +125,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
 
       {/* Location */}
       <div className={sectionClass}>
-        <h2 className="font-semibold flex items-center gap-2">
+        <h2 className="text-h4 flex items-center gap-2">
           <MapPin className="w-4 h-4" />
           Location
         </h2>
@@ -137,7 +137,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
 
       {/* Credits */}
       <div className={sectionClass}>
-        <h2 className="font-semibold">Credits</h2>
+        <h2 className="text-h4">Credits</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label>CPE Credit Amount</Label>

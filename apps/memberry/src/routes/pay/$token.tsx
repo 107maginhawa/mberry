@@ -71,7 +71,7 @@ function PublicPaymentPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full border rounded-lg p-6 bg-white text-center space-y-4">
-          <h1 className="text-xl font-bold text-[var(--color-error)]">Payment Link Invalid</h1>
+          <h1 className="text-h3 text-[var(--color-error)]">Payment Link Invalid</h1>
           <p className="text-[var(--color-muted)]">{error}</p>
         </div>
       </div>
@@ -83,7 +83,7 @@ function PublicPaymentPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full border rounded-lg p-6 bg-white text-center space-y-4">
           <div className="text-4xl">✅</div>
-          <h1 className="text-xl font-bold">Already Paid</h1>
+          <h1 className="text-h3">Already Paid</h1>
           <p className="text-[var(--color-muted)]">This invoice has already been paid. Thank you!</p>
         </div>
       </div>

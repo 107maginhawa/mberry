@@ -113,7 +113,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
       {/* Basic info */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">
+        <h3 className="text-section-label text-[var(--color-muted)]">
           Basic Info
         </h3>
 
@@ -163,7 +163,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
       {/* Date & Time */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">
+        <h3 className="text-section-label text-[var(--color-muted)]">
           Date &amp; Time
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -192,7 +192,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
       {/* Location */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">
+        <h3 className="text-section-label text-[var(--color-muted)]">
           Location
         </h3>
         <div className="space-y-2">
@@ -208,7 +208,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
       {/* Registration */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">
+        <h3 className="text-section-label text-[var(--color-muted)]">
           Registration
         </h3>
 

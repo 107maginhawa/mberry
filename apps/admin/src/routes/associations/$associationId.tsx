@@ -117,7 +117,7 @@ function AssociationDetailPage() {
             <div className="flex items-center gap-3">
               <Building2 className="w-6 h-6 text-muted-foreground" />
               <div>
-                <h1 className="text-2xl font-semibold text-foreground">
+                <h1 className="text-h1 text-foreground">
                   {association.name}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -148,7 +148,7 @@ function AssociationDetailPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setEditing(false)}>
               <div className="bg-card border rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Edit Association</h2>
+                  <h2 className="text-h2">Edit Association</h2>
                   <button onClick={() => setEditing(false)} className="text-muted-foreground hover:text-foreground" aria-label="Close">
                     <X className="w-4 h-4" />
                   </button>
@@ -219,7 +219,7 @@ function AssociationDetailPage() {
           {confirmDelete && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setConfirmDelete(false)}>
               <div className="bg-card border rounded-lg p-6 w-full max-w-sm shadow-lg" onClick={(e) => e.stopPropagation()}>
-                <h2 className="text-lg font-semibold mb-2">Delete Association</h2>
+                <h2 className="text-h2 mb-2">Delete Association</h2>
                 <p className="text-sm text-muted-foreground mb-4">
                   Are you sure you want to delete <strong>{association.name}</strong>? This action cannot be undone.
                 </p>
@@ -244,7 +244,7 @@ function AssociationDetailPage() {
 
           {/* Detail Card */}
           <div className="rounded-lg border bg-card p-6 mb-8">
-            <h2 className="text-lg font-medium mb-4">Details</h2>
+            <h2 className="text-h2 mb-4">Details</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Name</p>
@@ -287,7 +287,7 @@ function AssociationDetailPage() {
 
           {/* Organizations within this association */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Organizations</h2>
+            <h2 className="text-h2">Organizations</h2>
             <button className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-medium hover:bg-accent transition-colors">
               <Plus className="w-4 h-4" />
               Add Organization

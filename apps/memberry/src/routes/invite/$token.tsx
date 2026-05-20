@@ -61,7 +61,7 @@ function InvitePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="max-w-md w-full border rounded-lg p-6 space-y-4 text-center">
-          <h1 className="text-[26px] font-bold font-display text-[var(--color-error)]">
+          <h1 className="text-h2 text-[var(--color-error)]">
             {isExpired ? 'Invitation Expired' : isClaimed ? 'Already Activated' : 'Invalid Invitation'}
           </h1>
           <p className="text-[var(--color-muted)]">{error.error}</p>
@@ -89,7 +89,7 @@ function InvitePage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-md w-full border rounded-lg p-6 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-[26px] font-bold font-display">Welcome to Memberry</h1>
+          <h1 className="text-h2">Welcome to Memberry</h1>
           <p className="text-[var(--color-muted)]">
             You've been invited to join an organization.
           </p>

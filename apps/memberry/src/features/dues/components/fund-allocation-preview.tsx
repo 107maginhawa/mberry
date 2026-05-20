@@ -16,7 +16,7 @@ export function FundAllocationPreview({ amountCents, funds, currency = 'PHP' }: 
 
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium">Fund Allocation Preview</h4>
+      <h4 className="text-h4">Fund Allocation Preview</h4>
       <div className="space-y-1">
         {allocations.map((alloc, i) => (
           <div key={alloc.fundId} className="flex justify-between text-sm">

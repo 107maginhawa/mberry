@@ -106,7 +106,7 @@ export function DataExport() {
         <div className="flex items-start gap-3">
           <FileText size={20} className="text-[var(--color-primary)] shrink-0 mt-0.5" />
           <div>
-            <h2 className="text-[15px] font-semibold font-display">What's included in your export</h2>
+            <h2 className="text-h4">What's included in your export</h2>
             <p className="text-[13px] text-[var(--color-muted)] mt-1.5 leading-relaxed">
               Your export includes all personal data we hold about you: profile information,
               membership records, payment history, event registrations, training completions,
@@ -144,7 +144,7 @@ export function DataExport() {
       {/* Previous exports */}
       {exports.length > 0 && (
         <div>
-          <h2 className="text-[15px] font-semibold mb-3">Previous Exports</h2>
+          <h2 className="text-h4 mb-3">Previous Exports</h2>
           <GlassCard className="overflow-hidden">
             <div className="overflow-x-auto">
             <table className="w-full text-[14px]">

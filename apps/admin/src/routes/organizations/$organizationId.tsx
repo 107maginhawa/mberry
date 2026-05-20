@@ -66,7 +66,7 @@ function OrganizationDetailPage() {
             <div className="flex items-center gap-3">
               <Building className="w-6 h-6 text-muted-foreground" />
               <div>
-                <h1 className="text-2xl font-semibold text-foreground">
+                <h1 className="text-h1 text-foreground">
                   {org.name}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -82,7 +82,7 @@ function OrganizationDetailPage() {
 
           {/* Detail Card */}
           <div className="rounded-lg border bg-card p-6 mb-8">
-            <h2 className="text-lg font-medium mb-4">Details</h2>
+            <h2 className="text-h2 mb-4">Details</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Name</p>
@@ -125,7 +125,7 @@ function OrganizationDetailPage() {
 
           {/* Lifecycle Controls */}
           <div className="rounded-lg border bg-card p-6 mb-8">
-            <h2 className="text-lg font-medium mb-4">Lifecycle Controls</h2>
+            <h2 className="text-h2 mb-4">Lifecycle Controls</h2>
             <div className="flex items-center gap-3">
               <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors">
                 <Play className="w-4 h-4" />
@@ -143,7 +143,7 @@ function OrganizationDetailPage() {
           </div>
 
           {/* Members sub-table */}
-          <h2 className="text-lg font-medium mb-4">Members</h2>
+          <h2 className="text-h2 mb-4">Members</h2>
           <div className="rounded-lg border bg-card">
             <table className="w-full">
               <thead>

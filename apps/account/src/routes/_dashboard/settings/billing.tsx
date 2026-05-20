@@ -53,7 +53,7 @@ function BillingPage() {
   return (
     <div className="flex flex-col gap-6 p-6 max-w-3xl">
       <div>
-        <h1 className="text-3xl font-bold">Billing</h1>
+        <h1 className="text-h1">Billing</h1>
         <p className="text-muted-foreground">
           Connect a Stripe account if you want to charge for your sessions.
         </p>

@@ -75,7 +75,7 @@ function DashboardPage() {
             <AvatarFallback className="text-lg">{initials}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold">{user?.name || 'User'}</h1>
+            <h1 className="text-h2">{user?.name || 'User'}</h1>
             <p className="text-muted-foreground">{user?.email}</p>
             <div className="flex items-center gap-2 mt-1">
               {emailVerified ? (

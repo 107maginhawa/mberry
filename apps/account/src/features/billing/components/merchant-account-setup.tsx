@@ -117,7 +117,7 @@ export function MerchantAccountSetup({
       return (
         <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
           <CheckCircle2 className="mx-auto h-12 w-12 text-green-600 mb-4" aria-hidden="true" />
-          <h3 className="text-lg font-semibold text-green-900 mb-2">Merchant Account Connected</h3>
+          <h3 className="text-h3 text-green-900 mb-2">Merchant Account Connected</h3>
           <p className="text-sm text-green-700 mb-4">
             Your payment account is fully set up and ready to accept payments.
           </p>
@@ -133,7 +133,7 @@ export function MerchantAccountSetup({
       return (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-8 text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-amber-600 mb-4" aria-hidden="true" />
-          <h3 className="text-lg font-semibold text-amber-900 mb-2">Complete Your Payment Setup</h3>
+          <h3 className="text-h3 text-amber-900 mb-2">Complete Your Payment Setup</h3>
           <p className="text-sm text-amber-700 mb-4">
             Your payment account onboarding is incomplete.
             {account?.metadata?.onboardingStartedAt && (
@@ -157,7 +157,7 @@ export function MerchantAccountSetup({
     return (
       <div className="rounded-lg border border-dashed p-8 text-center">
         <CreditCard className="mx-auto h-12 w-12 text-muted-foreground mb-4" aria-hidden="true" />
-        <h3 className="text-lg font-semibold mb-2">Merchant Account Setup</h3>
+        <h3 className="text-h3 mb-2">Merchant Account Setup</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Connect your payment account to receive payments for your services.
           This will redirect you to complete the setup process.

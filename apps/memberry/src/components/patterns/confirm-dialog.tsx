@@ -31,7 +31,7 @@ export function ConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
       <div className="relative bg-[var(--color-surface)] rounded-[12px] border border-[var(--color-border)] p-6 max-w-md w-full mx-4 shadow-deep">
-        <h3 className="text-[20px] font-bold font-display mb-2">{title}</h3>
+        <h3 className="text-h3 mb-2">{title}</h3>
         <div className="text-[14px] text-[var(--color-text-secondary)] mb-4">{description}</div>
 
         {variant === "irreversible" && confirmText && (

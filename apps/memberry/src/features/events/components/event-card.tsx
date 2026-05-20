@@ -100,7 +100,7 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
 
         {/* Title */}
         <a href={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}`} className="block">
-          <h3 className="text-h4 font-semibold leading-snug hover:text-[var(--color-primary)] transition-colors line-clamp-2">
+          <h3 className="text-h4 leading-snug hover:text-[var(--color-primary)] transition-colors line-clamp-2">
             {event.title}
           </h3>
         </a>

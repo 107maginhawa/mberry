@@ -182,7 +182,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <h1 className="text-[26px] font-bold font-display truncate">{member.name ?? 'Unknown Member'}</h1>
+          <h1 className="text-h2 truncate">{member.name ?? 'Unknown Member'}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
             {member.memberNumber && (
               <span className="font-mono text-xs text-[var(--color-muted)] border rounded px-1.5 py-0.5">
@@ -203,7 +203,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Contact info */}
         <GlassCard className="p-5 space-y-3">
-          <h2 className="font-semibold text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Contact</h2>
+          <h2 className="text-section-label text-[var(--color-muted)]">Contact</h2>
           {member.email && (
             <div className="flex items-center gap-2 text-sm">
               <Mail className="h-4 w-4 text-[var(--color-muted)] shrink-0" />
@@ -223,7 +223,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
 
         {/* Membership info */}
         <GlassCard className="p-5 space-y-3">
-          <h2 className="font-semibold text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Membership</h2>
+          <h2 className="text-section-label text-[var(--color-muted)]">Membership</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
               <dt className="text-[var(--color-muted)]">Category</dt>
@@ -251,7 +251,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
 
       {/* Actions panel */}
       <GlassCard className="p-5 space-y-3">
-        <h2 className="font-semibold text-[12px] uppercase tracking-wide text-[var(--color-muted)]">Actions</h2>
+        <h2 className="text-section-label text-[var(--color-muted)]">Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" size="sm" onClick={() => setShowChangeCat(true)}>
             <Shield className="h-4 w-4 mr-2" />

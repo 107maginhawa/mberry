@@ -20,7 +20,7 @@ function SecuritySettingsPage() {
     <div className="flex flex-col gap-6 p-6 max-w-4xl">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-headline font-bold">Security Settings</h1>
+        <h1 className="text-h1">Security Settings</h1>
         <p className="text-muted-foreground font-body">
           Manage your account security and monitor login activity
         </p>

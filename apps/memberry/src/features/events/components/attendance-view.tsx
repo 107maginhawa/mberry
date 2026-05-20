@@ -83,7 +83,7 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
 
       {/* Manual check-in */}
       <div className="border rounded-lg p-4 space-y-3">
-        <h3 className="text-sm font-semibold">Manual Check-in</h3>
+        <h3 className="text-h4">Manual Check-in</h3>
         <div className="flex gap-2">
           <Input
             placeholder="Enter member ID..."

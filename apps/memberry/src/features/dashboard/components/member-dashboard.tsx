@@ -291,7 +291,7 @@ function SectionHeading({
 }) {
   return (
     <div className="flex items-center justify-between mb-3">
-      <h2 className="text-[16px] font-semibold font-display flex items-center gap-1.5">
+      <h2 className="text-h4 flex items-center gap-1.5">
         {icon}
         {title}
       </h2>

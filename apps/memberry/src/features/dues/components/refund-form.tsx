@@ -54,7 +54,7 @@ export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) 
 
   return (
     <div className="space-y-3 p-4 border rounded-lg">
-      <h4 className="text-sm font-medium">Initiate Refund</h4>
+      <h4 className="text-h4">Initiate Refund</h4>
       <div>
         <Label>Amount ({currency})</Label>
         <Input

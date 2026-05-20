@@ -183,7 +183,7 @@ function EventDetail() {
       {/* Description */}
       {event.description && (
         <div className="space-y-2">
-          <h2 className="text-h3 font-semibold font-display text-[var(--color-text)]">
+          <h2 className="text-h3 text-[var(--color-text)]">
             About this Event
           </h2>
           <p className="text-body leading-relaxed whitespace-pre-wrap text-[var(--color-muted)]">

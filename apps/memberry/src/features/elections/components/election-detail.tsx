@@ -176,7 +176,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
               {election.votingMode?.replace('_', '-')}
             </span>
           </div>
-          <h1 className="text-[26px] font-bold font-display">{election.title}</h1>
+          <h1 className="text-h2">{election.title}</h1>
           {election.type === 'bylaw' && election.passageThreshold && (
             <p className="text-sm text-[var(--color-muted)] mt-1">Requires {election.passageThreshold}% majority to pass</p>
           )}
@@ -255,7 +255,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
       {/* Positions & nominees */}
       {positions.length > 0 ? (
         <div className="space-y-4">
-          <h2 className="font-semibold flex items-center gap-2">
+          <h2 className="text-h4 flex items-center gap-2">
             <Vote className="w-4 h-4" />
             {election.type === 'officer' ? 'Positions & Nominees' : 'Items & Votes'}
           </h2>

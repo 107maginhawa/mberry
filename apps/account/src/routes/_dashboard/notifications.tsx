@@ -190,7 +190,7 @@ function NotificationsPage() {
       {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-headline font-bold flex items-center gap-3">
+          <h1 className="text-h1 flex items-center gap-3">
             <Bell className="h-8 w-8" />
             Notifications
             {unreadCount > 0 && (
@@ -252,7 +252,7 @@ function NotificationsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
-                              <h3 className={`font-semibold ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
+                              <h3 className={`text-h4 ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
                                 {notification.title}
                                 {!notification.read && (
                                   <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full inline-block"></span>
@@ -310,7 +310,7 @@ function NotificationsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
-                            <h3 className="font-semibold">
+                            <h3 className="text-h4">
                               {notification.title}
                               <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full inline-block"></span>
                             </h3>

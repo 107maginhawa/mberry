@@ -60,7 +60,7 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-card border rounded-lg shadow-lg w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Invite Operator</h2>
+          <h2 className="text-h2">Invite Operator</h2>
           <button onClick={onClose} className="p-1 rounded hover:bg-muted" aria-label="Close">
             <X className="w-4 h-4" />
           </button>
@@ -144,7 +144,7 @@ function OperatorsPage() {
         <div className="flex items-center gap-3">
           <ShieldCheck className="w-6 h-6 text-muted-foreground" />
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">
+            <h1 className="text-h1 text-foreground">
               Operators
             </h1>
             <p className="text-sm text-muted-foreground mt-1">

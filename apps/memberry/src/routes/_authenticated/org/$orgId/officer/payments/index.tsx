@@ -65,7 +65,7 @@ function OfficerPaymentsPage() {
       />
       <FinancialDashboard orgId={orgId} />
       <GlassCard className="p-5">
-        <h2 className="text-[16px] font-semibold font-display mb-3">Pending Payment Proofs</h2>
+        <h2 className="text-h4 mb-3">Pending Payment Proofs</h2>
         <PendingProofsList orgId={orgId} />
       </GlassCard>
       <PaymentHistoryTable orgId={orgId} scope="org" />

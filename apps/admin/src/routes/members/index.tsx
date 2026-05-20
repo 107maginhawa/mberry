@@ -70,7 +70,7 @@ function MembersPage() {
       <div className="flex items-center gap-3 mb-8">
         <Users className="w-6 h-6 text-muted-foreground" />
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Members</h1>
+          <h1 className="text-h1 text-foreground">Members</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Search and manage platform members across all organizations
           </p>

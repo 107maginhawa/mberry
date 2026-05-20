@@ -52,7 +52,7 @@ function OrgHome() {
 
       {/* Recent Announcements */}
       <section className="space-y-4">
-        <h2 className="text-[16px] font-semibold font-display flex items-center gap-2">
+        <h2 className="text-h4 flex items-center gap-2">
           <Megaphone className="w-5 h-5" />
           Recent Announcements
         </h2>
@@ -75,7 +75,7 @@ function OrgHome() {
           <div className="space-y-3">
             {announcementItems.map((a: any) => (
               <GlassCard key={a.id} className="p-4 space-y-1">
-                <h3 className="font-semibold text-[var(--color-text)]">
+                <h3 className="text-h4 text-[var(--color-text)]">
                   {a.title ?? a.subject ?? 'Announcement'}
                 </h3>
                 {a.body && (
@@ -97,7 +97,7 @@ function OrgHome() {
       {/* Upcoming Events */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-[16px] font-semibold font-display flex items-center gap-2">
+          <h2 className="text-h4 flex items-center gap-2">
             <Calendar className="w-5 h-5" />
             Upcoming Events
           </h2>
@@ -136,7 +136,7 @@ function OrgHome() {
                 className="block"
               >
                 <GlassCard className="p-4 space-y-2">
-                  <h3 className="font-semibold text-[var(--color-text)]">
+                  <h3 className="text-h4 text-[var(--color-text)]">
                     {event.title}
                   </h3>
                   <div className="space-y-1 text-sm text-[var(--color-muted)]">

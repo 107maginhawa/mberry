@@ -139,7 +139,7 @@ function Section({
 }) {
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+      <h3 className="text-section-label text-muted-foreground">{title}</h3>
       {items.length === 0 ? (
         <EmptyState>{empty}</EmptyState>
       ) : (

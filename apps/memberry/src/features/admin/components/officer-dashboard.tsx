@@ -128,7 +128,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
 
       {/* Smart action cards */}
       <section className="space-y-3">
-        <h2 className="text-[16px] font-semibold font-display mb-2">Action Items</h2>
+        <h2 className="text-h4 mb-2">Action Items</h2>
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -203,7 +203,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
 
       {/* Quick links */}
       <section className="mt-8">
-        <h2 className="text-[16px] font-semibold font-display mb-3">Quick Links</h2>
+        <h2 className="text-h4 mb-3">Quick Links</h2>
         <StaggerGrid className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StaggerItem><QuickLink href={`/org/${orgId}/officer/roster`} icon={<Users size={16} />} label="Roster" /></StaggerItem>
           <StaggerItem><QuickLink href={`/org/${orgId}/officer/applications`} icon={<ClipboardList size={16} />} label="Applications" /></StaggerItem>

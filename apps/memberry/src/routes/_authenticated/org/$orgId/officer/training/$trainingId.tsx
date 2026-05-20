@@ -127,7 +127,7 @@ function TrainingDetail() {
           <div className="lg:col-span-2 space-y-4">
             {training.description && (
               <GlassCard className="p-5">
-                <h2 className="font-display font-semibold mb-2">About</h2>
+                <h2 className="text-h4 mb-2">About</h2>
                 <p className="text-[14px] text-[var(--color-muted)] whitespace-pre-line">{training.description}</p>
               </GlassCard>
             )}

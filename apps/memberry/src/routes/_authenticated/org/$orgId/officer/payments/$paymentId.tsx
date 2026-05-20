@@ -65,7 +65,7 @@ function PaymentDetailPage() {
 
       {origAllocations.length > 0 && (
         <GlassCard className="p-5">
-          <h3 className="text-[14px] font-semibold font-display mb-3">Fund Allocation</h3>
+          <h3 className="text-h4 mb-3">Fund Allocation</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

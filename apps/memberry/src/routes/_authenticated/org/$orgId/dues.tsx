@@ -114,7 +114,7 @@ function MemberDuesPage() {
         </div>
       ) : unpaidInvoices.length > 0 ? (
         <section className="space-y-4">
-          <h2 className="text-h3 font-display flex items-center gap-2">
+          <h2 className="text-h3 flex items-center gap-2">
             <CreditCard className="w-5 h-5" />
             Pay Dues
           </h2>
@@ -199,7 +199,7 @@ function MemberDuesPage() {
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
               <div className="space-y-2">
-                <h2 className="text-h3 font-display">Membership Period Ended</h2>
+                <h2 className="text-h3">Membership Period Ended</h2>
                 <p className="text-[14px] text-[var(--color-muted)]">
                   Your membership period expired on{' '}
                   <span className="font-semibold text-[var(--color-text)]">
@@ -211,7 +211,7 @@ function MemberDuesPage() {
             </div>
 
             <div className="rounded-[8px] p-4 space-y-3 bg-[var(--color-surface-warm)]">
-              <h3 className="text-[14px] font-semibold flex items-center gap-2">
+              <h3 className="text-h4 flex items-center gap-2">
                 <Info className="w-4 h-4" />
                 How Renewal Works
               </h3>
@@ -245,7 +245,7 @@ function MemberDuesPage() {
           <div className="flex items-start gap-3">
             <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <div>
-              <h2 className="text-h3 font-display">All Dues Paid</h2>
+              <h2 className="text-h3">All Dues Paid</h2>
               <p className="text-[14px] text-[var(--color-muted)]">
                 Your membership is current through{' '}
                 <span className="font-semibold text-[var(--color-text)]">
@@ -262,7 +262,7 @@ function MemberDuesPage() {
           <div className="flex items-start gap-3">
             <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <div>
-              <h2 className="text-h3 font-display">All Dues Paid</h2>
+              <h2 className="text-h3">All Dues Paid</h2>
               <p className="text-[14px] text-[var(--color-muted)]">
                 No outstanding dues.{expiryDate && (
                   <> Your membership is current through{' '}
@@ -286,7 +286,7 @@ function MemberDuesPage() {
         </div>
       ) : payments.length > 0 ? (
         <section className="space-y-3">
-          <h2 className="text-h3 font-display">Payment History</h2>
+          <h2 className="text-h3">Payment History</h2>
           <GlassCard className="p-1">
             <div className="overflow-x-auto">
               <div className="space-y-1">

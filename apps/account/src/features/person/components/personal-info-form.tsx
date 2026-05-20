@@ -250,7 +250,7 @@ export function PersonalInfoForm({
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-lg font-semibold">
+                  <h3 className="text-h3">
                     {firstName || lastName ? `${firstName} ${lastName}`.trim() : 'Your Name'}
                   </h3>
                 </div>

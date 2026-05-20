@@ -112,7 +112,7 @@ function MyProfilePage() {
               photoUrl={(p as any)?.avatar?.url || p?.photoUrl}
             />
           </div>
-          <h2 className="text-[20px] font-bold font-display mt-3 text-center md:text-left">
+          <h2 className="text-h3 mt-3 text-center md:text-left">
             {formatPersonName(p?.firstName || '', p?.lastName, p?.middleName)}
           </h2>
           {p?.specialization && (
@@ -131,7 +131,7 @@ function MyProfilePage() {
         <div className="md:w-2/3 space-y-4">
           {/* Contact */}
           <GlassCard className="p-5">
-            <h3 className="text-[16px] font-semibold font-display mb-3">Contact</h3>
+            <h3 className="text-h4 mb-3">Contact</h3>
             <div className="space-y-2 text-[14px]">
               {p?.contactInfo?.email && (
                 <div className="flex justify-between">
@@ -163,7 +163,7 @@ function MyProfilePage() {
           {/* Org Memberships */}
           {memberships.length > 0 && (
             <GlassCard className="p-5">
-              <h3 className="text-[16px] font-semibold font-display mb-3">Organizations</h3>
+              <h3 className="text-h4 mb-3">Organizations</h3>
               <div className="space-y-2">
                 {memberships.map((m: any) => (
                   <div key={m.id} className="flex items-center justify-between py-1">

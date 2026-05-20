@@ -128,7 +128,7 @@ function AnnouncementDetailPage() {
       {/* Delivery stats */}
       {ann.stats && (
         <GlassCard className="p-5">
-          <h2 className="text-[16px] font-display font-semibold mb-3">Delivery Stats</h2>
+          <h2 className="text-h4 mb-3">Delivery Stats</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: 'Recipients', value: ann.stats.recipients },

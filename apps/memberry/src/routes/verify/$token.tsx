@@ -52,7 +52,7 @@ function PublicVerification() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full border rounded-lg p-6 bg-white text-center space-y-4">
           <div className="text-4xl">❌</div>
-          <h1 className="text-xl font-bold text-[var(--color-error)]">Verification Failed</h1>
+          <h1 className="text-h3 text-[var(--color-error)]">Verification Failed</h1>
           <p className="text-[var(--color-muted)]">{error}</p>
         </div>
       </div>
@@ -64,7 +64,7 @@ function PublicVerification() {
       <div className="max-w-md w-full border rounded-lg bg-white overflow-hidden">
         <div className="bg-green-600 p-6 text-white text-center">
           <div className="text-4xl mb-2">✓</div>
-          <h1 className="text-xl font-bold">Credential Verified</h1>
+          <h1 className="text-h3">Credential Verified</h1>
           <p className="text-sm opacity-80">Verified as of {result?.verifiedAt || 'now'}</p>
         </div>
         <div className="p-6 space-y-3 text-sm">

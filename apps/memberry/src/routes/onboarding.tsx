@@ -67,7 +67,7 @@ function MemberOnboarding() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-lg w-full border rounded-lg p-6 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-[26px] font-bold font-display">Complete Your Profile</h1>
+          <h1 className="text-h2">Complete Your Profile</h1>
           <p className="text-sm text-[var(--color-muted)]">
             Step {step} of 2 — you can skip and come back later
           </p>
@@ -81,7 +81,7 @@ function MemberOnboarding() {
 
         {step === 1 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Specialization</h2>
+            <h2 className="text-h3">Specialization</h2>
             <p className="text-sm text-[var(--color-muted)]">
               What is your area of professional practice?
             </p>
@@ -111,7 +111,7 @@ function MemberOnboarding() {
 
         {step === 2 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Privacy Preferences</h2>
+            <h2 className="text-h3">Privacy Preferences</h2>
             <p className="text-sm text-[var(--color-muted)]">
               Control how your information appears in the member directory.
             </p>

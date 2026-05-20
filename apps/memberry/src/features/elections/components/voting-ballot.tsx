@@ -147,7 +147,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-[26px] font-bold font-display">{election.title}</h1>
+        <h1 className="text-h2">{election.title}</h1>
         <p className="text-sm text-[var(--color-muted)] mt-1">
           Select one candidate for each position, then submit your ballot.
         </p>

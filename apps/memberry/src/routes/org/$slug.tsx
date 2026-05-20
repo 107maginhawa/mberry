@@ -126,7 +126,7 @@ function PublicOrgProfile() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="max-w-md w-full border rounded-lg p-8 bg-card text-center space-y-4">
-          <h1 className="text-xl font-bold">Organization Not Found</h1>
+          <h1 className="text-h3">Organization Not Found</h1>
           <p className="text-[var(--color-muted)]">The organization you're looking for doesn't exist or is no longer active.</p>
         </div>
       </div>
@@ -138,7 +138,7 @@ function PublicOrgProfile() {
       <div className="max-w-2xl mx-auto space-y-6 mt-8">
         <div className="border rounded-lg bg-card overflow-hidden">
           <div className="bg-primary p-8 text-primary-foreground">
-            <h1 className="text-[26px] font-bold font-display">{org.name}</h1>
+            <h1 className="text-h2">{org.name}</h1>
             {org.associationName && (
               <p className="text-sm opacity-80 mt-1">{org.associationName}</p>
             )}
@@ -196,7 +196,7 @@ function PublicOrgProfile() {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/50" onClick={() => { if (!submitting) setApplyOpen(false) }} />
           <div className="relative bg-card rounded-lg border p-6 max-w-md w-full mx-4 shadow-lg">
-            <h3 className="text-lg font-bold mb-1">Apply to Join {org.name}</h3>
+            <h3 className="text-h3 mb-1">Apply to Join {org.name}</h3>
             <p className="text-sm text-[var(--color-muted)] mb-4">
               Your application will be reviewed by the organization's officers.
             </p>

@@ -119,7 +119,7 @@ export function ActiveBookingCard({
             <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
               <XCircle className="w-6 h-6 text-red-600" />
             </div>
-            <h3 className="font-semibold text-lg">Booking Request Rejected</h3>
+            <h3 className="text-h3">Booking Request Rejected</h3>
             <p className="text-sm text-muted-foreground mt-2">
               {hostName} • {formatDate(booking.scheduledAt, { format: 'medium' })} • {formatDate(booking.scheduledAt, { format: 'time' })}
             </p>
@@ -172,7 +172,7 @@ export function ActiveBookingCard({
             <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <XCircle className="w-6 h-6 text-gray-600" />
             </div>
-            <h3 className="font-semibold text-lg">Appointment Cancelled</h3>
+            <h3 className="text-h3">Appointment Cancelled</h3>
             <p className="text-sm text-muted-foreground mt-2">
               {hostName} • {formatDate(booking.scheduledAt, { format: 'medium' })} • {formatDate(booking.scheduledAt, { format: 'time' })}
             </p>
@@ -228,7 +228,7 @@ export function ActiveBookingCard({
             <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <CheckCircle2 className="w-6 h-6 text-green-600" />
             </div>
-            <h3 className="font-semibold text-lg">Session Completed</h3>
+            <h3 className="text-h3">Session Completed</h3>
             <p className="text-sm text-muted-foreground mt-2">
               {hostName} • {formatDate(booking.scheduledAt, { format: 'medium' })} • {formatDate(booking.scheduledAt, { format: 'time' })}
             </p>

@@ -103,7 +103,7 @@ function GeneralSection() {
   return (
     <GlassCard className="p-6 space-y-4">
       <div>
-        <h2 className="text-[16px] font-semibold font-display">General</h2>
+        <h2 className="text-h4">General</h2>
         <p className="text-[14px] text-[var(--color-muted)] mt-1">Basic account settings</p>
       </div>
       <Link
@@ -118,7 +118,7 @@ function GeneralSection() {
       </Link>
 
       <div className="border-t border-[var(--color-border-light)] pt-4 mt-4">
-        <h3 className="text-[14px] font-semibold text-[var(--color-error)]">Danger Zone</h3>
+        <h3 className="text-h4 text-[var(--color-error)]">Danger Zone</h3>
 
         {deletionPending ? (
           <div className="mt-3 rounded-[8px] border border-[var(--color-warning-bg)] bg-[var(--color-warning-bg)] p-4">
@@ -219,7 +219,7 @@ function NotificationPreferencesSection() {
   return (
     <GlassCard className="p-6 space-y-4">
       <div>
-        <h2 className="text-[16px] font-semibold font-display">Notification Preferences</h2>
+        <h2 className="text-h4">Notification Preferences</h2>
         <p className="text-[14px] text-[var(--color-muted)] mt-1">In-app notifications are always on. High-priority items always push.</p>
       </div>
 
@@ -303,7 +303,7 @@ function PrivacySection() {
   if (effectiveSettings.length === 0) {
     return (
       <GlassCard className="p-6 space-y-4">
-        <h2 className="text-[16px] font-semibold font-display">Privacy</h2>
+        <h2 className="text-h4">Privacy</h2>
         <p className="text-[14px] text-[var(--color-muted)]">
           Join an organization to configure privacy settings.
         </p>
@@ -314,7 +314,7 @@ function PrivacySection() {
   return (
     <GlassCard className="p-6 space-y-4">
       <div>
-        <h2 className="text-[16px] font-semibold font-display">Privacy</h2>
+        <h2 className="text-h4">Privacy</h2>
         <p className="text-[14px] text-[var(--color-muted)] mt-1">
           Control your profile visibility in the member directory.
           Officers always see your name and license number.
@@ -359,7 +359,7 @@ function AccountSection() {
   return (
     <GlassCard className="p-6 space-y-4">
       <div>
-        <h2 className="text-[16px] font-semibold font-display">Security</h2>
+        <h2 className="text-h4">Security</h2>
         <p className="text-[14px] text-[var(--color-muted)] mt-1">
           Manage your password, email, and security settings.
         </p>

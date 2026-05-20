@@ -106,7 +106,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
           </div>
         </div>
 
-        <h3 className="text-h4 font-semibold">{event.title}</h3>
+        <h3 className="text-h4">{event.title}</h3>
 
         <div className="space-y-1.5 text-[13px] text-[var(--color-muted)]">
           <div className="flex items-center gap-2">

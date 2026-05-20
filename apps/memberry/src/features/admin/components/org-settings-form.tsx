@@ -131,7 +131,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
     <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-[16px] font-semibold font-display">Organization Profile</h2>
+        <h2 className="text-h4">Organization Profile</h2>
         {!isEditing ? (
           <Button size="sm" variant="outline" onClick={handleEdit}>
             <Pencil size={14} className="mr-1.5" />

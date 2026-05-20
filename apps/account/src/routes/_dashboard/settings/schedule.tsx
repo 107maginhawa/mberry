@@ -44,7 +44,7 @@ function SchedulePage() {
   return (
     <div className="flex flex-col gap-6 p-6 max-w-3xl">
       <div>
-        <h1 className="text-3xl font-bold">Schedule</h1>
+        <h1 className="text-h1">Schedule</h1>
         <p className="text-muted-foreground">
           Publish your weekly availability so other accounts can book sessions with you.
         </p>

@@ -47,7 +47,7 @@ function RouteComponent() {
             <div className="flex justify-center mb-3">
               <Logo variant="horizontal" size="xl" />
             </div>
-            <h1 className="text-2xl font-headline font-bold text-foreground">{headerContent.title}</h1>
+            <h1 className="text-h2 text-foreground">{headerContent.title}</h1>
             <p className="subtitle text-muted-foreground mt-2">{headerContent.subtitle}</p>
           </div>
         )}

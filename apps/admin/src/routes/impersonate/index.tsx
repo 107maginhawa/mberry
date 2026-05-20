@@ -95,7 +95,7 @@ function ImpersonatePage() {
       <div className="flex items-center gap-3 mb-8">
         <UserCog className="w-6 h-6 text-muted-foreground" />
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">
+          <h1 className="text-h1 text-foreground">
             Impersonate User
           </h1>
           <p className="text-sm text-muted-foreground mt-1">

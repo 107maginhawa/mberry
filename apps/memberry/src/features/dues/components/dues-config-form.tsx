@@ -129,7 +129,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
       )}
 
       <section className="space-y-4">
-        <h3 className="text-lg font-semibold">Default Dues</h3>
+        <h3 className="text-h3">Default Dues</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Default Amount</Label>
@@ -185,7 +185,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
       </section>
 
       <section className="space-y-4">
-        <h3 className="text-lg font-semibold">Reminder Schedule</h3>
+        <h3 className="text-h3">Reminder Schedule</h3>
         <div className="space-y-2">
           {reminders.map((r, i) => (
             <div key={i} className="flex items-center gap-3 text-sm">

@@ -118,7 +118,7 @@ function ConfirmPage() {
   return (
     <div className="flex flex-col gap-6 p-6 max-w-2xl">
       <div>
-        <h1 className="text-3xl font-bold">Confirm booking</h1>
+        <h1 className="text-h1">Confirm booking</h1>
         <p className="text-muted-foreground">{event.title}</p>
       </div>
 

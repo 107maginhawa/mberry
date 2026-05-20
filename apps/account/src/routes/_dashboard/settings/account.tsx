@@ -135,7 +135,7 @@ function AccountSettingsPage() {
   return (
     <div className="flex flex-col gap-6 p-6 max-w-4xl">
       <div>
-        <h1 className="text-3xl font-bold">Account Settings</h1>
+        <h1 className="text-h1">Account Settings</h1>
         <p className="text-muted-foreground">
           Manage your personal information and preferences
         </p>

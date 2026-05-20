@@ -24,7 +24,7 @@ function RootErrorComponent({ error }: { error: Error }) {
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
       <div className="rounded-lg border bg-card p-8 max-w-md w-full text-center">
         <Shield className="w-10 h-10 text-red-500 mx-auto mb-4" />
-        <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
+        <h1 className="text-h1 mb-2">Something went wrong</h1>
         <p className="text-sm text-muted-foreground mb-6">{error?.message ?? 'An unexpected error occurred.'}</p>
         <button
           onClick={() => window.location.reload()}

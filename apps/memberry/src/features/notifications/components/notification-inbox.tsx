@@ -172,7 +172,7 @@ export function NotificationInbox() {
         <div className="space-y-6">
           {grouped.map(({ label, items }) => (
             <div key={label}>
-              <h3 className="text-[12px] font-bold font-display uppercase tracking-wide text-[var(--color-muted)] mb-2 px-1">
+              <h3 className="text-section-label text-[var(--color-muted)] mb-2 px-1">
                 {label}
               </h3>
               <GlassCard className="divide-y divide-[var(--color-border-light)] overflow-hidden">
