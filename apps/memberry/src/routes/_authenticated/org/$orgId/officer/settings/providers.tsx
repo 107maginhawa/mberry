@@ -2,6 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@/lib/zod-resolver'
+import { z } from 'zod'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
@@ -41,29 +44,22 @@ interface Provider {
   updatedAt: string
 }
 
-interface ProviderFormState {
-  name: string
-  accreditationNumber: string
-  status: string
-  expiryDate: string
-}
+const providerSchema = z.object({
+  name: z.string().min(1, 'Provider name is required'),
+  accreditationNumber: z.string().min(1, 'Accreditation number is required'),
+  status: z.enum(['active', 'suspended', 'expired']).default('active'),
+  expiryDate: z.string().optional(),
+})
 
-const EMPTY_FORM: ProviderFormState = {
-  name: '',
-  accreditationNumber: '',
-  status: 'active',
-  expiryDate: '',
-}
+type ProviderFormData = z.infer<typeof providerSchema>
 
 function ProvidersPage() {
   const { orgId } = Route.useParams()
   const queryClient = useQueryClient()
 
-  // Dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null)
   const [deletingProvider, setDeletingProvider] = useState<Provider | null>(null)
-  const [form, setForm] = useState<ProviderFormState>(EMPTY_FORM)
 
   const { data, isLoading } = useQuery<{ data: Provider[]; total: number }>({
     queryKey: ['accredited-providers', orgId],
@@ -73,25 +69,29 @@ function ProvidersPage() {
   const providers = data?.data ?? []
 
   const createMutation = useMutation({
-    mutationFn: (body: Omit<ProviderFormState, 'expiryDate'> & { expiryDate?: string }) =>
-      api.post(`/api/accredited-providers/${orgId}`, body),
+    mutationFn: (body: ProviderFormData) =>
+      api.post(`/api/accredited-providers/${orgId}`, {
+        ...body,
+        expiryDate: body.expiryDate || undefined,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accredited-providers', orgId] })
       toast.success('Provider created')
       setShowCreateDialog(false)
-      setForm(EMPTY_FORM)
     },
     onError: () => toast.error('Failed to create provider'),
   })
 
   const editMutation = useMutation({
-    mutationFn: ({ id, body }: { id: string; body: Partial<ProviderFormState> }) =>
-      api.patch(`/api/accredited-providers/${orgId}/${id}`, body),
+    mutationFn: ({ id, body }: { id: string; body: ProviderFormData }) =>
+      api.patch(`/api/accredited-providers/${orgId}/${id}`, {
+        ...body,
+        expiryDate: body.expiryDate || undefined,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accredited-providers', orgId] })
       toast.success('Provider updated')
       setEditingProvider(null)
-      setForm(EMPTY_FORM)
     },
     onError: () => toast.error('Failed to update provider'),
   })
@@ -105,36 +105,6 @@ function ProvidersPage() {
     },
     onError: () => toast.error('Failed to delete provider'),
   })
-
-  function handleCreateOpen() {
-    setForm(EMPTY_FORM)
-    setShowCreateDialog(true)
-  }
-
-  function handleEditOpen(p: Provider) {
-    setForm({
-      name: p.name,
-      accreditationNumber: p.accreditationNumber,
-      status: p.status,
-      expiryDate: p.expiryDate ? (p.expiryDate.split('T')[0] ?? '') : '',
-    })
-    setEditingProvider(p)
-  }
-
-  function handleFormSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const body = {
-      name: form.name,
-      accreditationNumber: form.accreditationNumber,
-      status: form.status,
-      ...(form.expiryDate ? { expiryDate: form.expiryDate } : {}),
-    }
-    if (editingProvider) {
-      editMutation.mutate({ id: editingProvider.id, body })
-    } else {
-      createMutation.mutate(body)
-    }
-  }
 
   const isSubmitting = createMutation.isPending || editMutation.isPending
 
@@ -165,7 +135,7 @@ function ProvidersPage() {
           { label: 'Providers' },
         ]}
         actions={
-          <Button onClick={handleCreateOpen}>
+          <Button onClick={() => setShowCreateDialog(true)}>
             New Provider
           </Button>
         }
@@ -226,7 +196,7 @@ function ProvidersPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleEditOpen(p)}
+                          onClick={() => setEditingProvider(p)}
                         >
                           Edit
                         </Button>
@@ -255,64 +225,29 @@ function ProvidersPage() {
             <h2 className="text-h3 mb-4">
               {editingProvider ? 'Edit Provider' : 'New Provider'}
             </h2>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label>Name *</Label>
-                <Input
-                  type="text"
-                  required
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Provider name"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Accreditation Number *</Label>
-                <Input
-                  type="text"
-                  required
-                  value={form.accreditationNumber}
-                  onChange={e => setForm(f => ({ ...f, accreditationNumber: e.target.value }))}
-                  placeholder="e.g. PRC-2024-001"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Status</Label>
-                <Select value={form.status} onValueChange={(v) => setForm(f => ({ ...f, status: v }))}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="suspended">Suspended</SelectItem>
-                    <SelectItem value="expired">Expired</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Expiry Date (optional)</Label>
-                <Input
-                  type="date"
-                  value={form.expiryDate}
-                  onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))}
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => { setShowCreateDialog(false); setEditingProvider(null); setForm(EMPTY_FORM) }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Saving...' : (editingProvider ? 'Save Changes' : 'Create Provider')}
-                </Button>
-              </div>
-            </form>
+            <ProviderForm
+              key={editingProvider?.id ?? 'new'}
+              defaultValues={
+                editingProvider
+                  ? {
+                      name: editingProvider.name,
+                      accreditationNumber: editingProvider.accreditationNumber,
+                      status: editingProvider.status,
+                      expiryDate: editingProvider.expiryDate ? (editingProvider.expiryDate.split('T')[0] ?? '') : '',
+                    }
+                  : { name: '', accreditationNumber: '', status: 'active', expiryDate: '' }
+              }
+              isSubmitting={isSubmitting}
+              onSubmit={(data) => {
+                if (editingProvider) {
+                  editMutation.mutate({ id: editingProvider.id, body: data })
+                } else {
+                  createMutation.mutate(data)
+                }
+              }}
+              onCancel={() => { setShowCreateDialog(false); setEditingProvider(null) }}
+              submitLabel={editingProvider ? 'Save Changes' : 'Create Provider'}
+            />
           </div>
         </div>
       )}
@@ -344,5 +279,106 @@ function ProvidersPage() {
         </div>
       )}
     </div>
+  )
+}
+
+function ProviderForm({
+  defaultValues,
+  isSubmitting,
+  onSubmit,
+  onCancel,
+  submitLabel,
+}: {
+  defaultValues: ProviderFormData
+  isSubmitting: boolean
+  onSubmit: (data: ProviderFormData) => void
+  onCancel: () => void
+  submitLabel: string
+}) {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<ProviderFormData>({
+    resolver: zodResolver(providerSchema),
+    defaultValues,
+  })
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="name">Name *</Label>
+        <Input
+          id="name"
+          type="text"
+          placeholder="Provider name"
+          aria-describedby={errors.name ? 'name-error' : undefined}
+          {...register('name')}
+        />
+        {errors.name && (
+          <p id="name-error" role="alert" className="text-xs text-[var(--color-error)]">
+            {errors.name.message}
+          </p>
+        )}
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="accreditationNumber">Accreditation Number *</Label>
+        <Input
+          id="accreditationNumber"
+          type="text"
+          placeholder="e.g. PRC-2024-001"
+          aria-describedby={errors.accreditationNumber ? 'accreditationNumber-error' : undefined}
+          {...register('accreditationNumber')}
+        />
+        {errors.accreditationNumber && (
+          <p id="accreditationNumber-error" role="alert" className="text-xs text-[var(--color-error)]">
+            {errors.accreditationNumber.message}
+          </p>
+        )}
+      </div>
+      <div className="space-y-1.5">
+        <Label>Status</Label>
+        <Controller
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="expired">Expired</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="expiryDate">Expiry Date (optional)</Label>
+        <Input
+          id="expiryDate"
+          type="date"
+          {...register('expiryDate')}
+        />
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Saving...' : submitLabel}
+        </Button>
+      </div>
+    </form>
   )
 }

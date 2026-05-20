@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@/lib/zod-resolver'
+import { z } from 'zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   listDuesFundsOptions,
   listRosterMembersOptions,
   recordDuesPaymentMutation,
 } from '@monobase/sdk-ts/generated/react-query'
+import type { DuesFund } from '@monobase/sdk-ts/generated/types.gen'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
@@ -14,6 +18,17 @@ import { toast } from 'sonner'
 import { parseCentsInput } from '../lib/money'
 import { FundAllocationPreview } from './fund-allocation-preview'
 
+const recordPaymentSchema = z.object({
+  amount: z
+    .number({ error: 'Amount is required' })
+    .positive('Amount must be greater than 0'),
+  paymentDate: z.string().min(1, 'Payment date is required'),
+  paymentMethod: z.string().min(1, 'Payment method is required'),
+  referenceNumber: z.string().optional(),
+})
+
+type RecordPaymentFormData = z.infer<typeof recordPaymentSchema>
+
 interface RecordPaymentFormProps {
   orgId: string
 }
@@ -22,20 +37,35 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   const [personId, setPersonId] = useState('')
   const [memberSearch, setMemberSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [amount, setAmount] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('')
-  const [referenceNumber, setReferenceNumber] = useState('')
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
   const [showConfirm, setShowConfirm] = useState(false)
+  const [pendingData, setPendingData] = useState<RecordPaymentFormData | null>(null)
 
-  const { data: fundsData } = useQuery(listDuesFundsOptions({ query: { organizationId: orgId } }))
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<RecordPaymentFormData>({
+    resolver: zodResolver(recordPaymentSchema),
+    defaultValues: {
+      amount: undefined,
+      paymentDate: new Date().toISOString().split('T')[0],
+      paymentMethod: '',
+      referenceNumber: '',
+    },
+  })
 
-  const funds = (fundsData?.data ?? []).map((f: any) => ({
+  const amountValue = watch('amount')
+  const amountCents = amountValue && !Number.isNaN(amountValue) ? Math.round(amountValue * 100) : 0
+
+  const { data: fundsData } = useQuery(listDuesFundsOptions({ query: { organizationId: orgId }, headers: { 'x-org-id': orgId } }))
+
+  const funds = (fundsData?.data ?? []).map((f: DuesFund) => ({
     fundId: f.name,
-    percentage: parseFloat(f.percentage),
+    percentage: f.percentage,
   }))
-
-  const amountCents = parseCentsInput(amount)
 
   const recordMutation = useMutation({
     ...recordDuesPaymentMutation(),
@@ -44,9 +74,8 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
       toast.success('Payment recorded', { description: 'Receipt sent to member.' })
       setPersonId('')
       setMemberSearch('')
-      setAmount('')
-      setPaymentMethod('')
-      setReferenceNumber('')
+      setPendingData(null)
+      reset()
     },
     onError: () => {
       toast.error('Failed to record payment', { description: 'Please try again.' })
@@ -71,6 +100,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
         limit: 10,
         organizationId: orgId,
       },
+      headers: { 'x-org-id': orgId },
     }),
     enabled: debouncedSearch.length >= 2,
   })
@@ -83,11 +113,22 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
     setDebouncedSearch('')
   }
 
-  const canSubmit = personId && amountCents > 0 && paymentMethod
+  function onSubmit(data: RecordPaymentFormData) {
+    if (!personId) {
+      toast.error('Please select a member')
+      return
+    }
+    setPendingData(data)
+    setShowConfirm(true)
+  }
+
+  const amountCentsDisplay = pendingData
+    ? Math.round(pendingData.amount * 100)
+    : amountCents
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr,300px]">
-      <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setShowConfirm(true) }}>
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="relative">
           <Label>Member</Label>
           <Input
@@ -118,50 +159,75 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
         </div>
 
         <div>
-          <Label>Amount (PHP)</Label>
+          <Label htmlFor="amount">Amount (PHP)</Label>
           <Input
+            id="amount"
             type="number"
             step="0.01"
             min="0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
+            aria-describedby={errors.amount ? 'amount-error' : undefined}
+            {...register('amount', { valueAsNumber: true })}
           />
+          {errors.amount && (
+            <p id="amount-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
+              {errors.amount.message}
+            </p>
+          )}
         </div>
 
         <div>
-          <Label>Date</Label>
+          <Label htmlFor="paymentDate">Date</Label>
           <Input
+            id="paymentDate"
             type="date"
-            value={paymentDate}
-            onChange={(e) => setPaymentDate(e.target.value)}
+            aria-describedby={errors.paymentDate ? 'paymentDate-error' : undefined}
+            {...register('paymentDate')}
           />
+          {errors.paymentDate && (
+            <p id="paymentDate-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
+              {errors.paymentDate.message}
+            </p>
+          )}
         </div>
 
         <div>
           <Label>Payment Method</Label>
-          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-            <SelectTrigger><SelectValue placeholder="Select method" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cash">Cash</SelectItem>
-              <SelectItem value="check">Check</SelectItem>
-              <SelectItem value="bankTransfer">Bank Transfer</SelectItem>
-              <SelectItem value="gcash">GCash</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="paymentMethod"
+            control={control}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger aria-describedby={errors.paymentMethod ? 'paymentMethod-error' : undefined}>
+                  <SelectValue placeholder="Select method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="check">Check</SelectItem>
+                  <SelectItem value="bankTransfer">Bank Transfer</SelectItem>
+                  <SelectItem value="gcash">GCash</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.paymentMethod && (
+            <p id="paymentMethod-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
+              {errors.paymentMethod.message}
+            </p>
+          )}
         </div>
 
         <div>
-          <Label>Reference Number (optional)</Label>
+          <Label htmlFor="referenceNumber">Reference Number (optional)</Label>
           <Input
-            value={referenceNumber}
-            onChange={(e) => setReferenceNumber(e.target.value)}
+            id="referenceNumber"
             placeholder="Check/bank/GCash reference"
+            {...register('referenceNumber')}
           />
         </div>
 
-        <Button type="submit" disabled={!canSubmit}>
+        <Button type="submit" disabled={!personId}>
           Record Payment
         </Button>
       </form>
@@ -180,11 +246,28 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
             <DialogTitle>Record Payment</DialogTitle>
           </DialogHeader>
           <p className="text-sm">
-            Record payment of <span className="font-mono font-medium">₱{(amountCents / 100).toFixed(2)}</span> for this member?
+            Record payment of <span className="font-mono font-medium">₱{(amountCentsDisplay / 100).toFixed(2)}</span> for this member?
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancel</Button>
-            <Button onClick={() => (recordMutation as any).mutate({ body: { organizationId: orgId, personId, amount: amountCents, currency: 'PHP', paymentMethod, paidAt: paymentDate ? new Date(paymentDate).toISOString() : undefined, referenceNumber: referenceNumber || undefined } })} disabled={recordMutation.isPending}>
+            <Button
+              onClick={() => {
+                if (!pendingData) return
+                recordMutation.mutate({
+                  body: {
+                    organizationId: orgId,
+                    personId,
+                    amount: BigInt(Math.round(pendingData.amount * 100)),
+                    currency: 'PHP',
+                    paymentMethod: pendingData.paymentMethod as 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other',
+                    paidAt: pendingData.paymentDate ? new Date(pendingData.paymentDate) : undefined,
+                    referenceNumber: pendingData.referenceNumber || undefined,
+                  },
+                  headers: { 'x-org-id': orgId },
+                })
+              }}
+              disabled={recordMutation.isPending}
+            >
               {recordMutation.isPending ? 'Recording...' : 'Confirm'}
             </Button>
           </DialogFooter>

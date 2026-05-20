@@ -1,3 +1,6 @@
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@/lib/zod-resolver'
+import { z } from 'zod'
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -7,6 +10,20 @@ import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Switch } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
+
+const composeSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be 200 characters or fewer'),
+  content: z.string().min(1, 'Content is required'),
+  audienceType: z.enum(['all', 'by_category']).default('all'),
+  channelPush: z.boolean().default(true),
+  channelEmail: z.boolean().default(false),
+  visibility: z.enum(['internal', 'network']).default('internal'),
+  scheduledAt: z.string().optional(),
+})
+
+type ComposeFormData = z.infer<typeof composeSchema>
+
+type FormAction = 'draft' | 'sent' | 'scheduled'
 
 interface ComposeFormProps {
   orgId: string
@@ -23,26 +40,43 @@ interface ComposeFormProps {
   }
 }
 
-type FormAction = 'draft' | 'sent' | 'scheduled'
-
 export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [serverError, setServerError] = useState<string | null>(null)
 
-  const [title, setTitle] = useState(existingAnnouncement?.title ?? '')
-  const [content, setContent] = useState(existingAnnouncement?.content ?? '')
-  const [audienceType, setAudienceType] = useState(existingAnnouncement?.audienceType ?? 'all')
-  const [channelPush, setChannelPush] = useState(existingAnnouncement?.channelPush ?? true)
-  const [channelEmail, setChannelEmail] = useState(existingAnnouncement?.channelEmail ?? false)
-  const [visibility, setVisibility] = useState(existingAnnouncement?.visibility ?? 'internal')
-  const [scheduledAt, setScheduledAt] = useState(existingAnnouncement?.scheduledAt ?? '')
-  const [error, setError] = useState<string | null>(null)
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<ComposeFormData>({
+    // biome-ignore lint: Zod v4 type incompatibility with @hookform/resolvers 5.2.2
+    resolver: zodResolver(composeSchema),
+    defaultValues: {
+      title: existingAnnouncement?.title ?? '',
+      content: existingAnnouncement?.content ?? '',
+      audienceType: (existingAnnouncement?.audienceType as 'all' | 'by_category') ?? 'all',
+      channelPush: existingAnnouncement?.channelPush ?? true,
+      channelEmail: existingAnnouncement?.channelEmail ?? false,
+      visibility: (existingAnnouncement?.visibility as 'internal' | 'network') ?? 'internal',
+      scheduledAt: existingAnnouncement?.scheduledAt ?? '',
+    },
+  })
+
+  const titleValue = watch('title')
+  const audienceType = watch('audienceType')
+  const channelPush = watch('channelPush')
+  const channelEmail = watch('channelEmail')
+  const visibility = watch('visibility')
+  const scheduledAt = watch('scheduledAt')
 
   const mutation = useMutation({
     mutationFn: async (action: FormAction) => {
-      const body = {
-        title,
-        content,
+      const data = {
+        title: titleValue,
+        content: watch('content'),
         audienceType,
         channelPush,
         channelEmail,
@@ -51,30 +85,30 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         scheduledAt: action === 'scheduled' && scheduledAt ? scheduledAt : undefined,
       }
       if (existingAnnouncement?.id) {
-        return api.patch(`/api/communications/announcements/${existingAnnouncement.id}`, body)
+        return api.patch(`/api/communications/announcements/${existingAnnouncement.id}`, data)
       }
-      return api.post(`/api/communications/announcements/${orgId}`, body)
+      return api.post(`/api/communications/announcements/${orgId}`, data)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })
       navigate({ to: `/org/${orgId}/officer/communications` })
     },
     onError: (err: Error) => {
-      setError(err.message)
+      setServerError(err.message)
     },
   })
 
-  const handleSubmit = (action: FormAction) => {
-    setError(null)
-    if (!title.trim()) { setError('Title is required'); return }
-    if (!content.trim()) { setError('Content is required'); return }
-    mutation.mutate(action)
+  function submitWithAction(action: FormAction) {
+    return handleSubmit(() => {
+      setServerError(null)
+      mutation.mutate(action)
+    })()
   }
 
   return (
     <div className="max-w-2xl space-y-6">
-      {error && (
-        <div className="p-3 rounded-md bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">{error}</div>
+      {serverError && (
+        <div role="alert" aria-live="polite" className="p-3 rounded-md bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">{serverError}</div>
       )}
 
       {/* Title */}
@@ -83,11 +117,17 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         <Input
           id="title"
           placeholder="Announcement title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
+          aria-describedby={errors.title ? 'title-error' : 'title-count'}
+          {...register('title')}
         />
-        <p className="text-xs text-[var(--color-muted)] text-right">{title.length}/200</p>
+        {errors.title ? (
+          <p id="title-error" role="alert" className="text-xs text-[var(--color-error)]">
+            {errors.title.message}
+          </p>
+        ) : (
+          <p id="title-count" className="text-xs text-[var(--color-muted)] text-right">{titleValue.length}/200</p>
+        )}
       </div>
 
       {/* Content */}
@@ -96,11 +136,16 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         <Textarea
           id="content"
           placeholder="Write your announcement here..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
           rows={8}
           className="resize-y"
+          aria-describedby={errors.content ? 'content-error' : undefined}
+          {...register('content')}
         />
+        {errors.content && (
+          <p id="content-error" role="alert" className="text-xs text-[var(--color-error)]">
+            {errors.content.message}
+          </p>
+        )}
       </div>
 
       {/* Audience */}
@@ -112,7 +157,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
               key={type}
               type="button"
               variant={audienceType === type ? 'default' : 'outline'}
-              onClick={() => setAudienceType(type)}
+              onClick={() => setValue('audienceType', type)}
             >
               {type === 'all' ? 'All Members' : 'By Category'}
             </Button>
@@ -129,14 +174,14 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
               <p className="text-sm font-medium">Push Notification</p>
               <p className="text-xs text-[var(--color-muted)]">Send to member devices via OneSignal</p>
             </div>
-            <Switch checked={channelPush} onCheckedChange={setChannelPush} />
+            <Switch checked={channelPush} onCheckedChange={(v) => setValue('channelPush', v)} />
           </div>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">Email</p>
               <p className="text-xs text-[var(--color-muted)]">Send via transactional email</p>
             </div>
-            <Switch checked={channelEmail} onCheckedChange={setChannelEmail} />
+            <Switch checked={channelEmail} onCheckedChange={(v) => setValue('channelEmail', v)} />
           </div>
         </div>
       </div>
@@ -150,7 +195,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
               key={vis}
               type="button"
               variant={visibility === vis ? 'default' : 'outline'}
-              onClick={() => setVisibility(vis)}
+              onClick={() => setValue('visibility', vis)}
             >
               {vis === 'internal' ? 'Internal (Members Only)' : 'Network (Public)'}
             </Button>
@@ -164,8 +209,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         <Input
           id="scheduledAt"
           type="datetime-local"
-          value={scheduledAt}
-          onChange={(e) => setScheduledAt(e.target.value)}
+          {...register('scheduledAt')}
         />
         <p className="text-xs text-[var(--color-muted)]">Leave empty to send immediately or save as draft</p>
       </div>
@@ -174,7 +218,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
       <div className="flex gap-3 pt-2">
         <Button
           type="button"
-          onClick={() => handleSubmit('sent')}
+          onClick={() => submitWithAction('sent')}
           disabled={mutation.isPending}
         >
           {mutation.isPending ? 'Sending...' : 'Send Now'}
@@ -182,7 +226,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         {scheduledAt && (
           <Button
             type="button"
-            onClick={() => handleSubmit('scheduled')}
+            onClick={() => submitWithAction('scheduled')}
             disabled={mutation.isPending}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
@@ -192,7 +236,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         <Button
           type="button"
           variant="outline"
-          onClick={() => handleSubmit('draft')}
+          onClick={() => submitWithAction('draft')}
           disabled={mutation.isPending}
         >
           Save Draft

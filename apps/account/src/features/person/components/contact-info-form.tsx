@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@/lib/zod-resolver'
 import { Mail, Phone } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@monobase/ui'
@@ -49,7 +49,7 @@ export function ContactInfoForm({
   const defaultCountry = useDetectCountry()
 
   const form = useForm<ContactInfo>({
-    resolver: zodResolver(contactInfoSchema as any),
+    resolver: zodResolver(contactInfoSchema),
     defaultValues: {
       email: userEmail || defaultValues?.email || '',
       phone: defaultValues?.phone || '',

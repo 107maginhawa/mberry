@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@/lib/zod-resolver'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { getNames, getCode, getName } from 'country-list'
 import { Button } from '@monobase/ui'
@@ -63,8 +63,7 @@ export function AddressForm({
   }
 
   const form = useForm<OptionalAddress>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver((required ? addressSchema : optionalAddressSchema) as any),
+    resolver: zodResolver(required ? addressSchema : optionalAddressSchema),
     defaultValues: {
       street1: defaultValues?.street1 || '',
       street2: defaultValues?.street2 || '',

@@ -1,9 +1,14 @@
 import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@/lib/zod-resolver'
+import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { submitPaymentProofMutation } from '@monobase/sdk-ts/generated/react-query'
-import { Button } from '@monobase/ui'
-import { Input } from '@monobase/ui'
-import { Label } from '@monobase/ui'
+import {
+  submitPaymentProofMutation,
+  listDuesPaymentsQueryKey,
+  listDuesInvoicesQueryKey,
+} from '@monobase/sdk-ts/generated/react-query'
+import { Button, Input, Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Upload, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
@@ -17,6 +22,13 @@ const PAYMENT_METHODS = [
 ] as const
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'application/pdf']
+
+const proofUploadSchema = z.object({
+  paymentMethod: z.string().min(1, 'Payment method is required'),
+  referenceNumber: z.string().optional(),
+})
+
+type ProofUploadFormData = z.infer<typeof proofUploadSchema>
 
 interface ProofUploadFormProps {
   invoiceId: string
@@ -34,27 +46,31 @@ export function ProofUploadForm({
   onSuccess,
 }: ProofUploadFormProps) {
   const queryClient = useQueryClient()
-  const [paymentMethod, setPaymentMethod] = useState<string>('')
-  const [referenceNumber, setReferenceNumber] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
 
-  const submitMutOpts = submitPaymentProofMutation()
-  const submitMutation = useMutation({
-    ...submitMutOpts,
-    onSuccess: () => {
-      toast.success('Payment submitted', {
-        description: 'Your proof is pending officer confirmation.',
-      })
-      queryClient.invalidateQueries({ queryKey: ['listDuesPayments'] })
-      queryClient.invalidateQueries({ queryKey: ['listDuesInvoices'] })
-      onSuccess?.()
-    },
-    onError: (err: any) => {
-      const msg = err?.body?.error ?? err?.message ?? 'Submission failed'
-      toast.error(msg)
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProofUploadFormData>({
+    resolver: zodResolver(proofUploadSchema),
+    defaultValues: {
+      paymentMethod: '',
+      referenceNumber: '',
     },
   })
+
+  const submitMutation = useMutation(submitPaymentProofMutation())
+  const handleSubmitSuccess = () => {
+    toast.success('Payment submitted', {
+      description: 'Your proof is pending officer confirmation.',
+    })
+    queryClient.invalidateQueries({ queryKey: listDuesPaymentsQueryKey({ headers: { 'x-org-id': orgId } }) })
+    queryClient.invalidateQueries({ queryKey: listDuesInvoicesQueryKey({ headers: { 'x-org-id': orgId } }) })
+    onSuccess?.()
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
@@ -70,9 +86,11 @@ export function ProofUploadForm({
     setFile(f)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!file || !paymentMethod) return
+  async function onSubmit(data: ProofUploadFormData) {
+    if (!file) {
+      toast.error('Please upload a proof of payment file.')
+      return
+    }
 
     try {
       setUploading(true)
@@ -97,17 +115,25 @@ export function ProofUploadForm({
       submitMutation.mutate({
         body: {
           invoiceId,
-          amount: BigInt(invoiceAmount) as any,
+          amount: BigInt(invoiceAmount),
           currency,
-          paymentMethod: paymentMethod as any,
-          referenceNumber: referenceNumber || undefined,
+          paymentMethod: data.paymentMethod as 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other',
+          referenceNumber: data.referenceNumber || undefined,
           proofStorageKey: storageKey,
           proofFileName: file.name,
           proofMimeType: file.type,
         },
+      }, {
+        onSuccess: handleSubmitSuccess,
+        onError: (err: unknown) => {
+          const msg = (err as { body?: { error?: string }; message?: string })?.body?.error
+            ?? (err as { message?: string })?.message
+            ?? 'Submission failed'
+          toast.error(msg)
+        },
       })
-    } catch (err: any) {
-      toast.error(err.message ?? 'Upload failed')
+    } catch (err: unknown) {
+      toast.error((err as { message?: string })?.message ?? 'Upload failed')
     } finally {
       setUploading(false)
     }
@@ -116,29 +142,40 @@ export function ProofUploadForm({
   const busy = uploading || submitMutation.isPending
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label>Payment Method</Label>
-        <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select method" />
-          </SelectTrigger>
-          <SelectContent>
-            {PAYMENT_METHODS.map((m) => (
-              <SelectItem key={m.value} value={m.value}>
-                {m.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Controller
+          name="paymentMethod"
+          control={control}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger aria-describedby={errors.paymentMethod ? 'paymentMethod-error' : undefined}>
+                <SelectValue placeholder="Select method" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAYMENT_METHODS.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.paymentMethod && (
+          <p id="paymentMethod-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
+            {errors.paymentMethod.message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
-        <Label>Reference Number (optional)</Label>
+        <Label htmlFor="referenceNumber">Reference Number (optional)</Label>
         <Input
-          value={referenceNumber}
-          onChange={(e) => setReferenceNumber(e.target.value)}
+          id="referenceNumber"
           placeholder="GCash ref # or bank transfer ref"
+          {...register('referenceNumber')}
         />
       </div>
 
@@ -166,7 +203,7 @@ export function ProofUploadForm({
               <p className="text-xs text-[var(--color-muted)]">JPEG, PNG, or PDF (max 10MB)</p>
             </div>
           )}
-          <input
+          <Input
             id="proof-file-input"
             type="file"
             accept=".jpg,.jpeg,.png,.pdf"
@@ -176,7 +213,7 @@ export function ProofUploadForm({
         </div>
       </div>
 
-      <Button type="submit" disabled={!file || !paymentMethod || busy} className="w-full">
+      <Button type="submit" disabled={!file || busy} className="w-full">
         {busy ? 'Submitting...' : 'Submit Payment Proof'}
       </Button>
     </form>

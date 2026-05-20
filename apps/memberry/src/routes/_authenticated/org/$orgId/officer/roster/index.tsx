@@ -1,5 +1,8 @@
-import { useState } from 'react'
 import { createFileRoute, useSearch } from '@tanstack/react-router'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@/lib/zod-resolver'
+import { z } from 'zod'
+import { useState } from 'react'
 import { MemberTable } from '@/features/membership/components/member-table'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
@@ -58,51 +61,60 @@ function RosterPage() {
   )
 }
 
+const addMemberSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().optional(),
+  email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
+  licenseNumber: z.string().optional(),
+})
+
+type AddMemberFormData = z.infer<typeof addMemberSchema>
+
 function AddMemberDialog({ open, onClose, orgId }: { open: boolean; onClose: () => void; orgId: string }) {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
-  const [licenseNumber, setLicenseNumber] = useState('')
-  const [saving, setSaving] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<AddMemberFormData>({
+    resolver: zodResolver(addMemberSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      licenseNumber: '',
+    },
+  })
 
   const addMemberMutOpts = addRosterMemberMutation()
 
-  async function handleSubmit() {
-    if (!firstName.trim() || !email.trim()) {
-      toast.error('First name and email are required')
-      return
-    }
-    setSaving(true)
+  async function onSubmit(data: AddMemberFormData) {
     try {
       // First create person record via persons API (out of scope for SDK migration)
-      const personData: any = await api.post('/api/persons', {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        contactInfo: { email: email.trim() },
+      const personData = await api.post<{ id?: string; data?: { id?: string } }>('/api/persons', {
+        firstName: data.firstName.trim(),
+        lastName: data.lastName?.trim(),
+        contactInfo: { email: data.email.trim() },
       })
-      const personId: string = personData.id || personData.data?.id
+      const personId: string = personData.id ?? personData.data?.id ?? ''
 
       // Then add membership via SDK hook
-      await (addMemberMutOpts.mutationFn as (...args: any[]) => any)({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (addMemberMutOpts.mutationFn as (args: unknown) => Promise<any>)({
         body: {
           personId,
           tierId: 'default',
-          memberNumber: licenseNumber.trim() || undefined,
+          memberNumber: data.licenseNumber?.trim() || undefined,
         },
       })
 
-      toast.success(`${firstName} ${lastName} added as member`)
-      setFirstName('')
-      setLastName('')
-      setEmail('')
-      setLicenseNumber('')
+      toast.success(`${data.firstName} ${data.lastName ?? ''}`.trim() + ' added as member')
+      reset()
       onClose()
       // Reload page to show new member
       window.location.reload()
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to add member')
-    } finally {
-      setSaving(false)
+    } catch (err: unknown) {
+      toast.error((err as { message?: string })?.message || 'Failed to add member')
     }
   }
 
@@ -112,32 +124,63 @@ function AddMemberDialog({ open, onClose, orgId }: { open: boolean; onClose: () 
         <DialogHeader>
           <DialogTitle>Add New Member</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>First Name *</Label>
-              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Juan" />
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  placeholder="Juan"
+                  aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+                  {...register('firstName')}
+                />
+                {errors.firstName && (
+                  <p id="firstName-error" role="alert" className="text-xs text-[var(--color-error)]">
+                    {errors.firstName.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Cruz"
+                  {...register('lastName')}
+                />
+              </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Last Name</Label>
-              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Cruz" />
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="member@example.com"
+                aria-describedby={errors.email ? 'email-error' : undefined}
+                {...register('email')}
+              />
+              {errors.email && (
+                <p id="email-error" role="alert" className="text-xs text-[var(--color-error)]">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="licenseNumber">License/Member Number</Label>
+              <Input
+                id="licenseNumber"
+                placeholder="PRC-12345"
+                {...register('licenseNumber')}
+              />
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label>Email *</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="member@example.com" />
-          </div>
-          <div className="space-y-1.5">
-            <Label>License/Member Number</Label>
-            <Input value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} placeholder="PRC-12345" />
-          </div>
-        </div>
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={!firstName.trim() || !email.trim() || saving}>
-            {saving ? 'Adding...' : 'Add Member'}
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Adding...' : 'Add Member'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

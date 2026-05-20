@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@/lib/zod-resolver'
+import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
@@ -10,12 +12,32 @@ import {
   updateEventMutation,
   searchEventsQueryKey,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { EventType } from '@monobase/sdk-ts/generated/types.gen'
+
+const eventSchema = z.object({
+  title: z.string().min(1, 'Event title is required'),
+  eventType: z.string().min(1, 'Event type is required'),
+  description: z.string().optional(),
+  startDate: z.string().min(1, 'Start date is required'),
+  endDate: z.string().min(1, 'End date is required'),
+  location: z.string().optional(),
+  registrationFee: z
+    .number()
+    .min(0, 'Registration fee cannot be negative')
+    .default(0),
+  capacity: z.union([z.number().int().positive('Capacity must be a positive integer'), z.nan()]).optional(),
+  visibility: z.string().default('internal'),
+  status: z.string().default('draft'),
+})
+
+type EventFormData = z.infer<typeof eventSchema>
 
 interface EventFormProps {
   orgId: string
   event?: {
     id: string
     title: string
+    eventType?: string | null
     description?: string | null
     startDate: string
     endDate: string
@@ -25,7 +47,7 @@ interface EventFormProps {
     visibility?: string | null
     status: string
   }
-  onSuccess?: (event: any) => void
+  onSuccess?: (event: unknown) => void
   onCancel?: () => void
 }
 
@@ -38,54 +60,61 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
   const queryClient = useQueryClient()
   const isEdit = !!event
 
-  const [form, setForm] = useState({
-    title: event?.title ?? '',
-    eventType: (event as any)?.eventType ?? 'other',
-    description: event?.description ?? '',
-    startDate: toDatetimeLocal(event?.startDate),
-    endDate: toDatetimeLocal(event?.endDate),
-    location: event?.location ?? '',
-    registrationFee: event?.registrationFee ? String(event.registrationFee / 100) : '0',
-    capacity: event?.capacity ? String(event.capacity) : '',
-    visibility: event?.visibility ?? 'internal',
-    status: event?.status ?? 'draft',
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<EventFormData>({
+    resolver: zodResolver(eventSchema),
+    defaultValues: {
+      title: event?.title ?? '',
+      eventType: event?.eventType ?? 'other',
+      description: event?.description ?? '',
+      startDate: toDatetimeLocal(event?.startDate),
+      endDate: toDatetimeLocal(event?.endDate),
+      location: event?.location ?? '',
+      registrationFee: event?.registrationFee ? event.registrationFee / 100 : 0,
+      capacity: event?.capacity ?? undefined,
+      visibility: event?.visibility ?? 'internal',
+      status: event?.status ?? 'draft',
+    },
   })
-
-  const [error, setError] = useState<string | null>(null)
 
   const createMutOpts = createEventMutation()
   const createMut = useMutation({
     mutationFn: createMutOpts.mutationFn,
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
       onSuccess?.(data)
     },
-    onError: (err: Error) => { setError(err.message) },
   })
 
   const updateMutOpts = updateEventMutation()
   const updateMut = useMutation({
     mutationFn: updateMutOpts.mutationFn,
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
       onSuccess?.(data)
     },
-    onError: (err: Error) => { setError(err.message) },
   })
 
   const mutation = isEdit ? updateMut : createMut
+  const serverError = (mutation.error as Error | null)?.message ?? null
 
-  function submitEvent(submitStatus: 'draft' | 'published') {
-    const body: any = {
-      title: form.title,
+  function submitEvent(data: EventFormData, submitStatus: 'draft' | 'published') {
+    const body = {
+      title: data.title,
       organizationId: orgId,
-      eventType: form.eventType as any,
-      description: form.description || undefined,
-      startDate: new Date(form.startDate),
-      endDate: new Date(form.endDate),
-      location: form.location || undefined,
-      registrationFee: Math.round(parseFloat(form.registrationFee || '0') * 100),
-      capacity: form.capacity ? parseInt(form.capacity, 10) : undefined,
+      // Form stores eventType as string; cast to the generated union for the API call
+      eventType: data.eventType as EventType,
+      description: data.description || undefined,
+      startDate: new Date(data.startDate),
+      endDate: new Date(data.endDate),
+      location: data.location || undefined,
+      registrationFee: Math.round((data.registrationFee ?? 0) * 100),
+      capacity: data.capacity && !Number.isNaN(data.capacity) ? data.capacity : undefined,
       creditBearing: false,
     }
     if (isEdit) {
@@ -95,20 +124,13 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
     }
   }
 
-  const set = (field: string, value: any) =>
-    setForm((f) => ({ ...f, [field]: value }))
-
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        setError(null)
-        submitEvent(form.status as 'draft' | 'published')
-      }}
+      onSubmit={handleSubmit((data) => submitEvent(data, data.status as 'draft' | 'published'))}
       className="space-y-6"
     >
-      {error && (
-        <div className="p-3 rounded-md bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">{error}</div>
+      {serverError && (
+        <div role="alert" aria-live="polite" className="p-3 rounded-md bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">{serverError}</div>
       )}
 
       {/* Basic info */}
@@ -122,40 +144,49 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
             <Label htmlFor="title">Event Title</Label>
             <Input
               id="title"
-              value={form.title}
-              onChange={(e) => set('title', e.target.value)}
               placeholder="e.g. Annual General Assembly 2025"
-              required
+              aria-describedby={errors.title ? 'title-error' : undefined}
+              {...register('title')}
             />
+            {errors.title && (
+              <p id="title-error" role="alert" className="text-xs text-[var(--color-error)]">
+                {errors.title.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="eventType">Event Type</Label>
-            <Select value={form.eventType} onValueChange={(v) => set('eventType', v)}>
-              <SelectTrigger id="eventType" className="w-full">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="general_assembly">General Assembly</SelectItem>
-                <SelectItem value="induction_ceremony">Induction</SelectItem>
-                <SelectItem value="fellowship">Fellowship</SelectItem>
-                <SelectItem value="medical_mission">Medical Mission</SelectItem>
-                <SelectItem value="board_meeting">Board Meeting</SelectItem>
-                <SelectItem value="committee_meeting">Committee Meeting</SelectItem>
-                <SelectItem value="fundraiser">Fundraiser</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="eventType"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="eventType" className="w-full">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general_assembly">General Assembly</SelectItem>
+                    <SelectItem value="induction_ceremony">Induction</SelectItem>
+                    <SelectItem value="fellowship">Fellowship</SelectItem>
+                    <SelectItem value="medical_mission">Medical Mission</SelectItem>
+                    <SelectItem value="board_meeting">Board Meeting</SelectItem>
+                    <SelectItem value="committee_meeting">Committee Meeting</SelectItem>
+                    <SelectItem value="fundraiser">Fundraiser</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
 
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              value={form.description}
-              onChange={(e) => set('description', e.target.value)}
               placeholder="Event details, agenda, notes..."
               rows={4}
+              {...register('description')}
             />
           </div>
         </div>
@@ -172,20 +203,28 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
             <Input
               id="startDate"
               type="datetime-local"
-              value={form.startDate}
-              onChange={(e) => set('startDate', e.target.value)}
-              required
+              aria-describedby={errors.startDate ? 'startDate-error' : undefined}
+              {...register('startDate')}
             />
+            {errors.startDate && (
+              <p id="startDate-error" role="alert" className="text-xs text-[var(--color-error)]">
+                {errors.startDate.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="endDate">End</Label>
             <Input
               id="endDate"
               type="datetime-local"
-              value={form.endDate}
-              onChange={(e) => set('endDate', e.target.value)}
-              required
+              aria-describedby={errors.endDate ? 'endDate-error' : undefined}
+              {...register('endDate')}
             />
+            {errors.endDate && (
+              <p id="endDate-error" role="alert" className="text-xs text-[var(--color-error)]">
+                {errors.endDate.message}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -199,9 +238,8 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
           <Label htmlFor="location">Location</Label>
           <Input
             id="location"
-            value={form.location}
-            onChange={(e) => set('location', e.target.value)}
             placeholder="e.g. Manila Hotel Ballroom or https://meet.google.com/..."
+            {...register('location')}
           />
         </div>
       </div>
@@ -220,10 +258,15 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
               type="number"
               min="0"
               step="0.01"
-              value={form.registrationFee}
-              onChange={(e) => set('registrationFee', e.target.value)}
               placeholder="0"
+              aria-describedby={errors.registrationFee ? 'registrationFee-error' : undefined}
+              {...register('registrationFee', { valueAsNumber: true })}
             />
+            {errors.registrationFee && (
+              <p id="registrationFee-error" role="alert" className="text-xs text-[var(--color-error)]">
+                {errors.registrationFee.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="capacity">Capacity (leave blank for unlimited)</Label>
@@ -231,9 +274,8 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
               id="capacity"
               type="number"
               min="1"
-              value={form.capacity}
-              onChange={(e) => set('capacity', e.target.value)}
               placeholder="Unlimited"
+              {...register('capacity', { valueAsNumber: true })}
             />
           </div>
         </div>
@@ -241,15 +283,21 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         {/* Visibility — BR-16 */}
         <div className="space-y-1.5">
           <Label htmlFor="visibility">Visibility</Label>
-          <Select value={form.visibility} onValueChange={(v) => set('visibility', v)}>
-            <SelectTrigger id="visibility" className="w-full">
-              <SelectValue placeholder="Select visibility" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="internal">Internal (this org only)</SelectItem>
-              <SelectItem value="network">Network-Wide (all orgs in association)</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="visibility"
+            control={control}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="visibility" className="w-full">
+                  <SelectValue placeholder="Select visibility" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="internal">Internal (this org only)</SelectItem>
+                  <SelectItem value="network">Network-Wide (all orgs in association)</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       </div>
 
@@ -258,7 +306,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         <Button
           type="submit"
           variant="outline"
-          onClick={() => set('status', 'draft')}
+          onClick={() => setValue('status', 'draft')}
           disabled={mutation.isPending}
         >
           {mutation.isPending ? 'Saving...' : 'Save Draft'}
@@ -266,9 +314,8 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         <Button
           type="button"
           onClick={() => {
-            setError(null)
-            set('status', 'published')
-            submitEvent('published')
+            setValue('status', 'published')
+            handleSubmit((data) => submitEvent(data, 'published'))()
           }}
           disabled={mutation.isPending}
         >

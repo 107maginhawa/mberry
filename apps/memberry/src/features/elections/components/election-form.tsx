@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@/lib/zod-resolver'
+import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
 import { Button, Input } from '@monobase/ui'
@@ -9,6 +12,20 @@ import {
   listElectionsQueryKey,
   getElectionOptions,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import type { ElectionCreateRequest, ElectionType } from '@monobase/sdk-ts/generated/types.gen'
+
+const electionBasicsSchema = z.object({
+  title: z.string().min(1, 'Election title is required'),
+  type: z.enum(['officer', 'bylaw']),
+  votingMode: z.enum(['online', 'in_person', 'hybrid']),
+  passageThreshold: z.string().optional(),
+  nominationsOpenAt: z.string().optional(),
+  nominationsCloseAt: z.string().optional(),
+  votingOpenAt: z.string().optional(),
+  votingCloseAt: z.string().optional(),
+})
+
+type ElectionBasicsFormData = z.infer<typeof electionBasicsSchema>
 
 interface Position {
   id: string
@@ -32,7 +49,7 @@ interface ElectionFormProps {
   orgId: string
   electionId?: string
   initialData?: ElectionInitialData
-  onSuccess?: (election: any) => void
+  onSuccess?: (election: unknown) => void
   onCancel?: () => void
 }
 
@@ -57,26 +74,35 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
   const isEdit = !!electionId && !!initialData
   const queryClient = useQueryClient()
   const [step, setStep] = useState<Step>('basics')
-  const [error, setError] = useState<string | null>(null)
+  const [serverError, setServerError] = useState<string | null>(null)
 
-  const [form, setForm] = useState({
-    title: initialData?.title ?? '',
-    type: initialData?.type ?? ('officer' as 'officer' | 'bylaw'),
-    votingMode: initialData?.votingMode ?? ('online' as 'online' | 'in_person' | 'hybrid'),
-    passageThreshold: initialData?.passageThreshold ?? '',
-    nominationsOpenAt: initialData?.nominationsOpenAt ?? '',
-    nominationsCloseAt: initialData?.nominationsCloseAt ?? '',
-    votingOpenAt: initialData?.votingOpenAt ?? '',
-    votingCloseAt: initialData?.votingCloseAt ?? '',
+  const {
+    register,
+    watch,
+    setValue,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ElectionBasicsFormData>({
+    resolver: zodResolver(electionBasicsSchema),
+    defaultValues: {
+      title: initialData?.title ?? '',
+      type: initialData?.type ?? 'officer',
+      votingMode: initialData?.votingMode ?? 'online',
+      passageThreshold: initialData?.passageThreshold ?? '',
+      nominationsOpenAt: initialData?.nominationsOpenAt ?? '',
+      nominationsCloseAt: initialData?.nominationsCloseAt ?? '',
+      votingOpenAt: initialData?.votingOpenAt ?? '',
+      votingCloseAt: initialData?.votingCloseAt ?? '',
+    },
   })
+
+  const formType = watch('type')
+  const formVotingMode = watch('votingMode')
+  const formTitle = watch('title')
 
   const [positions, setPositions] = useState<Position[]>(
     initialData?.positions?.length ? initialData.positions : [{ id: generateId(), title: '', sortOrder: 0 }],
   )
-
-  function setField<K extends keyof typeof form>(key: K, value: typeof form[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-  }
 
   function addPosition() {
     setPositions((prev) => [
@@ -95,18 +121,18 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
 
   const createMut = useMutation({
     mutationFn: createElectionMutation().mutationFn,
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       queryClient.invalidateQueries({ queryKey: listElectionsQueryKey({ query: { organizationId: orgId } }) })
       onSuccess?.(data)
     },
     onError: (err: Error) => {
-      setError(err.message)
+      setServerError(err.message)
     },
   })
 
   const updateMut = useMutation({
     mutationFn: updateElectionMutation().mutationFn,
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       queryClient.invalidateQueries({ queryKey: listElectionsQueryKey({ query: { organizationId: orgId } }) })
       if (electionId) {
         queryClient.invalidateQueries({ queryKey: getElectionOptions({ path: { electionId } }).queryKey })
@@ -114,7 +140,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
       onSuccess?.(data)
     },
     onError: (err: Error) => {
-      setError(err.message)
+      setServerError(err.message)
     },
   })
 
@@ -123,9 +149,29 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
   const stepIndex = STEPS.findIndex((s) => s.key === step)
 
   function canProceed() {
-    if (step === 'basics') return form.title.trim().length > 0
+    if (step === 'basics') return formTitle.trim().length > 0
     if (step === 'positions') return positions.some((p) => p.title.trim().length > 0)
     return true
+  }
+
+  function submitForm(data: ElectionBasicsFormData) {
+    const body: ElectionCreateRequest = {
+      organizationId: orgId,
+      title: data.title,
+      // Form uses 'bylaw'/'officer'; API uses ElectionType union — map to nearest value
+      electionType: (data.type === 'bylaw' ? 'special' : 'general') as ElectionType,
+      positions: positions.filter((p) => p.title.trim()).map((p) => p.title.trim()),
+      nominationStart: data.nominationsOpenAt ? new Date(data.nominationsOpenAt) : new Date(),
+      nominationEnd: data.nominationsCloseAt ? new Date(data.nominationsCloseAt) : new Date(),
+      votingStart: data.votingOpenAt ? new Date(data.votingOpenAt) : new Date(),
+      votingEnd: data.votingCloseAt ? new Date(data.votingCloseAt) : new Date(),
+      ...(data.type === 'bylaw' && data.passageThreshold ? { quorumRequired: parseInt(data.passageThreshold, 10) } : {}),
+    }
+    if (isEdit) {
+      updateMut.mutate({ path: { electionId: electionId! }, body })
+    } else {
+      createMut.mutate({ body })
+    }
   }
 
   return (
@@ -169,10 +215,15 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
             <Label htmlFor="title">Election Title</Label>
             <Input
               id="title"
-              value={form.title}
-              onChange={(e) => setField('title', e.target.value)}
               placeholder="e.g. 2025 Board of Directors Election"
+              aria-describedby={errors.title ? 'title-error' : undefined}
+              {...register('title')}
             />
+            {errors.title && (
+              <p id="title-error" role="alert" className="text-xs text-[var(--color-error)]">
+                {errors.title.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -182,10 +233,10 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
                 <Button
                   key={t}
                   type="button"
-                  variant={form.type === t ? 'outline' : 'ghost'}
-                  onClick={() => setField('type', t)}
+                  variant={formType === t ? 'outline' : 'ghost'}
+                  onClick={() => setValue('type', t)}
                   className={`h-auto p-3 flex-col items-start text-left ${
-                    form.type === t ? 'border-[var(--color-primary)] bg-primary/5' : ''
+                    formType === t ? 'border-[var(--color-primary)] bg-primary/5' : ''
                   }`}
                 >
                   <p className="font-medium capitalize">{t}</p>
@@ -204,10 +255,10 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
                 <Button
                   key={m}
                   type="button"
-                  variant={form.votingMode === m ? 'outline' : 'ghost'}
-                  onClick={() => setField('votingMode', m)}
+                  variant={formVotingMode === m ? 'outline' : 'ghost'}
+                  onClick={() => setValue('votingMode', m)}
                   className={`p-2.5 text-sm capitalize ${
-                    form.votingMode === m ? 'border-[var(--color-primary)] bg-primary/5 font-medium' : ''
+                    formVotingMode === m ? 'border-[var(--color-primary)] bg-primary/5 font-medium' : ''
                   }`}
                 >
                   {m.replace('_', '-')}
@@ -216,7 +267,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
             </div>
           </div>
 
-          {form.type === 'bylaw' && (
+          {formType === 'bylaw' && (
             <div className="space-y-1.5">
               <Label htmlFor="threshold">Passage Threshold (%)</Label>
               <Input
@@ -224,9 +275,8 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
                 type="number"
                 min="1"
                 max="100"
-                value={form.passageThreshold}
-                onChange={(e) => setField('passageThreshold', e.target.value)}
                 placeholder="e.g. 67"
+                {...register('passageThreshold')}
               />
               <p className="text-xs text-[var(--color-muted)]">Percentage of votes needed to pass (e.g. 67 for two-thirds majority)</p>
             </div>
@@ -240,7 +290,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
           <div>
             <p className="text-sm font-medium">Positions</p>
             <p className="text-xs text-[var(--color-muted)] mt-0.5">
-              {form.type === 'officer' ? 'Add the officer positions to be elected' : 'Add the bylaw items to be voted on'}
+              {formType === 'officer' ? 'Add the officer positions to be elected' : 'Add the bylaw items to be voted on'}
             </p>
           </div>
 
@@ -251,7 +301,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
                 <Input
                   value={pos.title}
                   onChange={(e) => updatePositionTitle(pos.id, e.target.value)}
-                  placeholder={form.type === 'officer' ? `e.g. President` : `e.g. Amendment ${i + 1}`}
+                  placeholder={formType === 'officer' ? `e.g. President` : `e.g. Amendment ${i + 1}`}
                   className="flex-1"
                 />
                 <Button
@@ -292,8 +342,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
               <Input
                 id="nom-open"
                 type="datetime-local"
-                value={form.nominationsOpenAt}
-                onChange={(e) => setField('nominationsOpenAt', e.target.value)}
+                {...register('nominationsOpenAt')}
               />
             </div>
             <div className="space-y-1.5">
@@ -301,8 +350,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
               <Input
                 id="nom-close"
                 type="datetime-local"
-                value={form.nominationsCloseAt}
-                onChange={(e) => setField('nominationsCloseAt', e.target.value)}
+                {...register('nominationsCloseAt')}
               />
             </div>
             <div className="space-y-1.5">
@@ -310,8 +358,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
               <Input
                 id="vote-open"
                 type="datetime-local"
-                value={form.votingOpenAt}
-                onChange={(e) => setField('votingOpenAt', e.target.value)}
+                {...register('votingOpenAt')}
               />
             </div>
             <div className="space-y-1.5">
@@ -319,16 +366,15 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
               <Input
                 id="vote-close"
                 type="datetime-local"
-                value={form.votingCloseAt}
-                onChange={(e) => setField('votingCloseAt', e.target.value)}
+                {...register('votingCloseAt')}
               />
             </div>
           </div>
         </div>
       )}
 
-      {error && (
-        <p className="text-sm text-[var(--color-error)]">{error}</p>
+      {serverError && (
+        <p role="alert" aria-live="polite" className="text-sm text-[var(--color-error)]">{serverError}</p>
       )}
 
       {/* Actions */}
@@ -361,25 +407,8 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
           ) : (
             <Button
               type="button"
-              onClick={() => {
-                const body = {
-                  organizationId: orgId,
-                  title: form.title,
-                  electionType: form.type === 'bylaw' ? 'special' : 'general',
-                  positions: positions.filter((p) => p.title.trim()).map((p) => p.title.trim()),
-                  nominationStart: form.nominationsOpenAt ? new Date(form.nominationsOpenAt) : new Date(),
-                  nominationEnd: form.nominationsCloseAt ? new Date(form.nominationsCloseAt) : new Date(),
-                  votingStart: form.votingOpenAt ? new Date(form.votingOpenAt) : new Date(),
-                  votingEnd: form.votingCloseAt ? new Date(form.votingCloseAt) : new Date(),
-                  ...(form.type === 'bylaw' && form.passageThreshold ? { quorumRequired: parseInt(form.passageThreshold, 10) } : {}),
-                } as any
-                if (isEdit) {
-                  updateMut.mutate({ path: { electionId: electionId! }, body })
-                } else {
-                  createMut.mutate({ body })
-                }
-              }}
-              disabled={mutation.isPending || !form.title.trim()}
+              onClick={() => handleSubmit(submitForm)()}
+              disabled={mutation.isPending || !formTitle.trim()}
             >
               {mutation.isPending ? 'Saving...' : isEdit ? 'Save Changes' : 'Save as Draft'}
             </Button>
