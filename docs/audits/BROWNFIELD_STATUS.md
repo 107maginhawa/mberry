@@ -65,7 +65,7 @@
 
 | ID | Description | Module | Status | Wave |
 |----|-------------|--------|--------|------|
-| V-10 | Grace period 0-90 not validated | membership | OPEN | G1 |
+| V-10 | Grace period 0-90 not validated | membership | RESOLVED | Phase 34 (TypeSpec @maxValue(90)) |
 | V-11 | No payment recording handler (BR-06) | dues | RESOLVED | v1.2.0 Phase 20 |
 | V-12 | Credit cycle start uses activity date | training | OPEN | G2 |
 | V-13 | Credit carry-over 50% cap missing | training | OPEN | G2 |
@@ -75,7 +75,7 @@
 | V-17 | memberNumber vs licenseNumber inconsistency | membership | OPEN | G2 |
 | V-18 | Cross-context import of MembershipRepository | events/training | OPEN | G3 |
 | V-19 | TypeSpec coverage ~60% | cross-cutting | OPEN | G3 |
-| V-20 | No input validation on body.status | membership | OPEN | G1 |
+| V-20 | No input validation on body.status | membership | RESOLVED | Phase 34 (Zod updateMemberSchema) |
 | V-21 | Fund allocation 100% sum not validated | dues | RESOLVED | v1.1.0 Phase 17 |
 
 ### P3 Violations (0/8 — TRACKED)
@@ -97,12 +97,12 @@
 
 | Wave | Phase | Slices | Type(s) | Parallel? | Status | Integration Test? |
 |------|-------|--------|---------|-----------|--------|-------------------|
-| G1 | 34 | S-001, S-002, S-003, S-012 | stabilize | NO (sequential) | Not Started | No |
+| G1 | 34 | S-001, S-002, S-003, S-012 | stabilize | NO (sequential) | Complete | No |
 | G2 | 35 | S-004, S-005, S-006, S-007 | refactor | YES | Not Started | No |
 | G3 | 36 | S-008, S-009, S-010 | refactor | YES | Not Started | S-008 (cross-module) |
 | G4 | 37 | S-011, S-013 | new-feature | YES | Not Started | No |
 
-**Completion:** 0/4 waves complete
+**Completion:** 1/4 waves complete
 
 ---
 
