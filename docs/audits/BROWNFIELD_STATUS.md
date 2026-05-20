@@ -262,6 +262,22 @@ All three core metrics (Health 9.1, Compliance 9.8, Confidence 9.0) meet the >= 
 - L4 Release Gate: 9.2 (lint:shallow gated in CI)
 - Weighted: 0.25(8.9) + 0.30(9.0) + 0.25(9.0) + 0.20(9.2) = **9.015 -> 9.0**
 
+### OLI Pipeline Completion (post-graduation)
+
+| Skill | Status | Key Findings |
+|-------|--------|-------------|
+| `/oli-trace` | ✅ | 28/40 BR complete (70%), 46/72 AC orphaned, 0/114 WF in code |
+| `/oli-spec-consistency` | ✅ (8 FAIL→0) | Module IDs, status enums, roles, event contracts — all fixed |
+| `/oli-domain-model` | ⚠️ Partial | DOMAIN_MODEL.md corrected, DDD enhancement deferred |
+
+### Outstanding Bugs (not blocking graduation)
+
+| ID | File | Issue |
+|----|------|-------|
+| CR-01 | `cancelEventRegistration.ts:77` | Late cancellation notifies canceller not organizer |
+| CR-02 | `record-payment-form.tsx:260` | BigInt crashes JSON.stringify |
+| CR-03 | `notification.repo.ts:446` | Writes to non-existent metadata column |
+
 ---
 
 ## What's Next
