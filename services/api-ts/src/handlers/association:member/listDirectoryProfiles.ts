@@ -18,7 +18,7 @@ export async function listDirectoryProfiles(
 
   const orgId = ctx.get('organizationId');
   const query = ctx.req.valid('query');
-  const { visibility } = query as { visibility?: string };
+  const visibility = (query as Record<string, unknown>)['visibility'] as 'public' | 'memberOnly' | 'hidden' | undefined;
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
 

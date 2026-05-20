@@ -29,7 +29,7 @@ export async function listDuesInvoices(
     {
       organizationId: orgId,
       membershipId: query['membershipId'] as string | undefined,
-      status: query['status'] as string | undefined,
+      status: query['status'] as 'generated' | 'cancelled' | 'sent' | 'paid' | 'overdue' | 'writtenOff' | undefined,
     },
     { pagination: { offset, limit } },
   );

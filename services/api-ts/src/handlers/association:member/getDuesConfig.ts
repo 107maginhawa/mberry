@@ -30,7 +30,7 @@ export async function getDuesConfig(
   if (!config) {
     // Frontend may pass orgId as the param — look up by org
     const duesRepo = new DuesRepository(db);
-    config = (await duesRepo.getConfig(duesConfigId)) as typeof config;
+    config = (await duesRepo.getConfig(duesConfigId)) ?? null;
   }
 
   if (!config) {

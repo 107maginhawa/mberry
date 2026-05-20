@@ -24,10 +24,10 @@ export async function upsertDuesGatewayConfig(
 
   const [result] = await db
     .insert(duesGatewayConfigs)
-    .values({ ...body, organizationId } as Record<string, unknown>)
+    .values({ ...body, organizationId } as typeof duesGatewayConfigs.$inferInsert)
     .onConflictDoUpdate({
       target: [duesGatewayConfigs.organizationId],
-      set: { ...body, updatedAt: new Date() } as Record<string, unknown>,
+      set: { ...body, updatedAt: new Date() } as Partial<typeof duesGatewayConfigs.$inferSelect>,
     })
     .returning();
 
