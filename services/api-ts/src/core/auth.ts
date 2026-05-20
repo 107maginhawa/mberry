@@ -22,6 +22,13 @@ import { eq } from 'drizzle-orm';
 import { createTrustedOriginsList, determineCookieConfig } from '@/utils/cors';
 import { ac } from '@/utils/auth';
 import type { Config } from '@/core/config';
+import {
+  recordFailedAttempt,
+  clearFailedAttempts,
+  isLockedOut,
+  applyLockout,
+  MAX_FAILED_ATTEMPTS,
+} from '@/core/account-lockout';
 
 // Re-export auth instance type for type safety
 // AuthInstance type re-exported for convenience
@@ -220,6 +227,20 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
       session: {
         create: {
           after: async (session: { id: string; userId: string; ipAddress?: string | null; userAgent?: string | null }) => {
+            // AC-M01-005: Clear failed attempts on successful login
+            try {
+              const [userRow] = await database
+                .select({ email: schema.user.email })
+                .from(schema.user)
+                .where(eq(schema.user.id, session.userId))
+                .limit(1);
+              if (userRow?.email) {
+                clearFailedAttempts(userRow.email);
+              }
+            } catch (clearErr) {
+              logger?.warn({ error: clearErr, userId: session.userId }, 'Failed to clear lockout on login');
+            }
+
             try {
               const auditRepo = new AuditRepository(database, logger);
               await auditRepo.logEvent({
@@ -399,6 +420,35 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
           // Generate a proper UUID v4 for Better-Auth IDs
           return randomUUID();
         },
+      },
+    },
+
+    // AC-M01-005: Track failed login attempts for account lockout
+    onAPIError: {
+      onError: async (error: unknown, ctx: any) => {
+        // Only track credential-based sign-in failures
+        try {
+          const req = ctx?.request;
+          if (!req) return;
+          const url = new URL(req.url);
+          const isSignIn = url.pathname.includes('/sign-in') || url.pathname.includes('/login');
+          if (!isSignIn) return;
+
+          // Try to extract email from the request body
+          // Better-Auth passes the parsed body in context
+          const body = ctx?.body;
+          const email = body?.email;
+          if (!email || typeof email !== 'string') return;
+
+          const count = recordFailedAttempt(email);
+          logger?.info({ email, failedAttempts: count }, 'Failed login attempt recorded');
+
+          if (count >= MAX_FAILED_ATTEMPTS) {
+            await applyLockout(database, email, logger);
+          }
+        } catch (hookErr) {
+          logger?.warn({ error: hookErr }, 'AC-M01-005: Error in lockout tracking hook');
+        }
       },
     },
 
