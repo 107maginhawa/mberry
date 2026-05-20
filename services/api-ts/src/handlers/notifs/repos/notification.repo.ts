@@ -438,14 +438,12 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
                 recipients: (result as any).recipients
               }, 'Push notification sent via OneSignal');
 
+              // CR-03 fix: notifications schema has no metadata/deliveredAt columns.
+              // Log the OneSignal ID via the logger; only update columns that exist in the schema.
+              this.logger?.info({ notificationId: notification.id, oneSignalId: result.id }, 'OneSignal ID recorded');
               await this.updateOneById(notification.id, {
                 status: 'delivered',
                 sentAt: new Date(),
-                deliveredAt: new Date(),
-                metadata: {
-                  ...(notification as any).metadata,
-                  oneSignalId: result.id
-                }
               } as any);
             } else {
               this.logger?.warn({

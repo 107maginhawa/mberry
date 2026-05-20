@@ -70,16 +70,23 @@ export async function cancelEventRegistration(
       if (event) {
         const hoursUntilEvent = (event.startDate.getTime() - Date.now()) / (1000 * 60 * 60);
         if (hoursUntilEvent <= 24) {
-          const orgId = ctx.get('organizationId') || existing.organizationId;
-          await notifyLateCancellation(notifService, {
-            organizationId: orgId,
-            cancellerId: user.id,
-            organizerIds: [user.id], // TODO: resolve actual organizer from event.createdBy once schema supports it
-            eventId: existing.eventId,
-            eventName: event.title,
-            cancelledAt: new Date(),
-            eventStartsAt: event.startDate,
-          });
+          // Resolve the event organizer from the event record.
+          // event.createdBy comes from baseEntityFields and is set when the event is created.
+          const organizerIds = event.createdBy ? [event.createdBy] : [];
+          if (organizerIds.length > 0) {
+            const orgId = ctx.get('organizationId') || existing.organizationId;
+            await notifyLateCancellation(notifService, {
+              organizationId: orgId,
+              cancellerId: user.id,
+              organizerIds,
+              eventId: existing.eventId,
+              eventName: event.title,
+              cancelledAt: new Date(),
+              eventStartsAt: event.startDate,
+            });
+          } else {
+            logger?.warn({ eventId: existing.eventId }, 'Skipping late-cancellation notification: event has no createdBy organizer');
+          }
         }
       }
     } catch (err) {

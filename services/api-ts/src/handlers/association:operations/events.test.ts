@@ -216,6 +216,96 @@ describe('Waitlist', () => {
 
 // ─── [BR-27] Waitlist Promotion on Cancellation ────────────
 
+describe('[CR-01] cancelEventRegistration — late-cancellation notification targets organizer', () => {
+  let regMocks: ReturnType<typeof stubRepo>;
+  let eventMocks: ReturnType<typeof stubRepo>;
+
+  const cancellerId = 'canceller-user';
+  const organizerId = 'organizer-user';
+
+  const fakeConfirmedReg = {
+    id: 'reg-cr01',
+    eventId: 'evt-cr01',
+    personId: cancellerId,
+    organizationId: 'org-1',
+    status: 'confirmed',
+    cancelledAt: null,
+  };
+
+  // Event starts in 2 hours — within 24h window
+  const fakeEvent = {
+    id: 'evt-cr01',
+    title: 'CR-01 Test Event',
+    startDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
+    createdBy: organizerId,
+  };
+
+  afterEach(() => {
+    if (regMocks) Object.values(regMocks).forEach((m) => m.mockRestore());
+    if (eventMocks) Object.values(eventMocks).forEach((m) => m.mockRestore());
+  });
+
+  test('notification is sent to event organizer, not the canceller', async () => {
+    const notifiedRecipients: string[] = [];
+    const fakeNotifService = {
+      createNotification: async (req: any) => {
+        notifiedRecipients.push(req.recipient);
+        return { id: 'notif-1' };
+      },
+    };
+
+    regMocks = stubRepo(EventRegistrationRepository, {
+      findOneById: async () => fakeConfirmedReg,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeConfirmedReg, ...data }),
+    });
+    eventMocks = stubRepo(EventRepository, {
+      findOneById: async () => fakeEvent,
+    });
+
+    const { cancelEventRegistration } = await import('./cancelEventRegistration');
+    const ctx = makeCtx({
+      user: { id: cancellerId, role: 'member' },
+      notifs: fakeNotifService,
+      _params: { registrationId: 'reg-cr01' },
+    });
+    const response = await cancelEventRegistration(ctx);
+
+    expect(response.status).toBe(200);
+    // Notification must go to organizer, never to the canceller
+    expect(notifiedRecipients).toContain(organizerId);
+    expect(notifiedRecipients).not.toContain(cancellerId);
+  });
+
+  test('no notification sent when event has no createdBy organizer', async () => {
+    const notifiedRecipients: string[] = [];
+    const fakeNotifService = {
+      createNotification: async (req: any) => {
+        notifiedRecipients.push(req.recipient);
+        return { id: 'notif-1' };
+      },
+    };
+
+    regMocks = stubRepo(EventRegistrationRepository, {
+      findOneById: async () => fakeConfirmedReg,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeConfirmedReg, ...data }),
+    });
+    eventMocks = stubRepo(EventRepository, {
+      findOneById: async () => ({ ...fakeEvent, createdBy: null }),
+    });
+
+    const { cancelEventRegistration } = await import('./cancelEventRegistration');
+    const ctx = makeCtx({
+      user: { id: cancellerId, role: 'member' },
+      notifs: fakeNotifService,
+      _params: { registrationId: 'reg-cr01' },
+    });
+    const response = await cancelEventRegistration(ctx);
+
+    expect(response.status).toBe(200);
+    expect(notifiedRecipients).toHaveLength(0);
+  });
+});
+
 describe('[BR-27] cancelEventRegistration — waitlist promotion', () => {
   let regMocks: ReturnType<typeof stubRepo>;
   let waitlistMocks: ReturnType<typeof stubRepo>;
