@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Input } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { EventCard } from './event-card'
 import { Calendar, Users, Clock } from 'lucide-react'
 import {
@@ -24,7 +25,7 @@ const STATUS_TABS: { key: StatusTab; label: string }[] = [
 ]
 
 const EVENT_TYPES = [
-  { value: '', label: 'All Types' },
+  { value: 'all', label: 'All Types' },
   { value: 'general_assembly', label: 'General Assembly' },
   { value: 'induction_ceremony', label: 'Induction' },
   { value: 'fellowship', label: 'Fellowship' },
@@ -54,7 +55,7 @@ function filterEventsByTab(events: any[], tab: StatusTab): any[] {
 export function EventList({ orgId }: EventListProps) {
   const queryClient = useQueryClient()
   const [tab, setTab] = useState<StatusTab>('upcoming')
-  const [typeFilter, setTypeFilter] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
 
   const tabParams = tabToApiParams(tab)
@@ -63,7 +64,7 @@ export function EventList({ orgId }: EventListProps) {
       query: {
         organizationId: orgId,
         status: tabParams.status as any,
-        eventType: typeFilter as any || undefined,
+        eventType: (typeFilter !== 'all' ? typeFilter : undefined) as any,
         q: search || undefined,
         limit: 50,
       },
@@ -136,15 +137,16 @@ export function EventList({ orgId }: EventListProps) {
           ))}
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="h-9 rounded-md border bg-background px-3 text-sm"
-          >
-            {EVENT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
-            ))}
-          </select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="h-9 w-[160px]">
+              <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent>
+              {EVENT_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Input
             placeholder="Search events..."
             value={search}
@@ -163,7 +165,7 @@ export function EventList({ orgId }: EventListProps) {
         </div>
       ) : events.length === 0 ? (
         <div className="border rounded-lg p-12 text-center text-[var(--color-muted)]">
-          {search || typeFilter
+          {search || typeFilter !== 'all'
             ? 'No events match your filters.'
             : tab === 'drafts'
             ? 'No drafts. Create a new event to get started.'

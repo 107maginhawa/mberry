@@ -97,7 +97,7 @@ export function CreditRing({ earned, required, size = 52 }: CreditRingProps) {
   const progress = required > 0 ? Math.min(earned / required, 1) : (earned > 0 ? 1 : 0)
   const dashOffset = circumference * (1 - progress)
 
-  const color = progress >= 1 ? 'var(--color-success, #10b981)' : progress >= 0.6 ? 'var(--color-primary)' : 'var(--color-error, #ef4444)'
+  const color = progress >= 1 ? 'var(--color-success)' : progress >= 0.6 ? 'var(--color-primary)' : 'var(--color-error)'
 
   return (
     <svg

@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Info, MapPin } from 'lucide-react'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
+import { Textarea } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 
 interface TrainingFormProps {
   orgId: string
@@ -70,9 +75,6 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
     },
   })
 
-  const inputClass =
-    'w-full text-sm border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-ring'
-  const labelClass = 'block text-sm font-medium mb-1'
   const sectionClass = 'border rounded-xl p-5 space-y-4 bg-[var(--color-surface)]'
 
   return (
@@ -82,22 +84,24 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         <h2 className="font-semibold flex items-center gap-2"><Info className="w-4 h-4" /> Basic Info</h2>
 
         <div>
-          <label className={labelClass}>Type</label>
-          <select className={inputClass} {...field('type')}>
-            {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-          </select>
+          <Label>Type</Label>
+          <Select value={form.type} onValueChange={(val) => set('type', val)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <label className={labelClass}>Title <span className="text-[var(--color-error)]">*</span></label>
-          <input type="text" className={inputClass} placeholder="Training title" {...field('title')} />
+          <Label>Title <span className="text-[var(--color-error)]">*</span></Label>
+          <Input type="text" placeholder="Training title" {...field('title')} />
         </div>
 
         <div>
-          <label className={labelClass}>Description</label>
-          <textarea
+          <Label>Description</Label>
+          <Textarea
             rows={4}
-            className={inputClass}
             placeholder="What will participants learn?"
             {...field('description')}
           />
@@ -109,12 +113,12 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         <h2 className="font-semibold">Schedule</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Start Date & Time <span className="text-[var(--color-error)]">*</span></label>
-            <input type="datetime-local" className={inputClass} {...field('startDate')} />
+            <Label>Start Date & Time <span className="text-[var(--color-error)]">*</span></Label>
+            <Input type="datetime-local" {...field('startDate')} />
           </div>
           <div>
-            <label className={labelClass}>End Date & Time</label>
-            <input type="datetime-local" className={inputClass} {...field('endDate')} />
+            <Label>End Date & Time</Label>
+            <Input type="datetime-local" {...field('endDate')} />
           </div>
         </div>
       </div>
@@ -126,8 +130,8 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
           Location
         </h2>
         <div>
-          <label className={labelClass}>Location</label>
-          <input type="text" className={inputClass} placeholder="e.g. Manila Hotel, Ballroom or https://zoom.us/j/..." {...field('location')} />
+          <Label>Location</Label>
+          <Input type="text" placeholder="e.g. Manila Hotel, Ballroom or https://zoom.us/j/..." {...field('location')} />
         </div>
       </div>
 
@@ -136,38 +140,39 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         <h2 className="font-semibold">Credits</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>CPE Credit Amount</label>
-            <input type="number" min="0" step="0.5" className={inputClass} {...field('creditAmount')} />
+            <Label>CPE Credit Amount</Label>
+            <Input type="number" min={0} step={0.5} {...field('creditAmount')} />
           </div>
           <div>
-            <label className={labelClass}>Capacity</label>
-            <input type="number" min="1" className={inputClass} placeholder="Unlimited" {...field('capacity')} />
+            <Label>Capacity</Label>
+            <Input type="number" min={1} placeholder="Unlimited" {...field('capacity')} />
           </div>
         </div>
         <div>
-          <label className={labelClass}>Registration Fee (PHP)</label>
-          <input type="number" min="0" className={inputClass} {...field('registrationFee')} />
+          <Label>Registration Fee (PHP)</Label>
+          <Input type="number" min={0} {...field('registrationFee')} />
         </div>
       </div>
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           type="button"
           disabled={saveMutation.isPending || !form.title || !form.startDate}
           onClick={() => saveMutation.mutate('draft')}
-          className="px-4 py-2 text-sm border rounded-lg hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
         >
           {saveMutation.isPending ? 'Saving…' : 'Save Draft'}
-        </button>
-        <button
+        </Button>
+        <Button
+          size="sm"
           type="button"
           disabled={saveMutation.isPending || !form.title || !form.startDate}
           onClick={() => saveMutation.mutate('published')}
-          className="px-4 py-2 text-sm bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
         >
           {saveMutation.isPending ? 'Publishing…' : 'Publish'}
-        </button>
+        </Button>
         {saveMutation.isError && (
           <span className="text-sm text-[var(--color-error)] self-center">Failed to save. Try again.</span>
         )}

@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { Label } from '@monobase/ui'
+import { Textarea } from '@monobase/ui'
 import { Separator } from '@monobase/ui'
 import { Alert, AlertDescription } from '@monobase/ui'
 import { toast } from 'sonner'
@@ -341,12 +342,12 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           </DialogHeader>
           <div className="space-y-3 py-2">
             <Label htmlFor="suspend-reason">Reason for suspension</Label>
-            <textarea
+            <Textarea
               id="suspend-reason"
-              className="w-full border rounded-md px-3 py-2 text-sm min-h-[80px] resize-none focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="Describe the reason for suspension..."
               value={suspendReason}
               onChange={(e) => setSuspendReason(e.target.value)}
+              className="min-h-[80px] resize-none"
             />
           </div>
           <DialogFooter>

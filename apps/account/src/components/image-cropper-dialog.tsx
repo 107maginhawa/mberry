@@ -4,6 +4,7 @@ import Cropper from 'react-easy-crop'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { Button } from '@monobase/ui'
 import { Slider } from '@monobase/ui'
+import { Label } from '@monobase/ui'
 import { Loader2 } from 'lucide-react'
 
 interface ImageCropperDialogProps {
@@ -159,7 +160,7 @@ export function ImageCropperDialog({
 
           {/* Zoom Slider */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Zoom</label>
+            <Label className="text-sm font-medium">Zoom</Label>
             <Slider
               value={[zoom]}
               min={1}

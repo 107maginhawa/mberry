@@ -2,6 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useState } from 'react'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -160,12 +164,9 @@ function ProvidersPage() {
           { label: 'Providers' },
         ]}
         actions={
-          <button
-            onClick={handleCreateOpen}
-            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--color-primary-dark)] transition-colors"
-          >
+          <Button onClick={handleCreateOpen}>
             New Provider
-          </button>
+          </Button>
         }
       />
 
@@ -222,18 +223,21 @@ function ProvidersPage() {
                       </td>
                       <td className="p-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleEditOpen(p)}
-                            className="px-2 py-1 text-xs text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] rounded transition-colors"
                           >
                             Edit
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setDeletingProvider(p)}
-                            className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors"
+                            className="text-[var(--color-error)] hover:text-[var(--color-error)]"
                           >
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -253,64 +257,61 @@ function ProvidersPage() {
               {editingProvider ? 'Edit Provider' : 'New Provider'}
             </h2>
             <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Name *</label>
-                <input
+              <div className="space-y-1.5">
+                <Label>Name *</Label>
+                <Input
                   type="text"
                   required
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   placeholder="Provider name"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Accreditation Number *</label>
-                <input
+              <div className="space-y-1.5">
+                <Label>Accreditation Number *</Label>
+                <Input
                   type="text"
                   required
                   value={form.accreditationNumber}
                   onChange={e => setForm(f => ({ ...f, accreditationNumber: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   placeholder="e.g. PRC-2024-001"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
-                <select
-                  value={form.status}
-                  onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                >
-                  <option value="active">Active</option>
-                  <option value="suspended">Suspended</option>
-                  <option value="expired">Expired</option>
-                </select>
+              <div className="space-y-1.5">
+                <Label>Status</Label>
+                <Select value={form.status} onValueChange={(v) => setForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Expiry Date (optional)</label>
-                <input
+              <div className="space-y-1.5">
+                <Label>Expiry Date (optional)</Label>
+                <Input
                   type="date"
                   value={form.expiryDate}
                   onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => { setShowCreateDialog(false); setEditingProvider(null); setForm(EMPTY_FORM) }}
-                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-sm bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? 'Saving...' : (editingProvider ? 'Save Changes' : 'Create Provider')}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -326,19 +327,19 @@ function ProvidersPage() {
               Are you sure you want to delete <strong>{deletingProvider.name}</strong>? This cannot be undone.
             </p>
             <div className="flex justify-end gap-2">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setDeletingProvider(null)}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={() => deleteMutation.mutate(deletingProvider.id)}
                 disabled={deleteMutation.isPending}
-                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
               >
                 {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

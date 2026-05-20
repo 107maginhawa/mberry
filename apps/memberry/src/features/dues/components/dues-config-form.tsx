@@ -7,6 +7,7 @@ import {
   updateDuesConfigMutation,
 } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@monobase/ui'
+import { Checkbox } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
@@ -190,8 +191,8 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
             <div key={i} className="flex items-center gap-3 text-sm">
               <Switch checked={r.enabled} onCheckedChange={(checked) => { const updated = [...reminders]; updated[i] = { ...updated[i]!, enabled: checked }; setReminders(updated); handleChange() }} />
               <span className="w-40">{r.daysOffset < 0 ? `${Math.abs(r.daysOffset)} days before` : r.daysOffset === 0 ? 'Day of expiry' : `${r.daysOffset} days after`}</span>
-              <label className="flex items-center gap-1"><input type="checkbox" checked={r.channelPush} onChange={(e) => { const updated = [...reminders]; updated[i] = { ...updated[i]!, channelPush: e.target.checked }; setReminders(updated); handleChange() }} className="rounded" />Push</label>
-              <label className="flex items-center gap-1"><input type="checkbox" checked={r.channelEmail} onChange={(e) => { const updated = [...reminders]; updated[i] = { ...updated[i]!, channelEmail: e.target.checked }; setReminders(updated); handleChange() }} className="rounded" />Email</label>
+              <Label className="flex items-center gap-1"><Checkbox checked={r.channelPush} onCheckedChange={(checked) => { const updated = [...reminders]; updated[i] = { ...updated[i]!, channelPush: checked as boolean }; setReminders(updated); handleChange() }} />Push</Label>
+              <Label className="flex items-center gap-1"><Checkbox checked={r.channelEmail} onCheckedChange={(checked) => { const updated = [...reminders]; updated[i] = { ...updated[i]!, channelEmail: checked as boolean }; setReminders(updated); handleChange() }} />Email</Label>
             </div>
           ))}
         </div>

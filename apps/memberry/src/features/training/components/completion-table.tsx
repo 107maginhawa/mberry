@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { CheckCircle, Users, Award } from 'lucide-react'
+import { Checkbox } from '@monobase/ui'
+import { Button } from '@monobase/ui'
 import {
   listCustomTrainingEnrollmentsOptions,
   listCustomTrainingEnrollmentsQueryKey,
@@ -101,7 +103,8 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
       {selected.size > 0 && (
         <div className="flex items-center gap-3 p-3 bg-primary/5 border border-[var(--color-primary)]/20 rounded-lg">
           <span className="text-sm font-medium">{selected.size} selected</span>
-          <button
+          <Button
+            size="sm"
             onClick={() => {
               const ids = [...selected]
               // Fire one mutation per person (SDK doesn't support bulk)
@@ -110,13 +113,12 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
               )
             }}
             disabled={markAllMutation.isPending}
-            className="px-3 py-1.5 text-sm bg-[var(--color-primary)] text-white rounded-md disabled:opacity-50"
           >
             {markAllMutation.isPending ? 'Marking…' : 'Mark All Complete'}
-          </button>
-          <button onClick={() => setSelected(new Set())} className="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]">
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
             Clear
-          </button>
+          </Button>
         </div>
       )}
 
@@ -126,11 +128,9 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
           <thead className="bg-[var(--color-surface-warm)]">
             <tr>
               <th className="p-3 w-8">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={allSelected}
-                  onChange={toggleAll}
-                  className="rounded"
+                  onCheckedChange={toggleAll}
                   disabled={enrollments.length === 0}
                 />
               </th>
@@ -156,11 +156,9 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
               enrollments.map((e: any) => (
                 <tr key={e.id} className="border-t hover:bg-[var(--color-surface-warm)]">
                   <td className="p-3">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={selected.has(e.personId)}
-                      onChange={() => toggleOne(e.personId)}
-                      className="rounded"
+                      onCheckedChange={() => toggleOne(e.personId)}
                     />
                   </td>
                   <td className="p-3">
@@ -190,16 +188,17 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                   </td>
                   <td className="p-3 text-center">
                     {!e.completedAt && (
-                      <button
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => {
                           setMarking(e.personId)
                           markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: e.personId, creditAmount: Number(creditAmount) } } as any)
                         }}
                         disabled={markMutation.isPending && marking === e.personId}
-                        className="px-2 py-1 text-xs border rounded hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
                       >
                         {markMutation.isPending && marking === e.personId ? 'Marking…' : 'Mark Complete'}
-                      </button>
+                      </Button>
                     )}
                   </td>
                 </tr>

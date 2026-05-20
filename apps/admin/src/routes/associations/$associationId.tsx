@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Building2, ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Label } from '@monobase/ui'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
@@ -148,7 +149,7 @@ function AssociationDetailPage() {
               <div className="bg-card border rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold">Edit Association</h2>
-                  <button onClick={() => setEditing(false)} className="text-muted-foreground hover:text-foreground">
+                  <button onClick={() => setEditing(false)} className="text-muted-foreground hover:text-foreground" aria-label="Close">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -160,7 +161,7 @@ function AssociationDetailPage() {
                   className="space-y-4"
                 >
                   <div>
-                    <label className="block text-sm font-medium mb-1">Name</label>
+                    <Label className="block text-sm font-medium mb-1">Name</Label>
                     <input
                       type="text"
                       value={editName}
@@ -170,7 +171,7 @@ function AssociationDetailPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Country (2-letter code)</label>
+                    <Label className="block text-sm font-medium mb-1">Country (2-letter code)</Label>
                     <input
                       type="text"
                       value={editCountry}
@@ -182,7 +183,7 @@ function AssociationDetailPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Currency (3-letter code)</label>
+                    <Label className="block text-sm font-medium mb-1">Currency (3-letter code)</Label>
                     <input
                       type="text"
                       value={editCurrency}

@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Input } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { BookOpen, Users, Award, Search, SlidersHorizontal } from 'lucide-react'
 import { TrainingCard } from './training-card'
 import {
@@ -15,7 +17,7 @@ const TABS = [
 ]
 
 const TYPE_OPTIONS = [
-  { value: '', label: 'All Types' },
+  { value: 'all', label: 'All Types' },
   { value: 'seminar', label: 'Seminar' },
   { value: 'workshop', label: 'Workshop' },
   { value: 'convention', label: 'Convention' },
@@ -29,7 +31,7 @@ interface TrainingListProps {
 
 export function TrainingList({ orgId }: TrainingListProps) {
   const [activeTab, setActiveTab] = useState('published')
-  const [typeFilter, setTypeFilter] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
   const queryClient = useQueryClient()
 
@@ -41,7 +43,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
       query: {
         organizationId: orgId,
         status: apiStatus as any || undefined,
-        type: typeFilter as any || undefined,
+        type: (typeFilter !== 'all' ? typeFilter : undefined) as any,
         q: search || undefined,
       },
     }),
@@ -137,23 +139,24 @@ export function TrainingList({ orgId }: TrainingListProps) {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
-          <input
+          <Input
             type="text"
             placeholder="Search trainings..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full pl-9 pr-3 py-2 text-sm"
           />
         </div>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="text-sm border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          {TYPE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="text-sm w-[160px]">
+            <SelectValue placeholder="All Types" />
+          </SelectTrigger>
+          <SelectContent>
+            {TYPE_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Grid */}

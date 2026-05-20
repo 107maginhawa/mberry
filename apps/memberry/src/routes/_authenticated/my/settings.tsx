@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { api } from '@/lib/api'
@@ -321,17 +322,18 @@ function PrivacySection() {
       </div>
 
       {effectiveSettings.length > 1 && (
-        <select
-          value={selectedOrgIndex}
-          onChange={(e) => setSelectedOrgIndex(Number(e.target.value))}
-          className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-[14px]"
-        >
-          {effectiveSettings.map((s, i) => (
-            <option key={s.orgId} value={i}>
-              {s.orgName || s.orgId}
-            </option>
-          ))}
-        </select>
+        <Select value={String(selectedOrgIndex)} onValueChange={(v) => setSelectedOrgIndex(Number(v))}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select organization" />
+          </SelectTrigger>
+          <SelectContent>
+            {effectiveSettings.map((s, i) => (
+              <SelectItem key={s.orgId} value={String(i)}>
+                {s.orgName || s.orgId}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
 
       <div className="space-y-3">

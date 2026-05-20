@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
+import { Button } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import {
   createEventMutation,
   updateEventMutation,
@@ -129,21 +131,21 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
 
           <div className="space-y-2">
             <Label htmlFor="eventType">Event Type</Label>
-            <select
-              id="eventType"
-              value={form.eventType}
-              onChange={(e) => set('eventType', e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="general_assembly">General Assembly</option>
-              <option value="induction_ceremony">Induction</option>
-              <option value="fellowship">Fellowship</option>
-              <option value="medical_mission">Medical Mission</option>
-              <option value="board_meeting">Board Meeting</option>
-              <option value="committee_meeting">Committee Meeting</option>
-              <option value="fundraiser">Fundraiser</option>
-              <option value="other">Other</option>
-            </select>
+            <Select value={form.eventType} onValueChange={(v) => set('eventType', v)}>
+              <SelectTrigger id="eventType" className="w-full">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="general_assembly">General Assembly</SelectItem>
+                <SelectItem value="induction_ceremony">Induction</SelectItem>
+                <SelectItem value="fellowship">Fellowship</SelectItem>
+                <SelectItem value="medical_mission">Medical Mission</SelectItem>
+                <SelectItem value="board_meeting">Board Meeting</SelectItem>
+                <SelectItem value="committee_meeting">Committee Meeting</SelectItem>
+                <SelectItem value="fundraiser">Fundraiser</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="sm:col-span-2 space-y-2">
@@ -239,29 +241,29 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         {/* Visibility — BR-16 */}
         <div className="space-y-1.5">
           <Label htmlFor="visibility">Visibility</Label>
-          <select
-            id="visibility"
-            value={form.visibility}
-            onChange={(e) => set('visibility', e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <option value="internal">Internal (this org only)</option>
-            <option value="network">Network-Wide (all orgs in association)</option>
-          </select>
+          <Select value={form.visibility} onValueChange={(v) => set('visibility', v)}>
+            <SelectTrigger id="visibility" className="w-full">
+              <SelectValue placeholder="Select visibility" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="internal">Internal (this org only)</SelectItem>
+              <SelectItem value="network">Network-Wide (all orgs in association)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
-        <button
+        <Button
           type="submit"
+          variant="outline"
           onClick={() => set('status', 'draft')}
           disabled={mutation.isPending}
-          className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
         >
           {mutation.isPending ? 'Saving...' : 'Save Draft'}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => {
             setError(null)
@@ -269,18 +271,17 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
             submitEvent('published')
           }}
           disabled={mutation.isPending}
-          className="px-4 py-2 rounded-md bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
         >
           {mutation.isPending ? 'Publishing...' : 'Publish'}
-        </button>
+        </Button>
         {onCancel && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={onCancel}
-            className="px-4 py-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
           >
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </form>

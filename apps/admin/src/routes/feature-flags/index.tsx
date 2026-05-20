@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ToggleLeft, Plus, Trash2, X } from 'lucide-react'
+import { Label } from '@monobase/ui'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { RequireRole } from '@/lib/role-gate'
@@ -72,13 +73,13 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
       <div className="bg-card border rounded-lg shadow-lg w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Create Feature Flag</h2>
-          <button onClick={onClose} className="p-1 rounded hover:bg-muted">
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted" aria-label="Close">
             <X className="w-4 h-4" />
           </button>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Module</label>
+            <Label className="block text-sm font-medium mb-1">Module</Label>
             <select
               value={moduleName}
               onChange={(e) => setModuleName(e.target.value)}
@@ -90,7 +91,7 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Target Type</label>
+            <Label className="block text-sm font-medium mb-1">Target Type</Label>
             <select
               value={targetType}
               onChange={(e) => setTargetType(e.target.value)}
@@ -103,7 +104,7 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
           </div>
           {targetType !== 'global' && (
             <div>
-              <label className="block text-sm font-medium mb-1">Target ID</label>
+              <Label className="block text-sm font-medium mb-1">Target ID</Label>
               <input
                 type="text"
                 value={targetId}
@@ -114,7 +115,7 @@ function CreateFlagDialog({ open, onClose }: { open: boolean; onClose: () => voi
             </div>
           )}
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Enabled</label>
+            <Label className="text-sm font-medium">Enabled</Label>
             <button
               type="button"
               onClick={() => setEnabled(!enabled)}
@@ -246,6 +247,7 @@ function FeatureFlagsPage() {
                       disabled={deleteFlag.isPending}
                       className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
                       title="Delete flag"
+                      aria-label="Delete flag"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

@@ -3,6 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ShieldCheck, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Label } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
 import {
   listAdminsOptions,
@@ -57,57 +61,52 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
       <div className="bg-card border rounded-lg shadow-lg w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Invite Operator</h2>
-          <button onClick={onClose} className="p-1 rounded hover:bg-muted">
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted" aria-label="Close">
             <X className="w-4 h-4" />
           </button>
         </div>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
-            <input
+          <div className="space-y-1.5">
+            <Label>Name</Label>
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Full name"
-              className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
+          <div className="space-y-1.5">
+            <Label>Email</Label>
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@example.com"
-              className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Role</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="super">Super Admin</option>
-              <option value="support">Support</option>
-              <option value="analyst">Analyst</option>
-            </select>
+          <div className="space-y-1.5">
+            <Label>Role</Label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="super">Super Admin</SelectItem>
+                <SelectItem value="support">Support</SelectItem>
+                <SelectItem value="analyst">Analyst</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-muted transition-colors"
-            >
+            <Button variant="outline" onClick={onClose}>
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => invite.mutate({ body: { email, name, role: role as 'super' | 'support' | 'analyst' } })}
               disabled={!email || !name || invite.isPending}
-              className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               {invite.isPending ? 'Inviting...' : 'Invite'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -227,6 +226,7 @@ function OperatorsPage() {
                         onClick={() => setRevokeTarget(admin.id)}
                         className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
                         title="Revoke access"
+                        aria-label="Revoke access"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

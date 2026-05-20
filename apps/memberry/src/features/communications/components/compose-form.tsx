@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { api } from '@/lib/api'
+import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Switch } from '@monobase/ui'
+import { Textarea } from '@monobase/ui'
 
 interface ComposeFormProps {
   orgId: string
@@ -91,13 +93,13 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
       {/* Content */}
       <div className="space-y-2">
         <Label htmlFor="content">Message</Label>
-        <textarea
+        <Textarea
           id="content"
           placeholder="Write your announcement here..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={8}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-[var(--color-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
+          className="resize-y"
         />
       </div>
 
@@ -106,18 +108,14 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         <Label>Audience</Label>
         <div className="flex gap-3">
           {(['all', 'by_category'] as const).map((type) => (
-            <button
+            <Button
               key={type}
               type="button"
+              variant={audienceType === type ? 'default' : 'outline'}
               onClick={() => setAudienceType(type)}
-              className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors ${
-                audienceType === type
-                  ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                  : 'bg-background hover:bg-[var(--color-surface-warm)]'
-              }`}
             >
               {type === 'all' ? 'All Members' : 'By Category'}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -148,18 +146,14 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         <Label>Visibility</Label>
         <div className="flex gap-3">
           {(['internal', 'network'] as const).map((vis) => (
-            <button
+            <Button
               key={vis}
               type="button"
+              variant={visibility === vis ? 'default' : 'outline'}
               onClick={() => setVisibility(vis)}
-              className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors ${
-                visibility === vis
-                  ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                  : 'bg-background hover:bg-[var(--color-surface-warm)]'
-              }`}
             >
               {vis === 'internal' ? 'Internal (Members Only)' : 'Network (Public)'}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -178,40 +172,39 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">
-        <button
+        <Button
           type="button"
           onClick={() => handleSubmit('sent')}
           disabled={mutation.isPending}
-          className="px-5 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium hover:bg-[var(--color-primary-mid)] disabled:opacity-50"
         >
           {mutation.isPending ? 'Sending...' : 'Send Now'}
-        </button>
+        </Button>
         {scheduledAt && (
-          <button
+          <Button
             type="button"
             onClick={() => handleSubmit('scheduled')}
             disabled={mutation.isPending}
-            className="px-5 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             Schedule
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => handleSubmit('draft')}
           disabled={mutation.isPending}
-          className="px-5 py-2 border rounded-md text-sm font-medium hover:bg-[var(--color-surface-warm)] disabled:opacity-50"
         >
           Save Draft
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
           onClick={() => navigate({ to: `/org/${orgId}/officer/communications` })}
           disabled={mutation.isPending}
-          className="px-5 py-2 text-[var(--color-muted)] text-sm hover:text-[var(--color-text)] disabled:opacity-50"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   )

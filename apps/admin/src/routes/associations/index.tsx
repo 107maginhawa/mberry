@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Building2, Plus, X } from 'lucide-react'
+import { Label } from '@monobase/ui'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import {
@@ -55,7 +56,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
       <div className="bg-card border rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Create Association</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -67,7 +68,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
           className="space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
+            <Label className="block text-sm font-medium mb-1">Name</Label>
             <input
               type="text"
               value={name}
@@ -78,7 +79,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Country (2-letter code)</label>
+            <Label className="block text-sm font-medium mb-1">Country (2-letter code)</Label>
             <input
               type="text"
               value={country}
@@ -91,7 +92,7 @@ function CreateAssociationDialog({ open, onClose }: { open: boolean; onClose: ()
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Currency (3-letter code)</label>
+            <Label className="block text-sm font-medium mb-1">Currency (3-letter code)</Label>
             <input
               type="text"
               value={currency}

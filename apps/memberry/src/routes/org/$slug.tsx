@@ -2,6 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { Button } from '@monobase/ui'
+import { Label } from '@monobase/ui'
+import { Textarea } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { api, ApiError } from '@/lib/api'
 
 export const Route = createFileRoute('/org/$slug')({
@@ -112,7 +116,7 @@ function PublicOrgProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin h-8 w-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full" />
       </div>
     )
@@ -120,8 +124,8 @@ function PublicOrgProfile() {
 
   if (error || !org) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full border rounded-lg p-8 bg-white text-center space-y-4">
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="max-w-md w-full border rounded-lg p-8 bg-card text-center space-y-4">
           <h1 className="text-xl font-bold">Organization Not Found</h1>
           <p className="text-[var(--color-muted)]">The organization you're looking for doesn't exist or is no longer active.</p>
         </div>
@@ -130,10 +134,10 @@ function PublicOrgProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-2xl mx-auto space-y-6 mt-8">
-        <div className="border rounded-lg bg-white overflow-hidden">
-          <div className="bg-[#554B68] p-8 text-white">
+        <div className="border rounded-lg bg-card overflow-hidden">
+          <div className="bg-primary p-8 text-primary-foreground">
             <h1 className="text-[26px] font-bold font-display">{org.name}</h1>
             {org.associationName && (
               <p className="text-sm opacity-80 mt-1">{org.associationName}</p>
@@ -177,12 +181,9 @@ function PublicOrgProfile() {
         </div>
 
         <div className="text-center">
-          <button
-            onClick={handleApplyClick}
-            className="inline-flex items-center justify-center rounded-md bg-[#554B68] px-6 py-3 text-sm font-medium text-white hover:bg-[#443b55] transition-colors"
-          >
+          <Button onClick={handleApplyClick} size="lg">
             Apply to Join
-          </button>
+          </Button>
         </div>
 
         <div className="text-center text-xs text-[var(--color-muted)]">
@@ -194,7 +195,7 @@ function PublicOrgProfile() {
       {applyOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/50" onClick={() => { if (!submitting) setApplyOpen(false) }} />
-          <div className="relative bg-white rounded-lg border p-6 max-w-md w-full mx-4 shadow-lg">
+          <div className="relative bg-card rounded-lg border p-6 max-w-md w-full mx-4 shadow-lg">
             <h3 className="text-lg font-bold mb-1">Apply to Join {org.name}</h3>
             <p className="text-sm text-[var(--color-muted)] mb-4">
               Your application will be reviewed by the organization's officers.
@@ -203,32 +204,30 @@ function PublicOrgProfile() {
             <form onSubmit={handleSubmitApplication} className="space-y-4">
               {tiersLoading ? (
                 <div className="flex items-center gap-2 text-sm text-[var(--color-muted)] py-2">
-                  <div className="animate-spin h-4 w-4 border-2 border-[#554B68] border-t-transparent rounded-full" />
+                  <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
                   Loading membership tiers…
                 </div>
               ) : tiers.length > 1 ? (
-                <div>
-                  <label className="text-sm font-medium block mb-1.5" htmlFor="tier-select">
-                    Membership Tier <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="tier-select"
-                    value={selectedTierId}
-                    onChange={e => setSelectedTierId(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#554B68] focus:border-transparent"
-                  >
-                    <option value="">Select a tier…</option>
-                    {tiers.map((t: any) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}{t.annualFee != null ? ` — ₱${Number(t.annualFee)}/yr` : ''}
-                      </option>
-                    ))}
-                  </select>
+                <div className="space-y-1.5">
+                  <Label htmlFor="tier-select">
+                    Membership Tier <span className="text-[var(--color-error)]">*</span>
+                  </Label>
+                  <Select value={selectedTierId} onValueChange={setSelectedTierId}>
+                    <SelectTrigger id="tier-select" className="w-full">
+                      <SelectValue placeholder="Select a tier..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tiers.map((t: any) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.name}{t.annualFee != null ? ` — ₱${Number(t.annualFee)}/yr` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               ) : tiers.length === 1 ? (
-                <div className="text-sm text-[var(--color-muted)]">
-                  Tier: <span className="font-medium text-gray-900">{tiers[0].name}</span>
+                <div className="text-sm text-muted-foreground">
+                  Tier: <span className="font-medium text-foreground">{tiers[0].name}</span>
                   {tiers[0].annualFee != null && (
                     <span className="ml-1">— ₱{Number(tiers[0].annualFee)}/yr</span>
                   )}
@@ -239,37 +238,36 @@ function PublicOrgProfile() {
                 </div>
               )}
 
-              <div>
-                <label className="text-sm font-medium block mb-1.5" htmlFor="apply-message">
+              <div className="space-y-1.5">
+                <Label htmlFor="apply-message">
                   Message <span className="text-[var(--color-muted)] font-normal">(optional)</span>
-                </label>
-                <textarea
+                </Label>
+                <Textarea
                   id="apply-message"
                   value={message}
                   onChange={e => setMessage(e.target.value)}
-                  placeholder="Introduce yourself or share why you'd like to join…"
+                  placeholder="Introduce yourself or share why you'd like to join..."
                   rows={3}
                   maxLength={500}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#554B68] focus:border-transparent resize-none"
+                  className="resize-none"
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-1">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setApplyOpen(false)}
                   disabled={submitting}
-                  className="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={submitting || tiersLoading || (tiers.length > 0 && !selectedTierId)}
-                  className="px-4 py-2 rounded-md bg-[#554B68] text-white text-sm font-medium hover:bg-[#443b55] transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting…' : 'Submit Application'}
-                </button>
+                  {submitting ? 'Submitting...' : 'Submit Application'}
+                </Button>
               </div>
             </form>
           </div>

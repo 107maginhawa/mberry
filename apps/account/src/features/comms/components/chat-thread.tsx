@@ -110,7 +110,7 @@ export function ChatThread({ roomId, myPersonId }: ChatThreadProps) {
             onChange={(e) => setDraft(e.target.value)}
             disabled={send.isPending}
           />
-          <Button type="submit" size="icon" disabled={!draft.trim() || send.isPending}>
+          <Button type="submit" size="icon" disabled={!draft.trim() || send.isPending} aria-label="Send message">
             <Send className="h-4 w-4" />
           </Button>
         </form>

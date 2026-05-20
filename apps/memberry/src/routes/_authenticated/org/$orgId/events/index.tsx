@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Input } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Calendar, Search } from 'lucide-react'
 import { EventCard } from '@/features/events/components/event-card'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -17,7 +18,7 @@ export const Route = createFileRoute('/_authenticated/org/$orgId/events/')({
 })
 
 const EVENT_TYPES = [
-  { value: '', label: 'All Types' },
+  { value: 'all', label: 'All Types' },
   { value: 'general_assembly', label: 'General Assembly' },
   { value: 'induction_ceremony', label: 'Induction' },
   { value: 'fellowship', label: 'Fellowship' },
@@ -30,7 +31,7 @@ const EVENT_TYPES = [
 
 function OrgEvents() {
   const { orgId } = Route.useParams()
-  const [typeFilter, setTypeFilter] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
 
   const { data, isLoading } = useQuery(
@@ -38,7 +39,7 @@ function OrgEvents() {
       query: {
         organizationId: orgId,
         status: 'published' as any,
-        eventType: typeFilter as any || undefined,
+        eventType: (typeFilter !== 'all' ? typeFilter : undefined) as any,
         q: search || undefined,
         limit: 50,
       },
@@ -59,15 +60,16 @@ function OrgEvents() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="h-9 rounded-[8px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] px-3 text-body-sm"
-        >
-          {EVENT_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>{t.label}</option>
-          ))}
-        </select>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="h-9 w-[160px]">
+            <SelectValue placeholder="All Types" />
+          </SelectTrigger>
+          <SelectContent>
+            {EVENT_TYPES.map((t) => (
+              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="relative w-full sm:w-56">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--color-muted)]" />
           <Input
@@ -95,8 +97,8 @@ function OrgEvents() {
         <GlassCard className="p-6">
           <EmptyState
             icon={<Calendar className="w-8 h-8" />}
-            headline={search || typeFilter ? 'No events match your filters' : 'No upcoming events'}
-            description={search || typeFilter ? 'Try adjusting your search or filters.' : 'Check back soon for new events!'}
+            headline={search || typeFilter !== 'all' ? 'No events match your filters' : 'No upcoming events'}
+            description={search || typeFilter !== 'all' ? 'Try adjusting your search or filters.' : 'Check back soon for new events!'}
           />
         </GlassCard>
       ) : (
