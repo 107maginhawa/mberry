@@ -5,6 +5,7 @@
 import { eq, and, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
+import { NotFoundError } from '@/core/errors';
 import {
   trainings,
   trainingEnrollments,
@@ -58,7 +59,7 @@ export class TrainingRepository extends DatabaseRepository<Training, NewTraining
       .where(eq(trainings.id, id))
       .returning();
 
-    if (!updated) throw new Error(`Training ${id} not found`);
+    if (!updated) throw new NotFoundError(`Training ${id} not found`, { resourceType: 'Training', resource: id });
     return updated as Training;
   }
 }

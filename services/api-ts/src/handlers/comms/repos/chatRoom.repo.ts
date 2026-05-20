@@ -6,6 +6,7 @@
 import { eq, and, or, ne, desc, sql, isNull, isNotNull, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
+import { NotFoundError } from '@/core/errors';
 import { 
   chatRooms,
   chatMessages,
@@ -224,7 +225,7 @@ export class ChatRoomRepository extends DatabaseRepository<ChatRoom, NewChatRoom
     // Get current message count and increment
     const currentRoom = await this.findOneById(roomId);
     if (!currentRoom) {
-      throw new Error(`Chat room ${roomId} not found`);
+      throw new NotFoundError(`Chat room ${roomId} not found`, { resourceType: 'ChatRoom', resource: roomId });
     }
     
     const updatedRoom = await this.updateOneById(roomId, {

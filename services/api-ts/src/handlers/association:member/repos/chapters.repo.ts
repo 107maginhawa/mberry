@@ -6,6 +6,7 @@
 import { eq, and, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
+import { NotFoundError } from '@/core/errors';
 import {
   chapterAffiliations,
   affiliationTransfers,
@@ -76,7 +77,7 @@ export class ChapterAffiliationRepository extends DatabaseRepository<
     // Fetch the target affiliation to get personId
     const target = await this.findOneById(affiliationId);
     if (!target) {
-      throw new Error(`Chapter affiliation with id ${affiliationId} not found`);
+      throw new NotFoundError(`Chapter affiliation with id ${affiliationId} not found`, { resourceType: 'ChapterAffiliation', resource: affiliationId });
     }
 
     // Clear isPrimary on all affiliations for this person in this tenant

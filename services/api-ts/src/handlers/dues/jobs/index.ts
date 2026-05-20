@@ -4,6 +4,7 @@
  */
 
 import type { JobScheduler, JobContext } from '@/core/jobs';
+import { DeferredScopeError } from '@/core/errors';
 import { processDuesReminders } from './reminderProcessor';
 import { processWebhookRetry } from './webhookRetryProcessor';
 
@@ -27,7 +28,7 @@ export function registerDuesJobs(scheduler: JobScheduler): void {
         // TODO: Wire to actual payment gateway processor
         // For now, this is the integration point where the gateway
         // settlement handler will be called.
-        throw new Error('Payment processor not yet wired');
+        throw new DeferredScopeError('Payment processor');
       },
     });
   });

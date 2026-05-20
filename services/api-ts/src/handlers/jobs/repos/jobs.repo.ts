@@ -1,5 +1,6 @@
 import { eq, and, desc, gte, lte, like, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { NotFoundError, ValidationError } from '@/core/errors';
 import {
   jobPostings,
   jobApplications,
@@ -107,8 +108,8 @@ export class JobPostingRepository {
 
   async extendPosting(id: string, days: number = DEFAULT_EXPIRY_DAYS): Promise<JobPosting> {
     const posting = await this.get(id);
-    if (!posting) throw new Error('Posting not found');
-    if (!posting.expiresAt) throw new Error('Posting has no expiry date');
+    if (!posting) throw new NotFoundError('Posting not found', { resourceType: 'JobPosting', resource: id });
+    if (!posting.expiresAt) throw new ValidationError('Posting has no expiry date');
 
     // BR-37: Extension resets from CURRENT expiry date, not from today
     const newExpiry = new Date(posting.expiresAt);

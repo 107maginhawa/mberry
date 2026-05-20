@@ -7,7 +7,7 @@
 import { eq, and, or, lte, gte, isNull, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
-import { ConflictError } from '@/core/errors';
+import { ConflictError, ValidationError, NotFoundError } from '@/core/errors';
 import type {
   DayOfWeek
 } from './booking.schema';
@@ -138,7 +138,7 @@ export interface BookingEventFilters {
     this.logger?.debug({ ownerId, request }, 'Creating booking event with smart defaults');
 
     if (!request.dailyConfigs) {
-      throw new Error('dailyConfigs is required for booking event creation');
+      throw new ValidationError('dailyConfigs is required for booking event creation');
     }
 
     const eventData: NewBookingEvent = {
@@ -190,7 +190,7 @@ export interface BookingEventFilters {
 
     const currentEvent = await this.findOneById(eventId);
     if (!currentEvent) {
-      throw new Error(`Booking event ${eventId} not found`);
+      throw new NotFoundError(`Booking event ${eventId} not found`, { resourceType: 'BookingEvent', resource: eventId });
     }
 
     const majorChangeFields = [
@@ -383,23 +383,23 @@ export interface BookingEventFilters {
    */
   private validateTimeBlock(block: TimeBlock, day: DayOfWeek): void {
     const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;    if (!timeRegex.test(block.startTime)) {
-      throw new Error(`Invalid startTime format for ${day}: ${block.startTime}. Expected HH:MM format.`);
+      throw new ValidationError(`Invalid startTime format for ${day}: ${block.startTime}. Expected HH:MM format.`);
     }
 
     if (!timeRegex.test(block.endTime)) {
-      throw new Error(`Invalid endTime format for ${day}: ${block.endTime}. Expected HH:MM format.`);
+      throw new ValidationError(`Invalid endTime format for ${day}: ${block.endTime}. Expected HH:MM format.`);
     }
 
     if (block.startTime >= block.endTime) {
-      throw new Error(`StartTime must be before endTime for ${day}: ${block.startTime} >= ${block.endTime}`);
+      throw new ValidationError(`StartTime must be before endTime for ${day}: ${block.startTime} >= ${block.endTime}`);
     }
 
     if (block.slotDuration && (block.slotDuration < 15 || block.slotDuration > 480)) {
-      throw new Error(`Invalid slotDuration for ${day}: ${block.slotDuration}. Must be between 15-480 minutes.`);
+      throw new ValidationError(`Invalid slotDuration for ${day}: ${block.slotDuration}. Must be between 15-480 minutes.`);
     }
 
     if (block.bufferTime && (block.bufferTime < 0 || block.bufferTime > 120)) {
-      throw new Error(`Invalid bufferTime for ${day}: ${block.bufferTime}. Must be between 0-120 minutes.`);
+      throw new ValidationError(`Invalid bufferTime for ${day}: ${block.bufferTime}. Must be between 0-120 minutes.`);
     }
   }
 
@@ -416,7 +416,7 @@ export interface BookingEventFilters {
       if (!previousBlock || !currentBlock) continue;
       
       if (previousBlock.endTime > currentBlock.startTime) {
-        throw new Error(
+        throw new ValidationError(
           `Overlapping time blocks detected for ${day}: ` +
           `Block ending at ${previousBlock.endTime} overlaps with block starting at ${currentBlock.startTime}`
         );

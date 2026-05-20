@@ -41,7 +41,7 @@ export class EmailTemplateRepository extends DatabaseRepository<EmailTemplate, N
     super(db, emailTemplates, logger);
     
     if (!db) {
-      throw new Error('Database instance is required for EmailTemplateRepository');
+      throw new ValidationError('Database instance is required for EmailTemplateRepository');
     }
     
     // Register Handlebars helpers

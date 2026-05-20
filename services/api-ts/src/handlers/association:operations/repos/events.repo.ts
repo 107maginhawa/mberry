@@ -5,6 +5,7 @@
 import { eq, and, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
+import { NotFoundError } from '@/core/errors';
 import {
   events,
   eventRegistrations,
@@ -58,7 +59,7 @@ export class EventRepository extends DatabaseRepository<Event, NewEvent, EventFi
       .where(eq(events.id, id))
       .returning();
 
-    if (!updated) throw new Error(`Event ${id} not found`);
+    if (!updated) throw new NotFoundError(`Event ${id} not found`, { resourceType: 'Event', resource: id });
     return updated as Event;
   }
 
@@ -72,7 +73,7 @@ export class EventRepository extends DatabaseRepository<Event, NewEvent, EventFi
       .where(eq(events.id, id))
       .returning();
 
-    if (!updated) throw new Error(`Event ${id} not found`);
+    if (!updated) throw new NotFoundError(`Event ${id} not found`, { resourceType: 'Event', resource: id });
     return updated as Event;
   }
 }

@@ -6,6 +6,7 @@
 import { eq, and, gte, lte, desc, asc, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
+import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import {
   chatMessages,
   type ChatMessage,
@@ -74,11 +75,11 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
     
     // Validate message length
     if (messageContent.length > 5000) {
-      throw new Error('Message content exceeds maximum length of 5000 characters');
+      throw new ValidationError('Message content exceeds maximum length of 5000 characters');
     }
     
     if (!messageContent.trim()) {
-      throw new Error('Message content cannot be empty');
+      throw new ValidationError('Message content cannot be empty');
     }
     
     const message = await this.createOne({
@@ -112,7 +113,7 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
     
     // Validate video call data
     if (!videoCallData.participants || videoCallData.participants.length === 0) {
-      throw new Error('Video call must have at least one participant');
+      throw new ValidationError('Video call must have at least one participant');
     }
     
     // Ensure status is 'starting' for new calls
@@ -181,15 +182,15 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
     
     const message = await this.findOneById(messageId);
     if (!message) {
-      throw new Error(`Message ${messageId} not found`);
+      throw new NotFoundError(`Message ${messageId} not found`, { resourceType: 'ChatMessage', resource: messageId });
     }
     
     if (message.messageType !== 'video_call') {
-      throw new Error(`Message ${messageId} is not a video call message`);
+      throw new BusinessLogicError(`Message ${messageId} is not a video call message`);
     }
     
     if (!message.videoCallData) {
-      throw new Error(`Message ${messageId} has no video call data to update`);
+      throw new BusinessLogicError(`Message ${messageId} has no video call data to update`);
     }
     
     // Merge updates with existing data
@@ -230,7 +231,7 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
     
     const message = await this.findOneById(messageId);
     if (!message || message.messageType !== 'video_call' || !message.videoCallData) {
-      throw new Error(`Invalid video call message ${messageId}`);
+      throw new NotFoundError(`Invalid video call message ${messageId}`, { resourceType: 'VideoCallMessage', resource: messageId });
     }
     
     // Check if participant already exists
@@ -276,7 +277,7 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
     
     const message = await this.findOneById(messageId);
     if (!message || message.messageType !== 'video_call' || !message.videoCallData) {
-      throw new Error(`Invalid video call message ${messageId}`);
+      throw new NotFoundError(`Invalid video call message ${messageId}`, { resourceType: 'VideoCallMessage', resource: messageId });
     }
     
     const participantIndex = message.videoCallData.participants.findIndex(
@@ -284,7 +285,7 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
     );
     
     if (participantIndex === -1) {
-      throw new Error(`Participant ${userId} not found in video call ${messageId}`);
+      throw new NotFoundError(`Participant ${userId} not found in video call ${messageId}`, { resourceType: 'CallParticipant', resource: userId });
     }
     
     const updatedParticipants = [...message.videoCallData.participants];

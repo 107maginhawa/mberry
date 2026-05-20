@@ -6,6 +6,7 @@
 import { eq, and, or, gte, lte, isNull, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
+import { NotFoundError } from '@/core/errors';
 import {
   scheduleExceptions,
   bookingEvents,
@@ -84,7 +85,7 @@ export class ScheduleExceptionRepository extends DatabaseRepository<ScheduleExce
       .limit(1);
 
     if (!event[0]) {
-      throw new Error(`Booking event ${eventId} not found`);
+      throw new NotFoundError(`Booking event ${eventId} not found`, { resourceType: 'BookingEvent', resource: eventId });
     }
 
     const exceptionData: NewScheduleException = {

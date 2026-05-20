@@ -6,6 +6,7 @@
  */
 
 import { createHmac } from 'crypto';
+import { ExternalServiceError } from '@/core/errors';
 import type {
   GatewayAdapter,
   CheckoutOpts,
@@ -53,7 +54,7 @@ export class PayMongoAdapter implements GatewayAdapter {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`PayMongo checkout failed: ${error}`);
+      throw new ExternalServiceError(`PayMongo checkout failed: ${error}`, 'PayMongo', 'createCheckout');
     }
 
     const data = await response.json() as any;
@@ -105,7 +106,7 @@ export class PayMongoAdapter implements GatewayAdapter {
     });
 
     if (!response.ok) {
-      throw new Error(`PayMongo status check failed: ${response.status}`);
+      throw new ExternalServiceError(`PayMongo status check failed: ${response.status}`, 'PayMongo', 'getPaymentStatus');
     }
 
     const data = await response.json() as any;

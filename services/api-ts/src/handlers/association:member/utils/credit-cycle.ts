@@ -8,6 +8,8 @@
  * BR-12: Carryover capped at 50% of required credits.
  */
 
+import { ValidationError } from '@/core/errors';
+
 export interface CreditCycleConfig {
   /** Cycle duration in years (1, 2, or 3) */
   cyclePeriodYears: number;
@@ -65,7 +67,7 @@ export function getCycleForDateWithConfig(
   // Legacy mode: no fixed start configured
   if (!cycleStartMonth) {
     if (!registrationDate) {
-      throw new Error('registrationDate required when cycleStartMonth is not configured');
+      throw new ValidationError('registrationDate required when cycleStartMonth is not configured');
     }
     return getCycleForDate(registrationDate, targetDate, cyclePeriodYears);
   }

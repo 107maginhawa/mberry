@@ -6,6 +6,7 @@
 import type { JobScheduler } from '@/core/jobs';
 import type { DatabaseInstance } from '@/core/database';
 import type { NotificationService } from '@/core/notifs';
+import { DeferredScopeError } from '@/core/errors';
 import { slotGeneratorJob } from './slotGenerator';
 import { confirmationTimerJob } from './confirmationTimer';
 import { slotCleanupJob } from './slotCleanup';
@@ -58,10 +59,10 @@ export async function triggerSlotGeneration(
   if (ownerId) {
     // Note: regenerateEventSlots takes eventId, not ownerId
     // This function signature may need to be updated
-    throw new Error('triggerSlotGeneration with ownerId not implemented - use eventId instead');
+    throw new DeferredScopeError('triggerSlotGeneration with ownerId');
   } else {
     // Trigger the full job
-    throw new Error('Full job trigger not implemented - use scheduler.trigger()');
+    throw new DeferredScopeError('Full job trigger');
   }
 }
 

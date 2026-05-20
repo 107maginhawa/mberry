@@ -14,7 +14,7 @@ import {
   type CreateNotificationRequest
 } from './notification.schema';
 import type { PersonRepository } from '../../person/repos/person.repo';
-import { ValidationError, NotFoundError, ForbiddenError } from '@/core/errors';
+import { ValidationError, NotFoundError, ForbiddenError, ExternalServiceError } from '@/core/errors';
 import * as OneSignal from '@onesignal/node-onesignal';
 import { SYSTEM_USER_ID } from '@/core/constants';
 import { subDays } from 'date-fns';
@@ -463,7 +463,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
           }
         } else {
           // No OneSignal configured
-          throw new Error('OneSignal not configured, marking notification as failed');
+          throw new ExternalServiceError('OneSignal not configured, marking notification as failed', 'OneSignal');
         }
         break;
         
@@ -479,7 +479,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
           notificationId: notification.id,
           channel: notification.channel 
         }, 'Unknown notification channel');
-        throw new Error(`Unknown notification channel: ${notification.channel}`);
+        throw new ValidationError(`Unknown notification channel: ${notification.channel}`);
     }
   }
 
