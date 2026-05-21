@@ -123,7 +123,7 @@ describe('AC-M02-002: Privacy Toggle', () => {
         }),
       }),
     };
-    const ctx = makeCtx({ database: mockDb, _query: { organizationId: 'org-1' } });
+    const ctx = makeCtx({ database: mockDb, _query: { orgId: 'org-1' } });
     const res = await getMyPrivacySettings(ctx);
     expect(res.status).toBe(200);
     const body = (res as any).body;
@@ -153,7 +153,7 @@ describe('AC-M02-002: Privacy Toggle', () => {
         }),
       }),
     };
-    const ctx = makeCtx({ database: mockDb, _query: { organizationId: 'org-1' } });
+    const ctx = makeCtx({ database: mockDb, _query: { orgId: 'org-1' } });
     const res = await getMyPrivacySettings(ctx);
     expect(res.status).toBe(200);
     const body = (res as any).body;

@@ -271,7 +271,9 @@ describe('updateMember [BR-03]', () => {
         const response = await updateMember(ctx);
         // [BR-03] Invalid transitions: no error, no state change
         expect(response.status).toBe(200);
-        expect(capturedStatus).toBe(from); // status unchanged
+        // Handler maps 'grace' → 'gracePeriod' on DB write (line 68 of updateMember.ts)
+        const expectedDbStatus = from === 'grace' ? 'gracePeriod' : from;
+        expect(capturedStatus).toBe(expectedDbStatus); // status unchanged (DB enum)
       });
     }
 
