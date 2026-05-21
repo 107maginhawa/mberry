@@ -1190,6 +1190,22 @@ Opens a web interface at `http://localhost:4983`
 - **JSONB**: Use for flexible consent and configuration data
 - **Timestamps**: Include `created_at` and `updated_at` on all tables
 
+## Module Dependency Rules
+
+Handler modules have strict import boundaries:
+
+1. **Allowed imports**: own `repos/`, `@/core/`, `@/utils/`, `@/generated/`
+2. **Cross-module shared schemas**: importing a schema type from another module's `repos/*.schema.ts` is allowed (e.g., `association:member` importing a table reference from `association:operations` for joins)
+3. **Never import handler functions** from another module — use domain events or shared services in `@/core/` instead
+4. **Bidirectional imports** between handler modules are architectural debt — if discovered, track in `BROWNFIELD_STATUS.md` and plan extraction to `@/core/`
+
+```
+✅ import { personsTable } from '@/handlers/person/repos/person.schema'  // shared schema
+✅ import { AppError } from '@/core/errors'                               // core utility
+❌ import { createPerson } from '@/handlers/person/createPerson'          // handler function
+❌ import { someHelper } from '@/handlers/billing/utils/stripe'           // cross-module util
+```
+
 ## Test File Organization and Naming
 
 ### Naming Conventions
