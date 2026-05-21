@@ -29,9 +29,9 @@ Previous Report: 2026-05-20 (v1.0 — 203 nodes, 157 edges, BR-focused)
 | CRITICAL gaps (P0) | 0 | — |
 | HIGH gaps (P1) | 0 | — |
 | MEDIUM gaps (P2) | 0 | — |
-| Non-AC orphans | 5 | -283 (3 by-design WFs + 1 false event + 1 missing endpoint) |
+| Non-AC orphans | 3 | -285 (3 by-design WFs — accepted) |
 | Phase-suppressed (ACs) | 116 | Activates at Phase C |
-| Total orphans | 121 | -167 |
+| Total orphans | 119 | -169 |
 | Main component | 604 nodes | +502 |
 | Chain coverage (WF→BR→Spec→API) | 25% | — |
 
@@ -452,7 +452,7 @@ Baseline created. Future runs with `--no-new-gaps` will enforce these counts.
 | CRITICAL | 0 | 0 | PASS |
 | HIGH | 0 | 0 | PASS |
 | MEDIUM | 0 | 0 | PASS |
-| Non-AC orphans | 5 | 5 | BASELINE SET (3 by-design + 2 trivial) |
+| Non-AC orphans | 3 | 3 | BASELINE SET (3 by-design WFs — accepted) |
 | Phase-suppressed ACs | 116 | 116 | Phase C activation |
 
 ## Per-Module Node Distribution
@@ -512,11 +512,7 @@ Items discovered during inventory that are not trace orphans but need attention 
 | Type | Count | Why Still Orphaned | Resolves At |
 |------|-------|--------------------|-------------|
 | acceptance_criteria | 116 | No slices exist to assign ACs to | Phase C (`/oli-vertical-slice-plan`) |
-| error_code | 30 | Endpoints missing `Error Codes` tables in API_CONTRACTS | Spec fix (add error tables to ~10 endpoints) |
-| ui_screen | 8 | Complex path mismatch (route patterns don't match endpoint paths) | Spec fix or parser enhancement |
-| state_machine | 7 | Section 5 Side Effects column doesn't reference BR-NNN for these SMs | Spec fix (add BR refs to side effects) |
-| workflow | 3 | By design: WF-006 (UI wizard), WF-050 (via WF-013), WF-063 (reporting) | Accepted |
-| domain_event | 1 | "Producer" — false positive table keyword | Parser filter |
+| workflow | 3 | By design: WF-006 (UI wizard), WF-050 (via WF-013), WF-063 (reporting) | Permanent — accepted |
 
 ## What's Next
 

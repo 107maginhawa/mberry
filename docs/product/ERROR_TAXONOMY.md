@@ -256,7 +256,6 @@ Each module owns an exclusive error code range. No overlaps.
 | `M08-009` | 422 | Time slot conflicts with existing booking | BR-15 |
 | `M08-010` | 422 | Booking confirmation deadline exceeded — auto-rejected | BR-16 |
 | `M08-011` | 422 | Cannot modify past event | — |
-| `M08-012` | 422 | Schedule exception overlaps existing exception | — |
 
 ### 5.9 M09 — Training
 

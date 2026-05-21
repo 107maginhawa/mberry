@@ -6,10 +6,10 @@
   "created": "2026-05-21",
   "last_passed": "2026-05-21",
   "phase": "B",
-  "nodes": 775,
+  "nodes": 774,
   "edges": 2903,
-  "orphans_non_ac": 5,
+  "orphans_non_ac": 3,
   "orphans_ac_phase_c": 116,
-  "orphans_total": 121,
+  "orphans_total": 119,
   "main_component": 604
 }
