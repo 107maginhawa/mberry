@@ -1,5 +1,122 @@
+<!-- oli:api-contracts v1.0 | generated 2026-05-21 | source: DOMAIN_MODEL.md, MODULE_SPEC.md (all 19), notification.schema.ts -->
 # Event Contracts
-Generated from job handler code and schema definitions. Source of truth for async behavior.
+
+Canonical event catalog for the Memberry platform. Covers domain events (notification-based), background jobs (pg-boss), and cross-module async flows.
+
+---
+
+## 0. Event Envelope
+
+All domain events use the `CreateNotificationRequest` interface as the event envelope:
+
+```json
+{
+  "eventId": "uuid-v4",
+  "eventType": "booking.confirmed",
+  "version": "v1",
+  "timestamp": "2026-05-21T15:00:00.000Z",
+  "correlationId": "req_uuid",
+  "causationId": "uuid (event that caused this event)",
+  "source": "m08-events",
+  "payload": {
+    "organizationId": "uuid",
+    "recipient": "uuid (person ID)",
+    "type": "booking.confirmed",
+    "channel": "email | push | in-app",
+    "title": "Booking Confirmed",
+    "message": "Your booking has been confirmed",
+    "relatedEntityType": "booking",
+    "relatedEntity": "uuid",
+    "scheduledAt": null,
+    "consentValidated": true,
+    "targetApp": null
+  }
+}
+```
+
+## 0.1 Delivery Guarantees
+
+| Aspect | Value |
+|--------|-------|
+| Delivery | **At-least-once** (pg-boss retries on failure) |
+| Idempotency | Consumer-side dedup by `eventId` (notification `id` column) |
+| Ordering | **Per-entity** ordering (same `relatedEntity` processed sequentially) |
+| Trigger pattern | **Fire-and-forget** — errors swallowed to avoid breaking producer flow |
+
+## 0.2 Retry Policy
+
+| Parameter | Domain Events (Notifications) | Background Jobs (pg-boss) |
+|-----------|------------------------------|--------------------------|
+| Max retries | 1 (fire-and-forget) | 3 (configurable per job) |
+| Backoff | N/A | Exponential (`retryBackoff: true`, base 5s) |
+| Timeout | 30s | 5 min (`expireInMinutes`) |
+| DLQ | Failed notifications logged, status → `failed` | pg-boss built-in archive |
+
+## 0.3 Dead Letter Queue Handling
+
+- **Notifications**: Failed after delivery attempt → `status: 'failed'` in `notification` table. Admin can view/retry via M03 platform admin.
+- **Background jobs**: Failed after all retries → pg-boss archive table. `audit.retention` job cleans up after `deleteAfterDays`.
+- **Alerting**: P0 failed jobs (deletion processor, dues reminders) trigger platform admin notification.
+
+---
+
+## 0.4 Domain Event Catalog
+
+### Notification-Based Events (notificationTypeEnum)
+
+| Event Type | Producer | Consumer | Channel | Payload Context |
+|------------|----------|----------|---------|----------------|
+| `billing` | M06 (Dues) | Notification service | email/push/in-app | Generic billing alert |
+| `security` | M01 (Auth) | Notification service | email/push/in-app | Login, password change, 2FA |
+| `system` | M03 (Platform) | Notification service | email/push/in-app | System announcements |
+| `booking.created` | M08 (Events/Booking) | Notification service | configurable | `{ relatedEntity: bookingId }` |
+| `booking.confirmed` | M08 (Events/Booking) | Notification service | configurable | `{ relatedEntity: bookingId }` |
+| `booking.rejected` | M08 (Events/Booking) | Notification service | configurable | `{ relatedEntity: bookingId }` |
+| `booking.cancelled` | M08 (Events/Booking) | Notification service | configurable | `{ relatedEntity: bookingId }` |
+| `booking.no-show-client` | M08 (Events/Booking) | Notification service | configurable | `{ relatedEntity: bookingId }` |
+| `booking.no-show-host` | M08 (Events/Booking) | Notification service | configurable | `{ relatedEntity: bookingId }` |
+| `comms.video-call-started` | M07 (Comms) | Notification service | push/in-app | `{ relatedEntity: roomId }` |
+| `comms.video-call-joined` | M07 (Comms) | Notification service | in-app | `{ relatedEntity: roomId }` |
+| `comms.video-call-left` | M07 (Comms) | Notification service | in-app | `{ relatedEntity: roomId }` |
+| `comms.video-call-ended` | M07 (Comms) | Notification service | push/in-app | `{ relatedEntity: roomId }` |
+| `comms.chat-message` | M07 (Comms) | Notification service | push/in-app | `{ relatedEntity: roomId }` |
+| `waitlist.promoted` | M08 (Events) | Notification service | in-app | `{ personId, eventId, eventName, position }` |
+| `event.late-cancellation` | M08 (Events) | Notification service | in-app | `{ cancellerId, organizerIds[], eventId, eventName, cancelledAt, eventStartsAt }` |
+| `dunning.escalation` | M06 (Dues/Dunning) | Notification service | email/in-app | `{ personId, invoiceId, level, nextAction }` |
+| `task.overdue` | M19 (Committee) | Notification service | in-app | `{ personId, taskId, committeeName }` |
+
+### Cross-Module Domain Events (MODULE_SPEC 10b)
+
+| Event Name | Producer | Consumer(s) | Payload | Sync/Async |
+|------------|----------|-------------|---------|------------|
+| `PersonCreated` | M01 | M02, M05 | `{ personId, email, name }` | Sync (in-request) |
+| `PersonUpdated` | M02 | M11 (card regeneration) | `{ personId, changedFields[] }` | Async |
+| `PersonAnonymized` | M02 | M05, M06, M10, M11 | `{ personId }` | Async (deletion processor) |
+| `AccountDeletionScheduled` | M02 | Deletion processor | `{ personId, gracePeriodEnd }` | Async (30-day delay) |
+| `OrganizationCreated` | M03 | M04 (default positions) | `{ orgId, type, associationId }` | Sync |
+| `FeatureFlagToggled` | M03 | All modules | `{ flagName, enabled, scope }` | Async |
+| `OfficerAssigned` | M04 | M07 (notification) | `{ personId, roleName, orgId }` | Async |
+| `MembershipCreated` | M05 | M02 (profile update) | `{ membershipId, personId, orgId, tier }` | Sync |
+| `MembershipStatusChanged` | M05 | M02 (profile), M12 (voter eligibility) | `{ membershipId, personId, oldStatus, newStatus }` | Async |
+| `MemberTransferred` | M05 | M04 (org cleanup) | `{ personId, fromOrgId, toOrgId }` | Sync |
+| `PaymentRecorded` | M06 | M05 (expiry update), M08 (registration confirm) | `{ paymentId, personId, amount, invoiceId }` | Sync |
+| `PaymentRefunded` | M06 | M08 (registration refund) | `{ paymentId, registrationId, amount }` | Sync |
+| `DuesReminderSent` | M06 | Audit | `{ personId, invoiceId, reminderLevel }` | Async |
+| `AnnouncementPublished` | M07 | Email queue, Push service | `{ orgId, announcementId, audience, channels }` | Async |
+| `EventPublished` | M08 | M07 (announcements) | `{ eventId, orgId, eventName, date }` | Async |
+| `EventCancelled` | M08 | M06 (refunds), M07 (notification) | `{ eventId, registrantIds[], amounts[] }` | Sync |
+| `RegistrationConfirmed` | M08 | M07 (notification) | `{ registrationId, personId, eventId }` | Async |
+| `TrainingCompleted` | M09 | M10 (credit award), M11 (certificate) | `{ trainingId, personId, creditHours, type }` | Sync |
+| `TrainingPublished` | M09 | M07 (announcements) | `{ trainingId, orgId, title, date }` | Async |
+| `CreditAwarded` | M10 | M11 (transcript update) | `{ personId, creditEntryId, hours, category }` | Async |
+| `CredentialGenerated` | M11 | Audit | `{ personId, type, documentId }` | Async |
+| `ElectionOpened` | M12 | M07 (announcements) | `{ electionId, orgId, status }` | Async |
+| `ElectionPublished` | M12 | M04 (officer transitions) | `{ electionId, orgId, winners: [{positionId, winnerId}] }` | Sync |
+| `PostCreated` | M13 | Feed index | `{ postId, authorId, orgId }` | Async |
+| `JobListingExpired` | M15 | M07 (notification to poster) | `{ listingId, employerId }` | Async |
+| `CampaignCompleted` | M16 | M07 (notification) | `{ campaignId, advertiserId }` | Async |
+| `SurveyClosed` | M18 | M07 (results notification) | `{ surveyId, orgId, responseCount }` | Async |
+| `CommitteeExpired` | M19 | M04 (cleanup) | `{ committeeId, orgId }` | Async |
 
 ---
 
