@@ -1,6 +1,7 @@
-import { describe, test, expect, afterEach, mock } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach, mock } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { CommunicationsRepository } from './repos/communication.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // Mock audit
 mock.module('@/utils/audit', () => ({
@@ -40,6 +41,17 @@ const SCHEDULED_ANNOUNCEMENT = {
   id: 'ann-4',
   status: 'scheduled',
 };
+
+// Global officer stub — publishAnnouncement/archiveAnnouncement now require officer role
+beforeEach(() => {
+  restoreRepo(OfficerTermRepository);
+  stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+  });
+});
+afterEach(() => {
+  restoreRepo(OfficerTermRepository);
+});
 
 // ---------------------------------------------------------------------------
 // Auth guard tests — every handler must throw UnauthorizedError without session
@@ -461,19 +473,14 @@ describe('archiveAnnouncement', () => {
     expect(res.status).toBe(200);
   });
 
-  test('archives draft announcement and returns 200', async () => {
+  test('rejects archiving draft announcement (only sent→archived)', async () => {
     const { archiveAnnouncement } = await import('./archiveAnnouncement');
     mocks = stubRepo(CommunicationsRepository, {
       get: async () => DRAFT_ANNOUNCEMENT,
-      updateStatus: async (_id: string, status: string) => ({
-        ...DRAFT_ANNOUNCEMENT,
-        status,
-      }),
     });
 
     const ctx = makeCtx({ _params: { id: 'ann-1' } });
-    const res = await archiveAnnouncement(ctx as any);
-    expect(res.status).toBe(200);
+    await expect(archiveAnnouncement(ctx as any)).rejects.toThrow('Only sent announcements can be archived');
   });
 
   test('throws NotFoundError when announcement does not exist', async () => {
@@ -493,6 +500,19 @@ describe('archiveAnnouncement', () => {
     });
 
     const ctx = makeCtx({ _params: { id: 'ann-3' } });
-    await expect(archiveAnnouncement(ctx as any)).rejects.toThrow('Announcement is already archived');
+    await expect(archiveAnnouncement(ctx as any)).rejects.toThrow('Only sent announcements can be archived');
+  });
+
+  // ─── M7: Officer role enforcement ───────────────────────
+  test('returns 403 when non-officer tries to archive', async () => {
+    const { archiveAnnouncement } = await import('./archiveAnnouncement');
+    restoreRepo(OfficerTermRepository);
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+
+    const ctx = makeCtx({ _params: { id: 'ann-2' } });
+    const res = await archiveAnnouncement(ctx as any);
+    expect(res.status).toBe(403);
   });
 });

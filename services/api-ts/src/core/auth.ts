@@ -483,7 +483,29 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
  * Better-Auth handles all authentication endpoints
  */
 export function registerRoutes(app: App): void {
-  const { auth } = app;
+  const { auth, database, logger } = app;
+
+  // M3-R7: Block platform admins from disabling 2FA
+  // Must be registered BEFORE the catch-all /auth/* handler
+  app.post('/auth/two-factor/disable', async (c) => {
+    const session = c.get('session');
+    if (session) {
+      const user = c.get('user');
+      if (user) {
+        const { PlatformAdminRepository } = await import('@/handlers/platformadmin/repos/platform-admin.repo');
+        const adminRepo = new PlatformAdminRepository(database, logger);
+        const admin = await adminRepo.findById(user.id);
+        if (admin) {
+          return c.json(
+            { error: 'Platform administrators cannot disable two-factor authentication' },
+            403,
+          );
+        }
+      }
+    }
+    // Not a platform admin — pass through to Better-Auth
+    return auth.handler(c.req.raw);
+  });
 
   // Better-Auth handles all /auth/* routes with all HTTP methods
   app.all("/auth/*", (c) => auth.handler(c.req.raw));

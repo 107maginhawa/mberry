@@ -1,6 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { OfficerTermRepository } from './repos/governance.repo';
+import { ForbiddenError } from '@/core/errors';
+import { OfficerTermRepository, PositionRepository } from './repos/governance.repo';
+import { PlatformAdminRepository } from '@/handlers/platformadmin/repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -27,6 +29,19 @@ export async function createOfficerTerm(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new OfficerTermRepository(db, logger);
+
+  // BR-09e: President position assignment requires platform admin
+  const positionRepo = new PositionRepository(db);
+  const targetPosition = await positionRepo.findById(body.positionId);
+  if (targetPosition && targetPosition.title.toLowerCase() === 'president') {
+    const adminRepo = new PlatformAdminRepository(db, logger);
+    const callerAdmin = await adminRepo.findById(user.id);
+    if (!callerAdmin) {
+      throw new ForbiddenError(
+        'Assigning the President position requires platform administrator privileges',
+      );
+    }
+  }
 
   // M4-R1: One person per role — check no active holder exists for this position
   const existingHolder = await repo.findActiveByPosition(body.positionId);

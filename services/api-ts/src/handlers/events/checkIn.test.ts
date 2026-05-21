@@ -1,7 +1,8 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { checkIn } from './checkIn';
 import { EventsRepository } from './repos/events.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -32,8 +33,18 @@ const fakeAttendance = {
 describe('[BR-17] checkIn', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(EventsRepository);
+    restoreRepo(OfficerTermRepository);
+    // Default: user is an officer
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+    });
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('checks in attendee and returns 201', async () => {
@@ -134,6 +145,24 @@ describe('[BR-17] checkIn', () => {
     const response = await checkIn(ctx);
     expect(response.status).toBe(201);
     expect(response.body.data.personId).toBe('unregistered-person');
+  });
+
+  test('throws ForbiddenError when user has no officer term', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+    mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
+      isCheckedIn: async () => false,
+      checkIn: async (data: any) => fakeAttendance,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'evt-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    await expect(checkIn(ctx)).rejects.toThrow('Officer access required');
   });
 
   test('uses session.user.id for audit fields, ignores body.checkedInBy', async () => {

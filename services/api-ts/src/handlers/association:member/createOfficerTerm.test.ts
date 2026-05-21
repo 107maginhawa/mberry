@@ -1,8 +1,9 @@
-// Business Rules: [BR-09] — one person per role per org
+// Business Rules: [BR-09] — one person per role per org, [BR-09e] — President assignment requires platform admin
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { createOfficerTerm } from './createOfficerTerm';
-import { OfficerTermRepository } from './repos/governance.repo';
+import { OfficerTermRepository, PositionRepository } from './repos/governance.repo';
+import { PlatformAdminRepository } from '../platformadmin/repos/platform-admin.repo';
 
 // ─── Fixtures ────────────────────────────────────────────
 
@@ -27,10 +28,18 @@ describe('createOfficerTerm [BR-09]', () => {
 
   beforeEach(() => {
     restoreRepo(OfficerTermRepository);
+    restoreRepo(PositionRepository);
+    restoreRepo(PlatformAdminRepository);
+    // Default: non-President position so BR-09e guard doesn't trigger
+    stubRepo(PositionRepository, {
+      findById: async () => ({ id: 'pos-1', title: 'Society Officer', organizationId: 'org-1' }),
+    });
   });
 
   afterEach(() => {
     restoreRepo(OfficerTermRepository);
+    restoreRepo(PositionRepository);
+    restoreRepo(PlatformAdminRepository);
   });
 
   test('creates officer term and returns 201', async () => {
@@ -209,6 +218,59 @@ describe('createOfficerTerm [BR-09]', () => {
         (t) => t.personId === candidate.personId && t.organizationId === candidate.organizationId && t.status === 'active',
       );
       expect(personAlreadyOfficer).toBe(true);
+    });
+  });
+
+  // ─── [BR-09e] President assignment requires platform admin ────
+  describe('[BR-09e] President position assignment guard', () => {
+    test('rejects non-admin assigning President position with 403', async () => {
+      stubRepo(OfficerTermRepository, {
+        findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+        findActiveByPosition: async () => undefined,
+        findActiveByPersonInOrg: async () => [],
+        create: async () => createdTerm,
+      });
+      stubRepo(PositionRepository, {
+        findById: async () => ({ id: 'pos-pres', title: 'President', organizationId: 'org-1' }),
+      });
+      // User is NOT a platform admin
+      stubRepo(PlatformAdminRepository, {
+        findById: async () => null,
+      });
+
+      const ctx = makeCtx({
+        _body: {
+          positionId: 'pos-pres',
+          personId: 'person-2',
+          startDate: '2025-01-01',
+        },
+      });
+
+      // Should throw ForbiddenError (statusCode=403) since user is not a platform admin
+      await expect(createOfficerTerm(ctx)).rejects.toThrow('platform administrator');
+    });
+
+    test('allows non-President position without admin check', async () => {
+      stubRepo(OfficerTermRepository, {
+        findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+        findActiveByPosition: async () => undefined,
+        findActiveByPersonInOrg: async () => [],
+        create: async () => createdTerm,
+      });
+      stubRepo(PositionRepository, {
+        findById: async () => ({ id: 'pos-sec', title: 'Secretary', organizationId: 'org-1' }),
+      });
+
+      const ctx = makeCtx({
+        _body: {
+          positionId: 'pos-sec',
+          personId: 'person-2',
+          startDate: '2025-01-01',
+        },
+      });
+
+      const response = await createOfficerTerm(ctx);
+      expect(response.status).toBe(201);
     });
   });
 

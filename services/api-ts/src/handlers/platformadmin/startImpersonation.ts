@@ -36,6 +36,12 @@ export async function startImpersonation(
     throw new ForbiddenError('Only super and support admins can impersonate users');
   }
 
+  // M3-R5: Block impersonation of another platform admin
+  const targetAdmin = await adminRepo.findById(body.targetUserId);
+  if (targetAdmin) {
+    throw new ForbiddenError('Cannot impersonate another platform administrator');
+  }
+
   // Create a 30-minute scoped token
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 30 * 60 * 1000);

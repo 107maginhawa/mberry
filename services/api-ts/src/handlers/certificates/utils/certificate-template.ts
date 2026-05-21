@@ -24,6 +24,25 @@ export interface OrgBranding {
   orgName: string;
 }
 
+/** Escape user-controlled strings for safe HTML embedding. */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+/** Validate URL is safe for src attribute. */
+function sanitizeUrl(url: string): string {
+  const lower = url.toLowerCase().trim();
+  if (lower.startsWith('javascript:') || lower.startsWith('data:text/html')) {
+    return '';
+  }
+  return escapeHtml(url);
+}
+
 const DEFAULT_BRANDING: OrgBranding = {
   primaryColor: '#1a365d',
   orgName: 'Organization',
@@ -53,18 +72,18 @@ export function renderCertificateHtml(
 
   const creditLine =
     data.creditAmount != null
-      ? `<p class="credits">${data.creditAmount} CPD Credit${data.creditAmount !== 1 ? 's' : ''}${data.creditCategory ? ` (${data.creditCategory})` : ''}</p>`
+      ? `<p class="credits">${data.creditAmount} CPD Credit${data.creditAmount !== 1 ? 's' : ''}${data.creditCategory ? ` (${escapeHtml(data.creditCategory)})` : ''}</p>`
       : '';
 
   const logoHtml = brand.logoUrl
-    ? `<img src="${brand.logoUrl}" alt="${brand.orgName}" class="logo" />`
+    ? `<img src="${sanitizeUrl(brand.logoUrl)}" alt="${escapeHtml(brand.orgName)}" class="logo" />`
     : '';
 
   const signatoryHtml =
     brand.signatoryName
       ? `<div class="signatory">
-          <p class="sig-name">${brand.signatoryName}</p>
-          <p class="sig-title">${brand.signatoryTitle ?? ''}</p>
+          <p class="sig-name">${escapeHtml(brand.signatoryName)}</p>
+          <p class="sig-title">${escapeHtml(brand.signatoryTitle ?? '')}</p>
         </div>`
       : '';
 
@@ -75,7 +94,7 @@ export function renderCertificateHtml(
   body { font-family: Georgia, serif; text-align: center; padding: 60px; color: #333; }
   .header { margin-bottom: 40px; }
   .logo { max-height: 80px; margin-bottom: 20px; }
-  .title { font-size: 28px; color: ${brand.primaryColor}; margin-bottom: 10px; }
+  .title { font-size: 28px; color: ${escapeHtml(brand.primaryColor ?? '#1a365d')}; margin-bottom: 10px; }
   .org-name { font-size: 16px; color: #666; margin-bottom: 30px; }
   .recipient { font-size: 24px; font-weight: bold; margin: 20px 0; }
   .training { font-size: 18px; margin: 10px 0; }
@@ -90,16 +109,16 @@ export function renderCertificateHtml(
 <body>
   <div class="header">
     ${logoHtml}
-    <h1 class="title">${typeLabel}</h1>
-    <p class="org-name">${brand.orgName}</p>
+    <h1 class="title">${escapeHtml(typeLabel)}</h1>
+    <p class="org-name">${escapeHtml(brand.orgName)}</p>
   </div>
   <p>This certifies that</p>
-  <p class="recipient">${data.recipientName}</p>
+  <p class="recipient">${escapeHtml(data.recipientName)}</p>
   <p class="training">has ${data.certificateType === 'speaker' ? 'presented at' : 'completed'}</p>
-  <p class="training"><em>${data.trainingTitle}</em></p>
+  <p class="training"><em>${escapeHtml(data.trainingTitle)}</em></p>
   ${creditLine}
   <p class="date">${dateStr}</p>
-  <p class="cert-number">${data.certificateNumber}</p>
+  <p class="cert-number">${escapeHtml(data.certificateNumber)}</p>
   ${signatoryHtml}
 </body>
 </html>`;

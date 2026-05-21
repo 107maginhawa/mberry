@@ -1,6 +1,9 @@
 import type { Context } from 'hono';
-import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError, UnauthorizedError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
+import { auditAction } from '@/utils/audit';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   draft: ['nominationsOpen', 'cancelled'],
@@ -12,6 +15,13 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
 };
 
 export async function updateElectionStatus(ctx: Context): Promise<Response> {
+  const session = ctx.get('session');
+  if (!session) throw new UnauthorizedError();
+
+  // Elections require president authorization
+  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
+
   const db = ctx.get('database');
   const id = ctx.req.param('id');
   const body = await ctx.req.json();
@@ -44,5 +54,14 @@ export async function updateElectionStatus(ctx: Context): Promise<Response> {
   if (body.status === 'published') extra.publishedAt = new Date();
 
   const updated = await repo.update(id, { status: body.status, ...extra });
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'election',
+    resourceId: id,
+    description: `Election status changed from '${existing.status}' to '${body.status}'`,
+    details: { from: existing.status, to: body.status },
+  });
+
   return ctx.json({ data: updated }, 200);
 }

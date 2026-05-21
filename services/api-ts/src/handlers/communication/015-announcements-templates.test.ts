@@ -11,8 +11,12 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { CommunicationsRepository } from './repos/communication.repo';
 import { MessageTemplateRepository } from './repos/communication.repo';
 import { MessageRepository } from './repos/communication.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+
+// Global stub: publishAnnouncement and archiveAnnouncement call requirePosition → OfficerTermRepository
+stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -249,18 +253,16 @@ describe('announcement status transitions', () => {
     expect(res.status).toBe(200);
   });
 
-  test('archiveAnnouncement allows archiving draft announcement', async () => {
+  test('archiveAnnouncement rejects draft announcement (only sent can be archived)', async () => {
     const { archiveAnnouncement } = await import('./archiveAnnouncement');
     stubRepo(CommunicationsRepository, {
       get: async () => DRAFT_ANNOUNCEMENT,
-      updateStatus: async (_id: string, status: string) => ({
-        ...DRAFT_ANNOUNCEMENT, status,
-      }),
     });
 
     const ctx = makeCtx({ _params: { id: 'ann-1' } });
-    const res = await archiveAnnouncement(ctx as any);
-    expect(res.status).toBe(200);
+    await expect(archiveAnnouncement(ctx as any)).rejects.toThrow(
+      'Only sent announcements can be archived'
+    );
   });
 
   test('archiveAnnouncement rejects already-archived', async () => {
@@ -271,7 +273,7 @@ describe('announcement status transitions', () => {
 
     const ctx = makeCtx({ _params: { id: 'ann-3' } });
     await expect(archiveAnnouncement(ctx as any)).rejects.toThrow(
-      'Announcement is already archived'
+      'Only sent announcements can be archived'
     );
   });
 

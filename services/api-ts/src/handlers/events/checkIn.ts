@@ -1,11 +1,23 @@
 import type { Context } from 'hono';
-import { NotFoundError, ConflictError } from '@/core/errors';
+import { NotFoundError, ConflictError, ForbiddenError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import type { Session } from '@/types/auth';
 
 export async function checkIn(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
+
+  // Only officers can perform check-ins
+  const orgId = ctx.get('organizationId');
+  if (orgId) {
+    const officerRepo = new OfficerTermRepository(db);
+    const terms = await officerRepo.findActiveByPersonAndOrg(session.user.id, orgId);
+    if (terms.length === 0) {
+      throw new ForbiddenError('Officer access required to perform check-ins');
+    }
+  }
+
   const eventId = ctx.req.param('id');
   const body = await ctx.req.json();
   const repo = new EventsRepository(db);

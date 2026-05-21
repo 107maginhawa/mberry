@@ -1,9 +1,13 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { CommunicationsRepository } from './repos/communication.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { archiveAnnouncement } from './archiveAnnouncement';
 
 mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+
+// archiveAnnouncement calls requirePosition → OfficerTermRepository
+stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
 
 describe('archiveAnnouncement', () => {
   beforeEach(() => { restoreRepo(CommunicationsRepository); });
@@ -29,6 +33,6 @@ describe('archiveAnnouncement', () => {
       get: async () => ({ id: 'ann-1', status: 'archived' }),
     });
     const ctx = makeCtx({ _params: { id: 'ann-1' } });
-    await expect(archiveAnnouncement(ctx as any)).rejects.toThrow('Announcement is already archived');
+    await expect(archiveAnnouncement(ctx as any)).rejects.toThrow('Only sent announcements can be archived');
   });
 });

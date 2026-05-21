@@ -4,6 +4,8 @@ import type { DatabaseInstance } from '@/core/database';
 import type { PublishAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
 import { auditAction } from '@/utils/audit';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * publishAnnouncement
@@ -16,6 +18,10 @@ export async function publishAnnouncement(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
+
+  // M7: Only president/secretary can publish announcements
+  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
+  if (denied) return denied;
 
   const params = ctx.req.valid('param');
 

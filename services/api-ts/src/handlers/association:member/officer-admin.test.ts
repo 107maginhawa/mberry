@@ -2,7 +2,8 @@
 // Slice 005: org-admin-officer-roles stabilization
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { OfficerTermRepository, DisciplinaryActionRepository, TransitionChecklistRepository } from './repos/governance.repo';
+import { OfficerTermRepository, DisciplinaryActionRepository, TransitionChecklistRepository, PositionRepository } from './repos/governance.repo';
+import { PlatformAdminRepository } from '../platformadmin/repos/platform-admin.repo';
 
 // ─── Fixtures ────────────────────────────────────────────
 
@@ -37,9 +38,15 @@ const existingTerm = {
 describe('[M4-R1] one officer per role per org', () => {
   beforeEach(() => {
     restoreRepo(OfficerTermRepository);
+    restoreRepo(PositionRepository);
+    restoreRepo(PlatformAdminRepository);
+    stubRepo(PositionRepository, { findById: async () => ({ id: 'pos-1', title: 'Society Officer', organizationId: 'org-1' }) });
+    stubRepo(PlatformAdminRepository, { findById: async () => undefined });
   });
   afterEach(() => {
     restoreRepo(OfficerTermRepository);
+    restoreRepo(PositionRepository);
+    restoreRepo(PlatformAdminRepository);
   });
 
   test('returns 409 when position already has an active officer', async () => {
@@ -373,9 +380,15 @@ describe('[M4-R4] disciplinary action', () => {
 describe('[M4-R6] immutable audit trail', () => {
   beforeEach(() => {
     restoreRepo(OfficerTermRepository);
+    restoreRepo(PositionRepository);
+    restoreRepo(PlatformAdminRepository);
+    stubRepo(PositionRepository, { findById: async () => ({ id: 'pos-1', title: 'Society Officer', organizationId: 'org-1' }) });
+    stubRepo(PlatformAdminRepository, { findById: async () => undefined });
   });
   afterEach(() => {
     restoreRepo(OfficerTermRepository);
+    restoreRepo(PositionRepository);
+    restoreRepo(PlatformAdminRepository);
   });
 
   test('createOfficerTerm audit includes positionId and personId details', async () => {
@@ -472,9 +485,15 @@ describe('[M4-R5] SVG sanitization for officer badges', () => {
 describe('[BR-09] officer creation audit includes assignment details', () => {
   beforeEach(() => {
     restoreRepo(OfficerTermRepository);
+    restoreRepo(PositionRepository);
+    restoreRepo(PlatformAdminRepository);
+    stubRepo(PositionRepository, { findById: async () => ({ id: 'pos-1', title: 'Society Officer', organizationId: 'org-1' }) });
+    stubRepo(PlatformAdminRepository, { findById: async () => undefined });
   });
   afterEach(() => {
     restoreRepo(OfficerTermRepository);
+    restoreRepo(PositionRepository);
+    restoreRepo(PlatformAdminRepository);
   });
 
   test('successful creation includes positionId and personId in audit details', async () => {

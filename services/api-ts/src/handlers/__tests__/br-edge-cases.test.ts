@@ -43,7 +43,7 @@ describe('[BR-10] Impersonation session includes impersonator ID in audit contex
     };
 
     mocks = stubRepo(PlatformAdminRepository, {
-      findById: async () => ({ id: 'admin-42', name: 'Super Admin', role: 'super' }),
+      findById: async (id: string) => id === 'admin-42' ? { id: 'admin-42', name: 'Super Admin', role: 'super' } : undefined,
     });
     const impMocks = stubRepo(ImpersonationSessionRepository, {
       create: async (data: any) => ({ ...fakeSession, ...data }),

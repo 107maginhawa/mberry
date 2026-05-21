@@ -6,6 +6,8 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { castVote } from './castVote';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -47,10 +49,20 @@ describe('[FLOW-04] Election Vote → Tally → Winner', () => {
 
   beforeEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+    // castVote requires active membership
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ id: 'mem-1', duesExpiryDate: '2027-12-31', gracePeriodDays: 30, suspendedAt: null, removedAt: null }),
+    });
+    // updateElectionStatus requires president position
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
   });
 
   afterEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   // ── Vote Casting ──

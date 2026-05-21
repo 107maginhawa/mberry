@@ -17,6 +17,8 @@ import { castVote } from './castVote';
 import { getElection } from './getElection';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { BusinessLogicError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
@@ -44,8 +46,20 @@ const baseElection = {
 // ─── Full Lifecycle Chain ───────────────────────────────
 
 describe('[024] Election Full Lifecycle Chain', () => {
-  beforeEach(() => restoreRepo(ElectionsRepository));
-  afterEach(() => restoreRepo(ElectionsRepository));
+  beforeEach(() => {
+    restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ id: 'mem-1', duesExpiryDate: '2027-12-31', gracePeriodDays: 30, suspendedAt: null, removedAt: null }),
+    });
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
+  });
+  afterEach(() => {
+    restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+  });
 
   test('draft → nominationsOpen → votingOpen → awaitingConfirmation → published', async () => {
     const transitions = [
@@ -161,8 +175,17 @@ describe('[024] Election Full Lifecycle Chain', () => {
 // ─── BR-20: One Vote Per Position Per Member ────────────
 
 describe('[BR-20] One Vote Per Position Per Member', () => {
-  beforeEach(() => restoreRepo(ElectionsRepository));
-  afterEach(() => restoreRepo(ElectionsRepository));
+  beforeEach(() => {
+    restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ id: 'mem-1', duesExpiryDate: '2027-12-31', gracePeriodDays: 30, suspendedAt: null, removedAt: null }),
+    });
+  });
+  afterEach(() => {
+    restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+  });
 
   test('member can vote for different positions in same election', async () => {
     // Tracks which positions have been voted for
@@ -247,6 +270,7 @@ describe('[BR-20] One Vote Per Position Per Member', () => {
 describe('[BR-33] Vote Anonymity & Results Visibility', () => {
   beforeEach(() => restoreRepo(ElectionsRepository));
   afterEach(() => restoreRepo(ElectionsRepository));
+  // getElection doesn't use requirePosition or MembershipRepository — no extra stubs needed
 
   test('getElection returns aggregate tallies, not individual voter info', async () => {
     const tallies = [
@@ -329,8 +353,17 @@ describe('[BR-33] Vote Anonymity & Results Visibility', () => {
 // ─── castVote Input Validation ──────────────────────────
 
 describe('[024] castVote Input Validation', () => {
-  beforeEach(() => restoreRepo(ElectionsRepository));
-  afterEach(() => restoreRepo(ElectionsRepository));
+  beforeEach(() => {
+    restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ id: 'mem-1', duesExpiryDate: '2027-12-31', gracePeriodDays: 30, suspendedAt: null, removedAt: null }),
+    });
+  });
+  afterEach(() => {
+    restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+  });
 
   test('rejects invalid positionId UUID', async () => {
     stubRepo(ElectionsRepository, {

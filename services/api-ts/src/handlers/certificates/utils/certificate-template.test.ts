@@ -175,3 +175,50 @@ describe('[042] Certificate Template Validation', () => {
     expect(errors.some(e => e.includes('Invalid certificateType'))).toBe(true);
   });
 });
+
+// ─── XSS Prevention ──────────────────────────────────────
+
+describe('[042] Certificate Template XSS Prevention', () => {
+  test('escapes HTML in recipientName', () => {
+    const data = makeTemplateData({ recipientName: '<script>alert("xss")</script>' });
+    const html = renderCertificateHtml(data);
+    expect(html).not.toContain('<script>');
+    expect(html).toContain('&lt;script&gt;');
+  });
+
+  test('escapes HTML in trainingTitle', () => {
+    const data = makeTemplateData({ trainingTitle: '<img src=x onerror="alert(1)">' });
+    const html = renderCertificateHtml(data);
+    expect(html).not.toContain('<img src=x');
+    expect(html).toContain('&lt;img');
+  });
+
+  test('escapes HTML in orgName', () => {
+    const html = renderCertificateHtml(makeTemplateData(), { orgName: '"><script>xss</script>' });
+    expect(html).not.toContain('<script>xss');
+  });
+
+  test('sanitizes javascript: URLs in logoUrl', () => {
+    const html = renderCertificateHtml(makeTemplateData(), {
+      orgName: 'Test',
+      logoUrl: 'javascript:alert(1)',
+    });
+    expect(html).not.toContain('javascript:');
+  });
+
+  test('escapes HTML in signatoryName', () => {
+    const html = renderCertificateHtml(makeTemplateData(), {
+      orgName: 'Test',
+      signatoryName: '"><script>alert(1)</script>',
+      signatoryTitle: 'President',
+    });
+    expect(html).not.toContain('<script>alert');
+  });
+
+  test('escapes HTML in certificateNumber', () => {
+    const data = makeTemplateData({ certificateNumber: '<b>CERT-001</b>' });
+    const html = renderCertificateHtml(data);
+    expect(html).not.toContain('<b>CERT');
+    expect(html).toContain('&lt;b&gt;');
+  });
+});

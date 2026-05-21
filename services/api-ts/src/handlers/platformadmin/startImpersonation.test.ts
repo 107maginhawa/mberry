@@ -69,7 +69,8 @@ describe('startImpersonation [BR-10]', () => {
     const session = makeImpersonationSession();
     mocks = {
       ...stubRepo(PlatformAdminRepository, {
-        findById: async () => superAdmin,
+        // Caller is admin, target is NOT admin
+        findById: async (id: string) => id === 'user-1' ? superAdmin : undefined,
       }),
       ...stubRepo(ImpersonationSessionRepository, {
         create: async () => session,
@@ -92,7 +93,7 @@ describe('startImpersonation [BR-10]', () => {
     const session = makeImpersonationSession({ adminId: 'admin-2' });
     mocks = {
       ...stubRepo(PlatformAdminRepository, {
-        findById: async () => supportAdmin,
+        findById: async (id: string) => id === 'admin-2' ? supportAdmin : undefined,
       }),
       ...stubRepo(ImpersonationSessionRepository, {
         create: async () => session,
@@ -160,7 +161,7 @@ describe('startImpersonation [BR-10]', () => {
     let capturedData: any = null;
     mocks = {
       ...stubRepo(PlatformAdminRepository, {
-        findById: async () => superAdmin,
+        findById: async (id: string) => id === 'user-1' ? superAdmin : undefined,
       }),
       ...stubRepo(ImpersonationSessionRepository, {
         create: async (data: any) => {
@@ -187,7 +188,7 @@ describe('startImpersonation [BR-10]', () => {
 
     mocks = {
       ...stubRepo(PlatformAdminRepository, {
-        findById: async () => superAdmin,
+        findById: async (id: string) => id === 'user-1' ? superAdmin : undefined,
       }),
       ...stubRepo(ImpersonationSessionRepository, {
         create: async () => session,
@@ -224,7 +225,7 @@ describe('startImpersonation [BR-10]', () => {
     let capturedData: any = null;
     mocks = {
       ...stubRepo(PlatformAdminRepository, {
-        findById: async () => superAdmin,
+        findById: async (id: string) => id === 'user-1' ? superAdmin : undefined,
       }),
       ...stubRepo(ImpersonationSessionRepository, {
         create: async (data: any) => {
@@ -247,7 +248,7 @@ describe('startImpersonation [BR-10]', () => {
     let capturedData: any = null;
     mocks = {
       ...stubRepo(PlatformAdminRepository, {
-        findById: async () => superAdmin,
+        findById: async (id: string) => id === 'user-1' ? superAdmin : undefined,
       }),
       ...stubRepo(ImpersonationSessionRepository, {
         create: async (data: any) => {
@@ -264,5 +265,31 @@ describe('startImpersonation [BR-10]', () => {
 
     await startImpersonation(ctx);
     expect(capturedData.targetOrgId).toBeNull();
+  });
+
+  // ─── [M3-R5] Block impersonation of another admin ───────
+
+  test('[M3-R5] throws ForbiddenError when target is also a platform admin', async () => {
+    const targetAdmin = { ...superAdmin, id: 'admin-target', userId: 'target-admin-1', role: 'admin' };
+    mocks = {
+      ...stubRepo(PlatformAdminRepository, {
+        // Caller is admin, target is ALSO admin
+        findById: async (id: string) => {
+          if (id === 'user-1') return superAdmin;
+          if (id === 'target-admin-1') return targetAdmin;
+          return undefined;
+        },
+      }),
+      ...stubRepo(ImpersonationSessionRepository, {
+        create: async () => makeImpersonationSession(),
+      }),
+    };
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'super' },
+      _body: { targetUserId: 'target-admin-1' },
+    });
+
+    await expect(startImpersonation(ctx)).rejects.toThrow('Cannot impersonate another platform administrator');
   });
 });

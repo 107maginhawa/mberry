@@ -1,7 +1,9 @@
 import type { Context } from 'hono';
 import { z } from 'zod';
-import { NotFoundError, ConflictError, ValidationError } from '@/core/errors';
+import { NotFoundError, ConflictError, ValidationError, BusinessLogicError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { computeMembershipStatus } from '../association:member/utils/compute-membership-status';
 import type { Session } from '@/types/auth';
 
 const castVoteSchema = z.object({
@@ -24,6 +26,31 @@ export async function castVote(ctx: Context): Promise<Response> {
   const election = await repo.get(electionId);
   if (!election) throw new NotFoundError('Election not found');
   if (election.status !== 'votingOpen') throw new ConflictError('Voting is not open');
+
+  // BR-33: Voter must be active member of the org
+  const membershipRepo = new MembershipRepository(db);
+  const membership = await membershipRepo.findByPersonAndOrg(
+    session.user.id,
+    election.organizationId,
+  );
+  if (!membership) {
+    throw new BusinessLogicError(
+      'You must be a member of this organization to vote',
+      'NOT_ORG_MEMBER',
+    );
+  }
+  const voterStatus = computeMembershipStatus({
+    duesExpiryDate: membership.duesExpiryDate,
+    gracePeriodDays: membership.gracePeriodDays,
+    suspendedAt: membership.suspendedAt,
+    removedAt: membership.removedAt,
+  });
+  if (voterStatus !== 'active') {
+    throw new BusinessLogicError(
+      `Voting requires active membership. Current status: '${voterStatus}'`,
+      'VOTER_NOT_ACTIVE',
+    );
+  }
 
   const alreadyVoted = await repo.hasVoted(electionId, session.user.id, body.positionId);
   if (alreadyVoted) throw new ConflictError('Already voted for this position');

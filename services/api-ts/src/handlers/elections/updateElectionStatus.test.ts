@@ -1,8 +1,11 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { BusinessLogicError } from '@/core/errors';
+
+mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -20,11 +23,17 @@ describe('updateElectionStatus', () => {
 
   beforeEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(OfficerTermRepository);
+    // Default: user is President (authorized)
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
     restoreRepo(ElectionsRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('updates status and returns 200', async () => {
@@ -302,5 +311,45 @@ describe('updateElectionStatus', () => {
     const response = await updateElectionStatus(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data.status).toBe('cancelled');
+  });
+
+  // ─── Authorization ───────────────────────────────────────
+
+  test('throws UnauthorizedError without session', async () => {
+    const ctx = makeCtx({
+      user: null,
+      session: null,
+      _params: { id: 'election-1' },
+      _body: { status: 'nominationsOpen' },
+    });
+    await expect(updateElectionStatus(ctx)).rejects.toThrow('Unauthorized');
+  });
+
+  test('returns 403 when user is not president', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Treasurer' }],
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'election-1' },
+      _body: { status: 'nominationsOpen' },
+    });
+
+    const response = await updateElectionStatus(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('returns 403 when user has no officer term', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'election-1' },
+      _body: { status: 'nominationsOpen' },
+    });
+
+    const response = await updateElectionStatus(ctx);
+    expect(response.status).toBe(403);
   });
 });

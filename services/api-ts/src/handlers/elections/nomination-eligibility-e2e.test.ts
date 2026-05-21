@@ -14,6 +14,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { createNominee } from './createNominee';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -46,12 +47,16 @@ const nominees: any[] = [];
 describe('[BR-34] Nomination Eligibility E2E Flow', () => {
   beforeEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(OfficerTermRepository);
+    // updateElectionStatus requires president position
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     electionState.status = 'draft';
     nominees.length = 0;
   });
 
   afterEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   // ── Full lifecycle: create election → open nominations → nominate eligible member

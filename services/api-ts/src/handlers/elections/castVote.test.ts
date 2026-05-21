@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { castVote } from './castVote';
 import { ElectionsRepository } from './repos/elections.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -27,10 +28,22 @@ describe('[BR-33] castVote', () => {
 
   beforeEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+    // Default: voter is active member
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1',
+        duesExpiryDate: '2027-12-31',
+        gracePeriodDays: 30,
+        suspendedAt: null,
+        removedAt: null,
+      }),
+    });
   });
 
   afterEach(() => {
     restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
   });
 
   test('casts vote and returns 201', async () => {
@@ -191,5 +204,47 @@ describe('[BR-33] castVote', () => {
     });
 
     await expect(castVote(ctx)).rejects.toThrow('Election not found');
+  });
+
+  // ─── [BR-33] Voter Eligibility ────────────────────────────
+
+  test('[BR-33] rejects non-member voter', async () => {
+    mocks = stubRepo(ElectionsRepository, {
+      get: async () => fakeElection,
+      hasVoted: async () => false,
+    });
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'election-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
+    });
+
+    await expect(castVote(ctx)).rejects.toThrow('must be a member');
+  });
+
+  test('[BR-33] rejects lapsed member', async () => {
+    mocks = stubRepo(ElectionsRepository, {
+      get: async () => fakeElection,
+      hasVoted: async () => false,
+    });
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1',
+        duesExpiryDate: '2020-01-01', // expired long ago
+        gracePeriodDays: 30,
+        suspendedAt: null,
+        removedAt: null,
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'election-1' },
+      _body: { positionId: '00000000-0000-4000-8000-000000000001', nomineeId: '00000000-0000-4000-8000-000000000002' },
+    });
+
+    await expect(castVote(ctx)).rejects.toThrow('Voting requires active membership');
   });
 });
