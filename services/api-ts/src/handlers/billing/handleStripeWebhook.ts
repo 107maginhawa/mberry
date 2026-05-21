@@ -5,7 +5,7 @@ import {
   BusinessLogicError
 } from '@/core/errors';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
-import { invoices } from './repos/billing.schema';
+// invoices table import removed — use invoiceRepo.findAll() instead
 import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { eq } from 'drizzle-orm';
 import type Stripe from 'stripe';
@@ -350,9 +350,7 @@ async function handleChargeSucceeded(
   
   // Find invoice by payment intent ID in metadata
   // Note: This requires a custom query since we're searching in JSONB
-  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
-    .select()
-    .from(invoices);
+  const allInvoices = await invoiceRepo.findAll();
 
   const invoice = allInvoices.find((inv: any) => {
     const metadata = inv.metadata as InvoiceMetadata;
@@ -457,9 +455,7 @@ async function handleChargeFailed(
   }
   
   // Find invoice by payment intent ID in metadata
-  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
-    .select()
-    .from(invoices);
+  const allInvoices = await invoiceRepo.findAll();
 
   const invoice = allInvoices.find((inv: any) => {
     const metadata = inv.metadata as InvoiceMetadata;
@@ -529,9 +525,7 @@ async function handleChargeRefunded(
   }
   
   // Find invoice by payment intent ID in metadata
-  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
-    .select()
-    .from(invoices);
+  const allInvoices = await invoiceRepo.findAll();
 
   const invoice = allInvoices.find((inv: any) => {
     const metadata = inv.metadata as InvoiceMetadata;
@@ -680,9 +674,7 @@ async function handleTransferCreated(
   const transfer = event.data.object as Stripe.Transfer;
   
   // Find invoice by transfer ID in metadata
-  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
-    .select()
-    .from(invoices);
+  const allInvoices = await invoiceRepo.findAll();
 
   const foundInvoices = allInvoices.filter((inv: any) => {
     const metadata = inv.metadata as InvoiceMetadata;
@@ -715,9 +707,7 @@ async function handleTransferFailed(
   const transfer = event.data.object as Stripe.Transfer;
   
   // Find invoice by transfer ID in metadata
-  const allInvoices = await (invoiceRepo as any).db // structural: accessing protected DatabaseRepository.db
-    .select()
-    .from(invoices);
+  const allInvoices = await invoiceRepo.findAll();
 
   const foundInvoices = allInvoices.filter((inv: any) => {
     const metadata = inv.metadata as InvoiceMetadata;

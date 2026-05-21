@@ -43,6 +43,13 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
   }
 
   /**
+   * Find all invoices (unfiltered). Used by webhook handlers to search by metadata fields.
+   */
+  async findAll(): Promise<Invoice[]> {
+    return await this.db.select().from(invoices) as Invoice[];
+  }
+
+  /**
    * Build where conditions for invoice filtering (TypeSpec-aligned)
    */
   protected buildWhereConditions(filters?: InvoiceFilters): SQL<unknown> | undefined {
