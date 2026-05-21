@@ -122,6 +122,25 @@ member < secretary < treasurer < officer < president < admin
 
 `hasMinimumRole(userRole, requiredRole)` — returns true if user's role is >= required in hierarchy.
 
+### Role Alias Mapping (API_CONTRACTS ↔ ROLE_PERMISSION_MATRIX)
+
+API_CONTRACTS `| Auth |` property rows use shorthand keywords. This table maps them to ROLE_PERMISSION_MATRIX canonical roles for traceability:
+
+| API Auth Keyword | ROLE_PERMISSION_MATRIX Role | Scope | Notes |
+|-----------------|---------------------------|-------|-------|
+| `super` | Platform Admin | Platform | System-wide admin operations |
+| `admin` | Platform Admin | Platform | Alias for super in Auth rows |
+| `platform` | Platform Admin | Platform | Explicit platform scope |
+| `president` | President | Org | Highest org officer |
+| `secretary` | Secretary | Org | Member management, comms |
+| `treasurer` | Treasurer | Org | Financial operations |
+| `officer` | Officer (any of above) | Org | Generic officer — includes president, secretary, treasurer |
+| `member` | Member | Org | Standard authenticated member |
+| `user` | Member | System | Better-Auth system role, equivalent to Member |
+| `chairperson` | Chairperson | Committee | Committee-scoped leadership role |
+
+**Auth row format:** `GA+HG — role1, role2` where GA = Global Auth (session required), HG = Hierarchy Guard (org role check). Roles listed after `—` are the minimum roles with access.
+
 ### Public Routes
 
 Routes NOT requiring authentication are explicitly listed in ROLE_PERMISSION_MATRIX.md section 2. All other routes require at minimum an authenticated session (`user` role).

@@ -6,6 +6,7 @@
   "created": "2026-05-21",
   "last_passed": "2026-05-21",
   "phase": "B",
-  "nodes": 760,
-  "edges": 564
+  "nodes": 775,
+  "edges": 1691,
+  "phase_suppressed": 165
 }

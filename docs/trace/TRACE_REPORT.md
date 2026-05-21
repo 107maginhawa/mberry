@@ -22,19 +22,15 @@ Previous Report: 2026-05-20 (v1.0 — 203 nodes, 157 edges, BR-focused)
 
 ## Summary
 
-| Metric | Count |
-|--------|-------|
-| Total nodes | 760 |
-| Total edges | 564 |
-| CRITICAL gaps (P0) | 0 |
-| HIGH gaps (P1) | 0 (suppressed — Phase C/D algorithms inactive) |
-| MEDIUM gaps (P2) | 0 (after root cause analysis — see below) |
-| Reclassified: parser limitation | 20 (path syntax mismatch + multi-WF row parsing) |
-| Reclassified: by-design | 17 (reporting/utility workflows + utility endpoints) |
-| Reclassified: false positive | 11 (table keywords + bg jobs misclassified as events) |
-| Spec gap found + fixed | 1 (WF-075 added to M11 API_CONTRACTS) |
-| Phase-suppressed (expected) | 288 (ACs, error codes, SMs, roles — no slice/test edges yet) |
-| Chain coverage (WF→BR→Spec→API) | 25% |
+| Metric | Count | Delta from v1 |
+|--------|-------|---------------|
+| Total nodes | 775 | +15 (new BRs, ACs from format fix, module error codes) |
+| Total edges | 1,691 | +1,127 (error codes, roles, SMs, BR→API now connected) |
+| CRITICAL gaps (P0) | 0 | — |
+| HIGH gaps (P1) | 0 (suppressed) | — |
+| MEDIUM gaps (P2) | 0 (true gaps resolved) | -49 |
+| Phase-suppressed orphans | 165 | -123 (was 288) |
+| Chain coverage (WF→BR→Spec→API) | 25% | — |
 
 ### Phase-Gating Status
 
@@ -397,28 +393,32 @@ Two additional disabled jobs were also misclassified: `booking.reminderSender` a
 
 | Type | Count | Description |
 |------|-------|-------------|
+| api_endpoint | 229 | From 19 API_CONTRACTS files (incl. M11 credential templates, M16 ad placements) |
+| error_code | 168 | From ERROR_TAXONOMY (9 categories) + module-specific codes in API_CONTRACTS |
+| acceptance_criteria | 116 | AC-Mxx-NNN from MODULE_SPECs Section 11 (all 19 modules, both ### and ** formats) |
 | workflow | 108 | WF-001 through WF-108 from WORKFLOW_MAP |
-| business_rule | 40 | BR-01 through BR-40 from WORKFLOW_MAP Section 4 |
-| acceptance_criteria | 99 | AC-Mxx-NNN from MODULE_SPECs Section 11 |
-| state_machine | 15 | From WORKFLOW_MAP Section 5 + DOMAIN_MODEL Section 13 |
-| domain_event | 61 | From EVENT_CONTRACTS (notification + cross-module) |
-| error_code | 168 | From ERROR_TAXONOMY (9 categories, 168 codes) |
-| role | 6 | Platform Admin, President, VP, Secretary, Treasurer, Chairperson |
-| api_endpoint | 224 | From 19 API_CONTRACTS files |
+| business_rule | 49 | BR-01 through BR-49 from WORKFLOW_MAP Section 4 (incl. M09 + M16 additions) |
+| domain_event | 49 | From EVENT_CONTRACTS section 0.4 only (false positives filtered) |
 | ui_screen | 39 | From ui-prototype/screens.md (8 modules with screen specs) |
-| **Total** | **760** | |
+| state_machine | 11 | From WORKFLOW_MAP Section 5 |
+| role | 6 | Platform Admin, President, VP, Secretary, Treasurer, Chairperson |
+| **Total** | **775** | |
 
 ## Edges by Type
 
 | Type | Count | Avg Confidence | Description |
 |------|-------|----------------|-------------|
-| WF_EXPOSED_VIA_API | 214 | high | Workflow → API endpoint |
-| API_CONSUMED_BY_UI | 173 | medium | API endpoint → UI screen |
+| ERROR_RETURNED_BY_ENDPOINT | 670 | high | Error code → API endpoint (from error tables) |
+| ROLE_AUTHORIZED_FOR_ENDPOINT | 375 | medium | Role → API endpoint (from Auth property via alias mapping) |
+| WF_EXPOSED_VIA_API | 246 | high | Workflow → API endpoint (multi-WF rows now parsed) |
+| API_CONSUMED_BY_UI | 106 | medium | API endpoint → UI screen (path params normalized) |
+| BR_ENFORCED_BY_API | 81 | high | Business rule → API endpoint (from BR property rows) |
+| WF_ENFORCES_BR | 69 | high | Workflow → business rule |
 | BR_DEFINED_IN_SPEC | 55 | high | BR → MODULE_SPEC Section 5 |
-| EVENT_PUBLISHED_BY | 43 | high | Event → producer module |
-| WF_ENFORCES_BR | 41 | high | Workflow → business rule |
-| EVENT_CONSUMED_BY | 38 | high | Consumer module → event |
-| **Total** | **564** | | |
+| EVENT_PUBLISHED_BY | 48 | high | Event → producer module |
+| EVENT_CONSUMED_BY | 33 | high | Consumer module → event |
+| WF_TRIGGERS_SM | 8 | medium | Workflow → state machine (via BR refs in Section 5 side effects) |
+| **Total** | **1,691** | | |
 
 ### Edges Not Yet Populated (Phase C/D)
 
@@ -429,29 +429,27 @@ Two additional disabled jobs were also misclassified: `booking.reminderSender` a
 | AC_TESTED_BY | No spec-linked tests | Phase D |
 | AC_IMPLEMENTED_IN_SLICE | No slices linked | Phase C |
 | SLICE_HAS_TESTS | No slices linked | Phase C/D |
-| ROLE_AUTHORIZED_FOR_ENDPOINT | RBAC cross-ref deferred | Phase B+ |
-| BR_ENFORCED_BY_API | API_CONTRACTS BR field partially populated | Phase B+ |
 
 ## Connected Components
 
-| Metric | Count |
-|--------|-------|
-| Connected components | 406 |
-| Largest component | 102 nodes |
-| Islands (single-node) | 341 |
-| Top 5 components | 102, 49, 28, 13, 11 |
+| Metric | Before (v1) | After (v2) |
+|--------|------------|------------|
+| Connected components | 406 | 170 |
+| Largest component | 102 nodes | 557 nodes |
+| Islands (single-node) | 341 | 166 |
 
-**Interpretation:** High island count expected at Phase B. The 102-node main component contains the WF→BR→Spec→API chain for business-rule-heavy modules (M05, M06, M08). As Phase C/D edges connect, components merge and islands drop.
+**Interpretation:** 557-node main component now includes most WFs, BRs, API endpoints, error codes, and roles — connected via ERROR_RETURNED_BY_ENDPOINT and ROLE_AUTHORIZED_FOR_ENDPOINT edges. Remaining 166 islands are mostly phase-suppressed ACs (116) + 30 error codes from endpoints without error tables + 8 UI screens + 7 SMs + 3 WFs + 1 false-positive event.
 
 ## Ratchet Status
 
 Baseline created. Future runs with `--no-new-gaps` will enforce these counts.
 
-| Severity | Baseline | Current | Status |
-|----------|----------|---------|--------|
+| Severity | Baseline (v1) | Current (v2) | Status |
+|----------|--------------|-------------|--------|
 | CRITICAL | 0 | 0 | PASS |
-| HIGH | 0 (suppressed) | 0 | PASS |
-| MEDIUM | 0 (reclassified) | 0 | PASS |
+| HIGH | 0 | 0 | PASS |
+| MEDIUM | 0 | 0 | PASS |
+| Phase-suppressed | 288 | 165 | -123 (parser improvements connected 123 nodes) |
 
 ## Per-Module Node Distribution
 
@@ -492,18 +490,29 @@ Items discovered during inventory that are not trace orphans but need attention 
 | 5 | M09 missing BRs | P2 | Added BR-41 through BR-44 to WORKFLOW_MAP Section 4 (paid training, type restriction, completion lock, idempotent credits) | RESOLVED |
 | 6 | 4 integration contracts | P2 | Added: M16 `GET /ads/placements/{slot}` for M13/M15/M17 ad serving; `CommitteeAnnouncementPublished` + `VendorVerified` events in EVENT_CONTRACTS | RESOLVED |
 
-## Suggested Actions (Parser Improvements for Future Runs)
+## Parser Improvements (v2)
 
-All spec gaps resolved or tracked. Future trace parser improvements:
+| # | Improvement | Status | Result |
+|---|------------|--------|--------|
+| 1 | Normalize path params: `[id]` ↔ `:id` ↔ `{id}` | DONE | 8 screen orphans remain (partial path mismatch on complex routes) |
+| 2 | Multi-WF Workflow property rows | DONE | WF-054/055/056/079 now connected |
+| 3 | Event extraction restricted to section 0.4 | DONE | 1 false positive remains ("Producer") |
+| 4 | ERROR_RETURNED_BY_ENDPOINT edges from error tables | DONE | 670 edges, 138 error codes connected |
+| 5 | ROLE_AUTHORIZED_FOR_ENDPOINT via alias mapping | DONE | 375 edges, all 6 roles connected |
+| 6 | WF_TRIGGERS_SM via BR refs in Section 5 side effects | DONE | 8 edges, 4 SMs connected (7 remain — no BR refs in side effects) |
+| 7 | BR_ENFORCED_BY_API from Business rules property | DONE | 81 edges |
+| 8 | AC extraction: both `###` and `**` formats | DONE | 116 ACs (was 99) |
 
-| Priority | Improvement | Impact |
-|----------|------------|--------|
-| 1 | Normalize path params: `[id]` ↔ `:id` ↔ `{id}` before matching | Fixes 16 false screen orphans |
-| 2 | Handle multi-WF Workflow property rows and comma-separated WF lists | Fixes 4 false WF orphans |
-| 3 | Restrict event extraction to EVENT_CONTRACTS section 0.4 tables only | Eliminates 8 false-positive events |
-| 4 | Classify section 2.x entries as `background_job` node type | Correct 5 misclassified bg jobs |
-| 5 | Build ROLE_AUTHORIZED_FOR_ENDPOINT edges from RBAC matrix | Connect 6 role nodes |
-| 6 | Build WF_TRIGGERS_SM edges from state transition tables | Connect 15 SM nodes |
+### Remaining Phase-Suppressed Orphans (165)
+
+| Type | Count | Why Still Orphaned | Resolves At |
+|------|-------|--------------------|-------------|
+| acceptance_criteria | 116 | No slices exist to assign ACs to | Phase C (`/oli-vertical-slice-plan`) |
+| error_code | 30 | Endpoints missing `Error Codes` tables in API_CONTRACTS | Spec fix (add error tables to ~10 endpoints) |
+| ui_screen | 8 | Complex path mismatch (route patterns don't match endpoint paths) | Spec fix or parser enhancement |
+| state_machine | 7 | Section 5 Side Effects column doesn't reference BR-NNN for these SMs | Spec fix (add BR refs to side effects) |
+| workflow | 3 | By design: WF-006 (UI wizard), WF-050 (via WF-013), WF-063 (reporting) | Accepted |
+| domain_event | 1 | "Producer" — false positive table keyword | Parser filter |
 
 ## What's Next
 
