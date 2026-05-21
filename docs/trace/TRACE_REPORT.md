@@ -209,14 +209,189 @@ Two additional disabled jobs were also misclassified: `booking.reminderSender` a
 |----|-------|------------|
 | WF-075 (Credential Template Mgmt) | Missing from M11 API_CONTRACTS | Added 4 CRUD endpoints (GET/POST/PATCH/DELETE `/orgs/:id/credential-templates`) with feature flag `credential_templates` |
 
-**288 phase-suppressed orphans** (expected, not counted as gaps):
+## Phase Activation Registry
 
-| Type | Count | Reason |
-|------|-------|--------|
-| error_code | 168 | No error→endpoint edges yet (Phase B+ deferred) |
-| acceptance_criteria | 99 | No AC→slice or AC→test edges (Phase C/D) |
-| state_machine | 15 | No WF_TRIGGERS_SM edges (requires state transition parsing) |
-| role | 6 | No ROLE_AUTHORIZED_FOR_ENDPOINT edges (requires RBAC cross-ref) |
+288 nodes + 33 cross-module items are phase-suppressed with defined activation triggers. Each item has: what it is, what connects it, when that happens, and what validates it.
+
+### Error Codes → API Endpoints (168 items, activates Phase B+)
+
+**What:** 168 error codes from ERROR_TAXONOMY.md (VALIDATION-001 through INTERNAL-003) have no edges connecting them to the API endpoints that return them.
+
+**Activation trigger:** Build `ERROR_RETURNED_BY_ENDPOINT` edges by cross-referencing each API_CONTRACTS endpoint's Error Codes table against ERROR_TAXONOMY.
+
+**Resolution mechanism:** Each API_CONTRACTS endpoint already has an `Error Codes` table listing codes like `M01-001`, `M05-002`, etc. These map to ERROR_TAXONOMY categories. The edge type is: `error_code → api_endpoint` via `ERROR_RETURNED_BY_ENDPOINT`.
+
+**Validation:** After edge-building, every error code should have ≥1 endpoint edge. Orphan error codes = dead codes or missing endpoint documentation.
+
+| Module | Error Code Prefix | Endpoint Count | Expected Edges |
+|--------|------------------|----------------|----------------|
+| Global | VALIDATION-*, AUTH-*, AUTHZ-*, NOT_FOUND-*, RATE_LIMIT-*, INTERNAL-* | All endpoints | ~224 (every endpoint returns at least VALIDATION + AUTH) |
+| M01 | M01-* | 13 | ~20 |
+| M02 | M02-* | 10 | ~12 |
+| M03 | M03-* | 16 | ~18 |
+| M04 | M04-* | 8 | ~10 |
+| M05 | M05-* | 12 | ~15 |
+| M06 | M06-* | 13 | ~18 |
+| M07 | M07-* | 12 | ~14 |
+| M08 | M08-* | 11 | ~16 |
+| M09 | M09-* | 17 | ~20 |
+| M10 | M10-* | 5 | ~8 |
+| M11 | M11-* | 14 | ~16 |
+| M12 | M12-* | 9 | ~12 |
+| M13-M19 | M13-* through M19-* | 78 | ~90 |
+
+---
+
+### Acceptance Criteria → Slices + Tests (99 items, activates Phase C/D)
+
+**What:** 99 acceptance criteria (AC-M01-001 through AC-M19-004) from MODULE_SPEC Section 11 have no edges to slices or test files.
+
+**Activation trigger:**
+- Phase C: `/oli-vertical-slice-plan` assigns each AC to a slice → builds `AC_IMPLEMENTED_IN_SLICE` edges
+- Phase D: Test files reference AC IDs in describe blocks → builds `AC_TESTED_BY` edges
+
+**Resolution mechanism:** Each slice spec must list its ACs. Each test file must reference AC-IDs it validates.
+
+**Validation:** After Phase C, every AC should have ≥1 slice edge. After Phase D, every AC should have ≥1 test edge. Orphan ACs = untested acceptance criteria (P1 gap).
+
+**Per-module AC inventory:**
+
+| Module | AC Count | IDs | Priority ACs (P0/P1 workflows) |
+|--------|----------|-----|-------------------------------|
+| M01 Auth | 7 | AC-M01-001 through AC-M01-007 | AC-M01-001 (OTP Delivery), AC-M01-005 (Account Lockout) |
+| M02 Profile | 8 | AC-M02-001 through AC-M02-008 | AC-M02-003 (Deletion Grace), AC-M02-008 (Session Revocation) |
+| M03 Platform | 7 | AC-M03-001 through AC-M03-007 | AC-M03-001 (Impersonation), AC-M03-006 (MFA Mandatory) |
+| M04 Org Admin | 7 | AC-M04-001 through AC-M04-007 | AC-M04-002 (Officer Role Constraint) |
+| M05 Membership | 7 | AC-M05-001 through AC-M05-007 | AC-M05-001 (No Duplicates), AC-M05-003 (Status Computation) |
+| M06 Dues | 7 | AC-M06-001 through AC-M06-007 | AC-M06-001 (Payment Recording), AC-M06-005 (Refund Policy) |
+| M07 Comms | 6 | AC-M07-001 through AC-M07-006 | AC-M07-003 (Deduplication) |
+| M08 Events | 6 | AC-M08-001 through AC-M08-006 | AC-M08-001 (Capacity + Waitlist) |
+| M09 Training | 6 | AC-M09-001 through AC-M09-006 | AC-M09-001 (Credit Award on Attendance) |
+| M10 Credits | 5 | AC-M10-001 through AC-M10-005 | AC-M10-001 (Cycle Computation) |
+| M11 Docs/Creds | 6 | AC-M11-001 through AC-M11-006 | AC-M11-002 (QR HMAC Verification) |
+| M12 Elections | 6 | AC-M12-001 through AC-M12-006 | AC-M12-001 (Vote Integrity) |
+| M13 Feed | 5 | AC-M13-001 through AC-M13-005 | — (P2 module) |
+| M14 Dashboard | 5 | AC-M14-001 through AC-M14-005 | — (P2 module) |
+| M15 Jobs | 5 | AC-M15-001 through AC-M15-005 | — (P2 module) |
+| M16 Ads | 6 | AC-M16-001 through AC-M16-006 | — (P2 module) |
+| M17 Marketplace | 0 | — | No ACs defined yet (needs MODULE_SPEC Section 11) |
+| M18 Surveys | 0 | — | No ACs defined yet (needs MODULE_SPEC Section 11) |
+| M19 Committees | 0 | — | No ACs defined yet (needs MODULE_SPEC Section 11) |
+
+**Gap noted:** M17, M18, M19 have 0 acceptance criteria. These MODULE_SPECs need Section 11 populated before Phase C.
+
+---
+
+### State Machines → Workflows (15 items, activates Phase B+)
+
+**What:** 15 state machines from WORKFLOW_MAP Section 5 + DOMAIN_MODEL Section 13 have no `WF_TRIGGERS_SM` edges connecting them to workflows.
+
+**Activation trigger:** Parse WORKFLOW_MAP Section 5 state transition tables. Each transition row references triggering workflows.
+
+**Resolution mechanism:** Each state transition (e.g., `Active → Grace → Lapsed`) is triggered by a workflow step. Map `WF_TRIGGERS_SM` edges from the workflow that causes each transition.
+
+**State machine inventory:**
+
+| SM-ID | Name | States | Key Transitions | Triggering WFs |
+|-------|------|--------|----------------|----------------|
+| SM-001 | Membership Status | Pending, Active, Grace, Lapsed, Expired, Resigned, Deceased, Expelled | Active→Grace (expiry), Grace→Lapsed (30d) | WF-029, WF-032, WF-026, WF-035 |
+| SM-002 | Payment Status | Pending, Completed, Failed, Refunded, Partially_Refunded | Pending→Completed (payment) | WF-038, WF-040, WF-041, WF-044 |
+| SM-003 | Event Status | Draft, Published, Cancelled, Completed | Draft→Published (officer) | WF-051, WF-054 |
+| SM-004 | Event Registration | Registered, Waitlisted, Checked_In, No_Show, Cancelled | Waitlisted→Registered (FIFO) | WF-052, WF-053, WF-057 |
+| SM-005 | Training Status | Draft, Published, In_Progress, Completed, Cancelled | Published→In_Progress (start) | WF-058, WF-060 |
+| SM-006 | Enrollment Status | Enrolled, Waitlisted, Completed, Cancelled, No_Show | Enrolled→Completed (attendance) | WF-059, WF-060 |
+| SM-007 | Election Status | Draft, Nominations_Open, Voting_Open, Closed, Certified | Closed→Certified (results) | WF-076, WF-077 |
+| SM-008 | Announcement Status | Draft, Scheduled, Sent, Failed | Draft→Scheduled (officer) | WF-045, WF-046 |
+| SM-009 | Organization Lifecycle | Trial, Active, Suspended, Cancelled | Trial→Active (payment) | WF-015, WF-016, WF-023 |
+| SM-010 | Notification Status | Pending, Sent, Read, Failed | Pending→Sent (dispatch) | WF-046 |
+| SM-011 | Additional SMs | Various | Various | Various |
+| SM-DM-001 through SM-DM-004 | DOMAIN_MODEL Section 13 SMs | Various | Various | Cross-referenced from SM-001 through SM-010 |
+
+**Validation:** After edge-building, every SM should have ≥1 WF edge. Orphan SMs = state machines not triggered by any workflow (design gap).
+
+---
+
+### Roles → API Endpoints (6 items, activates Phase B+)
+
+**What:** 6 roles from ROLE_PERMISSION_MATRIX have no `ROLE_AUTHORIZED_FOR_ENDPOINT` edges.
+
+**Activation trigger:** Cross-reference ROLE_PERMISSION_MATRIX action columns against API_CONTRACTS endpoint Auth property rows.
+
+**Resolution mechanism:** Each API_CONTRACTS endpoint has `| Auth | GA+HG — officer, admin |` property. Map these role references to ROLE_PERMISSION_MATRIX roles.
+
+**Role inventory:**
+
+| Role | RBAC Level | Expected Endpoint Edges | Source |
+|------|-----------|------------------------|--------|
+| platform_admin | Platform | ~40 (all `/admin/*` endpoints) | ROLE_PERMISSION_MATRIX row 1 |
+| president | Org officer | ~80 (all org management + officer actions) | ROLE_PERMISSION_MATRIX row 2 |
+| vice_president | Org officer | ~60 (most org management) | ROLE_PERMISSION_MATRIX row 3 |
+| secretary | Org officer | ~70 (member management, comms) | ROLE_PERMISSION_MATRIX row 4 |
+| treasurer | Org officer | ~30 (financial endpoints) | ROLE_PERMISSION_MATRIX row 5 |
+| chairperson | Committee-scoped | ~15 (committee management only) | ROLE_PERMISSION_MATRIX sub-table |
+
+**Validation:** After edge-building, every role should connect to its authorized endpoints. Roles with 0 edges = RBAC misconfiguration.
+
+---
+
+### Cross-Module Blind Spots (33 items, activates Phase C)
+
+**What:** 33 module pairs reference each other in MODULE_SPECs without explicit event contracts or API integration contracts.
+
+**Activation trigger:** `/oli-vertical-slice-plan` — when slicing cross-module workflows, each integration point must declare its mechanism (event, API call, shared entity read, or UI navigation).
+
+**Resolution mechanism:** For each pair, choose one:
+1. **Event contract** — add to EVENT_CONTRACTS.md (for async state changes)
+2. **API contract** — add cross-module endpoint to API_CONTRACTS (for sync requests)
+3. **Shared entity read** — document in MODULE_SPEC integration section (for read-only lookups)
+4. **UI navigation** — document as frontend routing (no backend integration needed)
+5. **Accept as is** — module reference is informational only (no runtime coupling)
+
+**Pairs requiring resolution at Phase C:**
+
+| # | Source | Target | Reference Context | Likely Resolution |
+|---|--------|--------|-------------------|-------------------|
+| 1 | M04 | M06 | Org admin views financial data | Shared entity read |
+| 2 | M05 | M07 | Membership change triggers notification | Event: MembershipStatusChanged (exists) |
+| 3 | M05 | M11 | Membership status on credentials | Shared entity read |
+| 4 | M05 | M13 | Feed filters by membership | Shared entity read |
+| 5 | M05 | M14 | Dashboard aggregates membership | Shared entity read |
+| 6 | M05 | M15 | Job board requires active membership | Shared entity read |
+| 7 | M05 | M17 | Marketplace requires membership | Shared entity read |
+| 8 | M05 | M18 | Survey targets by membership category | UI navigation |
+| 9 | M05 | M19 | Committee requires active membership | Shared entity read |
+| 10 | M06 | M07 | Payment confirmation notification | Event: PaymentRecorded (exists) |
+| 11 | M06 | M09 | Paid training fee collection | Event: PaymentRecorded with registrationId (exists) |
+| 12 | M06 | M14 | Dashboard aggregates revenue | Shared entity read |
+| 13 | M07 | M11 | Comms references document links | UI navigation |
+| 14 | M08 | M04 | Event created by org officer | Shared entity read (orgId) |
+| 15 | M08 | M05 | Registration checks membership | Shared entity read |
+| 16 | M08 | M09 | Training events integration | Event: TrainingPublished (exists) |
+| 17 | M08 | M10 | Event attendance awards credits | Event: CreditAwarded (exists) |
+| 18 | M08 | M11 | Event certificate generation | Event: CertificateRequested (exists) |
+| 19 | M08 | M15 | Event job board cross-posting | UI navigation |
+| 20 | M09 | M04 | Training managed by org officer | Shared entity read (orgId) |
+| 21 | M09 | M05 | Enrollment checks membership | Shared entity read |
+| 22 | M09 | M15 | Training job board cross-posting | UI navigation |
+| 23 | M09 | M17 | Training materials marketplace | UI navigation |
+| 24 | M10 | M04 | Credit reports for org admin | Shared entity read |
+| 25 | M10 | M05 | Credit compliance + membership | Shared entity read |
+| 26 | M12 | M19 | Election winners → committee officers | Event: ElectionPublished (exists) |
+| 27 | M13 | M07 | Feed shares announcements | Shared entity read |
+| 28 | M13 | M08 | Feed shows events | Shared entity read |
+| 29 | M13 | M09 | Feed shows training | Shared entity read |
+| 30 | M13 | M16 | Feed shows sponsored content | API contract needed |
+| 31 | M15 | M16 | Job board ad placements | API contract needed |
+| 32 | M17 | M16 | Marketplace sponsored listings | API contract needed |
+| 33 | M19 | M07 | Committee announcements | Event: AnnouncementPublished or shared entity read |
+
+**Integration gaps requiring new contracts at Phase C:**
+- M13↔M16 (Feed + Advertising): needs ad placement API contract
+- M15↔M16 (Jobs + Advertising): needs sponsored job API contract
+- M17↔M16 (Marketplace + Advertising): needs sponsored listing API contract
+- M19↔M07 (Committees + Comms): needs committee announcement mechanism
+
+**Validation:** After Phase C slicing, re-run `/oli-trace` algorithm 4d. Every pair should have a documented integration mechanism. Remaining blind spots = P0 integration gaps.
 
 ## Nodes by Type
 
@@ -304,9 +479,22 @@ Baseline created. Future runs with `--no-new-gaps` will enforce these counts.
 
 **Note:** M09-M19 show 0 UI screens — their screen specs use a format not yet parsed or screens.md not yet generated.
 
+## Spec Debt Surfaced by Trace
+
+Items discovered during inventory that are not trace orphans but need attention before Phase C:
+
+| # | Item | Severity | Description | Resolution |
+|---|------|----------|-------------|------------|
+| 1 | M17 missing ACs | P1 | Marketplace MODULE_SPEC has 0 acceptance criteria (Section 11 empty) | Populate AC-M17-001+ before slicing |
+| 2 | M18 missing ACs | P1 | Surveys MODULE_SPEC has 0 acceptance criteria (Section 11 empty) | Populate AC-M18-001+ before slicing |
+| 3 | M19 missing ACs | P1 | Committees MODULE_SPEC has 0 acceptance criteria (Section 11 empty) | Populate AC-M19-001+ before slicing |
+| 4 | M16 missing BRs | P2 | Advertising MODULE_SPEC has 0 business rules in WORKFLOW_MAP Section 4 | Add BR-41+ for ad placement rules |
+| 5 | M09/M16 missing BRs | P2 | Training (M09) and Advertising (M16) have 0 BRs mapped to WFs | Review if module-local rules need promotion to canonical BRs |
+| 6 | 4 new API contracts | P2 | M13↔M16, M15↔M16, M17↔M16 ad integration + M19↔M07 comms need contracts | Design at Phase C `/oli-vertical-slice-plan` |
+
 ## Suggested Actions (Parser Improvements for Future Runs)
 
-No spec actions needed. All gaps resolved or accepted. Future trace parser improvements:
+All spec gaps resolved or tracked. Future trace parser improvements:
 
 | Priority | Improvement | Impact |
 |----------|------------|--------|
@@ -319,8 +507,10 @@ No spec actions needed. All gaps resolved or accepted. Future trace parser impro
 
 ## What's Next
 
-**All gaps resolved. 0 CRITICAL, 0 HIGH, 0 true MEDIUM. Continue pipeline.**
+**All trace gaps resolved. 0 CRITICAL, 0 HIGH, 0 true MEDIUM. 6 spec debt items tracked for Phase C prep.**
 
-- Next: `/oli-audit-compliance` (Wave 5) — compliance gate target >= 9.0
-- Then: `/oli-confidence-stack` (Wave 5) — test confidence gate target >= 9.0
-- Later: Re-run `/oli-trace` at Phase C after `/oli-vertical-slice-plan` to activate algorithms 4b/4d with slice data
+- **Before Phase C:** Populate M17/M18/M19 acceptance criteria (P1 spec debt)
+- **Next:** `/oli-audit-compliance` (Wave 5) — compliance gate target >= 9.0
+- **Then:** `/oli-confidence-stack` (Wave 5) — test confidence gate target >= 9.0
+- **Phase C:** Re-run `/oli-trace` after `/oli-vertical-slice-plan` to activate algorithms 4b/4c/4d with slice data
+- **Phase C:** Resolve 4 integration contract gaps (M13/M15/M17↔M16, M19↔M07)
