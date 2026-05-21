@@ -52,7 +52,7 @@ export async function createScheduleException(
   }
 
   // Create exception (organizationId inherited from the parent booking event)
-  const exception = await exceptionRepo.createExceptionForEvent(params.event, user.id, body as any, event.organizationId); // structural: validator type gap
+  const exception = await exceptionRepo.createExceptionForEvent(params.event, user.id, body as ScheduleExceptionCreateRequest, event.organizationId);
 
   // Log audit trail
   logger?.info({

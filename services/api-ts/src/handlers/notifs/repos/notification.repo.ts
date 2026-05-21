@@ -11,13 +11,23 @@ import {
   type Notification,
   type NewNotification,
   type NotificationFilters,
-  type CreateNotificationRequest
+  type CreateNotificationRequest,
+  type InternalNotificationRequest
 } from './notification.schema';
 import type { PersonRepository } from '../../person/repos/person.repo';
 import { ValidationError, NotFoundError, ForbiddenError, ExternalServiceError } from '@/core/errors';
 import * as OneSignal from '@onesignal/node-onesignal';
 import { SYSTEM_USER_ID } from '@/core/constants';
 import { subDays } from 'date-fns';
+
+/** Typed shape of the global app singleton used by the email service bridge. */
+interface AppGlobal {
+  app?: {
+    email?: {
+      queueEmail: (opts: Record<string, unknown>) => Promise<void>;
+    };
+  };
+}
 
 export class NotificationRepository extends DatabaseRepository<Notification, NewNotification, NotificationFilters> {
   private personRepo: PersonRepository;
@@ -95,7 +105,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
    * Create a notification for module integration
    * This is the primary method other modules will use to create notifications
    */
-  async createNotificationForModule(request: CreateNotificationRequest): Promise<Notification> {
+  async createNotificationForModule(request: CreateNotificationRequest | InternalNotificationRequest): Promise<Notification> {
     this.logger?.debug({ request }, 'Creating notification from module');
 
     // Validate recipient exists (optional - Person records may not exist for all User IDs)
@@ -132,10 +142,10 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
 
     // Create notification record with final status in single operation
     const notification = await this.createOne({
-      organizationId: request.organizationId,
+      organizationId: request.organizationId || '',
       recipient: request.recipient,
       type: request.type as Notification['type'],
-      channel: request.channel as Notification['channel'],
+      channel: (request.channel || ('channels' in request ? (request as InternalNotificationRequest).channels?.[0] : undefined) || 'in-app') as Notification['channel'],
       title: request.title,
       message: request.message,
       scheduledAt: request.scheduledAt || null,
@@ -349,7 +359,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
     switch (notification.channel) {
       case 'email': {
         // Use email service to queue the email
-        const emailService = (globalThis as any).app?.email; // structural: global app singleton access
+        const emailService = (globalThis as unknown as AppGlobal).app?.email;
         if (emailService) {
           // Map notification type to email template tag
           const templateTag = this.mapNotificationToEmailTemplate(notification.type);
@@ -359,7 +369,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
             const person = await this.personRepo.findOneById(notification.recipient);
             
             if (person && (person as Record<string, unknown>)['email']) {
-              await (emailService as unknown as { queueEmail: (opts: Record<string, unknown>) => Promise<void> }).queueEmail({
+              await emailService.queueEmail({
                 templateTags: [templateTag],
                 recipient: (person as Record<string, unknown>)['email'],
                 variables: {

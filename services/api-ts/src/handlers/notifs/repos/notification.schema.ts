@@ -123,6 +123,34 @@ export interface CreateNotificationRequest {
   targetApp?: string; // Optional: Filter push notifications by app tag (e.g., 'web', 'mobile')
 }
 
+/**
+ * Extended notification request for internal module use.
+ * Modules may attach arbitrary metadata (`data`), specify multiple delivery
+ * `channels`, and set a `priority` — none of which are part of the public API
+ * contract.  The notification service stores/forwards these as appropriate.
+ */
+export interface InternalNotificationRequest {
+  organizationId?: string;
+  recipient: string;
+  /** Accepts the standard enum values plus any module-specific type string. */
+  type: string;
+  title: string;
+  message: string;
+  scheduledAt?: Date;
+  relatedEntityType?: string;
+  relatedEntity?: string;
+  consentValidated?: boolean;
+  targetApp?: string;
+  /** Arbitrary payload forwarded to the notification consumer (e.g. invoiceId, bookingId). */
+  data?: Record<string, unknown>;
+  /** Preferred delivery channels (superset of the single `channel` field). */
+  channels?: Array<'email' | 'push' | 'in-app' | 'sms'>;
+  /** Single channel — kept for back-compat with CreateNotificationRequest. */
+  channel?: 'email' | 'push' | 'in-app';
+  /** Delivery priority hint. */
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+}
+
 // Filter interface for querying notifications
 export interface NotificationFilters {
   organizationId?: string;

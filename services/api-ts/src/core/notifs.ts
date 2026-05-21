@@ -11,7 +11,8 @@ import { NotificationRepository } from '@/handlers/notifs/repos/notification.rep
 import { PersonRepository } from '@/handlers/person/repos/person.repo';
 import type {
   Notification,
-  CreateNotificationRequest
+  CreateNotificationRequest,
+  InternalNotificationRequest
 } from '@/handlers/notifs/repos/notification.schema';
 
 /**
@@ -39,7 +40,7 @@ export interface NotificationService {
    * Create a notification (for module integration)
    * This is the primary method other modules will use
    */
-  createNotification(request: CreateNotificationRequest): Promise<Notification>;
+  createNotification(request: CreateNotificationRequest | InternalNotificationRequest): Promise<Notification>;
   
   /**
    * Process scheduled notifications (for job scheduler)
@@ -91,7 +92,7 @@ class NotificationServiceImpl implements NotificationService {
   /**
    * Create notification and send real-time WebSocket update
    */
-  async createNotification(request: CreateNotificationRequest): Promise<Notification> {
+  async createNotification(request: CreateNotificationRequest | InternalNotificationRequest): Promise<Notification> {
     const notification = await this.repo.createNotificationForModule(request);
 
     // Send real-time notification to user's WebSocket connection

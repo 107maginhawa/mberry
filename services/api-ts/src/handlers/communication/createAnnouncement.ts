@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateAnnouncementBody, CreateAnnouncementParams } from '@/generated/openapi/validators';
+import type { NewAnnouncement } from './repos/communication.schema';
 import { CommunicationsRepository } from './repos/communication.repo';
 import { auditAction } from '@/utils/audit';
 
@@ -28,7 +29,7 @@ export async function createAnnouncement(
     organizationId: params.organizationId,
     authorId: session.user.id,
     status: 'draft',
-  } as any); // structural: body spread type gap
+  } as NewAnnouncement);
 
   await auditAction(ctx, {
     action: 'create',

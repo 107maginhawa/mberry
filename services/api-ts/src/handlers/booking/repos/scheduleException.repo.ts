@@ -96,7 +96,7 @@ export class ScheduleExceptionRepository extends DatabaseRepository<ScheduleExce
       timezone: request.timezone || event[0].timezone,
       startDatetime: new Date(request.startDatetime),
       endDatetime: new Date(request.endDatetime),
-      reason: request.reason,
+      reason: request.reason ?? '',
       recurring: request.recurring || false,
       recurrencePattern: request.recurrencePattern,
       // Audit fields - exception created by owner

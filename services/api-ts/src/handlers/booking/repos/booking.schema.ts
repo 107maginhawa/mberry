@@ -491,9 +491,9 @@ export interface BookingCreateRequest {
 
 export interface ScheduleExceptionCreateRequest {
   timezone?: string; // Exception timezone (defaults to event timezone if not specified)
-  startDatetime: string; // Block start date/time (utcDateTime)
-  endDatetime: string; // Block end date/time (utcDateTime)
-  reason: string; // Reason for blocking (max 500 chars)
+  startDatetime: string | Date; // Block start date/time (utcDateTime) — accepts Date from Zod transform
+  endDatetime: string | Date; // Block end date/time (utcDateTime) — accepts Date from Zod transform
+  reason?: string; // Reason for blocking (max 500 chars) — optional per OpenAPI validator
   recurring?: boolean; // Whether this exception repeats (default: false)
   recurrencePattern?: RecurrencePattern; // Recurrence pattern
 }// Booking action request - matches TypeSpec

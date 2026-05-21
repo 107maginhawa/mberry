@@ -191,7 +191,7 @@ async function queueAutoRejectionNotifications(
       },
       channels: ['in-app', 'email', 'sms'],
       priority: 'high'
-    } as any); // structural: notification type gap
+    });
 
     // Provider notification - booking expired
     await notificationService.createNotification({
@@ -208,7 +208,7 @@ async function queueAutoRejectionNotifications(
       },
       channels: ['in-app', 'email'],
       priority: 'normal'
-    } as any); // structural: notification type gap
+    });
 
     logger.info({
       bookingId: booking.id,

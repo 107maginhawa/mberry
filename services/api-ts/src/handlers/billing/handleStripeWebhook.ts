@@ -201,7 +201,7 @@ async function handlePaymentIntentSucceeded(
       },
       channels: ['in-app', 'email'],
       priority: 'normal'
-    } as any); // structural: notification type gap
+    });
 
     logger.info(
       { invoiceId, paymentIntentId: paymentIntent.id, customerId: invoice.customer },
@@ -263,7 +263,7 @@ async function handlePaymentIntentFailed(
       },
       channels: ['in-app', 'email', 'sms'],
       priority: 'high'
-    } as any); // structural: notification type gap
+    });
 
     logger.info(
       { invoiceId, paymentIntentId: paymentIntent.id, customerId: invoice.customer },
@@ -405,7 +405,7 @@ async function handleChargeSucceeded(
       },
       channels: ['in-app', 'email'],
       priority: 'normal'
-    } as any); // structural: notification type gap
+    });
 
     // Notification for provider - payment received
     await notificationService.createNotification({
@@ -423,7 +423,7 @@ async function handleChargeSucceeded(
       },
       channels: ['in-app', 'email'],
       priority: 'normal'
-    } as any); // structural: notification type gap
+    });
 
     logger.info(
       { invoiceId: invoice.id, chargeId: charge.id, customerId: invoice.customer, merchantId: invoice.merchant },
@@ -494,7 +494,7 @@ async function handleChargeFailed(
       },
       channels: ['in-app', 'email'],
       priority: 'high'
-    } as any); // structural: notification type gap
+    });
 
     logger.info(
       { invoiceId: invoice.id, chargeId: charge.id, customerId: invoice.customer },

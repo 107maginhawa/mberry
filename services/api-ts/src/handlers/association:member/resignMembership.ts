@@ -48,7 +48,7 @@ export async function resignMembership(
     } as Partial<Membership>);
 
     // Void open invoices in same transaction
-    await (tx as any).update(duesInvoices) // structural: Drizzle transaction gap
+    await tx.update(duesInvoices)
       .set({ status: 'cancelled' })
       .where(
         and(
