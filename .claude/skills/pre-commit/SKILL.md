@@ -103,16 +103,7 @@ cd apps/account && bun run build
 bun run --filter '*' lint
 ```
 
-### 8. Cargo Check (if Rust touched)
-
-If you modified `services/cadence/` or `apps/account/src-tauri/`:
-
-```bash
-cd services/cadence && cargo check --all-targets
-cd apps/account/src-tauri && cargo check
-```
-
-### 9. Contract Suite (if API surface touched)
+### 8. Contract Suite (if API surface touched)
 
 If you modified handlers or TypeSpec:
 

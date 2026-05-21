@@ -1,0 +1,343 @@
+# Architecture Guide
+
+## Purpose
+
+This document explains how this application is technically structured and how new modules and vertical slices should be implemented.
+
+This is the **technical source of truth** for the repo. For other concerns:
+- **[README.md](./README.md)** — project overview, installation, commands
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** — development workflow, coding standards, PR process
+- **[CLAUDE.md](./CLAUDE.md)** — AI-specific instructions for Claude Code
+- **[specs/api/CONTRACT.md](./specs/api/CONTRACT.md)** — wire-level API contract
+- **[specs/api/IMPLEMENTING.md](./specs/api/IMPLEMENTING.md)** — playbook for adding a new server impl or client SDK
+
+## Architecture Philosophy
+
+**Spec-first, polyglot-ready monorepo.** The OpenAPI document at `specs/api/dist/openapi/openapi.json` is the single source of truth. Every server implementation and client SDK is generated from it.
+
+**Vertical slices over horizontal layers.** New features are built end-to-end (TypeSpec → handler → frontend → tests) rather than building all APIs first, then all frontend.
+
+**Convention over configuration.** Module structure, naming, error handling, and testing patterns are standardized. Follow the exemplars.
+
+## Tech Stack
+
+```
+Frontend:       Vite, React 19, TanStack Router, TanStack Query, TypeScript
+UI:             Radix UI primitives (shadcn/ui patterns), Tailwind CSS
+Backend:        Hono (HTTP framework), Bun runtime
+Database:       PostgreSQL 16, Drizzle ORM
+Validation:     Zod (auto-generated from TypeSpec via @hono/zod-validator)
+Auth:           Better-Auth
+API Spec:       TypeSpec → OpenAPI 3.0
+SDK:            @monobase/sdk-ts (auto-generated via @hey-api/openapi-ts)
+Testing:        Bun test (unit/integration), Playwright (E2E), Hurl + Schemathesis (contract/fuzz)
+Package Mgr:    Bun workspaces
+```
+
+## Repository Structure
+
+```
+monobase/
+├── apps/
+│   ├── account/              # Cloud account app (auth, profile, settings) [port 3002]
+│   ├── admin/                # Platform ops dashboard [port 3003]
+│   └── memberry/             # Product app (membership, dues, events) [port 3004]
+├── packages/
+│   ├── eslint-config/        # Shared ESLint flat configs
+│   ├── sdk-ts/               # Generated TS client SDK + TanStack Query hooks
+│   └── typescript-config/    # Shared TS configs
+├── services/
+│   └── api-ts/               # Reference Hono + Drizzle API implementation
+├── specs/
+│   └── api/                  # TypeSpec sources, OpenAPI output, contract tests
+│       ├── src/modules/      # TypeSpec definitions per module
+│       ├── dist/             # Generated OpenAPI + TS types
+│       └── tests/contract/   # Hurl contract test scenarios
+├── docs/
+│   ├── templates/            # PRD, module spec, slice spec, test plan templates
+│   └── checklists/           # Vertical slice, TDD, QA review checklists
+└── scripts/                  # Build and test utilities
+```
+
+## Module Structure
+
+Each handler module lives in `services/api-ts/src/handlers/<module>/` and contains:
+
+```
+handlers/<module>/
+├── createEntity.ts           # Handler: create
+├── getEntity.ts              # Handler: read
+├── updateEntity.ts           # Handler: update
+├── deleteEntity.ts           # Handler: delete
+├── listEntities.ts           # Handler: list (paginated)
+├── repos/
+│   ├── entity.schema.ts      # Drizzle schema definition
+│   └── entity.repo.ts        # Repository (extends DatabaseRepository)
+├── jobs/                     # Background job definitions (optional)
+└── utils/                    # Module-specific utilities (optional)
+```
+
+## Vertical Slice Structure
+
+A vertical slice is one complete workflow implemented end-to-end. Two variants:
+
+### Full-Stack Slice (user-facing features)
+- TypeSpec API definition
+- Generated routes, validators, types
+- Handler implementation
+- Frontend route/component
+- Client + server validation
+- Permission checks
+- Tests (unit, integration, contract)
+
+### Backend-Only Slice (webhooks, jobs, notifications)
+- TypeSpec API definition (if external-facing)
+- Handler implementation
+- Job/webhook processing
+- Tests
+
+### Before/After: Implementation Order
+
+**Before (horizontal — how existing modules were built):**
+Built all person handlers, then all booking handlers, then all billing handlers.
+
+**After (vertical — how new features should be built):**
+Build `create-appointment` end-to-end (TypeSpec → handler → frontend → tests) before starting `update-appointment`.
+
+## Data Flow
+
+```
+TypeSpec → OpenAPI → Generated Routes/Validators → Handler Implementations → Repositories → PostgreSQL
+                  → Generated SDK (sdk-ts) → TanStack Query hooks → React Components
+```
+
+## Handler Pattern
+
+The actual implementation pattern (NOT "Router → Validators → Service → Handlers"):
+
+1. **Routes** are auto-generated in `src/generated/openapi/routes.ts` and **validators** (Zod schemas) in `src/generated/openapi/validators.ts`. Never edit these.
+2. **Handler functions** are the business logic layer. Each receives a `ValidatedContext<TBody>` and accesses dependencies via `ctx.get()`:
+   - `ctx.get('database')` — Drizzle database instance
+   - `ctx.get('logger')` — Pino logger
+   - `ctx.get('user')` or `ctx.get('session')` — authenticated user/session
+   - `ctx.get('audit')` — audit logger
+   - `ctx.req.valid('json')` — validated request body (typed by generated validators)
+3. **Repositories** extend `DatabaseRepository` from `@/core/database.repo`, which provides `createOne`, `findOneById`, `findOne`, `updateOneById`, `deleteOneById`, `findMany`, `findManyWithPagination`. Subclasses implement `buildWhereConditions` for entity-specific filtering, and may add domain-specific helpers (e.g. `reviewExists`, `findOneWithLineItems`).
+
+## API Pattern
+
+Every endpoint uses the same request/response flow:
+
+1. Request → generated Zod validator (input shape enforced)
+2. Validated body → handler function (typed `ctx.req.valid('json')`)
+3. Handler → repository methods → Drizzle query → PostgreSQL
+4. Response → typed JSON body (shape matches TypeSpec definition)
+
+## Validation Pattern
+
+- **Server-side**: Zod validators auto-generated from TypeSpec. Applied by `@hono/zod-validator` middleware in generated routes. Server-side validation is always authoritative.
+- **Client-side**: Optional, for UX. Never rely on client-side validation alone.
+- **Error format**: Validation errors return 400 with `fieldErrors` (per-field) and `globalErrors` arrays. See Error Handling below.
+
+## Authentication and Authorization
+
+- **Better-Auth** provides session-based authentication (cookie + bearer token).
+- **Middleware stack**: `authMiddleware` validates session → `requireRole('admin')` checks permissions.
+- Roles are stored on the user record. Role checks use string matching (`user.role.includes('admin')`).
+- **No API key auth** — session-only for now.
+
+## Consent Model
+
+Consent management is planned but **not yet implemented** in the database schema. No JSONB consent fields exist on the Person model currently. See audit docs for current Person table structure.
+
+## Error Handling
+
+Full error hierarchy in `services/api-ts/src/core/errors.ts`:
+
+| Error Class | HTTP Status | Code | When to Use |
+|---|---|---|---|
+| `AppError` | 500 | `INTERNAL_ERROR` | Base class; unexpected errors |
+| `UnauthorizedError` | 401 | `UNAUTHORIZED` | Missing/invalid auth |
+| `ForbiddenError` | 403 | `FORBIDDEN` | Authenticated but insufficient role |
+| `ValidationError` | 400 | `VALIDATION_ERROR` | Input fails validation |
+| `BusinessLogicError` | 422 | `BUSINESS_ERROR` | Business rule violation |
+| `ConflictError` | 409 | `CONFLICT` | Duplicate or state conflict |
+| `NotFoundError` | 404 | `NOT_FOUND` | Resource doesn't exist |
+| `RateLimitError` | 429 | `RATE_LIMIT` | Too many requests (sets `Retry-After` header) |
+| `AuthenticationError` | 401 | `AUTHENTICATION_ERROR` | Auth mechanism failure (includes scheme info) |
+| `AuthorizationError` | 403 | `AUTHORIZATION_ERROR` | Permission failure (includes required/actual permissions) |
+| `TimeoutError` | 408 | `TIMEOUT_ERROR` | Operation timed out |
+| `ExternalServiceError` | 503 | `EXTERNAL_SERVICE_ERROR` | Third-party service failure |
+| `InternalError` | 500 | `INTERNAL_ERROR` | Internal server error with context |
+| `DeferredScopeError` | 501 | `DEFERRED_SCOPE` | Handler stub for features deferred to future scope |
+
+**Multiple response shapes**: Different error types return different response bodies. `RateLimitError` includes `limit`/`usage`/`resetTime`. `AuthenticationError` includes `scheme`/`supportedSchemes`. `NotFoundError` includes `resourceType`/`suggestions`. Zod validation errors include `fieldErrors`/`globalErrors`. Do not assume a single "standard" error shape.
+
+## Testing Architecture
+
+| Type | Tool | Command | When |
+|---|---|---|---|
+| Unit/Integration | Bun test | `cd services/api-ts && bun test` | Business logic, repos, utils |
+| E2E | Playwright | `cd apps/account && bun run test:e2e` | Critical user flows |
+| Contract | Hurl | `bun run test:contract` | API shape compliance |
+| Fuzz | Schemathesis | `bun run test:contract:fuzz` | Spec/impl drift detection |
+
+**Testing priority** (what to test first):
+1. Business rules
+2. Validation (valid + invalid inputs)
+3. Permissions (authorized + unauthorized)
+4. State transitions
+5. API contracts
+6. Critical user flows
+7. Error handling
+
+**Contract tests are first-class quality gates.** Every API change must pass the Hurl suite before merge.
+
+## Generated vs Hand-Written Boundary
+
+| Path | Generated? | Action |
+|---|---|---|
+| `services/api-ts/src/generated/openapi/*` | Yes — NEVER EDIT | Regenerate: `cd services/api-ts && bun run generate` |
+| `services/api-ts/src/generated/better-auth/*` | Yes — NEVER EDIT | Auth schema auto-generated |
+| `services/api-ts/src/generated/migrations/*` | Yes — NEVER EDIT | Generate: `cd services/api-ts && bun run db:generate` |
+| `specs/api/dist/*` | Yes — NEVER EDIT | Regenerate: `cd specs/api && bun run build` |
+| `packages/sdk-ts/src/generated/*` | Yes — NEVER EDIT | Regenerate: `cd packages/sdk-ts && bun run build` |
+| `specs/api/src/modules/*.tsp` | Hand-written | TypeSpec API definitions |
+| `services/api-ts/src/handlers/**/*.ts` | Hand-written | Handler business logic |
+| `services/api-ts/src/handlers/**/repos/*.schema.ts` | Hand-written | Drizzle database schemas |
+
+## Code Generation Pipeline
+
+Full flow when making API changes:
+
+```bash
+# 1. Edit TypeSpec definitions
+#    specs/api/src/modules/<module>.tsp
+
+# 2. Generate OpenAPI + TS types
+cd specs/api && bun run build
+
+# 3. Generate routes, validators, handler stubs
+cd ../../services/api-ts && bun run generate
+
+# 4. Implement handler business logic
+#    services/api-ts/src/handlers/<module>/<operation>.ts
+
+# 5. Regenerate SDK (if API changed)
+cd ../../packages/sdk-ts && bun run build
+
+# 6. Run contract tests
+bun run test:contract
+
+# 7. Run unit tests
+cd services/api-ts && bun test
+```
+
+## How to Add a New Module
+
+1. Read or write the module spec (use `docs/templates/MODULE_SPEC.template.md`).
+2. Define TypeSpec API in `specs/api/src/modules/<module>.tsp`.
+3. Run code generation pipeline (steps 2-3 above).
+4. Create handler directory: `services/api-ts/src/handlers/<module>/`.
+5. Create Drizzle schema in `repos/<entity>.schema.ts`.
+6. Create repository in `repos/<entity>.repo.ts` (extend `DatabaseRepository`).
+7. Generate database migration: `cd services/api-ts && bun run db:generate`.
+8. Implement the **first vertical slice** — not the entire module at once.
+9. Write tests for the first slice.
+10. Run quality gates. Iterate.
+
+## How to Add a New Vertical Slice
+
+1. Read or write the slice spec (use `docs/templates/SLICE_SPEC.template.md`).
+2. Inspect the Pattern Exemplar that matches your slice type.
+3. Write/update tests first for business rules, validation, permissions.
+4. Define or update TypeSpec API definitions.
+5. Run code generation pipeline.
+6. Implement handler.
+7. Implement frontend (if full-stack slice).
+8. Regenerate SDK if API changed.
+9. Run contract tests + unit tests.
+10. Verify against acceptance criteria.
+11. Do not modify unrelated modules.
+
+## Naming Conventions
+
+| Entity | Convention | Example |
+|---|---|---|
+| Handler file | `camelCase` verb + noun | `createBooking.ts` |
+| Schema file | `kebab-case.schema.ts` | `booking.schema.ts` |
+| Repo file | `kebab-case.repo.ts` | `booking.repo.ts` |
+| Test file | `kebab-case.test.ts` | `booking.test.ts` |
+| TypeSpec file | `kebab-case.tsp` | `booking.tsp` |
+| Route path | `/module/resource` | `/booking/slots` |
+| DB table | `snake_case` | `booking_slots` |
+| TS type | `PascalCase` | `BookingSlot` |
+| Config env var | `SCREAMING_SNAKE` | `DATABASE_URL` |
+
+## Pattern Exemplar Files
+
+When implementing a new feature, inspect these modules first to copy the existing pattern:
+
+| Pattern | Exemplar Module | Key Files | Notes |
+|---|---|---|---|
+| **Canonical CRUD** | `reviews` | `createReview.ts`, `repos/review.repo.ts` | Simplest: 4 handlers, 1 repo, no external service deps |
+| Auth-coupled CRUD | `person` | `createPerson.ts`, `repos/person.repo.ts` | PII, consent, 1:1 user-person |
+| Compliance logging | `audit` | `listAuditLogs.ts` | DB-only, admin role check |
+| Notification state | `notifs` | `listNotifications.ts`, `markNotificationAsRead.ts` | DB-only handlers (push delivery is external) |
+| Time-based scheduling | `booking` | Hosts, slots, events, exceptions | Complex module |
+| External service | `billing` | Stripe Connect integration | Stripe API calls |
+| File storage | `storage` | S3/MinIO presigned URL pattern | S3 presigned URLs |
+| Real-time | `comms` | WebRTC + chat rooms | Chat DB + video rooms |
+| Email templates | `email` | Handlebars templates + queue | SMTP + templates |
+| Background jobs | `booking/jobs/` | `slotGenerator.ts`, `confirmationTimer.ts` | Job definition patterns |
+
+> AI should NEVER invent a new pattern without checking exemplars first.
+
+## Quality Gates
+
+### Commands
+
+```bash
+bun run typecheck        # TypeScript checking across all workspaces
+bun run lint             # ESLint across all workspaces
+bun test                 # Unit tests (api-ts)
+bun run build            # Build all workspaces
+bun run test:contract    # Hurl contract tests (requires running API)
+bun run test:contract:fuzz  # Schemathesis fuzz testing
+```
+
+### CI
+
+All quality gates run on every PR. Contract tests boot the API, run Hurl, then run Schemathesis against the OpenAPI spec.
+
+### Local Pre-Push Check
+
+```bash
+bun run typecheck && bun run lint && bun test && bun run build
+```
+
+## Monorepo Strategy
+
+Workspaces: `apps/*`, `packages/*`, `services/*`, `specs/*`. All share a root `bun.lock`. Cross-workspace imports use `@monobase/<package>` aliases. Never import across workspaces by relative path.
+
+## What Not to Do
+
+- Do not invent a new folder structure without updating this document.
+- Do not put business logic directly in UI components.
+- Do not put complex business logic directly in generated routes.
+- Do not build all APIs before the frontend workflow is validated.
+- Do not build frontend-only screens without real backend behavior.
+- Do not skip permission checks for protected actions.
+- Do not skip tests for business rules, validation, permissions, and state transitions.
+- Do not change unrelated modules as part of a slice.
+- Do not edit generated files.
+
+## App-Specific Deviations
+
+### Existing modules built horizontally
+
+The existing 25 handler modules were built pre-TDD using the horizontal approach (all handlers, then tests). New features should use vertical slices. Do not refactor existing modules to vertical slices unless there is a concrete reason.
+
+### Known code issues
+
+Documented in brownfield audit reports under `docs/audits/`. Key items tracked in `.planning/` state files. See CLAUDE.md "P0/P1 Risk Summary" for current status.

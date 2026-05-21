@@ -25,11 +25,9 @@ workspace.
 **Monorepo Structure**:
 - `apps/` - Frontend applications:
   - `account/` - Vite + TanStack Router reference app (auth, profile, settings)
-  - `account/src-tauri/` - Tauri 2 desktop/mobile wrapper (Rust). Embeds api-ts (via the `api-ts-embedded` crate / QuickJS runtime) + the cadence P2P sync engine for offline-first operation. Optional — only built when packaging desktop/mobile.
 - `services/` - Backend services:
   - `api-ts/` - Reference TypeScript API impl (Hono + Drizzle). Sibling impls (`api-rs`, `api-go`, …) are documented in `specs/api/IMPLEMENTING.md` but not yet present.
-  - `api-ts-embedded/` - Rust crate that bundles `api-ts` into a QuickJS runtime (via `rquickjs` + esbuild) for offline-first Tauri embedding. Exposes `ApiTsEmbedded::new(db_path).request(method, path, body, headers) -> ApiTsResponse` to the host. JS bundle (`dist/bundle.js.gz`) is built by `cargo build` via `build.rs`.
-  - `cadence/` - P2P sync engine (Rust + Iroh transport, SQLite/Valkey metadata backends, JWT scope auth). Embedded into `apps/account/src-tauri` for offline-first sync; can also run as a standalone hub. See `services/cadence/README.md`.
+
 - `specs/api/` - TypeSpec API definitions; compiled to OpenAPI + TypeScript types. Also home of the contract docs and Hurl contract tests under `tests/contract/`.
 - `packages/` - Shared packages:
   - `eslint-config/` - Shared ESLint flat configs (`base`, `react`, `next`)
@@ -269,10 +267,7 @@ cd apps/account && bun run test:e2e     # E2E tests
 ### What Exists
 - ✅ **apps/account** - Reference Vite + TanStack Router app
 - ✅ **apps/account/src/components/** - Inlined shadcn/ui primitives
-- ✅ **apps/account/src-tauri/** - Tauri 2 desktop/mobile wrapper (Rust + QuickJS via api-ts-embedded + cadence)
 - ✅ **services/api-ts/** - Reference Hono + Drizzle API
-- ✅ **services/api-ts-embedded/** - Rust crate that bundles api-ts into QuickJS for offline Tauri (consumed by account/src-tauri)
-- ✅ **services/cadence/** - Rust P2P sync engine (compiles standalone; embedded by account Tauri)
 - ✅ **specs/api/** (`@monobase/api-spec`) - TypeSpec sources + generated OpenAPI + TS types
 - ✅ **packages/sdk-ts/** - Auto-generated TanStack Query hooks + hand-written client/flows/utils
 - ✅ **packages/eslint-config/** - Shared ESLint flat configs
@@ -295,12 +290,6 @@ To scaffold a new app, copy `apps/account/` and update `package.json` name + `vi
 - This template ships **no domain-vertical apps or modules**. Add your own
   (e.g., `apps/admin`, `services/api-ts/src/handlers/tenant/`) on top of the base.
 
-### Known In-Progress Areas
-- `apps/account/src-tauri/src/sync.rs` wires the cadence imports but the
-  `SyncEngine`/`SqliteBackend` integration in `init`/`start` is still a
-  stub (see `TODO` comments). `cargo check` is green; runtime sync is
-  not yet activated end-to-end.
-
 ### P0/P1 Risk Summary (from Codebase Audit)
 
 Full audit: `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md`
@@ -316,18 +305,6 @@ Full audit: `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md`
 - TypeSpec 100% coverage (8 inline app.ts routes remain hand-wired)
 - Audit log filter bug (eventType/category params don't filter)
 - BR-35 through BR-40 (deferred in Phase 18)
-
-### Working with Cadence (Rust)
-- Cadence lives at `services/cadence/` and is a Cargo crate independent of
-  the Bun workspaces. Build with `cd services/cadence && cargo check
-  --all-targets`. Full test suite (`cargo test`) needs Postgres + Valkey via
-  `services/cadence/docker-compose.deps.yml`.
-- The account Tauri wrapper consumes cadence via a `path = "../../../services/cadence"`
-  dependency in `apps/account/src-tauri/Cargo.toml`. Run
-  `cd apps/account/src-tauri && cargo check` after touching either crate.
-- Tauri icons live in `apps/account/src-tauri/icons/` and are committed.
-  Regenerate from the SVG via:
-  `bunx tauri icon apps/account/public/favicon.svg --output apps/account/src-tauri/icons`
 
 ## Development Protocol
 

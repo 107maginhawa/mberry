@@ -6,15 +6,11 @@
  *
  * 1. Provide the initial `baseUrl` so generated SDK functions can be called
  *    before the React provider mounts (e.g. from non-React contexts).
- * 2. Inject a custom fetch that routes through `getTransport()` when running
- *    inside Tauri's embedded mode, preserving IPC support without leaking
- *    Tauri concerns into the generated client.
+ * 2. Inject a custom fetch with credentials for session cookie support.
  *
  * Kept independent of `./generated/*` so this file compiles before the very
  * first run of `bun run generate`.
  */
-
-import { getTransport, isTauriEnvironment, isEmbeddedMode } from './transport';
 
 const DEFAULT_BASE_URL = 'http://localhost:7213';
 
@@ -40,63 +36,12 @@ export function getSdkBaseUrl(): string {
   return baseUrl;
 }
 
-function headersToRecord(headers: HeadersInit | undefined): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (!headers) return out;
-  if (headers instanceof Headers) {
-    headers.forEach((value, key) => {
-      out[key] = value;
-    });
-  } else if (Array.isArray(headers)) {
-    for (const [key, value] of headers) out[key] = value;
-  } else {
-    Object.assign(out, headers);
-  }
-  return out;
-}
-
-function bodyToString(body: BodyInit | null | undefined): string | undefined {
-  if (body == null) return undefined;
-  if (typeof body === 'string') return body;
-  // The IPC transport only carries string bodies. Generated SDK calls send JSON,
-  // so this is fine for the common path. Multipart/binary requests should stay
-  // on HTTP transport (multi-step storage upload uses a separate code path).
-  return undefined;
-}
-
 // Plain function type instead of `typeof fetch` — Bun's `typeof fetch` requires
 // the `preconnect` static method which we don't (and shouldn't) implement.
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 const customFetch: FetchFn = async (input, init) => {
-  // HTTP path (default for browsers and non-embedded Tauri): native fetch with
-  // credentials so Better-Auth session cookies ride along.
-  if (!isTauriEnvironment() || !isEmbeddedMode()) {
-    return fetch(input, { ...init, credentials: init?.credentials ?? 'include' });
-  }
-
-  // IPC path: bridge through the existing transport layer so requests reach
-  // the embedded backend via Tauri commands.
-  const url =
-    typeof input === 'string'
-      ? input
-      : input instanceof URL
-        ? input.toString()
-        : input.url;
-  const path = url.startsWith(baseUrl) ? url.slice(baseUrl.length) : url;
-
-  const transport = getTransport();
-  const resp = await transport.request({
-    method: (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase(),
-    url: path,
-    body: bodyToString(init?.body ?? null),
-    headers: headersToRecord(init?.headers),
-  });
-
-  return new Response(resp.body || null, {
-    status: resp.status,
-    headers: resp.headers,
-  });
+  return fetch(input, { ...init, credentials: init?.credentials ?? 'include' });
 };
 
 /**
@@ -181,7 +126,7 @@ export const errorInterceptor: (
  * cast at the end bridges the inferred `T` with our spread overrides without
  * pulling in the generated type.
  *
- * Wires the bootstrap `baseUrl` and a Tauri-aware fetch into the generated client.
+ * Wires the bootstrap `baseUrl` and credentialed fetch into the generated client.
  * The error interceptor is installed separately (see provider.tsx) because the
  * interceptor registry lives on the client *instance*, not the config object.
  */

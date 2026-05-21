@@ -47,7 +47,6 @@ for the playbook to add a new impl/SDK in any language.
 memberry/
 ├── apps/                      # Frontend applications
 │   ├── account/              # Auth, profile, settings (port 3002)
-│   │   └── src-tauri/        # Tauri 2 desktop/mobile wrapper (Rust + QuickJS)
 │   ├── admin/                # Platform ops dashboard (port 3003)
 │   └── memberry/             # Product app — membership, dues, events (port 3004)
 ├── packages/                  # Shared libraries
@@ -56,9 +55,7 @@ memberry/
 │   ├── ui/                   # Shared UI components (shadcn/ui primitives)
 │   └── typescript-config/    # Shared TypeScript configurations
 ├── services/                  # Backend services
-│   ├── api-ts/               # Reference TypeScript impl (Hono + Bun)
-│   ├── api-ts-embedded/      # Rust crate bundling api-ts into QuickJS for offline Tauri
-│   └── cadence/              # P2P sync engine (Rust + Iroh) — embedded in account Tauri, also runs as a hub
+│   └── api-ts/               # Reference TypeScript impl (Hono + Bun)
 ├── specs/                     # API contract
 │   └── api/                  # TypeSpec source + CONTRACT.md + IMPLEMENTING.md + tests/
 ├── scripts/                   # Repo-level scripts (contract test runner, etc.)
@@ -78,13 +75,12 @@ documented in `specs/api/IMPLEMENTING.md` but not yet scaffolded.
 - **PostgreSQL** >= 14
 - **Node.js** >= 18 (for some tooling compatibility)
 - **Git** for version control
-- **Rust** (1.90+) — only required to build `services/cadence` or the account Tauri desktop wrapper
+- **Rust** (1.90+) — only required for future sibling impls (e.g. `services/api-rs`)
 
 ### Optional Services
 - **AWS S3** or **MinIO** for file storage
 - **SMTP** server or **Postmark** for email delivery
 - **OneSignal** for push notifications
-- **Valkey/Redis** — only for cadence's distributed metadata backend (SQLite backend works without it)
 - **Hurl** + **Schemathesis** — for `bun run test:contract` and `:fuzz` (CI uses both)
 
 ## Quick Start

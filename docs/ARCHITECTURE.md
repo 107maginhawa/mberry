@@ -11,13 +11,10 @@
 memberry/
 ├── apps/
 │   ├── account/          # Auth, profile, settings (Vite + TanStack Router)
-│   │   └── src-tauri/    # Tauri 2 desktop/mobile wrapper (Rust + QuickJS)
 │   ├── admin/            # Platform ops dashboard
 │   └── memberry/         # Product app — membership, dues, events, training
 ├── services/
-│   ├── api-ts/           # Reference Hono + Drizzle API
-│   ├── api-ts-embedded/  # Rust crate: bundles api-ts into QuickJS for offline Tauri
-│   └── cadence/          # Rust P2P sync engine (Iroh transport, SQLite/Valkey)
+│   └── api-ts/           # Reference Hono + Drizzle API
 ├── specs/
 │   └── api/              # TypeSpec definitions → OpenAPI → TS types (@monobase/api-spec)
 │       └── tests/contract/  # Hurl contract suite (27 scenarios, 44 files)
@@ -253,15 +250,3 @@ Security-filtered in production. Consistent JSON format: `{ requestId, timestamp
 
 ---
 
-## Offline-First / Desktop Architecture
-
-```
-apps/account/src-tauri/
-├── Tauri 2 shell (Rust)
-├── api-ts-embedded (QuickJS runtime with bundled api-ts)
-└── cadence (P2P sync engine via Iroh)
-```
-
-`services/api-ts-embedded/` bundles the full api-ts into a QuickJS runtime via `rquickjs` + esbuild. Exposes `ApiTsEmbedded::new(db_path).request(method, path, body, headers) -> ApiTsResponse`.
-
-`services/cadence/` provides P2P sync (Iroh transport, SQLite/Valkey metadata, JWT scope auth). Currently scaffolded — `sync.rs` wiring is stub-only.

@@ -28,7 +28,7 @@ import {
 
 Hand-written extras live alongside the generated code:
 
-- `@monobase/sdk-ts/client` — `createClient`, `SdkError`, Tauri-aware fetch transport
+- `@monobase/sdk-ts/client` — `createClient`, `SdkError`, credentialed fetch transport
 - `@monobase/sdk-ts/flows/file-upload` — multi-step presign + upload + commit
 - `@monobase/sdk-ts/flows/billing-onboarding` — Stripe Connect orchestration
 - `@monobase/sdk-ts/utils/patch` — `buildPatch(current, update, { nullable: [...] })` typed PATCH builder
