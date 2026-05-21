@@ -29,7 +29,7 @@
 | Auth | All authenticated |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-051 |
+| Workflow | WF-051, WF-055 |
 | Business rules | BR-16, M8-R4 |
 
 **Query Parameters**
@@ -255,7 +255,7 @@ Same fields as POST (all optional for partial update).
 | Auth | president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-051 |
+| Workflow | WF-051, WF-054 |
 | Business rules | M8-R3 |
 
 **Response** `200 OK`
@@ -338,7 +338,7 @@ Same fields as POST (all optional for partial update).
 | Auth | All authenticated |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-052 |
+| Workflow | WF-052, WF-057 |
 | Business rules | BR-27, M8-R1, M8-R2, M8-R5 |
 
 **Request Body**
@@ -408,7 +408,7 @@ If at capacity (waitlisted):
 | Auth | Self (own registration) or officer |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-052 |
+| Workflow | WF-052, WF-057 |
 | Business rules | M8-R5, M8-R6 |
 
 **Response** `204 No Content`
@@ -434,7 +434,7 @@ No response body.
 | Auth | All authenticated |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-052 |
+| Workflow | WF-052, WF-056 |
 | Business rules | -- |
 
 **Query Parameters**
@@ -606,7 +606,7 @@ No response body.
 | EventPublished | Event status changed to published | orgId, eventId, title, startDate, visibility |
 | EventCancelled | Event cancelled | orgId, eventId, title, affectedRegistrations |
 | EventCompleted | Event marked completed | orgId, eventId, attendeeCount |
-| RegistrationConfirmed | Registration confirmed (direct or waitlist promotion) | orgId, eventId, personId |
+| RegistrationConfirmed | Registration confirmed (direct or waitlist promotion, WF-057) | orgId, eventId, personId |
 | AttendanceConfirmed | Check-in recorded | orgId, eventId, personId, method |
 
 ## 4. Domain Events Consumed

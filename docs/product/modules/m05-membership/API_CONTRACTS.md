@@ -29,7 +29,7 @@
 | Auth | super, admin, support, president, VP, secretary, treasurer, board-member, officer, staff, member (R) |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-030 |
+| Workflow | WF-030, WF-032 |
 | Business rules | BR-01, BR-02, BR-21 |
 
 **Query Parameters**
@@ -103,7 +103,7 @@
 | Auth | super, admin, support, president, VP, secretary, treasurer, board-member, officer, staff, member (own) |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-030 |
+| Workflow | WF-030, WF-032 |
 | Business rules | BR-01, BR-02 |
 
 **Response** `200 OK`
@@ -166,7 +166,7 @@
 | Auth | super, admin, president (2FA), secretary (2FA) |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-030 |
+| Workflow | WF-030, WF-035 |
 | Business rules | BR-22, BR-23, M5-R2, M5-R5 |
 
 **Request Body**
@@ -359,7 +359,7 @@
 | Auth | super, admin, president (2FA), secretary (2FA) |
 | Rate limit | Bulk operations (10 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-031 |
+| Workflow | WF-031, WF-037 |
 | Business rules | BR-22, M5-R2, M5-R3, M5-R8 |
 
 **Request Body** `multipart/form-data`
@@ -420,7 +420,7 @@
 | Auth | super, admin, president (2FA), secretary (2FA) |
 | Rate limit | Bulk operations (10 req/min) |
 | Idempotency | Required |
-| Workflow | WF-031 |
+| Workflow | WF-031, WF-037 |
 | Business rules | M5-R3, M5-R8 |
 
 **Request Body**
@@ -672,7 +672,7 @@
 
 | Event Name | Source | Side Effect |
 |------------|--------|-------------|
-| PaymentRecorded | M06 | Update dues_expiry_date; status recomputes to Active |
+| PaymentRecorded | M06 | Update dues_expiry_date; status recomputes to Active (WF-035: Reinstatement) |
 | PaymentRefunded | M06 | Reverse dues_expiry_date extension; status may revert |
 | MemberSuspended | M04 | Set suspendedAt timestamp; access revoked |
 | MemberRemoved | M04 | Set removedAt timestamp; org membership terminated |

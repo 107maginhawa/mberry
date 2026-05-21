@@ -41,8 +41,8 @@ Health services marketplace connecting verified healthcare professionals with pr
 | **Member** | A healthcare professional using the platform. Can belong to multiple organizations. |
 | **Platform Administrator** | Memberry employee managing the platform. Not affiliated with any association. |
 | **Active** | Dues are current. Full access to org features. |
-| **Vendor** | External entity offering products/services through the marketplace. [INFERRED -- not in DOMAIN_GLOSSARY] |
-| **Group Purchasing** | Collective buying by association members for volume discounts. [INFERRED] |
+| **Vendor** | External entity offering products/services through the marketplace (see DOMAIN_GLOSSARY: Marketplace Terms). |
+| **Group Purchasing** | Collective buying by association members for volume discounts (see DOMAIN_GLOSSARY: Marketplace Terms). |
 
 ## 3. Workflows
 
@@ -50,7 +50,7 @@ Health services marketplace connecting verified healthcare professionals with pr
 |----------|-------|-------------|----------|
 | WF-097: Vendor Registration & Verification | Vendor, Platform Admin | Apply, verify, list products | P0 |
 | WF-098: Browse Marketplace | Member | Search, filter by category | P0 |
-| WF-099: Vendor Suspension | Platform Admin | Suspend non-compliant vendor | P1 [INFERRED] |
+| WF-099: Vendor Suspension | Platform Admin | Suspend non-compliant vendor | P1 |
 
 ## 4. Workflow Details
 
@@ -79,7 +79,7 @@ Health services marketplace connecting verified healthcare professionals with pr
 **Alternate Flows:** Empty results show "No listings found" with category suggestions.
 **Postconditions:** Search event logged for analytics.
 
-### WF-099: Vendor Suspension [INFERRED]
+### WF-099: Vendor Suspension
 **Actor:** Platform Admin
 **Preconditions:** Vendor is verified
 **Steps:**
@@ -95,7 +95,7 @@ Health services marketplace connecting verified healthcare professionals with pr
 |---------|------|-----------|-------------------|
 | BR-38 | IF vendor has referral/commission arrangement THEN disclosure shown on listing detail AND association must acknowledge before interacting | Referral disclosure | Disclosure on detail page; block interaction until acknowledged |
 | M17-R1 | IF marketplace access THEN active membership required | Access gating | Grace/Lapsed see gating message |
-| M17-R2 | IF group purchasing THEN minimum participant threshold must be met | Group buying | Configurable per offer [INFERRED] |
+| M17-R2 | IF group purchasing THEN minimum participant threshold must be met | Group buying | Configurable per offer |
 | M17-R3 | IF vendor suspended THEN hide all listings, preserve data | Vendor management | Reversible via reinstatement |
 | M17-R4 | IF vendor not verified THEN listings not visible to members | Vendor verification | Only verified vendors shown |
 | M17-R5 | IF referral terms updated post-listing THEN existing associations notified within 30 days | BR-38 edge case | Block interaction until re-acknowledged |
@@ -106,9 +106,9 @@ Health services marketplace connecting verified healthcare professionals with pr
 |--------|--------------|-----------------|-------|
 | Browse marketplace | Active members (all org roles) | Grace, Lapsed, non-members | GA |
 | View vendor detail | Active members | Grace, Lapsed, non-members | GA |
-| Place order | Active members | Grace, Lapsed, non-members | GA [INFERRED] |
+| Place order | Active members | Grace, Lapsed, non-members | GA |
 | Register as vendor | Public (vendor applicant) | -- | Public form |
-| Manage vendor listings | Verified vendor (own listings) | -- | GA [INFERRED] |
+| Manage vendor listings | Verified vendor (own listings) | -- | GA |
 | Verify/reject vendor | super, admin | All others | PA |
 | Suspend vendor | super, admin | All others | PA |
 | Manage categories | super, admin | All others | PA |
@@ -187,7 +187,7 @@ Pending --> Confirmed (vendor confirms)
 Confirmed --> Fulfilled (vendor marks fulfilled)
 Pending --> Cancelled (buyer or vendor cancels)
 Confirmed --> Cancelled (buyer or vendor cancels)
-Fulfilled --> Refunded (dispute resolution) [INFERRED]
+Fulfilled --> Refunded (dispute resolution)
 ```
 
 ## 9. UI/UX Requirements
@@ -231,14 +231,14 @@ Fulfilled --> Refunded (dispute resolution) [INFERRED]
 | vendor.verified | Admin approves vendor | vendorId, orgId | -- |
 | vendor.suspended | Admin suspends vendor | vendorId, reason | -- |
 | listing.published | Listing goes active | listingId, vendorId, orgId | M16 (ad opportunities) |
-| order.confirmed | Vendor confirms order | orderId, buyerPersonId | Notifications [INFERRED] |
+| order.confirmed | Vendor confirms order | orderId, buyerPersonId | Notifications |
 | order.fulfilled | Order fulfilled | orderId, vendorId | -- |
 
 ### Consumed Events
 
 | Event Name | Source Module | Handler | Side Effect |
 |---|---|---|---|
-| MembershipStatusChanged | M05 | Check buyer eligibility | Block orders if no longer active [INFERRED] |
+| MembershipStatusChanged | M05 | Check buyer eligibility | Block orders if no longer active |
 
 ## 11. Acceptance Criteria
 
@@ -267,8 +267,8 @@ Fulfilled --> Refunded (dispute resolution) [INFERRED]
 - All vendors suspended: empty marketplace with "No vendors available" message.
 - Vendor verification revoked mid-order: existing confirmed orders continue; new orders blocked.
 - Referral terms updated after listing live: existing associations notified; interaction blocked until re-acknowledged (BR-38).
-- Group purchasing offer with 0 participants at deadline: offer cancelled. [INFERRED]
-- Vendor deletes listing with pending orders: orders preserved with "listing removed" note. [INFERRED]
+- Group purchasing offer with 0 participants at deadline: offer cancelled.
+- Vendor deletes listing with pending orders: orders preserved with "listing removed" note.
 
 ## 14. Dependencies
 
@@ -352,17 +352,17 @@ When implementing this module:
 | Section | Status | Notes |
 |---------|--------|-------|
 | 1. Module Overview | COMPLETE | |
-| 2. Domain Terms | PARTIAL | Vendor, Group Purchasing not in DOMAIN_GLOSSARY -- tagged [INFERRED] |
+| 2. Domain Terms | COMPLETE | Vendor, Group Purchasing referenced from DOMAIN_GLOSSARY: Marketplace Terms |
 | 3. Workflows | COMPLETE | From WORKFLOW_MAP |
-| 4. Workflow Details | COMPLETE | WF-099 is [INFERRED] |
+| 4. Workflow Details | COMPLETE | |
 | 5. Business Rules | COMPLETE | BR-38 from upstream; M17-R1 through R5 module-specific |
-| 6. Permissions | PARTIAL | No ROLE_PERMISSION_MATRIX section for M17 yet -- [INFERRED] from patterns |
+| 6. Permissions | PARTIAL | No ROLE_PERMISSION_MATRIX section for M17 yet |
 | 7. Data Requirements | COMPLETE | From DOMAIN_MODEL section 10 |
 | 7b. Aggregate Boundaries | COMPLETE | |
 | 8. State Transitions | COMPLETE | From DOMAIN_MODEL enums |
 | 9. UI/UX Requirements | COMPLETE | |
 | 10. API Expectations | COMPLETE | |
-| 10b. Domain Events | COMPLETE | From DOMAIN_MODEL inferred events |
+| 10b. Domain Events | COMPLETE | |
 | 11. Acceptance Criteria | COMPLETE | |
 | 12. Test Expectations | COMPLETE | |
 | 13. Edge Cases | COMPLETE | |

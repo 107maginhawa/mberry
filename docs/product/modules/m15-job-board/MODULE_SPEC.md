@@ -138,7 +138,7 @@ Healthcare professional job board within the association network. Officers and v
   2. System saves alert preferences
   3. When new listing matches criteria, system sends notification
 - **Alternate Flows:** Member edits/deletes alert
-- **Exception Flows:** Too many alerts — limit per member [INFERRED]
+- **Exception Flows:** Too many alerts — limit per member
 - **Postconditions:** Alert persisted; notifications triggered on match
 
 ## 5. Business Rules
@@ -207,7 +207,7 @@ Source: DOMAIN_MODEL.md `job_posting` table, `job_posting_status` enum, `job_pos
 
 Source: DOMAIN_MODEL.md `job_application` table, `job_application_status` enum.
 
-### Entity: JobBookmark [INFERRED]
+### Entity: JobBookmark
 
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
@@ -216,7 +216,7 @@ Source: DOMAIN_MODEL.md `job_application` table, `job_application_status` enum.
 | jobPostingId | Yes | Job FK | FK to job_posting. Unique with personId |
 | createdAt | Yes | Timestamp | Auto |
 
-### Entity: JobAlert [INFERRED]
+### Entity: JobAlert
 
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
@@ -232,8 +232,8 @@ Source: DOMAIN_MODEL.md `job_application` table, `job_application_status` enum.
 | Aggregate Root | Owned Entities | Owned Value Objects | Key Invariants |
 |---------------|---------------|--------------------|-----------------| 
 | JobPosting | JobApplication | requirements (JSONB) | Status transitions enforced; expiresAt >= createdAt; 30-day default |
-| JobBookmark [INFERRED] | — | — | Unique per (personId, jobPostingId) |
-| JobAlert [INFERRED] | — | — | One per (personId, keyword+specialty+location combo) |
+| JobBookmark | — | — | Unique per (personId, jobPostingId) |
+| JobAlert | — | — | One per (personId, keyword+specialty+location combo) |
 
 Source: DOMAIN_MODEL.md — "Jobs Context: `job_posting` — Root aggregate. Referenced by `job_application.postingId`."
 
@@ -391,7 +391,7 @@ Source: DOMAIN_MODEL.md `job_application_status` enum.
 - Member applies to same job twice — 409 conflict
 - Poster closes listing with pending applications — applications remain, status frozen
 - Job alert matches many new listings simultaneously — batch notification
-- Listing with no applicationUrl or applicationEmail — at least one required [INFERRED]
+- Listing with no applicationUrl or applicationEmail — at least one required
 - External employer account deactivated — all their listings closed
 - Very large number of listings (1000+) — pagination and search indexing
 

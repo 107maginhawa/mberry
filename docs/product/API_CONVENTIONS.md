@@ -432,6 +432,19 @@ Format: `req_<uuid-v4>` (e.g., `req_550e8400-e29b-41d4-a716-446655440000`)
 | Bulk operations | 120s | Yes |
 | Report generation | 60s | Yes |
 
+### Performance SLA Tiers
+
+p95 latency targets by endpoint category:
+
+| Endpoint Category | p95 Target | Examples |
+|-------------------|-----------|----------|
+| Read endpoints | < 200ms | GET /person/:id, GET /my/payments, list endpoints |
+| Write endpoints | < 500ms | POST /org/:id/payments/manual, PUT /org/:id/config/dues |
+| PDF generation | < 3s | Certificate generation, ID card rendering, receipt PDFs |
+| Reports/analytics | < 5s | Financial reports, national dashboard rollups, aging reports |
+
+> **Note:** Async audit logging recommended for read paths to meet p95 budget. Financial audit writes remain synchronous.
+
 If processing exceeds timeout, return `202 Accepted` with a polling endpoint:
 
 ```json
@@ -509,6 +522,31 @@ const tenantId = c.get('user').associationId;
 | Admin access | Platform admin can query deleted records via `?includeDeleted=true` |
 | Hard delete | Only via `person.deletionProcessor` (30-day grace period, then PII anonymization) |
 | Cascade | Soft delete does NOT cascade — each module handles its own cleanup |
+
+---
+
+## 23. Data Protection & PII Handling
+
+PII fields (`email`, `licenseNumber`, `phone`, `firstName`, `lastName`) encrypted at rest via PostgreSQL Transparent Data Encryption.
+
+| Encryption Strategy | Fields | Rationale |
+|---------------------|--------|-----------|
+| Deterministic encryption | `email`, `licenseNumber` | Searchable PII — deterministic encryption preserves index compatibility for lookups and uniqueness constraints |
+| Randomized encryption | `phone`, `address` (JSONB), `firstName`, `lastName` | Non-searchable PII — randomized encryption provides stronger confidentiality; these fields are only accessed by primary key lookup |
+
+Application logs must never contain raw PII — use `personId` references only. See AUDIT_CONTRACTS.md section 1.2 for PII access audit requirements.
+
+---
+
+## 24. Consistency Model
+
+| Data Category | Consistency Guarantee | Mechanism |
+|---------------|----------------------|-----------|
+| Operational data | Strong consistency | Single PostgreSQL instance. All reads reflect latest writes. |
+| Cross-module events | Eventual consistency (< 5 min window) | At-most-once delivery via pg-boss job queue. |
+| Membership status | Strong consistency | Computed at query time from `duesExpiryDate` — no caching. |
+| Audit logs | Strong consistency | Append-only, synchronous writes. No eventual consistency — audit writes complete before request returns. |
+| Financial data | Strong consistency (ACID) | All payment recording, fund allocation, and refunds execute within database transactions. No eventual consistency for financial mutations. |
 
 ---
 

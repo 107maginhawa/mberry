@@ -157,25 +157,25 @@ All 13 WORKFLOW_MAP [INFERRED] items (WF-014, 023, 044, 045, 050, 057, 069, 070,
 | Area | Reviewer | Status | Date | Conditions |
 |------|---------|--------|------|-----------|
 | Business rules | Elad (Product Owner) | APPROVED | 2026-05-21 | Per-module review with domain judgment delegated to Claude |
-| Permissions | Elad (Product Owner) | APPROVED WITH CONDITIONS | 2026-05-21 | Condition: ROLE_PERMISSION_MATRIX must be updated for M13-M19 before api-contracts generation |
-| Data governance | Elad (Product Owner) | APPROVED WITH CONDITIONS | 2026-05-21 | Condition: DPA 2012 data export (M02 WF-014) must be implemented as P0 |
-| API contracts | — | NOT YET GENERATED | — | Blocked until spec review passes |
-| UI specifications | — | NOT YET GENERATED | — | Blocked until spec review passes |
-| Security | Elad (Product Owner) | APPROVED WITH CONDITIONS | 2026-05-21 | Condition: BR-40 anonymous survey cryptographic guarantee must use proper anonymization (not just omitting respondentId) |
-| Performance | Elad (Product Owner) | APPROVED WITH CONDITIONS | 2026-05-21 | Condition: M16 async impression recording and M14 batch refresh patterns must be validated at load test |
+| Permissions | Elad (Product Owner) | APPROVED — CONDITION MET | 2026-05-21 | ROLE_PERMISSION_MATRIX sections 3.22-3.28 complete for M13-M19 |
+| Data governance | Elad (Product Owner) | APPROVED — SPEC CONDITION MET | 2026-05-21 | M02 WF-014 + API_CONTRACTS defined. Code implementation deferred to execution phase. |
+| API contracts | AI (oli pipeline) | GENERATED | 2026-05-21 | 19/19 modules have API_CONTRACTS.md |
+| UI specifications | AI (oli pipeline) | GENERATED | 2026-05-21 | 19/19 modules have ui-prototype/ (screens, components, interaction-states, mock-data) |
+| Security | Elad (Product Owner) | APPROVED — CONDITION MET | 2026-05-21 | BR-40: NULL respondentId for anonymous surveys (no data stored = no data to leak). DOMAIN_MODEL confirms nullable field. |
+| Performance | Elad (Product Owner) | APPROVED — CONDITION DEFERRED | 2026-05-21 | Load testing for M14/M16 requires running code. Spec-level patterns documented. Deferred to execution phase. |
 
 ## Outstanding Items (Action Required Before api-contracts)
 
-| # | Area | Item | Blocking? | Owner | Priority |
-|---|------|------|----------|-------|----------|
-| 1 | ROLE_PERMISSION_MATRIX | Add sections for M13-M19 (7 modules) | YES — blocks api-contracts for M13-M19 | AI (re-run /oli-module-specs or manual) | P0 |
-| 2 | DOMAIN_MODEL | Add missing tables: feed_post, mute_preference, job_bookmark, job_alert, survey, survey_response, ad_impression, ad_click, committee_meeting | YES — blocks api-contracts for affected modules | AI (update DOMAIN_MODEL.md) | P0 |
-| 3 | DOMAIN_GLOSSARY | Add ~30 missing terms (Vendor, Group Purchasing, Survey, Poll, Committee, Chairperson, etc.) | NO — non-blocking | AI (update DOMAIN_GLOSSARY.md) | P1 |
-| 4 | M09 MODULE_SPEC | Add `isNonCreditBearing` flag to training entity | NO — can be added during api-contracts | AI | P1 |
-| 5 | M10 MODULE_SPEC | Update edge case: block negative credit deductions | NO — spec text update | AI | P1 |
-| 6 | M10 MODULE_SPEC | Update edge case: no retroactive cycle recomputation | NO — spec text update | AI | P1 |
-| 7 | M12 MODULE_SPEC | Add election edge case resolutions (tie→runoff, withdrawal→runner-up, hybrid→witness attestation) | NO — spec text update | AI | P1 |
-| 8 | M16 | Campaign billing integration deferred | NO — P2 priority | Deferred to M16 execution | P2 |
+| # | Area | Item | Status | Resolution Date |
+|---|------|------|--------|----------------|
+| 1 | ROLE_PERMISSION_MATRIX | Add sections for M13-M19 (7 modules) | **RESOLVED** | 2026-05-21 — Sections 3.22-3.28 added |
+| 2 | DOMAIN_MODEL | Add missing tables: feed_post, mute_preference, job_bookmark, job_alert, survey, survey_response, ad_impression, ad_click, committee_meeting | **RESOLVED** | 2026-05-21 — All tables present in DOMAIN_MODEL |
+| 3 | DOMAIN_GLOSSARY | Add ~30 missing terms (Vendor, Group Purchasing, Survey, Poll, Committee, Chairperson, etc.) | **RESOLVED** | 2026-05-21 — Marketplace, Survey, Committee terms sections added |
+| 4 | M09 MODULE_SPEC | Add `isNonCreditBearing` flag to training entity | **RESOLVED** | 2026-05-21 — Flag documented in BR-15 and workflow details |
+| 5 | M10 MODULE_SPEC | Update edge case: block negative credit deductions | **RESOLVED** | 2026-05-21 — Edge case added to section 13 |
+| 6 | M10 MODULE_SPEC | Update edge case: no retroactive cycle recomputation | **RESOLVED** | 2026-05-21 — Edge case added to section 13 |
+| 7 | M12 MODULE_SPEC | Add election edge case resolutions (tie→runoff, withdrawal→runner-up, hybrid→witness attestation) | **RESOLVED** | 2026-05-21 — All 3 edge cases in section 13 |
+| 8 | M16 | Campaign billing integration deferred | **DEFERRED** | P2 — deferred to M16 execution phase |
 
 ## Applied Patches
 

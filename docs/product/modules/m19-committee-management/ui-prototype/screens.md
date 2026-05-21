@@ -44,7 +44,7 @@
 
 | Zone | Content |
 |------|---------|
-| Header | Committee name + type badge (standing/ad-hoc/special) |
+| Header | Committee name + type badge (standing/ad-hoc/special). Enum value `ad_hoc` displays as `Ad-Hoc` in UI badges. |
 | Status | Status badge (active/expired/dissolved) |
 | Chairperson | Name + avatar (or "No chairperson" warning) |
 | Members | Member count + avatar stack |
@@ -118,7 +118,7 @@
 | Field | Display |
 |-------|---------|
 | name | `<h1>` |
-| type | Badge: standing / ad-hoc / special |
+| type | Badge: standing / ad-hoc / special. Enum value `ad_hoc` displays as `Ad-Hoc` in UI badges. |
 | status | Badge: active / expired / dissolved |
 | purpose | `<p>` |
 | chairperson | Name + role badge, or leaderless warning |
@@ -344,7 +344,7 @@ Same layout as M19-S03 with differences:
 | Description | `<textarea>` | -- | No | Max 5000 chars | description |
 | Assignee | `<select>` | `aria-label="Assign to"` | No | Committee members only | assigneeId |
 | Due date | `<input type="date">` | -- | No | Must be future | dueDate |
-| Priority | Radio group | `role="radiogroup"` | No | low, medium, high | priority |
+| Priority | Radio group | `role="radiogroup"` | No | low, medium, high. Default: medium (M19-R7). Pre-select medium in UI. | priority |
 | Create | `<button type="submit">` | -- | -- | -- | POST task |
 
 ---

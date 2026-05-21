@@ -55,7 +55,7 @@ Manage association events -- creation, registration, attendance tracking, and QR
 | Event Cancellation | WF-054 | Officer | Cancel event, notify registrants, process refunds | P0 |
 | Events Dashboard | WF-055 | Officer | Event list, upcoming/past, attendance stats | P0 |
 | My Events | WF-056 | Member | Registered/past events with QR code | P0 |
-| Waitlist Auto-Promotion | WF-057 | System | FIFO promotion when spot opens | P0 [INFERRED] |
+| Waitlist Auto-Promotion | WF-057 | System | FIFO promotion when spot opens | P0 |
 
 ## 4. Workflow Details
 
@@ -164,6 +164,8 @@ Manage association events -- creation, registration, attendance tracking, and QR
 | M8-R5 | IF registration cancelled THEN release capacity and auto-promote first waitlisted | Cancellation | Capacity reclaimed |
 | M8-R6 | IF event completed THEN lock registrations and check-ins | Completion | No changes after completion |
 
+> **Membership status eligibility note:** Registration allowed for Active status. Life members always compute to Active via BR-03 (sentinel expiry 2099-12-31) — no special handling needed. Grace status members may also register (leniency period). Lapsed/Suspended/Removed/Resigned/Deceased/Expelled blocked.
+
 ## 6. Permissions
 
 | Action | Allowed Roles | Restricted Roles | Notes |
@@ -245,7 +247,7 @@ Draft ──publish──► Published ──cancel──► Cancelled
 | From | To | Trigger | Actor | Guards |
 |------|-----|---------|-------|--------|
 | Draft | Published | Officer publishes | Officer | All required fields filled |
-| Published | Completed | Officer marks complete | Officer | Event end date passed [INFERRED] |
+| Published | Completed | Officer marks complete | Officer | Event end date passed |
 | Published | Cancelled | Officer cancels | Officer (president 2FA) | Triggers refunds + notifications |
 
 ### Registration Status

@@ -160,6 +160,8 @@ From ROLE_PERMISSION_MATRIX Section 3.4 (Dues Module):
 | View own dues | All authenticated (except user) | user | GA |
 | Configure dues | super, admin, president (2FA), treasurer (2FA) | All others | GA+HG |
 
+> **2FA for Manual Payments:** Manual payment recording requires officer 2FA verification. Session-level 2FA with 30-minute timeout — once verified, subsequent manual recordings within the session skip re-verification. This balances security with officer workflow at convention payment desks.
+
 ## 7. Data Requirements
 
 ### Entity: DuesPayment
@@ -169,7 +171,7 @@ From ROLE_PERMISSION_MATRIX Section 3.4 (Dues Module):
 | id | Yes | UUID PK | -- |
 | organizationId | Yes | Organization FK | -- |
 | personId | Yes | Person FK | -- |
-| amount | Yes | Payment amount | Decimal, > 0 |
+| amount | Yes | Payment amount | bigint (cents), > 0 |
 | currency | Yes | ISO 4217 | Inherited from association config |
 | status | Yes | pending/completed/failed/refunded/partiallyRefunded/expired/submitted/underReview/confirmed/rejected | Enum: dues_payment_status |
 | paymentMethod | Yes | online/cash/check/bankTransfer/gcash/other | Enum: dues_payment_method |
@@ -183,7 +185,7 @@ From ROLE_PERMISSION_MATRIX Section 3.4 (Dues Module):
 |-------|---------|-------------|-------------------|
 | id | Yes | UUID PK | -- |
 | organizationId | Yes | Organization FK | One config per org |
-| duesAmount | Yes | Default dues amount | Decimal |
+| duesAmount | Yes | Default dues amount | bigint (cents) |
 | billingFrequency | Yes | annual/semi-annual/quarterly | Enum: billing_frequency |
 | gracePeriodDays | Yes | Grace period length | 0-90, default 30 |
 
@@ -193,7 +195,7 @@ From ROLE_PERMISSION_MATRIX Section 3.4 (Dues Module):
 |-------|---------|-------------|-------------------|
 | duesConfigId | Yes | DuesOrgConfig FK | -- |
 | categoryId | Yes | MembershipCategory FK | -- |
-| amount | Yes | Override amount | Decimal |
+| amount | Yes | Override amount | bigint (cents) |
 
 ### Entity: DuesFund
 
@@ -212,7 +214,7 @@ From ROLE_PERMISSION_MATRIX Section 3.4 (Dues Module):
 | id | Yes | UUID PK | -- |
 | paymentId | Yes | DuesPayment FK | -- |
 | fundId | Yes | DuesFund FK | -- |
-| amount | Yes | Allocated amount | Decimal |
+| amount | Yes | Allocated amount | bigint (cents) |
 | isReversal | Yes | Refund reversal flag | Default false |
 
 ### Entity: DuesGatewayConfig
@@ -268,17 +270,17 @@ From ROLE_PERMISSION_MATRIX Section 3.4 (Dues Module):
 pending -> completed (webhook confirms or manual confirmation)
 pending -> failed (gateway failure)
 pending -> expired (24h timeout, no webhook received)
-pending -> submitted (manual payment awaiting review) [INFERRED]
-submitted -> underReview (officer begins review) [INFERRED]
-underReview -> confirmed (officer approves) [INFERRED]
-underReview -> rejected (officer rejects) [INFERRED]
+pending -> submitted (manual payment awaiting review)
+submitted -> underReview (officer begins review)
+underReview -> confirmed (officer approves)
+underReview -> rejected (officer rejects)
 completed -> refunded (full refund)
 completed -> partiallyRefunded (partial refund)
-confirmed -> refunded (full refund) [INFERRED]
-confirmed -> partiallyRefunded (partial refund) [INFERRED]
+confirmed -> refunded (full refund)
+confirmed -> partiallyRefunded (partial refund)
 ```
 
-Note: The enum has 10 values. The submitted/underReview/confirmed/rejected flow is [INFERRED] from enum presence but not yet validated against handler code.
+Note: The enum has 10 values. The submitted/underReview/confirmed/rejected flow is derived from enum presence but not yet validated against handler code.
 
 ### Webhook Retry Status
 ```txt
@@ -336,8 +338,8 @@ States: Loading, Empty ("No payment history"), Populated
 
 | Event Name | Trigger | Payload | Consumers |
 |---|---|---|---|
-| PaymentRecorded | Payment completed (webhook or manual) | orgId, personId, amount, newExpiryDate | M05 (status recompute to Active) |
-| PaymentRefunded | Refund completed | orgId, personId, amount, reversedExpiryDate | M05 (status may revert) |
+| PaymentRecorded | Payment completed (webhook or manual) | paymentId, personId, orgId, amount, invoiceId, newExpiryDate, registrationId? | M05 (expiry update), M08 (registration confirm) |
+| PaymentRefunded | Refund completed | paymentId, personId, orgId, amount, invoiceId, reversedExpiryDate, registrationId? | M05 (expiry reversal), M08 (registration refund) |
 | InvoiceGenerated | Dues invoice created | orgId, personId, amount, dueDate | M07 (notification) |
 | dunning.escalation | Dunning threshold exceeded | organizationId, personId, membershipId, stage, daysOverdue, templateName | M07 (escalated notification) |
 
@@ -410,8 +412,9 @@ Required test categories:
 - Fund percentages sum to 99.99: blocked ("Percentages must total exactly 100%").
 - Org with no funds configured: entire payment goes to default fund. [VERIFY]
 - Payment in progress when refund attempted: blocked ("Payment must be completed before refund").
-- Member pays dues but is currently Suspended: payment recorded, expiry extended, but status remains Suspended (officer must restore). [INFERRED]
+- Member pays dues but is currently Suspended: payment recorded, expiry extended, but status remains Suspended (officer must restore).
 - Receipt number sequence reset at year boundary: ORG_CODE-2027-001 follows ORG_CODE-2026-NNN.
+- Gateway unavailable: IF payment gateway is unreachable THEN officers can manually record cash/check payments via manual entry form (M06 already supports manual recording via WF-044). Members see "Online payment temporarily unavailable. Contact your treasurer for offline payment options."
 
 ## 14. Dependencies
 
@@ -504,7 +507,7 @@ Metrics:
 When implementing this module:
 1. **Two handler directories exist**: `handlers/dues/` (15 handlers, hand-wired, no TypeSpec) is the primary payment system. `handlers/association:member/` also has dues-related handlers (the mega-module). New dues handlers should go in `dues/` with TypeSpec definitions.
 2. **Schema files**: Primary schema at `dues/repos/dues-payments.schema.ts`. Legacy schema at `association:member/repos/dues.schema.ts` (dues_config, dues_invoice -- legacy). Also `association:member/repos/dunning.schema.ts` for dunning tables.
-3. **Fund allocation is the critical path**: Implement the rounding algorithm with explicit tests. Use `Decimal` or integer-cents arithmetic to avoid floating-point errors. Last fund by sortOrder absorbs remainder.
+3. **Fund allocation is the critical path**: Implement the rounding algorithm with explicit tests. Use integer-cents arithmetic (bigint) to avoid floating-point errors. Last fund by sortOrder absorbs remainder.
 4. **Webhook idempotency**: Use `gatewayTransactionId` as the idempotency key. Always return 200 OK to webhooks (even for duplicates/errors). Log to `webhook_retry_log`.
 5. **Two-level payment architecture**: Platform gateway (billing/) and org gateway (dues/) are completely separate. Never cross-reference credentials (BR-30).
 6. **Financial retention**: Never hard-delete payment records. 7-year retention (BR-32). Use soft-delete patterns.
@@ -525,7 +528,7 @@ When implementing this module:
 | 6. Permissions | COMPLETE | From ROLE_PERMISSION_MATRIX 3.4 (7 actions) |
 | 7. Data Requirements | COMPLETE | 9 entities with full field specs from DOMAIN_MODEL |
 | 7b. Aggregate Boundaries | COMPLETE | 3 aggregates from DOMAIN_MODEL section 10 |
-| 8. State Transitions | COMPLETE | Payment status (10 values) + webhook retry status. [INFERRED] items tagged. |
+| 8. State Transitions | COMPLETE | Payment status (10 values) + webhook retry status. |
 | 9. UI/UX Requirements | COMPLETE | 4 screens with all 6 states |
 | 10. API Expectations | COMPLETE | 11 endpoints |
 | 10b. Domain Events | COMPLETE | 4 published (incl. dunning.escalation from DOMAIN_MODEL 11), 2 consumed |

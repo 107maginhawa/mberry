@@ -65,7 +65,7 @@ Provide national-level officers and platform administrators with cross-chapter a
 |----------|-------|-------|-------------|----------|
 | Review Association Health | WF-084 | National Officer | Cross-chapter KPIs, trends, comparison | P0 |
 | Chapter Drill-Down | WF-085 | National Officer | Specific chapter metrics | P0 |
-| National Data Export | WF-086 | National Officer | CSV/PDF export of aggregated data | P1 [INFERRED] |
+| National Data Export | WF-086 | National Officer | CSV/PDF export of aggregated data | P1 |
 | Configure Dashboard Access | — | Platform Admin | Grant national dashboard access | P0 |
 | Review All Associations | — | Platform Admin | Platform-wide analytics | P0 |
 
@@ -107,7 +107,7 @@ Provide national-level officers and platform administrators with cross-chapter a
   2. Selects format (CSV or PDF) and date range
   3. System generates export file
   4. Browser downloads file
-- **Alternate Flows:** Large dataset — async generation with notification on completion [INFERRED]
+- **Alternate Flows:** Large dataset — async generation with notification on completion
 - **Exception Flows:** Export fails — error toast with retry
 - **Postconditions:** Export event logged for audit
 
@@ -150,13 +150,13 @@ Provide national-level officers and platform administrators with cross-chapter a
 | trainingCount | Yes | Trainings held | Count in period |
 | snapshotDate | Yes | Computation date | When data was aggregated |
 
-> **Note:** This is a computed/materialized view, not a persisted entity. No table in DOMAIN_MODEL.md. [INFERRED]
+> **Note:** This is a computed/materialized view, not a persisted entity. No table in DOMAIN_MODEL.md.
 
 ## 7b. Aggregate Boundaries
 
 | Aggregate Root | Owned Entities | Owned Value Objects | Key Invariants |
 |---------------|---------------|--------------------|-----------------| 
-| NationalDashboardSnapshot [INFERRED] | — | — | Read-only computed view; no mutations; scoped by association |
+| NationalDashboardSnapshot | — | — | Read-only computed view; no mutations; scoped by association |
 
 > **Note:** M14 is a read-only reporting module. It does not own any domain entities — it aggregates data from M04, M05, M06, M08, M09, M10.
 
@@ -210,7 +210,7 @@ No state machines. This module is read-only (reporting/analytics). All data is c
 |------------|---------|---------|-----------|
 | DashboardExported | Export generated | { associationId, format, exportedBy } | Audit log |
 
-> **Note:** M14 is primarily a consumer, not a producer of events. [INFERRED]
+> **Note:** M14 is primarily a consumer, not a producer of events.
 
 ### Consumed Events
 
@@ -222,7 +222,7 @@ No state machines. This module is read-only (reporting/analytics). All data is c
 | CreditEntryCreated | M10 | refreshSnapshot | Updates compliance metrics |
 | EventCreated | M08 | refreshSnapshot | Updates event count |
 
-> **Note:** Consumed events trigger snapshot refresh, not real-time updates. Batch refresh acceptable. [INFERRED]
+> **Note:** Consumed events trigger snapshot refresh, not real-time updates. Batch refresh acceptable.
 
 ## 11. Acceptance Criteria
 
@@ -283,7 +283,7 @@ No state machines. This module is read-only (reporting/analytics). All data is c
 
 ### External Dependencies
 
-- PDF generation library for export [INFERRED]
+- PDF generation library for export
 
 ## 15. Error Handling
 
@@ -369,7 +369,7 @@ When implementing this module:
 | 8. State Transitions | COMPLETE | N/A — read-only module |
 | 9. UI/UX Requirements | COMPLETE | — |
 | 10. API Expectations | COMPLETE | — |
-| 10b. Domain Events | PARTIAL | Consumed events are [INFERRED] |
+| 10b. Domain Events | PARTIAL | Consumed events derived from cross-module patterns |
 | 11. Acceptance Criteria | COMPLETE | — |
 | 12. Test Expectations | COMPLETE | — |
 | 13. Edge Cases | COMPLETE | — |

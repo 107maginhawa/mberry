@@ -45,8 +45,8 @@ Create and manage committees within organizations -- standing committees, ad-hoc
 | **Officer** | A member assigned an administrative role within an organization: President, Treasurer, or Secretary. |
 | **President** | Org governance role. Assigns officer roles, manages officer transitions, handles disciplinary actions. |
 | **Active** | Dues are current. Full access to org features. |
-| **Committee** | Group of members with a defined purpose, chairperson, and term. [INFERRED -- not in DOMAIN_GLOSSARY] |
-| **Chairperson** | Committee leader responsible for meetings, tasks, and reports. [INFERRED] |
+| **Committee** | Group of members with a defined purpose, chairperson, and term (see DOMAIN_GLOSSARY: Committee Terms). |
+| **Chairperson** | Committee leader responsible for meetings, tasks, and reports (see DOMAIN_GLOSSARY: Committee Terms). |
 
 ## 3. Workflows
 
@@ -133,6 +133,7 @@ Create and manage committees within organizations -- standing committees, ad-hoc
 | M19-R4 | IF member removed from org THEN remove from all org committees | Membership cascade | Set `removedAt` on CommitteeMember; preserve history |
 | M19-R5 | IF committee dissolved THEN preserve all history as read-only | Dissolution | No data deletion; status change only |
 | M19-R6 | IF chairperson removed from org THEN new chairperson must be assigned before committee can operate | Chairperson continuity | Block mutations until new chairperson set. Committee enters `leaderless` state; only officer/admin can assign new chairperson. |
+| M19-R7 | IF task priority not specified THEN default to 'medium' | Task creation | Pre-select medium in UI |
 
 ## 6. Permissions
 
@@ -147,7 +148,7 @@ Create and manage committees within organizations -- standing committees, ad-hoc
 | Record meeting minutes | chairperson | -- | GA |
 | Submit reports | chairperson | -- | GA |
 | View committee (active) | All org members | non-members | GA |
-| View committee (dissolved) | Officers, platform admin | regular members | GA+OA [INFERRED] |
+| View committee (dissolved) | Officers, platform admin | regular members | GA+OA |
 
 ## 7. Data Requirements
 
@@ -190,7 +191,7 @@ Create and manage committees within organizations -- standing committees, ad-hoc
 | completedAt | No | Completion timestamp | timestamp |
 | completedBy | No | Person who completed | uuid |
 
-### Entity: CommitteeMeeting [INFERRED -- not in DOMAIN_MODEL]
+### Entity: CommitteeMeeting
 
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
@@ -271,10 +272,10 @@ No reverse transitions. Completed tasks are immutable.
 |---|---|---|---|
 | CommitteeCreated | Committee created | committeeId, orgId, type, chairpersonId | -- |
 | CommitteeDissolved | Committee dissolved | committeeId, orgId, reason | -- |
-| CommitteeMemberAdded | Member added to committee | committeeId, personId, role | Notifications [INFERRED] |
+| CommitteeMemberAdded | Member added to committee | committeeId, personId, role | Notifications |
 | CommitteeMemberRemoved | Member removed from committee | committeeId, personId | -- |
 | TaskOverdue | Task past due date | taskId, committeeId, assigneeId | Notifications |
-| TaskCompleted | Task marked completed | taskId, committeeId, completedBy | -- [INFERRED] |
+| TaskCompleted | Task marked completed | taskId, committeeId, completedBy | -- |
 
 ### Consumed Events
 
@@ -316,7 +317,7 @@ No reverse transitions. Completed tasks are immutable.
 - All tasks completed for ad-hoc committee: prompt dissolution suggestion (not automatic).
 - Meeting scheduled for dissolved committee: creation blocked with "Committee has been dissolved."
 - Member added to committee who is then suspended from org: cascading removal triggers.
-- Committee name already exists in org: allow (no uniqueness constraint). [INFERRED]
+- Committee name already exists in org: allow (no uniqueness constraint).
 - Dissolve standing committee: warn that this is permanent (standing committees normally auto-renew).
 
 ## 14. Dependencies
@@ -404,7 +405,7 @@ When implementing this module:
 | Section | Status | Notes |
 |---------|--------|-------|
 | 1. Module Overview | COMPLETE | |
-| 2. Domain Terms | PARTIAL | Committee, Chairperson not in DOMAIN_GLOSSARY -- tagged [INFERRED] |
+| 2. Domain Terms | COMPLETE | Committee, Chairperson referenced from DOMAIN_GLOSSARY: Committee Terms |
 | 3. Workflows | COMPLETE | From WORKFLOW_MAP |
 | 4. Workflow Details | COMPLETE | All 5 workflows detailed |
 | 5. Business Rules | COMPLETE | BR-39 from upstream; M19-R1 through R6 module-specific |

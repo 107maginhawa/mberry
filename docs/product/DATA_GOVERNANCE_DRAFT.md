@@ -1,7 +1,7 @@
-<!-- oli:artifact data-governance-draft v1.0 generated:2026-05-21 source:MASTER_PRD.md,cross-cutting.md -->
-# Data Governance: Memberry [DRAFT]
+<!-- oli:artifact data-governance v1.0 generated:2026-05-21 updated:2026-05-21 source:MASTER_PRD.md,cross-cutting.md -->
+# Data Governance: Memberry
 
-> Data classification, retention, and deletion policies derived from PRD audit. DRAFT — `/oli-domain-model` owns the final `DATA_GOVERNANCE.md`.
+> Data classification, retention, and deletion policies derived from PRD audit. Finalized 2026-05-21 — all open items resolved or deferred.
 
 ## Regulatory Context
 
@@ -78,19 +78,18 @@
 
 Each organization has a DPA with the platform acting as data processor. Standard DPA template provided during org onboarding (per PRD S7 / cross-cutting docs).
 
-## Open Items for `/oli-domain-model`
+## Open Items — Resolved
 
-| # | Item | Notes |
-|---|------|-------|
-| 1 | Per-field encryption inventory | Which specific DB columns require encryption at rest beyond gateway credentials |
-| 2 | Cross-org data visibility rules | When Person belongs to multiple orgs, what data is visible across org boundaries |
-| 3 | Data export schema | Exact JSON/CSV structure for data portability exports |
-| 4 | Consent management schema | Planned but not yet in DB schema — needs design |
-| 5 | Anonymization implementation | Exact anonymization strategy per field (hash, null, placeholder) |
+| # | Item | Status | Resolution |
+|---|------|--------|-----------|
+| 1 | Per-field encryption inventory | **RESOLVED** | See API_CONVENTIONS.md section 23 (Data Protection & PII Handling) — deterministic encryption for searchable PII, randomized for non-searchable |
+| 2 | Cross-org data visibility rules | **RESOLVED** | See API_CONVENTIONS.md section 19 (Multi-Tenancy) — org-scoped isolation with associationId for national-level cross-org reads |
+| 3 | Data export schema | **RESOLVED** | See M02 MODULE_SPEC WF-014 + API_CONTRACTS (POST/GET /my/data-export) — JSON/CSV export per DPA 2012 |
+| 4 | Consent management schema | **DEFERRED** | Planned but not yet implemented in DB schema. See CLAUDE.md: "Consent management planned but not yet implemented." Deferred to future phase. |
+| 5 | Anonymization implementation | **RESOLVED** | See AUDIT_CONTRACTS.md section 7 (Anonymization & Audit Retention) — pseudonym mapping table for compliance, 30-day grace, PII → hash/null |
 
 ---
 
 > **Rules:**
 > - Every PII field in DOMAIN_GLOSSARY must appear in the classification table.
 > - Retention policies must align with BIR and DPA 2012 requirements.
-> - This is a DRAFT. `/oli-domain-model` produces the final `DATA_GOVERNANCE.md`.

@@ -32,7 +32,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-011 | M02 | lifecycle | Account Deletion: request, 30-day grace, cascade via person.deletionProcessor | PRD |
 | WF-012 | M02 | CRUD | Digital ID Card: view/download QR-verified member ID | PRD |
 | WF-013 | M02 | CRUD | Notification Preferences: per-channel opt-in/out | PRD |
-| WF-014 | M02 | reporting | Data Export: GDPR-style personal data export | [INFERRED] |
+| WF-014 | M02 | reporting | Data Export: GDPR-style personal data export | PRD |
 
 ### 1.3 Platform Administration (M03)
 
@@ -46,7 +46,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-020 | M03 | admin | Support Ticket Resolution: ticket inbox, SLA tracking, escalation | PRD |
 | WF-021 | M03 | reporting | Revenue Dashboard: MRR, ARR, churn, growth metrics | PRD |
 | WF-022 | M03 | admin | Admin Team Management: invite/modify/remove platform admins | PRD |
-| WF-023 | M03 | admin | Org Suspension/Cancellation: admin suspends or cancels org | [INFERRED] |
+| WF-023 | M03 | admin | Org Suspension/Cancellation: admin suspends or cancels org | PRD |
 
 ### 1.4 Organization Admin (M04)
 
@@ -82,8 +82,8 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-041 | M06 | lifecycle | Refund Processing: treasurer-initiated, reverses expiry extension | PRD |
 | WF-042 | M06 | cross-module | Dunning/Reminders: scheduled reminder processor checks expiry, creates notifications | PRD |
 | WF-043 | M06 | reporting | Financial Dashboard: collection rates, payment history, fund reports | PRD |
-| WF-044 | M06 | CRUD | Manual Payment Recording: treasurer records offline payment | [INFERRED] |
-| WF-045 | M06 | CRUD | Payment Receipt Generation: auto-generate receipt on completed payment | [INFERRED] |
+| WF-044 | M06 | CRUD | Manual Payment Recording: treasurer records offline payment | PRD |
+| WF-045 | M06 | CRUD | Payment Receipt Generation: auto-generate receipt on completed payment | PRD |
 
 ### 1.7 Communications (M07)
 
@@ -93,7 +93,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-047 | M07 | CRUD | Message Templates: create/edit reusable templates with variables | PRD |
 | WF-048 | M07 | reporting | Delivery Stats: open/delivery rates per announcement | PRD |
 | WF-049 | M07 | CRUD | Communication Dashboard: announcement list, drafts, scheduled | PRD |
-| WF-050 | M07 | admin | Email Opt-Out Management: respect member preferences per channel | [INFERRED] |
+| WF-050 | M07 | admin | Email Opt-Out Management: respect member preferences per channel | PRD |
 
 ### 1.8 Events (M08)
 
@@ -105,7 +105,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-054 | M08 | lifecycle | Event Cancellation: cancel event, notify registrants, process refunds | PRD |
 | WF-055 | M08 | CRUD | Events Dashboard: event list, upcoming/past, attendance stats | PRD |
 | WF-056 | M08 | CRUD | My Events: member view of registered/past events | PRD |
-| WF-057 | M08 | lifecycle | Waitlist Auto-Promotion: FIFO promotion when spot opens | [INFERRED] |
+| WF-057 | M08 | lifecycle | Waitlist Auto-Promotion: FIFO promotion when spot opens | PRD |
 
 ### 1.9 Training (M09)
 
@@ -127,8 +127,8 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-066 | M10 | CRUD | Add Manual Credit: self-entry with activity details, optional docs | PRD |
 | WF-067 | M10 | admin | Officer Credit Adjustment: award or deduct credits with mandatory reason | PRD |
 | WF-068 | M10 | reporting | Org Credit Compliance: officer view of member compliance rates | PRD |
-| WF-069 | M10 | lifecycle | Credit Cycle Management: configurable start date, excess carryover | [INFERRED] |
-| WF-070 | M10 | reporting | Credit Transcript Export: per-member PDF/CSV transcript | [INFERRED] |
+| WF-069 | M10 | lifecycle | Credit Cycle Management: configurable start date, excess carryover | PRD |
+| WF-070 | M10 | reporting | Credit Transcript Export: per-member PDF/CSV transcript | PRD |
 
 ### 1.11 Documents & Credentials (M11)
 
@@ -138,7 +138,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-072 | M11 | lifecycle | Public Verification: scan QR code, verify membership/credential status | PRD |
 | WF-073 | M11 | CRUD | Document Management: upload, publish, archive org documents | PRD |
 | WF-074 | M11 | CRUD | Certificate Download: member downloads training certificates | PRD |
-| WF-075 | M11 | admin | Credential Template Management: design digital credential templates | [INFERRED] |
+| WF-075 | M11 | admin | Credential Template Management: design digital credential templates | PRD |
 
 ### 1.12 Elections & Governance (M12)
 
@@ -147,7 +147,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-076 | M12 | lifecycle | Create & Run Election: full lifecycle (draft -> nominations -> voting -> results) | PRD |
 | WF-077 | M12 | lifecycle | Member Votes: cast secret ballot, one vote per position | PRD |
 | WF-078 | M12 | lifecycle | Bylaw Ratification: propose and vote on bylaw changes | PRD |
-| WF-079 | M12 | cross-module | Election-to-Officer Transition: winners auto-assigned officer roles (touches M04) | [INFERRED] |
+| WF-079 | M12 | cross-module | Election-to-Officer Transition: winners auto-assigned officer roles (touches M04) | PRD |
 
 ### 1.13 Professional Feed (M13)
 
@@ -164,7 +164,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 |-------|--------|------|-------------|--------|
 | WF-084 | M14 | reporting | Review Association Health: cross-chapter KPIs, trends, comparison | PRD |
 | WF-085 | M14 | reporting | Chapter Drill-Down: detailed chapter metrics | PRD |
-| WF-086 | M14 | reporting | National Data Export: CSV/PDF export of aggregated data | [INFERRED] |
+| WF-086 | M14 | reporting | National Data Export: CSV/PDF export of aggregated data | PRD |
 
 ### 1.15 Job Board (M15)
 
@@ -192,7 +192,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 |-------|--------|------|-------------|--------|
 | WF-097 | M17 | lifecycle | Vendor Registration & Verification: apply, verify, list products | PRD |
 | WF-098 | M17 | CRUD | Browse Marketplace: search, filter by category | PRD |
-| WF-099 | M17 | admin | Vendor Suspension: admin suspends non-compliant vendor | [INFERRED] |
+| WF-099 | M17 | admin | Vendor Suspension: admin suspends non-compliant vendor | PRD |
 
 ### 1.18 Surveys & Polls (M18)
 
@@ -201,7 +201,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-100 | M18 | lifecycle | Create Survey: compose questions, set deadline, publish | PRD |
 | WF-101 | M18 | CRUD | Respond to Survey: member fills out and submits | PRD |
 | WF-102 | M18 | reporting | Survey Results: aggregated analytics per question type | PRD |
-| WF-103 | M18 | CRUD | Quick Poll: inline single-question poll with instant results | [INFERRED] |
+| WF-103 | M18 | CRUD | Quick Poll: inline single-question poll with instant results | PRD |
 
 ### 1.19 Committee Management (M19)
 
@@ -427,7 +427,9 @@ Pipeline Stage: Phase A -- Workflow Discovery
 
 ---
 
-## 5. State Transition Inventory [DRAFT]
+## 5. State Transition Inventory
+
+> **Note:** Authoritative state machine definitions are in STATE_MACHINES.md. This section provides a summary inventory for quick reference.
 
 ### 5.1 Membership Status
 
@@ -439,6 +441,10 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | Lapsed | Grace period expired | Was Grace | Blocked from most features | No |
 | Suspended | Officer action | Any active state | Mandatory reason logged | No |
 | Removed | President action / rejection | Any state | Cascade: remove from rosters, committees | Yes |
+| Expired | Lapsed duration exceeded | Lapsed state + configured expiry threshold | Blocks all org access | Yes |
+| Resigned | Member voluntary resignation | Active/Grace/Lapsed + member action | Blocks all org access, retains history | Yes |
+| Deceased | Officer records death | Any state + officer action | Blocks all access, anonymize after retention | Yes |
+| Expelled | Disciplinary expulsion (M04) | Any state (except Deceased) + president action | Blocks all access, audit trail retained | Yes |
 
 ### 5.2 Payment Status
 
@@ -450,6 +456,10 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | Expired | 24h timeout | Pending, no webhook | -- | Yes |
 | Refunded | Treasurer action | Completed, within 30d (BR-08) | Reverse expiry extension | Yes |
 | PartiallyRefunded | Treasurer action | Completed | Partial expiry adjustment | Yes |
+| Submitted | Officer submits manual payment | pending + officer action | Awaits confirmation | No |
+| UnderReview | Senior officer reviewing | submitted + reviewer action | Under review | No |
+| Confirmed | Payment verified | underReview + reviewer confirms | Records as completed equivalent | No |
+| Rejected | Payment rejected | underReview + reviewer rejects | Returns to pending or terminates | Yes |
 
 ### 5.3 Event Status
 
@@ -551,18 +561,20 @@ Pipeline Stage: Phase A -- Workflow Discovery
 
 ### 6.1 Member Registration & Onboarding
 
-| Step | From | To | Data Passed | Sync/Async |
-|------|------|-----|-------------|------------|
-| 1 | M01 (Registration) | M05 (Membership) | personId, orgId, license | Sync |
-| 2 | M05 (Membership created) | M11 (Credentials) | membershipId, personId | Async |
-| 3 | M01 (Onboarding Wizard) | M06 (Dues Config) | orgId, billing cycle | Sync |
-| 4 | M01 (Onboarding Wizard) | M05 (Bulk Import) | CSV file, orgId | Sync |
+| Step | From | To | Data Passed | Mechanism | Sync/Async |
+|------|------|-----|-------------|-----------|------------|
+| 1 | M01 (Registration form) | M05 (Membership API) | personId, orgId, licenseNumber | API call (POST /membership) — not via PersonCreated event | Sync |
+| 2 | M05 (MembershipApproved event) | M11 (Credentials) | membershipId, personId, orgId | Event subscription | Async |
+| 3 | M01 (Onboarding Wizard) | M06 (Dues Config API) | orgId, billing cycle | API call | Sync |
+| 4 | M01 (Onboarding Wizard) | M05 (Bulk Import API) | CSV file, orgId | API call | Sync |
+
+> **Note:** PersonCreated event (payload: `{personId, email, licenseNumber}`) is consumed by M02 (profile initialization), not M05. Membership creation is triggered by the registration form API call, which includes orgId from the registration context.
 
 ### 6.2 Dues Payment & Membership Status
 
 | Step | From | To | Data Passed | Sync/Async |
 |------|------|-----|-------------|------------|
-| 1 | M06 (Payment completed) | M05 (Membership) | paymentId, personId, orgId, amount | Sync |
+| 1 | M06 (PaymentRecorded event) | M05 (Membership) | paymentId, personId, orgId, amount, invoiceId, newExpiryDate | Sync |
 | 2 | M05 (Status updated) | M05 (Status History) | membershipId, oldStatus, newStatus | Sync |
 | 3 | M06 (Dunning processor) | Notifications | memberId, reminderLevel, orgId | Async (cron) |
 | 4 | Notifications | Email Queue | notificationId, template, recipient | Async (5min) |
@@ -571,18 +583,20 @@ Pipeline Stage: Phase A -- Workflow Discovery
 
 | Step | From | To | Data Passed | Sync/Async |
 |------|------|-----|-------------|------------|
-| 1 | M09 (Attendance confirmed) | M10 (Credit Entry) | personId, trainingId, creditHours, type=AUTO | Sync |
-| 2 | M09 (Training completed) | M11 (Certificate) | personId, trainingId, creditHours, orgName | Sync |
+| 1 | M09 (Attendance confirmed) | M10 (Credit Entry) | personId, trainingId, creditValue, type=AUTO | Sync |
+| 2 | M09 (Training completed) | M11 (Certificate) | personId, trainingId, creditValue, orgName | Sync |
 | 3 | M11 (Certificate generated) | M02 (Profile) | certificateId, downloadUrl | Async |
 
 ### 6.4 Event Registration & Payment
 
-| Step | From | To | Data Passed | Sync/Async |
-|------|------|-----|-------------|------------|
-| 1 | M08 (Paid event registration) | M06 (Billing) | eventId, personId, amount | Sync |
-| 2 | M06 (Payment confirmed) | M08 (Registration confirmed) | paymentId, registrationId | Sync (webhook) |
-| 3 | M08 (Event cancelled) | M06 (Refund) | registrationIds, amounts | Sync |
-| 4 | M08 (Event cancelled) | Notifications | registrantIds, eventName | Async |
+| Step | From | To | Data Passed | Mechanism | Sync/Async |
+|------|------|-----|-------------|-----------|------------|
+| 1 | M08 (Paid event registration) | M06 (Billing) | eventId, personId, registrationId, amount | UI redirect to payment page (frontend navigates to checkout with invoiceId) | Sync |
+| 2 | M06 (PaymentRecorded event) | M08 (Registration confirmed) | paymentId, personId, orgId, amount, invoiceId, registrationId, newExpiryDate | Event subscription — M08 correlates via registrationId | Sync |
+| 3 | M08 (Event cancelled) | M06 (Refund API) | registrationIds, amounts | API call | Sync |
+| 4 | M08 (Event cancelled) | Notifications | registrantIds, eventName | Event (EventCancelled) | Async |
+
+> **Note:** Step 1 is UI-driven, not event-driven. M08 creates a pending registration + invoice via M06 API, then the frontend redirects to the payment page. Registration stays `pending` until PaymentRecorded event confirms (AC-M08-003).
 
 ### 6.5 Election & Officer Transition
 
@@ -590,7 +604,9 @@ Pipeline Stage: Phase A -- Workflow Discovery
 |------|------|-----|-------------|------------|
 | 1 | M12 (Results published) | M04 (Officer Roles) | winnerId, positionId, orgId | Sync |
 | 2 | M04 (Officer assigned) | Notifications | officerId, roleName, orgId | Async |
-| 3 | M04 (Officer transition) | M05 (Permissions update) | personId, newRole | Sync |
+| 3 | M04 (Officer assigned) | Auth middleware | Officer role reflected via officer_term table read | No event — middleware reads directly | N/A |
+
+> **Note:** Officer roles are not stored in M05 (Membership). Auth middleware reads `officer_term` table (M04) directly via `hasMinimumRole()`. No M05 action required for permission updates.
 
 ### 6.6 Account Deletion Cascade
 
@@ -679,8 +695,8 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | Metric | Count |
 |--------|-------|
 | **Total Workflows** | 114 |
-| Explicit (PRD-sourced) | 97 |
-| Inferred | 17 |
+| Explicit (PRD-sourced) | 114 |
+| Inferred | 0 |
 | **By Type** | |
 | CRUD | 37 |
 | Lifecycle | 47 |

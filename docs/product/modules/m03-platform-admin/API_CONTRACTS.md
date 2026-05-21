@@ -29,7 +29,7 @@
 | Auth | PA (super, admin, support) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-019 |
+| Workflow | WF-015, WF-019 |
 | Business rules | — |
 
 **Query Parameters**
@@ -99,7 +99,7 @@
 | Auth | PA (super, admin) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-019 |
+| Workflow | WF-015, WF-019 |
 | Business rules | — |
 
 **Request Body**
@@ -155,7 +155,7 @@
 | Auth | PA (super, admin) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-019 |
+| Workflow | WF-015, WF-019 |
 | Business rules | — |
 
 **Request Body**
@@ -200,7 +200,7 @@
 | Auth | PA (super only) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-019 |
+| Workflow | WF-015, WF-019 |
 | Business rules | — |
 
 **Response** `204 No Content`
@@ -227,7 +227,7 @@ No response body.
 | Auth | PA (super, admin) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-020 |
+| Workflow | WF-016, WF-020 |
 | Business rules | M3-R10 |
 
 **Request Body**
@@ -285,7 +285,7 @@ No response body.
 | Auth | PA (super, admin) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-020 |
+| Workflow | WF-016, WF-020 |
 | Business rules | M3-R10 |
 
 **Request Body**
@@ -340,7 +340,7 @@ Valid state transitions (M3-R10):
 | Auth | PA (super, admin, support) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-021 |
+| Workflow | WF-018, WF-021 |
 | Business rules | M3-R9 |
 
 **Query Parameters**
@@ -386,7 +386,7 @@ Valid state transitions (M3-R10):
 | Auth | PA (super, admin) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-021 |
+| Workflow | WF-018, WF-021 |
 | Business rules | M3-R9 |
 
 **Request Body**
@@ -750,7 +750,7 @@ No response body.
 | Auth | PA (super only) |
 | Rate limit | Admin (300 req/min) |
 | Idempotency | Optional |
-| Workflow | WF-021 |
+| Workflow | WF-017, WF-021 |
 | Business rules | M3-R8 |
 
 **Request Body**

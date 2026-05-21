@@ -270,7 +270,7 @@ Each module owns an exclusive error code range. No overlaps.
 | `M09-006` | 422 | Accredited provider not found or inactive | — |
 | `M09-007` | 422 | Quiz attempt limit exceeded | — |
 | `M09-008` | 422 | Training requires paid registration | — |
-| `M09-009` | 422 | Non-credit-bearing training: isNonCreditBearing must be true when creditHours is 0 | — |
+| `M09-009` | 422 | Non-credit-bearing training: isNonCreditBearing must be true when creditValue is 0 | — |
 | `M09-010` | 422 | Certificate template not found | — |
 
 ### 5.10 M10 — Credit Tracking

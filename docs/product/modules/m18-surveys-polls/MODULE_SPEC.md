@@ -43,9 +43,9 @@ Collect member feedback, conduct organizational data gathering, and run quick po
 | **Member** | A healthcare professional using the platform. Can belong to multiple organizations. |
 | **Officer** | A member assigned an administrative role within an organization: President, Treasurer, or Secretary. |
 | **Active** | Dues are current. Full access to org features. |
-| **Survey** | Multi-question feedback form distributed to members. Can be anonymous or identified. [INFERRED -- not in DOMAIN_GLOSSARY] |
-| **Poll** | Single-question quick vote with inline results. [INFERRED] |
-| **Anonymous Survey** | Survey where individual responses cannot be linked to members by any user. [INFERRED] |
+| **Survey** | Multi-question feedback form distributed to members. Can be anonymous or identified (see DOMAIN_GLOSSARY: Survey & Poll Terms). |
+| **Poll** | Single-question quick vote with inline results (see DOMAIN_GLOSSARY: Survey & Poll Terms). |
+| **Anonymous Survey** | Survey where individual responses cannot be linked to members by any user (see DOMAIN_GLOSSARY: Survey & Poll Terms). |
 
 ## 3. Workflows
 
@@ -54,7 +54,7 @@ Collect member feedback, conduct organizational data gathering, and run quick po
 | WF-100: Create Survey | Officer | Compose questions, set deadline, publish | P0 |
 | WF-101: Respond to Survey | Member | Fill out and submit responses | P0 |
 | WF-102: Survey Results | Officer | Aggregated analytics per question type | P0 |
-| WF-103: Quick Poll | Officer/Member | Single-question poll with instant results | P1 [INFERRED] |
+| WF-103: Quick Poll | Officer/Member | Single-question poll with instant results | P1 |
 
 ## 4. Workflow Details
 
@@ -81,7 +81,7 @@ Collect member feedback, conduct organizational data gathering, and run quick po
 3. Fills out all required questions.
 4. Submits response. Confirmation shown.
 5. If re-edit enabled and before deadline, member can modify response.
-**Alternate Flows:** Member saves partial response as draft (if supported). [INFERRED]
+**Alternate Flows:** Member saves partial response as draft (if supported).
 **Exception Flows:** Survey closed mid-response -- submission rejected with "Survey has closed."
 **Postconditions:** SurveyResponse record created. For anonymous: `respondentId` is null.
 
@@ -95,7 +95,7 @@ Collect member feedback, conduct organizational data gathering, and run quick po
 4. Exports results as CSV.
 **Postconditions:** None (read-only).
 
-### WF-103: Quick Poll [INFERRED]
+### WF-103: Quick Poll
 **Actor:** Officer (creates), Member (votes)
 **Preconditions:** Officer role for creation; active member for voting
 **Steps:**
@@ -108,12 +108,12 @@ Collect member feedback, conduct organizational data gathering, and run quick po
 
 | Rule ID | Rule | Applies To | Expected Behavior |
 |---------|------|-----------|-------------------|
-| BR-40 | IF survey is anonymous THEN response-to-member mapping is impossible for all users including platform admin | Anonymity | No `respondentId` stored; cryptographic guarantee [INFERRED] |
+| BR-40 | IF survey is anonymous THEN response-to-member mapping is impossible for all users including platform admin | Anonymity | No `respondentId` stored; cryptographic guarantee |
 | M18-R1 | IF survey deadline passed THEN no more responses accepted | Deadline | Enforce cutoff; reject late submissions with error |
 | M18-R2 | IF identified survey THEN only org officers can view individual responses | Privacy | Platform admin cannot see individual response-to-member mappings |
 | M18-R3 | IF member already responded THEN allow edit until deadline (unless re-edit disabled per survey config) | Re-submission | Per-survey configuration |
 | M18-R4 | IF poll THEN show results inline after member votes | Polls | Instant results display |
-| M18-R5 | IF survey active THEN only targeted members can respond | Distribution | Non-targeted members cannot see/access the survey [INFERRED] |
+| M18-R5 | IF survey active THEN only targeted members can respond | Distribution | Non-targeted members cannot see/access the survey |
 
 ## 6. Permissions
 
@@ -129,7 +129,7 @@ Collect member feedback, conduct organizational data gathering, and run quick po
 
 ## 7. Data Requirements
 
-### Entity: Survey [INFERRED -- no DOMAIN_MODEL table defined]
+### Entity: Survey
 
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
@@ -144,7 +144,7 @@ Collect member feedback, conduct organizational data gathering, and run quick po
 | allowReEdit | No | Allow response editing | boolean (default: true) |
 | createdBy | Yes | Officer who created | uuid FK person |
 
-### Entity: SurveyResponse [INFERRED]
+### Entity: SurveyResponse
 
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
@@ -223,7 +223,7 @@ No reverse transitions. Closed surveys are immutable.
 
 | Event Name | Source Module | Handler | Side Effect |
 |---|---|---|---|
-| MembershipStatusChanged | M05 | Check respondent eligibility | Prevent response if no longer active [INFERRED] |
+| MembershipStatusChanged | M05 | Check respondent eligibility | Prevent response if no longer active |
 
 ## 11. Acceptance Criteria
 
@@ -257,7 +257,7 @@ No reverse transitions. Closed surveys are immutable.
 - Survey closed mid-response: submission rejected with "Survey has closed."
 - Member responds twice (re-edit disabled): second submission blocked with "You have already responded."
 - Survey with 0 responses at deadline: results page shows "No responses received."
-- Member's membership lapses after survey published but before deadline: response blocked. [INFERRED]
+- Member's membership lapses after survey published but before deadline: response blocked.
 - Officer edits questions on a draft that already has a saved version: overwrites previous draft.
 
 ## 14. Dependencies
@@ -342,12 +342,12 @@ When implementing this module:
 | Section | Status | Notes |
 |---------|--------|-------|
 | 1. Module Overview | COMPLETE | |
-| 2. Domain Terms | PARTIAL | Survey, Poll, Anonymous Survey not in DOMAIN_GLOSSARY -- tagged [INFERRED] |
+| 2. Domain Terms | COMPLETE | Survey, Poll, Anonymous Survey referenced from DOMAIN_GLOSSARY: Survey & Poll Terms |
 | 3. Workflows | COMPLETE | From WORKFLOW_MAP |
-| 4. Workflow Details | COMPLETE | WF-103 is [INFERRED] |
+| 4. Workflow Details | COMPLETE | |
 | 5. Business Rules | COMPLETE | BR-40 from upstream; M18-R1 through R5 module-specific |
-| 6. Permissions | PARTIAL | No ROLE_PERMISSION_MATRIX section for M18 -- [INFERRED] from existing v1.0 |
-| 7. Data Requirements | PARTIAL | No DOMAIN_MODEL tables -- all [INFERRED] from v1.0 spec and PRD |
+| 6. Permissions | PARTIAL | No ROLE_PERMISSION_MATRIX section for M18 |
+| 7. Data Requirements | PARTIAL | No DOMAIN_MODEL tables |
 | 7b. Aggregate Boundaries | COMPLETE | |
 | 8. State Transitions | COMPLETE | |
 | 9. UI/UX Requirements | COMPLETE | Full state coverage |

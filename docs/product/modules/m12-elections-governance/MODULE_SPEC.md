@@ -58,7 +58,7 @@ Manage elections and governance processes for healthcare associations — office
 | WF-076: Create & Run Election | President/Officer | Full lifecycle: draft → nominations → voting → results | P0 |
 | WF-077: Member Votes | Member | Cast secret ballot, one vote per position | P0 |
 | WF-078: Bylaw Ratification | Officer/Member | Propose and vote on bylaw changes | P1 |
-| WF-079: Election-to-Officer Transition | System | Winners auto-assigned officer roles (touches M04) | P1 [INFERRED] |
+| WF-079: Election-to-Officer Transition | System | Winners auto-assigned officer roles (touches M04) | P1 |
 
 ## 4. Workflow Details
 
@@ -106,7 +106,7 @@ Manage elections and governance processes for healthcare associations — office
 5. Results published with pass/fail based on threshold (e.g., majority or supermajority). [VERIFY: threshold configurable?]
 **Postconditions:** Bylaw vote results published. No automatic officer transition.
 
-### Workflow: Election-to-Officer Transition (WF-079) [INFERRED]
+### Workflow: Election-to-Officer Transition (WF-079)
 
 **Actor:** System (automated)
 **Preconditions:** Election status = published, winners determined
@@ -122,7 +122,7 @@ Manage elections and governance processes for healthcare associations — office
 | Rule ID | Rule | Applies To | Expected Behavior |
 |---------|------|-----------|-------------------|
 | BR-33 | IF voter THEN must be Active member of org | Voting eligibility | Grace/Lapsed/Suspended excluded |
-| BR-34 | IF nominee THEN must be Active member with minimum tenure [INFERRED] | Nomination eligibility | Per-org configurable |
+| BR-34 | IF nominee THEN must be Active member with minimum tenure | Nomination eligibility | Per-org configurable |
 | M12-R1 | IF vote cast THEN one per voter per position per election | Ballot integrity | Unique constraint on (electionId, positionId, voterId) |
 | M12-R2 | IF results published THEN immutable, cannot be changed | Result finality | No role can modify published results |
 | M12-R3 | IF election cancelled THEN all votes voided, members notified | Cancellation | Clean rollback, ElectionCancelled event |
@@ -453,9 +453,9 @@ Required test categories:
 |---------|--------|-------|
 | 1. Module Overview | COMPLETE | — |
 | 2. Domain Terms | COMPLETE | — |
-| 3. Workflows | COMPLETE | WF-079 is [INFERRED] |
+| 3. Workflows | COMPLETE | |
 | 4. Workflow Details | COMPLETE | — |
-| 5. Business Rules | COMPLETE | BR-34 minimum tenure is [INFERRED] |
+| 5. Business Rules | COMPLETE | |
 | 6. Permissions | COMPLETE | Matches ROLE_PERMISSION_MATRIX |
 | 7. Data Requirements | COMPLETE | — |
 | 7b. Aggregate Boundaries | COMPLETE | — |

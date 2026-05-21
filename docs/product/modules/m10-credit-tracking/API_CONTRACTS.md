@@ -132,7 +132,7 @@
 | Field | Type | Required | Nullable | Format | Constraints | Default | Example |
 |-------|------|----------|----------|--------|-------------|---------|---------|
 | activityName | string | YES | NO | — | non-empty, max 300 chars | — | "External CPD Seminar" |
-| activityDate | string | YES | NO | YYYY-MM-DD | must not be in future (TBD) | — | "2026-05-15" |
+| activityDate | string | YES | NO | YYYY-MM-DD | must not be in future (reject if activityDate > current date) | — | "2026-05-15" |
 | creditValue | number | YES | NO | decimal | > 0 | — | 4.0 |
 | provider | string | NO | YES | — | max 200 chars | null | "University of the Philippines" |
 | organizationId | string | YES | NO | uuid | org with credit tracking enabled | — | "550e8400-..." |

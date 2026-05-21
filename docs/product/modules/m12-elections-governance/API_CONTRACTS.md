@@ -241,7 +241,7 @@
 | Auth | GA+HG — president (2FA), admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | WF-076: Create & Run Election |
+| Workflow | WF-076: Create & Run Election, WF-079: Election-to-Officer Transition |
 | Business rules | M12-R2 (published immutable), M12-R4 (nomination window), M12-R6 (min 2 candidates) |
 
 **Request Body**
@@ -493,6 +493,14 @@
 #### POST `/orgs/:organizationId/elections/:electionId/vote` (type=bylaw)
 
 **Cast a yes/no vote on a bylaw proposal**
+
+| Property | Value |
+|----------|-------|
+| Auth | GA — all active members (BR-33) |
+| Rate limit | Authenticated (120 req/min) |
+| Idempotency | Required (Idempotency-Key recommended) |
+| Workflow | WF-077, WF-078: Bylaw Ratification |
+| Business rules | M12-R1 (one vote per voter), BR-33 (active members only) |
 
 Shares the same endpoint as officer election voting. For bylaw elections, the request body differs:
 

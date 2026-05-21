@@ -19,7 +19,7 @@ Revenue-generating advertising module for the Memberry platform. Enables healthc
 - **Platform Administrator** — Manages advertisers, reviews creatives, configures campaigns and ad slots
 - **Advertiser** — External company that registers to advertise (not a platform member)
 - **Member** — Views ads in feed/sidebar, can report inappropriate ads, can opt out of targeting
-- **Officer** — No special advertising role [INFERRED]
+- **Officer** — No special advertising role
 
 ### Related Modules
 
@@ -269,7 +269,7 @@ Source: DOMAIN_MODEL.md `member_ad_opt_out` table.
 |---------------|---------------|--------------------|-----------------| 
 | Advertiser | AdCampaign (via advertiserId cascade) | — | isActive must be true to create campaigns |
 | AdCampaign | AdCreative (via campaignId cascade) | — | spentCents <= budgetCents; at least one approved creative to activate; status transitions enforced |
-| AdReport | — | — | One report per (creativeId, reporterPersonId) [INFERRED] |
+| AdReport | — | — | One report per (creativeId, reporterPersonId) |
 | MemberAdOptOut | — | — | One per (organizationId, personId) |
 
 Source: DOMAIN_MODEL.md — "Advertising Context: `advertiser` — Root aggregate. `ad_campaign` — Campaign aggregate."
@@ -431,10 +431,10 @@ Source: DOMAIN_MODEL.md `creative_status` enum: pending, approved, rejected.
 - Member opts out then back in — targeting resumes
 - Campaign endsAt in the past — reject or immediately complete
 - Same member reports same creative twice — 409 conflict
-- Creative image URL returns 404 — fallback to text-only rendering [INFERRED]
+- Creative image URL returns 404 — fallback to text-only rendering
 - Ad slot not configured for association — no ads served in that slot
 - Concurrent impression recording — atomic spentCents increment
-- Very high impression volume — consider async impression recording [INFERRED]
+- Very high impression volume — consider async impression recording
 
 ## 14. Dependencies
 
@@ -467,7 +467,7 @@ Source: DOMAIN_MODEL.md `creative_status` enum: pending, approved, rejected.
 - **Concurrent users:** Impression tracking handles full platform traffic
 - **Response times:** Ad serving < 50ms (p95), impression recording < 10ms, dashboard < 2s
 - **Caching:** Active campaign + approved creatives cached per org; invalidated on status change
-- **Impression recording:** Async/batch insert for high-volume impression data [INFERRED]
+- **Impression recording:** Async/batch insert for high-volume impression data
 
 ## 17. Observability Hooks
 

@@ -211,3 +211,22 @@ Audit log access is exposed through the M03 Platform Admin module and the Audit 
 | `/audit/integrity/verify` | POST | Platform Super Admin | Verify hash chain integrity |
 
 See M03 Platform Admin API_CONTRACTS.md for full endpoint definitions.
+
+---
+
+## 7. Anonymization & Audit Retention
+
+After 30-day account deletion grace period, PII is anonymized in the person table (`firstName`, `lastName`, `email` replaced with hashed pseudonyms).
+
+Audit logs retain the original `personId` reference but the referenced person record is anonymized.
+
+For compliance investigations requiring de-anonymization, a separate pseudonym mapping table is maintained:
+
+| Aspect | Detail |
+|--------|--------|
+| Access | Accessible only to designated compliance officers (platform super-admin + explicit grant) |
+| Encryption | Encrypted at rest with a separate key from the main database |
+| Audit logging | All access to this table is itself audit-logged |
+| Retention | Same as audit logs (7 years per regulatory requirement) |
+
+This design satisfies DPA 2012 erasure requirements while preserving the ability to fulfill regulatory or legal investigation requests within the retention window.

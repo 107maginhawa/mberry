@@ -60,7 +60,7 @@ Generate, manage, and verify digital credentials — member ID cards, training c
 | WF-072: Public Verification | Public | Scan QR code, verify membership/credential status | P0 |
 | WF-073: Document Management | Officer | Upload, publish, archive org documents | P1 |
 | WF-074: Certificate Download | Member | Download training certificates | P0 |
-| WF-075: Credential Template Management | Officer/Admin | Design digital credential templates | P2 [INFERRED] |
+| WF-075: Credential Template Management | Officer/Admin | Design digital credential templates | P2 |
 
 ## 4. Workflow Details
 
@@ -115,7 +115,7 @@ Generate, manage, and verify digital credentials — member ID cards, training c
 **Exception Flows:** Training not completed — certificate not available. "Complete the training to receive your certificate."
 **Postconditions:** Certificate PDF downloaded, CredentialGenerated event logged.
 
-### Workflow: Credential Template Management (WF-075) [INFERRED]
+### Workflow: Credential Template Management (WF-075)
 
 **Actor:** Officer or Platform Admin
 **Preconditions:** Authenticated, admin or officer role
@@ -224,7 +224,7 @@ Generate, manage, and verify digital credentials — member ID cards, training c
 | qrPayload | Yes | HMAC-signed QR data | — |
 | generatedAt | Yes | Generation timestamp | Auto-generated |
 
-### Entity: VerificationRequest [INFERRED]
+### Entity: VerificationRequest
 
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
@@ -487,11 +487,11 @@ Required test categories:
 |---------|--------|-------|
 | 1. Module Overview | COMPLETE | — |
 | 2. Domain Terms | COMPLETE | — |
-| 3. Workflows | COMPLETE | WF-075 is [INFERRED] |
+| 3. Workflows | COMPLETE | |
 | 4. Workflow Details | COMPLETE | — |
 | 5. Business Rules | COMPLETE | — |
 | 6. Permissions | COMPLETE | Matches ROLE_PERMISSION_MATRIX |
-| 7. Data Requirements | COMPLETE | VerificationRequest entity is [INFERRED] |
+| 7. Data Requirements | COMPLETE | VerificationRequest entity not in DOMAIN_MODEL |
 | 7b. Aggregate Boundaries | COMPLETE | — |
 | 8. State Transitions | COMPLETE | Only Document has state machine |
 | 9. UI/UX Requirements | COMPLETE | — |
@@ -512,5 +512,5 @@ Required test categories:
 
 - **M02 (Member Profile):** PersonUpdated event contract must include fields needed for card regeneration (name, photo, license number)
 - **M05 (Membership):** MembershipStatusChanged event contract must include orgId and new status for card regeneration
-- **M09 (Training):** TrainingCompleted event contract must include trainingId, personId, creditHours, orgName for certificate generation
+- **M09 (Training):** TrainingCompleted event contract must include trainingId, personId, creditValue, orgName for certificate generation
 - **Audit:** All verification requests logged; changes to verification endpoint affect audit trail completeness

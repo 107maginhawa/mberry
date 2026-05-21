@@ -27,6 +27,7 @@ All tables inherit 6 base entity fields from `core/database.schema.ts`:
 | `person` | Core identity record for every user | 11 | `person/repos/person.schema.ts` |
 | `notification_preference` | Per-person, per-category push/email toggles | 5 | `person/repos/notification-preferences.schema.ts` |
 | `person_privacy_setting` | Directory visibility controls per person per org | 6 | `person/repos/privacy-settings.schema.ts` |
+| `data_export` | GDPR-style personal data export request tracking | 6 | `person/repos/data-export.schema.ts` |
 
 ### Enums
 
@@ -68,6 +69,14 @@ All tables inherit 6 base entity fields from `core/database.schema.ts`:
 - `addressVisible` boolean (default: false)
 - Unique: `(personId, organizationId)`
 
+**`data_export`**
+- `personId` uuid NOT NULL (FK → person)
+- `status` data_export_status enum NOT NULL (values: `requested`, `processing`, `ready`, `failed`, `expired`; default: requested)
+- `downloadUrl` text — nullable, set when status = ready
+- `expiresAt` timestamp — nullable, set when export is ready
+- `requestedAt` timestamp NOT NULL (default: now)
+- Indexes: `idx_data_export_person`, `idx_data_export_status`
+
 ### Foreign Keys
 _None — person is the root identity aggregate._
 
@@ -75,6 +84,7 @@ _None — person is the root identity aggregate._
 - `person` → M02 (Member Profile)
 - `notification_preference` → M02
 - `person_privacy_setting` → M02
+- `data_export` → M02
 
 ---
 
@@ -410,6 +420,7 @@ _None — person is the root identity aggregate._
 | `committee` | Standing or ad-hoc committee within an org | 6 | `association:operations/repos/committee.schema.ts` |
 | `committee_member` | Person assigned to a committee with role | 6 | `association:operations/repos/committee.schema.ts` |
 | `committee_task` | Task assigned within a committee | 9 | `association:operations/repos/committee-task.schema.ts` |
+| `committee_meeting` | Scheduled meeting with agenda and minutes | 5 | `association:operations/repos/committee-meeting.schema.ts` |
 
 #### Enums
 
@@ -454,6 +465,15 @@ _None — person is the root identity aggregate._
 - `completedAt` timestamp
 - `completedBy` uuid
 - Indexes: `idx_committee_task_org`, `idx_committee_task_committee`, `idx_committee_task_assignee`, `idx_committee_task_status`, `idx_committee_task_due`
+
+**`committee_meeting`**
+- `organizationId` uuid NOT NULL (FK → organization)
+- `committeeId` uuid NOT NULL (FK → committee)
+- `scheduledAt` timestamp NOT NULL
+- `agenda` text — nullable
+- `minutes` text — nullable (recorded post-meeting)
+- `createdBy` uuid NOT NULL (FK → person)
+- Indexes: `idx_committee_meeting_org`, `idx_committee_meeting_committee`
 
 #### Domain Events (Inferred)
 - `task.overdue` — already wired in `notifs/notification-triggers.ts` (GAP-017)
@@ -1727,12 +1747,19 @@ This is **not** a traditional state machine. Status is computed at query time fr
 
 | Priority | Status | Condition |
 |----------|--------|-----------|
+| 0 | `deceased` | `deceasedAt` is set (terminal — any non-terminal state) |
+| 0 | `expelled` | `expelledAt` is set (terminal — president action after disciplinary process) |
+| 0 | `resigned` | `resignedAt` is set (terminal — officer records voluntary resignation) |
 | 1 | `removed` | `removedAt` is set (irreversible officer action) |
 | 2 | `suspended` | `suspendedAt` is set (reversible officer action) |
 | 3 | `pendingPayment` | `isPendingPayment` flag true (initial state) |
 | 4 | `active` | `duesExpiryDate` is null (life/honorary) OR expiry >= today |
 | 5 | `gracePeriod` | Today is within `gracePeriodDays` after expiry |
+| 5.5 | `expired` | `duesExpiryDate` far past configurable threshold beyond lapse (terminal — requires re-application) |
 | 6 | `lapsed` | Grace period also expired |
+
+**Terminal states** (no outward transitions): `deceased`, `expelled`, `resigned`, `expired`
+**Re-entry from terminal states**: New membership application required (back to `pending`).
 
 **Reactivatable statuses** (from `membership-lifecycle.ts`): `pendingPayment`, `active`, `gracePeriod`, `lapsed`
 

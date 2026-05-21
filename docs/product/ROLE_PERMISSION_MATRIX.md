@@ -301,10 +301,12 @@ Listed in descending privilege order (index 0 = highest):
 | Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | Browse feed | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Create post | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Create post | GA+HG | Y | Y | -- | Y | -- | Y | -- | -- | -- | -- | -- | -- |
 | Moderate (hide/remove) | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 | Mute/unmute author | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | View hidden posts | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+
+> **Note:** Post creation restricted to President and Secretary (communications officers) per M13 MODULE_SPEC domain intent. Platform super/admin retain override access. VP and support staff can moderate but not create posts.
 
 ### 3.23 National Dashboard Module (M14)
 
@@ -325,6 +327,8 @@ Listed in descending privilege order (index 0 = highest):
 | Apply to job | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | Manage bookmarks/alerts | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | Approve external employers | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+
+> **External Actor — Verified Employer:** M15 `verified employer` is a domain entity status (public registration → platform admin approval), not an org role in ROLE_HIERARCHY. Auth uses `employer.verificationStatus` check, not `hasMinimumRole()`. Employers can only manage own job listings.
 
 ### 3.25 Advertising Module (M16)
 
@@ -347,11 +351,13 @@ Listed in descending privilege order (index 0 = highest):
 | Manage vendor listings | GA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Verify/reject vendor | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 
+> **External Actor — Verified Vendor:** M17 `verified vendor` is a domain entity status (public registration → platform admin verification), not an org role in ROLE_HIERARCHY. Auth uses `vendor.verificationStatus` check, not `hasMinimumRole()`. Vendors can only manage own listings and orders.
+
 ### 3.27 Surveys & Polls Module (M18)
 
 | Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Create survey | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Create survey | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 | Respond to survey | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | View survey results | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 | Create quick poll | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
@@ -359,14 +365,29 @@ Listed in descending privilege order (index 0 = highest):
 
 ### 3.28 Committee Management Module (M19)
 
+**Org-Level Roles:**
+
 | Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Create committee | GA+HG | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- |
+| Create committee | GA+HG | Y | Y | -- | Y | Y | -- | -- | -- | -- | -- | -- | -- |
 | View committee (active) | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | View committee (dissolved) | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 | Manage members | GA+HG | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- |
 | Manage tasks | GA+HG | Y | Y | Y | Y | Y | Y | -- | Y | Y | -- | -- | -- |
 | Dissolve committee | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
+
+**Committee-Scoped Roles** (stored in `committee_member.role`, checked via custom `requireCommitteeRole()` — not `hasMinimumRole()`):
+
+| Action | chairperson | vice_chair | secretary | member |
+|--------|------------|-----------|-----------|--------|
+| Manage committee members | Y | -- | -- | -- |
+| Manage tasks | Y | Y | Y | configurable |
+| Schedule meetings | Y | Y | -- | -- |
+| Record meeting minutes | Y | Y | Y | -- |
+| Submit reports | Y | -- | -- | -- |
+| Dissolve committee (own) | Y | -- | -- | -- |
+
+> **Note:** `chairperson` is a committee-scoped role, not an org-level role in ROLE_HIERARCHY. Auth is checked via `committee_member.role` lookup, not `hasMinimumRole()`. Org-level president/admin overrides apply regardless of committee role. See M19-R1: every committee must have a chairperson assigned. M19-R6: if chairperson removed from org, committee enters `leaderless` state until new chairperson assigned.
 
 ---
 

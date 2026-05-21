@@ -250,19 +250,26 @@ SUSPENDED -> EXPELLED (president action after disciplinary process)
 **Zero grace period**: Active -> Lapsed directly (no Grace state).
 
 ### Computation Priority (highest wins):
+0. `deceased` -- deceasedAt IS NOT NULL (terminal, priority 0)
+0. `expelled` -- expelledAt IS NOT NULL (terminal, priority 0)
+0. `resigned` -- resignedAt IS NOT NULL (terminal, priority 0)
 1. `removed` -- removedAt is set
 2. `suspended` -- suspendedAt is set
 3. `pendingPayment` -- isPendingPayment flag true
 4. `active` -- duesExpiryDate is null (life/honorary) OR expiry >= today
 5. `gracePeriod` -- today within gracePeriodDays after expiry
+5.5. `expired` -- duesExpiryDate far past configurable threshold beyond lapse (terminal, between lapsed and removed priority)
 6. `lapsed` -- grace period also expired
+
+**Terminal states** (no outward transitions): `deceased`, `expelled`, `resigned`, `expired`
+**Re-entry from terminal states**: New membership application required (back to `pending`).
 
 ### Application Status
 ```txt
 submitted -> underReview (officer opens)
 underReview -> approved (officer approves)
 underReview -> denied (officer rejects)
-underReview -> waitlisted (capacity full) [INFERRED]
+underReview -> waitlisted (capacity full)
 ```
 
 ### Transfer Status

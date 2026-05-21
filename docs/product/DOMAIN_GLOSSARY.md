@@ -257,7 +257,7 @@ Exception: `nationalOrgId` is used in royalty split schemas for the national bod
 
 | Term | Definition |
 |------|------------|
-| **Feed Post** | Officer-authored content item in the professional feed. Types: Announcement (auto from M07), EventHighlight (auto from M08), TrainingOpportunity (auto from M09), OfficerPost (manual). |
+| **Feed Post** | Officer-authored content item in the professional feed. DB entity name: `post`. Types (5-value enum): `Announcement` (auto from M07), `EventHighlight` (auto from M08), `TrainingOpportunity` (auto from M09), `Achievement` (manual), `ClinicalUpdate` (manual). |
 | **Mute Preference** | Per-member per-org setting to hide posts from a specific author in the feed. Does not block — only hides from feed view. |
 | **Engagement** | Feed interactions: like and bookmark. Tracked per post per member. |
 

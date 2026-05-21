@@ -208,7 +208,7 @@ N/A (read-only list with action buttons).
 
 **Route:** `/org/[id]/officer/training/[id]/attendance`
 **Purpose:** Mark attendance and trigger credit awards for completed training
-**Workflow:** Confirm Attendance & Award Credits (SO-3)
+**Workflow:** WF-060: Confirm Attendance & Award Credits
 
 ### ARIA Landmarks
 
@@ -295,7 +295,7 @@ N/A (read-only list with action buttons).
 
 **Route:** `/my/training`
 **Purpose:** Member view of personal training history and certificates
-**Workflow:** Browse & Enroll, Download Certificate (M-21)
+**Workflow:** WF-059: Training Enrollment, WF-061: Certificate Generation
 
 ### ARIA Landmarks
 
@@ -378,7 +378,7 @@ All authenticated members see the same view. No role differentiation on this scr
 
 **Route:** `/my/certificates/[id]`
 **Purpose:** View and download individual training certificate
-**Workflow:** Download Certificate (M-21)
+**Workflow:** WF-061: Certificate Generation
 
 ### ARIA Landmarks
 

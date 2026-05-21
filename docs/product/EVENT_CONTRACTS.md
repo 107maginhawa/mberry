@@ -89,7 +89,7 @@ All domain events use the `CreateNotificationRequest` interface as the event env
 
 | Event Name | Producer | Consumer(s) | Payload | Sync/Async |
 |------------|----------|-------------|---------|------------|
-| `PersonCreated` | M01 | M02, M05 | `{ personId, email, name }` | Sync (in-request) |
+| `PersonCreated` | M01 | M02, M05 | `{ personId, email, firstName, lastName }` | Sync (in-request) |
 | `PersonUpdated` | M02 | M11 (card regeneration) | `{ personId, changedFields[] }` | Async |
 | `PersonAnonymized` | M02 | M05, M06, M10, M11 | `{ personId }` | Async (deletion processor) |
 | `AccountDeletionScheduled` | M02 | Deletion processor | `{ personId, gracePeriodEnd }` | Async (30-day delay) |
@@ -99,16 +99,16 @@ All domain events use the `CreateNotificationRequest` interface as the event env
 | `MembershipCreated` | M05 | M02 (profile update) | `{ membershipId, personId, orgId, tier }` | Sync |
 | `MembershipStatusChanged` | M05 | M02 (profile), M12 (voter eligibility) | `{ membershipId, personId, oldStatus, newStatus }` | Async |
 | `MemberTransferred` | M05 | M04 (org cleanup) | `{ personId, fromOrgId, toOrgId }` | Sync |
-| `PaymentRecorded` | M06 | M05 (expiry update), M08 (registration confirm) | `{ paymentId, personId, amount, invoiceId }` | Sync |
-| `PaymentRefunded` | M06 | M08 (registration refund) | `{ paymentId, registrationId, amount }` | Sync |
+| `PaymentRecorded` | M06 | M05 (expiry update), M08 (registration confirm) | `{ paymentId, personId, orgId, amount, invoiceId, newExpiryDate, registrationId? }` | Sync |
+| `PaymentRefunded` | M06 | M05 (expiry reversal), M08 (registration refund) | `{ paymentId, personId, orgId, amount, invoiceId, reversedExpiryDate, registrationId? }` | Sync |
 | `DuesReminderSent` | M06 | Audit | `{ personId, invoiceId, reminderLevel }` | Async |
 | `AnnouncementPublished` | M07 | Email queue, Push service | `{ orgId, announcementId, audience, channels }` | Async |
 | `EventPublished` | M08 | M07 (announcements) | `{ eventId, orgId, eventName, date }` | Async |
 | `EventCancelled` | M08 | M06 (refunds), M07 (notification) | `{ eventId, registrantIds[], amounts[] }` | Sync |
 | `RegistrationConfirmed` | M08 | M07 (notification) | `{ registrationId, personId, eventId }` | Async |
-| `TrainingCompleted` | M09 | M10 (credit award), M11 (certificate) | `{ trainingId, personId, creditHours, type }` | Sync |
+| `TrainingCompleted` | M09 | M10 (credit award), M11 (certificate) | `{ trainingId, personId, creditValue, type }` | Sync |
 | `TrainingPublished` | M09 | M07 (announcements) | `{ trainingId, orgId, title, date }` | Async |
-| `CreditAwarded` | M10 | M11 (transcript update) | `{ personId, creditEntryId, hours, category }` | Async |
+| `CreditAwarded` | M10 | M11 (transcript update) | `{ personId, creditEntryId, creditValue, category }` | Async |
 | `CredentialGenerated` | M11 | Audit | `{ personId, type, documentId }` | Async |
 | `ElectionOpened` | M12 | M07 (announcements) | `{ electionId, orgId, status }` | Async |
 | `ElectionPublished` | M12 | M04 (officer transitions) | `{ electionId, orgId, winners: [{positionId, winnerId}] }` | Sync |
@@ -157,6 +157,8 @@ interface JobContext {
 ---
 
 ## 2. Job Contracts
+
+> **Documentation scope:** All background jobs (cron, interval, one-shot) are documented in this file under Job Contracts. API_CONTRACTS files cover HTTP endpoints only. For the full async processing picture, reference both this file and the relevant module's API_CONTRACTS.
 
 ### 2.1 `dues.reminderProcessor`
 

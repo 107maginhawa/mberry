@@ -64,19 +64,19 @@ Based on:
 | Action | Description | Permission Notes | Keyboard Shortcut |
 |---|---|---|---|
 | Filter by post type | Filter chips for post type enum | All authenticated | -- |
-| New Post | Open create post form/modal | Officers (Secretary, President, VP) only | -- |
+| New Post | Open create post form/modal | Officers (Secretary, President) only | -- |
 | Like/Bookmark | Toggle engagement on post | Active members only (M13-R1) | Enter on focused post action |
 | Mute author | Hide author's posts from feed | Any authenticated member | -- |
 | Unmute author | Restore muted author's posts | Any authenticated member | -- |
 | Report post | Flag post for moderation | Any authenticated member | -- |
-| Hide post | Moderate — hide post (reversible) | Officers (Secretary, President, VP) | -- |
-| Remove post | Moderate — remove post (terminal) | Officers (Secretary, President, VP) | -- |
-| Unhide post | Restore hidden post | Officers (Secretary, President, VP) | -- |
+| Hide post | Moderate — hide post (reversible) | Officers (Secretary, President) | -- |
+| Remove post | Moderate — remove post (terminal) | Officers (Secretary, President) | -- |
+| Unhide post | Restore hidden post | Officers (Secretary, President) | -- |
 | Infinite scroll | Load next page of posts | All | -- |
 
 ### Role-Variant Matrix
 
-| UI Element | Platform Admin | National Officer | Secretary/President/VP | Treasurer/Board/Officer/Staff | Active Member | Grace/Lapsed Member |
+| UI Element | Platform Admin | National Officer | Secretary/President | Treasurer/Board/Officer/Staff | Active Member | Grace/Lapsed Member |
 |---|---|---|---|---|---|---|
 | Feed post list | visible | visible | visible | visible | visible | visible (read-only) |
 | New Post button | visible | visible | visible | hidden | hidden | hidden |
@@ -138,7 +138,7 @@ Based on:
 
 **Purpose:** Compose and publish a new feed post
 **Route:** Inline on feed page or modal overlay
-**Primary Users/Roles:** Officers (Secretary, President, VP)
+**Primary Users/Roles:** Officers (Secretary, President)
 **Related Workflow:** WF-081 (Create Post)
 **PRD / Module Spec Reference:** MODULE_SPEC.md Section 9 — Create Post
 
@@ -187,7 +187,7 @@ Based on:
 
 ### Role-Variant Matrix
 
-| UI Element | Secretary/President/VP | All Other Roles |
+| UI Element | Secretary/President | All Other Roles |
 |---|---|---|
 | Entire form | visible + editable | hidden (button not rendered) |
 

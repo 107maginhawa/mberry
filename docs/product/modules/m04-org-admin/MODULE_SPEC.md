@@ -110,7 +110,7 @@ Steps:
 | M4-R1 | IF assigning officer role THEN one per role (except Board Member allows multiple) | Role assignment | Block duplicate role assignment |
 | M4-R2 | IF assigning/removing officer THEN only President can do it | Role management | API returns 403 for others |
 | M4-R3 | IF officer transition THEN checklist required before transfer | Transition | Role-specific items auto-generated |
-| M4-R4 | IF disciplinary action THEN reason required and action immutable | Discipline | Warning: no access change. Suspension: lose org features. Removal: terminate membership. Probation: restricted. |
+| M4-R4 | IF disciplinary action THEN reason required and action immutable. Original disciplinary action and reason are immutable after creation. Override is recorded as a separate audit event with its own reason, not an edit of the original. | Discipline | Warning: no access change. Suspension: lose org features. Removal: terminate membership. Probation: restricted. |
 | M4-R5 | IF SVG uploaded as logo THEN sanitize per BR-31 | Logo upload | Strip scripts, event handlers, external refs |
 | M4-R6 | IF officer action THEN log to immutable audit trail | All actions | Actor, timestamp, before/after state, IP |
 | M4-R7 | IF officer role in org A THEN no effect on org B | Cross-org | Independent per org |

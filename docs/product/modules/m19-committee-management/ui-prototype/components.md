@@ -404,6 +404,7 @@ interface CreateTaskData {
 |-----------|---------|
 | isSubmitting | Spinner, fields disabled |
 | committeeMembers.length is 1 | Only chairperson available, auto-select or "Unassigned" |
+| priority not set | Pre-select "medium" (M19-R7) |
 | dueDate in past | "Due date must be in the future." validation |
 | Success | sonner toast "Task created." Panel closes. Board updates. |
 

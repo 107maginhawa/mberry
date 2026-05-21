@@ -70,7 +70,7 @@ Give the platform operations team full control over the multi-tenant platform: a
 | Support Ticket Resolution | WF-020 | Super/Support | Ticket inbox, SLA tracking, escalation | P0 |
 | Revenue Dashboard | WF-021 | Super/Admin | MRR, ARR, churn, growth metrics | P0 |
 | Admin Team Management | WF-022 | Super Admin | Invite/modify/remove platform admins | P0 |
-| Org Suspension/Cancellation | WF-023 | Super/Admin | Admin suspends or cancels org [INFERRED] | P0 |
+| Org Suspension/Cancellation | WF-023 | Super/Admin | Admin suspends or cancels org | P0 |
 
 ## 4. Workflow Details
 
@@ -247,7 +247,7 @@ Postconditions: Admin team updated. New admins receive email invitation.
 | currentPeriodEnd | Yes | Billing period end | Date |
 | externalId | No | Stripe subscription ID | -- |
 
-### Entity: ImpersonationSession [INFERRED]
+### Entity: ImpersonationSession
 
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
@@ -291,7 +291,7 @@ Rules:
 - Cancellation starts 90-day data retention countdown.
 - Reactivation from Suspended restores full access immediately.
 
-### Subscription Lifecycle [INFERRED]
+### Subscription Lifecycle
 ```txt
 Trial --> Active (payment recorded)
 Trial --> Cancelled (trial expired)
@@ -561,7 +561,7 @@ When implementing this module:
 | 6. Permissions | COMPLETE | Expanded from ROLE_PERMISSION_MATRIX.md with admin CRUD |
 | 7. Data Requirements | COMPLETE | Added Subscription and ImpersonationSession entities |
 | 7b. Aggregate Boundaries | COMPLETE | From DOMAIN_MODEL.md |
-| 8. State Transitions | COMPLETE | Added Subscription lifecycle [INFERRED] |
+| 8. State Transitions | COMPLETE | Added Subscription lifecycle |
 | 9. UI/UX Requirements | COMPLETE | Added all required states |
 | 10. API Expectations | COMPLETE | Expanded with CRUD endpoints and admin team |
 | 10b. Domain Events | COMPLETE | Added ImpersonationStarted/Ended, AdminInvited |

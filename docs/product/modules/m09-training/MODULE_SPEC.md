@@ -54,13 +54,13 @@ Manage instructor-led and live professional development activities. Covers train
 
 | Workflow | WF-ID | Actor | Description | Priority |
 |----------|-------|-------|-------------|----------|
-| Create & Publish Training | [INFERRED] | Officer | Training creation with credits, fee, capacity, type | P0 |
-| Manage Enrollments | [INFERRED] | Officer | View, approve, cancel enrollments | P0 |
-| Confirm Attendance & Award Credits | SO-3 | Society Officer | Mark attendance, auto-generate credit entries | P0 |
-| Browse & Enroll | [INFERRED] | Member | Find trainings, enroll, pay fee | P0 |
-| View Training History | [INFERRED] | Member | Past trainings + credits earned | P0 |
-| Download Certificate | M-21 | Member | PDF with QR verification link | P0 |
-| Manage Accredited Providers | [INFERRED] | Officer | Provider CRUD, status management | P1 |
+| Create & Publish Training | WF-058 | Officer | Training CRUD: create, publish, cancel, complete (5 types) | P0 |
+| Manage Enrollments | WF-059 | Officer | Training enrollment: register with capacity management | P0 |
+| Confirm Attendance & Award Credits | WF-060 | Society Officer | Mark attendance, auto-credit to M10 | P0 |
+| Certificate Generation | WF-061 | Member | PDF with QR verification (touches M11) | P0 |
+| Paid Training | WF-062 | Member | Fee collection via M06 billing | P0 |
+| Training Analytics | WF-063 | Officer | Completion rates, revenue reporting | P0 |
+| Manage Accredited Providers | WF-064 | Officer | Provider CRUD and management | P1 |
 
 ## 4. Workflow Details
 
@@ -86,7 +86,7 @@ Manage instructor-led and live professional development activities. Covers train
 
 **Postconditions:** Training in `published` status. Notification sent to eligible members.
 
-### Workflow: Confirm Attendance & Award Credits (SO-3)
+### Workflow: Confirm Attendance & Award Credits (WF-060)
 
 **Actor:** Society Officer
 **Preconditions:** Training published or completed, enrollments exist
@@ -119,12 +119,12 @@ Manage instructor-led and live professional development activities. Covers train
 4. On success: enrollment status = `enrolled`.
 
 **Exception Flows:**
-- Training full: "Training is full." (no waitlist for training -- different from events [INFERRED]).
+- Training full: "Training is full." (no waitlist for training -- different from events).
 - Payment fails: enrollment not created.
 
 **Postconditions:** Enrollment record created. Member appears in attendance list.
 
-### Workflow: Download Certificate (M-21)
+### Workflow: Certificate Generation (WF-061)
 
 **Actor:** Member
 **Preconditions:** Enrollment completed, certificate generated

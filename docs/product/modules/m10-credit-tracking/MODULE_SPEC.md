@@ -62,8 +62,8 @@ Track continuing professional development (CPD/CE) credits across organizations.
 | WF-066: Add Manual Credit | Member | Self-entry with activity details, optional docs | P0 |
 | WF-067: Officer Credit Adjustment | Officer | Award or deduct credits with mandatory reason | P1 |
 | WF-068: Org Credit Compliance | Officer | Officer view of member compliance rates | P1 |
-| WF-069: Credit Cycle Management | Officer/Admin | Configurable start date, excess carryover | P1 [INFERRED] |
-| WF-070: Credit Transcript Export | Member | Per-member PDF/CSV transcript | P2 [INFERRED] |
+| WF-069: Credit Cycle Management | Officer/Admin | Configurable start date, excess carryover | P1 |
+| WF-070: Credit Transcript Export | Member | Per-member PDF/CSV transcript | P2 |
 
 ## 4. Workflow Details
 
@@ -116,7 +116,7 @@ Track continuing professional development (CPD/CE) credits across organizations.
 3. Filters by status (compliant/non-compliant), sorts by remaining.
 **Postconditions:** Officer sees org-wide compliance snapshot.
 
-### Workflow: Credit Transcript Export (WF-070) [INFERRED]
+### Workflow: Credit Transcript Export (WF-070)
 
 **Actor:** Member
 **Preconditions:** Authenticated, has credit entries
@@ -167,7 +167,7 @@ Track continuing professional development (CPD/CE) credits across organizations.
 | provider | No | Provider name | Optional |
 | reason | Conditional | Required for ADJUSTED type | Mandatory if type=ADJUSTED |
 | supportingDocumentUrl | No | Uploaded file URL | PDF/image, max 5MB |
-| cpdCategory | No | CPD category (PRC) | Enum: General, Major, Self-Directed [INFERRED] |
+| cpdCategory | No | CPD category (PRC) | Enum: General, Major, Self-Directed |
 | createdBy | Yes | Who created the entry | personId of creator |
 | createdAt | Yes | Timestamp | Auto-generated |
 
@@ -295,6 +295,8 @@ Required test categories:
 - Association changes cycle duration mid-cycle — existing cycles keep original dates. New duration applies to next cycle only. No retroactive recomputation.
 - Member's registration date changes (data correction) — cycle recalculation needed
 - Concurrent AUTO credit creation from same training (race condition) — unique constraint handles
+- Negative credit deduction attempted: BLOCK. Credit adjustments must be zero or positive. To remove credits, use the officer adjustment workflow with an explicit audit reason.
+- Mid-cycle configuration change (org changes required credits mid-cycle): No retroactive recomputation. New requirement applies from the next cycle. Current cycle members keep their existing target.
 
 ## 14. Dependencies
 
@@ -381,7 +383,7 @@ Required test categories:
 |---------|--------|-------|
 | 1. Module Overview | COMPLETE | — |
 | 2. Domain Terms | COMPLETE | — |
-| 3. Workflows | COMPLETE | WF-069, WF-070 are [INFERRED] |
+| 3. Workflows | COMPLETE | |
 | 4. Workflow Details | COMPLETE | — |
 | 5. Business Rules | COMPLETE | — |
 | 6. Permissions | COMPLETE | Matches ROLE_PERMISSION_MATRIX |
@@ -393,7 +395,7 @@ Required test categories:
 | 10b. Domain Events | COMPLETE | — |
 | 11. Acceptance Criteria | COMPLETE | — |
 | 12. Test Expectations | COMPLETE | — |
-| 13. Edge Cases | PARTIAL | Negative balance and mid-cycle config change need [VERIFY] |
+| 13. Edge Cases | COMPLETE | Negative balance, mid-cycle config change, negative deduction all addressed |
 | 14. Dependencies | COMPLETE | — |
 | 15. Error Handling | COMPLETE | — |
 | 16. Performance | COMPLETE | — |
@@ -406,4 +408,4 @@ Required test categories:
 
 - **M11 (Documents & Credentials):** Certificate generation depends on credit data; if credit entry schema changes, certificate templates may need updating
 - **M14 (National Dashboard):** Compliance metrics depend on credit aggregation logic; changes to cycle computation affect dashboard accuracy
-- **M09 (Training):** TrainingCompleted event contract must include creditHours and trainingId; changes break AUTO credit generation
+- **M09 (Training):** TrainingCompleted event contract must include creditValue and trainingId; changes break AUTO credit generation

@@ -40,7 +40,7 @@ Give healthcare professionals a curated, professional content feed within their 
 - Content moderation (hide/remove posts)
 - Mute/unmute specific authors
 - Visibility scoping (org-only vs network-wide)
-- Engagement actions (like, bookmark) [INFERRED]
+- Engagement actions (like, bookmark)
 
 ### Out of Scope
 
@@ -58,7 +58,7 @@ Give healthcare professionals a curated, professional content feed within their 
 | **Person** | Central PII hub. The identity record for any individual. |
 | **Member** | Healthcare professional using the platform. One account, multiple org memberships. |
 | **Officer** | Member assigned an administrative role (President, Treasurer, Secretary). |
-| **Post** | A feed content item authored by an officer, typed and scoped. [INFERRED — no DOMAIN_GLOSSARY entry] |
+| **Post** | A feed content item authored by an officer, typed and scoped (glossary: Feed Post). DB entity name: `post`. |
 
 ## 3. Workflows
 
@@ -80,7 +80,7 @@ Give healthcare professionals a curated, professional content feed within their 
   2. System loads org-scoped posts, newest first, paginated (infinite scroll)
   3. Member scrolls; system loads next page on threshold
   4. Member can filter by post type
-  5. Member can engage (like/bookmark) [INFERRED]
+  5. Member can engage (like/bookmark)
 - **Alternate Flows:** Member belongs to multiple orgs — feed shows selected org
 - **Exception Flows:** Non-active member sees read-only feed with banner prompting renewal
 - **Postconditions:** Feed view logged
@@ -139,7 +139,7 @@ Give healthcare professionals a curated, professional content feed within their 
 | Action | Allowed Roles | Restricted Roles | Notes |
 |--------|--------------|-----------------|-------|
 | Browse feed | All active members | Non-members | GA |
-| Create post | Officers (Secretary, President) | Member, Treasurer [INFERRED] | GA+HG |
+| Create post | Officers (Secretary, President) | Member, Treasurer | GA+HG |
 | Moderate (hide/remove) | Officers (Secretary, President) | Member | GA+HG |
 | Mute/unmute author | All authenticated | — | GA |
 | View hidden posts | Officers, Platform Admin | Member | GA+HG / PA |
@@ -163,7 +163,7 @@ Give healthcare professionals a curated, professional content feed within their 
 | createdAt | Yes | Timestamp | Auto |
 | updatedAt | Yes | Timestamp | Auto |
 
-### Entity: MutePreference [INFERRED]
+### Entity: MutePreference
 
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
@@ -180,7 +180,7 @@ Give healthcare professionals a curated, professional content feed within their 
 | Aggregate Root | Owned Entities | Owned Value Objects | Key Invariants |
 |---------------|---------------|--------------------|-----------------| 
 | Post | — | imageUrls (JSONB) | Max 4 images; body <= 2000 chars; status transitions enforced |
-| MutePreference [INFERRED] | — | — | Unique per (personId, mutedPersonId, organizationId) |
+| MutePreference | — | — | Unique per (personId, mutedPersonId, organizationId) |
 
 ## 8. State Transitions
 
@@ -249,9 +249,9 @@ Source: DOMAIN_MODEL.md state inventory — "Post (M13): Draft -> Published -> H
 
 | Event Name | Source Module | Handler | Side Effect |
 |------------|-------------|---------|-------------|
-| AnnouncementCreated | M07 | createFeedPost | Auto-creates Announcement-type feed post [INFERRED] |
-| EventCreated | M08 | createFeedPost | Auto-creates EventHighlight post [INFERRED] |
-| TrainingPublished | M09 | createFeedPost | Auto-creates TrainingOpportunity post [INFERRED] |
+| AnnouncementCreated | M07 | createFeedPost | Auto-creates Announcement-type feed post |
+| EventCreated | M08 | createFeedPost | Auto-creates EventHighlight post |
+| TrainingPublished | M09 | createFeedPost | Auto-creates TrainingOpportunity post |
 
 ## 11. Acceptance Criteria
 
@@ -385,11 +385,11 @@ When implementing this module:
 | 5. Business Rules | COMPLETE | BR-35 from WORKFLOW_MAP + module-specific rules |
 | 6. Permissions | PARTIAL | No explicit ROLE_PERMISSION_MATRIX section for M13; derived from PRD |
 | 7. Data Requirements | PARTIAL | No `feed_post` table in DOMAIN_MODEL.md — entity inferred from PRD |
-| 7b. Aggregate Boundaries | PARTIAL | MutePreference is [INFERRED] |
+| 7b. Aggregate Boundaries | PARTIAL | MutePreference entity not in DOMAIN_MODEL |
 | 8. State Transitions | COMPLETE | From DOMAIN_MODEL state inventory |
 | 9. UI/UX Requirements | COMPLETE | — |
 | 10. API Expectations | COMPLETE | — |
-| 10b. Domain Events | PARTIAL | Consumed events are [INFERRED] |
+| 10b. Domain Events | PARTIAL | Consumed events derived from cross-module patterns |
 | 11. Acceptance Criteria | COMPLETE | — |
 | 12. Test Expectations | COMPLETE | — |
 | 13. Edge Cases | COMPLETE | — |

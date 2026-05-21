@@ -64,7 +64,7 @@ Allow members to manage their professional identity, control privacy, configure 
 | Account Deletion | WF-011 | Member | Request, 30-day grace, cascade via person.deletionProcessor | P0 |
 | Digital ID Card | WF-012 | Member | View/download QR-verified member ID | P0 |
 | Notification Preferences | WF-013 | Member | Per-channel opt-in/out | P0 |
-| Data Export | WF-014 | Member | DPA-style personal data export [INFERRED] | P0 |
+| Data Export | WF-014 | Member | DPA-style personal data export | P0 |
 | Change Password/Email | -- | Member | Security settings with OTP verification | P0 |
 | Privacy Settings | -- | Member | Toggle directory visibility per field | P0 |
 
@@ -179,7 +179,7 @@ Postconditions: ZIP available for download with 7-day TTL.
 | Field | Required | Description | Validation / Notes |
 |-------|---------|-------------|-------------------|
 | specialization | No | Professional specialty | Free text |
-| subSpecialization | No | Sub-specialty | Free text |
+| subSpecialization | No | Sub-specialty | Free text, max 100 chars |
 | yearsOfPractice | No | Years in practice | Integer >= 0 |
 | affiliation | No | Clinic/hospital | Free text |
 | deletionRequestedAt | No | Deletion request timestamp | Set on request |

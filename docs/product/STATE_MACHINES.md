@@ -39,6 +39,12 @@
 | ACTIVE/GRACE/LAPSED | SUSPENDED | Officer action | Officer (president) |
 | SUSPENDED | ACTIVE | Officer restores | Officer (president) |
 | ACTIVE | REMOVED | President action | President only |
+| ACTIVE/GRACE/LAPSED | EXPIRED | Automatic when lapsed period exceeds configured duration | System |
+| ACTIVE/GRACE/LAPSED | RESIGNED | Member voluntarily resigns | Member (self-service) |
+| Any (except DECEASED) | DECEASED | Officer records member death | Officer (president) |
+| Any (except DECEASED) | EXPELLED | Disciplinary expulsion via M04 | President only |
+
+**Terminal States:** EXPIRED, RESIGNED, DECEASED, EXPELLED have no outward transitions. Reactivation from terminal states is not supported — a new membership record must be created.
 
 **Invariant:** Status is computed from `dues_expiry_date`, not stored as a mutable field. Invalid transitions are rejected silently.
 
@@ -155,14 +161,18 @@
 **Values:** `enrolled`, `completed` (implicit — no pgEnum; status tracked via completion timestamp)
 
 ```
-    ┌──────────┐  markComplete  ┌───────────┐
-    │ enrolled ├───────────────►│ completed │
-    └──────────┘                └───────────┘
+enrolled → completed (attendance confirmed)
+enrolled → cancelled (member/officer cancels)
+enrolled → noShow (training completed, not attended)
 ```
 
 | From | To | Trigger | Actor |
 |------|-----|---------|-------|
 | enrolled | completed | Officer confirms attendance + completion | Officer (society) |
+| enrolled | cancelled | Member or officer cancels before training date | Member/Officer |
+| enrolled | noShow | Training completed but member not marked as attended | System (post-training) |
+
+Cancelled and NoShow are terminal for that enrollment instance.
 
 **Side effect:** Completing enrollment auto-awards credits per BR-13 (M09 → M10 cross-module).
 

@@ -165,6 +165,98 @@ Exception Flows:
 Postconditions:
 - Org fully configured. Members imported. Claim emails sent.
 
+### Workflow: Forgot Password (WF-004)
+
+Actor: Any user (unauthenticated)
+Preconditions: Registered email exists
+Steps:
+1. Enter email on forgot password page.
+2. System sends OTP to registered email.
+3. User enters OTP.
+4. User sets new password (min 8 chars).
+5. Redirect to login.
+
+Alternate Flows:
+- Magic link option instead of OTP.
+
+Exception Flows:
+- Email not found → generic "If an account exists, a reset email has been sent" (prevents enumeration).
+- OTP expired → "Code expired. Request a new one."
+
+Postconditions:
+- Password updated, all existing sessions invalidated.
+
+### Workflow: Magic Link Login (WF-006)
+
+Actor: Existing member
+Preconditions: Account exists, email verified
+Steps:
+1. Enter email on login page.
+2. Select "Send magic link."
+3. System emails link (valid 15 minutes).
+4. Click link → auto-authenticated.
+
+Exception Flows:
+- Link expired → "Link expired. Request a new one."
+- Link already used → "Link already used. Request a new one." (single-use tokens)
+
+Postconditions:
+- Session created, redirected to dashboard.
+
+### Workflow: Account Claim — Imported Member (WF-007)
+
+Actor: Member imported via CSV who hasn't registered
+Preconditions: Invitation token exists, not yet claimed
+Steps:
+1. Receive invitation email with claim link.
+2. Click link.
+3. Verify identity (license number + email must match import data).
+4. Set password + optional MFA enrollment.
+5. Profile pre-populated from import data.
+
+Exception Flows:
+- Token expired → "Invitation expired. Contact your chapter secretary."
+- Already claimed → "Account already activated. Log in instead."
+
+Postconditions:
+- Account active, InvitationClaimed event emitted to M05.
+
+### Workflow: Invite Member (WF-008)
+
+Actor: Officer (President, Secretary)
+Preconditions: Officer authenticated with 2FA, org exists
+Steps:
+1. Open member invite form.
+2. Enter email, firstName, lastName, licenseNumber (optional).
+3. System creates Person record + invitation token.
+4. Invitation email sent with claim link.
+
+Exception Flows:
+- Email already registered → "Member already exists. Cannot re-invite."
+- Invalid email format → validation error.
+
+Postconditions:
+- Invitation token created, email queued via M07.
+
+### Workflow: Bulk CSV Import (WF-009)
+
+Actor: Officer (President, Secretary)
+Preconditions: Officer authenticated with 2FA, org exists
+Steps:
+1. Upload CSV file.
+2. System validates format (required: firstName, lastName, email; optional: licenseNumber, specialization).
+3. Preview: matched (existing members) vs new records shown.
+4. Officer confirms import.
+5. System creates Person records, generates invitation tokens, queues emails.
+
+Exception Flows:
+- Duplicate emails in CSV → skip duplicates with warning count.
+- Invalid rows → reject with line numbers and error messages.
+- File too large → "Maximum 500 members per import."
+
+Postconditions:
+- New members created with PENDING status, invitation emails queued, import log downloadable.
+
 ## 5. Business Rules
 
 | Rule ID | Rule | Applies To | Expected Behavior |
@@ -347,7 +439,7 @@ States:
 
 | Event Name | Trigger | Payload | Consumers |
 |---|---|---|---|
-| PersonCreated | Registration or claim completed | personId, email, licenseNumber | M02, M05 |
+| PersonCreated | Registration or claim completed | personId, email, firstName, lastName, licenseNumber | M02, M05 |
 | SessionCreated | Login success | personId, deviceInfo, sessionId | Audit |
 | InvitationClaimed | Imported member claims account | tokenId, personId, orgId | M05 |
 | OnboardingCompleted | Officer finishes wizard | orgId, officerId | M04, M05, M06 |
@@ -520,7 +612,7 @@ When implementing this module:
 | 1. Module Overview | COMPLETE | -- |
 | 2. Domain Terms | COMPLETE | Aligned with DOMAIN_GLOSSARY.md |
 | 3. Workflows | COMPLETE | Aligned with WORKFLOW_MAP.md WF-001 through WF-009 |
-| 4. Workflow Details | PARTIAL | WF-004 (Password Reset), WF-006 (Member Onboarding), WF-007 (MFA Enrollment), WF-008 (Invite), WF-009 (Bulk Import) not fully detailed |
+| 4. Workflow Details | COMPLETE | All workflows WF-001 through WF-009 fully detailed |
 | 5. Business Rules | COMPLETE | 15 rules including cross-refs to BR-22, BR-23, BR-25, BR-26 |
 | 6. Permissions | COMPLETE | Aligned with ROLE_PERMISSION_MATRIX.md |
 | 7. Data Requirements | COMPLETE | -- |

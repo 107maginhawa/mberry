@@ -29,7 +29,7 @@
 | Auth | GA — all authenticated users |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | Create & Publish Training [INFERRED] |
+| Workflow | WF-058: Create & Publish Training |
 | Business rules | M9-R6 (network-wide visibility default) |
 
 **Query Parameters**
@@ -121,7 +121,7 @@
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Optional |
-| Workflow | Create & Publish Training [INFERRED] |
+| Workflow | WF-058: Create & Publish Training |
 | Business rules | M9-R1 (5 platform types), BR-15 (credit-bearing enforcement) |
 
 **Request Body**
@@ -178,7 +178,7 @@
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Optional |
-| Workflow | Create & Publish Training [INFERRED] |
+| Workflow | WF-058: Create & Publish Training |
 | Business rules | M9-R3 (post-completion lock) |
 
 **Request Body**
@@ -213,7 +213,7 @@ Same fields as POST (all optional for partial update). Only `draft` and `publish
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | Create & Publish Training [INFERRED] |
+| Workflow | WF-058: Create & Publish Training |
 | Business rules | — |
 
 **Request Body** — None
@@ -249,7 +249,7 @@ Same fields as POST (all optional for partial update). Only `draft` and `publish
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | Create & Publish Training [INFERRED] |
+| Workflow | WF-058: Create & Publish Training |
 | Business rules | M9-R5 (refund all enrolled) |
 
 **Request Body** — None
@@ -286,7 +286,7 @@ Same fields as POST (all optional for partial update). Only `draft` and `publish
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | Confirm Attendance & Award Credits (SO-3) |
+| Workflow | WF-060: Confirm Attendance & Award Credits |
 | Business rules | M9-R3 (locks enrollments) |
 
 **Request Body** — None
@@ -324,7 +324,7 @@ Same fields as POST (all optional for partial update). Only `draft` and `publish
 | Auth | GA — any authenticated member |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Optional |
-| Workflow | Browse & Enroll [INFERRED] |
+| Workflow | WF-059: Training Enrollment |
 | Business rules | M9-R2 (paid requires payment), M9-R3 (post-completion lock) |
 
 **Request Body**
@@ -381,7 +381,7 @@ Same fields as POST (all optional for partial update). Only `draft` and `publish
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Required (idempotent per M9-R7) |
-| Workflow | SO-3: Confirm Attendance & Award Credits |
+| Workflow | WF-060: Confirm Attendance & Award Credits |
 | Business rules | BR-13 (auto-credit award), BR-17 (officer-only), M9-R7 (no duplicate credits) |
 
 **Request Body**
@@ -440,7 +440,7 @@ Same fields as POST (all optional for partial update). Only `draft` and `publish
 | Auth | GA — any authenticated user |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | View Training History [INFERRED] |
+| Workflow | WF-059: Training Enrollment (history view) |
 | Business rules | — |
 
 **Query Parameters**
@@ -499,7 +499,7 @@ Same fields as POST (all optional for partial update). Only `draft` and `publish
 | Auth | GA — own certificates only |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | M-21: Download Certificate |
+| Workflow | WF-061: Certificate Generation |
 | Business rules | BR-20 (HMAC-signed QR), M9-R4 (tamper-proof verification) |
 
 **Response** `200 OK`
@@ -529,7 +529,7 @@ Binary PDF file with member name, training title, date, credits earned, HMAC-sig
 | Auth | None (public endpoint) |
 | Rate limit | Unauthenticated (20 req/min) |
 | Idempotency | N/A |
-| Workflow | M-21: Download Certificate (verification) |
+| Workflow | WF-061: Certificate Generation (verification) |
 | Business rules | BR-20, M9-R4 (HMAC verification) |
 
 **Response** `200 OK`
@@ -579,7 +579,7 @@ Binary PDF file with member name, training title, date, credits earned, HMAC-sig
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | Manage Accredited Providers [INFERRED] |
+| Workflow | WF-064: Manage Accredited Providers |
 | Business rules | — |
 
 **Query Parameters**
@@ -639,7 +639,7 @@ Binary PDF file with member name, training title, date, credits earned, HMAC-sig
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Optional |
-| Workflow | Manage Accredited Providers [INFERRED] |
+| Workflow | WF-064: Manage Accredited Providers |
 | Business rules | — |
 
 **Request Body**
@@ -678,7 +678,7 @@ Binary PDF file with member name, training title, date, credits earned, HMAC-sig
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | Optional |
-| Workflow | Manage Accredited Providers [INFERRED] |
+| Workflow | WF-064: Manage Accredited Providers |
 | Business rules | — |
 
 **Request Body** — Same fields as POST (all optional).
@@ -710,7 +710,7 @@ Binary PDF file with member name, training title, date, credits earned, HMAC-sig
 | Auth | GA+HG — president (2FA), officer, admin, super |
 | Rate limit | Authenticated (120 req/min) |
 | Idempotency | N/A |
-| Workflow | Manage Accredited Providers [INFERRED] |
+| Workflow | WF-064: Manage Accredited Providers |
 | Business rules | — |
 
 **Response** `204 No Content`
