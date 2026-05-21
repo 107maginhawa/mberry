@@ -6,6 +6,7 @@
 import { eq, and, or, like, desc, sql, inArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
+import { InternalError } from '@/core/errors';
 import {
   invoices,
   invoiceLineItems,
@@ -220,7 +221,7 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
 
       // Create line items
       if (!invoice) {
-        throw new Error('Failed to create invoice');
+        throw new InternalError('Failed to create invoice');
       }
       
       const lineItems = await tx

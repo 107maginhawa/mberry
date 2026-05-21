@@ -6,7 +6,7 @@
 import { eq, and, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, InternalError } from '@/core/errors';
 import {
   chapterAffiliations,
   affiliationTransfers,
@@ -99,7 +99,7 @@ export class ChapterAffiliationRepository extends DatabaseRepository<
       .returning();
 
     if (!updated) {
-      throw new Error(`Failed to set primary affiliation ${affiliationId}`);
+      throw new InternalError(`Failed to set primary affiliation ${affiliationId}`);
     }
 
     this.logger?.info({ affiliationId, personId: target.personId }, 'Primary chapter affiliation updated');

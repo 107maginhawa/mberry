@@ -5,6 +5,7 @@
 
 import { eq, and, sql, isNull, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { InternalError, NotFoundError } from '@/core/errors';
 import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 import type { Logger } from '@/types/logger';
 
@@ -72,7 +73,7 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
       .returning();
 
     if (!created) {
-      throw new Error('Failed to create record');
+      throw new InternalError('Failed to create record');
     }
 
     this.logger?.debug({ id: (created as Record<string, unknown>)['id'] }, 'Record created successfully');
@@ -139,7 +140,7 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
       .returning();
 
     if (!updated) {
-      throw new Error(`Record with id ${id} not found`);
+      throw new NotFoundError(`Record with id ${id} not found`);
     }
 
     this.logger?.info({ id }, 'Record updated successfully');

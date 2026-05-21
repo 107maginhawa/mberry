@@ -5,6 +5,7 @@
 
 import { eq, and, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { InternalError } from '@/core/errors';
 import {
   accreditedProviders,
   type AccreditedProvider,
@@ -83,7 +84,7 @@ export class AccreditedProviderRepository {
       .insert(accreditedProviders)
       .values(data)
       .returning();
-    if (!result) throw new Error('Failed to create accredited provider');
+    if (!result) throw new InternalError('Failed to create accredited provider');
     return result;
   }
 
@@ -93,7 +94,7 @@ export class AccreditedProviderRepository {
       .set({ ...data, updatedAt: new Date() })
       .where(eq(accreditedProviders.id, id))
       .returning();
-    if (!result) throw new Error('Failed to update accredited provider');
+    if (!result) throw new InternalError('Failed to update accredited provider');
     return result;
   }
 

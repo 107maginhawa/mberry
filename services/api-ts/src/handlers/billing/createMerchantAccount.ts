@@ -5,9 +5,10 @@
  * Requires provider to be the owner of the account or an admin.
  */
 
-import { 
-  ForbiddenError, 
-  NotFoundError, 
+import {
+  ForbiddenError,
+  InternalError,
+  NotFoundError,
   ValidationError,
   ConflictError
 } from '@/core/errors';
@@ -159,6 +160,6 @@ export async function createMerchantAccount(
       throw error;
     }
     
-    throw new Error(`Failed to create merchant account: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new InternalError(`Failed to create merchant account: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

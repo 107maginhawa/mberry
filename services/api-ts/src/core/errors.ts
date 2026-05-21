@@ -109,6 +109,12 @@ export class NotFoundError extends AppError {
   }
 }
 
+export class InternalError extends AppError {
+  constructor(message: string = 'Internal server error') {
+    super(message, 'INTERNAL_ERROR', 500);
+  }
+}
+
 /**
  * Security filtering utility to remove sensitive fields in production
  */
