@@ -1,15 +1,17 @@
 # Module Specification: Auth & Onboarding (M01)
 
 ---
-Spec Version: 1.0
-Last Updated: 2026-05-20
-Last Validated Against: MASTER_PRD.md v3.0
+oli_version: "Phase B -- Module Specs"
+oli_artifact: MODULE_SPEC
+Spec Version: 2.0
+Last Updated: 2026-05-21
+Last Validated Against: MASTER_PRD.md v3.0, DOMAIN_MODEL.md v1.0, WORKFLOW_MAP.md v1.0
 ---
 
 ## 1. Module Overview
 
 ### Purpose
-Provide secure access to the platform for all user types and guide new users through first-time setup so they reach value as fast as possible. Foundation module — no dependencies.
+Provide secure access to the platform for all user types and guide new users through first-time setup so they reach value as fast as possible. Foundation module -- no dependencies.
 
 ### Users
 - Member (healthcare professional)
@@ -31,9 +33,10 @@ Provide secure access to the platform for all user types and guide new users thr
 - Account claim flow (bulk-imported members)
 - Smart onboarding wizard (org-type-aware)
 - Member onboarding wizard (optional, post-dashboard)
-- MFA (TOTP-based)
+- MFA (TOTP-based, passkey)
 - Invite system (officer-to-member)
-- Session management
+- Session management (concurrent sessions, 24h token expiry)
+- Bulk CSV import with member matching
 
 ### Out of Scope
 - Profile editing (M02)
@@ -48,28 +51,29 @@ Provide secure access to the platform for all user types and guide new users thr
 | Member | A healthcare professional using the platform. One account, one login. Can belong to multiple organizations. |
 | Officer | A member assigned an administrative role within an organization: President, Treasurer, or Secretary. |
 | Platform Administrator | A Memberry employee or super-admin who manages the platform itself. |
-| Organization | Operational unit within an association (e.g., chapter, society). |
-| Association | Top-level tenant organization. |
+| Organization | Operational unit within an association (e.g., chapter, society). Has org_type: chapter, society, national, clinic. |
+| Association | Top-level tenant organization. Has its own locale, currency, credit cycle config. |
 | OTP | One-time password, 6-digit code sent via email for verification. |
 | License Number | Professional regulatory license identifier (e.g., PRC license). |
 | Session | Active login session with device info and expiry. |
 
 ## 3. Workflows
 
-| Workflow | Actor | Description | Priority |
-|----------|-------|-------------|----------|
-| Self-Registration | Member | Register with name, email, license, password + OTP | P0 |
-| Account Claim | Imported Member | Claim pre-populated account via token link + OTP | P0 |
-| Login | All users | Email/password or magic link authentication | P0 |
-| Password Reset | All users | OTP-based password reset flow | P0 |
-| Smart Onboarding | Officer | Org-type-aware setup wizard (profile, import, dues, gateway, invite) | P0 |
-| Member Onboarding | Member | Optional profile completion wizard post-dashboard | P0 |
-| MFA Enrollment | All users | TOTP setup via authenticator app | P0 |
-| Invite Member | Officer | Send individual email invitation to prospective member | P0 |
+| Workflow | WF-ID | Actor | Description | Priority |
+|----------|-------|-------|-------------|----------|
+| Self-Registration | WF-001 | Member | Register with name, email, license, password + OTP | P0 |
+| Account Claim | WF-002 | Imported Member | Claim pre-populated account via token link + OTP | P0 |
+| Login | WF-003 | All users | Email/password or magic link authentication | P0 |
+| Password Reset | WF-004 | All users | OTP-based password reset flow | P0 |
+| Smart Onboarding | WF-005 | Officer | Org-type-aware setup wizard (profile, import, dues, gateway, invite) | P0 |
+| Member Onboarding | WF-006 | Member | Optional profile completion wizard post-dashboard | P0 |
+| MFA Enrollment | WF-007 | All users | TOTP setup via authenticator app | P0 |
+| Invite Member | WF-008 | Officer | Send individual email invitation to prospective member | P0 |
+| Bulk CSV Import | WF-009 | Officer | Upload, validate, preview, import members (cross-module with M05) | P0 |
 
 ## 4. Workflow Details
 
-### Workflow: Self-Registration (M-1)
+### Workflow: Self-Registration (WF-001)
 
 Actor: Prospective member
 Preconditions: None (public access)
@@ -96,7 +100,7 @@ Postconditions:
 - Member has active account.
 - If org-linked, application is pending officer approval.
 
-### Workflow: Account Claim (M-2)
+### Workflow: Account Claim (WF-002)
 
 Actor: Imported member
 Preconditions: Member bulk-imported by officer; claim email received
@@ -116,12 +120,12 @@ Exception Flows:
 Postconditions:
 - Imported member has working account with all imported data preserved.
 
-### Workflow: Login (M-3)
+### Workflow: Login (WF-003)
 
 Actor: Any registered user
 Preconditions: Account exists
 Steps:
-1. User enters email and password on /login.
+1. User enters email and password on /auth/sign-in.
 2. System validates credentials.
 3. If MFA enabled, prompts for TOTP code.
 4. Session created. Redirect to dashboard.
@@ -136,17 +140,17 @@ Exception Flows:
 Postconditions:
 - User authenticated with active session.
 
-### Workflow: Smart Onboarding Wizard (M-5)
+### Workflow: Smart Onboarding Wizard (WF-005)
 
 Actor: Officer (first login after org provisioning)
 Preconditions: Org provisioned, officer authenticated
 Steps:
 1. Wizard overlay with progress stepper.
-2. Step 1 — Org Profile: name, logo, contact, meeting schedule.
-3. Step 2 — Import Members: CSV template download, upload, validate, preview, confirm. Claim emails queued.
-4. Step 3 — Configure Dues: categories, rates, grace period, fund allocation (must total 100%).
-5. Step 4 — Connect Payment Gateway: PayMongo/Stripe API keys, test transaction.
-6. Step 5 — Send Welcome Emails: preview, select recipients, send.
+2. Step 1 -- Org Profile: name, logo, contact, meeting schedule.
+3. Step 2 -- Import Members: CSV template download, upload, validate, preview, confirm. Claim emails queued.
+4. Step 3 -- Configure Dues: categories, rates, grace period, fund allocation (must total 100%).
+5. Step 4 -- Connect Payment Gateway: PayMongo/Stripe API keys, test transaction.
+6. Step 5 -- Send Welcome Emails: preview, select recipients, send.
 7. Wizard complete. Dashboard with smart action cards.
 
 Alternate Flows:
@@ -176,7 +180,8 @@ Postconditions:
 | M1-R9 | IF file uploaded as logo THEN validate format and size | Org Profile (wizard) | SVG/JPEG/PNG/WebP; max 5MB photo, 2MB SVG; sanitize SVG |
 | M1-R10 | IF CSV row invalid THEN skip row, do not block valid rows | Bulk Import | Independent row validation; invalid rows downloadable |
 | M1-R11 | IF imported member already linked to org THEN do not re-import | Bulk Import | Counted separately in preview |
-| BR-22 | IF importing member THEN match by license (primary) or email (fallback) | Bulk Import | Auto-link existing accounts |
+| BR-22 | IF importing member THEN match by email (exact, case-insensitive) OR license number (normalized). IF email matches Person A but license matches Person B THEN flag for human resolution | Bulk Import | Auto-link existing accounts; conflict flagged |
+| BR-23 | IF license number entered THEN validate format per association regex (strip spaces, dashes, leading zeros; case-insensitive) | Registration, Import | Format enforcement per association |
 | BR-25 | IF OTP generated THEN 6-digit, 10-minute expiry pattern | Registration, Claim | Standard OTP pattern |
 | BR-26 | IF session created THEN concurrent sessions allowed, 24-hour token expiry | Session Management | Device-linked sessions |
 
@@ -184,8 +189,8 @@ Postconditions:
 
 | Action | Allowed Roles | Restricted Roles | Notes |
 |--------|--------------|-----------------|-------|
-| Self-register | user (unauthenticated) | — | Public access |
-| Login | All authenticated | — | GA (global auth) |
+| Self-register | user (unauthenticated) | -- | Public access |
+| Login | All authenticated | -- | GA (global auth) |
 | Send invite | president, secretary, officer | member, user | GA+HG |
 | Import roster | president (2FA), secretary (2FA), super, admin | All others | GA+HG |
 | Manage onboarding wizard | Officers with org access | member | Org-scoped |
@@ -199,9 +204,9 @@ Postconditions:
 | id | Yes | UUID primary key | Auto-generated |
 | firstName | Yes | First name | varchar(50) NOT NULL |
 | lastName | No | Last name | varchar(50) |
-| email | Yes | Email address | Unique, verified via OTP |
+| email | Yes | Email address | Unique globally, verified via OTP |
 | passwordHash | Yes | Hashed password | Min 8 chars, 1 upper, 1 number |
-| licenseNumber | Yes | Professional license | Validated against association regex |
+| licenseNumber | Yes | Professional license | Validated against association regex per BR-23 |
 | mfaEnabled | No | MFA toggle | Boolean, default false |
 | emailVerifiedAt | No | Verification timestamp | Set on OTP verification |
 
@@ -211,9 +216,9 @@ Postconditions:
 |-------|---------|-------------|-------------------|
 | id | Yes | UUID | Auto-generated |
 | personId | Yes | Person FK | References person |
-| tokenHash | Yes | Session token hash | — |
-| deviceInfo | No | Device/browser | — |
-| expiresAt | Yes | Session expiry | 30 days from last activity |
+| tokenHash | Yes | Session token hash | -- |
+| deviceInfo | No | Device/browser | -- |
+| expiresAt | Yes | Session expiry | 24h from creation per BR-26 |
 | revokedAt | No | Revocation time | Set on explicit revoke |
 
 ### Entity: InvitationToken
@@ -233,16 +238,17 @@ Postconditions:
 |-------|---------|-------------|-------------------|
 | id | Yes | UUID | Auto-generated |
 | organizationId | Yes | Org FK | One per org |
-| currentStep | Yes | Current wizard step | Integer |
+| currentStep | Yes | Current wizard step | Integer 1-5 |
 | stepsCompleted | Yes | Completed steps | JSONB array |
-| completedAt | No | Wizard completion time | — |
+| completedAt | No | Wizard completion time | -- |
 
 ## 7b. Aggregate Boundaries
 
 | Aggregate Root | Owned Entities | Owned Value Objects | Key Invariants |
 |---|---|---|---|
 | Person | Session, NotificationPreference, PrivacySetting | Address, ContactInfo | One Person per email globally. PII centralized. |
-| InvitationToken | — | — | Token unique. Single-use. 7-day expiry. |
+| InvitationToken | -- | -- | Token unique. Single-use. 7-day expiry. |
+| OnboardingState | -- | -- | One per org. Steps sequential. |
 
 Rules:
 - External modules reference Person by ID only.
@@ -252,75 +258,74 @@ Rules:
 
 ### Session Lifecycle
 ```txt
-Created → Active → Expired (30 days inactivity)
-Created → Active → Revoked (user/admin action)
+Created --> Active --> Expired (24h inactivity per BR-26)
+Created --> Active --> Revoked (user/admin action)
 ```
 
 ### Invitation Token Lifecycle
 ```txt
-Pending → Claimed
-Pending → Expired (7 days)
-Pending → Revoked (officer action)
+Pending --> Claimed
+Pending --> Expired (7 days)
+Pending --> Revoked (officer action)
 ```
 
 ### Onboarding Wizard
 ```txt
-Started → In Progress → Completed
-Started → In Progress → Resumed (save and return)
+Started --> InProgress --> Completed
+Started --> InProgress --> Resumed (save and return)
 ```
 
 Rules:
 - Sessions can be revoked individually or all-at-once.
 - Expired tokens can be regenerated by any org officer.
 
-## 9. UI / UX Requirements
+## 9. UI/UX Requirements
 
 ### Screen: Registration (/register)
-
 Purpose: Account creation
 Users: Prospective member
-Components:
-- Full name input
-- Email input (type=email)
-- License number input (format hint from association)
-- Password input with show/hide toggle and strength indicator
-- Privacy policy checkbox
-- "Create Account" button
-
+Components: Full name input, email input (type=email), license number input (format hint from association), password input with show/hide toggle and strength indicator, privacy policy checkbox, "Create Account" button
 States:
 - Loading: button spinner, fields disabled
 - Empty: default form
-- Validation error: inline field errors, red borders
+- ValidationError: inline field errors, red borders
 - Success: transition to /verify
+- UnexpectedError: "Something went wrong. Please try again." toast
+- PermissionError: N/A (public)
 
 ### Screen: OTP Verification (/verify)
-
 Purpose: Email verification
 Users: All during registration/claim/reset
-Components:
-- 6 individual digit inputs (auto-focus, auto-advance)
-- Countdown timer
-- Resend link (shows remaining resends)
-
+Components: 6 individual digit inputs (auto-focus, auto-advance), countdown timer, resend link (shows remaining resends)
 States:
 - Empty: cursor in first box
-- Error: boxes shake, re-focus, show attempts remaining
+- ValidationError: boxes shake, re-focus, show attempts remaining
 - Expired: "Code expired" with resend link
 - Success: green check, auto-redirect
+- UnexpectedError: retry prompt
+
+### Screen: Login (/auth/sign-in)
+Purpose: Authentication
+Users: All users
+Components: Email input, password input, "Sign In" button, magic link option, forgot password link
+States:
+- Empty: default form
+- Loading: spinner
+- ValidationError: "Incorrect email or password"
+- Locked: "Account temporarily locked. Try again in 15 minutes."
+- MFARequired: TOTP code input
+- UnexpectedError: retry prompt
 
 ### Screen: Onboarding Wizard (/onboarding/[step])
-
 Purpose: Org setup for officers
 Users: Officers
-Components:
-- 5-step progress stepper (sidebar desktop, horizontal mobile)
-- Step-specific forms (profile, import, dues, gateway, invite)
-- Save & Continue, Skip, Save & Exit buttons
-
+Components: 5-step progress stepper (sidebar desktop, horizontal mobile), step-specific forms (profile, import, dues, gateway, invite), Save & Continue / Skip / Save & Exit buttons
 States:
 - Loading: skeleton
 - Resumed: "Welcome back! You left off at step [N]."
+- ValidationError: inline errors per step
 - Success: step marked complete with green check
+- UnexpectedError: data preserved, retry prompt
 
 ## 10. API Expectations
 
@@ -328,7 +333,7 @@ States:
 |----------|---------|--------|---------|--------|
 | POST /register | Create account | name, email, license, password | personId, sessionToken | 409 duplicate email/license |
 | POST /verify-otp | Verify OTP code | email, code | verified: true | 400 invalid/expired code |
-| POST /login | Authenticate | email, password | sessionToken | 401 invalid creds, 423 locked |
+| POST /auth/sign-in | Authenticate | email, password | sessionToken | 401 invalid creds, 423 locked |
 | POST /magic-link | Send magic link | email | sent: true | 429 rate limited |
 | POST /accept-invite | Claim account | token, password, otpCode | personId, sessionToken | 410 expired token |
 | POST /forgot-password | Initiate reset | email | sent: true (always) | 429 rate limited |
@@ -381,6 +386,16 @@ Given 5 consecutive failed login attempts,
 When the 6th attempt is made,
 Then the account is locked for 15 minutes and the lockout event is audit-logged.
 
+### AC-M01-006: Member Matching on Import
+Given a CSV row has an email matching Person A but a license matching Person B,
+When import validation runs,
+Then the row is flagged for human resolution and no auto-linking occurs (per BR-22).
+
+### AC-M01-007: Login Route
+Given a user navigates to /auth/sign-in,
+When the page loads,
+Then the login form is displayed (not /login).
+
 ## 12. Test Expectations
 
 Required tests:
@@ -388,21 +403,25 @@ Required tests:
 - Account lockout after 5 failures and auto-unlock after 15 minutes
 - Claim token lifecycle: create, claim, expire, regenerate
 - Onboarding wizard state persistence across sessions
-- CSV import: valid rows, invalid rows, duplicates, cross-org matching
+- CSV import: valid rows, invalid rows, duplicates, cross-org matching (BR-22)
 - Magic link single-use and expiry
 - MFA enrollment, verification, and backup code usage
 - SVG sanitization removes script elements
 - Password strength validation against common password list
+- License number normalization and format validation (BR-23)
+- Concurrent session handling (BR-26)
 
 ## 13. Edge Cases
 
 - Member registers with email matching an imported-but-unclaimed record: link accounts.
 - Claim token used after account already claimed: show "already active" message.
 - Officer leaves wizard at Step 2, members partially imported: imported members persist, wizard resumes at Step 3.
-- Two officers import overlapping CSVs simultaneously: cross-org matching handles duplicates.
+- Two officers import overlapping CSVs simultaneously: cross-org matching handles duplicates (BR-22).
 - OTP service unavailable: show retry message, form data preserved.
 - Session expired during wizard: redirect to login, wizard state preserved.
 - License regex not configured for association: registration blocked with admin notification.
+- CSV row email matches Person A, license matches Person B: flagged for human resolution, no auto-link (BR-22).
+- Name mismatch on single-field match (e.g., "Maria Cruz" vs "Jose Santos"): flagged for manual review (BR-22).
 
 ## 14. Dependencies
 
@@ -413,7 +432,7 @@ Required tests:
 
 ### External Dependencies
 - Email service (OTP delivery, claim emails, magic links)
-- Better-Auth (session management, authentication)
+- Better-Auth (session management, authentication, email OTP, passkey, TOTP)
 - TOTP authenticator apps (MFA)
 
 ## 15. Error Handling
@@ -427,6 +446,7 @@ Required tests:
 | Gateway test fails | Allow skip | "Connection failed. Check API keys." |
 | CSV wrong format | Block upload | "Please upload a .csv file." |
 | Network error during registration | Preserve form data | "Connection lost. Your data is saved. Try again." |
+| Invalid license format | Block registration | "License must match format [pattern]." |
 
 ## 16. Performance Expectations
 
@@ -455,16 +475,16 @@ Metrics:
 |---|---|---|---|
 | auth_registrations_total | counter | method | Registration count |
 | auth_login_duration_seconds | histogram | method, status | Login response time |
-| auth_lockouts_total | counter | — | Account lockout count |
+| auth_lockouts_total | counter | -- | Account lockout count |
 | onboarding_completion_rate | gauge | org_type | Wizard completion % |
 
 ## 18. Feature Flags
 
 | Flag Name | Type | Default | Description | Cleanup Date |
 |---|---|---|---|---|
-| auth_magic_link_enabled | release | true | Gates magic link login | — |
-| auth_mfa_mandatory_officers | ops | false | Force MFA for all officers | — |
-| onboarding_wizard_v2 | release | false | New wizard flow | — |
+| auth_magic_link_enabled | release | true | Gates magic link login | -- |
+| auth_mfa_mandatory_officers | ops | false | Force MFA for all officers | -- |
+| onboarding_wizard_v2 | release | false | New wizard flow | -- |
 
 ## 19. Vertical Slice Plan
 
@@ -482,9 +502,50 @@ Metrics:
 ## 20. AI Instructions
 
 When implementing this module:
-1. Do not implement the entire module at once.
-2. Convert workflows into vertical slice specs.
-3. Implement one slice at a time.
-4. Keep terminology consistent with the Domain Glossary.
-5. Use acceptance criteria as test basis.
-6. Follow ARCHITECTURE.md, CONTRIBUTING.md, and CLAUDE.md.
+1. **Better-Auth integration**: Auth is handled by Better-Auth (not a separate module). Use its email OTP, passkey, TOTP, admin, bearer, and magic link plugins. See `services/api-ts/src/core/auth.ts` for config.
+2. **Auth route**: Login route is `/auth/sign-in`, NOT `/login`. Respect this convention.
+3. **No /api prefix**: Backend routes are registered without `/api` prefix (Vite proxy strips it).
+4. **Vertical slices**: Do not implement the entire module at once. Convert workflows into vertical slice specs. Implement one slice at a time.
+5. **Spec-first**: Define TypeSpec first, generate OpenAPI + types, then implement handlers.
+6. **Handler pattern**: Router -> Validators -> Handlers -> Repositories. See `services/api-ts/src/handlers/person/` for reference.
+7. **Session management**: Better-Auth manages sessions natively. Concurrent sessions allowed per BR-26.
+8. Keep terminology consistent with the Domain Glossary.
+9. Use acceptance criteria as test basis.
+10. Follow ARCHITECTURE.md, CONTRIBUTING.md, and CLAUDE.md.
+
+## 21. Section Completeness
+
+| Section | Status | Notes |
+|---------|--------|-------|
+| 1. Module Overview | COMPLETE | -- |
+| 2. Domain Terms | COMPLETE | Aligned with DOMAIN_GLOSSARY.md |
+| 3. Workflows | COMPLETE | Aligned with WORKFLOW_MAP.md WF-001 through WF-009 |
+| 4. Workflow Details | PARTIAL | WF-004 (Password Reset), WF-006 (Member Onboarding), WF-007 (MFA Enrollment), WF-008 (Invite), WF-009 (Bulk Import) not fully detailed |
+| 5. Business Rules | COMPLETE | 15 rules including cross-refs to BR-22, BR-23, BR-25, BR-26 |
+| 6. Permissions | COMPLETE | Aligned with ROLE_PERMISSION_MATRIX.md |
+| 7. Data Requirements | COMPLETE | -- |
+| 7b. Aggregate Boundaries | COMPLETE | From DOMAIN_MODEL.md |
+| 8. State Transitions | COMPLETE | -- |
+| 9. UI/UX Requirements | COMPLETE | Added error/permission states per template |
+| 10. API Expectations | COMPLETE | -- |
+| 10b. Domain Events | COMPLETE | From DOMAIN_MODEL.md |
+| 11. Acceptance Criteria | COMPLETE | 7 ACs in Given/When/Then |
+| 12. Test Expectations | COMPLETE | -- |
+| 13. Edge Cases | COMPLETE | -- |
+| 14. Dependencies | COMPLETE | -- |
+| 15. Error Handling | COMPLETE | -- |
+| 16. Performance Expectations | COMPLETE | -- |
+| 17. Observability Hooks | COMPLETE | -- |
+| 18. Feature Flags | COMPLETE | -- |
+| 19. Vertical Slice Plan | COMPLETE | -- |
+| 20. AI Instructions | COMPLETE | Enhanced with Better-Auth specifics |
+| 21. Section Completeness | COMPLETE | -- |
+| 22. Downstream Impact | COMPLETE | -- |
+
+## 22. Downstream Impact
+
+- **M02**: Depends on PersonCreated event. If Person entity schema changes, M02 data requirements must update.
+- **M03**: Consumes admin authentication from this module. MFA mandatory rule (M3-R7) relies on M01 MFA implementation.
+- **M05**: Depends on InvitationClaimed and PersonCreated events. Membership application flow triggered during registration.
+- **M04**: Depends on OnboardingCompleted event. Wizard completion triggers org management handoff.
+- **Audit**: All auth events logged. Changes to session lifecycle affect audit trail completeness.
