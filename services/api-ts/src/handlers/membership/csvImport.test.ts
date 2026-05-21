@@ -1,6 +1,7 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { MembershipRepository } from './repos/membership.repo';
+import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 import {
   parseCSV,
   validateImportRows,
@@ -8,6 +9,13 @@ import {
   bulkCSVImport,
   IMPORT_BATCH_SIZE,
 } from './csvImport';
+
+function stubDuesConfig() {
+  restoreRepo(DuesConfigRepository);
+  stubRepo(DuesConfigRepository, {
+    findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+  });
+}
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -193,9 +201,10 @@ describe('[AC-M01-002] CSV Preview', () => {
 describe('[BR-22] Bulk CSV Import', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
-  beforeEach(() => restoreRepo(MembershipRepository));
+  beforeEach(() => { restoreRepo(MembershipRepository); stubDuesConfig(); });
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(DuesConfigRepository);
   });
 
   test('imports valid rows from CSV, returns results', async () => {
@@ -277,9 +286,10 @@ describe('[BR-22] Bulk CSV Import', () => {
 describe('[AC-M05-003] Bulk Import Batching', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
-  beforeEach(() => restoreRepo(MembershipRepository));
+  beforeEach(() => { restoreRepo(MembershipRepository); stubDuesConfig(); });
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(DuesConfigRepository);
   });
 
   test('IMPORT_BATCH_SIZE is defined and reasonable', () => {
@@ -321,9 +331,10 @@ describe('[AC-M05-003] Bulk Import Batching', () => {
 describe('[GAP-002] Conflict Flagging in CSV Import', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
-  beforeEach(() => restoreRepo(MembershipRepository));
+  beforeEach(() => { restoreRepo(MembershipRepository); stubDuesConfig(); });
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach(m => m.mockRestore());
+    restoreRepo(DuesConfigRepository);
   });
 
   test('email→A + license→B conflict flagged with both person IDs', async () => {

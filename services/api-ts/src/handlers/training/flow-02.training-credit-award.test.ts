@@ -7,6 +7,7 @@ import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -69,6 +70,19 @@ function defaultMembershipStubs(overrides: Record<string, (...args: any[]) => an
   });
 }
 
+function stubOrgAssoc() {
+  stubRepo(OrganizationRepository, {
+    findById: async () => ({ id: ORG, associationId: 'assoc-1', name: 'Test Org', status: 'active' }),
+  });
+  stubRepo(AssociationRepository, {
+    findById: async () => ({
+      id: 'assoc-1', name: 'Test Assoc', creditCyclePeriod: 2,
+      requiredCreditsPerCycle: 40, carryoverEnabled: false,
+      cycleStartMonth: null, cycleStartDay: null,
+    }),
+  });
+}
+
 // ─── Tests ──────────────────────────────────────────────
 
 describe('[FLOW-02] Training Completion → Credit Award', () => {
@@ -80,6 +94,9 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
     restoreRepo(TrainingRepository);
     restoreRepo(CreditEntryRepository);
     restoreRepo(MembershipRepository);
+    restoreRepo(OrganizationRepository);
+    restoreRepo(AssociationRepository);
+    stubOrgAssoc();
   });
 
   afterEach(() => {

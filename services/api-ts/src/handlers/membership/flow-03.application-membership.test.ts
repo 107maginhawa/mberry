@@ -5,6 +5,7 @@ import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { reviewApplication } from './reviewApplication';
 import { MembershipRepository } from './repos/membership.repo';
+import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -44,10 +45,15 @@ describe('[FLOW-03] Application Approval → Membership Creation', () => {
 
   beforeEach(() => {
     restoreRepo(MembershipRepository);
+    restoreRepo(DuesConfigRepository);
+    stubRepo(DuesConfigRepository, {
+      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+    });
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(DuesConfigRepository);
   });
 
   test('approved application creates membership record', async () => {

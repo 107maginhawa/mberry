@@ -4,6 +4,7 @@ import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
 
 const fakeTraining = {
   id: 'training-1',
@@ -33,7 +34,28 @@ describe('markComplete', () => {
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
     restoreRepo(MembershipRepository);
+    restoreRepo(OrganizationRepository);
+    restoreRepo(AssociationRepository);
   });
+
+  // Default org/association stubs for credit-path tests (2yr cycle, no fixed start)
+  function stubOrgAssocDefaults(overrides?: { creditCyclePeriod?: number; cycleStartMonth?: number | null; cycleStartDay?: number | null }) {
+    const orgMock = stubRepo(OrganizationRepository, {
+      findById: async () => ({ id: 'org-1', associationId: 'assoc-1', name: 'Test Org', status: 'active' }),
+    });
+    const assocMock = stubRepo(AssociationRepository, {
+      findById: async () => ({
+        id: 'assoc-1',
+        name: 'Test Association',
+        creditCyclePeriod: overrides?.creditCyclePeriod ?? 2,
+        requiredCreditsPerCycle: 40,
+        carryoverEnabled: false,
+        cycleStartMonth: overrides?.cycleStartMonth ?? null,
+        cycleStartDay: overrides?.cycleStartDay ?? null,
+      }),
+    });
+    return { orgMock, assocMock };
+  }
 
   test('marks enrollment as completed and returns 201', async () => {
     mocks = stubRepo(TrainingRepository, {
@@ -154,6 +176,8 @@ describe('markComplete', () => {
         status: 'active',
       }),
     });
+
+    stubOrgAssocDefaults();
 
     const ctx = makeCtx({
       _params: { id: 'training-1', organizationId: 'org-1' },
@@ -308,6 +332,8 @@ describe('markComplete', () => {
       }),
     });
 
+    stubOrgAssocDefaults();
+
     const ctx = makeCtx({
       _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
@@ -367,6 +393,8 @@ describe('markComplete', () => {
       }),
     });
 
+    const { orgMock: orgMock1, assocMock: assocMock1 } = stubOrgAssocDefaults();
+
     const ctx1 = makeCtx({
       _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-A' },
@@ -375,6 +403,8 @@ describe('markComplete', () => {
     await markComplete(ctx1);
     Object.values(creditMock1).forEach((m) => m.mockRestore());
     Object.values(memberMock1).forEach((m) => m.mockRestore());
+    Object.values(orgMock1).forEach((m) => m.mockRestore());
+    Object.values(assocMock1).forEach((m) => m.mockRestore());
     Object.values(mocks).forEach((m) => m.mockRestore());
 
     // Second member: registered Jul 2024
@@ -403,6 +433,8 @@ describe('markComplete', () => {
         status: 'active',
       }),
     });
+
+    stubOrgAssocDefaults();
 
     const ctx2 = makeCtx({
       _params: { id: 'training-1', organizationId: 'org-1' },
@@ -458,6 +490,8 @@ describe('markComplete', () => {
       findByPersonAndOrg: async () => null,
     });
 
+    stubOrgAssocDefaults();
+
     const ctx = makeCtx({
       _params: { id: 'training-1', organizationId: 'org-1' },
       _body: { personId: 'person-1' },
@@ -472,6 +506,183 @@ describe('markComplete', () => {
 
     Object.values(creditMock).forEach((m) => m.mockRestore());
     Object.values(memberMock).forEach((m) => m.mockRestore());
+  });
+
+  // ─── [BR-11] Credit cycle configurable per association ──────
+
+  test('[BR-11] uses association creditCyclePeriod instead of hardcoded 2', async () => {
+    let creditCreated: any = null;
+
+    // Association configured with 3-year cycle
+    const trainingPast = {
+      ...fakeTraining,
+      endDate: new Date('2024-06-01'),
+      organizationId: 'org-1',
+    };
+
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => trainingPast,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        status,
+      }),
+    });
+
+    const creditMock = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => { creditCreated = data; return { id: 'credit-1', ...data }; },
+      findByTrainingAndPerson: async () => null,
+    });
+
+    const memberMock = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1',
+        personId: 'person-1',
+        organizationId: 'org-1',
+        startDate: '2022-01-01',
+        status: 'active',
+      }),
+    });
+
+    // 3-year cycle configured on association
+    stubOrgAssocDefaults({ creditCyclePeriod: 3 });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    const response = await markComplete(ctx);
+    expect(response.status).toBe(201);
+    expect(creditCreated).not.toBeNull();
+
+    // With 3-year cycle from Jan 2022: cycle 0 = Jan 2022 → Jan 2025, cycle 1 = Jan 2025 → Jan 2028
+    // Activity Jun 2024 falls in cycle 0 (Jan 2022 → Jan 2025)
+    const cycleStart = creditCreated.cycleStart;
+    expect(cycleStart.getFullYear()).toBe(2022);
+    expect(cycleStart.getMonth()).toBe(0); // January
+
+    Object.values(creditMock).forEach((m) => m.mockRestore());
+    Object.values(memberMock).forEach((m) => m.mockRestore());
+  });
+
+  test('[BR-11] uses fixed cycleStartMonth when configured on association', async () => {
+    let creditCreated: any = null;
+
+    const trainingPast = {
+      ...fakeTraining,
+      endDate: new Date('2025-09-15'),
+      organizationId: 'org-1',
+    };
+
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => trainingPast,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        status,
+      }),
+    });
+
+    const creditMock = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => { creditCreated = data; return { id: 'credit-1', ...data }; },
+      findByTrainingAndPerson: async () => null,
+    });
+
+    const memberMock = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1',
+        personId: 'person-1',
+        organizationId: 'org-1',
+        startDate: '2023-03-01',
+        status: 'active',
+      }),
+    });
+
+    // Fixed July 1 start, 2-year cycle
+    stubOrgAssocDefaults({ creditCyclePeriod: 2, cycleStartMonth: 7, cycleStartDay: 1 });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    const response = await markComplete(ctx);
+    expect(response.status).toBe(201);
+    expect(creditCreated).not.toBeNull();
+
+    // Fixed July 1 start with 2-year cycle: epoch-aligned
+    // Sep 2025 falls in a cycle starting July 1 of an even year (2024 or 2026)
+    const cycleStart = creditCreated.cycleStart;
+    expect(cycleStart.getMonth()).toBe(6); // July (0-indexed)
+    expect(cycleStart.getDate()).toBe(1);
+
+    Object.values(creditMock).forEach((m) => m.mockRestore());
+    Object.values(memberMock).forEach((m) => m.mockRestore());
+  });
+
+  test('[BR-11] defaults to 2-year cycle when association has no creditCyclePeriod', async () => {
+    let creditCreated: any = null;
+
+    mocks = stubRepo(TrainingRepository, {
+      getByOrg: async () => fakeTraining,
+      getEnrollmentCount: async () => 1,
+      listEnrollments: async () => [fakeEnrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({
+        ...fakeEnrollment,
+        status,
+      }),
+    });
+
+    const creditMock = stubRepo(CreditEntryRepository, {
+      createOne: async (data: any) => { creditCreated = data; return { id: 'credit-1', ...data }; },
+      findByTrainingAndPerson: async () => null,
+    });
+
+    const memberMock = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1',
+        personId: 'person-1',
+        organizationId: 'org-1',
+        startDate: '2023-01-01',
+        status: 'active',
+      }),
+    });
+
+    // Association with null creditCyclePeriod — should default to 2
+    const orgMock = stubRepo(OrganizationRepository, {
+      findById: async () => ({ id: 'org-1', associationId: 'assoc-1', name: 'Test Org', status: 'active' }),
+    });
+    const assocMock = stubRepo(AssociationRepository, {
+      findById: async () => ({
+        id: 'assoc-1',
+        name: 'Test Association',
+        creditCyclePeriod: null,
+        requiredCreditsPerCycle: null,
+        carryoverEnabled: false,
+        cycleStartMonth: null,
+        cycleStartDay: null,
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'training-1', organizationId: 'org-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    const response = await markComplete(ctx);
+    expect(response.status).toBe(201);
+    expect(creditCreated).not.toBeNull();
+    // Should still produce valid cycle dates (defaulting to 2yr)
+    expect(creditCreated.cycleStart).toBeInstanceOf(Date);
+    expect(creditCreated.cycleEnd).toBeInstanceOf(Date);
+
+    Object.values(creditMock).forEach((m) => m.mockRestore());
+    Object.values(memberMock).forEach((m) => m.mockRestore());
+    Object.values(orgMock).forEach((m) => m.mockRestore());
+    Object.values(assocMock).forEach((m) => m.mockRestore());
   });
 
   test('crashes without session (no auth)', async () => {

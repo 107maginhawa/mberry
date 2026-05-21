@@ -3,7 +3,8 @@ import { NotFoundError, ConflictError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
-import { getCycleForDate } from '../association:member/utils/credit-cycle';
+import { getCycleForDateWithConfig, type CreditCycleConfig } from '../association:member/utils/credit-cycle';
+import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
 
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -66,7 +67,29 @@ export async function markComplete(ctx: Context): Promise<Response> {
           registrationDate = activityDate;
         }
 
-        const cycle = getCycleForDate(registrationDate, activityDate, 2);
+        // [BR-11] Read credit cycle config from association (org → association lookup)
+        const orgRepo = new OrganizationRepository(db);
+        const org = await orgRepo.findById(training.organizationId);
+        let cycleConfig: CreditCycleConfig = {
+          cyclePeriodYears: 2,
+          requiredCredits: 40,
+          carryoverEnabled: false,
+        };
+        if (org) {
+          const assocRepo = new AssociationRepository(db);
+          const assoc = await assocRepo.findById(org.associationId);
+          if (assoc) {
+            cycleConfig = {
+              cyclePeriodYears: assoc.creditCyclePeriod ?? 2,
+              requiredCredits: assoc.requiredCreditsPerCycle ?? 40,
+              carryoverEnabled: assoc.carryoverEnabled ?? false,
+              cycleStartMonth: assoc.cycleStartMonth,
+              cycleStartDay: assoc.cycleStartDay,
+            };
+          }
+        }
+
+        const cycle = getCycleForDateWithConfig(activityDate, cycleConfig, registrationDate);
 
         await creditRepo.createOne({
           personId: body.personId,

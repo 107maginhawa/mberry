@@ -1,5 +1,6 @@
 import type { Context } from 'hono';
 import { MembershipRepository } from './repos/membership.repo';
+import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 import type { Session } from '@/types/auth';
 
 export async function reviewApplication(ctx: Context): Promise<Response> {
@@ -18,13 +19,18 @@ export async function reviewApplication(ctx: Context): Promise<Response> {
 
   // If approved, create membership
   if (status === 'approved') {
+    // [BR-02] Read grace period from org dues config
+    const duesRepo = new DuesConfigRepository(db);
+    const duesConfigs = await duesRepo.findAll({ organizationId: updated.organizationId, tierId: updated.tierId, status: 'active' });
+    const gracePeriodDays = duesConfigs[0]?.gracePeriodDays ?? 30;
+
     await repo.addMember({
       organizationId: updated.organizationId,
       personId: updated.personId!,
       tierId: updated.tierId,
       startDate: new Date().toISOString().split('T')[0]!,
       duesExpiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]!,
-      gracePeriodDays: 30,
+      gracePeriodDays,
       status: 'active',
       joinedAt: new Date(),
       createdBy: session.user.id,

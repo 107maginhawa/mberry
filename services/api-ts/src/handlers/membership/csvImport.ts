@@ -12,6 +12,7 @@
 import type { Context } from 'hono';
 import { sql } from 'drizzle-orm';
 import { MembershipRepository } from './repos/membership.repo';
+import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 import { persons } from '../person/repos/person.schema';
 import { importMemberRowSchema, normalizeLicense, type ImportMemberRow } from './importMembers';
 import type { Session } from '@/types/auth';
@@ -174,6 +175,11 @@ export async function bulkCSVImport(ctx: Context): Promise<Response> {
   const today = now.toISOString().split('T')[0];
   const nextYear = new Date(new Date().setFullYear(now.getFullYear() + 1)).toISOString().split('T')[0];
 
+  // [BR-02] Read grace period from org dues config
+  const duesRepo = new DuesConfigRepository(db);
+  const orgDuesConfigs = await duesRepo.findAll({ organizationId: orgId, status: 'active' });
+  const orgGracePeriodDays = orgDuesConfigs[0]?.gracePeriodDays ?? 30;
+
   const matched: MatchedMember[] = [];
   const created: CreatedMember[] = [];
   const flagged: FlaggedMember[] = [];
@@ -233,7 +239,7 @@ export async function bulkCSVImport(ctx: Context): Promise<Response> {
       memberNumber: row.memberNumber ?? row.licenseNumber,
       startDate: row.startDate ?? today,
       duesExpiryDate: row.duesExpiryDate ?? nextYear,
-      gracePeriodDays: 30,
+      gracePeriodDays: orgGracePeriodDays,
       status: 'active' as const,
       joinedAt: new Date(),
       createdBy: session.user.id,

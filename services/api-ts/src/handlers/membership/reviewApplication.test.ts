@@ -1,7 +1,8 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { reviewApplication } from './reviewApplication';
 import { MembershipRepository } from './repos/membership.repo';
+import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -33,8 +34,16 @@ const fakeMember = {
 describe('reviewApplication [BR-03]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    restoreRepo(DuesConfigRepository);
+    stubRepo(DuesConfigRepository, {
+      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+    });
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(DuesConfigRepository);
   });
 
   test('approves application and creates membership', async () => {

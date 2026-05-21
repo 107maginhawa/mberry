@@ -1,8 +1,9 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { importMembers, normalizeLicense, importMembersSchema } from './importMembers';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -25,11 +26,16 @@ describe('[BR-22] importMembers', () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
+    restoreRepo(DuesConfigRepository);
+    stubRepo(DuesConfigRepository, {
+      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+    });
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
     if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
+    restoreRepo(DuesConfigRepository);
   });
 
   test('imports members with personId and returns 201 with count', async () => {
@@ -279,11 +285,16 @@ describe('[BR-22] Member Matching on Import', () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
+    restoreRepo(DuesConfigRepository);
+    stubRepo(DuesConfigRepository, {
+      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+    });
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
     if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
+    restoreRepo(DuesConfigRepository);
   });
 
   // These tests exercise matching through the handler by providing a mock database

@@ -16,6 +16,7 @@ import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -72,6 +73,19 @@ function stubMembership(overrides: Record<string, (...args: any[]) => any> = {})
   });
 }
 
+function stubOrgAssoc() {
+  stubRepo(OrganizationRepository, {
+    findById: async () => ({ id: ORG, associationId: 'assoc-1', name: 'Test Org', status: 'active' }),
+  });
+  stubRepo(AssociationRepository, {
+    findById: async () => ({
+      id: 'assoc-1', name: 'Test Assoc', creditCyclePeriod: 2,
+      requiredCreditsPerCycle: 40, carryoverEnabled: false,
+      cycleStartMonth: null, cycleStartDay: null,
+    }),
+  });
+}
+
 // ─── AC-M09-001: Auto-credit on attendance confirmation ─
 
 describe('[AC-M09-001] Auto-credit on attendance confirmation', () => {
@@ -83,6 +97,9 @@ describe('[AC-M09-001] Auto-credit on attendance confirmation', () => {
     restoreRepo(TrainingRepository);
     restoreRepo(CreditEntryRepository);
     restoreRepo(MembershipRepository);
+    restoreRepo(OrganizationRepository);
+    restoreRepo(AssociationRepository);
+    stubOrgAssoc();
   });
 
   afterEach(() => {
@@ -175,6 +192,9 @@ describe('[AC-M10-002] No duplicate AUTO credits', () => {
     restoreRepo(TrainingRepository);
     restoreRepo(CreditEntryRepository);
     restoreRepo(MembershipRepository);
+    restoreRepo(OrganizationRepository);
+    restoreRepo(AssociationRepository);
+    stubOrgAssoc();
   });
 
   afterEach(() => {
@@ -264,6 +284,9 @@ describe('[FLOW-6.3] Attendance → Credit Entry → Certificate eligibility', (
     restoreRepo(TrainingRepository);
     restoreRepo(CreditEntryRepository);
     restoreRepo(MembershipRepository);
+    restoreRepo(OrganizationRepository);
+    restoreRepo(AssociationRepository);
+    stubOrgAssoc();
   });
 
   afterEach(() => {

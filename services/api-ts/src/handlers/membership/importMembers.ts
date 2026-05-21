@@ -2,6 +2,7 @@ import type { BaseContext } from '@/types/app';
 import { z } from 'zod';
 import { eq, ilike, or, sql } from 'drizzle-orm';
 import { MembershipRepository } from './repos/membership.repo';
+import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 import { persons } from '../person/repos/person.schema';
 import type { Session } from '@/types/auth';
 import { requirePosition } from '@/utils/officer-check';
@@ -76,6 +77,11 @@ export async function importMembers(ctx: BaseContext): Promise<Response> {
   const nextYear = new Date(new Date().setFullYear(now.getFullYear() + 1)).toISOString().split('T')[0];
   const today = new Date().toISOString().split('T')[0];
 
+  // [BR-02] Read grace period from org dues config
+  const duesRepo = new DuesConfigRepository(db);
+  const orgDuesConfigs = await duesRepo.findAll({ organizationId: orgId, status: 'active' });
+  const orgGracePeriodDays = orgDuesConfigs[0]?.gracePeriodDays ?? 30;
+
   const matched: MatchedMember[] = [];
   const created: CreatedMember[] = [];
   const flagged: FlaggedMember[] = [];
@@ -137,7 +143,7 @@ export async function importMembers(ctx: BaseContext): Promise<Response> {
       memberNumber: row.memberNumber ?? row.licenseNumber,
       startDate: row.startDate ?? today,
       duesExpiryDate: row.duesExpiryDate ?? nextYear,
-      gracePeriodDays: 30,
+      gracePeriodDays: orgGracePeriodDays,
       status: 'active' as const,
       joinedAt: new Date(),
       createdBy: session.user.id,

@@ -5,6 +5,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { importMembers } from './importMembers';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -28,14 +29,19 @@ describe('[FLOW-07] Member Import → Bulk Creation', () => {
 
   beforeEach(() => {
     restoreRepo(MembershipRepository);
+    restoreRepo(DuesConfigRepository);
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+    stubRepo(DuesConfigRepository, {
+      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
     });
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
     if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
+    restoreRepo(DuesConfigRepository);
   });
 
   test('imports multiple members with correct org and defaults', async () => {
