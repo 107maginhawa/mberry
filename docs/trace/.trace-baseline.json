@@ -7,6 +7,9 @@
   "last_passed": "2026-05-21",
   "phase": "B",
   "nodes": 775,
-  "edges": 1691,
-  "phase_suppressed": 165
+  "edges": 2903,
+  "orphans_non_ac": 5,
+  "orphans_ac_phase_c": 116,
+  "orphans_total": 121,
+  "main_component": 604
 }

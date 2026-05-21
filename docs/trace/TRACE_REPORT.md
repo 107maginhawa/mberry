@@ -24,12 +24,15 @@ Previous Report: 2026-05-20 (v1.0 — 203 nodes, 157 edges, BR-focused)
 
 | Metric | Count | Delta from v1 |
 |--------|-------|---------------|
-| Total nodes | 775 | +15 (new BRs, ACs from format fix, module error codes) |
-| Total edges | 1,691 | +1,127 (error codes, roles, SMs, BR→API now connected) |
+| Total nodes | 775 | +15 |
+| Total edges | 2,903 | +2,339 |
 | CRITICAL gaps (P0) | 0 | — |
-| HIGH gaps (P1) | 0 (suppressed) | — |
-| MEDIUM gaps (P2) | 0 (true gaps resolved) | -49 |
-| Phase-suppressed orphans | 165 | -123 (was 288) |
+| HIGH gaps (P1) | 0 | — |
+| MEDIUM gaps (P2) | 0 | — |
+| Non-AC orphans | 5 | -283 (3 by-design WFs + 1 false event + 1 missing endpoint) |
+| Phase-suppressed (ACs) | 116 | Activates at Phase C |
+| Total orphans | 121 | -167 |
+| Main component | 604 nodes | +502 |
 | Chain coverage (WF→BR→Spec→API) | 25% | — |
 
 ### Phase-Gating Status
@@ -432,24 +435,25 @@ Two additional disabled jobs were also misclassified: `booking.reminderSender` a
 
 ## Connected Components
 
-| Metric | Before (v1) | After (v2) |
-|--------|------------|------------|
-| Connected components | 406 | 170 |
-| Largest component | 102 nodes | 557 nodes |
-| Islands (single-node) | 341 | 166 |
+| Metric | v1 | v2 | v4 (current) |
+|--------|-----|-----|-------------|
+| Connected components | 406 | 170 | 125 |
+| Largest component | 102 | 557 | 604 |
+| Islands (single-node) | 341 | 166 | 122 |
 
-**Interpretation:** 557-node main component now includes most WFs, BRs, API endpoints, error codes, and roles — connected via ERROR_RETURNED_BY_ENDPOINT and ROLE_AUTHORIZED_FOR_ENDPOINT edges. Remaining 166 islands are mostly phase-suppressed ACs (116) + 30 error codes from endpoints without error tables + 8 UI screens + 7 SMs + 3 WFs + 1 false-positive event.
+**Interpretation:** 604-node main component contains WFs, BRs, API endpoints, error codes, roles, SMs, UI screens, and events — fully connected. 122 islands = 116 ACs (Phase C) + 3 by-design WFs + 1 false-positive event + 1 missing endpoint + 1 module ref.
 
 ## Ratchet Status
 
 Baseline created. Future runs with `--no-new-gaps` will enforce these counts.
 
-| Severity | Baseline (v1) | Current (v2) | Status |
-|----------|--------------|-------------|--------|
+| Severity | Baseline | Current | Status |
+|----------|----------|---------|--------|
 | CRITICAL | 0 | 0 | PASS |
 | HIGH | 0 | 0 | PASS |
 | MEDIUM | 0 | 0 | PASS |
-| Phase-suppressed | 288 | 165 | -123 (parser improvements connected 123 nodes) |
+| Non-AC orphans | 5 | 5 | BASELINE SET (3 by-design + 2 trivial) |
+| Phase-suppressed ACs | 116 | 116 | Phase C activation |
 
 ## Per-Module Node Distribution
 
