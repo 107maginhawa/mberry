@@ -445,9 +445,9 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | State | Trigger | Preconditions | Side Effects | Terminal? |
 |-------|---------|---------------|--------------|-----------|
 | Pending | Application submitted | Valid person record | -- | No |
-| Active | Approved / dues paid / officer restores | Valid application or payment | Log to status_history | No |
-| Grace | dues_expiry_date passed | Was Active | Read-only access, blocked from new registrations | No |
-| Lapsed | Grace period expired | Was Grace | Blocked from most features | No |
+| Active | Approved / dues paid / officer restores | Valid application or payment | Log to status_history; status computed from dues_expiry_date (BR-01) | No |
+| Grace | dues_expiry_date passed | Was Active; grace period per BR-02 | Read-only access, blocked from new registrations | No |
+| Lapsed | Grace period expired (BR-02) | Was Grace; valid transition per BR-03 | Blocked from most features | No |
 | Suspended | Officer action | Any active state | Mandatory reason logged | No |
 | Removed | President action / rejection | Any state | Cascade: remove from rosters, committees | Yes |
 | Expired | Lapsed duration exceeded | Lapsed state + configured expiry threshold | Blocks all org access | Yes |
@@ -475,17 +475,17 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | State | Trigger | Preconditions | Side Effects | Terminal? |
 |-------|---------|---------------|--------------|-----------|
 | Draft | Created | Officer auth | -- | No |
-| Published | Officer publishes | Has required fields | Visible to audience | No |
-| Completed | Post-event | Published | Lock registrations (M8-R6) | Yes |
+| Published | Officer publishes | Has required fields; visibility per BR-16 | Visible to audience | No |
+| Completed | Post-event | Published | Lock registrations (M8-R6); activity type per BR-15 | Yes |
 | Cancelled | Officer action | Published | Notify registrants, refunds (M8-R3) | Yes |
 
 ### 5.4 Event Registration Status
 
 | State | Trigger | Preconditions | Side Effects | Terminal? |
 |-------|---------|---------------|--------------|-----------|
-| Confirmed | Registration accepted | Active member, capacity available | -- | No |
-| Waitlisted | Registration when full | Active member, at capacity | -- | No |
-| Cancelled | Member or officer | Confirmed/Waitlisted | Release capacity, auto-promote waitlist | Yes |
+| Confirmed | Registration accepted | Active member, capacity available per BR-27 | -- | No |
+| Waitlisted | Registration when full | Active member, at capacity per BR-27 | FIFO waitlist queue | No |
+| Cancelled | Member or officer | Confirmed/Waitlisted | Release capacity, auto-promote waitlist (BR-27) | Yes |
 | Refunded | Event cancelled | Was Confirmed | Payment refund | Yes |
 | NoShow | Post-event mark | Confirmed, event completed | -- | Yes |
 
@@ -524,7 +524,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 |-------|---------|---------------|--------------|-----------|
 | Draft | Created | Officer auth | -- | No |
 | Scheduled | Officer sets future date | Draft, valid schedule | -- | No |
-| Sent | Delivery triggered | Scheduled time reached / immediate | Queue email, push, in-app | No |
+| Sent | Delivery triggered | Scheduled time reached / immediate | Queue email, push, in-app; dedup per BR-28 | No |
 | ScheduledFailed | Delivery failure | Was Scheduled | Alert officer | Yes |
 | Archived | Officer action | Sent | -- | Yes |
 
@@ -533,15 +533,15 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | State | Trigger | Preconditions | Side Effects | Terminal? |
 |-------|---------|---------------|--------------|-----------|
 | Trial | Provisioned by admin | Association exists | -- | No |
-| Active | Payment confirmed | Trial org | Full feature access | No |
-| Suspended | Admin action / payment failure | Active | Read-only for members | No |
+| Active | Payment confirmed | Trial org | Full feature access; payment gateway isolated per BR-30 | No |
+| Suspended | Admin action / payment failure | Active | Read-only for members; impersonation rules per BR-10 | No |
 | Cancelled | Admin action / trial expired | Active/Suspended | 90-day data preservation | Yes |
 
 ### 5.10 Notification Status
 
 | State | Trigger | Preconditions | Side Effects | Terminal? |
 |-------|---------|---------------|--------------|-----------|
-| Queued | Any module creates notification | -- | -- | No |
+| Queued | Any module creates notification | -- | Dedup check per BR-28 | No |
 | Sent | processScheduled job delivers | Queued | -- | No |
 | Delivered | Delivery confirmed | Sent | -- | No |
 | Read | User opens | Delivered | -- | Yes |
@@ -552,13 +552,13 @@ Pipeline Stage: Phase A -- Workflow Discovery
 
 | Entity | States | Notes |
 |--------|--------|-------|
-| Post (M13) | Draft -> Published -> Hidden/Removed | Hidden is reversible |
-| Job Listing (M15) | Draft -> Published -> Expired/Closed; Draft -> PendingReview -> Published/Rejected | 30-day auto-expiry |
-| Campaign (M16) | Draft -> Active -> Paused/Completed | Paused is reversible |
-| Creative (M16) | Pending -> Approved/Rejected | -- |
-| Survey (M18) | Draft -> Active -> Closed | Manual or deadline close |
-| Vendor (M17) | Pending -> Verified -> Suspended; Pending -> Rejected | Suspended is reversible |
-| Committee (M19) | Active -> Expired/Dissolved; Expired -> Renewed | Standing committees renew |
+| Post (M13) | Draft -> Published -> Hidden/Removed | Hidden is reversible; moderation per BR-35 |
+| Job Listing (M15) | Draft -> Published -> Expired/Closed; Draft -> PendingReview -> Published/Rejected | 30-day auto-expiry (BR-37) |
+| Campaign (M16) | Draft -> Active -> Paused/Completed | Paused is reversible; budget auto-pause per BR-49 |
+| Creative (M16) | Pending -> Approved/Rejected | Admin approval required per BR-45 |
+| Survey (M18) | Draft -> Active -> Closed | Manual or deadline close; anonymity per BR-40 |
+| Vendor (M17) | Pending -> Verified -> Suspended; Pending -> Rejected | Suspended is reversible; referral disclosure per BR-38 |
+| Committee (M19) | Active -> Expired/Dissolved; Expired -> Renewed | Standing committees renew; dissolution cascade per BR-39 |
 | Task (M19) | Open -> InProgress -> Completed/Overdue | -- |
 | Document (M11) | Draft -> Published -> Archived | -- |
 | Onboarding (M01) | Started -> InProgress -> Completed/Resumed | Resumable |

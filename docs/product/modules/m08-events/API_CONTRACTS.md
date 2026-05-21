@@ -394,6 +394,9 @@ If at capacity (waitlisted):
 | M08-002 | 422 | Registration deadline passed |
 | M08-005 | 422 | Already registered for this event |
 | M08-006 | 422 | Event not in published status |
+| M08-008 | 422 | Waitlist position not available |
+| M08-009 | 422 | Time slot conflicts with existing booking |
+| M08-010 | 422 | Booking confirmation deadline exceeded |
 | CORE-001 | 404 | Event not found |
 | AUTH-001 | 401 | Not authenticated |
 

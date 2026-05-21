@@ -807,6 +807,7 @@ Binary PDF file with member name, training title, date, credits earned, HMAC-sig
 |------|--------|------|
 | `AUTHZ-001` | 403 | Not an officer/admin |
 | `VALIDATION-001` | 400 | Invalid request body |
+| `M09-007` | 422 | Quiz attempt limit exceeded |
 
 ---
 

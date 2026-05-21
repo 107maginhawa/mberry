@@ -93,6 +93,8 @@
 | Code | Status | When |
 |------|--------|------|
 | M06-001 | 422 | Payment amount must be positive |
+| M06-002 | 422 | Payment exceeds invoice balance |
+| M06-003 | 422 | Invoice already fully paid |
 | M06-004 | 422 | Dues period not configured for this organization |
 | M06-011 | 422 | Manual payment requires receipt reference |
 | M06-014 | 422 | Duplicate idempotency key with different payload |
@@ -179,7 +181,11 @@ Always returns 200 to acknowledge receipt, even on processing errors (to prevent
 
 **Error Codes**
 
-None surfaced --- always returns 200. Processing failures logged internally and queued for retry via WebhookRetryLog.
+| Code | Status | When |
+|------|--------|------|
+| EXT-001 | 502 | Payment provider unavailable |
+
+Note: 200 is always returned to the gateway to prevent retries. `EXT-001` applies to outbound calls made during webhook processing (e.g., refund confirmation callbacks). Processing failures are logged internally and queued for retry via WebhookRetryLog.
 
 ---
 
@@ -413,6 +419,7 @@ Binary PDF file download.
 
 | Code | Status | When |
 |------|--------|------|
+| M06-012 | 422 | Aging report requires at least one overdue invoice |
 | AUTH-003 | 403 | Insufficient permissions |
 | VALIDATION-001 | 400 | Invalid date range |
 
@@ -664,6 +671,7 @@ Same shape as GET response.
 
 | Code | Status | When |
 |------|--------|------|
+| M06-008 | 422 | Dunning schedule conflicts with existing reminder entries |
 | VALIDATION-001 | 400 | Invalid schedule configuration |
 | AUTH-003 | 403 | Insufficient permissions |
 

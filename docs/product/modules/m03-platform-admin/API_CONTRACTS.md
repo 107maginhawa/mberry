@@ -508,6 +508,13 @@ Valid state transitions (M3-R10):
 | duration | integer | NO | — | Session duration in seconds |
 | pagesVisited | integer | NO | — | Number of pages navigated |
 
+**Error Codes**
+
+| Code | Status | When |
+|------|--------|------|
+| `AUTHZ-005` | 403 | Impersonation not permitted (non-admin using X-Impersonate-As) |
+| `AUTH-001` | 401 | No active session |
+
 ---
 
 ### 2.5 Admin Team

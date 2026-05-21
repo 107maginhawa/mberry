@@ -150,6 +150,7 @@ Binary PDF with member name, training title, date, credits earned, org branding,
 | `AUTH-001` | 401 | Not authenticated |
 | `AUTHZ-003` | 403 | Not the certificate owner |
 | `NOT_FOUND-001` | 404 | Certificate not found |
+| `M11-003` | 422 | Credential already issued for this training |
 | `M11-004` | 422 | Certificate template rendering failed |
 | `EXT-003` | 502 | Storage service unavailable |
 

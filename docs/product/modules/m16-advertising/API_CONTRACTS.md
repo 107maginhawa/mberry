@@ -315,6 +315,7 @@
 | `M16-001` | 422 | Budget must be positive |
 | `M16-003` | 422 | Ad slot not available for requested dates |
 | `M16-005` | 422 | Advertiser billing not configured |
+| `M16-006` | 422 | Campaign billing integration deferred |
 | `NOT_FOUND-001` | 404 | Advertiser not found |
 
 ---

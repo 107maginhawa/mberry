@@ -11,6 +11,7 @@
 **Route:** `/org/[organizationId]/officer/communications`
 **Purpose:** Announcement list, compose shortcut, delivery stats overview
 **App:** memberry (3004)
+**API Endpoints:** `GET /org/:organizationId/announcements`, `GET /org/:organizationId/announcements/:announcementId/stats`
 
 ### ARIA Landmarks
 
@@ -85,6 +86,7 @@
 **Route:** `/org/[organizationId]/officer/communications/new`
 **Purpose:** Create, preview, and send/schedule announcements
 **App:** memberry (3004)
+**API Endpoints:** `POST /org/:organizationId/announcements`, `POST /org/:organizationId/announcements/:announcementId/publish`, `POST /org/:organizationId/announcements/:announcementId/schedule`, `GET /org/:organizationId/templates`
 
 ### ARIA Landmarks
 
@@ -174,6 +176,7 @@
 **Route:** `/my/settings/notifications`
 **Purpose:** Member controls delivery channels per subscription topic
 **App:** account (3002) or memberry (3004)
+**API Endpoints:** `GET /my/notifications/preferences`, `PUT /my/notifications/preferences`
 
 ### ARIA Landmarks
 

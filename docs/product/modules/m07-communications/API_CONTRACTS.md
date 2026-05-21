@@ -526,6 +526,7 @@ Same shape as GET response.
 
 | Code | Status | When |
 |------|--------|------|
+| M07-007 | 422 | Unsubscribe token invalid |
 | VALIDATION-001 | 400 | Invalid topic or channel configuration |
 | AUTH-001 | 401 | Not authenticated |
 

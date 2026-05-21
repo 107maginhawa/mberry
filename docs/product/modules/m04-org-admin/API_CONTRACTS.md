@@ -414,9 +414,10 @@ Action type effects:
 
 | Code | Status | When |
 |------|--------|------|
+| M04-005 | 422 | Organization billing not configured |
+| M04-003 | 404 | Member not found in organization |
 | — | 400 | Empty reason (M4-R4) |
 | — | 403 | Not authorized (not president/admin) |
-| — | 404 | Person not found or not a member |
 
 ---
 

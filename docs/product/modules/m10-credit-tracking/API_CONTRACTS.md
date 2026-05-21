@@ -166,8 +166,11 @@
 | `VALIDATION-001` | 400 | Invalid request body |
 | `VALIDATION-004` | 400 | Credit value out of range |
 | `M10-001` | 422 | Negative credit value not allowed (BR-20) |
+| `M10-002` | 422 | Credit type not recognized |
 | `M10-004` | 422 | Cannot modify credits in closed compliance cycle (BR-21) |
+| `M10-005` | 422 | Duplicate credit entry for same training |
 | `M10-006` | 422 | Manual credit entry requires supporting document (if org requires it) |
+| `M10-007` | 422 | Retroactive cycle recomputation not supported |
 
 ---
 

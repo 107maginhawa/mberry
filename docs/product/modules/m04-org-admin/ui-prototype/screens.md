@@ -9,6 +9,7 @@
 **Primary Users:** All officers (president, VP, secretary, treasurer, board-member, officer, staff).
 **Related Workflow:** WF-027 (Org Dashboard).
 **App:** memberry (port 3004).
+**API Endpoints:** `GET /org/:id/dashboard`, `GET /org/:id`
 
 ### ARIA Landmark Structure
 
@@ -105,6 +106,7 @@
 **Primary Users:** President (full management), other officers (view).
 **Related Workflow:** WF-025 (Officer Transition).
 **App:** memberry (port 3004).
+**API Endpoints:** `POST /org/:id/officers`, `DELETE /org/:id/officers/:termId`, `POST /org/:id/officers/:termId/transition`
 
 ### ARIA Landmark Structure
 
@@ -221,6 +223,7 @@ When transitioning an officer role, a modal opens with a role-specific checklist
 **Primary Users:** Officers (any with active term).
 **Related Workflow:** WF-024 (Org Settings).
 **App:** memberry (port 3004).
+**API Endpoints:** `GET /org/:id`, `PUT /org/:id`
 
 ### ARIA Landmark Structure
 
@@ -306,6 +309,7 @@ When transitioning an officer role, a modal opens with a role-specific checklist
 **Primary Users:** Public (unauthenticated + authenticated).
 **Related Workflow:** WF-028 (Org Public Page).
 **App:** memberry (port 3004).
+**API Endpoints:** `GET /org/:slug/public`
 
 ### ARIA Landmark Structure
 
@@ -405,6 +409,7 @@ When transitioning an officer role, a modal opens with a role-specific checklist
 **Primary Users:** President.
 **Related Workflow:** WF-026 (Disciplinary Action).
 **App:** memberry (port 3004).
+**API Endpoints:** `POST /org/:id/discipline`
 
 ### ARIA Landmark Structure
 

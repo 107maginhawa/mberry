@@ -281,6 +281,7 @@
 | `AUTH-001` | 401 | Not authenticated |
 | `AUTHZ-001` | 403 | Not authorized |
 | `NOT_FOUND-001` | 404 | Election not found |
+| `M12-007` | 422 | Tie detected — runoff election required |
 | `M12-009` | 422 | Invalid election status transition |
 | `M12-001` | 422 | Election is not in nomination phase (attempted action requires nominations) |
 | `M12-003` | 422 | Voting period not open |

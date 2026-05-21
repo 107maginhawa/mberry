@@ -149,6 +149,20 @@ Routes NOT requiring authentication are explicitly listed in ROLE_PERMISSION_MAT
 
 Platform admins can impersonate users via `X-Impersonate-As: <personId>` header. Impersonation sessions are logged to audit trail with original admin identity preserved.
 
+### Global Error Codes (Middleware-Level)
+
+These error codes apply to ALL endpoints implicitly via middleware. They are NOT listed in individual endpoint error tables but are always possible responses:
+
+| Code | Status | When | Middleware |
+|------|--------|------|-----------|
+| `NOT_FOUND-002` | 404 | Route not found (unregistered endpoint) | Router |
+| `RATE_LIMIT-001` | 429 | Too many requests (rate limit exceeded) | Rate limiter |
+| `EXT-002` | 502 | Notification service unavailable (OneSignal) | Notification middleware |
+| `EXT-004` | 502 | Email service unavailable (email provider) | Email middleware |
+| `INTERNAL-002` | 503 | Service temporarily unavailable (DB connection failure) | Health check |
+
+**Traceability note:** These codes connect to all endpoints via the middleware layer. Individual API_CONTRACTS files do not repeat them. `EXT-001` (Stripe) is endpoint-specific and listed where payment endpoints exist.
+
 ---
 
 ## 4. API Versioning

@@ -164,8 +164,11 @@
 
 | Code | Status | When |
 |------|--------|------|
-| — | 401 | Invalid email or password |
-| — | 423 | Account locked (5 consecutive failures per M1-R4, 15 min lockout) |
+| `AUTH-003` | 401 | Invalid email or password |
+| `AUTH-004` | 401 | Account locked (5 consecutive failures per M1-R4, 15 min lockout) |
+| `AUTH-005` | 401 | 2FA required (MFA enabled but code not provided) |
+| `AUTH-007` | 401 | Account not verified (email verification pending) |
+| `AUTH-002` | 401 | Session expired (if refreshing existing session) |
 
 ---
 
@@ -640,8 +643,9 @@
 
 | Code | Status | When |
 |------|--------|------|
-| — | 400 | Invalid TOTP code |
-| — | 422 | All backup codes exhausted (M1-R7) |
+| `AUTH-006` | 401 | Invalid or expired TOTP code |
+| `AUTH-005` | 401 | 2FA required but code not provided |
+| `M01-007` | 422 | All backup codes exhausted (M1-R7) |
 
 ---
 

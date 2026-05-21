@@ -343,6 +343,7 @@
 | Code | Status | When |
 |------|--------|------|
 | M05-002 | 422 | Invalid membership status transition |
+| M05-009 | 422 | Cannot reinstate — dues payment required |
 | CORE-001 | 404 | Application not found |
 | AUTH-003 | 403 | Insufficient permissions |
 
