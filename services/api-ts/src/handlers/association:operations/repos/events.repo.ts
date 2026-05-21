@@ -64,6 +64,20 @@ export class EventRepository extends DatabaseRepository<Event, NewEvent, EventFi
   }
 
   /**
+   * Complete an event: set status to completed.
+   */
+  async complete(id: string): Promise<Event> {
+    const [updated] = await this.db
+      .update(events)
+      .set({ status: 'completed', updatedAt: new Date() })
+      .where(eq(events.id, id))
+      .returning();
+
+    if (!updated) throw new NotFoundError(`Event ${id} not found`, { resourceType: 'Event', resource: id });
+    return updated as Event;
+  }
+
+  /**
    * Cancel an event: set status to cancelled.
    */
   async cancel(id: string): Promise<Event> {

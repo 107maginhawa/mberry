@@ -188,6 +188,13 @@ export class ImpersonationSessionRepository {
     return row;
   }
 
+  async findByToken(token: string): Promise<ImpersonationSession | undefined> {
+    const [row] = await this.db.select().from(impersonationSessions)
+      .where(eq(impersonationSessions.sessionToken, token))
+      .limit(1);
+    return row;
+  }
+
   async end(id: string): Promise<ImpersonationSession | undefined> {
     const [row] = await this.db.update(impersonationSessions)
       .set({ endedAt: new Date(), updatedAt: new Date() })

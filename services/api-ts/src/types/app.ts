@@ -50,6 +50,15 @@ export type Variables = {
   // Platform admin (set by platformAdminAuthMiddleware on /admin/* routes)
   platformAdmin?: PlatformAdmin;
 
+  // Impersonation context (set by auth middleware when cookie present)
+  impersonationSession?: {
+    id: string;
+    adminId: string;
+    targetUserId: string;
+    targetOrgId: string | null;
+    expiresAt: Date;
+  };
+
   // Internal service authentication (P1-2: typed + rotatable)
   internalServiceToken?: string;
   internalServiceTokens?: string[];

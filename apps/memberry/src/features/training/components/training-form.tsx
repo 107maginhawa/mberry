@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { useNavigate } from '@tanstack/react-router'
 import { Info, MapPin } from 'lucide-react'
 import { Button } from '@monobase/ui'
@@ -73,6 +74,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
       queryClient.invalidateQueries({ queryKey: ['trainings', orgId] })
       navigate({ to: '/org/$orgId/officer/training/$trainingId', params: { orgId, trainingId: (data.data as { id: string }).id } })
     },
+    onError: (err) => toast.error(err.message || 'Failed to save training'),
   })
 
   const sectionClass = 'border rounded-xl p-5 space-y-4 bg-[var(--color-surface)]'

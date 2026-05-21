@@ -262,9 +262,9 @@ Most "unseeded" tables are populated through normal app usage (auth creates pers
 |--------|-------|
 | Frontend API calls analyzed | 107 |
 | Org-scoped with x-org-id header | 23 |
-| Org-scoped MISSING x-org-id | 44 |
+| Org-scoped MISSING x-org-id | 44 → **0 (false positive)** |
 
-Concentrated in elections (10+), booking (5), membership (4). Some may use orgId in query params instead of headers — depends on backend middleware fallback behavior. Needs verification against `middleware/org-context.ts`.
+**Verified 2026-05-22:** All 44 calls are false positives. `middleware/org-context.ts` has 6 fallback layers: (1) `x-org-id` header, (2) `orgId` query param, (3) `organizationId` query param, (4) `organizationId` path param, (5) UUID regex extraction from URL path, (6) request body `organizationId`/`orgId` for mutations. Every flagged route has a UUID in the path or body, so org context resolves without explicit `x-org-id` header.
 
 ---
 
@@ -362,7 +362,7 @@ The 10 P0 violations are NOT regressions — they are pre-existing permission ga
 | 13 | Event contracts | 9.5 | 5% | 0.48 | — | CLEAN — all 10 job contracts implemented. |
 | 14 | Audit logging compliance | 3.0 | 5% | 0.15 | P1 cap (40 gaps) | Global middleware covers writes; typed events missing. |
 | 15 | Error boundary coverage | 8.0 | 4% | 0.32 | — | 10 mutations without feedback. |
-| 16 | Contract consistency | 6.0 | 3% | 0.18 | — | 44 missing org-context headers. |
+| 16 | Contract consistency | 8.5 | 3% | 0.26 | — | 44 org-context "missing" verified as false positives (6-layer fallback). |
 | 17 | Data path connectivity | 8.5 | 5% | 0.43 | — | Most "unseeded" tables populate via app usage. |
 | | **TOTAL** | | **100%** | **6.8** | | |
 

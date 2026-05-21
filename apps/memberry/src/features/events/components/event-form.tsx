@@ -2,6 +2,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
@@ -89,6 +90,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
       onSuccess?.(data)
     },
+    onError: (err) => toast.error(err.message || 'Failed to create event'),
   })
 
   const updateMutOpts = updateEventMutation()
@@ -98,6 +100,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
       onSuccess?.(data)
     },
+    onError: (err) => toast.error(err.message || 'Failed to update event'),
   })
 
   const mutation = isEdit ? updateMut : createMut

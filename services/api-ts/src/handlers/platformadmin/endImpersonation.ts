@@ -1,3 +1,4 @@
+import { deleteCookie } from 'hono/cookie';
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { EndImpersonationParams } from '@/generated/openapi/validators';
@@ -28,6 +29,9 @@ export async function endImpersonation(
   }
 
   const ended = await repo.end(sessionId);
+
+  // Clear the impersonation cookie
+  deleteCookie(ctx, 'memberry-imp-token', { path: '/' });
 
   await auditAction(ctx, {
     action: 'update',

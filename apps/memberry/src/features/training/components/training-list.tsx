@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Button, Input } from '@monobase/ui'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
@@ -76,6 +77,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
   const cancelMutation = useMutation({
     ...cancelCustomTrainingMutation(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: searchTrainingsQueryKey({ query: { organizationId: orgId } }) }),
+    onError: (err) => toast.error(err.message || 'Failed to cancel training'),
   })
 
   const trainings = (data?.data ?? []) as unknown as TrainingWithCount[]

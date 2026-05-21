@@ -51,6 +51,7 @@ import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
 import { createRateLimiter } from '@/middleware/rate-limit';
 import { orgContextMiddleware, orgContextOptionalMiddleware } from '@/middleware/org-context';
+import { impersonationResolver, impersonationWriteBlock } from '@/middleware/impersonation-guard';
 
 // PRC Accredited Providers — hand-wired because these are org-scoped training
 // routes (not in provider.tsp which covers healthcare provider profiles).
@@ -65,6 +66,9 @@ import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedPr
 // - listEmailSuppressions: registered AFTER /email/* auth middleware (officer-only)
 import { unsubscribeEmail } from '@/handlers/email/unsubscribeEmail';
 import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
+
+// Event lifecycle: completeEvent hand-wired (not yet in TypeSpec)
+import { completeEvent } from '@/handlers/association:operations/completeEvent';
 
 
 /**
@@ -116,6 +120,10 @@ export function createApp(config: Config): App {
 
   // P1-5: Global rate limiting for custom endpoints (auth routes handled by Better-Auth)
   app.use('*', createRateLimiter());
+
+  // Impersonation: resolve cookie → context, then block writes if impersonating
+  app.use('*', impersonationResolver());
+  app.use('*', impersonationWriteBlock());
 
   // Register metrics middleware (before routes, after app creation)
   registerMetricsMiddleware(app as App);
@@ -181,6 +189,9 @@ export function createApp(config: Config): App {
 
   // Register API routes
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
+
+  // completeEvent — hand-wired (not yet in TypeSpec), follows cancelEvent pattern
+  app.post('/association/events/:eventId/complete', authMiddleware(), completeEvent as any);
 
   // PRC Accredited Providers — hand-wired, org-scoped (no /api prefix per CLAUDE.md)
   app.get('/accredited-providers/:organizationId', authMiddleware(), listAccreditedProviders);

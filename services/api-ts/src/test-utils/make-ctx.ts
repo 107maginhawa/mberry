@@ -70,7 +70,9 @@ export function makeCtx(overrides: Record<string, any> = {}) {
       header: () => null,
       json: () => Promise.resolve(jsonBody),
       query: (key: string) => queryValues[key] || null,
+      raw: { headers: new Headers() },
     },
+    header: (name: string, value: string, opts?: any) => { /* mock Set-Cookie etc. */ },
     json: (body: any, status: number) => ({ status, body }) as any as Response,
     body: (body: any, status: number) => ({ status, body }) as any as Response,
   } as any;

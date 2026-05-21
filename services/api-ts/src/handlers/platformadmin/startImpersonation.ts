@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { setCookie } from 'hono/cookie';
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { StartImpersonationBody } from '@/generated/openapi/validators';
@@ -54,6 +55,15 @@ export async function startImpersonation(
     sessionToken,
     startedAt: now,
     expiresAt,
+  });
+
+  // Set HTTP-only cookie for write-block middleware detection
+  setCookie(ctx, 'memberry-imp-token', sessionToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'Strict',
+    path: '/',
+    maxAge: 30 * 60, // 30 minutes, matches session expiry
   });
 
   await auditAction(ctx, {

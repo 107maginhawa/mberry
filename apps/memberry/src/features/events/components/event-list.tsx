@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { Button, Input } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
@@ -91,6 +92,7 @@ export function EventList({ orgId }: EventListProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: searchEventsQueryKey({ query: { organizationId: orgId } }) })
     },
+    onError: (err) => toast.error(err.message || 'Failed to cancel event'),
   })
 
   const events = filterEventsByTab(data?.data ?? [], tab)

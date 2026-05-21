@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   listDuesInvoicesOptions,
   listDuesInvoicesQueryKey,
@@ -40,6 +41,7 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: listDuesInvoicesQueryKey() })
     },
+    onError: (err) => toast.error(err.message || 'Failed to mark invoice as paid'),
   })
 
   if (isLoading) return (

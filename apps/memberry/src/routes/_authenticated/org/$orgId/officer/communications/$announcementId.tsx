@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { Button } from '@monobase/ui'
 import { api } from '@/lib/api'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -42,6 +43,7 @@ function AnnouncementDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['announcement', announcementId] })
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })
     },
+    onError: (err) => toast.error(err.message || 'Failed to publish announcement'),
   })
 
   const archiveMutation = useMutation({
@@ -50,6 +52,7 @@ function AnnouncementDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['announcement', announcementId] })
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })
     },
+    onError: (err) => toast.error(err.message || 'Failed to archive announcement'),
   })
 
   const ann = data?.data
