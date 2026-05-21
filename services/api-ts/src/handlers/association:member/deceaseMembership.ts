@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { BetterAuthInternalApi } from '@/types/auth';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { DeceaseMembershipBody, DeceaseMembershipParams } from '@/generated/openapi/validators';
@@ -69,7 +70,7 @@ export async function deceaseMembership(
   try {
     const auth = ctx.get('auth');
     if (auth && membership.personId) {
-      await (auth.api as any).revokeUserSessions({ // structural: Better-Auth gap
+      await (auth.api as unknown as BetterAuthInternalApi).revokeUserSessions({
         body: { userId: membership.personId },
         headers: ctx.req.raw.headers,
       });

@@ -44,6 +44,14 @@ export interface VersionedSecret {
   value: string;
 }
 
+/**
+ * Better-Auth internal API methods not exposed in published types.
+ * Used for session management in membership lifecycle handlers.
+ */
+export interface BetterAuthInternalApi {
+  revokeUserSessions: (opts: { body: { userId: string }; headers: Headers }) => Promise<void>;
+}
+
 export interface AuthConfig {
   baseUrl: string;
   secret: string;

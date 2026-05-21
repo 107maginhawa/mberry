@@ -1,4 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
+import type { BetterAuthInternalApi } from '@/types/auth';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import { OfficerTermRepository } from './repos/governance.repo';
@@ -49,7 +50,7 @@ export async function deleteOfficerTerm(
   try {
     const auth = ctx.get('auth');
     if (auth && existing.personId) {
-      await (auth.api as any).revokeUserSessions({ // structural: Better-Auth gap
+      await (auth.api as unknown as BetterAuthInternalApi).revokeUserSessions({
         body: { userId: existing.personId },
         headers: ctx.req.raw.headers,
       });
