@@ -422,8 +422,17 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | BR-38 | Marketplace referral disclosure | WF-098 | M17 |
 | BR-39 | Committee dissolution cascade | WF-108 | M19 |
 | BR-40 | Survey anonymity guarantee | WF-101, WF-102 | M18 |
+| BR-41 | Paid training requires payment confirmation before enrollment | WF-062 | M09 |
+| BR-42 | Training type restricted to 5 platform-defined types (not org-customizable) | WF-058 | M09 |
+| BR-43 | Completed training locks enrollments (no changes post-completion) | WF-058, WF-060 | M09 |
+| BR-44 | Duplicate attendance confirmation = no duplicate credits (idempotent) | WF-060 | M09 |
+| BR-45 | Ad creative requires admin approval before display (no self-serve) | WF-093 | M16 |
+| BR-46 | Ad targeting segment-based only, no individual member data shared | WF-093, WF-094 | M16 |
+| BR-47 | Sponsored content clearly labeled "Sponsored" | WF-094 | M16 |
+| BR-48 | Member ad opt-out: no targeted ads, generic only | WF-094 | M16 |
+| BR-49 | Campaign budget exhausted = auto-pause delivery (no overspend) | WF-093, WF-095 | M16 |
 
-**Orphan Rules:** None. All 40 BRs map to at least one workflow.
+**Orphan Rules:** None. All 49 BRs map to at least one workflow.
 
 ---
 
@@ -703,7 +712,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | Cross-module | 10 |
 | Admin | 12 |
 | Reporting | 8 |
-| **Business Rules** | 40 |
+| **Business Rules** | 49 |
 | BR -> WF mapped | 40 |
 | Orphan BRs (no workflow) | 0 |
 | **State Machines** | 22 |

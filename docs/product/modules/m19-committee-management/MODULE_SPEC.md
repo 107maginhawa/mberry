@@ -285,17 +285,23 @@ No reverse transitions. Completed tasks are immutable.
 
 ## 11. Acceptance Criteria
 
-**AC-M19-001:** Given committee creation form, when no chairperson is selected, then creation is blocked with "Chairperson is required."
+### AC-M19-001: Chairperson Required
+Given committee creation form, when no chairperson is selected, then creation is blocked with "Chairperson is required."
 
-**AC-M19-002:** Given an ad-hoc committee, when the president dissolves it, then status becomes `dissolved`, all data is preserved read-only, and members lose write access (BR-39).
+### AC-M19-002: Dissolution Preserves History
+Given an ad-hoc committee, when the president dissolves it, then status becomes `dissolved`, all data is preserved read-only, and members lose write access (BR-39).
 
-**AC-M19-003:** Given a task with dueDate of 2026-06-01, when current date is 2026-06-02, then the task is visually flagged as overdue in the committee dashboard.
+### AC-M19-003: Overdue Task Flagging
+Given a task with dueDate of 2026-06-01, when current date is 2026-06-02, then the task is visually flagged as overdue in the committee dashboard.
 
-**AC-M19-004:** Given a member removed from the organization, when the membership removal event fires, then the member is automatically removed from all committees in that org.
+### AC-M19-004: Cascading Member Removal
+Given a member removed from the organization, when the membership removal event fires, then the member is automatically removed from all committees in that org.
 
-**AC-M19-005:** Given a standing committee with term end date reached, when the system checks terms, then the committee is auto-renewed (status remains active, term dates extended).
+### AC-M19-005: Standing Committee Auto-Renewal
+Given a standing committee with term end date reached, when the system checks terms, then the committee is auto-renewed (status remains active, term dates extended).
 
-**AC-M19-006:** Given a dissolved committee, when any user attempts to create a task or add a member, then the action is blocked with "Committee has been dissolved."
+### AC-M19-006: Dissolved Committee Write Block
+Given a dissolved committee, when any user attempts to create a task or add a member, then the action is blocked with "Committee has been dissolved."
 
 ## 12. Test Expectations
 

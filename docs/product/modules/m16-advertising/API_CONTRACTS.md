@@ -657,3 +657,61 @@ Empty body.
 | data | object | No | — | Opt-out status |
 | data.isOptedOut | boolean | No | — | Current opt-out state |
 | data.optedOutAt | string | Yes | ISO 8601 | When opted out (null if not) |
+
+---
+
+### 2.8 Ad Serving Integration (consumed by M13, M15, M17)
+
+These endpoints are consumed by other modules' frontends to display contextual ads. They respect member opt-out (BR-48) and return only approved creatives (BR-45).
+
+#### GET `/ads/placements/{slot}`
+
+**Fetch ad creative for a specific placement slot**
+
+| Property | Value |
+|----------|-------|
+| Auth | GA — any authenticated member |
+| Rate limit | Authenticated (120 req/min) |
+| Idempotency | N/A |
+| Workflow | WF-094: Ad Display |
+| Business rules | BR-45 (admin-approved only), BR-46 (segment targeting), BR-47 (sponsored label), BR-48 (opt-out respected), BR-49 (budget check) |
+
+**Path Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| slot | string | Placement slot: `feed_inline`, `job_board_sidebar`, `marketplace_banner`, `marketplace_featured` |
+
+**Query Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| context | string | NO | Context module: `feed`, `jobs`, `marketplace` |
+| orgId | string | NO | Organization context for segment targeting |
+
+**Response** `200 OK`
+
+```json
+{
+  "data": {
+    "creativeId": "uuid",
+    "advertiserId": "uuid",
+    "type": "banner",
+    "imageUrl": "https://cdn.example.com/ad-banner.png",
+    "targetUrl": "https://advertiser.example.com/offer",
+    "sponsoredLabel": true,
+    "impressionToken": "opaque-tracking-token"
+  }
+}
+```
+
+**Response** `204 No Content` — Member opted out or no eligible ads for this slot.
+
+**Integration contracts:**
+
+| Consumer Module | Slot | Context | Description |
+|----------------|------|---------|-------------|
+| M13 (Professional Feed) | `feed_inline` | `feed` | Inline sponsored post between feed items |
+| M15 (Job Board) | `job_board_sidebar` | `jobs` | Sidebar ad on job listing pages |
+| M17 (Marketplace) | `marketplace_banner` | `marketplace` | Banner ad on marketplace browse page |
+| M17 (Marketplace) | `marketplace_featured` | `marketplace` | Featured/promoted vendor listing |

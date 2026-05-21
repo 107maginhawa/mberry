@@ -115,6 +115,8 @@ All domain events use the `CreateNotificationRequest` interface as the event env
 | `PostCreated` | M13 | Feed index | `{ postId, authorId, orgId }` | Async |
 | `JobListingExpired` | M15 | M07 (notification to poster) | `{ listingId, employerId }` | Async |
 | `CampaignCompleted` | M16 | M07 (notification) | `{ campaignId, advertiserId }` | Async |
+| `CommitteeAnnouncementPublished` | M19 | M07 (email/push) | `{ committeeId, orgId, announcementId, audience: "committee_members" }` | Async |
+| `VendorVerified` | M17 | M07 (notification to vendor) | `{ vendorId, orgId }` | Async |
 | `SurveyClosed` | M18 | M07 (results notification) | `{ surveyId, orgId, responseCount }` | Async |
 | `CommitteeExpired` | M19 | M04 (cleanup) | `{ committeeId, orgId }` | Async |
 

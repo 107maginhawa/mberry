@@ -483,14 +483,14 @@ Baseline created. Future runs with `--no-new-gaps` will enforce these counts.
 
 Items discovered during inventory that are not trace orphans but need attention before Phase C:
 
-| # | Item | Severity | Description | Resolution |
-|---|------|----------|-------------|------------|
-| 1 | M17 missing ACs | P1 | Marketplace MODULE_SPEC has 0 acceptance criteria (Section 11 empty) | Populate AC-M17-001+ before slicing |
-| 2 | M18 missing ACs | P1 | Surveys MODULE_SPEC has 0 acceptance criteria (Section 11 empty) | Populate AC-M18-001+ before slicing |
-| 3 | M19 missing ACs | P1 | Committees MODULE_SPEC has 0 acceptance criteria (Section 11 empty) | Populate AC-M19-001+ before slicing |
-| 4 | M16 missing BRs | P2 | Advertising MODULE_SPEC has 0 business rules in WORKFLOW_MAP Section 4 | Add BR-41+ for ad placement rules |
-| 5 | M09/M16 missing BRs | P2 | Training (M09) and Advertising (M16) have 0 BRs mapped to WFs | Review if module-local rules need promotion to canonical BRs |
-| 6 | 4 new API contracts | P2 | M13↔M16, M15↔M16, M17↔M16 ad integration + M19↔M07 comms need contracts | Design at Phase C `/oli-vertical-slice-plan` |
+| # | Item | Severity | Description | Status |
+|---|------|----------|-------------|--------|
+| 1 | M17 missing ACs | P1 | ACs existed but used `**bold**` format instead of `###` headers — normalized to `### AC-M17-NNN:` | RESOLVED (format fix) |
+| 2 | M18 missing ACs | P1 | ACs existed but used `**bold**` format — normalized to `### AC-M18-NNN:` | RESOLVED (format fix) |
+| 3 | M19 missing ACs | P1 | ACs existed but used `**bold**` format — normalized to `### AC-M19-NNN:` | RESOLVED (format fix) |
+| 4 | M16 missing BRs | P2 | Added BR-45 through BR-49 to WORKFLOW_MAP Section 4 (ad approval, targeting, labeling, opt-out, budget) | RESOLVED |
+| 5 | M09 missing BRs | P2 | Added BR-41 through BR-44 to WORKFLOW_MAP Section 4 (paid training, type restriction, completion lock, idempotent credits) | RESOLVED |
+| 6 | 4 integration contracts | P2 | Added: M16 `GET /ads/placements/{slot}` for M13/M15/M17 ad serving; `CommitteeAnnouncementPublished` + `VendorVerified` events in EVENT_CONTRACTS | RESOLVED |
 
 ## Suggested Actions (Parser Improvements for Future Runs)
 
@@ -507,9 +507,7 @@ All spec gaps resolved or tracked. Future trace parser improvements:
 
 ## What's Next
 
-**All trace gaps resolved. 0 CRITICAL, 0 HIGH, 0 true MEDIUM. 6 spec debt items tracked for Phase C prep.**
-
-- **Before Phase C:** Populate M17/M18/M19 acceptance criteria (P1 spec debt)
+**All trace gaps resolved. All spec debt resolved. 0 CRITICAL, 0 HIGH, 0 true MEDIUM.**
 - **Next:** `/oli-audit-compliance` (Wave 5) — compliance gate target >= 9.0
 - **Then:** `/oli-confidence-stack` (Wave 5) — test confidence gate target >= 9.0
 - **Phase C:** Re-run `/oli-trace` after `/oli-vertical-slice-plan` to activate algorithms 4b/4c/4d with slice data

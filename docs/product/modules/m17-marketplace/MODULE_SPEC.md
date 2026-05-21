@@ -242,15 +242,20 @@ Fulfilled --> Refunded (dispute resolution)
 
 ## 11. Acceptance Criteria
 
-**AC-M17-001:** Given a vendor with status `pending`, when platform admin approves, then vendor status becomes `verified` and `VendorVerified` event is emitted.
+### AC-M17-001: Vendor Verification
+Given a vendor with status `pending`, when platform admin approves, then vendor status becomes `verified` and `VendorVerified` event is emitted.
 
-**AC-M17-002:** Given a non-active member, when they access `/org/[id]/marketplace`, then they see "Active membership required" and cannot browse.
+### AC-M17-002: Membership Gating
+Given a non-active member, when they access `/org/[id]/marketplace`, then they see "Active membership required" and cannot browse.
 
-**AC-M17-003:** Given a verified vendor with active listings, when admin suspends the vendor, then all listings are hidden from member browse results.
+### AC-M17-003: Vendor Suspension Cascade
+Given a verified vendor with active listings, when admin suspends the vendor, then all listings are hidden from member browse results.
 
-**AC-M17-004:** Given a vendor with a referral arrangement (BR-38), when a member views the listing detail, then the referral disclosure is displayed and must be acknowledged before proceeding.
+### AC-M17-004: Referral Disclosure
+Given a vendor with a referral arrangement (BR-38), when a member views the listing detail, then the referral disclosure is displayed and must be acknowledged before proceeding.
 
-**AC-M17-005:** Given an unverified vendor, when a member searches the marketplace, then the vendor's listings do not appear in results.
+### AC-M17-005: Unverified Vendor Filtering
+Given an unverified vendor, when a member searches the marketplace, then the vendor's listings do not appear in results.
 
 ## 12. Test Expectations
 

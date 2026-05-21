@@ -227,17 +227,23 @@ No reverse transitions. Closed surveys are immutable.
 
 ## 11. Acceptance Criteria
 
-**AC-M18-001:** Given an anonymous survey, when any user (including platform admin) views responses, then no response can be linked to a specific member (respondentId is null in storage).
+### AC-M18-001: Anonymous Survey Privacy
+Given an anonymous survey, when any user (including platform admin) views responses, then no response can be linked to a specific member (respondentId is null in storage).
 
-**AC-M18-002:** Given a survey with a deadline of 2026-06-01T00:00:00Z, when a member submits a response at 2026-06-01T00:00:01Z, then the submission is rejected with "Survey has closed."
+### AC-M18-002: Deadline Enforcement
+Given a survey with a deadline of 2026-06-01T00:00:00Z, when a member submits a response at 2026-06-01T00:00:01Z, then the submission is rejected with "Survey has closed."
 
-**AC-M18-003:** Given an identified survey, when a platform admin requests individual responses, then access is denied (only org officers can view).
+### AC-M18-003: Officer-Only Individual Responses
+Given an identified survey, when a platform admin requests individual responses, then access is denied (only org officers can view).
 
-**AC-M18-004:** Given a survey with re-edit enabled, when a member who already responded submits again before the deadline, then the previous response is updated.
+### AC-M18-004: Response Re-Edit
+Given a survey with re-edit enabled, when a member who already responded submits again before the deadline, then the previous response is updated.
 
-**AC-M18-005:** Given a published survey, when the officer views results, then aggregated data is shown per question type (counts for MC, average for rating, text list for free text).
+### AC-M18-005: Aggregated Results Display
+Given a published survey, when the officer views results, then aggregated data is shown per question type (counts for MC, average for rating, text list for free text).
 
-**AC-M18-006:** Given a quick poll, when a member votes, then results are displayed inline immediately after submission.
+### AC-M18-006: Instant Poll Results
+Given a quick poll, when a member votes, then results are displayed inline immediately after submission.
 
 ## 12. Test Expectations
 
