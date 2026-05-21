@@ -77,6 +77,7 @@ export async function createOfficerTerm(
     resourceId: term.id,
     description: 'Officer term created',
     details: { positionId: body.positionId, personId: body.personId },
+    eventSubType: 'governance.officer-appointed',
   });
 
   return ctx.json(term, 201);

@@ -41,6 +41,7 @@ export async function cancelEvent(
     resourceType: 'event',
     resourceId: cancelled.id,
     description: 'Event cancelled',
+    eventSubType: 'association.event-cancelled',
   });
 
   return ctx.json(cancelled, 200);

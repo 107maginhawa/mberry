@@ -61,6 +61,7 @@ export async function updateElectionStatus(ctx: Context): Promise<Response> {
     resourceId: id,
     description: `Election status changed from '${existing.status}' to '${body.status}'`,
     details: { from: existing.status, to: body.status },
+    eventSubType: body.status === 'published' ? 'governance.election-closed' : 'governance.election-created',
   });
 
   return ctx.json({ data: updated }, 200);

@@ -116,6 +116,7 @@ export async function recordDuesPayment(
     resourceType: 'dues-payment',
     resourceId: payment.id,
     description: 'Dues payment recorded',
+    eventSubType: 'financial.payment-recorded',
   });
 
   return ctx.json({

@@ -95,6 +95,7 @@ export async function issueDigitalCredential(
     resourceType: 'digital-credential',
     resourceId: credential.id,
     description: `Digital credential "${body.credentialNumber}" issued for person ${body.personId}`,
+    eventSubType: 'content.certificate-generated',
   });
 
   return ctx.json(updated, 201);

@@ -92,6 +92,7 @@ export async function completeTrainingEnrollment(
     resourceId: completed.id,
     description: 'Training enrollment completed',
     details: creditAwarded ? { creditAwarded } : undefined,
+    eventSubType: 'training.training-completed',
   });
 
   return ctx.json({ ...completed, creditAwarded }, 200);

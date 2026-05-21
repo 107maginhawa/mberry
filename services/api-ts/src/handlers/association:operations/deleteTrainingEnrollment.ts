@@ -37,6 +37,7 @@ export async function deleteTrainingEnrollment(
     resourceType: 'training-enrollment',
     resourceId: params.enrollmentId,
     description: 'Training enrollment deleted',
+    eventSubType: 'training.enrollment-cancelled',
   });
 
   return ctx.json({ success: true }, 200);

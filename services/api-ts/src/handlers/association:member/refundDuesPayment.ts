@@ -76,6 +76,7 @@ export async function refundDuesPayment(
     resourceType: 'dues-payment',
     resourceId: paymentId,
     description: `Payment ${isFullRefund ? 'fully' : 'partially'} refunded`,
+    eventSubType: 'financial.payment-reversed',
   });
 
   return ctx.json(updated, 200);

@@ -75,6 +75,7 @@ export const auditLogEntries = pgTable('audit_log_entry', {
   
   // Event classification fields
   eventType: auditEventTypeEnum('event_type').notNull(),
+  eventSubType: varchar('event_sub_type', { length: 100 }),
   category: auditCategoryEnum('category').notNull(),
   action: auditActionEnum('action').notNull(),
   outcome: auditOutcomeEnum('outcome').notNull(),
@@ -136,6 +137,7 @@ export type UserType = 'client' | 'host' | 'admin' | 'system';
 // Request interfaces matching TypeSpec definitions
 export interface CreateAuditLogRequest {
   eventType: AuditEventType;
+  eventSubType?: string;  // typed audit sub-type like 'financial.payment-recorded'
   category: AuditCategory;
   action: AuditAction;
   outcome: AuditOutcome;

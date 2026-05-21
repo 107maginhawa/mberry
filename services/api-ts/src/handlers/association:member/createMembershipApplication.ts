@@ -53,6 +53,7 @@ export async function createMembershipApplication(
     resourceType: 'membership-application',
     resourceId: application.id,
     description: 'Membership application created',
+    eventSubType: 'membership.application-submitted',
   });
 
   return ctx.json(application, 201);

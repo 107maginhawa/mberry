@@ -57,6 +57,7 @@ export async function sendMessage(
     resourceType: 'message',
     resourceId: params.messageId,
     description: 'Message sent',
+    eventSubType: 'communication.email-sent',
   });
 
   return ctx.json(updated, 200);

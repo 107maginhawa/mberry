@@ -6,6 +6,7 @@
  */
 
 import type { BaseContext } from '@/types/app';
+import type { AuditEventSubType } from './audit-events';
 
 interface AuditActionOpts {
   action: 'create' | 'update' | 'delete' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'resign' | 'deceased';
@@ -13,6 +14,7 @@ interface AuditActionOpts {
   resourceId: string;
   description: string;
   details?: Record<string, unknown>;
+  eventSubType?: AuditEventSubType | string;  // typed audit sub-type like 'financial.payment-recorded'
 }
 
 /**
@@ -30,6 +32,7 @@ export async function auditAction(ctx: BaseContext, opts: AuditActionOpts): Prom
   try {
     await audit.logEvent({
       eventType: 'data-modification',
+      eventSubType: opts.eventSubType,
       category: 'association',
       action: opts.action,
       outcome: 'success',

@@ -64,6 +64,7 @@ export async function markDuesInvoicePaid(
     resourceType: 'dues-invoice',
     resourceId: invoiceId,
     description: 'Dues invoice marked as paid',
+    eventSubType: 'financial.dues-collected',
   });
 
   return ctx.json(updatedInvoice, 200);

@@ -63,6 +63,7 @@ export async function resignMembership(
     resourceType: 'membership',
     resourceId: membershipId,
     description: `Membership resigned${body.terminationReason ? `: ${body.terminationReason}` : ''}`,
+    eventSubType: 'governance.officer-resigned',
   });
 
   // P1-4: Revoke departed member's sessions so they can't access org resources

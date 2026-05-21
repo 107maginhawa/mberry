@@ -68,6 +68,7 @@ export async function certifyElection(
     resourceId: updated.id,
     description: `Election certified and published: ${updated.title}`,
     details: { voterCount, tallies },
+    eventSubType: 'governance.election-closed',
   });
 
   return ctx.json({ data: { election: updated, tallies, voterCount } }, 200);

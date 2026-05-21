@@ -68,6 +68,7 @@ export async function createDuesInvoice(
     resourceType: 'dues-invoice',
     resourceId: invoice.id,
     description: 'Dues invoice created',
+    eventSubType: 'financial.invoice-created',
   });
 
   return ctx.json(invoice, 201);

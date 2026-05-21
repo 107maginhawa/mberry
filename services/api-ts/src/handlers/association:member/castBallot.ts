@@ -91,6 +91,7 @@ export async function castBallot(
     resourceId: vote.id,
     description: `Ballot cast in election ${body.electionId}`,
     details: { electionId: body.electionId, positionId: body.positionId },
+    eventSubType: 'governance.vote-cast',
   });
 
   return ctx.json({ data: vote }, 201);

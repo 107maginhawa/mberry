@@ -49,6 +49,7 @@ export async function createElection(
     resourceType: 'election',
     resourceId: election.id,
     description: `Election created: ${election.title}`,
+    eventSubType: 'governance.election-created',
   });
 
   return ctx.json({ data: election }, 201);

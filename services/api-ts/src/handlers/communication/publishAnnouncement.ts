@@ -44,6 +44,7 @@ export async function publishAnnouncement(
     resourceId: params.id,
     description: `Published announcement`,
     details: { transition: 'published' },
+    eventSubType: 'content.announcement-published',
   });
 
   return ctx.json({ data: published }, 200);

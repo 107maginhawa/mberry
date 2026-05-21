@@ -46,6 +46,7 @@ export async function createEvent(
     resourceType: 'event',
     resourceId: event.id,
     description: 'Event created',
+    eventSubType: 'association.event-created',
   });
 
   return ctx.json(event, 201);

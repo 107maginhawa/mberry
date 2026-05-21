@@ -39,6 +39,7 @@ export async function completeEvent(ctx: HandlerContext): Promise<Response> {
     resourceType: 'event',
     resourceId: completed.id,
     description: 'Event completed',
+    eventSubType: 'association.event-completed',
   });
 
   return ctx.json(completed, 200);

@@ -42,6 +42,7 @@ export async function archiveAnnouncement(
     resourceId: params.id,
     description: `Archived announcement`,
     details: { transition: 'archived' },
+    eventSubType: 'content.announcement-archived',
   });
 
   return ctx.json({ data: archived }, 200);

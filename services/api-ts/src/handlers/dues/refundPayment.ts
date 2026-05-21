@@ -119,6 +119,7 @@ export async function refundPayment(
       requiresApproval: requiresApproval(refundAmount),
       previousRefundedAmount: payment.refundedAmount ?? 0,
     },
+    eventSubType: 'financial.payment-reversed',
   });
 
   return ctx.json(updated, 200);

@@ -45,6 +45,7 @@ export async function terminateMembership(
     resourceType: 'membership',
     resourceId: membershipId,
     description: 'Membership removed',
+    eventSubType: 'membership.member-terminated',
   });
 
   // P1-4: Invalidate removed member's sessions so they can't access org resources

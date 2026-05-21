@@ -76,6 +76,7 @@ export async function approveMembershipApplication(
     resourceType: 'membership-application',
     resourceId: applicationId,
     description: 'Membership application approved',
+    eventSubType: 'membership.member-approved',
   });
 
   return ctx.json(updatedApplication, 200);

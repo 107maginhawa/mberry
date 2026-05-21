@@ -56,6 +56,7 @@ export async function createTrainingEnrollment(
     resourceType: 'training-enrollment',
     resourceId: enrollment.id,
     description: 'Training enrollment created',
+    eventSubType: 'training.enrollment-created',
   });
 
   return ctx.json(enrollment, 201);

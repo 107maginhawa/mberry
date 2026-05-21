@@ -60,6 +60,7 @@ export async function createEventRegistration(
         resourceType: 'waitlist-entry',
         resourceId: entry.id,
         description: 'Auto-waitlisted due to capacity',
+        eventSubType: 'association.booking-created',
       });
 
       return ctx.json({ ...entry, waitlisted: true }, 201);
@@ -78,6 +79,7 @@ export async function createEventRegistration(
     resourceType: 'event-registration',
     resourceId: registration.id,
     description: 'Event registration created',
+    eventSubType: 'association.booking-created',
   });
 
   return ctx.json(registration, 201);

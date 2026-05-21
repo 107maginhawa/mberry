@@ -51,6 +51,7 @@ export async function denyMembershipApplication(
     resourceType: 'membership-application',
     resourceId: applicationId,
     description: 'Membership application denied',
+    eventSubType: 'membership.member-denied',
   });
 
   return ctx.json(updated, 200);

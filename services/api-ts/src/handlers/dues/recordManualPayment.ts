@@ -86,6 +86,7 @@ export async function recordManualPayment(
     resourceId: payment.id,
     description: `Manual payment recorded: ${body.paymentMethod}, ref: ${body.referenceNumber ?? 'none'}`,
     details: { method: body.paymentMethod, reference: body.referenceNumber },
+    eventSubType: 'financial.payment-recorded',
   });
 
   return ctx.json({

@@ -38,6 +38,7 @@ export async function endImpersonation(
     resourceType: 'impersonation-session',
     resourceId: sessionId,
     description: `Impersonation session ended for target user ${impSession.targetUserId}`,
+    eventSubType: 'authentication.impersonation-ended',
   });
 
   return ctx.json(ended, 200);

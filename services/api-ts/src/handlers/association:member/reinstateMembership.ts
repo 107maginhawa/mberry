@@ -44,6 +44,7 @@ export async function reinstateMembership(
     resourceType: 'membership',
     resourceId: membershipId,
     description: 'Membership reinstated',
+    eventSubType: 'membership.member-reinstated',
   });
 
   return ctx.json(updated, 200);

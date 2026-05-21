@@ -64,6 +64,7 @@ export async function deceaseMembership(
     resourceType: 'membership',
     resourceId: membershipId,
     description: `Membership marked deceased (date of death: ${body.dateOfDeath})${body.terminationReason ? `: ${body.terminationReason}` : ''}`,
+    eventSubType: 'membership.member-deceased',
   });
 
   // P1-4: Revoke departed member's sessions so they can't access org resources

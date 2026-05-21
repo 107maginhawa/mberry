@@ -48,6 +48,7 @@ export async function renewMembership(
     resourceType: 'membership',
     resourceId: membershipId,
     description: 'Membership renewed',
+    eventSubType: 'membership.member-renewed',
   });
 
   return ctx.json(updated, 200);

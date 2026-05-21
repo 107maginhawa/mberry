@@ -48,6 +48,7 @@ export async function createTraining(
     resourceType: 'training',
     resourceId: training.id,
     description: 'Training created',
+    eventSubType: 'training.training-created',
   });
 
   return ctx.json(training, 201);

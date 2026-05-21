@@ -59,6 +59,7 @@ export async function cancelEventRegistration(
     resourceType: 'event-registration',
     resourceId: cancelled.id,
     description: 'Event registration cancelled',
+    eventSubType: 'association.booking-cancelled',
   });
 
   // GAP-006: Notify organizers of late cancellation (within 24h of event)

@@ -72,6 +72,7 @@ export async function startImpersonation(
     resourceId: impSession.id,
     description: `Admin ${admin.name} started impersonating user ${body.targetUserId}`,
     details: { adminId: user.id, targetUserId: body.targetUserId },
+    eventSubType: 'authentication.impersonation-started',
   });
 
   return ctx.json(impSession, 201);
