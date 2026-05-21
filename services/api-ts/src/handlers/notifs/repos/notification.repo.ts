@@ -359,7 +359,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
             const person = await this.personRepo.findOneById(notification.recipient);
             
             if (person && (person as Record<string, unknown>)['email']) {
-              await (emailService as any).queueEmail({
+              await (emailService as unknown as { queueEmail: (opts: Record<string, unknown>) => Promise<void> }).queueEmail({
                 templateTags: [templateTag],
                 recipient: (person as Record<string, unknown>)['email'],
                 variables: {

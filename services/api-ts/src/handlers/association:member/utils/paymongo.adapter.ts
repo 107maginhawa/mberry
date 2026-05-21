@@ -111,20 +111,23 @@ export class PayMongoAdapter implements GatewayAdapter {
       throw new ExternalServiceError(`PayMongo status check failed: ${response.status}`, 'PayMongo', 'getPaymentStatus');
     }
 
-    // structural: PayMongo external API — deeply nested untyped response
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // structural: PayMongo external API — deeply nested untyped response
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: { data: { attributes: Record<string, any> } } = await response.json() as any;
+    // PayMongo external API — deeply nested untyped response
+    interface PayMongoAttrs {
+      status?: string;
+      payment_intent?: { attributes: { status: string } };
+      payments?: Array<{ id: string; attributes: { paid_at: number } }>;
+      line_items?: Array<{ amount: number; currency: string }>;
+    }
+    const data = await response.json() as { data: { attributes: PayMongoAttrs } };
     const attrs = data.data.attributes;
-    const payment = attrs['payments']?.[0];
+    const payment = attrs.payments?.[0];
 
     return {
-      status: mapPayMongoStatus(attrs['payment_intent']?.attributes?.status || attrs['status']),
+      status: mapPayMongoStatus(attrs.payment_intent?.attributes?.status || attrs.status || ''),
       gatewayEventId: payment?.id || sessionId,
       paidAt: payment?.attributes?.paid_at ? new Date(payment.attributes.paid_at * 1000) : undefined,
-      amount: attrs['line_items']?.[0]?.amount || 0,
-      currency: attrs['line_items']?.[0]?.currency || 'PHP',
+      amount: attrs.line_items?.[0]?.amount || 0,
+      currency: attrs.line_items?.[0]?.currency || 'PHP',
     };
   }
 }

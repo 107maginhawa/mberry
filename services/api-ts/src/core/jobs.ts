@@ -111,8 +111,8 @@ class PgBossScheduler implements JobScheduler {
     
     // Create an adapter that pg-boss expects
     const pgBossDb = {
-      executeSql: async (text: string, values?: any[]) => {
-        return await (pool as any).query(text, values);
+      executeSql: async (text: string, values?: unknown[]) => {
+        return await (pool as unknown as { query: (text: string, values?: unknown[]) => Promise<unknown> }).query(text, values);
       }
     };
 
