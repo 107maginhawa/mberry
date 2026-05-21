@@ -81,7 +81,7 @@ Manage instructor-led and live professional development activities. Covers train
 - No fee: free enrollment.
 
 **Exception Flows:**
-- Credit value = 0: [VERIFY] -- should this be blocked or allowed for non-credit trainings?
+- Credit value = 0: ALLOWED if `isNonCreditBearing: true` flag is set. Covers orientations/workshops that aren't CE but are still tracked as training. BR-15 applies to CE training only. If flag is false and creditValue = 0, block with "Credit-bearing training must have credits > 0."
 - Fee set but no payment gateway: "Online payment unavailable. Configure billing first."
 
 **Postconditions:** Training in `published` status. Notification sent to eligible members.
@@ -145,7 +145,7 @@ Manage instructor-led and live professional development activities. Covers train
 |---------|------|-----------|-------------------|
 | BR-13 | IF attendance confirmed THEN award credits immediately (AUTO type credit entry) | Auto-credit | No delay. Cross-module: M09 -> M10. |
 | BR-11 | IF credit cycle configured THEN start from registration date, not calendar year | Credit computation | Per-association config (enforced in M10) |
-| BR-15 | IF activity is training THEN credit-bearing; events are not | Training vs Events | Training always has creditValue > 0 |
+| BR-15 | IF activity is training AND isNonCreditBearing = false THEN credit-bearing; events are not | Training vs Events | CE training must have creditValue > 0. Non-credit-bearing trainings (isNonCreditBearing: true) allowed with creditValue = 0 |
 | BR-17 | IF attendance confirmation THEN only by officer (not self-service) | Check-in | Officers scan or mark manually |
 | BR-20 | IF training completed THEN certificate generated with HMAC-signed QR | Certificates | Post-activity certificate generation |
 | M9-R1 | IF training type THEN one of 5 platform-defined types (not org-customizable) | Training creation | Enum enforced at schema level |
@@ -419,7 +419,7 @@ Required test categories:
 
 - Training cancelled with 100 enrolled and paid members: all refunded via M06 in batch.
 - Member enrolled but attendance not confirmed post-training: officer marks noShow, no credits awarded.
-- Training with 0 credits configured: [VERIFY] -- should this be blocked? BR-15 says training = credit-bearing.
+- Training with 0 credits configured: ALLOWED with `isNonCreditBearing: true`. BR-15 applies to CE training only. Non-credit-bearing trainings (orientations, workshops) generate attendance certificates but no credit entries.
 - Two officers mark same member attended simultaneously: idempotent, one credit entry created.
 - Certificate PDF generation fails: retry available. Certificate record created, pdfUrl null until generated.
 - Accredited provider expires between training creation and completion: training still valid, provider status informational.

@@ -70,7 +70,7 @@ Manage elections and governance processes for healthcare associations — office
 1. Creates election: type (officer/bylaw), positions to elect, nomination dates, voting dates, voting mode (online/inPerson/hybrid).
 2. Transitions election to `nominationsOpen`. Members can self-nominate or be nominated.
 3. Nominees accept or decline nominations.
-4. Officer transitions to `votingOpen` (nominations close). Guard: at least 2 candidates per position (BR-33 applies at voting close, not at transition to voting [VERIFY]).
+4. Officer transitions to `votingOpen` (nominations close). Guard: at least 2 candidates per position. BR-33 guard fires at this transition (nominationsOpen → votingOpen), not at voting close. Positions with <2 candidates are flagged; officer must re-open nominations or remove position before proceeding.
 5. Active members cast votes (one per position). Secret ballot.
 6. Voting period ends. Election transitions to `awaitingConfirmation`. Results computed.
 7. President reviews results and transitions to `published`.
@@ -357,12 +357,12 @@ Required test categories:
 
 - Election with only 1 candidate per position — cannot transition to awaitingConfirmation (BR-33 guard)
 - Member's status changes to Lapsed mid-voting — already-cast votes remain, but member cannot cast additional votes
-- All nominees decline for a position — election must be cancelled or position removed [VERIFY]
-- Tie between candidates — how is winner determined? [VERIFY]
+- All nominees decline for a position — officer can cancel the position in that election OR re-open nominations for that position. Does not auto-cancel the entire election.
+- Tie between candidates — runoff election for tied candidates only. Officer triggers runoff manually. Original votes for non-tied candidates stand.
 - Large election (1000+ voters) — result computation performance
-- Voting mode = hybrid — how are in-person votes recorded? Manual entry by officer? [VERIFY]
+- Voting mode = hybrid — officer manually enters in-person votes with witness attestation (second officer confirms entry). Each in-person vote recorded with witnessPersonId.
 - Election dates in the past when creating — validation should prevent
-- Nominee withdraws after voting starts — votes already cast for them remain counted? [VERIFY]
+- Nominee withdraws after voting starts — votes already cast for withdrawn candidate remain counted. Candidate marked as `withdrawn`. If withdrawn candidate wins by vote count, position goes to runner-up.
 
 ## 14. Dependencies
 

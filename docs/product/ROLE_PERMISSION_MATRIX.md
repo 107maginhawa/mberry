@@ -296,6 +296,78 @@ Listed in descending privilege order (index 0 = highest):
 | Send message | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Video call | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
+### 3.22 Professional Feed Module (M13)
+
+| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+|--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
+| Browse feed | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| Create post | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Moderate (hide/remove) | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Mute/unmute author | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| View hidden posts | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+
+### 3.23 National Dashboard Module (M14)
+
+| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+|--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
+| View association health | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
+| Chapter drill-down | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
+| Export data | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
+| Configure dashboard access | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| View all associations | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+
+### 3.24 Job Board Module (M15)
+
+| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+|--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
+| Browse listings | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| Post job listing | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Apply to job | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
+| Manage bookmarks/alerts | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
+| Approve external employers | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+
+### 3.25 Advertising Module (M16)
+
+| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+|--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
+| View ads | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| Create campaign | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Approve creative | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| View ad dashboard | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Report ad | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| Opt out of targeting | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+
+### 3.26 Marketplace Module (M17)
+
+| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+|--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
+| Browse marketplace | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| Place order | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
+| Register as vendor | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| Manage vendor listings | GA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Verify/reject vendor | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+
+### 3.27 Surveys & Polls Module (M18)
+
+| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+|--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
+| Create survey | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Respond to survey | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
+| View survey results | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Create quick poll | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Vote on poll | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
+
+### 3.28 Committee Management Module (M19)
+
+| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+|--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
+| Create committee | GA+HG | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- |
+| View committee (active) | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
+| View committee (dissolved) | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Manage members | GA+HG | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- |
+| Manage tasks | GA+HG | Y | Y | Y | Y | Y | Y | -- | Y | Y | -- | -- | -- |
+| Dissolve committee | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
+
 ---
 
 ## 4. 2FA Enforcement

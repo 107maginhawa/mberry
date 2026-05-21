@@ -1,17 +1,17 @@
 # Domain Model
-Generated from 37 Drizzle ORM schema files. Source of truth for data architecture.
+Generated from 37 Drizzle ORM schema files + spec review additions. Source of truth for data architecture.
 
 ## Summary Statistics
 
 | Metric | Count |
 |--------|-------|
-| **Tables** | 96 |
-| **Enums (pgEnum)** | 90 |
+| **Tables** | 104 |
+| **Enums (pgEnum)** | 93 |
 | **Foreign Keys** | 49 |
-| **Unique Constraints** | 20 |
+| **Unique Constraints** | 24 |
 | **Check Constraints** | 10 |
 | **Schema Files** | 37 |
-| **Bounded Contexts** | 11 |
+| **Bounded Contexts** | 13 |
 
 All tables inherit 6 base entity fields from `core/database.schema.ts`:
 `id` (uuid PK), `createdAt`, `updatedAt`, `version` (optimistic locking), `createdBy`, `updatedBy`.
@@ -702,6 +702,8 @@ _None — person is the root identity aggregate._
 | `advertiser` | Registered advertiser company | 4 | `advertising/repos/advertising.schema.ts` |
 | `ad_campaign` | Ad campaign with budget, schedule, and slot targeting | 11 | `advertising/repos/advertising.schema.ts` |
 | `ad_creative` | Ad asset (image, text) requiring admin approval | 9 | `advertising/repos/advertising.schema.ts` |
+| `ad_impression` | Individual ad impression event (high-volume, async batch insert) | 6 | `advertising/repos/advertising.schema.ts` |
+| `ad_click` | Individual ad click-through event | 6 | `advertising/repos/advertising.schema.ts` |
 | `ad_report` | User-submitted ad complaint/report | 3 | `advertising/repos/advertising.schema.ts` |
 | `member_ad_opt_out` | Member opt-out from seeing ads | 2 | `advertising/repos/advertising.schema.ts` |
 
@@ -759,6 +761,25 @@ _None — person is the root identity aggregate._
 - `reason` text NOT NULL
 - Indexes: `ad_reports_creative_idx`
 
+**`ad_impression`**
+- `creativeId` uuid NOT NULL → FK `ad_creative`
+- `organizationId` uuid NOT NULL
+- `viewerPersonId` uuid — nullable (anonymous impressions)
+- `adSlot` ad_slot enum NOT NULL
+- `impressionAt` timestamptz NOT NULL
+- `ipHash` text — nullable, hashed for privacy
+- Indexes: `idx_ad_impression_creative`, `idx_ad_impression_org`, `idx_ad_impression_slot`, `idx_ad_impression_date`
+- **Note:** High-volume table — use async batch insert
+
+**`ad_click`**
+- `creativeId` uuid NOT NULL → FK `ad_creative`
+- `organizationId` uuid NOT NULL
+- `clickerPersonId` uuid — nullable (anonymous clicks)
+- `adSlot` ad_slot enum NOT NULL
+- `clickedAt` timestamptz NOT NULL
+- `redirectUrl` text NOT NULL
+- Indexes: `idx_ad_click_creative`, `idx_ad_click_org`, `idx_ad_click_date`
+
 **`member_ad_opt_out`** [Wave 4 Discovery]
 - `organizationId` uuid NOT NULL
 - `personId` uuid NOT NULL
@@ -771,6 +792,8 @@ _None — person is the root identity aggregate._
 |-------------|-----------|-------------|-----------|
 | `ad_campaign` | `advertiserId` | `advertiser` | cascade |
 | `ad_creative` | `campaignId` | `ad_campaign` | cascade |
+| `ad_impression` | `creativeId` | `ad_creative` | — |
+| `ad_click` | `creativeId` | `ad_creative` | — |
 | `ad_report` | `creativeId` | `ad_creative` | — |
 
 ### Domain Events (Inferred)
@@ -780,7 +803,7 @@ _None — person is the root identity aggregate._
 - `ad.reported` — member flagged a creative
 
 ### Module Mapping
-- `advertiser`, `ad_campaign`, `ad_creative`, `ad_report`, `member_ad_opt_out` → M16 (Advertising)
+- `advertiser`, `ad_campaign`, `ad_creative`, `ad_impression`, `ad_click`, `ad_report`, `member_ad_opt_out` → M16 (Advertising)
 
 ---
 
@@ -863,6 +886,8 @@ _None — person is the root identity aggregate._
 |-------|-------------|---------------------|-------------|
 | `job_posting` | Job/fellowship/internship posting by an org | 10 | `jobs/repos/jobs.schema.ts` |
 | `job_application` | Member application to a job posting | 5 | `jobs/repos/jobs.schema.ts` |
+| `job_bookmark` | Member-saved job posting for later review | 2 | `jobs/repos/jobs.schema.ts` |
+| `job_alert` | Saved search criteria for job notifications | 5 | `jobs/repos/jobs.schema.ts` |
 
 ### Enums
 
@@ -898,6 +923,21 @@ _None — person is the root identity aggregate._
 - `status` job_application_status enum (default: applied)
 - Indexes: `idx_job_app_posting`, `idx_job_app_person`, `idx_job_app_status`
 
+**`job_bookmark`**
+- `personId` uuid NOT NULL
+- `jobPostingId` uuid NOT NULL → FK `job_posting`
+- Unique: `(personId, jobPostingId)`
+- Indexes: `idx_job_bookmark_person`, `idx_job_bookmark_posting`
+
+**`job_alert`**
+- `personId` uuid NOT NULL
+- `keyword` text — nullable
+- `specialty` text — nullable
+- `location` text — nullable
+- `isActive` boolean (default: true)
+- Unique: `(personId, keyword, specialty, location)`
+- Indexes: `idx_job_alert_person`, `idx_job_alert_active`
+
 ### Domain Events (Inferred)
 - `job.posted` — posting goes active
 - `job.expired` — posting auto-expires
@@ -905,7 +945,114 @@ _None — person is the root identity aggregate._
 - `application.status-changed` — screening/interview/offer/hire/reject lifecycle
 
 ### Module Mapping
-- `job_posting`, `job_application` → M15 (Jobs)
+- `job_posting`, `job_application`, `job_bookmark`, `job_alert` → M15 (Jobs)
+
+---
+
+## 12. Professional Feed [Spec Review]
+
+| Table | Description | Columns (excl. base) | Schema File |
+|-------|-------------|---------------------|-------------|
+| `feed_post` | User-generated or system-generated feed content | 11 | `feed/repos/feed.schema.ts` |
+| `mute_preference` | Per-person mute of another person's posts within an org | 3 | `feed/repos/feed.schema.ts` |
+
+### Enums
+
+| Enum | Values |
+|------|--------|
+| `feed_post_type` | `announcement`, `eventHighlight`, `trainingOpportunity`, `officerPost` |
+| `feed_post_status` | `draft`, `published`, `hidden`, `archived` |
+
+### Table Details
+
+**`feed_post`**
+- `organizationId` uuid NOT NULL
+- `authorPersonId` uuid NOT NULL
+- `postType` feed_post_type enum NOT NULL
+- `title` text — nullable
+- `body` text NOT NULL (max 2000 chars)
+- `imageUrls` jsonb (string[], max 4 items)
+- `status` feed_post_status enum (default: draft)
+- `likeCount` integer (default: 0)
+- `bookmarkCount` integer (default: 0)
+- `sourceEventId` uuid — nullable FK to `event`
+- `sourceTrainingId` uuid — nullable FK to `training`
+- Indexes: `idx_feed_post_org`, `idx_feed_post_author`, `idx_feed_post_status`, `idx_feed_post_created`
+
+**`mute_preference`**
+- `personId` uuid NOT NULL
+- `mutedPersonId` uuid NOT NULL
+- `organizationId` uuid NOT NULL
+- Unique: `(personId, mutedPersonId, organizationId)`
+- Indexes: `idx_mute_preference_person`, `idx_mute_preference_org`
+
+### Key Relationships
+
+| Source Table | FK Column | Target Table | On Delete |
+|-------------|-----------|-------------|-----------|
+| `feed_post` | `authorPersonId` | `person` | — |
+| `feed_post` | `sourceEventId` | `event` | set null |
+| `feed_post` | `sourceTrainingId` | `training` | set null |
+
+### Domain Events (Inferred)
+- `feed.post.published` — post goes live
+- `feed.post.hidden` — post hidden by moderator/author
+
+### Module Mapping
+- `feed_post`, `mute_preference` → M13 (Professional Feed)
+
+---
+
+## 13. Surveys [Spec Review]
+
+| Table | Description | Columns (excl. base) | Schema File |
+|-------|-------------|---------------------|-------------|
+| `survey` | Survey/poll created by an org admin | 10 | `surveys/repos/surveys.schema.ts` |
+| `survey_response` | Individual survey response (nullable respondent for anonymous) | 5 | `surveys/repos/surveys.schema.ts` |
+
+### Enums
+
+| Enum | Values |
+|------|--------|
+| `survey_status` | `draft`, `published`, `closed`, `archived` |
+
+### Table Details
+
+**`survey`**
+- `organizationId` uuid NOT NULL
+- `createdByPersonId` uuid NOT NULL
+- `title` text NOT NULL
+- `description` text — nullable
+- `status` survey_status enum (default: draft)
+- `isAnonymous` boolean (default: false)
+- `allowReEdit` boolean (default: false)
+- `deadline` timestamptz — nullable
+- `targetAudience` jsonb — nullable (audience filter criteria)
+- `responseCount` integer (default: 0)
+- Indexes: `idx_survey_org`, `idx_survey_status`, `idx_survey_created`
+
+**`survey_response`**
+- `surveyId` uuid NOT NULL → FK `survey`
+- `respondentPersonId` uuid — nullable (NULL when `survey.isAnonymous = true` — cryptographic anonymity per BR-40)
+- `answers` jsonb NOT NULL
+- `submittedAt` timestamptz
+- `isDraft` boolean (default: false)
+- Indexes: `idx_survey_response_survey`, `idx_survey_response_respondent`
+
+### Key Relationships
+
+| Source Table | FK Column | Target Table | On Delete |
+|-------------|-----------|-------------|-----------|
+| `survey` | `createdByPersonId` | `person` | — |
+| `survey_response` | `surveyId` | `survey` | cascade |
+
+### Domain Events (Inferred)
+- `survey.published` — survey goes live
+- `survey.closed` — survey deadline reached or manually closed
+- `survey.response.submitted` — new response received
+
+### Module Mapping
+- `survey`, `survey_response` → M18 (Surveys & Polls)
 
 ---
 
@@ -957,9 +1104,16 @@ _None — person is the root identity aggregate._
 ┌──────────────────────────────────────────────────────┐
 │         WAVE 4 DISCOVERED CONTEXTS                    │
 │  Advertising (M16): advertiser → campaign → creative  │
+│                      + ad_impression, ad_click        │
 │  Marketplace (M17): vendor → listing → order          │
-│  Jobs (M15): job_posting → job_application            │
+│  Jobs (M15): job_posting → application/bookmark/alert │
 │  Committee Mgmt (M19): committee → member/task        │
+└──────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────┐
+│         SPEC REVIEW ADDITIONS                         │
+│  Prof. Feed (M13): feed_post, mute_preference         │
+│  Surveys (M18): survey → survey_response              │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -969,100 +1123,108 @@ _None — person is the root identity aggregate._
 |---|-------|---------|--------|-------------|
 | 1 | `accredited_provider` | Activities | M09 | `training/repos/accredited-provider.schema.ts` |
 | 2 | `ad_campaign` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
-| 3 | `ad_creative` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
-| 4 | `ad_report` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
-| 5 | `advertiser` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
-| 6 | `affiliation_transfer` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
-| 7 | `aging_bucket` | Financial | M06 | `association:member/repos/dues.schema.ts` |
-| 8 | `announcement` | Communication | M07 | `communication/repos/communication.schema.ts` |
-| 9 | `announcement_stats` | Communication | M07 | `communication/repos/communication.schema.ts` |
-| 10 | `association` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
-| 11 | `audit_log_entry` | Platform | M03 | `audit/repos/audit.schema.ts` |
-| 12 | `billing_config` | Financial | M06 | `billing/repos/billing.schema.ts` | [Wave 5]
-| 13 | `booking` | Activities | M08 | `booking/repos/booking.schema.ts` |
-| 14 | `booking_event` | Activities | M08 | `booking/repos/booking.schema.ts` |
-| 15 | `certificate` | Content | M11 | `certificates/repos/certificates.schema.ts` |
-| 16 | `chapter_affiliation` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
-| 17 | `chat_message` | Communication | M07 | `comms/repos/comms.schema.ts` |
-| 18 | `chat_room` | Communication | M07 | `comms/repos/comms.schema.ts` |
-| 19 | `check_in` | Activities | M08 | `association:operations/repos/events.schema.ts` |
-| 20 | `committee` | Activities | M19 | `association:operations/repos/committee.schema.ts` | [Wave 4]
-| 21 | `committee_member` | Activities | M19 | `association:operations/repos/committee.schema.ts` | [Wave 4]
-| 22 | `committee_task` | Activities | M19 | `association:operations/repos/committee-task.schema.ts` | [Wave 4]
-| 23 | `course` | Activities | M09 | `association:operations/repos/training.schema.ts` |
-| 24 | `course_enrollment` | Activities | M09 | `association:operations/repos/training.schema.ts` |
-| 25 | `credential_template` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
-| 26 | `credit_entry` | Membership | M10 | `association:member/repos/credits.schema.ts` |
-| 27 | `digital_credential` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
-| 28 | `directory_profile` | Membership | M04 | `association:member/repos/directory.schema.ts` |
-| 29 | `disciplinary_action` | Membership | M04 | `association:member/repos/governance.schema.ts` | [Wave 4]
-| 30 | `document` | Content | M11 | `documents/repos/documents.schema.ts` |
-| 31 | `document_access_log` | Content | M11 | `documents/repos/documents.schema.ts` |
-| 32 | `document_tag` | Content | M11 | `documents/repos/documents.schema.ts` |
-| 33 | `document_version` | Content | M11 | `documents/repos/documents.schema.ts` |
-| 34 | `dues_category_override` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
-| 35 | `dues_config` | Financial | M06 | `association:member/repos/dues.schema.ts` |
-| 36 | `dues_fund` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
-| 37 | `dues_fund_allocation` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
-| 38 | `dues_gateway_config` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
-| 39 | `dues_invoice` | Financial | M06 | `association:member/repos/dues.schema.ts` |
-| 40 | `dues_org_config` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
-| 41 | `dues_payment` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
-| 42 | `dues_payment_status_history` | Financial | M06 | `dues/repos/dues-status-history.schema.ts` |
-| 43 | `dues_reminder_log` | Financial | M06 | `association:member/repos/dues.schema.ts` |
-| 44 | `dues_reminder_schedule` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
-| 45 | `dunning_event` | Financial | M06 | `association:member/repos/dunning.schema.ts` |
-| 46 | `dunning_template` | Financial | M06 | `association:member/repos/dunning.schema.ts` |
-| 47 | `election` | Governance | M12 | `elections/repos/elections.schema.ts` |
-| 48 | `election_nominee` | Governance | M12 | `elections/repos/elections.schema.ts` |
-| 49 | `election_vote` | Governance | M12 | `elections/repos/elections.schema.ts` |
-| 50 | `email_queue` | Communication | M07 | `email/repos/email.schema.ts` |
-| 51 | `email_suppression` | Communication | M07 | `email/repos/suppression.schema.ts` |
-| 52 | `email_template` | Communication | M07 | `email/repos/email.schema.ts` |
-| 53 | `event` | Activities | M08 | `association:operations/repos/events.schema.ts` |
-| 54 | `event_registration` | Activities | M08 | `association:operations/repos/events.schema.ts` |
-| 55 | `feature_flag` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
-| 56 | `impersonation_session` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
-| 57 | `invitation_token` | Platform | M04 | `invite/repos/invite.schema.ts` |
-| 58 | `invoice` | Financial | M06 | `billing/repos/billing.schema.ts` |
-| 59 | `invoice_line_item` | Financial | M06 | `billing/repos/billing.schema.ts` |
-| 60 | `job_application` | Jobs | M15 | `jobs/repos/jobs.schema.ts` | [Wave 4]
-| 61 | `job_posting` | Jobs | M15 | `jobs/repos/jobs.schema.ts` | [Wave 4]
-| 62 | `license_renewal_alert` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
-| 63 | `marketplace_listing` | Marketplace | M17 | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
-| 64 | `marketplace_order` | Marketplace | M17 | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
-| 65 | `member_ad_opt_out` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
-| 66 | `membership` | Membership | M05 | `association:member/repos/membership.schema.ts` |
-| 67 | `membership_application` | Membership | M05 | `association:member/repos/membership.schema.ts` |
-| 68 | `membership_category` | Membership | M05 | `association:member/repos/membership.schema.ts` |
-| 69 | `membership_status_history` | Membership | M05 | `association:member/repos/status-history.schema.ts` |
-| 70 | `membership_tier` | Membership | M05 | `association:member/repos/membership.schema.ts` |
-| 71 | `merchant_account` | Financial | M06 | `billing/repos/billing.schema.ts` |
-| 72 | `message` | Communication | M07 | `communication/repos/communication.schema.ts` |
-| 73 | `message_template` | Communication | M07 | `communication/repos/communication.schema.ts` |
-| 74 | `notification` | Communication | M07 | `notifs/repos/notification.schema.ts` |
-| 75 | `notification_preference` | Identity | M02 | `person/repos/notification-preferences.schema.ts` |
-| 76 | `officer_term` | Membership | M04 | `association:member/repos/governance.schema.ts` |
-| 77 | `organization` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
-| 78 | `person` | Identity | M02 | `person/repos/person.schema.ts` |
-| 79 | `person_privacy_setting` | Identity | M02 | `person/repos/privacy-settings.schema.ts` |
-| 80 | `person_subscription` | Communication | M07 | `communication/repos/communication.schema.ts` |
-| 81 | `platform_admin` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
-| 82 | `position` | Membership | M04 | `association:member/repos/governance.schema.ts` |
-| 83 | `professional_license` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
-| 84 | `quiz_attempt` | Activities | M09 | `association:operations/repos/training.schema.ts` |
-| 85 | `review` | Platform | M03 | `reviews/repos/review.schema.ts` |
-| 86 | `royalty_split` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
-| 87 | `schedule_exception` | Activities | M08 | `booking/repos/booking.schema.ts` |
-| 88 | `stored_file` | Content | M11 | `storage/repos/file.schema.ts` |
-| 89 | `subscription_topic` | Communication | M07 | `communication/repos/communication.schema.ts` |
-| 90 | `time_slot` | Activities | M08 | `booking/repos/booking.schema.ts` |
-| 91 | `training` | Activities | M09 | `association:operations/repos/training.schema.ts` |
-| 92 | `training_enrollment` | Activities | M09 | `association:operations/repos/training.schema.ts` |
-| 93 | `transition_checklist` | Membership | M04 | `association:member/repos/governance.schema.ts` | [Wave 4]
-| 94 | `vendor` | Marketplace | M17 | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
-| 95 | `waitlist_entry` | Activities | M08 | `association:operations/repos/events.schema.ts` |
-| 96 | `webhook_retry_log` | Financial | M06 | `dues/repos/dues-payments.schema.ts` | [Wave 4]
+| 3 | `ad_click` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Spec Review]
+| 4 | `ad_creative` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
+| 5 | `ad_impression` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Spec Review]
+| 6 | `ad_report` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
+| 7 | `advertiser` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
+| 8 | `affiliation_transfer` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
+| 9 | `aging_bucket` | Financial | M06 | `association:member/repos/dues.schema.ts` |
+| 10 | `announcement` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 11 | `announcement_stats` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 12 | `association` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 13 | `audit_log_entry` | Platform | M03 | `audit/repos/audit.schema.ts` |
+| 14 | `billing_config` | Financial | M06 | `billing/repos/billing.schema.ts` | [Wave 5]
+| 15 | `booking` | Activities | M08 | `booking/repos/booking.schema.ts` |
+| 16 | `booking_event` | Activities | M08 | `booking/repos/booking.schema.ts` |
+| 17 | `certificate` | Content | M11 | `certificates/repos/certificates.schema.ts` |
+| 18 | `chapter_affiliation` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
+| 19 | `chat_message` | Communication | M07 | `comms/repos/comms.schema.ts` |
+| 20 | `chat_room` | Communication | M07 | `comms/repos/comms.schema.ts` |
+| 21 | `check_in` | Activities | M08 | `association:operations/repos/events.schema.ts` |
+| 22 | `committee` | Activities | M19 | `association:operations/repos/committee.schema.ts` | [Wave 4]
+| 23 | `committee_member` | Activities | M19 | `association:operations/repos/committee.schema.ts` | [Wave 4]
+| 24 | `committee_task` | Activities | M19 | `association:operations/repos/committee-task.schema.ts` | [Wave 4]
+| 25 | `course` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 26 | `course_enrollment` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 27 | `credential_template` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
+| 28 | `credit_entry` | Membership | M10 | `association:member/repos/credits.schema.ts` |
+| 29 | `digital_credential` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
+| 30 | `directory_profile` | Membership | M04 | `association:member/repos/directory.schema.ts` |
+| 31 | `disciplinary_action` | Membership | M04 | `association:member/repos/governance.schema.ts` | [Wave 4]
+| 32 | `document` | Content | M11 | `documents/repos/documents.schema.ts` |
+| 33 | `document_access_log` | Content | M11 | `documents/repos/documents.schema.ts` |
+| 34 | `document_tag` | Content | M11 | `documents/repos/documents.schema.ts` |
+| 35 | `document_version` | Content | M11 | `documents/repos/documents.schema.ts` |
+| 36 | `dues_category_override` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 37 | `dues_config` | Financial | M06 | `association:member/repos/dues.schema.ts` |
+| 38 | `dues_fund` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 39 | `dues_fund_allocation` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 40 | `dues_gateway_config` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 41 | `dues_invoice` | Financial | M06 | `association:member/repos/dues.schema.ts` |
+| 42 | `dues_org_config` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 43 | `dues_payment` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 44 | `dues_payment_status_history` | Financial | M06 | `dues/repos/dues-status-history.schema.ts` |
+| 45 | `dues_reminder_log` | Financial | M06 | `association:member/repos/dues.schema.ts` |
+| 46 | `dues_reminder_schedule` | Financial | M06 | `dues/repos/dues-payments.schema.ts` |
+| 47 | `dunning_event` | Financial | M06 | `association:member/repos/dunning.schema.ts` |
+| 48 | `dunning_template` | Financial | M06 | `association:member/repos/dunning.schema.ts` |
+| 49 | `election` | Governance | M12 | `elections/repos/elections.schema.ts` |
+| 50 | `election_nominee` | Governance | M12 | `elections/repos/elections.schema.ts` |
+| 51 | `election_vote` | Governance | M12 | `elections/repos/elections.schema.ts` |
+| 52 | `email_queue` | Communication | M07 | `email/repos/email.schema.ts` |
+| 53 | `email_suppression` | Communication | M07 | `email/repos/suppression.schema.ts` |
+| 54 | `email_template` | Communication | M07 | `email/repos/email.schema.ts` |
+| 55 | `event` | Activities | M08 | `association:operations/repos/events.schema.ts` |
+| 56 | `event_registration` | Activities | M08 | `association:operations/repos/events.schema.ts` |
+| 57 | `feature_flag` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 58 | `feed_post` | Professional Feed | M13 | `feed/repos/feed.schema.ts` | [Spec Review]
+| 59 | `impersonation_session` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 60 | `invitation_token` | Platform | M04 | `invite/repos/invite.schema.ts` |
+| 61 | `invoice` | Financial | M06 | `billing/repos/billing.schema.ts` |
+| 62 | `invoice_line_item` | Financial | M06 | `billing/repos/billing.schema.ts` |
+| 63 | `job_alert` | Jobs | M15 | `jobs/repos/jobs.schema.ts` | [Spec Review]
+| 64 | `job_application` | Jobs | M15 | `jobs/repos/jobs.schema.ts` | [Wave 4]
+| 65 | `job_bookmark` | Jobs | M15 | `jobs/repos/jobs.schema.ts` | [Spec Review]
+| 66 | `job_posting` | Jobs | M15 | `jobs/repos/jobs.schema.ts` | [Wave 4]
+| 67 | `license_renewal_alert` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
+| 68 | `marketplace_listing` | Marketplace | M17 | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
+| 69 | `marketplace_order` | Marketplace | M17 | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
+| 70 | `member_ad_opt_out` | Advertising | M16 | `advertising/repos/advertising.schema.ts` | [Wave 4]
+| 71 | `membership` | Membership | M05 | `association:member/repos/membership.schema.ts` |
+| 72 | `membership_application` | Membership | M05 | `association:member/repos/membership.schema.ts` |
+| 73 | `membership_category` | Membership | M05 | `association:member/repos/membership.schema.ts` |
+| 74 | `membership_status_history` | Membership | M05 | `association:member/repos/status-history.schema.ts` |
+| 75 | `membership_tier` | Membership | M05 | `association:member/repos/membership.schema.ts` |
+| 76 | `merchant_account` | Financial | M06 | `billing/repos/billing.schema.ts` |
+| 77 | `message` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 78 | `message_template` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 79 | `mute_preference` | Professional Feed | M13 | `feed/repos/feed.schema.ts` | [Spec Review]
+| 80 | `notification` | Communication | M07 | `notifs/repos/notification.schema.ts` |
+| 81 | `notification_preference` | Identity | M02 | `person/repos/notification-preferences.schema.ts` |
+| 82 | `officer_term` | Membership | M04 | `association:member/repos/governance.schema.ts` |
+| 83 | `organization` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 84 | `person` | Identity | M02 | `person/repos/person.schema.ts` |
+| 85 | `person_privacy_setting` | Identity | M02 | `person/repos/privacy-settings.schema.ts` |
+| 86 | `person_subscription` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 87 | `platform_admin` | Platform | M03 | `platformadmin/repos/platform-admin.schema.ts` |
+| 88 | `position` | Membership | M04 | `association:member/repos/governance.schema.ts` |
+| 89 | `professional_license` | Membership | M11 | `association:member/repos/credentials.schema.ts` |
+| 90 | `quiz_attempt` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 91 | `review` | Platform | M03 | `reviews/repos/review.schema.ts` |
+| 92 | `royalty_split` | Membership | M04 | `association:member/repos/chapters.schema.ts` |
+| 93 | `schedule_exception` | Activities | M08 | `booking/repos/booking.schema.ts` |
+| 94 | `stored_file` | Content | M11 | `storage/repos/file.schema.ts` |
+| 95 | `subscription_topic` | Communication | M07 | `communication/repos/communication.schema.ts` |
+| 96 | `survey` | Surveys | M18 | `surveys/repos/surveys.schema.ts` | [Spec Review]
+| 97 | `survey_response` | Surveys | M18 | `surveys/repos/surveys.schema.ts` | [Spec Review]
+| 98 | `time_slot` | Activities | M08 | `booking/repos/booking.schema.ts` |
+| 99 | `training` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 100 | `training_enrollment` | Activities | M09 | `association:operations/repos/training.schema.ts` |
+| 101 | `transition_checklist` | Membership | M04 | `association:member/repos/governance.schema.ts` | [Wave 4]
+| 102 | `vendor` | Marketplace | M17 | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
+| 103 | `waitlist_entry` | Activities | M08 | `association:operations/repos/events.schema.ts` |
+| 104 | `webhook_retry_log` | Financial | M06 | `dues/repos/dues-payments.schema.ts` | [Wave 4]
 
 ## Complete Enum Index (alphabetical)
 
@@ -1117,47 +1279,50 @@ _None — person is the root identity aggregate._
 | 47 | `event_status` | draft, published, cancelled, completed | `association:operations/repos/events.schema.ts` |
 | 48 | `event_type` | generalAssembly, inductionCeremony, fellowship, medicalMission, boardMeeting, committeeMeeting, fundraiser, other | `association:operations/repos/events.schema.ts` |
 | 49 | `event_visibility` | internal, network | `association:operations/repos/events.schema.ts` |
-| 50 | `file_status` | uploading, processing, available, failed | `storage/repos/file.schema.ts` |
-| 51 | `gateway_provider` | paymongo, stripe | `dues/repos/dues-payments.schema.ts` |
-| 52 | `gender` | male, female, non-binary, other, prefer-not-to-say | `person/repos/person.schema.ts` |
-| 53 | `invite_status` | pending, claimed, expired, revoked | `invite/repos/invite.schema.ts` |
-| 54 | `invite_type` | claim, invite | `invite/repos/invite.schema.ts` |
-| 55 | `invoice_status` | draft, open, paid, void, uncollectible | `billing/repos/billing.schema.ts` |
-| 56 | `job_application_status` | applied, screening, interviewed, offered, hired, rejected, withdrawn | `jobs/repos/jobs.schema.ts` | [Wave 4]
-| 57 | `job_posting_status` | draft, active, filled, expired, closed | `jobs/repos/jobs.schema.ts` | [Wave 4]
-| 58 | `job_posting_type` | full_time, part_time, contract, fellowship, internship | `jobs/repos/jobs.schema.ts` | [Wave 4]
-| 59 | `listing_status` | draft, active, archived | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
-| 60 | `location_type` | video, phone, in-person | `booking/repos/booking.schema.ts` |
-| 61 | `membership_status` | pendingPayment, active, gracePeriod, lapsed, expired, suspended, removed, resigned, deceased, expelled | `association:member/repos/membership.schema.ts` |
-| 62 | `message_status` | draft, scheduled, sending, sent, cancelled, failed | `communication/repos/communication.schema.ts` |
-| 63 | `message_type` | text, system, video_call | `comms/repos/comms.schema.ts` |
-| 64 | `nominee_status` | nominated, accepted, declined, elected | `elections/repos/elections.schema.ts` |
-| 65 | `notification_channel` | email, push, in-app | `notifs/repos/notification.schema.ts` |
-| 66 | `notification_status` | queued, sent, delivered, read, failed, expired | `notifs/repos/notification.schema.ts` |
-| 67 | `notification_type` | billing, security, system, booking.created, booking.confirmed, booking.rejected, booking.cancelled, booking.no-show-client, booking.no-show-host, comms.video-call-started, comms.video-call-joined, comms.video-call-left, comms.video-call-ended, comms.chat-message | `notifs/repos/notification.schema.ts` |
-| 68 | `order_status` | pending, confirmed, fulfilled, cancelled, refunded | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
-| 69 | `org_lifecycle_status` | trial, active, suspended, cancelled | `platformadmin/repos/platform-admin.schema.ts` |
-| 70 | `org_type` | chapter, society, national, clinic | `platformadmin/repos/platform-admin.schema.ts` |
-| 71 | `participant_type` | client, host | `comms/repos/comms.schema.ts` |
-| 72 | `payment_status` | pending, requires_capture, processing, succeeded, failed, canceled | `billing/repos/billing.schema.ts` |
-| 73 | `position_level` | national, regional, chapter | `association:member/repos/governance.schema.ts` |
-| 74 | `recurrence_type` | daily, weekly, monthly, yearly | `booking/repos/booking.schema.ts` |
-| 75 | `registration_status` | confirmed, waitlisted, cancelled, refunded, noShow | `association:operations/repos/events.schema.ts` |
-| 76 | `slot_status` | available, booked, blocked | `booking/repos/booking.schema.ts` |
-| 77 | `suppression_reason` | hard_bounce, unsubscribe, complaint, manual | `email/repos/suppression.schema.ts` |
-| 78 | `template_status` (comm) | draft, active, archived | `communication/repos/communication.schema.ts` |
-| 79 | `template_status` (email) | draft, active, archived | `email/repos/email.schema.ts` |
-| 80 | `term_status` | upcoming, active, completed, resigned, removed | `association:member/repos/governance.schema.ts` |
-| 81 | `tier_status` | active, retired | `association:member/repos/membership.schema.ts` |
-| 82 | `training_status` | draft, published, cancelled, completed | `association:operations/repos/training.schema.ts` |
-| 83 | `transfer_status` | requested, pendingSourceApproval, pendingTargetApproval, approved, denied, completed, cancelled | `association:member/repos/chapters.schema.ts` |
-| 84 | `transition_checklist_status` | pending, completed | `association:member/repos/governance.schema.ts` | [Wave 4]
-| 85 | `variable_type` | string, number, boolean, date, datetime, url, email, array | `email/repos/email.schema.ts` |
-| 86 | `vendor_category` | emr, supplies, insurance, telehealth, other | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
-| 87 | `vendor_status` | pending, verified, suspended, rejected | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
-| 88 | `video_call_status` | starting, active, ended, cancelled | `comms/repos/comms.schema.ts` |
-| 89 | `voting_mode` | online, inPerson, hybrid | `elections/repos/elections.schema.ts` |
-| 90 | `webhook_retry_status` | processing, completed, pending_retry, dead_letter | `dues/repos/dues-payments.schema.ts` | [Wave 4]
+| 50 | `feed_post_status` | draft, published, hidden, archived | `feed/repos/feed.schema.ts` | [Spec Review]
+| 51 | `feed_post_type` | announcement, eventHighlight, trainingOpportunity, officerPost | `feed/repos/feed.schema.ts` | [Spec Review]
+| 52 | `file_status` | uploading, processing, available, failed | `storage/repos/file.schema.ts` |
+| 53 | `gateway_provider` | paymongo, stripe | `dues/repos/dues-payments.schema.ts` |
+| 54 | `gender` | male, female, non-binary, other, prefer-not-to-say | `person/repos/person.schema.ts` |
+| 55 | `invite_status` | pending, claimed, expired, revoked | `invite/repos/invite.schema.ts` |
+| 56 | `invite_type` | claim, invite | `invite/repos/invite.schema.ts` |
+| 57 | `invoice_status` | draft, open, paid, void, uncollectible | `billing/repos/billing.schema.ts` |
+| 58 | `job_application_status` | applied, screening, interviewed, offered, hired, rejected, withdrawn | `jobs/repos/jobs.schema.ts` | [Wave 4]
+| 59 | `job_posting_status` | draft, active, filled, expired, closed | `jobs/repos/jobs.schema.ts` | [Wave 4]
+| 60 | `job_posting_type` | full_time, part_time, contract, fellowship, internship | `jobs/repos/jobs.schema.ts` | [Wave 4]
+| 61 | `listing_status` | draft, active, archived | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
+| 62 | `location_type` | video, phone, in-person | `booking/repos/booking.schema.ts` |
+| 63 | `membership_status` | pendingPayment, active, gracePeriod, lapsed, expired, suspended, removed, resigned, deceased, expelled | `association:member/repos/membership.schema.ts` |
+| 64 | `message_status` | draft, scheduled, sending, sent, cancelled, failed | `communication/repos/communication.schema.ts` |
+| 65 | `message_type` | text, system, video_call | `comms/repos/comms.schema.ts` |
+| 66 | `nominee_status` | nominated, accepted, declined, elected | `elections/repos/elections.schema.ts` |
+| 67 | `notification_channel` | email, push, in-app | `notifs/repos/notification.schema.ts` |
+| 68 | `notification_status` | queued, sent, delivered, read, failed, expired | `notifs/repos/notification.schema.ts` |
+| 69 | `notification_type` | billing, security, system, booking.created, booking.confirmed, booking.rejected, booking.cancelled, booking.no-show-client, booking.no-show-host, comms.video-call-started, comms.video-call-joined, comms.video-call-left, comms.video-call-ended, comms.chat-message | `notifs/repos/notification.schema.ts` |
+| 70 | `order_status` | pending, confirmed, fulfilled, cancelled, refunded | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
+| 71 | `org_lifecycle_status` | trial, active, suspended, cancelled | `platformadmin/repos/platform-admin.schema.ts` |
+| 72 | `org_type` | chapter, society, national, clinic | `platformadmin/repos/platform-admin.schema.ts` |
+| 73 | `participant_type` | client, host | `comms/repos/comms.schema.ts` |
+| 74 | `payment_status` | pending, requires_capture, processing, succeeded, failed, canceled | `billing/repos/billing.schema.ts` |
+| 75 | `position_level` | national, regional, chapter | `association:member/repos/governance.schema.ts` |
+| 76 | `recurrence_type` | daily, weekly, monthly, yearly | `booking/repos/booking.schema.ts` |
+| 77 | `registration_status` | confirmed, waitlisted, cancelled, refunded, noShow | `association:operations/repos/events.schema.ts` |
+| 78 | `slot_status` | available, booked, blocked | `booking/repos/booking.schema.ts` |
+| 79 | `suppression_reason` | hard_bounce, unsubscribe, complaint, manual | `email/repos/suppression.schema.ts` |
+| 80 | `survey_status` | draft, published, closed, archived | `surveys/repos/surveys.schema.ts` | [Spec Review]
+| 81 | `template_status` (comm) | draft, active, archived | `communication/repos/communication.schema.ts` |
+| 82 | `template_status` (email) | draft, active, archived | `email/repos/email.schema.ts` |
+| 83 | `term_status` | upcoming, active, completed, resigned, removed | `association:member/repos/governance.schema.ts` |
+| 84 | `tier_status` | active, retired | `association:member/repos/membership.schema.ts` |
+| 85 | `training_status` | draft, published, cancelled, completed | `association:operations/repos/training.schema.ts` |
+| 86 | `transfer_status` | requested, pendingSourceApproval, pendingTargetApproval, approved, denied, completed, cancelled | `association:member/repos/chapters.schema.ts` |
+| 87 | `transition_checklist_status` | pending, completed | `association:member/repos/governance.schema.ts` | [Wave 4]
+| 88 | `variable_type` | string, number, boolean, date, datetime, url, email, array | `email/repos/email.schema.ts` |
+| 89 | `vendor_category` | emr, supplies, insurance, telehealth, other | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
+| 90 | `vendor_status` | pending, verified, suspended, rejected | `marketplace/repos/marketplace.schema.ts` | [Wave 4]
+| 91 | `video_call_status` | starting, active, ended, cancelled | `comms/repos/comms.schema.ts` |
+| 92 | `voting_mode` | online, inPerson, hybrid | `elections/repos/elections.schema.ts` |
+| 93 | `webhook_retry_status` | processing, completed, pending_retry, dead_letter | `dues/repos/dues-payments.schema.ts` | [Wave 4]
 
 > **Note:** `template_status` is defined in two separate schema files (communication and email) with the same values. Two pgEnum definitions sharing the same name may cause migration conflicts — verify they use distinct DB enum names.
 
@@ -1171,7 +1336,7 @@ _Added 2026-05-20. Derived from handler directory structure, cross-module import
 
 ## 9. Bounded Contexts
 
-Eleven bounded contexts aligned with handler directory clusters. Each context owns its schema files and exposes repositories as its public API.
+Thirteen bounded contexts aligned with handler directory clusters. Each context owns its schema files and exposes repositories as its public API.
 
 ### Context Inventory
 
@@ -1185,9 +1350,11 @@ Eleven bounded contexts aligned with handler directory clusters. Each context ow
 | 6 | **Content** | `documents/`, `certificates/`, `storage/` | `document` | 6 |
 | 7 | **Governance** | `elections/` | `election` | 3 |
 | 8 | **Platform** | `platformadmin/`, `audit/`, `reviews/`, `invite/` | `organization` | 8 |
-| 9 | **Advertising** [Wave 4] | `advertising/` | `advertiser` | 5 |
+| 9 | **Advertising** [Wave 4] | `advertising/` | `advertiser` | 7 |
 | 10 | **Marketplace** [Wave 4] | `marketplace/` | `vendor` | 3 |
-| 11 | **Jobs** [Wave 4] | `jobs/` | `job_posting` | 2 |
+| 11 | **Jobs** [Wave 4] | `jobs/` | `job_posting` | 4 |
+| 12 | **Professional Feed** [Spec Review] | `feed/` | `feed_post` | 2 |
+| 13 | **Surveys** [Spec Review] | `surveys/` | `survey` | 2 |
 
 ### Context Definitions
 
@@ -1236,9 +1403,9 @@ Eleven bounded contexts aligned with handler directory clusters. Each context ow
 
 **9. Advertising Context** [Wave 4 Discovery]
 - **Owning module:** `advertising/`
-- **Core entities:** `advertiser`, `ad_campaign`, `ad_creative`, `ad_report`, `member_ad_opt_out`
-- **External dependencies:** Identity (person for contactPersonId, reviewedBy, reporterPersonId), Platform (organization)
-- **Notes:** Revenue module (M16). Segment-based targeting only — no PII in ad targeting (M16-R2). All creatives require admin approval (M16-R1) and "Sponsored" label (M16-R3). Members can opt out (M16-R4).
+- **Core entities:** `advertiser`, `ad_campaign`, `ad_creative`, `ad_impression` [Spec Review], `ad_click` [Spec Review], `ad_report`, `member_ad_opt_out`
+- **External dependencies:** Identity (person for contactPersonId, reviewedBy, reporterPersonId, viewerPersonId, clickerPersonId), Platform (organization)
+- **Notes:** Revenue module (M16). Segment-based targeting only — no PII in ad targeting (M16-R2). All creatives require admin approval (M16-R1) and "Sponsored" label (M16-R3). Members can opt out (M16-R4). `ad_impression` is high-volume — use async batch insert.
 
 **10. Marketplace Context** [Wave 4 Discovery]
 - **Owning module:** `marketplace/`
@@ -1248,9 +1415,21 @@ Eleven bounded contexts aligned with handler directory clusters. Each context ow
 
 **11. Jobs Context** [Wave 4 Discovery]
 - **Owning module:** `jobs/`
-- **Core entities:** `job_posting`, `job_application`
+- **Core entities:** `job_posting`, `job_application`, `job_bookmark` [Spec Review], `job_alert` [Spec Review]
 - **External dependencies:** Identity (person for personId, postedBy), Platform (organization)
-- **Notes:** Job board (M15). Supports full-time, part-time, contract, fellowship, and internship postings. Application pipeline: applied → screening → interviewed → offered → hired/rejected/withdrawn.
+- **Notes:** Job board (M15). Supports full-time, part-time, contract, fellowship, and internship postings. Application pipeline: applied → screening → interviewed → offered → hired/rejected/withdrawn. Bookmarks and alerts for job discovery.
+
+**12. Professional Feed Context** [Spec Review]
+- **Owning module:** `feed/`
+- **Core entities:** `feed_post`, `mute_preference`
+- **External dependencies:** Identity (person for authorPersonId, mutedPersonId), Platform (organization), Activities (event for sourceEventId, training for sourceTrainingId)
+- **Notes:** Social feed (M13). Post types: announcement, eventHighlight, trainingOpportunity, officerPost. Max 2000 chars body, max 4 images. Mute preferences per person per org.
+
+**13. Surveys Context** [Spec Review]
+- **Owning module:** `surveys/`
+- **Core entities:** `survey`, `survey_response`
+- **External dependencies:** Identity (person for createdByPersonId, respondentPersonId), Platform (organization)
+- **Notes:** Surveys and polls (M18). Anonymous mode nullifies respondentPersonId for cryptographic anonymity (BR-40). Supports draft responses and re-editing.
 
 ### Context Map
 
@@ -1279,6 +1458,11 @@ graph TD
         JOBS["Jobs<br/>(jobs/)"]
     end
 
+    subgraph "Engagement [Spec Review]"
+        FEED["Professional Feed<br/>(feed/)"]
+        SURVEYS["Surveys<br/>(surveys/)"]
+    end
+
     IDENTITY -->|"person.id (UUID)"| MEMBERSHIP
     IDENTITY -->|"person.id (UUID)"| FINANCIAL
     IDENTITY -->|"person.id (UUID)"| ACTIVITIES
@@ -1305,6 +1489,12 @@ graph TD
     PLATFORM -->|"organization.id (UUID)"| ADVERTISING
     PLATFORM -->|"organization.id (UUID)"| MARKETPLACE
     PLATFORM -->|"organization.id (UUID)"| JOBS
+
+    IDENTITY -->|"person.id (UUID)"| FEED
+    IDENTITY -->|"person.id (UUID)"| SURVEYS
+    PLATFORM -->|"organization.id (UUID)"| FEED
+    PLATFORM -->|"organization.id (UUID)"| SURVEYS
+    ACTIVITIES -->|"event.id, training.id"| FEED
 ```
 
 ---
@@ -1356,7 +1546,13 @@ Each bounded context has one or more aggregate roots — the entity that other e
 - **`vendor`** — Root aggregate. Referenced by `marketplace_listing.vendorId` (cascade) and `marketplace_order.vendorId`. File: `marketplace/repos/marketplace.schema.ts`
 
 **Jobs Context:** [Wave 4 Discovery]
-- **`job_posting`** — Root aggregate. Referenced by `job_application.postingId` (no FK constraint defined, UUID reference). File: `jobs/repos/jobs.schema.ts`
+- **`job_posting`** — Root aggregate. Referenced by `job_application.postingId`, `job_bookmark.jobPostingId`. File: `jobs/repos/jobs.schema.ts`
+
+**Professional Feed Context:** [Spec Review]
+- **`feed_post`** — Root aggregate. Standalone entity with optional cross-context references to `event` and `training` via nullable FKs. File: `feed/repos/feed.schema.ts`
+
+**Surveys Context:** [Spec Review]
+- **`survey`** — Root aggregate. Referenced by `survey_response.surveyId` (cascade). File: `surveys/repos/surveys.schema.ts`
 
 ---
 

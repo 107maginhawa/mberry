@@ -132,7 +132,7 @@ Create and manage committees within organizations -- standing committees, ad-hoc
 | M19-R3 | IF task past due date THEN flag as overdue in dashboard | Tasks | Visual indicator; domain event emitted |
 | M19-R4 | IF member removed from org THEN remove from all org committees | Membership cascade | Set `removedAt` on CommitteeMember; preserve history |
 | M19-R5 | IF committee dissolved THEN preserve all history as read-only | Dissolution | No data deletion; status change only |
-| M19-R6 | IF chairperson removed from org THEN new chairperson must be assigned before committee can operate [VERIFY] | Chairperson continuity | Block mutations until new chairperson set |
+| M19-R6 | IF chairperson removed from org THEN new chairperson must be assigned before committee can operate | Chairperson continuity | Block mutations until new chairperson set. Committee enters `leaderless` state; only officer/admin can assign new chairperson. |
 
 ## 6. Permissions
 
@@ -312,7 +312,7 @@ No reverse transitions. Completed tasks are immutable.
 ## 13. Edge Cases
 
 - Committee with 1 member (chairperson only): valid, operational.
-- Chairperson removed from org: new chairperson must be assigned before committee can operate. [VERIFY]
+- Chairperson removed from org: committee enters `leaderless` state. All mutations blocked until officer/admin assigns new chairperson. Committee visible but read-only.
 - All tasks completed for ad-hoc committee: prompt dissolution suggestion (not automatic).
 - Meeting scheduled for dissolved committee: creation blocked with "Committee has been dissolved."
 - Member added to committee who is then suspended from org: cascading removal triggers.

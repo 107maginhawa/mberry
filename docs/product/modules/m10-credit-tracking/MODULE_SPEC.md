@@ -290,9 +290,9 @@ Required test categories:
 
 - Member belongs to 5+ orgs — aggregation performance with large entry sets
 - Credit cycle boundary: entry date falls exactly on cycle start/end
-- Officer deducts more credits than member has earned — allow negative total? [VERIFY]
+- Officer deducts more credits than member has earned — BLOCKED. Show error: "Cannot deduct below 0. Current balance: N credits." Prevents accounting confusion and audit trail issues.
 - Manual credit with future activity date — should it be allowed?
-- Association changes cycle duration mid-cycle — how are existing cycles recomputed? [VERIFY]
+- Association changes cycle duration mid-cycle — existing cycles keep original dates. New duration applies to next cycle only. No retroactive recomputation.
 - Member's registration date changes (data correction) — cycle recalculation needed
 - Concurrent AUTO credit creation from same training (race condition) — unique constraint handles
 

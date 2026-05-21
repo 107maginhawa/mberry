@@ -253,6 +253,81 @@ Exception: `nationalOrgId` is used in royalty split schemas for the national bod
 
 ---
 
+## Professional Feed Terms
+
+| Term | Definition |
+|------|------------|
+| **Feed Post** | Officer-authored content item in the professional feed. Types: Announcement (auto from M07), EventHighlight (auto from M08), TrainingOpportunity (auto from M09), OfficerPost (manual). |
+| **Mute Preference** | Per-member per-org setting to hide posts from a specific author in the feed. Does not block — only hides from feed view. |
+| **Engagement** | Feed interactions: like and bookmark. Tracked per post per member. |
+
+---
+
+## National Dashboard Terms
+
+| Term | Definition |
+|------|------------|
+| **National Dashboard** | Read-only aggregation view showing cross-chapter KPIs for national officers. Computed from M04-M10 data, not persisted. |
+| **Dashboard Snapshot** | Point-in-time computed view of association health metrics. Refreshed via batch on domain events, not real-time. |
+
+---
+
+## Job Board Terms
+
+| Term | Definition |
+|------|------------|
+| **Job Posting** | Employment listing published by an org officer or approved external employer. Has status lifecycle: draft, published, closed, expired. |
+| **Job Application** | Member's application to a job posting. Status: submitted, reviewed, shortlisted, accepted, rejected, withdrawn. |
+| **Job Bookmark** | Member's saved reference to a job posting for later viewing. |
+| **Job Alert** | Member-configured notification trigger based on keyword, specialty, and/or location. Fires when matching listings are published. |
+| **External Employer** | Non-member organization approved by platform admin to post job listings. |
+
+---
+
+## Advertising Terms
+
+| Term | Definition |
+|------|------------|
+| **Advertiser** | External company registered to place ads on the platform. Not a platform member. Managed by platform admin. |
+| **Ad Campaign** | Budget-bound advertising effort with schedule, slot targeting, and creatives. Status: draft, active, paused, completed, cancelled. |
+| **Ad Creative** | Visual/text asset within a campaign. Requires platform admin approval before serving. |
+| **Ad Slot** | Placement location for ads: feed_banner, sidebar, email_footer, event_sponsor. |
+| **Ad Impression** | Record of an ad creative being displayed to a viewer. High-volume, async batch insert. |
+| **Ad Click** | Record of a viewer clicking through an ad creative to its redirect URL. |
+
+---
+
+## Marketplace Terms
+
+| Term | Definition |
+|------|------------|
+| **Vendor** | External entity offering products or services through the marketplace. Requires platform admin verification. |
+| **Group Purchasing** | Collective buying by association members for volume discounts. Requires minimum participant threshold (configurable per offer). |
+| **Marketplace Listing** | Product or service offered by a verified vendor. Scoped to specific associations via referral partnerships. |
+
+---
+
+## Survey & Poll Terms
+
+| Term | Definition |
+|------|------------|
+| **Survey** | Multi-question feedback form distributed to targeted members. Can be identified or anonymous. |
+| **Poll** | Single-question quick vote with inline instant results. Lightweight alternative to full surveys. |
+| **Anonymous Survey** | Survey where individual responses cannot be linked to members by any user including platform admin. No respondentId stored (cryptographic guarantee per BR-40). |
+| **Survey Response** | Member's submitted answers to a survey. Stored as JSONB. Respondent identity null for anonymous surveys. |
+
+---
+
+## Committee Terms
+
+| Term | Definition |
+|------|------------|
+| **Committee** | Group of members with a defined purpose, chairperson, and term. Types: standing (auto-renews) or ad-hoc (dissolves on completion). |
+| **Chairperson** | Committee leader responsible for meetings, tasks, and reports. Required for committee to operate. If removed, committee enters leaderless state. |
+| **Committee Task** | Action item assigned within a committee. Has assignee, due date, priority, and status (pending, in_progress, completed, cancelled). |
+
+---
+
 ## DDD Classification
 
 All classifications below are **[INFERRED]** from codebase analysis (schema structure, handler relationships, event patterns). They have not been validated through a formal domain modeling exercise.
