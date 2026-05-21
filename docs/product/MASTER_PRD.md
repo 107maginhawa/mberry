@@ -173,6 +173,50 @@ The platform has **40 normative business rules** documented in `docs/ver-3/busin
 
 Full rule definitions with edge cases: `docs/ver-3/business/business-rules.md`
 
+### Core Workflows
+
+107 user flows documented in `docs/ver-3/business/personas-and-roles.md` (authoritative). Key journeys per persona:
+
+**P6 Member (27 flows):** Register → verify email → complete profile → join org → pay dues → register for event → attend training → earn credits → download ID card. Core retention loop.
+
+**P3 Treasurer (11 flows):** Configure dues → record payment → allocate funds → process refund → generate financial report. All flows require `treasurer` position.
+
+**P4 Secretary (13 flows):** Import members → approve applications → create event → send announcement → manage roster. All flows require `secretary` position.
+
+**P2 President (14 flows):** Assign officers → approve members → manage org settings → initiate elections → review reports. Highest org-level authority.
+
+**P5 Society Officer (14 flows):** Create training program → manage enrollment → confirm attendance → issue credits → cross-org reporting.
+
+**P1 Platform Admin (22 flows):** Onboard association → manage subscriptions → toggle feature flags → impersonate (read-only) → health scoring.
+
+**Exception flows:** All officer actions require position validation (RBAC). Payment flows use idempotency keys. Session expiry redirects to login (no draft save). Invalid membership transitions rejected silently (BR-03). Refunds blocked after 30 days or fund allocation (BR-08).
+
+**Cross-module flows:** Event attendance → training completion → credit award (M08→M09→M10). Dues payment → expiry extension → membership status update (M06→M05). Full workflow map: `docs/product/WORKFLOW_MAP.md`.
+
+### Acceptance Criteria by Module
+
+Per-module acceptance criteria are defined in individual module specs at `docs/product/modules/m01-m19/`. Each module spec includes:
+- Functional requirements with pass/fail criteria
+- Business rule coverage mapping (BR-## tags)
+- UAT scenarios for critical paths
+
+Pilot-level acceptance criteria are in PRD S6 (Pilot Success Criteria) and S8 (Success Metrics).
+
+### Data Volume Estimates
+
+| Dimension | Pilot (3 months) | Scale (12 months) | Rationale |
+|-----------|------------------|-------------------|-----------|
+| Associations | 3-5 | 50-100 | PH dental/medical pilot associations |
+| Organizations per association | 10-20 chapters | 50-100 chapters | PH dental assoc has ~200 chapters total |
+| Members per org | 30-100 | 50-300 | PRD pilot target: 30+ active per org |
+| Total members | 1,000-5,000 | 25,000-100,000 | Target market: 250K+ licensed professionals |
+| Payments per org per month | 10-30 | 30-100 | PRD pilot target: 10+ payments per org |
+| Events per org per month | 2-5 | 5-15 | PRD target: 2+ events/month per active chapter |
+| Training completions per month | 50-200 | 500-5,000 | 1 training/quarter per chapter (PRD S8) |
+| File uploads per month | 100-500 | 1,000-10,000 | Certificates, ID cards, receipts |
+| Email sends per day | 50-200 | 1,000-10,000 | Announcements, reminders, receipts |
+| Concurrent WebSocket connections | 20-50 | 100-500 | Convention spike NFR: 500 max |
+
 ---
 
 ## 6. Rollout Phases
@@ -237,19 +281,122 @@ NFR breaches in production are treated as P1 incidents with 24-hour resolution S
 - SVG upload sanitization (BR-31)
 - No raw credit card storage -- delegated to PCI-DSS compliant gateway
 
+### Rate Limiting
+
+Global rate limiting implemented in `services/api-ts/src/middleware/rate-limit.ts`:
+
+| Category | Limit | Window | Scope |
+|----------|-------|--------|-------|
+| Write ops (POST/PUT/PATCH/DELETE) | 30 requests | 1 minute | Per IP |
+| Read ops (GET/HEAD/OPTIONS) | 120 requests | 1 minute | Per IP |
+| Auth routes (/auth/*) | Managed by Better-Auth | — | Per IP |
+| Health checks (/health, /ready) | Exempt | — | — |
+
+Response headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After` (on 429).
+
+Rate limiting is disabled in development and test environments. Convention spike scenario (500 concurrent users) stays within read limits.
+
+### UI States
+
+All data-fetching views must handle four states. Reference implementations exist in the codebase:
+
+| State | Component | Pattern | Reference |
+|-------|-----------|---------|-----------|
+| Loading | `SkeletonLoader` | Animated placeholder matching final layout | `apps/memberry/src/components/patterns/skeleton-loader.tsx` |
+| Empty | `EmptyState` | Illustration + message + primary action CTA | `apps/memberry/src/components/patterns/empty-state.tsx` |
+| Error | `ErrorBoundary` + `ErrorState` | Retry button + error message (no stack traces) | `apps/memberry/src/components/patterns/error-boundary.tsx`, `error-state.tsx` |
+| Success | Normal render | Data displayed in table/card/list | Standard TanStack Query `data` state |
+
+Error handling: TanStack Query `onError` → sonner toast for transient errors, inline `ErrorState` for page-level failures. Network errors trigger automatic retry (TanStack Query default: 3 retries with exponential backoff).
+
+### Edge Case Handling
+
+**Network failures:**
+- TanStack Query retries failed requests 3 times with exponential backoff (default behavior)
+- Mutations use `onError` callbacks to display sonner toast with retry action
+- WebSocket (comms module) shows `ConnectionStatus` indicator and auto-reconnects
+- Offline state: no offline support — user sees standard browser offline page
+
+**Partial operation recovery:**
+- Payment recording: idempotency keys prevent double-charge if request retries
+- Bulk operations (member import, bulk payment): each row processed independently — partial success returns list of failed rows with error details
+- File upload: failed uploads return error immediately — no partial file state
+- Database transactions: multi-table operations wrapped in transactions — all-or-nothing
+
+### Test Strategy
+
+Full protocol: `VERTICAL_TDD.md`. Test-first, vertical slices per module.
+
+**Test types and counts:**
+
+| Type | Count | Runner | Scope |
+|------|-------|--------|-------|
+| API unit tests | ~97 files | Bun test | Handler logic, repos, validators, business rules |
+| Contract tests | ~97 .hurl files | Hurl | API endpoint behavior against running server |
+| Frontend component tests | Growing | Vitest | Component rendering, hook behavior |
+| E2E tests | Growing | Playwright | Critical user journeys per persona |
+
+**Coverage targets:**
+- Every business rule (BR-01 through BR-40) must have at least one dedicated test tagged with `[BR-##]`
+- Every state machine transition must have a test (valid + invalid transitions)
+- Every handler must have unit tests covering happy path + error path
+- Critical user journeys (pay dues, register for event, record payment) must have E2E tests
+
+**Test pyramid:** Unit tests (fast, many) → Contract tests (API surface) → E2E tests (critical paths). No integration test layer — contract tests serve this purpose.
+
+### Feature Flags
+
+Feature flag system implemented in `services/api-ts/src/handlers/platformadmin/`:
+
+**Schema:** `feature_flag` table with `targetType` (association/organization/global), `targetId`, `moduleName`, `enabled` boolean.
+
+**CRUD:** Platform admin manages flags via admin dashboard. Flags are scoped:
+- **Global:** Applies to all associations (e.g., new module rollout)
+- **Association:** Applies to one association (e.g., pilot feature)
+- **Organization:** Applies to one org (e.g., beta testing)
+
+**Per-org `featureFlags` JSONB:** Organizations also carry a `featureFlags` JSONB column for quick-check flags without DB joins.
+
+**Naming convention:** `{module}.{feature}` (e.g., `events.qrCheckin`, `dues.onlinePayment`)
+
+**Lifecycle:** Create (disabled) → Enable for pilot orgs → Enable globally → Remove flag + dead code. Flags older than 6 months should be evaluated for permanent adoption or removal.
+
+**No A/B testing in Phase 1.** Feature flags are binary on/off toggles for phased rollout. A/B testing framework deferred to Phase 2.
+
 ### Localization
 
 - **Phase 1:** English UI with Filipino/Tagalog context where needed
 - **Currency:** Philippine Peso (PHP) primary; multi-currency framework ready
 - **Date/Time:** Asia/Manila default; org-configurable timezone
 - **Phase 2:** Full i18n framework for ASEAN expansion
+- **RTL support:** Not required — target markets (PH, ASEAN) are LTR
+
+**String externalization (Phase 1):**
+- UI strings are hardcoded in English (acceptable for Phase 1 single-locale)
+- Error messages from API use `AppError.message` (English)
+- Email templates support variable interpolation but single-language content
+
+**String externalization (Phase 2 preparation):**
+- Extract all UI strings to JSON resource files (`en.json`, `fil.json`)
+- Use `react-i18next` or equivalent for runtime string lookup
+- API error messages remain English (machine-readable `code` field used for client-side i18n)
+- Date/number/currency formatting via `Intl` APIs (already locale-aware)
+
+**Translation workflow (Phase 2):**
+- Professional translation for core UI strings (paid)
+- Community/officer translation for org-specific content (templates, announcements)
+- Translation memory tool (e.g., Crowdin) for consistency across updates
 
 ### Accessibility
 
-- WCAG 2.1 AA target
-- Keyboard navigation for all interactive elements
-- Screen reader compatibility for core flows
-- High contrast mode support
+- **Target:** WCAG 2.1 AA compliance
+- **Keyboard navigation:** All interactive elements reachable via Tab, activatable via Enter/Space. Focus indicators visible (`:focus-visible` CSS)
+- **Screen readers:** Core flows (login, dashboard, payment, event registration) tested with VoiceOver (macOS/iOS). ARIA landmarks on all page regions. Form fields have associated labels.
+- **Component library:** shadcn/ui primitives (Radix-based) provide built-in ARIA roles, keyboard handling, and focus management. Reference: `packages/ui/src/components/`
+- **Data tables:** `data-table.tsx` pattern includes column headers with scope, sortable columns with `aria-sort`, row selection with checkbox
+- **High contrast:** Support via CSS custom properties — no separate theme needed
+- **Assistive technology testing:** VoiceOver (primary), NVDA (Windows, Phase 2). No JAWS testing planned.
+- **Automated checks:** axe-core integration in E2E tests for accessibility regression detection (Phase 2)
 
 ### Concurrency Control
 

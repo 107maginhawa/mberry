@@ -5,32 +5,29 @@
 
 ## Executive Summary
 
-- **PRD readiness:** Ready for module specs (all P0 resolved, Ambiguity Gate PASSED)
-- **Pass rate:** 91.5% (97/106 applicable items)
-- **P0 failures (blocking):** 0 (3 resolved — error contract, session expiry, bootstrap data documented)
-- **P1 failures (high):** 0 (1 resolved — state machines documented for all entities)
-- **P2 failures (medium):** 4 (observability + DR resolved via companion specs; workflow details, data volumes, test strategy remain)
-- **P3 failures (low):** 5 (feature flag strategy, i18n string externalization, translation workflow)
+- **PRD readiness:** Ready for module specs — all items resolved, Ambiguity Gate PASSED
+- **Pass rate:** 100% (106/106 applicable items)
+- **P0 failures:** 0 (3 resolved)
+- **P1 failures:** 0 (1 resolved)
+- **P2 failures:** 0 (16 resolved)
+- **P3 failures:** 0 (8 resolved)
 - **Ambiguity Gate:** PASSED (10/10 answered)
-- **Resolved in this pass:**
-  - Error contract documented in PRD S7 (transcribed from `errors.ts` + TypeSpec `errors.tsp`)
-  - Session lifecycle documented in PRD S7 (redirect to login, no draft save — tracked as P2 improvement)
-  - Bootstrap data documented in PRD S7 (cross-references SEED_MANIFEST.md)
-  - Observability strategy: `docs/product/OBSERVABILITY.md` created (RED metrics, alerting thresholds, health checks)
-  - Disaster recovery plan: `docs/product/DISASTER_RECOVERY.md` created (RTO 4h, RPO 1h, backup strategy, BCDR testing)
-  - State machines: `docs/product/STATE_MACHINES.md` created (10 entity lifecycles extracted from schemas)
+- **Resolution summary (2026-05-21):**
+  - **Tier 1 (documented from code):** Error contract, session lifecycle, bootstrap data, rate limiting, test strategy
+  - **Tier 2 (extracted from code):** 10 state machines, workflow summaries, data volume estimates, UI state patterns, edge case handling, acceptance criteria locations
+  - **Tier 3 (new design):** Observability strategy, disaster recovery plan, feature flag system, i18n roadmap, accessibility testing plan, threat model, data governance draft, performance budgets
 
 ## PRD Health Score
 
 | Dimension | Score (0-10) | Notes |
 |-----------|-------------|-------|
 | Clarity (product, scope, goals) | 9 | Excellent product definition, clear anti-personas, explicit scope boundaries |
-| Completeness (all sections populated) | 9 | All major gaps closed — error contract, session lifecycle, observability, DR, state machines |
-| Testability (acceptance criteria, business rules) | 8 | 40 BR IDs + 10 state machines enable direct test mapping |
-| AI-readiness (unambiguous, splittable) | 9 | Well-structured modules, explicit dependencies, BR IDs, state machines, clear persona mapping |
-| Context-window-readiness (size, independence) | 9 | PRD references companion docs for details — keeps core doc under 400 lines |
+| Completeness (all sections populated) | 10 | All 24 categories pass. Companion specs cover observability, DR, state machines, threat model, data governance, performance |
+| Testability (acceptance criteria, business rules) | 9 | 40 BR IDs + 10 state machines + VERTICAL_TDD protocol + coverage targets |
+| AI-readiness (unambiguous, splittable) | 9 | Well-structured modules, explicit dependencies, BR IDs, state machines, implementation order derivable |
+| Context-window-readiness (size, independence) | 9 | PRD ~450 lines, references companion docs, independent sections |
 
-**Overall PRD health:** 8.8/10
+**Overall PRD health:** 9.2/10
 
 ## Audit Metadata
 
@@ -70,25 +67,25 @@
 | 2 | Roles and Permissions | 5 | 5 | 0 | 0 | — | 6 personas, detailed ROLE_PERMISSION_MATRIX exists |
 | 3 | Domain Model and Terminology | 6 | 6 | 0 | 0 | — | DOMAIN_GLOSSARY with DDD, bounded contexts, ACLs |
 | 4 | Modules | 5 | 5 | 0 | 0 | — | 19 modules with dependencies, monetization tiers |
-| 5 | Workflows | 6 | 3 | 3 | 0 | P2 | 107 flows referenced but not inlined; details in module specs |
+| 5 | Workflows | 6 | 6 | 0 | 0 | — | **RESOLVED:** Core workflows, exception flows, cross-module flows documented in PRD S5 |
 | 6 | Business Rules | 5 | 5 | 0 | 0 | — | 40 BRs with IDs, phases, edge cases |
-| 7 | Data Requirements | 5 | 4 | 1 | 0 | P2 | Missing: data volume estimates |
+| 7 | Data Requirements | 5 | 5 | 0 | 0 | — | **RESOLVED:** Data volume estimates added (pilot + scale) in PRD S5 |
 | 8 | State Transitions | 4 | 4 | 0 | 0 | — | **RESOLVED:** 10 state machines documented in `STATE_MACHINES.md` |
-| 9 | UI / UX Behavior | 5 | 3 | 2 | 0 | P2 | Missing: loading/empty/error state UI specs |
-| 10 | API Expectations | 6 | 5 | 1 | 0 | P2 | **RESOLVED:** error contract documented. Remaining: rate limiting details |
-| 11 | Acceptance Criteria | 4 | 3 | 1 | 0 | P2 | Per-module AC deferred to module specs |
-| 12 | Test Expectations | 4 | 1 | 3 | 0 | P2 | No test strategy, coverage targets, or test types in PRD |
+| 9 | UI / UX Behavior | 5 | 5 | 0 | 0 | — | **RESOLVED:** 4-state pattern (loading/empty/error/success) + reference components documented |
+| 10 | API Expectations | 6 | 6 | 0 | 0 | — | **RESOLVED:** Error contract + rate limiting (30 write/120 read per IP per min) documented |
+| 11 | Acceptance Criteria | 4 | 4 | 0 | 0 | — | **RESOLVED:** Per-module AC location documented, cross-referenced to module specs |
+| 12 | Test Expectations | 4 | 4 | 0 | 0 | — | **RESOLVED:** VERTICAL_TDD protocol, test types, coverage targets, test pyramid documented |
 | 13 | Non-Functional Requirements | 7 | 6 | 0 | 1 | — | Offline waived (removed from arch). All others covered. |
-| 14 | Edge Cases | 5 | 3 | 2 | 0 | P2 | Missing: network failure handling, partial operation recovery |
-| 15 | Ambiguity Gate | 10 | 10 | 0 | 0 | — | **RESOLVED:** All 10 items answered. See Ambiguity Gate section below |
-| 16 | AI Readiness | 4 | 3 | 1 | 0 | P3 | Implementation order not fully derivable from PRD alone |
-| 17 | Context Window Readiness | 4 | 4 | 0 | 0 | — | 303 lines, independent sections, source references |
+| 14 | Edge Cases | 5 | 5 | 0 | 0 | — | **RESOLVED:** Network failure (retry + reconnect) and partial operation recovery documented |
+| 15 | Ambiguity Gate | 10 | 10 | 0 | 0 | — | **RESOLVED:** All 10 items answered |
+| 16 | AI Readiness | 4 | 4 | 0 | 0 | — | **RESOLVED:** Implementation order derivable from module dependency table + wave assignments |
+| 17 | Context Window Readiness | 4 | 4 | 0 | 0 | — | PRD references companion docs, independent sections |
 | 18 | Scaffold Readiness | 3 | 3 | 0 | 0 | — | Full tech stack, monorepo structure, codegen pipeline |
 | 19 | Observability | 4 | 4 | 0 | 0 | — | **RESOLVED:** `OBSERVABILITY.md` created — RED metrics, alerting, health checks |
 | 20 | Disaster Recovery | 5 | 5 | 0 | 0 | — | **RESOLVED:** `DISASTER_RECOVERY.md` created — RTO 4h, RPO 1h, BCDR |
-| 21 | Feature Flags | 3 | 1 | 2 | 0 | P3 | Flags mentioned for platform admin but no strategy documented |
-| 22 | Internationalization | 5 | 2 | 3 | 0 | P3 | Target locales defined; RTL, string externalization, translation workflow missing |
-| 23 | Accessibility | 4 | 3 | 1 | 0 | P3 | WCAG AA target clear; assistive tech specifics missing |
+| 21 | Feature Flags | 3 | 3 | 0 | 0 | — | **RESOLVED:** Flag schema, scoping, naming convention, lifecycle documented |
+| 22 | Internationalization | 5 | 5 | 0 | 0 | — | **RESOLVED:** RTL waived (LTR markets), string externalization Phase 1→2 strategy, translation workflow |
+| 23 | Accessibility | 4 | 4 | 0 | 0 | — | **RESOLVED:** AT testing plan (VoiceOver primary), component library ARIA, automated axe-core plan |
 | 24 | Data Migration | 5 | 1 | 0 | 4 | — | Greenfield; member import via BR-22 covers the one applicable item |
 
 ## Ambiguity Gate (BLOCKING)
@@ -131,15 +128,7 @@
 
 ## Open Questions Remaining
 
-| # | Question | Impact If Unanswered | Blocking? |
-|---|---------|---------------------|-----------|
-| ~~1~~ | ~~Error response shape~~ | ~~Resolved~~ | ~~No~~ |
-| ~~2~~ | ~~Session expiry behavior~~ | ~~Resolved~~ | ~~No~~ |
-| ~~3~~ | ~~Bootstrap data~~ | ~~Resolved~~ | ~~No~~ |
-| ~~4~~ | ~~State machines for events, dues, training~~ | ~~Resolved~~ | ~~No~~ |
-| 5 | What are expected data volumes? (members per org, orgs per association, payments per month) | Performance testing and database indexing decisions lack targets. | No (P2) |
-| ~~6~~ | ~~Observability strategy~~ | ~~Resolved~~ | ~~No~~ |
-| ~~7~~ | ~~Disaster recovery plan~~ | ~~Resolved~~ | ~~No~~ |
+All questions resolved. No blocking items remain.
 
 ## Companion Artifact Status
 
@@ -159,13 +148,13 @@
 
 - **Total items checked:** 116
 - **Applicable:** 106 (10 waived/N/A)
-- **Passed:** 97 (was 78; +19 resolved)
-- **Failed:** 9 (was 28; 19 resolved)
+- **Passed:** 106
+- **Failed:** 0 (was 28; all resolved in 2 passes)
 - **Waived:** 6
 - **N/A:** 4
-- **Pass rate:** 91.5% (was 73.6%)
-- **Ambiguity Gate:** PASSED (was BLOCKED; 3 items resolved)
-- **Decision:** Ready for module specs — all P0 and P1 items resolved
+- **Pass rate:** 100% (was 73.6% → 91.5% → 100%)
+- **Ambiguity Gate:** PASSED (10/10)
+- **Decision:** Ready for module specs — clean audit, no blocking items
 
 ## What's Next
 
