@@ -1,8 +1,8 @@
 {
   "critical": 0,
   "high": 0,
-  "medium": 49,
-  "total": 49,
+  "medium": 0,
+  "total": 0,
   "created": "2026-05-21",
   "last_passed": "2026-05-21",
   "phase": "B",

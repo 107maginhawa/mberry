@@ -480,6 +480,117 @@ Binary PDF with member name, training title, date, credits earned, org branding,
 
 ### 2.6 Document Access Log
 
+### 2.7 Credential Templates (Feature-flagged: `credential_templates`)
+
+#### GET `/orgs/:organizationId/credential-templates`
+
+**List credential templates for the organization**
+
+| Property | Value |
+|----------|-------|
+| Auth | GA+HG — officer, admin |
+| Rate limit | Authenticated (120 req/min) |
+| Idempotency | N/A |
+| Workflow | WF-075: Credential Template Management |
+| Business rules | — |
+| Feature flag | `credential_templates` |
+
+**Response** `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Default ID Card",
+      "type": "id_card",
+      "logoUrl": "https://cdn.example.com/org-logo.svg",
+      "colorScheme": { "primary": "#1a365d", "accent": "#2b6cb0" },
+      "qrPlacement": "bottom-right",
+      "isActive": true,
+      "createdAt": "2026-05-21T10:00:00.000Z",
+      "updatedAt": "2026-05-21T10:00:00.000Z"
+    }
+  ],
+  "meta": { "total": 2 }
+}
+```
+
+#### POST `/orgs/:organizationId/credential-templates`
+
+**Create a new credential template**
+
+| Property | Value |
+|----------|-------|
+| Auth | GA+HG — officer, admin |
+| Rate limit | Authenticated (120 req/min) |
+| Idempotency | Optional |
+| Workflow | WF-075: Credential Template Management |
+| Business rules | M11-R6 (SVG sanitization on logo upload) |
+| Feature flag | `credential_templates` |
+
+**Request Body**
+
+| Field | Type | Required | Nullable | Constraints | Description |
+|-------|------|----------|----------|-------------|-------------|
+| name | string | YES | NO | 1-100 chars | Template name |
+| type | string | YES | NO | `id_card`, `certificate` | Credential type |
+| logoUrl | string | NO | YES | Valid URL | Org logo (SVG sanitized) |
+| colorScheme | object | NO | NO | `{primary, accent}` hex colors | Brand colors |
+| qrPlacement | string | NO | NO | `bottom-right`, `bottom-left`, `top-right`, `top-left` | QR code position |
+| fields | string[] | NO | NO | max 20 items | Fields to display on credential |
+
+**Response** `201 Created`
+
+**Error Codes**
+
+| Code | Status | When |
+|------|--------|------|
+| `M11-005` | 422 | Invalid color scheme format |
+| `M11-006` | 403 | Feature flag `credential_templates` not enabled |
+
+#### PATCH `/orgs/:organizationId/credential-templates/:templateId`
+
+**Update an existing credential template**
+
+| Property | Value |
+|----------|-------|
+| Auth | GA+HG — officer, admin |
+| Rate limit | Authenticated (120 req/min) |
+| Idempotency | N/A |
+| Workflow | WF-075: Credential Template Management |
+| Business rules | M11-R6 (SVG sanitization on logo upload) |
+| Feature flag | `credential_templates` |
+
+**Request Body** — Same fields as POST, all optional.
+
+**Response** `200 OK`
+
+#### DELETE `/orgs/:organizationId/credential-templates/:templateId`
+
+**Delete a credential template**
+
+| Property | Value |
+|----------|-------|
+| Auth | GA+HG — officer, admin |
+| Rate limit | Authenticated (120 req/min) |
+| Idempotency | N/A |
+| Workflow | WF-075: Credential Template Management |
+| Business rules | M11-R7 (Cannot delete active template; must deactivate first) |
+| Feature flag | `credential_templates` |
+
+**Response** `204 No Content`
+
+**Error Codes**
+
+| Code | Status | When |
+|------|--------|------|
+| `M11-007` | 409 | Template is currently active — deactivate before deleting |
+
+---
+
+### 2.8 Document Access Log
+
 #### GET `/orgs/:organizationId/documents/:documentId/access-log`
 
 **View document access log**
