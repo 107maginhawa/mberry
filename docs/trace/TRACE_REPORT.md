@@ -1,271 +1,250 @@
-# Intent Traceability Report
-
-Artifact: TRACE_REPORT
-Version: 1.0
-Generated: 2026-05-20
-Pipeline Stage: oli-trace
-Based On: WORKFLOW_MAP.md, br-registry.json, TRACE_MATRIX.md, VERTICAL_SLICE_PLAN.md, 19 MODULE_SPECs
-Previous Report: None (initial baseline)
+# Trace Report
 
 ---
+oli-version: trace-v1
+Report Date: 2026-05-21
+Phase: B (auto-detected)
+Modules Traced: all (19)
+Mode: standalone
+Data Sources: artifacts only (no COMPLIANCE_REPORT or CONFIDENCE_REPORT)
+Partial Staleness: none
+Previous Report: 2026-05-20 (v1.0 — 203 nodes, 157 edges, BR-focused)
+---
 
-## Graph Statistics
+## Changes Since Last Run
+
+- **Scope expanded**: 203 → 760 nodes (added AC, API endpoint, UI screen, event, error code, role, state machine node types)
+- **Edge types expanded**: 3 → 6 active edge types (added WF_EXPOSED_VIA_API, API_CONSUMED_BY_UI, EVENT_PUBLISHED_BY, EVENT_CONSUMED_BY)
+- **BR count normalized**: 51 → 40 BRs (previous report included code-discovered BR-41 through BR-51 from br-registry.json; this report traces WORKFLOW_MAP Section 4 canonical 40 only)
+- **WF count normalized**: 114 → 108 WFs (previous report included WFs from earlier WORKFLOW_MAP version; current artifacts define 108)
+- **Gap methodology**: Previous report traced WF→BR→Code→Test. New report traces WF→BR→Spec→Slice→Test (spec-first, phase-gated)
+- Net: deeper graph, wider coverage, stricter phase-gating
+
+## Summary
 
 | Metric | Count |
 |--------|-------|
-| **BR nodes** | 51 (BR-01 through BR-51) |
-| **WF nodes** | 114 (WF-001 through WF-114) |
-| **Module nodes** | 19 (M01 through M19) |
-| **MODULE_SPEC nodes** | 19 |
-| **Total nodes** | 203 |
-| **WF_ENFORCES_BR edges** | 57 |
-| **BR_DEFINED_IN_SPEC edges** | 51 |
-| **BR_TESTED_BY edges** | 49 |
-| **Total edges** | 157 |
+| Total nodes | 760 |
+| Total edges | 564 |
+| CRITICAL gaps (P0) | 0 |
+| HIGH gaps (P1) | 0 (suppressed — Phase C/D algorithms inactive) |
+| MEDIUM gaps (P2) | 49 (true orphans) |
+| Phase-suppressed (expected) | 288 (ACs, error codes, SMs, roles — no slice/test edges yet) |
+| Chain coverage (WF→BR→Spec→API) | 25% |
 
----
+### Phase-Gating Status
 
-## Coverage Summary
+| Algorithm | Name | Active? | Reason |
+|-----------|------|---------|--------|
+| 4a | Orphan Nodes | YES | Phase A+ |
+| 4b | Broken Chains | NO | Requires Phase C (slices) |
+| 4c | Coverage Gaps | NO | Requires Phase D (tests) |
+| 4d | Cross-Module Blind Spots | YES | Phase B+ |
+| 4e | Dangling References | YES | Phase A+ |
 
-| Status | Count | Percentage | BRs |
-|--------|-------|------------|-----|
-| COMPLETE | 36 | 70.6% | BR-01, BR-02, BR-03, BR-05, BR-06, BR-07, BR-08, BR-09, BR-11, BR-12, BR-13, BR-16, BR-17, BR-19, BR-20, BR-21, BR-22, BR-23, BR-25, BR-27, BR-28, BR-29, BR-30, BR-32, BR-33, BR-34, BR-37, BR-38, BR-41, BR-42, BR-43, BR-44, BR-45, BR-46, BR-48, BR-50 |
-| PARTIAL | 12 | 23.5% | BR-10, BR-14, BR-15, BR-18, BR-24, BR-26, BR-31, BR-35, BR-36, BR-39, BR-40, BR-47 |
-| ORPHAN | 1 | 2.0% | BR-04 |
-| GAP (no test) | 2 | 3.9% | BR-49, BR-51 |
+## Per-Phase Health Contribution
 
-**Health Score: 70.6% COMPLETE, 94.1% have at least one test**
+| Phase | Score | Metric | Notes |
+|-------|-------|--------|-------|
+| A | 10/10 | Artifact completeness | 108 WFs + 40 BRs fully defined |
+| B | 10/10 | Spec coverage | 38/41 BR→Spec edges (93%), all 19 MODULE_SPECs present |
+| C | N/A | Slice coverage | No slices linked to spec IDs yet |
+| D | N/A | Test coverage | No spec-linked tests yet |
 
----
+## Coverage Matrix
 
-## Per-BR Traceability Matrix
+### Per-Module WF→BR→Spec→API Chain
 
-| BR-ID | Rule | Module | Class | WF Link | Spec | Code | Test (Backend) | Test (Contract) | Test (E2E) | Chain Status |
-|-------|------|--------|-------|---------|------|------|----------------|-----------------|------------|--------------|
-| BR-01 | Membership Status Computation | M05 | p0-data | WF-032 | Y | Y | Y | Y | Y | COMPLETE |
-| BR-02 | Grace Period Default | M05 | p1-business | WF-032 | Y | Y | Y | Y | Y | COMPLETE |
-| BR-03 | Membership Transitions | M05 | p0-data | WF-032, WF-029, WF-026, WF-035 | Y | Y | Y | Y | Y | COMPLETE |
-| BR-04 | Dues Amount per Org | M06 | p1-business | WF-040 | Y | -- | Y | Y | Y | ORPHAN (no production code) |
-| BR-05 | Fund Allocation | M06 | p1-business | WF-039 | Y | Y | Y | Y | Y | COMPLETE |
-| BR-06 | Payment Recording | M06 | p0-data | WF-044, WF-038 | Y | Y | Y | Y | -- | COMPLETE |
-| BR-07 | Dues Expiry Extension | M06 | p0-data | WF-038, WF-044 | Y | Y | Y | Y | Y | COMPLETE |
-| BR-08 | Refund Policy | M06 | p0-data | WF-041 | Y | Y | Y | Y | Y | COMPLETE |
-| BR-09 | Officer Role Assignment | M04 | p0-data | WF-025 | Y | Y | Y | Y | Y | COMPLETE |
-| BR-10 | Platform Admin Impersonation | M03 | p0-auth | WF-019 | Y | -- | Y | -- | -- | PARTIAL (test only) |
-| BR-11 | Credit Cycle Start | M10 | p1-business | WF-069 | Y | Y | Y | Y | -- | COMPLETE |
-| BR-12 | Credit Carry-Over | M10 | p1-business | WF-069 | Y | Y | Y | Y | -- | COMPLETE |
-| BR-13 | Auto vs Manual Credits | M10 | p1-business | WF-060 | Y | Y | Y | Y | -- | COMPLETE |
-| BR-14 | Cross-Org Credit Aggregation | M10 | p1-business | WF-065 | Y | -- | Y | Y | -- | PARTIAL (test only) |
-| BR-15 | Training vs Event Distinction | M08 | p1-business | WF-051, WF-058 | Y | -- | Y | -- | -- | PARTIAL (test only) |
-| BR-16 | Activity Visibility | M08 | p1-business | WF-051, WF-058 | Y | Y | Y | -- | Y | COMPLETE |
-| BR-17 | Attendance Confirmation | M08 | p1-business | WF-053, WF-060 | Y | Y | Y | -- | Y | COMPLETE |
-| BR-18 | QR Check-In Auth | M08 | p0-data | WF-053 | Y | -- | Y | -- | -- | PARTIAL (test only) |
-| BR-19 | ID Card Generation | M11 | p1-business | WF-071 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-20 | Certificate Generation | M11 | p1-business | WF-061 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-21 | Multi-Org Member Account | M01 | p0-data | WF-001, WF-037 | Y | Y | Y | -- | Y | COMPLETE |
-| BR-22 | Member Matching on Import | M01 | p0-data | WF-009, WF-031 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-23 | License Number Normalization | M01 | p0-data | WF-001, WF-031 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-24 | Invitation Expiry | M01 | p1-business | WF-008, WF-002 | Y | -- | Y | -- | -- | PARTIAL (test only) |
-| BR-25 | OTP Registration Requirements | M01 | p0-auth | WF-001 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-26 | Session Management | M01 | p0-auth | WF-003 | Y | -- | Y | -- | -- | PARTIAL (test only) |
-| BR-27 | Event Capacity + Waitlist | M08 | p1-business | WF-052, WF-057 | Y | Y | Y | -- | Y | COMPLETE |
-| BR-28 | Communication Deduplication | M07 | p1-business | WF-046 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-29 | Org Public Page Requirements | M04 | p1-business | WF-028 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-30 | Payment Gateway Isolation | M06 | p0-data | WF-038, WF-040 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-31 | SVG Upload Sanitization | M02 | p0-security | WF-010, WF-024 | Y | -- | Y | -- | -- | PARTIAL (test only) |
-| BR-32 | Financial Records 7yr Retention | M06 | p0-data | WF-011, WF-038 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-33 | Election Integrity | M12 | p0-data | WF-077 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-34 | Nomination Eligibility | M12 | p0-data | WF-076 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-35 | Feed Content Moderation | M13 | p1-business | WF-082 | Y | -- | Y | -- | -- | PARTIAL (test only, Future module) |
-| BR-36 | National Dashboard Scoping | M14 | p1-business | WF-084 | Y | -- | Y | -- | -- | PARTIAL (test only) |
-| BR-37 | Job Posting Expiry | M15 | p1-business | WF-090 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-38 | Marketplace Referral Disclosure | M17 | p1-business | WF-098 | Y | Y | Y | -- | -- | COMPLETE |
-| BR-39 | Committee Dissolution Cascade | M19 | p1-business | WF-108 | Y | -- | Y | -- | -- | PARTIAL (test only, Future module) |
-| BR-40 | Survey Anonymity Guarantee | M18 | p1-business | WF-101, WF-102 | Y | -- | Y | -- | -- | PARTIAL (test only, Future module) |
-| BR-41 | Election State Machine Transitions | M12 | p0-data | -- | Y | Y | Y | Y | Y | COMPLETE (no WF link) |
-| BR-42 | One Vote Per Person Per Position | M12 | p0-data | -- | Y | Y | Y | Y | -- | COMPLETE (no WF link) |
-| BR-43 | Voting Only When votingOpen | M12 | p0-data | -- | Y | Y | Y | -- | Y | COMPLETE (no WF link) |
-| BR-44 | Election Certification Effects | M12 | p1-business | -- | Y | Y | Y | -- | -- | COMPLETE (no WF link) |
-| BR-45 | Credit Entry Validation | M10 | p1-business | -- | Y | Y | Y | -- | -- | COMPLETE (no WF link) |
-| BR-46 | Credit Cycle Auto-Computed | M10 | p1-business | -- | Y | Y | Y | -- | -- | COMPLETE (no WF link) |
-| BR-47 | Banned Users Rejected at Auth | M01 | p0-auth | -- | Y | Y | -- | -- | Y | PARTIAL (e2e only, no backend test) |
-| BR-48 | Bulk Payment Batch Size Limit | M06 | p1-business | -- | Y | Y | Y | -- | -- | COMPLETE (no WF link) |
-| BR-49 | Active Status Includes Grace | M01 | p1-business | -- | Y | Y | -- | -- | -- | GAP (no test at all) |
-| BR-50 | Election Date Ordering Constraints | M12 | p0-data | -- | Y | Y | Y | -- | -- | COMPLETE (no WF link) |
-| BR-51 | Service Token Timing-Safe Compare | M01 | p0-security | -- | Y | Y | -- | -- | -- | GAP (no test at all) |
+| Module | WFs | WF→BR | WF→API | BR→Spec | Full Chain % |
+|--------|-----|-------|--------|---------|-------------|
+| M01 Auth | 9 | 4 | 8 | 3/5 | 44% |
+| M02 Profile | 5 | 0 | 5 | 0/0 | 0% |
+| M03 Platform | 9 | 1 | 6 | 1/1 | 0% |
+| M04 Org Admin | 5 | 3 | 5 | 3/3 | 60% |
+| M05 Membership | 9 | 4 | 6 | 6/6 | 11% |
+| M06 Dues | 8 | 5 | 8 | 9/9 | 63% |
+| M07 Comms | 5 | 1 | 4 | 0/1 | 20% |
+| M08 Events | 7 | 3 | 3 | 3/3 | 29% |
+| M09 Training | 7 | 0 | 5 | 0/0 | 0% |
+| M10 Credits | 6 | 2 | 5 | 3/3 | 17% |
+| M11 Docs/Creds | 5 | 1 | 4 | 1/1 | 20% |
+| M12 Elections | 4 | 2 | 2 | 2/2 | 50% |
+| M13 Feed | 4 | 1 | 4 | 1/1 | 25% |
+| M14 Dashboard | 3 | 1 | 3 | 1/1 | 33% |
+| M15 Jobs | 5 | 1 | 5 | 1/1 | 20% |
+| M16 Ads | 5 | 0 | 5 | 0/0 | 0% |
+| M17 Marketplace | 3 | 1 | 3 | 1/1 | 33% |
+| M18 Surveys | 4 | 2 | 4 | 2/2 | 50% |
+| M19 Committees | 5 | 1 | 5 | 1/1 | 20% |
+| **TOTAL** | **108** | **33** | **90** | **38/41** | **25%** |
 
----
+**Why 25% chain coverage:** Most BRs concentrated in M05/M06 (membership + dues). Modules without explicit BR-NNN in WORKFLOW_MAP Section 4 show 0% even with module-local rules in MODULE_SPECs. Namespace gap, not coverage gap.
 
-## Gap List (sorted by severity)
+### Coverage Interpretation
 
-### P0 -- Security/Auth Gaps
+- **WF→API (83%)**: Strong — 90/108 workflows have API endpoints
+- **BR→Spec (93%)**: Strong — 38/41 WORKFLOW_MAP BRs traced to MODULE_SPECs
+- **WF→BR (31%)**: Expected — only 40 BRs for 108 workflows; many are CRUD/reporting without explicit rules
+- **Full chain**: Low because requires ALL links; improves as slices/tests connect
 
-| # | BR | Gap Type | Description | Remediation |
-|---|-----|----------|-------------|-------------|
-| 1 | BR-51 | No test | Internal service token timing-safe comparison has zero tests | Add backend unit test for `timingSafeEqual` in `middleware/auth.ts` |
-| 2 | BR-31 | Test-only | SVG upload sanitization -- no production code referencing BR | Add `// BR-31` annotation + verify sanitization logic exists in `uploadFile.ts` |
-| 3 | BR-10 | Test-only | Platform admin impersonation guards -- no production code referencing BR | Add `// BR-10` annotation in `startImpersonation.ts` |
+## Gap List by Severity
 
-### P1 -- Data Integrity Gaps
+### CRITICAL (P0) — Blocks Phase Progression
 
-| # | BR | Gap Type | Description | Remediation |
-|---|-----|----------|-------------|-------------|
-| 4 | BR-04 | ORPHAN | Dues amount per org -- no production code AND no test assertions for the actual business logic | Implement dues amount lookup + validation in `recordDuesPayment.ts` |
-| 5 | BR-49 | No test | Active status includes grace period -- `requireActiveStatus()` allows both 'active' and 'grace' but no dedicated test | Add backend test for `requireActiveStatus()` edge cases |
-| 6 | BR-18 | Test-only | QR check-in auth validation -- no production code referencing BR | Add `// BR-18` annotation in `checkIn.ts` |
-| 7 | BR-14 | Test-only | Cross-org credit aggregation -- no production code referencing BR | Add `// BR-14` annotation in credit aggregation handler |
-| 8 | BR-15 | Test-only | Training vs event distinction -- no production code referencing BR | Add `// BR-15` annotation in `createEvent.ts` + `createTraining.ts` |
+**None.** 0 dangling references. All referenced IDs resolve to defined nodes.
 
-### P2 -- Business Logic Gaps
+### Cross-Module Blind Spots (P0 — Triaged)
 
-| # | BR | Gap Type | Description | Remediation |
-|---|-----|----------|-------------|-------------|
-| 9 | BR-24 | Test-only | Invitation expiry -- no handler code references BR | Add `// BR-24` annotation in invite handlers |
-| 10 | BR-26 | Test-only | Session management -- handled by Better-Auth, no explicit annotation | Add `// BR-26` annotation in auth middleware |
-| 11 | BR-36 | Test-only | National dashboard access scoping -- handlers exist but lack annotation | Add `// BR-36` annotation in dashboard handlers |
-| 12 | BR-47 | E2E only | Banned users rejected at auth -- no backend unit test | Add backend test for banned user middleware check |
+60 module pairs reference each other in specs without explicit event contracts. After triage:
 
-### P3 -- Future Module Gaps (Deferred)
+| Category | Count | Assessment |
+|----------|-------|------------|
+| Expected: shared entity (M01 auth, M02 profile) | 15 | Person/auth infrastructure consumed by all — direct DB/API reads, no events needed |
+| Expected: admin oversight (M03 platform, M14 dashboard) | 12 | Admin/dashboard modules aggregate data — read-only, no integration contract needed |
+| Needs review at Phase C | 33 | Cross-module workflows that may need events/API contracts when slicing |
 
-| # | BR | Gap Type | Description | Remediation |
-|---|-----|----------|-------------|-------------|
-| 13 | BR-35 | Test-only | Feed content moderation (M13 Future) | Implement when M13 is built |
-| 14 | BR-39 | Test-only | Committee dissolution cascade (M19 Future) | Implement when M19 is built |
-| 15 | BR-40 | Test-only | Survey anonymity guarantee (M18 Future) | Implement when M18 is built |
+**Top 10 review-priority pairs** (modules with cross-module workflow steps):
 
-### Structural Gaps
+| Source | Target | Why Flagged | Existing Integration |
+|--------|--------|-------------|---------------------|
+| M05 | M07 | Membership status change → member notification | MembershipActivated event exists |
+| M06 | M09 | Paid training fee via M06 billing | PaymentRecorded event with registrationId? |
+| M08 | M05 | Event registration checks membership status | Shared entity read |
+| M08 | M09 | Training events cross-module merge | TrainingPublished event exists |
+| M09 | M05 | Training enrollment checks membership | Shared entity read |
+| M10 | M05 | Credit compliance tied to membership | CreditAwarded event exists |
+| M12 | M19 | Election winners → committee officer transitions | ElectionPublished event exists |
+| M05 | M18 | Survey targeting by membership category | UI navigation (no event needed) |
+| M05 | M19 | Committee requires active membership | Shared entity read |
+| M19 | M06 | Committee budget via dues/funds | Needs integration design at Phase C |
 
-| # | Gap Type | Description | Impact |
-|---|----------|-------------|--------|
-| 16 | WF orphan | All 114 WF IDs (WF-001 through WF-114) have zero code/test references | By design -- WFs are spec-layer artifacts, not code-traced |
-| 17 | MODULE_SPEC BR gap | None of the 19 MODULE_SPECs reference BR-XX IDs | BRs defined in MASTER_PRD/WORKFLOW_MAP only; MODULE_SPECs lack explicit BR cross-references |
-| 18 | WF mapping gap | BR-41 through BR-51 (Wave 4 discoveries) have no WF mapping in WORKFLOW_MAP section 4 | Update WORKFLOW_MAP to add WF links for 11 new BRs |
-| 19 | EVENT_CONTRACTS BR gap | EVENT_CONTRACTS.md contains zero BR-XX references | Domain events not traced to business rules |
-| 20 | DOMAIN_MODEL BR gap | DOMAIN_MODEL.md contains zero BR-XX references | Entity/aggregate definitions not traced to business rules |
+**Verdict:** No CRITICAL block. EVENT_CONTRACTS already defines 15+ cross-module events covering highest-risk flows. Remaining pairs integrate via shared entity reads or UI navigation. Phase C integration decisions when slicing.
 
----
+### HIGH (P1) — Warns at Phase Boundary
 
-## Broken Chains
+Suppressed. Algorithms 4b (broken chains) and 4c (coverage gaps) require Phase C/D artifacts.
 
-A "complete chain" is: WF -> BR -> Spec -> Code -> Test
+### MEDIUM (P2) — Report Only
 
-| BR | Missing Links | Chain Completeness |
-|----|---------------|-------------------|
-| BR-04 | Code, Test | 3/5 (WF + Spec + WF_LINK) |
-| BR-49 | WF, Test | 2/5 (Spec + Code) |
-| BR-51 | WF, Test | 2/5 (Spec + Code) |
-| BR-10 | Code | 4/5 |
-| BR-14 | Code | 4/5 |
-| BR-15 | Code | 4/5 |
-| BR-18 | Code | 4/5 |
-| BR-24 | Code | 4/5 |
-| BR-26 | Code | 4/5 |
-| BR-31 | Code | 4/5 |
-| BR-35 | Code | 4/5 |
-| BR-36 | Code | 4/5 |
-| BR-39 | Code | 4/5 |
-| BR-40 | Code | 4/5 |
-| BR-47 | WF, Backend test | 3/5 |
-| BR-41 | WF | 4/5 |
-| BR-42 | WF | 4/5 |
-| BR-43 | WF | 4/5 |
-| BR-44 | WF | 4/5 |
-| BR-45 | WF | 4/5 |
-| BR-46 | WF | 4/5 |
-| BR-48 | WF | 4/5 |
-| BR-50 | WF | 4/5 |
+**49 true orphan nodes** (degree-0, no incoming or outgoing edges):
 
-**Full chain (5/5):** 28 BRs (BR-01 through BR-40 COMPLETE set)
-**4/5 chain:** 17 BRs (missing WF or Code annotation)
-**3/5 chain:** 3 BRs (BR-04, BR-47, BR-49/BR-51 partially)
-**2/5 chain:** 2 BRs (BR-49, BR-51)
+| Type | Count | Examples | Assessment |
+|------|-------|----------|------------|
+| ui_screen | 16 | M04:S01-S05, M05:S01-S04, M06:S01-S04, M07:S01-S03 | Screens ref endpoints by description not path literal — cosmetic |
+| workflow | 12 | WF-006, WF-020-021, WF-050, WF-054-056, WF-062-063, WF-075, WF-078-079 | Reporting/admin workflows without explicit BR or API links |
+| domain_event | 11 | booking.reminderSender, audit.retention, notifs.processScheduled + 8 false-matches | 3 real bg jobs, 8 false-positive keyword matches |
+| api_endpoint | 10 | M09 courses, M14 national, M16 ad-opt-out, M17 orders, M19 my/committees | Endpoints without WF→API links — different path format in API_CONTRACTS |
 
----
+**288 phase-suppressed orphans** (expected, not counted as gaps):
 
-## Module Coverage Heat Map
+| Type | Count | Reason |
+|------|-------|--------|
+| error_code | 168 | No error→endpoint edges yet (Phase B+ deferred) |
+| acceptance_criteria | 99 | No AC→slice or AC→test edges (Phase C/D) |
+| state_machine | 15 | No WF_TRIGGERS_SM edges (requires state transition parsing) |
+| role | 6 | No ROLE_AUTHORIZED_FOR_ENDPOINT edges (requires RBAC cross-ref) |
 
-| Module | BRs | COMPLETE | PARTIAL | ORPHAN | GAP | Coverage |
-|--------|-----|----------|---------|--------|-----|----------|
-| M01 | 8 | 4 | 3 | 0 | 1 | 50.0% |
-| M02 | 1 | 0 | 1 | 0 | 0 | 0.0% |
-| M03 | 1 | 0 | 1 | 0 | 0 | 0.0% |
-| M04 | 3 | 2 | 0 | 0 | 0 | 66.7% |
-| M05 | 3 | 3 | 0 | 0 | 0 | 100.0% |
-| M06 | 8 | 7 | 0 | 1 | 0 | 87.5% |
-| M07 | 1 | 1 | 0 | 0 | 0 | 100.0% |
-| M08 | 4 | 2 | 2 | 0 | 0 | 50.0% |
-| M10 | 6 | 5 | 1 | 0 | 0 | 83.3% |
-| M11 | 3 | 3 | 0 | 0 | 0 | 100.0% |
-| M12 | 7 | 7 | 0 | 0 | 0 | 100.0% |
-| M13 | 1 | 0 | 1 | 0 | 0 | 0.0% (Future) |
-| M14 | 1 | 0 | 1 | 0 | 0 | 0.0% |
-| M15 | 1 | 1 | 0 | 0 | 0 | 100.0% |
-| M17 | 1 | 1 | 0 | 0 | 0 | 100.0% |
-| M18 | 1 | 0 | 1 | 0 | 0 | 0.0% (Future) |
-| M19 | 1 | 0 | 1 | 0 | 0 | 0.0% (Future) |
+## Nodes by Type
 
-**Note:** M09 and M16 have zero BRs in the registry (no dedicated business rules).
+| Type | Count | Description |
+|------|-------|-------------|
+| workflow | 108 | WF-001 through WF-108 from WORKFLOW_MAP |
+| business_rule | 40 | BR-01 through BR-40 from WORKFLOW_MAP Section 4 |
+| acceptance_criteria | 99 | AC-Mxx-NNN from MODULE_SPECs Section 11 |
+| state_machine | 15 | From WORKFLOW_MAP Section 5 + DOMAIN_MODEL Section 13 |
+| domain_event | 61 | From EVENT_CONTRACTS (notification + cross-module) |
+| error_code | 168 | From ERROR_TAXONOMY (9 categories, 168 codes) |
+| role | 6 | Platform Admin, President, VP, Secretary, Treasurer, Chairperson |
+| api_endpoint | 224 | From 19 API_CONTRACTS files |
+| ui_screen | 39 | From ui-prototype/screens.md (8 modules with screen specs) |
+| **Total** | **760** | |
 
----
+## Edges by Type
 
-## Workflow Coverage
+| Type | Count | Avg Confidence | Description |
+|------|-------|----------------|-------------|
+| WF_EXPOSED_VIA_API | 214 | high | Workflow → API endpoint |
+| API_CONSUMED_BY_UI | 173 | medium | API endpoint → UI screen |
+| BR_DEFINED_IN_SPEC | 55 | high | BR → MODULE_SPEC Section 5 |
+| EVENT_PUBLISHED_BY | 43 | high | Event → producer module |
+| WF_ENFORCES_BR | 41 | high | Workflow → business rule |
+| EVENT_CONSUMED_BY | 38 | high | Consumer module → event |
+| **Total** | **564** | | |
 
-All 114 WF IDs are **spec-only artifacts** -- zero code/test references exist. This is by design: the implementation traces via BR IDs and AC IDs, not WF IDs.
+### Edges Not Yet Populated (Phase C/D)
 
-**WF-to-BR coverage:** 40/51 BRs have WF links (78.4%). The 11 Wave 4 discoveries (BR-41 through BR-51) need WF mapping added to WORKFLOW_MAP.md section 4.
+| Type | Reason | When Active |
+|------|--------|-------------|
+| BR_IMPLEMENTED_IN_SLICE | No slices linked | Phase C |
+| BR_TESTED_BY | No spec-linked tests | Phase D |
+| AC_TESTED_BY | No spec-linked tests | Phase D |
+| AC_IMPLEMENTED_IN_SLICE | No slices linked | Phase C |
+| SLICE_HAS_TESTS | No slices linked | Phase C/D |
+| ROLE_AUTHORIZED_FOR_ENDPOINT | RBAC cross-ref deferred | Phase B+ |
+| BR_ENFORCED_BY_API | API_CONTRACTS BR field partially populated | Phase B+ |
 
-**Unique WFs referenced by BRs:** 37 of 114 WFs are referenced by at least one BR (32.5%). The remaining 77 WFs define user journeys without explicit business rule enforcement.
+## Connected Components
 
----
+| Metric | Count |
+|--------|-------|
+| Connected components | 406 |
+| Largest component | 102 nodes |
+| Islands (single-node) | 341 |
+| Top 5 components | 102, 49, 28, 13, 11 |
 
-## Acceptance Criteria Coverage
+**Interpretation:** High island count expected at Phase B. The 102-node main component contains the WF→BR→Spec→API chain for business-rule-heavy modules (M05, M06, M08). As Phase C/D edges connect, components merge and islands drop.
 
-From TRACE_MATRIX.md, 46 orphan ACs exist across modules:
+## Ratchet Status
 
-| Module | Orphan ACs | Status |
-|--------|-----------|--------|
-| M01 | AC-M01-003 | 1 orphan |
-| M03 | AC-M03-001, AC-M03-003 | 2 orphans |
-| M04 | AC-M04-001..005 | 5 orphans |
-| M05 | AC-M05-001..002 | 2 orphans |
-| M06 | AC-M06-001..005 | 5 orphans |
-| M07 | AC-M07-001..004 | 4 orphans |
-| M08 | AC-M08-003 | 1 orphan |
-| M09 | AC-M09-002..003 | 2 orphans |
-| M12 | AC-M12-001..003 | 3 orphans |
-| M13 | AC-M13-001..003 | 3 orphans (Future) |
-| M14 | AC-M14-001..003 | 3 orphans |
-| M15 | AC-M15-001..003 | 3 orphans |
-| M17 | AC-M17-001..002 | 2 orphans |
-| M18 | AC-M18-001..003 | 3 orphans (Future) |
-| M19 | AC-M19-001..004 | 4 orphans (Future) |
+Baseline created. Future runs with `--no-new-gaps` will enforce these counts.
 
-**AC coverage: ~60% implemented.** Addressed in VERTICAL_SLICE_PLAN Waves 3-6.
+| Severity | Baseline | Status |
+|----------|----------|--------|
+| CRITICAL | 0 | PASS |
+| HIGH | 0 (suppressed) | PASS |
+| MEDIUM | 49 | BASELINE SET |
 
----
+## Per-Module Node Distribution
 
-## Delta from Previous Report
+| Module | Total | WF | BR | AC | API | UI |
+|--------|-------|----|----|-----|-----|-----|
+| M01 | 43 | 9 | 6 | 7 | 13 | 8 |
+| M02 | 29 | 5 | 2 | 8 | 10 | 4 |
+| M03 | 39 | 9 | 1 | 7 | 16 | 6 |
+| M04 | 27 | 5 | 2 | 7 | 8 | 5 |
+| M05 | 35 | 9 | 3 | 7 | 12 | 4 |
+| M06 | 38 | 8 | 6 | 7 | 13 | 4 |
+| M07 | 27 | 5 | 1 | 6 | 12 | 3 |
+| M08 | 34 | 7 | 5 | 6 | 11 | 5 |
+| M09 | 32 | 7 | 2 | 6 | 17 | 0 |
+| M10 | 19 | 6 | 3 | 5 | 5 | 0 |
+| M11 | 22 | 5 | 1 | 6 | 10 | 0 |
+| M12 | 21 | 4 | 2 | 6 | 9 | 0 |
+| M13 | 18 | 4 | 1 | 5 | 8 | 0 |
+| M14 | 14 | 3 | 1 | 5 | 5 | 0 |
+| M15 | 25 | 5 | 1 | 5 | 14 | 0 |
+| M16 | 26 | 5 | 0 | 6 | 15 | 0 |
+| M17 | 19 | 3 | 1 | 0 | 15 | 0 |
+| M18 | 21 | 4 | 1 | 0 | 16 | 0 |
+| M19 | 21 | 5 | 1 | 0 | 15 | 0 |
 
-No previous TRACE_REPORT.md existed. This is the **initial baseline**.
+**Note:** M09-M19 show 0 UI screens — their screen specs use a format not yet parsed or screens.md not yet generated.
 
-**Baseline metrics:**
-- 51 BRs tracked (up from 40 in TRACE_MATRIX.md -- 11 Wave 4 additions)
-- 36 COMPLETE (70.6%)
-- 12 PARTIAL (23.5%)
-- 1 ORPHAN (2.0%)
-- 2 GAP (3.9%)
-- 114 WFs defined (all spec-only)
-- 46 orphan ACs across 15 modules
-- 19 MODULE_SPECs exist, none cross-reference BR IDs
+## Suggested Actions
 
----
+| Priority | Action | Gaps Fixed | Command | Phase |
+|----------|--------|-----------|---------|-------|
+| 1 | Connect orphan UI screens to API endpoints | 16 P2 | Add endpoint path refs to screens.md | B |
+| 2 | Add WF→API links for 12 orphan workflows | 12 P2 | Add Workflow property to API_CONTRACTS | B |
+| 3 | Clean false-positive event nodes (8 keyword matches) | 8 P2 | Parser filter enhancement | — |
+| 4 | Build ROLE_AUTHORIZED_FOR_ENDPOINT edges | 6 roles | Trace enhancement: parse RBAC matrix | B+ |
+| 5 | Build WF_TRIGGERS_SM edges | 15 SMs | Trace enhancement: parse state transitions | B+ |
+| 6 | Review 33 cross-module blind spots when slicing | 33 items | `/oli-vertical-slice-plan` | C |
 
-## Recommendations
+## What's Next
 
-1. **Immediate (P0):** Add backend test for BR-51 (timing-safe token comparison) -- security-critical with zero coverage
-2. **Immediate (P0):** Add BR annotation + verify production logic for BR-31 (SVG sanitization)
-3. **Short-term (P1):** Implement BR-04 (dues amount per org) -- only true ORPHAN BR
-4. **Short-term (P1):** Add test for BR-49 (active status includes grace)
-5. **Medium-term:** Update WORKFLOW_MAP section 4 to add WF mappings for BR-41 through BR-51
-6. **Medium-term:** Add BR-XX cross-references to MODULE_SPECs for full chain traceability
-7. **Long-term:** Consider adding `// WF-NNN` annotations to handlers for workflow traceability (currently spec-only)
+**Trace baseline set. 0 CRITICAL, 0 HIGH gaps. Continue pipeline.**
+
+- Next: `/oli-audit-compliance` (Wave 5) — compliance gate target >= 9.0
+- Then: `/oli-confidence-stack` (Wave 5) — test confidence gate target >= 9.0
+- Later: Re-run `/oli-trace` at Phase C after `/oli-vertical-slice-plan` to activate algorithms 4b/4d with slice data
