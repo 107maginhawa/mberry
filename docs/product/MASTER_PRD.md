@@ -257,6 +257,84 @@ NFR breaches in production are treated as P1 incidents with 24-hour resolution S
 - Officer action serialization (prevent conflicting role assignments)
 - Idempotency keys for payment and notification operations
 
+### Error Contract
+
+All API errors return a consistent JSON shape defined in TypeSpec (`specs/api/src/common/errors.tsp`) and implemented in `services/api-ts/src/core/errors.ts`:
+
+```json
+{ "code": "ERROR_CODE", "message": "Human-readable", "requestId": "uuid", "timestamp": "ISO 8601", "statusCode": 400 }
+```
+
+| Code | HTTP | When | Extra Fields |
+|------|------|------|-------------|
+| `VALIDATION_ERROR` | 400 | Zod schema failure | `fieldErrors[]`, `globalErrors[]` |
+| `UNAUTHORIZED` | 401 | Missing or expired session | — |
+| `AUTHENTICATION_ERROR` | 401 | Login failure | `scheme`, `supportedSchemes[]` |
+| `FORBIDDEN` | 403 | Valid session, insufficient role | — |
+| `AUTHORIZATION_ERROR` | 403 | RBAC denial | `requiredPermission`, `resource` |
+| `NOT_FOUND` | 404 | Resource or route missing | `resourceType`, `suggestions[]` |
+| `METHOD_NOT_ALLOWED` | 405 | Correct path, wrong method | `allowed[]` + `Allow` header |
+| `CONFLICT` | 409 | Optimistic locking / duplicate | `reason`, `resolution[]` |
+| `BUSINESS_ERROR` | 422 | Domain rule violation | — |
+| `RATE_LIMIT` | 429 | Throttled | `limit`, `usage`, `resetTime` + `Retry-After` header |
+| `DEFERRED_SCOPE` | 501 | Handler planned for future wave | — |
+| `INTERNAL_SERVER_ERROR` | 500 | Unhandled | `trackingId` |
+
+Production mode strips `path`, `method`, and internal `details` from responses. TypeSpec models define the same hierarchy: `ErrorDetail` base with `ValidationError`, `AuthenticationError`, `AuthorizationError`, `NotFoundError`, `ConflictError`, `RateLimitError` extensions.
+
+### Session Lifecycle
+
+- **Duration:** Configurable via `config.auth.sessionExpiresIn` (Better-Auth)
+- **Expiry detection:** API returns `401 UNAUTHORIZED` on expired session
+- **Frontend behavior:** Route guards (`requireAuth` in TanStack Router `beforeLoad`) catch 401 and redirect to `/auth/sign-in`
+- **In-progress work:** Form state is **not preserved** on session expiry — data entered in unsubmitted forms is lost
+- **Post-login redirect:** Returns to dashboard, not the previous page
+- **Tracked improvements (P2):**
+  - Redirect back to previous page after re-authentication
+  - Auto-save form drafts to `localStorage` for long-form flows (payment recording, member import)
+
+### Bootstrap Data Requirements
+
+Minimum bootstrap for a new deployment:
+
+1. **Database migrations** — run automatically on server start
+2. **Platform admin account** — at least one super-admin for platform operations
+3. **Role definitions** — system-wide and org-scoped roles defined in code (`types/auth.ts`, `utils/org-auth.ts`), not DB seed
+4. **First association + organization** — created through platform admin UI after initial login
+
+For development and testing: `bun run db:seed-scenarios` creates 18 phases of scenario data (associations, orgs, members, officers, dues, events, training). Full manifest: `docs/product/SEED_MANIFEST.md`.
+
+### Observability
+
+See `docs/product/OBSERVABILITY.md` for the full observability strategy. Key points:
+
+- **Logging:** Pino structured JSON, configurable levels (`LOG_LEVEL` env var), correlation via `requestId`
+- **Metrics:** RED method (Rate, Errors, Duration) per endpoint, tied to NFR targets
+- **Alerting:** Thresholds derived from NFR targets (p95 > 500ms, uptime < 99.5%, error rate > 1%)
+- **Tracing:** Request correlation via `X-Request-ID` header propagation
+- **Health check:** `/health` endpoint for liveness + readiness probes
+
+### Disaster Recovery
+
+See `docs/product/DISASTER_RECOVERY.md` for the full DR plan. Key points:
+
+- **RTO:** 4 hours (maximum acceptable recovery time)
+- **RPO:** 1 hour (maximum acceptable data loss)
+- **Backups:** Daily full PostgreSQL backups + continuous WAL archiving
+- **Financial data:** 7-year retention per BIR requirements (BR-32)
+- **BCDR testing:** Quarterly restore validation
+
+### State Machines
+
+See `docs/product/STATE_MACHINES.md` for all entity lifecycle state machines. Every entity with a `status` field has a documented state machine with valid transitions. Key machines:
+
+- **Membership** (BR-03): PENDING → ACTIVE → GRACE → LAPSED → SUSPENDED → REMOVED
+- **Dues Payment:** pending → completed/failed → refunded/partiallyRefunded
+- **Invoice:** draft → open → paid/void/uncollectible
+- **Event:** draft → active → paused → archived
+- **Training Enrollment:** enrolled → completed
+- **Message:** draft → scheduled → sending → sent/cancelled/failed
+
 ---
 
 ## 8. Success Metrics
