@@ -15,6 +15,7 @@ import { OrderRepository } from './repos/order.repo';
 import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { Vendor, MarketplaceListing, MarketplaceOrder } from './repos/marketplace.schema';
 
+// Mock-Classification: APPROPRIATE — marketplace with payment + inventory boundary
 function makeVendor(overrides: Partial<Vendor> = {}): Vendor {
   return {
     id: 'vendor-1', organizationId: 'org-1', companyName: 'Acme Medical',

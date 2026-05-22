@@ -23,6 +23,7 @@ import {
   type TaskOverdueContext,
 } from './notification-triggers';
 
+// Mock-Classification: APPROPRIATE — OneSignal push notification boundary
 // ---------------------------------------------------------------------------
 // Mock NotificationService
 // ---------------------------------------------------------------------------

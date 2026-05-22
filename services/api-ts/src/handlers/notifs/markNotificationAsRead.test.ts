@@ -13,6 +13,7 @@ import { DatabaseRepository } from '@/core/database.repo';
 import { NotFoundError } from '@/core/errors';
 import type { Notification } from './repos/notification.schema';
 
+// Mock-Classification: APPROPRIATE — OneSignal push notification boundary
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

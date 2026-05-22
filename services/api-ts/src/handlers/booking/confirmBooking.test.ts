@@ -15,6 +15,7 @@ import { describe, test, expect, mock, beforeEach } from 'bun:test';
 import { confirmBooking } from './confirmBooking';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
 
+// Mock-Classification: APPROPRIATE — booking handler with complex repo chain
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

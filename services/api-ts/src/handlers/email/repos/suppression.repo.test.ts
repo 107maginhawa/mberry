@@ -9,6 +9,7 @@ import { describe, test, expect, spyOn } from 'bun:test';
 import { SuppressionRepository } from './suppression.repo';
 import type { EmailSuppression } from './suppression.schema';
 
+// Mock-Classification: APPROPRIATE — external email/SMTP service boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

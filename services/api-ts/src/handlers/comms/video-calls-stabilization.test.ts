@@ -13,6 +13,7 @@
 
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
+// Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
 import { joinVideoCall } from './joinVideoCall';
 import { endVideoCall } from './endVideoCall';
 import { leaveVideoCall } from './leaveVideoCall';

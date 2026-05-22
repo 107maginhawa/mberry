@@ -13,6 +13,7 @@ import { VendorRepository } from './repos/vendor.repo';
 import { ValidationError, NotFoundError } from '@/core/errors';
 import type { Vendor } from './repos/marketplace.schema';
 
+// Mock-Classification: APPROPRIATE — marketplace with payment gateway boundary
 function makeVendor(overrides: Partial<Vendor> = {}): Vendor {
   return {
     id: 'vendor-1', organizationId: 'org-1', companyName: 'Acme Medical',

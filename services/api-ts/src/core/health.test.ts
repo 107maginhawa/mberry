@@ -9,6 +9,7 @@
 import { describe, test, expect, mock } from 'bun:test';
 import { Hono } from 'hono';
 
+// Mock-Classification: APPROPRIATE — health check with external dependency probes
 // ---------------------------------------------------------------------------
 // Stub external modules before importing health.ts
 // ---------------------------------------------------------------------------

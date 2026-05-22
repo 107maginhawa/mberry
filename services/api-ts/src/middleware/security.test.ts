@@ -15,6 +15,7 @@ import { describe, it, expect, mock } from 'bun:test';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
 import type { Config } from '@/core/config';
 
+// Mock-Classification: APPROPRIATE — security middleware with auth infrastructure deps
 // ---------------------------------------------------------------------------
 // Shared fixtures
 // ---------------------------------------------------------------------------

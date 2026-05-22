@@ -18,6 +18,7 @@ import {
 } from '@/core/errors';
 import type { ChatRoom, ChatMessage, VideoCallData } from './repos/comms.schema';
 
+// Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

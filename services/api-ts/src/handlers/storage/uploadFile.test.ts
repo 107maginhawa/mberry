@@ -13,6 +13,7 @@ import { uploadFile } from './uploadFile';
 import { StorageFileRepository } from './repos/file.repo';
 import { ValidationError } from '@/core/errors';
 
+// Mock-Classification: APPROPRIATE — S3/MinIO external storage boundary
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

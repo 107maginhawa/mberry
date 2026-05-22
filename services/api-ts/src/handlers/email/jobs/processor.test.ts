@@ -13,6 +13,7 @@ import { emailProcessorJob } from './processor';
 import type { JobContext } from '@/core/jobs';
 import type { EmailService } from '@/core/email';
 
+// Mock-Classification: APPROPRIATE — external email/SMTP service boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

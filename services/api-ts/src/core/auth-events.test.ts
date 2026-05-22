@@ -12,6 +12,7 @@ import { describe, test, expect, mock } from 'bun:test';
 import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
 import type { AuditLogEntry, CreateAuditLogRequest } from '@/handlers/audit/repos/audit.schema';
 
+// Mock-Classification: APPROPRIATE — security/auth infrastructure boundary
 // ---------------------------------------------------------------------------
 // Helpers (same pattern as audit.repo.test.ts)
 // ---------------------------------------------------------------------------

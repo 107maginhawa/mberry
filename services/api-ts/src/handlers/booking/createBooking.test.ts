@@ -16,6 +16,7 @@ import { createBooking } from './createBooking';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import { fakeBooking as createFakeBooking } from '@/test-utils/factories';
 
+// Mock-Classification: APPROPRIATE — booking handler with complex repo chain
 // ---------------------------------------------------------------------------
 // Context builder
 // ---------------------------------------------------------------------------

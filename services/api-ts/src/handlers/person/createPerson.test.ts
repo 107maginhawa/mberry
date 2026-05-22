@@ -12,6 +12,7 @@ import { PersonRepository } from './repos/person.repo';
 import { ConflictError } from '@/core/errors';
 import type { Person } from './repos/person.schema';
 
+// Mock-Classification: APPROPRIATE — person handler with auth + DB boundary
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

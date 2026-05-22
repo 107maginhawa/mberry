@@ -17,6 +17,7 @@ import {
 } from '@/core/errors';
 import type { Review } from './repos/review.schema';
 
+// Mock-Classification: APPROPRIATE — review service with external deps
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

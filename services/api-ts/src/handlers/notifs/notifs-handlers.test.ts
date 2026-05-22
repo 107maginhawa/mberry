@@ -24,6 +24,7 @@ import { PersonRepository } from '../person/repos/person.repo';
 import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { Notification } from './repos/notification.schema';
 
+// Mock-Classification: APPROPRIATE — OneSignal push notification boundary
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

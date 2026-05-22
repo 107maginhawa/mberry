@@ -16,6 +16,7 @@ import type { AuditLogEntry, CreateAuditLogRequest } from './repos/audit.schema'
 import { registerAuditJobs } from './jobs/index';
 import type { JobScheduler } from '@/core/jobs';
 
+// Mock-Classification: APPROPRIATE — audit logging infrastructure boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

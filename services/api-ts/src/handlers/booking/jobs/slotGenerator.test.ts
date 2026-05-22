@@ -24,6 +24,7 @@ import type { BookingEvent, DailyConfig } from '../repos/booking.schema';
 import { DayOfWeek } from '../repos/booking.schema';
 import { addDays, startOfDay, addMinutes, subDays } from 'date-fns';
 
+// Mock-Classification: APPROPRIATE — background job with external scheduler
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

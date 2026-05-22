@@ -9,6 +9,7 @@ import { describe, test, expect, mock } from 'bun:test';
 import { registerAuditJobs } from './index';
 import type { JobScheduler, JobContext } from '@/core/jobs';
 
+// Mock-Classification: APPROPRIATE — audit logging infrastructure boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

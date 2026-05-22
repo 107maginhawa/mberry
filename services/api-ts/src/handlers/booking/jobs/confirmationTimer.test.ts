@@ -15,6 +15,7 @@ import {
 } from './confirmationTimer';
 import { subMinutes, addMinutes } from 'date-fns';
 
+// Mock-Classification: APPROPRIATE — background job with external scheduler
 // ---------------------------------------------------------------------------
 // isEligibleForAutoRejection — pure function, no DB
 // ---------------------------------------------------------------------------

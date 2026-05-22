@@ -10,6 +10,7 @@ import { EmailQueueRepository } from './queue.repo';
 import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { EmailQueueItem, QueueEmailRequest } from './email.schema';
 
+// Mock-Classification: APPROPRIATE — external email/SMTP service boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

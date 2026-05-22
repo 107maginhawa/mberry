@@ -11,6 +11,7 @@ import { CampaignRepository } from './repos/campaign.repo';
 import { ValidationError, NotFoundError } from '@/core/errors';
 import type { Creative, Campaign } from './repos/advertising.schema';
 
+// Mock-Classification: APPROPRIATE — ad service with moderation boundary
 function makeCreative(overrides: Partial<Creative> = {}): Creative {
   return {
     id: 'cre-1', organizationId: 'org-1', campaignId: 'camp-1',

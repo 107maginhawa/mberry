@@ -12,6 +12,7 @@ import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
 import type { ChatRoom, ChatMessage } from './repos/comms.schema';
 
+// Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

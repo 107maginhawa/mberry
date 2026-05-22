@@ -14,6 +14,7 @@
 
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
+// Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
 import { createChatRoom } from './createChatRoom';
 import { getChatRoom } from './getChatRoom';
 import { getChatMessages } from './getChatMessages';

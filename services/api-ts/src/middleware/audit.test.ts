@@ -8,6 +8,7 @@
 import { describe, it, expect, mock, beforeEach } from 'bun:test';
 import { createAuditMiddleware } from '@/middleware/audit';
 
+// Mock-Classification: APPROPRIATE — audit logging infrastructure boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

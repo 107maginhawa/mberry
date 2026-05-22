@@ -9,6 +9,7 @@
 import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
 import type { JobScheduler, JobHandler, JobHealth } from './jobs';
 
+// Mock-Classification: APPROPRIATE — job scheduler infrastructure boundary
 // ---------------------------------------------------------------------------
 // Mock pg-boss
 // ---------------------------------------------------------------------------

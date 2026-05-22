@@ -23,6 +23,7 @@ import {
   BusinessLogicError,
 } from '@/core/errors';
 
+// Mock-Classification: APPROPRIATE — S3/MinIO external storage boundary
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

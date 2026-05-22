@@ -11,6 +11,7 @@ import { describe, test, expect, mock, beforeEach } from 'bun:test';
 import { PersonRepository } from './person.repo';
 import type { Person, NewPerson } from './person.schema';
 
+// Mock-Classification: APPROPRIATE — DB repository layer boundary
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

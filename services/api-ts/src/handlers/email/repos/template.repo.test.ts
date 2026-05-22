@@ -12,6 +12,7 @@ import { ValidationError, NotFoundError } from '@/core/errors';
 import type { EmailTemplate, NewEmailTemplate, TemplateVariable } from './email.schema';
 import Handlebars from 'handlebars';
 
+// Mock-Classification: APPROPRIATE — external email/SMTP service boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

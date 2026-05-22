@@ -14,6 +14,7 @@
 
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
+// Mock-Classification: APPROPRIATE — external email/SMTP service boundary
 // ---------------------------------------------------------------------------
 // Types matching the real ones (avoid deep import chains in test bootstrap)
 // ---------------------------------------------------------------------------

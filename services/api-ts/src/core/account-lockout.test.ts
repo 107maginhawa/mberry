@@ -18,6 +18,7 @@ import {
   _resetForTest,
 } from './account-lockout';
 
+// Mock-Classification: APPROPRIATE — security/auth infrastructure boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

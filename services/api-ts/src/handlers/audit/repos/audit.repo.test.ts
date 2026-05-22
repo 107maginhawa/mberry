@@ -13,6 +13,7 @@ import { createHash } from 'crypto';
 import { AuditRepository } from './audit.repo';
 import type { AuditLogEntry, CreateAuditLogRequest } from './audit.schema';
 
+// Mock-Classification: APPROPRIATE — audit logging infrastructure boundary
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
