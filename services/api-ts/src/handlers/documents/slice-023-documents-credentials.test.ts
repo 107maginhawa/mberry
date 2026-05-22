@@ -10,6 +10,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { createHmac } from 'crypto';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeCertificate } from '@/test-utils/factories';
 import { generateQrToken, verifyQrToken } from '@/handlers/association:operations/utils/qr-checkin';
 import { createCredentialToken, verifyCredentialToken } from '@/handlers/association:member/utils/credential-token';
 import { CertificatesRepository } from '@/handlers/certificates/repos/certificates.repo';
@@ -165,14 +166,14 @@ describe('[AC-M11-002] Certificate After Training', () => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
   });
 
-  const fakeCert = {
+  const fakeCert = fakeCertificate({
     id: 'cert-023-1',
     organizationId: ORG_ID,
     personId: PERSON_ID,
     trainingId: 'training-complete-1',
     certificateNumber: 'CERT-2026-000001',
     issuedAt: new Date('2026-05-01'),
-  };
+  });
 
   test('getCertificate returns certificate by ID', async () => {
     mocks = stubRepo(CertificatesRepository, {

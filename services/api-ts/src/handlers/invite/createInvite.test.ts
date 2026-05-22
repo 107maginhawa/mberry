@@ -1,26 +1,24 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeInvite as createFakeInvite } from '@/test-utils/factories';
 import { createInvite } from './createInvite';
 import { InviteRepository } from './repos/invite.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeInvite = {
-  id: 'invite-1',
+const fakeInvite = createFakeInvite({
   organizationId: 'tenant-1',
   personId: null,
   tokenHash: 'hashed-token-abc',
   type: 'invite',
-  status: 'pending',
   email: 'member@example.com',
   message: null,
   metadata: null,
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   createdByOfficer: 'user-1',
   claimedAt: null,
-  createdAt: new Date(),
   updatedAt: new Date(),
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

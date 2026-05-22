@@ -1,22 +1,19 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeInvite as createFakeInvite } from '@/test-utils/factories';
 import { InviteRepository } from './repos/invite.repo';
 import { validateInvite } from './validateInvite';
 
 const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
 const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // 1 day ago
 
-const fakeInvite = {
-  id: 'invite-1',
+const fakeInvite = createFakeInvite({
   email: 'member@pda.org',
-  organizationId: 'org-1',
   type: 'member',
-  status: 'pending',
   tokenHash: 'hashed-token',
   expiresAt: futureDate,
   metadata: { firstName: 'Alice' },
-  createdAt: new Date(),
-};
+});
 
 function makeCtxForInvite(overrides: Record<string, any> = {}) {
   const ctx = makeCtx(overrides) as any;

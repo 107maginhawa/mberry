@@ -1,31 +1,27 @@
 // Business Rules: [BR-02]
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeTraining as createFakeTraining, fakeEnrollment as createFakeEnrollment } from '@/test-utils/factories';
 import { enroll } from './enroll';
 import { TrainingRepository } from './repos/training.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 
-const fakeTraining = {
-  id: 'training-1',
-  organizationId: 'org-1',
+const fakeTraining = createFakeTraining({
   organizationId: 'org-1',
   title: 'CPD Seminar',
   status: 'published',
   capacity: 50,
   startDate: new Date('2026-06-01'),
   endDate: new Date('2026-06-02'),
-};
+});
 
-const fakeEnrollment = {
-  id: 'enroll-1',
+const fakeEnrollment = createFakeEnrollment({
   organizationId: 'org-1',
   trainingId: 'training-1',
   personId: 'user-1',
   status: 'enrolled',
-  enrolledAt: new Date(),
-  completedAt: null,
   cancelledAt: null,
-};
+});
 
 describe('enroll', () => {
   let mocks: ReturnType<typeof stubRepo>;

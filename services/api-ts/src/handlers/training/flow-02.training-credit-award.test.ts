@@ -3,6 +3,7 @@
 // Cross-module: training → credits (via CreditEntryRepository)
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeTraining as createFakeTraining, fakeEnrollment as createFakeEnrollment } from '@/test-utils/factories';
 import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
@@ -15,7 +16,7 @@ const ORG = 'org-flow-02';
 const PERSON = 'person-flow-02';
 const TRAINING_ID = 'training-1';
 
-const fakeTraining = {
+const fakeTraining = createFakeTraining({
   id: TRAINING_ID,
   organizationId: ORG,
   title: 'CPD Seminar 2026',
@@ -24,15 +25,13 @@ const fakeTraining = {
   endDate: new Date('2026-01-02'),
   creditAmount: 8,
   creditBearing: true,
-};
+});
 
-const fakeEnrollment = {
-  id: 'enroll-1',
+const fakeEnrollment = createFakeEnrollment({
   trainingId: TRAINING_ID,
   personId: PERSON,
   status: 'registered',
-  completedAt: null,
-};
+});
 
 function defaultTrainingStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
   return stubRepo(TrainingRepository, {

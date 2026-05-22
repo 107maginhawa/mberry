@@ -1,6 +1,7 @@
 // Business Rules: [BR-08]
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeDuesPayment as createFakeDuesPayment, fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { refundDuesPayment } from './refundDuesPayment';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
@@ -8,9 +9,8 @@ import { OfficerTermRepository } from './repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakePayment = {
+const fakePayment = createFakeDuesPayment({
   id: 'pay-1',
-  organizationId: 'org-1',
   personId: 'person-1',
   receiptNumber: 'ORG-2025-000001',
   amount: 5000,
@@ -21,7 +21,7 @@ const fakePayment = {
   recordedBy: 'user-1',
   membershipExtendedFrom: '2025-06-30',
   membershipExtendedTo: '2026-06-30',
-};
+});
 
 const fakeAllocations = [
   { id: 'alloc-1', paymentId: 'pay-1', fundId: 'fund-1', amount: 3000, isReversal: false, organizationId: 'org-1' },
@@ -29,15 +29,13 @@ const fakeAllocations = [
   { id: 'alloc-3', paymentId: 'pay-1', fundId: 'fund-3', amount: 750, isReversal: false, organizationId: 'org-1' },
 ];
 
-const fakeMembership = {
+const fakeMembership = createFakeMembership({
   id: 'mem-1',
-  organizationId: 'org-1',
   personId: 'person-1',
   duesExpiryDate: '2026-06-30',
-  status: 'active',
   suspendedAt: null,
   removedAt: null,
-};
+});
 
 /** Fake DB that passes tx through to callback (simulates transaction) */
 const txDb = {

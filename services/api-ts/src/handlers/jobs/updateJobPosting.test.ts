@@ -4,15 +4,14 @@
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeJobPosting as createFakeJobPosting } from '@/test-utils/factories';
 import { updateJobPosting } from './updateJobPosting';
 import { JobPostingRepository } from './repos/jobs.repo';
 
 const now = new Date('2026-06-01T00:00:00Z');
 const thirtyDaysLater = new Date('2026-07-01T00:00:00Z');
 
-const fakePosting = {
-  id: 'job-1',
-  organizationId: 'org-1',
+const fakePosting = createFakeJobPosting({
   title: 'Senior Engineer',
   organizationName: 'Acme Corp',
   type: 'full_time' as const,
@@ -24,7 +23,7 @@ const fakePosting = {
   createdAt: now,
   updatedAt: now,
   version: 1,
-};
+});
 
 describe('[M15] updateJobPosting', () => {
   let mocks: ReturnType<typeof stubRepo>;

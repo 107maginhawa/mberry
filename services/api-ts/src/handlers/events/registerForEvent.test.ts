@@ -1,31 +1,21 @@
 // Business Rules: [BR-02] [BR-27]
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeEvent as createFakeEvent, fakeRegistration as createFakeRegistration } from '@/test-utils/factories';
 import { registerForEvent } from './registerForEvent';
 import { EventsRepository } from './repos/events.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeEvent = {
-  id: 'evt-1',
-  organizationId: 'org-1',
-  title: 'Annual Conference',
-  capacity: 100,
-  status: 'published',
-  createdBy: 'user-1',
-  updatedBy: 'user-1',
-};
+const fakeEvent = createFakeEvent({ capacity: 100 });
 
-const fakeRegistration = {
-  id: 'reg-1',
+const fakeRegistration = createFakeRegistration({
   organizationId: 'org-1',
   eventId: 'evt-1',
-  personId: 'user-1',
-  status: 'confirmed',
   createdBy: 'user-1',
   updatedBy: 'user-1',
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

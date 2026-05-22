@@ -1,10 +1,11 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeOrg as createFakeOrg } from '@/test-utils/factories';
 import { OrganizationRepository } from './repos/platform-admin.repo';
 import { getOrganization } from './getOrganization';
 import { NotFoundError } from '@/core/errors';
 
-const fakeOrg = { id: 'org-1', associationId: 'assoc-1', name: 'Manila Chapter', status: 'active' };
+const fakeOrg = createFakeOrg({ associationId: 'assoc-1', name: 'Manila Chapter' });
 
 describe('getOrganization', () => {
   beforeEach(() => {

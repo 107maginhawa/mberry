@@ -7,6 +7,7 @@
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeNominee as createFakeNominee } from '@/test-utils/factories';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
 import { MembershipRepository } from './repos/membership.repo';
@@ -79,17 +80,14 @@ const secretaryTerm = {
   positionTitle: 'Secretary',
 };
 
-const fakeCandidate = {
+const fakeCandidate = createFakeNominee({
   id: 'candidate-1',
   electionId: 'election-1',
   positionId: 'pos-1',
   personId: 'person-1',
   nominatedBy: 'user-1',
-  organizationId: 'org-1',
   status: 'nominated',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+});
 
 const txDb: any = {
   transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),

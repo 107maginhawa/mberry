@@ -1,5 +1,6 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeDuesPayment, fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { refundPayment } from './refundPayment';
 import { DuesRepository } from './repos/dues.repo';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
@@ -13,7 +14,7 @@ function daysAgo(days: number): Date {
   return new Date(NOW.getTime() - days * 24 * 60 * 60 * 1000);
 }
 
-const fakePayment = {
+const fakePayment = fakeDuesPayment({
   id: 'pay-1',
   organizationId: 'org-1',
   personId: 'person-1',
@@ -29,7 +30,7 @@ const fakePayment = {
   membershipExtendedTo: '2027-05-30',
   createdAt: daysAgo(5),
   updatedAt: daysAgo(5),
-};
+});
 
 const fakeAllocations = [
   { id: 'alloc-1', paymentId: 'pay-1', fundId: 'fund-1', amount: 3000, isReversal: false, organizationId: 'org-1' },
@@ -37,7 +38,7 @@ const fakeAllocations = [
   { id: 'alloc-3', paymentId: 'pay-1', fundId: 'fund-3', amount: 750, isReversal: false, organizationId: 'org-1' },
 ];
 
-const fakeMembership = {
+const fakeMembership = createFakeMembership({
   id: 'mem-1',
   organizationId: 'org-1',
   personId: 'person-1',
@@ -45,7 +46,7 @@ const fakeMembership = {
   status: 'active',
   suspendedAt: null,
   removedAt: null,
-};
+});
 
 /** Fake DB that passes tx through to callback (simulates transaction) */
 const txDb = {

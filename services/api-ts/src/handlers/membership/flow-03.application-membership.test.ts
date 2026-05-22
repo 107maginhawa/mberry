@@ -3,6 +3,7 @@
 // Cross-module: application review → membership creation
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeApplication as createFakeApplication } from '@/test-utils/factories';
 import { reviewApplication } from './reviewApplication';
 import { MembershipRepository } from './repos/membership.repo';
 import { DuesConfigRepository } from '../association:member/repos/dues.repo';
@@ -14,7 +15,7 @@ const PERSON = 'person-flow-03';
 const APP_ID = 'app-1';
 const OFFICER = 'officer-1';
 
-const fakeApplication = {
+const fakeApplication = createFakeApplication({
   id: APP_ID,
   organizationId: ORG,
   personId: PERSON,
@@ -22,7 +23,7 @@ const fakeApplication = {
   status: 'submitted',
   reason: null,
   reviewedBy: null,
-};
+});
 
 function defaultStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
   return stubRepo(MembershipRepository, {

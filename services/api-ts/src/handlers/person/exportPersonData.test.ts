@@ -7,23 +7,14 @@
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakePerson as createFakePerson } from '@/test-utils/factories';
 import { exportPersonData } from './exportPersonData';
 import { PersonRepository } from './repos/person.repo';
 
-const fakePerson = {
-  id: 'user-1',
-  firstName: 'Maria',
-  lastName: 'Santos',
-  middleName: 'Ramos',
-  contactInfo: { email: 'maria@test.com', phone: '+639171234567' },
-  primaryAddress: { street1: '123 Main', city: 'Manila', state: 'NCR', postalCode: '1000', country: 'PH' },
-  licenseNumber: 'PRC-12345',
+const fakePerson = createFakePerson({
   specialization: 'Orthodontics',
   prcId: '123456',
-  dateOfBirth: '1985-06-15',
-  createdAt: new Date('2025-01-01'),
-  updatedAt: new Date('2025-06-01'),
-};
+});
 
 describe('exportPersonData', () => {
   let mocks: any;

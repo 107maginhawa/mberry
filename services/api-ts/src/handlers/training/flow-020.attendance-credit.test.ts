@@ -12,6 +12,7 @@
  */
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeTraining, fakeEnrollment } from '@/test-utils/factories';
 import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
@@ -24,7 +25,7 @@ const ORG = 'org-020';
 const PERSON = 'person-020';
 const TRAINING_ID = 'training-020';
 
-const creditBearingTraining = {
+const creditBearingTraining = fakeTraining({
   id: TRAINING_ID,
   organizationId: ORG,
   title: 'Advanced CPD Workshop',
@@ -33,17 +34,16 @@ const creditBearingTraining = {
   endDate: new Date('2025-01-02'), // Past date
   creditBearing: true,
   creditAmount: 10,
-};
+});
 
-const activeEnrollment = {
+const activeEnrollment = fakeEnrollment({
   id: 'enroll-020',
   trainingId: TRAINING_ID,
   personId: PERSON,
   status: 'enrolled',
   enrolledAt: new Date('2025-01-01'),
-  completedAt: null,
   cancelledAt: null,
-};
+});
 
 function stubTraining(overrides: Record<string, (...args: any[]) => any> = {}) {
   return stubRepo(TrainingRepository, {

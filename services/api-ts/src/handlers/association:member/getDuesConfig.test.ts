@@ -1,23 +1,22 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeDuesConfig as createFakeDuesConfig } from '@/test-utils/factories';
 import { getDuesConfig } from './getDuesConfig';
 import { DuesConfigRepository } from './repos/dues.repo';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeConfig = {
+const fakeConfig = createFakeDuesConfig({
   id: 'config-1',
-  organizationId: 'org-1',
   defaultAmount: 5000,
   annualAmount: 5000,
   currency: 'PHP',
   billingFrequency: 'annual',
-  gracePeriodDays: 30,
   effectiveDate: '2026-01-01',
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

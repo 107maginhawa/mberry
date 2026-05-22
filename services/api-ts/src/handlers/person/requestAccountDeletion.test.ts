@@ -8,6 +8,7 @@
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakePerson as createFakePerson } from '@/test-utils/factories';
 import { requestAccountDeletion } from './requestAccountDeletion';
 import { cancelAccountDeletion } from './cancelAccountDeletion';
 import { executeAccountDeletion } from './executeAccountDeletion';
@@ -15,25 +16,17 @@ import { PersonRepository } from './repos/person.repo';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-const fakePerson = {
-  id: 'user-1',
-  firstName: 'Maria',
-  lastName: 'Santos',
-  middleName: 'Ramos',
-  contactInfo: { email: 'maria@test.com', phone: '+639171234567' },
-  primaryAddress: { street1: '123 Main', city: 'Manila', state: 'NCR', postalCode: '1000', country: 'PH' },
-  licenseNumber: 'PRC-12345',
+const fakePerson = createFakePerson({
   specialization: 'Orthodontics',
   prcId: '123456',
   avatar: { url: 'https://example.com/avatar.jpg' },
-  dateOfBirth: '1985-06-15',
   languagesSpoken: ['en', 'tl'],
   deletionRequestedAt: null,
   deletionScheduledAt: null,
   deletionCompletedAt: null,
   createdAt: new Date(),
   updatedAt: new Date(),
-};
+});
 
 // ─── requestAccountDeletion ─────────────────────────────────
 

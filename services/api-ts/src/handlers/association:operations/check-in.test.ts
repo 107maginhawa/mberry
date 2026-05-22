@@ -1,6 +1,7 @@
 // Business Rules: [BR-17]
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeEvent as createFakeEvent, fakeCheckIn as createFakeCheckIn } from '@/test-utils/factories';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
@@ -17,21 +18,17 @@ import { OfficerTermRepository } from '@/handlers/association:member/repos/gover
 
 // ─── Shared fixtures ─────────────────────────────────────
 
-const fakeEvent = {
-  id: 'evt-1',
-  organizationId: 'org-1',
+const fakeEvent = createFakeEvent({
   title: 'Annual Conference',
-  status: 'published',
-};
+});
 
-const fakeCheckIn = {
-  id: 'ci-1',
+const fakeCheckIn = createFakeCheckIn({
   eventId: 'evt-1',
   personId: 'person-1',
   method: 'manual' as const,
   checkedInBy: 'user-1',
   organizationId: 'org-1',
-};
+});
 
 // ─── [BR-18] Authenticated scanner + valid event ─────────
 

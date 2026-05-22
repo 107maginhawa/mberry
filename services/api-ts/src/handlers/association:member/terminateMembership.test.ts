@@ -1,23 +1,22 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { terminateMembership } from './terminateMembership';
 import { MembershipRepository } from './repos/membership.repo';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeMembership = {
+const fakeMembership = createFakeMembership({
   id: 'mem-1',
   organizationId: 'tenant-1',
-  organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
-  status: 'active',
   removedAt: null,
   terminationReason: null,
   startDate: '2025-01-01',
   duesExpiryDate: '2026-01-01',
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

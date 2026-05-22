@@ -1,12 +1,13 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { settlePayment } from './settle-payment';
 import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const baseMembership = {
+const baseMembership = createFakeMembership({
   id: 'mem-1',
   organizationId: 'org-1',
   personId: 'person-1',
@@ -18,7 +19,7 @@ const baseMembership = {
   joinedAt: new Date().toISOString(),
   suspendedAt: null,
   removedAt: null,
-};
+});
 
 /** Fake DB that passes `tx` through to the callback (simulates transaction) */
 const fakeDb = {

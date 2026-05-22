@@ -1,13 +1,13 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeDuesInvoice as createFakeDuesInvoice } from '@/test-utils/factories';
 import { recordManualPayment } from './recordManualPayment';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeInvoice = {
+const fakeInvoice = createFakeDuesInvoice({
   id: 'inv-1',
-  organizationId: 'org-1',
   membershipId: 'mem-1',
   status: 'generated' as const,
   amount: 5000,
@@ -15,9 +15,7 @@ const fakeInvoice = {
   periodStart: '2025-01-01',
   periodEnd: '2025-12-31',
   version: 1,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+});
 
 const fakeMarkedPaid = {
   ...fakeInvoice,

@@ -11,6 +11,7 @@
 
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeCertificate } from '@/test-utils/factories';
 import { CertificatesRepository } from './repos/certificates.repo';
 import { generateCertificatePdf } from './generateCertificatePdf';
 
@@ -18,14 +19,12 @@ import { generateCertificatePdf } from './generateCertificatePdf';
 
 const OWNER = 'user-1';
 
-const fakeCert = {
-  id: 'cert-1',
-  organizationId: 'org-1',
+const fakeCert = fakeCertificate({
   personId: OWNER,
   trainingId: 'training-1',
   certificateNumber: 'CERT-2026-000001',
   issuedAt: new Date('2026-03-15'),
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

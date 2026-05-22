@@ -1,21 +1,14 @@
 // Business Rules: [BR-17]
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { checkIn } from './checkIn';
 import { EventsRepository } from './repos/events.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeEvent = {
-  id: 'evt-1',
-  organizationId: 'org-1',
-  organizationId: 'org-1',
-  title: 'Annual Conference',
-  status: 'published',
-  createdBy: 'user-1',
-  updatedBy: 'user-1',
-};
+const fakeEvent = createFakeEvent();
 
 const fakeAttendance = {
   id: 'att-1',

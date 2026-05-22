@@ -10,18 +10,17 @@
 
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeMember as createFakeMember } from '@/test-utils/factories';
 import { addMember } from './addMember';
 import { MembershipRepository } from './repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeMember = {
+const fakeMember = createFakeMember({
   id: 'member-1',
-  organizationId: 'org-1',
   personId: 'person-1',
-  status: 'active',
   joinedAt: new Date(),
-};
+});
 
 // ─── [BR-16] Activity Visibility ──────────────────────────
 

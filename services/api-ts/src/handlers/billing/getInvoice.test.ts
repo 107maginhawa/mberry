@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeBillingInvoice } from '@/test-utils/factories';
 import { InvoiceRepository } from './repos/billing.repo';
 import { getInvoice } from './getInvoice';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
@@ -20,7 +21,7 @@ function makeBillingCtx(userId: string, role: string, extraOverrides: Record<str
   });
 }
 
-const fakeInvoice = {
+const fakeInvoice = fakeBillingInvoice({
   id: INVOICE_ID, invoiceNumber: 'INV-2026-001',
   customer: CUSTOMER_ID, merchant: MERCHANT_ID,
   status: 'open', subtotal: 1000, tax: null, total: 1000,
@@ -30,7 +31,7 @@ const fakeInvoice = {
   voidedAt: null, voidedBy: null, voidThresholdMinutes: null,
   authorizedAt: null, authorizedBy: null, context: null, metadata: null,
   createdAt: new Date(), updatedAt: new Date(),
-};
+});
 
 describe('getInvoice', () => {
   beforeEach(() => {

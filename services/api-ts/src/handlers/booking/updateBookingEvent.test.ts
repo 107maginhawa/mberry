@@ -1,18 +1,10 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeBookingEvent } from '@/test-utils/factories';
 import { BookingEventRepository } from './repos/bookingEvent.repo';
 import { updateBookingEvent } from './updateBookingEvent';
 
-const fakeEvent = {
-  id: 'event-1',
-  owner: 'user-1',
-  title: 'Dental Consultation',
-  status: 'active',
-  organizationId: 'org-1',
-  duration: 30,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+const fakeEvent = fakeBookingEvent({ duration: 30 });
 
 function makeCtxForUpdate(overrides: Record<string, any> = {}) {
   const ctx = makeCtx(overrides) as any;

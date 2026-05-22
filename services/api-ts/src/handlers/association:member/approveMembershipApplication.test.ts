@@ -1,5 +1,6 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeApplication as createFakeApplication } from '@/test-utils/factories';
 import { approveMembershipApplication } from './approveMembershipApplication';
 import { MembershipApplicationRepository, MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
@@ -7,16 +8,14 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeApplication = {
-  id: 'app-1',
-  organizationId: 'org-1',
+const fakeApplication = createFakeApplication({
   personId: 'person-1',
   tierId: 'tier-1',
   status: 'submitted',
   reviewedBy: null,
   reviewedAt: null,
   denialReason: null,
-};
+});
 
 const approvedApplication = {
   ...fakeApplication,

@@ -1,25 +1,17 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeElection as createFakeElection, fakeVote as createFakeVote } from '@/test-utils/factories';
 import { castVote } from './castVote';
 import { ElectionsRepository } from './repos/elections.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeElection = {
-  id: 'election-1',
-  organizationId: 'org-1',
-  title: '2026 Board Election',
-  status: 'votingOpen',
-};
+const fakeElection = createFakeElection();
 
-const fakeVote = {
-  id: 'vote-1',
-  electionId: 'election-1',
-  positionId: '00000000-0000-4000-8000-000000000001',
+const fakeVote = createFakeVote({
   nomineeId: '00000000-0000-4000-8000-000000000002',
-  voterId: 'user-1',
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

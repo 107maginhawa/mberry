@@ -1,17 +1,14 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeOrg as createFakeOrg } from '@/test-utils/factories';
 import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { getOrgProfile } from './getOrgProfile';
 
-const fakeOrg = {
-  id: 'org-1',
-  name: 'Philippine Dental Association',
-  slug: 'pda',
+const fakeOrg = createFakeOrg({
   contactEmail: 'admin@pda.org',
   region: 'Manila',
   orgType: 'chapter',
-  status: 'active',
-};
+});
 
 describe('getOrgProfile', () => {
   let mocks: ReturnType<typeof stubRepo>;

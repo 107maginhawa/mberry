@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
+import { fakeApplication as createFakeApplication } from '@/test-utils/factories';
 import { listOrgApplications } from './listOrgApplications';
 
 /**
@@ -7,13 +8,10 @@ import { listOrgApplications } from './listOrgApplications';
  * Tests mock the database object at context level.
  */
 
-const fakeApplication = {
-  id: 'app-1',
-  organizationId: 'org-1',
+const fakeApplication = createFakeApplication({
   personId: 'user-1',
   status: 'submitted',
-  createdAt: new Date(),
-};
+});
 
 function makeDbMock(overrides: {
   adminRows?: any[];

@@ -1,33 +1,27 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeApplication as createFakeApplication, fakeMember as createFakeMember } from '@/test-utils/factories';
 import { reviewApplication } from './reviewApplication';
 import { MembershipRepository } from './repos/membership.repo';
 import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeApplication = {
-  id: 'app-1',
-  organizationId: 'org-1',
-  organizationId: 'org-1',
+const fakeApplication = createFakeApplication({
   personId: 'person-1',
   tierId: 'tier-1',
   status: 'submitted',
   reviewedBy: null,
   reviewedAt: null,
   denialReason: null,
-  createdAt: new Date(),
   updatedAt: new Date(),
-};
+});
 
-const fakeMember = {
+const fakeMember = createFakeMember({
   id: 'mem-1',
-  organizationId: 'org-1',
-  organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
-  status: 'active',
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

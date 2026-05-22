@@ -1,17 +1,16 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeTraining as createFakeTraining } from '@/test-utils/factories';
 import { listTrainings } from './listTrainings';
 import { TrainingRepository } from './repos/training.repo';
 
-const fakeTraining = {
-  id: 'training-1',
-  organizationId: 'org-1',
+const fakeTraining = createFakeTraining({
   organizationId: 'org-1',
   title: 'CPD Seminar',
   status: 'published',
   startDate: new Date('2026-06-01'),
   endDate: new Date('2026-06-02'),
-};
+});
 
 describe('listTrainings', () => {
   let mocks: ReturnType<typeof stubRepo>;

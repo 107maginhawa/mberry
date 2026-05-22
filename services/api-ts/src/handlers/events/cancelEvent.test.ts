@@ -1,20 +1,13 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { cancelEvent } from './cancelEvent';
 import { EventsRepository } from './repos/events.repo';
 import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeEvent = {
-  id: 'evt-1',
-  organizationId: 'org-1',
-  organizationId: 'org-1',
-  title: 'Annual Conference',
-  status: 'published',
-  createdBy: 'user-1',
-  updatedBy: 'user-1',
-};
+const fakeEvent = createFakeEvent();
 
 // ─── Tests ──────────────────────────────────────────────
 

@@ -1,14 +1,11 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeDocument } from '@/test-utils/factories';
 import { DocumentRepository } from './repos/documents.repo';
 import { getDocument } from './getDocument';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 
-const fakeDoc = {
-  id: 'doc-1', organizationId: 'tenant-1', title: 'Test Doc',
-  fileName: 'test.pdf', mimeType: 'application/pdf', size: 1024,
-  storageKey: 'uploads/test.pdf', status: 'published',
-};
+const fakeDoc = fakeDocument();
 
 describe('getDocument', () => {
   beforeEach(() => {

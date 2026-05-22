@@ -1,17 +1,10 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeScheduleException } from '@/test-utils/factories';
 import { ScheduleExceptionRepository } from './repos/scheduleException.repo';
 import { deleteScheduleException } from './deleteScheduleException';
 
-const fakeException = {
-  id: 'exception-1',
-  event: 'event-1',
-  owner: 'user-1',
-  startDatetime: new Date('2026-06-01T10:00:00Z'),
-  endDatetime: new Date('2026-06-01T12:00:00Z'),
-  reason: 'Holiday',
-  recurring: false,
-};
+const fakeException = fakeScheduleException({ id: 'exception-1', event: 'event-1', owner: 'user-1', startDatetime: new Date('2026-06-01T10:00:00Z'), endDatetime: new Date('2026-06-01T12:00:00Z'), recurring: false });
 
 describe('deleteScheduleException', () => {
   let mocks: ReturnType<typeof stubRepo>;

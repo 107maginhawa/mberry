@@ -7,6 +7,7 @@
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeBillingInvoice, fakeMerchantAccount as createFakeMerchantAccount } from '@/test-utils/factories';
 import { createInvoice } from './createInvoice';
 import { finalizeInvoice } from './finalizeInvoice';
 import { captureInvoicePayment } from './captureInvoicePayment';
@@ -21,7 +22,7 @@ const CUSTOMER_ID = 'cust-uuid-2222-2222-2222-222222222222';
 const ADMIN_ID = 'admin-uuid-5555-5555-5555-555555555555';
 const INVOICE_ID = 'inv-uuid-3333-3333-3333-333333333333';
 
-const baseDraftInvoice = {
+const baseDraftInvoice = fakeBillingInvoice({
   id: INVOICE_ID,
   invoiceNumber: 'INV-2026-000001',
   customer: CUSTOMER_ID,
@@ -49,7 +50,7 @@ const baseDraftInvoice = {
   version: 1,
   createdBy: null,
   updatedBy: null,
-};
+});
 
 const baseLineItems = [
   {
@@ -97,12 +98,12 @@ const voidedInvoice = {
   },
 };
 
-const fakeMerchantAccount = {
+const fakeMerchantAccount = createFakeMerchantAccount({
   id: 'ma-1',
   person: MERCHANT_ID,
   active: true,
   metadata: { stripeAccountId: 'acct_test_456' },
-};
+});
 
 const fakeBilling = {
   cancelPaymentIntent: async () => ({ id: 'pi_test_123', status: 'canceled' }),

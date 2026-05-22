@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakePerson as createFakePerson, fakeMerchantAccount as createFakeMerchantAccount } from '@/test-utils/factories';
 import { MerchantAccountRepository } from './repos/billing.repo';
 import { PersonRepository } from '../person/repos/person.repo';
 import { createMerchantAccount } from './createMerchantAccount';
@@ -15,8 +16,8 @@ function makeBillingCtx(userId: string, role: string, extraOverrides: Record<str
   return makeCtx({ user, session: { id: 's-1', userId, user }, logger: fakeLogger, ...extraOverrides });
 }
 
-const fakePerson = { id: PERSON_ID, userId: MERCHANT_USER_ID, email: 'merch@example.com' };
-const newMerchantAccount = { id: 'ma-new', personId: PERSON_ID, stripeAccountId: 'acct_test', status: 'pending' };
+const fakePerson = createFakePerson({ id: PERSON_ID, userId: MERCHANT_USER_ID, email: 'merch@example.com' });
+const newMerchantAccount = createFakeMerchantAccount({ id: 'ma-new', personId: PERSON_ID, stripeAccountId: 'acct_test', status: 'pending' });
 const fakeBilling = {
   createConnectAccount: async () => ({ id: 'acct_test', type: 'express' }),
   createAccountLink: async () => ({ url: 'https://stripe.com/onboard' }),

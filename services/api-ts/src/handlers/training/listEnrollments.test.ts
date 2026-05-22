@@ -1,22 +1,21 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeTraining as createFakeTraining, fakeEnrollment as createFakeEnrollment } from '@/test-utils/factories';
 import { TrainingRepository } from './repos/training.repo';
 import { listEnrollments } from './listEnrollments';
 
-const fakeTraining = {
-  id: 'training-1',
+const fakeTraining = createFakeTraining({
   organizationId: 'org-1',
   title: 'CPD Seminar',
   status: 'published',
-};
+});
 
-const fakeEnrollment = {
+const fakeEnrollment = createFakeEnrollment({
   id: 'enrollment-1',
   trainingId: 'training-1',
   personId: 'user-1',
   status: 'enrolled',
-  enrolledAt: new Date(),
-};
+});
 
 const fakeStats = {
   enrolled: 1,

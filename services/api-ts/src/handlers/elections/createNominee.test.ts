@@ -11,6 +11,7 @@
 
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeElection as createFakeElection, fakeNominee as createFakeNominee } from '@/test-utils/factories';
 import { createNominee } from './createNominee';
 import { ElectionsRepository } from './repos/elections.repo';
 
@@ -28,22 +29,15 @@ function monthsAgo(months: number): Date {
   return d;
 }
 
-const fakeElection = {
-  id: ELECTION_ID,
-  organizationId: ORG_ID,
-  title: '2026 Board Election',
-  status: 'nominationsOpen',
-};
+const fakeElection = createFakeElection({ status: 'nominationsOpen' });
 
-const fakeNominee = {
-  id: 'nominee-1',
-  electionId: ELECTION_ID,
+const fakeNominee = createFakeNominee({
   positionId: POSITION_ID,
   personId: NOMINEE_ID,
   organizationId: ORG_ID,
   nominatedBy: 'user-1',
   status: 'nominated',
-};
+});
 
 /** Active membership joined 8 months ago (qualifies) */
 const activeMembership = {

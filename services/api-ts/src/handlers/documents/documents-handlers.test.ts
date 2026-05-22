@@ -11,6 +11,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeDocument as createFakeDocument } from '@/test-utils/factories';
 import { DocumentRepository, DocumentVersionRepository, DocumentAccessLogRepository } from './repos/documents.repo';
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
@@ -20,24 +21,19 @@ const ORG_ID = 'org-1';
 const USER_ID = 'user-1';
 const VERSION_ID = 'ver-00000000-0000-4000-8000-000000000002';
 
-const fakeDocument = {
+const fakeDocument = createFakeDocument({
   id: DOC_ID,
   organizationId: ORG_ID,
   title: 'Test Document',
-  fileName: 'test.pdf',
-  mimeType: 'application/pdf',
-  size: 1024,
-  storageKey: 'uploads/test.pdf',
   ownerId: USER_ID,
   ownerType: 'person',
   accessLevel: 'tenantOnly',
   category: null,
   tags: [],
-  status: 'published',
   currentVersionId: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
-};
+});
 
 const archivedDocument = { ...fakeDocument, status: 'archived' };
 

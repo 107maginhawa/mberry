@@ -1,12 +1,13 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeBillingInvoice, fakePerson as createFakePerson, fakeMerchantAccount as createFakeMerchantAccount } from '@/test-utils/factories';
 import { voidInvoice } from './voidInvoice';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import { PersonRepository } from '../person/repos/person.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeInvoice = {
+const fakeInvoice = fakeBillingInvoice({
   id: 'inv-1',
   invoiceNumber: 'INV-2025-000001',
   customer: 'person-customer',
@@ -26,19 +27,19 @@ const fakeInvoice = {
   },
   createdAt: new Date(),
   updatedAt: new Date(),
-};
+});
 
-const fakePerson = {
+const fakePerson = createFakePerson({
   id: 'person-merchant',
   email: 'merchant@test.com',
-};
+});
 
-const fakeMerchantAccount = {
+const fakeMerchantAccount = createFakeMerchantAccount({
   id: 'ma-1',
   person: 'person-merchant',
   active: true,
   metadata: { stripeAccountId: 'acct_test_456' },
-};
+});
 
 const fakeVoidedInvoice = {
   ...fakeInvoice,

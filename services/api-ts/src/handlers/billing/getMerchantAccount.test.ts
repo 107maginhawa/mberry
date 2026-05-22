@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeMerchantAccount as createFakeMerchantAccount } from '@/test-utils/factories';
 import { MerchantAccountRepository } from './repos/billing.repo';
 import { getMerchantAccount } from './getMerchantAccount';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
@@ -14,11 +15,11 @@ function makeBillingCtx(userId: string, role: string, extraOverrides: Record<str
   return makeCtx({ user, session: { id: 's-1', userId, user }, logger: fakeLogger, ...extraOverrides });
 }
 
-const fakeMerchantAccount = {
+const fakeMerchantAccount = createFakeMerchantAccount({
   id: MA_ID, person: MERCHANT_USER_ID, stripeAccountId: 'acct_test',
   metadata: { stripeAccountId: 'acct_test' },
   status: 'active', createdAt: new Date(), updatedAt: new Date(),
-};
+});
 
 describe('getMerchantAccount', () => {
   beforeEach(() => {

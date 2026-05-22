@@ -7,22 +7,11 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeNotification } from '@/test-utils/factories';
 import { NotificationRepository } from './repos/notification.repo';
 import { getNotification } from './getNotification';
 
-const fakeNotif = {
-  id: 'n-1',
-  organizationId: 'org-1',
-  recipient: 'user-1',
-  type: 'system',
-  channel: 'in-app',
-  title: 'Test',
-  message: 'Hello',
-  status: 'sent',
-  sentAt: new Date(),
-  readAt: null,
-  deliveredAt: null,
-  scheduledAt: null,
+const fakeNotif = fakeNotification({
   relatedEntityType: null,
   relatedEntity: null,
   consentValidated: false,
@@ -31,7 +20,7 @@ const fakeNotif = {
   createdBy: 'system',
   updatedBy: 'system',
   version: 1,
-};
+});
 
 describe('getNotification', () => {
   beforeEach(() => {

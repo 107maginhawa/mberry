@@ -1,10 +1,10 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeReview as createFakeReview } from '@/test-utils/factories';
 import { ReviewRepository } from './repos/review.repo';
 import { listReviews } from './listReviews';
 
-const fakeReview = {
-  id: 'review-1',
+const fakeReview = createFakeReview({
   reviewer: 'user-1',
   reviewedEntity: 'user-2',
   reviewType: 'nps',
@@ -12,9 +12,8 @@ const fakeReview = {
   rating: 5,
   comment: 'Great session',
   deletedAt: null,
-  createdAt: new Date(),
   updatedAt: new Date(),
-};
+});
 
 describe('listReviews', () => {
   let mocks: ReturnType<typeof stubRepo>;

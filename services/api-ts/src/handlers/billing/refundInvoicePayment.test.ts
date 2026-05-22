@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeBillingInvoice } from '@/test-utils/factories';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import { PersonRepository } from '../person/repos/person.repo';
 import { refundInvoicePayment } from './refundInvoicePayment';
@@ -16,14 +17,14 @@ function makeBillingCtx(userId: string, role: string, extraOverrides: Record<str
   return makeCtx({ user, session: { id: 's-1', userId, user }, logger: fakeLogger, ...extraOverrides });
 }
 
-const capturedInvoice = {
+const capturedInvoice = fakeBillingInvoice({
   id: INVOICE_ID, invoiceNumber: 'INV-2026-001',
   merchant: MERCHANT_ID, customer: 'cust-1',
   status: 'open', total: 1000, currency: 'PHP',
   paymentStatus: 'succeeded',
   metadata: { stripePaymentIntentId: 'pi_test', stripeChargeId: 'ch_test', stripeAccountId: 'acct_test' },
   createdAt: new Date(), updatedAt: new Date(),
-};
+});
 
 const fakeBilling = { createRefund: async () => ({ id: 're_test', status: 'succeeded' }) };
 

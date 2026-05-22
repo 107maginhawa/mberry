@@ -1,5 +1,6 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeElection as createFakeElection } from '@/test-utils/factories';
 import { openElectionVoting } from './openElectionVoting';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
@@ -20,16 +21,15 @@ const officerTerm = {
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeElection = {
+const fakeElection = createFakeElection({
   id: 'election-1',
-  organizationId: 'org-1',
   title: '2026 Board Election',
   status: 'nominationsOpen',
   positions: [
     { id: 'pos-1', title: 'President', sortOrder: 0 },
     { id: 'pos-2', title: 'Secretary', sortOrder: 1 },
   ],
-};
+});
 
 const updatedElection = {
   ...fakeElection,

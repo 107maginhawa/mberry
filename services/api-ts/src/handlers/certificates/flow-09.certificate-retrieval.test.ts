@@ -3,6 +3,7 @@
 // tests verify existing CRUD (get/list) works correctly.
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeCertificate as createFakeCertificate } from '@/test-utils/factories';
 import { getCertificate } from './getCertificate';
 import { listCertificates } from './listCertificates';
 import { CertificatesRepository } from './repos/certificates.repo';
@@ -11,14 +12,13 @@ import { CertificatesRepository } from './repos/certificates.repo';
 
 const PERSON = 'person-flow-09';
 
-const fakeCertificate = {
-  id: 'cert-1',
+const fakeCertificate = createFakeCertificate({
   personId: PERSON,
   eventId: 'event-1',
   type: 'attendance',
   issuedAt: new Date('2026-03-01'),
   fileUrl: '/certificates/cert-1.pdf',
-};
+});
 
 function defaultStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
   return stubRepo(CertificatesRepository, {

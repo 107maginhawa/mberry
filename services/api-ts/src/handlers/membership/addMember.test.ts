@@ -1,13 +1,13 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeMember as createFakeMember } from '@/test-utils/factories';
 import { addMember } from './addMember';
 import { MembershipRepository } from './repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeMember = {
+const fakeMember = createFakeMember({
   id: 'mem-1',
-  organizationId: 'org-1',
   organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
@@ -20,7 +20,7 @@ const fakeMember = {
   joinedAt: new Date(),
   createdBy: 'user-1',
   updatedBy: 'user-1',
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

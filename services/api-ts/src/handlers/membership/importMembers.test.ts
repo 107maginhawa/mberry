@@ -1,6 +1,7 @@
 // Business Rules: [BR-22] [BR-23]
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeMember as createFakeMember } from '@/test-utils/factories';
 import { importMembers, normalizeLicense, importMembersSchema } from './importMembers';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
@@ -8,13 +9,11 @@ import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeMember = {
+const fakeMember = createFakeMember({
   id: 'mem-1',
-  organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
-  status: 'active',
-};
+});
 
 // ─── Tests: Existing Import Behavior ────────────────────
 

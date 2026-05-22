@@ -3,6 +3,7 @@
 // and updateElectionStatus manages election lifecycle.
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeElection as createFakeElection, fakeVote as createFakeVote } from '@/test-utils/factories';
 import { castVote } from './castVote';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
@@ -16,21 +17,15 @@ const VOTER = 'voter-1';
 const POSITION_ID = '00000000-0000-4000-8000-000000000001';
 const NOMINEE_ID = '00000000-0000-4000-8000-000000000002';
 
-const fakeElection = {
-  id: ELECTION_ID,
-  organizationId: 'org-1',
+const fakeElection = createFakeElection({
   title: 'Board Elections 2026',
-  status: 'votingOpen',
   publishedAt: new Date('2026-03-01'),
-};
+});
 
-const fakeVote = {
-  id: 'vote-1',
-  electionId: ELECTION_ID,
-  positionId: POSITION_ID,
+const fakeVote = createFakeVote({
   nomineeId: NOMINEE_ID,
   voterId: VOTER,
-};
+});
 
 function defaultStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
   return stubRepo(ElectionsRepository, {

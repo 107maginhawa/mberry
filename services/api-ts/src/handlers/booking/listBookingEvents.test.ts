@@ -1,17 +1,10 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeBookingEvent } from '@/test-utils/factories';
 import { BookingEventRepository } from './repos/bookingEvent.repo';
 import { listBookingEvents } from './listBookingEvents';
 
-const fakeEvent = {
-  id: 'event-1',
-  owner: 'user-1',
-  title: 'Dental Consultation',
-  status: 'active',
-  organizationId: 'org-1',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+const fakeEvent = fakeBookingEvent();
 
 describe('listBookingEvents', () => {
   let mocks: ReturnType<typeof stubRepo>;

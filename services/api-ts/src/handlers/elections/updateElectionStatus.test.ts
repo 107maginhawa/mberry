@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeElection as createFakeElection } from '@/test-utils/factories';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
@@ -9,12 +10,7 @@ mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeElection = {
-  id: 'election-1',
-  organizationId: 'org-1',
-  title: '2026 Board Election',
-  status: 'draft',
-};
+const fakeElection = createFakeElection({ status: 'draft' });
 
 // ─── Tests ──────────────────────────────────────────────
 

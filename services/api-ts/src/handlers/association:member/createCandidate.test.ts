@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeElection as createFakeElection, fakeMembership as createFakeMembership, fakeNominee as createFakeNominee } from '@/test-utils/factories';
 import { createCandidate } from './createCandidate';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { MembershipRepository } from './repos/membership.repo';
@@ -9,9 +10,8 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 
 const now = new Date('2026-06-15T12:00:00Z');
 
-const fakeElection = {
+const fakeElection = createFakeElection({
   id: 'election-1',
-  organizationId: 'org-1',
   title: 'Board Election 2026',
   type: 'officer' as const,
   status: 'nominationsOpen' as const,
@@ -23,13 +23,10 @@ const fakeElection = {
   passageThreshold: null,
   positions: [{ id: 'pos-1', title: 'President', sortOrder: 1 }],
   publishedAt: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+});
 
-const fakeActiveMembership = {
+const fakeActiveMembership = createFakeMembership({
   id: 'mem-1',
-  organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
   startDate: '2025-01-01',
@@ -40,21 +37,15 @@ const fakeActiveMembership = {
   suspendedAt: null,
   removedAt: null,
   memberNumber: 'M-001',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+});
 
-const fakeNominee = {
-  id: 'nominee-1',
+const fakeNominee = createFakeNominee({
   electionId: 'election-1',
   positionId: 'pos-1',
   personId: 'person-1',
   nominatedBy: 'user-1',
-  organizationId: 'org-1',
   status: 'nominated' as const,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+});
 
 const defaultBody = {
   electionId: 'election-1',

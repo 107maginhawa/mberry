@@ -1,15 +1,15 @@
 // Business Rules: [BR-33, BR-34]
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeElection as createFakeElection, fakeNominee as createFakeNominee, fakeMembership as createFakeMembership, fakeVote as createFakeVote } from '@/test-utils/factories';
 import { castBallot } from './castBallot';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { MembershipRepository } from './repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeElection = {
+const fakeElection = createFakeElection({
   id: 'election-1',
-  organizationId: 'org-1',
   title: 'Board Election 2025',
   status: 'votingOpen',
   type: 'officer',
@@ -17,50 +17,42 @@ const fakeElection = {
     { id: 'pos-president', title: 'President', sortOrder: 1 },
     { id: 'pos-treasurer', title: 'Treasurer', sortOrder: 2 },
   ],
-};
+});
 
-const fakeNominee = {
-  id: 'nominee-1',
+const fakeNominee = createFakeNominee({
   electionId: 'election-1',
   positionId: 'pos-president',
   personId: 'candidate-person-1',
-  organizationId: 'org-1',
   status: 'accepted',
-};
+});
 
-const fakeNomineeWrongPosition = {
+const fakeNomineeWrongPosition = createFakeNominee({
   id: 'nominee-2',
   electionId: 'election-1',
   positionId: 'pos-treasurer',
   personId: 'candidate-person-2',
-  organizationId: 'org-1',
   status: 'accepted',
-};
+});
 
-const fakeNomineeOtherElection = {
+const fakeNomineeOtherElection = createFakeNominee({
   id: 'nominee-3',
   electionId: 'election-other',
   positionId: 'pos-president',
   personId: 'candidate-person-3',
-  organizationId: 'org-1',
   status: 'accepted',
-};
+});
 
-const fakeMembership = {
+const fakeMembership = createFakeMembership({
   id: 'mem-1',
-  organizationId: 'org-1',
   personId: 'user-1',
-  status: 'active',
-};
+});
 
-const fakeVote = {
-  id: 'vote-1',
+const fakeVote = createFakeVote({
   electionId: 'election-1',
   positionId: 'pos-president',
   nomineeId: 'nominee-1',
   voterId: 'user-1',
-  organizationId: 'org-1',
-};
+});
 
 /** Fake DB that passes tx through to callback (simulates transaction) */
 const txDb = {

@@ -1,23 +1,22 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { deceaseMembership } from './deceaseMembership';
 import { MembershipRepository } from './repos/membership.repo';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeMembership = {
+const fakeMembership = createFakeMembership({
   id: 'mem-1',
-  organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
-  status: 'active',
   removedAt: null,
   removalReason: null,
   dateOfDeath: null,
   startDate: '2025-01-01',
   duesExpiryDate: '2026-01-01',
-};
+});
 
 /** Fake DB that supports transactions and raw drizzle-style update chains */
 const makeInvoiceNoOp = () => ({

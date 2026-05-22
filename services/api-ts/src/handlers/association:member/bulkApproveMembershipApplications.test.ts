@@ -1,13 +1,13 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeApplication as createFakeApplication } from '@/test-utils/factories';
 import { bulkApproveMembershipApplications } from './bulkApproveMembershipApplications';
 import { MembershipApplicationRepository, MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeApplication = {
-  id: 'app-1',
+const fakeApplication = createFakeApplication({
   organizationId: 'tenant-1',
   personId: 'person-1',
   tierId: 'tier-1',
@@ -15,9 +15,9 @@ const fakeApplication = {
   reviewedBy: null,
   reviewedAt: null,
   denialReason: null,
-};
+});
 
-const fakeApplication2 = {
+const fakeApplication2 = createFakeApplication({
   id: 'app-2',
   organizationId: 'tenant-1',
   personId: 'person-2',
@@ -26,7 +26,7 @@ const fakeApplication2 = {
   reviewedBy: null,
   reviewedAt: null,
   denialReason: null,
-};
+});
 
 const crossOrgApplication = {
   id: 'app-cross',

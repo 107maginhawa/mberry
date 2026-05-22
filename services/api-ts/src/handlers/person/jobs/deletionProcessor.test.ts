@@ -7,6 +7,7 @@
  */
 
 import { describe, test, expect } from 'bun:test';
+import { fakePerson as createFakePerson } from '@/test-utils/factories';
 import { processDeletions } from './deletionProcessor';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -65,16 +66,12 @@ function makeLogger() {
 }
 
 const fakePastDueDate = new Date(Date.now() - THIRTY_DAYS_MS - 1000);
-const fakePersonPendingDeletion = {
+const fakePersonPendingDeletion = createFakePerson({
   id: 'person-1',
-  firstName: 'Maria',
-  lastName: 'Santos',
-  middleName: 'Ramos',
-  contactInfo: { email: 'maria@test.com', phone: '+639171234567' },
   deletionRequestedAt: new Date(Date.now() - THIRTY_DAYS_MS - 1000),
   deletionScheduledAt: fakePastDueDate,
   deletionCompletedAt: null,
-};
+});
 
 // ─── processDeletions tests ───────────────────────────────
 

@@ -1,23 +1,13 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeBookingEvent, fakeSlot as fakeSlotFactory } from '@/test-utils/factories';
 import { TimeSlotRepository } from './repos/timeSlot.repo';
 import { BookingEventRepository } from './repos/bookingEvent.repo';
 import { listEventSlots } from './listEventSlots';
 
-const fakeEvent = {
-  id: 'event-1',
-  owner: 'user-1',
-  status: 'active',
-  organizationId: 'org-1',
-};
+const fakeEvent = fakeBookingEvent();
 
-const fakeSlot = {
-  id: 'slot-1',
-  event: 'event-1',
-  startTime: new Date('2026-06-01T10:00:00Z'),
-  endTime: new Date('2026-06-01T10:30:00Z'),
-  status: 'available',
-};
+const fakeSlot = fakeSlotFactory({ event: 'event-1' });
 
 describe('listEventSlots', () => {
   let eventMocks: ReturnType<typeof stubRepo>;

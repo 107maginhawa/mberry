@@ -1,5 +1,6 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeInvite as createFakeInvite } from '@/test-utils/factories';
 import { claimInvite } from './claimInvite';
 import { InviteRepository } from './repos/invite.repo';
 import { hashToken } from './utils/token';
@@ -10,22 +11,18 @@ const TEST_SECRET = 'dev-secret-change-in-production';
 const RAW_TOKEN = 'valid-raw-token-abc123';
 const TOKEN_HASH = hashToken(RAW_TOKEN, TEST_SECRET);
 
-const fakePendingInvite = {
-  id: 'invite-1',
-  organizationId: 'org-1',
-  personId: null,
+const fakePendingInvite = createFakeInvite({
   tokenHash: TOKEN_HASH,
   type: 'invite',
-  status: 'pending',
   email: 'member@example.com',
+  personId: null,
   message: null,
   metadata: { role: 'member' },
-  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   createdByOfficer: 'officer-1',
   claimedAt: null,
-  createdAt: new Date(),
   updatedAt: new Date(),
-};
+});
 
 const fakeClaimedInvite = {
   ...fakePendingInvite,

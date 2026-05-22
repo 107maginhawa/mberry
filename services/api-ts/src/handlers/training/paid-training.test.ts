@@ -15,12 +15,13 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeTraining, fakeEnrollment, fakeMembership } from '@/test-utils/factories';
 import { TrainingRepository } from './repos/training.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const freeTraining = {
+const freeTraining = fakeTraining({
   id: 'trn-free',
   organizationId: 'org-1',
   title: 'Free Workshop',
@@ -30,9 +31,9 @@ const freeTraining = {
   currency: 'PHP',
   startDate: new Date('2026-09-01'),
   endDate: new Date('2026-09-01'),
-};
+});
 
-const paidTraining = {
+const paidTraining = fakeTraining({
   id: 'trn-paid',
   organizationId: 'org-1',
   title: 'Advanced Certification',
@@ -42,7 +43,7 @@ const paidTraining = {
   currency: 'PHP',
   startDate: new Date('2026-10-15'),
   endDate: new Date('2026-10-17'),
-};
+});
 
 const completedTraining = {
   ...freeTraining,
@@ -56,21 +57,20 @@ const cancelledTraining = {
   status: 'cancelled',
 };
 
-const activeMembership = {
+const activeMembership = fakeMembership({
   id: 'mem-1',
   organizationId: 'org-1',
   personId: 'user-1',
   status: 'active',
-};
+});
 
-const baseEnrollment = {
+const baseEnrollment = fakeEnrollment({
   id: 'enr-1',
   trainingId: 'trn-free',
   personId: 'user-1',
   organizationId: 'org-1',
   status: 'enrolled',
-  enrolledAt: new Date(),
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

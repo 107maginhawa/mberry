@@ -1,15 +1,12 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { createEvent } from './createEvent';
 import { EventsRepository } from './repos/events.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeEvent = {
-  id: 'evt-1',
-  organizationId: 'org-1',
-  organizationId: 'org-1',
-  title: 'Annual Conference',
+const fakeEvent = createFakeEvent({
   description: 'Yearly gathering',
   location: 'Manila',
   startDate: new Date('2026-06-01'),
@@ -19,9 +16,7 @@ const fakeEvent = {
   creditBearing: false,
   creditAmount: 0,
   status: 'draft',
-  createdBy: 'user-1',
-  updatedBy: 'user-1',
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

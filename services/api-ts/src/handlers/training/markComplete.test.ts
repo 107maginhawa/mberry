@@ -1,33 +1,29 @@
 // Business Rules: [BR-11] [BR-13]
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeTraining as createFakeTraining, fakeEnrollment as createFakeEnrollment } from '@/test-utils/factories';
 import { markComplete } from './markComplete';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
 
-const fakeTraining = {
-  id: 'training-1',
-  orgId: 'org-1',
+const fakeTraining = createFakeTraining({
   organizationId: 'org-1',
   title: 'CPD Seminar',
   status: 'completed',
   capacity: 50,
   creditAmount: 8,
   endDate: new Date('2024-01-01'), // Past date — BR-20 requires activity to have ended
-};
+});
 
-const fakeEnrollment = {
-  id: 'enroll-1',
+const fakeEnrollment = createFakeEnrollment({
   orgId: 'org-1',
   trainingId: 'training-1',
   personId: 'person-1',
   status: 'enrolled',
-  enrolledAt: new Date(),
-  completedAt: null,
   cancelledAt: null,
-};
+});
 
 describe('markComplete', () => {
   let mocks: ReturnType<typeof stubRepo>;

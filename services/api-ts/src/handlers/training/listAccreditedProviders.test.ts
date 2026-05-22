@@ -1,18 +1,16 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeAccreditedProvider as createFakeProvider } from '@/test-utils/factories';
 import { AccreditedProviderRepository } from './repos/accredited-provider.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { listAccreditedProviders } from './listAccreditedProviders';
 
 const fakeProviderWithExpiry = {
-  id: 'provider-1',
-  organizationId: 'org-1',
-  name: 'PRC Academy',
-  accreditationNumber: 'PRC-2026-001',
-  status: 'active' as const,
-  expiryDate: new Date('2027-01-01'),
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  ...createFakeProvider({
+    accreditationNumber: 'PRC-2026-001',
+    status: 'active' as const,
+    expiryDate: new Date('2027-01-01'),
+  }),
   expiringSoon: false,
 };
 

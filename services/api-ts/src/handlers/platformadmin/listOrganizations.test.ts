@@ -1,11 +1,12 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeOrg as createFakeOrg } from '@/test-utils/factories';
 import { OrganizationRepository } from './repos/platform-admin.repo';
 import { listOrganizations } from './listOrganizations';
 
 const fakeOrgs = [
-  { id: 'org-1', associationId: 'assoc-1', name: 'Manila Chapter', status: 'active' },
-  { id: 'org-2', associationId: 'assoc-1', name: 'Cebu Chapter', status: 'trial' },
+  createFakeOrg({ associationId: 'assoc-1', name: 'Manila Chapter' }),
+  createFakeOrg({ id: 'org-2', associationId: 'assoc-1', name: 'Cebu Chapter', status: 'trial' }),
 ];
 
 describe('listOrganizations', () => {

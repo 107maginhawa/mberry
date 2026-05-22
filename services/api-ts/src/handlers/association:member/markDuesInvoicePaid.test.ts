@@ -1,5 +1,6 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeDuesInvoice as createFakeDuesInvoice, fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { markDuesInvoicePaid } from './markDuesInvoicePaid';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
@@ -8,26 +9,25 @@ import { OfficerTermRepository } from '@/handlers/association:member/repos/gover
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeInvoice = {
+const fakeInvoice = createFakeDuesInvoice({
   id: 'inv-1',
   membershipId: 'mem-1',
   personId: 'person-1',
-  organizationId: 'tenant-1',  // matches makeCtx default organizationId
+  organizationId: 'tenant-1',
   invoiceNumber: 'INV-2025-001',
   periodStart: '2025-01-01',
   periodEnd: '2025-12-31',
   totalAmount: 5000,
   status: 'sent',
   generatedAt: new Date().toISOString(),
-};
+});
 
-const fakeMembership = {
+const fakeMembership = createFakeMembership({
   id: 'mem-1',
   organizationId: 'tenant-1',
   personId: 'person-1',
   duesExpiryDate: '2025-06-30',
-  status: 'active',
-};
+});
 
 /** Fake DB that passes tx through to callback (simulates transaction) */
 const txDb = {
