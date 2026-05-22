@@ -303,7 +303,14 @@ export function registerRoutes(app: any, specs: any[], config?: any): void {
     );
   }
 
-  // API Documentation UI
+  // API Documentation UI — disabled in production to prevent reconnaissance
+  if (process.env['NODE_ENV'] === 'production') {
+    if (logger) {
+      logger.debug('OpenAPI docs disabled in production');
+    }
+    return;
+  }
+
   app.get(
     '/docs',
     Scalar({

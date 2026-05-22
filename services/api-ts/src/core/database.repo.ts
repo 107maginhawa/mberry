@@ -13,6 +13,7 @@ import type { Logger } from '@/types/logger';
 interface BaseTableColumns {
   id: PgColumn;
   createdAt?: PgColumn;
+  version?: PgColumn;
 }
 
 /**
@@ -131,6 +132,7 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
     const updateData = {
       ...data,
       updatedAt: new Date(),
+      version: sql`${(this.table as unknown as BaseTableColumns).version} + 1`,
     };
 
     const [updated] = await this.db

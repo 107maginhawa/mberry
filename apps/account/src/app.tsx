@@ -95,19 +95,21 @@ function App() {
   return (
     <ApiProvider apiBaseUrl={config.apiUrl} notifier={toast}>
       <InnerApp />
-      <TanStackDevtools
-        config={{ position: 'bottom-right' }}
-        plugins={[
-          {
-            name: 'TanStack Query',
-            render: <ReactQueryDevtoolsPanel />
-          },
-          {
-            name: 'TanStack Router',
-            render: <TanStackRouterDevtoolsPanel />
-          }
-        ]}
-      />
+      {import.meta.env.DEV && (
+        <TanStackDevtools
+          config={{ position: 'bottom-right' }}
+          plugins={[
+            {
+              name: 'TanStack Query',
+              render: <ReactQueryDevtoolsPanel />
+            },
+            {
+              name: 'TanStack Router',
+              render: <TanStackRouterDevtoolsPanel />
+            }
+          ]}
+        />
+      )}
     </ApiProvider>
   )
 }
