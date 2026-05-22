@@ -360,7 +360,7 @@ async function expandSingleField(
 /**
  * Expand an array field using internal HTTP requests
  * Note: Makes individual requests for each ID (N+1 issue)
- * TODO: Consider implementing batch expand endpoint for better performance
+ * Deferred: batch expand endpoint for N+1 performance — optimization v1.2.0
  */
 async function expandArrayField(
   fieldValues: any[],

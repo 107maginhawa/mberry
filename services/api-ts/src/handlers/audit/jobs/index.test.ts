@@ -10,6 +10,7 @@ import { registerAuditJobs } from './index';
 import type { JobScheduler, JobContext } from '@/core/jobs';
 
 // Mock-Classification: APPROPRIATE — audit logging infrastructure boundary
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

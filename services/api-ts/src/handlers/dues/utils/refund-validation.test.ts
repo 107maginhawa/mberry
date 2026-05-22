@@ -6,6 +6,7 @@ import {
   REFUND_WINDOW_DAYS,
   APPROVAL_THRESHOLD_CENTS,
 } from './refund-validation';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 // ─── Fixtures ───────────────────────────────────────────
 

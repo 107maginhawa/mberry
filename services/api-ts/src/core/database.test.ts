@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { detectDialect } from './database';
+// Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 describe('detectDialect', () => {
   test('detects postgresql from postgres:// URL', () => {

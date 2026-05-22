@@ -22,6 +22,7 @@ import {
   type WebhookRetryResult,
   type WebhookEvent,
 } from './webhookRetryProcessor';
+// Factory N/A: job handler test — scheduler/queue assertions, no domain entity construction
 
 // ---------------------------------------------------------------------------
 // Mock helpers

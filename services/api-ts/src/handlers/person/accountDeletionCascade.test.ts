@@ -12,6 +12,8 @@
 
 import { describe, test, expect } from 'bun:test';
 import { executeCascadeDeletion, type CascadeResult } from './accountDeletionCascade';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 // ─── Helpers ─────────────────────────────────────────────
 

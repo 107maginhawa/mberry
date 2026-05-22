@@ -8,6 +8,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { parseConfig } from './config';
+// Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 // ---------------------------------------------------------------------------
 // Helpers for isolated env-var manipulation

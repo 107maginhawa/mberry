@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { generateSlug } from './slug';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('generateSlug', () => {
   test('converts name to kebab-case', () => {

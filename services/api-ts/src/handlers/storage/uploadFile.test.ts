@@ -9,6 +9,7 @@
  */
 
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 import { uploadFile } from './uploadFile';
 import { StorageFileRepository } from './repos/file.repo';
 import { ValidationError } from '@/core/errors';

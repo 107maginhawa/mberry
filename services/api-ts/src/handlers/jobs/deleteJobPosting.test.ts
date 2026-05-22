@@ -7,6 +7,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeJobPosting as createFakeJobPosting } from '@/test-utils/factories';
 import { deleteJobPosting } from './deleteJobPosting';
 import { JobPostingRepository } from './repos/jobs.repo';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 const now = new Date('2026-06-01T00:00:00Z');
 

@@ -10,6 +10,7 @@ import { AdvertiserRepository } from './repos/advertiser.repo';
 import { CampaignRepository } from './repos/campaign.repo';
 import { ValidationError, NotFoundError } from '@/core/errors';
 import type { Advertiser, Campaign } from './repos/advertising.schema';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 function makeAdvertiser(overrides: Partial<Advertiser> = {}): Advertiser {
   return {

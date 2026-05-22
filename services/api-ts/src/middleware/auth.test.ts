@@ -7,6 +7,7 @@
 import { describe, it, expect, mock, beforeEach } from 'bun:test';
 import { authMiddleware } from '@/middleware/auth';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 // ---------------------------------------------------------------------------
 // Helpers

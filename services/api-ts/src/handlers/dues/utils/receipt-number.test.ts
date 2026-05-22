@@ -1,5 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { formatReceiptNumber, parseReceiptNumber } from './receipt-number';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 describe('formatReceiptNumber', () => {
   test('formats with zero-padded sequence', () => {

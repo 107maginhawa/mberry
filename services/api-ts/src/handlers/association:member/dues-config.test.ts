@@ -4,6 +4,7 @@ import {
   DuesConfigCreateRequestSchema,
   DuesConfigUpdateRequestSchema,
 } from '@/generated/openapi/validators';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 /**
  * V-10: gracePeriodDays upper bound validation (max 90 days)

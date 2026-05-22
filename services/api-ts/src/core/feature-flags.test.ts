@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { parseFeatureFlags, isEnabled } from './feature-flags';
+// Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 describe('parseFeatureFlags', () => {
   test('parses FF_ prefixed env vars', () => {

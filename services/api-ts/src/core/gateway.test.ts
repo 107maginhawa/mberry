@@ -19,6 +19,7 @@ import {
   type GatewayCredentials,
   type GatewayProvider,
 } from './gateway';
+// Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 // ---------------------------------------------------------------------------
 // Helpers

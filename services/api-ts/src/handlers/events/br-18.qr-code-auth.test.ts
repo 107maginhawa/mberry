@@ -11,6 +11,7 @@
 
 import { describe, test, expect } from 'bun:test';
 import { createHmac, timingSafeEqual } from 'crypto';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 // ─── Domain helpers (pure, no DB, no HTTP) ──────────────────
 

@@ -26,6 +26,7 @@ import {
   createErrorHandler,
 } from './errors';
 import type { Config } from './config';
+// Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 // ---------------------------------------------------------------------------
 // Minimal config stub

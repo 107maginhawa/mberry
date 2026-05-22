@@ -30,7 +30,8 @@ export async function updateInstitutionalMembership(
   // Extract validated request body
   const body = ctx.req.valid('json');
   
-  // TODO: Implement business logic
+  // Implementation-Status: STUB — institutional memberships deferred to v1.2.0
+  // Tracked: GAP-BACKLOG.md, association:member mega-module split plan
   // Examples of throwing errors:
   // throw new UnauthorizedError();
   // throw new ForbiddenError('You do not have access to this resource');

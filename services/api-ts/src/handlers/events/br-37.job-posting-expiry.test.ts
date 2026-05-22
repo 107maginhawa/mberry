@@ -15,6 +15,7 @@
  */
 
 import { describe, test, expect } from 'bun:test';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 // ─── Pure rule functions (will be extracted to module when M15 is built) ───
 

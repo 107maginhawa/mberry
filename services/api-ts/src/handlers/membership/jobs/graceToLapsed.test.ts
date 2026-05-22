@@ -10,6 +10,7 @@
 
 import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { processGraceToLapsed, type GraceToLapsedResult } from './graceToLapsed';
+// Factory N/A: job handler test — scheduler/queue assertions, no domain entity construction
 
 // ---------------------------------------------------------------------------
 // Mock helpers

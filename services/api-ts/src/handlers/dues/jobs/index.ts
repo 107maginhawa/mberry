@@ -25,9 +25,8 @@ export function registerDuesJobs(scheduler: JobScheduler): void {
       logger: context.logger,
       now: new Date(),
       processPayment: async (_payload) => {
-        // TODO: Wire to actual payment gateway processor
-        // For now, this is the integration point where the gateway
-        // settlement handler will be called.
+        // Deferred: wire to payment gateway processor — dues v2 integration. Tracked: GAP-BACKLOG.md
+        // Integration point where gateway settlement handler will be called.
         throw new DeferredScopeError('Payment processor');
       },
     });

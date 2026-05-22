@@ -30,7 +30,8 @@ export async function listSeatAllocations(
   const query = ctx.req.valid('query');
   
   
-  // TODO: Implement business logic
+  // Implementation-Status: STUB — institutional memberships deferred to v1.2.0
+  // Tracked: GAP-BACKLOG.md, association:member mega-module split plan
   // Examples of throwing errors:
   // throw new UnauthorizedError();
   // throw new ForbiddenError('You do not have access to this resource');

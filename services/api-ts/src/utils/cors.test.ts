@@ -6,6 +6,7 @@
 import { describe, it, expect } from 'bun:test';
 import { createOriginValidator, createTrustedOriginsList, determineCookieConfig } from '@/utils/cors';
 import type { Config } from '@/core/config';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('CORS Configuration', () => {
   const mockContext = {} as any; // Mock Hono context

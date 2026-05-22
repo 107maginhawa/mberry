@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { ac, permissionStatements } from '@/utils/auth';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('Better-Auth Access Control', () => {
   describe('Permission Definitions', () => {

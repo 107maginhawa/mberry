@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { processDuesReminders, type ReminderResult } from './reminderProcessor';
+// Factory N/A: job handler test — scheduler/queue assertions, no domain entity construction
 
 /**
  * Reminder Processor Tests

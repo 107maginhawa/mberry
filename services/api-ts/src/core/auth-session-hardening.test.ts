@@ -8,6 +8,7 @@
  */
 
 import { describe, test, expect, mock } from 'bun:test';
+// Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 // ---------------------------------------------------------------------------
 // AC-M01-001: OTP delivery configuration

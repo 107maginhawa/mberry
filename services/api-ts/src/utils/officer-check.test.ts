@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { requireOfficerTerm, requirePosition } from './officer-check';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 describe('requireOfficerTerm', () => {
   let mocks: Record<string, { mockRestore: () => void }>;

@@ -7,6 +7,7 @@
 
 import { describe, test, expect } from 'bun:test';
 import { DEFAULT_SESSION_LIMIT, enforceSessionLimit } from './session-limit';
+// Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 // ---------------------------------------------------------------------------
 // Constants

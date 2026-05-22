@@ -5,6 +5,7 @@ import { MerchantAccountRepository } from './repos/billing.repo';
 import { PersonRepository } from '../person/repos/person.repo';
 import { onboardMerchantAccount } from './onboardMerchantAccount';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 const MERCHANT_USER_ID = 'merch-user-1';
 const MA_ID = 'ma-1';

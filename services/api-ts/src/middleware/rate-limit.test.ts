@@ -8,6 +8,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { Hono } from 'hono';
 import { createRateLimiter } from '@/middleware/rate-limit';
+// Factory N/A: middleware test — context/request object assertions, no domain entities
 
 // ---------------------------------------------------------------------------
 // Helpers

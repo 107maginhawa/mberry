@@ -16,6 +16,7 @@ import {
   getDueReminders,
   type ReminderScheduleEntry,
 } from './reminder-schedule';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 // ---------------------------------------------------------------------------
 // M6-R5: Default schedule 60/30/7 pre, day-of, 7/30 post

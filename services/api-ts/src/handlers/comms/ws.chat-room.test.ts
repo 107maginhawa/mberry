@@ -13,6 +13,7 @@ import { ChatMessageRepository } from './repos/chatMessage.repo';
 import type { ChatRoom, ChatMessage } from './repos/comms.schema';
 
 // Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

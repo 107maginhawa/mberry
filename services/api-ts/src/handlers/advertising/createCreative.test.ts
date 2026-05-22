@@ -11,6 +11,7 @@ import { CampaignRepository } from './repos/campaign.repo';
 import { CreativeRepository } from './repos/creative.repo';
 import { ValidationError, NotFoundError } from '@/core/errors';
 import type { Campaign, Creative } from './repos/advertising.schema';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 function makeCampaign(overrides: Partial<Campaign> = {}): Campaign {
   return {

@@ -124,7 +124,7 @@ export async function createInvoice(
     };
   });
 
-  const tax = 0; // TODO: Calculate tax based on jurisdiction
+  const tax = 0; // Deferred: tax calculation by jurisdiction — billing v2. Tracked: GAP-BACKLOG.md
   const total = subtotal + tax;
 
   // Create invoice with line items using transaction

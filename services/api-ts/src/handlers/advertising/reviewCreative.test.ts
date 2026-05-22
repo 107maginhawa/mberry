@@ -9,6 +9,7 @@ import { reviewCreative } from './reviewCreative';
 import { CreativeRepository } from './repos/creative.repo';
 import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { Creative } from './repos/advertising.schema';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 function makeCreative(overrides: Partial<Creative> = {}): Creative {
   return {

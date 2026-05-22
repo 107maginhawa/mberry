@@ -4,6 +4,7 @@
 
 import { describe, test, expect } from 'bun:test';
 import { BulkRateLimiter } from './bulk-rate-limiter';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('BulkRateLimiter', () => {
   test('canSend returns true when under limit', () => {

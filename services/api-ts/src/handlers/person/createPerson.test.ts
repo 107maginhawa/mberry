@@ -13,6 +13,7 @@ import { ConflictError } from '@/core/errors';
 import type { Person } from './repos/person.schema';
 
 // Mock-Classification: APPROPRIATE — person handler with auth + DB boundary
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

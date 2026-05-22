@@ -4,6 +4,7 @@ import { fakeDocumentTag } from '@/test-utils/factories';
 import { DocumentTagRepository } from './repos/documents.repo';
 import { listDocumentTags } from './listDocumentTags';
 import { UnauthorizedError } from '@/core/errors';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 const fakeTags = [
   fakeDocumentTag({ id: 'tag-1', name: 'Policy' }),

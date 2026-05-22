@@ -25,6 +25,8 @@
 import { describe, test, expect, beforeAll } from 'bun:test';
 import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
 import { API_AVAILABLE } from '@/tests/helpers/api-available';
+// Test-Classification: INTEGRATION — requires live API server (API_AVAILABLE flag)
+// These tests run in CI with full API stack, skip in unit-test-only mode.
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'; // pda-metro-manila from seed
 

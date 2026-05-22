@@ -6,6 +6,7 @@
  */
 
 import { describe, test, expect, beforeEach, mock } from 'bun:test';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 import {
   recordFailedAttempt,
   getFailedAttemptCount,

@@ -1,6 +1,9 @@
 import { describe, test, expect, beforeAll } from 'bun:test';
 import { apiAs, type ApiClient } from '@/tests/helpers/api-as';
 import { API_AVAILABLE } from '@/tests/helpers/api-available';
+// Factory N/A: integration test — uses API responses as test data, not domain factories
+// Test-Classification: INTEGRATION — requires live API server (API_AVAILABLE flag)
+// These tests run in CI with full API stack, skip in unit-test-only mode.
 
 /**
  * Cross-org isolation (IDOR) tests.

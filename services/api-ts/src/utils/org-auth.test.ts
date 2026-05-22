@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
 import { requireActiveStatus, requireOrgRole, requireTenantAccess } from './org-auth';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 // ─── BR-49: requireActiveStatus allows active + grace ────
 

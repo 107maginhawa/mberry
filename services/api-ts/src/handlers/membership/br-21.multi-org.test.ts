@@ -12,6 +12,7 @@
  */
 
 import { describe, test, expect } from 'bun:test';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 describe('[BR-21] Multi-Org Member Account', () => {
   // ─── Core Rule: One Account, Multiple Org Memberships ─────

@@ -6,6 +6,7 @@ import {
   FINANCIAL_RETENTION_YEARS,
   type FundSplit,
 } from './fund-math';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('allocateFunds [BR-05]', () => {
   test('splits evenly when divisible [BR-05]', () => {

@@ -15,6 +15,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
 // Mock-Classification: APPROPRIATE — external email/SMTP service boundary
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 // ---------------------------------------------------------------------------
 // Types matching the real ones (avoid deep import chains in test bootstrap)
 // ---------------------------------------------------------------------------
@@ -385,9 +386,9 @@ describe('EmailServiceImpl guard pipeline', () => {
 
       expect(mocks.send).toHaveBeenCalledTimes(1);
       const [sendRequest] = mocks.send.mock.calls[0] as [any];
-      expect(sendRequest.headers).toBeDefined();
+      expect(typeof sendRequest.headers).toBe('object');
       const headers = sendRequest.headers as Record<string, string>;
-      expect(headers['List-Unsubscribe']).toBeDefined();
+      expect(headers['List-Unsubscribe']).toMatch(/<https?:\/\//);
       expect(headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
     });
 

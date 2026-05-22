@@ -209,7 +209,7 @@ function generateWebRTCRoomUrl(roomId: string, baseUrl: string): string {
  * via the Authorization header. Clients should use their existing session token
  * when connecting to the WebSocket URL.
  *
- * TODO: Generate short-lived JWT specifically for WebRTC for better security
+ * Deferred: generate short-lived JWT for WebRTC — security hardening v1.2.0
  */
 function generateWebRTCToken(userId: string, callMessageId: string): string {
   // Return placeholder - client should use their session token

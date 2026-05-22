@@ -88,11 +88,8 @@ export async function markInvoiceUncollectible(
   // Update invoice status to uncollectible
   const updatedInvoice = await invoiceRepo.updateStatus(invoiceId, 'uncollectible', user.id);
 
-  // TODO: Trigger any necessary cleanup:
-  // - Cancel pending payment intents
-  // - Update accounting records
-  // - Send notifications
-  // - Create audit log entries
+  // Deferred: uncollectible cleanup pipeline — billing v2
+  // Cancel pending payment intents, update accounting, send notifications, create audit log
 
   logger.info({
     invoiceId,
@@ -109,24 +106,27 @@ export async function markInvoiceUncollectible(
     invoiceNumber: updatedInvoice.invoiceNumber,
     customer: updatedInvoice.customer, // Already correct field name
     merchant: updatedInvoice.merchant, // Already correct field name
-    context: null, // TODO: Add context field to schema
+    // Schema-Gap: fields [context, paymentCaptureMethod, paymentDueAt, paidBy, voidedBy,
+    //   voidThresholdMinutes, authorizedAt/authorizedBy, metadata, lineItems]
+    //   deferred to billing v2 schema migration. Tracked: GAP-BACKLOG.md
+    context: null,
     status: updatedInvoice.status,
     subtotal: updatedInvoice.subtotal,
     tax: updatedInvoice.tax,
     total: updatedInvoice.total,
     currency: updatedInvoice.currency,
-    paymentCaptureMethod: 'automatic', // TODO: Add to schema
-    paymentDueAt: null, // TODO: Add dueAt field to schema
-    lineItems: [], // TODO: Implement proper line items storage
+    paymentCaptureMethod: 'automatic',
+    paymentDueAt: null,
+    lineItems: [],
     paymentStatus: updatedInvoice.paymentStatus || null,
     paidAt: updatedInvoice.paidAt?.toISOString() || null,
-    paidBy: null, // TODO: Add to schema
+    paidBy: null,
     voidedAt: updatedInvoice.voidedAt?.toISOString() || null,
-    voidedBy: null, // TODO: Add to schema
-    voidThresholdMinutes: null, // TODO: Add to schema
-    authorizedAt: null, // TODO: Add to schema
-    authorizedBy: null, // TODO: Add to schema
-    metadata: null, // TODO: Add metadata support
+    voidedBy: null,
+    voidThresholdMinutes: null,
+    authorizedAt: null,
+    authorizedBy: null,
+    metadata: null,
     createdAt: updatedInvoice.createdAt.toISOString(),
     updatedAt: updatedInvoice.updatedAt.toISOString()
   };

@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { AUDIT_EVENT_CATEGORIES, typedEventSubType } from './audit-events';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('Typed Audit Events', () => {
   test('all categories have at least one sub-type', () => {

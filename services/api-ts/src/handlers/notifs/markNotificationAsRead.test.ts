@@ -6,6 +6,7 @@
  */
 
 import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 import { markNotificationAsRead } from './markNotificationAsRead';
 import { NotificationRepository } from './repos/notification.repo';
 import { PersonRepository } from '../person/repos/person.repo';

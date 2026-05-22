@@ -5,6 +5,7 @@ import {
   FEED_POST_VALID_TRANSITIONS,
   isValidTransition,
 } from './status-transitions';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('isValidTransition', () => {
   it('returns true for a known valid transition', () => {

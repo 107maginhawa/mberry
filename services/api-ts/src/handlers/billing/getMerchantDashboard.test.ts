@@ -4,6 +4,7 @@ import { fakeMerchantAccount as createFakeMerchantAccount } from '@/test-utils/f
 import { MerchantAccountRepository } from './repos/billing.repo';
 import { getMerchantDashboard } from './getMerchantDashboard';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 const MERCHANT_USER_ID = 'merch-user-1';
 const MA_ID = 'ma-1';

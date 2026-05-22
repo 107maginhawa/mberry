@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { CertificatesRepository } from './certificates.repo';
+// Factory N/A: repository test — DB operation assertions with inline query params
 
 function makeDb(rows: any[] = []) {
   const chain = {

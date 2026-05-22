@@ -6,6 +6,7 @@ import {
   calculateReminderDates,
   getDueReminders,
 } from './reminder-schedule';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('PayMongoAdapter', () => {
   const adapter = new PayMongoAdapter('sk_test_key', 'whsec_test');

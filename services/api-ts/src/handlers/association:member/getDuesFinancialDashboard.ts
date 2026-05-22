@@ -51,6 +51,6 @@ export async function getDuesFinancialDashboard(
     totalCount: Number(stats.totalCount),
     collectionRate: Number(stats.collectionRate),
     gatewayConfigured: !!gatewayConfig?.connected,
-    expiringThisMonth: 0, // TODO: implement with membership expiry query in Slice 3
+    expiringThisMonth: 0, // Deferred: membership expiry query — dues dashboard v1.2.0
   }, 200);
 }

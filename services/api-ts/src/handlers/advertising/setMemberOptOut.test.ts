@@ -7,6 +7,7 @@
 import { describe, test, expect } from 'bun:test';
 import { setMemberOptOut } from './setMemberOptOut';
 import { ValidationError } from '@/core/errors';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 function makeCtx(opts: { userId?: string; body?: Record<string, any> } = {}) {
   const userId = opts.userId ?? 'user-1';

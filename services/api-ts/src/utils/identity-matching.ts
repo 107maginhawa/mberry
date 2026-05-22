@@ -46,7 +46,7 @@ export async function findIdentityMatches(
   email?: string,
   licenseNumber?: string
 ): Promise<IdentityMatch[]> {
-  // TODO: Implement actual DB queries in Wave 1 when person schema has license fields
+  // Deferred: DB queries pending person schema license fields — identity matching v1.2.0
   // Placeholder structure:
   //
   // const matches: IdentityMatch[] = [];

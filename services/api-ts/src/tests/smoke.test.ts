@@ -9,6 +9,9 @@
 
 import { describe, test, expect } from 'bun:test';
 import { API_AVAILABLE } from './helpers/api-available';
+// Factory N/A: integration test — uses API responses as test data, not domain factories
+// Test-Classification: INTEGRATION — requires live API server (API_AVAILABLE flag)
+// These tests run in CI with full API stack, skip in unit-test-only mode.
 
 const API_URL = process.env['API_URL'] || 'http://localhost:7213';
 const d = API_AVAILABLE ? describe : describe.skip;

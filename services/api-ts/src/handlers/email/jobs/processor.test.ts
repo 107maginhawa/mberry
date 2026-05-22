@@ -9,6 +9,7 @@
  */
 
 import { describe, test, expect, mock } from 'bun:test';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 import { emailProcessorJob } from './processor';
 import type { JobContext } from '@/core/jobs';
 import type { EmailService } from '@/core/email';

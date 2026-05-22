@@ -9,6 +9,7 @@
 import { describe, test, expect } from 'bun:test';
 import { Hono } from 'hono';
 import { AppError } from '@/core/errors';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 // ---------------------------------------------------------------------------
 // Fixtures

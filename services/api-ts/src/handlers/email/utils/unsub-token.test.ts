@@ -4,6 +4,7 @@
 
 import { describe, test, expect } from 'bun:test';
 import { generateUnsubToken, verifyUnsubToken } from './unsub-token';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('generateUnsubToken', () => {
   test('returns a non-empty base64url string', () => {

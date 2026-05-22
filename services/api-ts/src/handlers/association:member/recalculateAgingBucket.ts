@@ -24,8 +24,8 @@ export async function recalculateAgingBucket(
     description: 'Aging bucket recalculated',
   });
 
-  // Placeholder — full recalculation from overdue invoices not yet implemented
-  // TODO: Query overdue invoices, bucket by age, upsert aging snapshot
+  // Implementation-Status: STUB — aging bucket recalculation deferred to v1.2.0
+  // Deferred: query overdue invoices, bucket by age, upsert aging snapshot
   return ctx.json({
     organizationId,
     asOfDate: new Date().toISOString().split('T')[0],

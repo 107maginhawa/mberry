@@ -6,6 +6,7 @@
  * the decision function without Better-Auth infrastructure.
  */
 import { describe, test, expect } from 'bun:test';
+// Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 describe('M3-R7: MFA disable prevention for platform admins', () => {
   // The guard in auth.ts checks: if user is in platform_admin table → reject

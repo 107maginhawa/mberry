@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { computeNewExpiry, type BillingCycle } from './expiry-extension';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 // [BR-07] Dues Expiry Extension on Payment
 // Tests written from BR text, not from implementation.

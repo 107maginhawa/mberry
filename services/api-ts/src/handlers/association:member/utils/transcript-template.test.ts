@@ -18,6 +18,7 @@ import {
   type TranscriptCreditEntry,
 } from './transcript-template';
 import { summarizeCycle, type CreditCycle } from './credit-cycle';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 // ─── Fixtures ───────────────────────────────────────────
 

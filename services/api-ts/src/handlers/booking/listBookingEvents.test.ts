@@ -3,6 +3,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeBookingEvent } from '@/test-utils/factories';
 import { BookingEventRepository } from './repos/bookingEvent.repo';
 import { listBookingEvents } from './listBookingEvents';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 const fakeEvent = fakeBookingEvent();
 

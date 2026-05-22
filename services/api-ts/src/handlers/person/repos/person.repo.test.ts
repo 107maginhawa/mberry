@@ -12,6 +12,7 @@ import { PersonRepository } from './person.repo';
 import type { Person, NewPerson } from './person.schema';
 
 // Mock-Classification: APPROPRIATE — DB repository layer boundary
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

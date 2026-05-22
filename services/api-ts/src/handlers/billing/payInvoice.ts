@@ -114,7 +114,7 @@ export async function payInvoice(
   try {
     // Get pricing from invoice (already in cents as integers)
     const amount = invoice.total;
-    const platformAmount = 0; // TODO: Calculate platform fee
+    const platformAmount = 0; // Deferred: platform fee calculation — billing v2. Tracked: GAP-BACKLOG.md
     const currency = invoice.currency;
     
     // Create payment intent with Stripe

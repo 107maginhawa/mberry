@@ -1,6 +1,10 @@
 import { describe, test, expect } from 'bun:test';
 import { apiAs } from './helpers/api-as';
 import { API_AVAILABLE } from './helpers/api-available';
+// Factory N/A: integration test — uses API responses as test data, not domain factories
+// Test-Classification: INTEGRATION — requires live API server (API_AVAILABLE flag)
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
+// These tests run in CI with full API stack, skip in unit-test-only mode.
 
 // INFRA: requires live API server on port 7213 with seed data
 const d = API_AVAILABLE ? describe : describe.skip;

@@ -19,6 +19,7 @@ import {
   electionTypeEnum,
   votingModeEnum,
 } from './repos/elections.schema';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 describe('[024] Elections Schema — Enum Verification', () => {
   test('electionStatusEnum contains all lifecycle states', () => {

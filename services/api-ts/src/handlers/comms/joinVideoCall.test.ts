@@ -7,6 +7,7 @@
  */
 
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 import { joinVideoCall } from './joinVideoCall';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';

@@ -13,6 +13,7 @@ import { requestAccountDeletion } from './requestAccountDeletion';
 import { cancelAccountDeletion } from './cancelAccountDeletion';
 import { executeAccountDeletion } from './executeAccountDeletion';
 import { PersonRepository } from './repos/person.repo';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 

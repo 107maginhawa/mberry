@@ -18,6 +18,7 @@ import {
   type DunningMemberContext,
   type DunningTemplateConfig,
 } from './utils/dunning-escalation';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 // ---------------------------------------------------------------------------
 // GAP-012: Dunning stage determination

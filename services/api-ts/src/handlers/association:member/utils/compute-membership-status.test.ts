@@ -7,6 +7,7 @@
  */
 import { describe, test, expect } from 'bun:test';
 import { computeMembershipStatus } from './compute-membership-status';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 // Helper: create a date string N days from reference
 function daysFromNow(n: number, ref = new Date()): string {

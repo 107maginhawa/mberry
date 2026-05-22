@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { validateDateOfBirth, validatedDateOfBirth } from './date';
 import { ValidationError } from '@/core/errors';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
 describe('Date Validation Utilities', () => {
   describe('validateDateOfBirth', () => {

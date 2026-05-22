@@ -8,6 +8,7 @@ import { createAdvertiser } from './createAdvertiser';
 import { AdvertiserRepository } from './repos/advertiser.repo';
 import { ValidationError } from '@/core/errors';
 import type { Advertiser } from './repos/advertising.schema';
+// Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 function makeAdvertiser(overrides: Partial<Advertiser> = {}): Advertiser {
   return {

@@ -9,6 +9,7 @@
 import { describe, test, expect } from 'bun:test';
 import { fakePerson as createFakePerson } from '@/test-utils/factories';
 import { processDeletions } from './deletionProcessor';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -245,7 +246,7 @@ describe('processDeletions', () => {
 
     const after = new Date();
     const updateData = capturedSets.find((s: any) => s.firstName === 'DELETED');
-    expect(updateData.deletionCompletedAt).toBeDefined();
+    expect(updateData.deletionCompletedAt).toBeInstanceOf(Date);
     const completedAt = new Date(updateData.deletionCompletedAt);
     expect(completedAt.getTime()).toBeGreaterThanOrEqual(before.getTime() - 1000);
     expect(completedAt.getTime()).toBeLessThanOrEqual(after.getTime() + 1000);
@@ -382,6 +383,6 @@ describe('processDeletions', () => {
     expect(details.phone).toBeUndefined();
     expect(details.contactInfo).toBeUndefined();
     // Must contain only safe identifiers
-    expect(details.personId).toBeDefined();
+    expect(details.personId).toBe('person-1');
   });
 });

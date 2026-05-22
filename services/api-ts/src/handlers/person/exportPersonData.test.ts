@@ -10,6 +10,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakePerson as createFakePerson } from '@/test-utils/factories';
 import { exportPersonData } from './exportPersonData';
 import { PersonRepository } from './repos/person.repo';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 
 const fakePerson = createFakePerson({
   specialization: 'Orthodontics',

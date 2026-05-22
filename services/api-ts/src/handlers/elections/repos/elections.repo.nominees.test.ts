@@ -13,6 +13,7 @@
 
 import { describe, test, expect } from 'bun:test';
 import { ElectionsRepository } from './elections.repo';
+// Factory N/A: repository test — DB operation assertions with inline query params
 
 // ─── DB Stub Factory ────────────────────────────────────
 

@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { orgContextMiddleware } from './org-context';
+// Factory N/A: middleware test — context/request object assertions, no domain entities
 
 /**
  * Org-context middleware tests.

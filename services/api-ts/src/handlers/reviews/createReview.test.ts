@@ -7,6 +7,7 @@
  */
 
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 import { createReview } from './createReview';
 import { ReviewRepository } from './repos/review.repo';
 import {

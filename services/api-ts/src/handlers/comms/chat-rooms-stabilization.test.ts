@@ -15,6 +15,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
 // Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
+// Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 import { createChatRoom } from './createChatRoom';
 import { getChatRoom } from './getChatRoom';
 import { getChatMessages } from './getChatMessages';
