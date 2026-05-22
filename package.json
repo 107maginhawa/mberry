@@ -1,0 +1,54 @@
+{
+  "name": "monobase",
+  "version": "0.1.0.0",
+  "private": true,
+  "description": "Monobase Application Platform Monorepo",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*",
+    "specs/*"
+  ],
+  "packageManager": "bun@1.2.21",
+  "scripts": {
+    "build": "bun run --filter '*' build",
+    "clean": "rm -rf node_modules bun.lock && find . -name 'node_modules' -type d -prune -exec rm -rf {} +",
+    "lint:migrations": "bun scripts/migration-safety.ts",
+    "lint:no-skips": "bun scripts/lint-no-skips.ts",
+    "lint:shallow": "bun scripts/lint-shallow-tests.ts",
+    "rollback": "bash scripts/rollback.sh",
+    "test:contract": "bun scripts/run-contract-tests.ts",
+    "test:br": "bun run scripts/br-coverage.ts",
+    "test:contract:fuzz": "bun scripts/run-schemathesis.ts",
+    "prepare": "husky",
+    "test:registry": "bun run testing/registry/report.ts",
+    "test:inventory": "bun run testing/scripts/generate-endpoint-inventory.ts && bun run testing/scripts/generate-screen-inventory.ts && bun run testing/scripts/generate-component-inventory.ts",
+    "typecheck": "bun run --filter '*' typecheck",
+    "lint": "bun run --filter '*' lint"
+  },
+  "lint-staged": {
+    "services/api-ts/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config services/api-ts/eslint.config.js"],
+    "apps/account/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/account/eslint.config.js"],
+    "apps/memberry/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/memberry/eslint.config.js"],
+    "apps/admin/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/admin/eslint.config.js"]
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.2.21"
+  },
+  "overrides": {
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "csstype": "3.2.3"
+  },
+  "devDependencies": {
+    "@esbuild/darwin-arm64": "^0.25.0",
+    "@esbuild/linux-x64": "^0.25.0",
+    "@rollup/rollup-darwin-arm64": "^4.52.3",
+    "@rollup/rollup-linux-x64-gnu": "^4.52.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "react-hook-form": "^7.75.0"
+  }
+}

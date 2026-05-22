@@ -1,0 +1,106 @@
+/**
+ * Get Invoice Handler
+ *
+ * Retrieves a single invoice by ID.
+ * Follows TypeSpec billing.tsp definition with current schema adaptation.
+ */
+
+import type { ValidatedContext } from '@/types/app';
+import type { GetInvoiceQuery, GetInvoiceParams } from '@/generated/openapi/validators';
+import { ForbiddenError, NotFoundError } from '@/core/errors';
+import type { Session } from '@/types/auth';
+import { InvoiceRepository } from './repos/billing.repo';
+
+/**
+ * getInvoice
+ *
+ * Path: GET /invoices/{invoice}
+ * OperationId: getInvoice
+ *
+ * Get invoice by ID with authorization checks
+ */
+export async function getInvoice(
+  ctx: ValidatedContext<never, GetInvoiceQuery, GetInvoiceParams>
+): Promise<Response> {
+  const database = ctx.get('database');
+  const logger = ctx.get('logger');
+
+  // Get authenticated session (guaranteed by middleware)
+  const session = ctx.get('session') as Session;
+  const user = session.user;
+
+  // Extract validated parameters
+  const params = ctx.req.valid('param');
+  const query = ctx.req.valid('query');
+
+  const invoiceId = params.invoice;
+
+  logger.debug({ invoiceId, userId: user.id }, 'Getting invoice');
+
+  // Create repository instance
+  const invoiceRepo = new InvoiceRepository(database, logger);
+
+  // Get invoice with line items
+  const invoice = await invoiceRepo.findOneWithLineItems(invoiceId);
+
+  if (!invoice) {
+    throw new NotFoundError('Invoice not found', {
+      resourceType: 'invoice',
+      resource: invoiceId,
+      suggestions: ['Check invoice ID format', 'Verify invoice exists in system']
+    });
+  }
+
+  // Authorization check: merchant, customer, or admin can view
+  const userRoles = user.role ? user.role.split(',').map((r: string) => r.trim()) : [];
+  const isAdmin = userRoles.includes('admin');
+
+  if (!isAdmin && invoice.merchant !== user.id && invoice.customer !== user.id) {
+    throw new ForbiddenError('You can only access invoices where you are the merchant or customer');
+  }
+
+  logger.info({
+    invoiceId,
+    invoiceNumber: invoice.invoiceNumber,
+    merchantId: invoice.merchant,
+    customerId: invoice.customer,
+    status: invoice.status,
+    total: invoice.total
+  }, 'Invoice retrieved successfully');
+
+  // Format response to match TypeSpec Invoice model
+  const response = {
+    id: invoice.id,
+    invoiceNumber: invoice.invoiceNumber,
+    customer: invoice.customer,
+    merchant: invoice.merchant,
+    context: invoice.context || null,
+    status: invoice.status,
+    subtotal: invoice.subtotal,
+    tax: invoice.tax || null,
+    total: invoice.total,
+    currency: invoice.currency,
+    paymentCaptureMethod: invoice.paymentCaptureMethod,
+    paymentDueAt: invoice.paymentDueAt?.toISOString() || null,
+    lineItems: (invoice.lineItems || []).map((item: any) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      amount: item.amount,
+      metadata: item.metadata || null
+    })),
+    paymentStatus: invoice.paymentStatus || null,
+    paidAt: invoice.paidAt?.toISOString() || null,
+    paidBy: invoice.paidBy || null,
+    voidedAt: invoice.voidedAt?.toISOString() || null,
+    voidedBy: invoice.voidedBy || null,
+    voidThresholdMinutes: invoice.voidThresholdMinutes || null,
+    authorizedAt: invoice.authorizedAt?.toISOString() || null,
+    authorizedBy: invoice.authorizedBy || null,
+    metadata: invoice.metadata || null,
+    createdAt: invoice.createdAt.toISOString(),
+    updatedAt: invoice.updatedAt.toISOString()
+  };
+
+  return ctx.json(response, 200);
+}

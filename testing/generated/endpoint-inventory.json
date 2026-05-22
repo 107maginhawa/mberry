@@ -1,0 +1,3219 @@
+{
+  "generated": "2026-05-12T14:05:02.900Z",
+  "count": 357,
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/admin/admins",
+      "operationId": "inviteAdmin",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/admins",
+      "operationId": "listAdmins",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/admins/{adminId}",
+      "operationId": "updateAdmin",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/admins/{adminId}",
+      "operationId": "revokeAdmin",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/associations",
+      "operationId": "createAssociation",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/associations",
+      "operationId": "listAssociations",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/associations/{associationId}",
+      "operationId": "getAssociation",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/associations/{associationId}",
+      "operationId": "updateAssociation",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/associations/{associationId}",
+      "operationId": "deleteAssociation",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/feature-flags",
+      "operationId": "setFeatureFlag",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/feature-flags",
+      "operationId": "listFeatureFlags",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/feature-flags/{flagId}",
+      "operationId": "deleteFeatureFlag",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/impersonate",
+      "operationId": "startImpersonation",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/impersonate/{sessionId}/end",
+      "operationId": "endImpersonation",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/me/role",
+      "operationId": "getAdminRole",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/organizations",
+      "operationId": "createOrganization",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/organizations",
+      "operationId": "listOrganizations",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/organizations/{organizationId}",
+      "operationId": "getOrganization",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/organizations/{organizationId}",
+      "operationId": "updateOrganization",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/organizations/{organizationId}/transition",
+      "operationId": "transitionOrgStatus",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/document-tags",
+      "operationId": "createDocumentTag",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/document-tags",
+      "operationId": "listDocumentTags",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/document-tags/{tagId}",
+      "operationId": "getDocumentTag",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/document-tags/{tagId}",
+      "operationId": "updateDocumentTag",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/document-tags/{tagId}",
+      "operationId": "deleteDocumentTag",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/documents",
+      "operationId": "createDocument",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents",
+      "operationId": "searchDocuments",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents/{documentId}",
+      "operationId": "getDocument",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/documents/{documentId}",
+      "operationId": "updateDocument",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/documents/{documentId}",
+      "operationId": "deleteDocument",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents/{documentId}/access-log",
+      "operationId": "getDocumentAccessLog",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/documents/{documentId}/archive",
+      "operationId": "archiveDocument",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/documents/{documentId}/versions",
+      "operationId": "uploadNewDocumentVersion",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents/{documentId}/versions",
+      "operationId": "listDocumentVersions",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents/{documentId}/versions/{versionId}",
+      "operationId": "getDocumentVersion",
+      "tags": [
+        "Documents"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/event-lifecycle/my",
+      "operationId": "listMyCustomEvents",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/event-lifecycle/{eventId}/attendance",
+      "operationId": "listCustomEventAttendance",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/event-lifecycle/{eventId}/check-in",
+      "operationId": "checkInCustomEvent",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/event-lifecycle/{eventId}/register",
+      "operationId": "registerForCustomEvent",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/event-lifecycle/{eventId}/registrations",
+      "operationId": "listCustomEventRegistrations",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/events",
+      "operationId": "createEvent",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/events",
+      "operationId": "searchEvents",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/checkins",
+      "operationId": "createCheckIn",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/checkins",
+      "operationId": "searchCheckIns",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/registrations",
+      "operationId": "createEventRegistration",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/registrations",
+      "operationId": "searchEventRegistrations",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/registrations/{registrationId}",
+      "operationId": "getEventRegistration",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/events/registrations/{registrationId}",
+      "operationId": "updateEventRegistration",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/events/registrations/{registrationId}",
+      "operationId": "deleteEventRegistration",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/registrations/{registrationId}/cancel",
+      "operationId": "cancelEventRegistration",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/registrations/{registrationId}/refund",
+      "operationId": "refundEventRegistration",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/{eventId}",
+      "operationId": "getEvent",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/events/{eventId}",
+      "operationId": "updateEvent",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/events/{eventId}",
+      "operationId": "deleteEvent",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/{eventId}/cancel",
+      "operationId": "cancelEvent",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/{eventId}/publish",
+      "operationId": "publishEvent",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/{eventId}/waitlist",
+      "operationId": "listWaitlistEntries",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/{eventId}/waitlist/{entryId}/promote",
+      "operationId": "promoteWaitlistEntry",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers",
+      "operationId": "createAffiliationTransfer",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/affiliation-transfers",
+      "operationId": "listAffiliationTransfers",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/affiliation-transfers/{transferId}",
+      "operationId": "getAffiliationTransfer",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers/{transferId}/approve-source",
+      "operationId": "approveTransferBySource",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers/{transferId}/approve-target",
+      "operationId": "approveTransferByTarget",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers/{transferId}/complete",
+      "operationId": "completeAffiliationTransfer",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers/{transferId}/deny",
+      "operationId": "denyAffiliationTransfer",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/aging-buckets/{organizationId}",
+      "operationId": "getAgingBucket",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/aging-buckets/{organizationId}/recalculate",
+      "operationId": "recalculateAgingBucket",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/applications",
+      "operationId": "createMembershipApplication",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/applications",
+      "operationId": "listMembershipApplications",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/applications/{applicationId}",
+      "operationId": "getMembershipApplication",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/applications/{applicationId}",
+      "operationId": "updateMembershipApplication",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/applications/{applicationId}",
+      "operationId": "deleteMembershipApplication",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/applications/{applicationId}/approve",
+      "operationId": "approveMembershipApplication",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/applications/{applicationId}/deny",
+      "operationId": "denyMembershipApplication",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/ballots",
+      "operationId": "castBallot",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/ballots",
+      "operationId": "listBallots",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/candidates",
+      "operationId": "createCandidate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/candidates",
+      "operationId": "listCandidates",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/candidates/{candidateId}",
+      "operationId": "getCandidate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/candidates/{candidateId}",
+      "operationId": "updateCandidate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/candidates/{candidateId}",
+      "operationId": "deleteCandidate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/certificates",
+      "operationId": "listMyCertificates",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/certificates/{certificateId}",
+      "operationId": "getCertificate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/chapter-affiliations",
+      "operationId": "createChapterAffiliation",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/chapter-affiliations",
+      "operationId": "listChapterAffiliations",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/chapter-affiliations/{affiliationId}",
+      "operationId": "getChapterAffiliation",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/chapter-affiliations/{affiliationId}",
+      "operationId": "updateChapterAffiliation",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/chapter-affiliations/{affiliationId}",
+      "operationId": "deleteChapterAffiliation",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/chapter-affiliations/{affiliationId}/set-primary",
+      "operationId": "setPrimaryChapterAffiliation",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credential-templates",
+      "operationId": "createCredentialTemplate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credential-templates",
+      "operationId": "listCredentialTemplates",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credential-templates/{templateId}",
+      "operationId": "getCredentialTemplate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/credential-templates/{templateId}",
+      "operationId": "updateCredentialTemplate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/credential-templates/{templateId}",
+      "operationId": "deleteCredentialTemplate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credentials",
+      "operationId": "listDigitalCredentials",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credentials/issue",
+      "operationId": "issueDigitalCredential",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credentials/public-verify",
+      "operationId": "verifyCredentialPublic",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credentials/verify",
+      "operationId": "verifyDigitalCredentialAuthenticated",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credentials/{credentialId}",
+      "operationId": "getDigitalCredential",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/credentials/{credentialId}",
+      "operationId": "updateDigitalCredential",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/credentials/{credentialId}",
+      "operationId": "deleteDigitalCredential",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credentials/{credentialId}/revoke",
+      "operationId": "revokeDigitalCredential",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/directory/profiles",
+      "operationId": "createDirectoryProfile",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/directory/profiles",
+      "operationId": "listDirectoryProfiles",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/directory/profiles/{profileId}",
+      "operationId": "getDirectoryProfile",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/directory/profiles/{profileId}",
+      "operationId": "updateDirectoryProfile",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/directory/profiles/{profileId}",
+      "operationId": "deleteDirectoryProfile",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/directory/search",
+      "operationId": "searchDirectory",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/directory/search/{personId}/public",
+      "operationId": "getPublicDirectoryProfile",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-configs",
+      "operationId": "createDuesConfig",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-configs",
+      "operationId": "listDuesConfigs",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-configs/{duesConfigId}",
+      "operationId": "getDuesConfig",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/dues-configs/{duesConfigId}",
+      "operationId": "updateDuesConfig",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/dues-configs/{duesConfigId}",
+      "operationId": "deleteDuesConfig",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-gateway/{organizationId}",
+      "operationId": "getDuesGatewayConfig",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/dues-gateway/{organizationId}",
+      "operationId": "upsertDuesGatewayConfig",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/dues-gateway/{organizationId}",
+      "operationId": "disconnectDuesGateway",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-gateway/{organizationId}/test",
+      "operationId": "testDuesGatewayConnection",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-invoices",
+      "operationId": "createDuesInvoice",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-invoices",
+      "operationId": "listDuesInvoices",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-invoices/generate",
+      "operationId": "generateDuesInvoicesForOrg",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-invoices/{invoiceId}",
+      "operationId": "getDuesInvoice",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/dues-invoices/{invoiceId}",
+      "operationId": "updateDuesInvoice",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/dues-invoices/{invoiceId}",
+      "operationId": "deleteDuesInvoice",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-invoices/{invoiceId}/mark-paid",
+      "operationId": "markDuesInvoicePaid",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-payments",
+      "operationId": "listDuesPayments",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments",
+      "operationId": "recordDuesPayment",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-payments/pending-proofs",
+      "operationId": "listPendingProofs",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments/submit-proof",
+      "operationId": "submitPaymentProof",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-payments/{paymentId}",
+      "operationId": "getDuesPayment",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments/{paymentId}/confirm",
+      "operationId": "confirmPaymentProof",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments/{paymentId}/refund",
+      "operationId": "refundDuesPayment",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments/{paymentId}/reject",
+      "operationId": "rejectPaymentProof",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-reporting",
+      "operationId": "listDuesFunds",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/dues-reporting/{organizationId}",
+      "operationId": "upsertDuesFunds",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-reporting/{organizationId}/dashboard",
+      "operationId": "getDuesFinancialDashboard",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-reporting/{organizationId}/report",
+      "operationId": "generateDuesReport",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dunning/events",
+      "operationId": "listDunningEvents",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dunning/run",
+      "operationId": "runDunning",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dunning/templates",
+      "operationId": "createDunningTemplate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dunning/templates",
+      "operationId": "listDunningTemplates",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dunning/templates/{templateId}",
+      "operationId": "getDunningTemplate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/dunning/templates/{templateId}",
+      "operationId": "updateDunningTemplate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/dunning/templates/{templateId}",
+      "operationId": "deleteDunningTemplate",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/elections",
+      "operationId": "createElection",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/elections",
+      "operationId": "listElections",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/elections/{electionId}",
+      "operationId": "getElection",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/elections/{electionId}",
+      "operationId": "updateElection",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/elections/{electionId}",
+      "operationId": "deleteElection",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/elections/{electionId}/certify",
+      "operationId": "certifyElection",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/elections/{electionId}/open-nominations",
+      "operationId": "openElectionNominations",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/elections/{electionId}/open-voting",
+      "operationId": "openElectionVoting",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/institutional-memberships",
+      "operationId": "createInstitutionalMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/institutional-memberships",
+      "operationId": "listInstitutionalMemberships",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
+      "operationId": "getInstitutionalMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
+      "operationId": "updateInstitutionalMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
+      "operationId": "deleteInstitutionalMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats",
+      "operationId": "allocateSeat",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats",
+      "operationId": "listSeatAllocations",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats/{seatAllocationId}/revoke",
+      "operationId": "revokeSeat",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/license-renewal-alerts",
+      "operationId": "listLicenseRenewalAlerts",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/license-renewal-alerts/{alertId}/acknowledge",
+      "operationId": "acknowledgeLicenseRenewalAlert",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/licenses",
+      "operationId": "createProfessionalLicense",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/licenses",
+      "operationId": "listProfessionalLicenses",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/licenses/{licenseId}",
+      "operationId": "getProfessionalLicense",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/licenses/{licenseId}",
+      "operationId": "updateProfessionalLicense",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/licenses/{licenseId}",
+      "operationId": "deleteProfessionalLicense",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/membership-categories",
+      "operationId": "listMembershipCategories",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/membership-categories/{organizationId}",
+      "operationId": "upsertMembershipCategory",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships",
+      "operationId": "createMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/memberships",
+      "operationId": "listMemberships",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/memberships/{membershipId}",
+      "operationId": "getMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/memberships/{membershipId}",
+      "operationId": "updateMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/memberships/{membershipId}",
+      "operationId": "deleteMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships/{membershipId}/reinstate",
+      "operationId": "reinstateMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships/{membershipId}/renew",
+      "operationId": "renewMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships/{membershipId}/terminate",
+      "operationId": "terminateMembership",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/officer-terms",
+      "operationId": "createOfficerTerm",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/officer-terms",
+      "operationId": "listOfficerTerms",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/officer-terms/{termId}",
+      "operationId": "getOfficerTerm",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/officer-terms/{termId}",
+      "operationId": "updateOfficerTerm",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/officer-terms/{termId}",
+      "operationId": "deleteOfficerTerm",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/org-profile/{organizationId}",
+      "operationId": "getOrganizationProfile",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/org-profile/{organizationId}",
+      "operationId": "updateOrganizationProfile",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/positions",
+      "operationId": "createPosition",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/positions",
+      "operationId": "listPositions",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/positions/{positionId}",
+      "operationId": "getPosition",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/positions/{positionId}",
+      "operationId": "updatePosition",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/positions/{positionId}",
+      "operationId": "deletePosition",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/roster",
+      "operationId": "listRosterMembers",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/roster",
+      "operationId": "addRosterMember",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/roster/import",
+      "operationId": "importRosterMembers",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/roster/{memberId}",
+      "operationId": "getRosterMember",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/roster/{memberId}",
+      "operationId": "updateRosterMember",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/royalty-splits",
+      "operationId": "createRoyaltySplit",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/royalty-splits",
+      "operationId": "listRoyaltySplits",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/royalty-splits/{royaltySplitId}",
+      "operationId": "getRoyaltySplit",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/royalty-splits/{royaltySplitId}",
+      "operationId": "updateRoyaltySplit",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/royalty-splits/{royaltySplitId}",
+      "operationId": "deleteRoyaltySplit",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/tiers",
+      "operationId": "createMembershipTier",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/tiers",
+      "operationId": "listMembershipTiers",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/tiers/{tierId}",
+      "operationId": "getMembershipTier",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/tiers/{tierId}",
+      "operationId": "updateMembershipTier",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/tiers/{tierId}",
+      "operationId": "deleteMembershipTier",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/message-templates",
+      "operationId": "createMessageTemplate",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/message-templates",
+      "operationId": "searchMessageTemplates",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/message-templates/{templateId}",
+      "operationId": "getMessageTemplate",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/message-templates/{templateId}",
+      "operationId": "updateMessageTemplate",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/message-templates/{templateId}",
+      "operationId": "deleteMessageTemplate",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/message-templates/{templateId}/preview",
+      "operationId": "previewMessageTemplate",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/messages",
+      "operationId": "createMessage",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/messages",
+      "operationId": "searchMessages",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/messages/{messageId}",
+      "operationId": "getMessage",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/messages/{messageId}",
+      "operationId": "updateMessage",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/messages/{messageId}",
+      "operationId": "deleteMessage",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/messages/{messageId}/cancel",
+      "operationId": "cancelMessage",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/messages/{messageId}/schedule",
+      "operationId": "scheduleMessage",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/messages/{messageId}/send",
+      "operationId": "sendMessage",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/person-subscriptions",
+      "operationId": "listPersonSubscriptions",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/person-subscriptions/bulk-update",
+      "operationId": "bulkUpdatePersonSubscriptions",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/person-subscriptions/{subscriptionId}",
+      "operationId": "updatePersonSubscription",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/subscription-topics",
+      "operationId": "createSubscriptionTopic",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/association/subscription-topics/{topicId}",
+      "operationId": "getSubscriptionTopic",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/subscription-topics/{topicId}",
+      "operationId": "updateSubscriptionTopic",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/subscription-topics/{topicId}",
+      "operationId": "deleteSubscriptionTopic",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/association/training",
+      "operationId": "createTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training",
+      "operationId": "searchTrainings",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training-lifecycle/my",
+      "operationId": "listMyCustomTrainings",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training-lifecycle/{trainingId}/cancel",
+      "operationId": "cancelCustomTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training-lifecycle/{trainingId}/check-in",
+      "operationId": "checkInCustomTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training-lifecycle/{trainingId}/complete",
+      "operationId": "completeCustomTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training-lifecycle/{trainingId}/enroll",
+      "operationId": "enrollInCustomTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training-lifecycle/{trainingId}/enrollments",
+      "operationId": "listCustomTrainingEnrollments",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/courses",
+      "operationId": "createCourse",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses",
+      "operationId": "searchCourses",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/courses/enrollments",
+      "operationId": "createCourseEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses/enrollments",
+      "operationId": "searchCourseEnrollments",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses/enrollments/{enrollmentId}",
+      "operationId": "getCourseEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/training/courses/enrollments/{enrollmentId}",
+      "operationId": "updateCourseEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/training/courses/enrollments/{enrollmentId}",
+      "operationId": "deleteCourseEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/courses/enrollments/{enrollmentId}/progress",
+      "operationId": "updateCourseProgress",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/courses/quiz-attempts",
+      "operationId": "createQuizAttempt",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses/quiz-attempts",
+      "operationId": "searchQuizAttempts",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses/{courseId}",
+      "operationId": "getCourse",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/training/courses/{courseId}",
+      "operationId": "updateCourse",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/training/courses/{courseId}",
+      "operationId": "deleteCourse",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/enrollments",
+      "operationId": "createTrainingEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/enrollments",
+      "operationId": "searchTrainingEnrollments",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/enrollments/{enrollmentId}",
+      "operationId": "getTrainingEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/training/enrollments/{enrollmentId}",
+      "operationId": "updateTrainingEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/training/enrollments/{enrollmentId}",
+      "operationId": "deleteTrainingEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/enrollments/{enrollmentId}/complete",
+      "operationId": "completeTrainingEnrollment",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/{trainingId}",
+      "operationId": "getTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/training/{trainingId}",
+      "operationId": "updateTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/training/{trainingId}",
+      "operationId": "deleteTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/{trainingId}/publish",
+      "operationId": "publishTraining",
+      "tags": [
+        "Association:Operations"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "GET",
+      "path": "/audit/logs",
+      "operationId": "listAuditLogs",
+      "tags": [
+        "Audit"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices",
+      "operationId": "createInvoice",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/billing/invoices",
+      "operationId": "listInvoices",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/billing/invoices/{invoice}",
+      "operationId": "getInvoice",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/billing/invoices/{invoice}",
+      "operationId": "updateInvoice",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/billing/invoices/{invoice}",
+      "operationId": "deleteInvoice",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/capture",
+      "operationId": "captureInvoicePayment",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/finalize",
+      "operationId": "finalizeInvoice",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/mark-uncollectible",
+      "operationId": "markInvoiceUncollectible",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/pay",
+      "operationId": "payInvoice",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/refund",
+      "operationId": "refundInvoicePayment",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/void",
+      "operationId": "voidInvoice",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/merchant-accounts",
+      "operationId": "createMerchantAccount",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/billing/merchant-accounts/{merchantAccount}",
+      "operationId": "getMerchantAccount",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/merchant-accounts/{merchantAccount}/dashboard",
+      "operationId": "getMerchantDashboard",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/merchant-accounts/{merchantAccount}/onboard",
+      "operationId": "onboardMerchantAccount",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/billing/webhooks/stripe",
+      "operationId": "handleStripeWebhook",
+      "tags": [
+        "Billing"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings",
+      "operationId": "createBooking",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/booking/bookings",
+      "operationId": "listBookings",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/booking/bookings/{booking}",
+      "operationId": "getBooking",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings/{booking}/cancel",
+      "operationId": "cancelBooking",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings/{booking}/confirm",
+      "operationId": "confirmBooking",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings/{booking}/no-show",
+      "operationId": "markNoShowBooking",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings/{booking}/reject",
+      "operationId": "rejectBooking",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events",
+      "operationId": "listBookingEvents",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/booking/events",
+      "operationId": "createBookingEvent",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events/{event}",
+      "operationId": "getBookingEvent",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/booking/events/{event}",
+      "operationId": "updateBookingEvent",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/booking/events/{event}",
+      "operationId": "deleteBookingEvent",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/booking/events/{event}/exceptions",
+      "operationId": "createScheduleException",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events/{event}/exceptions",
+      "operationId": "listScheduleExceptions",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events/{event}/exceptions/{exception}",
+      "operationId": "getScheduleException",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/booking/events/{event}/exceptions/{exception}",
+      "operationId": "deleteScheduleException",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events/{event}/slots",
+      "operationId": "listEventSlots",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/booking/slots/{slotId}",
+      "operationId": "getTimeSlot",
+      "tags": [
+        "Booking"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms",
+      "operationId": "createChatRoom",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/comms/chat-rooms",
+      "operationId": "listChatRooms",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/comms/chat-rooms/{room}",
+      "operationId": "getChatRoom",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/comms/chat-rooms/{room}/messages",
+      "operationId": "getChatMessages",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms/{room}/messages",
+      "operationId": "sendChatMessage",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms/{room}/video-call/end",
+      "operationId": "endVideoCall",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms/{room}/video-call/join",
+      "operationId": "joinVideoCall",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms/{room}/video-call/leave",
+      "operationId": "leaveVideoCall",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/comms/chat-rooms/{room}/video-call/participant",
+      "operationId": "updateVideoCallParticipant",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/comms/ice-servers",
+      "operationId": "getIceServers",
+      "tags": [
+        "Comms"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/communications/announcements/detail/{id}",
+      "operationId": "getAnnouncement",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/communications/announcements/{id}",
+      "operationId": "updateAnnouncement",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/communications/announcements/{id}",
+      "operationId": "deleteAnnouncement",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/communications/announcements/{id}/archive",
+      "operationId": "archiveAnnouncement",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/communications/announcements/{id}/publish",
+      "operationId": "publishAnnouncement",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/communications/announcements/{orgId}",
+      "operationId": "listAnnouncements",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/communications/announcements/{orgId}",
+      "operationId": "createAnnouncement",
+      "tags": [
+        "Communication"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/credit-compliance/{orgId}",
+      "operationId": "getCreditCompliance",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/dues/dashboard/{orgId}",
+      "operationId": "getDuesDashboard",
+      "tags": [
+        "Dues"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/email/queue",
+      "operationId": "listEmailQueueItems",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/email/queue/{queue}",
+      "operationId": "getEmailQueueItem",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/email/queue/{queue}/cancel",
+      "operationId": "cancelEmailQueueItem",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/email/queue/{queue}/retry",
+      "operationId": "retryEmailQueueItem",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/email/templates",
+      "operationId": "listEmailTemplates",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/email/templates",
+      "operationId": "createEmailTemplate",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/email/templates/{template}",
+      "operationId": "getEmailTemplate",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/email/templates/{template}",
+      "operationId": "updateEmailTemplate",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/email/templates/{template}/test",
+      "operationId": "testEmailTemplate",
+      "tags": [
+        "Email"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/membership/applications/{orgId}",
+      "operationId": "listOrgApplications",
+      "tags": [
+        "Membership"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/membership/members/{orgId}",
+      "operationId": "listOrgMembers",
+      "tags": [
+        "Membership"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/membership/org-profile/{orgId}",
+      "operationId": "getOrgProfile",
+      "tags": [
+        "Membership"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PUT",
+      "path": "/membership/org-profile/{orgId}",
+      "operationId": "updateOrgProfile",
+      "tags": [
+        "Membership"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/notifs",
+      "operationId": "listNotifications",
+      "tags": [
+        "Notifs"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/notifs/read-all",
+      "operationId": "markAllNotificationsAsRead",
+      "tags": [
+        "Notifs"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/notifs/{notif}",
+      "operationId": "getNotification",
+      "tags": [
+        "Notifs"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/notifs/{notif}/read",
+      "operationId": "markNotificationAsRead",
+      "tags": [
+        "Notifs"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/officer-terms/{orgId}",
+      "operationId": "listOfficerTermsSummary",
+      "tags": [
+        "Association:Member"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/persons",
+      "operationId": "createPerson",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons",
+      "operationId": "listPersons",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/persons/me",
+      "operationId": "updateMyProfile",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/persons/me/cancel-delete",
+      "operationId": "cancelMyAccountDeletion",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/persons/me/credit-entries",
+      "operationId": "createMyCreditEntry",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/credit-entries",
+      "operationId": "listMyCreditEntries",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/credit-summary",
+      "operationId": "getMyCreditSummary",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/persons/me/delete",
+      "operationId": "requestMyAccountDeletion",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/export",
+      "operationId": "exportMyData",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/memberships",
+      "operationId": "getMyMemberships",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/notification-preferences",
+      "operationId": "getMyNotificationPreferences",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/persons/me/notification-preferences",
+      "operationId": "updateMyNotificationPreferences",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/officer-role/{orgId}",
+      "operationId": "getMyOfficerRole",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/privacy",
+      "operationId": "getMyPrivacySettings",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/persons/me/privacy",
+      "operationId": "updateMyPrivacySettings",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/persons/{person}",
+      "operationId": "getPerson",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/persons/{person}",
+      "operationId": "updatePerson",
+      "tags": [
+        "Person"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/public/org/{slug}",
+      "operationId": "getOrganizationBySlug",
+      "tags": [
+        "PlatformAdmin"
+      ],
+      "hasAuth": false
+    },
+    {
+      "method": "POST",
+      "path": "/read-all",
+      "operationId": "markAllNotificationsRead",
+      "tags": [
+        "Notifs"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/reviews/",
+      "operationId": "createReview",
+      "tags": [
+        "Reviews"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/reviews/",
+      "operationId": "listReviews",
+      "tags": [
+        "Reviews"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/reviews/{review}",
+      "operationId": "getReview",
+      "tags": [
+        "Reviews"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/reviews/{review}",
+      "operationId": "deleteReview",
+      "tags": [
+        "Reviews"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/storage/files",
+      "operationId": "listFiles",
+      "tags": [
+        "Storage"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/storage/files/upload",
+      "operationId": "uploadFile",
+      "tags": [
+        "Storage"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/storage/files/{file}",
+      "operationId": "getFile",
+      "tags": [
+        "Storage"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/storage/files/{file}",
+      "operationId": "deleteFile",
+      "tags": [
+        "Storage"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "POST",
+      "path": "/storage/files/{file}/complete",
+      "operationId": "completeFileUpload",
+      "tags": [
+        "Storage"
+      ],
+      "hasAuth": true
+    },
+    {
+      "method": "GET",
+      "path": "/storage/files/{file}/download",
+      "operationId": "getFileDownload",
+      "tags": [
+        "Storage"
+      ],
+      "hasAuth": true
+    }
+  ]
+}

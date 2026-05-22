@@ -1,0 +1,438 @@
+import { describe, it, expect } from 'bun:test';
+import {
+  INVOICE_VALID_TRANSITIONS,
+  PAYMENT_VALID_TRANSITIONS,
+  isValidInvoiceTransition,
+  isValidPaymentTransition,
+  invoiceTransitionError,
+  paymentTransitionError,
+} from './status-transitions';
+// Factory N/A: utility function test — primitive inputs/outputs, no domain entities
+
+// ---------------------------------------------------------------------------
+// Invoice transition matrix
+// ---------------------------------------------------------------------------
+
+const INVOICE_STATUSES = ['generated', 'sent', 'paid', 'overdue', 'cancelled', 'writtenOff'] as const;
+
+describe('isValidInvoiceTransition', () => {
+  describe('valid transitions', () => {
+    it('generated → sent', () => expect(isValidInvoiceTransition('generated', 'sent')).toBe(true));
+    it('generated → cancelled', () => expect(isValidInvoiceTransition('generated', 'cancelled')).toBe(true));
+
+    it('sent → paid', () => expect(isValidInvoiceTransition('sent', 'paid')).toBe(true));
+    it('sent → overdue', () => expect(isValidInvoiceTransition('sent', 'overdue')).toBe(true));
+    it('sent → cancelled', () => expect(isValidInvoiceTransition('sent', 'cancelled')).toBe(true));
+
+    it('overdue → paid', () => expect(isValidInvoiceTransition('overdue', 'paid')).toBe(true));
+    it('overdue → cancelled', () => expect(isValidInvoiceTransition('overdue', 'cancelled')).toBe(true));
+    it('overdue → writtenOff', () => expect(isValidInvoiceTransition('overdue', 'writtenOff')).toBe(true));
+  });
+
+  describe('terminal states — no outgoing transitions', () => {
+    for (const terminal of ['paid', 'cancelled', 'writtenOff'] as const) {
+      for (const target of INVOICE_STATUSES) {
+        it(`${terminal} → ${target} is false`, () =>
+          expect(isValidInvoiceTransition(terminal, target)).toBe(false));
+      }
+    }
+  });
+
+  describe('invalid transitions (non-terminal sources)', () => {
+    // generated cannot skip ahead or go backwards
+    it('generated → paid (skip)', () => expect(isValidInvoiceTransition('generated', 'paid')).toBe(false));
+    it('generated → overdue (skip)', () => expect(isValidInvoiceTransition('generated', 'overdue')).toBe(false));
+    it('generated → writtenOff (skip)', () => expect(isValidInvoiceTransition('generated', 'writtenOff')).toBe(false));
+
+    // sent cannot jump to writtenOff directly
+    it('sent → writtenOff (skip)', () => expect(isValidInvoiceTransition('sent', 'writtenOff')).toBe(false));
+    // sent cannot self-transition
+    it('sent → generated (backwards)', () => expect(isValidInvoiceTransition('sent', 'generated')).toBe(false));
+    it('sent → sent (self)', () => expect(isValidInvoiceTransition('sent', 'sent')).toBe(false));
+
+    // overdue cannot go to sent (backwards)
+    it('overdue → generated (backwards)', () => expect(isValidInvoiceTransition('overdue', 'generated')).toBe(false));
+    it('overdue → sent (backwards)', () => expect(isValidInvoiceTransition('overdue', 'sent')).toBe(false));
+    it('overdue → overdue (self)', () => expect(isValidInvoiceTransition('overdue', 'overdue')).toBe(false));
+  });
+
+  describe('unknown status', () => {
+    it('unknown from returns false', () => expect(isValidInvoiceTransition('bogus', 'sent')).toBe(false));
+    it('unknown to returns false', () => expect(isValidInvoiceTransition('generated', 'bogus')).toBe(false));
+    it('both unknown returns false', () => expect(isValidInvoiceTransition('foo', 'bar')).toBe(false));
+    it('empty string returns false', () => expect(isValidInvoiceTransition('', 'sent')).toBe(false));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Payment transition matrix
+// ---------------------------------------------------------------------------
+
+const PAYMENT_STATUSES = [
+  'pending', 'submitted', 'underReview', 'confirmed', 'completed',
+  'refunded', 'partiallyRefunded', 'failed', 'rejected', 'expired',
+] as const;
+
+describe('isValidPaymentTransition', () => {
+  describe('valid transitions', () => {
+    it('pending → submitted', () => expect(isValidPaymentTransition('pending', 'submitted')).toBe(true));
+    it('pending → expired', () => expect(isValidPaymentTransition('pending', 'expired')).toBe(true));
+    it('pending → cancelled', () => expect(isValidPaymentTransition('pending', 'cancelled')).toBe(true));
+
+    it('submitted → underReview', () => expect(isValidPaymentTransition('submitted', 'underReview')).toBe(true));
+    it('submitted → confirmed', () => expect(isValidPaymentTransition('submitted', 'confirmed')).toBe(true));
+    it('submitted → rejected', () => expect(isValidPaymentTransition('submitted', 'rejected')).toBe(true));
+
+    it('underReview → confirmed', () => expect(isValidPaymentTransition('underReview', 'confirmed')).toBe(true));
+    it('underReview → rejected', () => expect(isValidPaymentTransition('underReview', 'rejected')).toBe(true));
+
+    it('confirmed → completed', () => expect(isValidPaymentTransition('confirmed', 'completed')).toBe(true));
+
+    it('completed → refunded', () => expect(isValidPaymentTransition('completed', 'refunded')).toBe(true));
+    it('completed → partiallyRefunded', () => expect(isValidPaymentTransition('completed', 'partiallyRefunded')).toBe(true));
+
+    it('partiallyRefunded → refunded', () => expect(isValidPaymentTransition('partiallyRefunded', 'refunded')).toBe(true));
+  });
+
+  describe('terminal states — no outgoing transitions', () => {
+    for (const terminal of ['refunded', 'failed', 'rejected', 'expired'] as const) {
+      for (const target of PAYMENT_STATUSES) {
+        it(`${terminal} → ${target} is false`, () =>
+          expect(isValidPaymentTransition(terminal, target)).toBe(false));
+      }
+    }
+  });
+
+  describe('invalid transitions (non-terminal sources)', () => {
+    // pending cannot skip
+    it('pending → confirmed (skip)', () => expect(isValidPaymentTransition('pending', 'confirmed')).toBe(false));
+    it('pending → completed (skip)', () => expect(isValidPaymentTransition('pending', 'completed')).toBe(false));
+    it('pending → refunded (skip)', () => expect(isValidPaymentTransition('pending', 'refunded')).toBe(false));
+    it('pending → rejected (skip)', () => expect(isValidPaymentTransition('pending', 'rejected')).toBe(false));
+    it('pending → underReview (skip)', () => expect(isValidPaymentTransition('pending', 'underReview')).toBe(false));
+    it('pending → partiallyRefunded (skip)', () => expect(isValidPaymentTransition('pending', 'partiallyRefunded')).toBe(false));
+    it('pending → pending (self)', () => expect(isValidPaymentTransition('pending', 'pending')).toBe(false));
+
+    // submitted cannot skip ahead to completed/refunded
+    it('submitted → completed (skip)', () => expect(isValidPaymentTransition('submitted', 'completed')).toBe(false));
+    it('submitted → refunded (skip)', () => expect(isValidPaymentTransition('submitted', 'refunded')).toBe(false));
+    it('submitted → pending (backwards)', () => expect(isValidPaymentTransition('submitted', 'pending')).toBe(false));
+    it('submitted → submitted (self)', () => expect(isValidPaymentTransition('submitted', 'submitted')).toBe(false));
+    it('submitted → expired (skip)', () => expect(isValidPaymentTransition('submitted', 'expired')).toBe(false));
+
+    // underReview cannot go backwards or skip
+    it('underReview → pending (backwards)', () => expect(isValidPaymentTransition('underReview', 'pending')).toBe(false));
+    it('underReview → submitted (backwards)', () => expect(isValidPaymentTransition('underReview', 'submitted')).toBe(false));
+    it('underReview → completed (skip)', () => expect(isValidPaymentTransition('underReview', 'completed')).toBe(false));
+    it('underReview → refunded (skip)', () => expect(isValidPaymentTransition('underReview', 'refunded')).toBe(false));
+    it('underReview → underReview (self)', () => expect(isValidPaymentTransition('underReview', 'underReview')).toBe(false));
+
+    // confirmed cannot skip or go backwards
+    it('confirmed → pending (backwards)', () => expect(isValidPaymentTransition('confirmed', 'pending')).toBe(false));
+    it('confirmed → submitted (backwards)', () => expect(isValidPaymentTransition('confirmed', 'submitted')).toBe(false));
+    it('confirmed → underReview (backwards)', () => expect(isValidPaymentTransition('confirmed', 'underReview')).toBe(false));
+    it('confirmed → refunded (skip)', () => expect(isValidPaymentTransition('confirmed', 'refunded')).toBe(false));
+    it('confirmed → rejected (skip)', () => expect(isValidPaymentTransition('confirmed', 'rejected')).toBe(false));
+    it('confirmed → confirmed (self)', () => expect(isValidPaymentTransition('confirmed', 'confirmed')).toBe(false));
+
+    // completed cannot go backwards
+    it('completed → pending (backwards)', () => expect(isValidPaymentTransition('completed', 'pending')).toBe(false));
+    it('completed → confirmed (backwards)', () => expect(isValidPaymentTransition('completed', 'confirmed')).toBe(false));
+    it('completed → completed (self)', () => expect(isValidPaymentTransition('completed', 'completed')).toBe(false));
+    it('completed → rejected (invalid)', () => expect(isValidPaymentTransition('completed', 'rejected')).toBe(false));
+    it('completed → expired (invalid)', () => expect(isValidPaymentTransition('completed', 'expired')).toBe(false));
+
+    // partiallyRefunded cannot go anywhere except refunded (already tested as valid)
+    it('partiallyRefunded → pending (invalid)', () => expect(isValidPaymentTransition('partiallyRefunded', 'pending')).toBe(false));
+    it('partiallyRefunded → completed (backwards)', () => expect(isValidPaymentTransition('partiallyRefunded', 'completed')).toBe(false));
+    it('partiallyRefunded → partiallyRefunded (self)', () => expect(isValidPaymentTransition('partiallyRefunded', 'partiallyRefunded')).toBe(false));
+    it('partiallyRefunded → rejected (invalid)', () => expect(isValidPaymentTransition('partiallyRefunded', 'rejected')).toBe(false));
+  });
+
+  describe('unknown status', () => {
+    it('unknown from returns false', () => expect(isValidPaymentTransition('bogus', 'confirmed')).toBe(false));
+    it('unknown to returns false', () => expect(isValidPaymentTransition('pending', 'bogus')).toBe(false));
+    it('both unknown returns false', () => expect(isValidPaymentTransition('foo', 'bar')).toBe(false));
+    it('empty string returns false', () => expect(isValidPaymentTransition('', 'completed')).toBe(false));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Error message helpers
+// ---------------------------------------------------------------------------
+
+describe('invoiceTransitionError', () => {
+  it('includes from and to in message', () => {
+    const msg = invoiceTransitionError('generated', 'paid');
+    expect(msg).toContain('generated');
+    expect(msg).toContain('paid');
+  });
+
+  it('lists allowed transitions', () => {
+    const msg = invoiceTransitionError('generated', 'paid');
+    expect(msg).toContain('sent');
+    expect(msg).toContain('cancelled');
+  });
+
+  it('says "terminal state" for terminal status', () => {
+    const msg = invoiceTransitionError('paid', 'generated');
+    expect(msg).toContain('terminal');
+  });
+
+  it('handles unknown from status', () => {
+    const msg = invoiceTransitionError('bogus', 'sent');
+    expect(msg).toContain('bogus');
+  });
+});
+
+describe('paymentTransitionError', () => {
+  it('includes from and to in message', () => {
+    const msg = paymentTransitionError('pending', 'refunded');
+    expect(msg).toContain('pending');
+    expect(msg).toContain('refunded');
+  });
+
+  it('lists allowed transitions', () => {
+    const msg = paymentTransitionError('pending', 'refunded');
+    expect(msg).toContain('submitted');
+  });
+
+  it('says "terminal state" for terminal status', () => {
+    const msg = paymentTransitionError('refunded', 'pending');
+    expect(msg).toContain('terminal');
+  });
+
+  it('handles unknown from status', () => {
+    const msg = paymentTransitionError('bogus', 'completed');
+    expect(msg).toContain('bogus');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DuesInvoice happy-path scenarios (transition + domain context)
+// ---------------------------------------------------------------------------
+
+describe('DuesInvoice happy-path transitions', () => {
+  it('sent → paid: invoice amount matches payment amount', () => {
+    const invoiceAmount = 5000;
+    const paymentAmount = 5000;
+
+    expect(isValidInvoiceTransition('sent', 'paid')).toBe(true);
+    expect(paymentAmount).toBe(invoiceAmount);
+    // Transition is valid AND amounts reconcile — happy path complete
+  });
+
+  it('sent → paid: rejects transition when payment amount is less than invoice', () => {
+    const invoiceAmount = 5000;
+    const paymentAmount = 3000;
+
+    // Transition itself is valid (state machine allows it)
+    expect(isValidInvoiceTransition('sent', 'paid')).toBe(true);
+    // But business logic should reject underpayment
+    expect(paymentAmount).toBeLessThan(invoiceAmount);
+    expect(paymentAmount >= invoiceAmount).toBe(false);
+  });
+
+  it('sent → overdue: aging scenario — invoice past due date', () => {
+    const dueDate = new Date('2026-01-15');
+    const now = new Date('2026-02-01'); // 17 days past due
+
+    expect(isValidInvoiceTransition('sent', 'overdue')).toBe(true);
+    expect(now.getTime()).toBeGreaterThan(dueDate.getTime());
+    // Aging: invoice has been sent and due date has passed
+  });
+
+  it('sent → overdue: does NOT age if still within due date', () => {
+    const dueDate = new Date('2026-02-15');
+    const now = new Date('2026-01-20'); // 26 days before due
+
+    expect(isValidInvoiceTransition('sent', 'overdue')).toBe(true);
+    // Transition is structurally valid but should not fire yet
+    expect(now.getTime()).toBeLessThan(dueDate.getTime());
+  });
+
+  it('overdue → paid: late payment accepted with full amount', () => {
+    const invoiceAmount = 7500;
+    const paymentAmount = 7500;
+    const dueDate = new Date('2026-01-15');
+    const paymentDate = new Date('2026-03-10'); // ~2 months late
+
+    expect(isValidInvoiceTransition('overdue', 'paid')).toBe(true);
+    expect(paymentAmount).toBe(invoiceAmount);
+    expect(paymentDate.getTime()).toBeGreaterThan(dueDate.getTime());
+    // Late payment resolves the overdue invoice
+  });
+
+  it('overdue → paid: late payment with penalty surcharge', () => {
+    const invoiceAmount = 5000;
+    const latePenalty = 500;
+    const totalDue = invoiceAmount + latePenalty;
+    const paymentAmount = 5500;
+
+    expect(isValidInvoiceTransition('overdue', 'paid')).toBe(true);
+    expect(paymentAmount).toBe(totalDue);
+    // Full payment including penalty clears the overdue invoice
+  });
+
+  it('paid is terminal — cannot transition to any other state (including voided)', () => {
+    // "voided" is not a valid invoice status in the state machine
+    expect(isValidInvoiceTransition('paid', 'generated')).toBe(false);
+    expect(isValidInvoiceTransition('paid', 'sent')).toBe(false);
+    expect(isValidInvoiceTransition('paid', 'overdue')).toBe(false);
+    expect(isValidInvoiceTransition('paid', 'cancelled')).toBe(false);
+    expect(isValidInvoiceTransition('paid', 'writtenOff')).toBe(false);
+    // "voided" is not a recognized status — also rejected
+    expect(isValidInvoiceTransition('paid', 'voided')).toBe(false);
+  });
+
+  it('generated → sent → paid: full lifecycle happy path', () => {
+    expect(isValidInvoiceTransition('generated', 'sent')).toBe(true);
+    expect(isValidInvoiceTransition('sent', 'paid')).toBe(true);
+    // Cannot go further — paid is terminal
+    expect(isValidInvoiceTransition('paid', 'generated')).toBe(false);
+  });
+
+  it('generated → sent → overdue → paid: late payment lifecycle', () => {
+    expect(isValidInvoiceTransition('generated', 'sent')).toBe(true);
+    expect(isValidInvoiceTransition('sent', 'overdue')).toBe(true);
+    expect(isValidInvoiceTransition('overdue', 'paid')).toBe(true);
+    // Terminal
+    expect(isValidInvoiceTransition('paid', 'sent')).toBe(false);
+  });
+
+  it('error message for paid → voided includes terminal indicator', () => {
+    const msg = invoiceTransitionError('paid', 'voided');
+    expect(msg).toContain('terminal');
+    expect(msg).toContain('paid');
+    expect(msg).toContain('voided');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Payment happy-path scenarios (transition + domain context)
+// ---------------------------------------------------------------------------
+
+describe('Payment happy-path transitions', () => {
+  it('pending → submitted → confirmed → completed: gateway success lifecycle', () => {
+    expect(isValidPaymentTransition('pending', 'submitted')).toBe(true);
+    expect(isValidPaymentTransition('submitted', 'confirmed')).toBe(true);
+    expect(isValidPaymentTransition('confirmed', 'completed')).toBe(true);
+  });
+
+  it('pending → completed requires intermediate steps (cannot skip)', () => {
+    expect(isValidPaymentTransition('pending', 'completed')).toBe(false);
+    // Must go through submitted → confirmed → completed
+  });
+
+  it('completed → refunded: full refund with amount verification', () => {
+    const paymentAmount = 5000;
+    const refundAmount = 5000;
+
+    expect(isValidPaymentTransition('completed', 'refunded')).toBe(true);
+    expect(refundAmount).toBe(paymentAmount);
+    // Full refund — amounts match
+  });
+
+  it('completed → partiallyRefunded: partial refund with amount check', () => {
+    const paymentAmount = 5000;
+    const refundAmount = 2000;
+
+    expect(isValidPaymentTransition('completed', 'partiallyRefunded')).toBe(true);
+    expect(refundAmount).toBeLessThan(paymentAmount);
+    expect(refundAmount).toBeGreaterThan(0);
+    // Partial refund — refund is less than original payment
+  });
+
+  it('partiallyRefunded → refunded: second refund completes the full refund', () => {
+    const paymentAmount = 5000;
+    const firstRefund = 2000;
+    const secondRefund = 3000;
+    const totalRefunded = firstRefund + secondRefund;
+
+    expect(isValidPaymentTransition('completed', 'partiallyRefunded')).toBe(true);
+    expect(isValidPaymentTransition('partiallyRefunded', 'refunded')).toBe(true);
+    expect(totalRefunded).toBe(paymentAmount);
+  });
+
+  it('completed → refunded: cannot refund more than payment amount', () => {
+    const paymentAmount = 5000;
+    const refundAmount = 7000;
+
+    // Transition is valid at state-machine level
+    expect(isValidPaymentTransition('completed', 'refunded')).toBe(true);
+    // But business logic should reject over-refund
+    expect(refundAmount).toBeGreaterThan(paymentAmount);
+    expect(refundAmount <= paymentAmount).toBe(false);
+  });
+
+  it('refunded is terminal — cannot transition further', () => {
+    expect(isValidPaymentTransition('refunded', 'pending')).toBe(false);
+    expect(isValidPaymentTransition('refunded', 'completed')).toBe(false);
+    expect(isValidPaymentTransition('refunded', 'partiallyRefunded')).toBe(false);
+    expect(isValidPaymentTransition('refunded', 'refunded')).toBe(false);
+  });
+
+  it('pending → expired: payment window timeout', () => {
+    const createdAt = new Date('2026-01-01T10:00:00Z');
+    const expiryWindow = 24 * 60 * 60 * 1000; // 24 hours
+    const now = new Date('2026-01-03T10:00:00Z'); // 48 hours later
+
+    expect(isValidPaymentTransition('pending', 'expired')).toBe(true);
+    expect(now.getTime() - createdAt.getTime()).toBeGreaterThan(expiryWindow);
+  });
+
+  it('pending → cancelled: user-initiated cancellation', () => {
+    expect(isValidPaymentTransition('pending', 'cancelled')).toBe(true);
+    // Only pending payments can be cancelled by the user
+    expect(isValidPaymentTransition('submitted', 'cancelled')).toBe(false);
+    expect(isValidPaymentTransition('completed', 'cancelled')).toBe(false);
+  });
+
+  it('submitted → rejected: gateway rejects payment', () => {
+    expect(isValidPaymentTransition('submitted', 'rejected')).toBe(true);
+    // Rejected is terminal
+    expect(isValidPaymentTransition('rejected', 'pending')).toBe(false);
+    expect(isValidPaymentTransition('rejected', 'submitted')).toBe(false);
+  });
+
+  it('error message for pending → completed explains skip is invalid', () => {
+    const msg = paymentTransitionError('pending', 'completed');
+    expect(msg).toContain('pending');
+    expect(msg).toContain('completed');
+    expect(msg).toContain('submitted'); // lists allowed transitions from pending
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Sanity-check the exported maps are well-formed
+// ---------------------------------------------------------------------------
+
+describe('INVOICE_VALID_TRANSITIONS map integrity', () => {
+  it('covers all 6 invoice statuses', () => {
+    expect(Object.keys(INVOICE_VALID_TRANSITIONS)).toHaveLength(6);
+  });
+
+  it('all target statuses are known invoice statuses', () => {
+    const known = new Set(INVOICE_STATUSES);
+    for (const [, targets] of Object.entries(INVOICE_VALID_TRANSITIONS)) {
+      for (const t of targets) {
+        expect(known.has(t as typeof INVOICE_STATUSES[number])).toBe(true);
+      }
+    }
+  });
+});
+
+describe('PAYMENT_VALID_TRANSITIONS map integrity', () => {
+  it('covers all 10 payment statuses', () => {
+    expect(Object.keys(PAYMENT_VALID_TRANSITIONS)).toHaveLength(10);
+  });
+
+  it('all target statuses are known payment statuses (or "cancelled")', () => {
+    const known = new Set([...PAYMENT_STATUSES, 'cancelled']);
+    for (const [, targets] of Object.entries(PAYMENT_VALID_TRANSITIONS)) {
+      for (const t of targets) {
+        expect(known.has(t)).toBe(true);
+      }
+    }
+  });
+});

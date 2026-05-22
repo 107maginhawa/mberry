@@ -1,0 +1,505 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Lint
+        run: bun run lint
+      - name: Migration safety lint
+        run: bun run lint:migrations
+      - name: No silent test skips
+        run: bun run lint:no-skips
+      - name: Shallow test assertion lint
+        run: bun run lint:shallow --ci
+      - name: Check SDK freshness
+        run: |
+          bun --filter @monobase/sdk-ts run generate
+          git diff --exit-code packages/sdk-ts/src/generated/ || (echo "::error::SDK is stale. Run 'bun --filter @monobase/sdk-ts run generate' and commit." && exit 1)
+      - name: Dependency audit
+        run: bunx audit-ci --moderate || true
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: monobase
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d monobase"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      minio:
+        image: minio/minio:latest
+        ports: ['9000:9000']
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        options: >-
+          --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
+      PORT: 7213
+      API_URL: http://localhost:7213
+      AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      STORAGE_PROVIDER: minio
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_BUCKET: monobase-files
+      STORAGE_ACCESS_KEY_ID: minioadmin
+      STORAGE_SECRET_ACCESS_KEY: minioadmin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+      - name: Install Playwright browsers
+        run: cd apps/memberry && bunx playwright install --with-deps chromium
+      - name: Boot API
+        run: |
+          cd services/api-ts
+          bun dev > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS "$API_URL/livez" && exit 0
+            sleep 1
+          done
+          echo "API never became ready"
+          tail -200 /tmp/api.log
+          exit 1
+      - name: Seed database
+        run: cd services/api-ts && bun run db:seed-modules
+      - name: Start Memberry app
+        run: |
+          cd apps/memberry
+          bun dev > /tmp/memberry.log 2>&1 &
+          echo $! > /tmp/memberry.pid
+      - name: Wait for Memberry app
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "http://localhost:3004" > /dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "Memberry app never became ready"
+          tail -100 /tmp/memberry.log
+          exit 1
+      - name: Run E2E tests
+        run: cd apps/memberry && bun run test:e2e
+
+      - name: Install Playwright browsers (admin)
+        run: cd apps/admin && bunx playwright install --with-deps chromium
+
+      - name: Start Admin app
+        run: |
+          cd apps/admin
+          bun dev > /tmp/admin.log 2>&1 &
+          echo $! > /tmp/admin.pid
+
+      - name: Wait for Admin app
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "http://localhost:3003" > /dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "Admin app never became ready"
+          tail -100 /tmp/admin.log
+          exit 1
+
+      - name: Run Admin E2E tests
+        run: cd apps/admin && bun run test:e2e
+
+      - name: Install Playwright browsers (account)
+        run: cd apps/account && bunx playwright install --with-deps chromium
+
+      - name: Start Account app
+        run: |
+          cd apps/account
+          bun dev > /tmp/account.log 2>&1 &
+          echo $! > /tmp/account.pid
+
+      - name: Wait for Account app
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "http://localhost:3002" > /dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "Account app never became ready"
+          tail -100 /tmp/account.log
+          exit 1
+
+      - name: Run Account E2E tests
+        run: cd apps/account && bun run test:e2e
+
+      - name: Upload Memberry test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-memberry
+          path: apps/memberry/playwright-report/
+
+      - name: Upload Admin test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-admin
+          path: apps/admin/playwright-report/
+
+      - name: Upload Account test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-account
+          path: apps/account/playwright-report/
+
+  build-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build API Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/api-ts/Dockerfile
+          push: false
+          tags: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          load: true
+      - name: Verify container health — /livez responds
+        run: |
+          docker run --rm -d --name api-health-test -p 7213:7213 \
+            -e DATABASE_URL=postgresql://fake:5432/fake \
+            -e AUTH_SECRET=ci-health-test \
+            -e INTERNAL_SERVICE_TOKEN=ci-test-token \
+            ghcr.io/${{ github.repository }}/api:${{ github.sha }}
+          # Poll /livez (liveness — no DB needed) for up to 15s
+          for i in $(seq 1 15); do
+            if curl -fsS http://localhost:7213/livez; then
+              echo "Container healthy — /livez 200"
+              docker stop api-health-test || true
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Container /livez never responded"
+          docker logs api-health-test || true
+          docker stop api-health-test || true
+          exit 1
+
+  build-frontends:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VITE_API_URL: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+      - name: Build Memberry app
+        run: cd apps/memberry && bun run build
+      - name: Build Admin app
+        run: cd apps/admin && bun run build
+      - name: Build Account app
+        run: cd apps/account && bun run build
+      - name: Upload frontend-memberry artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-memberry
+          path: apps/memberry/dist/
+      - name: Upload frontend-admin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-admin
+          path: apps/admin/dist/
+      - name: Upload frontend-account artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-account
+          path: apps/account/dist/
+
+  artifact-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build-frontends]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Download frontend-memberry artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-memberry
+          path: apps/memberry/dist/
+      - name: Download frontend-admin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-admin
+          path: apps/admin/dist/
+      - name: Download frontend-account artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-account
+          path: apps/account/dist/
+      - name: Verify built artifacts exist and have content
+        run: |
+          for app in memberry admin account; do
+            INDEX="apps/$app/dist/index.html"
+            if [ ! -f "$INDEX" ]; then
+              echo "::error::Missing $INDEX in built artifact"
+              exit 1
+            fi
+            SIZE=$(wc -c < "$INDEX")
+            if [ "$SIZE" -lt 100 ]; then
+              echo "::error::$INDEX too small ($SIZE bytes) — build likely failed"
+              exit 1
+            fi
+            echo "$app: $INDEX ($SIZE bytes) ✓"
+          done
+      - name: Smoke test — built Memberry serves and contains app shell
+        run: |
+          cd apps/memberry
+          bun run preview --port 4173 &
+          PID=$!
+          for i in $(seq 1 15); do
+            curl -fsS http://localhost:4173 > /dev/null 2>&1 && break
+            sleep 1
+          done
+          # Verify HTML contains the app mount point
+          BODY=$(curl -sS http://localhost:4173)
+          echo "$BODY" | grep -q 'id="root"' || echo "$BODY" | grep -q 'id="app"' || {
+            echo "::error::Memberry built artifact missing app mount point"
+            kill $PID || true
+            exit 1
+          }
+          echo "Memberry artifact smoke ✓"
+          kill $PID || true
+
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: monobase
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d monobase"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      minio:
+        image: minio/minio:latest
+        ports: ['9000:9000']
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        options: >-
+          --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
+      PORT: 7213
+      API_URL: http://localhost:7213
+      AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      STORAGE_PROVIDER: minio
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_BUCKET: monobase-files
+      STORAGE_ACCESS_KEY_ID: minioadmin
+      STORAGE_SECRET_ACCESS_KEY: minioadmin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Install Hurl
+        run: |
+          curl -fsSL -o /tmp/hurl.deb \
+            https://github.com/Orange-OpenSource/hurl/releases/download/6.0.0/hurl_6.0.0_amd64.deb
+          sudo dpkg -i /tmp/hurl.deb
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+      - name: Boot API
+        run: |
+          cd services/api-ts
+          bun dev > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS "$API_URL/livez" && exit 0
+            sleep 1
+          done
+          echo "API never became ready"
+          tail -200 /tmp/api.log
+          exit 1
+      - name: Seed database
+        run: cd services/api-ts && bun run db:seed-modules
+      - name: Run contract tests
+        run: bun run test:contract
+      - name: API logs
+        if: always()
+        run: tail -500 /tmp/api.log || true
+
+  coverage-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [lint-typecheck, e2e]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: BR coverage regression check
+        run: bun run scripts/br-coverage.ts --ci
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: monobase
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d monobase"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      minio:
+        image: minio/minio:latest
+        ports: ['9000:9000']
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        options: >-
+          --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
+      PORT: 7213
+      API_URL: http://localhost:7213
+      AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      STORAGE_PROVIDER: minio
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_BUCKET: monobase-files
+      STORAGE_ACCESS_KEY_ID: minioadmin
+      STORAGE_SECRET_ACCESS_KEY: minioadmin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+      - name: Run unit tests
+        run: cd services/api-ts && bun test
+      - name: Run frontend unit tests (with coverage)
+        run: cd apps/memberry && bun run test -- --coverage
+      - name: Run account unit tests (with coverage)
+        run: cd apps/account && bun run test -- --coverage
+      - name: Run SDK unit tests
+        run: cd packages/sdk-ts && bun run test
+
+  new-code-gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Check new handlers have tests
+        run: bun run scripts/new-code-gate.ts --base origin/${{ github.base_ref }}
+
+  ci-gate:
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs:
+      - lint-typecheck
+      - unit-tests
+      - e2e
+      - contract
+      - build-api
+      - build-frontends
+      - artifact-smoke
+      - coverage-gate
+      - new-code-gate
+    steps:
+      - name: Check all gates passed
+        run: |
+          echo "Gate results:"
+          echo "  lint-typecheck: ${{ needs.lint-typecheck.result }}"
+          echo "  unit-tests: ${{ needs.unit-tests.result }}"
+          echo "  e2e: ${{ needs.e2e.result }}"
+          echo "  contract: ${{ needs.contract.result }}"
+          echo "  build-api: ${{ needs.build-api.result }}"
+          echo "  build-frontends: ${{ needs.build-frontends.result }}"
+          echo "  artifact-smoke: ${{ needs.artifact-smoke.result }}"
+          echo "  coverage-gate: ${{ needs.coverage-gate.result }}"
+          echo "  new-code-gate: ${{ needs.new-code-gate.result }}"
+          if [[ "${{ needs.lint-typecheck.result }}" != "success" ]] || \
+             [[ "${{ needs.unit-tests.result }}" != "success" ]] || \
+             [[ "${{ needs.e2e.result }}" != "success" ]] || \
+             [[ "${{ needs.contract.result }}" != "success" ]] || \
+             [[ "${{ needs.build-api.result }}" != "success" ]] || \
+             [[ "${{ needs.build-frontends.result }}" != "success" ]] || \
+             [[ "${{ needs.artifact-smoke.result }}" != "success" ]] || \
+             [[ "${{ needs.coverage-gate.result }}" != "success" ]] || \
+             [[ "${{ needs.new-code-gate.result }}" == "failure" ]]; then
+            echo "::error::One or more CI gates failed"
+            exit 1
+          fi
+          echo "All gates passed"

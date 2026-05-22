@@ -1,0 +1,56 @@
+import type { ValidatedContext } from '@/types/app';
+import type { DatabaseInstance } from '@/core/database';
+import { UnauthorizedError } from '@/core/errors';
+import type { CreateElectionBody } from '@/generated/openapi/validators';
+import { ElectionsRepository } from '../elections/repos/elections.repo';
+import type { NewElection } from '../elections/repos/elections.schema';
+import { auditAction } from '@/utils/audit';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
+
+/**
+ * createElection
+ *
+ * Path: POST /association/member/elections
+ * OperationId: createElection
+ */
+export async function createElection(
+  ctx: ValidatedContext<CreateElectionBody, never, never>
+): Promise<Response> {
+  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT]);
+  if (denied) return denied;
+
+  const session = ctx.get('session');
+  if (!session) throw new UnauthorizedError();
+
+  const orgId = ctx.get('organizationId');
+  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  const body = ctx.req.valid('json');
+  const db = ctx.get('database') as DatabaseInstance;
+  const repo = new ElectionsRepository(db);
+
+  // Convert position strings to {id, title, sortOrder} objects for JSONB storage
+  const positionObjects = (body.positions ?? []).map((p: string, i: number) => ({
+    id: crypto.randomUUID(),
+    title: p,
+    sortOrder: i,
+  }));
+
+  const election = await repo.create({
+    ...body,
+    positions: positionObjects,
+    organizationId: orgId,
+    status: 'draft',
+  } as NewElection);
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'election',
+    resourceId: election.id,
+    description: `Election created: ${election.title}`,
+    eventSubType: 'governance.election-created',
+  });
+
+  return ctx.json({ data: election }, 201);
+}

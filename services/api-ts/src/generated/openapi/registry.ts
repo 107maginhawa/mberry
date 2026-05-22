@@ -1,0 +1,760 @@
+/**
+ * Handler registry - maps operationIds to handler functions
+ * This file is regenerated on each run
+ */
+
+import { inviteAdmin } from '../../handlers/platformadmin/inviteAdmin';
+import { listAdmins } from '../../handlers/platformadmin/listAdmins';
+import { updateAdmin } from '../../handlers/platformadmin/updateAdmin';
+import { revokeAdmin } from '../../handlers/platformadmin/revokeAdmin';
+import { createAssociation } from '../../handlers/platformadmin/createAssociation';
+import { listAssociations } from '../../handlers/platformadmin/listAssociations';
+import { getAssociation } from '../../handlers/platformadmin/getAssociation';
+import { updateAssociation } from '../../handlers/platformadmin/updateAssociation';
+import { deleteAssociation } from '../../handlers/platformadmin/deleteAssociation';
+import { setFeatureFlag } from '../../handlers/platformadmin/setFeatureFlag';
+import { listFeatureFlags } from '../../handlers/platformadmin/listFeatureFlags';
+import { deleteFeatureFlag } from '../../handlers/platformadmin/deleteFeatureFlag';
+import { startImpersonation } from '../../handlers/platformadmin/startImpersonation';
+import { endImpersonation } from '../../handlers/platformadmin/endImpersonation';
+import { getAdminRole } from '../../handlers/platformadmin/getAdminRole';
+import { createOrganization } from '../../handlers/platformadmin/createOrganization';
+import { listOrganizations } from '../../handlers/platformadmin/listOrganizations';
+import { getOrganization } from '../../handlers/platformadmin/getOrganization';
+import { updateOrganization } from '../../handlers/platformadmin/updateOrganization';
+import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
+import { getOrganizationBySlug } from '../../handlers/platformadmin/getOrganizationBySlug';
+import { createDocumentTag } from '../../handlers/documents/createDocumentTag';
+import { listDocumentTags } from '../../handlers/documents/listDocumentTags';
+import { getDocumentTag } from '../../handlers/documents/getDocumentTag';
+import { updateDocumentTag } from '../../handlers/documents/updateDocumentTag';
+import { deleteDocumentTag } from '../../handlers/documents/deleteDocumentTag';
+import { createDocument } from '../../handlers/documents/createDocument';
+import { searchDocuments } from '../../handlers/documents/searchDocuments';
+import { getDocument } from '../../handlers/documents/getDocument';
+import { updateDocument } from '../../handlers/documents/updateDocument';
+import { deleteDocument } from '../../handlers/documents/deleteDocument';
+import { getDocumentAccessLog } from '../../handlers/documents/getDocumentAccessLog';
+import { archiveDocument } from '../../handlers/documents/archiveDocument';
+import { uploadNewDocumentVersion } from '../../handlers/documents/uploadNewDocumentVersion';
+import { listDocumentVersions } from '../../handlers/documents/listDocumentVersions';
+import { getDocumentVersion } from '../../handlers/documents/getDocumentVersion';
+import { listMyCustomEvents } from '../../handlers/association:operations/listMyCustomEvents';
+import { listCustomEventAttendance } from '../../handlers/association:operations/listCustomEventAttendance';
+import { checkInCustomEvent } from '../../handlers/association:operations/checkInCustomEvent';
+import { registerForCustomEvent } from '../../handlers/association:operations/registerForCustomEvent';
+import { listCustomEventRegistrations } from '../../handlers/association:operations/listCustomEventRegistrations';
+import { createEvent } from '../../handlers/association:operations/createEvent';
+import { searchEvents } from '../../handlers/association:operations/searchEvents';
+import { createCheckIn } from '../../handlers/association:operations/createCheckIn';
+import { searchCheckIns } from '../../handlers/association:operations/searchCheckIns';
+import { createEventRegistration } from '../../handlers/association:operations/createEventRegistration';
+import { searchEventRegistrations } from '../../handlers/association:operations/searchEventRegistrations';
+import { getEventRegistration } from '../../handlers/association:operations/getEventRegistration';
+import { updateEventRegistration } from '../../handlers/association:operations/updateEventRegistration';
+import { deleteEventRegistration } from '../../handlers/association:operations/deleteEventRegistration';
+import { cancelEventRegistration } from '../../handlers/association:operations/cancelEventRegistration';
+import { refundEventRegistration } from '../../handlers/association:operations/refundEventRegistration';
+import { getEvent } from '../../handlers/association:operations/getEvent';
+import { updateEvent } from '../../handlers/association:operations/updateEvent';
+import { deleteEvent } from '../../handlers/association:operations/deleteEvent';
+import { cancelEvent } from '../../handlers/association:operations/cancelEvent';
+import { publishEvent } from '../../handlers/association:operations/publishEvent';
+import { listWaitlistEntries } from '../../handlers/association:operations/listWaitlistEntries';
+import { promoteWaitlistEntry } from '../../handlers/association:operations/promoteWaitlistEntry';
+import { createTraining } from '../../handlers/association:operations/createTraining';
+import { searchTrainings } from '../../handlers/association:operations/searchTrainings';
+import { listMyCustomTrainings } from '../../handlers/association:operations/listMyCustomTrainings';
+import { cancelCustomTraining } from '../../handlers/association:operations/cancelCustomTraining';
+import { checkInCustomTraining } from '../../handlers/association:operations/checkInCustomTraining';
+import { completeCustomTraining } from '../../handlers/association:operations/completeCustomTraining';
+import { enrollInCustomTraining } from '../../handlers/association:operations/enrollInCustomTraining';
+import { listCustomTrainingEnrollments } from '../../handlers/association:operations/listCustomTrainingEnrollments';
+import { createCourse } from '../../handlers/association:operations/createCourse';
+import { searchCourses } from '../../handlers/association:operations/searchCourses';
+import { createCourseEnrollment } from '../../handlers/association:operations/createCourseEnrollment';
+import { searchCourseEnrollments } from '../../handlers/association:operations/searchCourseEnrollments';
+import { getCourseEnrollment } from '../../handlers/association:operations/getCourseEnrollment';
+import { updateCourseEnrollment } from '../../handlers/association:operations/updateCourseEnrollment';
+import { deleteCourseEnrollment } from '../../handlers/association:operations/deleteCourseEnrollment';
+import { updateCourseProgress } from '../../handlers/association:operations/updateCourseProgress';
+import { createQuizAttempt } from '../../handlers/association:operations/createQuizAttempt';
+import { searchQuizAttempts } from '../../handlers/association:operations/searchQuizAttempts';
+import { getCourse } from '../../handlers/association:operations/getCourse';
+import { updateCourse } from '../../handlers/association:operations/updateCourse';
+import { deleteCourse } from '../../handlers/association:operations/deleteCourse';
+import { createTrainingEnrollment } from '../../handlers/association:operations/createTrainingEnrollment';
+import { searchTrainingEnrollments } from '../../handlers/association:operations/searchTrainingEnrollments';
+import { getTrainingEnrollment } from '../../handlers/association:operations/getTrainingEnrollment';
+import { updateTrainingEnrollment } from '../../handlers/association:operations/updateTrainingEnrollment';
+import { deleteTrainingEnrollment } from '../../handlers/association:operations/deleteTrainingEnrollment';
+import { completeTrainingEnrollment } from '../../handlers/association:operations/completeTrainingEnrollment';
+import { getTraining } from '../../handlers/association:operations/getTraining';
+import { updateTraining } from '../../handlers/association:operations/updateTraining';
+import { deleteTraining } from '../../handlers/association:operations/deleteTraining';
+import { publishTraining } from '../../handlers/association:operations/publishTraining';
+import { createAffiliationTransfer } from '../../handlers/association:member/createAffiliationTransfer';
+import { listAffiliationTransfers } from '../../handlers/association:member/listAffiliationTransfers';
+import { getAffiliationTransfer } from '../../handlers/association:member/getAffiliationTransfer';
+import { approveTransferBySource } from '../../handlers/association:member/approveTransferBySource';
+import { approveTransferByTarget } from '../../handlers/association:member/approveTransferByTarget';
+import { completeAffiliationTransfer } from '../../handlers/association:member/completeAffiliationTransfer';
+import { denyAffiliationTransfer } from '../../handlers/association:member/denyAffiliationTransfer';
+import { getAgingBucket } from '../../handlers/association:member/getAgingBucket';
+import { recalculateAgingBucket } from '../../handlers/association:member/recalculateAgingBucket';
+import { createMembershipApplication } from '../../handlers/association:member/createMembershipApplication';
+import { listMembershipApplications } from '../../handlers/association:member/listMembershipApplications';
+import { bulkApproveMembershipApplications } from '../../handlers/association:member/bulkApproveMembershipApplications';
+import { getMembershipApplication } from '../../handlers/association:member/getMembershipApplication';
+import { updateMembershipApplication } from '../../handlers/association:member/updateMembershipApplication';
+import { deleteMembershipApplication } from '../../handlers/association:member/deleteMembershipApplication';
+import { approveMembershipApplication } from '../../handlers/association:member/approveMembershipApplication';
+import { denyMembershipApplication } from '../../handlers/association:member/denyMembershipApplication';
+import { castBallot } from '../../handlers/association:member/castBallot';
+import { listBallots } from '../../handlers/association:member/listBallots';
+import { createCandidate } from '../../handlers/association:member/createCandidate';
+import { listCandidates } from '../../handlers/association:member/listCandidates';
+import { getCandidate } from '../../handlers/association:member/getCandidate';
+import { updateCandidate } from '../../handlers/association:member/updateCandidate';
+import { deleteCandidate } from '../../handlers/association:member/deleteCandidate';
+import { listMyCertificates } from '../../handlers/association:member/listMyCertificates';
+import { getCertificate } from '../../handlers/association:member/getCertificate';
+import { createChapterAffiliation } from '../../handlers/association:member/createChapterAffiliation';
+import { listChapterAffiliations } from '../../handlers/association:member/listChapterAffiliations';
+import { getChapterAffiliation } from '../../handlers/association:member/getChapterAffiliation';
+import { updateChapterAffiliation } from '../../handlers/association:member/updateChapterAffiliation';
+import { deleteChapterAffiliation } from '../../handlers/association:member/deleteChapterAffiliation';
+import { setPrimaryChapterAffiliation } from '../../handlers/association:member/setPrimaryChapterAffiliation';
+import { createCredentialTemplate } from '../../handlers/association:member/createCredentialTemplate';
+import { listCredentialTemplates } from '../../handlers/association:member/listCredentialTemplates';
+import { getCredentialTemplate } from '../../handlers/association:member/getCredentialTemplate';
+import { updateCredentialTemplate } from '../../handlers/association:member/updateCredentialTemplate';
+import { deleteCredentialTemplate } from '../../handlers/association:member/deleteCredentialTemplate';
+import { listDigitalCredentials } from '../../handlers/association:member/listDigitalCredentials';
+import { issueDigitalCredential } from '../../handlers/association:member/issueDigitalCredential';
+import { verifyCredentialPublic } from '../../handlers/association:member/verifyCredentialPublic';
+import { verifyDigitalCredentialAuthenticated } from '../../handlers/association:member/verifyDigitalCredentialAuthenticated';
+import { getDigitalCredential } from '../../handlers/association:member/getDigitalCredential';
+import { updateDigitalCredential } from '../../handlers/association:member/updateDigitalCredential';
+import { deleteDigitalCredential } from '../../handlers/association:member/deleteDigitalCredential';
+import { revokeDigitalCredential } from '../../handlers/association:member/revokeDigitalCredential';
+import { createDirectoryProfile } from '../../handlers/association:member/createDirectoryProfile';
+import { listDirectoryProfiles } from '../../handlers/association:member/listDirectoryProfiles';
+import { getDirectoryProfile } from '../../handlers/association:member/getDirectoryProfile';
+import { updateDirectoryProfile } from '../../handlers/association:member/updateDirectoryProfile';
+import { deleteDirectoryProfile } from '../../handlers/association:member/deleteDirectoryProfile';
+import { searchDirectory } from '../../handlers/association:member/searchDirectory';
+import { getPublicDirectoryProfile } from '../../handlers/association:member/getPublicDirectoryProfile';
+import { createDuesConfig } from '../../handlers/association:member/createDuesConfig';
+import { listDuesConfigs } from '../../handlers/association:member/listDuesConfigs';
+import { getDuesConfig } from '../../handlers/association:member/getDuesConfig';
+import { updateDuesConfig } from '../../handlers/association:member/updateDuesConfig';
+import { deleteDuesConfig } from '../../handlers/association:member/deleteDuesConfig';
+import { getDuesGatewayConfig } from '../../handlers/association:member/getDuesGatewayConfig';
+import { upsertDuesGatewayConfig } from '../../handlers/association:member/upsertDuesGatewayConfig';
+import { disconnectDuesGateway } from '../../handlers/association:member/disconnectDuesGateway';
+import { testDuesGatewayConnection } from '../../handlers/association:member/testDuesGatewayConnection';
+import { createDuesInvoice } from '../../handlers/association:member/createDuesInvoice';
+import { listDuesInvoices } from '../../handlers/association:member/listDuesInvoices';
+import { generateDuesInvoicesForOrg } from '../../handlers/association:member/generateDuesInvoicesForOrg';
+import { getDuesInvoice } from '../../handlers/association:member/getDuesInvoice';
+import { updateDuesInvoice } from '../../handlers/association:member/updateDuesInvoice';
+import { deleteDuesInvoice } from '../../handlers/association:member/deleteDuesInvoice';
+import { markDuesInvoicePaid } from '../../handlers/association:member/markDuesInvoicePaid';
+import { listDuesPayments } from '../../handlers/association:member/listDuesPayments';
+import { recordDuesPayment } from '../../handlers/association:member/recordDuesPayment';
+import { listPendingProofs } from '../../handlers/association:member/listPendingProofs';
+import { submitPaymentProof } from '../../handlers/association:member/submitPaymentProof';
+import { getDuesPayment } from '../../handlers/association:member/getDuesPayment';
+import { confirmPaymentProof } from '../../handlers/association:member/confirmPaymentProof';
+import { refundDuesPayment } from '../../handlers/association:member/refundDuesPayment';
+import { rejectPaymentProof } from '../../handlers/association:member/rejectPaymentProof';
+import { listDuesFunds } from '../../handlers/association:member/listDuesFunds';
+import { upsertDuesFunds } from '../../handlers/association:member/upsertDuesFunds';
+import { getDuesFinancialDashboard } from '../../handlers/association:member/getDuesFinancialDashboard';
+import { generateDuesReport } from '../../handlers/association:member/generateDuesReport';
+import { listDunningEvents } from '../../handlers/association:member/listDunningEvents';
+import { runDunning } from '../../handlers/association:member/runDunning';
+import { createDunningTemplate } from '../../handlers/association:member/createDunningTemplate';
+import { listDunningTemplates } from '../../handlers/association:member/listDunningTemplates';
+import { getDunningTemplate } from '../../handlers/association:member/getDunningTemplate';
+import { updateDunningTemplate } from '../../handlers/association:member/updateDunningTemplate';
+import { deleteDunningTemplate } from '../../handlers/association:member/deleteDunningTemplate';
+import { createElection } from '../../handlers/association:member/createElection';
+import { listElections } from '../../handlers/association:member/listElections';
+import { getElection } from '../../handlers/association:member/getElection';
+import { updateElection } from '../../handlers/association:member/updateElection';
+import { deleteElection } from '../../handlers/association:member/deleteElection';
+import { certifyElection } from '../../handlers/association:member/certifyElection';
+import { openElectionNominations } from '../../handlers/association:member/openElectionNominations';
+import { openElectionVoting } from '../../handlers/association:member/openElectionVoting';
+import { createInstitutionalMembership } from '../../handlers/association:member/createInstitutionalMembership';
+import { listInstitutionalMemberships } from '../../handlers/association:member/listInstitutionalMemberships';
+import { getInstitutionalMembership } from '../../handlers/association:member/getInstitutionalMembership';
+import { updateInstitutionalMembership } from '../../handlers/association:member/updateInstitutionalMembership';
+import { deleteInstitutionalMembership } from '../../handlers/association:member/deleteInstitutionalMembership';
+import { allocateSeat } from '../../handlers/association:member/allocateSeat';
+import { listSeatAllocations } from '../../handlers/association:member/listSeatAllocations';
+import { revokeSeat } from '../../handlers/association:member/revokeSeat';
+import { listLicenseRenewalAlerts } from '../../handlers/association:member/listLicenseRenewalAlerts';
+import { acknowledgeLicenseRenewalAlert } from '../../handlers/association:member/acknowledgeLicenseRenewalAlert';
+import { createProfessionalLicense } from '../../handlers/association:member/createProfessionalLicense';
+import { listProfessionalLicenses } from '../../handlers/association:member/listProfessionalLicenses';
+import { getProfessionalLicense } from '../../handlers/association:member/getProfessionalLicense';
+import { updateProfessionalLicense } from '../../handlers/association:member/updateProfessionalLicense';
+import { deleteProfessionalLicense } from '../../handlers/association:member/deleteProfessionalLicense';
+import { listMembershipCategories } from '../../handlers/association:member/listMembershipCategories';
+import { upsertMembershipCategory } from '../../handlers/association:member/upsertMembershipCategory';
+import { createMembership } from '../../handlers/association:member/createMembership';
+import { listMemberships } from '../../handlers/association:member/listMemberships';
+import { getMembership } from '../../handlers/association:member/getMembership';
+import { updateMembership } from '../../handlers/association:member/updateMembership';
+import { deleteMembership } from '../../handlers/association:member/deleteMembership';
+import { deceaseMembership } from '../../handlers/association:member/deceaseMembership';
+import { reinstateMembership } from '../../handlers/association:member/reinstateMembership';
+import { renewMembership } from '../../handlers/association:member/renewMembership';
+import { resignMembership } from '../../handlers/association:member/resignMembership';
+import { terminateMembership } from '../../handlers/association:member/terminateMembership';
+import { createOfficerTerm } from '../../handlers/association:member/createOfficerTerm';
+import { listOfficerTerms } from '../../handlers/association:member/listOfficerTerms';
+import { getOfficerTerm } from '../../handlers/association:member/getOfficerTerm';
+import { updateOfficerTerm } from '../../handlers/association:member/updateOfficerTerm';
+import { deleteOfficerTerm } from '../../handlers/association:member/deleteOfficerTerm';
+import { getOrganizationProfile } from '../../handlers/association:member/getOrganizationProfile';
+import { updateOrganizationProfile } from '../../handlers/association:member/updateOrganizationProfile';
+import { createPosition } from '../../handlers/association:member/createPosition';
+import { listPositions } from '../../handlers/association:member/listPositions';
+import { getPosition } from '../../handlers/association:member/getPosition';
+import { updatePosition } from '../../handlers/association:member/updatePosition';
+import { deletePosition } from '../../handlers/association:member/deletePosition';
+import { listRosterMembers } from '../../handlers/association:member/listRosterMembers';
+import { addRosterMember } from '../../handlers/association:member/addRosterMember';
+import { importRosterMembers } from '../../handlers/association:member/importRosterMembers';
+import { getRosterMember } from '../../handlers/association:member/getRosterMember';
+import { updateRosterMember } from '../../handlers/association:member/updateRosterMember';
+import { createRoyaltySplit } from '../../handlers/association:member/createRoyaltySplit';
+import { listRoyaltySplits } from '../../handlers/association:member/listRoyaltySplits';
+import { getRoyaltySplit } from '../../handlers/association:member/getRoyaltySplit';
+import { updateRoyaltySplit } from '../../handlers/association:member/updateRoyaltySplit';
+import { deleteRoyaltySplit } from '../../handlers/association:member/deleteRoyaltySplit';
+import { createMembershipTier } from '../../handlers/association:member/createMembershipTier';
+import { listMembershipTiers } from '../../handlers/association:member/listMembershipTiers';
+import { getMembershipTier } from '../../handlers/association:member/getMembershipTier';
+import { updateMembershipTier } from '../../handlers/association:member/updateMembershipTier';
+import { deleteMembershipTier } from '../../handlers/association:member/deleteMembershipTier';
+import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
+import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
+import { createMessageTemplate } from '../../handlers/communication/createMessageTemplate';
+import { searchMessageTemplates } from '../../handlers/communication/searchMessageTemplates';
+import { getMessageTemplate } from '../../handlers/communication/getMessageTemplate';
+import { updateMessageTemplate } from '../../handlers/communication/updateMessageTemplate';
+import { deleteMessageTemplate } from '../../handlers/communication/deleteMessageTemplate';
+import { previewMessageTemplate } from '../../handlers/communication/previewMessageTemplate';
+import { createMessage } from '../../handlers/communication/createMessage';
+import { searchMessages } from '../../handlers/communication/searchMessages';
+import { getMessage } from '../../handlers/communication/getMessage';
+import { updateMessage } from '../../handlers/communication/updateMessage';
+import { deleteMessage } from '../../handlers/communication/deleteMessage';
+import { cancelMessage } from '../../handlers/communication/cancelMessage';
+import { scheduleMessage } from '../../handlers/communication/scheduleMessage';
+import { sendMessage } from '../../handlers/communication/sendMessage';
+import { listPersonSubscriptions } from '../../handlers/communication/listPersonSubscriptions';
+import { bulkUpdatePersonSubscriptions } from '../../handlers/communication/bulkUpdatePersonSubscriptions';
+import { updatePersonSubscription } from '../../handlers/communication/updatePersonSubscription';
+import { createSubscriptionTopic } from '../../handlers/communication/createSubscriptionTopic';
+import { getSubscriptionTopic } from '../../handlers/communication/getSubscriptionTopic';
+import { updateSubscriptionTopic } from '../../handlers/communication/updateSubscriptionTopic';
+import { deleteSubscriptionTopic } from '../../handlers/communication/deleteSubscriptionTopic';
+import { getAnnouncement } from '../../handlers/communication/getAnnouncement';
+import { updateAnnouncement } from '../../handlers/communication/updateAnnouncement';
+import { deleteAnnouncement } from '../../handlers/communication/deleteAnnouncement';
+import { archiveAnnouncement } from '../../handlers/communication/archiveAnnouncement';
+import { publishAnnouncement } from '../../handlers/communication/publishAnnouncement';
+import { listAnnouncements } from '../../handlers/communication/listAnnouncements';
+import { createAnnouncement } from '../../handlers/communication/createAnnouncement';
+import { listAuditLogs } from '../../handlers/audit/listAuditLogs';
+import { createInvoice } from '../../handlers/billing/createInvoice';
+import { listInvoices } from '../../handlers/billing/listInvoices';
+import { getInvoice } from '../../handlers/billing/getInvoice';
+import { updateInvoice } from '../../handlers/billing/updateInvoice';
+import { deleteInvoice } from '../../handlers/billing/deleteInvoice';
+import { captureInvoicePayment } from '../../handlers/billing/captureInvoicePayment';
+import { finalizeInvoice } from '../../handlers/billing/finalizeInvoice';
+import { markInvoiceUncollectible } from '../../handlers/billing/markInvoiceUncollectible';
+import { payInvoice } from '../../handlers/billing/payInvoice';
+import { refundInvoicePayment } from '../../handlers/billing/refundInvoicePayment';
+import { voidInvoice } from '../../handlers/billing/voidInvoice';
+import { createMerchantAccount } from '../../handlers/billing/createMerchantAccount';
+import { getMerchantAccount } from '../../handlers/billing/getMerchantAccount';
+import { getMerchantDashboard } from '../../handlers/billing/getMerchantDashboard';
+import { onboardMerchantAccount } from '../../handlers/billing/onboardMerchantAccount';
+import { handleStripeWebhook } from '../../handlers/billing/handleStripeWebhook';
+import { createBooking } from '../../handlers/booking/createBooking';
+import { listBookings } from '../../handlers/booking/listBookings';
+import { getBooking } from '../../handlers/booking/getBooking';
+import { cancelBooking } from '../../handlers/booking/cancelBooking';
+import { confirmBooking } from '../../handlers/booking/confirmBooking';
+import { markNoShowBooking } from '../../handlers/booking/markNoShowBooking';
+import { rejectBooking } from '../../handlers/booking/rejectBooking';
+import { listBookingEvents } from '../../handlers/booking/listBookingEvents';
+import { createBookingEvent } from '../../handlers/booking/createBookingEvent';
+import { getBookingEvent } from '../../handlers/booking/getBookingEvent';
+import { updateBookingEvent } from '../../handlers/booking/updateBookingEvent';
+import { deleteBookingEvent } from '../../handlers/booking/deleteBookingEvent';
+import { createScheduleException } from '../../handlers/booking/createScheduleException';
+import { listScheduleExceptions } from '../../handlers/booking/listScheduleExceptions';
+import { getScheduleException } from '../../handlers/booking/getScheduleException';
+import { deleteScheduleException } from '../../handlers/booking/deleteScheduleException';
+import { listEventSlots } from '../../handlers/booking/listEventSlots';
+import { getTimeSlot } from '../../handlers/booking/getTimeSlot';
+import { createChatRoom } from '../../handlers/comms/createChatRoom';
+import { listChatRooms } from '../../handlers/comms/listChatRooms';
+import { getChatRoom } from '../../handlers/comms/getChatRoom';
+import { getChatMessages } from '../../handlers/comms/getChatMessages';
+import { sendChatMessage } from '../../handlers/comms/sendChatMessage';
+import { endVideoCall } from '../../handlers/comms/endVideoCall';
+import { joinVideoCall } from '../../handlers/comms/joinVideoCall';
+import { leaveVideoCall } from '../../handlers/comms/leaveVideoCall';
+import { updateVideoCallParticipant } from '../../handlers/comms/updateVideoCallParticipant';
+import { getIceServers } from '../../handlers/comms/getIceServers';
+import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
+import { listEmailQueueItems } from '../../handlers/email/listEmailQueueItems';
+import { getEmailQueueItem } from '../../handlers/email/getEmailQueueItem';
+import { cancelEmailQueueItem } from '../../handlers/email/cancelEmailQueueItem';
+import { retryEmailQueueItem } from '../../handlers/email/retryEmailQueueItem';
+import { listEmailTemplates } from '../../handlers/email/listEmailTemplates';
+import { createEmailTemplate } from '../../handlers/email/createEmailTemplate';
+import { getEmailTemplate } from '../../handlers/email/getEmailTemplate';
+import { updateEmailTemplate } from '../../handlers/email/updateEmailTemplate';
+import { testEmailTemplate } from '../../handlers/email/testEmailTemplate';
+import { listOrgApplications } from '../../handlers/membership/listOrgApplications';
+import { listOrgMembers } from '../../handlers/membership/listOrgMembers';
+import { getOrgProfile } from '../../handlers/membership/getOrgProfile';
+import { updateOrgProfile } from '../../handlers/membership/updateOrgProfile';
+import { listNotifications } from '../../handlers/notifs/listNotifications';
+import { markAllNotificationsAsRead } from '../../handlers/notifs/markAllNotificationsAsRead';
+import { getNotification } from '../../handlers/notifs/getNotification';
+import { markNotificationAsRead } from '../../handlers/notifs/markNotificationAsRead';
+import { markAllNotificationsRead } from '../../handlers/notifs/markAllNotificationsRead';
+import { createPerson } from '../../handlers/person/createPerson';
+import { listPersons } from '../../handlers/person/listPersons';
+import { updateMyProfile } from '../../handlers/person/updateMyProfile';
+import { cancelMyAccountDeletion } from '../../handlers/person/cancelMyAccountDeletion';
+import { createMyCreditEntry } from '../../handlers/person/createMyCreditEntry';
+import { listMyCreditEntries } from '../../handlers/person/listMyCreditEntries';
+import { getMyCreditSummary } from '../../handlers/person/getMyCreditSummary';
+import { requestMyAccountDeletion } from '../../handlers/person/requestMyAccountDeletion';
+import { exportMyData } from '../../handlers/person/exportMyData';
+import { getMyMemberships } from '../../handlers/person/getMyMemberships';
+import { getMyNotificationPreferences } from '../../handlers/person/getMyNotificationPreferences';
+import { updateMyNotificationPreferences } from '../../handlers/person/updateMyNotificationPreferences';
+import { getMyOfficerRole } from '../../handlers/person/getMyOfficerRole';
+import { getMyPrivacySettings } from '../../handlers/person/getMyPrivacySettings';
+import { updateMyPrivacySettings } from '../../handlers/person/updateMyPrivacySettings';
+import { getPerson } from '../../handlers/person/getPerson';
+import { updatePerson } from '../../handlers/person/updatePerson';
+import { createReview } from '../../handlers/reviews/createReview';
+import { listReviews } from '../../handlers/reviews/listReviews';
+import { getReview } from '../../handlers/reviews/getReview';
+import { deleteReview } from '../../handlers/reviews/deleteReview';
+import { listFiles } from '../../handlers/storage/listFiles';
+import { uploadFile } from '../../handlers/storage/uploadFile';
+import { getFile } from '../../handlers/storage/getFile';
+import { deleteFile } from '../../handlers/storage/deleteFile';
+import { completeFileUpload } from '../../handlers/storage/completeFileUpload';
+import { getFileDownload } from '../../handlers/storage/getFileDownload';
+
+export const registry = {
+  // Platformadmin handlers
+  inviteAdmin,
+  listAdmins,
+  updateAdmin,
+  revokeAdmin,
+  createAssociation,
+  listAssociations,
+  getAssociation,
+  updateAssociation,
+  deleteAssociation,
+  setFeatureFlag,
+  listFeatureFlags,
+  deleteFeatureFlag,
+  startImpersonation,
+  endImpersonation,
+  getAdminRole,
+  createOrganization,
+  listOrganizations,
+  getOrganization,
+  updateOrganization,
+  transitionOrgStatus,
+  getOrganizationBySlug,
+
+  // Documents handlers
+  createDocumentTag,
+  listDocumentTags,
+  getDocumentTag,
+  updateDocumentTag,
+  deleteDocumentTag,
+  createDocument,
+  searchDocuments,
+  getDocument,
+  updateDocument,
+  deleteDocument,
+  getDocumentAccessLog,
+  archiveDocument,
+  uploadNewDocumentVersion,
+  listDocumentVersions,
+  getDocumentVersion,
+
+  // Association:operations handlers
+  listMyCustomEvents,
+  listCustomEventAttendance,
+  checkInCustomEvent,
+  registerForCustomEvent,
+  listCustomEventRegistrations,
+  createEvent,
+  searchEvents,
+  createCheckIn,
+  searchCheckIns,
+  createEventRegistration,
+  searchEventRegistrations,
+  getEventRegistration,
+  updateEventRegistration,
+  deleteEventRegistration,
+  cancelEventRegistration,
+  refundEventRegistration,
+  getEvent,
+  updateEvent,
+  deleteEvent,
+  cancelEvent,
+  publishEvent,
+  listWaitlistEntries,
+  promoteWaitlistEntry,
+  createTraining,
+  searchTrainings,
+  listMyCustomTrainings,
+  cancelCustomTraining,
+  checkInCustomTraining,
+  completeCustomTraining,
+  enrollInCustomTraining,
+  listCustomTrainingEnrollments,
+  createCourse,
+  searchCourses,
+  createCourseEnrollment,
+  searchCourseEnrollments,
+  getCourseEnrollment,
+  updateCourseEnrollment,
+  deleteCourseEnrollment,
+  updateCourseProgress,
+  createQuizAttempt,
+  searchQuizAttempts,
+  getCourse,
+  updateCourse,
+  deleteCourse,
+  createTrainingEnrollment,
+  searchTrainingEnrollments,
+  getTrainingEnrollment,
+  updateTrainingEnrollment,
+  deleteTrainingEnrollment,
+  completeTrainingEnrollment,
+  getTraining,
+  updateTraining,
+  deleteTraining,
+  publishTraining,
+
+  // Association:member handlers
+  createAffiliationTransfer,
+  listAffiliationTransfers,
+  getAffiliationTransfer,
+  approveTransferBySource,
+  approveTransferByTarget,
+  completeAffiliationTransfer,
+  denyAffiliationTransfer,
+  getAgingBucket,
+  recalculateAgingBucket,
+  createMembershipApplication,
+  listMembershipApplications,
+  bulkApproveMembershipApplications,
+  getMembershipApplication,
+  updateMembershipApplication,
+  deleteMembershipApplication,
+  approveMembershipApplication,
+  denyMembershipApplication,
+  castBallot,
+  listBallots,
+  createCandidate,
+  listCandidates,
+  getCandidate,
+  updateCandidate,
+  deleteCandidate,
+  listMyCertificates,
+  getCertificate,
+  createChapterAffiliation,
+  listChapterAffiliations,
+  getChapterAffiliation,
+  updateChapterAffiliation,
+  deleteChapterAffiliation,
+  setPrimaryChapterAffiliation,
+  createCredentialTemplate,
+  listCredentialTemplates,
+  getCredentialTemplate,
+  updateCredentialTemplate,
+  deleteCredentialTemplate,
+  listDigitalCredentials,
+  issueDigitalCredential,
+  verifyCredentialPublic,
+  verifyDigitalCredentialAuthenticated,
+  getDigitalCredential,
+  updateDigitalCredential,
+  deleteDigitalCredential,
+  revokeDigitalCredential,
+  createDirectoryProfile,
+  listDirectoryProfiles,
+  getDirectoryProfile,
+  updateDirectoryProfile,
+  deleteDirectoryProfile,
+  searchDirectory,
+  getPublicDirectoryProfile,
+  createDuesConfig,
+  listDuesConfigs,
+  getDuesConfig,
+  updateDuesConfig,
+  deleteDuesConfig,
+  getDuesGatewayConfig,
+  upsertDuesGatewayConfig,
+  disconnectDuesGateway,
+  testDuesGatewayConnection,
+  createDuesInvoice,
+  listDuesInvoices,
+  generateDuesInvoicesForOrg,
+  getDuesInvoice,
+  updateDuesInvoice,
+  deleteDuesInvoice,
+  markDuesInvoicePaid,
+  listDuesPayments,
+  recordDuesPayment,
+  listPendingProofs,
+  submitPaymentProof,
+  getDuesPayment,
+  confirmPaymentProof,
+  refundDuesPayment,
+  rejectPaymentProof,
+  listDuesFunds,
+  upsertDuesFunds,
+  getDuesFinancialDashboard,
+  generateDuesReport,
+  listDunningEvents,
+  runDunning,
+  createDunningTemplate,
+  listDunningTemplates,
+  getDunningTemplate,
+  updateDunningTemplate,
+  deleteDunningTemplate,
+  createElection,
+  listElections,
+  getElection,
+  updateElection,
+  deleteElection,
+  certifyElection,
+  openElectionNominations,
+  openElectionVoting,
+  createInstitutionalMembership,
+  listInstitutionalMemberships,
+  getInstitutionalMembership,
+  updateInstitutionalMembership,
+  deleteInstitutionalMembership,
+  allocateSeat,
+  listSeatAllocations,
+  revokeSeat,
+  listLicenseRenewalAlerts,
+  acknowledgeLicenseRenewalAlert,
+  createProfessionalLicense,
+  listProfessionalLicenses,
+  getProfessionalLicense,
+  updateProfessionalLicense,
+  deleteProfessionalLicense,
+  listMembershipCategories,
+  upsertMembershipCategory,
+  createMembership,
+  listMemberships,
+  getMembership,
+  updateMembership,
+  deleteMembership,
+  deceaseMembership,
+  reinstateMembership,
+  renewMembership,
+  resignMembership,
+  terminateMembership,
+  createOfficerTerm,
+  listOfficerTerms,
+  getOfficerTerm,
+  updateOfficerTerm,
+  deleteOfficerTerm,
+  getOrganizationProfile,
+  updateOrganizationProfile,
+  createPosition,
+  listPositions,
+  getPosition,
+  updatePosition,
+  deletePosition,
+  listRosterMembers,
+  addRosterMember,
+  importRosterMembers,
+  getRosterMember,
+  updateRosterMember,
+  createRoyaltySplit,
+  listRoyaltySplits,
+  getRoyaltySplit,
+  updateRoyaltySplit,
+  deleteRoyaltySplit,
+  createMembershipTier,
+  listMembershipTiers,
+  getMembershipTier,
+  updateMembershipTier,
+  deleteMembershipTier,
+  getCreditCompliance,
+  listOfficerTermsSummary,
+
+  // Communication handlers
+  createMessageTemplate,
+  searchMessageTemplates,
+  getMessageTemplate,
+  updateMessageTemplate,
+  deleteMessageTemplate,
+  previewMessageTemplate,
+  createMessage,
+  searchMessages,
+  getMessage,
+  updateMessage,
+  deleteMessage,
+  cancelMessage,
+  scheduleMessage,
+  sendMessage,
+  listPersonSubscriptions,
+  bulkUpdatePersonSubscriptions,
+  updatePersonSubscription,
+  createSubscriptionTopic,
+  getSubscriptionTopic,
+  updateSubscriptionTopic,
+  deleteSubscriptionTopic,
+  getAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
+  archiveAnnouncement,
+  publishAnnouncement,
+  listAnnouncements,
+  createAnnouncement,
+
+  // Audit handlers
+  listAuditLogs,
+
+  // Billing handlers
+  createInvoice,
+  listInvoices,
+  getInvoice,
+  updateInvoice,
+  deleteInvoice,
+  captureInvoicePayment,
+  finalizeInvoice,
+  markInvoiceUncollectible,
+  payInvoice,
+  refundInvoicePayment,
+  voidInvoice,
+  createMerchantAccount,
+  getMerchantAccount,
+  getMerchantDashboard,
+  onboardMerchantAccount,
+  handleStripeWebhook,
+
+  // Booking handlers
+  createBooking,
+  listBookings,
+  getBooking,
+  cancelBooking,
+  confirmBooking,
+  markNoShowBooking,
+  rejectBooking,
+  listBookingEvents,
+  createBookingEvent,
+  getBookingEvent,
+  updateBookingEvent,
+  deleteBookingEvent,
+  createScheduleException,
+  listScheduleExceptions,
+  getScheduleException,
+  deleteScheduleException,
+  listEventSlots,
+  getTimeSlot,
+
+  // Comms handlers
+  createChatRoom,
+  listChatRooms,
+  getChatRoom,
+  getChatMessages,
+  sendChatMessage,
+  endVideoCall,
+  joinVideoCall,
+  leaveVideoCall,
+  updateVideoCallParticipant,
+  getIceServers,
+
+  // Dues handlers
+  getDuesDashboard,
+
+  // Email handlers
+  listEmailQueueItems,
+  getEmailQueueItem,
+  cancelEmailQueueItem,
+  retryEmailQueueItem,
+  listEmailTemplates,
+  createEmailTemplate,
+  getEmailTemplate,
+  updateEmailTemplate,
+  testEmailTemplate,
+
+  // Membership handlers
+  listOrgApplications,
+  listOrgMembers,
+  getOrgProfile,
+  updateOrgProfile,
+
+  // Notifs handlers
+  listNotifications,
+  markAllNotificationsAsRead,
+  getNotification,
+  markNotificationAsRead,
+  markAllNotificationsRead,
+
+  // Person handlers
+  createPerson,
+  listPersons,
+  updateMyProfile,
+  cancelMyAccountDeletion,
+  createMyCreditEntry,
+  listMyCreditEntries,
+  getMyCreditSummary,
+  requestMyAccountDeletion,
+  exportMyData,
+  getMyMemberships,
+  getMyNotificationPreferences,
+  updateMyNotificationPreferences,
+  getMyOfficerRole,
+  getMyPrivacySettings,
+  updateMyPrivacySettings,
+  getPerson,
+  updatePerson,
+
+  // Reviews handlers
+  createReview,
+  listReviews,
+  getReview,
+  deleteReview,
+
+  // Storage handlers
+  listFiles,
+  uploadFile,
+  getFile,
+  deleteFile,
+  completeFileUpload,
+  getFileDownload,
+
+};

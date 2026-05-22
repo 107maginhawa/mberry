@@ -1,0 +1,79 @@
+import { useState } from "react"
+import type { ReactNode } from "react"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
+  Input,
+  Label,
+} from "@monobase/ui"
+
+interface ConfirmDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title: string
+  description: string | ReactNode
+  confirmLabel: string
+  onConfirm: () => void
+  variant?: "destructive" | "high-consequence" | "irreversible"
+  confirmText?: string
+}
+
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel,
+  onConfirm,
+  variant = "destructive",
+  confirmText,
+}: ConfirmDialogProps) {
+  const [typedText, setTypedText] = useState("")
+  const canConfirm = variant === "irreversible" ? typedText === confirmText : true
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-md border-[var(--color-border)] bg-[var(--color-surface)]">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-h3">{title}</AlertDialogTitle>
+          <AlertDialogDescription className="text-[14px] text-[var(--color-text-secondary)]">
+            {description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        {variant === "irreversible" && confirmText && (
+          <div className="my-2">
+            <Label className="text-[13px] font-medium text-[var(--color-muted)] block mb-1.5">
+              Type <span className="font-mono font-semibold">{confirmText}</span> to confirm
+            </Label>
+            <Input
+              type="text"
+              value={typedText}
+              onChange={(e) => setTypedText(e.target.value)}
+              autoFocus
+            />
+          </div>
+        )}
+
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setTypedText("")}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-[var(--color-error)] text-white hover:bg-[var(--color-error)]/90"
+            onClick={() => { onConfirm(); setTypedText("") }}
+            disabled={!canConfirm}
+          >
+            {confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}

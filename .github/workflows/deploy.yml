@@ -1,0 +1,265 @@
+name: Deploy
+
+# Required GitHub Secrets (per environment: staging, production):
+#   RAILWAY_TOKEN          — Railway API token (Account Settings -> Tokens)
+#   CLOUDFLARE_API_TOKEN   — Cloudflare API token (Edit Pages permission)
+#   CLOUDFLARE_ACCOUNT_ID  — Cloudflare account ID
+#
+# Required GitHub Variables (per environment):
+#   STAGING_API_URL        — Railway staging URL (e.g., https://memberry-staging.up.railway.app)
+#   PRODUCTION_API_URL     — Railway production URL
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy target'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      image_tag: ${{ steps.image-tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/api-ts/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/api:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Set image tag output
+        id: image-tag
+        run: echo "image_tag=ghcr.io/${{ github.repository }}/api:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+
+      - run: bun install --frozen-lockfile
+
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+
+      # Frontend builds are done per-environment in deploy jobs below
+      # (each environment needs its own VITE_API_URL baked in at build time)
+
+  deploy-staging:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+
+      - run: bun install --frozen-lockfile
+
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+
+      - name: Build frontends (staging)
+        env:
+          VITE_API_URL: ${{ vars.STAGING_API_URL || '' }}
+        run: |
+          cd apps/memberry && bun run build
+          cd ../../apps/admin && bun run build
+          cd ../../apps/account && bun run build
+
+      - name: Deploy API to staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm install -g @railway/cli
+          railway up --service memberry-api --environment staging --image ${{ needs.build.outputs.image_tag }}
+
+      - name: Deploy frontends to staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm install -g wrangler
+          wrangler pages deploy apps/memberry/dist/ --project-name memberry-staging --branch main
+          wrangler pages deploy apps/admin/dist/ --project-name memberry-admin-staging --branch main
+          wrangler pages deploy apps/account/dist/ --project-name memberry-account-staging --branch main
+
+      - name: Health check — staging API
+        if: vars.STAGING_API_URL != ''
+        run: |
+          DEPLOY_URL="${{ vars.STAGING_API_URL }}"
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/readyz")
+            echo "Attempt $i: HTTP $STATUS"
+            [ "$STATUS" = "200" ] && echo "Staging API ready" && exit 0
+            sleep 5
+          done
+          echo "::error::Staging health check failed after 150s"
+          exit 1
+
+      - name: Smoke test — staging
+        if: vars.STAGING_API_URL != ''
+        run: |
+          DEPLOY_URL="${{ vars.STAGING_API_URL }}"
+          FAILED=0
+
+          # 1. Liveness
+          curl -fsS "$DEPLOY_URL/livez" > /dev/null || { echo "::error::livez failed"; FAILED=1; }
+
+          # 2. Readiness (verbose — checks db, storage, jobs)
+          READYZ=$(curl -fsS "$DEPLOY_URL/readyz?verbose")
+          echo "readyz: $READYZ"
+          echo "$READYZ" | grep -q '"status":"pass"' || { echo "::error::readyz not passing"; FAILED=1; }
+
+          # 3. Auth endpoint responds (not 500)
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/api/auth/session")
+          echo "auth/session: HTTP $AUTH_STATUS"
+          [ "$AUTH_STATUS" -lt 500 ] || { echo "::error::auth endpoint 5xx"; FAILED=1; }
+
+          # 4. Feature flags endpoint (if available)
+          FF_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/feature-flags")
+          echo "feature-flags: HTTP $FF_STATUS"
+          [ "$FF_STATUS" -lt 500 ] || { echo "::warning::feature-flags endpoint 5xx"; }
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Staging smoke tests failed — do NOT deploy to production"
+            exit 1
+          fi
+          echo "Staging smoke tests passed ✓"
+
+  deploy-production:
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'production'
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+
+      - run: bun install --frozen-lockfile
+
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+
+      - name: Build frontends (production)
+        env:
+          VITE_API_URL: ${{ vars.PRODUCTION_API_URL || '' }}
+        run: |
+          cd apps/memberry && bun run build
+          cd ../../apps/admin && bun run build
+          cd ../../apps/account && bun run build
+
+      - name: Deploy API to production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm install -g @railway/cli
+          railway up --service memberry-api --environment production --image ${{ needs.build.outputs.image_tag }}
+
+      - name: Deploy frontends to production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm install -g wrangler
+          wrangler pages deploy apps/memberry/dist/ --project-name memberry-production --branch main
+          wrangler pages deploy apps/admin/dist/ --project-name memberry-admin-production --branch main
+          wrangler pages deploy apps/account/dist/ --project-name memberry-account-production --branch main
+
+      - name: Health check — production API
+        if: vars.PRODUCTION_API_URL != ''
+        run: |
+          DEPLOY_URL="${{ vars.PRODUCTION_API_URL }}"
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/readyz")
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Production API ready"
+              # Double-check: verify /readyz returns healthy JSON
+              curl -s "$DEPLOY_URL/readyz" | grep -q '"status":"ok"' || {
+                echo "::warning::API responded 200 but readyz body unexpected"
+              }
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Production health check failed after 150s"
+          exit 1
+
+      - name: Smoke test — production
+        if: vars.PRODUCTION_API_URL != ''
+        run: |
+          DEPLOY_URL="${{ vars.PRODUCTION_API_URL }}"
+          FAILED=0
+
+          # 1. Liveness
+          curl -fsS "$DEPLOY_URL/livez" > /dev/null || { echo "::error::livez failed"; FAILED=1; }
+
+          # 2. Readiness (verbose — checks db, storage, jobs)
+          READYZ=$(curl -fsS "$DEPLOY_URL/readyz?verbose")
+          echo "readyz: $READYZ"
+          echo "$READYZ" | grep -q '"status":"pass"' || { echo "::error::readyz not passing"; FAILED=1; }
+
+          # 3. Auth endpoint responds (not 500)
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/api/auth/session")
+          echo "auth/session: HTTP $AUTH_STATUS"
+          [ "$AUTH_STATUS" -lt 500 ] || { echo "::error::auth endpoint 5xx"; FAILED=1; }
+
+          # 4. Feature flags endpoint
+          FF_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/feature-flags")
+          echo "feature-flags: HTTP $FF_STATUS"
+          [ "$FF_STATUS" -lt 500 ] || { echo "::warning::feature-flags endpoint 5xx"; }
+
+          # 5. Deploy marker — log commit SHA for rollback reference
+          echo "deployed_sha=${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Production Deploy ✓" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **SHA**: \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Rollback**: \`bun run rollback -- --env production --to-sha <previous-sha>\`" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Production smoke tests failed — consider rollback"
+            exit 1
+          fi
+          echo "Production smoke tests passed ✓"

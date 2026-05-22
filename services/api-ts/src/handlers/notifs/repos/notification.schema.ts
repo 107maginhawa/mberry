@@ -1,0 +1,163 @@
+/**
+ * Database schema for notifications - matches TypeSpec API definition
+ * Provides multi-channel notification support with healthcare compliance
+ */
+
+import { pgTable, varchar, timestamp, jsonb, pgEnum, index, uuid, boolean } from 'drizzle-orm/pg-core';
+import { baseEntityFields } from '@/core/database.schema';
+
+// Notification type enum - matches TypeSpec definition
+export const notificationTypeEnum = pgEnum('notification_type', [
+  'billing',
+  'security',
+  'system',
+  // Booking module notifications
+  'booking.created',
+  'booking.confirmed',
+  'booking.rejected',
+  'booking.cancelled',
+  'booking.no-show-client',
+  'booking.no-show-host',
+  // Comms module notifications
+  'comms.video-call-started',
+  'comms.video-call-joined',
+  'comms.video-call-left',
+  'comms.video-call-ended',
+  'comms.chat-message',
+  // Cross-cutting notifications (Slice 027)
+  'waitlist.promoted',         // GAP-003: Waitlist promotion
+  'event.late-cancellation',   // GAP-006: Late cancellation
+  'dunning.escalation',        // GAP-012: Dunning escalation
+  'task.overdue',              // GAP-017: Committee task overdue
+]);
+
+// Notification channel enum - matches TypeSpec definition
+export const notificationChannelEnum = pgEnum('notification_channel', [
+  'email',
+  'push',
+  'in-app'
+]);
+
+// Notification status enum - matches TypeSpec definition
+export const notificationStatusEnum = pgEnum('notification_status', [
+  'queued',
+  'sent',
+  'delivered',
+  'read',
+  'failed',
+  'expired'
+]);
+
+// Notifications table - matches TypeSpec Notification model
+export const notifications = pgTable('notification', {
+  // Base entity fields (includes id, timestamps, version, audit fields)
+  ...baseEntityFields,
+  
+  // Multi-tenant scoping (P0-7)
+  organizationId: uuid('organization_id').notNull(),
+
+  // Core notification fields from TypeSpec
+  recipient: uuid('recipient_id').notNull(), // Person ID (foreign key)
+  type: notificationTypeEnum('type').notNull(),
+  channel: notificationChannelEnum('channel').notNull(),
+  title: varchar('title', { length: 200 }).notNull(),
+  message: varchar('message', { length: 1000 }).notNull(),
+  
+  // Scheduling and context
+  scheduledAt: timestamp('scheduled_at'), // null = immediate
+  relatedEntityType: varchar('related_entity_type', { length: 50 }),
+  relatedEntity: uuid('related_entity'),
+  
+  // Status tracking
+  status: notificationStatusEnum('status').notNull().default('queued'),
+  sentAt: timestamp('sent_at'),
+  readAt: timestamp('read_at'), // For in-app notifications
+  
+  // Healthcare compliance
+  consentValidated: boolean('consent_validated').notNull().default(false),
+}, (table) => ({
+  // Indexes for efficient querying
+  orgIdx: index('notifications_org_idx').on(table.organizationId),
+  recipientStatusIdx: index('notifications_recipient_status_idx').on(table.recipient, table.status),
+  scheduledStatusIdx: index('notifications_scheduled_status_idx').on(table.scheduledAt, table.status),
+  typeChannelIdx: index('notifications_type_channel_idx').on(table.type, table.channel),
+  createdAtIdx: index('notifications_created_at_idx').on(table.createdAt),
+
+}));
+
+// Type exports for TypeScript
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+
+// API response type - matches TypeSpec Notification model
+export interface NotificationResponse {
+  id: string;
+  recipient: string;
+  type: string;
+  channel: string;
+  title: string;
+  message: string;
+  scheduledAt?: Date;
+  relatedEntityType?: string;
+  relatedEntity?: string;
+  status: string;
+  sentAt?: Date;
+  readAt?: Date;
+  consentValidated: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Request type for creating notifications (used by other modules)
+export interface CreateNotificationRequest {
+  organizationId: string;
+  recipient: string;
+  type: 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message' | 'waitlist.promoted' | 'event.late-cancellation' | 'dunning.escalation' | 'task.overdue';
+  channel: 'email' | 'push' | 'in-app';
+  title: string;
+  message: string;
+  scheduledAt?: Date;
+  relatedEntityType?: string;
+  relatedEntity?: string;
+  consentValidated?: boolean;
+  targetApp?: string; // Optional: Filter push notifications by app tag (e.g., 'web', 'mobile')
+}
+
+/**
+ * Extended notification request for internal module use.
+ * Modules may attach arbitrary metadata (`data`), specify multiple delivery
+ * `channels`, and set a `priority` — none of which are part of the public API
+ * contract.  The notification service stores/forwards these as appropriate.
+ */
+export interface InternalNotificationRequest {
+  organizationId?: string;
+  recipient: string;
+  /** Accepts the standard enum values plus any module-specific type string. */
+  type: string;
+  title: string;
+  message: string;
+  scheduledAt?: Date;
+  relatedEntityType?: string;
+  relatedEntity?: string;
+  consentValidated?: boolean;
+  targetApp?: string;
+  /** Arbitrary payload forwarded to the notification consumer (e.g. invoiceId, bookingId). */
+  data?: Record<string, unknown>;
+  /** Preferred delivery channels (superset of the single `channel` field). */
+  channels?: Array<'email' | 'push' | 'in-app' | 'sms'>;
+  /** Single channel — kept for back-compat with CreateNotificationRequest. */
+  channel?: 'email' | 'push' | 'in-app';
+  /** Delivery priority hint. */
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+}
+
+// Filter interface for querying notifications
+export interface NotificationFilters {
+  organizationId?: string;
+  recipient?: string;
+  type?: string;
+  channel?: string;
+  status?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
