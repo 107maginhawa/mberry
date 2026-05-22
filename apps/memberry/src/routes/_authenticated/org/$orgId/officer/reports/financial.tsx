@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { generateDuesReportOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@monobase/ui'
-import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
+import { DatePicker } from '@/components/patterns/date-picker'
 import { ReportSelector } from '@/features/dues/components/report-selector'
 import { ReportResults } from '@/features/dues/components/report-results'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -61,11 +61,19 @@ function FinancialReportsPage() {
           <div className="flex items-end gap-4 flex-wrap">
             <div>
               <Label>From</Label>
-              <Input type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); setShouldFetch(false) }} />
+              <DatePicker
+                value={fromDate ? new Date(fromDate) : undefined}
+                onValueChange={(d) => { setFromDate(d ? d.toISOString().split('T')[0] : ''); setShouldFetch(false) }}
+                placeholder="Start date"
+              />
             </div>
             <div>
               <Label>To</Label>
-              <Input type="date" value={toDate} onChange={(e) => { setToDate(e.target.value); setShouldFetch(false) }} />
+              <DatePicker
+                value={toDate ? new Date(toDate) : undefined}
+                onValueChange={(d) => { setToDate(d ? d.toISOString().split('T')[0] : ''); setShouldFetch(false) }}
+                placeholder="End date"
+              />
             </div>
             <Button onClick={handleGenerate} disabled={dateError || !selectedType}>
               {shouldFetch && reportData ? 'Refresh' : 'Generate Report'}

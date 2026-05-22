@@ -8,6 +8,7 @@ import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
 import { Button } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { DateTimePicker } from '@/components/patterns/date-picker'
 import {
   createEventMutation,
   updateEventMutation,
@@ -202,29 +203,39 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="startDate">Start</Label>
-            <Input
-              id="startDate"
-              type="datetime-local"
-              aria-describedby={errors.startDate ? 'startDate-error' : undefined}
-              {...register('startDate')}
+            <Label>Start</Label>
+            <Controller
+              name="startDate"
+              control={control}
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value ? new Date(field.value).toISOString() : undefined}
+                  onValueChange={(iso) => field.onChange(new Date(iso).toISOString().slice(0, 16))}
+                  placeholder="Select start date & time"
+                />
+              )}
             />
             {errors.startDate && (
-              <p id="startDate-error" role="alert" className="text-xs text-[var(--color-error)]">
+              <p role="alert" className="text-xs text-[var(--color-error)]">
                 {errors.startDate.message}
               </p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="endDate">End</Label>
-            <Input
-              id="endDate"
-              type="datetime-local"
-              aria-describedby={errors.endDate ? 'endDate-error' : undefined}
-              {...register('endDate')}
+            <Label>End</Label>
+            <Controller
+              name="endDate"
+              control={control}
+              render={({ field }) => (
+                <DateTimePicker
+                  value={field.value ? new Date(field.value).toISOString() : undefined}
+                  onValueChange={(iso) => field.onChange(new Date(iso).toISOString().slice(0, 16))}
+                  placeholder="Select end date & time"
+                />
+              )}
             />
             {errors.endDate && (
-              <p id="endDate-error" role="alert" className="text-xs text-[var(--color-error)]">
+              <p role="alert" className="text-xs text-[var(--color-error)]">
                 {errors.endDate.message}
               </p>
             )}

@@ -40,10 +40,16 @@ function AuthenticatedLayout() {
 
   return (
     <div className="flex min-h-screen">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-[var(--radius-sm)] focus:bg-[var(--color-primary)] focus:text-white focus:text-body-sm focus:font-medium"
+      >
+        Skip to main content
+      </a>
       <MemberSidebar userEmail={user?.email} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MemberHeader userName={user?.name} />
-        <main className="flex-1 overflow-auto pb-[68px] md:pb-0">
+        <main id="main-content" className="flex-1 overflow-auto pb-[68px] md:pb-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

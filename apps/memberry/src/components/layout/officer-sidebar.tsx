@@ -131,7 +131,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-2 overflow-y-auto">
+      <nav aria-label="Officer navigation" className="flex-1 py-2 overflow-y-auto">
         {filteredSections.map((section, si) => (
           <div key={si} className={si > 0 ? "mt-3" : ""}>
             {section.label && (

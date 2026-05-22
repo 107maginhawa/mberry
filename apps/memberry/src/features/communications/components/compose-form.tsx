@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { useState } from 'react'
@@ -10,6 +10,7 @@ import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Switch } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
+import { DateTimePicker } from '@/components/patterns/date-picker'
 
 const composeSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be 200 characters or fewer'),
@@ -50,6 +51,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<ComposeFormData>({
     // biome-ignore lint: Zod v4 type incompatibility with @hookform/resolvers 5.2.2
@@ -205,11 +207,17 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
 
       {/* Schedule */}
       <div className="space-y-2">
-        <Label htmlFor="scheduledAt">Schedule (optional)</Label>
-        <Input
-          id="scheduledAt"
-          type="datetime-local"
-          {...register('scheduledAt')}
+        <Label>Schedule (optional)</Label>
+        <Controller
+          name="scheduledAt"
+          control={control}
+          render={({ field }) => (
+            <DateTimePicker
+              value={field.value ? new Date(field.value).toISOString() : undefined}
+              onValueChange={(iso) => field.onChange(iso)}
+              placeholder="Select schedule date & time"
+            />
+          )}
         />
         <p className="text-xs text-[var(--color-muted)]">Leave empty to send immediately or save as draft</p>
       </div>

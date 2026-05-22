@@ -1,6 +1,17 @@
 import { useState } from "react"
 import type { ReactNode } from "react"
-import { Button, Input, Label } from "@monobase/ui"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
+  Input,
+  Label,
+} from "@monobase/ui"
 
 interface ConfirmDialogProps {
   open: boolean
@@ -26,17 +37,18 @@ export function ConfirmDialog({
   const [typedText, setTypedText] = useState("")
   const canConfirm = variant === "irreversible" ? typedText === confirmText : true
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
-      <div className="relative bg-[var(--color-surface)] rounded-[12px] border border-[var(--color-border)] p-6 max-w-md w-full mx-4 shadow-deep">
-        <h3 className="text-h3 mb-2">{title}</h3>
-        <div className="text-[14px] text-[var(--color-text-secondary)] mb-4">{description}</div>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-md border-[var(--color-border)] bg-[var(--color-surface)]">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-h3">{title}</AlertDialogTitle>
+          <AlertDialogDescription className="text-[14px] text-[var(--color-text-secondary)]">
+            {description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
         {variant === "irreversible" && confirmText && (
-          <div className="mb-4">
+          <div className="my-2">
             <Label className="text-[13px] font-medium text-[var(--color-muted)] block mb-1.5">
               Type <span className="font-mono font-semibold">{confirmText}</span> to confirm
             </Label>
@@ -44,28 +56,24 @@ export function ConfirmDialog({
               type="text"
               value={typedText}
               onChange={(e) => setTypedText(e.target.value)}
-              className="w-full px-4 py-[11px] border border-[var(--color-border)] rounded-[8px] text-[14px] focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)] outline-none"
               autoFocus
             />
           </div>
         )}
 
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={() => { setTypedText(""); onOpenChange(false) }}
-          >
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setTypedText("")}>
             Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => { onConfirm(); setTypedText(""); onOpenChange(false) }}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-[var(--color-error)] text-white hover:bg-[var(--color-error)]/90"
+            onClick={() => { onConfirm(); setTypedText("") }}
             disabled={!canConfirm}
           >
             {confirmLabel}
-          </Button>
-        </div>
-      </div>
-    </div>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

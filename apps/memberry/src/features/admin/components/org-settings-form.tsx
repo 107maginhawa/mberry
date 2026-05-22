@@ -8,6 +8,7 @@ import { Label } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Pencil, X, Save, Globe, Mail, Phone, MapPin, Calendar, Image } from 'lucide-react'
+import { DatePicker } from '@/components/patterns/date-picker'
 
 interface OrgSettingsFormProps {
   orgId: string
@@ -286,10 +287,10 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
             Founding Date
           </Label>
           {isEditing ? (
-            <Input
-              type="date"
-              value={draft.foundingDate}
-              onChange={(e) => set('foundingDate', e.target.value)}
+            <DatePicker
+              value={draft.foundingDate ? new Date(draft.foundingDate) : undefined}
+              onValueChange={(d) => set('foundingDate', d ? d.toISOString().split('T')[0] : '')}
+              placeholder="Select founding date"
             />
           ) : (
             <FieldValue

@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
 import { Button, Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
+import { DateTimePicker } from '@/components/patterns/date-picker'
 import {
   createElectionMutation,
   updateElectionMutation,
@@ -60,11 +61,6 @@ const STEPS: { key: Step; label: string }[] = [
   { key: 'positions', label: 'Positions' },
   { key: 'timeline', label: 'Timeline' },
 ]
-
-function toDatetimeLocal(iso?: string | null) {
-  if (!iso) return ''
-  return new Date(iso).toISOString().slice(0, 16)
-}
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10)
@@ -338,35 +334,35 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="nom-open">Nominations Open</Label>
-              <Input
-                id="nom-open"
-                type="datetime-local"
-                {...register('nominationsOpenAt')}
+              <Label>Nominations Open</Label>
+              <DateTimePicker
+                value={watch('nominationsOpenAt') ? new Date(watch('nominationsOpenAt')!).toISOString() : undefined}
+                onValueChange={(iso) => setValue('nominationsOpenAt', new Date(iso).toISOString().slice(0, 16))}
+                placeholder="Select date & time"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="nom-close">Nominations Close</Label>
-              <Input
-                id="nom-close"
-                type="datetime-local"
-                {...register('nominationsCloseAt')}
+              <Label>Nominations Close</Label>
+              <DateTimePicker
+                value={watch('nominationsCloseAt') ? new Date(watch('nominationsCloseAt')!).toISOString() : undefined}
+                onValueChange={(iso) => setValue('nominationsCloseAt', new Date(iso).toISOString().slice(0, 16))}
+                placeholder="Select date & time"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="vote-open">Voting Opens</Label>
-              <Input
-                id="vote-open"
-                type="datetime-local"
-                {...register('votingOpenAt')}
+              <Label>Voting Opens</Label>
+              <DateTimePicker
+                value={watch('votingOpenAt') ? new Date(watch('votingOpenAt')!).toISOString() : undefined}
+                onValueChange={(iso) => setValue('votingOpenAt', new Date(iso).toISOString().slice(0, 16))}
+                placeholder="Select date & time"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="vote-close">Voting Closes</Label>
-              <Input
-                id="vote-close"
-                type="datetime-local"
-                {...register('votingCloseAt')}
+              <Label>Voting Closes</Label>
+              <DateTimePicker
+                value={watch('votingCloseAt') ? new Date(watch('votingCloseAt')!).toISOString() : undefined}
+                onValueChange={(iso) => setValue('votingCloseAt', new Date(iso).toISOString().slice(0, 16))}
+                placeholder="Select date & time"
               />
             </div>
           </div>

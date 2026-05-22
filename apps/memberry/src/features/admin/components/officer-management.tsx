@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { Button } from '@monobase/ui'
-import { Input } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Label } from '@monobase/ui'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
 import { UserPlus, Trash2, Shield } from 'lucide-react'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { TableSkeleton } from '@/components/patterns/skeleton-loader'
+import { Combobox } from '@/components/patterns/combobox'
 
 interface OfficerManagementProps {
   orgId: string
@@ -296,53 +295,38 @@ function AssignRoleModal({
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label>Position</Label>
-            <Select value={positionId} onValueChange={setPositionId}>
-              <SelectTrigger>
-                <SelectValue placeholder={loadingPositions ? 'Loading positions...' : 'Select a position'} />
-              </SelectTrigger>
-              <SelectContent>
-                {positions.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              options={positions.map((p) => ({ value: p.id, label: p.title }))}
+              value={positionId || undefined}
+              onValueChange={setPositionId}
+              placeholder={loadingPositions ? 'Loading positions...' : 'Select a position'}
+              searchPlaceholder="Search positions..."
+              emptyMessage="No positions found."
+              disabled={loadingPositions}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Member</Label>
-            <Input
-              value={memberSearch}
-              onChange={(e) => {
-                setMemberSearch(e.target.value)
+            <Combobox
+              options={memberResults.map((m) => ({
+                value: m.id,
+                label: m.name,
+                description: m.email || undefined,
+              }))}
+              value={selectedMember?.id}
+              onValueChange={(val) => {
+                const member = memberResults.find((m) => m.id === val)
+                if (member) handleSelectMember(member)
+              }}
+              onSearchChange={(search) => {
+                setMemberSearch(search)
                 setSelectedMember(null)
               }}
               placeholder="Search member by name..."
+              searchPlaceholder="Type to search members..."
+              emptyMessage="No members found."
+              loading={searchingMembers}
             />
-            {searchingMembers && (
-              <p className="text-[12px] text-[var(--color-muted)]">Searching...</p>
-            )}
-            {memberResults.length > 0 && !selectedMember && (
-              <div className="border border-[var(--color-border-light)] rounded-md max-h-40 overflow-y-auto">
-                {memberResults.map((m) => (
-                  <Button
-                    key={m.id}
-                    type="button"
-                    variant="ghost"
-                    className="w-full justify-start px-3 py-2 text-[14px]"
-                    onClick={() => handleSelectMember(m)}
-                  >
-                    <span className="font-medium">{m.name}</span>
-                    {m.email && <span className="text-[var(--color-muted)] ml-2 text-[12px]">{m.email}</span>}
-                  </Button>
-                ))}
-              </div>
-            )}
-            {selectedMember && (
-              <p className="text-[12px] text-[var(--color-primary)]">
-                Selected: {selectedMember.name}
-              </p>
-            )}
           </div>
         </div>
         <DialogFooter className="gap-2">

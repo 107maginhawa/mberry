@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
+import { DatePicker } from '@/components/patterns/date-picker'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -31,6 +32,7 @@ function CreditLog() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CreditLogFormData>({
     resolver: zodResolver(creditLogSchema),
@@ -91,12 +93,17 @@ function CreditLog() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="activityDate">Date *</Label>
-              <Input
-                id="activityDate"
-                type="date"
-                aria-describedby={errors.activityDate ? 'activityDate-error' : undefined}
-                {...register('activityDate')}
+              <Label>Date *</Label>
+              <Controller
+                name="activityDate"
+                control={control}
+                render={({ field }) => (
+                  <DatePicker
+                    value={field.value ? new Date(field.value) : undefined}
+                    onValueChange={(d) => field.onChange(d ? d.toISOString().split('T')[0] : '')}
+                    placeholder="Select activity date"
+                  />
+                )}
               />
               {errors.activityDate && (
                 <p id="activityDate-error" role="alert" className="text-xs text-[var(--color-error)]">

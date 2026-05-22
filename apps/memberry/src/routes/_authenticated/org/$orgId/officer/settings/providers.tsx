@@ -9,6 +9,7 @@ import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { DatePicker } from '@/components/patterns/date-picker'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
@@ -357,11 +358,17 @@ function ProviderForm({
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="expiryDate">Expiry Date (optional)</Label>
-        <Input
-          id="expiryDate"
-          type="date"
-          {...register('expiryDate')}
+        <Label>Expiry Date (optional)</Label>
+        <Controller
+          name="expiryDate"
+          control={control}
+          render={({ field }) => (
+            <DatePicker
+              value={field.value ? new Date(field.value) : undefined}
+              onValueChange={(d) => field.onChange(d ? d.toISOString().split('T')[0] : '')}
+              placeholder="Select expiry date"
+            />
+          )}
         />
       </div>
       <div className="flex justify-end gap-2 pt-2">

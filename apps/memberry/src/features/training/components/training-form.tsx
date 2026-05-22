@@ -8,6 +8,7 @@ import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { DateTimePicker } from '@/components/patterns/date-picker'
 
 interface TrainingFormProps {
   orgId: string
@@ -116,11 +117,19 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label>Start Date & Time <span className="text-[var(--color-error)]">*</span></Label>
-            <Input type="datetime-local" {...field('startDate')} />
+            <DateTimePicker
+              value={form.startDate ? new Date(form.startDate).toISOString() : undefined}
+              onValueChange={(iso) => set('startDate', new Date(iso).toISOString().slice(0, 16))}
+              placeholder="Select start date & time"
+            />
           </div>
           <div>
             <Label>End Date & Time</Label>
-            <Input type="datetime-local" {...field('endDate')} />
+            <DateTimePicker
+              value={form.endDate ? new Date(form.endDate).toISOString() : undefined}
+              onValueChange={(iso) => set('endDate', new Date(iso).toISOString().slice(0, 16))}
+              placeholder="Select end date & time"
+            />
           </div>
         </div>
       </div>

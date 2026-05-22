@@ -21,7 +21,7 @@ export function MemberSidebar({ userEmail }: MemberSidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-3">
+      <nav aria-label="Member navigation" className="flex-1 py-3">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <Link
             key={to}

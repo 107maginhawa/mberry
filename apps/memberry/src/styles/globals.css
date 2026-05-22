@@ -195,6 +195,25 @@
     outline-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
   }
 
+  /* Global focus-visible ring per DESIGN.md Section 10.5 */
+  :focus-visible {
+    outline: 2px solid var(--color-primary-subtle);
+    outline-offset: 2px;
+  }
+
+  /* Buttons, links, inputs get stronger focus ring */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
   body {
     font-family: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", sans-serif;
     font-weight: 400;

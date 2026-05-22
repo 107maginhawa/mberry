@@ -17,6 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { toast } from 'sonner'
 import { parseCentsInput } from '../lib/money'
 import { FundAllocationPreview } from './fund-allocation-preview'
+import { Combobox } from '@/components/patterns/combobox'
+import { DatePicker } from '@/components/patterns/date-picker'
 
 const recordPaymentSchema = z.object({
   amount: z
@@ -107,12 +109,6 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
 
   const memberResults = memberSearchData?.data ?? []
 
-  function selectMember(m: { personId: string; memberNumber?: string; id: string }) {
-    setPersonId(m.personId || m.id)
-    setMemberSearch(m.memberNumber || m.personId)
-    setDebouncedSearch('')
-  }
-
   function onSubmit(data: RecordPaymentFormData) {
     if (!personId) {
       toast.error('Please select a member')
@@ -129,33 +125,29 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr,300px]">
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <div className="relative">
+        <div>
           <Label>Member</Label>
-          <Input
-            value={memberSearch}
-            onChange={(e) => { setMemberSearch(e.target.value); setPersonId('') }}
+          <Combobox
+            options={memberResults.map((m) => ({
+              value: m.personId || m.id,
+              label: m.memberNumber || m.personId,
+              description: m.memberNumber ? `#${m.memberNumber}` : undefined,
+            }))}
+            value={personId || undefined}
+            onValueChange={(val) => {
+              setPersonId(val)
+              const member = memberResults.find((m) => (m.personId || m.id) === val)
+              if (member) setMemberSearch(member.memberNumber || member.personId)
+            }}
+            onSearchChange={(search) => {
+              setMemberSearch(search)
+              if (personId) setPersonId('')
+            }}
             placeholder="Search by name or license number..."
+            searchPlaceholder="Type to search members..."
+            emptyMessage="No members found."
+            loading={searchingMembers}
           />
-          {searchingMembers && <p className="text-xs text-[var(--color-muted)] mt-1">Searching...</p>}
-          {memberResults.length > 0 && !personId && (
-            <div className="border rounded-md mt-1 max-h-40 overflow-y-auto bg-white relative z-50 shadow-lg">
-              {memberResults.map((m) => (
-                <Button
-                  key={m.id}
-                  type="button"
-                  variant="ghost"
-                  className="w-full justify-start px-3 py-2 text-sm"
-                  onClick={() => selectMember(m)}
-                >
-                  <span className="font-medium">{m.memberNumber || m.personId}</span>
-                  {m.memberNumber && <span className="text-[var(--color-muted)] ml-2 text-xs font-mono">#{m.memberNumber}</span>}
-                </Button>
-              ))}
-            </div>
-          )}
-          {personId && (
-            <p className="text-xs text-[var(--color-muted)] mt-1">Selected: {memberSearch}</p>
-          )}
         </div>
 
         <div>
@@ -177,15 +169,20 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
         </div>
 
         <div>
-          <Label htmlFor="paymentDate">Date</Label>
-          <Input
-            id="paymentDate"
-            type="date"
-            aria-describedby={errors.paymentDate ? 'paymentDate-error' : undefined}
-            {...register('paymentDate')}
+          <Label>Date</Label>
+          <Controller
+            name="paymentDate"
+            control={control}
+            render={({ field }) => (
+              <DatePicker
+                value={field.value ? new Date(field.value) : undefined}
+                onValueChange={(d) => field.onChange(d ? d.toISOString().split('T')[0] : '')}
+                placeholder="Select payment date"
+              />
+            )}
           />
           {errors.paymentDate && (
-            <p id="paymentDate-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
+            <p role="alert" className="text-xs text-[var(--color-error)] mt-1">
               {errors.paymentDate.message}
             </p>
           )}

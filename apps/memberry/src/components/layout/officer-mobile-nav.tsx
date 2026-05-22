@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useParams } from '@tanstack/react-router'
-import { Button } from '@monobase/ui'
+import { Button, Sheet, SheetContent, SheetHeader, SheetTitle } from '@monobase/ui'
 import { POSITION_NAV_CONFIG } from '@/config/position-nav'
 import {
-  Menu, X, Bell,
+  Menu, Bell,
   LayoutDashboard, Users, Inbox, Upload,
   Settings, CreditCard, PieChart, BarChart3,
   Calendar, BookOpen, Megaphone,
@@ -85,6 +85,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
           onClick={() => setDrawerOpen(true)}
           className="p-1.5"
           aria-label="Open menu"
+          aria-expanded={drawerOpen}
         >
           <Menu size={20} />
         </Button>
@@ -96,80 +97,67 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
         </Link>
       </header>
 
-      {/* Full-screen drawer */}
-      {drawerOpen && (
-        <div className="md:hidden fixed inset-0 z-50">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setDrawerOpen(false)}
-          />
-          {/* Drawer panel */}
-          <div className="absolute inset-y-0 left-0 w-[280px] bg-[var(--color-primary)] text-white flex flex-col animate-in slide-in-from-left duration-200">
-            {/* Drawer header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.12]">
+      {/* Sheet drawer — Radix handles focus trap, Escape, scroll lock, ARIA */}
+      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <SheetContent
+          side="left"
+          className="w-[280px] p-0 bg-[var(--color-primary)] text-white border-r-0 md:hidden"
+        >
+          <SheetHeader className="px-5 py-4 border-b border-white/[0.12]">
+            <SheetTitle className="flex items-center">
               <img src="/memberry-logo-white.png" alt="Memberry" className="h-7 w-auto" />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setDrawerOpen(false)}
-                className="p-1"
-                aria-label="Close menu"
-              >
-                <X size={18} />
-              </Button>
-            </div>
+            </SheetTitle>
+          </SheetHeader>
 
-            {orgName && (
-              <p className="px-5 py-2 text-[12px] text-white/50 truncate">{orgName}</p>
-            )}
+          {orgName && (
+            <p className="px-5 py-2 text-[12px] text-white/50 truncate">{orgName}</p>
+          )}
 
-            {/* Nav sections */}
-            <nav className="flex-1 py-2 overflow-y-auto">
-              {filteredSections.map((section, si) => (
-                <div key={si} className={si > 0 ? 'mt-2' : ''}>
-                  {section.label && (
-                    <div className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-white/40">
-                      {section.label}
-                    </div>
-                  )}
-                  {section.items.map(({ to, label, icon: Icon }) => (
-                    <Link
-                      key={`${to}-${label}`}
-                      to={to}
-                      onClick={() => setDrawerOpen(false)}
-                      className="flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors"
-                      activeProps={{
-                        className: 'flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[17px]',
-                      }}
-                      activeOptions={{ exact: false }}
-                    >
-                      <Icon size={18} />
-                      {label}
-                    </Link>
-                  ))}
-                </div>
-              ))}
-            </nav>
+          {/* Nav sections */}
+          <nav aria-label="Officer navigation" className="flex-1 py-2 overflow-y-auto">
+            {filteredSections.map((section, si) => (
+              <div key={si} className={si > 0 ? 'mt-2' : ''}>
+                {section.label && (
+                  <div className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-white/40">
+                    {section.label}
+                  </div>
+                )}
+                {section.items.map(({ to, label, icon: Icon }) => (
+                  <Link
+                    key={`${to}-${label}`}
+                    to={to}
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors"
+                    activeProps={{
+                      className: 'flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[17px]',
+                    }}
+                    activeOptions={{ exact: false }}
+                  >
+                    <Icon size={18} />
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </nav>
 
-            {/* Back to member + user info */}
-            <div className="border-t border-white/[0.12]">
-              <Link
-                to="/dashboard"
-                onClick={() => setDrawerOpen(false)}
-                className="flex items-center gap-2 px-5 py-2.5 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
-              >
-                <ArrowLeft size={14} />
-                Back to Member View
-              </Link>
-            </div>
-            <div className="px-5 py-3 border-t border-white/[0.12]">
-              {userName && <p className="text-[13px] text-white font-medium truncate">{userName}</p>}
-              {role && <p className="text-[11px] text-white/50">{role}</p>}
-            </div>
+          {/* Back to member + user info */}
+          <div className="mt-auto border-t border-white/[0.12]">
+            <Link
+              to="/dashboard"
+              onClick={() => setDrawerOpen(false)}
+              className="flex items-center gap-2 px-5 py-2.5 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
+            >
+              <ArrowLeft size={14} />
+              Back to Member View
+            </Link>
           </div>
-        </div>
-      )}
+          <div className="px-5 py-3 border-t border-white/[0.12]">
+            {userName && <p className="text-[13px] text-white font-medium truncate">{userName}</p>}
+            {role && <p className="text-[11px] text-white/50">{role}</p>}
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

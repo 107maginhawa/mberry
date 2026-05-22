@@ -53,6 +53,12 @@ function OfficerLayout() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-[var(--radius-sm)] focus:bg-[var(--color-primary)] focus:text-white focus:text-body-sm focus:font-medium"
+      >
+        Skip to main content
+      </a>
       <OfficerMobileNav
         userName={user?.name}
         role={primaryRole}
@@ -64,7 +70,7 @@ function OfficerLayout() {
         role={primaryRole}
         positions={positions}
       />
-      <main className="flex-1 overflow-auto flex flex-col">
+      <main id="main-content" className="flex-1 overflow-auto flex flex-col">
         <div className="max-w-[1200px] mx-auto px-5 md:px-7 py-5 md:py-7 flex-1 w-full">
           <ErrorBoundary>
             <Outlet />

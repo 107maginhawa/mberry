@@ -11,6 +11,7 @@ import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { Calendar, Award, Shield, UserPlus, CreditCard, CircleDot } from 'lucide-react'
+import { Progress } from '@monobase/ui'
 import { useNavigate } from '@tanstack/react-router'
 import { api } from '@/lib/api'
 
@@ -98,8 +99,12 @@ function DashboardPage() {
   })
 
   const electionsQuery = useQuery({
-    ...listElectionsOptions({ query: { limit: 10 } }),
+    ...listElectionsOptions({
+      query: { limit: 10 },
+      headers: firstOrgId ? { 'x-org-id': firstOrgId } : undefined,
+    }),
     retry: false,
+    enabled: !!firstOrgId,
   })
   const announcementsQuery = useQuery<any[]>({
     queryKey: ['dashboard-announcements', firstOrgId],
@@ -430,15 +435,13 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
                 Expires {expiryDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-[var(--color-border-light)] overflow-hidden" role="progressbar" aria-valuenow={Math.round(periodProgress * 100)} aria-valuemin={0} aria-valuemax={100}>
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  (daysLeft ?? 0) <= 0 ? 'bg-red-500' :
-                  (daysLeft ?? 0) <= 30 ? 'bg-amber-500' : 'bg-emerald-500'
-                }`}
-                style={{ width: `${Math.min(100, periodProgress * 100)}%` }}
-              />
-            </div>
+            <Progress
+              value={Math.min(100, periodProgress * 100)}
+              className={`h-1.5 bg-[var(--color-border-light)] ${
+                (daysLeft ?? 0) <= 0 ? '[&>div]:bg-red-500' :
+                (daysLeft ?? 0) <= 30 ? '[&>div]:bg-amber-500' : '[&>div]:bg-emerald-500'
+              }`}
+            />
           </div>
         )}
       </Link>
