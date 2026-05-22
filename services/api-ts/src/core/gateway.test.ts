@@ -1,3 +1,4 @@
+// Business Rules: [BR-30]
 /**
  * Tests for gateway adapter interface (M6-R12) and credential isolation (BR-30).
  *

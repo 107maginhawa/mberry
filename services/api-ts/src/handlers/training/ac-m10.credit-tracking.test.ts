@@ -1,3 +1,4 @@
+// Business Rules: [BR-12]
 /**
  * AC-M10: Credit Tracking Module — Pure Domain Logic Tests
  *

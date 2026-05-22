@@ -24,6 +24,14 @@ export interface OrgBranding {
   orgName: string;
 }
 
+/** Validate color is a safe hex or rgb/rgba value for CSS context. */
+function sanitizeColor(color: string | undefined, fallback: string = '#1a365d'): string {
+  if (!color) return fallback;
+  if (/^#[0-9a-fA-F]{3,8}$/.test(color)) return color;
+  if (/^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(\s*,\s*[\d.]+)?\s*\)$/.test(color)) return color;
+  return fallback;
+}
+
 /** Escape user-controlled strings for safe HTML embedding. */
 function escapeHtml(str: string): string {
   return str
@@ -79,11 +87,12 @@ export function renderCertificateHtml(
     ? `<img src="${sanitizeUrl(brand.logoUrl)}" alt="${escapeHtml(brand.orgName)}" class="logo" />`
     : '';
 
+  const safeTitle = (brand.signatoryTitle ?? '').slice(0, 100);
   const signatoryHtml =
     brand.signatoryName
       ? `<div class="signatory">
           <p class="sig-name">${escapeHtml(brand.signatoryName)}</p>
-          <p class="sig-title">${escapeHtml(brand.signatoryTitle ?? '')}</p>
+          <p class="sig-title">${escapeHtml(safeTitle)}</p>
         </div>`
       : '';
 
@@ -94,7 +103,7 @@ export function renderCertificateHtml(
   body { font-family: Georgia, serif; text-align: center; padding: 60px; color: #333; }
   .header { margin-bottom: 40px; }
   .logo { max-height: 80px; margin-bottom: 20px; }
-  .title { font-size: 28px; color: ${escapeHtml(brand.primaryColor ?? '#1a365d')}; margin-bottom: 10px; }
+  .title { font-size: 28px; color: ${sanitizeColor(brand.primaryColor)}; margin-bottom: 10px; }
   .org-name { font-size: 16px; color: #666; margin-bottom: 30px; }
   .recipient { font-size: 24px; font-weight: bold; margin: 20px 0; }
   .training { font-size: 18px; margin: 10px 0; }

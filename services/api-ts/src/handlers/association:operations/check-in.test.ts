@@ -1,3 +1,4 @@
+// Business Rules: [BR-17]
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { EventRepository, CheckInRepository } from './repos/events.repo';

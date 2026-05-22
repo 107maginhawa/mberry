@@ -18,6 +18,7 @@ import { ForbiddenError } from '@/core/errors';
 import { ImpersonationSessionRepository } from '@/handlers/platformadmin/repos/platform-admin.repo';
 
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const MAX_IMPERSONATION_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 /**
  * Resolves the impersonation cookie and populates context.
@@ -33,7 +34,12 @@ export function impersonationResolver() {
       const repo = new ImpersonationSessionRepository(db, logger);
       const session = await repo.findByToken(token);
 
-      if (session && !session.endedAt && session.expiresAt > new Date()) {
+      if (
+        session &&
+        !session.endedAt &&
+        session.expiresAt > new Date() &&
+        Date.now() - session.createdAt.getTime() <= MAX_IMPERSONATION_DURATION_MS
+      ) {
         ctx.set('impersonationSession', {
           id: session.id,
           adminId: session.adminId,

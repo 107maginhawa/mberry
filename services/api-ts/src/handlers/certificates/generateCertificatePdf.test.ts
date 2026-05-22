@@ -1,3 +1,4 @@
+// Business Rules: [BR-20]
 /**
  * Tests for generateCertificatePdf handler (Slice 042)
  *

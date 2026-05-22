@@ -1,3 +1,4 @@
+// Business Rules: [BR-03]
 // FLOW-10: Membership Expiry → Status Downgrade
 // Tests BR-03 state machine in updateMember: valid transitions enforced,
 // invalid transitions silently rejected.

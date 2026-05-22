@@ -1,3 +1,4 @@
+// Business Rules: [BR-30]
 /**
  * Tests for BillingConfigRepository — per-org credential storage (BR-30).
  *

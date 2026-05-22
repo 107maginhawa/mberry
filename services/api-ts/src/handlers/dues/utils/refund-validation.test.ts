@@ -1,3 +1,4 @@
+// Business Rules: [BR-08]
 import { describe, test, expect } from 'bun:test';
 import {
   validateRefundEligibility,

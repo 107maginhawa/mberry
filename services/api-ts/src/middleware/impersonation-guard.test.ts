@@ -16,8 +16,14 @@ const activeSession = {
   startedAt: new Date(),
   expiresAt: new Date(Date.now() + 30 * 60 * 1000),
   endedAt: null,
-  createdAt: new Date(),
+  createdAt: new Date(), // fresh — within 2 hours
   updatedAt: new Date(),
+};
+
+const twoHourOldSession = {
+  ...activeSession,
+  createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000 - 1), // just over 2 hours ago
+  expiresAt: new Date(Date.now() + 60 * 60 * 1000), // expiresAt still in future
 };
 
 const expiredSession = {
@@ -174,6 +180,48 @@ describe('impersonation-guard middleware', () => {
         headers: { Cookie: 'memberry-imp-token=unknown-token' },
       });
       expect(res.status).toBe(201);
+    });
+  });
+
+  describe('impersonation session timeout (2-hour max duration)', () => {
+    test('rejects expired impersonation session (>2 hours since createdAt)', async () => {
+      stubRepo(ImpersonationSessionRepository, {
+        findByToken: async () => twoHourOldSession,
+      });
+
+      const app = createTestApp();
+      // GET should pass through (session not set, no write-block applies)
+      const getRes = await app.request('/test', {
+        headers: { Cookie: 'memberry-imp-token=old-token' },
+      });
+      expect(getRes.status).toBe(200);
+
+      // POST should also pass through — session is treated as expired (not set)
+      const postRes = await app.request('/test', {
+        method: 'POST',
+        headers: { Cookie: 'memberry-imp-token=old-token' },
+      });
+      expect(postRes.status).toBe(201);
+    });
+
+    test('accepts fresh impersonation session (<2 hours since createdAt)', async () => {
+      stubRepo(ImpersonationSessionRepository, {
+        findByToken: async () => activeSession,
+      });
+
+      const app = createTestApp();
+      // GET allowed
+      const getRes = await app.request('/test', {
+        headers: { Cookie: 'memberry-imp-token=valid-token' },
+      });
+      expect(getRes.status).toBe(200);
+
+      // POST blocked (write-block active because session is fresh)
+      const postRes = await app.request('/test', {
+        method: 'POST',
+        headers: { Cookie: 'memberry-imp-token=valid-token' },
+      });
+      expect(postRes.status).toBe(403);
     });
   });
 });

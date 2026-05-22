@@ -1,3 +1,4 @@
+// Business Rules: [BR-06]
 /**
  * Tests for recordManualPayment (handlers/dues/)
  *

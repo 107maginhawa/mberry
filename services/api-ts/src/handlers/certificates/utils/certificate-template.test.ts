@@ -222,3 +222,76 @@ describe('[042] Certificate Template XSS Prevention', () => {
     expect(html).toContain('&lt;b&gt;');
   });
 });
+
+// ─── CSS Injection Prevention ────────────────────────────
+
+describe('[042] Certificate Template CSS Injection Prevention', () => {
+  test('sanitizeColor accepts 3-digit hex color', () => {
+    const html = renderCertificateHtml(makeTemplateData(), { primaryColor: '#abc' });
+    expect(html).toContain('color: #abc');
+  });
+
+  test('sanitizeColor accepts 6-digit hex color', () => {
+    const html = renderCertificateHtml(makeTemplateData(), { primaryColor: '#1a365d' });
+    expect(html).toContain('color: #1a365d');
+  });
+
+  test('sanitizeColor accepts 8-digit hex with alpha', () => {
+    const html = renderCertificateHtml(makeTemplateData(), { primaryColor: '#1a365dff' });
+    expect(html).toContain('color: #1a365dff');
+  });
+
+  test('sanitizeColor accepts rgb color', () => {
+    const html = renderCertificateHtml(makeTemplateData(), { primaryColor: 'rgb(26, 54, 93)' });
+    expect(html).toContain('color: rgb(26, 54, 93)');
+  });
+
+  test('sanitizeColor accepts rgba color', () => {
+    const html = renderCertificateHtml(makeTemplateData(), { primaryColor: 'rgba(26, 54, 93, 0.5)' });
+    expect(html).toContain('color: rgba(26, 54, 93, 0.5)');
+  });
+
+  test('rejects CSS injection — named color with expression', () => {
+    const html = renderCertificateHtml(makeTemplateData(), {
+      primaryColor: 'red; background-image: url(evil)',
+    });
+    expect(html).toContain('color: #1a365d');
+    expect(html).not.toContain('background-image');
+  });
+
+  test('rejects CSS injection — closing brace injection', () => {
+    const html = renderCertificateHtml(makeTemplateData(), {
+      primaryColor: '; } body { display:none',
+    });
+    expect(html).toContain('color: #1a365d');
+    expect(html).not.toContain('display:none');
+  });
+
+  test('rejects plain named color (not in allowlist)', () => {
+    const html = renderCertificateHtml(makeTemplateData(), { primaryColor: 'red' });
+    expect(html).toContain('color: #1a365d');
+  });
+
+  test('falls back for undefined primaryColor', () => {
+    const html = renderCertificateHtml(makeTemplateData(), { primaryColor: undefined });
+    expect(html).toContain('color: #1a365d');
+  });
+
+  test('signatoryTitle truncated at 100 chars', () => {
+    const longTitle = 'A'.repeat(150);
+    const html = renderCertificateHtml(makeTemplateData(), {
+      signatoryName: 'Dr. Smith',
+      signatoryTitle: longTitle,
+    });
+    expect(html).not.toContain(longTitle);
+    expect(html).toContain('A'.repeat(100));
+  });
+
+  test('short signatoryTitle passes through unchanged', () => {
+    const html = renderCertificateHtml(makeTemplateData(), {
+      signatoryName: 'Dr. Smith',
+      signatoryTitle: 'President',
+    });
+    expect(html).toContain('President');
+  });
+});

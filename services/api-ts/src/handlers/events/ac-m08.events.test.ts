@@ -1,3 +1,4 @@
+// Business Rules: [BR-16]
 /**
  * AC-M08: Events Module — Pure Domain Logic Tests
  *

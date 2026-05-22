@@ -1,3 +1,4 @@
+// Business Rules: [BR-29]
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
 import { getOrganizationBySlug } from './getOrganizationBySlug';
