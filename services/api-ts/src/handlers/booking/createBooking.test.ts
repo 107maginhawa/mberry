@@ -14,6 +14,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 import { createBooking } from './createBooking';
 import { NotFoundError, ConflictError } from '@/core/errors';
+import { fakeBooking as createFakeBooking } from '@/test-utils/factories';
 
 // ---------------------------------------------------------------------------
 // Context builder
@@ -77,15 +78,15 @@ describe('createBooking handler — with mocked repo', () => {
     const { BookingRepository } = await import('./repos/booking.repo');
     const originalProto = BookingRepository.prototype.createBooking;
 
-    const fakeBooking = { id: 'b-1', status: 'pending', client: 'user-1' };
-    BookingRepository.prototype.createBooking = mock(async () => fakeBooking);
+    const booking = createFakeBooking({ id: 'b-1', status: 'pending', client: 'user-1' });
+    BookingRepository.prototype.createBooking = mock(async () => booking);
 
     const { ctx } = makeCtx({ userId: 'user-1', body: { slot: 'slot-1', locationType: 'video' } });
 
     const response = await createBooking(ctx);
 
     expect(response.status).toBe(201);
-    expect(response.data).toEqual(fakeBooking);
+    expect(response.data).toEqual(booking);
 
     // Restore
     BookingRepository.prototype.createBooking = originalProto;

@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeEnrollment, fakeEvent, fakeRegistration } from '@/test-utils/factories';
 import { TrainingEnrollmentRepository } from './repos/training.repo';
 import { EventRepository, EventRegistrationRepository } from './repos/events.repo';
 
@@ -34,12 +35,12 @@ describe('listMyCustomTrainings', () => {
   });
 
   test('returns 200 with user enrollments', async () => {
-    const fakeEnrollments = [
-      { id: 'enr-1', trainingId: 'tr-1', personId: 'user-1', status: 'enrolled' },
-      { id: 'enr-2', trainingId: 'tr-2', personId: 'user-1', status: 'completed' },
+    const enrollments = [
+      fakeEnrollment({ id: 'enr-1', trainingId: 'tr-1', personId: 'user-1', status: 'enrolled' }),
+      fakeEnrollment({ id: 'enr-2', trainingId: 'tr-2', personId: 'user-1', status: 'completed' }),
     ];
     mocks = stubRepo(TrainingEnrollmentRepository, {
-      findMany: async () => fakeEnrollments,
+      findMany: async () => enrollments,
     });
     const { listMyCustomTrainings } = await import('./listMyCustomTrainings');
     const ctx = makeCtx({ _query: {} });
@@ -62,11 +63,11 @@ describe('listMyCustomTrainings', () => {
   });
 
   test('filters by status when provided', async () => {
-    const fakeEnrollments = [
-      { id: 'enr-1', trainingId: 'tr-1', personId: 'user-1', status: 'completed' },
+    const enrollments = [
+      fakeEnrollment({ id: 'enr-1', trainingId: 'tr-1', personId: 'user-1', status: 'completed' }),
     ];
     mocks = stubRepo(TrainingEnrollmentRepository, {
-      findMany: async () => fakeEnrollments,
+      findMany: async () => enrollments,
     });
     const { listMyCustomTrainings } = await import('./listMyCustomTrainings');
     const ctx = makeCtx({ _query: { status: 'completed' } });
@@ -111,17 +112,17 @@ describe('listCustomEventRegistrations', () => {
   });
 
   test('returns 200 with registrations for valid event', async () => {
-    const fakeEvent = { id: 'evt-1', title: 'Conference', status: 'published', organizationId: 'org-1' };
-    const fakeRegs = [
-      { id: 'reg-1', eventId: 'evt-1', personId: 'p-1', status: 'confirmed' },
-      { id: 'reg-2', eventId: 'evt-1', personId: 'p-2', status: 'confirmed' },
+    const evt = fakeEvent({ id: 'evt-1', title: 'Conference', status: 'published', organizationId: 'org-1' });
+    const regs = [
+      fakeRegistration({ id: 'reg-1', eventId: 'evt-1', personId: 'p-1', status: 'confirmed' }),
+      fakeRegistration({ id: 'reg-2', eventId: 'evt-1', personId: 'p-2', status: 'confirmed' }),
     ];
     mocks = {
       ...stubRepo(EventRepository, {
-        findOneById: async () => fakeEvent,
+        findOneById: async () => evt,
       }),
       ...stubRepo(EventRegistrationRepository, {
-        findMany: async () => fakeRegs,
+        findMany: async () => regs,
       }),
     };
     const { listCustomEventRegistrations } = await import('./listCustomEventRegistrations');
@@ -133,10 +134,10 @@ describe('listCustomEventRegistrations', () => {
   });
 
   test('returns 200 with empty list when no registrations', async () => {
-    const fakeEvent = { id: 'evt-1', title: 'Conference', status: 'published', organizationId: 'org-1' };
+    const evt = fakeEvent({ id: 'evt-1', title: 'Conference', status: 'published', organizationId: 'org-1' });
     mocks = {
       ...stubRepo(EventRepository, {
-        findOneById: async () => fakeEvent,
+        findOneById: async () => evt,
       }),
       ...stubRepo(EventRegistrationRepository, {
         findMany: async () => [],

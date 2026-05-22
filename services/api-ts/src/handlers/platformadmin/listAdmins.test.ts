@@ -1,11 +1,12 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakePlatformAdmin } from '@/test-utils/factories';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
 import { listAdmins } from './listAdmins';
 
 const fakeAdmins = [
-  { id: 'admin-1', email: 'a@example.com', name: 'Admin', role: 'super' },
-  { id: 'admin-2', email: 'b@example.com', name: 'Support', role: 'support' },
+  fakePlatformAdmin({ email: 'a@example.com' }),
+  fakePlatformAdmin({ id: 'admin-2', email: 'b@example.com', name: 'Support', role: 'support' }),
 ];
 
 describe('listAdmins', () => {

@@ -4,6 +4,7 @@ import { DocumentRepository } from './repos/documents.repo';
 import { searchDocuments } from './searchDocuments';
 import { UnauthorizedError } from '@/core/errors';
 
+// Factory N/A: paginated query result wrapper
 const fakeResult = {
   data: [{ id: 'doc-1', title: 'Test' }],
   totalCount: 1,

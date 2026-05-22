@@ -5,6 +5,7 @@ import { EventsRepository } from './repos/events.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
+// Factory N/A: composite join result (registration + event)
 const fakeMyEvents = [
   {
     registration: { id: 'reg-1', eventId: 'evt-1', personId: 'user-1', status: 'confirmed' },

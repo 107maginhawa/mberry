@@ -200,7 +200,21 @@ No redistribution needed — all rule classes present.
 | BRITTLE (inline hardcoded) | ~877 | 19.8% |
 | **Score** | | **8.0/10** |
 
-**Improvement:** Centralized factory file (`src/test-utils/factories.ts`) with 30 domain factory functions. 115/140 test files with inline `const fake*` data refactored to use factory calls with override pattern. Remaining 27 files contain service mocks, logger stubs, or computed test objects that don't map to domain entities.
+**Improvement:** Centralized factory file (`src/test-utils/factories.ts`) with 36 domain factory functions. 132/140 test files with inline `const fake*` data refactored to use factory calls with override pattern. Remaining 8 files contain service mocks, paginated result wrappers, or composite join results — each annotated with `// Factory N/A: <reason>` for auditability.
+
+### Test Todo Catalog
+
+21 `test.todo()` items across 4 files. All are deferred by design — not forgotten tests.
+
+| Category | Count | Files | Reason Deferred |
+|----------|:---:|-------|----------------|
+| Better-Auth config (OTP, sessions) | 13 | `membership/br-p2-gap.test.ts` | Config-level validation, not unit-testable — requires Better-Auth integration test harness |
+| Visibility defaults | 3 | `membership/br-p2-gap.test.ts` | Needs handler implementation (events/training default visibility) |
+| BR-25 OTP rate limiting | 2 | `__tests__/br-edge-cases.test.ts` | Better-Auth owns OTP rate limiting logic |
+| Middleware integration | 2 | `tests/route-protection-association.test.ts`, `tests/email-integration.test.ts` | Requires integration test harness with real middleware chain |
+| Email route org-context | 1 | `tests/email-integration.test.ts` | Known missing middleware — tracked separately |
+
+**Status:** Cataloged, not blocking. 13 items require Better-Auth config validation (future integration test phase). 8 items blocked on middleware/handler implementation.
 
 ### Composite Score
 `(9.6 x 0.4) + (8.5 x 0.2) + (9.9 x 0.2) + (8.0 x 0.2) = 3.84 + 1.70 + 1.98 + 1.60 = **9.1/10**`

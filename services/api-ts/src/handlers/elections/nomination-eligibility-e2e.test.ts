@@ -88,6 +88,7 @@ describe('[BR-34] Nomination Eligibility E2E Flow', () => {
       joinedAt: monthsAgo(8),
     };
 
+    // Factory N/A: uses dynamic test constants (ELECTION_ID, ELIGIBLE_PERSON_ID)
     const fakeNominee = {
       id: 'nominee-1',
       electionId: ELECTION_ID,

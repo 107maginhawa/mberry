@@ -2,12 +2,13 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { listElections } from './listElections';
 import { ElectionsRepository } from './repos/elections.repo';
+import { fakeElection as createFakeElection } from '@/test-utils/factories';
 
 // ─── Fixtures ───────────────────────────────────────────
 
 const fakeElections = [
-  { id: 'e-1', organizationId: 'org-1', title: '2026 Board Election', status: 'draft' },
-  { id: 'e-2', organizationId: 'org-1', title: 'Bylaw Amendment', status: 'votingOpen' },
+  createFakeElection({ id: 'e-1', title: '2026 Board Election', status: 'draft' }),
+  createFakeElection({ id: 'e-2', title: 'Bylaw Amendment', status: 'votingOpen' }),
 ];
 
 // ─── Tests ──────────────────────────────────────────────

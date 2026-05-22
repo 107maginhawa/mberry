@@ -6,6 +6,7 @@ import { NotFoundError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
 
+// Factory N/A: response wrapper (membership + person join)
 const fakeMemberResult = {
   membership: {
     id: 'mem-1',

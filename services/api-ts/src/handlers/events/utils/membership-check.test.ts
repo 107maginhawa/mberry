@@ -4,6 +4,7 @@ import { stubRepo } from '@/test-utils/make-ctx';
 import { MembershipRepository } from '../../association:member/repos/membership.repo';
 import { checkActiveMembership } from './membership-check';
 
+// Factory N/A: empty DB stub for dependency injection
 // Fake db placeholder — stubRepo patches the prototype so db is unused
 const fakeDb = {} as any;
 

@@ -2,12 +2,10 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DocumentVersionRepository } from './repos/documents.repo';
 import { getDocumentVersion } from './getDocumentVersion';
+import { fakeDocumentVersion } from '@/test-utils/factories';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 
-const fakeVersion = {
-  id: 'ver-1', documentId: 'doc-1', organizationId: 'tenant-1',
-  versionNumber: 2, fileName: 'v2.pdf', fileSize: 2048,
-};
+const fakeVersion = fakeDocumentVersion({ versionNumber: 2, fileName: 'v2.pdf', fileSize: 2048 });
 
 describe('getDocumentVersion', () => {
   beforeEach(() => {

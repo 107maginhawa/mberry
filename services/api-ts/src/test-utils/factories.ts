@@ -390,6 +390,18 @@ export function fakeDocument(overrides: Record<string, any> = {}) {
   };
 }
 
+export function fakeDocumentVersion(overrides: Record<string, any> = {}) {
+  return {
+    id: 'ver-1',
+    documentId: 'doc-1',
+    organizationId: 'tenant-1',
+    versionNumber: 1,
+    fileName: 'v1.pdf',
+    fileSize: 1024,
+    ...overrides,
+  };
+}
+
 export function fakeDocumentTag(overrides: Record<string, any> = {}) {
   return {
     id: 'tag-1',
@@ -529,6 +541,83 @@ export function fakeJobPosting(overrides: Record<string, any> = {}) {
     location: 'Manila',
     createdBy: 'user-1',
     createdAt: new Date(),
+    ...overrides,
+  };
+}
+
+// ─── Membership Tier ────────────────────────────────────
+
+export function fakeMembershipTier(overrides: Record<string, any> = {}) {
+  return {
+    id: 'tier-1',
+    organizationId: 'org-1',
+    name: 'Regular',
+    code: 'REG',
+    annualFee: 100_00,
+    currency: 'PHP',
+    status: 'active',
+    ...overrides,
+  };
+}
+
+// ─── Membership Category ────────────────────────────────
+
+export function fakeMembershipCategory(overrides: Record<string, any> = {}) {
+  return {
+    id: 'cat-1',
+    organizationId: 'org-1',
+    name: 'General Dentistry',
+    description: 'General practitioners',
+    code: 'GEN',
+    ...overrides,
+  };
+}
+
+// ─── Training Course ────────────────────────────────────
+
+export function fakeTrainingCourse(overrides: Record<string, any> = {}) {
+  return {
+    id: 'crs-1',
+    title: 'Dental Anatomy 101',
+    status: 'active',
+    ...overrides,
+  };
+}
+
+// ─── Quiz Attempt ───────────────────────────────────────
+
+export function fakeQuizAttempt(overrides: Record<string, any> = {}) {
+  return {
+    id: 'qa-1',
+    courseId: 'crs-1',
+    personId: 'user-1',
+    score: 85,
+    passed: true,
+    ...overrides,
+  };
+}
+
+// ─── Platform Admin ─────────────────────────────────────
+
+export function fakePlatformAdmin(overrides: Record<string, any> = {}) {
+  return {
+    id: 'admin-1',
+    email: 'admin@example.com',
+    name: 'Admin',
+    role: 'super',
+    ...overrides,
+  };
+}
+
+// ─── Feature Flag ───────────────────────────────────────
+
+export function fakeFeatureFlag(overrides: Record<string, any> = {}) {
+  return {
+    id: 'flag-1',
+    targetType: 'org',
+    targetId: 'org-1',
+    moduleName: 'billing',
+    enabled: true,
     ...overrides,
   };
 }

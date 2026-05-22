@@ -1,14 +1,12 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeMembershipCategory } from '@/test-utils/factories';
 import { upsertCategory } from './upsertCategory';
 import { MembershipRepository } from './repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeCategory = {
-  id: 'cat-1',
-  organizationId: 'org-1',
-  organizationId: 'org-1',
+const fakeCategory = fakeMembershipCategory({
   name: 'Regular',
   description: 'Regular members',
   applicableTiers: ['tier-1'],
@@ -16,7 +14,7 @@ const fakeCategory = {
   updatedBy: 'user-1',
   createdAt: new Date(),
   updatedAt: new Date(),
-};
+});
 
 // ─── Tests ──────────────────────────────────────────────
 

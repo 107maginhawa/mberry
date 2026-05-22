@@ -5,6 +5,7 @@ import { MembershipRepository } from './repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
+// Factory N/A: composite join result (application + person)
 const fakeApplications = [
   {
     application: { id: 'app-1', organizationId: 'org-1', personId: 'p-1', status: 'submitted' },

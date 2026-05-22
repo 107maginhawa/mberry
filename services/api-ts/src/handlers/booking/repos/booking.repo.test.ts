@@ -14,6 +14,7 @@ import { NotFoundError, ConflictError } from '@/core/errors';
 // Helpers
 // ---------------------------------------------------------------------------
 
+// Factory N/A: local repo-level factory with DB-specific fields
 function makeBooking(overrides: Record<string, any> = {}) {
   return {
     id: 'booking-1',

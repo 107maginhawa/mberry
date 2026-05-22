@@ -1,10 +1,11 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeDocument } from '@/test-utils/factories';
 import { DocumentRepository, DocumentAccessLogRepository } from './repos/documents.repo';
 import { getDocumentAccessLog } from './getDocumentAccessLog';
 import { NotFoundError } from '@/core/errors';
 
-const existingDoc = { id: 'doc-1', organizationId: 'tenant-1', title: 'Test Doc', status: 'published' };
+const existingDoc = fakeDocument();
 const fakeLogs = [
   { id: 'log-1', documentId: 'doc-1', accessedBy: 'user-1', action: 'view', accessedAt: new Date() },
 ];

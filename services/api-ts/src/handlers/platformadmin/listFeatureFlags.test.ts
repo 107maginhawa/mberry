@@ -1,11 +1,12 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeFeatureFlag } from '@/test-utils/factories';
 import { FeatureFlagRepository } from './repos/platform-admin.repo';
 import { listFeatureFlags } from './listFeatureFlags';
 
 const fakeFlags = [
-  { id: 'flag-1', targetType: 'org', targetId: 'org-1', moduleName: 'billing', enabled: true },
-  { id: 'flag-2', targetType: 'org', targetId: 'org-1', moduleName: 'events', enabled: false },
+  fakeFeatureFlag(),
+  fakeFeatureFlag({ id: 'flag-2', moduleName: 'events', enabled: false }),
 ];
 
 describe('listFeatureFlags', () => {

@@ -1,13 +1,14 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeMembershipCategory } from '@/test-utils/factories';
 import { listCategories } from './listCategories';
 import { MembershipRepository } from './repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
 const fakeCategories = [
-  { id: 'cat-1', organizationId: 'org-1', organizationId: 'org-1', name: 'Regular', description: 'Regular member' },
-  { id: 'cat-2', organizationId: 'org-1', organizationId: 'org-1', name: 'Senior', description: 'Senior member' },
+  fakeMembershipCategory({ id: 'cat-1', name: 'Regular', description: 'Regular member' }),
+  fakeMembershipCategory({ id: 'cat-2', name: 'Senior', description: 'Senior member' }),
 ];
 
 // ─── Tests ──────────────────────────────────────────────

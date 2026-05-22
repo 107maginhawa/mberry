@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeEvent as createFakeEvent, fakeRegistration as createFakeRegistration, fakeCheckIn as createFakeCheckIn } from '@/test-utils/factories';
 import { EventRepository, EventRegistrationRepository, CheckInRepository, WaitlistEntryRepository } from './repos/events.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
@@ -223,22 +224,22 @@ describe('[CR-01] cancelEventRegistration — late-cancellation notification tar
   const cancellerId = 'canceller-user';
   const organizerId = 'organizer-user';
 
-  const fakeConfirmedReg = {
+  const fakeConfirmedReg = createFakeRegistration({
     id: 'reg-cr01',
     eventId: 'evt-cr01',
     personId: cancellerId,
     organizationId: 'org-1',
     status: 'confirmed',
     cancelledAt: null,
-  };
+  });
 
   // Event starts in 2 hours — within 24h window
-  const fakeEvent = {
+  const fakeEvt = createFakeEvent({
     id: 'evt-cr01',
     title: 'CR-01 Test Event',
     startDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
     createdBy: organizerId,
-  };
+  });
 
   afterEach(() => {
     if (regMocks) Object.values(regMocks).forEach((m) => m.mockRestore());
@@ -259,7 +260,7 @@ describe('[CR-01] cancelEventRegistration — late-cancellation notification tar
       updateOneById: async (_id: string, data: any) => ({ ...fakeConfirmedReg, ...data }),
     });
     eventMocks = stubRepo(EventRepository, {
-      findOneById: async () => fakeEvent,
+      findOneById: async () => fakeEvt,
     });
 
     const { cancelEventRegistration } = await import('./cancelEventRegistration');
@@ -290,7 +291,7 @@ describe('[CR-01] cancelEventRegistration — late-cancellation notification tar
       updateOneById: async (_id: string, data: any) => ({ ...fakeConfirmedReg, ...data }),
     });
     eventMocks = stubRepo(EventRepository, {
-      findOneById: async () => ({ ...fakeEvent, createdBy: null }),
+      findOneById: async () => ({ ...fakeEvt, createdBy: null }),
     });
 
     const { cancelEventRegistration } = await import('./cancelEventRegistration');
@@ -310,20 +311,20 @@ describe('[BR-27] cancelEventRegistration — waitlist promotion', () => {
   let regMocks: ReturnType<typeof stubRepo>;
   let waitlistMocks: ReturnType<typeof stubRepo>;
 
-  const fakeConfirmedReg = {
+  const fakeConfirmedReg = createFakeRegistration({
     id: 'reg-1',
     eventId: 'evt-1',
     personId: 'person-1',
     organizationId: 'org-1',
     status: 'confirmed',
     cancelledAt: null,
-  };
+  });
 
-  const fakeWaitlistedReg = {
+  const fakeWaitlistedReg = createFakeRegistration({
     ...fakeConfirmedReg,
     id: 'reg-2',
     status: 'waitlisted',
-  };
+  });
 
   afterEach(() => {
     if (regMocks) Object.values(regMocks).forEach((m) => m.mockRestore());
@@ -434,21 +435,21 @@ describe('[AC-M08-001] createCheckIn — QR check-in requires authenticated scan
   let mocks: Record<string, { mockRestore: () => void }>;
   let officerMocks: Record<string, { mockRestore: () => void }>;
 
-  const fakeEvent = {
+  const fakeEvent = createFakeEvent({
     id: 'evt-1',
     organizationId: 'org-1',
     title: 'Conference',
     status: 'published',
-  };
+  });
 
-  const fakeCheckIn = {
+  const fakeCheckIn = createFakeCheckIn({
     id: 'ci-1',
     eventId: 'evt-1',
     personId: 'person-1',
     method: 'manual',
     checkedInBy: 'user-1',
     organizationId: 'org-1',
-  };
+  });
 
   beforeEach(() => {
     restoreRepo(EventRepository);

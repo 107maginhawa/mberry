@@ -2,11 +2,12 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DocumentVersionRepository } from './repos/documents.repo';
 import { listDocumentVersions } from './listDocumentVersions';
+import { fakeDocumentVersion } from '@/test-utils/factories';
 import { UnauthorizedError } from '@/core/errors';
 
 const fakeVersions = [
-  { id: 'ver-1', documentId: 'doc-1', versionNumber: 1 },
-  { id: 'ver-2', documentId: 'doc-1', versionNumber: 2 },
+  fakeDocumentVersion(),
+  fakeDocumentVersion({ id: 'ver-2', versionNumber: 2 }),
 ];
 
 describe('listDocumentVersions', () => {

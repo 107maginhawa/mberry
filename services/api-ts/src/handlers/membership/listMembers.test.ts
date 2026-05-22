@@ -5,6 +5,7 @@ import { MembershipRepository } from './repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
+// Factory N/A: paginated list result wrapper
 const fakeListResult = {
   data: [
     {

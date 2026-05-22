@@ -9,6 +9,7 @@
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeEnrollment } from '@/test-utils/factories';
 import { startImpersonation } from '../platformadmin/startImpersonation';
 import { PlatformAdminRepository, ImpersonationSessionRepository } from '../platformadmin/repos/platform-admin.repo';
 import { updateEvent } from '../events/updateEvent';
@@ -264,13 +265,13 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
   });
 
   test('[BR-20] returns 201 when activity has ended and is not cancelled', async () => {
-    const fakeEnrollment = {
+    const enrollment = fakeEnrollment({
       id: 'enr-1',
       trainingId: 'train-1',
       personId: 'person-1',
       status: 'enrolled',
       completedAt: null,
-    };
+    });
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({
         id: 'train-1',
@@ -282,8 +283,8 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
         creditAmount: 5,
       }),
       getEnrollmentCount: async () => 1,
-      listEnrollments: async () => [fakeEnrollment],
-      updateEnrollmentStatus: async (_id: string, status: string) => ({ ...fakeEnrollment, status, completedAt: new Date() }),
+      listEnrollments: async () => [enrollment],
+      updateEnrollmentStatus: async (_id: string, status: string) => ({ ...enrollment, status, completedAt: new Date() }),
     });
     const creditMocks = stubRepo(CreditEntryRepository, {
       createOne: async (data: any) => ({ id: 'credit-1', ...data }),

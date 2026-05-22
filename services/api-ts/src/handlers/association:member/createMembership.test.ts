@@ -7,21 +7,14 @@
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeMembershipTier } from '@/test-utils/factories';
 import { createMembership } from './createMembership';
 import { MembershipTierRepository, MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeTier = {
-  id: 'tier-1',
-  organizationId: 'org-1',
-  name: 'Regular',
-  code: 'REG',
-  annualFee: 100_00,
-  currency: 'PHP',
-  status: 'active',
-};
+const fakeTier = fakeMembershipTier();
 
 // ─── Tests ──────────────────────────────────────────────
 

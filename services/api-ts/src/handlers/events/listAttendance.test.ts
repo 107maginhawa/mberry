@@ -1,13 +1,14 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { fakeAttendance as createFakeAttendance } from '@/test-utils/factories';
 import { listAttendance } from './listAttendance';
 import { EventsRepository } from './repos/events.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
-const fakeAttendance = [
-  { id: 'att-1', eventId: 'evt-1', personId: 'person-1', method: 'qr', checkedInAt: new Date() },
-  { id: 'att-2', eventId: 'evt-1', personId: 'person-2', method: 'manual', checkedInAt: new Date() },
+const attendanceList = [
+  createFakeAttendance({ id: 'att-1', eventId: 'evt-1', personId: 'person-1', method: 'qr', checkedInAt: new Date() }),
+  createFakeAttendance({ id: 'att-2', eventId: 'evt-1', personId: 'person-2', method: 'manual', checkedInAt: new Date() }),
 ];
 
 const fakeStats = { total: 2, qr: 1, manual: 1 };
@@ -23,7 +24,7 @@ describe('listAttendance', () => {
 
   test('returns attendance list with stats and 200', async () => {
     mocks = stubRepo(EventsRepository, {
-      listAttendance: async () => fakeAttendance,
+      listAttendance: async () => attendanceList,
       getAttendanceStats: async () => fakeStats,
     });
 

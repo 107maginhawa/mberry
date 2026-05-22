@@ -10,6 +10,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { NotificationRepository } from './repos/notification.repo';
 import { listNotifications } from './listNotifications';
 
+// Factory N/A: paginated query result wrapper
 const fakeResult = { data: [{ id: 'n-1', type: 'system', status: 'sent' }], totalCount: 1 };
 
 describe('listNotifications', () => {

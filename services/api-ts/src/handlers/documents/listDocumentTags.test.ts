@@ -1,12 +1,13 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeDocumentTag } from '@/test-utils/factories';
 import { DocumentTagRepository } from './repos/documents.repo';
 import { listDocumentTags } from './listDocumentTags';
 import { UnauthorizedError } from '@/core/errors';
 
 const fakeTags = [
-  { id: 'tag-1', organizationId: 'tenant-1', name: 'Policy' },
-  { id: 'tag-2', organizationId: 'tenant-1', name: 'Form' },
+  fakeDocumentTag({ id: 'tag-1', name: 'Policy' }),
+  fakeDocumentTag({ id: 'tag-2', name: 'Form' }),
 ];
 
 describe('listDocumentTags', () => {

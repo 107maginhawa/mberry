@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeTraining, fakeTrainingCourse, fakeQuizAttempt, fakeRegistration, fakeEnrollment } from '@/test-utils/factories';
 import {
   TrainingRepository,
   TrainingEnrollmentRepository,
@@ -60,12 +61,12 @@ describe('searchTrainings', () => {
   });
 
   test('returns 200 with paginated results', async () => {
-    const fakeTrainings = [
-      { id: 'tr-1', title: 'CPD Workshop', status: 'published' },
-      { id: 'tr-2', title: 'Ethics Seminar', status: 'draft' },
+    const trainings = [
+      fakeTraining({ id: 'tr-1', title: 'CPD Workshop', status: 'published' }),
+      fakeTraining({ id: 'tr-2', title: 'Ethics Seminar', status: 'draft' }),
     ];
     mocks = stubRepo(TrainingRepository, {
-      findMany: async () => fakeTrainings,
+      findMany: async () => trainings,
       count: async () => 5,
     });
     const { searchTrainings } = await import('./searchTrainings');
@@ -109,11 +110,11 @@ describe('searchCourses', () => {
   });
 
   test('returns 200 with course results', async () => {
-    const fakeCourses = [
-      { id: 'crs-1', title: 'Dental Anatomy 101', status: 'active' },
+    const courses = [
+      fakeTrainingCourse(),
     ];
     mocks = stubRepo(CourseRepository, {
-      findMany: async () => fakeCourses,
+      findMany: async () => courses,
       count: async () => 1,
     });
     const { searchCourses } = await import('./searchCourses');
@@ -169,11 +170,11 @@ describe('searchQuizAttempts', () => {
   });
 
   test('returns 200 with quiz attempt results', async () => {
-    const fakeAttempts = [
-      { id: 'qa-1', courseId: 'crs-1', personId: 'p-1', score: 85, passed: true },
+    const attempts = [
+      fakeQuizAttempt({ personId: 'p-1' }),
     ];
     mocks = stubRepo(QuizAttemptRepository, {
-      findMany: async () => fakeAttempts,
+      findMany: async () => attempts,
       count: async () => 1,
     });
     const { searchQuizAttempts } = await import('./searchQuizAttempts');
@@ -228,12 +229,12 @@ describe('searchEventRegistrations', () => {
   });
 
   test('returns 200 with registration results', async () => {
-    const fakeRegs = [
-      { id: 'reg-1', eventId: 'evt-1', personId: 'p-1', status: 'confirmed' },
-      { id: 'reg-2', eventId: 'evt-1', personId: 'p-2', status: 'waitlisted' },
+    const regs = [
+      fakeRegistration({ id: 'reg-1', eventId: 'evt-1', personId: 'p-1', status: 'confirmed' }),
+      fakeRegistration({ id: 'reg-2', eventId: 'evt-1', personId: 'p-2', status: 'waitlisted' }),
     ];
     mocks = stubRepo(EventRegistrationRepository, {
-      findMany: async () => fakeRegs,
+      findMany: async () => regs,
       count: async () => 2,
     });
     const { searchEventRegistrations } = await import('./searchEventRegistrations');
@@ -245,11 +246,11 @@ describe('searchEventRegistrations', () => {
   });
 
   test('filters by status when provided', async () => {
-    const fakeRegs = [
-      { id: 'reg-1', eventId: 'evt-1', personId: 'p-1', status: 'confirmed' },
+    const regs = [
+      fakeRegistration({ id: 'reg-1', eventId: 'evt-1', personId: 'p-1', status: 'confirmed' }),
     ];
     mocks = stubRepo(EventRegistrationRepository, {
-      findMany: async () => fakeRegs,
+      findMany: async () => regs,
       count: async () => 1,
     });
     const { searchEventRegistrations } = await import('./searchEventRegistrations');
@@ -291,11 +292,11 @@ describe('searchTrainingEnrollments', () => {
   });
 
   test('returns 200 with enrollment results', async () => {
-    const fakeEnrollments = [
-      { id: 'enr-1', trainingId: 'tr-1', personId: 'p-1', status: 'enrolled' },
+    const enrollments = [
+      fakeEnrollment({ id: 'enr-1', trainingId: 'tr-1', personId: 'p-1', status: 'enrolled' }),
     ];
     mocks = stubRepo(TrainingEnrollmentRepository, {
-      findMany: async () => fakeEnrollments,
+      findMany: async () => enrollments,
       count: async () => 1,
     });
     const { searchTrainingEnrollments } = await import('./searchTrainingEnrollments');
