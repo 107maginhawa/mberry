@@ -27,7 +27,7 @@ import { trainings, trainingEnrollments } from './handlers/association:operation
 import { persons } from './handlers/person/repos/person.schema';
 import { organizations } from './handlers/platformadmin/repos/platform-admin.schema';
 
-const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://elad-mini@localhost:5432/monobase';
+const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://postgres@localhost:5432/monobase';
 
 async function seedModules() {
   const pool = new Pool({ connectionString: DATABASE_URL });

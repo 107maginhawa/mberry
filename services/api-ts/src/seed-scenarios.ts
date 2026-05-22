@@ -53,7 +53,7 @@ import { chapterAffiliations } from './handlers/association:member/repos/chapter
 import { notificationPreferences } from './handlers/person/repos/notification-preferences.schema';
 import { personPrivacySettings } from './handlers/person/repos/privacy-settings.schema';
 
-const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://elad-mini@localhost:5432/monobase';
+const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://postgres@localhost:5432/monobase';
 const API_URL = process.env['API_URL'] || 'http://localhost:7213';
 const PASSWORD = 'TestPass123!';
 
@@ -227,7 +227,7 @@ const OFFICERS = [
   { email: 'membership@memberry.ph', firstName: 'Sofia', lastName: 'Garcia', position: 'Membership Chair', spec: 'General Dentistry', license: '0056789' },
 ];
 
-type MemberStatus = 'active' | 'grace' | 'lapsed' | 'suspended' | 'removed' | 'pendingPayment';
+type MemberStatus = 'active' | 'grace' | 'lapsed' | 'suspended' | 'removed' | 'pendingPayment' | 'expired' | 'resigned';
 
 const MEMBERS: { email: string; firstName: string; lastName: string; spec: string; license: string; status: MemberStatus }[] = [
   // Legacy test user (referenced by 6+ test files — DO NOT REMOVE)
@@ -263,6 +263,10 @@ const MEMBERS: { email: string; firstName: string; lastName: string; spec: strin
   // 2 pendingPayment (approved but awaiting first dues payment)
   { email: 'member24@memberry.ph', firstName: 'Francisco', lastName: 'Gonzales', spec: 'General Dentistry', license: '0100024', status: 'pendingPayment' },
   { email: 'member25@memberry.ph', firstName: 'Claudia', lastName: 'Tiu', spec: 'Orthodontics', license: '0100025', status: 'pendingPayment' },
+  // 1 expired (dues expired over a year ago)
+  { email: 'member26@memberry.ph', firstName: 'Ramon', lastName: 'Villanueva', spec: 'General Dentistry', license: '0100026', status: 'expired' },
+  // 1 resigned (voluntary departure)
+  { email: 'member27@memberry.ph', firstName: 'Elena', lastName: 'Santos', spec: 'Prosthodontics', license: '0100027', status: 'resigned' },
 ];
 
 const APPLICANTS = [
@@ -569,22 +573,30 @@ async function seedMember(
       break;
     case 'grace':
       duesExpiry = graceExpiry(15); // expired 15 days ago (within 30-day grace)
-      dbStatus = 'active'; // computeMembershipStatus derives gracePeriod from expiry
+      dbStatus = 'gracePeriod'; // stored as gracePeriod enum value
       break;
     case 'lapsed':
       duesExpiry = lapsedExpiry(75); // expired 75 days ago (past 30-day grace)
-      dbStatus = 'active'; // computeMembershipStatus derives lapsed from expiry
+      dbStatus = 'lapsed';
       break;
     case 'suspended':
       duesExpiry = ACTIVE_EXPIRY; // was active before suspension
-      dbStatus = 'active';
+      dbStatus = 'suspended';
       suspendedAt = daysAgo(14); // suspended 2 weeks ago
       break;
     case 'removed':
       duesExpiry = ACTIVE_EXPIRY;
-      dbStatus = 'active';
+      dbStatus = 'removed';
       removedAt = daysAgo(30); // removed 1 month ago
       removalReason = 'Fraudulent credentials — license number verified as invalid by PRC';
+      break;
+    case 'expired':
+      duesExpiry = lapsedExpiry(400); // expired over a year ago
+      dbStatus = 'expired';
+      break;
+    case 'resigned':
+      duesExpiry = ACTIVE_EXPIRY;
+      dbStatus = 'resigned';
       break;
     case 'pendingPayment':
       duesExpiry = ACTIVE_EXPIRY;
@@ -715,6 +727,8 @@ async function seedElections(db: ReturnType<typeof drizzle>, orgId: string, pres
   const electionData = [
     { title: 'PDA Metro Manila Officers Election 2025', status: 'published', nominationsOpenAt: '2025-01-01', nominationsCloseAt: '2025-01-15', votingOpenAt: '2025-01-20', votingCloseAt: '2025-01-25' },
     { title: 'PDA Metro Manila Officers Election 2026', status: 'draft', nominationsOpenAt: '2026-07-01', nominationsCloseAt: '2026-07-15', votingOpenAt: '2026-07-20', votingCloseAt: '2026-07-25' },
+    // votingOpen election — enables BR-42 vote integrity testing
+    { title: 'PDA Metro Manila Mid-Year Election 2026', status: 'votingOpen', nominationsOpenAt: dateStr(daysAgo(30)), nominationsCloseAt: dateStr(daysAgo(7)), votingOpenAt: dateStr(daysAgo(3)), votingCloseAt: dateStr(daysFromNow(14)) },
   ];
 
   for (const e of electionData) {
@@ -740,6 +754,8 @@ async function seedAnnouncements(db: ReturnType<typeof drizzle>, orgId: string, 
   const annData = [
     { title: 'May Dues Reminder - Please Pay Before June 1', content: '<p>Dear members, annual dues for 2025 are due. Please settle your accounts before June 1.</p>', audienceType: 'all', visibility: 'internal', status: 'sent', publishedAt: new Date('2026-05-01') },
     { title: 'Upcoming Board Meeting - June 15', content: '<p>Board meeting on June 15 at 2:00 PM. Agenda: budget review, election prep, membership drive.</p>', audienceType: 'officers', visibility: 'internal', status: 'draft', publishedAt: null },
+    { title: 'Annual Convention Registration Open', content: '<p>Early bird registration for the 2026 PDA Annual Convention is now open.</p>', audienceType: 'all', visibility: 'internal', status: 'scheduled', publishedAt: daysFromNow(7) },
+    { title: 'April Newsletter - Community Dental Mission Recap', content: '<p>Thank you to all volunteers who participated in the Tondo dental mission.</p>', audienceType: 'all', visibility: 'internal', status: 'archived', publishedAt: daysAgo(45) },
   ];
 
   for (const a of annData) {
@@ -859,7 +875,7 @@ async function seedRelationalData(
       const methods = ['gcash', 'bankTransfer', 'cash', 'online', 'check'];
       await db.execute(sql`
         INSERT INTO dues_payment (organization_id, person_id, receipt_number, amount, currency, payment_method, status, paid_at)
-        VALUES (${orgId}, ${paymentMembers[i]!.personId}, ${`RCP-${NOW.getFullYear()}-${String(i + 1).padStart(3, '0')}`}, 300000, 'PHP', ${methods[i % methods.length]}::dues_payment_method, 'completed'::dues_payment_status, ${daysAgo(345 - i * 5)})
+        VALUES (${orgId}, ${paymentMembers[i]!.personId}, ${`RCP-${NOW.getFullYear()}-${String(i + 1).padStart(3, '0')}`}, 300000, 'PHP', ${methods[i % methods.length]}::dues_payment_method, 'completed'::dues_payment_status, ${daysAgo(50 - i * 5)})
       `);
     }
     console.log(`    ✓ Dues payments: 10 records`);
@@ -1627,12 +1643,13 @@ async function seedDuesInfrastructure(
     if (existingOrgConfig.length === 0) {
       await db.insert(duesOrgConfigs).values({
         organizationId: orgId,
-        annualAmount: 300000,
+        defaultAmount: 300000, // ₱3,000 in centavos
         currency: 'PHP',
+        billingFrequency: 'annual',
+        dueDateMonth: 1, // January
+        dueDateDay: 1,
         gracePeriodDays: 30,
-        reminderEnabled: true,
-        autoLapse: true,
-      } as any);
+      });
       console.log('    ✓ 1 dues org config seeded');
     } else {
       console.log('    (dues org config already seeded, skipping)');
@@ -1739,6 +1756,50 @@ async function seedDuesInfrastructure(
     }
   } else {
     console.log('    (submitted proofs already exist, skipping)');
+  }
+
+  // ─── Payment status variety (refunded, rejected) ──────────────
+  try {
+    const refundedExists = await db.execute(
+      sql`SELECT count(*) as c FROM dues_payment WHERE status = 'refunded'`
+    );
+    const refundedCount = Number((refundedExists as any).rows?.[0]?.c ?? (refundedExists as any)[0]?.c ?? 0);
+    if (refundedCount === 0 && memberPersonIds.length > 2) {
+      // Add 1 refunded payment
+      await db.execute(sql`
+        INSERT INTO dues_payment (organization_id, person_id, receipt_number, amount, currency, payment_method, status, paid_at, refunded_amount, refund_date, refund_reason)
+        VALUES (${orgId}, ${memberPersonIds[0]}, 'RCP-REFUND-001', 300000, 'PHP', 'gcash'::dues_payment_method, 'refunded'::dues_payment_status, ${daysAgo(90)}, 300000, ${daysAgo(60)}, 'Duplicate payment — member paid via bank transfer and GCash')
+      `);
+      // Add 1 rejected payment
+      await db.execute(sql`
+        INSERT INTO dues_payment (organization_id, person_id, receipt_number, amount, currency, payment_method, status, paid_at, rejection_reason, proof_storage_key, proof_file_name, proof_mime_type)
+        VALUES (${orgId}, ${memberPersonIds[1]}, 'RCP-REJECT-001', 300000, 'PHP', 'bankTransfer'::dues_payment_method, 'rejected'::dues_payment_status, ${daysAgo(45)}, 'Proof of payment does not match amount — screenshot shows ₱2,000 not ₱3,000', 'proofs/wrong-amount-transfer.jpg', 'wrong-amount.jpg', 'image/jpeg')
+      `);
+      console.log('    ✓ 1 refunded + 1 rejected payment seeded');
+    }
+  } catch (e) {
+    console.log(`    (payment variety seeding failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Pending payments for aging report ────────────────────────
+  try {
+    const pendingExists = await db.execute(
+      sql`SELECT count(*) as c FROM dues_payment WHERE status = 'pending'`
+    );
+    const pendingCount = Number((pendingExists as any).rows?.[0]?.c ?? (pendingExists as any)[0]?.c ?? 0);
+    if (pendingCount === 0 && memberPersonIds.length >= 4) {
+      // Create pending payments at various ages for aging bucket distribution
+      const agingDays = [10, 25, 40, 55, 70, 85, 100, 120];
+      for (let i = 0; i < Math.min(agingDays.length, memberPersonIds.length); i++) {
+        await db.execute(sql`
+          INSERT INTO dues_payment (organization_id, person_id, receipt_number, amount, currency, payment_method, status, created_at)
+          VALUES (${orgId}, ${memberPersonIds[i]}, ${`RCP-AGING-${String(i + 1).padStart(3, '0')}`}, 300000, 'PHP', 'online'::dues_payment_method, 'pending'::dues_payment_status, ${daysAgo(agingDays[i]!)})
+        `);
+      }
+      console.log(`    ✓ ${Math.min(agingDays.length, memberPersonIds.length)} pending payments seeded (aging report)`);
+    }
+  } catch (e) {
+    console.log(`    (aging payments failed: ${(e as Error).message?.slice(0, 80)})`);
   }
 }
 

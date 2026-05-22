@@ -11,9 +11,9 @@ interface MemberElectionListProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  nominations_open: { label: 'Nominations Open', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]', icon: Users },
-  voting_open: { label: 'Voting Open', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: Vote },
-  awaiting_confirmation: { label: 'Awaiting Results', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', icon: Clock },
+  nominationsOpen: { label: 'Nominations Open', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]', icon: Users },
+  votingOpen: { label: 'Voting Open', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: Vote },
+  awaitingConfirmation: { label: 'Awaiting Results', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', icon: Clock },
   published: { label: 'Results Published', color: 'bg-emerald-100 text-emerald-800', icon: CheckCircle2 },
 }
 
@@ -22,8 +22,8 @@ const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
   bylaw: { label: 'Bylaw', color: 'bg-orange-100 text-orange-800' },
 }
 
-const MEMBER_VISIBLE = ['nominations_open', 'voting_open', 'awaiting_confirmation', 'published']
-const ACTIVE_STATUSES = ['nominations_open', 'voting_open']
+const MEMBER_VISIBLE = ['nominationsOpen', 'votingOpen', 'awaitingConfirmation', 'published']
+const ACTIVE_STATUSES = ['nominationsOpen', 'votingOpen']
 
 type TabFilter = 'active' | 'completed' | 'all'
 

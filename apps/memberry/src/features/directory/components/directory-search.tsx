@@ -51,11 +51,11 @@ export function DirectorySearch({ orgId, tenantId }: DirectorySearchProps) {
                   <img src={p.photoUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-[var(--color-surface-warm)] flex items-center justify-center text-sm font-medium text-[var(--color-primary)]">
-                    {(p.firstName || '?')[0]}
+                    {(p.displayName || '?')[0]}
                   </div>
                 )}
                 <div>
-                  <div className="font-medium text-sm">{[p.firstName, p.lastName].filter(Boolean).join(' ')}</div>
+                  <div className="font-medium text-sm">{p.displayName || 'Unknown Member'}</div>
                   {p.title && <div className="text-xs text-[var(--color-muted)]">{p.title}</div>}
                 </div>
               </div>

@@ -32,7 +32,7 @@ import { duesInvoices } from './handlers/association:member/repos/dues.schema';
 import { personPrivacySettings } from './handlers/person/repos/privacy-settings.schema';
 import { notificationPreferences } from './handlers/person/repos/notification-preferences.schema';
 
-const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://elad-mini@localhost:5432/monobase';
+const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://postgres@localhost:5432/monobase';
 
 // ─── Helpers ────────────────────────────────────────────────
 

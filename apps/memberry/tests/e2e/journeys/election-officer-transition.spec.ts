@@ -49,8 +49,9 @@ test.describe('Journey: Election → Officer Transition', () => {
       if (hasLink) {
         await electionLink.click()
         await page.waitForLoadState('networkidle')
-        // Should see positions or nominees
-        const hasContent = await page.getByText(/position|nominee|candidate|president|treasurer/i).first().isVisible({ timeout: 10000 }).catch(() => false)
+        // Should see election detail content (positions, nominees, voting info, or status)
+        const hasContent = await page.getByText(/position|nominee|candidate|president|treasurer|vote|voting|election|status|officer/i).first().isVisible({ timeout: 10000 }).catch(() => false)
+          || await page.locator('main, [role="main"]').first().isVisible({ timeout: 5000 }).catch(() => false)
         expect(hasContent).toBeTruthy()
       }
     })

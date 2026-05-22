@@ -54,7 +54,7 @@ export function CertificateList() {
 
               <div className="space-y-1">
                 <p className="font-semibold text-[14px] line-clamp-2">Training Certificate</p>
-                <p className="text-[12px] text-[var(--color-muted)]">Training ID: {cert.trainingId.slice(0, 8)}...</p>
+                <p className="text-[12px] text-[var(--color-muted)]">Training ID: {cert.trainingId?.slice(0, 8) ?? 'N/A'}...</p>
               </div>
 
               <div className="flex items-center justify-between">
