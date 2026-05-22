@@ -30,12 +30,12 @@ interface CreditSummary {
 }
 
 function MyCredits() {
-  const { data: summary, isLoading: summaryLoading } = useQuery({
+  const { data: summary, isLoading: summaryLoading, isError: summaryError } = useQuery({
     queryKey: ['credit-summary'],
     queryFn: () => api.get<CreditSummary>('/api/persons/me/credit-summary'),
   })
 
-  const { data: entriesResp, isLoading: entriesLoading } = useQuery({
+  const { data: entriesResp, isLoading: entriesLoading, isError: entriesError } = useQuery({
     queryKey: ['credit-entries'],
     queryFn: () => api.get<{ data: CreditEntry[] }>('/api/persons/me/credit-entries'),
   })
@@ -46,6 +46,18 @@ function MyCredits() {
   const entries = entriesResp?.data || []
   const navigate = useNavigate()
   const loading = summaryLoading || entriesLoading
+  const hasError = summaryError || entriesError
+
+  if (hasError && !loading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="CPD Credits" subtitle="Your professional development credit summary across all organizations" />
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load credit data. Please try refreshing the page.
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (

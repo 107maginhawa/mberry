@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
+import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/settings')({
@@ -221,7 +222,12 @@ function NotificationPreferencesSection() {
     }
   }, [prefs, prefsQuery.data])
 
-  if (prefsQuery.isLoading) return <div className="text-[14px] text-[var(--color-muted)]">Loading preferences...</div>
+  if (prefsQuery.isLoading) return <GlassCard className="p-6"><ListSkeleton rows={5} /></GlassCard>
+  if (prefsQuery.isError) return (
+    <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+      Unable to load notification preferences. Please try refreshing the page.
+    </div>
+  )
 
   return (
     <GlassCard className="p-6 space-y-4">
@@ -305,7 +311,12 @@ function PrivacySection() {
     }
   }, [orgId, selectedOrgIndex, allSettings, privacyQuery.data])
 
-  if (privacyQuery.isLoading) return null
+  if (privacyQuery.isLoading) return <GlassCard className="p-6"><ListSkeleton rows={4} /></GlassCard>
+  if (privacyQuery.isError) return (
+    <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+      Unable to load privacy settings. Please try refreshing the page.
+    </div>
+  )
 
   if (effectiveSettings.length === 0) {
     return (

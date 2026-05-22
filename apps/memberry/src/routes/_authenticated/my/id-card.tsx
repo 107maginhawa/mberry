@@ -37,12 +37,12 @@ function IdCardSkeleton() {
 }
 
 function MyIdCard() {
-  const { data: person, isLoading: personLoading } = useQuery<any>({
+  const { data: person, isLoading: personLoading, isError: personError } = useQuery<any>({
     queryKey: ['my-person'],
     queryFn: () => api.get('/api/persons/me'),
   })
 
-  const { data: memberships, isLoading: membershipsLoading } = useQuery<any>({
+  const { data: memberships, isLoading: membershipsLoading, isError: membershipsError } = useQuery<any>({
     queryKey: ['my-memberships'],
     queryFn: async () => {
       const json = await api.get<any>('/api/persons/me/memberships')
@@ -51,6 +51,7 @@ function MyIdCard() {
   })
 
   const isLoading = personLoading || membershipsLoading
+  const hasError = personError || membershipsError
   const p = person?.data ?? person
   const membership = Array.isArray(memberships) ? memberships[0] : null
 
@@ -88,6 +89,10 @@ function MyIdCard() {
 
       {isLoading ? (
         <IdCardSkeleton />
+      ) : hasError ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load your ID card. Please try refreshing the page.
+        </div>
       ) : !membership ? (
         <EmptyState
           icon={<CreditCard size={40} />}

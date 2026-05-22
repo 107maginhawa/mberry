@@ -36,7 +36,7 @@ function OrgEvents() {
   const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     searchEventsOptions({
       query: {
         organizationId: orgId,
@@ -87,7 +87,11 @@ function OrgEvents() {
       </div>
 
       {/* Grid */}
-      {isLoading ? (
+      {isError ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load events. Please try refreshing the page.
+        </div>
+      ) : isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <GlassCard key={i} className="p-4 space-y-3">

@@ -11,8 +11,9 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
+import { EmptyState } from '@/components/patterns/empty-state'
 import { Button, Input, Label } from '@monobase/ui'
-import { Shield, Lock, CreditCard, Download } from 'lucide-react'
+import { Shield, Lock, CreditCard, Download, UserCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'
 
@@ -87,9 +88,11 @@ function MyProfilePage() {
     return (
       <div>
         <PageHeader title="Profile" />
-        <div className="rounded-[12px] border border-[var(--color-border-light)] p-6 text-center text-[var(--color-muted)]">
-          No profile found. Complete onboarding to create your profile.
-        </div>
+        <EmptyState
+          icon={<UserCircle size={40} />}
+          headline="No profile found"
+          description="Complete onboarding to create your professional profile."
+        />
       </div>
     )
   }
