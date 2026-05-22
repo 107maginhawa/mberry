@@ -79,7 +79,7 @@ export async function importMembers(ctx: BaseContext): Promise<Response> {
 
   // [BR-02] Read grace period from org dues config
   const duesRepo = new DuesConfigRepository(db);
-  const orgDuesConfigs = await duesRepo.findAll({ organizationId: orgId, status: 'active' });
+  const orgDuesConfigs = await duesRepo.findMany({ organizationId: orgId, status: 'active' });
   const orgGracePeriodDays = orgDuesConfigs[0]?.gracePeriodDays ?? 30;
 
   const matched: MatchedMember[] = [];

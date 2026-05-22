@@ -12,10 +12,10 @@ function aggregatePollResults(question: SurveyQuestion, responses: SurveyRespons
   for (const r of responses) {
     const answer = (r.answers as Record<string, unknown>)[question.id];
     if (typeof answer === 'string' && answer in counts) {
-      counts[answer]++;
+      counts[answer]!++;
     } else if (Array.isArray(answer)) {
       for (const a of answer) {
-        if (typeof a === 'string' && a in counts) counts[a]++;
+        if (typeof a === 'string' && a in counts) counts[a]!++;
       }
     }
   }

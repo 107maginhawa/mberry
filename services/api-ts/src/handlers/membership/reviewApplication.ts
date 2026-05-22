@@ -21,7 +21,7 @@ export async function reviewApplication(ctx: Context): Promise<Response> {
   if (status === 'approved') {
     // [BR-02] Read grace period from org dues config
     const duesRepo = new DuesConfigRepository(db);
-    const duesConfigs = await duesRepo.findAll({ organizationId: updated.organizationId, tierId: updated.tierId, status: 'active' });
+    const duesConfigs = await duesRepo.findMany({ organizationId: updated.organizationId, tierId: updated.tierId, status: 'active' });
     const gracePeriodDays = duesConfigs[0]?.gracePeriodDays ?? 30;
 
     await repo.addMember({

@@ -289,7 +289,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
           {isEditing ? (
             <DatePicker
               value={draft.foundingDate ? new Date(draft.foundingDate) : undefined}
-              onValueChange={(d) => set('foundingDate', d ? d.toISOString().split('T')[0] : '')}
+              onValueChange={(d) => set('foundingDate', d ? d.toISOString().split('T')[0]! : '')}
               placeholder="Select founding date"
             />
           ) : (

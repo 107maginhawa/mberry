@@ -18,10 +18,10 @@ function aggregateMultipleChoice(
     const answer = (r.answers as Record<string, unknown>)[q.id];
     if (q.multiSelect && Array.isArray(answer)) {
       for (const a of answer) {
-        if (typeof a === 'string' && a in counts) counts[a]++;
+        if (typeof a === 'string' && a in counts) counts[a]!++;
       }
     } else if (typeof answer === 'string' && answer in counts) {
-      counts[answer]++;
+      counts[answer]!++;
     }
   }
 
@@ -55,7 +55,7 @@ function aggregateRatingScale(
   for (const r of responses) {
     const val = (r.answers as Record<string, unknown>)[q.id];
     if (typeof val === 'number' && val >= scaleMin && val <= scaleMax) {
-      distribution[val]++;
+      distribution[val]!++;
       sum += val;
       count++;
     }
@@ -104,8 +104,8 @@ function aggregateRanking(q: SurveyQuestion, responses: SurveyResponse[]) {
       for (let i = 0; i < ranking.length; i++) {
         const item = ranking[i] as string;
         if (item in rankSums) {
-          rankSums[item] += i + 1;
-          rankCounts[item]++;
+          rankSums[item]! += i + 1;
+          rankCounts[item]!++;
         }
       }
     }

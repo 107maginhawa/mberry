@@ -32,7 +32,7 @@ interface MutationFeedbackOptions<TData, TError, TVariables, TContext>
  */
 export function useMutationFeedback<
   TData = unknown,
-  TError extends Error = Error,
+  TError = Error,
   TVariables = void,
   TContext = unknown,
 >({
@@ -44,19 +44,20 @@ export function useMutationFeedback<
 }: MutationFeedbackOptions<TData, TError, TVariables, TContext>) {
   return useMutation<TData, TError, TVariables, TContext>({
     ...options,
-    onSuccess: (data, variables, context) => {
+    onSuccess: (...args) => {
       if (successMessage) {
-        const msg = typeof successMessage === 'function' ? successMessage(data) : successMessage
+        const msg = typeof successMessage === 'function' ? successMessage(args[0]) : successMessage
         toast.success(msg)
       }
-      onSuccess?.(data, variables, context)
+      onSuccess?.(...args)
     },
-    onError: (error, variables, context) => {
+    onError: (...args) => {
+      const error = args[0]
       const msg = errorMessage
         ? typeof errorMessage === 'function' ? errorMessage(error) : errorMessage
-        : error.message || 'Something went wrong'
+        : (error instanceof Error ? error.message : 'Something went wrong')
       toast.error(msg)
-      onError?.(error, variables, context)
+      onError?.(...args)
     },
   })
 }

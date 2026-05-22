@@ -8,16 +8,16 @@ export async function listSurveys(ctx: Context): Promise<Response> {
 
   const repo = new SurveyRepository(db);
 
-  const result = await repo.list(orgId, {
-    status: query.status,
-    limit: query.limit ? Number(query.limit) : 20,
-    offset: query.offset ? Number(query.offset) : 0,
-  });
+  const status = query['status'];
+  const limit = query['limit'] ? Number(query['limit']) : 20;
+  const offset = query['offset'] ? Number(query['offset']) : 0;
+
+  const result = await repo.list(orgId, { status, limit, offset });
 
   return ctx.json({
     data: result.data,
     total: result.total,
-    limit: query.limit ? Number(query.limit) : 20,
-    offset: query.offset ? Number(query.offset) : 0,
+    limit,
+    offset,
   });
 }

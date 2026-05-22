@@ -76,10 +76,10 @@ export async function exportDashboardReport(ctx: Context): Promise<Response> {
     return ctx.json({ error: 'Invalid JSON body' }, 400);
   }
 
-  const reportType = body.reportType as ReportType;
-  const outputFormat = (body.outputFormat as OutputFormat) ?? 'pdf';
-  const scope = typeof body.scope === 'string' ? body.scope : 'all_chapters';
-  const columns = Array.isArray(body.columns) ? (body.columns as string[]) : [];
+  const reportType = body['reportType'] as ReportType;
+  const outputFormat = (body['outputFormat'] as OutputFormat) ?? 'pdf';
+  const scope = typeof body['scope'] === 'string' ? body['scope'] : 'all_chapters';
+  const columns = Array.isArray(body['columns']) ? (body['columns'] as string[]) : [];
 
   if (!VALID_REPORT_TYPES.includes(reportType)) {
     return ctx.json(
@@ -107,12 +107,12 @@ export async function exportDashboardReport(ctx: Context): Promise<Response> {
   }
 
   // ── Parse date range ─────────────────────────────────────────────────────
-  const dateRangeStart = body.dateRangeStart
-    ? new Date(body.dateRangeStart as string)
+  const dateRangeStart = body['dateRangeStart']
+    ? new Date(body['dateRangeStart'] as string)
     : new Date(new Date().getFullYear(), 0, 1); // default: start of current year
 
-  const dateRangeEnd = body.dateRangeEnd
-    ? new Date(body.dateRangeEnd as string)
+  const dateRangeEnd = body['dateRangeEnd']
+    ? new Date(body['dateRangeEnd'] as string)
     : new Date();
 
   if (isNaN(dateRangeStart.getTime()) || isNaN(dateRangeEnd.getTime())) {

@@ -37,6 +37,11 @@
     "node": ">=18.0.0",
     "bun": ">=1.2.21"
   },
+  "overrides": {
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "csstype": "3.2.3"
+  },
   "devDependencies": {
     "@esbuild/darwin-arm64": "^0.25.0",
     "@esbuild/linux-x64": "^0.25.0",
