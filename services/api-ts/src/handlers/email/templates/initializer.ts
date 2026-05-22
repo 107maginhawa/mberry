@@ -225,7 +225,7 @@ export async function initializeEmailTemplates(
       // Create template definition
       const templateDef: NewEmailTemplate = {
         name: metadata.name,
-        organizationId: organizationId ?? '',
+        organizationId: organizationId || '00000000-0000-0000-0000-000000000000',
         description: metadata.description,
         subject: metadata.subject,
         bodyHtml: html,

@@ -620,7 +620,9 @@
       "contract": [
         "specs/api/tests/contract/nomination-eligibility.hurl"
       ],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/election-nominations.spec.ts"
+      ]
     },
     "annotations": "Backend solid (10 unit tests). E2E has test.fixme stubs for ineligible/eligible nomination. Contract: auth-only stub."
   },
@@ -738,7 +740,9 @@
       "contract": [
         "specs/api/tests/contract/elections-flow.hurl"
       ],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/election-integrity.spec.ts"
+      ]
     },
     "annotations": "Wave 4 discovery. ConflictError on duplicate vote."
   },
@@ -768,7 +772,9 @@
         "services/api-ts/src/handlers/elections/certifyElection.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/election-integrity.spec.ts"
+      ]
     },
     "annotations": "Wave 4 discovery. Certification ends outgoing officer terms, creates new terms, generates transition checklists."
   },
@@ -782,7 +788,9 @@
         "services/api-ts/src/handlers/person/createMyCreditEntry.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/member/credit-validation.spec.ts"
+      ]
     },
     "annotations": "Wave 4 discovery. Validates activityName non-empty and creditAmount > 0."
   },
@@ -796,7 +804,9 @@
         "services/api-ts/src/handlers/association:member/utils/credit-cycle.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/member/credit-validation.spec.ts"
+      ]
     },
     "annotations": "Wave 4 discovery. Cycle computed from registrationDate + activityDate + cyclePeriodYears."
   },
@@ -838,7 +848,9 @@
         "services/api-ts/src/utils/org-auth.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/member/grace-period-access.spec.ts"
+      ]
     },
     "annotations": "Wave 4 discovery. requireActiveStatus() allows both 'active' and 'grace'. 6 test cases: active passes, grace passes, suspended/lapsed/expired/missing all fail with 403."
   },
@@ -852,7 +864,9 @@
         "services/api-ts/src/handlers/elections/createElection.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/memberry/tests/e2e/officer/election-integrity.spec.ts"
+      ]
     },
     "annotations": "Wave 4 discovery. CHECK constraints enforce: nominations close > open, voting close > open, voting open >= nominations close."
   },

@@ -126,6 +126,11 @@ CREATE TABLE IF NOT EXISTS "announcement_stats" (
 	"email_opened" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='announcement_stats' AND column_name='organization_id')
+  THEN ALTER TABLE "announcement_stats" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "announcement" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -161,6 +166,11 @@ CREATE TABLE IF NOT EXISTS "dues_category_override" (
 	CONSTRAINT "dues_cat_override_unique" UNIQUE("dues_config_id","category_id")
 );
 --> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dues_category_override' AND column_name='organization_id')
+  THEN ALTER TABLE "dues_category_override" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "dues_org_config" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -192,6 +202,11 @@ CREATE TABLE IF NOT EXISTS "dues_fund_allocation" (
 	"is_reversal" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dues_fund_allocation' AND column_name='organization_id')
+  THEN ALTER TABLE "dues_fund_allocation" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "dues_fund" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -265,6 +280,11 @@ CREATE TABLE IF NOT EXISTS "dues_reminder_schedule" (
 	"is_custom" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dues_reminder_schedule' AND column_name='organization_id')
+  THEN ALTER TABLE "dues_reminder_schedule" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "election_nominee" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -280,6 +300,11 @@ CREATE TABLE IF NOT EXISTS "election_nominee" (
 	"status" "nominee_status" DEFAULT 'nominated' NOT NULL
 );
 --> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='election_nominee' AND column_name='organization_id')
+  THEN ALTER TABLE "election_nominee" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "election_vote" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -294,6 +319,11 @@ CREATE TABLE IF NOT EXISTS "election_vote" (
 	"voter_id" uuid NOT NULL
 );
 --> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='election_vote' AND column_name='organization_id')
+  THEN ALTER TABLE "election_vote" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "election" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -329,6 +359,11 @@ CREATE TABLE IF NOT EXISTS "notification_preference" (
 	"email_enabled" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notification_preference' AND column_name='organization_id')
+  THEN ALTER TABLE "notification_preference" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "person_privacy_setting" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -344,100 +379,492 @@ CREATE TABLE IF NOT EXISTS "person_privacy_setting" (
 	"address_visible" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "affiliation_transfer" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "chapter_affiliation" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "royalty_split" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "directory_profile" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "membership_application" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "membership_tier" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "membership" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "check_in" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "event_registration" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "event" RENAME COLUMN "tenant_id" TO "event_type";--> statement-breakpoint
-ALTER TABLE "course_enrollment" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "quiz_attempt" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "training_enrollment" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "message_template" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "message" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "person_subscription" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "subscription_topic" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "document_tag" RENAME COLUMN "tenant_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "document_version" RENAME COLUMN "file_id" TO "organization_id";--> statement-breakpoint
-ALTER TABLE "document_version" RENAME COLUMN "mime_type" TO "storage_key";--> statement-breakpoint
-ALTER TABLE "document" RENAME COLUMN "tenant_id" TO "file_name";--> statement-breakpoint
-ALTER TABLE "document" RENAME COLUMN "description" TO "size";--> statement-breakpoint
-DROP INDEX "affiliation_transfer_tenant_status_idx";--> statement-breakpoint
-DROP INDEX "chapter_affiliation_tenant_person_idx";--> statement-breakpoint
-DROP INDEX "chapter_affiliation_tenant_chapter_idx";--> statement-breakpoint
-DROP INDEX "royalty_split_tenant_chapter_idx";--> statement-breakpoint
-DROP INDEX "royalty_split_tenant_membership_idx";--> statement-breakpoint
-DROP INDEX "idx_credit_tenant";--> statement-breakpoint
-DROP INDEX "directory_profile_tenant_person_idx";--> statement-breakpoint
-DROP INDEX "directory_profile_tenant_visibility_idx";--> statement-breakpoint
-DROP INDEX "aging_bucket_tenant_org_idx";--> statement-breakpoint
-DROP INDEX "dues_config_tenant_org_idx";--> statement-breakpoint
-DROP INDEX "dues_invoice_tenant_org_status_idx";--> statement-breakpoint
-DROP INDEX "dues_invoice_tenant_membership_idx";--> statement-breakpoint
-DROP INDEX "idx_officer_term_tenant";--> statement-breakpoint
-DROP INDEX "idx_position_tenant";--> statement-breakpoint
-DROP INDEX "membership_app_tenant_org_status_idx";--> statement-breakpoint
-DROP INDEX "membership_category_tenant_idx";--> statement-breakpoint
-DROP INDEX "membership_tier_tenant_idx";--> statement-breakpoint
-DROP INDEX "membership_tier_tenant_code_idx";--> statement-breakpoint
-DROP INDEX "membership_tenant_org_idx";--> statement-breakpoint
-DROP INDEX "membership_tenant_person_idx";--> statement-breakpoint
-DROP INDEX "membership_tenant_status_idx";--> statement-breakpoint
-DROP INDEX "idx_event_tenant";--> statement-breakpoint
-DROP INDEX "idx_course_tenant";--> statement-breakpoint
-DROP INDEX "idx_training_tenant";--> statement-breakpoint
-DROP INDEX "idx_msg_template_tenant";--> statement-breakpoint
-DROP INDEX "idx_message_tenant";--> statement-breakpoint
-DROP INDEX "idx_sub_topic_tenant";--> statement-breakpoint
-DROP INDEX "idx_doctag_tenant";--> statement-breakpoint
-DROP INDEX "idx_doc_tenant";--> statement-breakpoint
-ALTER TABLE "membership_category" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "event" ADD COLUMN "visibility" "event_visibility" DEFAULT 'internal' NOT NULL;--> statement-breakpoint
-ALTER TABLE "waitlist_entry" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "audit_log_entry" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "invoice_line_item" ADD COLUMN "organization_id" uuid;--> statement-breakpoint
-ALTER TABLE "invoice" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "merchant_account" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "booking_event" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "booking" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "schedule_exception" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "time_slot" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "chat_message" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "chat_room" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "document_access_log" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "document" ADD COLUMN "mime_type" varchar(100) NOT NULL;--> statement-breakpoint
-ALTER TABLE "document" ADD COLUMN "storage_key" varchar(500) NOT NULL;--> statement-breakpoint
-ALTER TABLE "document" ADD COLUMN "owner_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "document" ADD COLUMN "owner_type" varchar(100) NOT NULL;--> statement-breakpoint
-ALTER TABLE "document" ADD COLUMN "access_level" varchar(50) DEFAULT 'orgOnly' NOT NULL;--> statement-breakpoint
-ALTER TABLE "email_queue" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "email_template" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "notification" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "person" ADD COLUMN "deletion_requested_at" timestamp;--> statement-breakpoint
-ALTER TABLE "person" ADD COLUMN "deletion_scheduled_at" timestamp;--> statement-breakpoint
-ALTER TABLE "person" ADD COLUMN "deletion_completed_at" timestamp;--> statement-breakpoint
-ALTER TABLE "organization" ADD COLUMN "slug" varchar(100);--> statement-breakpoint
-ALTER TABLE "review" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "stored_file" ADD COLUMN "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "certificate" ADD CONSTRAINT "certificate_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "announcement_stats" ADD CONSTRAINT "announcement_stats_announcement_id_announcement_id_fk" FOREIGN KEY ("announcement_id") REFERENCES "public"."announcement"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "announcement" ADD CONSTRAINT "announcement_author_id_person_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "dues_category_override" ADD CONSTRAINT "dues_category_override_dues_config_id_dues_org_config_id_fk" FOREIGN KEY ("dues_config_id") REFERENCES "public"."dues_org_config"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "dues_fund_allocation" ADD CONSTRAINT "dues_fund_allocation_payment_id_dues_payment_id_fk" FOREIGN KEY ("payment_id") REFERENCES "public"."dues_payment"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "dues_fund_allocation" ADD CONSTRAINT "dues_fund_allocation_fund_id_dues_fund_id_fk" FOREIGN KEY ("fund_id") REFERENCES "public"."dues_fund"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "dues_payment" ADD CONSTRAINT "dues_payment_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "dues_payment" ADD CONSTRAINT "dues_payment_recorded_by_person_id_fk" FOREIGN KEY ("recorded_by") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "dues_reminder_schedule" ADD CONSTRAINT "dues_reminder_schedule_dues_config_id_dues_org_config_id_fk" FOREIGN KEY ("dues_config_id") REFERENCES "public"."dues_org_config"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "election_nominee" ADD CONSTRAINT "election_nominee_election_id_election_id_fk" FOREIGN KEY ("election_id") REFERENCES "public"."election"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "election_nominee" ADD CONSTRAINT "election_nominee_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "election_nominee" ADD CONSTRAINT "election_nominee_nominated_by_person_id_fk" FOREIGN KEY ("nominated_by") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_election_id_election_id_fk" FOREIGN KEY ("election_id") REFERENCES "public"."election"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_nominee_id_election_nominee_id_fk" FOREIGN KEY ("nominee_id") REFERENCES "public"."election_nominee"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_voter_id_person_id_fk" FOREIGN KEY ("voter_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='person_privacy_setting' AND column_name='org_id')
+  THEN ALTER TABLE "person_privacy_setting" ADD COLUMN "org_id" uuid NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='affiliation_transfer' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='affiliation_transfer' AND column_name='organization_id')
+  THEN ALTER TABLE "affiliation_transfer" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='affiliation_transfer' AND column_name='organization_id')
+  THEN ALTER TABLE "affiliation_transfer" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chapter_affiliation' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chapter_affiliation' AND column_name='organization_id')
+  THEN ALTER TABLE "chapter_affiliation" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chapter_affiliation' AND column_name='organization_id')
+  THEN ALTER TABLE "chapter_affiliation" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='royalty_split' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='royalty_split' AND column_name='organization_id')
+  THEN ALTER TABLE "royalty_split" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='royalty_split' AND column_name='organization_id')
+  THEN ALTER TABLE "royalty_split" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='directory_profile' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='directory_profile' AND column_name='organization_id')
+  THEN ALTER TABLE "directory_profile" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='directory_profile' AND column_name='organization_id')
+  THEN ALTER TABLE "directory_profile" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership_application' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership_application' AND column_name='organization_id')
+  THEN ALTER TABLE "membership_application" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership_application' AND column_name='organization_id')
+  THEN ALTER TABLE "membership_application" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership_tier' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership_tier' AND column_name='organization_id')
+  THEN ALTER TABLE "membership_tier" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership_tier' AND column_name='organization_id')
+  THEN ALTER TABLE "membership_tier" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership' AND column_name='organization_id')
+  THEN ALTER TABLE "membership" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership' AND column_name='organization_id')
+  THEN ALTER TABLE "membership" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='check_in' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='check_in' AND column_name='organization_id')
+  THEN ALTER TABLE "check_in" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='check_in' AND column_name='organization_id')
+  THEN ALTER TABLE "check_in" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='event_registration' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='event_registration' AND column_name='organization_id')
+  THEN ALTER TABLE "event_registration" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='event_registration' AND column_name='organization_id')
+  THEN ALTER TABLE "event_registration" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='event' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='event' AND column_name='event_type')
+  THEN ALTER TABLE "event" RENAME COLUMN "tenant_id" TO "event_type";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='course_enrollment' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='course_enrollment' AND column_name='organization_id')
+  THEN ALTER TABLE "course_enrollment" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='course_enrollment' AND column_name='organization_id')
+  THEN ALTER TABLE "course_enrollment" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='quiz_attempt' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='quiz_attempt' AND column_name='organization_id')
+  THEN ALTER TABLE "quiz_attempt" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='quiz_attempt' AND column_name='organization_id')
+  THEN ALTER TABLE "quiz_attempt" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='training_enrollment' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='training_enrollment' AND column_name='organization_id')
+  THEN ALTER TABLE "training_enrollment" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='training_enrollment' AND column_name='organization_id')
+  THEN ALTER TABLE "training_enrollment" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='message_template' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='message_template' AND column_name='organization_id')
+  THEN ALTER TABLE "message_template" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='message_template' AND column_name='organization_id')
+  THEN ALTER TABLE "message_template" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='message' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='message' AND column_name='organization_id')
+  THEN ALTER TABLE "message" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='message' AND column_name='organization_id')
+  THEN ALTER TABLE "message" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='person_subscription' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='person_subscription' AND column_name='organization_id')
+  THEN ALTER TABLE "person_subscription" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='person_subscription' AND column_name='organization_id')
+  THEN ALTER TABLE "person_subscription" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscription_topic' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscription_topic' AND column_name='organization_id')
+  THEN ALTER TABLE "subscription_topic" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscription_topic' AND column_name='organization_id')
+  THEN ALTER TABLE "subscription_topic" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document_tag' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document_tag' AND column_name='organization_id')
+  THEN ALTER TABLE "document_tag" RENAME COLUMN "tenant_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document_tag' AND column_name='organization_id')
+  THEN ALTER TABLE "document_tag" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document_version' AND column_name='file_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document_version' AND column_name='organization_id')
+  THEN ALTER TABLE "document_version" RENAME COLUMN "file_id" TO "organization_id";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document_version' AND column_name='mime_type')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document_version' AND column_name='storage_key')
+  THEN ALTER TABLE "document_version" RENAME COLUMN "mime_type" TO "storage_key";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='tenant_id')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='file_name')
+  THEN ALTER TABLE "document" RENAME COLUMN "tenant_id" TO "file_name";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='organization_id')
+  THEN ALTER TABLE "document" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='description')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='size')
+  THEN ALTER TABLE "document" RENAME COLUMN "description" TO "size";
+  END IF;
+END $$;--> statement-breakpoint
+DROP INDEX IF EXISTS "affiliation_transfer_tenant_status_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "chapter_affiliation_tenant_person_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "chapter_affiliation_tenant_chapter_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "royalty_split_tenant_chapter_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "royalty_split_tenant_membership_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_credit_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "directory_profile_tenant_person_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "directory_profile_tenant_visibility_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "aging_bucket_tenant_org_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "dues_config_tenant_org_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "dues_invoice_tenant_org_status_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "dues_invoice_tenant_membership_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_officer_term_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_position_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "membership_app_tenant_org_status_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "membership_category_tenant_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "membership_tier_tenant_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "membership_tier_tenant_code_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "membership_tenant_org_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "membership_tenant_person_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "membership_tenant_status_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_event_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_course_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_training_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_msg_template_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_message_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_sub_topic_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_doctag_tenant";--> statement-breakpoint
+DROP INDEX IF EXISTS "idx_doc_tenant";--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='membership_category' AND column_name='organization_id')
+  THEN ALTER TABLE "membership_category" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='event' AND column_name='visibility')
+  THEN ALTER TABLE "event" ADD COLUMN "visibility" "event_visibility" DEFAULT 'internal' NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='waitlist_entry' AND column_name='organization_id')
+  THEN ALTER TABLE "waitlist_entry" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='audit_log_entry' AND column_name='organization_id')
+  THEN ALTER TABLE "audit_log_entry" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='invoice_line_item' AND column_name='organization_id')
+  THEN ALTER TABLE "invoice_line_item" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='invoice' AND column_name='organization_id')
+  THEN ALTER TABLE "invoice" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='merchant_account' AND column_name='organization_id')
+  THEN ALTER TABLE "merchant_account" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='booking_event' AND column_name='organization_id')
+  THEN ALTER TABLE "booking_event" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='booking' AND column_name='organization_id')
+  THEN ALTER TABLE "booking" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_exception' AND column_name='organization_id')
+  THEN ALTER TABLE "schedule_exception" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='time_slot' AND column_name='organization_id')
+  THEN ALTER TABLE "time_slot" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chat_message' AND column_name='organization_id')
+  THEN ALTER TABLE "chat_message" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chat_room' AND column_name='organization_id')
+  THEN ALTER TABLE "chat_room" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document_access_log' AND column_name='organization_id')
+  THEN ALTER TABLE "document_access_log" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='mime_type')
+  THEN ALTER TABLE "document" ADD COLUMN "mime_type" varchar(100) NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='storage_key')
+  THEN ALTER TABLE "document" ADD COLUMN "storage_key" varchar(500) NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='owner_id')
+  THEN ALTER TABLE "document" ADD COLUMN "owner_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='owner_type')
+  THEN ALTER TABLE "document" ADD COLUMN "owner_type" varchar(100) NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='access_level')
+  THEN ALTER TABLE "document" ADD COLUMN "access_level" varchar(50) DEFAULT 'orgOnly' NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='email_queue' AND column_name='organization_id')
+  THEN ALTER TABLE "email_queue" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='email_template' AND column_name='organization_id')
+  THEN ALTER TABLE "email_template" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notification' AND column_name='organization_id')
+  THEN ALTER TABLE "notification" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='person' AND column_name='deletion_requested_at')
+  THEN ALTER TABLE "person" ADD COLUMN "deletion_requested_at" timestamp;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='person' AND column_name='deletion_scheduled_at')
+  THEN ALTER TABLE "person" ADD COLUMN "deletion_scheduled_at" timestamp;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='person' AND column_name='deletion_completed_at')
+  THEN ALTER TABLE "person" ADD COLUMN "deletion_completed_at" timestamp;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='organization' AND column_name='slug')
+  THEN ALTER TABLE "organization" ADD COLUMN "slug" varchar(100);
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='review' AND column_name='organization_id')
+  THEN ALTER TABLE "review" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stored_file' AND column_name='organization_id')
+  THEN ALTER TABLE "stored_file" ADD COLUMN "organization_id" uuid NOT NULL;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='certificate_person_id_person_id_fk')
+  THEN ALTER TABLE "certificate" ADD CONSTRAINT "certificate_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE cascade ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='announcement_stats_announcement_id_announcement_id_fk')
+  THEN ALTER TABLE "announcement_stats" ADD CONSTRAINT "announcement_stats_announcement_id_announcement_id_fk" FOREIGN KEY ("announcement_id") REFERENCES "public"."announcement"("id") ON DELETE cascade ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='announcement_author_id_person_id_fk')
+  THEN ALTER TABLE "announcement" ADD CONSTRAINT "announcement_author_id_person_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='dues_category_override_dues_config_id_dues_org_config_id_fk')
+  THEN ALTER TABLE "dues_category_override" ADD CONSTRAINT "dues_category_override_dues_config_id_dues_org_config_id_fk" FOREIGN KEY ("dues_config_id") REFERENCES "public"."dues_org_config"("id") ON DELETE cascade ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='dues_fund_allocation_payment_id_dues_payment_id_fk')
+  THEN ALTER TABLE "dues_fund_allocation" ADD CONSTRAINT "dues_fund_allocation_payment_id_dues_payment_id_fk" FOREIGN KEY ("payment_id") REFERENCES "public"."dues_payment"("id") ON DELETE cascade ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='dues_fund_allocation_fund_id_dues_fund_id_fk')
+  THEN ALTER TABLE "dues_fund_allocation" ADD CONSTRAINT "dues_fund_allocation_fund_id_dues_fund_id_fk" FOREIGN KEY ("fund_id") REFERENCES "public"."dues_fund"("id") ON DELETE no action ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='dues_payment_person_id_person_id_fk')
+  THEN ALTER TABLE "dues_payment" ADD CONSTRAINT "dues_payment_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE cascade ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='dues_payment_recorded_by_person_id_fk')
+  THEN ALTER TABLE "dues_payment" ADD CONSTRAINT "dues_payment_recorded_by_person_id_fk" FOREIGN KEY ("recorded_by") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='dues_reminder_schedule_dues_config_id_dues_org_config_id_fk')
+  THEN ALTER TABLE "dues_reminder_schedule" ADD CONSTRAINT "dues_reminder_schedule_dues_config_id_dues_org_config_id_fk" FOREIGN KEY ("dues_config_id") REFERENCES "public"."dues_org_config"("id") ON DELETE cascade ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='election_nominee_election_id_election_id_fk')
+  THEN ALTER TABLE "election_nominee" ADD CONSTRAINT "election_nominee_election_id_election_id_fk" FOREIGN KEY ("election_id") REFERENCES "public"."election"("id") ON DELETE cascade ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='election_nominee_person_id_person_id_fk')
+  THEN ALTER TABLE "election_nominee" ADD CONSTRAINT "election_nominee_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='election_nominee_nominated_by_person_id_fk')
+  THEN ALTER TABLE "election_nominee" ADD CONSTRAINT "election_nominee_nominated_by_person_id_fk" FOREIGN KEY ("nominated_by") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='election_vote_election_id_election_id_fk')
+  THEN ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_election_id_election_id_fk" FOREIGN KEY ("election_id") REFERENCES "public"."election"("id") ON DELETE cascade ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='election_vote_nominee_id_election_nominee_id_fk')
+  THEN ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_nominee_id_election_nominee_id_fk" FOREIGN KEY ("nominee_id") REFERENCES "public"."election_nominee"("id") ON DELETE no action ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='election_vote_voter_id_person_id_fk')
+  THEN ALTER TABLE "election_vote" ADD CONSTRAINT "election_vote_voter_id_person_id_fk" FOREIGN KEY ("voter_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dues_config' AND column_name='organization_id')
+  THEN ALTER TABLE "dues_config" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dues_invoice' AND column_name='organization_id')
+  THEN ALTER TABLE "dues_invoice" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='aging_bucket' AND column_name='organization_id')
+  THEN ALTER TABLE "aging_bucket" ADD COLUMN "organization_id" uuid;
+  END IF;
+END $$;--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_cred_template_org" ON "credential_template" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_cred_template_type" ON "credential_template" USING btree ("type");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_cred_template_status" ON "credential_template" USING btree ("status");--> statement-breakpoint
@@ -539,16 +966,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS "idx_org_slug" ON "organization" USING btree (
 CREATE INDEX IF NOT EXISTS "reviews_org_idx" ON "review" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "stored_files_org_idx" ON "stored_file" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "stored_files_owner_idx" ON "stored_file" USING btree ("owner");--> statement-breakpoint
-ALTER TABLE "credit_entry" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "aging_bucket" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "dues_config" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "dues_invoice" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "officer_term" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "position" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "membership_application" DROP COLUMN "org_id";--> statement-breakpoint
-ALTER TABLE "membership_category" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "membership_category" DROP COLUMN "org_id";--> statement-breakpoint
-ALTER TABLE "membership" DROP COLUMN "org_id";--> statement-breakpoint
-ALTER TABLE "waitlist_entry" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "course" DROP COLUMN "tenant_id";--> statement-breakpoint
-ALTER TABLE "training" DROP COLUMN "tenant_id";
+ALTER TABLE "credit_entry" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "aging_bucket" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "dues_config" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "dues_invoice" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "officer_term" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "position" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "membership_application" DROP COLUMN IF EXISTS "org_id";--> statement-breakpoint
+ALTER TABLE "membership_category" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "membership_category" DROP COLUMN IF EXISTS "org_id";--> statement-breakpoint
+ALTER TABLE "membership" DROP COLUMN IF EXISTS "org_id";--> statement-breakpoint
+ALTER TABLE "waitlist_entry" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "course" DROP COLUMN IF EXISTS "tenant_id";--> statement-breakpoint
+ALTER TABLE "training" DROP COLUMN IF EXISTS "tenant_id";

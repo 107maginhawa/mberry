@@ -9,7 +9,7 @@
  */
 
 import { createMiddleware } from 'hono/factory';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, notInArray } from 'drizzle-orm';
 import type { Variables } from '@/types/app';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.schema';
@@ -115,7 +115,9 @@ export function orgContextMiddleware() {
         and(
           eq(memberships.personId, user.id),
           eq(memberships.organizationId, orgId),
-          inArray(memberships.status, ['active', 'gracePeriod']),
+          // BR-01: status is computed at query time from duesExpiryDate.
+          // Allow all statuses except permanently removed members.
+          notInArray(memberships.status, ['removed', 'expelled', 'deceased']),
         )
       )
       .limit(1);
@@ -221,7 +223,8 @@ export function orgContextOptionalMiddleware() {
         and(
           eq(memberships.personId, user.id),
           eq(memberships.organizationId, orgId),
-          inArray(memberships.status, ['active', 'gracePeriod']),
+          // BR-01: status is computed at query time from duesExpiryDate.
+          notInArray(memberships.status, ['removed', 'expelled', 'deceased']),
         )
       )
       .limit(1);

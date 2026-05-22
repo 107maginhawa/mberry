@@ -58,6 +58,28 @@ const API_URL = process.env['API_URL'] || 'http://localhost:7213';
 const PASSWORD = 'TestPass123!';
 
 // ═══════════════════════════════════════════════════════════════
+// Relative date helpers — all seed dates computed from NOW
+// so data never ages out
+// ═══════════════════════════════════════════════════════════════
+
+const NOW = new Date();
+const daysAgo = (d: number) => new Date(NOW.getTime() - d * 86400000);
+const daysFromNow = (d: number) => new Date(NOW.getTime() + d * 86400000);
+const dateStr = (d: Date) => d.toISOString().split('T')[0]!;
+
+/** Active member: dues expire 7 months from now */
+const ACTIVE_EXPIRY = dateStr(daysFromNow(210));
+/** Grace member: dues expired N days ago (within 30-day grace) */
+const graceExpiry = (daysBack: number) => dateStr(daysAgo(daysBack));
+/** Lapsed member: dues expired N days ago (past 30-day grace) */
+const lapsedExpiry = (daysBack: number) => dateStr(daysAgo(daysBack));
+/** Officer term: started 10 months ago, ends 2 months from now */
+const TERM_START = daysAgo(300);
+const TERM_END = daysFromNow(65);
+/** Membership start: ~1 year ago */
+const MEMBERSHIP_START = dateStr(daysAgo(365));
+
+// ═══════════════════════════════════════════════════════════════
 // SeedClient — fetch wrapper with auth cookie management
 // ═══════════════════════════════════════════════════════════════
 
@@ -205,10 +227,12 @@ const OFFICERS = [
   { email: 'membership@memberry.ph', firstName: 'Sofia', lastName: 'Garcia', position: 'Membership Chair', spec: 'General Dentistry', license: '0056789' },
 ];
 
-const MEMBERS: { email: string; firstName: string; lastName: string; spec: string; license: string; status: 'active' | 'grace' | 'lapsed' }[] = [
+type MemberStatus = 'active' | 'grace' | 'lapsed' | 'suspended' | 'removed' | 'pendingPayment';
+
+const MEMBERS: { email: string; firstName: string; lastName: string; spec: string; license: string; status: MemberStatus }[] = [
   // Legacy test user (referenced by 6+ test files — DO NOT REMOVE)
   { email: 'member@memberry.ph', firstName: 'Miguel', lastName: 'Bautista', spec: 'General Dentistry', license: '0099999', status: 'active' },
-  // 20 active
+  // 15 active (dues paid, future expiry)
   { email: 'member01@memberry.ph', firstName: 'Isabella', lastName: 'Dela Cruz', spec: 'General Dentistry', license: '0100001', status: 'active' },
   { email: 'member02@memberry.ph', firstName: 'Luis', lastName: 'Ramos', spec: 'Oral Surgery', license: '0100002', status: 'active' },
   { email: 'member03@memberry.ph', firstName: 'Patricia', lastName: 'Navarro', spec: 'Periodontics', license: '0100003', status: 'active' },
@@ -224,23 +248,26 @@ const MEMBERS: { email: string; firstName: string; lastName: string; spec: strin
   { email: 'member13@memberry.ph', firstName: 'Gabriela', lastName: 'Tan', spec: 'Periodontics', license: '0100013', status: 'active' },
   { email: 'member14@memberry.ph', firstName: 'Pedro', lastName: 'Sy', spec: 'Oral Surgery', license: '0100014', status: 'active' },
   { email: 'member15@memberry.ph', firstName: 'Andrea', lastName: 'Ong', spec: 'General Dentistry', license: '0100015', status: 'active' },
-  { email: 'member16@memberry.ph', firstName: 'Jose', lastName: 'Co', spec: 'Endodontics', license: '0100016', status: 'active' },
-  { email: 'member17@memberry.ph', firstName: 'Valeria', lastName: 'Chua', spec: 'General Dentistry', license: '0100017', status: 'active' },
-  { email: 'member18@memberry.ph', firstName: 'Ricardo', lastName: 'Go', spec: 'Pediatric Dentistry', license: '0100018', status: 'active' },
-  { email: 'member19@memberry.ph', firstName: 'Catalina', lastName: 'Yap', spec: 'General Dentistry', license: '0100019', status: 'active' },
-  { email: 'member20@memberry.ph', firstName: 'Eduardo', lastName: 'Ang', spec: 'Prosthodontics', license: '0100020', status: 'active' },
-  // 3 grace period
-  { email: 'member21@memberry.ph', firstName: 'Mariana', lastName: 'Castillo', spec: 'General Dentistry', license: '0100021', status: 'grace' },
-  { email: 'member22@memberry.ph', firstName: 'Sergio', lastName: 'Wu', spec: 'Oral Surgery', license: '0100022', status: 'grace' },
-  { email: 'member23@memberry.ph', firstName: 'Daniela', lastName: 'Lee', spec: 'Periodontics', license: '0100023', status: 'grace' },
-  // 2 lapsed
-  { email: 'member24@memberry.ph', firstName: 'Francisco', lastName: 'Gonzales', spec: 'General Dentistry', license: '0100024', status: 'lapsed' },
-  { email: 'member25@memberry.ph', firstName: 'Claudia', lastName: 'Tiu', spec: 'Orthodontics', license: '0100025', status: 'lapsed' },
+  // 3 grace period (expired 10-20 days ago, within 30-day grace)
+  { email: 'member16@memberry.ph', firstName: 'Jose', lastName: 'Co', spec: 'Endodontics', license: '0100016', status: 'grace' },
+  { email: 'member17@memberry.ph', firstName: 'Valeria', lastName: 'Chua', spec: 'General Dentistry', license: '0100017', status: 'grace' },
+  { email: 'member18@memberry.ph', firstName: 'Ricardo', lastName: 'Go', spec: 'Pediatric Dentistry', license: '0100018', status: 'grace' },
+  // 2 lapsed (expired 60-90 days ago, past grace)
+  { email: 'member19@memberry.ph', firstName: 'Catalina', lastName: 'Yap', spec: 'General Dentistry', license: '0100019', status: 'lapsed' },
+  { email: 'member20@memberry.ph', firstName: 'Eduardo', lastName: 'Ang', spec: 'Prosthodontics', license: '0100020', status: 'lapsed' },
+  // 2 suspended (officer action — non-payment escalation or conduct issue)
+  { email: 'member21@memberry.ph', firstName: 'Mariana', lastName: 'Castillo', spec: 'General Dentistry', license: '0100021', status: 'suspended' },
+  { email: 'member22@memberry.ph', firstName: 'Sergio', lastName: 'Wu', spec: 'Oral Surgery', license: '0100022', status: 'suspended' },
+  // 1 removed (irreversible — fraudulent credentials)
+  { email: 'member23@memberry.ph', firstName: 'Daniela', lastName: 'Lee', spec: 'Periodontics', license: '0100023', status: 'removed' },
+  // 2 pendingPayment (approved but awaiting first dues payment)
+  { email: 'member24@memberry.ph', firstName: 'Francisco', lastName: 'Gonzales', spec: 'General Dentistry', license: '0100024', status: 'pendingPayment' },
+  { email: 'member25@memberry.ph', firstName: 'Claudia', lastName: 'Tiu', spec: 'Orthodontics', license: '0100025', status: 'pendingPayment' },
 ];
 
 const APPLICANTS = [
-  { email: 'applicant01@memberry.ph', firstName: 'Beatriz', lastName: 'Lao', spec: 'General Dentistry', license: '0200001' },
-  { email: 'applicant02@memberry.ph', firstName: 'Manuel', lastName: 'Yu', spec: 'Prosthodontics', license: '0200002' },
+  { email: 'applicant01@memberry.ph', firstName: 'Beatriz', lastName: 'Lao', spec: 'General Dentistry', license: '0200001', rejected: false },
+  { email: 'applicant02@memberry.ph', firstName: 'Manuel', lastName: 'Yu', spec: 'Prosthodontics', license: '0200002', rejected: true },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -360,8 +387,8 @@ async function seedPresident(
     await db.insert(memberships).values({
       organizationId: orgId, personId: client.personId,
       tierId: regularTierId, memberNumber: 'PDA-2025-001',
-      startDate: '2025-01-01', duesExpiryDate: '2025-12-31',
-      gracePeriodDays: 30, status: 'active', joinedAt: new Date(),
+      startDate: MEMBERSHIP_START, duesExpiryDate: ACTIVE_EXPIRY,
+      gracePeriodDays: 30, status: 'active', joinedAt: daysAgo(365),
     } as any);
   }
 
@@ -384,7 +411,7 @@ async function seedPresident(
     await db.insert(officerTerms).values({
       positionId: presPos.id, personId: client.personId,
       organizationId: orgId, status: 'active',
-      startDate: new Date('2025-07-01'), endDate: new Date('2026-06-30'),
+      startDate: TERM_START, endDate: TERM_END,
     } as any);
   }
 
@@ -447,14 +474,12 @@ async function seedOfficer(
   const existingMbr = await db.select().from(memberships)
     .where(eq(memberships.personId, client.personId)).limit(1);
   if (existingMbr.length === 0) {
-    const oneYearLater = new Date();
-    oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
     await db.insert(memberships).values({
       organizationId: orgId, personId: client.personId,
       tierId: regularTierId, memberNumber: memberNum,
-      startDate: new Date().toISOString().split('T')[0],
-      duesExpiryDate: '2025-12-31',
-      gracePeriodDays: 30, status: 'active', joinedAt: new Date(),
+      startDate: MEMBERSHIP_START,
+      duesExpiryDate: ACTIVE_EXPIRY,
+      gracePeriodDays: 30, status: 'active', joinedAt: daysAgo(365),
     } as any);
   }
 
@@ -480,7 +505,7 @@ async function seedOfficer(
     await db.insert(officerTerms).values({
       positionId: pos.id, personId: client.personId,
       organizationId: orgId, status: 'active',
-      startDate: new Date('2025-07-01'), endDate: new Date('2026-06-30'),
+      startDate: TERM_START, endDate: TERM_END,
     } as any);
   }
 
@@ -530,10 +555,44 @@ async function seedMember(
   // Set member role
   await db.update(userTable).set({ role: 'association:member' } as any).where(eq(userTable.id, client.userId));
 
-  // Create membership via DB
-  const duesExpiry = member.status === 'active' ? '2025-12-31'
-    : member.status === 'grace' ? '2025-04-01'
-    : '2024-12-31';
+  // Create membership via DB — status-specific dates and fields
+  let duesExpiry: string;
+  let dbStatus: string = member.status;
+  let suspendedAt: Date | null = null;
+  let removedAt: Date | null = null;
+  let removalReason: string | null = null;
+
+  switch (member.status) {
+    case 'active':
+      duesExpiry = ACTIVE_EXPIRY; // +7 months
+      dbStatus = 'active';
+      break;
+    case 'grace':
+      duesExpiry = graceExpiry(15); // expired 15 days ago (within 30-day grace)
+      dbStatus = 'active'; // computeMembershipStatus derives gracePeriod from expiry
+      break;
+    case 'lapsed':
+      duesExpiry = lapsedExpiry(75); // expired 75 days ago (past 30-day grace)
+      dbStatus = 'active'; // computeMembershipStatus derives lapsed from expiry
+      break;
+    case 'suspended':
+      duesExpiry = ACTIVE_EXPIRY; // was active before suspension
+      dbStatus = 'active';
+      suspendedAt = daysAgo(14); // suspended 2 weeks ago
+      break;
+    case 'removed':
+      duesExpiry = ACTIVE_EXPIRY;
+      dbStatus = 'active';
+      removedAt = daysAgo(30); // removed 1 month ago
+      removalReason = 'Fraudulent credentials — license number verified as invalid by PRC';
+      break;
+    case 'pendingPayment':
+      duesExpiry = ACTIVE_EXPIRY;
+      dbStatus = 'pendingPayment';
+      break;
+    default:
+      duesExpiry = ACTIVE_EXPIRY;
+  }
 
   const existingMbr = await db.select().from(memberships)
     .where(eq(memberships.personId, client.personId)).limit(1);
@@ -541,11 +600,14 @@ async function seedMember(
     await db.insert(memberships).values({
       organizationId: orgId, personId: client.personId,
       tierId: regularTierId, memberNumber: memberNum,
-      startDate: '2025-01-01',
+      startDate: MEMBERSHIP_START,
       duesExpiryDate: duesExpiry,
       gracePeriodDays: 30,
-      status: member.status === 'grace' ? 'active' : member.status,
-      joinedAt: new Date(),
+      status: dbStatus,
+      joinedAt: daysAgo(365),
+      suspendedAt,
+      removedAt,
+      removalReason,
     } as any);
   }
 
@@ -573,15 +635,25 @@ async function seedApplicant(
     dateOfBirth: '1992-08-10', gender: applicant.firstName === 'Manuel' ? 'male' : 'female',
   });
 
-  // President submits application on behalf — do NOT approve, stays pending
-  await president.post('/association/member/applications', {
+  // President submits application on behalf
+  const app = await president.post('/association/member/applications', {
     organizationId: orgId,
     personId: client.personId,
     tierId: regularTierId,
     applicationDate: new Date().toISOString().split('T')[0],
   });
 
-  console.log(`  ✓ ${applicant.firstName} ${applicant.lastName} — pending applicant`);
+  // If rejected applicant, update via DB
+  if (applicant.rejected && app && !app.__conflict) {
+    const appId = app.id || app.data?.id;
+    if (appId) {
+      await db.update(membershipApplications)
+        .set({ status: 'denied', reviewedAt: new Date() } as any)
+        .where(eq(membershipApplications.id, appId));
+    }
+  }
+
+  console.log(`  ✓ ${applicant.firstName} ${applicant.lastName} — ${applicant.rejected ? 'rejected' : 'pending'} applicant`);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -705,10 +777,12 @@ async function seedCredits(db: ReturnType<typeof drizzle>, memberClients: SeedCl
     return;
   }
 
-  // Give credits to first 3 members
-  for (let i = 0; i < Math.min(3, memberClients.length); i++) {
+  // Give credits to first 10 members (varied amounts for realistic dashboard)
+  // Members 0-4: well above requirement (60+), 5-7: close to requirement, 8-9: shortfall
+  const creditCounts = [8, 6, 5, 5, 4, 3, 3, 2, 1, 1];
+  for (let i = 0; i < Math.min(creditCounts.length, memberClients.length); i++) {
     const client = memberClients[i]!;
-    const count = i === 0 ? 5 : i === 1 ? 3 : 2;
+    const count = creditCounts[i]!;
     for (let j = 0; j < count; j++) {
       const act = activities[j % activities.length]!;
       await client.post('/persons/me/credit-entries', {
@@ -717,12 +791,13 @@ async function seedCredits(db: ReturnType<typeof drizzle>, memberClients: SeedCl
         provider: act.provider || 'PDA Metro Manila',
         activityDate: act.date,
         creditAmount: act.credits,
-        registrationDate: '2025-01-01',
+        registrationDate: dateStr(daysAgo(365)),
         cyclePeriodYears: 3,
       });
     }
-    console.log(`    ✓ ${client.email}: ${count} credit entries`);
+    if (i < 5) console.log(`    ✓ ${client.email}: ${count} credit entries`);
   }
+  console.log(`    ✓ 10 members with credit entries (varied amounts)`);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -784,7 +859,7 @@ async function seedRelationalData(
       const methods = ['gcash', 'bankTransfer', 'cash', 'online', 'check'];
       await db.execute(sql`
         INSERT INTO dues_payment (organization_id, person_id, receipt_number, amount, currency, payment_method, status, paid_at)
-        VALUES (${orgId}, ${paymentMembers[i]!.personId}, ${`RCP-2025-${String(i + 1).padStart(3, '0')}`}, 300000, 'PHP', ${methods[i % methods.length]}::dues_payment_method, 'completed'::dues_payment_status, ${new Date('2025-01-15')})
+        VALUES (${orgId}, ${paymentMembers[i]!.personId}, ${`RCP-${NOW.getFullYear()}-${String(i + 1).padStart(3, '0')}`}, 300000, 'PHP', ${methods[i % methods.length]}::dues_payment_method, 'completed'::dues_payment_status, ${daysAgo(345 - i * 5)})
       `);
     }
     console.log(`    ✓ Dues payments: 10 records`);
@@ -889,8 +964,8 @@ async function seedIdorOfficer(db: ReturnType<typeof drizzle>, org2Id: string, t
     await db.insert(memberships).values({
       organizationId: org2Id, personId: client.personId,
       tierId, memberNumber: 'PDA-CEBU-001',
-      startDate: '2025-01-01', duesExpiryDate: '2025-12-31',
-      gracePeriodDays: 30, status: 'active', joinedAt: new Date(),
+      startDate: MEMBERSHIP_START, duesExpiryDate: ACTIVE_EXPIRY,
+      gracePeriodDays: 30, status: 'active', joinedAt: daysAgo(365),
     } as any);
   }
 
@@ -913,7 +988,7 @@ async function seedIdorOfficer(db: ReturnType<typeof drizzle>, org2Id: string, t
     await db.insert(officerTerms).values({
       positionId: pos.id, personId: client.personId,
       organizationId: org2Id, status: 'active',
-      startDate: new Date('2025-07-01'), endDate: new Date('2026-06-30'),
+      startDate: TERM_START, endDate: TERM_END,
     } as any);
   }
 
@@ -1517,7 +1592,7 @@ async function seedDuesInfrastructure(
           { fundName: 'Building Fund', percentage: 30, isLast: false },
           { fundName: 'Emergency Fund', percentage: 20, isLast: true },
         ],
-        effectiveDate: '2025-01-01',
+        effectiveDate: dateStr(daysAgo(365)),
         status: 'active',
       } as any);
     }
@@ -1578,22 +1653,22 @@ async function seedDuesInfrastructure(
     if (membershipRows.length > 0) {
       const invoiceStatuses: Array<{ status: string; sentAt: Date | null; paidAt: Date | null }> = [
         // 5 paid
-        { status: 'paid', sentAt: new Date('2025-01-10'), paidAt: new Date('2025-01-15') },
-        { status: 'paid', sentAt: new Date('2025-01-10'), paidAt: new Date('2025-01-20') },
-        { status: 'paid', sentAt: new Date('2025-01-10'), paidAt: new Date('2025-02-01') },
-        { status: 'paid', sentAt: new Date('2025-01-10'), paidAt: new Date('2025-02-10') },
-        { status: 'paid', sentAt: new Date('2025-01-10'), paidAt: new Date('2025-02-15') },
-        // 3 sent
-        { status: 'sent', sentAt: new Date('2025-04-01'), paidAt: null },
-        { status: 'sent', sentAt: new Date('2025-04-15'), paidAt: null },
-        { status: 'sent', sentAt: new Date('2025-05-01'), paidAt: null },
-        // 3 generated
+        { status: 'paid', sentAt: daysAgo(350), paidAt: daysAgo(345) },
+        { status: 'paid', sentAt: daysAgo(350), paidAt: daysAgo(340) },
+        { status: 'paid', sentAt: daysAgo(350), paidAt: daysAgo(330) },
+        { status: 'paid', sentAt: daysAgo(350), paidAt: daysAgo(325) },
+        { status: 'paid', sentAt: daysAgo(350), paidAt: daysAgo(320) },
+        // 3 sent (recent)
+        { status: 'sent', sentAt: daysAgo(30), paidAt: null },
+        { status: 'sent', sentAt: daysAgo(20), paidAt: null },
+        { status: 'sent', sentAt: daysAgo(10), paidAt: null },
+        // 3 generated (not yet sent)
         { status: 'generated', sentAt: null, paidAt: null },
         { status: 'generated', sentAt: null, paidAt: null },
         { status: 'generated', sentAt: null, paidAt: null },
         // 2 overdue
-        { status: 'overdue', sentAt: new Date('2025-01-10'), paidAt: null },
-        { status: 'overdue', sentAt: new Date('2025-02-01'), paidAt: null },
+        { status: 'overdue', sentAt: daysAgo(90), paidAt: null },
+        { status: 'overdue', sentAt: daysAgo(75), paidAt: null },
       ];
 
       const fundAllocs = [
@@ -1610,13 +1685,13 @@ async function seedDuesInfrastructure(
           membershipId: m.id,
           personId: m.personId,
           organizationId: orgId,
-          invoiceNumber: `INV-2025-${String(invoiceNum).padStart(3, '0')}`,
-          periodStart: '2025-01-01',
-          periodEnd: '2025-12-31',
+          invoiceNumber: `INV-${NOW.getFullYear()}-${String(invoiceNum).padStart(3, '0')}`,
+          periodStart: dateStr(daysAgo(365)),
+          periodEnd: ACTIVE_EXPIRY,
           totalAmount: 300000,
           fundAllocations: fundAllocs,
           status: inv.status,
-          generatedAt: new Date('2025-01-05'),
+          generatedAt: daysAgo(360),
           sentAt: inv.sentAt,
           paidAt: inv.paidAt,
         } as any);
@@ -2392,8 +2467,8 @@ async function seedProfileAndGovernanceGapFill(
       });
     }
 
-    // Grace period members (indices 20-22 in memberPersonIds, membership IDs ~20-22)
-    for (let i = 20; i < Math.min(23, allMembershipIds.length); i++) {
+    // Grace period members (indices 15-17 in memberPersonIds — Jose, Valeria, Ricardo)
+    for (let i = 15; i < Math.min(18, allMembershipIds.length); i++) {
       historyData.push({
         organizationId: orgId,
         membershipId: allMembershipIds[i]!,
@@ -2402,12 +2477,12 @@ async function seedProfileAndGovernanceGapFill(
         toStatus: 'gracePeriod',
         reason: 'Annual dues overdue — entered grace period (BR-D3)',
         changedBy: presidentPersonId,
-        changedAt: daysAgo(30 - (i - 20) * 3),
+        changedAt: daysAgo(15 - (i - 15) * 3),
       });
     }
 
-    // Lapsed members (indices 23-24)
-    for (let i = 23; i < Math.min(25, allMembershipIds.length); i++) {
+    // Lapsed members (indices 18-19 — Catalina, Eduardo)
+    for (let i = 18; i < Math.min(20, allMembershipIds.length); i++) {
       historyData.push({
         organizationId: orgId,
         membershipId: allMembershipIds[i]!,
@@ -2416,7 +2491,7 @@ async function seedProfileAndGovernanceGapFill(
         toStatus: 'gracePeriod',
         reason: 'Annual dues overdue — entered grace period',
         changedBy: presidentPersonId,
-        changedAt: daysAgo(90),
+        changedAt: daysAgo(75),
       });
       historyData.push({
         organizationId: orgId,
@@ -2426,9 +2501,52 @@ async function seedProfileAndGovernanceGapFill(
         toStatus: 'lapsed',
         reason: 'Grace period expired without payment',
         changedBy: presidentPersonId,
-        changedAt: daysAgo(60),
+        changedAt: daysAgo(45),
       });
     }
+
+    // Suspended members (indices 20-21 — Mariana, Sergio)
+    for (let i = 20; i < Math.min(22, allMembershipIds.length); i++) {
+      historyData.push({
+        organizationId: orgId,
+        membershipId: allMembershipIds[i]!,
+        personId: memberPersonIds[i] ?? presidentPersonId,
+        fromStatus: 'active',
+        toStatus: 'suspended',
+        reason: i === 20
+          ? 'Non-payment escalation — 3 dunning notices ignored'
+          : 'Professional conduct issue — under review by ethics committee',
+        changedBy: presidentPersonId,
+        changedAt: daysAgo(14),
+      });
+    }
+
+    // Removed member (index 22 — Daniela)
+    if (allMembershipIds[22] && memberPersonIds[22]) {
+      historyData.push({
+        organizationId: orgId,
+        membershipId: allMembershipIds[22],
+        personId: memberPersonIds[22],
+        fromStatus: 'active',
+        toStatus: 'suspended',
+        reason: 'Credential fraud investigation initiated',
+        changedBy: presidentPersonId,
+        changedAt: daysAgo(45),
+      });
+      historyData.push({
+        organizationId: orgId,
+        membershipId: allMembershipIds[22],
+        personId: memberPersonIds[22],
+        fromStatus: 'suspended',
+        toStatus: 'removed',
+        reason: 'Fraudulent credentials — license number verified as invalid by PRC',
+        changedBy: presidentPersonId,
+        changedAt: daysAgo(30),
+      });
+    }
+
+    // PendingPayment members (indices 23-24 — Francisco, Claudia) — no history needed
+    // (they are in initial state, only have null → pendingPayment which is implicit)
 
     for (const h of historyData) {
       await db.insert(membershipStatusHistory).values(h as any);
@@ -2477,8 +2595,8 @@ async function main() {
     officerClients.push(client);
   }
 
-  // Phase 3: Regular Members
-  console.log('\nPhase 3: Regular Members (25)...');
+  // Phase 3: Regular Members (all 6 statuses)
+  console.log('\nPhase 3: Regular Members (25 — active/grace/lapsed/suspended/removed/pendingPayment)...');
   const memberClients: SeedClient[] = [];
   for (let i = 0; i < MEMBERS.length; i++) {
     const m = MEMBERS[i]!;
@@ -2604,18 +2722,26 @@ async function main() {
   const docCount = await db.select().from(documents);
   const courseCount = await db.select().from(courses);
 
-  console.log('\n╔══════════════════════════════════════════╗');
-  console.log('║         SEED SCENARIOS COMPLETE          ║');
-  console.log('╠══════════════════════════════════════════╣');
-  console.log(`║  Persons:        ${String(personCount.length).padStart(4)}               ║`);
-  console.log(`║  Memberships:    ${String(membershipCount.length).padStart(4)}               ║`);
-  console.log(`║  Officers:          5                    ║`);
-  console.log(`║  Pending Apps:      2                    ║`);
-  console.log(`║  Notifications:  ${String(notifCount.length).padStart(4)}               ║`);
-  console.log(`║  Certificates:   ${String(certCount.length).padStart(4)}               ║`);
-  console.log(`║  Documents:      ${String(docCount.length).padStart(4)}               ║`);
-  console.log(`║  Courses:        ${String(courseCount.length).padStart(4)}               ║`);
-  console.log('╚══════════════════════════════════════════╝');
+  console.log('\n╔══════════════════════════════════════════════╗');
+  console.log('║           SEED SCENARIOS COMPLETE            ║');
+  console.log('╠══════════════════════════════════════════════╣');
+  console.log(`║  Persons:         ${String(personCount.length).padStart(4)}                     ║`);
+  console.log(`║  Memberships:     ${String(membershipCount.length).padStart(4)}                     ║`);
+  console.log(`║  Officers:           5                       ║`);
+  console.log(`║  Applicants:         2 (1 pending, 1 reject) ║`);
+  console.log(`║  Notifications:   ${String(notifCount.length).padStart(4)}                     ║`);
+  console.log(`║  Certificates:    ${String(certCount.length).padStart(4)}                     ║`);
+  console.log(`║  Documents:       ${String(docCount.length).padStart(4)}                     ║`);
+  console.log(`║  Courses:         ${String(courseCount.length).padStart(4)}                     ║`);
+  console.log('╠══════════════════════════════════════════════╣');
+  console.log('║  Member Status Distribution:                 ║');
+  console.log('║    Active:          16 (5 officers + 11 reg) ║');
+  console.log('║    Grace Period:     3                       ║');
+  console.log('║    Lapsed:           2                       ║');
+  console.log('║    Suspended:        2                       ║');
+  console.log('║    Removed:          1                       ║');
+  console.log('║    Pending Payment:  2                       ║');
+  console.log('╚══════════════════════════════════════════════╝');
 
   await pool.end();
 }
