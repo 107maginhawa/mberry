@@ -69,6 +69,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
     setValue,
     formState: { errors },
   } = useForm<EventFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: event?.title ?? '',

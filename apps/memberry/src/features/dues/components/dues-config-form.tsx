@@ -100,6 +100,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
     setValue,
     formState: { errors },
   } = useForm<DuesConfigFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(duesConfigSchema),
     defaultValues: {
       defaultAmount: undefined,

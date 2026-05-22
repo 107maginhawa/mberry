@@ -55,6 +55,7 @@ export function ProofUploadForm({
     handleSubmit,
     formState: { errors },
   } = useForm<ProofUploadFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(proofUploadSchema),
     defaultValues: {
       paymentMethod: '',

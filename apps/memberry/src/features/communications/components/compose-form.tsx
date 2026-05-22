@@ -54,6 +54,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
     control,
     formState: { errors },
   } = useForm<ComposeFormData>({
+    mode: 'onBlur',
     // biome-ignore lint: Zod v4 type incompatibility with @hookform/resolvers 5.2.2
     resolver: zodResolver(composeSchema),
     defaultValues: {

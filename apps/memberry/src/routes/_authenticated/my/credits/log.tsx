@@ -35,6 +35,7 @@ function CreditLog() {
     control,
     formState: { errors, isSubmitting },
   } = useForm<CreditLogFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(creditLogSchema),
     defaultValues: {
       activityName: '',

@@ -51,6 +51,7 @@ function PublicOrgProfile() {
   type ApplyFormData = z.infer<typeof applySchema>
 
   const { register: applyRegister, handleSubmit: applyHandleSubmit, watch: applyWatch, reset: applyReset, formState: { errors: applyErrors } } = useForm<ApplyFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(applySchema),
     defaultValues: { tierId: '', message: '' },
   })

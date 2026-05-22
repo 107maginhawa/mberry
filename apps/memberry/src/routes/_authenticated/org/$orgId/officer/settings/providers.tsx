@@ -302,6 +302,7 @@ function ProviderForm({
     control,
     formState: { errors },
   } = useForm<ProviderFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(providerSchema),
     defaultValues,
   })

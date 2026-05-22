@@ -2,23 +2,22 @@ import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   listDuesFundsOptions,
   listRosterMembersOptions,
   recordDuesPaymentMutation,
 } from '@monobase/sdk-ts/generated/react-query'
 import type { DuesFund } from '@monobase/sdk-ts/generated/types.gen'
-import { Button } from '@monobase/ui'
-import { Input } from '@monobase/ui'
-import { Label } from '@monobase/ui'
+import { Button, Input } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
-import { parseCentsInput } from '../lib/money'
 import { FundAllocationPreview } from './fund-allocation-preview'
 import { Combobox } from '@/components/patterns/combobox'
 import { DatePicker } from '@/components/patterns/date-picker'
+import { FormField } from '@/components/patterns/form-field'
+import { useMutationFeedback } from '@/hooks/use-mutation-feedback'
 
 const recordPaymentSchema = z.object({
   amount: z
@@ -50,6 +49,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
     reset,
     formState: { errors },
   } = useForm<RecordPaymentFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(recordPaymentSchema),
     defaultValues: {
       amount: undefined,
@@ -69,18 +69,16 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
     percentage: f.percentage,
   }))
 
-  const recordMutation = useMutation({
+  const recordMutation = useMutationFeedback({
     ...recordDuesPaymentMutation(),
+    successMessage: 'Payment recorded',
+    errorMessage: 'Failed to record payment',
     onSuccess: () => {
       setShowConfirm(false)
-      toast.success('Payment recorded', { description: 'Receipt sent to member.' })
       setPersonId('')
       setMemberSearch('')
       setPendingData(null)
       reset()
-    },
-    onError: () => {
-      toast.error('Failed to record payment', { description: 'Please try again.' })
     },
   })
 
@@ -125,8 +123,7 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr,300px]">
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <Label>Member</Label>
+        <FormField name="member" label="Member" required>
           <Combobox
             options={memberResults.map((m) => ({
               value: m.personId || m.id,
@@ -148,28 +145,19 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
             emptyMessage="No members found."
             loading={searchingMembers}
           />
-        </div>
+        </FormField>
 
-        <div>
-          <Label htmlFor="amount">Amount (PHP)</Label>
+        <FormField name="amount" label="Amount (PHP)" required error={errors.amount}>
           <Input
-            id="amount"
             type="number"
             step="0.01"
             min="0"
             placeholder="0.00"
-            aria-describedby={errors.amount ? 'amount-error' : undefined}
             {...register('amount', { valueAsNumber: true })}
           />
-          {errors.amount && (
-            <p id="amount-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
-              {errors.amount.message}
-            </p>
-          )}
-        </div>
+        </FormField>
 
-        <div>
-          <Label>Date</Label>
+        <FormField name="paymentDate" label="Date" required error={errors.paymentDate}>
           <Controller
             name="paymentDate"
             control={control}
@@ -181,21 +169,15 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
               />
             )}
           />
-          {errors.paymentDate && (
-            <p role="alert" className="text-xs text-[var(--color-error)] mt-1">
-              {errors.paymentDate.message}
-            </p>
-          )}
-        </div>
+        </FormField>
 
-        <div>
-          <Label>Payment Method</Label>
+        <FormField name="paymentMethod" label="Payment Method" required error={errors.paymentMethod}>
           <Controller
             name="paymentMethod"
             control={control}
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger aria-describedby={errors.paymentMethod ? 'paymentMethod-error' : undefined}>
+                <SelectTrigger>
                   <SelectValue placeholder="Select method" />
                 </SelectTrigger>
                 <SelectContent>
@@ -208,21 +190,14 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
               </Select>
             )}
           />
-          {errors.paymentMethod && (
-            <p id="paymentMethod-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
-              {errors.paymentMethod.message}
-            </p>
-          )}
-        </div>
+        </FormField>
 
-        <div>
-          <Label htmlFor="referenceNumber">Reference Number (optional)</Label>
+        <FormField name="referenceNumber" label="Reference Number" description="Check, bank transfer, or GCash reference">
           <Input
-            id="referenceNumber"
             placeholder="Check/bank/GCash reference"
             {...register('referenceNumber')}
           />
-        </div>
+        </FormField>
 
         <Button type="submit" disabled={!personId}>
           Record Payment

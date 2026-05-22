@@ -77,6 +77,7 @@ function AddMemberDialog({ open, onClose, orgId }: { open: boolean; onClose: () 
     reset,
     formState: { errors, isSubmitting },
   } = useForm<AddMemberFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(addMemberSchema),
     defaultValues: {
       firstName: '',

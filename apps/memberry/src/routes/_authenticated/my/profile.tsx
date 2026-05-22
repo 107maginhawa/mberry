@@ -237,6 +237,7 @@ function ProfileEditForm({
     handleSubmit,
     formState: { errors },
   } = useForm<ProfileEditFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(profileEditSchema),
     defaultValues: {
       firstName: person?.firstName || '',

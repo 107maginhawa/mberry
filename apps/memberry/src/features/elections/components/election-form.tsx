@@ -79,6 +79,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
     handleSubmit,
     formState: { errors },
   } = useForm<ElectionBasicsFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(electionBasicsSchema),
     defaultValues: {
       title: initialData?.title ?? '',
