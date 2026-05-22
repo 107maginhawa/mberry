@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -9,7 +8,7 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
-import { listCustomEventRegistrationsOptions, checkInCustomEventMutation } from '@monobase/sdk-ts/generated/react-query'
+import { listCustomEventRegistrationsOptions, listCustomEventRegistrationsQueryKey, checkInCustomEventMutation } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgId/officer/events/$eventId/attendance',
@@ -20,11 +19,11 @@ export const Route = createFileRoute(
 function EventAttendance() {
   const { orgId, eventId } = Route.useParams()
   const queryClient = useQueryClient()
-  const [checkedIn, setCheckedIn] = useState<Set<string>>(new Set())
 
-  const { data, isLoading, error } = useQuery(
-    listCustomEventRegistrationsOptions({ path: { eventId } })
-  )
+  const queryOpts = listCustomEventRegistrationsOptions({ path: { eventId } })
+  const regQueryKey = listCustomEventRegistrationsQueryKey({ path: { eventId } })
+
+  const { data, isLoading, error } = useQuery(queryOpts)
 
   interface EventRegistration {
     id: string
@@ -37,28 +36,40 @@ function EventAttendance() {
   }
 
   const checkInMutOpts = checkInCustomEventMutation()
-  const checkInMutation = useMutation<unknown, Error, EventRegistration>({
+  const checkInMutation = useMutation<unknown, Error, EventRegistration, { previous: unknown }>({
     mutationFn: (reg) => (checkInMutOpts.mutationFn as (...args: unknown[]) => Promise<unknown>)({
       path: { eventId },
       body: { eventId, registrationId: reg.id, personId: reg.personId ?? reg.memberId, method: 'manual' as const },
     }),
-    onSuccess: (_data, reg) => {
-      const memberId = reg.personId ?? reg.memberId
-      if (memberId) setCheckedIn((prev) => new Set(prev).add(memberId))
-      queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['attendance', eventId] })
+    onMutate: async (reg) => {
+      await queryClient.cancelQueries({ queryKey: regQueryKey })
+      const previous = queryClient.getQueryData(regQueryKey)
+      queryClient.setQueryData(regQueryKey, (old: any) => {
+        if (!old?.data) return old
+        return {
+          ...old,
+          data: old.data.map((r: EventRegistration) =>
+            r.id === reg.id ? { ...r, checkedIn: true } : r
+          ),
+        }
+      })
+      return { previous }
+    },
+    onSuccess: () => {
       toast.success('Member checked in successfully')
     },
-    onError: (err) => {
+    onError: (err, _reg, context) => {
+      if (context?.previous) queryClient.setQueryData(regQueryKey, context.previous)
       const apiErr = err as { body?: { message?: string }; message?: string }
       toast.error(apiErr?.body?.message ?? apiErr?.message ?? 'Check-in failed')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: regQueryKey })
     },
   })
 
   const registrations = (data?.data ?? []) as EventRegistration[]
-  const presentCount = registrations.filter(
-    (r) => r.checkedIn || checkedIn.has(r.memberId ?? r.personId ?? ''),
-  ).length
+  const presentCount = registrations.filter((r) => r.checkedIn).length
 
   return (
     <div className="space-y-6">
@@ -98,7 +109,7 @@ function EventAttendance() {
         <GlassCard className="divide-y divide-[var(--color-border-light)]">
           {registrations.map((reg) => {
             const memberId = reg.memberId ?? reg.personId
-            const isPresent = reg.checkedIn || (memberId != null && checkedIn.has(memberId))
+            const isPresent = !!reg.checkedIn
 
             return (
               <div

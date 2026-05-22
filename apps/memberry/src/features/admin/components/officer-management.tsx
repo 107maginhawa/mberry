@@ -61,15 +61,25 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
   })
 
   async function handleRemove(officer: Officer) {
+    const queryKey = ['officer-terms', orgId]
+    // Optimistic: remove row immediately
+    await queryClient.cancelQueries({ queryKey })
+    const previous = queryClient.getQueryData(queryKey)
+    queryClient.setQueryData(queryKey, (old: Officer[] | undefined) =>
+      old ? old.filter((o) => o.id !== officer.id) : old
+    )
+    setConfirmRemove(null)
+
     try {
       const termId = officer.termId || officer.id
       await api.delete(`/api/association/member/officer-terms/${termId}`, { 'x-org-id': orgId })
-      queryClient.invalidateQueries({ queryKey: ['officer-terms', orgId] })
       toast.success(`${officer.name} removed as ${officer.role}`)
     } catch {
+      // Rollback on error
+      queryClient.setQueryData(queryKey, previous)
       toast.error('Failed to remove officer')
     }
-    setConfirmRemove(null)
+    queryClient.invalidateQueries({ queryKey })
   }
 
   function handleAssigned(officer: Officer) {

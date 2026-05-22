@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Receipt } from 'lucide-react'
 import { formatCents } from '../lib/money'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { GlassCard } from '@/components/motion/glass-card'
 
 interface PaymentHistoryTableProps {
   orgId?: string
@@ -95,6 +96,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
           description="No payments match your current filters. Try adjusting or clearing filters."
         />
       ) : (
+        <GlassCard className="overflow-hidden">
         <Table className="text-sm">
           <TableHeader>
             <TableRow className="bg-[var(--color-surface-warm)]">
@@ -121,6 +123,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
             ))}
           </TableBody>
         </Table>
+        </GlassCard>
       )}
 
       {total > limit && (

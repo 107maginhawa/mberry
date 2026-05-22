@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
@@ -89,10 +90,10 @@ function MyOrganizationsPage() {
           action={{ label: 'Find Organizations', onClick: () => toast.info('Organization discovery coming soon') }}
         />
       ) : (
-        <div className="space-y-3">
+        <StaggerGrid className="space-y-3">
           {memberships.map((m: any) => (
+            <StaggerItem key={m.id}>
             <div
-              key={m.id}
               className="flex items-center gap-4 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-5 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all"
             >
               <Link
@@ -147,12 +148,13 @@ function MyOrganizationsPage() {
                 )}
               </div>
             </div>
+            </StaggerItem>
           ))}
 
           <p className="text-[13px] font-medium text-[var(--color-muted)] text-center mt-4">
             Each organization manages its own membership, dues, and credits independently.
           </p>
-        </div>
+        </StaggerGrid>
       )}
 
       <ConfirmDialog

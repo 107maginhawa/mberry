@@ -39,16 +39,16 @@ function MySettingsPage() {
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
-        <TabsContent value="general">
+        <TabsContent value="general" className="animate-in fade-in-0 duration-300">
           <GeneralSection />
         </TabsContent>
-        <TabsContent value="privacy">
+        <TabsContent value="privacy" className="animate-in fade-in-0 duration-300">
           <PrivacySection />
         </TabsContent>
-        <TabsContent value="security">
+        <TabsContent value="security" className="animate-in fade-in-0 duration-300">
           <AccountSection />
         </TabsContent>
-        <TabsContent value="notifications">
+        <TabsContent value="notifications" className="animate-in fade-in-0 duration-300">
           <NotificationPreferencesSection />
         </TabsContent>
       </Tabs>

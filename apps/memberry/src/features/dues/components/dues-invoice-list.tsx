@@ -36,12 +36,30 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
     }),
   })
 
+  const invoiceQueryKey = listDuesInvoicesQueryKey()
   const markPaidMutation = useMutation({
     ...markDuesInvoicePaidMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: listDuesInvoicesQueryKey() })
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: invoiceQueryKey })
+      const previous = queryClient.getQueryData(invoiceQueryKey)
+      queryClient.setQueryData(invoiceQueryKey, (old: any) => {
+        if (!old?.data) return old
+        return {
+          ...old,
+          data: old.data.map((inv: DuesInvoice) =>
+            inv.id === variables.path.invoiceId ? { ...inv, status: 'paid' } : inv
+          ),
+        }
+      })
+      return { previous }
     },
-    onError: (err) => toast.error(err.message || 'Failed to mark invoice as paid'),
+    onError: (err, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(invoiceQueryKey, context.previous)
+      toast.error(err.message || 'Failed to mark invoice as paid')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: invoiceQueryKey })
+    },
   })
 
   if (isLoading) return (

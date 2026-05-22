@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
+import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 
 export const Route = createFileRoute('/_authenticated/org/$orgId/home')({
   component: OrgHome,
@@ -72,9 +73,10 @@ function OrgHome() {
             />
           </GlassCard>
         ) : (
-          <div className="space-y-3">
+          <StaggerGrid className="space-y-3">
             {announcementItems.map((a: any) => (
-              <GlassCard key={a.id} className="p-4 space-y-1">
+              <StaggerItem key={a.id}>
+              <GlassCard className="p-4 space-y-1">
                 <h3 className="text-h4 text-[var(--color-text)]">
                   {a.title ?? a.subject ?? 'Announcement'}
                 </h3>
@@ -89,8 +91,9 @@ function OrgHome() {
                   </p>
                 )}
               </GlassCard>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerGrid>
         )}
       </section>
 
@@ -127,10 +130,10 @@ function OrgHome() {
             />
           </GlassCard>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StaggerGrid className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {eventItems.map((event: any) => (
+              <StaggerItem key={event.id}>
               <Link
-                key={event.id}
                 to="/org/$orgId/events/$eventId"
                 params={{ orgId, eventId: event.id }}
                 className="block"
@@ -153,8 +156,9 @@ function OrgHome() {
                   </div>
                 </GlassCard>
               </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerGrid>
         )}
       </section>
     </div>

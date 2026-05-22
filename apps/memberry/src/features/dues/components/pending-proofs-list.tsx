@@ -31,31 +31,71 @@ export function PendingProofsList({ orgId }: PendingProofsListProps) {
     select: (d: any) => d?.data ?? [],
   })
 
+  const proofsQueryKey = listPendingProofsQueryKey({ query: { organizationId: orgId }, headers: { 'x-org-id': orgId } })
+  const paymentsQueryKey = listDuesPaymentsQueryKey({ headers: { 'x-org-id': orgId } })
+
+  function optimisticRemoveProof(paymentId: string) {
+    return {
+      onMutate: async () => {
+        await queryClient.cancelQueries({ queryKey: proofsQueryKey })
+        const previous = queryClient.getQueryData(proofsQueryKey)
+        queryClient.setQueryData(proofsQueryKey, (old: any) => {
+          if (!old?.data) return old
+          return { ...old, data: old.data.filter((p: any) => p.id !== paymentId) }
+        })
+        return { previous }
+      },
+      onError: (_err: any, _vars: any, context: { previous?: unknown } | undefined) => {
+        if (context?.previous) queryClient.setQueryData(proofsQueryKey, context.previous)
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: proofsQueryKey })
+        queryClient.invalidateQueries({ queryKey: paymentsQueryKey })
+      },
+    }
+  }
+
   const confirmMutOpts = confirmPaymentProofMutation()
   const confirmMutation = useMutation({
     ...confirmMutOpts,
+    onMutate: async (variables: any) => {
+      const paymentId = variables.path?.paymentId
+      const helpers = optimisticRemoveProof(paymentId)
+      return helpers.onMutate()
+    },
     onSuccess: () => {
       toast.success('Payment confirmed')
-      queryClient.invalidateQueries({ queryKey: listPendingProofsQueryKey({ query: { organizationId: orgId }, headers: { 'x-org-id': orgId } }) })
-      queryClient.invalidateQueries({ queryKey: listDuesPaymentsQueryKey({ headers: { 'x-org-id': orgId } }) })
     },
-    onError: (err: any) => {
+    onError: (err: any, vars: any, context: any) => {
+      if (context?.previous) queryClient.setQueryData(proofsQueryKey, context.previous)
       toast.error(err?.body?.error ?? 'Confirmation failed')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: proofsQueryKey })
+      queryClient.invalidateQueries({ queryKey: paymentsQueryKey })
     },
   })
 
   const rejectMutOpts = rejectPaymentProofMutation()
   const rejectMutation = useMutation({
     ...rejectMutOpts,
+    onMutate: async (variables: any) => {
+      const paymentId = variables.path?.paymentId
+      const helpers = optimisticRemoveProof(paymentId)
+      return helpers.onMutate()
+    },
     onSuccess: () => {
       toast.success('Payment rejected')
       setRejectingId(null)
       setRejectReason('')
-      queryClient.invalidateQueries({ queryKey: listPendingProofsQueryKey({ query: { organizationId: orgId }, headers: { 'x-org-id': orgId } }) })
-      queryClient.invalidateQueries({ queryKey: listDuesPaymentsQueryKey({ headers: { 'x-org-id': orgId } }) })
     },
-    onError: (err: any) => {
+    onError: (err: any, vars: any, context: any) => {
+      if (context?.previous) queryClient.setQueryData(proofsQueryKey, context.previous)
       toast.error(err?.body?.error ?? 'Rejection failed')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: proofsQueryKey })
+      queryClient.invalidateQueries({ queryKey: paymentsQueryKey })
     },
   })
 

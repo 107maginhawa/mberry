@@ -35,19 +35,83 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
     listCustomTrainingEnrollmentsOptions({ path: { trainingId }, query: { organizationId: orgId } }),
   )
 
+  const enrollmentQueryKey = listCustomTrainingEnrollmentsQueryKey({ path: { trainingId }, query: { organizationId: orgId } })
+
+  function optimisticComplete(personId: string) {
+    return {
+      onMutate: async () => {
+        await queryClient.cancelQueries({ queryKey: enrollmentQueryKey })
+        const previous = queryClient.getQueryData(enrollmentQueryKey)
+        queryClient.setQueryData(enrollmentQueryKey, (old: any) => {
+          if (!old?.data) return old
+          return {
+            ...old,
+            data: old.data.map((e: TrainingEnrollment) =>
+              e.personId === personId ? { ...e, completedAt: new Date().toISOString() } : e
+            ),
+          }
+        })
+        return { previous }
+      },
+      onError: (_err: unknown, _vars: unknown, context: { previous?: unknown } | undefined) => {
+        if (context?.previous) queryClient.setQueryData(enrollmentQueryKey, context.previous)
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: enrollmentQueryKey })
+      },
+    }
+  }
+
   const markMutation = useMutation({
     ...completeCustomTrainingMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: listCustomTrainingEnrollmentsQueryKey({ path: { trainingId }, query: { organizationId: orgId } }) })
+    onMutate: async (variables: any) => {
+      await queryClient.cancelQueries({ queryKey: enrollmentQueryKey })
+      const previous = queryClient.getQueryData(enrollmentQueryKey)
+      const pid = variables.body?.personId
+      if (pid) {
+        queryClient.setQueryData(enrollmentQueryKey, (old: any) => {
+          if (!old?.data) return old
+          return {
+            ...old,
+            data: old.data.map((e: TrainingEnrollment) =>
+              e.personId === pid ? { ...e, completedAt: new Date().toISOString() } : e
+            ),
+          }
+        })
+      }
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(enrollmentQueryKey, context.previous)
       setMarking(null)
     },
-    onError: () => { setMarking(null) },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: enrollmentQueryKey })
+      setMarking(null)
+    },
   })
 
   const markAllMutation = useMutation({
     ...completeCustomTrainingMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: listCustomTrainingEnrollmentsQueryKey({ path: { trainingId }, query: { organizationId: orgId } }) })
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: enrollmentQueryKey })
+      const previous = queryClient.getQueryData(enrollmentQueryKey)
+      queryClient.setQueryData(enrollmentQueryKey, (old: any) => {
+        if (!old?.data) return old
+        return {
+          ...old,
+          data: old.data.map((e: TrainingEnrollment) =>
+            selected.has(e.personId) ? { ...e, completedAt: new Date().toISOString() } : e
+          ),
+        }
+      })
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(enrollmentQueryKey, context.previous)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: enrollmentQueryKey })
       setSelected(new Set())
     },
   })
