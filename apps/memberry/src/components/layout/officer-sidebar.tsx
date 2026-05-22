@@ -119,12 +119,15 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
   const filteredSections = sections.filter(s => allowedSections.has(s.label || ''))
 
   return (
-    <aside className="hidden md:flex w-[240px] bg-[var(--color-primary)] text-white flex-col shrink-0">
+    <aside className="hidden md:flex w-[64px] lg:w-[240px] bg-[var(--color-primary)] text-white flex-col shrink-0 transition-[width] duration-200">
       {/* Logo + Org Name */}
-      <div className="px-4 py-3 border-b border-white/[0.12]">
-        <img src="/memberry-logo-white.png" alt="Memberry" className="h-10 w-auto" />
+      <div className="px-3 lg:px-4 py-3 border-b border-white/[0.12]">
+        <img src="/memberry-logo-white.png" alt="Memberry" className="h-10 w-auto lg:block hidden" />
+        <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center mx-auto lg:hidden">
+          <span className="text-white font-bold text-sm">M</span>
+        </div>
         {orgName && (
-          <p className="mt-2 text-[12px] text-white/50 truncate" title={orgName}>
+          <p className="mt-2 text-[12px] text-white/50 truncate hidden lg:block" title={orgName}>
             {orgName}
           </p>
         )}
@@ -135,23 +138,27 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
         {filteredSections.map((section, si) => (
           <div key={si} className={si > 0 ? "mt-3" : ""}>
             {section.label && (
-              <div className="px-6 py-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-white/40">
+              <div className="hidden lg:block px-6 py-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-white/40">
                 {section.label}
               </div>
+            )}
+            {si > 0 && (
+              <div className="lg:hidden mx-3 my-1 border-t border-white/[0.08]" />
             )}
             {section.items.map(({ to, label, icon: Icon }, idx) => (
               <Link
                 key={`${to}-${idx}`}
                 to={to}
-                className="flex items-center gap-2.5 px-6 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors duration-150"
+                title={label}
+                className="flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors duration-150"
                 activeProps={{
                   className:
-                    "flex items-center gap-2.5 px-6 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[21px]",
+                    "flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] lg:pl-[21px]",
                 }}
                 activeOptions={{ exact: false }}
               >
                 <Icon size={18} className="shrink-0 opacity-70" />
-                {label}
+                <span className="hidden lg:inline">{label}</span>
               </Link>
             ))}
           </div>
@@ -159,25 +166,26 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
       </nav>
 
       {/* Back to member view */}
-      <div className="px-4 py-2 border-t border-white/[0.12]">
+      <div className="px-2 lg:px-4 py-2 border-t border-white/[0.12]">
         <Link
           to="/dashboard"
-          className="flex items-center gap-2 px-2 py-2 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.08] rounded-[6px] transition-colors"
+          title="Back to Member View"
+          className="flex items-center justify-center lg:justify-start gap-2 px-2 py-2 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.08] rounded-[6px] transition-colors"
         >
           <ArrowLeft size={14} />
-          Back to Member View
+          <span className="hidden lg:inline">Back to Member View</span>
         </Link>
       </div>
 
       {/* User info */}
-      <div className="px-6 py-3 border-t border-white/[0.12]">
-        <div className="flex items-center gap-2.5">
+      <div className="px-2 lg:px-6 py-3 border-t border-white/[0.12]">
+        <div className="flex items-center justify-center lg:justify-start gap-2.5">
           <div className="w-[34px] h-[34px] rounded-full bg-[var(--color-primary-mid)] flex items-center justify-center shrink-0">
             <span className="text-white font-semibold text-[13px]">
               {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2) : '?'}
             </span>
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 hidden lg:block">
             {userName && <p className="text-[14px] text-white font-medium truncate">{userName}</p>}
             {role && <p className="text-[12px] text-white/50">{role}</p>}
             {!userName && userEmail && <p className="text-[11px] text-white/50 truncate">{userEmail}</p>}

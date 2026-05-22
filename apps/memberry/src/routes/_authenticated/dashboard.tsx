@@ -219,7 +219,7 @@ function DashboardPage() {
       <section>
         <h2 className="text-h4 mb-4">Your Organizations</h2>
         {membershipsQuery.isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <CardSkeleton />
             <CardSkeleton />
           </div>
@@ -230,7 +230,7 @@ function DashboardPage() {
             action={{ label: 'Find Organizations', onClick: () => navigate({ to: '/my/organizations' }) }}
           />
         ) : (
-          <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {memberships.map((m: any) => (
               <StaggerItem key={m.id}>
                 <OrgCard membership={m} invoices={invoices} />

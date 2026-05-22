@@ -58,6 +58,18 @@ const navItems = [
   { to: '/audit', label: 'Audit Log', icon: Shield },
 ]
 
+function MobileGate() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-background text-center lg:hidden">
+      <Shield className="w-12 h-12 text-muted-foreground mb-4" />
+      <h1 className="text-xl font-bold mb-2">Desktop Required</h1>
+      <p className="text-sm text-muted-foreground max-w-sm">
+        The admin dashboard requires a screen width of at least 1024px. Please switch to a desktop browser for the best experience.
+      </p>
+    </div>
+  )
+}
+
 function RootComponent() {
   const user = useAdminUser()
   const visibleNavItems = navItems.filter((item) => {
@@ -66,7 +78,9 @@ function RootComponent() {
   })
 
   return (
-    <div className="flex h-screen">
+    <>
+    <MobileGate />
+    <div className="hidden lg:flex h-screen">
       {/* Sidebar */}
       <aside
         className="flex flex-col w-[260px] min-w-[260px] bg-[#2D2635] text-white"
@@ -110,5 +124,6 @@ function RootComponent() {
       </main>
       <Toaster richColors position="top-right" />
     </div>
+    </>
   )
 }

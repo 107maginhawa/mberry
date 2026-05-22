@@ -35,7 +35,7 @@ function OrgTraining() {
       />
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <CardSkeleton />
           <CardSkeleton />
           <CardSkeleton />
@@ -48,7 +48,7 @@ function OrgTraining() {
           description="Check back later for upcoming training sessions and courses."
         />
       ) : (
-        <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {trainings.map((t: any) => (
             <StaggerItem key={t.id}>
               <Link

@@ -15,14 +15,13 @@ function OfficerPendingSkeleton() {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar skeleton */}
-      <div className="hidden md:flex w-[220px] flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)]">
-        <div className="p-4 space-y-3">
-          <div className="h-5 w-24 bg-[var(--color-border)] rounded animate-pulse" />
-          <div className="h-4 w-16 bg-[var(--color-border)] rounded animate-pulse" />
+      <div className="hidden md:flex w-[64px] lg:w-[240px] flex-col bg-[var(--color-primary)] shrink-0 transition-[width] duration-200">
+        <div className="p-3 lg:p-4 space-y-3">
+          <div className="h-8 w-8 lg:h-5 lg:w-24 bg-white/10 rounded animate-pulse mx-auto lg:mx-0" />
         </div>
-        <div className="flex-1 p-3 space-y-2">
+        <div className="flex-1 p-2 lg:p-3 space-y-2">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-9 bg-[var(--color-border)] rounded animate-pulse" />
+            <div key={i} className="h-9 bg-white/10 rounded animate-pulse" />
           ))}
         </div>
       </div>

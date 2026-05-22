@@ -138,13 +138,13 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
         <h2 className="text-h4 mb-2">Action Items</h2>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <CardSkeleton />
             <CardSkeleton />
             <CardSkeleton />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {/* Expiring dues */}
             {(m?.expiringIn30Days ?? 0) > 0 && (
               <ActionCard

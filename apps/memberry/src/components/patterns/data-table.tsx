@@ -57,18 +57,18 @@ export function DataTable<TData, TValue>({
   const end = Math.min((pageIndex + 1) * pageSize, totalRows)
 
   return (
-    <div>
-      {/* Mobile card layout */}
+    <div style={{ containerType: 'inline-size' }}>
+      {/* Mobile card layout — viewport fallback + container query override */}
       {renderMobileCard && (
-        <div className="md:hidden flex flex-col gap-3">
+        <div className="md:hidden cq-table-cards flex flex-col gap-3">
           {table.getRowModel().rows.map((row) => (
             <div key={row.id}>{renderMobileCard(row.original)}</div>
           ))}
         </div>
       )}
 
-      {/* Desktop table */}
-      <div className={renderMobileCard ? 'hidden md:block' : ''} role="grid" aria-label="Data table">
+      {/* Desktop table — viewport fallback + container query override */}
+      <div className={renderMobileCard ? 'hidden md:block cq-table-desktop' : ''} role="grid" aria-label="Data table">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

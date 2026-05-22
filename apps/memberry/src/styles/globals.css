@@ -266,3 +266,26 @@
     .animate-shimmer { animation: none !important; }
   }
 }
+
+/* Container query support for fluid components */
+
+/* DataTable: switch between card/table based on container width */
+@container (max-width: 639px) {
+  .cq-table-cards { display: flex !important; }
+  .cq-table-desktop { display: none !important; }
+}
+@container (min-width: 640px) {
+  .cq-table-cards { display: none !important; }
+  .cq-table-desktop { display: block !important; }
+}
+
+/* Stat grid: responsive columns based on container */
+@container (min-width: 800px) {
+  .cq-stat-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@container (max-width: 799px) and (min-width: 400px) {
+  .cq-stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@container (max-width: 399px) {
+  .cq-stat-grid { grid-template-columns: 1fr; }
+}

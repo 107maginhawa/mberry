@@ -256,7 +256,7 @@ function MyEvents() {
           />
         </GlassCard>
       ) : (
-        <StaggerGrid className="grid gap-4 sm:grid-cols-2">
+        <StaggerGrid className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {displayed.map((item) => (
             <StaggerItem key={item.registration.id}>
               <EventRegistrationCard item={item} />

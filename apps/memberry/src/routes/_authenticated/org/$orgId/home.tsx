@@ -111,7 +111,7 @@ function OrgHome() {
         </div>
 
         {loadingEvents ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <ListSkeleton rows={4} />
           </div>
         ) : eventsError ? (
@@ -127,7 +127,7 @@ function OrgHome() {
             />
           </GlassCard>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {eventItems.map((event: any) => (
               <Link
                 key={event.id}
