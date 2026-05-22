@@ -69,65 +69,37 @@ jobs:
       - name: Generate API codegen
         run: bun --filter @monobase/api-ts run generate
 
-      - name: Build Memberry app
-        env:
-          VITE_API_URL: ${{ vars.STAGING_API_URL || '' }}
-        run: cd apps/memberry && bun run build
-
-      - name: Build Admin app
-        env:
-          VITE_API_URL: ${{ vars.STAGING_API_URL || '' }}
-        run: cd apps/admin && bun run build
-
-      - name: Build Account app
-        env:
-          VITE_API_URL: ${{ vars.STAGING_API_URL || '' }}
-        run: cd apps/account && bun run build
-
-      - name: Upload frontend-memberry artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-memberry
-          path: apps/memberry/dist/
-
-      - name: Upload frontend-admin artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-admin
-          path: apps/admin/dist/
-
-      - name: Upload frontend-account artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-account
-          path: apps/account/dist/
+      # Frontend builds are done per-environment in deploy jobs below
+      # (each environment needs its own VITE_API_URL baked in at build time)
 
   deploy-staging:
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
     needs: [build]
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     environment: staging
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download frontend-memberry artifact
-        uses: actions/download-artifact@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          name: frontend-memberry
-          path: apps/memberry/dist/
+          bun-version: 1.2.21
 
-      - name: Download frontend-admin artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-admin
-          path: apps/admin/dist/
+      - run: bun install --frozen-lockfile
 
-      - name: Download frontend-account artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-account
-          path: apps/account/dist/
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+
+      - name: Build frontends (staging)
+        env:
+          VITE_API_URL: ${{ vars.STAGING_API_URL || '' }}
+        run: |
+          cd apps/memberry && bun run build
+          cd ../../apps/admin && bun run build
+          cd ../../apps/account && bun run build
 
       - name: Deploy API to staging
         env:
@@ -198,23 +170,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download frontend-memberry artifact
-        uses: actions/download-artifact@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          name: frontend-memberry
-          path: apps/memberry/dist/
+          bun-version: 1.2.21
 
-      - name: Download frontend-admin artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-admin
-          path: apps/admin/dist/
+      - run: bun install --frozen-lockfile
 
-      - name: Download frontend-account artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-account
-          path: apps/account/dist/
+      - name: Build OpenAPI spec
+        run: bun --filter @monobase/api-spec run build
+
+      - name: Generate API codegen
+        run: bun --filter @monobase/api-ts run generate
+
+      - name: Build frontends (production)
+        env:
+          VITE_API_URL: ${{ vars.PRODUCTION_API_URL || '' }}
+        run: |
+          cd apps/memberry && bun run build
+          cd ../../apps/admin && bun run build
+          cd ../../apps/account && bun run build
 
       - name: Deploy API to production
         env:

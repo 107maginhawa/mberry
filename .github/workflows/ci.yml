@@ -476,6 +476,7 @@ jobs:
       - build-frontends
       - artifact-smoke
       - coverage-gate
+      - new-code-gate
     steps:
       - name: Check all gates passed
         run: |
@@ -488,6 +489,7 @@ jobs:
           echo "  build-frontends: ${{ needs.build-frontends.result }}"
           echo "  artifact-smoke: ${{ needs.artifact-smoke.result }}"
           echo "  coverage-gate: ${{ needs.coverage-gate.result }}"
+          echo "  new-code-gate: ${{ needs.new-code-gate.result }}"
           if [[ "${{ needs.lint-typecheck.result }}" != "success" ]] || \
              [[ "${{ needs.unit-tests.result }}" != "success" ]] || \
              [[ "${{ needs.e2e.result }}" != "success" ]] || \
@@ -495,7 +497,8 @@ jobs:
              [[ "${{ needs.build-api.result }}" != "success" ]] || \
              [[ "${{ needs.build-frontends.result }}" != "success" ]] || \
              [[ "${{ needs.artifact-smoke.result }}" != "success" ]] || \
-             [[ "${{ needs.coverage-gate.result }}" != "success" ]]; then
+             [[ "${{ needs.coverage-gate.result }}" != "success" ]] || \
+             [[ "${{ needs.new-code-gate.result }}" == "failure" ]]; then
             echo "::error::One or more CI gates failed"
             exit 1
           fi

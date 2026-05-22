@@ -382,7 +382,7 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
         },
       },
       deleteUser: {
-        enabled: true,
+        enabled: false, // Disabled until proper safeguards (re-auth, admin notification, soft-delete) are built
       },
     },
     

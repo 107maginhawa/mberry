@@ -48,11 +48,11 @@ function matchesTunneling(origin: string): boolean {
  * Create dynamic origin validator based on configuration
  */
 export function createOriginValidator(corsConfig: Config['cors'], logger?: Logger) {
-  return (origin: string, context: Context): string => {
+  return (origin: string, context: Context): string | undefined => {
     // Handle non-browser requests (no origin header) or empty origin
+    // Return undefined — non-browser requests don't need CORS headers
     if (!origin) {
-      // Return first explicit origin or fallback to wildcard
-      return corsConfig.origins.includes('*') ? '*' : (corsConfig.origins[0] || '*');
+      return undefined;
     }
 
     // In strict mode, only use explicit origins list
@@ -61,7 +61,7 @@ export function createOriginValidator(corsConfig: Config['cors'], logger?: Logge
       if (logger && !isAllowed) {
         logger.debug({ origin, mode: 'strict' }, 'CORS: Blocked origin in strict mode');
       }
-      return isAllowed ? origin : corsConfig.origins[0] || '*';
+      return isAllowed ? origin : undefined;
     }
 
     // Check explicit origins first (including wildcard)
@@ -85,18 +85,17 @@ export function createOriginValidator(corsConfig: Config['cors'], logger?: Logge
       return origin;
     }
 
-    // Block unmatched origins - return safe default
+    // Block unmatched origins — return undefined so Hono omits the CORS header
     if (logger) {
       logger.debug({
         origin,
         allowLocalNetwork: corsConfig.allowLocalNetwork,
         allowTunneling: corsConfig.allowTunneling,
         strict: corsConfig.strict
-      }, 'CORS: Blocked unmatched origin, using fallback');
+      }, 'CORS: Blocked unmatched origin');
     }
 
-    // Return first allowed origin or wildcard as fallback
-    return corsConfig.origins.includes('*') ? '*' : (corsConfig.origins[0] || '*');
+    return undefined;
   };
 }
 
