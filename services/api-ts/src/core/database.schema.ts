@@ -14,6 +14,9 @@ export const baseEntityFields = {
   id: uuid('id').primaryKey().defaultRandom(),
   
   // Timestamps
+  // TODO: Migrate to timestamp('...', { withTimezone: true }) — tracked as GitHub issue
+  // Current: TIMESTAMP WITHOUT TIME ZONE. Safe if server runs UTC.
+  // Migration touches all tables — requires dedicated phase with testing.
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   

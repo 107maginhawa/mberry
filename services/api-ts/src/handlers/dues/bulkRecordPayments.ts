@@ -87,16 +87,17 @@ export async function bulkRecordPayments(
 
   for (const row of validPayments) {
     try {
-      const sequence = await repo.getNextReceiptSequence(orgId, year);
-      const receiptNumber = formatReceiptNumber('ORG', year, sequence);
-
-      const { payment } = await db.transaction(async (txDb: DatabaseInstance) => {
+      const { payment, receiptNumber } = await db.transaction(async (txDb: DatabaseInstance) => {
         const txRepo = new DuesRepository(txDb);
+
+        // Generate receipt inside tx to prevent race condition duplicates
+        const sequence = await txRepo.getNextReceiptSequence(orgId, year);
+        const rcptNumber = formatReceiptNumber('ORG', year, sequence);
 
         const pay = await txRepo.createPayment({
           organizationId: orgId,
           personId: row.personId,
-          receiptNumber,
+          receiptNumber: rcptNumber,
           amount: row.amount,
           currency: row.currency ?? 'PHP',
           paymentMethod: row.paymentMethod as 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'online' | 'other',
@@ -125,7 +126,7 @@ export async function bulkRecordPayments(
           });
         }
 
-        return { payment: pay };
+        return { payment: pay, receiptNumber: rcptNumber };
       });
 
       results.push({

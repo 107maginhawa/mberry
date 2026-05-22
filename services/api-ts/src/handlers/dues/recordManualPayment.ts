@@ -34,19 +34,20 @@ export async function recordManualPayment(
   const recentPayment = await repo.findRecentPaymentForPerson(orgId, body.personId);
   const hasConcurrentWarning = !!recentPayment;
 
-  // [M6-R6] Generate receipt number in org sequence
-  const year = new Date().getFullYear();
-  const sequence = await repo.getNextReceiptSequence(orgId, year);
-  const receiptNumber = formatReceiptNumber('ORG', year, sequence);
-
-  // Wrap payment creation + settlement in a single transaction
-  const { payment, settlement } = await db.transaction(async (txDb: DatabaseInstance) => {
+  // Wrap receipt number generation + payment creation + settlement in a single transaction
+  // Receipt sequence must be inside tx to prevent race conditions on concurrent payments
+  const { payment, settlement, receiptNumber } = await db.transaction(async (txDb: DatabaseInstance) => {
     const txRepo = new DuesRepository(txDb);
+
+    // [M6-R6] Generate receipt number in org sequence (inside tx to prevent duplicates)
+    const year = new Date().getFullYear();
+    const sequence = await txRepo.getNextReceiptSequence(orgId, year);
+    const rcptNumber = formatReceiptNumber('ORG', year, sequence);
 
     const pay = await txRepo.createPayment({
       organizationId: orgId,
       personId: body.personId,
-      receiptNumber,
+      receiptNumber: rcptNumber,
       amount: body.amount,
       currency: body.currency ?? 'PHP',
       paymentMethod: body.paymentMethod,
@@ -77,7 +78,7 @@ export async function recordManualPayment(
       });
     }
 
-    return { payment: pay, settlement: settle };
+    return { payment: pay, settlement: settle, receiptNumber: rcptNumber };
   });
 
   await auditAction(ctx, {

@@ -1,5 +1,6 @@
 import {
   MutationCache,
+  QueryCache,
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
@@ -46,6 +47,8 @@ export interface ApiProviderProps {
   queryClient?: QueryClient
   /** Optional notifier — without it, mutations meta.toast is silently ignored. */
   notifier?: SdkNotifier
+  /** Called on 401 (session expired). Typically: clear auth state + redirect to sign-in. */
+  onSessionExpired?: () => void
   children: ReactNode
 }
 
@@ -71,7 +74,30 @@ function readToastMeta(meta: unknown): MutationToastMeta | undefined {
   return toast as MutationToastMeta
 }
 
-export function createDefaultQueryClient(notifier?: SdkNotifier): QueryClient {
+/**
+ * Debounced 401 handler — prevents redirect storm when multiple queries fail
+ * simultaneously on session expiry.
+ */
+function createSessionExpiredHandler(onSessionExpired?: () => void) {
+  let lastFired = 0
+  return (error: unknown) => {
+    if (!onSessionExpired) return
+    if (error instanceof SdkError && error.status === 401) {
+      const now = Date.now()
+      if (now - lastFired > 2000) {
+        lastFired = now
+        onSessionExpired()
+      }
+    }
+  }
+}
+
+export function createDefaultQueryClient(
+  notifier?: SdkNotifier,
+  onSessionExpired?: () => void,
+): QueryClient {
+  const handleExpired = createSessionExpiredHandler(onSessionExpired)
+
   return new QueryClient({
     defaultOptions: {
       queries: {
@@ -87,6 +113,9 @@ export function createDefaultQueryClient(notifier?: SdkNotifier): QueryClient {
         gcTime: 1000 * 5,
       },
     },
+    queryCache: new QueryCache({
+      onError: (error) => handleExpired(error),
+    }),
     mutationCache: new MutationCache({
       onSuccess: (_data, _vars, _ctx, mutation) => {
         if (!notifier) return
@@ -94,6 +123,7 @@ export function createDefaultQueryClient(notifier?: SdkNotifier): QueryClient {
         if (meta?.success) notifier.success(meta.success)
       },
       onError: (error, _vars, _ctx, mutation) => {
+        handleExpired(error)
         if (!notifier) return
         const meta = readToastMeta(mutation.meta)
         const message =
@@ -110,11 +140,12 @@ export function ApiProvider({
   queryClient: providedQueryClient,
   apiBaseUrl,
   notifier,
+  onSessionExpired,
   children,
 }: ApiProviderProps) {
   const queryClient = useMemo(
-    () => providedQueryClient ?? createDefaultQueryClient(notifier),
-    [providedQueryClient, notifier],
+    () => providedQueryClient ?? createDefaultQueryClient(notifier, onSessionExpired),
+    [providedQueryClient, notifier, onSessionExpired],
   )
 
   // Install the error interceptor exactly once across the app's lifetime.

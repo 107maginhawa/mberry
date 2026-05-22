@@ -55,13 +55,23 @@ export async function castVote(ctx: Context): Promise<Response> {
   const alreadyVoted = await repo.hasVoted(electionId, session.user.id, body.positionId);
   if (alreadyVoted) throw new ConflictError('Already voted for this position');
 
-  const vote = await repo.castVote({
-    electionId,
-    positionId: body.positionId,
-    nomineeId: body.nomineeId,
-    voterId: session.user.id,
-    organizationId: election.organizationId,
-  });
+  let vote;
+  try {
+    vote = await repo.castVote({
+      electionId,
+      positionId: body.positionId,
+      nomineeId: body.nomineeId,
+      voterId: session.user.id,
+      organizationId: election.organizationId,
+    });
+  } catch (error: unknown) {
+    // Catch unique constraint violation (race condition: concurrent vote passed hasVoted check)
+    const dbError = error as { code?: string };
+    if (dbError.code === '23505') {
+      throw new ConflictError('Already voted for this position');
+    }
+    throw error;
+  }
 
   return ctx.json({ data: vote }, 201);
 }
