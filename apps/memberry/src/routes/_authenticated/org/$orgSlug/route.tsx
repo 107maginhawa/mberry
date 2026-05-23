@@ -20,9 +20,12 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug')({
           })
         }
       } catch (e) {
-        // If it's a redirect, re-throw it
+        // Re-throw redirects
         if (e instanceof Response || (e && typeof e === 'object' && 'to' in e)) throw e
-        // UUID not found — let route render and show 404
+        // Re-throw network errors — only swallow 404 (org not found)
+        const status = (e as any)?.status ?? (e as any)?.response?.status
+        if (status !== 404 && status !== 400) throw e
+        // UUID not found — let route render and OrgProvider show error
       }
     }
   },

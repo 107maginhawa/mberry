@@ -23,21 +23,35 @@ export interface OrgMembership {
   duesExpiryDate?: string
 }
 
+interface MembershipApiResponse {
+  data: Array<{
+    id: string
+    organizationId: string
+    orgName: string
+    orgSlug: string
+    memberNumber?: string
+    status: string
+    tierId?: string
+    startDate?: string
+    duesExpiryDate?: string
+  }>
+}
+
 export function useMyOrgs() {
   const location = useLocation()
 
-  const { data: orgs = [], isLoading } = useQuery({
+  const { data: orgs = [], isLoading, error } = useQuery({
     queryKey: ['my-memberships'],
     queryFn: async () => {
-      const json = await api.get<any>('/api/persons/me/memberships')
+      const json = await api.get<MembershipApiResponse>('/api/persons/me/memberships')
       const raw = json.data || []
-      return raw.map((m: any) => ({
+      return raw.map((m) => ({
         id: m.id,
-        organizationId: m.organizationId || m.orgId,
-        orgName: m.orgName || m.organizationName || '',
+        organizationId: m.organizationId,
+        orgName: m.orgName || '',
         orgSlug: m.orgSlug || '',
-        memberNumber: m.memberNumber || m.membershipNumber,
-        status: m.status || m.membershipStatus || 'active',
+        memberNumber: m.memberNumber,
+        status: m.status || 'active',
         tierId: m.tierId,
         startDate: m.startDate,
         duesExpiryDate: m.duesExpiryDate,
@@ -49,5 +63,5 @@ export function useMyOrgs() {
   const slugMatch = location.pathname.match(/^\/org\/([^/]+)/)
   const activeOrgSlug = slugMatch?.[1] ?? null
 
-  return { orgs, isLoading, activeOrgSlug }
+  return { orgs, isLoading, error, activeOrgSlug }
 }

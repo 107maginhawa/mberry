@@ -57,6 +57,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
   const { registration, event } = item
   const upcoming = isUpcoming(event.startDate)
   const orgId = event.organizationId
+  const orgSlug = event.orgSlug || orgId || ''
   const queryClient = useQueryClient()
 
   const cancelMutation = useMutation({
@@ -81,7 +82,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
       {/* Clickable card body → event detail */}
       <Link
         to="/org/$orgSlug/events/$eventId"
-        params={{ orgSlug: orgId ?? '', eventId: event.id }}
+        params={{ orgSlug, eventId: event.id }}
         className="block p-4 space-y-3 hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
       >
         <div className="flex items-start justify-between gap-2">

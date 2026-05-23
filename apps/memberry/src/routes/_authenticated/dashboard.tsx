@@ -163,8 +163,17 @@ function DashboardPage() {
   const overdueInvoices = invoices.filter((inv: any) => inv.status === 'overdue')
   const nextDueInvoice = unpaidInvoices[0]
 
+  // Build orgId → slug lookup for navigation
+  const orgIdToSlug: Record<string, string> = {}
+  for (const m of memberships) {
+    const oid = m.orgId ?? m.organizationId
+    if (oid && m.orgSlug) orgIdToSlug[oid] = m.orgSlug
+  }
+
   // Smart org routing for quick actions: org with unpaid dues first, else first org
   const duesOrgId = nextDueInvoice?.organizationId ?? undefined
+  const duesOrgSlug = duesOrgId ? orgIdToSlug[duesOrgId] : undefined
+  const firstOrgSlug = firstOrgId ? orgIdToSlug[firstOrgId] : undefined
   const eventsOrgId = firstOrgId
 
   const { user } = Route.useRouteContext()
@@ -255,10 +264,10 @@ function DashboardPage() {
             status={unpaidInvoices.length > 0 ? (overdueInvoices.length > 0 ? 'error' : 'warning') : 'success'}
             statusLabel={unpaidInvoices.length > 0 ? (overdueInvoices.length > 0 ? 'Overdue' : 'Payment due') : 'All paid'}
             errorMessage={invoicesQuery.isError ? 'Unable to load dues status' : undefined}
-            action={duesOrgId
-              ? { label: unpaidInvoices.length > 0 ? 'Pay now' : 'View dues', to: '/org/$orgSlug/dues', params: { orgSlug: duesOrgId } }
-              : firstOrgId
-                ? { label: 'View dues', to: '/org/$orgSlug/dues', params: { orgSlug: firstOrgId } }
+            action={duesOrgSlug
+              ? { label: unpaidInvoices.length > 0 ? 'Pay now' : 'View dues', to: '/org/$orgSlug/dues', params: { orgSlug: duesOrgSlug } }
+              : firstOrgSlug
+                ? { label: 'View dues', to: '/org/$orgSlug/dues', params: { orgSlug: firstOrgSlug } }
                 : undefined
             }
           />
@@ -316,8 +325,8 @@ function DashboardPage() {
 
       {/* Quick Actions */}
       <QuickActions
-        duesOrgId={duesOrgId}
-        eventsOrgId={eventsOrgId}
+        duesOrgSlug={duesOrgSlug}
+        eventsOrgSlug={firstOrgSlug}
       />
 
       {/* Org News + Credit Progress */}
@@ -343,6 +352,7 @@ function DashboardPage() {
 
 function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[] }) {
   const orgId = m.orgId ?? m.organizationId
+  const orgSlug = m.orgSlug || ''
   const officerQuery = useQuery<string | null>({
     queryKey: ['officer-role', orgId],
     queryFn: async () => {
@@ -396,7 +406,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
     <GlassCard className="p-5">
       <Link
         to="/org/$orgSlug/home"
-        params={{ orgSlug: orgId ?? '' }}
+        params={{ orgSlug }}
         className="block hover:opacity-80 transition-opacity"
       >
         <div className="flex items-start justify-between">
@@ -451,7 +461,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
         {hasOrgUnpaid && orgId && (
           <Link
             to="/org/$orgSlug/dues"
-            params={{ orgSlug: orgId }}
+            params={{ orgSlug }}
             className="inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
           >
             <CreditCard size={12} aria-hidden="true" />
@@ -470,7 +480,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
         {officerRole && (
           <Link
             to="/org/$orgSlug/officer/dashboard"
-            params={{ orgSlug: orgId ?? '' }}
+            params={{ orgSlug }}
             className="ml-auto inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
           >
             <Shield size={12} aria-hidden="true" />

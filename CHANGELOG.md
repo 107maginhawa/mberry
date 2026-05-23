@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- Fix UUID passed as orgSlug in dashboard/my routes — eliminates redirect round-trip on every org navigation
+- Fix getTraining handler using fetch-then-check org isolation (TOCTOU) — now uses scoped query
+- Fix getTraining auth guard returning raw JSON instead of throwing UnauthorizedError
+- Fix useMyOrgs using untyped API response — now properly typed with MembershipApiResponse
+- Fix silent error swallowing on membership fetch — OrgIconRail now shows error state
+- Fix OrgProvider context value not memoized — reduces unnecessary re-renders
+- Fix OrgProvider rendering children with empty orgId during loading
+- Fix slug redirect silently catching network errors — now only catches 404/400
+
+### Removed
+- Delete dead `association:member/getMyMemberships.ts` handler (duplicate, not wired)
+- Delete dead `training/getTraining.ts` handler and test (no auth, not wired)
+
+### Added
+- Add getTraining tests for wired handler (auth, org isolation, happy path, cross-org attack)
+- Expand getMyMemberships tests (orgSlug presence, empty result, orgId alias enrichment)
+- Add useMyOrgs hook tests (fetch, active org detection, error state, field mapping)
+- Add OrgProvider context tests (slug resolution, officer check, context value)
+- Add OrgIconRail component tests (render, active highlight, error state)
+- Add OrgPickerSheet component tests (open/close, org list, status badges)
+- Add CHANGELOG.md
+
 ## [0.1.0.0] - 2026-05-02
 
 ### Added

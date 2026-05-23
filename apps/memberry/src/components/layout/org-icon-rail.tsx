@@ -32,8 +32,16 @@ interface OrgIconRailProps {
 }
 
 export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
-  const { orgs, activeOrgSlug } = useMyOrgs()
+  const { orgs, activeOrgSlug, error } = useMyOrgs()
   const navigate = useNavigate()
+
+  if (error) {
+    return (
+      <aside className="hidden md:flex w-[56px] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col items-center py-3 shrink-0">
+        <span className="text-[10px] text-[var(--color-muted)] text-center px-1">Failed to load orgs</span>
+      </aside>
+    )
+  }
 
   if (orgs.length === 0) return null
 

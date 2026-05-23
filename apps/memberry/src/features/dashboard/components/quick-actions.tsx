@@ -9,19 +9,19 @@ interface QuickAction {
 }
 
 interface QuickActionsProps {
-  /** Org with unpaid dues (prioritized), falling back to first org */
-  duesOrgId?: string
-  /** First org for event browsing */
-  eventsOrgId?: string
+  /** Org slug with unpaid dues (prioritized), falling back to first org */
+  duesOrgSlug?: string
+  /** First org slug for event browsing */
+  eventsOrgSlug?: string
 }
 
-export function QuickActions({ duesOrgId, eventsOrgId }: QuickActionsProps) {
+export function QuickActions({ duesOrgSlug, eventsOrgSlug }: QuickActionsProps) {
   const actions: QuickAction[] = [
     {
       icon: <CreditCard size={20} />,
-      label: duesOrgId ? 'Pay Dues' : 'Payments',
-      to: duesOrgId ? '/org/$orgSlug/dues' : '/my/payments',
-      params: duesOrgId ? { orgSlug: duesOrgId } : undefined,
+      label: duesOrgSlug ? 'Pay Dues' : 'Payments',
+      to: duesOrgSlug ? '/org/$orgSlug/dues' : '/my/payments',
+      params: duesOrgSlug ? { orgSlug: duesOrgSlug } : undefined,
     },
     {
       icon: <IdCard size={20} />,
@@ -36,8 +36,8 @@ export function QuickActions({ duesOrgId, eventsOrgId }: QuickActionsProps) {
     {
       icon: <Calendar size={20} />,
       label: 'Events',
-      to: eventsOrgId ? '/org/$orgSlug/events' : '/my/events',
-      params: eventsOrgId ? { orgSlug: eventsOrgId } : undefined,
+      to: eventsOrgSlug ? '/org/$orgSlug/events' : '/my/events',
+      params: eventsOrgSlug ? { orgSlug: eventsOrgSlug } : undefined,
     },
     {
       icon: <BookOpen size={20} />,

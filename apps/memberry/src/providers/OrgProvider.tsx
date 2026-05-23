@@ -11,7 +11,7 @@
  *   3. Expose { org, orgId, orgSlug, role, permissions, isOfficer } via context
  */
 
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getOrganizationBySlugOptions } from '@monobase/sdk-ts/generated/react-query'
@@ -64,19 +64,28 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   const isOfficer = officerData?.data?.isOfficer ?? false
   const permissions = officerData?.data?.positions ?? []
   const role: OrgRole = isOfficer ? 'officer' : orgId ? 'member' : null
+  const isLoading = orgLoading || (!!orgId && officerLoading)
+
+  const value = useMemo<OrgContextValue>(
+    () => ({
+      org: org ?? null,
+      orgId,
+      orgSlug,
+      role,
+      permissions,
+      isOfficer,
+      isLoading,
+    }),
+    [org, orgId, orgSlug, role, permissions, isOfficer, isLoading],
+  )
+
+  // Don't render children until org is resolved — prevents invalid API calls with empty orgId
+  if (isLoading && !orgId) {
+    return null
+  }
 
   return (
-    <OrgContext.Provider
-      value={{
-        org: org ?? null,
-        orgId,
-        orgSlug,
-        role,
-        permissions,
-        isOfficer,
-        isLoading: orgLoading || (!!orgId && officerLoading),
-      }}
-    >
+    <OrgContext.Provider value={value}>
       {children}
     </OrgContext.Provider>
   )

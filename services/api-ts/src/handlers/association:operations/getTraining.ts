@@ -1,7 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { GetTrainingParams } from '@/generated/openapi/validators';
-import { ForbiddenError, NotFoundError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError, ForbiddenError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 
 /**
@@ -14,23 +14,19 @@ export async function getTraining(
   ctx: ValidatedContext<never, never, GetTrainingParams>
 ): Promise<Response> {
   const user = ctx.get('user');
-  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+  if (!user) throw new UnauthorizedError();
 
   const orgId = ctx.get('organizationId');
-  if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+  if (!orgId) throw new ForbiddenError('Organization context required');
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new TrainingRepository(db, logger);
 
-  const training = await repo.findOneById(params.trainingId);
+  // Scoped query: fetch only within caller's org (prevents cross-org data leak)
+  const training = await repo.findOne({ id: params.trainingId, organizationId: orgId });
   if (!training) throw new NotFoundError('Training not found');
-
-  // Prevent cross-org data leak: verify training belongs to caller's org
-  if (training.organizationId !== orgId) {
-    throw new ForbiddenError('Training not found in this organization');
-  }
 
   return ctx.json(training, 200);
 }

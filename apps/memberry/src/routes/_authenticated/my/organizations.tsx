@@ -98,7 +98,7 @@ function MyOrganizationsPage() {
             >
               <Link
                 to="/org/$orgSlug/members"
-                params={{ orgSlug: normalizeOrgId(m) ?? '' }}
+                params={{ orgSlug: m.orgSlug || normalizeOrgId(m) || '' }}
                 className="flex items-center gap-4 flex-1 min-w-0"
               >
                 <AvatarInitials name={m.orgName ?? 'Org'} size="md" />
