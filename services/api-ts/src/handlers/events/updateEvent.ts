@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { NotFoundError, ForbiddenError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError, ForbiddenError, BusinessLogicError, ValidationError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
 import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 import type { Session } from '@/types/auth';
@@ -25,6 +25,24 @@ export async function updateEvent(ctx: Context): Promise<Response> {
     );
   }
 
+  // Slug is immutable after first save
+  if (body.eventSlug !== undefined) {
+    throw new BusinessLogicError(
+      'Event slug cannot be changed after creation.',
+      'SLUG_IMMUTABLE'
+    );
+  }
+
+  // Validate credit hours if provided
+  if (body.creditAmount !== undefined && body.creditAmount !== null) {
+    if (body.creditAmount > 40) {
+      throw new ValidationError('Credit amount cannot exceed 40 hours');
+    }
+    if (body.creditAmount > 0 && (body.creditAmount * 2) % 1 !== 0) {
+      throw new ValidationError('Credit amount must be in 0.5 increments');
+    }
+  }
+
   // Map old field names to new schema columns; omit fields not in schema
   const {
     type: _type,
@@ -34,6 +52,7 @@ export async function updateEvent(ctx: Context): Promise<Response> {
     qrEnabled: _qrEnabled,
     registrationEnabled: _registrationEnabled,
     status: _status,
+    eventSlug: _eventSlug,
     startAt,
     endAt,
     fee,

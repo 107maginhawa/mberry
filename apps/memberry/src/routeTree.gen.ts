@@ -18,6 +18,7 @@ import { Route as VerifyTokenRouteImport } from './routes/verify/$token'
 import { Route as PayTokenRouteImport } from './routes/pay/$token'
 import { Route as OrgSlugRouteImport } from './routes/org/$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite/$token'
+import { Route as DiscoverEventsRouteImport } from './routes/discover/events'
 import { Route as AuthAuthViewRouteImport } from './routes/auth/$authView'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings/security'
@@ -132,6 +133,11 @@ const OrgSlugRoute = OrgSlugRouteImport.update({
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverEventsRoute = DiscoverEventsRouteImport.update({
+  id: '/discover/events',
+  path: '/discover/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthAuthViewRoute = AuthAuthViewRouteImport.update({
@@ -559,6 +565,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/auth/$authView': typeof AuthAuthViewRoute
+  '/discover/events': typeof DiscoverEventsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
@@ -640,6 +647,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/auth/$authView': typeof AuthAuthViewRoute
+  '/discover/events': typeof DiscoverEventsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
@@ -720,6 +728,7 @@ export interface FileRoutesById {
   '/verify-email': typeof VerifyEmailRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/auth/$authView': typeof AuthAuthViewRoute
+  '/discover/events': typeof DiscoverEventsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
@@ -803,6 +812,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/dashboard'
     | '/auth/$authView'
+    | '/discover/events'
     | '/invite/$token'
     | '/org/$slug'
     | '/pay/$token'
@@ -884,6 +894,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/dashboard'
     | '/auth/$authView'
+    | '/discover/events'
     | '/invite/$token'
     | '/org/$slug'
     | '/pay/$token'
@@ -963,6 +974,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/_authenticated/dashboard'
     | '/auth/$authView'
+    | '/discover/events'
     | '/invite/$token'
     | '/org/$slug'
     | '/pay/$token'
@@ -1045,6 +1057,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   AuthAuthViewRoute: typeof AuthAuthViewRoute
+  DiscoverEventsRoute: typeof DiscoverEventsRoute
   InviteTokenRoute: typeof InviteTokenRoute
   OrgSlugRoute: typeof OrgSlugRoute
   PayTokenRoute: typeof PayTokenRoute
@@ -1114,6 +1127,13 @@ declare module '@tanstack/react-router' {
       path: '/invite/$token'
       fullPath: '/invite/$token'
       preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover/events': {
+      id: '/discover/events'
+      path: '/discover/events'
+      fullPath: '/discover/events'
+      preLoaderRoute: typeof DiscoverEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/$authView': {
@@ -1929,6 +1949,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   AuthAuthViewRoute: AuthAuthViewRoute,
+  DiscoverEventsRoute: DiscoverEventsRoute,
   InviteTokenRoute: InviteTokenRoute,
   OrgSlugRoute: OrgSlugRoute,
   PayTokenRoute: PayTokenRoute,

@@ -510,6 +510,13 @@ namespace MonobaseAPI {
   interface PlatformAdminManagement extends PlatformAdminModule.AdminManagement {}
 
   // =========================================================================
+  // Public Event Endpoints (no auth — shareable event pages)
+  // =========================================================================
+
+  @tag("Events")
+  interface PublicEventEndpoints extends Association.Operations.Events.PublicEventEndpoints {}
+
+  // =========================================================================
   // Platform Admin Custom (public org lookup + admin identity)
   // =========================================================================
 

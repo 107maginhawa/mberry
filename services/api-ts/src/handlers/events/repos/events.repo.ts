@@ -64,6 +64,48 @@ export class EventsRepository {
     return event;
   }
 
+  async listPublic(filters?: {
+    eventType?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    pricing?: 'free' | 'paid' | 'all';
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const conditions: SQL<unknown>[] = [
+      eq(events.visibility, 'network'),
+      inArray(events.status, ['published', 'completed'] as Event['status'][]),
+    ];
+
+    if (filters?.eventType) conditions.push(eq(events.eventType, filters.eventType as NonNullable<Event['eventType']>));
+    if (filters?.dateFrom) conditions.push(gte(events.startDate, filters.dateFrom));
+    if (filters?.dateTo) conditions.push(lte(events.startDate, filters.dateTo));
+    if (filters?.search) conditions.push(like(events.title, `%${filters.search}%`));
+    if (filters?.pricing === 'free') conditions.push(eq(events.registrationFee, 0));
+    if (filters?.pricing === 'paid') conditions.push(sql`${events.registrationFee} > 0`);
+
+    const [data, countResult] = await Promise.all([
+      this.db
+        .select()
+        .from(events)
+        .where(and(...conditions))
+        .orderBy(desc(events.startDate))
+        .limit(filters?.limit ?? 20)
+        .offset(filters?.offset ?? 0),
+      this.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(events)
+        .where(and(...conditions)),
+    ]);
+    return { data, total: countResult[0]?.count ?? 0 };
+  }
+
+  async findBySlug(slug: string): Promise<Event | undefined> {
+    const [event] = await this.db.select().from(events).where(eq(events.eventSlug, slug)).limit(1);
+    return event;
+  }
+
   async create(data: NewEvent): Promise<Event> {
     const [result] = await this.db.insert(events).values(data).returning();
     return result!;

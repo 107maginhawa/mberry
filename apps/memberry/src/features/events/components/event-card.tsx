@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@monobase/ui'
-import { Calendar, MapPin, Users, MoreHorizontal } from 'lucide-react'
+import { Calendar, MapPin, Users, MoreHorizontal, DollarSign, Award } from 'lucide-react'
 import { Link, useParams } from '@tanstack/react-router'
 import { GlassCard } from '@/components/motion/glass-card'
 
@@ -14,6 +14,14 @@ interface EventCardProps {
     location?: string | null
     registrationCount?: number
     capacity?: number | null
+    registrationFee?: number | bigint | null
+    currency?: string | null
+    creditBearing?: boolean
+    creditAmount?: number | null
+    cpdActivityType?: string | null
+    coverImageUrl?: string | null
+    visibility?: string | null
+    eventSlug?: string | null
   }
   orgId: string
   onEdit?: (id: string) => void
@@ -26,6 +34,9 @@ const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
   published: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
   cancelled: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
+  completed: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
+  registration_open: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  in_progress: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
 }
 
 function formatEventDate(startDate: string | Date, endDate: string | Date) {
@@ -37,6 +48,20 @@ function formatEventDate(startDate: string | Date, endDate: string | Date) {
   return `${dateStr} · ${startTime}–${endTime}`
 }
 
+function formatDateBadge(startDate: string | Date) {
+  const d = new Date(startDate)
+  return {
+    month: d.toLocaleDateString('en-PH', { month: 'short' }).toUpperCase(),
+    day: d.getDate().toString(),
+  }
+}
+
+function formatPrice(fee: number | bigint | null | undefined, currency: string | null | undefined) {
+  if (!fee || fee === 0 || fee === 0n) return 'Free'
+  const amt = Number(fee) / 100
+  return `${currency ?? 'PHP'} ${amt.toLocaleString()}`
+}
+
 function getLocation(event: EventCardProps['event']) {
   return event.location ?? 'In-person'
 }
@@ -44,16 +69,45 @@ function getLocation(event: EventCardProps['event']) {
 export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBase }: EventCardProps) {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [menuOpen, setMenuOpen] = useState(false)
+  const dateBadge = formatDateBadge(event.startDate)
 
   return (
     <GlassCard className="overflow-hidden">
+      {/* Cover image */}
+      {event.coverImageUrl && (
+        <div className="relative h-40 overflow-hidden">
+          <img
+            src={event.coverImageUrl}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          {/* Date badge overlay */}
+          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-2.5 py-1.5 text-center shadow-sm">
+            <div className="text-[10px] font-semibold text-[var(--color-muted)] leading-none">{dateBadge.month}</div>
+            <div className="text-lg font-bold leading-tight">{dateBadge.day}</div>
+          </div>
+        </div>
+      )}
+
       <div className="p-4 space-y-3">
-        {/* Header */}
+        {/* Header — status + badges */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[event.status] ?? 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]'}`}>
-              {event.status}
+              {event.status.replace('_', ' ')}
             </span>
+            {/* Price badge */}
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-foreground)]">
+              <DollarSign className="w-3 h-3" />
+              {formatPrice(event.registrationFee, event.currency)}
+            </span>
+            {/* CPD hours badge */}
+            {event.creditBearing && event.creditAmount && event.creditAmount > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-primary)]">
+                <Award className="w-3 h-3" />
+                {event.creditAmount} CPD hrs
+              </span>
+            )}
           </div>
           <div className="relative">
             <Button

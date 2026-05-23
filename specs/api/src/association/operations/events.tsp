@@ -110,6 +110,48 @@ enum WaitlistEntryStatus {
   cancelled: "cancelled",
 }
 
+@doc("CPD continuing professional development activity type")
+enum CpdActivityType {
+  @doc("Formal presentation, most common for dental/medical CPD")
+  seminar: "seminar",
+
+  @doc("Hands-on, interactive session")
+  workshop: "workshop",
+
+  @doc("Multi-session, multi-day event")
+  conference: "conference",
+
+  @doc("Online live session")
+  webinar: "webinar",
+
+  @doc("Clinical skills training, lab work")
+  handsOn: "hands_on",
+
+  @doc("Outreach, dental missions, health camps")
+  community: "community",
+
+  @doc("Paper presentation, poster session")
+  research: "research",
+
+  @doc("Preceptorship, teaching, supervision")
+  mentorship: "mentorship",
+
+  @doc("Reading group, journal club (SDL, often capped at 30% of total)")
+  selfDirected: "self_directed",
+
+  @doc("Catch-all for org-specific types")
+  other: "other",
+}
+
+@doc("Visibility scope of an event")
+enum EventVisibility {
+  @doc("Visible only to organization members")
+  internal: "internal",
+
+  @doc("Visible publicly across the network")
+  network: "network",
+}
+
 @doc("Method used to check in an attendee")
 enum CheckInMethod {
   @doc("QR code scan at the door")
@@ -192,6 +234,20 @@ model Event extends BaseEntity {
   @doc("Number of CE credits awarded for attendance")
   @minValue(0)
   creditAmount?: float64;
+
+  @doc("CPD activity type categorization")
+  cpdActivityType?: CpdActivityType;
+
+  @doc("URL-safe slug for public event page, globally unique, immutable after first save")
+  @maxLength(300)
+  eventSlug?: string;
+
+  @doc("URL of the cover image stored in S3/MinIO")
+  @maxLength(2048)
+  coverImageUrl?: string;
+
+  @doc("Visibility scope of the event")
+  visibility: EventVisibility;
 }
 
 @doc("An individual person's registration for a specific event")
@@ -323,6 +379,16 @@ model EventCreateRequest {
   @doc("CE credit amount")
   @minValue(0)
   creditAmount?: float64;
+
+  @doc("CPD activity type")
+  cpdActivityType?: CpdActivityType;
+
+  @doc("Cover image URL")
+  @maxLength(2048)
+  coverImageUrl?: string;
+
+  @doc("Visibility scope")
+  visibility?: EventVisibility;
 }
 
 @doc("Request body for updating an existing event")
@@ -375,6 +441,16 @@ model EventUpdateRequest {
   @doc("CE credit amount")
   @minValue(0)
   creditAmount?: float64 | null;
+
+  @doc("CPD activity type")
+  cpdActivityType?: CpdActivityType | null;
+
+  @doc("Cover image URL")
+  @maxLength(2048)
+  coverImageUrl?: string | null;
+
+  @doc("Visibility scope")
+  visibility?: EventVisibility;
 }
 
 @doc("Query parameters for filtering events")
@@ -761,6 +837,25 @@ namespace Association.Operations.Events {
       | ApiNotFoundResponse
       | ApiConflictResponse;
 
+    @doc("Register and pay for a paid event. Creates a Stripe Checkout session and returns the checkout URL.")
+    @operationId("registerAndPayForEvent")
+    @post
+    @route("/{eventId}/register-and-pay")
+    @extension("x-security-required-roles", #["association:member"])
+    registerAndPayForEvent(
+      @path eventId: string
+    ): ApiCreatedResponse<{
+      @doc("Stripe Checkout session URL")
+      checkoutUrl: string;
+      @doc("Registration ID (pending payment)")
+      registrationId: string;
+    }>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
     @doc("Check in an attendee at a specific event.")
     @operationId("checkInCustomEvent")
     @post
@@ -801,5 +896,48 @@ namespace Association.Operations.Events {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiNotFoundResponse;
+  }
+
+  /**
+   * Public event endpoints. No authentication required.
+   * Used for shareable event pages and social media previews.
+   */
+  interface PublicEventEndpoints {
+    @doc("Get a published event by its public slug. Returns 404 for draft/cancelled events.")
+    @operationId("getPublicEvent")
+    @get
+    @route("/public/events/{slug}")
+    getPublicEvent(
+      @path slug: string
+    ): ApiOkResponse<Event>
+      | ApiNotFoundResponse;
+
+    @doc("List public events across all organizations. Only shows network-visibility, non-draft events.")
+    @operationId("listPublicEvents")
+    @get
+    @route("/public/events")
+    listPublicEvents(
+      ...PaginationQuery,
+
+      @doc("Filter by country (from org region)")
+      @query
+      country?: string,
+
+      @doc("Filter by event type")
+      @query
+      eventType?: EventType,
+
+      @doc("Filter events starting on or after this date")
+      @query
+      dateFrom?: utcDateTime,
+
+      @doc("Filter events starting on or before this date")
+      @query
+      dateTo?: utcDateTime,
+
+      @doc("Filter by pricing: free, paid, or all")
+      @query
+      pricing?: string,
+    ): ApiOkResponse<PaginatedResponse<Event>>;
   }
 }

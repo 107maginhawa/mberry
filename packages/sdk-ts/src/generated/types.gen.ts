@@ -8913,6 +8913,44 @@ export type BookmarkUpdate = {
 };
 
 /**
+ * Request body for bulk-approving membership applications
+ */
+export type BulkApproveApplicationsRequest = {
+    /**
+     * IDs of applications to approve in a single batch
+     */
+    applicationIds: Array<string>;
+};
+
+/**
+ * Response from a bulk approve operation with partial-success semantics
+ */
+export type BulkApproveApplicationsResponse = {
+    /**
+     * IDs of applications successfully approved
+     */
+    succeeded: Array<string>;
+    /**
+     * Applications that failed to approve, with reasons
+     */
+    failed: Array<BulkApproveFailure>;
+};
+
+/**
+ * A single failure entry in a bulk approve operation
+ */
+export type BulkApproveFailure = {
+    /**
+     * ID of the application that failed to approve
+     */
+    id: string;
+    /**
+     * Human-readable reason for the failure
+     */
+    reason: string;
+};
+
+/**
  * A conflict-of-interest attestation submitted by a member
  */
 export type CoiAttestation = {
@@ -10852,6 +10890,49 @@ export type CheckInUpdate = {
 };
 
 /**
+ * Response after successfully claiming an invitation
+ */
+export type ClaimInviteResponse = {
+    /**
+     * Whether the claim was successful
+     */
+    claimed: boolean;
+    /**
+     * Organization the user was invited to
+     */
+    organizationId: string;
+    /**
+     * Pre-populated data from the invitation
+     */
+    metadata?: {
+        /**
+         * Pre-populated name from import
+         */
+        name?: string;
+        /**
+         * Pre-populated license number from import
+         */
+        licenseNumber?: string;
+        /**
+         * Membership category to assign on claim
+         */
+        membershipCategoryId?: string;
+        /**
+         * Membership tier to assign on claim
+         */
+        membershipTierId?: string;
+    };
+    /**
+     * Membership outcome — 'joined' if auto-joined, 'pendingApproval' if org requires approval
+     */
+    membershipStatus?: 'joined' | 'pendingApproval';
+    /**
+     * Membership ID if auto-joined
+     */
+    membershipId?: string;
+};
+
+/**
  * A standing or ad-hoc committee of the association
  */
 export type Committee = {
@@ -12219,6 +12300,11 @@ export type CourseUpdate = {
 };
 
 /**
+ * CPD continuing professional development activity type
+ */
+export type CpdActivityType = 'seminar' | 'workshop' | 'conference' | 'webinar' | 'hands_on' | 'community' | 'research' | 'mentorship' | 'self_directed' | 'other';
+
+/**
  * Create chat room request
  */
 export type CreateChatRoomRequest = {
@@ -12260,6 +12346,79 @@ export type CreateCreditEntryRequest = {
      * Organisation ID to associate the entry with; defaults to user's first membership org
      */
     organizationId?: string;
+};
+
+/**
+ * Request body for creating an invitation
+ */
+export type CreateInviteRequest = {
+    /**
+     * Email address to send the invitation to
+     */
+    email: string;
+    /**
+     * Person ID if inviting an existing person
+     */
+    personId?: string;
+    /**
+     * Invitation type — 'invite' for officer-sent, 'claim' for bulk import
+     */
+    type?: 'invite' | 'claim';
+    /**
+     * Personalized message from the officer
+     */
+    message?: string;
+    /**
+     * Pre-populated data for the claim flow
+     */
+    metadata?: {
+        /**
+         * Pre-populated name from import
+         */
+        name?: string;
+        /**
+         * Pre-populated license number from import
+         */
+        licenseNumber?: string;
+        /**
+         * Membership category to assign on claim
+         */
+        membershipCategoryId?: string;
+        /**
+         * Membership tier to assign on claim
+         */
+        membershipTierId?: string;
+    };
+};
+
+/**
+ * Response after successfully creating an invitation
+ */
+export type CreateInviteResponse = {
+    /**
+     * Invitation record ID
+     */
+    id: string;
+    /**
+     * Raw invite token — shown only once, not stored server-side
+     */
+    token: string;
+    /**
+     * Email the invitation was sent to
+     */
+    email: string;
+    /**
+     * Invitation type
+     */
+    type: string;
+    /**
+     * Token expiration timestamp
+     */
+    expiresAt: Date;
+    /**
+     * Current invitation status
+     */
+    status: string;
 };
 
 /**
@@ -16710,6 +16869,22 @@ export type Event = {
      * Number of CE credits awarded for attendance
      */
     creditAmount?: number;
+    /**
+     * CPD activity type categorization
+     */
+    cpdActivityType?: 'seminar' | 'workshop' | 'conference' | 'webinar' | 'hands_on' | 'community' | 'research' | 'mentorship' | 'self_directed' | 'other';
+    /**
+     * URL-safe slug for public event page, globally unique, immutable after first save
+     */
+    eventSlug?: string;
+    /**
+     * URL of the cover image stored in S3/MinIO
+     */
+    coverImageUrl?: string;
+    /**
+     * Visibility scope of the event
+     */
+    visibility: 'internal' | 'network';
 };
 
 /**
@@ -16776,6 +16951,18 @@ export type EventCreateRequest = {
      * CE credit amount
      */
     creditAmount?: number;
+    /**
+     * CPD activity type
+     */
+    cpdActivityType?: 'seminar' | 'workshop' | 'conference' | 'webinar' | 'hands_on' | 'community' | 'research' | 'mentorship' | 'self_directed' | 'other';
+    /**
+     * Cover image URL
+     */
+    coverImageUrl?: string;
+    /**
+     * Visibility scope
+     */
+    visibility?: 'internal' | 'network';
 };
 
 /**
@@ -17232,6 +17419,22 @@ export type EventUpdate = {
      * Number of CE credits awarded for attendance
      */
     creditAmount?: number;
+    /**
+     * CPD activity type categorization
+     */
+    cpdActivityType?: 'seminar' | 'workshop' | 'conference' | 'webinar' | 'hands_on' | 'community' | 'research' | 'mentorship' | 'self_directed' | 'other';
+    /**
+     * URL-safe slug for public event page, globally unique, immutable after first save
+     */
+    eventSlug?: string;
+    /**
+     * URL of the cover image stored in S3/MinIO
+     */
+    coverImageUrl?: string;
+    /**
+     * Visibility scope of the event
+     */
+    visibility?: 'internal' | 'network';
 };
 
 /**
@@ -17294,7 +17497,24 @@ export type EventUpdateRequest = {
      * CE credit amount
      */
     creditAmount?: number | null;
+    /**
+     * CPD activity type
+     */
+    cpdActivityType?: 'seminar' | 'workshop' | 'conference' | 'webinar' | 'hands_on' | 'community' | 'research' | 'mentorship' | 'self_directed' | 'other';
+    /**
+     * Cover image URL
+     */
+    coverImageUrl?: string | null;
+    /**
+     * Visibility scope
+     */
+    visibility?: 'internal' | 'network';
 };
+
+/**
+ * Visibility scope of an event
+ */
+export type EventVisibility = 'internal' | 'network';
 
 /**
  * The result of a certification examination attempt
@@ -18704,7 +18924,7 @@ export type InstitutionalMembership = {
     /**
      * Lifecycle status of this institutional membership
      */
-    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
 };
 
 /**
@@ -18849,7 +19069,7 @@ export type InstitutionalMembershipUpdate = {
     /**
      * Lifecycle status of this institutional membership
      */
-    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
 };
 
 /**
@@ -18903,6 +19123,51 @@ export type InternalServerError = {
      */
     reported?: boolean;
 };
+
+/**
+ * Error response when an invitation is no longer claimable
+ */
+export type InviteGoneResponse = {
+    /**
+     * Human-readable error message
+     */
+    error: string;
+    /**
+     * Machine-readable error code: ALREADY_CLAIMED, REVOKED, or EXPIRED
+     */
+    code: 'ALREADY_CLAIMED' | 'REVOKED' | 'EXPIRED';
+    /**
+     * Organization ID — included for expired invites so user can re-request
+     */
+    orgId?: string;
+};
+
+/**
+ * Pre-populated data attached to an invitation for the claim flow
+ */
+export type InviteMetadata = {
+    /**
+     * Pre-populated name from import
+     */
+    name?: string;
+    /**
+     * Pre-populated license number from import
+     */
+    licenseNumber?: string;
+    /**
+     * Membership category to assign on claim
+     */
+    membershipCategoryId?: string;
+    /**
+     * Membership tier to assign on claim
+     */
+    membershipTierId?: string;
+};
+
+/**
+ * Invitation type
+ */
+export type InviteType = 'invite' | 'claim';
 
 /**
  * Invoice for billing and payments
@@ -20261,19 +20526,19 @@ export type Membership = {
     /**
      * Computed lifecycle status stored for query performance
      */
-    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
     /**
      * Timestamp when the person first joined the association
      */
     joinedAt: Date;
     /**
-     * Timestamp of termination, if applicable
+     * Timestamp of removal, if applicable
      */
-    terminatedAt?: Date;
+    removedAt?: Date;
     /**
-     * Reason provided for termination
+     * Reason provided for removal
      */
-    terminationReason?: string;
+    removalReason?: string;
     /**
      * Internal note about this membership
      */
@@ -20658,6 +20923,20 @@ export type MembershipCreateRequest = {
 };
 
 /**
+ * Request to record a member's death
+ */
+export type MembershipDeceasedRequest = {
+    /**
+     * Date of death
+     */
+    dateOfDeath: Date;
+    /**
+     * Optional notes
+     */
+    terminationReason?: string;
+};
+
+/**
  * Offset-based paginated response with page navigation
  */
 export type MembershipListResponse = {
@@ -20705,9 +20984,19 @@ export type MembershipListResponse = {
 };
 
 /**
+ * Request to record a member's voluntary resignation
+ */
+export type MembershipResignRequest = {
+    /**
+     * Reason for resignation
+     */
+    terminationReason?: string;
+};
+
+/**
  * Lifecycle status of a membership record. Computed from duesExpiryDate and stored for query performance.
  */
-export type MembershipStatus = 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+export type MembershipStatus = 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
 
 /**
  * Request to terminate a membership
@@ -20979,19 +21268,19 @@ export type MembershipUpdate = {
     /**
      * Computed lifecycle status stored for query performance
      */
-    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
     /**
      * Timestamp when the person first joined the association
      */
     joinedAt?: Date;
     /**
-     * Timestamp of termination, if applicable
+     * Timestamp of removal, if applicable
      */
-    terminatedAt?: Date;
+    removedAt?: Date;
     /**
-     * Reason provided for termination
+     * Reason provided for removal
      */
-    terminationReason?: string;
+    removalReason?: string;
     /**
      * Internal note about this membership
      */
@@ -22155,6 +22444,265 @@ export type OfficerRoleResponse = {
          */
         positions: Array<OfficerPosition>;
     };
+};
+
+/**
+ * Officer-enriched view of a roster member, including dues and training compliance data
+ */
+export type OfficerRosterMember = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * ID of the person
+     */
+    personId: string;
+    /**
+     * ID of the membership tier
+     */
+    tierId: string;
+    /**
+     * Optional membership category ID
+     */
+    categoryId?: string;
+    /**
+     * Human-readable member number or license number
+     */
+    memberNumber?: string;
+    /**
+     * Date on which membership benefits began
+     */
+    startDate: Date;
+    /**
+     * Date on which current dues period expires
+     */
+    duesExpiryDate: Date;
+    /**
+     * Lifecycle status of this membership
+     */
+    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
+    /**
+     * Timestamp when the person first joined the association
+     */
+    joinedAt: Date;
+    /**
+     * Number of days after duesExpiryDate before membership lapses
+     */
+    gracePeriodDays: number;
+    /**
+     * Internal note about this membership
+     */
+    note?: string;
+    /**
+     * First name of the person (from person JOIN)
+     */
+    firstName?: string;
+    /**
+     * Last name of the person (from person JOIN)
+     */
+    lastName?: string;
+    /**
+     * Full name of the person (from person JOIN)
+     */
+    name?: string;
+    /**
+     * Email address of the person (from person JOIN)
+     */
+    email?: string;
+    /**
+     * Name of the membership category (from category JOIN)
+     */
+    categoryName?: string;
+    /**
+     * Status of the latest dues invoice for this member; null if no invoice exists
+     */
+    duesInvoiceStatus?: string;
+    /**
+     * Total CPD credits earned by this member in the current cycle
+     */
+    creditsEarned: number;
+    /**
+     * Whether the member meets the 40-credit CPD threshold for the current cycle
+     */
+    trainingCompliant: boolean;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type OfficerRosterMemberListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<OfficerRosterMember>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Officer-enriched view of a roster member, including dues and training compliance data
+ */
+export type OfficerRosterMemberUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * ID of the person
+     */
+    personId?: string;
+    /**
+     * ID of the membership tier
+     */
+    tierId?: string;
+    /**
+     * Optional membership category ID
+     */
+    categoryId?: string;
+    /**
+     * Human-readable member number or license number
+     */
+    memberNumber?: string;
+    /**
+     * Date on which membership benefits began
+     */
+    startDate?: Date;
+    /**
+     * Date on which current dues period expires
+     */
+    duesExpiryDate?: Date;
+    /**
+     * Lifecycle status of this membership
+     */
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
+    /**
+     * Timestamp when the person first joined the association
+     */
+    joinedAt?: Date;
+    /**
+     * Number of days after duesExpiryDate before membership lapses
+     */
+    gracePeriodDays?: number;
+    /**
+     * Internal note about this membership
+     */
+    note?: string;
+    /**
+     * First name of the person (from person JOIN)
+     */
+    firstName?: string;
+    /**
+     * Last name of the person (from person JOIN)
+     */
+    lastName?: string;
+    /**
+     * Full name of the person (from person JOIN)
+     */
+    name?: string;
+    /**
+     * Email address of the person (from person JOIN)
+     */
+    email?: string;
+    /**
+     * Name of the membership category (from category JOIN)
+     */
+    categoryName?: string;
+    /**
+     * Status of the latest dues invoice for this member; null if no invoice exists
+     */
+    duesInvoiceStatus?: string;
+    /**
+     * Total CPD credits earned by this member in the current cycle
+     */
+    creditsEarned?: number;
+    /**
+     * Whether the member meets the 40-credit CPD threshold for the current cycle
+     */
+    trainingCompliant?: boolean;
 };
 
 /**
@@ -26539,7 +27087,7 @@ export type RosterMember = {
     /**
      * Lifecycle status of this membership
      */
-    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    status: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
     /**
      * Timestamp when the person first joined the association
      */
@@ -26552,53 +27100,6 @@ export type RosterMember = {
      * Internal note about this membership
      */
     note?: string;
-};
-
-/**
- * Offset-based paginated response with page navigation
- */
-export type RosterMemberListResponse = {
-    /**
-     * Response data items
-     */
-    data: Array<RosterMember>;
-    /**
-     * Pagination metadata
-     */
-    pagination: {
-        /**
-         * Current offset
-         */
-        offset: number;
-        /**
-         * Items per page
-         */
-        limit: number;
-        /**
-         * Number of items in current page
-         */
-        count: number;
-        /**
-         * Total number of items
-         */
-        totalCount: number;
-        /**
-         * Total number of pages
-         */
-        totalPages: number;
-        /**
-         * Current page number (1-based)
-         */
-        currentPage: number;
-        /**
-         * Whether there are more pages
-         */
-        hasNextPage: boolean;
-        /**
-         * Whether there are previous pages
-         */
-        hasPreviousPage: boolean;
-    };
 };
 
 /**
@@ -26660,7 +27161,7 @@ export type RosterMemberUpdate = {
     /**
      * Lifecycle status of this membership
      */
-    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
     /**
      * Timestamp when the person first joined the association
      */
@@ -29547,7 +30048,7 @@ export type UpdateMemberRequest = {
     /**
      * Lifecycle status
      */
-    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'terminated';
+    status?: 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
     /**
      * Internal note about this membership
      */
@@ -29732,6 +30233,53 @@ export type UpsertFundsRequest = {
  * Valid URL
  */
 export type Url = string;
+
+/**
+ * Successful token validation response with pre-populated claim data
+ */
+export type ValidateInviteResponse = {
+    /**
+     * Whether the token is valid
+     */
+    valid: boolean;
+    /**
+     * Email associated with the invitation
+     */
+    email: string;
+    /**
+     * Organization ID the invitation belongs to
+     */
+    orgId: string;
+    /**
+     * Invitation type
+     */
+    type: string;
+    /**
+     * Pre-populated data for the claim form
+     */
+    metadata?: {
+        /**
+         * Pre-populated name from import
+         */
+        name?: string;
+        /**
+         * Pre-populated license number from import
+         */
+        licenseNumber?: string;
+        /**
+         * Membership category to assign on claim
+         */
+        membershipCategoryId?: string;
+        /**
+         * Membership tier to assign on claim
+         */
+        membershipTierId?: string;
+    };
+    /**
+     * Token expiration timestamp
+     */
+    expiresAt: Date;
+};
 
 /**
  * Input validation error
@@ -32576,6 +33124,58 @@ export type RegisterForCustomEventResponses = {
 
 export type RegisterForCustomEventResponse = RegisterForCustomEventResponses[keyof RegisterForCustomEventResponses];
 
+export type RegisterAndPayForEventData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/event-lifecycle/{eventId}/register-and-pay';
+};
+
+export type RegisterAndPayForEventErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RegisterAndPayForEventError = RegisterAndPayForEventErrors[keyof RegisterAndPayForEventErrors];
+
+export type RegisterAndPayForEventResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        /**
+         * Stripe Checkout session URL
+         */
+        checkoutUrl: string;
+        /**
+         * Registration ID (pending payment)
+         */
+        registrationId: string;
+    };
+};
+
+export type RegisterAndPayForEventResponse = RegisterAndPayForEventResponses[keyof RegisterAndPayForEventResponses];
+
 export type ListCustomEventRegistrationsData = {
     body?: never;
     path: {
@@ -33865,6 +34465,39 @@ export type CreateMembershipApplicationResponses = {
 };
 
 export type CreateMembershipApplicationResponse = CreateMembershipApplicationResponses[keyof CreateMembershipApplicationResponses];
+
+export type BulkApproveMembershipApplicationsData = {
+    body: BulkApproveApplicationsRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/applications/bulk-approve';
+};
+
+export type BulkApproveMembershipApplicationsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type BulkApproveMembershipApplicationsError = BulkApproveMembershipApplicationsErrors[keyof BulkApproveMembershipApplicationsErrors];
+
+export type BulkApproveMembershipApplicationsResponses = {
+    /**
+     * Success response with data
+     */
+    200: BulkApproveApplicationsResponse;
+};
+
+export type BulkApproveMembershipApplicationsResponse = BulkApproveMembershipApplicationsResponses[keyof BulkApproveMembershipApplicationsResponses];
 
 export type DeleteMembershipApplicationData = {
     body?: never;
@@ -38000,6 +38633,43 @@ export type UpdateMembershipResponses = {
     200: unknown;
 };
 
+export type DeceaseMembershipData = {
+    body: MembershipDeceasedRequest;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}/deceased';
+};
+
+export type DeceaseMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DeceaseMembershipError = DeceaseMembershipErrors[keyof DeceaseMembershipErrors];
+
+export type DeceaseMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
 export type ReinstateMembershipData = {
     body?: never;
     path: {
@@ -38060,6 +38730,43 @@ export type RenewMembershipErrors = {
 export type RenewMembershipError = RenewMembershipErrors[keyof RenewMembershipErrors];
 
 export type RenewMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type ResignMembershipData = {
+    body: MembershipResignRequest;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}/resign';
+};
+
+export type ResignMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type ResignMembershipError = ResignMembershipErrors[keyof ResignMembershipErrors];
+
+export type ResignMembershipResponses = {
     /**
      * Success response with data
      */
@@ -38590,6 +39297,8 @@ export type ListRosterMembersData = {
         status?: MembershipStatus;
         categoryId?: string;
         search?: string;
+        duesStatus?: string;
+        trainingCompliant?: boolean;
     };
     url: '/association/member/roster';
 };
@@ -38611,7 +39320,7 @@ export type ListRosterMembersResponses = {
     /**
      * Success response with data
      */
-    200: RosterMemberListResponse;
+    200: OfficerRosterMemberListResponse;
 };
 
 export type ListRosterMembersResponse = ListRosterMembersResponses[keyof ListRosterMembersResponses];
@@ -41350,6 +42059,14 @@ export type ListAuditLogsData = {
          */
         action?: AuditAction;
         /**
+         * Filter by event type
+         */
+        eventType?: AuditEventType;
+        /**
+         * Filter by audit category
+         */
+        category?: AuditCategory;
+        /**
          * Start date for filtering audit logs (inclusive)
          */
         startDate?: StrictUtcDateTime;
@@ -43343,7 +44060,7 @@ export type PublishAnnouncementResponse = PublishAnnouncementResponses[keyof Pub
 export type ListAnnouncementsData = {
     body?: never;
     path: {
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: {
         status?: AnnouncementStatus;
@@ -43373,7 +44090,7 @@ export type ListAnnouncementsData = {
          */
         sort?: SafeQueryString;
     };
-    url: '/communications/announcements/{orgId}';
+    url: '/communications/announcements/{organizationId}';
 };
 
 export type ListAnnouncementsErrors = {
@@ -43401,10 +44118,10 @@ export type ListAnnouncementsResponse = ListAnnouncementsResponses[keyof ListAnn
 export type CreateAnnouncementData = {
     body: AnnouncementCreateRequest;
     path: {
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: never;
-    url: '/communications/announcements/{orgId}';
+    url: '/communications/announcements/{organizationId}';
 };
 
 export type CreateAnnouncementErrors = {
@@ -43439,10 +44156,10 @@ export type GetCreditComplianceData = {
         /**
          * Organisation ID to generate the compliance report for
          */
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: never;
-    url: '/credit-compliance/{orgId}';
+    url: '/credit-compliance/{organizationId}';
 };
 
 export type GetCreditComplianceErrors = {
@@ -43477,10 +44194,10 @@ export type GetDuesDashboardData = {
         /**
          * Organisation ID
          */
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: never;
-    url: '/dues/dashboard/{orgId}';
+    url: '/dues/dashboard/{organizationId}';
 };
 
 export type GetDuesDashboardErrors = {
@@ -43910,13 +44627,120 @@ export type TestEmailTemplateResponses = {
 
 export type TestEmailTemplateResponse = TestEmailTemplateResponses[keyof TestEmailTemplateResponses];
 
+export type CreateInviteData = {
+    body: CreateInviteRequest;
+    path?: never;
+    query?: never;
+    url: '/invite';
+};
+
+export type CreateInviteErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateInviteError = CreateInviteErrors[keyof CreateInviteErrors];
+
+export type CreateInviteResponses = {
+    /**
+     * Resource created response
+     */
+    201: CreateInviteResponse;
+};
+
+export type CreateInviteResponse2 = CreateInviteResponses[keyof CreateInviteResponses];
+
+export type ClaimInviteData = {
+    body?: never;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/invite/claim/{token}';
+};
+
+export type ClaimInviteErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+    /**
+     * Resource is gone — invitation already claimed, revoked, or expired
+     */
+    410: InviteGoneResponse;
+};
+
+export type ClaimInviteError = ClaimInviteErrors[keyof ClaimInviteErrors];
+
+export type ClaimInviteResponses = {
+    /**
+     * Success response with data
+     */
+    200: ClaimInviteResponse;
+};
+
+export type ClaimInviteResponse2 = ClaimInviteResponses[keyof ClaimInviteResponses];
+
+export type ValidateInviteData = {
+    body?: never;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/invite/validate/{token}';
+};
+
+export type ValidateInviteErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Resource is gone — invitation already claimed, revoked, or expired
+     */
+    410: InviteGoneResponse;
+};
+
+export type ValidateInviteError = ValidateInviteErrors[keyof ValidateInviteErrors];
+
+export type ValidateInviteResponses = {
+    /**
+     * Success response with data
+     */
+    200: ValidateInviteResponse;
+};
+
+export type ValidateInviteResponse2 = ValidateInviteResponses[keyof ValidateInviteResponses];
+
 export type ListOrgApplicationsData = {
     body?: never;
     path: {
         /**
          * Organisation ID
          */
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: {
         /**
@@ -43924,7 +44748,7 @@ export type ListOrgApplicationsData = {
          */
         status?: string;
     };
-    url: '/membership/applications/{orgId}';
+    url: '/membership/applications/{organizationId}';
 };
 
 export type ListOrgApplicationsErrors = {
@@ -43957,10 +44781,10 @@ export type ListOrgMembersData = {
         /**
          * Organisation ID
          */
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: never;
-    url: '/membership/members/{orgId}';
+    url: '/membership/members/{organizationId}';
 };
 
 export type ListOrgMembersErrors = {
@@ -43993,10 +44817,10 @@ export type GetOrgProfileData = {
         /**
          * Organisation ID
          */
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: never;
-    url: '/membership/org-profile/{orgId}';
+    url: '/membership/org-profile/{organizationId}';
 };
 
 export type GetOrgProfileErrors = {
@@ -44027,10 +44851,10 @@ export type UpdateOrgProfileData = {
         /**
          * Organisation ID
          */
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: never;
-    url: '/membership/org-profile/{orgId}';
+    url: '/membership/org-profile/{organizationId}';
 };
 
 export type UpdateOrgProfileErrors = {
@@ -44256,10 +45080,10 @@ export type ListOfficerTermsSummaryData = {
         /**
          * Organisation ID to list officer terms for
          */
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: never;
-    url: '/officer-terms/{orgId}';
+    url: '/officer-terms/{organizationId}';
 };
 
 export type ListOfficerTermsSummaryErrors = {
@@ -44669,10 +45493,10 @@ export type GetMyOfficerRoleData = {
         /**
          * Organisation ID to check officer status for
          */
-        orgId: Uuid;
+        organizationId: Uuid;
     };
     query?: never;
-    url: '/persons/me/officer-role/{orgId}';
+    url: '/persons/me/officer-role/{organizationId}';
 };
 
 export type GetMyOfficerRoleErrors = {
@@ -44832,6 +45656,94 @@ export type UpdatePersonResponses = {
 };
 
 export type UpdatePersonResponse = UpdatePersonResponses[keyof UpdatePersonResponses];
+
+export type ListPublicEventsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+        /**
+         * Filter by country (from org region)
+         */
+        country?: string;
+        /**
+         * Filter by event type
+         */
+        eventType?: EventType;
+        /**
+         * Filter events starting on or after this date
+         */
+        dateFrom?: Date;
+        /**
+         * Filter events starting on or before this date
+         */
+        dateTo?: Date;
+        /**
+         * Filter by pricing: free, paid, or all
+         */
+        pricing?: string;
+    };
+    url: '/public/events';
+};
+
+export type ListPublicEventsResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventListResponse;
+};
+
+export type ListPublicEventsResponse = ListPublicEventsResponses[keyof ListPublicEventsResponses];
+
+export type GetPublicEventData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/public/events/{slug}';
+};
+
+export type GetPublicEventErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetPublicEventError = GetPublicEventErrors[keyof GetPublicEventErrors];
+
+export type GetPublicEventResponses = {
+    /**
+     * Success response with data
+     */
+    200: Event;
+};
+
+export type GetPublicEventResponse = GetPublicEventResponses[keyof GetPublicEventResponses];
 
 export type GetOrganizationBySlugData = {
     body?: never;

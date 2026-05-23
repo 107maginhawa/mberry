@@ -293,6 +293,12 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.registerForCustomEvent as unknown as Handler
   );
 
+  // registerAndPayForEvent
+  app.post('/association/event-lifecycle/:eventId/register-and-pay',
+    zValidator('param', validators.RegisterAndPayForEventParams, validationErrorHandler),
+    registry.registerAndPayForEvent as unknown as Handler
+  );
+
   // listCustomEventRegistrations
   app.get('/association/event-lifecycle/:eventId/registrations',
     zValidator('param', validators.ListCustomEventRegistrationsParams, validationErrorHandler),
@@ -2523,6 +2529,18 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('param', validators.UpdatePersonParams, validationErrorHandler),
     zValidator('json', validators.UpdatePersonBody, validationErrorHandler),
     registry.updatePerson as unknown as Handler
+  );
+
+  // listPublicEvents
+  app.get('/public/events',
+    zValidator('query', validators.ListPublicEventsQuery, validationErrorHandler),
+    registry.listPublicEvents as unknown as Handler
+  );
+
+  // getPublicEvent
+  app.get('/public/events/:slug',
+    zValidator('param', validators.GetPublicEventParams, validationErrorHandler),
+    registry.getPublicEvent as unknown as Handler
   );
 
   // getOrganizationBySlug

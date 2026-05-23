@@ -30,6 +30,7 @@ describe('[BR-15] createEvent', () => {
   test('creates event and returns 201', async () => {
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
+      findBySlug: async () => undefined,
     });
 
     const ctx = makeCtx({
@@ -54,6 +55,7 @@ describe('[BR-15] createEvent', () => {
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
+      findBySlug: async () => undefined,
     });
 
     const ctx = makeCtx({
@@ -78,6 +80,7 @@ describe('[BR-15] createEvent', () => {
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
+      findBySlug: async () => undefined,
     });
 
     const ctx = makeCtx({
@@ -98,6 +101,7 @@ describe('[BR-15] createEvent', () => {
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
+      findBySlug: async () => undefined,
     });
 
     const ctx = makeCtx({
@@ -116,6 +120,7 @@ describe('[BR-15] createEvent', () => {
   test('accepts start date in the past (no validation in handler)', async () => {
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
+      findBySlug: async () => undefined,
     });
 
     const ctx = makeCtx({
@@ -135,6 +140,7 @@ describe('[BR-15] createEvent', () => {
   test('accepts end date before start date (no validation in handler)', async () => {
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
+      findBySlug: async () => undefined,
     });
 
     const ctx = makeCtx({
@@ -155,6 +161,7 @@ describe('[BR-15] createEvent', () => {
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
+      findBySlug: async () => undefined,
     });
 
     const ctx = makeCtx({
@@ -175,6 +182,7 @@ describe('[BR-15] createEvent', () => {
   test('crashes without session (no auth)', async () => {
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
+      findBySlug: async () => undefined,
     });
 
     const ctx = makeCtx({

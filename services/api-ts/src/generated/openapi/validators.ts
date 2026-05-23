@@ -3378,7 +3378,9 @@ export const ClaimInviteResponseSchema = z.object({
   licenseNumber: z.string().optional(),
   membershipCategoryId: z.string().optional(),
   membershipTierId: z.string().optional()
-}).optional()
+}).optional(),
+  membershipStatus: z.enum(["joined", "pendingApproval"]).optional(),
+  membershipId: z.string().uuid().optional()
 });
 
 export const CommitteeSchema = z.object({
@@ -3774,6 +3776,8 @@ export const CourseUpdateSchema = z.object({
   status: z.enum(["draft", "published", "retired"]).optional(),
   author: z.string().max(255).optional()
 });
+
+export const CpdActivityTypeSchema = z.enum(["seminar", "workshop", "conference", "webinar", "hands_on", "community", "research", "mentorship", "self_directed", "other"]);
 
 export const CreateChatRoomRequestSchema = z.object({
   participants: z.array(UUIDSchema),
@@ -5150,7 +5154,11 @@ export const EventSchema = z.object({
   earlyBirdFee: z.number().int().gte(0).optional(),
   status: z.enum(["draft", "published", "registration_open", "registration_closed", "in_progress", "completed", "cancelled"]),
   creditBearing: z.boolean(),
-  creditAmount: z.number().gte(0).optional()
+  creditAmount: z.number().gte(0).optional(),
+  cpdActivityType: z.enum(["seminar", "workshop", "conference", "webinar", "hands_on", "community", "research", "mentorship", "self_directed", "other"]).optional(),
+  eventSlug: z.string().max(300).optional(),
+  coverImageUrl: z.string().max(2048).optional(),
+  visibility: z.enum(["internal", "network"])
 });
 
 export const EventCreateRequestSchema = z.object({
@@ -5168,7 +5176,10 @@ export const EventCreateRequestSchema = z.object({
   earlyBirdDeadline: z.string().datetime().transform((str) => new Date(str)).optional(),
   earlyBirdFee: z.number().int().gte(0).optional(),
   creditBearing: z.boolean(),
-  creditAmount: z.number().gte(0).optional()
+  creditAmount: z.number().gte(0).optional(),
+  cpdActivityType: z.enum(["seminar", "workshop", "conference", "webinar", "hands_on", "community", "research", "mentorship", "self_directed", "other"]).optional(),
+  coverImageUrl: z.string().max(2048).optional(),
+  visibility: z.enum(["internal", "network"]).optional()
 });
 
 export const EventListResponseSchema = z.object({
@@ -5297,7 +5308,11 @@ export const EventUpdateSchema = z.object({
   earlyBirdFee: z.number().int().gte(0).optional(),
   status: z.enum(["draft", "published", "registration_open", "registration_closed", "in_progress", "completed", "cancelled"]).optional(),
   creditBearing: z.boolean().optional(),
-  creditAmount: z.number().gte(0).optional()
+  creditAmount: z.number().gte(0).optional(),
+  cpdActivityType: z.enum(["seminar", "workshop", "conference", "webinar", "hands_on", "community", "research", "mentorship", "self_directed", "other"]).optional(),
+  eventSlug: z.string().max(300).optional(),
+  coverImageUrl: z.string().max(2048).optional(),
+  visibility: z.enum(["internal", "network"]).optional()
 });
 
 export const EventUpdateRequestSchema = z.object({
@@ -5314,8 +5329,13 @@ export const EventUpdateRequestSchema = z.object({
   earlyBirdDeadline: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
   earlyBirdFee: z.union([z.number().int().gte(0), z.null()]).optional(),
   creditBearing: z.boolean().optional(),
-  creditAmount: z.union([z.number().gte(0), z.null()]).optional()
+  creditAmount: z.union([z.number().gte(0), z.null()]).optional(),
+  cpdActivityType: z.union([z.enum(["seminar", "workshop", "conference", "webinar", "hands_on", "community", "research", "mentorship", "self_directed", "other"]), z.null()]).optional(),
+  coverImageUrl: z.union([z.string().max(2048), z.null()]).optional(),
+  visibility: z.enum(["internal", "network"]).optional()
 });
+
+export const EventVisibilitySchema = z.enum(["internal", "network"]);
 
 export const ExamResultSchema = z.object({
   id: z.string().uuid(),
@@ -9602,6 +9622,16 @@ export type RegisterForCustomEventParams = z.infer<typeof RegisterForCustomEvent
 
 export const RegisterForCustomEventResponse = EventRegistrationSchema;
 
+export const RegisterAndPayForEventParams = z.object({
+  eventId: z.string(),
+});
+export type RegisterAndPayForEventParams = z.infer<typeof RegisterAndPayForEventParams>;
+
+export const RegisterAndPayForEventResponse = z.object({
+  checkoutUrl: z.string(),
+  registrationId: z.string()
+});
+
 export const ListCustomEventRegistrationsParams = z.object({
   eventId: z.string(),
 });
@@ -12394,6 +12424,30 @@ export const UpdatePersonBody = PersonUpdateRequestSchema;
 export type UpdatePersonBody = z.infer<typeof UpdatePersonBody>;
 
 export const UpdatePersonResponse = PersonSchema;
+
+export const ListPublicEventsQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+  country: z.string().optional(),
+  eventType: EventTypeSchema.optional(),
+  dateFrom: z.string().datetime().transform((str) => new Date(str)).optional(),
+  dateTo: z.string().datetime().transform((str) => new Date(str)).optional(),
+  pricing: z.string().optional(),
+});
+export type ListPublicEventsQuery = z.infer<typeof ListPublicEventsQuery>;
+
+export const ListPublicEventsResponse = EventListResponseSchema;
+
+export const GetPublicEventParams = z.object({
+  slug: z.string(),
+});
+export type GetPublicEventParams = z.infer<typeof GetPublicEventParams>;
+
+export const GetPublicEventResponse = EventSchema;
 
 export const GetOrganizationBySlugParams = z.object({
   slug: z.string(),

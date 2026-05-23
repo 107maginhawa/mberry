@@ -78,6 +78,9 @@ import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
 // Public org discovery — hand-wired (not yet in TypeSpec)
 import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
 
+// OG meta route for social sharing crawlers (WhatsApp, Facebook, Twitter)
+import { serveEventOgMeta } from '@/handlers/events/serveEventOgMeta';
+
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -145,6 +148,9 @@ export function createApp(config: Config): App {
 
   // Public org discovery — no auth required
   app.get('/public/orgs', listPublicOrgs as any);
+
+  // OG meta for event social sharing — serves HTML with og:meta for crawlers
+  app.get('/og/events/:slug', serveEventOgMeta as any);
 
   // Register auth routes
   registerAuthRoutes(app as App);

@@ -75,7 +75,8 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
   const regStatus = REG_STATUS_STYLES[registration.status] ?? { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: registration.status }
   const canCancel = upcoming && registration.status !== 'cancelled' && registration.status !== 'refunded'
   const countdown = upcoming ? formatCountdown(event.startDate) : null
-  const credits = event.cpdCredits ?? event.cpd_credits ?? event.credits ?? null
+  const credits = event.creditAmount ?? event.cpdCredits ?? event.cpd_credits ?? event.credits ?? null
+  const isPendingCheckIn = upcoming && event.creditBearing && credits && credits > 0
 
   return (
     <GlassCard className={`overflow-hidden ${!upcoming ? 'opacity-75' : ''}`}>
@@ -91,9 +92,9 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
               {regStatus.label}
             </span>
             {credits != null && credits > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-primary-bg)] text-[var(--color-primary)]">
                 <Award size={10} />
-                {credits} CPD
+                {credits} CPD{isPendingCheckIn ? ' (pending check-in)' : ''}
               </span>
             )}
           </div>
