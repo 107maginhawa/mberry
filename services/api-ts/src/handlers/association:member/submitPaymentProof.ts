@@ -2,9 +2,9 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { SubmitPaymentProofBody } from '@/generated/openapi/validators';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { DuesInvoiceRepository } from './repos/dues.repo';
-import { formatReceiptNumber } from '@/handlers/dues/utils/receipt-number';
+import { formatReceiptNumber } from './utils/receipt-number';
 import { auditAction } from '@/utils/audit';
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];

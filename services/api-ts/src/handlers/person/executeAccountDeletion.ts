@@ -17,7 +17,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { PersonRepository } from './repos/person.repo';
-import { duesPayments } from '../dues/repos/dues-payments.schema';
+import { duesPayments } from '../association:member/repos/dues-payments.schema';
 import * as schema from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
 import { executeCascadeDeletion } from './accountDeletionCascade';

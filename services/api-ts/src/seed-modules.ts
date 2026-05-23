@@ -16,7 +16,7 @@ import { eq, sql } from 'drizzle-orm';
 import { Pool } from 'pg';
 
 // Dues tables (new migration)
-import { duesOrgConfigs, duesFunds, duesPayments } from './handlers/dues/repos/dues-payments.schema';
+import { duesOrgConfigs, duesFunds, duesPayments } from './handlers/association:member/repos/dues-payments.schema';
 
 // Membership, Events, Training — OLD schemas (existing DB tables)
 import { membershipCategories } from './handlers/association:member/repos/membership.schema';

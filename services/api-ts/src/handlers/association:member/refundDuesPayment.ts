@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { RefundDuesPaymentBody, RefundDuesPaymentParams } from '@/generated/openapi/validators';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { membershipLifecycle } from './utils/membership-lifecycle';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';

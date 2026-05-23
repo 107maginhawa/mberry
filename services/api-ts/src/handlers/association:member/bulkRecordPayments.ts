@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { DuesRepository } from './repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { formatReceiptNumber } from './utils/receipt-number';
 import { settlePayment } from './utils/settle-payment';
 

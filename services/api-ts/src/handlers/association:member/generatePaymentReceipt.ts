@@ -3,10 +3,10 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
-import { DuesRepository } from './repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 
 /**
- * generatePaymentReceipt (handlers/dues/)
+ * generatePaymentReceipt
  *
  * Generates a payment receipt HTML document for a completed dues payment.
  * Includes org branding, receipt number, payment details, and fund allocations.

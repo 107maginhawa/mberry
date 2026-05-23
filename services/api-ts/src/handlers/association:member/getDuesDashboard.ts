@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { GetDuesDashboardParams } from '@/generated/openapi/validators';
-import { DuesRepository } from './repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { events } from '@/handlers/association:operations/repos/events.schema';
 import { eq, gte, and, sql } from 'drizzle-orm';
 import { requirePosition } from '@/utils/officer-check';

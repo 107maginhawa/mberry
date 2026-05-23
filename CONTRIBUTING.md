@@ -424,6 +424,32 @@ export function PersonCard({ person, onSelect }: PersonCardProps) {
 }
 ```
 
+### Frontend Error Handling
+
+Use **sonner toast** (`toast.error()` / `toast.success()`) for all user-facing error and success feedback. Use `extractErrorMessage()` from `@/utils/error` to extract the message consistently.
+
+```typescript
+// In TanStack Query mutations (standard pattern)
+import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
+
+const mutation = useMutation({
+  mutationFn: (data) => sdk.someEndpoint(data),
+  onSuccess: () => toast.success('Saved'),
+  onError: (err) => toast.error(extractErrorMessage(err, 'Save failed')),
+})
+
+// In imperative code (file uploads, multi-step flows)
+try {
+  await upload(file)
+  toast.success('Uploaded')
+} catch (err) {
+  toast.error(extractErrorMessage(err, 'Upload failed'))
+}
+```
+
+**Do not** use `window.alert()`, `console.error()` as user feedback, or inline error state unless the error is contextual to a specific form field. The `ErrorBoundary` in `_authenticated.tsx` catches unhandled crashes — do not add more ErrorBoundary wrappers unless isolating a specific widget.
+
 ### API Handlers
 
 - Use Zod for request validation

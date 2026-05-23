@@ -17,7 +17,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { DuesRepository } from './repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { generatePaymentReceipt, renderReceiptHtml } from './generatePaymentReceipt';
 
 // ─── Fixtures ───────────────────────────────────────────

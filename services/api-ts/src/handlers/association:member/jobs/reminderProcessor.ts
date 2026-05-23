@@ -11,8 +11,8 @@
 import type { DatabaseInstance } from '@/core/database';
 import { eq, and, sql } from 'drizzle-orm';
 import { duesOrgConfigs, duesReminderSchedules } from '../repos/dues-payments.schema';
-import { duesReminderLogs } from '../../association:member/repos/dues.schema';
-import { memberships } from '../../association:member/repos/membership.schema';
+import { duesReminderLogs } from '../repos/dues.schema';
+import { memberships } from '../repos/membership.schema';
 import { inArray } from 'drizzle-orm';
 
 interface ReminderContext {

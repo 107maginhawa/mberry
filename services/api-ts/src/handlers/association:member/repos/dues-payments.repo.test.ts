@@ -7,7 +7,7 @@
  */
 
 import { describe, test, expect, beforeEach } from 'bun:test';
-import { DuesRepository } from './dues.repo';
+import { DuesRepository } from './dues-payments.repo';
 import { restoreRepo } from '@/test-utils/make-ctx';
 
 // ---------------------------------------------------------------------------

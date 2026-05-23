@@ -10,7 +10,7 @@ import {
   membershipLifecycle,
   toBillingCycle,
   type SettlementResult,
-} from '@/handlers/association:member/utils/membership-lifecycle';
+} from './membership-lifecycle';
 
 // Re-export toBillingCycle so existing consumers (markDuesInvoicePaid) don't break
 export { toBillingCycle };

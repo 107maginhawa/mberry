@@ -317,7 +317,7 @@ import { joinVideoCall } from '../../handlers/comms/joinVideoCall';
 import { leaveVideoCall } from '../../handlers/comms/leaveVideoCall';
 import { updateVideoCallParticipant } from '../../handlers/comms/updateVideoCallParticipant';
 import { getIceServers } from '../../handlers/comms/getIceServers';
-import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
+import { getDuesDashboard } from '../../handlers/association:member/getDuesDashboard';
 import { listEmailQueueItems } from '../../handlers/email/listEmailQueueItems';
 import { getEmailQueueItem } from '../../handlers/email/getEmailQueueItem';
 import { cancelEmailQueueItem } from '../../handlers/email/cancelEmailQueueItem';

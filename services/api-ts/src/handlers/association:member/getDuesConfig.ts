@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { GetDuesConfigParams } from '@/generated/openapi/validators';
 import { DuesConfigRepository } from './repos/dues.repo';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 
 /**
  * getDuesConfig

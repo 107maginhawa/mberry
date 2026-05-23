@@ -4,7 +4,7 @@ import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import type { GetDuesFinancialDashboardParams } from '@/generated/openapi/validators';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 
 /**
  * getDuesFinancialDashboard

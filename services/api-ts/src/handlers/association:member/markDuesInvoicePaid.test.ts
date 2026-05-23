@@ -4,7 +4,7 @@ import { fakeDuesInvoice as createFakeDuesInvoice, fakeMembership as createFakeM
 import { markDuesInvoicePaid } from './markDuesInvoicePaid';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { MembershipRepository } from './repos/membership.repo';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────

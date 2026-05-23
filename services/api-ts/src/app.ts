@@ -23,7 +23,7 @@ import { registerEmailJobs } from '@/handlers/email/jobs';
 import { registerNotifsJobs } from '@/handlers/notifs/jobs';
 import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
-import { registerDuesJobs } from '@/handlers/dues/jobs';
+import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
 

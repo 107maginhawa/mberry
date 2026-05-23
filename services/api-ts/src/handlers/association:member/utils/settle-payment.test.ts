@@ -2,8 +2,8 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { settlePayment } from './settle-payment';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
-import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { DuesRepository } from '../repos/dues-payments.repo';
+import { MembershipRepository } from '../repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 

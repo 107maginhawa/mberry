@@ -18,7 +18,7 @@ import { Pool } from 'pg';
 import { memberships, membershipTiers, membershipCategories } from './handlers/association:member/repos/membership.schema';
 import { positions, officerTerms } from './handlers/association:member/repos/governance.schema';
 import { creditEntries } from './handlers/association:member/repos/credits.schema';
-import { duesPayments } from './handlers/dues/repos/dues-payments.schema';
+import { duesPayments } from './handlers/association:member/repos/dues-payments.schema';
 import { certificates } from './handlers/certificates/repos/certificates.schema';
 import { events, eventRegistrations } from './handlers/association:operations/repos/events.schema';
 import { trainings, trainingEnrollments } from './handlers/association:operations/repos/training.schema';

@@ -31,7 +31,7 @@ import { invoices, invoiceLineItems, merchantAccounts, billingConfigs } from './
 
 // Phase 17-18 imports (audit-gap tables)
 import { duesConfigs, duesInvoices } from './handlers/association:member/repos/dues.schema';
-import { duesFunds, duesOrgConfigs } from './handlers/dues/repos/dues-payments.schema';
+import { duesFunds, duesOrgConfigs } from './handlers/association:member/repos/dues-payments.schema';
 import { committees, committeeMembers } from './handlers/association:operations/repos/committee.schema';
 import { committeeTasks } from './handlers/association:operations/repos/committee-task.schema';
 import { dunningTemplates, dunningEvents } from './handlers/association:member/repos/dunning.schema';

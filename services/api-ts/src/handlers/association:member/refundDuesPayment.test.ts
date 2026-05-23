@@ -3,7 +3,7 @@ import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDuesPayment as createFakeDuesPayment, fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { refundDuesPayment } from './refundDuesPayment';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
 

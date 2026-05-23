@@ -9,7 +9,7 @@
  */
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { listDuesPayments } from './listDuesPayments';
 
