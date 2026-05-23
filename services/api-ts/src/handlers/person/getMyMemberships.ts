@@ -42,6 +42,7 @@ export async function getMyMemberships(ctx: BaseContext): Promise<Response> {
       removalReason: memberships.removalReason,
       note: memberships.note,
       orgName: organizations.name,
+      orgSlug: organizations.slug,
     })
     .from(memberships)
     .leftJoin(organizations, eq(memberships.organizationId, organizations.id))

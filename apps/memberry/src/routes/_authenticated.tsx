@@ -3,6 +3,7 @@ import { requireAuth } from "@/utils/guards"
 import { MemberSidebar } from "@/components/layout/member-sidebar"
 import { MemberBottomNav } from "@/components/layout/member-bottom-nav"
 import { MemberHeader } from "@/components/layout/member-header"
+import { OrgIconRail } from "@/components/layout/org-icon-rail"
 import { ErrorBoundary } from "@/components/patterns/error-boundary"
 import { AnimatePresence, motion } from "framer-motion"
 import { useSpringTransition } from "@/components/motion/use-spring-transition"
@@ -46,6 +47,7 @@ function AuthenticatedLayout() {
       >
         Skip to main content
       </a>
+      <OrgIconRail />
       <MemberSidebar userEmail={user?.email} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MemberHeader userName={user?.name} />

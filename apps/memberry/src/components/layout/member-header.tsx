@@ -4,19 +4,12 @@ import { useQuery } from '@tanstack/react-query'
 import { Button } from '@monobase/ui'
 import { Bell, ChevronDown } from 'lucide-react'
 import { api } from '@/lib/api'
+import { AvatarInitials } from '@/components/patterns/avatar-initials'
+import { OrgPickerSheet } from '@/components/layout/org-picker-sheet'
+import { useMyOrgs } from '@/hooks/useMyOrgs'
 
 interface MemberHeaderProps {
   userName?: string
-}
-
-interface OrgMembership {
-  organizationId: string
-  organizationName?: string
-  membershipStatus?: string
-  membershipNumber?: string
-  orgId?: string
-  memberNumber?: string
-  status?: string
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -33,29 +26,12 @@ const STATUS_LABEL: Record<string, string> = {
   pending: 'Pending',
 }
 
-const SELECTED_ORG_KEY = 'memberry:selectedOrgId'
-
 export function MemberHeader({ userName }: MemberHeaderProps) {
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(
-    () => localStorage.getItem(SELECTED_ORG_KEY)
-  )
+  const { orgs, activeOrgSlug } = useMyOrgs()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
-
-  const { data: orgs = [] } = useQuery({
-    queryKey: ['my-memberships'],
-    queryFn: async () => {
-      const json = await api.get<any>('/api/persons/me/memberships')
-      const raw = json.data || []
-      return raw.map((m: any) => ({
-        ...m,
-        organizationId: m.organizationId || m.orgId,
-        membershipNumber: m.membershipNumber || m.memberNumber,
-        membershipStatus: m.membershipStatus || m.status,
-      })) as OrgMembership[]
-    },
-  })
 
   const { data: notifCount = 0 } = useQuery({
     queryKey: ['notif-unread-count'],
@@ -65,15 +41,6 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
       return items.filter((n: any) => n.status !== 'read').length as number
     },
   })
-
-  // Default to stored selection, or first org
-  useEffect(() => {
-    if (orgs.length > 0 && !orgs.find((o) => o.organizationId === selectedOrgId)) {
-      const defaultId = orgs[0]!.organizationId
-      setSelectedOrgId(defaultId)
-      localStorage.setItem(SELECTED_ORG_KEY, defaultId)
-    }
-  }, [orgs, selectedOrgId])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -86,14 +53,8 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [dropdownOpen])
 
-  const currentOrg = orgs.find((o) => o.organizationId === selectedOrgId) || orgs[0]
+  const currentOrg = orgs.find((o) => o.orgSlug === activeOrgSlug) || orgs[0]
   const hasMultipleOrgs = orgs.length >= 2
-
-  function selectOrg(org: OrgMembership) {
-    setSelectedOrgId(org.organizationId)
-    localStorage.setItem(SELECTED_ORG_KEY, org.organizationId)
-    setDropdownOpen(false)
-  }
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-12 px-4 md:px-6 bg-[var(--color-primary)] text-white md:bg-[var(--color-nav-elevated)] md:backdrop-blur-[var(--nav-blur)] md:text-[var(--color-text)] md:border-b md:border-[var(--color-border-light)]">
@@ -111,24 +72,44 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
 
       {/* Right: org pill + bell */}
       <div className="flex items-center gap-3">
-        {/* Org context pill / switcher */}
+        {/* Mobile: avatar tap → bottom sheet */}
         {currentOrg && (
-          <div className="relative" ref={dropdownRef}>
+          <Button
+            variant="ghost"
+            onClick={() => setSheetOpen(true)}
+            className="md:hidden relative p-0"
+            aria-label="Switch organization"
+          >
+            <AvatarInitials
+              name={currentOrg.orgName || '?'}
+              size="sm"
+            />
+            {hasMultipleOrgs && (
+              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-white/20 flex items-center justify-center">
+                <ChevronDown size={8} className="text-white" />
+              </span>
+            )}
+          </Button>
+        )}
+
+        {/* Desktop: org context pill / switcher (unchanged from original) */}
+        {currentOrg && (
+          <div className="relative hidden md:block" ref={dropdownRef}>
             <Button
               variant="ghost"
-              onClick={() => hasMultipleOrgs ? setDropdownOpen(!dropdownOpen) : navigate({ to: `/org/${currentOrg.organizationId}/members` })}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-white/15 md:bg-[var(--color-surface-warm)] md:border md:border-[var(--color-border-light)] md:text-[var(--color-text)] hover:bg-white/25 md:hover:bg-[var(--color-surface-warm)]"
+              onClick={() => hasMultipleOrgs ? setDropdownOpen(!dropdownOpen) : navigate({ to: `/org/${currentOrg.orgSlug}/home` as '/' })}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] text-[var(--color-text)] hover:bg-[var(--color-surface-warm)]"
             >
               <span
-                className={`w-2 h-2 rounded-full ${STATUS_DOT[currentOrg.membershipStatus || 'active'] || STATUS_DOT.active}`}
+                className={`w-2 h-2 rounded-full ${STATUS_DOT[currentOrg.status] || STATUS_DOT.active}`}
               />
               <span className="truncate max-w-[120px]">
-                {currentOrg.organizationName || currentOrg.membershipNumber || 'Org'}
+                {currentOrg.orgName || currentOrg.memberNumber || 'Org'}
               </span>
               {hasMultipleOrgs && <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />}
             </Button>
 
-            {/* Dropdown */}
+            {/* Desktop dropdown */}
             {dropdownOpen && hasMultipleOrgs && (
               <div className="absolute right-0 top-full mt-1 w-[280px] bg-[var(--color-surface)] border border-[var(--color-border-light)] rounded-[12px] shadow-lg overflow-hidden z-50">
                 <div className="py-1">
@@ -136,24 +117,27 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
                     <Button
                       key={org.organizationId}
                       variant="ghost"
-                      onClick={() => selectOrg(org)}
+                      onClick={() => {
+                        setDropdownOpen(false)
+                        navigate({ to: `/org/${org.orgSlug}/home` as '/' })
+                      }}
                       className={`w-full flex items-center gap-3 px-4 py-3 text-left ${
-                        org.organizationId === selectedOrgId ? 'bg-[var(--color-surface-warm)]' : ''
+                        org.orgSlug === activeOrgSlug ? 'bg-[var(--color-surface-warm)]' : ''
                       }`}
                     >
                       <span
-                        className={`w-2.5 h-2.5 rounded-full shrink-0 ${STATUS_DOT[org.membershipStatus || 'active'] || STATUS_DOT.active}`}
+                        className={`w-2.5 h-2.5 rounded-full shrink-0 ${STATUS_DOT[org.status] || STATUS_DOT.active}`}
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-medium text-[var(--color-text)] truncate">
-                          {org.organizationName || org.membershipNumber || 'Organization'}
+                          {org.orgName || 'Organization'}
                         </p>
                         <p className="text-[11px] text-[var(--color-muted)]">
-                          {STATUS_LABEL[org.membershipStatus || 'active'] || 'Active'}
-                          {org.membershipNumber ? ` · ${org.membershipNumber}` : ''}
+                          {STATUS_LABEL[org.status] || 'Active'}
+                          {org.memberNumber ? ` · ${org.memberNumber}` : ''}
                         </p>
                       </div>
-                      {org.organizationId === selectedOrgId && (
+                      {org.orgSlug === activeOrgSlug && (
                         <span className="text-[var(--color-primary)] text-[11px] font-semibold shrink-0">Current</span>
                       )}
                     </Button>
@@ -161,11 +145,11 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
                 </div>
                 <div className="border-t border-[var(--color-border-light)]">
                   <Link
-                    to="/my/organizations"
+                    to={"/my/organizations" as "/"}
                     onClick={() => setDropdownOpen(false)}
                     className="block px-4 py-2.5 text-[12px] font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] transition-colors"
                   >
-                    View All Memberships
+                    Join another organization
                   </Link>
                 </div>
               </div>
@@ -173,10 +157,10 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
           </div>
         )}
 
-        {/* No orgs — empty state per BR-21 */}
-        {orgs.length === 0 && orgs !== null && (
+        {/* No orgs — empty state */}
+        {orgs.length === 0 && (
           <Link
-            to="/my/organizations"
+            to={"/my/organizations" as "/"}
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-white/15 md:bg-[var(--color-surface-warm)] md:border md:border-[var(--color-border-light)] md:text-[var(--color-muted)]"
           >
             Join an organization
@@ -196,6 +180,14 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
           )}
         </Link>
       </div>
+
+      {/* Mobile org picker sheet */}
+      <OrgPickerSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        orgs={orgs}
+        activeOrgSlug={activeOrgSlug}
+      />
     </header>
   )
 }
