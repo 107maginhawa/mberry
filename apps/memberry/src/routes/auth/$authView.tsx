@@ -7,15 +7,54 @@ export const Route = createFileRoute('/auth/$authView')({
 
 function AuthPage() {
   const { authView } = Route.useParams()
+
+  // Define headers for known auth paths
+  const authHeaders = {
+    'sign-in': {
+      title: 'Welcome back',
+      subtitle: 'Sign in to your Memberry account',
+    },
+    'sign-up': {
+      title: 'Create an account',
+      subtitle: 'Join Memberry today',
+    },
+    'forgot-password': {
+      title: 'Reset your password',
+      subtitle: "We'll send you a reset link",
+    },
+    'verify-email': {
+      title: 'Verify your email',
+      subtitle: 'Check your inbox for the verification link',
+    },
+    'two-factor': {
+      title: 'Two-factor authentication',
+      subtitle: 'Enter your verification code',
+    },
+  }
+
+  // Get header content for current auth view (undefined for unknown paths)
+  const headerContent = authHeaders[authView as keyof typeof authHeaders]
+
+  // callback URL
   const callbackURL = globalThis.location.origin
 
   return (
-    <main className="h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-6">
-          <h1 className="text-h2 text-[#554B68]">Memberry</h1>
+    <main className="h-screen overflow-y-auto flex items-center justify-center bg-background py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full mx-auto">
+        {headerContent && (
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-3">
+              <h1 className="text-h1 text-[#554B68]">Memberry</h1>
+            </div>
+            <h2 className="text-h2 text-foreground">{headerContent.title}</h2>
+            <p className="subtitle text-muted-foreground mt-2">
+              {headerContent.subtitle}
+            </p>
+          </div>
+        )}
+        <div className="w-full overflow-hidden flex justify-center text-center [&_.flex.items-center.gap-2]:justify-center">
+          <AuthView pathname={authView} callbackURL={callbackURL} />
         </div>
-        <AuthView pathname={authView} callbackURL={callbackURL} />
       </div>
     </main>
   )

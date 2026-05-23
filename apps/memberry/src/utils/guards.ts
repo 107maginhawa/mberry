@@ -91,6 +91,46 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
 }
 
 /**
+ * Requires user to have a person profile. Redirects to onboarding if missing.
+ */
+export async function requirePerson({ context }: { context: RouterContext }) {
+  if (!context.auth.person) {
+    throw redirect({ to: '/onboarding' })
+  }
+  return { person: context.auth.person }
+}
+
+/**
+ * Requires user to NOT have a person profile (for onboarding).
+ * Redirects to dashboard if person already exists.
+ */
+export async function requireNoPerson({ context }: { context: RouterContext }) {
+  if (context.auth.person) {
+    throw redirect({ to: '/dashboard' })
+  }
+}
+
+/**
+ * Requires user to have a verified email.
+ * Redirects to verify-email if not verified.
+ */
+export async function requireEmailVerified({ context }: { context: RouterContext }) {
+  if (!context.auth.user?.emailVerified) {
+    throw redirect({ to: '/verify-email' })
+  }
+}
+
+/**
+ * Requires user to NOT have a verified email (for verify-email page).
+ * Redirects to dashboard if already verified.
+ */
+export async function requireNotEmailVerified({ context }: { context: RouterContext }) {
+  if (context.auth.user?.emailVerified) {
+    throw redirect({ to: '/dashboard' })
+  }
+}
+
+/**
  * Compose multiple guards into a single beforeLoad handler.
  */
 export function composeGuards(...guards: Array<(opts: any) => Promise<any> | any>) {
