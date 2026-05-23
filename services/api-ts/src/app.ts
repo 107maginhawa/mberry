@@ -102,6 +102,14 @@ import { getMyCredits } from '@/handlers/person/getMyCredits';
 import { bulkIssueCertificates } from '@/handlers/certificates/bulkIssueCertificates';
 import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
 
+// Wave 1 Financial: Special Assessments CRUD (T8)
+import { createSpecialAssessment } from '@/handlers/association:member/createSpecialAssessment';
+import { listSpecialAssessments } from '@/handlers/association:member/listSpecialAssessments';
+import { updateSpecialAssessment } from '@/handlers/association:member/updateSpecialAssessment';
+import { deleteSpecialAssessment } from '@/handlers/association:member/deleteSpecialAssessment';
+import { applySpecialAssessment } from '@/handlers/association:member/applySpecialAssessment';
+import { getSpecialAssessmentCollection } from '@/handlers/association:member/getSpecialAssessmentCollection';
+
 /**
  * Create and configure the Hono application with proper dependency injection
  * Returns the Hono app instance with database, logger, auth, and storage attached
@@ -286,6 +294,14 @@ export function createApp(config: Config): App {
   app.post('/association/member/compliance/:organizationId/refresh', authMiddleware(), refreshCompliance as any);
   app.get('/persons/me/credits', authMiddleware(), orgContextOptionalMiddleware(), getMyCredits as any);
   app.post('/certificates/bulk-issue', authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
+
+  // Wave 1 Financial: Special Assessments CRUD (T8)
+  app.post('/association/member/special-assessments', authMiddleware(), createSpecialAssessment as any);
+  app.get('/association/member/special-assessments/:orgId', authMiddleware(), listSpecialAssessments as any);
+  app.put('/association/member/special-assessments/:id', authMiddleware(), updateSpecialAssessment as any);
+  app.delete('/association/member/special-assessments/:id', authMiddleware(), deleteSpecialAssessment as any);
+  app.post('/association/member/special-assessments/:id/apply', authMiddleware(), applySpecialAssessment as any);
+  app.get('/association/member/special-assessments/:id/collection', authMiddleware(), getSpecialAssessmentCollection as any);
 
   // Wave 4β: Saved Segments — CRUD for audience segment presets
   app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
