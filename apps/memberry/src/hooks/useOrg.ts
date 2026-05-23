@@ -1,9 +1,9 @@
 /**
  * Slug-based org resolution hook.
  *
- * Reads `orgSlug` from URL params, resolves to full org object (including UUID)
- * via GET /public/org/:slug. Cached with staleTime: Infinity since slugs are
- * immutable in Wave 0.
+ * Reads from OrgProvider context (set at the $orgSlug layout route).
+ * Returns { orgId, orgSlug, org, isLoading } — same shape as before
+ * so all 40+ consumers remain unchanged.
  *
  * Usage:
  *   const { orgId, orgSlug, org, isLoading } = useOrg()
@@ -11,24 +11,16 @@
  *   // orgSlug = slug for navigation params
  */
 
-import { useParams } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import { getOrganizationBySlugOptions } from '@monobase/sdk-ts/generated/react-query'
+import { useOrgProvider } from '@/providers/OrgProvider'
 
 export function useOrg() {
-  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
-
-  const { data: org, isLoading, error } = useQuery({
-    ...getOrganizationBySlugOptions({ path: { slug: orgSlug } }),
-    staleTime: Infinity,
-    enabled: !!orgSlug,
-  })
+  const ctx = useOrgProvider()
 
   return {
-    orgId: org?.id ?? '',
-    orgSlug,
-    org: org ?? null,
-    isLoading,
-    error,
+    orgId: ctx.orgId,
+    orgSlug: ctx.orgSlug,
+    org: ctx.org,
+    isLoading: ctx.isLoading,
+    error: null,
   }
 }

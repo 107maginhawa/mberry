@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { getOrganization } from '@monobase/sdk-ts/generated/sdk.gen'
+import { OrgProvider } from '@/providers/OrgProvider'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -29,5 +30,9 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug')({
 })
 
 function OrgLayout() {
-  return <Outlet />
+  return (
+    <OrgProvider>
+      <Outlet />
+    </OrgProvider>
+  )
 }

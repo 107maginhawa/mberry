@@ -1,24 +1,24 @@
 /**
  * Centralized org context hook.
  *
- * - Routes under /org/$orgSlug/*: reads orgSlug from URL params (authoritative).
- *   Use the useOrg() hook for full slug-to-UUID resolution on /org/ routes.
+ * - Routes under /org/$orgSlug/*: reads from OrgProvider context (authoritative).
+ *   Returns the resolved UUID orgId (not the slug).
  * - Routes under /my/*: reads from localStorage (display-only, for org switcher pill).
  *   /my/ routes show cross-org data — localStorage orgId is NOT used for data scoping.
  */
 
-import { useParams, useLocation } from '@tanstack/react-router'
+import { useLocation } from '@tanstack/react-router'
+import { useOrgProviderOptional } from '@/providers/OrgProvider'
 
 const LS_KEY = 'memberry:selectedOrgId'
 
 export function useOrgContext(): { orgId: string | null; source: 'url' | 'localStorage' } {
-  const params = useParams({ strict: false }) as { orgSlug?: string }
+  const orgCtx = useOrgProviderOptional()
   const location = useLocation()
 
-  // URL param takes priority — present on /org/$orgSlug/* routes
-  // Note: orgSlug is a slug, not a UUID. For UUID-based orgId, use useOrg() instead.
-  if (params.orgSlug) {
-    return { orgId: params.orgSlug, source: 'url' }
+  // OrgProvider present → we're on /org/$orgSlug/* routes
+  if (orgCtx?.orgId) {
+    return { orgId: orgCtx.orgId, source: 'url' }
   }
 
   // On /my/* routes, read from localStorage for pill display
