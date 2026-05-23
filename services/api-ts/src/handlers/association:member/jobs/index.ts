@@ -7,6 +7,8 @@ import type { JobScheduler, JobContext } from '@/core/jobs';
 import { DeferredScopeError } from '@/core/errors';
 import { processDuesReminders } from './reminderProcessor';
 import { processWebhookRetry } from './webhookRetryProcessor';
+import { processCreditIssue } from './creditIssue';
+import { processComplianceThreshold } from './complianceThreshold';
 
 /**
  * Register all dues module jobs with the scheduler
@@ -30,5 +32,33 @@ export function registerDuesJobs(scheduler: JobScheduler): void {
         throw new DeferredScopeError('Payment processor');
       },
     });
+  });
+
+  // --- Wave 2b: Credit Pipeline ---
+  scheduler.registerDelayed('attendance.confirmed', 0, async (context: JobContext) => {
+    const data = context.data as Record<string, unknown>;
+    await scheduler.trigger('credit.issue', {
+      sourceType: 'event_checkin', sourceId: data['checkinId'], personId: data['personId'],
+      organizationId: data['organizationId'], creditAmount: data['creditAmount'],
+      cpdActivityType: data['cpdActivityType'], attestation: data['attestation'],
+    });
+  });
+
+  scheduler.registerDelayed('credit.issue', 0, async (context: JobContext) => {
+    const result = await processCreditIssue(context);
+    if (result?.thresholdMet) {
+      await scheduler.trigger('compliance.threshold_met', { personId: result.personId, organizationId: result.organizationId, totalCredits: result.totalCredits, requiredCredits: result.requiredCredits });
+    }
+  });
+
+  scheduler.registerDelayed('compliance.threshold_met', 0, async (context: JobContext) => {
+    await processComplianceThreshold(context);
+  });
+
+  scheduler.registerDelayed('certificate.bulk_generate', 0, async (context: JobContext) => {
+    const { generateCertificates } = await import('../../certificates/bulkIssueCertificates');
+    const data = context.data as any;
+    await generateCertificates(context.db, data, data.requestedBy);
+    context.logger.info({ count: data.personIds?.length, orgId: data.organizationId }, 'certificate.bulk_generate: done');
   });
 }

@@ -78,9 +78,26 @@ import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
 // Public org discovery — hand-wired (not yet in TypeSpec)
 import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
 
+// Platform admin: national dashboard + cross-org committee list (dark handlers → now wired)
+import { getNationalDashboard } from '@/handlers/platformadmin/getNationalDashboard';
+import { listAllCommittees } from '@/handlers/platformadmin/listAllCommittees';
+import { getCommittee } from '@/handlers/association:operations/getCommittee';
+
 // OG meta route for social sharing crawlers (WhatsApp, Facebook, Twitter)
 import { serveEventOgMeta } from '@/handlers/events/serveEventOgMeta';
 
+// Public credential lookup (Wave 3a — Trust Directory)
+import { lookupCredentialPublic } from '@/handlers/association:member/lookupCredentialPublic';
+
+// Wave 2b: Credit pipeline, CPD config, compliance, certificates
+import { getCpdConfig } from '@/handlers/association:member/getCpdConfig';
+import { updateCpdConfig } from '@/handlers/association:member/updateCpdConfig';
+import { awardManualCredit } from '@/handlers/association:member/awardManualCredit';
+import { getComplianceReport } from '@/handlers/association:member/getComplianceReport';
+import { refreshCompliance } from '@/handlers/association:member/refreshCompliance';
+import { getMyCredits } from '@/handlers/person/getMyCredits';
+import { bulkIssueCertificates } from '@/handlers/certificates/bulkIssueCertificates';
+import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -152,11 +169,22 @@ export function createApp(config: Config): App {
   // OG meta for event social sharing — serves HTML with og:meta for crawlers
   app.get('/og/events/:slug', serveEventOgMeta as any);
 
+  // Public credential lookup by credential number (Wave 3a — Trust Directory)
+  app.get('/association/member/credentials/lookup/:credentialNumber', lookupCredentialPublic as any);
+
+  // Public certificate verification (Wave 2b)
+  app.get('/certificates/verify/:certificateNumber', verifyCertificatePublic as any);
+
   // Register auth routes
   registerAuthRoutes(app as App);
 
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
+
+  // Platform admin: national dashboard + cross-org committees (hand-wired, under /admin/*)
+  app.get('/admin/national-dashboard/:associationId', getNationalDashboard as any);
+  app.get('/admin/committees', listAllCommittees as any);
+  app.get('/admin/committees/:id', getCommittee as any);
 
   // One-tap payment token: PUBLIC endpoints (member clicks from email, no auth)
   // Registered before any wildcard auth middleware to avoid interception
@@ -179,6 +207,7 @@ export function createApp(config: Config): App {
   // Public association endpoints that must NOT have auth middleware
   const ASSOCIATION_PUBLIC_PATHS = [
     '/association/member/credentials/public-verify',
+    '/association/member/credentials/lookup',
     '/association/member/ethics/public-complaints',
     '/association/member/ethics/public-complaint',
     '/association/member/directory/public',
@@ -245,6 +274,15 @@ export function createApp(config: Config): App {
   app.post('/accredited-providers/:organizationId', authMiddleware(), createAccreditedProvider);
   app.patch('/accredited-providers/:organizationId/:providerId', authMiddleware(), updateAccreditedProvider);
   app.delete('/accredited-providers/:organizationId/:providerId', authMiddleware(), deleteAccreditedProvider);
+
+  // Wave 2b: CPD config, manual credit, compliance, bulk certificates
+  app.get('/association/member/cpd-config/:organizationId', authMiddleware(), getCpdConfig as any);
+  app.patch('/association/member/cpd-config/:organizationId', authMiddleware(), updateCpdConfig as any);
+  app.post('/association/member/credits/manual', authMiddleware(), orgContextMiddleware(), awardManualCredit as any);
+  app.get('/association/member/compliance/:organizationId', authMiddleware(), getComplianceReport as any);
+  app.post('/association/member/compliance/:organizationId/refresh', authMiddleware(), refreshCompliance as any);
+  app.get('/persons/me/credits', authMiddleware(), orgContextOptionalMiddleware(), getMyCredits as any);
+  app.post('/certificates/bulk-issue', authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
 
   // Register WebSocket handlers
   registerWebSocketRoutes(app as App);

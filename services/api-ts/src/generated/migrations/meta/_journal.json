@@ -309,6 +309,34 @@
       "when": 1779897700000,
       "tag": "0043_checkin_attestation",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1779984000000,
+      "tag": "0044_wave3a_trust_privacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1780070400000,
+      "tag": "0045_wave2b_credit_pipeline",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1780070500000,
+      "tag": "0046_wave2b_compliance_view",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1780156800000,
+      "tag": "0047_wave2b_certificate_extension",
+      "breakpoints": true
     }
   ]
 }
