@@ -11,20 +11,13 @@ import { Button, Skeleton } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { formatCents } from '../lib/money'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { DuesStatusBadge } from './dues-status-badge'
 
 interface DuesInvoiceListProps {
   orgId: string
   tenantId: string
 }
 
-const STATUS_BADGES: Record<string, string> = {
-  generated: 'bg-gray-100 text-gray-800',
-  sent: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
-  paid: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
-  overdue: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
-  cancelled: 'bg-gray-100 text-gray-500',
-  writtenOff: 'bg-orange-100 text-orange-800',
-}
 
 export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
   const queryClient = useQueryClient()
@@ -107,9 +100,7 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
               {formatCents(Number(inv.totalAmount))}
             </TableCell>
             <TableCell className="px-4 py-3">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGES[inv.status] || STATUS_BADGES.generated}`}>
-                {inv.status}
-              </span>
+              <DuesStatusBadge status={inv.status} type="invoice" />
             </TableCell>
             <TableCell className="px-4 py-3">
               {['generated', 'sent', 'overdue'].includes(inv.status) && (

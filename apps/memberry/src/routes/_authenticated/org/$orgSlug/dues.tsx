@@ -7,6 +7,8 @@ import { formatCents } from '@/features/dues/lib/money'
 import { ProofUploadForm } from '@/features/dues/components/proof-upload-form'
 import { api } from '@/lib/api'
 import { CreditCard, Clock, CheckCircle, XCircle, AlertTriangle, Info, Building, Receipt } from 'lucide-react'
+import { DuesStatusCard } from '@/features/dues/components/dues-status-card'
+import type { DuesStatusCardProps } from '@/features/dues/components/dues-status-card'
 import { useOrg } from '@/hooks/useOrg'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -96,6 +98,26 @@ function MemberDuesPage() {
     }
   }
 
+  // Derive dues status for the summary card
+  const duesStatus: DuesStatusCardProps['status'] | null = (() => {
+    if (!membershipData) return null
+    if (unpaidInvoices.some((inv: any) => inv.status === 'overdue')) return 'overdue'
+    if (unpaidInvoices.length > 0) return 'pendingPayment'
+    if (memberStatus === 'grace') return 'gracePeriod'
+    if (memberStatus === 'lapsed' || memberStatus === 'suspended') return 'lapsed'
+    if (isExpired) return 'lapsed'
+    return 'active'
+  })()
+
+  // Find the first unpaid invoice for next-payment info
+  const nextInvoice = unpaidInvoices[0] as any | undefined
+
+  // Scroll to pay section when Pay Now is clicked
+  const handlePayNow = () => {
+    const paySection = document.querySelector('h2')
+    paySection?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
       <PageHeader
@@ -106,6 +128,18 @@ function MemberDuesPage() {
           { label: 'Dues' },
         ]}
       />
+
+      {/* Dues Status Summary Card */}
+      {duesStatus && expiryDate && (
+        <DuesStatusCard
+          status={duesStatus}
+          expiryDate={expiryDate.toISOString()}
+          nextPaymentAmount={nextInvoice?.totalAmount}
+          nextPaymentDueDate={nextInvoice?.periodEnd}
+          currency={duesConfig?.currency ?? 'PHP'}
+          onPayNow={unpaidInvoices.length > 0 ? handlePayNow : undefined}
+        />
+      )}
 
       {/* Unpaid Invoices — Proof Upload */}
       {loadingInvoices ? (
@@ -127,11 +161,11 @@ function MemberDuesPage() {
                   <GlassCard className="p-5 space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-mono text-sm text-[var(--color-muted)]">{inv.invoiceNumber}</p>
+                        <p className="font-mono text-[13px] text-[var(--color-muted)]">{inv.invoiceNumber}</p>
                         <p className="text-h2 font-display font-bold tabular-nums">
                           <CountUp value={inv.totalAmount / 100} prefix="₱" format={(n) => n.toLocaleString('en-PH', { minimumFractionDigits: 2 })} />
                         </p>
-                        <p className="text-sm text-[var(--color-muted)]">
+                        <p className="text-[13px] text-[var(--color-muted)]">
                           Period: {inv.periodStart} to {inv.periodEnd}
                         </p>
                       </div>
@@ -142,7 +176,7 @@ function MemberDuesPage() {
 
                     {existingSubmission ? (
                       <div className="rounded-[8px] p-4 bg-[var(--color-surface-warm)]">
-                        <div className="flex items-center gap-2 text-sm">
+                        <div className="flex items-center gap-2 text-[14px]">
                           {(() => {
                             const s = PAYMENT_STATUS_BADGE[existingSubmission.status]
                             const Icon = s?.icon ?? Clock
@@ -157,13 +191,13 @@ function MemberDuesPage() {
                           })()}
                         </div>
                         {existingSubmission.status === 'rejected' && existingSubmission.rejectionReason && (
-                          <p className="text-sm text-[var(--color-error)] mt-2">
+                          <p className="text-[13px] text-[var(--color-error)] mt-2">
                             Reason: {existingSubmission.rejectionReason}
                           </p>
                         )}
                         {existingSubmission.status === 'rejected' && (
                           <div className="mt-3">
-                            <p className="text-sm text-[var(--color-muted)] mb-2">
+                            <p className="text-[13px] text-[var(--color-muted)] mb-2">
                               You can resubmit your proof:
                             </p>
                             <ProofUploadForm
@@ -177,7 +211,7 @@ function MemberDuesPage() {
                       </div>
                     ) : (
                       <div>
-                        <p className="text-sm text-[var(--color-muted)] mb-3">
+                        <p className="text-[13px] text-[var(--color-muted)] mb-3">
                           Upload your GCash screenshot or bank transfer receipt to pay.
                         </p>
                         <ProofUploadForm
@@ -201,7 +235,7 @@ function MemberDuesPage() {
               <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
               <div className="space-y-2">
                 <h2 className="text-h3">Membership Period Ended</h2>
-                <p className="text-sm text-[var(--color-muted)]">
+                <p className="text-[14px] text-[var(--color-muted)]">
                   Your membership period expired on{' '}
                   <span className="font-semibold text-[var(--color-text)]">
                     {expiryDate?.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })}
@@ -216,7 +250,7 @@ function MemberDuesPage() {
                 <Info className="w-4 h-4" />
                 How Renewal Works
               </h3>
-              <ol className="text-sm text-[var(--color-muted)] space-y-2 list-decimal list-inside">
+              <ol className="text-[13px] text-[var(--color-muted)] space-y-2 list-decimal list-inside">
                 <li>Your chapter treasurer generates a renewal invoice for the next membership period</li>
                 <li>You'll receive a notification when your invoice is ready</li>
                 <li>Pay via GCash, bank transfer, or other accepted methods and upload your receipt here</li>
@@ -224,7 +258,7 @@ function MemberDuesPage() {
                 <li>Your membership is renewed and your new expiry date is updated</li>
               </ol>
               {duesConfig?.amount && (
-                <p className="text-sm font-semibold mt-2">
+                <p className="text-[14px] font-semibold mt-2">
                   Annual dues: <span className="font-bold text-[var(--color-primary)]">{formatCents(duesConfig.amount, duesConfig.currency ?? 'PHP')}</span>
                 </p>
               )}
@@ -232,7 +266,7 @@ function MemberDuesPage() {
 
             <div className="rounded-[8px] p-4 flex items-start gap-3 border border-[var(--color-surface-border-glass)]">
               <Building className="w-4 h-4 text-[var(--color-muted)] shrink-0 mt-0.5" />
-              <div className="text-sm">
+              <div className="text-[14px]">
                 <p className="font-semibold">Need to renew immediately?</p>
                 <p className="text-[var(--color-muted)]">
                   Contact your chapter treasurer or organization officer to request a renewal invoice.
@@ -247,7 +281,7 @@ function MemberDuesPage() {
             <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <div>
               <h2 className="text-h3">All Dues Paid</h2>
-              <p className="text-sm text-[var(--color-muted)]">
+              <p className="text-[14px] text-[var(--color-muted)]">
                 Your membership is current through{' '}
                 <span className="font-semibold text-[var(--color-text)]">
                   {expiryDate?.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })}
@@ -264,7 +298,7 @@ function MemberDuesPage() {
             <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <div>
               <h2 className="text-h3">All Dues Paid</h2>
-              <p className="text-sm text-[var(--color-muted)]">
+              <p className="text-[14px] text-[var(--color-muted)]">
                 No outstanding dues.{expiryDate && (
                   <> Your membership is current through{' '}
                   <span className="font-semibold text-[var(--color-text)]">
@@ -296,10 +330,10 @@ function MemberDuesPage() {
                   return (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between rounded-[8px] px-4 py-3 text-sm hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
+                      className="flex items-center justify-between rounded-[8px] px-4 py-3 text-[14px] hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-xs tabular-nums">{p.receiptNumber}</span>
+                        <span className="font-mono text-[12px] tabular-nums">{p.receiptNumber}</span>
                         <Badge className={s?.className ?? 'bg-gray-100 text-gray-600'}>
                           {s?.label ?? p.status}
                         </Badge>
@@ -308,7 +342,7 @@ function MemberDuesPage() {
                         <span className="font-mono font-semibold tabular-nums">
                           {formatCents(p.amount, p.currency)}
                         </span>
-                        <span className="text-xs text-[var(--color-muted)]">
+                        <span className="text-[12px] text-[var(--color-muted)]">
                           {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}
                         </span>
                       </div>

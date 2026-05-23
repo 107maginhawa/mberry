@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { DuesPaymentStatus, DuesPayment } from '@monobase/sdk-ts/generated/types.gen'
-import { Badge, Button } from '@monobase/ui'
+import { Button } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
@@ -10,24 +10,13 @@ import { Receipt } from 'lucide-react'
 import { formatCents } from '../lib/money'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { GlassCard } from '@/components/motion/glass-card'
+import { DuesStatusBadge } from './dues-status-badge'
 
 interface PaymentHistoryTableProps {
   orgId?: string
   scope: 'member' | 'org'
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  completed: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
-  pending: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
-  failed: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
-  refunded: 'bg-gray-100 text-gray-600',
-  partiallyRefunded: 'bg-gray-100 text-gray-600',
-  submitted: 'bg-blue-100 text-blue-800',
-  underReview: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
-  rejected: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
-  expired: 'bg-orange-100 text-orange-800',
-}
 
 const METHOD_LABELS: Record<string, string> = {
   online: 'Online',
@@ -115,9 +104,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
                 <TableCell className="px-3 py-2 text-mono tabular-nums">{formatCents(Number(p.amount), p.currency)}</TableCell>
                 <TableCell className="px-3 py-2 text-body-sm">{METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}</TableCell>
                 <TableCell className="px-3 py-2">
-                  <Badge variant="secondary" className={STATUS_COLORS[p.status] ?? ''}>
-                    {p.status}
-                  </Badge>
+                  <DuesStatusBadge status={p.status} type="payment" />
                 </TableCell>
               </TableRow>
             ))}
