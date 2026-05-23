@@ -10,7 +10,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { DuesRepository } from './repos/dues.repo';
+import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { getDuesDashboard } from './getDuesDashboard';
 
@@ -22,7 +22,7 @@ const fullStats = {
   paidCount: 42,
   unpaidCount: 22,
   overdueCount: 8,
-  collectionRate: 0.57,
+  collectionRate: 57,
 };
 
 // ─── Tests ──────────────────────────────────────────────
@@ -58,7 +58,7 @@ describe('getDuesDashboard', () => {
 
   test('returns dashboard stats for valid org', async () => {
     stubRepo(DuesRepository, {
-      getDashboardStats: async () => fullStats,
+      getFullDashboardStats: async () => fullStats,
       getMemberCount: async () => 64,
     });
 
@@ -74,7 +74,7 @@ describe('getDuesDashboard', () => {
       paidCount: 42,
       unpaidCount: 22,
       overdueCount: 8,
-      collectionRate: 0.57,
+      collectionRate: 57,
       memberCount: 64,
     });
   });
@@ -83,7 +83,7 @@ describe('getDuesDashboard', () => {
 
   test('returns zeros when no payment data exists', async () => {
     stubRepo(DuesRepository, {
-      getDashboardStats: async () => ({
+      getFullDashboardStats: async () => ({
         totalCollected: 0,
         totalOutstanding: 0,
         paidCount: 0,
@@ -113,7 +113,7 @@ describe('getDuesDashboard', () => {
 
   test('collection rate is 0 when no amounts (division by zero safe)', async () => {
     stubRepo(DuesRepository, {
-      getDashboardStats: async () => ({
+      getFullDashboardStats: async () => ({
         totalCollected: 0,
         totalOutstanding: 0,
         paidCount: 0,
@@ -135,13 +135,13 @@ describe('getDuesDashboard', () => {
 
   test('collection rate reflects ratio correctly', async () => {
     stubRepo(DuesRepository, {
-      getDashboardStats: async () => ({
+      getFullDashboardStats: async () => ({
         totalCollected: 100000,
         totalOutstanding: 100000,
         paidCount: 10,
         unpaidCount: 10,
         overdueCount: 0,
-        collectionRate: 0.5,
+        collectionRate: 50,
       }),
       getMemberCount: async () => 20,
     });
@@ -152,6 +152,6 @@ describe('getDuesDashboard', () => {
 
     const res = await getDuesDashboard(ctx);
     expect(res.status).toBe(200);
-    expect(res.body.data.collectionRate).toBe(0.5);
+    expect(res.body.data.collectionRate).toBe(50);
   });
 });

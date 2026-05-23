@@ -1,5 +1,7 @@
-import { eq, and, desc, sql, gte, lte, type SQL } from 'drizzle-orm';
+import { eq, and, desc, sql, gte, lte, count, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { memberships } from './membership.schema';
+import { duesInvoices } from './dues.schema';
 
 /** Valid dues payment status transitions — used by handlers for guard logic. */
 export const VALID_PAYMENT_TRANSITIONS: Record<string, string[]> = {
@@ -224,6 +226,54 @@ export class DuesRepository {
         ? Math.round(((stats?.completedCount ?? 0) / stats.totalCount) * 100)
         : 0,
     };
+  }
+
+  /**
+   * Invoice-aware dashboard stats — joins duesPayments + duesInvoices for
+   * richer metrics (unpaidCount, overdueCount). collectionRate is 0-100 integer.
+   * Preferred over getDashboardStats() for officer-facing dashboards.
+   */
+  async getFullDashboardStats(organizationId: string) {
+    const [paymentStats] = await this.db
+      .select({
+        totalCollected: sql<number>`COALESCE(SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END), 0)::int`,
+        paidCount: sql<number>`COUNT(CASE WHEN status = 'completed' THEN 1 END)::int`,
+      })
+      .from(duesPayments)
+      .where(eq(duesPayments.organizationId, organizationId));
+
+    const [invoiceStats] = await this.db
+      .select({
+        totalOutstanding: sql<number>`COALESCE(SUM(CASE WHEN status IN ('generated', 'sent', 'overdue') THEN total_amount ELSE 0 END), 0)::int`,
+        unpaidCount: sql<number>`COUNT(CASE WHEN status IN ('generated', 'sent') THEN 1 END)::int`,
+        overdueCount: sql<number>`COUNT(CASE WHEN status = 'overdue' THEN 1 END)::int`,
+      })
+      .from(duesInvoices)
+      .where(eq(duesInvoices.organizationId, organizationId));
+
+    const totalCollected = paymentStats?.totalCollected ?? 0;
+    const totalOutstanding = invoiceStats?.totalOutstanding ?? 0;
+    const total = totalCollected + totalOutstanding;
+
+    return {
+      totalCollected,
+      totalOutstanding,
+      paidCount: paymentStats?.paidCount ?? 0,
+      unpaidCount: invoiceStats?.unpaidCount ?? 0,
+      overdueCount: invoiceStats?.overdueCount ?? 0,
+      collectionRate: total > 0 ? Math.round((totalCollected / total) * 100) : 0,
+    };
+  }
+
+  async getMemberCount(organizationId: string): Promise<number> {
+    const [result] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(memberships)
+      .where(and(
+        eq(memberships.organizationId, organizationId),
+        eq(memberships.status, 'active'),
+      ));
+    return result?.count ?? 0;
   }
 
   // ─── Reminders ────────────────────────────────────────

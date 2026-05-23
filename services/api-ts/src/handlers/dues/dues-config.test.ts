@@ -13,7 +13,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { DuesRepository } from './repos/dues.repo';
+import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { getDuesDashboard } from './getDuesDashboard';
 import {
@@ -75,7 +75,7 @@ afterEach(() => {
 describe('Dues config permission enforcement', () => {
   test('Treasurer can access dues dashboard', async () => {
     stubRepo(DuesRepository, {
-      getDashboardStats: async () => ({
+      getFullDashboardStats: async () => ({
         totalCollected: '50000',
         totalOutstanding: '10000',
         paidCount: 10,
@@ -103,7 +103,7 @@ describe('Dues config permission enforcement', () => {
 
   test('President can access dues dashboard', async () => {
     stubRepo(DuesRepository, {
-      getDashboardStats: async () => ({
+      getFullDashboardStats: async () => ({
         totalCollected: '30000',
         totalOutstanding: '5000',
         paidCount: 6,

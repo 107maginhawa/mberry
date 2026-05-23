@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { GetDuesDashboardParams } from '@/generated/openapi/validators';
-import { DuesRepository } from './repos/dues.repo';
+import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -35,7 +35,7 @@ export async function getDuesDashboard(
 
   const repo = new DuesRepository(db);
   const [stats, memberCount] = await Promise.all([
-    repo.getDashboardStats(orgId),
+    repo.getFullDashboardStats(orgId),
     repo.getMemberCount(orgId),
   ]);
 

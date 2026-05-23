@@ -34,6 +34,11 @@ import {
   type DuesGatewayConfig,
 } from '../../association:member/repos/dues-payments.schema';
 
+/**
+ * @deprecated Use `DuesRepository` from `@/handlers/association:member/repos/dues-payments.repo`
+ * instead. This legacy repo has a collectionRate bug (returns 0.00-1.00 instead of 0-100)
+ * and duplicates methods available in the canonical repo. Will be removed in v1.2.0.
+ */
 export class DuesRepository {
   constructor(private db: DatabaseInstance) {}
 
