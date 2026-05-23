@@ -265,6 +265,84 @@ export class DuesRepository {
     };
   }
 
+  /**
+   * Treasurer metrics: trailing collection rates, monthly breakdown, status distribution.
+   * All collectionRate values are 0-100 integers.
+   */
+  async getMetricsWithTrends(organizationId: string) {
+    // Trailing collection rates for 30/90/365 day windows
+    const trailingRates = await this.computeTrailingRates(organizationId, [30, 90, 365]);
+
+    // Monthly breakdown (last 12 months)
+    const monthlyBreakdown = await this.computeMonthlyBreakdown(organizationId, 12);
+
+    // Member status distribution from invoice statuses
+    const statusDistribution = await this.computeStatusDistribution(organizationId);
+
+    return { trailingRates, monthlyBreakdown, statusDistribution };
+  }
+
+  private async computeTrailingRates(organizationId: string, windows: number[]) {
+    const results: Record<string, number> = {};
+
+    for (const days of windows) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+
+      const [stats] = await this.db
+        .select({
+          collected: sql<number>`COALESCE(SUM(CASE WHEN status = 'completed' AND ${duesPayments.paidAt} >= ${cutoff} THEN amount ELSE 0 END), 0)::int`,
+          total: sql<number>`COALESCE(SUM(CASE WHEN ${duesPayments.createdAt} >= ${cutoff} THEN amount ELSE 0 END), 0)::int`,
+        })
+        .from(duesPayments)
+        .where(eq(duesPayments.organizationId, organizationId));
+
+      const collected = stats?.collected ?? 0;
+      const total = stats?.total ?? 0;
+      results[`days${days}`] = total > 0 ? Math.round((collected / total) * 100) : 0;
+    }
+
+    return results as { days30: number; days90: number; days365: number };
+  }
+
+  private async computeMonthlyBreakdown(organizationId: string, months: number) {
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - months);
+
+    return this.db
+      .select({
+        month: sql<string>`to_char(${duesPayments.paidAt}, 'YYYY-MM')`,
+        collected: sql<number>`COALESCE(SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END), 0)::int`,
+        outstanding: sql<number>`COALESCE(SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END), 0)::int`,
+      })
+      .from(duesPayments)
+      .where(and(
+        eq(duesPayments.organizationId, organizationId),
+        gte(duesPayments.createdAt, cutoff),
+      ))
+      .groupBy(sql`to_char(${duesPayments.paidAt}, 'YYYY-MM')`)
+      .orderBy(sql`to_char(${duesPayments.paidAt}, 'YYYY-MM')`);
+  }
+
+  private async computeStatusDistribution(organizationId: string) {
+    const [dist] = await this.db
+      .select({
+        active: sql<number>`COUNT(CASE WHEN status = 'paid' THEN 1 END)::int`,
+        dueSoon: sql<number>`COUNT(CASE WHEN status IN ('generated', 'sent') THEN 1 END)::int`,
+        overdue: sql<number>`COUNT(CASE WHEN status = 'overdue' THEN 1 END)::int`,
+        lapsed: sql<number>`COUNT(CASE WHEN status = 'voided' THEN 1 END)::int`,
+      })
+      .from(duesInvoices)
+      .where(eq(duesInvoices.organizationId, organizationId));
+
+    return {
+      active: dist?.active ?? 0,
+      dueSoon: dist?.dueSoon ?? 0,
+      overdue: dist?.overdue ?? 0,
+      lapsed: dist?.lapsed ?? 0,
+    };
+  }
+
   async getMemberCount(organizationId: string): Promise<number> {
     const [result] = await this.db
       .select({ count: sql<number>`count(*)::int` })
