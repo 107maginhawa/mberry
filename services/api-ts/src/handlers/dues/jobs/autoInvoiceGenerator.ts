@@ -136,7 +136,7 @@ export function computeBillingPeriod(
   }
   const periodEnd = periodEndDate.toISOString().split('T')[0];
 
-  return { periodStart, periodEnd };
+  return { periodStart: periodStart!, periodEnd: periodEnd! };
 }
 
 /**
@@ -144,7 +144,7 @@ export function computeBillingPeriod(
  */
 function generateInvoiceNumber(orgId: string, date: Date, index: number): string {
   const orgShort = orgId.slice(0, 8);
-  const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
+  const dateStr = date.toISOString().split('T')[0]!.replace(/-/g, '');
   const seq = String(index + 1).padStart(4, '0');
   return `INV-${orgShort}-${dateStr}-${seq}`;
 }
