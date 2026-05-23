@@ -20,6 +20,9 @@ export const personPrivacySettings = pgTable(
     phoneVisible: boolean('phone_visible').notNull().default(false),
     photoVisible: boolean('photo_visible').notNull().default(true),
     addressVisible: boolean('address_visible').notNull().default(false),
+    credentialsVisible: boolean('credentials_visible').notNull().default(false),
+    duesStatusVisible: boolean('dues_status_visible').notNull().default(false),
+    ceComplianceVisible: boolean('ce_compliance_visible').notNull().default(false),
   },
   (table) => ({
     personOrgIdx: uniqueIndex('privacy_person_org_idx').on(table.personId, table.organizationId),

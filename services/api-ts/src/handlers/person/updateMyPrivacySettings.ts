@@ -53,6 +53,9 @@ export async function updateMyPrivacySettings(
     phoneVisible: (b['phoneVisible'] as boolean | undefined) ?? existing?.phoneVisible ?? false,
     photoVisible: (b['photoVisible'] as boolean | undefined) ?? existing?.photoVisible ?? true,
     addressVisible: (b['addressVisible'] as boolean | undefined) ?? existing?.addressVisible ?? false,
+    credentialsVisible: (b['credentialsVisible'] as boolean | undefined) ?? existing?.credentialsVisible ?? false,
+    duesStatusVisible: (b['duesStatusVisible'] as boolean | undefined) ?? existing?.duesStatusVisible ?? false,
+    ceComplianceVisible: (b['ceComplianceVisible'] as boolean | undefined) ?? existing?.ceComplianceVisible ?? false,
   };
 
   let row;

@@ -1,15 +1,10 @@
-import { describe, test, expect, afterEach, mock } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { EventRepository } from '../association:operations/repos/events.repo';
 import { MerchantAccountRepository } from '@/handlers/billing/repos/billing.repo';
-
-// Mock requirePosition to always pass (officer check tested elsewhere)
-mock.module('@/utils/officer-check', () => ({
-  requirePosition: async () => null,
-}));
-
-const { publishEvent } = await import('../association:operations/publishEvent');
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { publishEvent } from '../association:operations/publishEvent';
 
 const paidDraft = createFakeEvent({
   id: 'evt-paid-draft',
@@ -30,9 +25,11 @@ describe('[W2A] Publish Guard — Stripe onboarding check', () => {
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('blocks publishing paid event without Stripe account', async () => {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     mocks = stubRepo(EventRepository, {
       findOneById: async () => paidDraft,
     });
@@ -49,6 +46,7 @@ describe('[W2A] Publish Guard — Stripe onboarding check', () => {
   });
 
   test('allows publishing free event without Stripe', async () => {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     mocks = stubRepo(EventRepository, {
       findOneById: async () => freeDraft,
       publish: async () => ({ ...freeDraft, status: 'published', publishedAt: new Date() }),
@@ -64,6 +62,7 @@ describe('[W2A] Publish Guard — Stripe onboarding check', () => {
   });
 
   test('allows publishing paid event with Stripe account', async () => {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
     mocks = stubRepo(EventRepository, {
       findOneById: async () => paidDraft,
       publish: async () => ({ ...paidDraft, status: 'published', publishedAt: new Date() }),

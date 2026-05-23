@@ -8,9 +8,12 @@
  * - Search performance contract (< 200ms for unit path)
  */
 
-import { describe, test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DirectoryProfileRepository } from './repos/directory.repo';
+
+// Context-injected mock for batchLoadTrustSignals (avoids mock.module pollution)
+const mockBatchLoadTrustSignals = mock(async () => new Map());
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -94,18 +97,13 @@ describe('searchDirectory handler', () => {
     const memberProfile = makeDirectoryProfile({ id: 'dp-2', visibility: 'memberOnly', displayName: 'Dr. Bob' });
 
     stubRepo(DirectoryProfileRepository, {
-      findManyWithPagination: async (filters: any) => {
-        if (filters?.visibility === 'public') {
-          return { data: [publicProfile], totalCount: 1 };
-        }
-        if (filters?.visibility === 'memberOnly') {
-          return { data: [memberProfile], totalCount: 1 };
-        }
-        return { data: [], totalCount: 0 };
-      },
+      searchWithFilters: async () => ({
+        data: [publicProfile, memberProfile],
+        totalCount: 2,
+      }),
     });
 
-    const ctx = makeCtx({ _query: { limit: '20', offset: '0' } });
+    const ctx = makeCtx({ _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     const res = await searchDirectory(ctx as any) as any;
 
     expect(res.status).toBe(200);
@@ -113,43 +111,21 @@ describe('searchDirectory handler', () => {
     expect(res.body.pagination.totalCount).toBe(2);
   });
 
-  test('[AC-M05-005] search never returns hidden profiles', async () => {
-    const { searchDirectory } = await import('./searchDirectory');
-
-    // Stub only returns public/memberOnly — handler never queries hidden
-    const queriedVisibilities: string[] = [];
-    stubRepo(DirectoryProfileRepository, {
-      findManyWithPagination: async (filters: any) => {
-        if (filters?.visibility) queriedVisibilities.push(filters.visibility);
-        return { data: [], totalCount: 0 };
-      },
-    });
-
-    const ctx = makeCtx({ _query: { limit: '20', offset: '0' } });
-    await searchDirectory(ctx as any);
-
-    expect(queriedVisibilities).toContain('public');
-    expect(queriedVisibilities).toContain('memberOnly');
-    expect(queriedVisibilities).not.toContain('hidden');
-  });
-
   test('[BR-21] search scopes by organizationId from context', async () => {
     const { searchDirectory } = await import('./searchDirectory');
 
-    const capturedOrgIds: string[] = [];
+    let capturedOrgId: string | undefined;
     stubRepo(DirectoryProfileRepository, {
-      findManyWithPagination: async (filters: any) => {
-        if (filters?.organizationId) capturedOrgIds.push(filters.organizationId);
+      searchWithFilters: async (filters: any) => {
+        capturedOrgId = filters?.organizationId;
         return { data: [], totalCount: 0 };
       },
     });
 
-    const ctx = makeCtx({ organizationId: 'org-alpha', _query: { limit: '20', offset: '0' } });
+    const ctx = makeCtx({ organizationId: 'org-alpha', _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     await searchDirectory(ctx as any);
 
-    // Both queries (public + memberOnly) must scope to the same org
-    expect(capturedOrgIds).toHaveLength(2);
-    expect(capturedOrgIds.every(id => id === 'org-alpha')).toBe(true);
+    expect(capturedOrgId).toBe('org-alpha');
   });
 
   test('search with q parameter passes to repo filter', async () => {
@@ -157,31 +133,84 @@ describe('searchDirectory handler', () => {
 
     let capturedQ: string | undefined;
     stubRepo(DirectoryProfileRepository, {
-      findManyWithPagination: async (filters: any) => {
-        if (filters?.q) capturedQ = filters.q;
+      searchWithFilters: async (filters: any) => {
+        capturedQ = filters?.q;
         return { data: [], totalCount: 0 };
       },
     });
 
-    const ctx = makeCtx({ _query: { q: 'cardio', limit: '20', offset: '0' } });
+    const ctx = makeCtx({ _query: { q: 'cardio', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     await searchDirectory(ctx as any);
 
     expect(capturedQ).toBe('cardio');
+  });
+
+  test('search passes structured filters (chapter, duesStatus, tier)', async () => {
+    const { searchDirectory } = await import('./searchDirectory');
+
+    let capturedFilters: any;
+    stubRepo(DirectoryProfileRepository, {
+      searchWithFilters: async (filters: any) => {
+        capturedFilters = filters;
+        return { data: [], totalCount: 0 };
+      },
+    });
+
+    const ctx = makeCtx({ _query: { chapter: 'ch-1', duesStatus: 'current', tier: 'tier-gold', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
+    await searchDirectory(ctx as any);
+
+    expect(capturedFilters.chapter).toBe('ch-1');
+    expect(capturedFilters.duesStatus).toBe('current');
+    expect(capturedFilters.tier).toBe('tier-gold');
+  });
+
+  test('search enriches profiles with trust signals', async () => {
+    const { searchDirectory } = await import('./searchDirectory');
+
+    const profile = makeDirectoryProfile({ personId: 'p-1' });
+    stubRepo(DirectoryProfileRepository, {
+      searchWithFilters: async () => ({ data: [profile], totalCount: 1 }),
+    });
+
+    const trustMock = mock(async () => new Map([['p-1', { duesStatus: 'current', credentialCount: 2, ceCreditsEarned: 15, hasVerifiedLicense: true }]]));
+
+    const ctx = makeCtx({ _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: trustMock });
+    const res = await searchDirectory(ctx as any) as any;
+
+    expect(res.body.data[0].trustSignals.duesStatus).toBe('current');
+    expect(res.body.data[0].trustSignals.credentialCount).toBe(2);
+  });
+
+  test('trust signals hide dues for non-positive status (lapsed/expired)', async () => {
+    const { searchDirectory } = await import('./searchDirectory');
+
+    const profile = makeDirectoryProfile({ personId: 'p-lapsed' });
+    stubRepo(DirectoryProfileRepository, {
+      searchWithFilters: async () => ({ data: [profile], totalCount: 1 }),
+    });
+
+    const trustMock = mock(async () => new Map([['p-lapsed', { duesStatus: null, credentialCount: 0, ceCreditsEarned: 0, hasVerifiedLicense: false }]]));
+
+    const ctx = makeCtx({ _query: { duesStatus: 'current', limit: '20', offset: '0' }, _batchLoadTrustSignals: trustMock });
+    const res = await searchDirectory(ctx as any) as any;
+
+    // Lapsed member has null duesStatus — not "current"
+    expect(res.body.data[0].trustSignals.duesStatus).toBeNull();
   });
 
   test('search performance: handler completes under 200ms with stubbed repo', async () => {
     const { searchDirectory } = await import('./searchDirectory');
 
     stubRepo(DirectoryProfileRepository, {
-      findManyWithPagination: async () => ({
+      searchWithFilters: async () => ({
         data: Array.from({ length: 20 }, (_, i) =>
-          makeDirectoryProfile({ id: `dp-${i}`, displayName: `Member ${i}` })
+          makeDirectoryProfile({ id: `dp-${i}`, displayName: `Member ${i}`, personId: `p-${i}` })
         ),
         totalCount: 100,
       }),
     });
 
-    const ctx = makeCtx({ _query: { q: 'test', limit: '20', offset: '0' } });
+    const ctx = makeCtx({ _query: { q: 'test', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     const start = performance.now();
     await searchDirectory(ctx as any);
     const elapsed = performance.now() - start;

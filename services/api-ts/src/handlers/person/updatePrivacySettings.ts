@@ -55,6 +55,9 @@ export async function updatePrivacySettings(ctx: HandlerContext): Promise<Respon
     phoneVisible: (body['phoneVisible'] as boolean | undefined) ?? existing?.phoneVisible ?? false,
     photoVisible: (body['photoVisible'] as boolean | undefined) ?? existing?.photoVisible ?? true,
     addressVisible: (body['addressVisible'] as boolean | undefined) ?? existing?.addressVisible ?? false,
+    credentialsVisible: (body['credentialsVisible'] as boolean | undefined) ?? existing?.credentialsVisible ?? false,
+    duesStatusVisible: (body['duesStatusVisible'] as boolean | undefined) ?? existing?.duesStatusVisible ?? false,
+    ceComplianceVisible: (body['ceComplianceVisible'] as boolean | undefined) ?? existing?.ceComplianceVisible ?? false,
   };
 
   if (existing) {

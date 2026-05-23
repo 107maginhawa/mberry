@@ -26,6 +26,9 @@ const PRIVACY_FIELDS = [
   { key: 'phoneVisible', label: 'Phone', desc: 'Show phone number in the member directory' },
   { key: 'photoVisible', label: 'Photo', desc: 'Show profile photo in the member directory' },
   { key: 'addressVisible', label: 'Address', desc: 'Show address in the member directory' },
+  { key: 'credentialsVisible', label: 'Credentials', desc: 'Show verified credentials in the directory' },
+  { key: 'duesStatusVisible', label: 'Dues Status', desc: 'Show dues standing in the directory' },
+  { key: 'ceComplianceVisible', label: 'CE Compliance', desc: 'Show continuing education status in the directory' },
 ]
 
 function MySettingsPage() {
@@ -274,6 +277,9 @@ function PrivacySection() {
     phoneVisible: false,
     photoVisible: true,
     addressVisible: false,
+    credentialsVisible: false,
+    duesStatusVisible: false,
+    ceComplianceVisible: false,
   }
 
   const privacyQuery = useQuery<any[]>({
