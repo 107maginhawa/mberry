@@ -184,3 +184,28 @@ export const announcementStats = pgTable('announcement_stats', {
 export type Announcement = typeof announcements.$inferSelect;
 export type NewAnnouncement = typeof announcements.$inferInsert;
 export type AnnouncementStats = typeof announcementStats.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// Saved Segments (audience presets)
+// ---------------------------------------------------------------------------
+
+export const savedSegments = pgTable('saved_segment', {
+  ...baseEntityFields,
+  organizationId: uuid('organization_id').notNull(),
+  name: varchar('name', { length: 100 }).notNull(),
+  filters: jsonb('filters').notNull(),
+}, (table) => ({
+  orgIdx: index('saved_segment_org_idx').on(table.organizationId),
+}));
+
+export type SavedSegment = typeof savedSegments.$inferSelect;
+export type NewSavedSegment = typeof savedSegments.$inferInsert;
+
+/** Segment filter criteria for announcement targeting */
+export interface SegmentFilters {
+  duesStatus?: string;
+  membershipTier?: string;
+  chapterIds?: string[];
+  joinedAfter?: string;
+  joinedBefore?: string;
+}

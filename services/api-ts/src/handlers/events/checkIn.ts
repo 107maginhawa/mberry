@@ -77,7 +77,19 @@ export async function checkIn(ctx: Context): Promise<Response> {
     logger?.warn({ error: err, eventId }, 'Failed to enqueue attendance.confirmed job');
   }
 
-  // TODO: Post-event NPS survey trigger (deferred — survey module not yet implemented)
+  // Post-event NPS survey trigger (non-blocking)
+  try {
+    const npsJobs = ctx.get('jobs') as JobScheduler | undefined;
+    if (npsJobs) {
+      await npsJobs.trigger('survey.postEventNps', {
+        eventId,
+        personId: body.personId,
+        organizationId: event.organizationId,
+      });
+    }
+  } catch (err) {
+    ctx.get('logger')?.warn({ error: err, eventId }, 'Failed to enqueue survey.postEventNps');
+  }
 
   return ctx.json({ data: attendance }, 201);
 }

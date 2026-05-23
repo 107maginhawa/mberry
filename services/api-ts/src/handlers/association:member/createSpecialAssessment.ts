@@ -19,9 +19,9 @@ export async function createSpecialAssessment(
   const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
-  const body = ctx.req.valid('json') ?? ctx.get('_body') ?? (ctx as any)._body;
-  const organizationId = ctx.get('organizationId');
-  const user = ctx.get('user');
+  const body = ctx.req.valid('json');
+  const organizationId = ctx.get('organizationId') as string;
+  
 
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new SpecialAssessmentRepository(db);
@@ -36,7 +36,7 @@ export async function createSpecialAssessment(
     fundId: body.fundId ?? null,
     appliesTo: body.appliesTo ?? 'all',
     status: 'draft',
-    createdBy: user.id,
+    createdBy: session!.user.id,
   });
 
   return ctx.json(assessment, 201);

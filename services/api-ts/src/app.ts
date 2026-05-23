@@ -26,6 +26,7 @@ import { registerBookingJobs } from '@/handlers/booking/jobs';
 import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
+import { registerSurveyJobs } from '@/handlers/surveys/jobs';
 
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
@@ -366,6 +367,7 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerDuesJobs(jobs);
   registerPersonJobs(jobs);
   registerMembershipJobs(jobs, app.notifs);
+  registerSurveyJobs(jobs, app.notifs);
 
   logger.debug('Starting background job scheduler...');
   await jobs.start();

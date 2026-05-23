@@ -10,11 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrainingIndexRouteImport } from './routes/training/index'
 import { Route as OrganizationsIndexRouteImport } from './routes/organizations/index'
 import { Route as OperatorsIndexRouteImport } from './routes/operators/index'
+import { Route as NationalDashboardIndexRouteImport } from './routes/national-dashboard/index'
 import { Route as MembersIndexRouteImport } from './routes/members/index'
 import { Route as ImpersonateIndexRouteImport } from './routes/impersonate/index'
 import { Route as FeatureFlagsIndexRouteImport } from './routes/feature-flags/index'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
+import { Route as CommitteesIndexRouteImport } from './routes/committees/index'
 import { Route as AuditIndexRouteImport } from './routes/audit/index'
 import { Route as AssociationsIndexRouteImport } from './routes/associations/index'
 import { Route as OrganizationsOrganizationIdRouteImport } from './routes/organizations/$organizationId'
@@ -25,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrainingIndexRoute = TrainingIndexRouteImport.update({
+  id: '/training/',
+  path: '/training/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrganizationsIndexRoute = OrganizationsIndexRouteImport.update({
   id: '/organizations/',
   path: '/organizations/',
@@ -33,6 +42,11 @@ const OrganizationsIndexRoute = OrganizationsIndexRouteImport.update({
 const OperatorsIndexRoute = OperatorsIndexRouteImport.update({
   id: '/operators/',
   path: '/operators/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NationalDashboardIndexRoute = NationalDashboardIndexRouteImport.update({
+  id: '/national-dashboard/',
+  path: '/national-dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MembersIndexRoute = MembersIndexRouteImport.update({
@@ -48,6 +62,16 @@ const ImpersonateIndexRoute = ImpersonateIndexRouteImport.update({
 const FeatureFlagsIndexRoute = FeatureFlagsIndexRouteImport.update({
   id: '/feature-flags/',
   path: '/feature-flags/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommitteesIndexRoute = CommitteesIndexRouteImport.update({
+  id: '/committees/',
+  path: '/committees/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuditIndexRoute = AuditIndexRouteImport.update({
@@ -77,13 +101,17 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/associations/$associationId': typeof AssociationsAssociationIdRoute
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
-  '/associations': typeof AssociationsIndexRoute
-  '/audit': typeof AuditIndexRoute
-  '/feature-flags': typeof FeatureFlagsIndexRoute
-  '/impersonate': typeof ImpersonateIndexRoute
-  '/members': typeof MembersIndexRoute
-  '/operators': typeof OperatorsIndexRoute
-  '/organizations': typeof OrganizationsIndexRoute
+  '/associations/': typeof AssociationsIndexRoute
+  '/audit/': typeof AuditIndexRoute
+  '/committees/': typeof CommitteesIndexRoute
+  '/events/': typeof EventsIndexRoute
+  '/feature-flags/': typeof FeatureFlagsIndexRoute
+  '/impersonate/': typeof ImpersonateIndexRoute
+  '/members/': typeof MembersIndexRoute
+  '/national-dashboard/': typeof NationalDashboardIndexRoute
+  '/operators/': typeof OperatorsIndexRoute
+  '/organizations/': typeof OrganizationsIndexRoute
+  '/training/': typeof TrainingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,11 +119,15 @@ export interface FileRoutesByTo {
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
   '/associations': typeof AssociationsIndexRoute
   '/audit': typeof AuditIndexRoute
+  '/committees': typeof CommitteesIndexRoute
+  '/events': typeof EventsIndexRoute
   '/feature-flags': typeof FeatureFlagsIndexRoute
   '/impersonate': typeof ImpersonateIndexRoute
   '/members': typeof MembersIndexRoute
+  '/national-dashboard': typeof NationalDashboardIndexRoute
   '/operators': typeof OperatorsIndexRoute
   '/organizations': typeof OrganizationsIndexRoute
+  '/training': typeof TrainingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,11 +136,15 @@ export interface FileRoutesById {
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
   '/associations/': typeof AssociationsIndexRoute
   '/audit/': typeof AuditIndexRoute
+  '/committees/': typeof CommitteesIndexRoute
+  '/events/': typeof EventsIndexRoute
   '/feature-flags/': typeof FeatureFlagsIndexRoute
   '/impersonate/': typeof ImpersonateIndexRoute
   '/members/': typeof MembersIndexRoute
+  '/national-dashboard/': typeof NationalDashboardIndexRoute
   '/operators/': typeof OperatorsIndexRoute
   '/organizations/': typeof OrganizationsIndexRoute
+  '/training/': typeof TrainingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -116,13 +152,17 @@ export interface FileRouteTypes {
     | '/'
     | '/associations/$associationId'
     | '/organizations/$organizationId'
-    | '/associations'
-    | '/audit'
-    | '/feature-flags'
-    | '/impersonate'
-    | '/members'
-    | '/operators'
-    | '/organizations'
+    | '/associations/'
+    | '/audit/'
+    | '/committees/'
+    | '/events/'
+    | '/feature-flags/'
+    | '/impersonate/'
+    | '/members/'
+    | '/national-dashboard/'
+    | '/operators/'
+    | '/organizations/'
+    | '/training/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -130,11 +170,15 @@ export interface FileRouteTypes {
     | '/organizations/$organizationId'
     | '/associations'
     | '/audit'
+    | '/committees'
+    | '/events'
     | '/feature-flags'
     | '/impersonate'
     | '/members'
+    | '/national-dashboard'
     | '/operators'
     | '/organizations'
+    | '/training'
   id:
     | '__root__'
     | '/'
@@ -142,11 +186,15 @@ export interface FileRouteTypes {
     | '/organizations/$organizationId'
     | '/associations/'
     | '/audit/'
+    | '/committees/'
+    | '/events/'
     | '/feature-flags/'
     | '/impersonate/'
     | '/members/'
+    | '/national-dashboard/'
     | '/operators/'
     | '/organizations/'
+    | '/training/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,11 +203,15 @@ export interface RootRouteChildren {
   OrganizationsOrganizationIdRoute: typeof OrganizationsOrganizationIdRoute
   AssociationsIndexRoute: typeof AssociationsIndexRoute
   AuditIndexRoute: typeof AuditIndexRoute
+  CommitteesIndexRoute: typeof CommitteesIndexRoute
+  EventsIndexRoute: typeof EventsIndexRoute
   FeatureFlagsIndexRoute: typeof FeatureFlagsIndexRoute
   ImpersonateIndexRoute: typeof ImpersonateIndexRoute
   MembersIndexRoute: typeof MembersIndexRoute
+  NationalDashboardIndexRoute: typeof NationalDashboardIndexRoute
   OperatorsIndexRoute: typeof OperatorsIndexRoute
   OrganizationsIndexRoute: typeof OrganizationsIndexRoute
+  TrainingIndexRoute: typeof TrainingIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -171,52 +223,80 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/training/': {
+      id: '/training/'
+      path: '/training'
+      fullPath: '/training/'
+      preLoaderRoute: typeof TrainingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/organizations/': {
       id: '/organizations/'
       path: '/organizations'
-      fullPath: '/organizations'
+      fullPath: '/organizations/'
       preLoaderRoute: typeof OrganizationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/operators/': {
       id: '/operators/'
       path: '/operators'
-      fullPath: '/operators'
+      fullPath: '/operators/'
       preLoaderRoute: typeof OperatorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/national-dashboard/': {
+      id: '/national-dashboard/'
+      path: '/national-dashboard'
+      fullPath: '/national-dashboard/'
+      preLoaderRoute: typeof NationalDashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/members/': {
       id: '/members/'
       path: '/members'
-      fullPath: '/members'
+      fullPath: '/members/'
       preLoaderRoute: typeof MembersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/impersonate/': {
       id: '/impersonate/'
       path: '/impersonate'
-      fullPath: '/impersonate'
+      fullPath: '/impersonate/'
       preLoaderRoute: typeof ImpersonateIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feature-flags/': {
       id: '/feature-flags/'
       path: '/feature-flags'
-      fullPath: '/feature-flags'
+      fullPath: '/feature-flags/'
       preLoaderRoute: typeof FeatureFlagsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/committees/': {
+      id: '/committees/'
+      path: '/committees'
+      fullPath: '/committees/'
+      preLoaderRoute: typeof CommitteesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/audit/': {
       id: '/audit/'
       path: '/audit'
-      fullPath: '/audit'
+      fullPath: '/audit/'
       preLoaderRoute: typeof AuditIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/associations/': {
       id: '/associations/'
       path: '/associations'
-      fullPath: '/associations'
+      fullPath: '/associations/'
       preLoaderRoute: typeof AssociationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -243,11 +323,15 @@ const rootRouteChildren: RootRouteChildren = {
   OrganizationsOrganizationIdRoute: OrganizationsOrganizationIdRoute,
   AssociationsIndexRoute: AssociationsIndexRoute,
   AuditIndexRoute: AuditIndexRoute,
+  CommitteesIndexRoute: CommitteesIndexRoute,
+  EventsIndexRoute: EventsIndexRoute,
   FeatureFlagsIndexRoute: FeatureFlagsIndexRoute,
   ImpersonateIndexRoute: ImpersonateIndexRoute,
   MembersIndexRoute: MembersIndexRoute,
+  NationalDashboardIndexRoute: NationalDashboardIndexRoute,
   OperatorsIndexRoute: OperatorsIndexRoute,
   OrganizationsIndexRoute: OrganizationsIndexRoute,
+  TrainingIndexRoute: TrainingIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

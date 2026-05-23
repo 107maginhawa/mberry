@@ -3849,6 +3849,32 @@ export const CreateReviewRequestSchema = z.object({
   comment: z.string().max(1000).optional()
 });
 
+export const SurveyQuestionSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(["nps", "rating", "single_choice", "multi_choice", "text", "yes_no"]),
+  text: z.string().max(500),
+  required: z.boolean(),
+  order: z.number().int().gte(0),
+  options: z.array(z.string()).optional(),
+  scale: z.object({
+  min: z.number().int(),
+  max: z.number().int()
+}).optional(),
+  maxLength: z.number().int().gte(1).lte(5000).optional()
+});
+
+export const CreateSurveyRequestSchema = z.object({
+  title: z.string().max(200),
+  description: z.string().max(2000).optional(),
+  surveyType: z.enum(["nps", "satisfaction", "poll", "custom"]),
+  questions: z.array(SurveyQuestionSchema).optional(),
+  settings: z.object({
+  anonymous: z.boolean().optional(),
+  deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
+  targetAudience: z.string().optional()
+}).optional()
+});
+
 export const TemplateVariableSchema = z.object({
   id: z.string().max(100),
   type: z.enum(["string", "number", "boolean", "date", "datetime", "url", "email", "array"]),
@@ -7543,7 +7569,10 @@ export const PrivacySettingsSchema = z.object({
   emailVisible: z.boolean(),
   phoneVisible: z.boolean(),
   photoVisible: z.boolean(),
-  addressVisible: z.boolean()
+  addressVisible: z.boolean(),
+  credentialsVisible: z.boolean(),
+  duesStatusVisible: z.boolean(),
+  ceComplianceVisible: z.boolean()
 });
 
 export const ProfessionalLicenseSchema = z.object({
@@ -7842,6 +7871,11 @@ export const PublicationUpdateSchema = z.object({
   status: z.enum(["active", "suspended", "retired"]).optional()
 });
 
+export const QuestionAnswerSchema = z.object({
+  questionId: z.string().uuid(),
+  value: z.unknown()
+});
+
 export const QuizAttemptSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -8053,6 +8087,8 @@ export const ResourceUpdateSchema = z.object({
   downloadCount: z.number().int().gte(0).optional(),
   status: z.enum(["draft", "published", "archived"]).optional()
 });
+
+export const ResponseStatusSchema = z.enum(["pending", "completed", "skipped"]);
 
 export const ReviewSchema = z.object({
   id: z.string().uuid(),
@@ -8282,6 +8318,11 @@ export const SanctionRecordUpdateSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   status: z.enum(["active", "expired", "overturned"]).optional()
+});
+
+export const ScaleConfigSchema = z.object({
+  min: z.number().int(),
+  max: z.number().int()
 });
 
 export const ScheduleExceptionSchema = z.object({
@@ -8612,6 +8653,11 @@ export const SubmitPaymentProofRequestSchema = z.object({
   proofMimeType: z.string().min(1).max(100)
 });
 
+export const SubmitResponseRequestSchema = z.object({
+  answers: z.array(QuestionAnswerSchema),
+  contextId: z.string().uuid().optional()
+});
+
 export const SuppressionListSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -8643,6 +8689,140 @@ export const SuppressionListUpdateSchema = z.object({
 });
 
 export const SuppressionReasonSchema = z.enum(["unsubscribed", "bounced", "complaint", "manual"]);
+
+export const SurveySchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  title: z.string().max(200),
+  description: z.string().max(2000).optional(),
+  status: z.enum(["draft", "active", "closed", "archived"]),
+  surveyType: z.enum(["nps", "satisfaction", "poll", "custom"]),
+  questions: z.array(SurveyQuestionSchema),
+  settings: z.object({
+  anonymous: z.boolean().optional(),
+  deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
+  targetAudience: z.string().optional()
+}),
+  analyticsSnapshot: z.object({
+  totalResponses: z.number().int(),
+  completionRate: z.number(),
+  npsScore: z.number().optional(),
+  questionBreakdown: z.record(z.string(), z.unknown())
+}).optional()
+});
+
+export const SurveyAnalyticsSchema = z.object({
+  totalResponses: z.number().int(),
+  completionRate: z.number(),
+  npsScore: z.number().optional(),
+  questionBreakdown: z.record(z.string(), z.unknown())
+});
+
+export const SurveyAnalyticsUpdateSchema = z.object({
+  totalResponses: z.number().int().optional(),
+  completionRate: z.number().optional(),
+  npsScore: z.number().optional(),
+  questionBreakdown: z.record(z.string(), z.unknown()).optional()
+});
+
+export const SurveyListResponseSchema = z.object({
+  data: z.array(SurveySchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const SurveyQuestionTypeSchema = z.enum(["nps", "rating", "single_choice", "multi_choice", "text", "yes_no"]);
+
+export const SurveyResponseSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  surveyId: z.string().uuid(),
+  responderId: z.string().uuid(),
+  answers: z.array(QuestionAnswerSchema),
+  status: z.enum(["pending", "completed", "skipped"]),
+  completedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  contextId: z.string().uuid().optional()
+});
+
+export const SurveyResponseListResponseSchema = z.object({
+  data: z.array(SurveyResponseSchema),
+  pagination: z.object({
+  offset: z.number().int(),
+  limit: z.number().int(),
+  count: z.number().int(),
+  totalCount: z.number().int(),
+  totalPages: z.number().int(),
+  currentPage: z.number().int(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+})
+});
+
+export const SurveyResponseUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  surveyId: z.string().uuid().optional(),
+  responderId: z.string().uuid().optional(),
+  answers: z.array(QuestionAnswerSchema).optional(),
+  status: z.enum(["pending", "completed", "skipped"]).optional(),
+  completedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  contextId: z.string().uuid().optional()
+});
+
+export const SurveySettingsSchema = z.object({
+  anonymous: z.boolean().optional(),
+  deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
+  targetAudience: z.string().optional()
+});
+
+export const SurveyStatusSchema = z.enum(["draft", "active", "closed", "archived"]);
+
+export const SurveyTypeSchema = z.enum(["nps", "satisfaction", "poll", "custom"]);
+
+export const SurveyUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  title: z.string().max(200).optional(),
+  description: z.string().max(2000).optional(),
+  status: z.enum(["draft", "active", "closed", "archived"]).optional(),
+  surveyType: z.enum(["nps", "satisfaction", "poll", "custom"]).optional(),
+  questions: z.array(SurveyQuestionSchema).optional(),
+  settings: z.object({
+  anonymous: z.boolean().optional(),
+  deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
+  targetAudience: z.string().optional()
+}).optional(),
+  analyticsSnapshot: z.object({
+  totalResponses: z.number().int().optional(),
+  completionRate: z.number().optional(),
+  npsScore: z.number().optional(),
+  questionBreakdown: z.record(z.string(), z.unknown()).optional()
+}).optional()
+});
 
 export const TaxReceiptSchema = z.object({
   id: z.string().uuid(),
@@ -8924,7 +9104,22 @@ export const UpdatePrivacySettingsRequestSchema = z.object({
   emailVisible: z.boolean().optional(),
   phoneVisible: z.boolean().optional(),
   photoVisible: z.boolean().optional(),
-  addressVisible: z.boolean().optional()
+  addressVisible: z.boolean().optional(),
+  credentialsVisible: z.boolean().optional(),
+  duesStatusVisible: z.boolean().optional(),
+  ceComplianceVisible: z.boolean().optional()
+});
+
+export const UpdateSurveyRequestSchema = z.object({
+  title: z.string().max(200).optional(),
+  description: z.string().max(2000).optional(),
+  surveyType: z.enum(["nps", "satisfaction", "poll", "custom"]).optional(),
+  questions: z.array(SurveyQuestionSchema).optional(),
+  settings: z.object({
+  anonymous: z.boolean().optional(),
+  deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
+  targetAudience: z.string().optional()
+}).optional()
 });
 
 export const UpdateTemplateRequestSchema = z.object({
@@ -12539,3 +12734,95 @@ export const GetFileDownloadParams = z.object({
 export type GetFileDownloadParams = z.infer<typeof GetFileDownloadParams>;
 
 export const GetFileDownloadResponse = FileDownloadResponseSchema;
+
+export const CreateSurveyBody = CreateSurveyRequestSchema;
+export type CreateSurveyBody = z.infer<typeof CreateSurveyBody>;
+
+export const CreateSurveyResponse = SurveySchema;
+
+export const ListSurveysQuery = z.object({
+  status: SurveyStatusSchema.optional(),
+  surveyType: SurveyTypeSchema.optional(),
+  mine: z.coerce.boolean().optional(),
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListSurveysQuery = z.infer<typeof ListSurveysQuery>;
+
+export const ListSurveysResponse = SurveyListResponseSchema;
+
+export const GetSurveyParams = z.object({
+  survey: UUIDSchema,
+});
+export type GetSurveyParams = z.infer<typeof GetSurveyParams>;
+
+export const GetSurveyResponse = SurveySchema;
+
+export const UpdateSurveyParams = z.object({
+  survey: UUIDSchema,
+});
+export type UpdateSurveyParams = z.infer<typeof UpdateSurveyParams>;
+
+export const UpdateSurveyBody = UpdateSurveyRequestSchema;
+export type UpdateSurveyBody = z.infer<typeof UpdateSurveyBody>;
+
+export const UpdateSurveyResponse = SurveySchema;
+
+export const DeleteSurveyParams = z.object({
+  survey: UUIDSchema,
+});
+export type DeleteSurveyParams = z.infer<typeof DeleteSurveyParams>;
+
+export const DeleteSurveyResponse = z.void();
+
+export const GetSurveyAnalyticsParams = z.object({
+  survey: UUIDSchema,
+});
+export type GetSurveyAnalyticsParams = z.infer<typeof GetSurveyAnalyticsParams>;
+
+export const GetSurveyAnalyticsResponse = SurveyAnalyticsSchema;
+
+export const CloseSurveyParams = z.object({
+  survey: UUIDSchema,
+});
+export type CloseSurveyParams = z.infer<typeof CloseSurveyParams>;
+
+export const CloseSurveyResponse = SurveySchema;
+
+export const PublishSurveyParams = z.object({
+  survey: UUIDSchema,
+});
+export type PublishSurveyParams = z.infer<typeof PublishSurveyParams>;
+
+export const PublishSurveyResponse = SurveySchema;
+
+export const SubmitSurveyResponseParams = z.object({
+  survey: UUIDSchema,
+});
+export type SubmitSurveyResponseParams = z.infer<typeof SubmitSurveyResponseParams>;
+
+export const SubmitSurveyResponseBody = SubmitResponseRequestSchema;
+export type SubmitSurveyResponseBody = z.infer<typeof SubmitSurveyResponseBody>;
+
+export const SubmitSurveyResponseResponse = SurveyResponseSchema;
+
+export const ListSurveyResponsesParams = z.object({
+  survey: UUIDSchema,
+});
+export type ListSurveyResponsesParams = z.infer<typeof ListSurveyResponsesParams>;
+
+export const ListSurveyResponsesQuery = z.object({
+  offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
+  limit: z.coerce.number().int().gte(1).lte(100).optional(),
+  page: z.coerce.number().int().gte(1).lte(2147483647).optional(),
+  pageSize: z.coerce.number().int().gte(1).lte(100).optional(),
+  q: SafeQueryStringSchema.optional(),
+  sort: SafeQueryStringSchema.optional(),
+});
+export type ListSurveyResponsesQuery = z.infer<typeof ListSurveyResponsesQuery>;
+
+export const ListSurveyResponsesResponse = SurveyResponseListResponseSchema;

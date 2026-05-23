@@ -50,6 +50,7 @@ import { listMyCustomEvents } from '../../handlers/association:operations/listMy
 import { listCustomEventAttendance } from '../../handlers/association:operations/listCustomEventAttendance';
 import { checkInCustomEvent } from '../../handlers/association:operations/checkInCustomEvent';
 import { registerForCustomEvent } from '../../handlers/association:operations/registerForCustomEvent';
+import { registerAndPayForEvent } from '../../handlers/association:operations/registerAndPayForEvent';
 import { listCustomEventRegistrations } from '../../handlers/association:operations/listCustomEventRegistrations';
 import { createEvent } from '../../handlers/association:operations/createEvent';
 import { searchEvents } from '../../handlers/association:operations/searchEvents';
@@ -375,6 +376,16 @@ import { getFile } from '../../handlers/storage/getFile';
 import { deleteFile } from '../../handlers/storage/deleteFile';
 import { completeFileUpload } from '../../handlers/storage/completeFileUpload';
 import { getFileDownload } from '../../handlers/storage/getFileDownload';
+import { createSurvey } from '../../handlers/surveys/createSurvey';
+import { listSurveys } from '../../handlers/surveys/listSurveys';
+import { getSurvey } from '../../handlers/surveys/getSurvey';
+import { updateSurvey } from '../../handlers/surveys/updateSurvey';
+import { deleteSurvey } from '../../handlers/surveys/deleteSurvey';
+import { getSurveyAnalytics } from '../../handlers/surveys/getSurveyAnalytics';
+import { closeSurvey } from '../../handlers/surveys/closeSurvey';
+import { publishSurvey } from '../../handlers/surveys/publishSurvey';
+import { submitSurveyResponse } from '../../handlers/surveys/submitSurveyResponse';
+import { listSurveyResponses } from '../../handlers/surveys/listSurveyResponses';
 
 export const registry = {
   // Platformadmin handlers
@@ -422,6 +433,7 @@ export const registry = {
   listCustomEventAttendance,
   checkInCustomEvent,
   registerForCustomEvent,
+  registerAndPayForEvent,
   listCustomEventRegistrations,
   createEvent,
   searchEvents,
@@ -777,5 +789,17 @@ export const registry = {
   deleteFile,
   completeFileUpload,
   getFileDownload,
+
+  // Surveys handlers
+  createSurvey,
+  listSurveys,
+  getSurvey,
+  updateSurvey,
+  deleteSurvey,
+  getSurveyAnalytics,
+  closeSurvey,
+  publishSurvey,
+  submitSurveyResponse,
+  listSurveyResponses,
 
 };

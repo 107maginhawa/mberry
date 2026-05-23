@@ -187,6 +187,7 @@ See [CONTRIBUTING.md#critical-conventions](./CONTRIBUTING.md#critical-convention
 - **Use `sonner`** for toasts, not shadcn `useToast`
 - **Auth route is `/auth/sign-in`**, not `/login`
 - **Restart API server** after adding new route registrations (no hot-reload)
+- **NEVER delete handler files to fix type errors** — fix the types instead. If handlers have TS errors, update signatures to match generated validator types from `@/generated/openapi/validators`
 
 ## OpenAPI Specification
 

@@ -19,7 +19,7 @@ export async function getSpecialAssessmentCollection(
   const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
-  const params = ctx.req.valid('param') ?? ctx.get('_params') ?? (ctx as any)._params;
+  const params = ctx.req.valid('param');
 
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new SpecialAssessmentRepository(db);

@@ -1,0 +1,286 @@
+/**
+ * Repository for surveys module - database operations
+ */
+
+import { and, eq, sql, gt, lt, count, type SQL } from 'drizzle-orm';
+import type { DatabaseInstance } from '@/core/database';
+import {
+  surveys,
+  surveyResponses,
+  type Survey,
+  type NewSurvey,
+  type SurveyResponseRecord,
+  type NewSurveyResponse,
+  type SurveyAnalyticsSnapshot,
+} from './survey.schema';
+
+// ---------------------------------------------------------------------------
+// Filters
+// ---------------------------------------------------------------------------
+
+export interface SurveyFilters {
+  organizationId?: string;
+  status?: string;
+  surveyType?: string;
+  createdBy?: string;
+}
+
+export interface SurveyResponseFilters {
+  organizationId?: string;
+  surveyId?: string;
+  responderId?: string;
+  status?: string;
+}
+
+// ---------------------------------------------------------------------------
+// SurveyRepository
+// ---------------------------------------------------------------------------
+
+export class SurveyRepository {
+  constructor(private db: DatabaseInstance, private logger?: any) {}
+
+  private buildWhereConditions(filters?: SurveyFilters): SQL<unknown> | undefined {
+    if (!filters) return undefined;
+    const conditions: SQL<unknown>[] = [];
+
+    if (filters.organizationId) {
+      conditions.push(eq(surveys.organizationId, filters.organizationId));
+    }
+    if (filters.status) {
+      conditions.push(eq(surveys.status, filters.status));
+    }
+    if (filters.surveyType) {
+      conditions.push(eq(surveys.surveyType, filters.surveyType));
+    }
+    if (filters.createdBy) {
+      conditions.push(eq(surveys.createdBy, filters.createdBy));
+    }
+
+    return conditions.length > 0 ? and(...conditions) : undefined;
+  }
+
+  async findById(id: string): Promise<Survey | undefined> {
+    const [row] = await this.db
+      .select()
+      .from(surveys)
+      .where(eq(surveys.id, id))
+      .limit(1);
+    return row;
+  }
+
+  async findManyWithPagination(
+    filters: SurveyFilters,
+    opts: { pagination: { limit: number; offset: number } }
+  ): Promise<{ data: Survey[]; totalCount: number }> {
+    const where = this.buildWhereConditions(filters);
+
+    const [data, countResult] = await Promise.all([
+      this.db
+        .select()
+        .from(surveys)
+        .where(where)
+        .limit(opts.pagination.limit)
+        .offset(opts.pagination.offset)
+        .orderBy(surveys.createdAt),
+      this.db
+        .select({ count: count() })
+        .from(surveys)
+        .where(where),
+    ]);
+
+    return { data, totalCount: Number(countResult[0]?.count ?? 0) };
+  }
+
+  async createSurvey(data: NewSurvey): Promise<Survey> {
+    const [row] = await this.db.insert(surveys).values(data).returning();
+    return row!;
+  }
+
+  async updateDraftSurvey(
+    id: string,
+    updates: Partial<Pick<NewSurvey, 'title' | 'description' | 'surveyType' | 'questions' | 'settings'>> & { updatedBy?: string }
+  ): Promise<Survey | undefined> {
+    const [row] = await this.db
+      .update(surveys)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(eq(surveys.id, id), eq(surveys.status, 'draft')))
+      .returning();
+    return row;
+  }
+
+  async publish(id: string, updatedBy: string): Promise<Survey | undefined> {
+    const [row] = await this.db
+      .update(surveys)
+      .set({ status: 'active', updatedBy, updatedAt: new Date() })
+      .where(and(eq(surveys.id, id), eq(surveys.status, 'draft')))
+      .returning();
+    return row;
+  }
+
+  async close(id: string, updatedBy: string): Promise<Survey | undefined> {
+    const [row] = await this.db
+      .update(surveys)
+      .set({ status: 'closed', updatedBy, updatedAt: new Date() })
+      .where(and(eq(surveys.id, id), eq(surveys.status, 'active')))
+      .returning();
+    return row;
+  }
+
+  async deleteDraft(id: string): Promise<boolean> {
+    const result = await this.db
+      .delete(surveys)
+      .where(and(eq(surveys.id, id), eq(surveys.status, 'draft')))
+      .returning({ id: surveys.id });
+    return result.length > 0;
+  }
+
+  async updateAnalyticsSnapshot(id: string, snapshot: SurveyAnalyticsSnapshot): Promise<void> {
+    await this.db
+      .update(surveys)
+      .set({ analyticsSnapshot: snapshot, updatedAt: new Date() })
+      .where(eq(surveys.id, id));
+  }
+
+  async findActiveNpsSurvey(organizationId: string): Promise<Survey | undefined> {
+    const [row] = await this.db
+      .select()
+      .from(surveys)
+      .where(
+        and(
+          eq(surveys.organizationId, organizationId),
+          eq(surveys.status, 'active'),
+          eq(surveys.surveyType, 'nps')
+        )
+      )
+      .limit(1);
+    return row;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SurveyResponseRepository
+// ---------------------------------------------------------------------------
+
+export class SurveyResponseRepository {
+  constructor(private db: DatabaseInstance, private logger?: any) {}
+
+  private buildWhereConditions(filters?: SurveyResponseFilters): SQL<unknown> | undefined {
+    if (!filters) return undefined;
+    const conditions: SQL<unknown>[] = [];
+
+    if (filters.organizationId) {
+      conditions.push(eq(surveyResponses.organizationId, filters.organizationId));
+    }
+    if (filters.surveyId) {
+      conditions.push(eq(surveyResponses.surveyId, filters.surveyId));
+    }
+    if (filters.responderId) {
+      conditions.push(eq(surveyResponses.responderId, filters.responderId));
+    }
+    if (filters.status) {
+      conditions.push(eq(surveyResponses.status, filters.status));
+    }
+
+    return conditions.length > 0 ? and(...conditions) : undefined;
+  }
+
+  async findManyWithPagination(
+    filters: SurveyResponseFilters,
+    opts: { pagination: { limit: number; offset: number } }
+  ): Promise<{ data: SurveyResponseRecord[]; totalCount: number }> {
+    const where = this.buildWhereConditions(filters);
+
+    const [data, countResult] = await Promise.all([
+      this.db
+        .select()
+        .from(surveyResponses)
+        .where(where)
+        .limit(opts.pagination.limit)
+        .offset(opts.pagination.offset)
+        .orderBy(surveyResponses.createdAt),
+      this.db
+        .select({ count: count() })
+        .from(surveyResponses)
+        .where(where),
+    ]);
+
+    return { data, totalCount: Number(countResult[0]?.count ?? 0) };
+  }
+
+  async findAllBySurveyId(surveyId: string): Promise<SurveyResponseRecord[]> {
+    return this.db
+      .select()
+      .from(surveyResponses)
+      .where(
+        and(
+          eq(surveyResponses.surveyId, surveyId),
+          eq(surveyResponses.status, 'completed')
+        )
+      );
+  }
+
+  async submitResponse(data: NewSurveyResponse): Promise<SurveyResponseRecord> {
+    const [row] = await this.db
+      .insert(surveyResponses)
+      .values({ ...data, status: 'completed', completedAt: new Date() })
+      .returning();
+    return row!;
+  }
+
+  async createPendingResponse(data: NewSurveyResponse): Promise<SurveyResponseRecord> {
+    const [row] = await this.db
+      .insert(surveyResponses)
+      .values({ ...data, status: 'pending' })
+      .returning();
+    return row!;
+  }
+
+  async findByResponderAndSurvey(responderId: string, surveyId: string): Promise<SurveyResponseRecord | undefined> {
+    const [row] = await this.db
+      .select()
+      .from(surveyResponses)
+      .where(
+        and(
+          eq(surveyResponses.responderId, responderId),
+          eq(surveyResponses.surveyId, surveyId)
+        )
+      )
+      .limit(1);
+    return row;
+  }
+
+  async countRecentForMember(responderId: string, sinceHours: number = 24): Promise<number> {
+    const since = new Date(Date.now() - sinceHours * 60 * 60 * 1000);
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(surveyResponses)
+      .where(
+        and(
+          eq(surveyResponses.responderId, responderId),
+          gt(surveyResponses.createdAt, since)
+        )
+      );
+    return Number(result?.count ?? 0);
+  }
+
+  async markAsSkipped(id: string): Promise<void> {
+    await this.db
+      .update(surveyResponses)
+      .set({ status: 'skipped', updatedAt: new Date() })
+      .where(eq(surveyResponses.id, id));
+  }
+
+  async markPendingAsSkippedBefore(cutoff: Date): Promise<number> {
+    const result = await this.db
+      .update(surveyResponses)
+      .set({ status: 'skipped', updatedAt: new Date() })
+      .where(
+        and(
+          eq(surveyResponses.status, 'pending'),
+          lt(surveyResponses.createdAt, cutoff)
+        )
+      )
+      .returning({ id: surveyResponses.id });
+    return result.length;
+  }
+}

@@ -19,7 +19,7 @@ export async function listSpecialAssessments(
   const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
-  const organizationId = ctx.get('organizationId');
+  const organizationId = ctx.get('organizationId') as string;
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new SpecialAssessmentRepository(db);
 

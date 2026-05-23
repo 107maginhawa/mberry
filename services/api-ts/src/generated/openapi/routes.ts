@@ -293,7 +293,11 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.registerForCustomEvent as unknown as Handler
   );
 
-  // registerAndPayForEvent — removed (handler deleted)
+  // registerAndPayForEvent
+  app.post('/association/event-lifecycle/:eventId/register-and-pay',
+    zValidator('param', validators.RegisterAndPayForEventParams, validationErrorHandler),
+    registry.registerAndPayForEvent as unknown as Handler
+  );
 
   // listCustomEventRegistrations
   app.get('/association/event-lifecycle/:eventId/registrations',
@@ -2621,6 +2625,77 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getFileDownload as unknown as Handler
   );
 
-  // Survey routes — removed (handlers deleted, reimplemented when needed)
+  // createSurvey
+  app.post('/surveys/',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('json', validators.CreateSurveyBody, validationErrorHandler),
+    registry.createSurvey as unknown as Handler
+  );
+
+  // listSurveys
+  app.get('/surveys/',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.ListSurveysQuery, validationErrorHandler),
+    registry.listSurveys as unknown as Handler
+  );
+
+  // getSurvey
+  app.get('/surveys/:survey',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.GetSurveyParams, validationErrorHandler),
+    registry.getSurvey as unknown as Handler
+  );
+
+  // updateSurvey
+  app.patch('/surveys/:survey',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('param', validators.UpdateSurveyParams, validationErrorHandler),
+    zValidator('json', validators.UpdateSurveyBody, validationErrorHandler),
+    registry.updateSurvey as unknown as Handler
+  );
+
+  // deleteSurvey
+  app.delete('/surveys/:survey',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('param', validators.DeleteSurveyParams, validationErrorHandler),
+    registry.deleteSurvey as unknown as Handler
+  );
+
+  // getSurveyAnalytics
+  app.get('/surveys/:survey/analytics',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('param', validators.GetSurveyAnalyticsParams, validationErrorHandler),
+    registry.getSurveyAnalytics as unknown as Handler
+  );
+
+  // closeSurvey
+  app.post('/surveys/:survey/close',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('param', validators.CloseSurveyParams, validationErrorHandler),
+    registry.closeSurvey as unknown as Handler
+  );
+
+  // publishSurvey
+  app.post('/surveys/:survey/publish',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('param', validators.PublishSurveyParams, validationErrorHandler),
+    registry.publishSurvey as unknown as Handler
+  );
+
+  // submitSurveyResponse
+  app.post('/surveys/:survey/responses',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.SubmitSurveyResponseParams, validationErrorHandler),
+    zValidator('json', validators.SubmitSurveyResponseBody, validationErrorHandler),
+    registry.submitSurveyResponse as unknown as Handler
+  );
+
+  // listSurveyResponses
+  app.get('/surveys/:survey/responses',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('param', validators.ListSurveyResponsesParams, validationErrorHandler),
+    zValidator('query', validators.ListSurveyResponsesQuery, validationErrorHandler),
+    registry.listSurveyResponses as unknown as Handler
+  );
 
 }
