@@ -33,7 +33,7 @@ const STATUS_CONFIG = {
 
 export interface DuesStatusCardProps {
   status: 'active' | 'gracePeriod' | 'lapsed' | 'overdue' | 'pendingPayment'
-  expiryDate: string // ISO date
+  expiryDate?: string // ISO date — optional for new members
   nextPaymentAmount?: number // cents
   nextPaymentDueDate?: string // ISO date
   currency?: string // default 'PHP'
@@ -69,8 +69,9 @@ export function DuesStatusCard({
   onPayNow,
 }: DuesStatusCardProps) {
   const config = STATUS_CONFIG[status]
-  const daysRemaining = getDaysRemaining(expiryDate)
-  const isOverdue = daysRemaining < 0
+  const daysRemaining = expiryDate ? getDaysRemaining(expiryDate) : NaN
+  const hasValidExpiry = !Number.isNaN(daysRemaining)
+  const isOverdue = hasValidExpiry && daysRemaining < 0
 
   return (
     <GlassCard className="p-5">
@@ -78,13 +79,14 @@ export function DuesStatusCard({
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <span
           className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-semibold ${config.badgeClass}`}
+          aria-label={`Membership status: ${config.label}`}
         >
           <span className={`w-2 h-2 rounded-full ${config.dotClass}`} />
           {config.label}
         </span>
         <span className="text-[13px] text-[var(--color-muted)] flex items-center gap-1.5">
           <Calendar className="w-3.5 h-3.5" />
-          Valid until {formatDate(expiryDate)}
+          {expiryDate ? `Valid until ${formatDate(expiryDate)}` : 'No expiry set'}
         </span>
       </div>
 
@@ -92,7 +94,7 @@ export function DuesStatusCard({
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-1">
           {/* Next payment info */}
-          {nextPaymentAmount != null && nextPaymentDueDate && (
+          {nextPaymentAmount != null && nextPaymentDueDate ? (
             <p className="text-[14px] text-[var(--color-text)] flex items-center gap-1.5">
               <CreditCard className="w-4 h-4 text-[var(--color-muted)]" />
               Next payment: <span className="font-semibold">{formatCents(nextPaymentAmount, currency)}</span>
@@ -100,14 +102,25 @@ export function DuesStatusCard({
                 Due: {formatShortDate(nextPaymentDueDate)}
               </span>
             </p>
+          ) : (
+            <p className="text-[14px] text-[var(--color-muted)] flex items-center gap-1.5">
+              <CreditCard className="w-4 h-4 text-[var(--color-muted)]" />
+              No upcoming payment
+            </p>
           )}
 
           {/* Days remaining / overdue */}
-          <p className="text-[13px] text-[var(--color-muted)] flex items-center gap-1.5">
+          <p
+            className="text-[13px] text-[var(--color-muted)] flex items-center gap-1.5"
+            role="status"
+            aria-live="polite"
+          >
             <Clock className="w-3.5 h-3.5" />
-            {isOverdue
-              ? `${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? 's' : ''} overdue`
-              : `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`}
+            {!hasValidExpiry
+              ? 'No expiry set'
+              : isOverdue
+                ? `${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? 's' : ''} overdue`
+                : `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`}
           </p>
         </div>
 

@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { listDuesInvoicesOptions, listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
-import { Badge } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { formatCents } from '@/features/dues/lib/money'
 import { ProofUploadForm } from '@/features/dues/components/proof-upload-form'
-import { api } from '@/lib/api'
-import { CreditCard, Clock, CheckCircle, XCircle, AlertTriangle, Info, Building, Receipt } from 'lucide-react'
 import { DuesStatusCard } from '@/features/dues/components/dues-status-card'
 import type { DuesStatusCardProps } from '@/features/dues/components/dues-status-card'
+import { DuesStatusBadge } from '@/features/dues/components/dues-status-badge'
+import { api } from '@/lib/api'
+import { CreditCard, CheckCircle, AlertTriangle, Info, Building, Receipt } from 'lucide-react'
 import { useOrg } from '@/hooks/useOrg'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -19,21 +19,6 @@ import { EmptyState } from '@/components/patterns/empty-state'
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/dues')({
   component: MemberDuesPage,
 })
-
-const STATUS_BADGE: Record<string, { className: string; label: string }> = {
-  generated: { className: 'bg-yellow-100 text-yellow-800', label: 'Unpaid' },
-  sent: { className: 'bg-yellow-100 text-yellow-800', label: 'Unpaid' },
-  overdue: { className: 'bg-red-100 text-red-800', label: 'Overdue' },
-  paid: { className: 'bg-green-100 text-green-800', label: 'Paid' },
-  cancelled: { className: 'bg-gray-100 text-gray-600', label: 'Cancelled' },
-}
-
-const PAYMENT_STATUS_BADGE: Record<string, { className: string; label: string; icon: any }> = {
-  submitted: { className: 'bg-blue-100 text-blue-800', label: 'Pending Review', icon: Clock },
-  confirmed: { className: 'bg-green-100 text-green-800', label: 'Confirmed', icon: CheckCircle },
-  rejected: { className: 'bg-red-100 text-red-800', label: 'Rejected', icon: XCircle },
-  completed: { className: 'bg-green-100 text-green-800', label: 'Completed', icon: CheckCircle },
-}
 
 function MemberDuesPage() {
   const { orgId, orgSlug } = useOrg()
@@ -85,6 +70,17 @@ function MemberDuesPage() {
   const isExpired = expiryDate ? expiryDate < new Date() && memberStatus !== 'active' : false
   const daysUntilExpiry = expiryDate ? Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null
 
+  // Derive dues status for DuesStatusCard
+  const duesStatus: DuesStatusCardProps['status'] | null = (() => {
+    if (!memberStatus) return null
+    if (memberStatus === 'active' && daysUntilExpiry !== null && daysUntilExpiry <= 0) return 'overdue'
+    if (memberStatus === 'active' && daysUntilExpiry !== null && daysUntilExpiry <= 30) return 'gracePeriod'
+    if (memberStatus === 'active') return 'active'
+    if (memberStatus === 'lapsed' || memberStatus === 'expired') return 'lapsed'
+    if (memberStatus === 'pendingPayment') return 'pendingPayment'
+    return 'active'
+  })()
+
   // Find unpaid invoices (can submit proof for)
   const unpaidInvoices = invoices.filter(
     (inv: any) => ['generated', 'sent', 'overdue'].includes(inv.status)
@@ -96,26 +92,6 @@ function MemberDuesPage() {
     if (p.invoiceId && ['submitted', 'confirmed'].includes(p.status)) {
       submittedPaymentsByInvoice.set(p.invoiceId, p)
     }
-  }
-
-  // Derive dues status for the summary card
-  const duesStatus: DuesStatusCardProps['status'] | null = (() => {
-    if (!membershipData) return null
-    if (unpaidInvoices.some((inv: any) => inv.status === 'overdue')) return 'overdue'
-    if (unpaidInvoices.length > 0) return 'pendingPayment'
-    if (memberStatus === 'grace') return 'gracePeriod'
-    if (memberStatus === 'lapsed' || memberStatus === 'suspended') return 'lapsed'
-    if (isExpired) return 'lapsed'
-    return 'active'
-  })()
-
-  // Find the first unpaid invoice for next-payment info
-  const nextInvoice = unpaidInvoices[0] as any | undefined
-
-  // Scroll to pay section when Pay Now is clicked
-  const handlePayNow = () => {
-    const paySection = document.querySelector('h2')
-    paySection?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
@@ -134,10 +110,12 @@ function MemberDuesPage() {
         <DuesStatusCard
           status={duesStatus}
           expiryDate={expiryDate.toISOString()}
-          nextPaymentAmount={nextInvoice?.totalAmount}
-          nextPaymentDueDate={nextInvoice?.periodEnd}
+          nextPaymentAmount={unpaidInvoices[0]?.totalAmount}
+          nextPaymentDueDate={unpaidInvoices[0]?.periodEnd}
           currency={duesConfig?.currency ?? 'PHP'}
-          onPayNow={unpaidInvoices.length > 0 ? handlePayNow : undefined}
+          onPayNow={unpaidInvoices.length > 0 ? () => {
+            document.getElementById('pay-dues-section')?.scrollIntoView({ behavior: 'smooth' })
+          } : undefined}
         />
       )}
 
@@ -148,7 +126,7 @@ function MemberDuesPage() {
           <Skeleton className="h-48 rounded-xl animate-shimmer" />
         </div>
       ) : unpaidInvoices.length > 0 ? (
-        <section className="space-y-4">
+        <section id="pay-dues-section" className="space-y-4">
           <h2 className="text-h3 flex items-center gap-2">
             <CreditCard className="w-5 h-5" />
             Pay Dues
@@ -169,26 +147,13 @@ function MemberDuesPage() {
                           Period: {inv.periodStart} to {inv.periodEnd}
                         </p>
                       </div>
-                      <Badge className={STATUS_BADGE[inv.status]?.className ?? ''}>
-                        {STATUS_BADGE[inv.status]?.label ?? inv.status}
-                      </Badge>
+                      <DuesStatusBadge type="invoice" status={inv.status} />
                     </div>
 
                     {existingSubmission ? (
                       <div className="rounded-[8px] p-4 bg-[var(--color-surface-warm)]">
                         <div className="flex items-center gap-2 text-[14px]">
-                          {(() => {
-                            const s = PAYMENT_STATUS_BADGE[existingSubmission.status]
-                            const Icon = s?.icon ?? Clock
-                            return (
-                              <>
-                                <Icon className="h-4 w-4" />
-                                <span className="font-semibold">
-                                  Payment {s?.label ?? existingSubmission.status}
-                                </span>
-                              </>
-                            )
-                          })()}
+                          <DuesStatusBadge type="payment" status={existingSubmission.status} />
                         </div>
                         {existingSubmission.status === 'rejected' && existingSubmission.rejectionReason && (
                           <p className="text-[13px] text-[var(--color-error)] mt-2">
@@ -326,7 +291,6 @@ function MemberDuesPage() {
             <div className="overflow-x-auto">
               <div className="space-y-1">
                 {payments.slice(0, 10).map((p: any) => {
-                  const s = PAYMENT_STATUS_BADGE[p.status]
                   return (
                     <div
                       key={p.id}
@@ -334,9 +298,7 @@ function MemberDuesPage() {
                     >
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-[12px] tabular-nums">{p.receiptNumber}</span>
-                        <Badge className={s?.className ?? 'bg-gray-100 text-gray-600'}>
-                          {s?.label ?? p.status}
-                        </Badge>
+                        <DuesStatusBadge type="payment" status={p.status} />
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="font-mono font-semibold tabular-nums">

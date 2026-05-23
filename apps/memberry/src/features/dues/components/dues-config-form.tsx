@@ -85,19 +85,21 @@ const DEFAULT_REMINDERS: ReminderRow[] = [
 ]
 
 function getBillingDates(frequency: string, cycleStartMonth: number, dueDateDay: number): string {
+  const month = Math.max(1, Math.min(12, cycleStartMonth))
+  const day = Math.max(1, Math.min(28, dueDateDay))
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
   const ordinal = (d: number) => d + (['th','st','nd','rd'][(d % 100 - 20) % 10] || ['th','st','nd','rd'][d % 100] || 'th')
-  const dayStr = ordinal(dueDateDay)
+  const dayStr = ordinal(day)
 
   switch (frequency) {
     case 'annual':
-      return `Dues due on the ${dayStr} of ${months[cycleStartMonth - 1]} each year`
+      return `Dues due on the ${dayStr} of ${months[month - 1]} each year`
     case 'semi-annual': {
-      const m2 = (cycleStartMonth + 5) % 12 // +6 months, 0-indexed
-      return `Dues due on the ${dayStr} of ${months[cycleStartMonth - 1]} and ${months[m2]}`
+      const m2 = (month + 5) % 12 // +6 months, 0-indexed
+      return `Dues due on the ${dayStr} of ${months[month - 1]} and ${months[m2]}`
     }
     case 'quarterly': {
-      const qMonths = [0, 3, 6, 9].map(offset => months[(cycleStartMonth - 1 + offset) % 12])
+      const qMonths = [0, 3, 6, 9].map(offset => months[(month - 1 + offset) % 12])
       return `Dues due on the ${dayStr} of ${qMonths.join(', ')}`
     }
     default:
