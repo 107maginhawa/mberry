@@ -14,7 +14,7 @@ interface MemberSidebarProps {
 
 export function MemberSidebar({ userEmail }: MemberSidebarProps) {
   return (
-    <aside className="hidden md:flex w-[180px] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col shrink-0">
+    <aside className="hidden md:flex w-[var(--sidebar-width)] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col shrink-0">
       {/* Logo */}
       <div className="px-4 py-3 border-b border-[var(--color-border-light)]">
         <img src="/memberry-logo.png" alt="Memberry" className="h-10 w-auto" />
@@ -26,10 +26,10 @@ export function MemberSidebar({ userEmail }: MemberSidebarProps) {
           <Link
             key={to}
             to={to}
-            className="flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-warm)] transition-colors duration-150"
+            className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-warm)] transition-colors duration-150"
             activeProps={{
               className:
-                "flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-[var(--color-primary)] font-semibold border-l-[3px] border-[var(--color-primary)] pl-[17px]",
+                "flex items-center gap-2.5 px-5 py-2.5 text-sm text-[var(--color-primary)] font-semibold border-l-[3px] border-[var(--color-primary)] pl-[calc(1.25rem-3px)]",
             }}
           >
             <Icon size={18} className="shrink-0" />
@@ -40,7 +40,7 @@ export function MemberSidebar({ userEmail }: MemberSidebarProps) {
 
       {/* User */}
       <div className="px-5 py-3 border-t border-[var(--color-border-light)]">
-        <p className="text-[11px] text-[var(--color-muted)] truncate">{userEmail}</p>
+        <p className="text-xs text-[var(--color-muted)] truncate">{userEmail}</p>
       </div>
     </aside>
   )

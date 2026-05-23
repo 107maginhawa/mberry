@@ -108,12 +108,12 @@ export function DataExport() {
           <FileText size={20} className="text-[var(--color-primary)] shrink-0 mt-0.5" />
           <div>
             <h2 className="text-h4">What's included in your export</h2>
-            <p className="text-[13px] text-[var(--color-muted)] mt-1.5 leading-relaxed">
+            <p className="text-sm text-[var(--color-muted)] mt-1.5 leading-relaxed">
               Your export includes all personal data we hold about you: profile information,
               membership records, payment history, event registrations, training completions,
               certificates, and notifications. The export is delivered as a JSON file.
             </p>
-            <p className="text-[13px] text-[var(--color-muted)] mt-2">
+            <p className="text-sm text-[var(--color-muted)] mt-2">
               Exports are available for 7 days after generation. You can request one export every{' '}
               {RATE_LIMIT_HOURS} hours.
             </p>
@@ -136,7 +136,7 @@ export function DataExport() {
               : 'Request Data Export'}
         </Button>
         {rateLimited && (
-          <p className="text-[12px] text-[var(--color-muted)] mt-2">
+          <p className="text-xs text-[var(--color-muted)] mt-2">
             You requested an export recently. Check back in {hoursUntilNextRequest()} hour(s).
           </p>
         )}
@@ -147,13 +147,13 @@ export function DataExport() {
         <div>
           <h2 className="text-h4 mb-3">Previous Exports</h2>
           <GlassCard className="overflow-hidden">
-            <Table className="text-[14px]">
+            <Table className="text-sm">
               <TableHeader className="bg-[var(--color-surface-warm)]">
                 <TableRow>
-                  <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide">
+                  <TableHead className="px-5 py-3 font-semibold text-xs uppercase tracking-wide">
                     Date
                   </TableHead>
-                  <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide">
+                  <TableHead className="px-5 py-3 font-semibold text-xs uppercase tracking-wide">
                     Status
                   </TableHead>
                   <TableHead className="px-5 py-3 w-24"></TableHead>
@@ -172,7 +172,7 @@ export function DataExport() {
                       </TableCell>
                       <TableCell className="px-5 py-3.5">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold ${config.className}`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.className}`}
                         >
                           {config.icon}
                           {config.label}
@@ -182,7 +182,7 @@ export function DataExport() {
                         {e.status === 'Ready' && e.downloadUrl ? (
                           <a
                             href={e.downloadUrl}
-                            className="text-[13px] font-semibold text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
+                            className="text-sm font-semibold text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
                           >
                             <Download size={13} />
                             Download

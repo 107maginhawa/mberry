@@ -44,7 +44,7 @@ function AuthPage() {
         {headerContent && (
           <div className="text-center mb-6">
             <div className="flex justify-center mb-3">
-              <h1 className="text-h1 text-[#554B68]">Memberry</h1>
+              <h1 className="text-h1 text-[var(--color-primary)]">Memberry</h1>
             </div>
             <h2 className="text-h2 text-foreground">{headerContent.title}</h2>
             <p className="subtitle text-muted-foreground mt-2">

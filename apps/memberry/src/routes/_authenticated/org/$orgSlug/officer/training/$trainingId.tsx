@@ -110,14 +110,14 @@ function TrainingDetail() {
 
       {/* Badges */}
       <div className="flex flex-wrap gap-2">
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
           {training.type ? (TYPE_LABELS[training.type] ?? training.type) : null}
         </span>
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium ${training.status ? (STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700') : 'bg-gray-100 text-gray-700'}`}>
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${training.status ? (STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700') : 'bg-gray-100 text-gray-700'}`}>
           {training.status?.replace('_', ' ')}
         </span>
         {Number(training.creditAmount) > 0 && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-amber-100 text-amber-700">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
             <Award className="w-3 h-3" />
             {training.creditAmount} CPE
           </span>
@@ -131,7 +131,7 @@ function TrainingDetail() {
             key={t.key}
             variant="ghost"
             onClick={() => setTab(t.key)}
-            className={`px-4 py-2 text-[14px] font-medium border-b-2 -mb-px rounded-none ${
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px rounded-none ${
               tab === t.key
                 ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
                 : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-text)]'
@@ -150,7 +150,7 @@ function TrainingDetail() {
             {training.description && (
               <GlassCard className="p-5">
                 <h2 className="text-h4 mb-2">About</h2>
-                <p className="text-[14px] text-[var(--color-muted)] whitespace-pre-line">{training.description}</p>
+                <p className="text-sm text-[var(--color-muted)] whitespace-pre-line">{training.description}</p>
               </GlassCard>
             )}
 
@@ -158,7 +158,7 @@ function TrainingDetail() {
 
           {/* Sidebar */}
           <div className="space-y-4">
-            <GlassCard className="p-5 space-y-3 text-[14px]">
+            <GlassCard className="p-5 space-y-3 text-sm">
               <div className="flex items-start gap-2">
                 <Calendar className="w-4 h-4 mt-0.5 text-[var(--color-muted)] shrink-0" />
                 <div>

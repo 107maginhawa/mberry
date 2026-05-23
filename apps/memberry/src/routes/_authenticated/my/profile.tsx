@@ -130,12 +130,12 @@ function MyProfilePage() {
             {formatPersonName(p?.firstName || '', p?.lastName, p?.middleName)}
           </h2>
           {p?.specialization && (
-            <span className="inline-block mt-1 px-3 py-1 rounded-full text-[12px] font-semibold bg-[var(--color-primary-subtle)] text-[var(--color-primary)]">
+            <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-primary-subtle)] text-[var(--color-primary)]">
               {p.specialization}
             </span>
           )}
           {formatLicenseDisplay(p?.licenseNumber, p?.prcId) && (
-            <p className="text-[13px] font-medium text-[var(--color-muted)] mt-1">
+            <p className="text-sm font-medium text-[var(--color-muted)] mt-1">
               {formatLicenseDisplay(p.licenseNumber, p.prcId)}
             </p>
           )}
@@ -146,7 +146,7 @@ function MyProfilePage() {
           {/* Contact */}
           <GlassCard className="p-5">
             <h3 className="text-h4 mb-3">Contact</h3>
-            <div className="space-y-2 text-[14px]">
+            <div className="space-y-2 text-sm">
               {p?.contactInfo?.email && (
                 <div className="flex justify-between">
                   <span className="text-[var(--color-muted)]">Email</span>
@@ -181,7 +181,7 @@ function MyProfilePage() {
               <div className="space-y-2">
                 {memberships.map((m: any) => (
                   <div key={m.id} className="flex items-center justify-between py-1">
-                    <span className="text-[14px]">{m.orgName}</span>
+                    <span className="text-sm">{m.orgName}</span>
                     <StatusBadge status={m.status ?? 'pending'} />
                   </div>
                 ))}
@@ -191,16 +191,16 @@ function MyProfilePage() {
 
           {/* Quick Links */}
           <div className="grid grid-cols-2 gap-3">
-            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-[14px] font-semibold">
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
               <Shield size={18} className="text-[var(--color-muted)]" /> Privacy
             </Link>
-            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-[14px] font-semibold">
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
               <Lock size={18} className="text-[var(--color-muted)]" /> Security
             </Link>
-            <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-[14px] font-semibold">
+            <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
               <CreditCard size={18} className="text-[var(--color-muted)]" /> ID Card
             </Link>
-            <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-[14px] font-semibold">
+            <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
               <Download size={18} className="text-[var(--color-muted)]" /> Data Export
             </Link>
           </div>
@@ -285,7 +285,7 @@ function ProfileEditForm({
       <div>
         <Label
           htmlFor={name}
-          className="block text-[13px] font-semibold text-[var(--color-text-secondary)] mb-1.5"
+          className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-1.5"
         >
           {label}
         </Label>
@@ -293,7 +293,7 @@ function ProfileEditForm({
           id={name}
           type="text"
           placeholder={opts?.placeholder}
-          className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-[14px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
+          className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
           aria-describedby={errMsg ? `${name}-error` : undefined}
           {...register(name)}
         />
@@ -318,7 +318,7 @@ function ProfileEditForm({
       />
 
       {error && (
-        <div role="alert" aria-live="polite" className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-[14px] mb-4">
+        <div role="alert" aria-live="polite" className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-sm mb-4">
           {error}
         </div>
       )}

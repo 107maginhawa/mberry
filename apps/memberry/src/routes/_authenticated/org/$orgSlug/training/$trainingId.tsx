@@ -98,7 +98,7 @@ function TrainingDetail() {
           ]}
         />
         <GlassCard className="p-8 text-center">
-          <p className="text-[14px] text-[var(--color-muted)]">Failed to load training details.</p>
+          <p className="text-sm text-[var(--color-muted)]">Failed to load training details.</p>
         </GlassCard>
       </div>
     )
@@ -118,12 +118,12 @@ function TrainingDetail() {
         actions={
           <div className="flex items-center gap-2 flex-wrap">
             {training.status && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                 {training.status}
               </span>
             )}
             {training.type && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
                 {training.type.replace('_', ' ')}
               </span>
             )}
@@ -137,8 +137,8 @@ function TrainingDetail() {
           <div className="flex items-center gap-3">
             <Calendar className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
             <div>
-              <p className="text-[12px] font-medium text-[var(--color-muted)]">Start Date</p>
-              <p className="text-[13px]">{formatDate(training.startDate)}</p>
+              <p className="text-xs font-medium text-[var(--color-muted)]">Start Date</p>
+              <p className="text-sm">{formatDate(training.startDate)}</p>
             </div>
           </div>
 
@@ -146,8 +146,8 @@ function TrainingDetail() {
             <div className="flex items-center gap-3">
               <Clock className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
               <div>
-                <p className="text-[12px] font-medium text-[var(--color-muted)]">End Date</p>
-                <p className="text-[13px]">{formatDate(training.endDate)}</p>
+                <p className="text-xs font-medium text-[var(--color-muted)]">End Date</p>
+                <p className="text-sm">{formatDate(training.endDate)}</p>
               </div>
             </div>
           )}
@@ -156,8 +156,8 @@ function TrainingDetail() {
             <div className="flex items-center gap-3">
               <Award className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
               <div>
-                <p className="text-[12px] font-medium text-[var(--color-muted)]">Credit Hours</p>
-                <p className="text-[13px] font-semibold text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <p className="text-xs font-medium text-[var(--color-muted)]">Credit Hours</p>
+                <p className="text-sm font-semibold text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   <CountUp value={Number(creditAmount)} /> CPE
                 </p>
               </div>
@@ -168,8 +168,8 @@ function TrainingDetail() {
             <div className="flex items-center gap-3">
               <DollarSign className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
               <div>
-                <p className="text-[12px] font-medium text-[var(--color-muted)]">Fee</p>
-                <p className="text-[13px]">
+                <p className="text-xs font-medium text-[var(--color-muted)]">Fee</p>
+                <p className="text-sm">
                   PHP {Number(fee).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                 </p>
               </div>
@@ -181,8 +181,8 @@ function TrainingDetail() {
           <div className="flex items-center gap-3 pt-2 border-t border-[var(--color-border-light)]">
             <BookOpen className="w-4 h-4 shrink-0 text-[var(--color-muted)]" />
             <div>
-              <p className="text-[12px] font-medium text-[var(--color-muted)]">Provider</p>
-              <p className="text-[13px]">{training.provider}</p>
+              <p className="text-xs font-medium text-[var(--color-muted)]">Provider</p>
+              <p className="text-sm">{training.provider}</p>
             </div>
           </div>
         )}
@@ -192,7 +192,7 @@ function TrainingDetail() {
       {training.description && (
         <GlassCard className="p-5 space-y-2">
           <h2 className="text-h4">About this Training</h2>
-          <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[var(--color-muted)]">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap text-[var(--color-muted)]">
             {training.description}
           </p>
         </GlassCard>
@@ -202,7 +202,7 @@ function TrainingDetail() {
       <div className="pt-2">
         {enrolled ? (
           <GlassCard className="p-4 text-center">
-            <p className="text-[14px] font-medium">You are enrolled in this training.</p>
+            <p className="text-sm font-medium">You are enrolled in this training.</p>
           </GlassCard>
         ) : (
           <Button

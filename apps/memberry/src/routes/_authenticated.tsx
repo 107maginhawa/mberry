@@ -51,7 +51,7 @@ function AuthenticatedLayout() {
       <MemberSidebar userEmail={user?.email} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MemberHeader userName={user?.name} />
-        <main id="main-content" className="flex-1 overflow-auto pb-[68px] md:pb-0">
+        <main id="main-content" className="flex-1 overflow-auto pb-[var(--bottom-nav-height)] md:pb-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

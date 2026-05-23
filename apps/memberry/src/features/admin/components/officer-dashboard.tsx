@@ -102,31 +102,31 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
           <StaggerGrid className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
             <StaggerItem>
               <GlassCard className="p-4 text-center">
-                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Active Members</p>
+                <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Active Members</p>
                 <p className="text-[28px] font-bold font-display mt-1"><CountUp value={m?.activeCount ?? 0} /></p>
               </GlassCard>
             </StaggerItem>
             <StaggerItem>
               <GlassCard className="p-4 text-center">
-                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Grace Period</p>
+                <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Grace Period</p>
                 <p className="text-[28px] font-bold font-display mt-1"><CountUp value={m?.graceCount ?? 0} /></p>
               </GlassCard>
             </StaggerItem>
             <StaggerItem>
               <GlassCard className="p-4 text-center">
-                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Lapsed</p>
+                <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Lapsed</p>
                 <p className="text-[28px] font-bold font-display mt-1"><CountUp value={m?.lapsedCount ?? 0} /></p>
               </GlassCard>
             </StaggerItem>
             <StaggerItem>
               <GlassCard className="p-4 text-center">
-                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Collection Rate</p>
+                <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Collection Rate</p>
                 <p className="text-[28px] font-bold font-display mt-1"><CountUp value={collectionRate} suffix="%" /></p>
               </GlassCard>
             </StaggerItem>
             <StaggerItem>
               <GlassCard className="p-4 text-center">
-                <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">Upcoming Activities</p>
+                <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Upcoming Activities</p>
                 <p className="text-[28px] font-bold font-display mt-1"><CountUp value={upcomingActivities} /></p>
               </GlassCard>
             </StaggerItem>
@@ -198,8 +198,8 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
                 <div className="col-span-full rounded-[12px] border border-[var(--color-success-bg)] bg-[var(--color-success-bg)] p-5 flex items-center gap-3">
                   <Users size={20} className="text-[var(--color-success)] shrink-0" />
                   <div>
-                    <p className="text-[14px] font-semibold text-[var(--color-success)]">All clear</p>
-                    <p className="text-[13px] font-medium text-[var(--color-muted)]">
+                    <p className="text-sm font-semibold text-[var(--color-success)]">All clear</p>
+                    <p className="text-sm font-medium text-[var(--color-muted)]">
                       No urgent action items. Keep up the great work!
                     </p>
                   </div>
@@ -254,11 +254,11 @@ function ActionCard({
       <div className="flex items-start gap-3">
         <span className="shrink-0 mt-0.5">{icon}</span>
         <div>
-          <p className="text-[14px] font-semibold">{title}</p>
-          <p className="text-[13px] font-medium text-[var(--color-muted)] mt-0.5">{description}</p>
+          <p className="text-sm font-semibold">{title}</p>
+          <p className="text-sm font-medium text-[var(--color-muted)] mt-0.5">{description}</p>
         </div>
       </div>
-      <p className="text-[12px] font-semibold text-[var(--color-primary)] mt-3">View &rarr;</p>
+      <p className="text-xs font-semibold text-[var(--color-primary)] mt-3">View &rarr;</p>
     </Link>
   )
 }
@@ -268,7 +268,7 @@ function QuickLink({ href, icon, label }: { href: string; icon: React.ReactNode;
     <Link
       // Dynamic hrefs cannot be statically typed against TanStack Router's route registry
       to={href as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
-      className="flex items-center gap-2 rounded-[10px] border border-[var(--color-border-light)] bg-[var(--color-surface)] px-4 py-3 text-[13px] font-semibold hover:shadow-soft transition-shadow"
+      className="flex items-center gap-2 rounded-[10px] border border-[var(--color-border-light)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold hover:shadow-soft transition-shadow"
     >
       <span className="text-[var(--color-muted)]">{icon}</span>
       {label}

@@ -63,7 +63,7 @@ export function OrgPickerSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-t-[16px] max-h-[70vh]">
         <SheetHeader className="pb-3 border-b border-[var(--color-border-light)]">
-          <SheetTitle className="text-[16px]">Your Organizations</SheetTitle>
+          <SheetTitle className="text-base">Your Organizations</SheetTitle>
         </SheetHeader>
 
         <div className="py-2 overflow-y-auto">
@@ -88,28 +88,28 @@ export function OrgPickerSheet({
                   statusRing={isActive ? 'info' : undefined}
                 />
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-[14px] font-medium text-[var(--color-text)] truncate">
+                  <p className="text-sm font-medium text-[var(--color-text)] truncate">
                     {org.orgName || 'Organization'}
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[org.status] || STATUS_DOT.active}`}
                     />
-                    <span className="text-[11px] text-[var(--color-muted)]">
+                    <span className="text-xs text-[var(--color-muted)]">
                       {STATUS_LABEL[org.status] || 'Active'}
                     </span>
                     {org.memberNumber && (
-                      <span className="text-[11px] text-[var(--color-muted)]">
+                      <span className="text-xs text-[var(--color-muted)]">
                         · #{org.memberNumber}
                       </span>
                     )}
                   </div>
                 </div>
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                <Badge variant="secondary" className="text-[0.625rem] px-1.5 py-0 shrink-0">
                   {role}
                 </Badge>
                 {isActive && (
-                  <span className="text-[var(--color-primary)] text-[11px] font-semibold shrink-0">
+                  <span className="text-[var(--color-primary)] text-xs font-semibold shrink-0">
                     Current
                   </span>
                 )}
@@ -123,7 +123,7 @@ export function OrgPickerSheet({
           <Link
             to={"/my/organizations" as "/"}
             onClick={() => onOpenChange(false)}
-            className="flex items-center gap-2 px-4 py-3 text-[13px] font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] rounded-[8px] transition-colors"
+            className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] rounded-[8px] transition-colors"
           >
             <Plus size={16} />
             Join another organization

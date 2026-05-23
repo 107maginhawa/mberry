@@ -81,7 +81,7 @@ function RegistrationsTab({ eventId, orgId }: { eventId: string; orgId: string }
 
   return (
     <GlassCard className="overflow-hidden">
-      <Table className="text-[14px]">
+      <Table className="text-sm">
         <TableHeader className="bg-[var(--color-surface-warm)]/50">
           <TableRow>
             <TableHead className="p-3">Member</TableHead>
@@ -171,7 +171,7 @@ function EventDetail() {
                 key={t.key}
                 variant="ghost"
                 onClick={() => { setTab(t.key); setEditMode(false) }}
-                className={`px-4 py-2.5 text-[14px] font-medium border-b-2 -mb-px rounded-none ${
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px rounded-none ${
                   tab === t.key
                     ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
                     : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-text)]'
@@ -204,28 +204,28 @@ function EventDetail() {
                     <Calendar className="w-4 h-4 mt-0.5 text-[var(--color-muted)] shrink-0" />
                     <div>
                       <dt className="text-xs text-[var(--color-muted)] mb-0.5">Start</dt>
-                      <dd className="text-[14px]">{formatDate(event.startDate)}</dd>
+                      <dd className="text-sm">{formatDate(event.startDate)}</dd>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Clock className="w-4 h-4 mt-0.5 text-[var(--color-muted)] shrink-0" />
                     <div>
                       <dt className="text-xs text-[var(--color-muted)] mb-0.5">End</dt>
-                      <dd className="text-[14px]">{formatDate(event.endDate)}</dd>
+                      <dd className="text-sm">{formatDate(event.endDate)}</dd>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <MapPin className="w-4 h-4 mt-0.5 text-[var(--color-muted)] shrink-0" />
                     <div>
                       <dt className="text-xs text-[var(--color-muted)] mb-0.5">Location</dt>
-                      <dd className="text-[14px]">{event.location ?? 'TBA'}</dd>
+                      <dd className="text-sm">{event.location ?? 'TBA'}</dd>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Users className="w-4 h-4 mt-0.5 text-[var(--color-muted)] shrink-0" />
                     <div>
                       <dt className="text-xs text-[var(--color-muted)] mb-0.5">Registration</dt>
-                      <dd className="text-[14px]">
+                      <dd className="text-sm">
                         {event.registrationCount ?? 0}
                         {event.capacity ? ` / ${event.capacity}` : ''} registered
                         {event.registrationFee ? ` · PHP ${(Number(event.registrationFee) / 100).toFixed(2)} fee` : ' · Free'}

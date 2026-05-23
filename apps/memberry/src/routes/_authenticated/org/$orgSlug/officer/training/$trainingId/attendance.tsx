@@ -69,7 +69,7 @@ function TrainingAttendance() {
           <GlassCard className="px-3 py-2">
             <div className="flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-[var(--color-muted)]" />
-              <span className="text-[14px] font-medium">
+              <span className="text-sm font-medium">
                 {presentCount} / {enrollments.length} present
               </span>
             </div>
@@ -112,17 +112,17 @@ function TrainingAttendance() {
                       }}
                     />
                     <div>
-                      <p className="text-[14px] font-medium">
+                      <p className="text-sm font-medium">
                         {enrollment.memberName ?? enrollment.personName ?? memberId}
                       </p>
-                      <p className="text-[12px] text-[var(--color-muted)]">
+                      <p className="text-xs text-[var(--color-muted)]">
                         {enrollment.email ?? `ID: ${memberId}`}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {isPresent ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <UserCheck className="w-3 h-3" /> Present
                       </span>
                     ) : (

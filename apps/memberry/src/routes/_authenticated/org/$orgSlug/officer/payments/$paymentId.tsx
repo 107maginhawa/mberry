@@ -72,8 +72,8 @@ function PaymentDetailPage() {
           <Table className="text-sm">
             <TableHeader>
               <TableRow className="border-b border-[var(--color-border-light)]">
-                <TableHead className="px-3 py-2 text-[12px] uppercase tracking-wide">Fund</TableHead>
-                <TableHead className="px-3 py-2 text-right text-[12px] uppercase tracking-wide">Amount</TableHead>
+                <TableHead className="px-3 py-2 text-xs uppercase tracking-wide">Fund</TableHead>
+                <TableHead className="px-3 py-2 text-right text-xs uppercase tracking-wide">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

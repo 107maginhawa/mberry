@@ -103,13 +103,13 @@ function MyIdCard() {
         <div className="max-w-md mx-auto">
           <GlassCard className="p-6 space-y-4">
             <div className="text-center space-y-2">
-              <div className="w-20 h-20 rounded-full bg-[var(--color-primary)] mx-auto flex items-center justify-center text-[24px] font-bold font-display text-white">
+              <div className="w-20 h-20 rounded-full bg-[var(--color-primary)] mx-auto flex items-center justify-center text-2xl font-bold font-display text-white">
                 {initials}
               </div>
-              <p className="font-bold font-display text-[20px]">{fullName || 'Member Name'}</p>
-              <p className="text-[13px] text-[var(--color-muted)]">License: {license}</p>
+              <p className="font-bold font-display text-xl">{fullName || 'Member Name'}</p>
+              <p className="text-sm text-[var(--color-muted)]">License: {license}</p>
             </div>
-            <div className="border-t border-[var(--color-border-light)] pt-4 space-y-2 text-[14px]">
+            <div className="border-t border-[var(--color-border-light)] pt-4 space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-[var(--color-muted)]">Organization</span><span className="font-medium">{orgName}</span></div>
               <div className="flex justify-between"><span className="text-[var(--color-muted)]">Category</span><span className="font-medium">{category}</span></div>
               <div className="flex justify-between items-center">
@@ -123,8 +123,8 @@ function MyIdCard() {
               <div className="flex justify-between"><span className="text-[var(--color-muted)]">Valid Until</span><span className="font-medium">{validUntil}</span></div>
             </div>
             <div className="border-t border-[var(--color-border-light)] pt-4 text-center">
-              <div className="w-24 h-24 bg-[var(--color-surface-warm)] mx-auto rounded-[8px] flex items-center justify-center text-[12px] text-[var(--color-muted)]">QR Code</div>
-              <p className="text-[12px] text-[var(--color-muted)] mt-2">Verified by Memberry</p>
+              <div className="w-24 h-24 bg-[var(--color-surface-warm)] mx-auto rounded-[8px] flex items-center justify-center text-xs text-[var(--color-muted)]">QR Code</div>
+              <p className="text-xs text-[var(--color-muted)] mt-2">Verified by Memberry</p>
             </div>
           </GlassCard>
 

@@ -144,7 +144,7 @@ function ProvidersPage() {
       />
 
       <GlassCard>
-        <Table className="text-[14px]">
+        <Table className="text-sm">
           <TableHeader className="bg-[var(--color-surface-warm)]">
             <TableRow>
               <TableHead className="p-3 font-display">Name</TableHead>

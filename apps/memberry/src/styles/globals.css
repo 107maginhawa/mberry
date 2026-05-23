@@ -49,6 +49,12 @@
     --color-nav-elevated: rgba(255, 255, 255, 0.55);
     --nav-blur: 24px;
 
+    /* Layout dimensions */
+    --rail-width: 56px;
+    --sidebar-width: 180px;
+    --dropdown-width: 280px;
+    --bottom-nav-height: 68px;
+
     /* Motion */
     --spring-bounce: 0.15;
     --spring-duration: 0.5s;

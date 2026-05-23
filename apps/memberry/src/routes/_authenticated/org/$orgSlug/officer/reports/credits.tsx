@@ -70,7 +70,7 @@ function CreditReport() {
         <StaggerItem>
           <GlassCard className="p-2">
             <Button variant="ghost" onClick={() => setFilter('all')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'all' ? 'ring-2 ring-[var(--color-primary)]' : ''}`}>
-              <p className="text-[14px] text-[var(--color-muted)]">Total Tracked</p>
+              <p className="text-sm text-[var(--color-muted)]">Total Tracked</p>
               <p className="text-[26px] font-display font-bold"><CountUp value={summary.total} /></p>
             </Button>
           </GlassCard>
@@ -78,7 +78,7 @@ function CreditReport() {
         <StaggerItem>
           <GlassCard className="p-2">
             <Button variant="ghost" onClick={() => setFilter('compliant')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'compliant' ? 'ring-2 ring-green-500' : ''}`}>
-              <p className="text-[14px] text-[var(--color-muted)]">Compliant</p>
+              <p className="text-sm text-[var(--color-muted)]">Compliant</p>
               <p className="text-[26px] font-display font-bold text-green-600"><CountUp value={summary.compliant} /></p>
             </Button>
           </GlassCard>
@@ -86,7 +86,7 @@ function CreditReport() {
         <StaggerItem>
           <GlassCard className="p-2">
             <Button variant="ghost" onClick={() => setFilter('at_risk')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'at_risk' ? 'ring-2 ring-yellow-500' : ''}`}>
-              <p className="text-[14px] text-[var(--color-muted)]">At Risk</p>
+              <p className="text-sm text-[var(--color-muted)]">At Risk</p>
               <p className="text-[26px] font-display font-bold text-yellow-600"><CountUp value={summary.atRisk} /></p>
             </Button>
           </GlassCard>
@@ -94,7 +94,7 @@ function CreditReport() {
         <StaggerItem>
           <GlassCard className="p-2">
             <Button variant="ghost" onClick={() => setFilter('non_compliant')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'non_compliant' ? 'ring-2 ring-red-500' : ''}`}>
-              <p className="text-[14px] text-[var(--color-muted)]">Non-Compliant</p>
+              <p className="text-sm text-[var(--color-muted)]">Non-Compliant</p>
               <p className="text-[26px] font-display font-bold text-red-600"><CountUp value={summary.nonCompliant} /></p>
             </Button>
           </GlassCard>
@@ -108,7 +108,7 @@ function CreditReport() {
 
       {/* Table */}
       <GlassCard>
-        <Table className="text-[14px]">
+        <Table className="text-sm">
           <TableHeader className="bg-[var(--color-surface-warm)]">
             <TableRow>
               <TableHead className="p-3 font-display">Member</TableHead>

@@ -271,7 +271,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
               href={current.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[14px] text-[var(--color-primary)] underline"
+              className="text-sm text-[var(--color-primary)] underline"
             >
               {current.website}
             </a>
@@ -302,7 +302,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
       </div>
 
       {isEditing && isDirty && (
-        <p className="text-[12px] text-[var(--color-warning)] mt-4">You have unsaved changes.</p>
+        <p className="text-xs text-[var(--color-warning)] mt-4">You have unsaved changes.</p>
       )}
     </div>
   )
@@ -310,7 +310,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
 
 function FieldValue({ value, placeholder = '—' }: { value: string; placeholder?: string }) {
   return (
-    <p className={`text-[14px] py-2 ${value ? 'text-[var(--color-text)]' : 'text-[var(--color-muted)]'}`}>
+    <p className={`text-sm py-2 ${value ? 'text-[var(--color-text)]' : 'text-[var(--color-muted)]'}`}>
       {value || placeholder}
     </p>
   )

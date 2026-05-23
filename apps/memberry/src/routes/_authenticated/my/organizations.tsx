@@ -59,7 +59,7 @@ function MyOrganizationsPage() {
       queryClient.invalidateQueries({ queryKey: ['my-memberships'] })
       setLeaveTarget(null)
     } catch {
-      toast.error('Something went wrong. Please try again.')
+      toast.error('Unable to process your request. Check your connection and try again.')
     } finally {
       setLeaving(false)
     }
@@ -103,14 +103,14 @@ function MyOrganizationsPage() {
               >
                 <AvatarInitials name={m.orgName ?? 'Org'} size="md" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-semibold truncate">{m.orgName}</p>
+                  <p className="text-sm font-semibold truncate">{m.orgName}</p>
                   <div className="flex items-center gap-2 mt-1">
                     {m.memberNumber && (
-                      <span className="text-[13px] font-medium text-[var(--color-muted)]">#{m.memberNumber}</span>
+                      <span className="text-sm font-medium text-[var(--color-muted)]">#{m.memberNumber}</span>
                     )}
                   </div>
                   {m.duesExpiryDate && (
-                    <p className="text-[13px] font-medium text-[var(--color-muted)] mt-1">
+                    <p className="text-sm font-medium text-[var(--color-muted)] mt-1">
                       Dues expire: {new Date(m.duesExpiryDate).toLocaleDateString()}
                     </p>
                   )}
@@ -151,7 +151,7 @@ function MyOrganizationsPage() {
             </StaggerItem>
           ))}
 
-          <p className="text-[13px] font-medium text-[var(--color-muted)] text-center mt-4">
+          <p className="text-sm font-medium text-[var(--color-muted)] text-center mt-4">
             Each organization manages its own membership, dues, and credits independently.
           </p>
         </StaggerGrid>
@@ -176,7 +176,7 @@ function MyOrganizationsPage() {
           <DialogHeader>
             <DialogTitle>Transfer Membership</DialogTitle>
           </DialogHeader>
-          <p className="text-[13px] text-[var(--color-muted)]">
+          <p className="text-sm text-[var(--color-muted)]">
             Transfer your membership from <strong>{transferTarget?.orgName}</strong> to another chapter in the same association.
           </p>
           <div className="space-y-2 py-2">

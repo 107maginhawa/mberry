@@ -183,7 +183,7 @@ function RosterImportPage() {
       {result && (
         <div className="flex items-center gap-3 p-4 rounded-[12px] bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">
           <Check size={18} className="text-[var(--color-success)] shrink-0" />
-          <p className="text-[14px] text-[var(--color-success)]">
+          <p className="text-sm text-[var(--color-success)]">
             Successfully imported {result.imported} members
           </p>
         </div>
@@ -199,10 +199,10 @@ function RosterImportPage() {
             onClick={() => document.getElementById('csv-input')?.click()}
           >
             <Upload size={32} className="mx-auto mb-3 text-[var(--color-muted)]" />
-            <p className="text-[14px] font-medium text-[var(--color-text)]">
+            <p className="text-sm font-medium text-[var(--color-text)]">
               Drop CSV file here or click to browse
             </p>
-            <p className="text-[12px] text-[var(--color-muted)] mt-1">
+            <p className="text-xs text-[var(--color-muted)] mt-1">
               Expected columns: First Name, Last Name, Email, License Number, Member Number
             </p>
             <Input
@@ -222,8 +222,8 @@ function RosterImportPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText size={16} className="text-[var(--color-primary)]" />
-              <span className="text-[14px] font-medium">{file?.name}</span>
-              <span className="text-[12px] text-[var(--color-muted)]">
+              <span className="text-sm font-medium">{file?.name}</span>
+              <span className="text-xs text-[var(--color-muted)]">
                 ({parsed.rows.length} rows)
               </span>
             </div>
@@ -248,7 +248,7 @@ function RosterImportPage() {
           {parsed.rows.some((r) => !r.email && !r.licenseNumber) && (
             <div className="flex items-start gap-2 p-3 rounded-[8px] bg-[var(--color-warning-bg)] border border-[var(--color-warning)]/20">
               <AlertTriangle size={14} className="text-[var(--color-warning)] shrink-0 mt-0.5" />
-              <p className="text-[12px] text-[var(--color-warning)]">
+              <p className="text-xs text-[var(--color-warning)]">
                 Some rows have no email or license number and will be skipped during import.
                 Per BR-22, members are matched by email or license number.
               </p>
@@ -257,12 +257,12 @@ function RosterImportPage() {
 
           {/* Preview table — show first 20 rows */}
           <div className="rounded-[12px] border border-[var(--color-border-light)] overflow-hidden">
-            <Table className="text-[13px]">
+            <Table className="text-sm">
               <TableHeader className="bg-[var(--color-surface-warm)]">
                 <TableRow>
-                  <TableHead className="px-4 py-2.5 font-semibold text-[11px] uppercase tracking-wide">#</TableHead>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase tracking-wide">#</TableHead>
                   {parsed.headers.map((h) => (
-                    <TableHead key={h} className="px-4 py-2.5 font-semibold text-[11px] uppercase tracking-wide">
+                    <TableHead key={h} className="px-4 py-2.5 font-semibold text-xs uppercase tracking-wide">
                       {h}
                     </TableHead>
                   ))}
@@ -282,7 +282,7 @@ function RosterImportPage() {
               </TableBody>
             </Table>
             {parsed.rows.length > 20 && (
-              <div className="px-4 py-2 text-[12px] text-[var(--color-muted)] bg-[var(--color-surface-warm)] border-t border-[var(--color-border-light)]">
+              <div className="px-4 py-2 text-xs text-[var(--color-muted)] bg-[var(--color-surface-warm)] border-t border-[var(--color-border-light)]">
                 Showing 20 of {parsed.rows.length} rows
               </div>
             )}

@@ -33,7 +33,7 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
   if (error || !cert?.id) {
     return (
       <GlassCard className="max-w-2xl p-8 text-center">
-        <p className="text-[14px] text-[var(--color-muted)]">
+        <p className="text-sm text-[var(--color-muted)]">
           Certificate not found or you do not have permission to view it.
         </p>
       </GlassCard>
@@ -62,7 +62,7 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
         <div className="p-8 space-y-6">
           {/* Header */}
           <div className="text-center space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--color-muted)]">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
               Certificate of Completion
             </p>
             <h2 className="text-[22px] font-bold font-display">Training Certificate</h2>
@@ -72,22 +72,22 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
           <div className="border-t border-[var(--color-border-light)]" />
 
           {/* Details grid */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-[13px]">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
             <div>
-              <p className="text-[11px] text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Certificate No.</p>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Certificate No.</p>
               <p className="font-mono font-semibold">{cert.certificateNumber}</p>
             </div>
             <div>
-              <p className="text-[11px] text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Date Issued</p>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Date Issued</p>
               <p className="font-medium">{formatDate(cert.issuedAt)}</p>
             </div>
             <div>
-              <p className="text-[11px] text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Training ID</p>
-              <p className="font-mono text-[12px] truncate">{cert.trainingId}</p>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Training ID</p>
+              <p className="font-mono text-xs truncate">{cert.trainingId}</p>
             </div>
             <div>
-              <p className="text-[11px] text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Organization</p>
-              <p className="font-mono text-[12px] truncate">{cert.organizationId}</p>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Organization</p>
+              <p className="font-mono text-xs truncate">{cert.organizationId}</p>
             </div>
           </div>
 
@@ -96,10 +96,10 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
 
           {/* Verification footer */}
           <div className="text-center">
-            <p className="text-[12px] text-[var(--color-muted)]">
+            <p className="text-xs text-[var(--color-muted)]">
               Verify this certificate at:
             </p>
-            <p className="text-[12px] font-mono text-[var(--color-primary)] mt-0.5 break-all">{verificationUrl}</p>
+            <p className="text-xs font-mono text-[var(--color-primary)] mt-0.5 break-all">{verificationUrl}</p>
           </div>
         </div>
       </GlassCard>

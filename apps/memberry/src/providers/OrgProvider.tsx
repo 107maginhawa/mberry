@@ -79,9 +79,13 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     [org, orgId, orgSlug, role, permissions, isOfficer, isLoading],
   )
 
-  // Don't render children until org is resolved — prevents invalid API calls with empty orgId
+  // Show loading skeleton until org is resolved — prevents invalid API calls with empty orgId
   if (isLoading && !orgId) {
-    return null
+    return (
+      <div className="flex-1 flex items-center justify-center py-20">
+        <div className="animate-spin h-6 w-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full" />
+      </div>
+    )
   }
 
   return (

@@ -87,11 +87,11 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${regStatus.bg}`}>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${regStatus.bg}`}>
               {regStatus.label}
             </span>
             {credits != null && credits > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
                 <Award size={10} />
                 {credits} CPD
               </span>
@@ -99,10 +99,10 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
           </div>
           <div className="flex items-center gap-2">
             {countdown && (
-              <span className="text-[11px] font-semibold text-[var(--color-primary)]">{countdown}</span>
+              <span className="text-xs font-semibold text-[var(--color-primary)]">{countdown}</span>
             )}
             {!upcoming && (
-              <span className="text-[11px] text-[var(--color-muted)]">Past</span>
+              <span className="text-xs text-[var(--color-muted)]">Past</span>
             )}
             <ExternalLink size={12} className="text-[var(--color-muted)]" />
           </div>
@@ -110,7 +110,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
 
         <h3 className="text-h4">{event.title}</h3>
 
-        <div className="space-y-1.5 text-[13px] text-[var(--color-muted)]">
+        <div className="space-y-1.5 text-sm text-[var(--color-muted)]">
           <div className="flex items-center gap-2">
             <Calendar size={13} className="shrink-0" />
             <span>{formatEventDate(event.startDate)}</span>
@@ -133,7 +133,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-[12px] text-red-600 border-red-200 hover:bg-red-50"
+            className="h-7 text-xs text-red-600 border-red-200 hover:bg-red-50"
             disabled={cancelMutation.isPending}
             onClick={(e) => {
               e.preventDefault()

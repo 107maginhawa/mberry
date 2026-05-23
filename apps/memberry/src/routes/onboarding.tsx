@@ -225,7 +225,7 @@ function OnboardingPage() {
       <div className="w-full max-w-2xl space-y-6">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <h1 className="text-h1 text-[#554B68]">Memberry</h1>
+            <h1 className="text-h1 text-[var(--color-primary)]">Memberry</h1>
           </div>
           <h2 className="text-h2 text-foreground">Welcome to Memberry</h2>
           <p className="text-gray-600 mt-2">Let's set up your profile</p>

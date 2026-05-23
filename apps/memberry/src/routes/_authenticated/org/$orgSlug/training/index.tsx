@@ -58,9 +58,9 @@ function OrgTraining() {
                 className="block"
               >
                 <GlassCard className="p-5 hover:bg-[var(--color-surface-elevated-hover)] transition-colors">
-                  <p className="text-[14px] font-semibold line-clamp-1">{t.title}</p>
-                  <p className="text-[12px] text-[var(--color-muted)] mt-1 capitalize">{t.type?.replace('_', ' ')}</p>
-                  <div className="flex items-center gap-3 mt-3 text-[12px] text-[var(--color-muted)]">
+                  <p className="text-sm font-semibold line-clamp-1">{t.title}</p>
+                  <p className="text-xs text-[var(--color-muted)] mt-1 capitalize">{t.type?.replace('_', ' ')}</p>
+                  <div className="flex items-center gap-3 mt-3 text-xs text-[var(--color-muted)]">
                     <span>{formatDate(t.startDate ?? t.startAt)}</span>
                     {Number(t.creditAmount ?? t.creditValue ?? 0) > 0 && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 font-medium">
@@ -70,7 +70,7 @@ function OrgTraining() {
                     )}
                   </div>
                   {t.instructor && (
-                    <p className="text-[12px] text-[var(--color-muted)] mt-2">Instructor: {t.instructor}</p>
+                    <p className="text-xs text-[var(--color-muted)] mt-2">Instructor: {t.instructor}</p>
                   )}
                 </GlassCard>
               </Link>

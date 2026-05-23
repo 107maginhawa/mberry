@@ -106,15 +106,15 @@ function GeneralSection() {
     <GlassCard className="p-6 space-y-4">
       <div>
         <h2 className="text-h4">General</h2>
-        <p className="text-[14px] text-[var(--color-muted)] mt-1">Basic account settings</p>
+        <p className="text-sm text-[var(--color-muted)] mt-1">Basic account settings</p>
       </div>
       <Link
         to="/my/profile"
         className="flex items-center justify-between rounded-[8px] border border-[var(--color-border-light)] p-4 hover:shadow-soft transition-shadow"
       >
         <div>
-          <p className="text-[14px] font-semibold">Edit Profile</p>
-          <p className="text-[13px] text-[var(--color-muted)]">Update your name, specialization, and contact info</p>
+          <p className="text-sm font-semibold">Edit Profile</p>
+          <p className="text-sm text-[var(--color-muted)]">Update your name, specialization, and contact info</p>
         </div>
         <span className="text-[var(--color-muted)]">&rarr;</span>
       </Link>
@@ -124,8 +124,8 @@ function GeneralSection() {
 
         {deletionPending ? (
           <div className="mt-3 rounded-[8px] border border-[var(--color-warning-bg)] bg-[var(--color-warning-bg)] p-4">
-            <p className="text-[14px] font-semibold text-[var(--color-warning)]">Account deletion scheduled</p>
-            <p className="text-[13px] text-[var(--color-muted)] mt-1">
+            <p className="text-sm font-semibold text-[var(--color-warning)]">Account deletion scheduled</p>
+            <p className="text-sm text-[var(--color-muted)] mt-1">
               Your account will be permanently anonymized on{' '}
               <strong>{new Date(deletionPending).toLocaleDateString()}</strong>.
               You can cancel before then.
@@ -142,16 +142,16 @@ function GeneralSection() {
           </div>
         ) : showConfirm ? (
           <div className="mt-3 rounded-[8px] border border-[var(--color-error-bg)] bg-[var(--color-error-bg)] p-4 space-y-3">
-            <p className="text-[13px] text-[var(--color-muted)]">
+            <p className="text-sm text-[var(--color-muted)]">
               This will schedule your account for deletion after a 30-day grace period.
               Your personal data will be anonymized. Financial records are retained per law.
             </p>
-            <p className="text-[13px] font-semibold">Type DELETE to confirm:</p>
+            <p className="text-sm font-semibold">Type DELETE to confirm:</p>
             <Input
               type="text"
               value={confirmText}
               onChange={e => setConfirmText(e.target.value)}
-              className="w-full border border-[var(--color-border)] rounded-[6px] px-3 py-2 text-[13px]"
+              className="w-full border border-[var(--color-border)] rounded-[6px] px-3 py-2 text-sm"
               placeholder="DELETE"
             />
             <div className="flex gap-2">
@@ -174,7 +174,7 @@ function GeneralSection() {
           </div>
         ) : (
           <>
-            <p className="text-[13px] text-[var(--color-muted)] mt-1">
+            <p className="text-sm text-[var(--color-muted)] mt-1">
               Account deletion is permanent. Your data will be anonymized after a 30-day grace period.
             </p>
             <Button
@@ -233,7 +233,7 @@ function NotificationPreferencesSection() {
     <GlassCard className="p-6 space-y-4">
       <div>
         <h2 className="text-h4">Notification Preferences</h2>
-        <p className="text-[14px] text-[var(--color-muted)] mt-1">In-app notifications are always on. High-priority items always push.</p>
+        <p className="text-sm text-[var(--color-muted)] mt-1">In-app notifications are always on. High-priority items always push.</p>
       </div>
 
       <div className="space-y-3">
@@ -242,8 +242,8 @@ function NotificationPreferencesSection() {
           return (
             <div key={cat.key} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
               <div>
-                <div className="text-[14px] font-semibold">{cat.label}</div>
-                <div className="text-[13px] text-[var(--color-muted)]">{cat.desc}</div>
+                <div className="text-sm font-semibold">{cat.label}</div>
+                <div className="text-sm text-[var(--color-muted)]">{cat.desc}</div>
               </div>
               <div className="flex gap-4">
                 <ToggleSwitch
@@ -322,7 +322,7 @@ function PrivacySection() {
     return (
       <GlassCard className="p-6 space-y-4">
         <h2 className="text-h4">Privacy</h2>
-        <p className="text-[14px] text-[var(--color-muted)]">
+        <p className="text-sm text-[var(--color-muted)]">
           Join an organization to configure privacy settings.
         </p>
       </GlassCard>
@@ -333,7 +333,7 @@ function PrivacySection() {
     <GlassCard className="p-6 space-y-4">
       <div>
         <h2 className="text-h4">Privacy</h2>
-        <p className="text-[14px] text-[var(--color-muted)] mt-1">
+        <p className="text-sm text-[var(--color-muted)] mt-1">
           Control your profile visibility in the member directory.
           Officers always see your name and license number.
         </p>
@@ -358,8 +358,8 @@ function PrivacySection() {
         {PRIVACY_FIELDS.map(f => (
           <div key={f.key} className="flex items-center justify-between py-2 border-b border-[var(--color-border-light)] last:border-0">
             <div>
-              <div className="text-[14px] font-semibold">{f.label}</div>
-              <div className="text-[13px] text-[var(--color-muted)]">{f.desc}</div>
+              <div className="text-sm font-semibold">{f.label}</div>
+              <div className="text-sm text-[var(--color-muted)]">{f.desc}</div>
             </div>
             <ToggleSwitch
               label="Visible"
@@ -378,13 +378,13 @@ function AccountSection() {
     <GlassCard className="p-6 space-y-4">
       <div>
         <h2 className="text-h4">Security</h2>
-        <p className="text-[14px] text-[var(--color-muted)] mt-1">
+        <p className="text-sm text-[var(--color-muted)] mt-1">
           Manage your password, email, and security settings.
         </p>
       </div>
       <a
         href="/auth/settings"
-        className="inline-flex items-center rounded-[8px] border-[1.5px] border-[var(--color-border)] px-[22px] py-[10px] text-[14px] font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
+        className="inline-flex items-center rounded-[8px] border-[1.5px] border-[var(--color-border)] px-[22px] py-[10px] text-sm font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
       >
         Open Account Settings
       </a>
@@ -403,7 +403,7 @@ function ToggleSwitch({
 }) {
   return (
     <div className="flex items-center gap-2 cursor-pointer select-none">
-      <Label className="text-[13px] text-[var(--color-muted)] cursor-pointer">{label}</Label>
+      <Label className="text-sm text-[var(--color-muted)] cursor-pointer">{label}</Label>
       <Switch
         checked={checked}
         onCheckedChange={onChange}

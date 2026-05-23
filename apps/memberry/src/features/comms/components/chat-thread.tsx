@@ -93,7 +93,7 @@ export function ChatThread({ roomId, myPersonId }: ChatThreadProps) {
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{text}</p>
-                    <p className={`mt-1 text-[10px] ${mine ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                    <p className={`mt-1 text-[0.625rem] ${mine ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                       {formatTime(m.timestamp)}
                     </p>
                   </div>

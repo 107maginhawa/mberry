@@ -14,12 +14,12 @@ export function StatCard({ label, value, change, accent }: StatCardProps) {
           : "bg-[var(--color-surface)] border-[var(--color-border-light)]"
       }`}
     >
-      <p className="text-[13px] font-medium text-[var(--color-muted)]">{label}</p>
+      <p className="text-sm font-medium text-[var(--color-muted)]">{label}</p>
       <p className="text-[30px] font-bold font-display leading-[1.2] text-[var(--color-primary)]" style={{ fontVariantNumeric: "tabular-nums" }}>
         {value}
       </p>
       {change && (
-        <p className={`text-[12px] font-semibold mt-1 ${change.positive ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}`}>
+        <p className={`text-xs font-semibold mt-1 ${change.positive ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}`}>
           {change.positive ? "+" : ""}{change.value}
         </p>
       )}

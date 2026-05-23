@@ -42,14 +42,14 @@ export function ConfirmDialog({
       <AlertDialogContent className="max-w-md border-[var(--color-border)] bg-[var(--color-surface)]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-h3">{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-[14px] text-[var(--color-text-secondary)]">
+          <AlertDialogDescription className="text-sm text-[var(--color-text-secondary)]">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {variant === "irreversible" && confirmText && (
           <div className="my-2">
-            <Label className="text-[13px] font-medium text-[var(--color-muted)] block mb-1.5">
+            <Label className="text-sm font-medium text-[var(--color-muted)] block mb-1.5">
               Type <span className="font-mono font-semibold">{confirmText}</span> to confirm
             </Label>
             <Input

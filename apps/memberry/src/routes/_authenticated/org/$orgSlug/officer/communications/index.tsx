@@ -24,7 +24,7 @@ function OfficerCommunications() {
             to="/org/$orgSlug/officer/communications/new"
             params={{ orgSlug }}
             search={{ edit: undefined }}
-            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-[8px] text-[14px] font-medium hover:bg-[var(--color-primary-mid)]"
+            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-[8px] text-sm font-medium hover:bg-[var(--color-primary-mid)]"
           >
             New Message
           </Link>

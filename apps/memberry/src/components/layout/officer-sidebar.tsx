@@ -127,7 +127,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
           <span className="text-white font-bold text-sm">M</span>
         </div>
         {orgName && (
-          <p className="mt-2 text-[12px] text-white/50 truncate hidden lg:block" title={orgName}>
+          <p className="mt-2 text-xs text-white/50 truncate hidden lg:block" title={orgName}>
             {orgName}
           </p>
         )}
@@ -138,7 +138,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
         {filteredSections.map((section, si) => (
           <div key={si} className={si > 0 ? "mt-3" : ""}>
             {section.label && (
-              <div className="hidden lg:block px-6 py-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-white/40">
+              <div className="hidden lg:block px-6 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[1.5px] text-white/40">
                 {section.label}
               </div>
             )}
@@ -150,10 +150,10 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
                 key={`${to}-${idx}`}
                 to={to}
                 title={label}
-                className="flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors duration-150"
+                className="flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-sm text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors duration-150"
                 activeProps={{
                   className:
-                    "flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] lg:pl-[21px]",
+                    "flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-sm text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] lg:pl-[21px]",
                 }}
                 activeOptions={{ exact: false }}
               >
@@ -170,7 +170,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
         <Link
           to="/dashboard"
           title="Back to Member View"
-          className="flex items-center justify-center lg:justify-start gap-2 px-2 py-2 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.08] rounded-[6px] transition-colors"
+          className="flex items-center justify-center lg:justify-start gap-2 px-2 py-2 text-xs text-white/50 hover:text-white hover:bg-white/[0.08] rounded-[6px] transition-colors"
         >
           <ArrowLeft size={14} />
           <span className="hidden lg:inline">Back to Member View</span>
@@ -181,14 +181,14 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
       <div className="px-2 lg:px-6 py-3 border-t border-white/[0.12]">
         <div className="flex items-center justify-center lg:justify-start gap-2.5">
           <div className="w-[34px] h-[34px] rounded-full bg-[var(--color-primary-mid)] flex items-center justify-center shrink-0">
-            <span className="text-white font-semibold text-[13px]">
+            <span className="text-white font-semibold text-sm">
               {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2) : '?'}
             </span>
           </div>
           <div className="min-w-0 hidden lg:block">
-            {userName && <p className="text-[14px] text-white font-medium truncate">{userName}</p>}
-            {role && <p className="text-[12px] text-white/50">{role}</p>}
-            {!userName && userEmail && <p className="text-[11px] text-white/50 truncate">{userEmail}</p>}
+            {userName && <p className="text-sm text-white font-medium truncate">{userName}</p>}
+            {role && <p className="text-xs text-white/50">{role}</p>}
+            {!userName && userEmail && <p className="text-xs text-white/50 truncate">{userEmail}</p>}
           </div>
         </div>
       </div>

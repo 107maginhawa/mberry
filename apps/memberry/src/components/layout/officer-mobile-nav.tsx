@@ -89,7 +89,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
         >
           <Menu size={20} />
         </Button>
-        <span className="text-[14px] font-semibold truncate max-w-[200px]">
+        <span className="text-sm font-semibold truncate max-w-[200px]">
           {orgName || 'Organization'}
         </span>
         <Link to="/my/notifications" className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
@@ -110,7 +110,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
           </SheetHeader>
 
           {orgName && (
-            <p className="px-5 py-2 text-[12px] text-white/50 truncate">{orgName}</p>
+            <p className="px-5 py-2 text-xs text-white/50 truncate">{orgName}</p>
           )}
 
           {/* Nav sections */}
@@ -118,7 +118,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
             {filteredSections.map((section, si) => (
               <div key={si} className={si > 0 ? 'mt-2' : ''}>
                 {section.label && (
-                  <div className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-white/40">
+                  <div className="px-5 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[1.5px] text-white/40">
                     {section.label}
                   </div>
                 )}
@@ -127,9 +127,9 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
                     key={`${to}-${label}`}
                     to={to}
                     onClick={() => setDrawerOpen(false)}
-                    className="flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors"
+                    className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors"
                     activeProps={{
-                      className: 'flex items-center gap-2.5 px-5 py-2.5 text-[14px] text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[17px]',
+                      className: 'flex items-center gap-2.5 px-5 py-2.5 text-sm text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[17px]',
                     }}
                     activeOptions={{ exact: false }}
                   >
@@ -146,15 +146,15 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
             <Link
               to="/dashboard"
               onClick={() => setDrawerOpen(false)}
-              className="flex items-center gap-2 px-5 py-2.5 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 text-xs text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
             >
               <ArrowLeft size={14} />
               Back to Member View
             </Link>
           </div>
           <div className="px-5 py-3 border-t border-white/[0.12]">
-            {userName && <p className="text-[13px] text-white font-medium truncate">{userName}</p>}
-            {role && <p className="text-[11px] text-white/50">{role}</p>}
+            {userName && <p className="text-sm text-white font-medium truncate">{userName}</p>}
+            {role && <p className="text-xs text-white/50">{role}</p>}
           </div>
         </SheetContent>
       </Sheet>

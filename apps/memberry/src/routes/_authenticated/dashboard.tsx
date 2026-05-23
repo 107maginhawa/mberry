@@ -217,8 +217,8 @@ function DashboardPage() {
           <div className="flex items-center gap-3">
             <UserPlus size={20} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
             <div>
-              <p className="text-[14px] font-semibold">Complete your profile</p>
-              <p className="text-[13px] font-medium text-[var(--color-muted)]">Add your specialization and preferences</p>
+              <p className="text-sm font-semibold">Complete your profile</p>
+              <p className="text-sm font-medium text-[var(--color-muted)]">Add your specialization and preferences</p>
             </div>
           </div>
         </Link>
@@ -287,13 +287,13 @@ function DashboardPage() {
             <div className="flex items-center gap-3">
               <CreditRing earned={myEarned} required={myRequired || myEarned} size={44} />
               <div>
-                <p className="text-[20px] font-bold font-display text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <p className="text-xl font-bold font-display text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   <CountUp value={myEarned} />
                   {myRequired > 0 && (
-                    <span className="text-[13px] font-medium text-[var(--color-muted)]">/<CountUp value={myRequired} /></span>
+                    <span className="text-sm font-medium text-[var(--color-muted)]">/<CountUp value={myRequired} /></span>
                   )}
                 </p>
-                <p className="text-[11px] font-medium text-[var(--color-muted)]">
+                <p className="text-xs font-medium text-[var(--color-muted)]">
                   {cpdStatusLabel
                     ? cpdStatusLabel
                     : myRequired > 0 && myEarned < myRequired
@@ -391,9 +391,9 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
     hasOrgUnpaid ? 'warning' : 'good'
 
   const standingColors = {
-    good: 'bg-emerald-500',
-    warning: 'bg-amber-500',
-    poor: 'bg-red-500',
+    good: 'bg-[var(--color-success)]',
+    warning: 'bg-[var(--color-warning)]',
+    poor: 'bg-[var(--color-error)]',
   }
 
   const standingLabels = {
@@ -414,7 +414,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
             <AvatarInitials name={m.orgName ?? 'Org'} size="md" />
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-[14px] font-semibold">{m.orgName}</p>
+                <p className="text-sm font-semibold">{m.orgName}</p>
                 <span
                   className={`w-2 h-2 rounded-full ${standingColors[standing]}`}
                   role="img"
@@ -422,7 +422,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
                 />
               </div>
               {m.memberNumber && (
-                <p className="text-[13px] font-medium text-[var(--color-muted)]">#{m.memberNumber}</p>
+                <p className="text-sm font-medium text-[var(--color-muted)]">#{m.memberNumber}</p>
               )}
             </div>
           </div>
@@ -433,7 +433,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
         {expiryDate && (
           <div className="mt-3">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-[12px] font-medium text-[var(--color-muted)]">
+              <p className="text-xs font-medium text-[var(--color-muted)]">
                 {daysLeft !== null && daysLeft > 0
                   ? `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`
                   : daysLeft !== null && daysLeft <= 0
@@ -441,15 +441,15 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
                     : ''
                 }
               </p>
-              <p className="text-[11px] text-[var(--color-muted)]">
+              <p className="text-xs text-[var(--color-muted)]">
                 Expires {expiryDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
             </div>
             <Progress
               value={Math.min(100, periodProgress * 100)}
               className={`h-1.5 bg-[var(--color-border-light)] ${
-                (daysLeft ?? 0) <= 0 ? '[&>div]:bg-red-500' :
-                (daysLeft ?? 0) <= 30 ? '[&>div]:bg-amber-500' : '[&>div]:bg-emerald-500'
+                (daysLeft ?? 0) <= 0 ? '[&>div]:bg-[var(--color-error)]' :
+                (daysLeft ?? 0) <= 30 ? '[&>div]:bg-[var(--color-warning)]' : '[&>div]:bg-[var(--color-success)]'
               }`}
             />
           </div>
@@ -462,7 +462,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
           <Link
             to="/org/$orgSlug/dues"
             params={{ orgSlug }}
-            className="inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] hover:underline"
           >
             <CreditCard size={12} aria-hidden="true" />
             Pay Dues
@@ -471,7 +471,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
         {orgId && (
           <Link
             to="/my/id-card"
-            className="inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:underline"
           >
             <CircleDot size={12} aria-hidden="true" />
             ID Card
@@ -481,7 +481,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
           <Link
             to="/org/$orgSlug/officer/dashboard"
             params={{ orgSlug }}
-            className="ml-auto inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
+            className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] hover:underline"
           >
             <Shield size={12} aria-hidden="true" />
             {officerRole} Dashboard

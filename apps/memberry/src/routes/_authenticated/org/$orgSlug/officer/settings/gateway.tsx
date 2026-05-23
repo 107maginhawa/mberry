@@ -28,7 +28,7 @@ function GatewaySettingsPage() {
         />
         <GlassCard className="p-6 text-center">
           <h2 className="text-h3 mb-2">Desktop Only</h2>
-          <p className="text-[14px] text-[var(--color-muted)]">
+          <p className="text-sm text-[var(--color-muted)]">
             This page is only available on desktop. Please use a larger screen to configure payment
             gateway settings.
           </p>

@@ -42,15 +42,24 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
     },
   })
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click or Escape key
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false)
       }
     }
-    if (dropdownOpen) document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setDropdownOpen(false)
+    }
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClick)
+      document.addEventListener('keydown', handleKeyDown)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [dropdownOpen])
 
   const currentOrg = orgs.find((o) => o.orgSlug === activeOrgSlug) || orgs[0]
@@ -60,13 +69,13 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
     <header className="sticky top-0 z-30 flex items-center justify-between h-12 px-4 md:px-6 bg-[var(--color-primary)] text-white md:bg-[var(--color-nav-elevated)] md:backdrop-blur-[var(--nav-blur)] md:text-[var(--color-text)] md:border-b md:border-[var(--color-border-light)]">
       {/* Left: logo (mobile only) */}
       <div className="flex items-center md:hidden">
-        <img src="/memberry-logo-white.png" alt="Memberry" className="h-6 w-auto" />
+        <img src="/memberry-logo-white.png" alt="Memberry" className="h-6 w-auto" width={96} height={24} />
       </div>
 
       {/* Desktop: user name */}
       <div className="hidden md:block">
         {userName && (
-          <span className="text-[14px] text-[var(--color-muted)]">{userName}</span>
+          <span className="text-sm text-[var(--color-muted)]">{userName}</span>
         )}
       </div>
 
@@ -98,7 +107,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
             <Button
               variant="ghost"
               onClick={() => hasMultipleOrgs ? setDropdownOpen(!dropdownOpen) : navigate({ to: `/org/${currentOrg.orgSlug}/home` as '/' })}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] text-[var(--color-text)] hover:bg-[var(--color-surface-warm)]"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] text-[var(--color-text)] hover:bg-[var(--color-surface-warm)]"
             >
               <span
                 className={`w-2 h-2 rounded-full ${STATUS_DOT[currentOrg.status] || STATUS_DOT.active}`}
@@ -111,7 +120,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
 
             {/* Desktop dropdown */}
             {dropdownOpen && hasMultipleOrgs && (
-              <div className="absolute right-0 top-full mt-1 w-[280px] bg-[var(--color-surface)] border border-[var(--color-border-light)] rounded-[12px] shadow-lg overflow-hidden z-50">
+              <div className="absolute right-0 top-full mt-1 w-[var(--dropdown-width)] bg-[var(--color-surface)] border border-[var(--color-border-light)] rounded-[12px] shadow-lg overflow-hidden z-50">
                 <div className="py-1">
                   {orgs.map((org) => (
                     <Button
@@ -129,16 +138,16 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
                         className={`w-2.5 h-2.5 rounded-full shrink-0 ${STATUS_DOT[org.status] || STATUS_DOT.active}`}
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium text-[var(--color-text)] truncate">
+                        <p className="text-sm font-medium text-[var(--color-text)] truncate">
                           {org.orgName || 'Organization'}
                         </p>
-                        <p className="text-[11px] text-[var(--color-muted)]">
+                        <p className="text-xs text-[var(--color-muted)]">
                           {STATUS_LABEL[org.status] || 'Active'}
                           {org.memberNumber ? ` · ${org.memberNumber}` : ''}
                         </p>
                       </div>
                       {org.orgSlug === activeOrgSlug && (
-                        <span className="text-[var(--color-primary)] text-[11px] font-semibold shrink-0">Current</span>
+                        <span className="text-[var(--color-primary)] text-xs font-semibold shrink-0">Current</span>
                       )}
                     </Button>
                   ))}
@@ -147,7 +156,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
                   <Link
                     to={"/my/organizations" as "/"}
                     onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-2.5 text-[12px] font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] transition-colors"
+                    className="block px-4 py-2.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] transition-colors"
                   >
                     Join another organization
                   </Link>
@@ -161,7 +170,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
         {orgs.length === 0 && (
           <Link
             to={"/my/organizations" as "/"}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-white/15 md:bg-[var(--color-surface-warm)] md:border md:border-[var(--color-border-light)] md:text-[var(--color-muted)]"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-white/15 md:bg-[var(--color-surface-warm)] md:border md:border-[var(--color-border-light)] md:text-[var(--color-muted)]"
           >
             Join an organization
           </Link>
@@ -174,7 +183,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
         >
           <Bell size={18} />
           {notifCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-[var(--color-error)] text-white text-[10px] font-bold px-1">
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-[var(--color-error)] text-white text-[0.625rem] font-bold px-1">
               {notifCount}
             </span>
           )}

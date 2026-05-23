@@ -37,13 +37,25 @@ export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
 
   if (error) {
     return (
-      <aside className="hidden md:flex w-[56px] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col items-center py-3 shrink-0">
-        <span className="text-[10px] text-[var(--color-muted)] text-center px-1">Failed to load orgs</span>
+      <aside className="hidden md:flex w-[var(--rail-width)] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col items-center py-3 shrink-0">
+        <span className="text-[0.625rem] text-[var(--color-muted)] text-center px-1">Failed to load orgs</span>
       </aside>
     )
   }
 
-  if (orgs.length === 0) return null
+  if (orgs.length === 0) {
+    return (
+      <aside className="hidden md:flex w-[var(--rail-width)] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col items-center py-3 shrink-0">
+        <Link
+          to={"/my/organizations" as "/"}
+          className="flex items-center justify-center w-[34px] h-[34px] rounded-[12px] border-2 border-dashed border-[var(--color-border-light)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
+          aria-label="Join an organization"
+        >
+          <Plus size={18} />
+        </Link>
+      </aside>
+    )
+  }
 
   function getRoleBadge(org: OrgMembership): string {
     if (officerOrgIds?.has(org.organizationId)) return 'Officer'
@@ -51,7 +63,7 @@ export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
   }
 
   return (
-    <aside className="hidden md:flex w-[56px] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col items-center py-3 shrink-0 gap-1">
+    <aside className="hidden md:flex w-[var(--rail-width)] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col items-center py-3 shrink-0 gap-1">
       <TooltipProvider delayDuration={200}>
         {/* Org avatars */}
         <nav aria-label="Organization switcher" className="flex flex-col items-center gap-2 flex-1">
@@ -87,7 +99,7 @@ export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
                 </TooltipTrigger>
                 <TooltipContent side="right" className="flex items-center gap-2">
                   <span>{org.orgName}</span>
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                  <Badge variant="secondary" className="text-[0.625rem] px-1.5 py-0">
                     {role}
                   </Badge>
                 </TooltipContent>

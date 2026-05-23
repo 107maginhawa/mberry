@@ -10,7 +10,7 @@ const NAV_ITEMS = [
 
 export function MemberBottomNav() {
   return (
-    <nav aria-label="Member navigation" className="md:hidden fixed bottom-0 left-0 right-0 h-[68px] bg-[var(--color-nav-elevated)] backdrop-blur-[var(--nav-blur)] border-t border-[var(--color-border-light)] flex items-center justify-around z-40">
+    <nav aria-label="Member navigation" className="md:hidden fixed bottom-0 left-0 right-0 h-[var(--bottom-nav-height)] bg-[var(--color-nav-elevated)] backdrop-blur-[var(--nav-blur)] border-t border-[var(--color-border-light)] flex items-center justify-around z-40">
       {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
         <Link
           key={to}
@@ -19,7 +19,7 @@ export function MemberBottomNav() {
           activeProps={{ className: "flex flex-col items-center gap-[3px] text-[var(--color-primary)]" }}
         >
           <Icon size={22} />
-          <span className="text-[11px] font-medium">{label}</span>
+          <span className="text-xs font-medium">{label}</span>
         </Link>
       ))}
     </nav>

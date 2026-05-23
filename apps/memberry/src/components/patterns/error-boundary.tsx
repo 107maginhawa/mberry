@@ -51,7 +51,11 @@ function ErrorFallback({ error, onRetry }: { error: Error | null; onRetry: () =>
       <AlertCircle className="h-12 w-12" style={{ color: 'var(--color-error)' }} />
       <h3 className="text-h4 text-[var(--color-text)]">Something went wrong</h3>
       <p className="text-body-sm text-[var(--color-text-secondary)] max-w-md">
-        {error?.message || 'An unexpected error occurred. Please try again.'}
+        {error?.message?.includes('fetch')
+          ? 'Unable to connect. Check your internet connection and try again.'
+          : error?.message?.includes('401') || error?.message?.includes('Unauthorized')
+          ? 'Your session has expired. Please sign in again.'
+          : error?.message || 'An unexpected error occurred. Please try again.'}
       </p>
       <Button
         ref={retryRef}

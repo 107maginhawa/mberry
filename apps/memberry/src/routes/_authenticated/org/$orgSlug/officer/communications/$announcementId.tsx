@@ -91,8 +91,8 @@ function AnnouncementDetailPage() {
       />
 
       {/* Status bar */}
-      <div className="flex items-center gap-3 text-[14px] text-[var(--color-muted)]">
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>
+      <div className="flex items-center gap-3 text-sm text-[var(--color-muted)]">
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>
           {ann.status.charAt(0).toUpperCase() + ann.status.slice(1).replace('_', ' ')}
         </span>
         <span>{ann.audienceType === 'all' ? 'All members' : 'Selected categories'}</span>
@@ -102,30 +102,30 @@ function AnnouncementDetailPage() {
 
       {/* Content */}
       <GlassCard className="p-5">
-        <div className="whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--color-text)]">
+        <div className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-text)]">
           {ann.content}
         </div>
       </GlassCard>
 
       {/* Metadata */}
       <GlassCard className="p-5">
-        <div className="grid grid-cols-2 gap-4 text-[14px]">
+        <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-[12px] text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Created</p>
+            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Created</p>
             <p>{formatDate(ann.createdAt)}</p>
           </div>
           <div>
-            <p className="text-[12px] text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Published</p>
+            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Published</p>
             <p>{formatDate(ann.publishedAt)}</p>
           </div>
           {ann.scheduledAt && (
             <div>
-              <p className="text-[12px] text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Scheduled For</p>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Scheduled For</p>
               <p>{formatDate(ann.scheduledAt)}</p>
             </div>
           )}
           <div>
-            <p className="text-[12px] text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Visibility</p>
+            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wide mb-0.5">Visibility</p>
             <p className="capitalize">{ann.visibility}</p>
           </div>
         </div>
@@ -143,8 +143,8 @@ function AnnouncementDetailPage() {
               { label: 'Email Opened', value: ann.stats.emailOpened },
             ].map((stat) => (
               <div key={stat.label} className="p-3 border rounded-[8px] text-center">
-                <p className="text-[20px] font-bold">{stat.value}</p>
-                <p className="text-[12px] text-[var(--color-muted)] mt-0.5">{stat.label}</p>
+                <p className="text-xl font-bold">{stat.value}</p>
+                <p className="text-xs text-[var(--color-muted)] mt-0.5">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -187,7 +187,7 @@ function AnnouncementDetailPage() {
             to="/org/$orgSlug/officer/communications/new"
             params={{ orgSlug }}
             search={{ edit: announcementId }}
-            className="px-4 py-2 border rounded-[8px] text-[14px] font-medium hover:bg-[var(--color-surface-warm)]"
+            className="px-4 py-2 border rounded-[8px] text-sm font-medium hover:bg-[var(--color-surface-warm)]"
           >
             Edit
           </Link>

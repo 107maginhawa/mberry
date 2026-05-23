@@ -65,9 +65,10 @@ describe('OrgIconRail', () => {
       activeOrgSlug: null,
     })
 
-    const { container } = renderWithProviders(<OrgIconRail />)
+    renderWithProviders(<OrgIconRail />)
 
-    expect(container.firstChild).toBeNull()
+    // Shows "Join" prompt instead of nothing
+    expect(screen.getByLabelText('Join an organization')).toBeInTheDocument()
   })
 
   test('renders org avatars', () => {

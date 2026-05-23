@@ -69,7 +69,7 @@ function FundSettingsPage() {
         ]}
         actions={
           <div className="flex items-center gap-3">
-            {hasChanges && <span className="text-[14px] text-[var(--color-muted)]">Unsaved changes</span>}
+            {hasChanges && <span className="text-sm text-[var(--color-muted)]">Unsaved changes</span>}
             <Button onClick={() => saveMutation.mutate()} disabled={!isValid || saveMutation.isPending || !hasChanges}>
               {saveMutation.isPending ? 'Saving...' : 'Save'}
             </Button>

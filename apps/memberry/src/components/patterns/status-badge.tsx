@@ -13,7 +13,7 @@ export function StatusBadge({ status }: { status: MembershipStatus }) {
   return (
     <span
       data-testid="status-badge"
-      className={`inline-flex items-center px-3 py-1 rounded-full text-[12px] font-semibold ${config.className}`}
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${config.className}`}
     >
       {config.label}
     </span>

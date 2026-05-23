@@ -139,9 +139,9 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
   if (!alert) return null
 
   const variantStyles = {
-    error: 'bg-red-50 border-red-200 text-red-800',
-    warning: 'bg-amber-50 border-amber-200 text-amber-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-700',
+    error: 'bg-[var(--color-error-bg)] border-[var(--color-error)] text-[var(--color-error)]',
+    warning: 'bg-[var(--color-warning-bg)] border-[var(--color-warning)] text-[var(--color-warning)]',
+    info: 'bg-[var(--color-info-bg)] border-[var(--color-info)] text-[var(--color-info)]',
   }
 
   return (
@@ -151,13 +151,13 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
     >
       <div className="flex items-center gap-2.5">
         <span className="shrink-0" aria-hidden="true">{alert.icon}</span>
-        <p className="text-[13px] font-semibold">{alert.message}</p>
+        <p className="text-sm font-semibold">{alert.message}</p>
       </div>
       {alert.action && (
         <Link
           to={alert.action.to}
           params={alert.action.params ?? {}}
-          className="shrink-0 text-[12px] font-bold underline underline-offset-2 hover:no-underline"
+          className="shrink-0 text-xs font-bold underline underline-offset-2 hover:no-underline"
         >
           {alert.action.label}
         </Link>
