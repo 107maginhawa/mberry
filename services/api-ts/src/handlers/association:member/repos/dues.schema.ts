@@ -55,6 +55,8 @@ export const duesConfigs = pgTable('dues_config', {
   annualAmount: bigint('annual_amount', { mode: 'number' }).notNull(),
   currency: varchar('currency', { length: 3 }).notNull(),
   gracePeriodDays: integer('grace_period_days').default(30).notNull(),
+  dueDateDay: integer('due_date_day').default(1).notNull(),
+  cycleStartMonth: integer('cycle_start_month').default(1).notNull(),
   fundAllocations: jsonb('fund_allocations').$type<FundAllocation[]>().notNull(),
   effectiveDate: date('effective_date').notNull(),
   status: duesConfigStatusEnum('status').default('active').notNull(),

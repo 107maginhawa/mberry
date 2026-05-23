@@ -25,7 +25,7 @@ interface HandwiredDuesConfig {
   annualAmount?: number | bigint
   defaultAmount?: number | bigint
   currency?: string
-  billingFrequency?: 'annual' | 'quarterly'
+  billingFrequency?: 'annual' | 'semi-annual' | 'quarterly'
   dueDateMonth?: number
   dueDateDay?: number
   gracePeriodDays?: number
@@ -88,7 +88,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   const queryClient = useQueryClient()
 
   const [currency, setCurrency] = useState('PHP')
-  const [billingFrequency, setBillingFrequency] = useState<'annual' | 'quarterly'>('annual')
+  const [billingFrequency, setBillingFrequency] = useState<'annual' | 'semi-annual' | 'quarterly'>('annual')
   const [dueDateMonth, setDueDateMonth] = useState('1')
   const [dueDateDay, setDueDateDay] = useState('1')
   const [reminders, setReminders] = useState<ReminderRow[]>(DEFAULT_REMINDERS)
@@ -230,10 +230,11 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Billing Frequency</Label>
-              <Select value={billingFrequency} onValueChange={(v) => { setBillingFrequency(v as 'annual' | 'quarterly'); setHasChanges(true) }}>
+              <Select value={billingFrequency} onValueChange={(v) => { setBillingFrequency(v as 'annual' | 'semi-annual' | 'quarterly'); setHasChanges(true) }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="annual">Annual</SelectItem>
+                  <SelectItem value="semi-annual">Semi-Annual</SelectItem>
                   <SelectItem value="quarterly">Quarterly</SelectItem>
                 </SelectContent>
               </Select>
@@ -241,7 +242,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
             <div>
               <Label>Due Date</Label>
               <div className="flex gap-2">
-                {billingFrequency === 'annual' && (
+                {(billingFrequency === 'annual' || billingFrequency === 'semi-annual') && (
                   <Select value={dueDateMonth} onValueChange={(v) => { setDueDateMonth(v); setHasChanges(true) }}>
                     <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
                     <SelectContent>
