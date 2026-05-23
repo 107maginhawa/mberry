@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@monobase/ui'
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react'
 
 interface CollectionRateCardProps {
