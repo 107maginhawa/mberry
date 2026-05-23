@@ -10,6 +10,7 @@ import { DuesStatusBadge } from '@/features/dues/components/dues-status-badge'
 import { ArrearsBreakdown } from '@/features/dues/components/arrears-breakdown'
 import { PaymentScheduleTimeline } from '@/features/dues/components/payment-schedule-timeline'
 import type { TimelinePeriod } from '@/features/dues/components/payment-schedule-timeline'
+import { buildPaymentCsv, downloadCsv } from '@/features/dues/lib/csv-export'
 import { api } from '@/lib/api'
 import { CreditCard, CheckCircle, AlertTriangle, Info, Building, Receipt, Download } from 'lucide-react'
 import { useOrg } from '@/hooks/useOrg'
@@ -124,19 +125,8 @@ function MemberDuesPage() {
   // CSV export for payment history
   function exportPaymentsCsv() {
     if (payments.length === 0) return
-    const header = 'Receipt Number,Amount,Currency,Status,Date\n'
-    const rows = (payments as any[]).map((p: any) => {
-      const amt = (Number(p.amount ?? 0) / 100).toFixed(2)
-      const date = p.paidAt ? new Date(p.paidAt).toLocaleDateString() : ''
-      return `${p.receiptNumber ?? ''},${amt},${p.currency ?? 'PHP'},${p.status ?? ''},${date}`
-    }).join('\n')
-    const blob = new Blob([header + rows], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'payment-history.csv'
-    a.click()
-    URL.revokeObjectURL(url)
+    const csv = buildPaymentCsv(payments as any[])
+    downloadCsv(csv, 'payment-history.csv')
   }
 
   // Check if any proof is already submitted for each invoice
