@@ -1,326 +1,229 @@
-<!-- oli:ui-blueprint v1.0 | generated 2026-05-21 | source: MODULE_SPEC.md, API_CONTRACTS.md -->
-# UI Blueprint --- Mock Data: Events (M08)
+<!-- oli:ui-blueprint v2.0 | generated 2026-05-23 | source: MODULE_SPEC.md, Wave 2a design doc -->
 
-> Demonstration data for UI prototyping. Non-authoritative. UUIDs are fake.
+# UI Blueprint — Mock Data: Events (M08) — Wave 2a
+
+> Demonstration data for UI prototyping. **Non-authoritative.** UUIDs are fake.
 > All names, locations, and amounts are fictional.
+> DO NOT import from production code — mock data lives in test fixtures only.
 
 ---
 
-## Entity: Event (5 records)
+## Events
 
-```json
-[
+```typescript
+const mockEvents = [
   {
-    "id": "aa0e8400-e29b-41d4-a716-446655440001",
-    "organizationId": "660e8400-e29b-41d4-a716-446655440000",
-    "title": "Annual General Assembly 2026",
-    "description": "<p>Join us for the annual general assembly. Agenda: board elections, financial report, committee updates.</p>",
-    "eventType": "generalAssembly",
-    "status": "published",
-    "visibility": "internal",
-    "startDate": "2026-07-15T09:00:00.000Z",
-    "endDate": "2026-07-15T17:00:00.000Z",
-    "location": "Manila Hotel Grand Ballroom",
-    "coverImage": "https://cdn.example.com/events/aga-2026.jpg",
-    "capacityLimit": 500,
-    "feeAmount": "2500",
-    "currency": "PHP",
-    "registrationCount": 342,
-    "waitlistCount": 0
+    id: "evt-001",
+    organizationId: "org-pda-ncr",
+    title: "CPD Seminar: Advances in Prosthodontics 2026",
+    eventType: "seminar",
+    description: "A full-day seminar covering the latest advances in prosthodontic materials and techniques. Featuring 3 speakers from PDA-accredited institutions.",
+    location: "Manila Hotel Ballroom, One Rizal Park, Manila",
+    startDate: "2026-07-15T09:00:00+08:00",
+    endDate: "2026-07-15T17:00:00+08:00",
+    capacity: 150,
+    registrationFee: 50000, // PHP 500.00 in cents
+    currency: "PHP",
+    creditBearing: true,
+    creditAmount: 8,
+    cpdActivityType: "seminar",
+    status: "published",
+    visibility: "network",
+    eventSlug: "cpd-seminar-advances-in-prosthodontics-2026",
+    coverImageUrl: "https://storage.memberry.app/events/prostho-seminar-cover.jpg",
+    publishedAt: "2026-06-01T08:00:00+08:00",
   },
   {
-    "id": "aa0e8400-e29b-41d4-a716-446655440002",
-    "organizationId": "660e8400-e29b-41d4-a716-446655440000",
-    "title": "Induction Ceremony - New Members 2026",
-    "description": "<p>Welcome ceremony for all new members inducted in 2026.</p>",
-    "eventType": "inductionCeremony",
-    "status": "published",
-    "visibility": "internal",
-    "startDate": "2026-06-20T18:00:00.000Z",
-    "endDate": "2026-06-20T21:00:00.000Z",
-    "location": "Shangri-La The Fort, Function Room A",
-    "coverImage": null,
-    "capacityLimit": 100,
-    "feeAmount": "0",
-    "currency": "PHP",
-    "registrationCount": 98,
-    "waitlistCount": 5
+    id: "evt-002",
+    organizationId: "org-pda-ncr",
+    title: "PDA NCR General Assembly & Elections",
+    eventType: "generalAssembly",
+    description: "Annual general assembly with officer elections. All members in good standing are eligible to vote.",
+    location: "Crowne Plaza Manila Galleria, Ortigas",
+    startDate: "2026-08-20T14:00:00+08:00",
+    endDate: "2026-08-20T18:00:00+08:00",
+    capacity: 300,
+    registrationFee: 0,
+    currency: "PHP",
+    creditBearing: false,
+    creditAmount: 0,
+    cpdActivityType: null,
+    status: "draft",
+    visibility: "internal",
+    eventSlug: "pda-ncr-general-assembly-elections",
+    coverImageUrl: null,
   },
   {
-    "id": "aa0e8400-e29b-41d4-a716-446655440003",
-    "organizationId": "660e8400-e29b-41d4-a716-446655440000",
-    "title": "Community Dental Mission - Tondo",
-    "description": "<p>Free dental services for Tondo community. Volunteers needed for extraction, cleaning, and oral health education.</p>",
-    "eventType": "medicalMission",
-    "status": "published",
-    "visibility": "network",
-    "startDate": "2026-08-10T07:00:00.000Z",
-    "endDate": "2026-08-10T16:00:00.000Z",
-    "location": "Tondo Barangay Hall, Manila",
-    "coverImage": "https://cdn.example.com/events/dental-mission-2026.jpg",
-    "capacityLimit": null,
-    "feeAmount": null,
-    "currency": "PHP",
-    "registrationCount": 45,
-    "waitlistCount": 0
+    id: "evt-003",
+    organizationId: "org-pda-cebu",
+    title: "Dental Mission: Brgy. Guadalupe",
+    eventType: "other",
+    description: "Community dental mission in Barangay Guadalupe. Volunteer dentists needed for extractions, prophylaxis, and oral health education.",
+    location: "Guadalupe Community Center, Cebu City",
+    startDate: "2026-06-28T07:00:00+08:00",
+    endDate: "2026-06-28T15:00:00+08:00",
+    capacity: 30,
+    registrationFee: 0,
+    currency: "PHP",
+    creditBearing: true,
+    creditAmount: 4,
+    cpdActivityType: "community",
+    status: "published",
+    visibility: "network",
+    eventSlug: "dental-mission-brgy-guadalupe",
+    coverImageUrl: "https://storage.memberry.app/events/dental-mission-cebu.jpg",
   },
   {
-    "id": "aa0e8400-e29b-41d4-a716-446655440004",
-    "organizationId": "660e8400-e29b-41d4-a716-446655440000",
-    "title": "Board Meeting - Q2 Review",
-    "description": "<p>Quarterly review of chapter finances and membership growth.</p>",
-    "eventType": "boardMeeting",
-    "status": "completed",
-    "visibility": "internal",
-    "startDate": "2026-04-28T14:00:00.000Z",
-    "endDate": "2026-04-28T16:00:00.000Z",
-    "location": "Online - Zoom",
-    "coverImage": null,
-    "capacityLimit": 15,
-    "feeAmount": null,
-    "currency": "PHP",
-    "registrationCount": 12,
-    "waitlistCount": 0
+    id: "evt-004",
+    organizationId: "org-pda-ncr",
+    title: "Hands-On Workshop: Digital Impressions",
+    eventType: "other",
+    description: "Hands-on workshop using intraoral scanners. Limited to 20 participants. Equipment provided.",
+    location: "UST Dental Skills Lab, Manila",
+    startDate: "2026-09-10T09:00:00+08:00",
+    endDate: "2026-09-10T16:00:00+08:00",
+    capacity: 20,
+    registrationFee: 250000, // PHP 2,500.00
+    currency: "PHP",
+    creditBearing: true,
+    creditAmount: 6,
+    cpdActivityType: "hands_on",
+    status: "published",
+    visibility: "network",
+    eventSlug: "hands-on-workshop-digital-impressions",
+    coverImageUrl: "https://storage.memberry.app/events/digital-impressions-workshop.jpg",
   },
-  {
-    "id": "aa0e8400-e29b-41d4-a716-446655440005",
-    "organizationId": "660e8400-e29b-41d4-a716-446655440000",
-    "title": "Fellowship Night - Christmas 2025",
-    "description": "<p>Annual Christmas fellowship dinner and gift exchange.</p>",
-    "eventType": "fellowship",
-    "status": "cancelled",
-    "visibility": "internal",
-    "startDate": "2025-12-15T18:00:00.000Z",
-    "endDate": "2025-12-15T22:00:00.000Z",
-    "location": "Makati Shangri-La, Rizal Ballroom",
-    "coverImage": null,
-    "capacityLimit": 200,
-    "feeAmount": "3500",
-    "currency": "PHP",
-    "registrationCount": 150,
-    "waitlistCount": 0
-  }
-]
+];
 ```
 
 ---
 
-## Entity: EventRegistration (5 records)
+## Registrations
 
-```json
-[
+```typescript
+const mockRegistrations = [
   {
-    "id": "bb0e8400-e29b-41d4-a716-446655440001",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440001",
-    "personId": "770e8400-e29b-41d4-a716-446655440001",
-    "status": "confirmed",
-    "paymentId": "ff0e8400-e29b-41d4-a716-446655440010",
-    "registeredAt": "2026-05-10T10:00:00.000Z",
-    "cancelledAt": null
+    id: "reg-001",
+    eventId: "evt-001",
+    personId: "person-maria",
+    status: "confirmed",
+    registeredAt: "2026-06-15T10:30:00+08:00",
+    cancelledAt: null,
   },
   {
-    "id": "bb0e8400-e29b-41d4-a716-446655440002",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440001",
-    "personId": "770e8400-e29b-41d4-a716-446655440003",
-    "status": "confirmed",
-    "paymentId": "ff0e8400-e29b-41d4-a716-446655440011",
-    "registeredAt": "2026-05-12T14:30:00.000Z",
-    "cancelledAt": null
+    id: "reg-002",
+    eventId: "evt-001",
+    personId: "person-jose",
+    status: "waitlisted",
+    registeredAt: "2026-06-20T14:00:00+08:00",
+    cancelledAt: null,
   },
   {
-    "id": "bb0e8400-e29b-41d4-a716-446655440003",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440002",
-    "personId": "770e8400-e29b-41d4-a716-446655440004",
-    "status": "waitlisted",
-    "paymentId": null,
-    "registeredAt": "2026-06-01T09:00:00.000Z",
-    "cancelledAt": null
+    id: "reg-003",
+    eventId: "evt-004",
+    personId: "person-maria",
+    status: "confirmed",
+    registeredAt: "2026-07-01T09:00:00+08:00",
+    cancelledAt: null,
   },
-  {
-    "id": "bb0e8400-e29b-41d4-a716-446655440004",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440005",
-    "personId": "770e8400-e29b-41d4-a716-446655440001",
-    "status": "refunded",
-    "paymentId": "ff0e8400-e29b-41d4-a716-446655440012",
-    "registeredAt": "2025-11-20T10:00:00.000Z",
-    "cancelledAt": "2025-12-10T08:00:00.000Z"
-  },
-  {
-    "id": "bb0e8400-e29b-41d4-a716-446655440005",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440004",
-    "personId": "770e8400-e29b-41d4-a716-446655440002",
-    "status": "confirmed",
-    "paymentId": null,
-    "registeredAt": "2026-04-20T11:00:00.000Z",
-    "cancelledAt": null
-  }
-]
+];
 ```
 
 ---
 
-## Entity: CheckIn (3 records)
+## Check-Ins
 
-```json
-[
+```typescript
+const mockCheckIns = [
   {
-    "id": "cc0e8400-e29b-41d4-a716-446655440001",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440004",
-    "personId": "770e8400-e29b-41d4-a716-446655440002",
-    "method": "manual",
-    "checkedInBy": "cc0e8400-e29b-41d4-a716-446655440001",
-    "checkedInAt": "2026-04-28T14:05:00.000Z"
+    id: "ci-001",
+    eventId: "evt-001",
+    personId: "person-maria",
+    method: "manual",
+    checkedInAt: "2026-07-15T08:45:00+08:00",
+    checkedInBy: "person-officer-anna",
+    attestation: {
+      officerId: "person-officer-anna",
+      method: "manual",
+      deviceInfo: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X)",
+      timestamp: "2026-07-15T08:45:00+08:00",
+    },
   },
   {
-    "id": "cc0e8400-e29b-41d4-a716-446655440002",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440004",
-    "personId": "770e8400-e29b-41d4-a716-446655440001",
-    "method": "qr",
-    "checkedInBy": "cc0e8400-e29b-41d4-a716-446655440001",
-    "checkedInAt": "2026-04-28T14:02:00.000Z"
+    id: "ci-002",
+    eventId: "evt-001",
+    personId: "person-carlos",
+    method: "qr",
+    checkedInAt: "2026-07-15T08:50:00+08:00",
+    checkedInBy: "person-officer-anna",
+    attestation: {
+      officerId: "person-officer-anna",
+      method: "qr",
+      deviceInfo: "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X)",
+      timestamp: "2026-07-15T08:50:00+08:00",
+    },
   },
-  {
-    "id": "cc0e8400-e29b-41d4-a716-446655440003",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440004",
-    "personId": "770e8400-e29b-41d4-a716-446655440005",
-    "method": "qr",
-    "checkedInBy": "cc0e8400-e29b-41d4-a716-446655440002",
-    "checkedInAt": "2026-04-28T14:10:00.000Z"
-  }
-]
+];
 ```
 
 ---
 
-## Entity: WaitlistEntry (3 records)
+## Persons (for display context)
 
-```json
-[
-  {
-    "id": "dd0e8400-e29b-41d4-a716-446655440001",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440002",
-    "personId": "770e8400-e29b-41d4-a716-446655440004",
-    "position": 1,
-    "promotedAt": null
-  },
-  {
-    "id": "dd0e8400-e29b-41d4-a716-446655440002",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440002",
-    "personId": "770e8400-e29b-41d4-a716-446655440006",
-    "position": 2,
-    "promotedAt": null
-  },
-  {
-    "id": "dd0e8400-e29b-41d4-a716-446655440003",
-    "eventId": "aa0e8400-e29b-41d4-a716-446655440002",
-    "personId": "770e8400-e29b-41d4-a716-446655440007",
-    "position": 3,
-    "promotedAt": null
-  }
-]
+```typescript
+const mockPersons = [
+  { id: "person-maria", firstName: "Maria", lastName: "Santos", email: "maria@example.com" },
+  { id: "person-jose", firstName: "Jose", lastName: "Reyes", email: "jose@example.com" },
+  { id: "person-carlos", firstName: "Carlos", lastName: "Cruz", email: "carlos@example.com" },
+  { id: "person-officer-anna", firstName: "Anna", lastName: "Garcia", email: "anna@example.com" },
+];
 ```
 
 ---
 
-## Attendee List (Check-In Screen, 5 records)
+## CPD Activity Types
 
-```json
-[
-  {
-    "registrationId": "bb0e8400-e29b-41d4-a716-446655440001",
-    "personId": "770e8400-e29b-41d4-a716-446655440001",
-    "personName": "Maria Santos",
-    "registrationStatus": "confirmed",
-    "checkedIn": true,
-    "checkInMethod": "qr",
-    "checkedInAt": "2026-07-15T09:15:00.000Z"
-  },
-  {
-    "registrationId": "bb0e8400-e29b-41d4-a716-446655440002",
-    "personId": "770e8400-e29b-41d4-a716-446655440003",
-    "personName": "Ana Cruz",
-    "registrationStatus": "confirmed",
-    "checkedIn": true,
-    "checkInMethod": "manual",
-    "checkedInAt": "2026-07-15T09:20:00.000Z"
-  },
-  {
-    "registrationId": "bb0e8400-e29b-41d4-a716-446655440006",
-    "personId": "770e8400-e29b-41d4-a716-446655440002",
-    "personName": "Jose Reyes",
-    "registrationStatus": "confirmed",
-    "checkedIn": false,
-    "checkInMethod": null,
-    "checkedInAt": null
-  },
-  {
-    "registrationId": "bb0e8400-e29b-41d4-a716-446655440007",
-    "personId": "770e8400-e29b-41d4-a716-446655440005",
-    "personName": "Lucia Fernandez",
-    "registrationStatus": "confirmed",
-    "checkedIn": false,
-    "checkInMethod": null,
-    "checkedInAt": null
-  },
-  {
-    "registrationId": "bb0e8400-e29b-41d4-a716-446655440008",
-    "personId": "770e8400-e29b-41d4-a716-446655440004",
-    "personName": "Carlos Mendoza",
-    "registrationStatus": "cancelled",
-    "checkedIn": false,
-    "checkInMethod": null,
-    "checkedInAt": null
-  }
-]
+```typescript
+const cpdActivityTypes = [
+  { value: "seminar", label: "Seminar", description: "Formal presentation" },
+  { value: "workshop", label: "Workshop", description: "Hands-on, interactive" },
+  { value: "conference", label: "Conference", description: "Multi-session event" },
+  { value: "webinar", label: "Webinar", description: "Online live session" },
+  { value: "hands_on", label: "Hands-on Training", description: "Clinical skills, lab work" },
+  { value: "community", label: "Community Service", description: "Outreach, missions" },
+  { value: "research", label: "Research", description: "Paper presentation, poster" },
+  { value: "mentorship", label: "Mentorship", description: "Teaching, supervision" },
+  { value: "self_directed", label: "Self-Directed Learning", description: "Journal club, reading group" },
+  { value: "other", label: "Other", description: "Org-specific" },
+];
 ```
 
 ---
 
-## My Events (Member View, 3 records)
+## Stripe Checkout (paid registration)
 
-```json
-[
-  {
-    "registrationId": "bb0e8400-e29b-41d4-a716-446655440001",
-    "status": "confirmed",
-    "registeredAt": "2026-05-10T10:00:00.000Z",
-    "event": {
-      "id": "aa0e8400-e29b-41d4-a716-446655440001",
-      "title": "Annual General Assembly 2026",
-      "eventType": "generalAssembly",
-      "startDate": "2026-07-15T09:00:00.000Z",
-      "endDate": "2026-07-15T17:00:00.000Z",
-      "location": "Manila Hotel Grand Ballroom",
-      "organizationName": "PDA Manila Chapter"
-    }
-  },
-  {
-    "registrationId": "bb0e8400-e29b-41d4-a716-446655440009",
-    "status": "confirmed",
-    "registeredAt": "2026-05-18T08:00:00.000Z",
-    "event": {
-      "id": "aa0e8400-e29b-41d4-a716-446655440003",
-      "title": "Community Dental Mission - Tondo",
-      "eventType": "medicalMission",
-      "startDate": "2026-08-10T07:00:00.000Z",
-      "endDate": "2026-08-10T16:00:00.000Z",
-      "location": "Tondo Barangay Hall, Manila",
-      "organizationName": "PDA Manila Chapter"
-    }
-  },
-  {
-    "registrationId": "bb0e8400-e29b-41d4-a716-446655440004",
-    "status": "refunded",
-    "registeredAt": "2025-11-20T10:00:00.000Z",
-    "event": {
-      "id": "aa0e8400-e29b-41d4-a716-446655440005",
-      "title": "Fellowship Night - Christmas 2025",
-      "eventType": "fellowship",
-      "startDate": "2025-12-15T18:00:00.000Z",
-      "endDate": "2025-12-15T22:00:00.000Z",
-      "location": "Makati Shangri-La, Rizal Ballroom",
-      "organizationName": "PDA Manila Chapter"
-    }
-  }
-]
+```typescript
+const mockStripeCheckout = {
+  checkoutUrl: "https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5",
+  registrationId: "reg-003",
+};
+```
+
+---
+
+## .ics Calendar Output
+
+```
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Memberry//Events//EN
+BEGIN:VEVENT
+DTSTART:20260715T010000Z
+DTEND:20260715T090000Z
+SUMMARY:CPD Seminar: Advances in Prosthodontics 2026
+LOCATION:Manila Hotel Ballroom\, One Rizal Park\, Manila
+DESCRIPTION:A full-day seminar covering the latest advances...
+UID:evt-001@memberry.app
+END:VEVENT
+END:VCALENDAR
 ```

@@ -1,444 +1,399 @@
-<!-- oli:ui-blueprint v1.0 | generated 2026-05-21 -->
-# UI Blueprint --- Components: Events (M08)
+<!-- oli:ui-blueprint v2.0 | generated 2026-05-23 | source: MODULE_SPEC.md, Wave 2a design doc -->
+<!-- supersedes: v1.0 (2026-05-21) — adds Wave 2a components (CPD badge, price badge, cover image, calendar download, public event card) -->
+
+# UI Blueprint — Components: Events (M08) — Wave 2a
 
 > Reusable components for the Events module. Built on Radix UI (shadcn) primitives.
+> Design tokens from globals.css: `--color-primary`, `--color-success`, `--color-warning`, `--color-error`
 
 ---
 
 ## Component 1: EventStatusBadge
 
-**Purpose:** Color-coded badge for event status.
-
 ### TypeScript Props Interface
 
 ```typescript
 interface EventStatusBadgeProps {
-  status: EventStatus;
-  size?: "sm" | "md" | "lg";
+  status: "draft" | "published" | "cancelled" | "completed" | "registration_open" | "in_progress";
+  size?: "sm" | "md";
 }
-
-type EventStatus = "draft" | "published" | "cancelled" | "completed";
 ```
 
 ### WAI-ARIA Pattern
-
-- **Pattern:** Status indicator
-- **Attributes:** `aria-label="Event status: [status]"`
-
-### Keyboard Interaction
-
-| Key | Action |
-|-----|--------|
-| N/A | Non-interactive |
+- `role="status"`, `aria-label="Event status: {status}"`
 
 ### Render Contract
 
-| Status | Color | Icon | Label |
-|--------|-------|------|-------|
-| draft | gray-400 | FileEdit | Draft |
-| published | green-500 | Globe | Published |
-| cancelled | red-500 | XCircle | Cancelled |
-| completed | blue-500 | CheckCircle | Completed |
+| Status | Background | Text | Label |
+|--------|-----------|------|-------|
+| draft | `var(--color-surface-warm)` | `var(--color-muted)` | "draft" |
+| published | `var(--color-success-bg)` | `var(--color-success)` | "published" |
+| registration_open | `var(--color-success-bg)` | `var(--color-success)` | "registration open" |
+| in_progress | `var(--color-warning-bg)` | `var(--color-warning)` | "in progress" |
+| completed | `var(--color-surface-warm)` | `var(--color-muted)` | "completed" |
+| cancelled | `var(--color-error-bg)` | `var(--color-error)` | "cancelled" |
 
-### Events
-
-None.
-
-### States
-
-- **Default:** Badge with color + icon + label
-- **Skeleton:** Gray rounded rectangle
+### Implementation Status: ✅ Inline in EventCard (STATUS_COLORS map)
 
 ---
 
-## Component 2: EventTypeBadge
-
-**Purpose:** Badge displaying event type classification.
+## Component 2: PriceBadge
 
 ### TypeScript Props Interface
 
 ```typescript
-interface EventTypeBadgeProps {
-  eventType: EventType;
+interface PriceBadgeProps {
+  /** Fee in cents (bigint from API) */
+  fee: number | bigint | null | undefined;
+  /** ISO 4217 currency code */
+  currency?: string | null;
   size?: "sm" | "md";
 }
-
-type EventType =
-  | "generalAssembly"
-  | "inductionCeremony"
-  | "fellowship"
-  | "medicalMission"
-  | "boardMeeting"
-  | "committeeMeeting"
-  | "fundraiser"
-  | "other";
 ```
 
 ### WAI-ARIA Pattern
-
-- **Attributes:** `aria-label="Event type: [label]"`
-
-### Keyboard Interaction
-
-None (non-interactive).
+- `aria-label="Registration fee: {formatted price}"`
 
 ### Render Contract
 
-| Type | Color | Icon | Label |
-|------|-------|------|-------|
-| generalAssembly | purple-500 | Users | General Assembly |
-| inductionCeremony | amber-500 | Award | Induction Ceremony |
-| fellowship | green-400 | Heart | Fellowship |
-| medicalMission | blue-500 | Stethoscope | Medical Mission |
-| boardMeeting | gray-500 | Briefcase | Board Meeting |
-| committeeMeeting | gray-400 | Users2 | Committee Meeting |
-| fundraiser | emerald-500 | DollarSign | Fundraiser |
-| other | slate-400 | Calendar | Other |
+| Condition | Display | Style |
+|-----------|---------|-------|
+| fee = 0 or null | "Free" | `var(--color-success-bg)` + `var(--color-success)` |
+| fee > 0 | "PHP 500" (formatted) | `var(--color-surface-warm)` + `var(--color-foreground)` |
 
-### Events
-
-None.
-
-### States
-
-- **Default:** Badge with color + icon + label
+### Implementation Status: ✅ Inline in EventCard + EventDetail
 
 ---
 
-## Component 3: RegistrationStatusBadge
-
-**Purpose:** Badge for event registration status.
+## Component 3: CpdBadge
 
 ### TypeScript Props Interface
 
 ```typescript
-interface RegistrationStatusBadgeProps {
-  status: RegistrationStatus;
-  waitlistPosition?: number;
+interface CpdBadgeProps {
+  /** Whether event is credit-bearing */
+  creditBearing: boolean;
+  /** Number of CPD hours */
+  creditAmount: number | null | undefined;
+  /** Activity type for tooltip */
+  cpdActivityType?: string | null;
+  /** Whether member is registered (shows "pending check-in") */
+  isRegistered?: boolean;
   size?: "sm" | "md";
 }
-
-type RegistrationStatus = "confirmed" | "waitlisted" | "cancelled" | "refunded" | "noShow";
 ```
 
 ### WAI-ARIA Pattern
-
-- **Attributes:** `aria-label="Registration: [status]"`. If waitlisted: `aria-label="Waitlisted, position [N]"`
-
-### Keyboard Interaction
-
-None (non-interactive).
+- `aria-label="{creditAmount} CPD hours{isRegistered ? ', pending check-in' : ''}"`
 
 ### Render Contract
 
-| Status | Color | Icon | Label |
-|--------|-------|------|-------|
-| confirmed | green-500 | CheckCircle | Confirmed |
-| waitlisted | yellow-500 | Clock | Waitlisted (#N) |
-| cancelled | gray-400 | XCircle | Cancelled |
-| refunded | blue-400 | RotateCcw | Refunded |
-| noShow | red-300 | UserX | No Show |
+| Condition | Display | Style |
+|-----------|---------|-------|
+| Not credit-bearing or creditAmount=0 | Hidden | — |
+| Credit-bearing + not registered | "4 CPD hrs" | `var(--color-primary-bg)` + `var(--color-primary)` |
+| Credit-bearing + registered | "4 CPD hours (pending check-in)" | Same + suffix |
 
-### Events
-
-None.
-
-### States
-
-- **Default:** Badge with status. Waitlisted includes position number.
+### Implementation Status: ✅ Inline in EventCard + EventDetail + MyEvents
 
 ---
 
-## Component 4: QRScannerView
+## Component 4: EventCard (Officer)
 
-**Purpose:** Camera-based QR code scanner for event check-in.
+### TypeScript Props Interface
+
+```typescript
+interface EventCardProps {
+  event: {
+    id: string;
+    title: string;
+    status: string;
+    startDate: string | Date;
+    endDate: string | Date;
+    location?: string | null;
+    registrationCount?: number;
+    capacity?: number | null;
+    registrationFee?: number | bigint | null;
+    currency?: string | null;
+    creditBearing?: boolean;
+    creditAmount?: number | null;
+    cpdActivityType?: string | null;
+    coverImageUrl?: string | null;
+    visibility?: string | null;
+    eventSlug?: string | null;
+  };
+  orgId: string;
+  onEdit?: (id: string) => void;
+  onCancel?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
+  linkBase?: string;
+}
+```
+
+### WAI-ARIA Pattern
+- Card: `role="article"`, title is a link
+- Actions menu: dropdown with `aria-label="Actions"`
+
+### Render Contract
+
+```
+┌─────────────────────────────────┐
+│ [Cover Image] (h-40, optional)  │
+│  ┌──────┐                       │
+│  │ JUN  │ ← date badge overlay  │
+│  │  15  │                       │
+│  └──────┘                       │
+├─────────────────────────────────┤
+│ [status] [PHP 500] [4 CPD hrs] … │ ← badge row
+│                                 │
+│ Event Title (h4, line-clamp-2)  │
+│                                 │
+│ 📅 Jun 15, 2026 · 09:00–17:00  │
+│ 📍 Manila Hotel Ballroom        │
+│ 👥 42 / 100 registered          │
+└─────────────────────────────────┘
+```
+
+### Implementation Status: ✅ Implemented at `features/events/components/event-card.tsx`
+
+---
+
+## Component 5: PublicEventCard
+
+### TypeScript Props Interface
+
+```typescript
+interface PublicEventCardProps {
+  event: {
+    id: string;
+    title: string;
+    startDate: string | Date;
+    location?: string | null;
+    coverImageUrl?: string | null;
+    registrationFee?: number | bigint | null;
+    currency?: string | null;
+    creditBearing?: boolean;
+    creditAmount?: number | null;
+    eventSlug?: string | null;
+  };
+}
+```
+
+### WAI-ARIA Pattern
+- Entire card is a link (`<Link>`)
+- `aria-label="Event: {title}"`
+
+### Render Contract
+
+```
+┌─────────────────────────────────┐
+│ [Cover Image] (h-36, optional)  │
+├─────────────────────────────────┤
+│ [Free] [4 CPD hrs]              │ ← badges
+│ Event Title (h4, line-clamp-2)  │
+│ 📅 Sat, Jun 15, 2026           │
+│ 📍 Manila Hotel Ballroom        │
+└─────────────────────────────────┘
+```
+
+### Implementation Status: ✅ Inline in `/discover/events` route
+
+---
+
+## Component 6: QRScannerView
 
 ### TypeScript Props Interface
 
 ```typescript
 interface QRScannerViewProps {
-  /** Event ID for check-in context */
-  eventId: string;
-  /** Organization ID */
-  organizationId: string;
-  /** Scan result handler */
-  onScan: (result: ScanResult) => void;
+  /** Called when a valid QR code is scanned */
+  onScan: (data: string) => void;
+  /** Called on scan error */
+  onError?: (error: Error) => void;
   /** Whether scanner is active */
-  isActive: boolean;
-  /** Whether event is locked (completed) */
-  isLocked: boolean;
-}
-
-interface ScanResult {
-  personId: string;
-  registrationId: string;
+  active: boolean;
+  /** Toggle scanner visibility */
+  onToggle: () => void;
 }
 ```
 
 ### WAI-ARIA Pattern
-
-- **Pattern:** Live region for scan results
-- **Attributes:**
-  - Scanner: `role="application"`, `aria-label="QR code scanner"`
-  - Result: `role="alert"`, `aria-live="assertive"`
-  - Camera: `aria-label="Camera viewfinder for QR scanning"`
+- Container: `role="region"`, `aria-label="QR Code Scanner"`
+- Toggle button: `aria-expanded="{active}"`, `aria-controls="qr-scanner"`
+- Camera: `role="img"`, `aria-label="Camera viewfinder"`
 
 ### Keyboard Interaction
-
-| Key | Action |
-|-----|--------|
-| Space | Toggle scanner on/off |
-| Tab | Move to manual search input |
-| Escape | Deactivate scanner |
+- Space/Enter: toggle scanner
+- Escape: close scanner
 
 ### Render Contract
 
-- Camera viewfinder with crosshair overlay
-- Scan result flash: green (success), red (error), blue (duplicate)
-- Result display: member name + status
-- Fallback: "Camera not available. Use manual check-in."
-
-### Events
-
-| Event | Payload | When |
-|-------|---------|------|
-| onScan | `ScanResult` | Valid QR decoded |
-| onError | `{ message: string }` | Invalid QR or camera error |
+```
+┌─────────────────────────────────┐
+│ [Open Scanner] button           │ ← collapsed state
+├─────────────────────────────────┤
+│ ┌─────────────────────────┐     │ ← expanded state
+│ │                         │     │
+│ │     Camera Viewfinder   │     │
+│ │                         │     │
+│ └─────────────────────────┘     │
+│ Point camera at attendee's QR   │
+│ [Close Scanner]                 │
+└─────────────────────────────────┘
+```
 
 ### States
 
-- **Inactive:** "Tap to activate scanner" overlay
-- **Active:** Camera feed with crosshair
-- **Scanning:** Brief processing indicator (< 1s)
-- **Success:** Green flash (1.5s) with member name
-- **Error:** Red flash with error message
-- **Duplicate:** Blue flash "Already checked in"
-- **Locked:** "Check-in closed. Event completed." Scanner disabled.
-- **No camera:** "Camera not available" with manual check-in CTA
+| State | Display |
+|-------|---------|
+| Collapsed | "Open Scanner" button only |
+| Active | Camera viewfinder + close button |
+| Permission denied | "Camera access required" message + manual fallback |
+| Scan success | Green flash overlay |
+| Scan error | Red flash overlay + error message |
+
+### Library: `html5-qrcode` (npm)
+
+### Implementation Status: ❌ **Not yet implemented** — manual search is primary check-in path
 
 ---
 
-## Component 5: CapacityIndicator
-
-**Purpose:** Visual indicator of event capacity and registration count.
+## Component 7: RegistrationStatusBadge
 
 ### TypeScript Props Interface
 
 ```typescript
-interface CapacityIndicatorProps {
-  /** Current confirmed registrations */
-  registrationCount: number;
-  /** Maximum capacity (null = unlimited) */
-  capacityLimit: number | null;
-  /** Current waitlist size */
-  waitlistCount: number;
-  /** Compact display mode */
-  compact?: boolean;
+interface RegistrationStatusBadgeProps {
+  status: "confirmed" | "waitlisted" | "cancelled" | "refunded" | "noShow" | "pendingPayment";
+  waitlistPosition?: number;
+  size?: "sm" | "md";
 }
 ```
 
-### WAI-ARIA Pattern
-
-- **Pattern:** [Meter](https://www.w3.org/WAI/ARIA/apg/patterns/meter/) for capacity
-- **Attributes:**
-  - `role="meter"`, `aria-valuenow`, `aria-valuemin="0"`, `aria-valuemax="[capacity]"`
-  - `aria-label="Event capacity: [count] of [capacity]"`
-  - If unlimited: `aria-label="[count] registered, no capacity limit"`
-
-### Keyboard Interaction
-
-None (non-interactive).
-
 ### Render Contract
 
-- Progress bar: green (< 80%), yellow (80-99%), red (100%)
-- Text: "N / [capacity] spots" or "N registered (unlimited)"
-- Waitlist badge: "N on waitlist" if waitlistCount > 0
-- Full state: "Event Full" with waitlist option text
+| Status | Background | Text | Label |
+|--------|-----------|------|-------|
+| confirmed | success-bg | success | "Confirmed" |
+| waitlisted | warning-bg | warning | "Waitlisted" or "Waitlisted (#N)" |
+| cancelled | error-bg | error | "Cancelled" |
+| pendingPayment | warning-bg | warning | "Pending Payment" |
+| refunded | surface-warm | muted | "Refunded" |
+| noShow | surface-warm | muted | "No Show" |
 
-### Events
-
-None.
-
-### States
-
-- **Available:** Green bar, spots remaining text
-- **Nearly full:** Yellow bar (> 80% capacity)
-- **Full:** Red bar, "Event Full" + waitlist count
-- **Unlimited:** No bar, just count text
-- **Skeleton:** Gray bar placeholder
-
----
-
-## Component 6: EventRegistrationCard
-
-**Purpose:** Card showing a member's event registration with QR code access.
-
-### TypeScript Props Interface
-
-```typescript
-interface EventRegistrationCardProps {
-  /** Registration data with embedded event */
-  registration: {
-    registrationId: string;
-    status: RegistrationStatus;
-    registeredAt: string;
-    event: {
-      id: string;
-      title: string;
-      eventType: EventType;
-      startDate: string;
-      endDate: string;
-      location: string | null;
-      organizationName: string;
-    };
-  };
-  /** Show QR code handler */
-  onShowQR: (registrationId: string) => void;
-  /** Cancel registration handler */
-  onCancel: (registrationId: string) => void;
-  /** Whether cancellation is allowed */
-  canCancel: boolean;
-}
-```
-
-### WAI-ARIA Pattern
-
-- **Pattern:** [Card](https://www.w3.org/WAI/ARIA/apg/patterns/card/) (interactive)
-- **Attributes:**
-  - Card: `role="article"`, `aria-label="Registration for [title]"`
-  - QR button: `aria-label="Show QR code for check-in"`
-  - Cancel button: `aria-label="Cancel registration"`
-
-### Keyboard Interaction
-
-| Key | Action |
-|-----|--------|
-| Tab | Move between card actions |
-| Enter | Activate focused action (QR or Cancel) |
-| Space | Same as Enter |
-
-### Render Contract
-
-- Event title (linked to detail)
-- Event type badge + date + location
-- Organization name
-- Registration status badge
-- QR code button (for confirmed registrations)
-- Cancel button (if allowed)
-
-### Events
-
-| Event | Payload | When |
-|-------|---------|------|
-| onShowQR | `{ registrationId: string }` | QR button clicked |
-| onCancel | `{ registrationId: string }` | Cancel clicked (after confirmation) |
-| onClick | -- | Card body clicked (navigate to event) |
-
-### States
-
-- **Confirmed:** Full card with QR button
-- **Waitlisted:** Card with position indicator, no QR
-- **Cancelled:** Muted card with strike-through title
-- **Completed (past):** Muted card, no actions
-- **Skeleton:** Gray card placeholder
-
----
-
-## Component 7: QRCodeModal
-
-**Purpose:** Modal displaying QR code for event check-in.
-
-### TypeScript Props Interface
-
-```typescript
-interface QRCodeModalProps {
-  /** Whether modal is open */
-  isOpen: boolean;
-  /** Close handler */
-  onClose: () => void;
-  /** Registration ID (encoded in QR) */
-  registrationId: string;
-  /** Event title for display */
-  eventTitle: string;
-  /** Member name for display */
-  memberName: string;
-}
-```
-
-### WAI-ARIA Pattern
-
-- **Pattern:** [Dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/)
-- **Attributes:** `role="dialog"`, `aria-label="Check-in QR code for [eventTitle]"`, `aria-modal="true"`
-
-### Keyboard Interaction
-
-| Key | Action |
-|-----|--------|
-| Escape | Close modal |
-| Tab | Move to close button |
-
-### Render Contract
-
-- QR code (large, centered, high contrast)
-- Event title text
-- Member name text
-- "Present this code to the check-in officer" instruction
-- Close button
-
-### Events
-
-| Event | Payload | When |
-|-------|---------|------|
-| onClose | -- | Escape, close button, or backdrop click |
-
-### States
-
-- **Open:** Modal with QR code displayed. QR generated client-side from registrationId.
-- **Closed:** Modal hidden.
+### Implementation Status: ✅ Inline in MyEvents (REG_STATUS_STYLES map)
 
 ---
 
 ## Component 8: AttendanceCounter
 
-**Purpose:** Real-time attendance count display for check-in screen.
-
 ### TypeScript Props Interface
 
 ```typescript
 interface AttendanceCounterProps {
-  /** Checked-in count */
   attendeeCount: number;
-  /** Total confirmed registrations */
   totalRegistered: number;
-  /** Attendance percentage */
   percentage: number;
 }
 ```
 
 ### WAI-ARIA Pattern
-
-- **Pattern:** [Meter](https://www.w3.org/WAI/ARIA/apg/patterns/meter/)
-- **Attributes:** `role="meter"`, `aria-valuenow`, `aria-label="Attendance: [count] of [total]"`
-
-### Keyboard Interaction
-
-None (non-interactive display).
+- `role="meter"`, `aria-valuenow`, `aria-valuemin="0"`, `aria-valuemax="100"`
+- `aria-label="Attendance: {attendeeCount} of {totalRegistered} checked in"`
 
 ### Render Contract
 
-- Large number: "[attendeeCount] / [totalRegistered]"
-- Progress bar (green fill)
-- Percentage text
-- Real-time update animation (count increment)
+```
+42 / 100 checked in (42%)
+[████████░░░░░░░░░░░░] ← progress bar
+```
 
-### Events
+### Implementation Status: ✅ Inline in attendance page (stats from repo)
 
-None.
+---
 
-### States
+## Component 9: CalendarDownloadButton
 
-- **Default:** Counter with progress bar
-- **Zero:** "0 / [total] checked in"
-- **Complete:** Green highlight "All checked in!"
-- **Updating:** Brief pulse animation on count change
+### TypeScript Props Interface
+
+```typescript
+interface CalendarDownloadButtonProps {
+  event: {
+    title: string;
+    description?: string;
+    location?: string;
+    startDate: string | Date;
+    endDate: string | Date;
+  };
+  variant?: "default" | "outline";
+  size?: "sm" | "md" | "lg";
+}
+```
+
+### Render Contract
+- Button: CalendarPlus icon + "Add to Calendar"
+- Click: generates .ics file client-side, triggers browser download
+
+### Implementation Status: ✅ Implemented at `features/events/utils/generate-ics.ts`, inline button in EventDetail
+
+---
+
+## Component 10: EventRegistrationCard (My Events)
+
+### TypeScript Props Interface
+
+```typescript
+interface EventRegistrationCardProps {
+  item: {
+    registration: {
+      id: string;
+      status: string;
+      checkedIn?: boolean;
+    };
+    event: {
+      id: string;
+      title: string;
+      startDate: string;
+      location?: string | null;
+      organizationId: string;
+      orgSlug?: string;
+      creditBearing?: boolean;
+      creditAmount?: number | null;
+    };
+  };
+}
+```
+
+### Render Contract
+
+```
+┌─────────────────────────────────┐
+│ [Confirmed] [4 CPD pending]  →  │ ← status + CPD + countdown
+│ Event Title (h4)                │
+│ 📅 Sat, Jun 15 09:00           │
+│ 🏢 Manila Hotel                │
+├─────────────────────────────────┤
+│ You're registered    [Cancel]   │ ← action row (upcoming only)
+│ --- or ---                      │
+│ Attended / Did not attend       │ ← result row (past only)
+└─────────────────────────────────┘
+```
+
+### Implementation Status: ✅ Inline in `/my/events` route
+
+---
+
+## Component Inventory — Implementation Status
+
+| # | Component | Status | File |
+|---|-----------|--------|------|
+| 1 | EventStatusBadge | ✅ Inline | `event-card.tsx` |
+| 2 | PriceBadge | ✅ Inline | `event-card.tsx`, `$eventId.tsx` |
+| 3 | CpdBadge | ✅ Inline | `event-card.tsx`, `$eventId.tsx`, `events.tsx` |
+| 4 | EventCard | ✅ Component | `event-card.tsx` |
+| 5 | PublicEventCard | ✅ Inline | `discover/events.tsx` |
+| 6 | QRScannerView | ❌ Not built | — |
+| 7 | RegistrationStatusBadge | ✅ Inline | `my/events.tsx` |
+| 8 | AttendanceCounter | ✅ Inline | attendance page |
+| 9 | CalendarDownloadButton | ✅ Inline | `$eventId.tsx` |
+| 10 | EventRegistrationCard | ✅ Inline | `my/events.tsx` |

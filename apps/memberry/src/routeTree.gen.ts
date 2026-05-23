@@ -18,6 +18,7 @@ import { Route as VerifyTokenRouteImport } from './routes/verify/$token'
 import { Route as PayTokenRouteImport } from './routes/pay/$token'
 import { Route as OrgSlugRouteImport } from './routes/org/$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite/$token'
+import { Route as EventsEventSlugRouteImport } from './routes/events/$eventSlug'
 import { Route as DiscoverEventsRouteImport } from './routes/discover/events'
 import { Route as AuthAuthViewRouteImport } from './routes/auth/$authView'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -42,6 +43,7 @@ import { Route as AuthenticatedOrgOrgSlugOfficerRouteImport } from './routes/_au
 import { Route as AuthenticatedOrgOrgSlugMembersRouteImport } from './routes/_authenticated/org/$orgSlug/members'
 import { Route as AuthenticatedOrgOrgSlugHomeRouteImport } from './routes/_authenticated/org/$orgSlug/home'
 import { Route as AuthenticatedOrgOrgSlugDuesRouteImport } from './routes/_authenticated/org/$orgSlug/dues'
+import { Route as AuthenticatedOrgOrgSlugDirectoryRouteImport } from './routes/_authenticated/org/$orgSlug/directory'
 import { Route as AuthenticatedMyCreditsLogRouteImport } from './routes/_authenticated/my/credits/log'
 import { Route as AuthenticatedMyCertificatesCertificateIdRouteImport } from './routes/_authenticated/my/certificates/$certificateId'
 import { Route as AuthenticatedMyBookingsBookingIdRouteImport } from './routes/_authenticated/my/bookings/$bookingId'
@@ -56,6 +58,7 @@ import { Route as AuthenticatedOrgOrgSlugOfficerDashboardRouteImport } from './r
 import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications'
 import { Route as AuthenticatedOrgOrgSlugOfficerApplicationsRouteImport } from './routes/_authenticated/org/$orgSlug/officer/applications'
 import { Route as AuthenticatedOrgOrgSlugEventsEventIdRouteImport } from './routes/_authenticated/org/$orgSlug/events/$eventId'
+import { Route as AuthenticatedOrgOrgSlugDirectoryPersonIdRouteImport } from './routes/_authenticated/org/$orgSlug/directory/$personId'
 import { Route as AuthenticatedMyBookingsHostPersonIdRouteImport } from './routes/_authenticated/my/bookings/host.$personId'
 import { Route as AuthenticatedOrgOrgSlugOfficerTrainingIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/training/index'
 import { Route as AuthenticatedOrgOrgSlugOfficerRosterIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/roster/index'
@@ -133,6 +136,11 @@ const OrgSlugRoute = OrgSlugRouteImport.update({
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsEventSlugRoute = EventsEventSlugRouteImport.update({
+  id: '/events/$eventSlug',
+  path: '/events/$eventSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiscoverEventsRoute = DiscoverEventsRouteImport.update({
@@ -268,6 +276,12 @@ const AuthenticatedOrgOrgSlugDuesRoute =
     path: '/dues',
     getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
+const AuthenticatedOrgOrgSlugDirectoryRoute =
+  AuthenticatedOrgOrgSlugDirectoryRouteImport.update({
+    id: '/directory',
+    path: '/directory',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
+  } as any)
 const AuthenticatedMyCreditsLogRoute =
   AuthenticatedMyCreditsLogRouteImport.update({
     id: '/my/credits/log',
@@ -351,6 +365,12 @@ const AuthenticatedOrgOrgSlugEventsEventIdRoute =
     id: '/events/$eventId',
     path: '/events/$eventId',
     getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugDirectoryPersonIdRoute =
+  AuthenticatedOrgOrgSlugDirectoryPersonIdRouteImport.update({
+    id: '/$personId',
+    path: '/$personId',
+    getParentRoute: () => AuthenticatedOrgOrgSlugDirectoryRoute,
   } as any)
 const AuthenticatedMyBookingsHostPersonIdRoute =
   AuthenticatedMyBookingsHostPersonIdRouteImport.update({
@@ -566,6 +586,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/auth/$authView': typeof AuthAuthViewRoute
   '/discover/events': typeof DiscoverEventsRoute
+  '/events/$eventSlug': typeof EventsEventSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
@@ -587,6 +608,7 @@ export interface FileRoutesByFullPath {
   '/my/bookings/$bookingId': typeof AuthenticatedMyBookingsBookingIdRoute
   '/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/org/$orgSlug/directory': typeof AuthenticatedOrgOrgSlugDirectoryRouteWithChildren
   '/org/$orgSlug/dues': typeof AuthenticatedOrgOrgSlugDuesRoute
   '/org/$orgSlug/home': typeof AuthenticatedOrgOrgSlugHomeRoute
   '/org/$orgSlug/members': typeof AuthenticatedOrgOrgSlugMembersRoute
@@ -595,6 +617,7 @@ export interface FileRoutesByFullPath {
   '/my/certificates': typeof AuthenticatedMyCertificatesIndexRoute
   '/my/credits': typeof AuthenticatedMyCreditsIndexRoute
   '/my/bookings/host/$personId': typeof AuthenticatedMyBookingsHostPersonIdRouteWithChildren
+  '/org/$orgSlug/directory/$personId': typeof AuthenticatedOrgOrgSlugDirectoryPersonIdRoute
   '/org/$orgSlug/events/$eventId': typeof AuthenticatedOrgOrgSlugEventsEventIdRoute
   '/org/$orgSlug/officer/applications': typeof AuthenticatedOrgOrgSlugOfficerApplicationsRoute
   '/org/$orgSlug/officer/communications': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRouteWithChildren
@@ -648,6 +671,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/auth/$authView': typeof AuthAuthViewRoute
   '/discover/events': typeof DiscoverEventsRoute
+  '/events/$eventSlug': typeof EventsEventSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
@@ -669,6 +693,7 @@ export interface FileRoutesByTo {
   '/my/bookings/$bookingId': typeof AuthenticatedMyBookingsBookingIdRoute
   '/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/org/$orgSlug/directory': typeof AuthenticatedOrgOrgSlugDirectoryRouteWithChildren
   '/org/$orgSlug/dues': typeof AuthenticatedOrgOrgSlugDuesRoute
   '/org/$orgSlug/home': typeof AuthenticatedOrgOrgSlugHomeRoute
   '/org/$orgSlug/members': typeof AuthenticatedOrgOrgSlugMembersRoute
@@ -677,6 +702,7 @@ export interface FileRoutesByTo {
   '/my/certificates': typeof AuthenticatedMyCertificatesIndexRoute
   '/my/credits': typeof AuthenticatedMyCreditsIndexRoute
   '/my/bookings/host/$personId': typeof AuthenticatedMyBookingsHostPersonIdRouteWithChildren
+  '/org/$orgSlug/directory/$personId': typeof AuthenticatedOrgOrgSlugDirectoryPersonIdRoute
   '/org/$orgSlug/events/$eventId': typeof AuthenticatedOrgOrgSlugEventsEventIdRoute
   '/org/$orgSlug/officer/applications': typeof AuthenticatedOrgOrgSlugOfficerApplicationsRoute
   '/org/$orgSlug/officer/dashboard': typeof AuthenticatedOrgOrgSlugOfficerDashboardRoute
@@ -729,6 +755,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/auth/$authView': typeof AuthAuthViewRoute
   '/discover/events': typeof DiscoverEventsRoute
+  '/events/$eventSlug': typeof EventsEventSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
@@ -750,6 +777,7 @@ export interface FileRoutesById {
   '/_authenticated/my/bookings/$bookingId': typeof AuthenticatedMyBookingsBookingIdRoute
   '/_authenticated/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/_authenticated/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
+  '/_authenticated/org/$orgSlug/directory': typeof AuthenticatedOrgOrgSlugDirectoryRouteWithChildren
   '/_authenticated/org/$orgSlug/dues': typeof AuthenticatedOrgOrgSlugDuesRoute
   '/_authenticated/org/$orgSlug/home': typeof AuthenticatedOrgOrgSlugHomeRoute
   '/_authenticated/org/$orgSlug/members': typeof AuthenticatedOrgOrgSlugMembersRoute
@@ -758,6 +786,7 @@ export interface FileRoutesById {
   '/_authenticated/my/certificates/': typeof AuthenticatedMyCertificatesIndexRoute
   '/_authenticated/my/credits/': typeof AuthenticatedMyCreditsIndexRoute
   '/_authenticated/my/bookings/host/$personId': typeof AuthenticatedMyBookingsHostPersonIdRouteWithChildren
+  '/_authenticated/org/$orgSlug/directory/$personId': typeof AuthenticatedOrgOrgSlugDirectoryPersonIdRoute
   '/_authenticated/org/$orgSlug/events/$eventId': typeof AuthenticatedOrgOrgSlugEventsEventIdRoute
   '/_authenticated/org/$orgSlug/officer/applications': typeof AuthenticatedOrgOrgSlugOfficerApplicationsRoute
   '/_authenticated/org/$orgSlug/officer/communications': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRouteWithChildren
@@ -813,6 +842,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/auth/$authView'
     | '/discover/events'
+    | '/events/$eventSlug'
     | '/invite/$token'
     | '/org/$slug'
     | '/pay/$token'
@@ -834,6 +864,7 @@ export interface FileRouteTypes {
     | '/my/bookings/$bookingId'
     | '/my/certificates/$certificateId'
     | '/my/credits/log'
+    | '/org/$orgSlug/directory'
     | '/org/$orgSlug/dues'
     | '/org/$orgSlug/home'
     | '/org/$orgSlug/members'
@@ -842,6 +873,7 @@ export interface FileRouteTypes {
     | '/my/certificates'
     | '/my/credits'
     | '/my/bookings/host/$personId'
+    | '/org/$orgSlug/directory/$personId'
     | '/org/$orgSlug/events/$eventId'
     | '/org/$orgSlug/officer/applications'
     | '/org/$orgSlug/officer/communications'
@@ -895,6 +927,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/auth/$authView'
     | '/discover/events'
+    | '/events/$eventSlug'
     | '/invite/$token'
     | '/org/$slug'
     | '/pay/$token'
@@ -916,6 +949,7 @@ export interface FileRouteTypes {
     | '/my/bookings/$bookingId'
     | '/my/certificates/$certificateId'
     | '/my/credits/log'
+    | '/org/$orgSlug/directory'
     | '/org/$orgSlug/dues'
     | '/org/$orgSlug/home'
     | '/org/$orgSlug/members'
@@ -924,6 +958,7 @@ export interface FileRouteTypes {
     | '/my/certificates'
     | '/my/credits'
     | '/my/bookings/host/$personId'
+    | '/org/$orgSlug/directory/$personId'
     | '/org/$orgSlug/events/$eventId'
     | '/org/$orgSlug/officer/applications'
     | '/org/$orgSlug/officer/dashboard'
@@ -975,6 +1010,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/auth/$authView'
     | '/discover/events'
+    | '/events/$eventSlug'
     | '/invite/$token'
     | '/org/$slug'
     | '/pay/$token'
@@ -996,6 +1032,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my/bookings/$bookingId'
     | '/_authenticated/my/certificates/$certificateId'
     | '/_authenticated/my/credits/log'
+    | '/_authenticated/org/$orgSlug/directory'
     | '/_authenticated/org/$orgSlug/dues'
     | '/_authenticated/org/$orgSlug/home'
     | '/_authenticated/org/$orgSlug/members'
@@ -1004,6 +1041,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my/certificates/'
     | '/_authenticated/my/credits/'
     | '/_authenticated/my/bookings/host/$personId'
+    | '/_authenticated/org/$orgSlug/directory/$personId'
     | '/_authenticated/org/$orgSlug/events/$eventId'
     | '/_authenticated/org/$orgSlug/officer/applications'
     | '/_authenticated/org/$orgSlug/officer/communications'
@@ -1058,6 +1096,7 @@ export interface RootRouteChildren {
   VerifyEmailRoute: typeof VerifyEmailRoute
   AuthAuthViewRoute: typeof AuthAuthViewRoute
   DiscoverEventsRoute: typeof DiscoverEventsRoute
+  EventsEventSlugRoute: typeof EventsEventSlugRoute
   InviteTokenRoute: typeof InviteTokenRoute
   OrgSlugRoute: typeof OrgSlugRoute
   PayTokenRoute: typeof PayTokenRoute
@@ -1127,6 +1166,13 @@ declare module '@tanstack/react-router' {
       path: '/invite/$token'
       fullPath: '/invite/$token'
       preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventSlug': {
+      id: '/events/$eventSlug'
+      path: '/events/$eventSlug'
+      fullPath: '/events/$eventSlug'
+      preLoaderRoute: typeof EventsEventSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discover/events': {
@@ -1297,6 +1343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgOrgSlugDuesRouteImport
       parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
+    '/_authenticated/org/$orgSlug/directory': {
+      id: '/_authenticated/org/$orgSlug/directory'
+      path: '/directory'
+      fullPath: '/org/$orgSlug/directory'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugDirectoryRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
+    }
     '/_authenticated/my/credits/log': {
       id: '/_authenticated/my/credits/log'
       path: '/my/credits/log'
@@ -1394,6 +1447,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/org/$orgSlug/events/$eventId'
       preLoaderRoute: typeof AuthenticatedOrgOrgSlugEventsEventIdRouteImport
       parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
+    }
+    '/_authenticated/org/$orgSlug/directory/$personId': {
+      id: '/_authenticated/org/$orgSlug/directory/$personId'
+      path: '/$personId'
+      fullPath: '/org/$orgSlug/directory/$personId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugDirectoryPersonIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugDirectoryRoute
     }
     '/_authenticated/my/bookings/host/$personId': {
       id: '/_authenticated/my/bookings/host/$personId'
@@ -1636,6 +1696,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedOrgOrgSlugDirectoryRouteChildren {
+  AuthenticatedOrgOrgSlugDirectoryPersonIdRoute: typeof AuthenticatedOrgOrgSlugDirectoryPersonIdRoute
+}
+
+const AuthenticatedOrgOrgSlugDirectoryRouteChildren: AuthenticatedOrgOrgSlugDirectoryRouteChildren =
+  {
+    AuthenticatedOrgOrgSlugDirectoryPersonIdRoute:
+      AuthenticatedOrgOrgSlugDirectoryPersonIdRoute,
+  }
+
+const AuthenticatedOrgOrgSlugDirectoryRouteWithChildren =
+  AuthenticatedOrgOrgSlugDirectoryRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugDirectoryRouteChildren,
+  )
+
 interface AuthenticatedOrgOrgSlugOfficerCommunicationsRouteChildren {
   AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute
   AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute
@@ -1829,6 +1904,7 @@ const AuthenticatedOrgOrgSlugOfficerRouteWithChildren =
   )
 
 interface AuthenticatedOrgOrgSlugRouteRouteChildren {
+  AuthenticatedOrgOrgSlugDirectoryRoute: typeof AuthenticatedOrgOrgSlugDirectoryRouteWithChildren
   AuthenticatedOrgOrgSlugDuesRoute: typeof AuthenticatedOrgOrgSlugDuesRoute
   AuthenticatedOrgOrgSlugHomeRoute: typeof AuthenticatedOrgOrgSlugHomeRoute
   AuthenticatedOrgOrgSlugMembersRoute: typeof AuthenticatedOrgOrgSlugMembersRoute
@@ -1844,6 +1920,8 @@ interface AuthenticatedOrgOrgSlugRouteRouteChildren {
 
 const AuthenticatedOrgOrgSlugRouteRouteChildren: AuthenticatedOrgOrgSlugRouteRouteChildren =
   {
+    AuthenticatedOrgOrgSlugDirectoryRoute:
+      AuthenticatedOrgOrgSlugDirectoryRouteWithChildren,
     AuthenticatedOrgOrgSlugDuesRoute: AuthenticatedOrgOrgSlugDuesRoute,
     AuthenticatedOrgOrgSlugHomeRoute: AuthenticatedOrgOrgSlugHomeRoute,
     AuthenticatedOrgOrgSlugMembersRoute: AuthenticatedOrgOrgSlugMembersRoute,
@@ -1950,6 +2028,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyEmailRoute: VerifyEmailRoute,
   AuthAuthViewRoute: AuthAuthViewRoute,
   DiscoverEventsRoute: DiscoverEventsRoute,
+  EventsEventSlugRoute: EventsEventSlugRoute,
   InviteTokenRoute: InviteTokenRoute,
   OrgSlugRoute: OrgSlugRoute,
   PayTokenRoute: PayTokenRoute,
