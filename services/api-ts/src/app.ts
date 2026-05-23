@@ -190,6 +190,20 @@ export function createApp(config: Config): App {
   // Register API routes
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // HAND-WIRED ROUTES (not in TypeSpec / generated OpenAPI router)
+  // Migrate these to TypeSpec to close the 8-route backlog.
+  //
+  // 1. GET  /email/unsubscribe                              — RFC 8058 public unsubscribe (middleware ordering)
+  // 2. POST /email/unsubscribe                              — RFC 8058 public unsubscribe (middleware ordering)
+  // 3. GET  /email/suppressions                             — Officer-only suppression list (middleware ordering)
+  // 4. POST /association/events/:eventId/complete           — Event lifecycle (not yet in TypeSpec)
+  // 5. GET  /accredited-providers/:organizationId           — PRC accredited providers (org-scoped training)
+  // 6. POST /accredited-providers/:organizationId           — PRC accredited providers (org-scoped training)
+  // 7. PATCH /accredited-providers/:organizationId/:providerId — PRC accredited providers (org-scoped training)
+  // 8. DELETE /accredited-providers/:organizationId/:providerId — PRC accredited providers (org-scoped training)
+  // ──────────────────────────────────────────────────────────────────────────
+
   // completeEvent — hand-wired (not yet in TypeSpec), follows cancelEvent pattern
   app.post('/association/events/:eventId/complete', authMiddleware(), completeEvent as any);
 

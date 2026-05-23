@@ -65,7 +65,7 @@ The API service has **25 handler directories** under `services/api-ts/src/handle
 9. **booking** — Time-based scheduling (19 handlers, TypeSpec)
 10. **events** — Event management (11 handlers, TypeSpec)
 11. **training** — CPD/CE credit tracking (10 handlers, hand-wired)
-12. **elections** — Voting and nominations (6 handlers, TypeSpec)
+12. **elections** — Voting and nominations (6 handlers, hand-wired)
 
 **Communications**:
 13. **communication** — Templates, queuing (28 handlers, TypeSpec)
