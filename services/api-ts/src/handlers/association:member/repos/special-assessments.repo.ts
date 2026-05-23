@@ -154,6 +154,36 @@ export class SpecialAssessmentRepository {
     };
   }
 
+  // ─── Invoice Generation ────────────────────────────────
+
+  async createInvoiceForTarget(data: {
+    personId: string;
+    organizationId: string;
+    totalAmount: number;
+    currency: string;
+    periodStart: string;
+    periodEnd: string;
+    invoiceNumber: string;
+    fundAllocations: Array<{ fundName: string; amount: number }>;
+    membershipId: string;
+  }) {
+    const [result] = await this.db
+      .insert(duesInvoices)
+      .values({
+        membershipId: data.membershipId,
+        personId: data.personId,
+        organizationId: data.organizationId,
+        invoiceNumber: data.invoiceNumber,
+        periodStart: data.periodStart,
+        periodEnd: data.periodEnd,
+        totalAmount: data.totalAmount,
+        fundAllocations: data.fundAllocations,
+        status: 'generated',
+      })
+      .returning();
+    return result;
+  }
+
   // ─── Active Members Query ─────────────────────────────
 
   async getActiveOrgMemberPersonIds(organizationId: string): Promise<string[]> {
