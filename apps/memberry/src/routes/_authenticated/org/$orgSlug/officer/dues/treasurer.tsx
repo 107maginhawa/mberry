@@ -68,7 +68,7 @@ function TreasurerDashboardPage() {
       </div>
 
       <Suspense fallback={<Skeleton className="h-64" />}>
-        <TopUnpaidList members={[]} />
+        <TopUnpaidList members={metrics?.topUnpaid ?? []} currency="PHP" />
       </Suspense>
     </div>
   )

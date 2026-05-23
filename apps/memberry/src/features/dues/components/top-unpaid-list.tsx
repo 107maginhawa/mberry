@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Card, CardContent, CardHeader, CardTitle } from '@monobase/ui'
+import { Button } from '@monobase/ui'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@monobase/ui'
 import { formatCents } from '../lib/money'
 
 interface UnpaidMember {

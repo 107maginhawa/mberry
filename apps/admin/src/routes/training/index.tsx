@@ -1,0 +1,160 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { GraduationCap, Search } from 'lucide-react'
+import { useState } from 'react'
+import {
+  Input,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@monobase/ui'
+import { RequireRole } from '@/lib/role-gate'
+import { searchCoursesOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+
+export const Route = createFileRoute('/training/')({
+  component: () => (
+    <RequireRole allowed={['super', 'support', 'analyst']}>
+      <TrainingPage />
+    </RequireRole>
+  ),
+})
+
+interface CourseItem {
+  id: string
+  title: string
+  organizationId?: string
+  organizationName?: string
+  status?: string
+  enrollmentCount?: number
+  completionCount?: number
+  credits?: number
+  startDate?: string
+  endDate?: string
+  provider?: string
+}
+
+function TrainingPage() {
+  const [search, setSearch] = useState('')
+
+  const { data, isLoading, error } = useQuery(
+    searchCoursesOptions({
+      query: {
+        ...(search.length >= 2 ? { q: search } : {}),
+        limit: 50,
+      },
+    })
+  )
+
+  const courses = (data?.data ?? []) as unknown as CourseItem[]
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center gap-3 mb-8">
+        <GraduationCap className="w-6 h-6 text-muted-foreground" />
+        <div>
+          <h1 className="text-h1 text-foreground">Training &amp; Courses</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Cross-org training and course overview
+          </p>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search courses..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
+          {error instanceof Error ? error.message : 'Failed to load courses'}
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="rounded-lg border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-4 text-sm">Course</TableHead>
+              <TableHead className="p-4 text-sm">Organization</TableHead>
+              <TableHead className="p-4 text-sm">Provider</TableHead>
+              <TableHead className="p-4 text-sm">Status</TableHead>
+              <TableHead className="p-4 text-sm text-right">Enrolled</TableHead>
+              <TableHead className="p-4 text-sm text-right">Credits</TableHead>
+              <TableHead className="p-4 text-sm">Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="p-8 text-center text-muted-foreground animate-pulse">
+                  Loading courses...
+                </TableCell>
+              </TableRow>
+            ) : courses.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="p-8 text-center text-muted-foreground">
+                  <GraduationCap className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                  <p>No courses found{search ? ` matching "${search}"` : ''}</p>
+                  {search && <p className="text-xs mt-1">Try a different search term</p>}
+                </TableCell>
+              </TableRow>
+            ) : (
+              courses.map((course) => (
+                <TableRow key={course.id}>
+                  <TableCell className="p-4 text-sm font-medium">{course.title}</TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">
+                    {course.organizationName ?? '--'}
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">
+                    {course.provider ?? '--'}
+                  </TableCell>
+                  <TableCell className="p-4 text-sm">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                        course.status === 'active'
+                          ? 'bg-green-100 text-green-700'
+                          : course.status === 'completed'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {course.status ?? 'unknown'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-right">
+                    {course.enrollmentCount ?? 0}
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-right">
+                    {course.credits ?? '--'}
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">
+                    {course.startDate
+                      ? new Date(course.startDate).toLocaleDateString('en-PH', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                      : '--'}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}

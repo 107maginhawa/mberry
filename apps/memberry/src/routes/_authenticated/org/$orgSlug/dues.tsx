@@ -69,9 +69,7 @@ function MemberDuesPage() {
   const { data: agingBucketsData } = useQuery({
     queryKey: ['aging-buckets-for-org', orgId],
     queryFn: async () => {
-      const res = await api.get<any>(`/api/association/member/aging-buckets?organizationId=${orgId}`)
-      const buckets = res?.data ?? []
-      return buckets[0] ?? null
+      return api.get<any>(`/api/association/member/aging-buckets/${orgId}`)
     },
     retry: false,
   })

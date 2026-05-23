@@ -19,6 +19,7 @@ import {
   IdCard,
   ArrowLeft,
   Vote,
+  FileSpreadsheet,
 } from "lucide-react"
 
 interface NavSection {
@@ -62,6 +63,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
         { to: `${base}/settings/dues`, label: "Dues Config", icon: Settings },
         { to: `${base}/payments`, label: "Payment Records", icon: CreditCard },
         { to: `${base}/settings/funds`, label: "Fund Allocation", icon: PieChart },
+        { to: `${base}/dues/assessments`, label: "Assessments", icon: FileSpreadsheet },
         { to: `${base}/reports/financial`, label: "Reports", icon: BarChart3 },
       ],
     },

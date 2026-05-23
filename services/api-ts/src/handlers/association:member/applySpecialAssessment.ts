@@ -79,7 +79,7 @@ export async function applySpecialAssessment(
       membershipId: personId, // use personId as fallback membershipId
     });
 
-    await repo.markTargetWithInvoice(assessment.id, personId, invoice.id);
+    await repo.markTargetWithInvoice(assessment.id, personId, invoice!.id);
     invoicesCreated.push(invoice);
     counter++;
   }

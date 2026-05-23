@@ -8,12 +8,13 @@ import type { Logger } from '@/types/logger';
 import type { DatabaseInstance } from '@/core/database';
 import {
   messageTemplates, messages, subscriptionTopics, personSubscriptions,
-  announcements, announcementStats,
+  announcements, announcementStats, savedSegments,
   type NewMessageTemplate, type MessageTemplate,
   type NewMessage, type Message,
   type NewSubscriptionTopic, type SubscriptionTopic,
   type NewPersonSubscription, type PersonSubscription,
   type Announcement, type NewAnnouncement, type AnnouncementStats,
+  type SavedSegment, type NewSavedSegment,
 } from './communication.schema';
 
 export class MessageTemplateRepository {
@@ -279,5 +280,29 @@ export class CommunicationsRepository {
       totalRecipients: sql<number>`COALESCE(SUM(CASE WHEN ${announcements.status} = 'sent' THEN 1 ELSE 0 END), 0)::int`,
     }).from(announcements).where(eq(announcements.organizationId, orgId));
     return stats;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Saved Segments
+// ---------------------------------------------------------------------------
+
+export class SavedSegmentRepository {
+  constructor(private db: DatabaseInstance) {}
+
+  async create(data: NewSavedSegment): Promise<SavedSegment> {
+    const [row] = await this.db.insert(savedSegments).values(data).returning();
+    return row!;
+  }
+
+  async list(organizationId: string): Promise<SavedSegment[]> {
+    return this.db.select().from(savedSegments)
+      .where(eq(savedSegments.organizationId, organizationId))
+      .orderBy(desc(savedSegments.createdAt));
+  }
+
+  async delete(id: string, organizationId: string): Promise<void> {
+    await this.db.delete(savedSegments)
+      .where(and(eq(savedSegments.id, id), eq(savedSegments.organizationId, organizationId)));
   }
 }

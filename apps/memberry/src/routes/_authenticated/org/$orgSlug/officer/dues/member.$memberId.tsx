@@ -17,7 +17,7 @@ function MemberFinancialDetailPage() {
   const { data: summary, isLoading } = useQuery({
     queryKey: ['dues-member-summary', orgId, memberId],
     queryFn: () =>
-      api.get(`/association/member/dues-member-summary/${orgId}/${memberId}`).then(r => r.data),
+      api.get(`/association/member/dues-member-summary/${orgId}/${memberId}`).then((r: any) => r.data),
     enabled: !!orgId && !!memberId,
   })
 

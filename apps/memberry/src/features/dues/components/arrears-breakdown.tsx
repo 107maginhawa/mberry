@@ -95,7 +95,7 @@ export function ArrearsBreakdown({ invoices, currency = 'PHP', agingBuckets }: A
           <h3 className="text-[14px] font-semibold">{year}</h3>
           <GlassCard className="p-1">
             <div className="space-y-1">
-              {grouped[year].map((inv) => {
+              {grouped[year]?.map((inv) => {
                 const daysOverdue = getDaysOverdue(inv.dueDate)
                 return (
                   <div

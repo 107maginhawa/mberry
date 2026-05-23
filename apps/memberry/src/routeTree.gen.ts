@@ -102,6 +102,7 @@ import { Route as AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteImport } from 
 import { Route as AuthenticatedOrgOrgSlugOfficerElectionsNewRouteImport } from './routes/_authenticated/org/$orgSlug/officer/elections/new'
 import { Route as AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/elections/$electionId'
 import { Route as AuthenticatedOrgOrgSlugOfficerDuesTreasurerRouteImport } from './routes/_authenticated/org/$orgSlug/officer/dues/treasurer'
+import { Route as AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRouteImport } from './routes/_authenticated/org/$orgSlug/officer/dues/assessments'
 import { Route as AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/documents/$documentId'
 import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsSentRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications/sent'
 import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsNewRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications/new'
@@ -651,6 +652,12 @@ const AuthenticatedOrgOrgSlugOfficerDuesTreasurerRoute =
     path: '/dues/treasurer',
     getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
+const AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRoute =
+  AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRouteImport.update({
+    id: '/dues/assessments',
+    path: '/dues/assessments',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
 const AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRoute =
   AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRouteImport.update({
     id: '/documents/$documentId',
@@ -799,6 +806,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgSlug/officer/communications/new': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute
   '/org/$orgSlug/officer/communications/sent': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsSentRoute
   '/org/$orgSlug/officer/documents/$documentId': typeof AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRoute
+  '/org/$orgSlug/officer/dues/assessments': typeof AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRoute
   '/org/$orgSlug/officer/dues/treasurer': typeof AuthenticatedOrgOrgSlugOfficerDuesTreasurerRoute
   '/org/$orgSlug/officer/elections/$electionId': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren
   '/org/$orgSlug/officer/elections/new': typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRoute
@@ -903,6 +911,7 @@ export interface FileRoutesByTo {
   '/org/$orgSlug/officer/communications/new': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute
   '/org/$orgSlug/officer/communications/sent': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsSentRoute
   '/org/$orgSlug/officer/documents/$documentId': typeof AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRoute
+  '/org/$orgSlug/officer/dues/assessments': typeof AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRoute
   '/org/$orgSlug/officer/dues/treasurer': typeof AuthenticatedOrgOrgSlugOfficerDuesTreasurerRoute
   '/org/$orgSlug/officer/elections/$electionId': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren
   '/org/$orgSlug/officer/elections/new': typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRoute
@@ -1012,6 +1021,7 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgSlug/officer/communications/new': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute
   '/_authenticated/org/$orgSlug/officer/communications/sent': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsSentRoute
   '/_authenticated/org/$orgSlug/officer/documents/$documentId': typeof AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRoute
+  '/_authenticated/org/$orgSlug/officer/dues/assessments': typeof AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRoute
   '/_authenticated/org/$orgSlug/officer/dues/treasurer': typeof AuthenticatedOrgOrgSlugOfficerDuesTreasurerRoute
   '/_authenticated/org/$orgSlug/officer/elections/$electionId': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren
   '/_authenticated/org/$orgSlug/officer/elections/new': typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRoute
@@ -1121,6 +1131,7 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/officer/communications/new'
     | '/org/$orgSlug/officer/communications/sent'
     | '/org/$orgSlug/officer/documents/$documentId'
+    | '/org/$orgSlug/officer/dues/assessments'
     | '/org/$orgSlug/officer/dues/treasurer'
     | '/org/$orgSlug/officer/elections/$electionId'
     | '/org/$orgSlug/officer/elections/new'
@@ -1225,6 +1236,7 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/officer/communications/new'
     | '/org/$orgSlug/officer/communications/sent'
     | '/org/$orgSlug/officer/documents/$documentId'
+    | '/org/$orgSlug/officer/dues/assessments'
     | '/org/$orgSlug/officer/dues/treasurer'
     | '/org/$orgSlug/officer/elections/$electionId'
     | '/org/$orgSlug/officer/elections/new'
@@ -1333,6 +1345,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/$orgSlug/officer/communications/new'
     | '/_authenticated/org/$orgSlug/officer/communications/sent'
     | '/_authenticated/org/$orgSlug/officer/documents/$documentId'
+    | '/_authenticated/org/$orgSlug/officer/dues/assessments'
     | '/_authenticated/org/$orgSlug/officer/dues/treasurer'
     | '/_authenticated/org/$orgSlug/officer/elections/$electionId'
     | '/_authenticated/org/$orgSlug/officer/elections/new'
@@ -2042,6 +2055,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerDuesTreasurerRouteImport
       parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
+    '/_authenticated/org/$orgSlug/officer/dues/assessments': {
+      id: '/_authenticated/org/$orgSlug/officer/dues/assessments'
+      path: '/dues/assessments'
+      fullPath: '/org/$orgSlug/officer/dues/assessments'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
     '/_authenticated/org/$orgSlug/officer/documents/$documentId': {
       id: '/_authenticated/org/$orgSlug/officer/documents/$documentId'
       path: '/documents/$documentId'
@@ -2281,6 +2301,7 @@ interface AuthenticatedOrgOrgSlugOfficerRouteChildren {
   AuthenticatedOrgOrgSlugOfficerPaymentsRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsRouteWithChildren
   AuthenticatedOrgOrgSlugOfficerRosterRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterRouteWithChildren
   AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRoute: typeof AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRoute
+  AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRoute: typeof AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRoute
   AuthenticatedOrgOrgSlugOfficerDuesTreasurerRoute: typeof AuthenticatedOrgOrgSlugOfficerDuesTreasurerRoute
   AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren
   AuthenticatedOrgOrgSlugOfficerElectionsNewRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRoute
@@ -2328,6 +2349,8 @@ const AuthenticatedOrgOrgSlugOfficerRouteChildren: AuthenticatedOrgOrgSlugOffice
       AuthenticatedOrgOrgSlugOfficerRosterRouteWithChildren,
     AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRoute:
       AuthenticatedOrgOrgSlugOfficerDocumentsDocumentIdRoute,
+    AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRoute:
+      AuthenticatedOrgOrgSlugOfficerDuesAssessmentsRoute,
     AuthenticatedOrgOrgSlugOfficerDuesTreasurerRoute:
       AuthenticatedOrgOrgSlugOfficerDuesTreasurerRoute,
     AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRoute:

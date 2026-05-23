@@ -1,7 +1,8 @@
-import { eq, and, desc, sql, gte, lte, count, type SQL } from 'drizzle-orm';
+import { eq, and, desc, sql, gte, lte, count, ne, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { memberships } from './membership.schema';
 import { duesInvoices } from './dues.schema';
+import { persons } from '../../person/repos/person.schema';
 
 /** Valid dues payment status transitions — used by handlers for guard logic. */
 export const VALID_PAYMENT_TRANSITIONS: Record<string, string[]> = {
@@ -279,7 +280,10 @@ export class DuesRepository {
     // Member status distribution from invoice statuses
     const statusDistribution = await this.computeStatusDistribution(organizationId);
 
-    return { trailingRates, monthlyBreakdown, statusDistribution };
+    // Top unpaid members (up to 10)
+    const topUnpaid = await this.computeTopUnpaid(organizationId, 10);
+
+    return { trailingRates, monthlyBreakdown, statusDistribution, topUnpaid };
   }
 
   private async computeTrailingRates(organizationId: string, windows: number[]) {
@@ -498,6 +502,32 @@ export class DuesRepository {
       .from(duesPayments)
       .where(and(...conditions))
       .orderBy(duesPayments.createdAt);
+  }
+
+  // ─── Top Unpaid ───────────────────────────────────────
+
+  private async computeTopUnpaid(organizationId: string, limit: number) {
+    const rows = await this.db
+      .select({
+        personId: duesInvoices.membershipId,
+        name: sql<string>`COALESCE(${persons.firstName} || ' ' || ${persons.lastName}, 'Unknown')`,
+        outstanding: sql<number>`COALESCE(SUM(${duesInvoices.totalAmount}), 0)::int`,
+        invoiceCount: sql<number>`COUNT(*)::int`,
+      })
+      .from(duesInvoices)
+      .leftJoin(persons, eq(duesInvoices.membershipId, persons.id))
+      .where(
+        and(
+          eq(duesInvoices.organizationId, organizationId),
+          ne(duesInvoices.status, 'paid'),
+          ne(duesInvoices.status, 'cancelled'),
+        ),
+      )
+      .groupBy(duesInvoices.membershipId, persons.firstName, persons.lastName)
+      .orderBy(sql`SUM(${duesInvoices.totalAmount}) DESC`)
+      .limit(limit);
+
+    return rows;
   }
 
   // ─── Gateway ──────────────────────────────────────────

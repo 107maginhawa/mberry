@@ -95,4 +95,37 @@ describe('getMyMemberships', () => {
     expect(body.data[0].orgId).toBe('uuid-123');
     expect(body.data[0].organizationId).toBe('uuid-123');
   });
+
+  test('does not expose PII-adjacent fields (createdBy, updatedBy, note, removalReason)', async () => {
+    const mockDb = {
+      select: () => ({
+        from: () => ({
+          leftJoin: () => ({
+            where: async () => [
+              {
+                id: 'mem-3',
+                organizationId: 'org-1',
+                personId: 'user-1',
+                orgName: 'Test Org',
+                orgSlug: 'test-org',
+                status: 'active',
+              },
+            ],
+          }),
+        }),
+      }),
+    };
+    const ctx = makeCtx({ database: mockDb });
+    const res = await getMyMemberships(ctx);
+    const body = (res as any).body;
+    const item = body.data[0];
+    expect(item).not.toHaveProperty('createdBy');
+    expect(item).not.toHaveProperty('updatedBy');
+    expect(item).not.toHaveProperty('note');
+    expect(item).not.toHaveProperty('removalReason');
+    expect(item).not.toHaveProperty('removedAt');
+    expect(item).not.toHaveProperty('version');
+    expect(item).not.toHaveProperty('createdAt');
+    expect(item).not.toHaveProperty('updatedAt');
+  });
 });

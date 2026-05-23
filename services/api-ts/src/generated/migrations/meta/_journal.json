@@ -337,6 +337,20 @@
       "when": 1780156800000,
       "tag": "0047_wave2b_certificate_extension",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1780243200000,
+      "tag": "0048_wave4b_saved_segments",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1780329600000,
+      "tag": "0049_special_assessments",
+      "breakpoints": true
     }
   ]
 }
