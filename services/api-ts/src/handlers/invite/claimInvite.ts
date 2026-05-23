@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { ConflictError, NotFoundError, ValidationError, BusinessLogicError } from '@/core/errors';
 import { InviteRepository } from './repos/invite.repo';
 import { MembershipRepository } from '../membership/repos/membership.repo';
+import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { hashToken, isExpired } from './utils/token';
 import { auditAction } from '@/utils/audit';
 
@@ -98,9 +99,20 @@ export async function claimInvite(
     description: `Membership created for user ${user.id} in org ${invite.organizationId} via invite claim`,
   });
 
+  // Look up org slug for frontend redirect (non-critical — don't fail claim if lookup fails)
+  let organizationSlug: string | null = null;
+  try {
+    const orgRepo = new OrganizationRepository(db, logger);
+    const org = await orgRepo.findById(invite.organizationId);
+    organizationSlug = org?.slug ?? null;
+  } catch {
+    // Slug lookup is best-effort; frontend falls back to /my/organizations
+  }
+
   return ctx.json({
     claimed: true,
     organizationId: invite.organizationId,
+    organizationSlug,
     metadata: invite.metadata,
     membershipStatus: 'joined',
     membershipId: membership.id,

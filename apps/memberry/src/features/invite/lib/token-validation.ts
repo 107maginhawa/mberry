@@ -85,6 +85,7 @@ export async function validateInviteToken(token: string): Promise<
 export interface ClaimInviteResult {
   claimed: boolean;
   organizationId: string;
+  organizationSlug?: string | null;
   membershipStatus?: 'joined' | 'pendingApproval';
   membershipId?: string;
 }
