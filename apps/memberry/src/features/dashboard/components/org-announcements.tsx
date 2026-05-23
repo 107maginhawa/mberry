@@ -29,7 +29,7 @@ export function OrgAnnouncements({ announcements, orgNames, isError }: OrgAnnoun
       </div>
 
       {isError ? (
-        <p role="alert" aria-live="polite" className="text-sm text-red-600">Unable to load announcements</p>
+        <p role="alert" aria-live="polite" className="text-sm text-[var(--color-error)]">Unable to load announcements</p>
       ) : announcements.length === 0 ? (
         <EmptyState
           headline="No recent announcements"

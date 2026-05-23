@@ -15,8 +15,8 @@ export function MemberBottomNav() {
         <Link
           key={to}
           to={to}
-          className="flex flex-col items-center gap-[3px] text-[var(--color-muted)]"
-          activeProps={{ className: "flex flex-col items-center gap-[3px] text-[var(--color-primary)]" }}
+          className="flex flex-col items-center justify-center gap-[3px] min-w-[44px] min-h-[44px] text-[var(--color-muted)]"
+          activeProps={{ className: "flex flex-col items-center justify-center gap-[3px] min-w-[44px] min-h-[44px] text-[var(--color-primary)]" }}
         >
           <Icon size={22} />
           <span className="text-xs font-medium">{label}</span>

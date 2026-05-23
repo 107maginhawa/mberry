@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Button } from '@monobase/ui'
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@monobase/ui'
 import { Bell, ChevronDown } from 'lucide-react'
 import { api } from '@/lib/api'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
@@ -28,9 +28,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export function MemberHeader({ userName }: MemberHeaderProps) {
   const { orgs, activeOrgSlug } = useMyOrgs()
-  const [dropdownOpen, setDropdownOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
   const { data: notifCount = 0 } = useQuery({
@@ -41,26 +39,6 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
       return items.filter((n: any) => n.status !== 'read').length as number
     },
   })
-
-  // Close dropdown on outside click or Escape key
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false)
-      }
-    }
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setDropdownOpen(false)
-    }
-    if (dropdownOpen) {
-      document.addEventListener('mousedown', handleClick)
-      document.addEventListener('keydown', handleKeyDown)
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClick)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [dropdownOpen])
 
   const currentOrg = orgs.find((o) => o.orgSlug === activeOrgSlug) || orgs[0]
   const hasMultipleOrgs = orgs.length >= 2
@@ -86,7 +64,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
           <Button
             variant="ghost"
             onClick={() => setSheetOpen(true)}
-            className="md:hidden relative p-0"
+            className="md:hidden relative p-0 min-w-[44px] min-h-[44px]"
             aria-label="Switch organization"
           >
             <AvatarInitials
@@ -101,36 +79,31 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
           </Button>
         )}
 
-        {/* Desktop: org context pill / switcher (unchanged from original) */}
+        {/* Desktop: org context pill / switcher */}
         {currentOrg && (
-          <div className="relative hidden md:block" ref={dropdownRef}>
-            <Button
-              variant="ghost"
-              onClick={() => hasMultipleOrgs ? setDropdownOpen(!dropdownOpen) : navigate({ to: `/org/${currentOrg.orgSlug}/home` as '/' })}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] text-[var(--color-text)] hover:bg-[var(--color-surface-warm)]"
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${STATUS_DOT[currentOrg.status] || STATUS_DOT.active}`}
-              />
-              <span className="truncate max-w-[120px]">
-                {currentOrg.orgName || currentOrg.memberNumber || 'Org'}
-              </span>
-              {hasMultipleOrgs && <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />}
-            </Button>
-
-            {/* Desktop dropdown */}
-            {dropdownOpen && hasMultipleOrgs && (
-              <div className="absolute right-0 top-full mt-1 w-[var(--dropdown-width)] bg-[var(--color-surface)] border border-[var(--color-border-light)] rounded-[12px] shadow-lg overflow-hidden z-50">
-                <div className="py-1">
+          <div className="hidden md:block">
+            {hasMultipleOrgs ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] text-[var(--color-text)] hover:bg-[var(--color-surface-warm)]"
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${STATUS_DOT[currentOrg.status] || STATUS_DOT.active}`}
+                    />
+                    <span className="truncate max-w-[120px]">
+                      {currentOrg.orgName || currentOrg.memberNumber || 'Org'}
+                    </span>
+                    <ChevronDown size={12} className="transition-transform group-data-[state=open]:rotate-180" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[var(--dropdown-width)] rounded-[12px] p-0 overflow-hidden">
                   {orgs.map((org) => (
-                    <Button
+                    <DropdownMenuItem
                       key={org.organizationId}
-                      variant="ghost"
-                      onClick={() => {
-                        setDropdownOpen(false)
-                        navigate({ to: `/org/${org.orgSlug}/home` as '/' })
-                      }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left ${
+                      onSelect={() => navigate({ to: `/org/${org.orgSlug}/home` as '/' })}
+                      className={`flex items-center gap-3 px-4 py-3 cursor-pointer ${
                         org.orgSlug === activeOrgSlug ? 'bg-[var(--color-surface-warm)]' : ''
                       }`}
                     >
@@ -149,19 +122,30 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
                       {org.orgSlug === activeOrgSlug && (
                         <span className="text-[var(--color-primary)] text-xs font-semibold shrink-0">Current</span>
                       )}
-                    </Button>
+                    </DropdownMenuItem>
                   ))}
-                </div>
-                <div className="border-t border-[var(--color-border-light)]">
-                  <Link
-                    to={"/my/organizations" as "/"}
-                    onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-2.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] transition-colors"
+                  <DropdownMenuSeparator className="m-0" />
+                  <DropdownMenuItem
+                    onSelect={() => navigate({ to: '/my/organizations' as '/' })}
+                    className="px-4 py-2.5 text-xs font-medium text-[var(--color-primary)] cursor-pointer"
                   >
                     Join another organization
-                  </Link>
-                </div>
-              </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={() => navigate({ to: `/org/${currentOrg.orgSlug}/home` as '/' })}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] text-[var(--color-text)] hover:bg-[var(--color-surface-warm)]"
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${STATUS_DOT[currentOrg.status] || STATUS_DOT.active}`}
+                />
+                <span className="truncate max-w-[120px]">
+                  {currentOrg.orgName || currentOrg.memberNumber || 'Org'}
+                </span>
+              </Button>
             )}
           </div>
         )}
@@ -179,6 +163,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
         {/* Notification bell */}
         <Link
           to="/my/notifications"
+          aria-label="Notifications"
           className="relative p-1.5 rounded-full hover:bg-white/10 md:hover:bg-[var(--color-surface-warm)] transition-colors"
         >
           <Bell size={18} />

@@ -57,8 +57,8 @@ function VerifyEmailPage() {
 
         <Card>
           <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-2">
-              <Mail className="w-6 h-6 text-blue-600" />
+            <div className="mx-auto w-12 h-12 rounded-full bg-[var(--color-info-bg)] flex items-center justify-center mb-2">
+              <Mail className="w-6 h-6 text-[var(--color-info)]" />
             </div>
             <CardTitle className="text-2xl">Verify Your Email</CardTitle>
             <CardDescription>

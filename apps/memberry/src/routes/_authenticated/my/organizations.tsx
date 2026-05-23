@@ -140,7 +140,7 @@ function MyOrganizationsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setLeaveTarget({ membershipId: m.id, orgName: m.orgName ?? 'this organization', orgId: normalizeOrgId(m) })}
-                      className="hover:border-red-300 hover:text-red-600 hover:bg-red-50"
+                      className="hover:border-[var(--color-error)] hover:text-[var(--color-error)] hover:bg-[var(--color-error-bg)]"
                     >
                       Leave
                     </Button>

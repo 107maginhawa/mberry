@@ -17,7 +17,7 @@ export function MemberSidebar({ userEmail }: MemberSidebarProps) {
     <aside className="hidden md:flex w-[var(--sidebar-width)] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col shrink-0">
       {/* Logo */}
       <div className="px-4 py-3 border-b border-[var(--color-border-light)]">
-        <img src="/memberry-logo.png" alt="Memberry" className="h-10 w-auto" />
+        <img src="/memberry-logo.png" alt="Memberry" className="h-10 w-auto" width={120} height={40} />
       </div>
 
       {/* Navigation */}

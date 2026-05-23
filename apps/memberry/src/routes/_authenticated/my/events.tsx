@@ -21,12 +21,12 @@ export const Route = createFileRoute('/_authenticated/my/events')({
 })
 
 const REG_STATUS_STYLES: Record<string, { bg: string; label: string }> = {
-  confirmed: { bg: 'bg-emerald-100 text-emerald-800', label: 'Confirmed' },
-  waitlisted: { bg: 'bg-amber-100 text-amber-800', label: 'Waitlisted' },
-  cancelled: { bg: 'bg-red-100 text-red-800', label: 'Cancelled' },
-  pendingPayment: { bg: 'bg-orange-100 text-orange-800', label: 'Pending Payment' },
-  refunded: { bg: 'bg-gray-100 text-gray-600', label: 'Refunded' },
-  noShow: { bg: 'bg-gray-100 text-gray-600', label: 'No Show' },
+  confirmed: { bg: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', label: 'Confirmed' },
+  waitlisted: { bg: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', label: 'Waitlisted' },
+  cancelled: { bg: 'bg-[var(--color-error-bg)] text-[var(--color-error)]', label: 'Cancelled' },
+  pendingPayment: { bg: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', label: 'Pending Payment' },
+  refunded: { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: 'Refunded' },
+  noShow: { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: 'No Show' },
 }
 
 function formatEventDate(startDate: string) {
@@ -72,7 +72,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
     },
   })
 
-  const regStatus = REG_STATUS_STYLES[registration.status] ?? { bg: 'bg-gray-100 text-gray-600', label: registration.status }
+  const regStatus = REG_STATUS_STYLES[registration.status] ?? { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: registration.status }
   const canCancel = upcoming && registration.status !== 'cancelled' && registration.status !== 'refunded'
   const countdown = upcoming ? formatCountdown(event.startDate) : null
   const credits = event.cpdCredits ?? event.cpd_credits ?? event.credits ?? null
@@ -133,7 +133,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-xs text-red-600 border-red-200 hover:bg-red-50"
+            className="h-7 text-xs text-[var(--color-error)] border-[var(--color-error)] hover:bg-[var(--color-error-bg)]"
             disabled={cancelMutation.isPending}
             onClick={(e) => {
               e.preventDefault()

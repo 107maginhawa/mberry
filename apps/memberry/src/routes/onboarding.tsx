@@ -221,14 +221,14 @@ function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-2xl space-y-6">
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <h1 className="text-h1 text-[var(--color-primary)]">Memberry</h1>
           </div>
           <h2 className="text-h2 text-foreground">Welcome to Memberry</h2>
-          <p className="text-gray-600 mt-2">Let's set up your profile</p>
+          <p className="text-[var(--color-muted)] mt-2">Let's set up your profile</p>
         </div>
 
         <Progress value={(currentStep / totalSteps) * 100} className="h-2" />

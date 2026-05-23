@@ -27,7 +27,7 @@ export function CreditBreakdown({ totalCredits, requiredCredits, isError }: Cred
       </div>
 
       {isError ? (
-        <p role="alert" aria-live="polite" className="text-sm text-red-600">Unable to load credit data</p>
+        <p role="alert" aria-live="polite" className="text-sm text-[var(--color-error)]">Unable to load credit data</p>
       ) : totalCredits === 0 ? (
         <EmptyState
           headline="No credits yet"

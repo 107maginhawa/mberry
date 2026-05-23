@@ -18,7 +18,7 @@ const statusDot: Record<string, string> = {
   success: 'bg-[var(--color-success)]',
   warning: 'bg-[var(--color-warning)]',
   error: 'bg-[var(--color-error)]',
-  neutral: 'bg-gray-400',
+  neutral: 'bg-[var(--color-muted)]',
 }
 
 const statusDefaults: Record<string, string> = {
@@ -34,10 +34,10 @@ export function ActionWidget({ icon, label, value, subtitle, status, statusLabel
       <div role="alert" aria-live="polite" className="rounded-[12px] border border-red-200/60 bg-[var(--color-error-bg)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] p-4 flex flex-col justify-between min-h-[130px]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-red-400" aria-hidden="true">{icon}</span>
-            <p className="text-xs font-medium text-red-400 uppercase tracking-wide">{label}</p>
+            <span className="text-[var(--color-error)]" aria-hidden="true">{icon}</span>
+            <p className="text-xs font-medium text-[var(--color-error)] uppercase tracking-wide">{label}</p>
           </div>
-          <p className="text-sm font-medium text-red-600">{errorMessage}</p>
+          <p className="text-sm font-medium text-[var(--color-error)]">{errorMessage}</p>
         </div>
       </div>
     )
