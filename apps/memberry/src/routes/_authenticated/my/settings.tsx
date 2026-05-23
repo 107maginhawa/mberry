@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Switch, Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Label } from '@monobase/ui'
+import { ChangePasswordCard, TwoFactorCard, PasskeysCard, SessionsCard } from '@daveyplate/better-auth-ui'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
@@ -381,20 +382,18 @@ function PrivacySection() {
 
 function AccountSection() {
   return (
-    <GlassCard className="p-6 space-y-4">
+    <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-h4">Security</h2>
         <p className="text-sm text-[var(--color-muted)] mt-1">
-          Manage your password, email, and security settings.
+          Manage your password, two-factor authentication, and active sessions.
         </p>
       </div>
-      <a
-        href="/auth/settings"
-        className="inline-flex items-center rounded-[8px] border-[1.5px] border-[var(--color-border)] px-[22px] py-[10px] text-sm font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors duration-150"
-      >
-        Open Account Settings
-      </a>
-    </GlassCard>
+      <ChangePasswordCard />
+      <TwoFactorCard />
+      <PasskeysCard />
+      <SessionsCard />
+    </div>
   )
 }
 

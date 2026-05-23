@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getPersonOptions, updatePersonMutation, createPersonMutation } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
-import type { Person } from '@monobase/sdk-ts/generated/types.gen'
 import { formatPersonName, formatLicenseDisplay } from '@/features/profile/lib/profile-display'
 import { zodResolver } from '@/lib/zod-resolver'
 import { useState, useEffect } from 'react'
@@ -12,7 +11,7 @@ import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
 import { EmptyState } from '@/components/patterns/empty-state'
-import { Button, Input, Label } from '@monobase/ui'
+import { Button, Input, Label, Textarea } from '@monobase/ui'
 import { Shield, Lock, CreditCard, Download, UserCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -40,7 +39,6 @@ function MyProfilePage() {
     retry: false,
   })
 
-  // Auto-create person record if missing (for users who signed up before the hook)
   const { user } = Route.useRouteContext()
   const createPerson = useMutation({
     ...createPersonMutation(),
@@ -115,15 +113,13 @@ function MyProfilePage() {
         }
       />
 
-      {/* Two-column layout: photo + info */}
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Left: Avatar + quick info */}
         <div className="md:w-1/3 flex flex-col items-center md:items-start">
           <div data-testid="profile-avatar">
             <AvatarInitials
               name={formatPersonName(p?.firstName || '?', p?.lastName, p?.middleName)}
               size="lg"
-                photoUrl={p?.avatar?.url || (p as unknown as { photoUrl?: string })?.photoUrl}
+              photoUrl={p?.avatar?.url || (p as unknown as { photoUrl?: string })?.photoUrl}
             />
           </div>
           <h2 className="text-h3 mt-3 text-center md:text-left">
@@ -141,40 +137,45 @@ function MyProfilePage() {
           )}
         </div>
 
-        {/* Right: Detail sections */}
         <div className="md:w-2/3 space-y-4">
+          {/* Bio */}
+          {(p as any)?.bio && (
+            <GlassCard className="p-5">
+              <h3 className="text-h4 mb-2">About</h3>
+              <p className="text-sm text-[var(--color-muted)] whitespace-pre-line">{(p as any).bio}</p>
+            </GlassCard>
+          )}
+
           {/* Contact */}
           <GlassCard className="p-5">
             <h3 className="text-h4 mb-3">Contact</h3>
             <div className="space-y-2 text-sm">
               {p?.contactInfo?.email && (
-                <div className="flex justify-between">
-                  <span className="text-[var(--color-muted)]">Email</span>
-                  <span>{p.contactInfo.email}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-[var(--color-muted)]">Email</span><span>{p.contactInfo.email}</span></div>
               )}
               {p?.contactInfo?.phone && (
-                <div className="flex justify-between">
-                  <span className="text-[var(--color-muted)]">Phone</span>
-                  <span>{p.contactInfo.phone}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-[var(--color-muted)]">Phone</span><span>{p.contactInfo.phone}</span></div>
               )}
               {p?.timezone && (
-                <div className="flex justify-between">
-                  <span className="text-[var(--color-muted)]">Timezone</span>
-                  <span>{p.timezone}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-[var(--color-muted)]">Timezone</span><span>{p.timezone}</span></div>
               )}
               {p?.preferredLanguage && (
-                <div className="flex justify-between">
-                  <span className="text-[var(--color-muted)]">Language</span>
-                  <span>{p.preferredLanguage}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-[var(--color-muted)]">Language</span><span>{p.preferredLanguage}</span></div>
               )}
             </div>
           </GlassCard>
 
-          {/* Org Memberships */}
+          {/* Address */}
+          {p?.primaryAddress && (
+            <GlassCard className="p-5">
+              <h3 className="text-h4 mb-3">Address</h3>
+              <p className="text-sm text-[var(--color-muted)]">
+                {[p.primaryAddress.street1, p.primaryAddress.street2, p.primaryAddress.city, p.primaryAddress.state, p.primaryAddress.postalCode, p.primaryAddress.country].filter(Boolean).join(', ')}
+              </p>
+            </GlassCard>
+          )}
+
+          {/* Memberships */}
           {memberships.length > 0 && (
             <GlassCard className="p-5">
               <h3 className="text-h4 mb-3">Organizations</h3>
@@ -210,6 +211,8 @@ function MyProfilePage() {
   )
 }
 
+// ─── Enhanced Edit Form ──────────────────────────────────
+
 const profileEditSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().optional(),
@@ -217,9 +220,16 @@ const profileEditSchema = z.object({
   specialization: z.string().optional(),
   licenseNumber: z.string().optional(),
   prcId: z.string().optional(),
+  bio: z.string().max(2000).optional(),
   phone: z.string().optional(),
   timezone: z.string().optional(),
   preferredLanguage: z.string().optional(),
+  street1: z.string().optional(),
+  street2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  postalCode: z.string().optional(),
+  country: z.string().optional(),
 })
 
 type ProfileEditFormData = z.infer<typeof profileEditSchema>
@@ -249,13 +259,24 @@ function ProfileEditForm({
       specialization: person?.specialization || '',
       licenseNumber: person?.licenseNumber || '',
       prcId: person?.prcId || '',
+      bio: (person as any)?.bio || '',
       phone: person?.contactInfo?.phone || '',
       timezone: person?.timezone || '',
       preferredLanguage: person?.preferredLanguage || '',
+      street1: person?.primaryAddress?.street1 || '',
+      street2: person?.primaryAddress?.street2 || '',
+      city: person?.primaryAddress?.city || '',
+      state: person?.primaryAddress?.state || '',
+      postalCode: person?.primaryAddress?.postalCode || '',
+      country: person?.primaryAddress?.country || '',
     },
   })
 
   function onSubmit(data: ProfileEditFormData) {
+    const address = (data.street1 || data.city || data.country)
+      ? { street1: data.street1, street2: data.street2, city: data.city, state: data.state, postalCode: data.postalCode, country: data.country }
+      : undefined
+
     onSave.mutate({
       path: { person: person?.id || 'me' },
       body: {
@@ -265,43 +286,28 @@ function ProfileEditForm({
         specialization: data.specialization || null,
         licenseNumber: data.licenseNumber || null,
         prcId: data.prcId || null,
-        contactInfo: {
-          email: person?.contactInfo?.email,
-          phone: data.phone || undefined,
-        },
+        bio: data.bio || null,
+        contactInfo: { email: person?.contactInfo?.email, phone: data.phone || undefined },
         timezone: data.timezone || null,
         preferredLanguage: data.preferredLanguage || null,
+        primaryAddress: address,
       },
     })
   }
 
-  function field(
-    label: string,
-    name: keyof ProfileEditFormData,
-    opts?: { placeholder?: string }
-  ) {
+  function field(label: string, name: keyof ProfileEditFormData, opts?: { placeholder?: string; type?: string }) {
     const errMsg = errors[name]?.message
     return (
       <div>
-        <Label
-          htmlFor={name}
-          className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-1.5"
-        >
-          {label}
-        </Label>
+        <Label htmlFor={name} className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-1.5">{label}</Label>
         <Input
           id={name}
-          type="text"
+          type={opts?.type || 'text'}
           placeholder={opts?.placeholder}
           className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
-          aria-describedby={errMsg ? `${name}-error` : undefined}
           {...register(name)}
         />
-        {errMsg && (
-          <p id={`${name}-error`} role="alert" className="text-xs text-[var(--color-error)] mt-1">
-            {errMsg}
-          </p>
-        )}
+        {errMsg && <p role="alert" className="text-xs text-[var(--color-error)] mt-1">{errMsg}</p>}
       </div>
     )
   }
@@ -310,52 +316,82 @@ function ProfileEditForm({
     <div>
       <PageHeader
         title="Edit Profile"
-        actions={
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        }
+        actions={<Button variant="outline" onClick={onCancel}>Cancel</Button>}
       />
 
       {error && (
-        <div role="alert" aria-live="polite" className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-sm mb-4">
+        <div role="alert" className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-sm mb-4">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-6 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {field('First Name', 'firstName')}
-          {field('Last Name', 'lastName')}
-        </div>
-        {field('Middle Name', 'middleName')}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Personal Info */}
+        <GlassCard className="p-6 space-y-4">
+          <h3 className="text-h4">Personal Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {field('First Name', 'firstName')}
+            {field('Last Name', 'lastName')}
+          </div>
+          {field('Middle Name', 'middleName')}
+        </GlassCard>
 
-        <div className="border-t border-[var(--color-border-light)] my-4" />
+        {/* Professional */}
+        <GlassCard className="p-6 space-y-4">
+          <h3 className="text-h4">Professional</h3>
+          {field('Specialization', 'specialization', { placeholder: 'e.g. Orthodontics' })}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {field('License Number', 'licenseNumber')}
+            {field('PRC ID', 'prcId')}
+          </div>
+          <div>
+            <Label htmlFor="bio" className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-1.5">Bio</Label>
+            <Textarea
+              id="bio"
+              placeholder="Tell others about your practice and experience..."
+              className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-sm min-h-[100px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
+              {...register('bio')}
+            />
+          </div>
+        </GlassCard>
 
-        {field('Specialization', 'specialization', { placeholder: 'e.g. Orthodontics' })}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {field('License Number', 'licenseNumber')}
-          {field('PRC ID', 'prcId')}
-        </div>
+        {/* Contact */}
+        <GlassCard className="p-6 space-y-4">
+          <h3 className="text-h4">Contact</h3>
+          <div>
+            <Label className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-1.5">Email</Label>
+            <Input
+              type="email"
+              value={person?.contactInfo?.email || ''}
+              disabled
+              className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-sm bg-[var(--color-surface)] opacity-60"
+            />
+            <p className="text-xs text-[var(--color-muted)] mt-1">Email is managed through your account settings</p>
+          </div>
+          {field('Phone', 'phone', { placeholder: '+63 917 123 4567' })}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {field('Timezone', 'timezone', { placeholder: 'Asia/Manila' })}
+            {field('Language', 'preferredLanguage', { placeholder: 'en' })}
+          </div>
+        </GlassCard>
 
-        <div className="border-t border-[var(--color-border-light)] my-4" />
+        {/* Address */}
+        <GlassCard className="p-6 space-y-4">
+          <h3 className="text-h4">Address</h3>
+          {field('Street', 'street1')}
+          {field('Street Line 2', 'street2')}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {field('City', 'city')}
+            {field('State/Province', 'state')}
+            {field('Postal Code', 'postalCode')}
+          </div>
+          {field('Country', 'country', { placeholder: 'PH' })}
+        </GlassCard>
 
-        {field('Phone', 'phone', { placeholder: '+63 ...' })}
-        {field('Timezone', 'timezone', { placeholder: 'Asia/Manila' })}
-        {field('Preferred Language', 'preferredLanguage', { placeholder: 'en' })}
-
-        <div className="flex justify-end gap-3 pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={onSave.isPending}
-          >
+        {/* Submit */}
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button type="submit" disabled={onSave.isPending}>
             {onSave.isPending ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>

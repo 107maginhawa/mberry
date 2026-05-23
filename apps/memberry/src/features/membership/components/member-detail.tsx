@@ -36,6 +36,7 @@ import { AlertTriangle, ArrowLeft, CreditCard, Heart, Mail, Phone, RefreshCw, Sh
 import { GlassCard } from '@/components/motion/glass-card'
 import { PageHeader } from '@/components/patterns/page-header'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
+import { CredentialList } from './credential-list'
 
 interface MemberDetailProps {
   orgId: string
@@ -263,6 +264,9 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           </dl>
         </GlassCard>
       </div>
+
+      {/* Credentials (professional licenses) */}
+      <CredentialList personId={member.personId ?? memberId} orgId={orgId} />
 
       {/* Actions panel */}
       <GlassCard className="p-5 space-y-3">
