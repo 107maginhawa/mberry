@@ -13,7 +13,7 @@ import {
 function stubDuesConfig() {
   restoreRepo(DuesConfigRepository);
   stubRepo(DuesConfigRepository, {
-    findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+    findMany: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
   });
 }
 

@@ -33,6 +33,9 @@ import "./modules/platform-admin-custom.tsp";
 import "./modules/membership-custom.tsp";
 import "./modules/dues-custom.tsp";
 
+// Invite module — officer invites, public validation, authenticated claim
+import "./modules/invite.tsp";
+
 // Infrastructure endpoints (health.tsp and feature-flags.tsp removed — real
 // implementations live in core/health.ts and platformadmin/listFeatureFlags.ts)
 
@@ -536,6 +539,16 @@ namespace MonobaseAPI {
 
   @tag("Dues")
   interface DuesCustomManagement extends DuesCustomModule.DuesCustomManagement {}
+
+  // =========================================================================
+  // Invite Module — officer invites, public validation, authenticated claim
+  // =========================================================================
+
+  @tag("Invite")
+  interface InviteManagement extends InviteModule.InviteManagement {}
+
+  @tag("Invite")
+  interface InviteTokenEndpoints extends InviteModule.InviteTokenEndpoints {}
 
   // =========================================================================
   // Infrastructure Endpoints

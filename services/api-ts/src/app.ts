@@ -70,6 +70,14 @@ import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 // Event lifecycle: completeEvent hand-wired (not yet in TypeSpec)
 import { completeEvent } from '@/handlers/association:operations/completeEvent';
 
+// One-tap payment token: public validate + checkout, officer send-link
+import { sendPaymentLink } from '@/handlers/dues/sendPaymentLink';
+import { validatePaymentToken } from '@/handlers/dues/validatePaymentToken';
+import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
+
+// Public org discovery — hand-wired (not yet in TypeSpec)
+import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
+
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -135,11 +143,19 @@ export function createApp(config: Config): App {
   // Register feature flags endpoint (public, no auth)
   registerFeatureFlagRoutes(app as App);
 
+  // Public org discovery — no auth required
+  app.get('/public/orgs', listPublicOrgs as any);
+
   // Register auth routes
   registerAuthRoutes(app as App);
 
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
+
+  // One-tap payment token: PUBLIC endpoints (member clicks from email, no auth)
+  // Registered before any wildcard auth middleware to avoid interception
+  app.get('/pay/:token/validate', validatePaymentToken as any);
+  app.post('/pay/:token/checkout', checkoutPaymentToken as any);
 
   // Public unsubscribe endpoint — registered BEFORE /email/* auth middleware
   // RFC 8058: users click from email client without being logged in
@@ -187,6 +203,14 @@ export function createApp(config: Config): App {
     app.use(prefix, orgContextOptionalMiddleware());
   }
 
+  // Invite routes middleware:
+  // - /invite/validate/:token is PUBLIC (no auth) — user clicks link before logging in
+  // - /invite/claim/:token requires auth — user must be logged in
+  // - POST /invite requires auth + org context — officer invites member
+  app.use('/invite', authMiddleware(), orgContextMiddleware());
+  app.use('/invite/claim/*', authMiddleware());
+  // /invite/validate/* intentionally has no auth — public endpoint
+
   // Register API routes
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
 
@@ -206,6 +230,9 @@ export function createApp(config: Config): App {
 
   // completeEvent — hand-wired (not yet in TypeSpec), follows cancelEvent pattern
   app.post('/association/events/:eventId/complete', authMiddleware(), completeEvent as any);
+
+  // One-tap payment send-link — officer generates payment link (auth required)
+  app.post('/org/:organizationId/payments/send-link', authMiddleware(), orgContextMiddleware(), sendPaymentLink as any);
 
   // PRC Accredited Providers — hand-wired, org-scoped (no /api prefix per CLAUDE.md)
   app.get('/accredited-providers/:organizationId', authMiddleware(), listAccreditedProviders);

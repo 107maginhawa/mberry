@@ -25,8 +25,7 @@ describe('Trainings', () => {
   test('getTraining returns 401 without user', async () => {
     const { getTraining } = await import('./getTraining');
     const ctx = makeCtx({ user: null, _params: { trainingId: 't-1' } });
-    const response = await getTraining(ctx);
-    expect(response.status).toBe(401);
+    await expect(getTraining(ctx)).rejects.toThrow('Unauthorized');
   });
 
   test('updateTraining returns 401 without user', async () => {

@@ -48,7 +48,7 @@ describe('[FLOW-03] Application Approval → Membership Creation', () => {
     restoreRepo(MembershipRepository);
     restoreRepo(DuesConfigRepository);
     stubRepo(DuesConfigRepository, {
-      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+      findMany: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
     });
   });
 

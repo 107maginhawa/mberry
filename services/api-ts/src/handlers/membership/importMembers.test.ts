@@ -28,7 +28,7 @@ describe('[BR-22] importMembers', () => {
     });
     restoreRepo(DuesConfigRepository);
     stubRepo(DuesConfigRepository, {
-      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+      findMany: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
     });
   });
 
@@ -287,7 +287,7 @@ describe('[BR-22] Member Matching on Import', () => {
     });
     restoreRepo(DuesConfigRepository);
     stubRepo(DuesConfigRepository, {
-      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+      findMany: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
     });
   });
 

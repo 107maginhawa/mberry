@@ -37,6 +37,7 @@ function InvitePage() {
     setClaiming(true)
     const result = await claimInviteToken(token)
     if (result.ok) {
+      // Redirect to org list — slug-based redirect deferred until org slug is in the response
       navigate({ to: '/my/organizations' })
     } else {
       setError({ error: result.error })

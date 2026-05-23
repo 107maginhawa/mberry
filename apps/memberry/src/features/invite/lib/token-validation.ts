@@ -82,14 +82,21 @@ export async function validateInviteToken(token: string): Promise<
   }
 }
 
+export interface ClaimInviteResult {
+  claimed: boolean;
+  organizationId: string;
+  membershipStatus?: 'joined' | 'pendingApproval';
+  membershipId?: string;
+}
+
 /**
  * Claim an invite token (requires authentication).
  */
 export async function claimInviteToken(token: string): Promise<
-  { ok: true; data: { claimed: boolean; orgId: string } } | { ok: false; error: string }
+  { ok: true; data: ClaimInviteResult } | { ok: false; error: string }
 > {
   try {
-    const data = await api.post<{ claimed: boolean; orgId: string }>(`/api/invite/${encodeURIComponent(token)}/claim`);
+    const data = await api.post<ClaimInviteResult>(`/api/invite/${encodeURIComponent(token)}/claim`);
     return { ok: true, data };
   } catch (err) {
     if (err instanceof ApiError) {
