@@ -1,14 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { listDuesInvoicesOptions, listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
-import { Skeleton } from '@monobase/ui'
+import { Button, Skeleton } from '@monobase/ui'
 import { formatCents } from '@/features/dues/lib/money'
 import { ProofUploadForm } from '@/features/dues/components/proof-upload-form'
 import { DuesStatusCard } from '@/features/dues/components/dues-status-card'
 import type { DuesStatusCardProps } from '@/features/dues/components/dues-status-card'
 import { DuesStatusBadge } from '@/features/dues/components/dues-status-badge'
+import { ArrearsBreakdown } from '@/features/dues/components/arrears-breakdown'
+import { PaymentScheduleTimeline } from '@/features/dues/components/payment-schedule-timeline'
+import type { TimelinePeriod } from '@/features/dues/components/payment-schedule-timeline'
 import { api } from '@/lib/api'
-import { CreditCard, CheckCircle, AlertTriangle, Info, Building, Receipt } from 'lucide-react'
+import { CreditCard, CheckCircle, AlertTriangle, Info, Building, Receipt, Download } from 'lucide-react'
 import { useOrg } from '@/hooks/useOrg'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -61,6 +64,17 @@ function MemberDuesPage() {
     select: (d: any) => d?.data ?? [],
   })
 
+  // Fetch aging buckets for this org
+  const { data: agingBucketsData } = useQuery({
+    queryKey: ['aging-buckets-for-org', orgId],
+    queryFn: async () => {
+      const res = await api.get<any>(`/api/association/member/aging-buckets?organizationId=${orgId}`)
+      const buckets = res?.data ?? []
+      return buckets[0] ?? null
+    },
+    retry: false,
+  })
+
   const invoices = invoicesData ?? []
   const payments = paymentsData ?? []
 
@@ -85,6 +99,45 @@ function MemberDuesPage() {
   const unpaidInvoices = invoices.filter(
     (inv: any) => ['generated', 'sent', 'overdue'].includes(inv.status)
   )
+
+  // Derive timeline periods from invoices + payments
+  const timelinePeriods: TimelinePeriod[] = (() => {
+    const allInvoices = invoices as any[]
+    return allInvoices.map((inv: any) => {
+      const matchedPayment = (payments as any[]).find(
+        (p: any) => p.invoiceId === inv.id && p.status === 'confirmed'
+      )
+      const isPaid = !!matchedPayment || inv.status === 'paid'
+      const isOverdue = ['overdue'].includes(inv.status)
+      const year = inv.periodStart?.slice(0, 4) ?? ''
+      return {
+        id: inv.id,
+        label: year,
+        amount: inv.totalAmount ?? 0,
+        dueDate: inv.dueDate ?? inv.periodEnd ?? '',
+        status: isPaid ? 'paid' as const : isOverdue ? 'overdue' as const : 'upcoming' as const,
+        paidDate: matchedPayment?.paidAt,
+      }
+    })
+  })()
+
+  // CSV export for payment history
+  function exportPaymentsCsv() {
+    if (payments.length === 0) return
+    const header = 'Receipt Number,Amount,Currency,Status,Date\n'
+    const rows = (payments as any[]).map((p: any) => {
+      const amt = (Number(p.amount ?? 0) / 100).toFixed(2)
+      const date = p.paidAt ? new Date(p.paidAt).toLocaleDateString() : ''
+      return `${p.receiptNumber ?? ''},${amt},${p.currency ?? 'PHP'},${p.status ?? ''},${date}`
+    }).join('\n')
+    const blob = new Blob([header + rows], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'payment-history.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   // Check if any proof is already submitted for each invoice
   const submittedPaymentsByInvoice = new Map<string, any>()
@@ -117,6 +170,36 @@ function MemberDuesPage() {
             document.getElementById('pay-dues-section')?.scrollIntoView({ behavior: 'smooth' })
           } : undefined}
         />
+      )}
+
+      {/* Arrears Breakdown */}
+      {!loadingInvoices && (
+        <section className="space-y-3">
+          <h2 className="text-h3">Outstanding Dues</h2>
+          <ArrearsBreakdown
+            invoices={unpaidInvoices}
+            currency={duesConfig?.currency ?? 'PHP'}
+            agingBuckets={agingBucketsData ? {
+              current: agingBucketsData.current ?? 0,
+              thirtyDay: agingBucketsData.thirtyDay ?? 0,
+              sixtyDay: agingBucketsData.sixtyDay ?? 0,
+              ninetyDay: agingBucketsData.ninetyDay ?? 0,
+              overNinety: agingBucketsData.overNinety ?? 0,
+              totalOutstanding: agingBucketsData.totalOutstanding ?? 0,
+            } : undefined}
+          />
+        </section>
+      )}
+
+      {/* Payment Schedule Timeline */}
+      {!loadingInvoices && timelinePeriods.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-h3">Payment Timeline</h2>
+          <PaymentScheduleTimeline
+            periods={timelinePeriods}
+            currency={duesConfig?.currency ?? 'PHP'}
+          />
+        </section>
       )}
 
       {/* Unpaid Invoices — Proof Upload */}
@@ -286,7 +369,13 @@ function MemberDuesPage() {
         </div>
       ) : payments.length > 0 ? (
         <section className="space-y-3">
-          <h2 className="text-h3">Payment History</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-h3">Payment History</h2>
+            <Button variant="outline" size="sm" onClick={exportPaymentsCsv} aria-label="Export payment history as CSV">
+              <Download className="w-4 h-4 mr-1.5" />
+              Export CSV
+            </Button>
+          </div>
           <GlassCard className="p-1">
             <div className="overflow-x-auto">
               <div className="space-y-1">
