@@ -233,10 +233,16 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
                 aria-describedby={errors.defaultAmount ? 'defaultAmount-error' : undefined}
                 {...register('defaultAmount', { valueAsNumber: true, onChange: () => setHasChanges(true) })}
               />
-              {errors.defaultAmount && (
+              {errors.defaultAmount ? (
                 <p id="defaultAmount-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
                   {errors.defaultAmount.message}
                 </p>
+              ) : billingFrequency !== 'annual' && (
+                <PerPeriodBreakdown
+                  annualAmount={Number(configAmount ?? 0) / 100}
+                  frequency={billingFrequency}
+                  currency={currency}
+                />
               )}
             </div>
             <div>
@@ -280,7 +286,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
                 <Input
                   type="number"
                   min="1"
-                  max="31"
+                  max="28"
                   value={dueDateDay}
                   onChange={(e) => { setDueDateDay(e.target.value); setHasChanges(true) }}
                   className="w-20"
@@ -335,5 +341,17 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
         </div>
       </form>
     </div>
+  )
+}
+
+function PerPeriodBreakdown({ annualAmount, frequency, currency }: { annualAmount: number; frequency: string; currency: string }) {
+  if (!annualAmount || annualAmount <= 0) return null
+  const divisor = frequency === 'quarterly' ? 4 : frequency === 'semi-annual' ? 2 : 1
+  const perPeriod = annualAmount / divisor
+  const label = frequency === 'quarterly' ? 'quarter' : 'half-year'
+  return (
+    <p className="text-xs text-muted-foreground mt-1" aria-label={`Per-period breakdown`}>
+      {currency} {annualAmount.toLocaleString()}/year = {currency} {perPeriod.toLocaleString()}/{label}
+    </p>
   )
 }
