@@ -13,10 +13,11 @@ vi.mock('@monobase/ui', () => ({
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params, ...props }: any) => (
-    <a href={to?.replace('$orgId', params?.orgId).replace('$electionId', params?.electionId)} {...props}>
+    <a href={to?.replace('$orgSlug', params?.orgSlug).replace('$electionId', params?.electionId)} {...props}>
       {children}
     </a>
   ),
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 import { listElectionsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'

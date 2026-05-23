@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { Vote, Trophy, Users, CheckCircle2, Clock, ArrowRight } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
 import { getElectionOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
@@ -61,6 +61,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function MemberElectionDetail({ electionId, orgId, userId }: MemberElectionDetailProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const { data, isLoading, error } = useQuery(
     getElectionOptions({ path: { electionId } }),
   )
@@ -144,8 +145,8 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
       {/* Vote CTA */}
       {isVotingOpen && !hasVoted && (
         <Link
-          to="/org/$orgId/elections/$electionId/vote"
-          params={{ orgId, electionId }}
+          to="/org/$orgSlug/elections/$electionId/vote"
+          params={{ orgSlug, electionId }}
           className="flex items-center justify-between gap-3 p-4 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-mid)] transition-colors"
         >
           <div className="flex items-center gap-3">
@@ -281,8 +282,8 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
       {/* Back link */}
       <div className="pt-2">
         <Link
-          to="/org/$orgId/elections"
-          params={{ orgId }}
+          to="/org/$orgSlug/elections"
+          params={{ orgSlug }}
           className="text-sm text-[var(--color-primary)] hover:underline"
         >
           ← Back to Elections

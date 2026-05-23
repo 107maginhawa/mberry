@@ -28,7 +28,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
       variant: 'error',
       icon: <AlertTriangle size={16} />,
       message: `Dues overdue — ${overdueInvoices.length} unpaid invoice${overdueInvoices.length > 1 ? 's' : ''}`,
-      action: orgId ? { label: 'Pay now', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+      action: orgId ? { label: 'Pay now', to: '/org/$orgSlug/dues', params: { orgSlug: orgId } } : undefined,
     })
   }
 
@@ -53,7 +53,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         variant: 'error',
         icon: <AlertTriangle size={16} />,
         message: `Dues expired for ${m.orgName ?? 'your organization'}`,
-        action: orgId ? { label: 'Renew now', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+        action: orgId ? { label: 'Renew now', to: '/org/$orgSlug/dues', params: { orgSlug: orgId } } : undefined,
       })
     } else if (daysLeft <= 0 && !orgHasUnpaid && overdueInvoices.length === 0) {
       // Period ended but all invoices paid — renewal invoice not yet generated
@@ -62,7 +62,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         variant: 'info',
         icon: <Clock size={16} />,
         message: `Membership period ended for ${m.orgName ?? 'your organization'} — renewal invoice pending`,
-        action: orgId ? { label: 'View status', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+        action: orgId ? { label: 'View status', to: '/org/$orgSlug/dues', params: { orgSlug: orgId } } : undefined,
       })
     } else if (daysLeft > 0 && daysLeft <= 30) {
       alerts.push({
@@ -70,7 +70,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         variant: 'warning',
         icon: <Clock size={16} />,
         message: `Dues expire in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} for ${m.orgName ?? 'your organization'}`,
-        action: orgId ? { label: 'Renew now', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+        action: orgId ? { label: 'Renew now', to: '/org/$orgSlug/dues', params: { orgSlug: orgId } } : undefined,
       })
     } else if (daysLeft > 30 && daysLeft <= 60) {
       alerts.push({
@@ -78,7 +78,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         variant: 'info',
         icon: <Clock size={16} />,
         message: `Dues expire in ${daysLeft} days for ${m.orgName ?? 'your organization'}`,
-        action: orgId ? { label: 'View dues', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+        action: orgId ? { label: 'View dues', to: '/org/$orgSlug/dues', params: { orgSlug: orgId } } : undefined,
       })
     }
   }
@@ -104,9 +104,9 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         ? `Vote now — "${topElection.title}" closes in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
         : `Vote now — "${topElection.title}"`,
       action: topElection.organizationId && topElection.id
-        ? { label: 'Vote', to: '/org/$orgId/elections/$electionId/vote', params: { orgId: topElection.organizationId, electionId: topElection.id } }
+        ? { label: 'Vote', to: '/org/$orgSlug/elections/$electionId/vote', params: { orgSlug: topElection.organizationId, electionId: topElection.id } }
         : topElection.organizationId
-        ? { label: 'Vote', to: '/org/$orgId/elections', params: { orgId: topElection.organizationId } }
+        ? { label: 'Vote', to: '/org/$orgSlug/elections', params: { orgSlug: topElection.organizationId } }
         : undefined,
     })
   }
@@ -120,7 +120,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
       variant: 'info',
       icon: <FileCheck size={16} />,
       message: `${pendingInvoices.length} pending invoice${pendingInvoices.length > 1 ? 's' : ''} awaiting payment`,
-      action: orgId ? { label: 'Pay dues', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+      action: orgId ? { label: 'Pay dues', to: '/org/$orgSlug/dues', params: { orgSlug: orgId } } : undefined,
     })
   }
 

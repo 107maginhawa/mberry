@@ -22,9 +22,10 @@ vi.mock('./nominee-picker-dialog', () => ({
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params, className }: any) => {
-    const href = to?.replace('$orgId', params?.orgId || '').replace('$electionId', params?.electionId || '')
+    const href = to?.replace('$orgSlug', params?.orgSlug || '').replace('$electionId', params?.electionId || '')
     return <a href={href} className={className}>{children}</a>
   },
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 vi.mock('sonner', () => ({

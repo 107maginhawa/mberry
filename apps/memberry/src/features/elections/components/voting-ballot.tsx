@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { Vote, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button, Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
@@ -52,6 +52,7 @@ const NOMINEE_STATUS_COLORS: Record<string, string> = {
 }
 
 export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [selections, setSelections] = useState<Record<string, string>>({})
@@ -106,7 +107,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
         </p>
         <Button
           variant="link"
-          onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
+          onClick={() => navigate({ to: '/org/$orgSlug/elections/$electionId', params: { orgSlug, electionId } })}
         >
           ← Back to election
         </Button>
@@ -123,7 +124,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
         <p className="text-sm text-[var(--color-muted)]">Your vote has been recorded. You cannot vote again.</p>
         <Button
           variant="link"
-          onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
+          onClick={() => navigate({ to: '/org/$orgSlug/elections/$electionId', params: { orgSlug, electionId } })}
         >
           ← View election details
         </Button>
@@ -163,7 +164,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
       queryClient.invalidateQueries({ queryKey: ['my-ballots', electionId] })
 
       toast.success('Your votes have been cast!')
-      navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })
+      navigate({ to: '/org/$orgSlug/elections/$electionId', params: { orgSlug, electionId } })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to cast vote. Please try again.')
       toast.error('Failed to cast vote')
@@ -259,7 +260,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
       <div className="flex items-center justify-between pt-2 border-t">
         <Button
           variant="ghost"
-          onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
+          onClick={() => navigate({ to: '/org/$orgSlug/elections/$electionId', params: { orgSlug, electionId } })}
         >
           Cancel
         </Button>

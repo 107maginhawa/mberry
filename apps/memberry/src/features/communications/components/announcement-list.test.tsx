@@ -14,6 +14,12 @@ vi.mock('@monobase/ui', () => ({
   ),
 }))
 
+// Mock @tanstack/react-router
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, ...rest }: any) => <a href={String(to)} {...rest}>{children}</a>,
+  useParams: () => ({ orgSlug: 'test-org' }),
+}))
+
 // Mock api
 vi.mock('@/lib/api', () => ({
   api: {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@monobase/ui'
 import { Calendar, MapPin, Users, MoreHorizontal } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { GlassCard } from '@/components/motion/glass-card'
 
 interface EventCardProps {
@@ -42,6 +42,7 @@ function getLocation(event: EventCardProps['event']) {
 }
 
 export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBase }: EventCardProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -66,7 +67,7 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
             {menuOpen && (
               <div className="absolute right-0 top-7 z-10 w-36 border border-[var(--color-surface-border-glass)] rounded-[8px] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] text-body-sm">
                 <a
-                  href={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}`}
+                  href={`${linkBase ?? `/org/${orgSlug}/officer/events`}/${event.id}`}
                   className="block px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)] rounded-t-[8px]"
                   onClick={() => setMenuOpen(false)}
                 >
@@ -106,7 +107,7 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
 
         {/* Title */}
         <Link
-          to={`${linkBase ?? `/org/${orgId}/officer/events`}/${event.id}` as any /* eslint-disable-line @typescript-eslint/no-explicit-any */} className="block">
+          to={`${linkBase ?? `/org/${orgSlug}/officer/events`}/${event.id}` as any /* eslint-disable-line @typescript-eslint/no-explicit-any */} className="block">
           <h3 className="text-h4 leading-snug hover:text-[var(--color-primary)] transition-colors line-clamp-2">
             {event.title}
           </h3>

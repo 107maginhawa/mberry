@@ -256,9 +256,9 @@ function DashboardPage() {
             statusLabel={unpaidInvoices.length > 0 ? (overdueInvoices.length > 0 ? 'Overdue' : 'Payment due') : 'All paid'}
             errorMessage={invoicesQuery.isError ? 'Unable to load dues status' : undefined}
             action={duesOrgId
-              ? { label: unpaidInvoices.length > 0 ? 'Pay now' : 'View dues', to: '/org/$orgId/dues', params: { orgId: duesOrgId } }
+              ? { label: unpaidInvoices.length > 0 ? 'Pay now' : 'View dues', to: '/org/$orgSlug/dues', params: { orgSlug: duesOrgId } }
               : firstOrgId
-                ? { label: 'View dues', to: '/org/$orgId/dues', params: { orgId: firstOrgId } }
+                ? { label: 'View dues', to: '/org/$orgSlug/dues', params: { orgSlug: firstOrgId } }
                 : undefined
             }
           />
@@ -395,8 +395,8 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
   return (
     <GlassCard className="p-5">
       <Link
-        to="/org/$orgId/home"
-        params={{ orgId: orgId ?? '' }}
+        to="/org/$orgSlug/home"
+        params={{ orgSlug: orgId ?? '' }}
         className="block hover:opacity-80 transition-opacity"
       >
         <div className="flex items-start justify-between">
@@ -450,8 +450,8 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
       <div className="mt-3 pt-3 border-t border-[var(--color-border-light)] flex items-center gap-2 flex-wrap">
         {hasOrgUnpaid && orgId && (
           <Link
-            to="/org/$orgId/dues"
-            params={{ orgId }}
+            to="/org/$orgSlug/dues"
+            params={{ orgSlug: orgId }}
             className="inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
           >
             <CreditCard size={12} aria-hidden="true" />
@@ -469,8 +469,8 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
         )}
         {officerRole && (
           <Link
-            to="/org/$orgId/officer/dashboard"
-            params={{ orgId: orgId ?? '' }}
+            to="/org/$orgSlug/officer/dashboard"
+            params={{ orgSlug: orgId ?? '' }}
             className="ml-auto inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
           >
             <Shield size={12} aria-hidden="true" />

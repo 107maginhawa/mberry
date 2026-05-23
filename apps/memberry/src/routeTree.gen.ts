@@ -27,57 +27,58 @@ import { Route as AuthenticatedMyNotificationsRouteImport } from './routes/_auth
 import { Route as AuthenticatedMyIdCardRouteImport } from './routes/_authenticated/my/id-card'
 import { Route as AuthenticatedMyEventsRouteImport } from './routes/_authenticated/my/events'
 import { Route as AuthenticatedMyDataExportRouteImport } from './routes/_authenticated/my/data-export'
+import { Route as AuthenticatedOrgOrgSlugRouteRouteImport } from './routes/_authenticated/org/$orgSlug/route'
 import { Route as AuthenticatedMyCreditsIndexRouteImport } from './routes/_authenticated/my/credits/index'
 import { Route as AuthenticatedMyCertificatesIndexRouteImport } from './routes/_authenticated/my/certificates/index'
-import { Route as AuthenticatedOrgOrgIdOfficerRouteImport } from './routes/_authenticated/org/$orgId/officer'
-import { Route as AuthenticatedOrgOrgIdMembersRouteImport } from './routes/_authenticated/org/$orgId/members'
-import { Route as AuthenticatedOrgOrgIdHomeRouteImport } from './routes/_authenticated/org/$orgId/home'
-import { Route as AuthenticatedOrgOrgIdDuesRouteImport } from './routes/_authenticated/org/$orgId/dues'
+import { Route as AuthenticatedOrgOrgSlugOfficerRouteImport } from './routes/_authenticated/org/$orgSlug/officer'
+import { Route as AuthenticatedOrgOrgSlugMembersRouteImport } from './routes/_authenticated/org/$orgSlug/members'
+import { Route as AuthenticatedOrgOrgSlugHomeRouteImport } from './routes/_authenticated/org/$orgSlug/home'
+import { Route as AuthenticatedOrgOrgSlugDuesRouteImport } from './routes/_authenticated/org/$orgSlug/dues'
 import { Route as AuthenticatedMyCreditsLogRouteImport } from './routes/_authenticated/my/credits/log'
 import { Route as AuthenticatedMyCertificatesCertificateIdRouteImport } from './routes/_authenticated/my/certificates/$certificateId'
-import { Route as AuthenticatedOrgOrgIdTrainingIndexRouteImport } from './routes/_authenticated/org/$orgId/training/index'
-import { Route as AuthenticatedOrgOrgIdEventsIndexRouteImport } from './routes/_authenticated/org/$orgId/events/index'
-import { Route as AuthenticatedOrgOrgIdElectionsIndexRouteImport } from './routes/_authenticated/org/$orgId/elections/index'
-import { Route as AuthenticatedOrgOrgIdTrainingTrainingIdRouteImport } from './routes/_authenticated/org/$orgId/training/$trainingId'
-import { Route as AuthenticatedOrgOrgIdOfficerRosterRouteImport } from './routes/_authenticated/org/$orgId/officer/roster'
-import { Route as AuthenticatedOrgOrgIdOfficerPaymentsRouteImport } from './routes/_authenticated/org/$orgId/officer/payments'
-import { Route as AuthenticatedOrgOrgIdOfficerOfficersRouteImport } from './routes/_authenticated/org/$orgId/officer/officers'
-import { Route as AuthenticatedOrgOrgIdOfficerDashboardRouteImport } from './routes/_authenticated/org/$orgId/officer/dashboard'
-import { Route as AuthenticatedOrgOrgIdOfficerCommunicationsRouteImport } from './routes/_authenticated/org/$orgId/officer/communications'
-import { Route as AuthenticatedOrgOrgIdOfficerApplicationsRouteImport } from './routes/_authenticated/org/$orgId/officer/applications'
-import { Route as AuthenticatedOrgOrgIdEventsEventIdRouteImport } from './routes/_authenticated/org/$orgId/events/$eventId'
-import { Route as AuthenticatedOrgOrgIdOfficerTrainingIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/training/index'
-import { Route as AuthenticatedOrgOrgIdOfficerRosterIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/roster/index'
-import { Route as AuthenticatedOrgOrgIdOfficerPaymentsIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/payments/index'
-import { Route as AuthenticatedOrgOrgIdOfficerEventsIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/events/index'
-import { Route as AuthenticatedOrgOrgIdOfficerElectionsIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/elections/index'
-import { Route as AuthenticatedOrgOrgIdOfficerCommunicationsIndexRouteImport } from './routes/_authenticated/org/$orgId/officer/communications/index'
-import { Route as AuthenticatedOrgOrgIdElectionsElectionIdIndexRouteImport } from './routes/_authenticated/org/$orgId/elections/$electionId/index'
-import { Route as AuthenticatedOrgOrgIdOfficerTrainingNewRouteImport } from './routes/_authenticated/org/$orgId/officer/training/new'
-import { Route as AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteImport } from './routes/_authenticated/org/$orgId/officer/training/$trainingId'
-import { Route as AuthenticatedOrgOrgIdOfficerSettingsProvidersRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/providers'
-import { Route as AuthenticatedOrgOrgIdOfficerSettingsOrgRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/org'
-import { Route as AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/membership-categories'
-import { Route as AuthenticatedOrgOrgIdOfficerSettingsGatewayRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/gateway'
-import { Route as AuthenticatedOrgOrgIdOfficerSettingsFundsRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/funds'
-import { Route as AuthenticatedOrgOrgIdOfficerSettingsDuesRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/dues'
-import { Route as AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport } from './routes/_authenticated/org/$orgId/officer/settings/chapters'
-import { Route as AuthenticatedOrgOrgIdOfficerRosterImportRouteImport } from './routes/_authenticated/org/$orgId/officer/roster/import'
-import { Route as AuthenticatedOrgOrgIdOfficerRosterMemberIdRouteImport } from './routes/_authenticated/org/$orgId/officer/roster/$memberId'
-import { Route as AuthenticatedOrgOrgIdOfficerReportsFinancialRouteImport } from './routes/_authenticated/org/$orgId/officer/reports/financial'
-import { Route as AuthenticatedOrgOrgIdOfficerReportsCreditsRouteImport } from './routes/_authenticated/org/$orgId/officer/reports/credits'
-import { Route as AuthenticatedOrgOrgIdOfficerPaymentsNewRouteImport } from './routes/_authenticated/org/$orgId/officer/payments/new'
-import { Route as AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRouteImport } from './routes/_authenticated/org/$orgId/officer/payments/$paymentId'
-import { Route as AuthenticatedOrgOrgIdOfficerEventsNewRouteImport } from './routes/_authenticated/org/$orgId/officer/events/new'
-import { Route as AuthenticatedOrgOrgIdOfficerEventsEventIdRouteImport } from './routes/_authenticated/org/$orgId/officer/events/$eventId'
-import { Route as AuthenticatedOrgOrgIdOfficerElectionsNewRouteImport } from './routes/_authenticated/org/$orgId/officer/elections/new'
-import { Route as AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteImport } from './routes/_authenticated/org/$orgId/officer/elections/$electionId'
-import { Route as AuthenticatedOrgOrgIdOfficerCommunicationsNewRouteImport } from './routes/_authenticated/org/$orgId/officer/communications/new'
-import { Route as AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRouteImport } from './routes/_authenticated/org/$orgId/officer/communications/$announcementId'
-import { Route as AuthenticatedOrgOrgIdElectionsElectionIdVoteRouteImport } from './routes/_authenticated/org/$orgId/elections/$electionId/vote'
-import { Route as AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRouteImport } from './routes/_authenticated/org/$orgId/officer/training/$trainingId/attendance'
-import { Route as AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRouteImport } from './routes/_authenticated/org/$orgId/officer/events/$eventId/attendance'
-import { Route as AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRouteImport } from './routes/_authenticated/org/$orgId/officer/elections/$electionId/edit'
+import { Route as AuthenticatedOrgOrgSlugTrainingIndexRouteImport } from './routes/_authenticated/org/$orgSlug/training/index'
+import { Route as AuthenticatedOrgOrgSlugEventsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/events/index'
+import { Route as AuthenticatedOrgOrgSlugElectionsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/elections/index'
+import { Route as AuthenticatedOrgOrgSlugTrainingTrainingIdRouteImport } from './routes/_authenticated/org/$orgSlug/training/$trainingId'
+import { Route as AuthenticatedOrgOrgSlugOfficerRosterRouteImport } from './routes/_authenticated/org/$orgSlug/officer/roster'
+import { Route as AuthenticatedOrgOrgSlugOfficerPaymentsRouteImport } from './routes/_authenticated/org/$orgSlug/officer/payments'
+import { Route as AuthenticatedOrgOrgSlugOfficerOfficersRouteImport } from './routes/_authenticated/org/$orgSlug/officer/officers'
+import { Route as AuthenticatedOrgOrgSlugOfficerDashboardRouteImport } from './routes/_authenticated/org/$orgSlug/officer/dashboard'
+import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications'
+import { Route as AuthenticatedOrgOrgSlugOfficerApplicationsRouteImport } from './routes/_authenticated/org/$orgSlug/officer/applications'
+import { Route as AuthenticatedOrgOrgSlugEventsEventIdRouteImport } from './routes/_authenticated/org/$orgSlug/events/$eventId'
+import { Route as AuthenticatedOrgOrgSlugOfficerTrainingIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/training/index'
+import { Route as AuthenticatedOrgOrgSlugOfficerRosterIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/roster/index'
+import { Route as AuthenticatedOrgOrgSlugOfficerPaymentsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/payments/index'
+import { Route as AuthenticatedOrgOrgSlugOfficerEventsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/events/index'
+import { Route as AuthenticatedOrgOrgSlugOfficerElectionsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/elections/index'
+import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications/index'
+import { Route as AuthenticatedOrgOrgSlugElectionsElectionIdIndexRouteImport } from './routes/_authenticated/org/$orgSlug/elections/$electionId/index'
+import { Route as AuthenticatedOrgOrgSlugOfficerTrainingNewRouteImport } from './routes/_authenticated/org/$orgSlug/officer/training/new'
+import { Route as AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/training/$trainingId'
+import { Route as AuthenticatedOrgOrgSlugOfficerSettingsProvidersRouteImport } from './routes/_authenticated/org/$orgSlug/officer/settings/providers'
+import { Route as AuthenticatedOrgOrgSlugOfficerSettingsOrgRouteImport } from './routes/_authenticated/org/$orgSlug/officer/settings/org'
+import { Route as AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRouteImport } from './routes/_authenticated/org/$orgSlug/officer/settings/membership-categories'
+import { Route as AuthenticatedOrgOrgSlugOfficerSettingsGatewayRouteImport } from './routes/_authenticated/org/$orgSlug/officer/settings/gateway'
+import { Route as AuthenticatedOrgOrgSlugOfficerSettingsFundsRouteImport } from './routes/_authenticated/org/$orgSlug/officer/settings/funds'
+import { Route as AuthenticatedOrgOrgSlugOfficerSettingsDuesRouteImport } from './routes/_authenticated/org/$orgSlug/officer/settings/dues'
+import { Route as AuthenticatedOrgOrgSlugOfficerSettingsChaptersRouteImport } from './routes/_authenticated/org/$orgSlug/officer/settings/chapters'
+import { Route as AuthenticatedOrgOrgSlugOfficerRosterImportRouteImport } from './routes/_authenticated/org/$orgSlug/officer/roster/import'
+import { Route as AuthenticatedOrgOrgSlugOfficerRosterMemberIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/roster/$memberId'
+import { Route as AuthenticatedOrgOrgSlugOfficerReportsFinancialRouteImport } from './routes/_authenticated/org/$orgSlug/officer/reports/financial'
+import { Route as AuthenticatedOrgOrgSlugOfficerReportsCreditsRouteImport } from './routes/_authenticated/org/$orgSlug/officer/reports/credits'
+import { Route as AuthenticatedOrgOrgSlugOfficerPaymentsNewRouteImport } from './routes/_authenticated/org/$orgSlug/officer/payments/new'
+import { Route as AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/payments/$paymentId'
+import { Route as AuthenticatedOrgOrgSlugOfficerEventsNewRouteImport } from './routes/_authenticated/org/$orgSlug/officer/events/new'
+import { Route as AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/events/$eventId'
+import { Route as AuthenticatedOrgOrgSlugOfficerElectionsNewRouteImport } from './routes/_authenticated/org/$orgSlug/officer/elections/new'
+import { Route as AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/elections/$electionId'
+import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsNewRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications/new'
+import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications/$announcementId'
+import { Route as AuthenticatedOrgOrgSlugElectionsElectionIdVoteRouteImport } from './routes/_authenticated/org/$orgSlug/elections/$electionId/vote'
+import { Route as AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRouteImport } from './routes/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance'
+import { Route as AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRouteImport } from './routes/_authenticated/org/$orgSlug/officer/events/$eventId/attendance'
+import { Route as AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRouteImport } from './routes/_authenticated/org/$orgSlug/officer/elections/$electionId/edit'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
@@ -171,6 +172,12 @@ const AuthenticatedMyDataExportRoute =
     path: '/my/data-export',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedOrgOrgSlugRouteRoute =
+  AuthenticatedOrgOrgSlugRouteRouteImport.update({
+    id: '/org/$orgSlug',
+    path: '/org/$orgSlug',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedMyCreditsIndexRoute =
   AuthenticatedMyCreditsIndexRouteImport.update({
     id: '/my/credits/',
@@ -183,29 +190,29 @@ const AuthenticatedMyCertificatesIndexRoute =
     path: '/my/certificates/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerRoute =
-  AuthenticatedOrgOrgIdOfficerRouteImport.update({
-    id: '/org/$orgId/officer',
-    path: '/org/$orgId/officer',
-    getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedOrgOrgSlugOfficerRoute =
+  AuthenticatedOrgOrgSlugOfficerRouteImport.update({
+    id: '/officer',
+    path: '/officer',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdMembersRoute =
-  AuthenticatedOrgOrgIdMembersRouteImport.update({
-    id: '/org/$orgId/members',
-    path: '/org/$orgId/members',
-    getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedOrgOrgSlugMembersRoute =
+  AuthenticatedOrgOrgSlugMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdHomeRoute =
-  AuthenticatedOrgOrgIdHomeRouteImport.update({
-    id: '/org/$orgId/home',
-    path: '/org/$orgId/home',
-    getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedOrgOrgSlugHomeRoute =
+  AuthenticatedOrgOrgSlugHomeRouteImport.update({
+    id: '/home',
+    path: '/home',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdDuesRoute =
-  AuthenticatedOrgOrgIdDuesRouteImport.update({
-    id: '/org/$orgId/dues',
-    path: '/org/$orgId/dues',
-    getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedOrgOrgSlugDuesRoute =
+  AuthenticatedOrgOrgSlugDuesRouteImport.update({
+    id: '/dues',
+    path: '/dues',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
 const AuthenticatedMyCreditsLogRoute =
   AuthenticatedMyCreditsLogRouteImport.update({
@@ -219,263 +226,264 @@ const AuthenticatedMyCertificatesCertificateIdRoute =
     path: '/my/certificates/$certificateId',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedOrgOrgIdTrainingIndexRoute =
-  AuthenticatedOrgOrgIdTrainingIndexRouteImport.update({
-    id: '/org/$orgId/training/',
-    path: '/org/$orgId/training/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedOrgOrgIdEventsIndexRoute =
-  AuthenticatedOrgOrgIdEventsIndexRouteImport.update({
-    id: '/org/$orgId/events/',
-    path: '/org/$orgId/events/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedOrgOrgIdElectionsIndexRoute =
-  AuthenticatedOrgOrgIdElectionsIndexRouteImport.update({
-    id: '/org/$orgId/elections/',
-    path: '/org/$orgId/elections/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedOrgOrgIdTrainingTrainingIdRoute =
-  AuthenticatedOrgOrgIdTrainingTrainingIdRouteImport.update({
-    id: '/org/$orgId/training/$trainingId',
-    path: '/org/$orgId/training/$trainingId',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerRosterRoute =
-  AuthenticatedOrgOrgIdOfficerRosterRouteImport.update({
-    id: '/roster',
-    path: '/roster',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerPaymentsRoute =
-  AuthenticatedOrgOrgIdOfficerPaymentsRouteImport.update({
-    id: '/payments',
-    path: '/payments',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerOfficersRoute =
-  AuthenticatedOrgOrgIdOfficerOfficersRouteImport.update({
-    id: '/officers',
-    path: '/officers',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerDashboardRoute =
-  AuthenticatedOrgOrgIdOfficerDashboardRouteImport.update({
-    id: '/dashboard',
-    path: '/dashboard',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerCommunicationsRoute =
-  AuthenticatedOrgOrgIdOfficerCommunicationsRouteImport.update({
-    id: '/communications',
-    path: '/communications',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerApplicationsRoute =
-  AuthenticatedOrgOrgIdOfficerApplicationsRouteImport.update({
-    id: '/applications',
-    path: '/applications',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdEventsEventIdRoute =
-  AuthenticatedOrgOrgIdEventsEventIdRouteImport.update({
-    id: '/org/$orgId/events/$eventId',
-    path: '/org/$orgId/events/$eventId',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerTrainingIndexRoute =
-  AuthenticatedOrgOrgIdOfficerTrainingIndexRouteImport.update({
+const AuthenticatedOrgOrgSlugTrainingIndexRoute =
+  AuthenticatedOrgOrgSlugTrainingIndexRouteImport.update({
     id: '/training/',
     path: '/training/',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerRosterIndexRoute =
-  AuthenticatedOrgOrgIdOfficerRosterIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRosterRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerPaymentsIndexRoute =
-  AuthenticatedOrgOrgIdOfficerPaymentsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerPaymentsRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerEventsIndexRoute =
-  AuthenticatedOrgOrgIdOfficerEventsIndexRouteImport.update({
+const AuthenticatedOrgOrgSlugEventsIndexRoute =
+  AuthenticatedOrgOrgSlugEventsIndexRouteImport.update({
     id: '/events/',
     path: '/events/',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerElectionsIndexRoute =
-  AuthenticatedOrgOrgIdOfficerElectionsIndexRouteImport.update({
+const AuthenticatedOrgOrgSlugElectionsIndexRoute =
+  AuthenticatedOrgOrgSlugElectionsIndexRouteImport.update({
     id: '/elections/',
     path: '/elections/',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute =
-  AuthenticatedOrgOrgIdOfficerCommunicationsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerCommunicationsRoute,
-  } as any)
-const AuthenticatedOrgOrgIdElectionsElectionIdIndexRoute =
-  AuthenticatedOrgOrgIdElectionsElectionIdIndexRouteImport.update({
-    id: '/org/$orgId/elections/$electionId/',
-    path: '/org/$orgId/elections/$electionId/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerTrainingNewRoute =
-  AuthenticatedOrgOrgIdOfficerTrainingNewRouteImport.update({
-    id: '/training/new',
-    path: '/training/new',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute =
-  AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteImport.update({
+const AuthenticatedOrgOrgSlugTrainingTrainingIdRoute =
+  AuthenticatedOrgOrgSlugTrainingTrainingIdRouteImport.update({
     id: '/training/$trainingId',
     path: '/training/$trainingId',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute =
-  AuthenticatedOrgOrgIdOfficerSettingsProvidersRouteImport.update({
-    id: '/settings/providers',
-    path: '/settings/providers',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+const AuthenticatedOrgOrgSlugOfficerRosterRoute =
+  AuthenticatedOrgOrgSlugOfficerRosterRouteImport.update({
+    id: '/roster',
+    path: '/roster',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerSettingsOrgRoute =
-  AuthenticatedOrgOrgIdOfficerSettingsOrgRouteImport.update({
-    id: '/settings/org',
-    path: '/settings/org',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+const AuthenticatedOrgOrgSlugOfficerPaymentsRoute =
+  AuthenticatedOrgOrgSlugOfficerPaymentsRouteImport.update({
+    id: '/payments',
+    path: '/payments',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute =
-  AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRouteImport.update({
-    id: '/settings/membership-categories',
-    path: '/settings/membership-categories',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+const AuthenticatedOrgOrgSlugOfficerOfficersRoute =
+  AuthenticatedOrgOrgSlugOfficerOfficersRouteImport.update({
+    id: '/officers',
+    path: '/officers',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute =
-  AuthenticatedOrgOrgIdOfficerSettingsGatewayRouteImport.update({
-    id: '/settings/gateway',
-    path: '/settings/gateway',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+const AuthenticatedOrgOrgSlugOfficerDashboardRoute =
+  AuthenticatedOrgOrgSlugOfficerDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerSettingsFundsRoute =
-  AuthenticatedOrgOrgIdOfficerSettingsFundsRouteImport.update({
-    id: '/settings/funds',
-    path: '/settings/funds',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+const AuthenticatedOrgOrgSlugOfficerCommunicationsRoute =
+  AuthenticatedOrgOrgSlugOfficerCommunicationsRouteImport.update({
+    id: '/communications',
+    path: '/communications',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerSettingsDuesRoute =
-  AuthenticatedOrgOrgIdOfficerSettingsDuesRouteImport.update({
-    id: '/settings/dues',
-    path: '/settings/dues',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+const AuthenticatedOrgOrgSlugOfficerApplicationsRoute =
+  AuthenticatedOrgOrgSlugOfficerApplicationsRouteImport.update({
+    id: '/applications',
+    path: '/applications',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute =
-  AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport.update({
-    id: '/settings/chapters',
-    path: '/settings/chapters',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerRosterImportRoute =
-  AuthenticatedOrgOrgIdOfficerRosterImportRouteImport.update({
-    id: '/import',
-    path: '/import',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRosterRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute =
-  AuthenticatedOrgOrgIdOfficerRosterMemberIdRouteImport.update({
-    id: '/$memberId',
-    path: '/$memberId',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRosterRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerReportsFinancialRoute =
-  AuthenticatedOrgOrgIdOfficerReportsFinancialRouteImport.update({
-    id: '/reports/financial',
-    path: '/reports/financial',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerReportsCreditsRoute =
-  AuthenticatedOrgOrgIdOfficerReportsCreditsRouteImport.update({
-    id: '/reports/credits',
-    path: '/reports/credits',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerPaymentsNewRoute =
-  AuthenticatedOrgOrgIdOfficerPaymentsNewRouteImport.update({
-    id: '/new',
-    path: '/new',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerPaymentsRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute =
-  AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRouteImport.update({
-    id: '/$paymentId',
-    path: '/$paymentId',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerPaymentsRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerEventsNewRoute =
-  AuthenticatedOrgOrgIdOfficerEventsNewRouteImport.update({
-    id: '/events/new',
-    path: '/events/new',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
-  } as any)
-const AuthenticatedOrgOrgIdOfficerEventsEventIdRoute =
-  AuthenticatedOrgOrgIdOfficerEventsEventIdRouteImport.update({
+const AuthenticatedOrgOrgSlugEventsEventIdRoute =
+  AuthenticatedOrgOrgSlugEventsEventIdRouteImport.update({
     id: '/events/$eventId',
     path: '/events/$eventId',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerElectionsNewRoute =
-  AuthenticatedOrgOrgIdOfficerElectionsNewRouteImport.update({
-    id: '/elections/new',
-    path: '/elections/new',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+const AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute =
+  AuthenticatedOrgOrgSlugOfficerTrainingIndexRouteImport.update({
+    id: '/training/',
+    path: '/training/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerElectionsElectionIdRoute =
-  AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteImport.update({
-    id: '/elections/$electionId',
-    path: '/elections/$electionId',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerRoute,
+const AuthenticatedOrgOrgSlugOfficerRosterIndexRoute =
+  AuthenticatedOrgOrgSlugOfficerRosterIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRosterRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerCommunicationsNewRoute =
-  AuthenticatedOrgOrgIdOfficerCommunicationsNewRouteImport.update({
+const AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute =
+  AuthenticatedOrgOrgSlugOfficerPaymentsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerPaymentsRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerEventsIndexRoute =
+  AuthenticatedOrgOrgSlugOfficerEventsIndexRouteImport.update({
+    id: '/events/',
+    path: '/events/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute =
+  AuthenticatedOrgOrgSlugOfficerElectionsIndexRouteImport.update({
+    id: '/elections/',
+    path: '/elections/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRoute =
+  AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerCommunicationsRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute =
+  AuthenticatedOrgOrgSlugElectionsElectionIdIndexRouteImport.update({
+    id: '/elections/$electionId/',
+    path: '/elections/$electionId/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerTrainingNewRoute =
+  AuthenticatedOrgOrgSlugOfficerTrainingNewRouteImport.update({
+    id: '/training/new',
+    path: '/training/new',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRoute =
+  AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteImport.update({
+    id: '/training/$trainingId',
+    path: '/training/$trainingId',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerSettingsProvidersRoute =
+  AuthenticatedOrgOrgSlugOfficerSettingsProvidersRouteImport.update({
+    id: '/settings/providers',
+    path: '/settings/providers',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerSettingsOrgRoute =
+  AuthenticatedOrgOrgSlugOfficerSettingsOrgRouteImport.update({
+    id: '/settings/org',
+    path: '/settings/org',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRoute =
+  AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRouteImport.update({
+    id: '/settings/membership-categories',
+    path: '/settings/membership-categories',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerSettingsGatewayRoute =
+  AuthenticatedOrgOrgSlugOfficerSettingsGatewayRouteImport.update({
+    id: '/settings/gateway',
+    path: '/settings/gateway',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerSettingsFundsRoute =
+  AuthenticatedOrgOrgSlugOfficerSettingsFundsRouteImport.update({
+    id: '/settings/funds',
+    path: '/settings/funds',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerSettingsDuesRoute =
+  AuthenticatedOrgOrgSlugOfficerSettingsDuesRouteImport.update({
+    id: '/settings/dues',
+    path: '/settings/dues',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerSettingsChaptersRoute =
+  AuthenticatedOrgOrgSlugOfficerSettingsChaptersRouteImport.update({
+    id: '/settings/chapters',
+    path: '/settings/chapters',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerRosterImportRoute =
+  AuthenticatedOrgOrgSlugOfficerRosterImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRosterRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerRosterMemberIdRoute =
+  AuthenticatedOrgOrgSlugOfficerRosterMemberIdRouteImport.update({
+    id: '/$memberId',
+    path: '/$memberId',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRosterRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute =
+  AuthenticatedOrgOrgSlugOfficerReportsFinancialRouteImport.update({
+    id: '/reports/financial',
+    path: '/reports/financial',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute =
+  AuthenticatedOrgOrgSlugOfficerReportsCreditsRouteImport.update({
+    id: '/reports/credits',
+    path: '/reports/credits',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute =
+  AuthenticatedOrgOrgSlugOfficerPaymentsNewRouteImport.update({
     id: '/new',
     path: '/new',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerCommunicationsRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerPaymentsRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRoute =
-  AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRouteImport.update({
+const AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute =
+  AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRouteImport.update({
+    id: '/$paymentId',
+    path: '/$paymentId',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerPaymentsRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerEventsNewRoute =
+  AuthenticatedOrgOrgSlugOfficerEventsNewRouteImport.update({
+    id: '/events/new',
+    path: '/events/new',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerEventsEventIdRoute =
+  AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteImport.update({
+    id: '/events/$eventId',
+    path: '/events/$eventId',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerElectionsNewRoute =
+  AuthenticatedOrgOrgSlugOfficerElectionsNewRouteImport.update({
+    id: '/elections/new',
+    path: '/elections/new',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRoute =
+  AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteImport.update({
+    id: '/elections/$electionId',
+    path: '/elections/$electionId',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute =
+  AuthenticatedOrgOrgSlugOfficerCommunicationsNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerCommunicationsRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute =
+  AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRouteImport.update({
     id: '/$announcementId',
     path: '/$announcementId',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerCommunicationsRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerCommunicationsRoute,
   } as any)
-const AuthenticatedOrgOrgIdElectionsElectionIdVoteRoute =
-  AuthenticatedOrgOrgIdElectionsElectionIdVoteRouteImport.update({
-    id: '/org/$orgId/elections/$electionId/vote',
-    path: '/org/$orgId/elections/$electionId/vote',
-    getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute =
+  AuthenticatedOrgOrgSlugElectionsElectionIdVoteRouteImport.update({
+    id: '/elections/$electionId/vote',
+    path: '/elections/$electionId/vote',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRoute =
-  AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRouteImport.update({
+const AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute =
+  AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRouteImport.update({
     id: '/attendance',
     path: '/attendance',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRoute =
-  AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRouteImport.update({
+const AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute =
+  AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRouteImport.update({
     id: '/attendance',
     path: '/attendance',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerEventsEventIdRoute,
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerEventsEventIdRoute,
   } as any)
-const AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRoute =
-  AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRouteImport.update({
+const AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute =
+  AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRouteImport.update({
     id: '/edit',
     path: '/edit',
-    getParentRoute: () => AuthenticatedOrgOrgIdOfficerElectionsElectionIdRoute,
+    getParentRoute: () =>
+      AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -487,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/my/data-export': typeof AuthenticatedMyDataExportRoute
   '/my/events': typeof AuthenticatedMyEventsRoute
   '/my/id-card': typeof AuthenticatedMyIdCardRoute
@@ -498,55 +507,55 @@ export interface FileRoutesByFullPath {
   '/my/training': typeof AuthenticatedMyTrainingRoute
   '/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
-  '/org/$orgId/dues': typeof AuthenticatedOrgOrgIdDuesRoute
-  '/org/$orgId/home': typeof AuthenticatedOrgOrgIdHomeRoute
-  '/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
-  '/org/$orgId/officer': typeof AuthenticatedOrgOrgIdOfficerRouteWithChildren
+  '/org/$orgSlug/dues': typeof AuthenticatedOrgOrgSlugDuesRoute
+  '/org/$orgSlug/home': typeof AuthenticatedOrgOrgSlugHomeRoute
+  '/org/$orgSlug/members': typeof AuthenticatedOrgOrgSlugMembersRoute
+  '/org/$orgSlug/officer': typeof AuthenticatedOrgOrgSlugOfficerRouteWithChildren
   '/my/certificates': typeof AuthenticatedMyCertificatesIndexRoute
   '/my/credits': typeof AuthenticatedMyCreditsIndexRoute
-  '/org/$orgId/events/$eventId': typeof AuthenticatedOrgOrgIdEventsEventIdRoute
-  '/org/$orgId/officer/applications': typeof AuthenticatedOrgOrgIdOfficerApplicationsRoute
-  '/org/$orgId/officer/communications': typeof AuthenticatedOrgOrgIdOfficerCommunicationsRouteWithChildren
-  '/org/$orgId/officer/dashboard': typeof AuthenticatedOrgOrgIdOfficerDashboardRoute
-  '/org/$orgId/officer/officers': typeof AuthenticatedOrgOrgIdOfficerOfficersRoute
-  '/org/$orgId/officer/payments': typeof AuthenticatedOrgOrgIdOfficerPaymentsRouteWithChildren
-  '/org/$orgId/officer/roster': typeof AuthenticatedOrgOrgIdOfficerRosterRouteWithChildren
-  '/org/$orgId/training/$trainingId': typeof AuthenticatedOrgOrgIdTrainingTrainingIdRoute
-  '/org/$orgId/elections': typeof AuthenticatedOrgOrgIdElectionsIndexRoute
-  '/org/$orgId/events': typeof AuthenticatedOrgOrgIdEventsIndexRoute
-  '/org/$orgId/training': typeof AuthenticatedOrgOrgIdTrainingIndexRoute
-  '/org/$orgId/elections/$electionId/vote': typeof AuthenticatedOrgOrgIdElectionsElectionIdVoteRoute
-  '/org/$orgId/officer/communications/$announcementId': typeof AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRoute
-  '/org/$orgId/officer/communications/new': typeof AuthenticatedOrgOrgIdOfficerCommunicationsNewRoute
-  '/org/$orgId/officer/elections/$electionId': typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteWithChildren
-  '/org/$orgId/officer/elections/new': typeof AuthenticatedOrgOrgIdOfficerElectionsNewRoute
-  '/org/$orgId/officer/events/$eventId': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRouteWithChildren
-  '/org/$orgId/officer/events/new': typeof AuthenticatedOrgOrgIdOfficerEventsNewRoute
-  '/org/$orgId/officer/payments/$paymentId': typeof AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute
-  '/org/$orgId/officer/payments/new': typeof AuthenticatedOrgOrgIdOfficerPaymentsNewRoute
-  '/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
-  '/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
-  '/org/$orgId/officer/roster/$memberId': typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute
-  '/org/$orgId/officer/roster/import': typeof AuthenticatedOrgOrgIdOfficerRosterImportRoute
-  '/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
-  '/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
-  '/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
-  '/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
-  '/org/$orgId/officer/settings/membership-categories': typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute
-  '/org/$orgId/officer/settings/org': typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRoute
-  '/org/$orgId/officer/settings/providers': typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute
-  '/org/$orgId/officer/training/$trainingId': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren
-  '/org/$orgId/officer/training/new': typeof AuthenticatedOrgOrgIdOfficerTrainingNewRoute
-  '/org/$orgId/elections/$electionId': typeof AuthenticatedOrgOrgIdElectionsElectionIdIndexRoute
-  '/org/$orgId/officer/communications/': typeof AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute
-  '/org/$orgId/officer/elections': typeof AuthenticatedOrgOrgIdOfficerElectionsIndexRoute
-  '/org/$orgId/officer/events': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
-  '/org/$orgId/officer/payments/': typeof AuthenticatedOrgOrgIdOfficerPaymentsIndexRoute
-  '/org/$orgId/officer/roster/': typeof AuthenticatedOrgOrgIdOfficerRosterIndexRoute
-  '/org/$orgId/officer/training': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
-  '/org/$orgId/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRoute
-  '/org/$orgId/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRoute
-  '/org/$orgId/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRoute
+  '/org/$orgSlug/events/$eventId': typeof AuthenticatedOrgOrgSlugEventsEventIdRoute
+  '/org/$orgSlug/officer/applications': typeof AuthenticatedOrgOrgSlugOfficerApplicationsRoute
+  '/org/$orgSlug/officer/communications': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRouteWithChildren
+  '/org/$orgSlug/officer/dashboard': typeof AuthenticatedOrgOrgSlugOfficerDashboardRoute
+  '/org/$orgSlug/officer/officers': typeof AuthenticatedOrgOrgSlugOfficerOfficersRoute
+  '/org/$orgSlug/officer/payments': typeof AuthenticatedOrgOrgSlugOfficerPaymentsRouteWithChildren
+  '/org/$orgSlug/officer/roster': typeof AuthenticatedOrgOrgSlugOfficerRosterRouteWithChildren
+  '/org/$orgSlug/training/$trainingId': typeof AuthenticatedOrgOrgSlugTrainingTrainingIdRoute
+  '/org/$orgSlug/elections': typeof AuthenticatedOrgOrgSlugElectionsIndexRoute
+  '/org/$orgSlug/events': typeof AuthenticatedOrgOrgSlugEventsIndexRoute
+  '/org/$orgSlug/training': typeof AuthenticatedOrgOrgSlugTrainingIndexRoute
+  '/org/$orgSlug/elections/$electionId/vote': typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute
+  '/org/$orgSlug/officer/communications/$announcementId': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute
+  '/org/$orgSlug/officer/communications/new': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute
+  '/org/$orgSlug/officer/elections/$electionId': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren
+  '/org/$orgSlug/officer/elections/new': typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRoute
+  '/org/$orgSlug/officer/events/$eventId': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteWithChildren
+  '/org/$orgSlug/officer/events/new': typeof AuthenticatedOrgOrgSlugOfficerEventsNewRoute
+  '/org/$orgSlug/officer/payments/$paymentId': typeof AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute
+  '/org/$orgSlug/officer/payments/new': typeof AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute
+  '/org/$orgSlug/officer/reports/credits': typeof AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute
+  '/org/$orgSlug/officer/reports/financial': typeof AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute
+  '/org/$orgSlug/officer/roster/$memberId': typeof AuthenticatedOrgOrgSlugOfficerRosterMemberIdRoute
+  '/org/$orgSlug/officer/roster/import': typeof AuthenticatedOrgOrgSlugOfficerRosterImportRoute
+  '/org/$orgSlug/officer/settings/chapters': typeof AuthenticatedOrgOrgSlugOfficerSettingsChaptersRoute
+  '/org/$orgSlug/officer/settings/dues': typeof AuthenticatedOrgOrgSlugOfficerSettingsDuesRoute
+  '/org/$orgSlug/officer/settings/funds': typeof AuthenticatedOrgOrgSlugOfficerSettingsFundsRoute
+  '/org/$orgSlug/officer/settings/gateway': typeof AuthenticatedOrgOrgSlugOfficerSettingsGatewayRoute
+  '/org/$orgSlug/officer/settings/membership-categories': typeof AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRoute
+  '/org/$orgSlug/officer/settings/org': typeof AuthenticatedOrgOrgSlugOfficerSettingsOrgRoute
+  '/org/$orgSlug/officer/settings/providers': typeof AuthenticatedOrgOrgSlugOfficerSettingsProvidersRoute
+  '/org/$orgSlug/officer/training/$trainingId': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteWithChildren
+  '/org/$orgSlug/officer/training/new': typeof AuthenticatedOrgOrgSlugOfficerTrainingNewRoute
+  '/org/$orgSlug/elections/$electionId': typeof AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute
+  '/org/$orgSlug/officer/communications/': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRoute
+  '/org/$orgSlug/officer/elections': typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute
+  '/org/$orgSlug/officer/events': typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRoute
+  '/org/$orgSlug/officer/payments/': typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute
+  '/org/$orgSlug/officer/roster/': typeof AuthenticatedOrgOrgSlugOfficerRosterIndexRoute
+  '/org/$orgSlug/officer/training': typeof AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute
+  '/org/$orgSlug/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute
+  '/org/$orgSlug/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute
+  '/org/$orgSlug/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -557,6 +566,7 @@ export interface FileRoutesByTo {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/my/data-export': typeof AuthenticatedMyDataExportRoute
   '/my/events': typeof AuthenticatedMyEventsRoute
   '/my/id-card': typeof AuthenticatedMyIdCardRoute
@@ -568,52 +578,52 @@ export interface FileRoutesByTo {
   '/my/training': typeof AuthenticatedMyTrainingRoute
   '/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
-  '/org/$orgId/dues': typeof AuthenticatedOrgOrgIdDuesRoute
-  '/org/$orgId/home': typeof AuthenticatedOrgOrgIdHomeRoute
-  '/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
-  '/org/$orgId/officer': typeof AuthenticatedOrgOrgIdOfficerRouteWithChildren
+  '/org/$orgSlug/dues': typeof AuthenticatedOrgOrgSlugDuesRoute
+  '/org/$orgSlug/home': typeof AuthenticatedOrgOrgSlugHomeRoute
+  '/org/$orgSlug/members': typeof AuthenticatedOrgOrgSlugMembersRoute
+  '/org/$orgSlug/officer': typeof AuthenticatedOrgOrgSlugOfficerRouteWithChildren
   '/my/certificates': typeof AuthenticatedMyCertificatesIndexRoute
   '/my/credits': typeof AuthenticatedMyCreditsIndexRoute
-  '/org/$orgId/events/$eventId': typeof AuthenticatedOrgOrgIdEventsEventIdRoute
-  '/org/$orgId/officer/applications': typeof AuthenticatedOrgOrgIdOfficerApplicationsRoute
-  '/org/$orgId/officer/dashboard': typeof AuthenticatedOrgOrgIdOfficerDashboardRoute
-  '/org/$orgId/officer/officers': typeof AuthenticatedOrgOrgIdOfficerOfficersRoute
-  '/org/$orgId/training/$trainingId': typeof AuthenticatedOrgOrgIdTrainingTrainingIdRoute
-  '/org/$orgId/elections': typeof AuthenticatedOrgOrgIdElectionsIndexRoute
-  '/org/$orgId/events': typeof AuthenticatedOrgOrgIdEventsIndexRoute
-  '/org/$orgId/training': typeof AuthenticatedOrgOrgIdTrainingIndexRoute
-  '/org/$orgId/elections/$electionId/vote': typeof AuthenticatedOrgOrgIdElectionsElectionIdVoteRoute
-  '/org/$orgId/officer/communications/$announcementId': typeof AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRoute
-  '/org/$orgId/officer/communications/new': typeof AuthenticatedOrgOrgIdOfficerCommunicationsNewRoute
-  '/org/$orgId/officer/elections/$electionId': typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteWithChildren
-  '/org/$orgId/officer/elections/new': typeof AuthenticatedOrgOrgIdOfficerElectionsNewRoute
-  '/org/$orgId/officer/events/$eventId': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRouteWithChildren
-  '/org/$orgId/officer/events/new': typeof AuthenticatedOrgOrgIdOfficerEventsNewRoute
-  '/org/$orgId/officer/payments/$paymentId': typeof AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute
-  '/org/$orgId/officer/payments/new': typeof AuthenticatedOrgOrgIdOfficerPaymentsNewRoute
-  '/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
-  '/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
-  '/org/$orgId/officer/roster/$memberId': typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute
-  '/org/$orgId/officer/roster/import': typeof AuthenticatedOrgOrgIdOfficerRosterImportRoute
-  '/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
-  '/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
-  '/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
-  '/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
-  '/org/$orgId/officer/settings/membership-categories': typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute
-  '/org/$orgId/officer/settings/org': typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRoute
-  '/org/$orgId/officer/settings/providers': typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute
-  '/org/$orgId/officer/training/$trainingId': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren
-  '/org/$orgId/officer/training/new': typeof AuthenticatedOrgOrgIdOfficerTrainingNewRoute
-  '/org/$orgId/elections/$electionId': typeof AuthenticatedOrgOrgIdElectionsElectionIdIndexRoute
-  '/org/$orgId/officer/communications': typeof AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute
-  '/org/$orgId/officer/elections': typeof AuthenticatedOrgOrgIdOfficerElectionsIndexRoute
-  '/org/$orgId/officer/events': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
-  '/org/$orgId/officer/payments': typeof AuthenticatedOrgOrgIdOfficerPaymentsIndexRoute
-  '/org/$orgId/officer/roster': typeof AuthenticatedOrgOrgIdOfficerRosterIndexRoute
-  '/org/$orgId/officer/training': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
-  '/org/$orgId/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRoute
-  '/org/$orgId/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRoute
-  '/org/$orgId/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRoute
+  '/org/$orgSlug/events/$eventId': typeof AuthenticatedOrgOrgSlugEventsEventIdRoute
+  '/org/$orgSlug/officer/applications': typeof AuthenticatedOrgOrgSlugOfficerApplicationsRoute
+  '/org/$orgSlug/officer/dashboard': typeof AuthenticatedOrgOrgSlugOfficerDashboardRoute
+  '/org/$orgSlug/officer/officers': typeof AuthenticatedOrgOrgSlugOfficerOfficersRoute
+  '/org/$orgSlug/training/$trainingId': typeof AuthenticatedOrgOrgSlugTrainingTrainingIdRoute
+  '/org/$orgSlug/elections': typeof AuthenticatedOrgOrgSlugElectionsIndexRoute
+  '/org/$orgSlug/events': typeof AuthenticatedOrgOrgSlugEventsIndexRoute
+  '/org/$orgSlug/training': typeof AuthenticatedOrgOrgSlugTrainingIndexRoute
+  '/org/$orgSlug/elections/$electionId/vote': typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute
+  '/org/$orgSlug/officer/communications/$announcementId': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute
+  '/org/$orgSlug/officer/communications/new': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute
+  '/org/$orgSlug/officer/elections/$electionId': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren
+  '/org/$orgSlug/officer/elections/new': typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRoute
+  '/org/$orgSlug/officer/events/$eventId': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteWithChildren
+  '/org/$orgSlug/officer/events/new': typeof AuthenticatedOrgOrgSlugOfficerEventsNewRoute
+  '/org/$orgSlug/officer/payments/$paymentId': typeof AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute
+  '/org/$orgSlug/officer/payments/new': typeof AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute
+  '/org/$orgSlug/officer/reports/credits': typeof AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute
+  '/org/$orgSlug/officer/reports/financial': typeof AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute
+  '/org/$orgSlug/officer/roster/$memberId': typeof AuthenticatedOrgOrgSlugOfficerRosterMemberIdRoute
+  '/org/$orgSlug/officer/roster/import': typeof AuthenticatedOrgOrgSlugOfficerRosterImportRoute
+  '/org/$orgSlug/officer/settings/chapters': typeof AuthenticatedOrgOrgSlugOfficerSettingsChaptersRoute
+  '/org/$orgSlug/officer/settings/dues': typeof AuthenticatedOrgOrgSlugOfficerSettingsDuesRoute
+  '/org/$orgSlug/officer/settings/funds': typeof AuthenticatedOrgOrgSlugOfficerSettingsFundsRoute
+  '/org/$orgSlug/officer/settings/gateway': typeof AuthenticatedOrgOrgSlugOfficerSettingsGatewayRoute
+  '/org/$orgSlug/officer/settings/membership-categories': typeof AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRoute
+  '/org/$orgSlug/officer/settings/org': typeof AuthenticatedOrgOrgSlugOfficerSettingsOrgRoute
+  '/org/$orgSlug/officer/settings/providers': typeof AuthenticatedOrgOrgSlugOfficerSettingsProvidersRoute
+  '/org/$orgSlug/officer/training/$trainingId': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteWithChildren
+  '/org/$orgSlug/officer/training/new': typeof AuthenticatedOrgOrgSlugOfficerTrainingNewRoute
+  '/org/$orgSlug/elections/$electionId': typeof AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute
+  '/org/$orgSlug/officer/communications': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRoute
+  '/org/$orgSlug/officer/elections': typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute
+  '/org/$orgSlug/officer/events': typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRoute
+  '/org/$orgSlug/officer/payments': typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute
+  '/org/$orgSlug/officer/roster': typeof AuthenticatedOrgOrgSlugOfficerRosterIndexRoute
+  '/org/$orgSlug/officer/training': typeof AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute
+  '/org/$orgSlug/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute
+  '/org/$orgSlug/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute
+  '/org/$orgSlug/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -626,6 +636,7 @@ export interface FileRoutesById {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/_authenticated/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/_authenticated/my/data-export': typeof AuthenticatedMyDataExportRoute
   '/_authenticated/my/events': typeof AuthenticatedMyEventsRoute
   '/_authenticated/my/id-card': typeof AuthenticatedMyIdCardRoute
@@ -637,55 +648,55 @@ export interface FileRoutesById {
   '/_authenticated/my/training': typeof AuthenticatedMyTrainingRoute
   '/_authenticated/my/certificates/$certificateId': typeof AuthenticatedMyCertificatesCertificateIdRoute
   '/_authenticated/my/credits/log': typeof AuthenticatedMyCreditsLogRoute
-  '/_authenticated/org/$orgId/dues': typeof AuthenticatedOrgOrgIdDuesRoute
-  '/_authenticated/org/$orgId/home': typeof AuthenticatedOrgOrgIdHomeRoute
-  '/_authenticated/org/$orgId/members': typeof AuthenticatedOrgOrgIdMembersRoute
-  '/_authenticated/org/$orgId/officer': typeof AuthenticatedOrgOrgIdOfficerRouteWithChildren
+  '/_authenticated/org/$orgSlug/dues': typeof AuthenticatedOrgOrgSlugDuesRoute
+  '/_authenticated/org/$orgSlug/home': typeof AuthenticatedOrgOrgSlugHomeRoute
+  '/_authenticated/org/$orgSlug/members': typeof AuthenticatedOrgOrgSlugMembersRoute
+  '/_authenticated/org/$orgSlug/officer': typeof AuthenticatedOrgOrgSlugOfficerRouteWithChildren
   '/_authenticated/my/certificates/': typeof AuthenticatedMyCertificatesIndexRoute
   '/_authenticated/my/credits/': typeof AuthenticatedMyCreditsIndexRoute
-  '/_authenticated/org/$orgId/events/$eventId': typeof AuthenticatedOrgOrgIdEventsEventIdRoute
-  '/_authenticated/org/$orgId/officer/applications': typeof AuthenticatedOrgOrgIdOfficerApplicationsRoute
-  '/_authenticated/org/$orgId/officer/communications': typeof AuthenticatedOrgOrgIdOfficerCommunicationsRouteWithChildren
-  '/_authenticated/org/$orgId/officer/dashboard': typeof AuthenticatedOrgOrgIdOfficerDashboardRoute
-  '/_authenticated/org/$orgId/officer/officers': typeof AuthenticatedOrgOrgIdOfficerOfficersRoute
-  '/_authenticated/org/$orgId/officer/payments': typeof AuthenticatedOrgOrgIdOfficerPaymentsRouteWithChildren
-  '/_authenticated/org/$orgId/officer/roster': typeof AuthenticatedOrgOrgIdOfficerRosterRouteWithChildren
-  '/_authenticated/org/$orgId/training/$trainingId': typeof AuthenticatedOrgOrgIdTrainingTrainingIdRoute
-  '/_authenticated/org/$orgId/elections/': typeof AuthenticatedOrgOrgIdElectionsIndexRoute
-  '/_authenticated/org/$orgId/events/': typeof AuthenticatedOrgOrgIdEventsIndexRoute
-  '/_authenticated/org/$orgId/training/': typeof AuthenticatedOrgOrgIdTrainingIndexRoute
-  '/_authenticated/org/$orgId/elections/$electionId/vote': typeof AuthenticatedOrgOrgIdElectionsElectionIdVoteRoute
-  '/_authenticated/org/$orgId/officer/communications/$announcementId': typeof AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRoute
-  '/_authenticated/org/$orgId/officer/communications/new': typeof AuthenticatedOrgOrgIdOfficerCommunicationsNewRoute
-  '/_authenticated/org/$orgId/officer/elections/$electionId': typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteWithChildren
-  '/_authenticated/org/$orgId/officer/elections/new': typeof AuthenticatedOrgOrgIdOfficerElectionsNewRoute
-  '/_authenticated/org/$orgId/officer/events/$eventId': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRouteWithChildren
-  '/_authenticated/org/$orgId/officer/events/new': typeof AuthenticatedOrgOrgIdOfficerEventsNewRoute
-  '/_authenticated/org/$orgId/officer/payments/$paymentId': typeof AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute
-  '/_authenticated/org/$orgId/officer/payments/new': typeof AuthenticatedOrgOrgIdOfficerPaymentsNewRoute
-  '/_authenticated/org/$orgId/officer/reports/credits': typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
-  '/_authenticated/org/$orgId/officer/reports/financial': typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
-  '/_authenticated/org/$orgId/officer/roster/$memberId': typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute
-  '/_authenticated/org/$orgId/officer/roster/import': typeof AuthenticatedOrgOrgIdOfficerRosterImportRoute
-  '/_authenticated/org/$orgId/officer/settings/chapters': typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
-  '/_authenticated/org/$orgId/officer/settings/dues': typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
-  '/_authenticated/org/$orgId/officer/settings/funds': typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
-  '/_authenticated/org/$orgId/officer/settings/gateway': typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
-  '/_authenticated/org/$orgId/officer/settings/membership-categories': typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute
-  '/_authenticated/org/$orgId/officer/settings/org': typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRoute
-  '/_authenticated/org/$orgId/officer/settings/providers': typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute
-  '/_authenticated/org/$orgId/officer/training/$trainingId': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren
-  '/_authenticated/org/$orgId/officer/training/new': typeof AuthenticatedOrgOrgIdOfficerTrainingNewRoute
-  '/_authenticated/org/$orgId/elections/$electionId/': typeof AuthenticatedOrgOrgIdElectionsElectionIdIndexRoute
-  '/_authenticated/org/$orgId/officer/communications/': typeof AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute
-  '/_authenticated/org/$orgId/officer/elections/': typeof AuthenticatedOrgOrgIdOfficerElectionsIndexRoute
-  '/_authenticated/org/$orgId/officer/events/': typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
-  '/_authenticated/org/$orgId/officer/payments/': typeof AuthenticatedOrgOrgIdOfficerPaymentsIndexRoute
-  '/_authenticated/org/$orgId/officer/roster/': typeof AuthenticatedOrgOrgIdOfficerRosterIndexRoute
-  '/_authenticated/org/$orgId/officer/training/': typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
-  '/_authenticated/org/$orgId/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRoute
-  '/_authenticated/org/$orgId/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRoute
-  '/_authenticated/org/$orgId/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRoute
+  '/_authenticated/org/$orgSlug/events/$eventId': typeof AuthenticatedOrgOrgSlugEventsEventIdRoute
+  '/_authenticated/org/$orgSlug/officer/applications': typeof AuthenticatedOrgOrgSlugOfficerApplicationsRoute
+  '/_authenticated/org/$orgSlug/officer/communications': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRouteWithChildren
+  '/_authenticated/org/$orgSlug/officer/dashboard': typeof AuthenticatedOrgOrgSlugOfficerDashboardRoute
+  '/_authenticated/org/$orgSlug/officer/officers': typeof AuthenticatedOrgOrgSlugOfficerOfficersRoute
+  '/_authenticated/org/$orgSlug/officer/payments': typeof AuthenticatedOrgOrgSlugOfficerPaymentsRouteWithChildren
+  '/_authenticated/org/$orgSlug/officer/roster': typeof AuthenticatedOrgOrgSlugOfficerRosterRouteWithChildren
+  '/_authenticated/org/$orgSlug/training/$trainingId': typeof AuthenticatedOrgOrgSlugTrainingTrainingIdRoute
+  '/_authenticated/org/$orgSlug/elections/': typeof AuthenticatedOrgOrgSlugElectionsIndexRoute
+  '/_authenticated/org/$orgSlug/events/': typeof AuthenticatedOrgOrgSlugEventsIndexRoute
+  '/_authenticated/org/$orgSlug/training/': typeof AuthenticatedOrgOrgSlugTrainingIndexRoute
+  '/_authenticated/org/$orgSlug/elections/$electionId/vote': typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute
+  '/_authenticated/org/$orgSlug/officer/communications/$announcementId': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute
+  '/_authenticated/org/$orgSlug/officer/communications/new': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute
+  '/_authenticated/org/$orgSlug/officer/elections/$electionId': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren
+  '/_authenticated/org/$orgSlug/officer/elections/new': typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRoute
+  '/_authenticated/org/$orgSlug/officer/events/$eventId': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteWithChildren
+  '/_authenticated/org/$orgSlug/officer/events/new': typeof AuthenticatedOrgOrgSlugOfficerEventsNewRoute
+  '/_authenticated/org/$orgSlug/officer/payments/$paymentId': typeof AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute
+  '/_authenticated/org/$orgSlug/officer/payments/new': typeof AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute
+  '/_authenticated/org/$orgSlug/officer/reports/credits': typeof AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute
+  '/_authenticated/org/$orgSlug/officer/reports/financial': typeof AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute
+  '/_authenticated/org/$orgSlug/officer/roster/$memberId': typeof AuthenticatedOrgOrgSlugOfficerRosterMemberIdRoute
+  '/_authenticated/org/$orgSlug/officer/roster/import': typeof AuthenticatedOrgOrgSlugOfficerRosterImportRoute
+  '/_authenticated/org/$orgSlug/officer/settings/chapters': typeof AuthenticatedOrgOrgSlugOfficerSettingsChaptersRoute
+  '/_authenticated/org/$orgSlug/officer/settings/dues': typeof AuthenticatedOrgOrgSlugOfficerSettingsDuesRoute
+  '/_authenticated/org/$orgSlug/officer/settings/funds': typeof AuthenticatedOrgOrgSlugOfficerSettingsFundsRoute
+  '/_authenticated/org/$orgSlug/officer/settings/gateway': typeof AuthenticatedOrgOrgSlugOfficerSettingsGatewayRoute
+  '/_authenticated/org/$orgSlug/officer/settings/membership-categories': typeof AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRoute
+  '/_authenticated/org/$orgSlug/officer/settings/org': typeof AuthenticatedOrgOrgSlugOfficerSettingsOrgRoute
+  '/_authenticated/org/$orgSlug/officer/settings/providers': typeof AuthenticatedOrgOrgSlugOfficerSettingsProvidersRoute
+  '/_authenticated/org/$orgSlug/officer/training/$trainingId': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteWithChildren
+  '/_authenticated/org/$orgSlug/officer/training/new': typeof AuthenticatedOrgOrgSlugOfficerTrainingNewRoute
+  '/_authenticated/org/$orgSlug/elections/$electionId/': typeof AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute
+  '/_authenticated/org/$orgSlug/officer/communications/': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRoute
+  '/_authenticated/org/$orgSlug/officer/elections/': typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute
+  '/_authenticated/org/$orgSlug/officer/events/': typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRoute
+  '/_authenticated/org/$orgSlug/officer/payments/': typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute
+  '/_authenticated/org/$orgSlug/officer/roster/': typeof AuthenticatedOrgOrgSlugOfficerRosterIndexRoute
+  '/_authenticated/org/$orgSlug/officer/training/': typeof AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute
+  '/_authenticated/org/$orgSlug/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute
+  '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute
+  '/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -698,6 +709,7 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$token'
+    | '/org/$orgSlug'
     | '/my/data-export'
     | '/my/events'
     | '/my/id-card'
@@ -709,55 +721,55 @@ export interface FileRouteTypes {
     | '/my/training'
     | '/my/certificates/$certificateId'
     | '/my/credits/log'
-    | '/org/$orgId/dues'
-    | '/org/$orgId/home'
-    | '/org/$orgId/members'
-    | '/org/$orgId/officer'
+    | '/org/$orgSlug/dues'
+    | '/org/$orgSlug/home'
+    | '/org/$orgSlug/members'
+    | '/org/$orgSlug/officer'
     | '/my/certificates'
     | '/my/credits'
-    | '/org/$orgId/events/$eventId'
-    | '/org/$orgId/officer/applications'
-    | '/org/$orgId/officer/communications'
-    | '/org/$orgId/officer/dashboard'
-    | '/org/$orgId/officer/officers'
-    | '/org/$orgId/officer/payments'
-    | '/org/$orgId/officer/roster'
-    | '/org/$orgId/training/$trainingId'
-    | '/org/$orgId/elections'
-    | '/org/$orgId/events'
-    | '/org/$orgId/training'
-    | '/org/$orgId/elections/$electionId/vote'
-    | '/org/$orgId/officer/communications/$announcementId'
-    | '/org/$orgId/officer/communications/new'
-    | '/org/$orgId/officer/elections/$electionId'
-    | '/org/$orgId/officer/elections/new'
-    | '/org/$orgId/officer/events/$eventId'
-    | '/org/$orgId/officer/events/new'
-    | '/org/$orgId/officer/payments/$paymentId'
-    | '/org/$orgId/officer/payments/new'
-    | '/org/$orgId/officer/reports/credits'
-    | '/org/$orgId/officer/reports/financial'
-    | '/org/$orgId/officer/roster/$memberId'
-    | '/org/$orgId/officer/roster/import'
-    | '/org/$orgId/officer/settings/chapters'
-    | '/org/$orgId/officer/settings/dues'
-    | '/org/$orgId/officer/settings/funds'
-    | '/org/$orgId/officer/settings/gateway'
-    | '/org/$orgId/officer/settings/membership-categories'
-    | '/org/$orgId/officer/settings/org'
-    | '/org/$orgId/officer/settings/providers'
-    | '/org/$orgId/officer/training/$trainingId'
-    | '/org/$orgId/officer/training/new'
-    | '/org/$orgId/elections/$electionId'
-    | '/org/$orgId/officer/communications/'
-    | '/org/$orgId/officer/elections'
-    | '/org/$orgId/officer/events'
-    | '/org/$orgId/officer/payments/'
-    | '/org/$orgId/officer/roster/'
-    | '/org/$orgId/officer/training'
-    | '/org/$orgId/officer/elections/$electionId/edit'
-    | '/org/$orgId/officer/events/$eventId/attendance'
-    | '/org/$orgId/officer/training/$trainingId/attendance'
+    | '/org/$orgSlug/events/$eventId'
+    | '/org/$orgSlug/officer/applications'
+    | '/org/$orgSlug/officer/communications'
+    | '/org/$orgSlug/officer/dashboard'
+    | '/org/$orgSlug/officer/officers'
+    | '/org/$orgSlug/officer/payments'
+    | '/org/$orgSlug/officer/roster'
+    | '/org/$orgSlug/training/$trainingId'
+    | '/org/$orgSlug/elections'
+    | '/org/$orgSlug/events'
+    | '/org/$orgSlug/training'
+    | '/org/$orgSlug/elections/$electionId/vote'
+    | '/org/$orgSlug/officer/communications/$announcementId'
+    | '/org/$orgSlug/officer/communications/new'
+    | '/org/$orgSlug/officer/elections/$electionId'
+    | '/org/$orgSlug/officer/elections/new'
+    | '/org/$orgSlug/officer/events/$eventId'
+    | '/org/$orgSlug/officer/events/new'
+    | '/org/$orgSlug/officer/payments/$paymentId'
+    | '/org/$orgSlug/officer/payments/new'
+    | '/org/$orgSlug/officer/reports/credits'
+    | '/org/$orgSlug/officer/reports/financial'
+    | '/org/$orgSlug/officer/roster/$memberId'
+    | '/org/$orgSlug/officer/roster/import'
+    | '/org/$orgSlug/officer/settings/chapters'
+    | '/org/$orgSlug/officer/settings/dues'
+    | '/org/$orgSlug/officer/settings/funds'
+    | '/org/$orgSlug/officer/settings/gateway'
+    | '/org/$orgSlug/officer/settings/membership-categories'
+    | '/org/$orgSlug/officer/settings/org'
+    | '/org/$orgSlug/officer/settings/providers'
+    | '/org/$orgSlug/officer/training/$trainingId'
+    | '/org/$orgSlug/officer/training/new'
+    | '/org/$orgSlug/elections/$electionId'
+    | '/org/$orgSlug/officer/communications/'
+    | '/org/$orgSlug/officer/elections'
+    | '/org/$orgSlug/officer/events'
+    | '/org/$orgSlug/officer/payments/'
+    | '/org/$orgSlug/officer/roster/'
+    | '/org/$orgSlug/officer/training'
+    | '/org/$orgSlug/officer/elections/$electionId/edit'
+    | '/org/$orgSlug/officer/events/$eventId/attendance'
+    | '/org/$orgSlug/officer/training/$trainingId/attendance'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -768,6 +780,7 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$token'
+    | '/org/$orgSlug'
     | '/my/data-export'
     | '/my/events'
     | '/my/id-card'
@@ -779,52 +792,52 @@ export interface FileRouteTypes {
     | '/my/training'
     | '/my/certificates/$certificateId'
     | '/my/credits/log'
-    | '/org/$orgId/dues'
-    | '/org/$orgId/home'
-    | '/org/$orgId/members'
-    | '/org/$orgId/officer'
+    | '/org/$orgSlug/dues'
+    | '/org/$orgSlug/home'
+    | '/org/$orgSlug/members'
+    | '/org/$orgSlug/officer'
     | '/my/certificates'
     | '/my/credits'
-    | '/org/$orgId/events/$eventId'
-    | '/org/$orgId/officer/applications'
-    | '/org/$orgId/officer/dashboard'
-    | '/org/$orgId/officer/officers'
-    | '/org/$orgId/training/$trainingId'
-    | '/org/$orgId/elections'
-    | '/org/$orgId/events'
-    | '/org/$orgId/training'
-    | '/org/$orgId/elections/$electionId/vote'
-    | '/org/$orgId/officer/communications/$announcementId'
-    | '/org/$orgId/officer/communications/new'
-    | '/org/$orgId/officer/elections/$electionId'
-    | '/org/$orgId/officer/elections/new'
-    | '/org/$orgId/officer/events/$eventId'
-    | '/org/$orgId/officer/events/new'
-    | '/org/$orgId/officer/payments/$paymentId'
-    | '/org/$orgId/officer/payments/new'
-    | '/org/$orgId/officer/reports/credits'
-    | '/org/$orgId/officer/reports/financial'
-    | '/org/$orgId/officer/roster/$memberId'
-    | '/org/$orgId/officer/roster/import'
-    | '/org/$orgId/officer/settings/chapters'
-    | '/org/$orgId/officer/settings/dues'
-    | '/org/$orgId/officer/settings/funds'
-    | '/org/$orgId/officer/settings/gateway'
-    | '/org/$orgId/officer/settings/membership-categories'
-    | '/org/$orgId/officer/settings/org'
-    | '/org/$orgId/officer/settings/providers'
-    | '/org/$orgId/officer/training/$trainingId'
-    | '/org/$orgId/officer/training/new'
-    | '/org/$orgId/elections/$electionId'
-    | '/org/$orgId/officer/communications'
-    | '/org/$orgId/officer/elections'
-    | '/org/$orgId/officer/events'
-    | '/org/$orgId/officer/payments'
-    | '/org/$orgId/officer/roster'
-    | '/org/$orgId/officer/training'
-    | '/org/$orgId/officer/elections/$electionId/edit'
-    | '/org/$orgId/officer/events/$eventId/attendance'
-    | '/org/$orgId/officer/training/$trainingId/attendance'
+    | '/org/$orgSlug/events/$eventId'
+    | '/org/$orgSlug/officer/applications'
+    | '/org/$orgSlug/officer/dashboard'
+    | '/org/$orgSlug/officer/officers'
+    | '/org/$orgSlug/training/$trainingId'
+    | '/org/$orgSlug/elections'
+    | '/org/$orgSlug/events'
+    | '/org/$orgSlug/training'
+    | '/org/$orgSlug/elections/$electionId/vote'
+    | '/org/$orgSlug/officer/communications/$announcementId'
+    | '/org/$orgSlug/officer/communications/new'
+    | '/org/$orgSlug/officer/elections/$electionId'
+    | '/org/$orgSlug/officer/elections/new'
+    | '/org/$orgSlug/officer/events/$eventId'
+    | '/org/$orgSlug/officer/events/new'
+    | '/org/$orgSlug/officer/payments/$paymentId'
+    | '/org/$orgSlug/officer/payments/new'
+    | '/org/$orgSlug/officer/reports/credits'
+    | '/org/$orgSlug/officer/reports/financial'
+    | '/org/$orgSlug/officer/roster/$memberId'
+    | '/org/$orgSlug/officer/roster/import'
+    | '/org/$orgSlug/officer/settings/chapters'
+    | '/org/$orgSlug/officer/settings/dues'
+    | '/org/$orgSlug/officer/settings/funds'
+    | '/org/$orgSlug/officer/settings/gateway'
+    | '/org/$orgSlug/officer/settings/membership-categories'
+    | '/org/$orgSlug/officer/settings/org'
+    | '/org/$orgSlug/officer/settings/providers'
+    | '/org/$orgSlug/officer/training/$trainingId'
+    | '/org/$orgSlug/officer/training/new'
+    | '/org/$orgSlug/elections/$electionId'
+    | '/org/$orgSlug/officer/communications'
+    | '/org/$orgSlug/officer/elections'
+    | '/org/$orgSlug/officer/events'
+    | '/org/$orgSlug/officer/payments'
+    | '/org/$orgSlug/officer/roster'
+    | '/org/$orgSlug/officer/training'
+    | '/org/$orgSlug/officer/elections/$electionId/edit'
+    | '/org/$orgSlug/officer/events/$eventId/attendance'
+    | '/org/$orgSlug/officer/training/$trainingId/attendance'
   id:
     | '__root__'
     | '/'
@@ -836,6 +849,7 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$token'
+    | '/_authenticated/org/$orgSlug'
     | '/_authenticated/my/data-export'
     | '/_authenticated/my/events'
     | '/_authenticated/my/id-card'
@@ -847,55 +861,55 @@ export interface FileRouteTypes {
     | '/_authenticated/my/training'
     | '/_authenticated/my/certificates/$certificateId'
     | '/_authenticated/my/credits/log'
-    | '/_authenticated/org/$orgId/dues'
-    | '/_authenticated/org/$orgId/home'
-    | '/_authenticated/org/$orgId/members'
-    | '/_authenticated/org/$orgId/officer'
+    | '/_authenticated/org/$orgSlug/dues'
+    | '/_authenticated/org/$orgSlug/home'
+    | '/_authenticated/org/$orgSlug/members'
+    | '/_authenticated/org/$orgSlug/officer'
     | '/_authenticated/my/certificates/'
     | '/_authenticated/my/credits/'
-    | '/_authenticated/org/$orgId/events/$eventId'
-    | '/_authenticated/org/$orgId/officer/applications'
-    | '/_authenticated/org/$orgId/officer/communications'
-    | '/_authenticated/org/$orgId/officer/dashboard'
-    | '/_authenticated/org/$orgId/officer/officers'
-    | '/_authenticated/org/$orgId/officer/payments'
-    | '/_authenticated/org/$orgId/officer/roster'
-    | '/_authenticated/org/$orgId/training/$trainingId'
-    | '/_authenticated/org/$orgId/elections/'
-    | '/_authenticated/org/$orgId/events/'
-    | '/_authenticated/org/$orgId/training/'
-    | '/_authenticated/org/$orgId/elections/$electionId/vote'
-    | '/_authenticated/org/$orgId/officer/communications/$announcementId'
-    | '/_authenticated/org/$orgId/officer/communications/new'
-    | '/_authenticated/org/$orgId/officer/elections/$electionId'
-    | '/_authenticated/org/$orgId/officer/elections/new'
-    | '/_authenticated/org/$orgId/officer/events/$eventId'
-    | '/_authenticated/org/$orgId/officer/events/new'
-    | '/_authenticated/org/$orgId/officer/payments/$paymentId'
-    | '/_authenticated/org/$orgId/officer/payments/new'
-    | '/_authenticated/org/$orgId/officer/reports/credits'
-    | '/_authenticated/org/$orgId/officer/reports/financial'
-    | '/_authenticated/org/$orgId/officer/roster/$memberId'
-    | '/_authenticated/org/$orgId/officer/roster/import'
-    | '/_authenticated/org/$orgId/officer/settings/chapters'
-    | '/_authenticated/org/$orgId/officer/settings/dues'
-    | '/_authenticated/org/$orgId/officer/settings/funds'
-    | '/_authenticated/org/$orgId/officer/settings/gateway'
-    | '/_authenticated/org/$orgId/officer/settings/membership-categories'
-    | '/_authenticated/org/$orgId/officer/settings/org'
-    | '/_authenticated/org/$orgId/officer/settings/providers'
-    | '/_authenticated/org/$orgId/officer/training/$trainingId'
-    | '/_authenticated/org/$orgId/officer/training/new'
-    | '/_authenticated/org/$orgId/elections/$electionId/'
-    | '/_authenticated/org/$orgId/officer/communications/'
-    | '/_authenticated/org/$orgId/officer/elections/'
-    | '/_authenticated/org/$orgId/officer/events/'
-    | '/_authenticated/org/$orgId/officer/payments/'
-    | '/_authenticated/org/$orgId/officer/roster/'
-    | '/_authenticated/org/$orgId/officer/training/'
-    | '/_authenticated/org/$orgId/officer/elections/$electionId/edit'
-    | '/_authenticated/org/$orgId/officer/events/$eventId/attendance'
-    | '/_authenticated/org/$orgId/officer/training/$trainingId/attendance'
+    | '/_authenticated/org/$orgSlug/events/$eventId'
+    | '/_authenticated/org/$orgSlug/officer/applications'
+    | '/_authenticated/org/$orgSlug/officer/communications'
+    | '/_authenticated/org/$orgSlug/officer/dashboard'
+    | '/_authenticated/org/$orgSlug/officer/officers'
+    | '/_authenticated/org/$orgSlug/officer/payments'
+    | '/_authenticated/org/$orgSlug/officer/roster'
+    | '/_authenticated/org/$orgSlug/training/$trainingId'
+    | '/_authenticated/org/$orgSlug/elections/'
+    | '/_authenticated/org/$orgSlug/events/'
+    | '/_authenticated/org/$orgSlug/training/'
+    | '/_authenticated/org/$orgSlug/elections/$electionId/vote'
+    | '/_authenticated/org/$orgSlug/officer/communications/$announcementId'
+    | '/_authenticated/org/$orgSlug/officer/communications/new'
+    | '/_authenticated/org/$orgSlug/officer/elections/$electionId'
+    | '/_authenticated/org/$orgSlug/officer/elections/new'
+    | '/_authenticated/org/$orgSlug/officer/events/$eventId'
+    | '/_authenticated/org/$orgSlug/officer/events/new'
+    | '/_authenticated/org/$orgSlug/officer/payments/$paymentId'
+    | '/_authenticated/org/$orgSlug/officer/payments/new'
+    | '/_authenticated/org/$orgSlug/officer/reports/credits'
+    | '/_authenticated/org/$orgSlug/officer/reports/financial'
+    | '/_authenticated/org/$orgSlug/officer/roster/$memberId'
+    | '/_authenticated/org/$orgSlug/officer/roster/import'
+    | '/_authenticated/org/$orgSlug/officer/settings/chapters'
+    | '/_authenticated/org/$orgSlug/officer/settings/dues'
+    | '/_authenticated/org/$orgSlug/officer/settings/funds'
+    | '/_authenticated/org/$orgSlug/officer/settings/gateway'
+    | '/_authenticated/org/$orgSlug/officer/settings/membership-categories'
+    | '/_authenticated/org/$orgSlug/officer/settings/org'
+    | '/_authenticated/org/$orgSlug/officer/settings/providers'
+    | '/_authenticated/org/$orgSlug/officer/training/$trainingId'
+    | '/_authenticated/org/$orgSlug/officer/training/new'
+    | '/_authenticated/org/$orgSlug/elections/$electionId/'
+    | '/_authenticated/org/$orgSlug/officer/communications/'
+    | '/_authenticated/org/$orgSlug/officer/elections/'
+    | '/_authenticated/org/$orgSlug/officer/events/'
+    | '/_authenticated/org/$orgSlug/officer/payments/'
+    | '/_authenticated/org/$orgSlug/officer/roster/'
+    | '/_authenticated/org/$orgSlug/officer/training/'
+    | '/_authenticated/org/$orgSlug/officer/elections/$electionId/edit'
+    | '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance'
+    | '/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1037,6 +1051,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyDataExportRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/org/$orgSlug': {
+      id: '/_authenticated/org/$orgSlug'
+      path: '/org/$orgSlug'
+      fullPath: '/org/$orgSlug'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugRouteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/my/credits/': {
       id: '/_authenticated/my/credits/'
       path: '/my/credits'
@@ -1051,33 +1072,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyCertificatesIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/org/$orgId/officer': {
-      id: '/_authenticated/org/$orgId/officer'
-      path: '/org/$orgId/officer'
-      fullPath: '/org/$orgId/officer'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/org/$orgSlug/officer': {
+      id: '/_authenticated/org/$orgSlug/officer'
+      path: '/officer'
+      fullPath: '/org/$orgSlug/officer'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/members': {
-      id: '/_authenticated/org/$orgId/members'
-      path: '/org/$orgId/members'
-      fullPath: '/org/$orgId/members'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdMembersRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/org/$orgSlug/members': {
+      id: '/_authenticated/org/$orgSlug/members'
+      path: '/members'
+      fullPath: '/org/$orgSlug/members'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugMembersRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/home': {
-      id: '/_authenticated/org/$orgId/home'
-      path: '/org/$orgId/home'
-      fullPath: '/org/$orgId/home'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdHomeRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/org/$orgSlug/home': {
+      id: '/_authenticated/org/$orgSlug/home'
+      path: '/home'
+      fullPath: '/org/$orgSlug/home'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugHomeRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/dues': {
-      id: '/_authenticated/org/$orgId/dues'
-      path: '/org/$orgId/dues'
-      fullPath: '/org/$orgId/dues'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdDuesRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/org/$orgSlug/dues': {
+      id: '/_authenticated/org/$orgSlug/dues'
+      path: '/dues'
+      fullPath: '/org/$orgSlug/dues'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugDuesRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
     '/_authenticated/my/credits/log': {
       id: '/_authenticated/my/credits/log'
@@ -1093,504 +1114,547 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyCertificatesCertificateIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/org/$orgId/training/': {
-      id: '/_authenticated/org/$orgId/training/'
-      path: '/org/$orgId/training'
-      fullPath: '/org/$orgId/training'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdTrainingIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/org/$orgId/events/': {
-      id: '/_authenticated/org/$orgId/events/'
-      path: '/org/$orgId/events'
-      fullPath: '/org/$orgId/events'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdEventsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/org/$orgId/elections/': {
-      id: '/_authenticated/org/$orgId/elections/'
-      path: '/org/$orgId/elections'
-      fullPath: '/org/$orgId/elections'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdElectionsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/org/$orgId/training/$trainingId': {
-      id: '/_authenticated/org/$orgId/training/$trainingId'
-      path: '/org/$orgId/training/$trainingId'
-      fullPath: '/org/$orgId/training/$trainingId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdTrainingTrainingIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/org/$orgId/officer/roster': {
-      id: '/_authenticated/org/$orgId/officer/roster'
-      path: '/roster'
-      fullPath: '/org/$orgId/officer/roster'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerRosterRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/payments': {
-      id: '/_authenticated/org/$orgId/officer/payments'
-      path: '/payments'
-      fullPath: '/org/$orgId/officer/payments'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/officers': {
-      id: '/_authenticated/org/$orgId/officer/officers'
-      path: '/officers'
-      fullPath: '/org/$orgId/officer/officers'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerOfficersRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/dashboard': {
-      id: '/_authenticated/org/$orgId/officer/dashboard'
-      path: '/dashboard'
-      fullPath: '/org/$orgId/officer/dashboard'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerDashboardRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/communications': {
-      id: '/_authenticated/org/$orgId/officer/communications'
-      path: '/communications'
-      fullPath: '/org/$orgId/officer/communications'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/applications': {
-      id: '/_authenticated/org/$orgId/officer/applications'
-      path: '/applications'
-      fullPath: '/org/$orgId/officer/applications'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerApplicationsRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/events/$eventId': {
-      id: '/_authenticated/org/$orgId/events/$eventId'
-      path: '/org/$orgId/events/$eventId'
-      fullPath: '/org/$orgId/events/$eventId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdEventsEventIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/org/$orgId/officer/training/': {
-      id: '/_authenticated/org/$orgId/officer/training/'
+    '/_authenticated/org/$orgSlug/training/': {
+      id: '/_authenticated/org/$orgSlug/training/'
       path: '/training'
-      fullPath: '/org/$orgId/officer/training'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+      fullPath: '/org/$orgSlug/training'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugTrainingIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/officer/roster/': {
-      id: '/_authenticated/org/$orgId/officer/roster/'
-      path: '/'
-      fullPath: '/org/$orgId/officer/roster/'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerRosterIndexRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRosterRoute
-    }
-    '/_authenticated/org/$orgId/officer/payments/': {
-      id: '/_authenticated/org/$orgId/officer/payments/'
-      path: '/'
-      fullPath: '/org/$orgId/officer/payments/'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsIndexRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsRoute
-    }
-    '/_authenticated/org/$orgId/officer/events/': {
-      id: '/_authenticated/org/$orgId/officer/events/'
+    '/_authenticated/org/$orgSlug/events/': {
+      id: '/_authenticated/org/$orgSlug/events/'
       path: '/events'
-      fullPath: '/org/$orgId/officer/events'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerEventsIndexRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+      fullPath: '/org/$orgSlug/events'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugEventsIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/officer/elections/': {
-      id: '/_authenticated/org/$orgId/officer/elections/'
+    '/_authenticated/org/$orgSlug/elections/': {
+      id: '/_authenticated/org/$orgSlug/elections/'
       path: '/elections'
-      fullPath: '/org/$orgId/officer/elections'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsIndexRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+      fullPath: '/org/$orgSlug/elections'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugElectionsIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/officer/communications/': {
-      id: '/_authenticated/org/$orgId/officer/communications/'
-      path: '/'
-      fullPath: '/org/$orgId/officer/communications/'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsIndexRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsRoute
-    }
-    '/_authenticated/org/$orgId/elections/$electionId/': {
-      id: '/_authenticated/org/$orgId/elections/$electionId/'
-      path: '/org/$orgId/elections/$electionId'
-      fullPath: '/org/$orgId/elections/$electionId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdElectionsElectionIdIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/org/$orgId/officer/training/new': {
-      id: '/_authenticated/org/$orgId/officer/training/new'
-      path: '/training/new'
-      fullPath: '/org/$orgId/officer/training/new'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingNewRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/training/$trainingId': {
-      id: '/_authenticated/org/$orgId/officer/training/$trainingId'
+    '/_authenticated/org/$orgSlug/training/$trainingId': {
+      id: '/_authenticated/org/$orgSlug/training/$trainingId'
       path: '/training/$trainingId'
-      fullPath: '/org/$orgId/officer/training/$trainingId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+      fullPath: '/org/$orgSlug/training/$trainingId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugTrainingTrainingIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/officer/settings/providers': {
-      id: '/_authenticated/org/$orgId/officer/settings/providers'
-      path: '/settings/providers'
-      fullPath: '/org/$orgId/officer/settings/providers'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+    '/_authenticated/org/$orgSlug/officer/roster': {
+      id: '/_authenticated/org/$orgSlug/officer/roster'
+      path: '/roster'
+      fullPath: '/org/$orgSlug/officer/roster'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
-    '/_authenticated/org/$orgId/officer/settings/org': {
-      id: '/_authenticated/org/$orgId/officer/settings/org'
-      path: '/settings/org'
-      fullPath: '/org/$orgId/officer/settings/org'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+    '/_authenticated/org/$orgSlug/officer/payments': {
+      id: '/_authenticated/org/$orgSlug/officer/payments'
+      path: '/payments'
+      fullPath: '/org/$orgSlug/officer/payments'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
-    '/_authenticated/org/$orgId/officer/settings/membership-categories': {
-      id: '/_authenticated/org/$orgId/officer/settings/membership-categories'
-      path: '/settings/membership-categories'
-      fullPath: '/org/$orgId/officer/settings/membership-categories'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+    '/_authenticated/org/$orgSlug/officer/officers': {
+      id: '/_authenticated/org/$orgSlug/officer/officers'
+      path: '/officers'
+      fullPath: '/org/$orgSlug/officer/officers'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerOfficersRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
-    '/_authenticated/org/$orgId/officer/settings/gateway': {
-      id: '/_authenticated/org/$orgId/officer/settings/gateway'
-      path: '/settings/gateway'
-      fullPath: '/org/$orgId/officer/settings/gateway'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+    '/_authenticated/org/$orgSlug/officer/dashboard': {
+      id: '/_authenticated/org/$orgSlug/officer/dashboard'
+      path: '/dashboard'
+      fullPath: '/org/$orgSlug/officer/dashboard'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerDashboardRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
-    '/_authenticated/org/$orgId/officer/settings/funds': {
-      id: '/_authenticated/org/$orgId/officer/settings/funds'
-      path: '/settings/funds'
-      fullPath: '/org/$orgId/officer/settings/funds'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+    '/_authenticated/org/$orgSlug/officer/communications': {
+      id: '/_authenticated/org/$orgSlug/officer/communications'
+      path: '/communications'
+      fullPath: '/org/$orgSlug/officer/communications'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
-    '/_authenticated/org/$orgId/officer/settings/dues': {
-      id: '/_authenticated/org/$orgId/officer/settings/dues'
-      path: '/settings/dues'
-      fullPath: '/org/$orgId/officer/settings/dues'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+    '/_authenticated/org/$orgSlug/officer/applications': {
+      id: '/_authenticated/org/$orgSlug/officer/applications'
+      path: '/applications'
+      fullPath: '/org/$orgSlug/officer/applications'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerApplicationsRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
-    '/_authenticated/org/$orgId/officer/settings/chapters': {
-      id: '/_authenticated/org/$orgId/officer/settings/chapters'
-      path: '/settings/chapters'
-      fullPath: '/org/$orgId/officer/settings/chapters'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/roster/import': {
-      id: '/_authenticated/org/$orgId/officer/roster/import'
-      path: '/import'
-      fullPath: '/org/$orgId/officer/roster/import'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerRosterImportRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRosterRoute
-    }
-    '/_authenticated/org/$orgId/officer/roster/$memberId': {
-      id: '/_authenticated/org/$orgId/officer/roster/$memberId'
-      path: '/$memberId'
-      fullPath: '/org/$orgId/officer/roster/$memberId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRosterRoute
-    }
-    '/_authenticated/org/$orgId/officer/reports/financial': {
-      id: '/_authenticated/org/$orgId/officer/reports/financial'
-      path: '/reports/financial'
-      fullPath: '/org/$orgId/officer/reports/financial'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/reports/credits': {
-      id: '/_authenticated/org/$orgId/officer/reports/credits'
-      path: '/reports/credits'
-      fullPath: '/org/$orgId/officer/reports/credits'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/payments/new': {
-      id: '/_authenticated/org/$orgId/officer/payments/new'
-      path: '/new'
-      fullPath: '/org/$orgId/officer/payments/new'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsNewRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsRoute
-    }
-    '/_authenticated/org/$orgId/officer/payments/$paymentId': {
-      id: '/_authenticated/org/$orgId/officer/payments/$paymentId'
-      path: '/$paymentId'
-      fullPath: '/org/$orgId/officer/payments/$paymentId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsRoute
-    }
-    '/_authenticated/org/$orgId/officer/events/new': {
-      id: '/_authenticated/org/$orgId/officer/events/new'
-      path: '/events/new'
-      fullPath: '/org/$orgId/officer/events/new'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerEventsNewRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
-    }
-    '/_authenticated/org/$orgId/officer/events/$eventId': {
-      id: '/_authenticated/org/$orgId/officer/events/$eventId'
+    '/_authenticated/org/$orgSlug/events/$eventId': {
+      id: '/_authenticated/org/$orgSlug/events/$eventId'
       path: '/events/$eventId'
-      fullPath: '/org/$orgId/officer/events/$eventId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+      fullPath: '/org/$orgSlug/events/$eventId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugEventsEventIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/officer/elections/new': {
-      id: '/_authenticated/org/$orgId/officer/elections/new'
-      path: '/elections/new'
-      fullPath: '/org/$orgId/officer/elections/new'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsNewRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+    '/_authenticated/org/$orgSlug/officer/training/': {
+      id: '/_authenticated/org/$orgSlug/officer/training/'
+      path: '/training'
+      fullPath: '/org/$orgSlug/officer/training'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
-    '/_authenticated/org/$orgId/officer/elections/$electionId': {
-      id: '/_authenticated/org/$orgId/officer/elections/$electionId'
+    '/_authenticated/org/$orgSlug/officer/roster/': {
+      id: '/_authenticated/org/$orgSlug/officer/roster/'
+      path: '/'
+      fullPath: '/org/$orgSlug/officer/roster/'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/payments/': {
+      id: '/_authenticated/org/$orgSlug/officer/payments/'
+      path: '/'
+      fullPath: '/org/$orgSlug/officer/payments/'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/events/': {
+      id: '/_authenticated/org/$orgSlug/officer/events/'
+      path: '/events'
+      fullPath: '/org/$orgSlug/officer/events'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/elections/': {
+      id: '/_authenticated/org/$orgSlug/officer/elections/'
+      path: '/elections'
+      fullPath: '/org/$orgSlug/officer/elections'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/communications/': {
+      id: '/_authenticated/org/$orgSlug/officer/communications/'
+      path: '/'
+      fullPath: '/org/$orgSlug/officer/communications/'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRoute
+    }
+    '/_authenticated/org/$orgSlug/elections/$electionId/': {
+      id: '/_authenticated/org/$orgSlug/elections/$electionId/'
       path: '/elections/$electionId'
-      fullPath: '/org/$orgId/officer/elections/$electionId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerRoute
+      fullPath: '/org/$orgSlug/elections/$electionId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugElectionsElectionIdIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/officer/communications/new': {
-      id: '/_authenticated/org/$orgId/officer/communications/new'
+    '/_authenticated/org/$orgSlug/officer/training/new': {
+      id: '/_authenticated/org/$orgSlug/officer/training/new'
+      path: '/training/new'
+      fullPath: '/org/$orgSlug/officer/training/new'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingNewRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/training/$trainingId': {
+      id: '/_authenticated/org/$orgSlug/officer/training/$trainingId'
+      path: '/training/$trainingId'
+      fullPath: '/org/$orgSlug/officer/training/$trainingId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/settings/providers': {
+      id: '/_authenticated/org/$orgSlug/officer/settings/providers'
+      path: '/settings/providers'
+      fullPath: '/org/$orgSlug/officer/settings/providers'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsProvidersRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/settings/org': {
+      id: '/_authenticated/org/$orgSlug/officer/settings/org'
+      path: '/settings/org'
+      fullPath: '/org/$orgSlug/officer/settings/org'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsOrgRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/settings/membership-categories': {
+      id: '/_authenticated/org/$orgSlug/officer/settings/membership-categories'
+      path: '/settings/membership-categories'
+      fullPath: '/org/$orgSlug/officer/settings/membership-categories'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/settings/gateway': {
+      id: '/_authenticated/org/$orgSlug/officer/settings/gateway'
+      path: '/settings/gateway'
+      fullPath: '/org/$orgSlug/officer/settings/gateway'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsGatewayRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/settings/funds': {
+      id: '/_authenticated/org/$orgSlug/officer/settings/funds'
+      path: '/settings/funds'
+      fullPath: '/org/$orgSlug/officer/settings/funds'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsFundsRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/settings/dues': {
+      id: '/_authenticated/org/$orgSlug/officer/settings/dues'
+      path: '/settings/dues'
+      fullPath: '/org/$orgSlug/officer/settings/dues'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsDuesRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/settings/chapters': {
+      id: '/_authenticated/org/$orgSlug/officer/settings/chapters'
+      path: '/settings/chapters'
+      fullPath: '/org/$orgSlug/officer/settings/chapters'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsChaptersRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/roster/import': {
+      id: '/_authenticated/org/$orgSlug/officer/roster/import'
+      path: '/import'
+      fullPath: '/org/$orgSlug/officer/roster/import'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterImportRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/roster/$memberId': {
+      id: '/_authenticated/org/$orgSlug/officer/roster/$memberId'
+      path: '/$memberId'
+      fullPath: '/org/$orgSlug/officer/roster/$memberId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterMemberIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/reports/financial': {
+      id: '/_authenticated/org/$orgSlug/officer/reports/financial'
+      path: '/reports/financial'
+      fullPath: '/org/$orgSlug/officer/reports/financial'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerReportsFinancialRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/reports/credits': {
+      id: '/_authenticated/org/$orgSlug/officer/reports/credits'
+      path: '/reports/credits'
+      fullPath: '/org/$orgSlug/officer/reports/credits'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerReportsCreditsRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/payments/new': {
+      id: '/_authenticated/org/$orgSlug/officer/payments/new'
       path: '/new'
-      fullPath: '/org/$orgId/officer/communications/new'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsNewRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsRoute
+      fullPath: '/org/$orgSlug/officer/payments/new'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsNewRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsRoute
     }
-    '/_authenticated/org/$orgId/officer/communications/$announcementId': {
-      id: '/_authenticated/org/$orgId/officer/communications/$announcementId'
+    '/_authenticated/org/$orgSlug/officer/payments/$paymentId': {
+      id: '/_authenticated/org/$orgSlug/officer/payments/$paymentId'
+      path: '/$paymentId'
+      fullPath: '/org/$orgSlug/officer/payments/$paymentId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/events/new': {
+      id: '/_authenticated/org/$orgSlug/officer/events/new'
+      path: '/events/new'
+      fullPath: '/org/$orgSlug/officer/events/new'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsNewRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/events/$eventId': {
+      id: '/_authenticated/org/$orgSlug/officer/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/org/$orgSlug/officer/events/$eventId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/elections/new': {
+      id: '/_authenticated/org/$orgSlug/officer/elections/new'
+      path: '/elections/new'
+      fullPath: '/org/$orgSlug/officer/elections/new'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/elections/$electionId': {
+      id: '/_authenticated/org/$orgSlug/officer/elections/$electionId'
+      path: '/elections/$electionId'
+      fullPath: '/org/$orgSlug/officer/elections/$electionId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/communications/new': {
+      id: '/_authenticated/org/$orgSlug/officer/communications/new'
+      path: '/new'
+      fullPath: '/org/$orgSlug/officer/communications/new'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/communications/$announcementId': {
+      id: '/_authenticated/org/$orgSlug/officer/communications/$announcementId'
       path: '/$announcementId'
-      fullPath: '/org/$orgId/officer/communications/$announcementId'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsRoute
+      fullPath: '/org/$orgSlug/officer/communications/$announcementId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRoute
     }
-    '/_authenticated/org/$orgId/elections/$electionId/vote': {
-      id: '/_authenticated/org/$orgId/elections/$electionId/vote'
-      path: '/org/$orgId/elections/$electionId/vote'
-      fullPath: '/org/$orgId/elections/$electionId/vote'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdElectionsElectionIdVoteRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/org/$orgSlug/elections/$electionId/vote': {
+      id: '/_authenticated/org/$orgSlug/elections/$electionId/vote'
+      path: '/elections/$electionId/vote'
+      fullPath: '/org/$orgSlug/elections/$electionId/vote'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
-    '/_authenticated/org/$orgId/officer/training/$trainingId/attendance': {
-      id: '/_authenticated/org/$orgId/officer/training/$trainingId/attendance'
+    '/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance': {
+      id: '/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance'
       path: '/attendance'
-      fullPath: '/org/$orgId/officer/training/$trainingId/attendance'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute
+      fullPath: '/org/$orgSlug/officer/training/$trainingId/attendance'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRoute
     }
-    '/_authenticated/org/$orgId/officer/events/$eventId/attendance': {
-      id: '/_authenticated/org/$orgId/officer/events/$eventId/attendance'
+    '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance': {
+      id: '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance'
       path: '/attendance'
-      fullPath: '/org/$orgId/officer/events/$eventId/attendance'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRoute
+      fullPath: '/org/$orgSlug/officer/events/$eventId/attendance'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdRoute
     }
-    '/_authenticated/org/$orgId/officer/elections/$electionId/edit': {
-      id: '/_authenticated/org/$orgId/officer/elections/$electionId/edit'
+    '/_authenticated/org/$orgSlug/officer/elections/$electionId/edit': {
+      id: '/_authenticated/org/$orgSlug/officer/elections/$electionId/edit'
       path: '/edit'
-      fullPath: '/org/$orgId/officer/elections/$electionId/edit'
-      preLoaderRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRouteImport
-      parentRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdRoute
+      fullPath: '/org/$orgSlug/officer/elections/$electionId/edit'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRoute
     }
   }
 }
 
-interface AuthenticatedOrgOrgIdOfficerCommunicationsRouteChildren {
-  AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRoute
-  AuthenticatedOrgOrgIdOfficerCommunicationsNewRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsNewRoute
-  AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute
+interface AuthenticatedOrgOrgSlugOfficerCommunicationsRouteChildren {
+  AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute
+  AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute
+  AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRoute
 }
 
-const AuthenticatedOrgOrgIdOfficerCommunicationsRouteChildren: AuthenticatedOrgOrgIdOfficerCommunicationsRouteChildren =
+const AuthenticatedOrgOrgSlugOfficerCommunicationsRouteChildren: AuthenticatedOrgOrgSlugOfficerCommunicationsRouteChildren =
   {
-    AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRoute:
-      AuthenticatedOrgOrgIdOfficerCommunicationsAnnouncementIdRoute,
-    AuthenticatedOrgOrgIdOfficerCommunicationsNewRoute:
-      AuthenticatedOrgOrgIdOfficerCommunicationsNewRoute,
-    AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute:
-      AuthenticatedOrgOrgIdOfficerCommunicationsIndexRoute,
+    AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute:
+      AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRoute,
+    AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute:
+      AuthenticatedOrgOrgSlugOfficerCommunicationsNewRoute,
+    AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRoute:
+      AuthenticatedOrgOrgSlugOfficerCommunicationsIndexRoute,
   }
 
-const AuthenticatedOrgOrgIdOfficerCommunicationsRouteWithChildren =
-  AuthenticatedOrgOrgIdOfficerCommunicationsRoute._addFileChildren(
-    AuthenticatedOrgOrgIdOfficerCommunicationsRouteChildren,
+const AuthenticatedOrgOrgSlugOfficerCommunicationsRouteWithChildren =
+  AuthenticatedOrgOrgSlugOfficerCommunicationsRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugOfficerCommunicationsRouteChildren,
   )
 
-interface AuthenticatedOrgOrgIdOfficerPaymentsRouteChildren {
-  AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute
-  AuthenticatedOrgOrgIdOfficerPaymentsNewRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsNewRoute
-  AuthenticatedOrgOrgIdOfficerPaymentsIndexRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsIndexRoute
+interface AuthenticatedOrgOrgSlugOfficerPaymentsRouteChildren {
+  AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute
+  AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute
+  AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute
 }
 
-const AuthenticatedOrgOrgIdOfficerPaymentsRouteChildren: AuthenticatedOrgOrgIdOfficerPaymentsRouteChildren =
+const AuthenticatedOrgOrgSlugOfficerPaymentsRouteChildren: AuthenticatedOrgOrgSlugOfficerPaymentsRouteChildren =
   {
-    AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute:
-      AuthenticatedOrgOrgIdOfficerPaymentsPaymentIdRoute,
-    AuthenticatedOrgOrgIdOfficerPaymentsNewRoute:
-      AuthenticatedOrgOrgIdOfficerPaymentsNewRoute,
-    AuthenticatedOrgOrgIdOfficerPaymentsIndexRoute:
-      AuthenticatedOrgOrgIdOfficerPaymentsIndexRoute,
+    AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute:
+      AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute,
+    AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute:
+      AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute,
+    AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute:
+      AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute,
   }
 
-const AuthenticatedOrgOrgIdOfficerPaymentsRouteWithChildren =
-  AuthenticatedOrgOrgIdOfficerPaymentsRoute._addFileChildren(
-    AuthenticatedOrgOrgIdOfficerPaymentsRouteChildren,
+const AuthenticatedOrgOrgSlugOfficerPaymentsRouteWithChildren =
+  AuthenticatedOrgOrgSlugOfficerPaymentsRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugOfficerPaymentsRouteChildren,
   )
 
-interface AuthenticatedOrgOrgIdOfficerRosterRouteChildren {
-  AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute: typeof AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute
-  AuthenticatedOrgOrgIdOfficerRosterImportRoute: typeof AuthenticatedOrgOrgIdOfficerRosterImportRoute
-  AuthenticatedOrgOrgIdOfficerRosterIndexRoute: typeof AuthenticatedOrgOrgIdOfficerRosterIndexRoute
+interface AuthenticatedOrgOrgSlugOfficerRosterRouteChildren {
+  AuthenticatedOrgOrgSlugOfficerRosterMemberIdRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterMemberIdRoute
+  AuthenticatedOrgOrgSlugOfficerRosterImportRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterImportRoute
+  AuthenticatedOrgOrgSlugOfficerRosterIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterIndexRoute
 }
 
-const AuthenticatedOrgOrgIdOfficerRosterRouteChildren: AuthenticatedOrgOrgIdOfficerRosterRouteChildren =
+const AuthenticatedOrgOrgSlugOfficerRosterRouteChildren: AuthenticatedOrgOrgSlugOfficerRosterRouteChildren =
   {
-    AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute:
-      AuthenticatedOrgOrgIdOfficerRosterMemberIdRoute,
-    AuthenticatedOrgOrgIdOfficerRosterImportRoute:
-      AuthenticatedOrgOrgIdOfficerRosterImportRoute,
-    AuthenticatedOrgOrgIdOfficerRosterIndexRoute:
-      AuthenticatedOrgOrgIdOfficerRosterIndexRoute,
+    AuthenticatedOrgOrgSlugOfficerRosterMemberIdRoute:
+      AuthenticatedOrgOrgSlugOfficerRosterMemberIdRoute,
+    AuthenticatedOrgOrgSlugOfficerRosterImportRoute:
+      AuthenticatedOrgOrgSlugOfficerRosterImportRoute,
+    AuthenticatedOrgOrgSlugOfficerRosterIndexRoute:
+      AuthenticatedOrgOrgSlugOfficerRosterIndexRoute,
   }
 
-const AuthenticatedOrgOrgIdOfficerRosterRouteWithChildren =
-  AuthenticatedOrgOrgIdOfficerRosterRoute._addFileChildren(
-    AuthenticatedOrgOrgIdOfficerRosterRouteChildren,
+const AuthenticatedOrgOrgSlugOfficerRosterRouteWithChildren =
+  AuthenticatedOrgOrgSlugOfficerRosterRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugOfficerRosterRouteChildren,
   )
 
-interface AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteChildren {
-  AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRoute
+interface AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteChildren {
+  AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute
 }
 
-const AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteChildren: AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteChildren =
+const AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteChildren: AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteChildren =
   {
-    AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRoute:
-      AuthenticatedOrgOrgIdOfficerElectionsElectionIdEditRoute,
+    AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute:
+      AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute,
   }
 
-const AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteWithChildren =
-  AuthenticatedOrgOrgIdOfficerElectionsElectionIdRoute._addFileChildren(
-    AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteChildren,
+const AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren =
+  AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteChildren,
   )
 
-interface AuthenticatedOrgOrgIdOfficerEventsEventIdRouteChildren {
-  AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRoute: typeof AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRoute
+interface AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteChildren {
+  AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute
 }
 
-const AuthenticatedOrgOrgIdOfficerEventsEventIdRouteChildren: AuthenticatedOrgOrgIdOfficerEventsEventIdRouteChildren =
+const AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteChildren: AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteChildren =
   {
-    AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRoute:
-      AuthenticatedOrgOrgIdOfficerEventsEventIdAttendanceRoute,
+    AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute:
+      AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute,
   }
 
-const AuthenticatedOrgOrgIdOfficerEventsEventIdRouteWithChildren =
-  AuthenticatedOrgOrgIdOfficerEventsEventIdRoute._addFileChildren(
-    AuthenticatedOrgOrgIdOfficerEventsEventIdRouteChildren,
+const AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteWithChildren =
+  AuthenticatedOrgOrgSlugOfficerEventsEventIdRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteChildren,
   )
 
-interface AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteChildren {
-  AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRoute
+interface AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteChildren {
+  AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute
 }
 
-const AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteChildren: AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteChildren =
+const AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteChildren: AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteChildren =
   {
-    AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRoute:
-      AuthenticatedOrgOrgIdOfficerTrainingTrainingIdAttendanceRoute,
+    AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute:
+      AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute,
   }
 
-const AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren =
-  AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute._addFileChildren(
-    AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteChildren,
+const AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteWithChildren =
+  AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteChildren,
   )
 
-interface AuthenticatedOrgOrgIdOfficerRouteChildren {
-  AuthenticatedOrgOrgIdOfficerApplicationsRoute: typeof AuthenticatedOrgOrgIdOfficerApplicationsRoute
-  AuthenticatedOrgOrgIdOfficerCommunicationsRoute: typeof AuthenticatedOrgOrgIdOfficerCommunicationsRouteWithChildren
-  AuthenticatedOrgOrgIdOfficerDashboardRoute: typeof AuthenticatedOrgOrgIdOfficerDashboardRoute
-  AuthenticatedOrgOrgIdOfficerOfficersRoute: typeof AuthenticatedOrgOrgIdOfficerOfficersRoute
-  AuthenticatedOrgOrgIdOfficerPaymentsRoute: typeof AuthenticatedOrgOrgIdOfficerPaymentsRouteWithChildren
-  AuthenticatedOrgOrgIdOfficerRosterRoute: typeof AuthenticatedOrgOrgIdOfficerRosterRouteWithChildren
-  AuthenticatedOrgOrgIdOfficerElectionsElectionIdRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteWithChildren
-  AuthenticatedOrgOrgIdOfficerElectionsNewRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsNewRoute
-  AuthenticatedOrgOrgIdOfficerEventsEventIdRoute: typeof AuthenticatedOrgOrgIdOfficerEventsEventIdRouteWithChildren
-  AuthenticatedOrgOrgIdOfficerEventsNewRoute: typeof AuthenticatedOrgOrgIdOfficerEventsNewRoute
-  AuthenticatedOrgOrgIdOfficerReportsCreditsRoute: typeof AuthenticatedOrgOrgIdOfficerReportsCreditsRoute
-  AuthenticatedOrgOrgIdOfficerReportsFinancialRoute: typeof AuthenticatedOrgOrgIdOfficerReportsFinancialRoute
-  AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute
-  AuthenticatedOrgOrgIdOfficerSettingsDuesRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsDuesRoute
-  AuthenticatedOrgOrgIdOfficerSettingsFundsRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsFundsRoute
-  AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute
-  AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute
-  AuthenticatedOrgOrgIdOfficerSettingsOrgRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsOrgRoute
-  AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute: typeof AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute
-  AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren
-  AuthenticatedOrgOrgIdOfficerTrainingNewRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingNewRoute
-  AuthenticatedOrgOrgIdOfficerElectionsIndexRoute: typeof AuthenticatedOrgOrgIdOfficerElectionsIndexRoute
-  AuthenticatedOrgOrgIdOfficerEventsIndexRoute: typeof AuthenticatedOrgOrgIdOfficerEventsIndexRoute
-  AuthenticatedOrgOrgIdOfficerTrainingIndexRoute: typeof AuthenticatedOrgOrgIdOfficerTrainingIndexRoute
+interface AuthenticatedOrgOrgSlugOfficerRouteChildren {
+  AuthenticatedOrgOrgSlugOfficerApplicationsRoute: typeof AuthenticatedOrgOrgSlugOfficerApplicationsRoute
+  AuthenticatedOrgOrgSlugOfficerCommunicationsRoute: typeof AuthenticatedOrgOrgSlugOfficerCommunicationsRouteWithChildren
+  AuthenticatedOrgOrgSlugOfficerDashboardRoute: typeof AuthenticatedOrgOrgSlugOfficerDashboardRoute
+  AuthenticatedOrgOrgSlugOfficerOfficersRoute: typeof AuthenticatedOrgOrgSlugOfficerOfficersRoute
+  AuthenticatedOrgOrgSlugOfficerPaymentsRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsRouteWithChildren
+  AuthenticatedOrgOrgSlugOfficerRosterRoute: typeof AuthenticatedOrgOrgSlugOfficerRosterRouteWithChildren
+  AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren
+  AuthenticatedOrgOrgSlugOfficerElectionsNewRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsNewRoute
+  AuthenticatedOrgOrgSlugOfficerEventsEventIdRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteWithChildren
+  AuthenticatedOrgOrgSlugOfficerEventsNewRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsNewRoute
+  AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute: typeof AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute
+  AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute: typeof AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute
+  AuthenticatedOrgOrgSlugOfficerSettingsChaptersRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsChaptersRoute
+  AuthenticatedOrgOrgSlugOfficerSettingsDuesRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsDuesRoute
+  AuthenticatedOrgOrgSlugOfficerSettingsFundsRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsFundsRoute
+  AuthenticatedOrgOrgSlugOfficerSettingsGatewayRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsGatewayRoute
+  AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRoute
+  AuthenticatedOrgOrgSlugOfficerSettingsOrgRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsOrgRoute
+  AuthenticatedOrgOrgSlugOfficerSettingsProvidersRoute: typeof AuthenticatedOrgOrgSlugOfficerSettingsProvidersRoute
+  AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteWithChildren
+  AuthenticatedOrgOrgSlugOfficerTrainingNewRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingNewRoute
+  AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute
+  AuthenticatedOrgOrgSlugOfficerEventsIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRoute
+  AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute
 }
 
-const AuthenticatedOrgOrgIdOfficerRouteChildren: AuthenticatedOrgOrgIdOfficerRouteChildren =
+const AuthenticatedOrgOrgSlugOfficerRouteChildren: AuthenticatedOrgOrgSlugOfficerRouteChildren =
   {
-    AuthenticatedOrgOrgIdOfficerApplicationsRoute:
-      AuthenticatedOrgOrgIdOfficerApplicationsRoute,
-    AuthenticatedOrgOrgIdOfficerCommunicationsRoute:
-      AuthenticatedOrgOrgIdOfficerCommunicationsRouteWithChildren,
-    AuthenticatedOrgOrgIdOfficerDashboardRoute:
-      AuthenticatedOrgOrgIdOfficerDashboardRoute,
-    AuthenticatedOrgOrgIdOfficerOfficersRoute:
-      AuthenticatedOrgOrgIdOfficerOfficersRoute,
-    AuthenticatedOrgOrgIdOfficerPaymentsRoute:
-      AuthenticatedOrgOrgIdOfficerPaymentsRouteWithChildren,
-    AuthenticatedOrgOrgIdOfficerRosterRoute:
-      AuthenticatedOrgOrgIdOfficerRosterRouteWithChildren,
-    AuthenticatedOrgOrgIdOfficerElectionsElectionIdRoute:
-      AuthenticatedOrgOrgIdOfficerElectionsElectionIdRouteWithChildren,
-    AuthenticatedOrgOrgIdOfficerElectionsNewRoute:
-      AuthenticatedOrgOrgIdOfficerElectionsNewRoute,
-    AuthenticatedOrgOrgIdOfficerEventsEventIdRoute:
-      AuthenticatedOrgOrgIdOfficerEventsEventIdRouteWithChildren,
-    AuthenticatedOrgOrgIdOfficerEventsNewRoute:
-      AuthenticatedOrgOrgIdOfficerEventsNewRoute,
-    AuthenticatedOrgOrgIdOfficerReportsCreditsRoute:
-      AuthenticatedOrgOrgIdOfficerReportsCreditsRoute,
-    AuthenticatedOrgOrgIdOfficerReportsFinancialRoute:
-      AuthenticatedOrgOrgIdOfficerReportsFinancialRoute,
-    AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute:
-      AuthenticatedOrgOrgIdOfficerSettingsChaptersRoute,
-    AuthenticatedOrgOrgIdOfficerSettingsDuesRoute:
-      AuthenticatedOrgOrgIdOfficerSettingsDuesRoute,
-    AuthenticatedOrgOrgIdOfficerSettingsFundsRoute:
-      AuthenticatedOrgOrgIdOfficerSettingsFundsRoute,
-    AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute:
-      AuthenticatedOrgOrgIdOfficerSettingsGatewayRoute,
-    AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute:
-      AuthenticatedOrgOrgIdOfficerSettingsMembershipCategoriesRoute,
-    AuthenticatedOrgOrgIdOfficerSettingsOrgRoute:
-      AuthenticatedOrgOrgIdOfficerSettingsOrgRoute,
-    AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute:
-      AuthenticatedOrgOrgIdOfficerSettingsProvidersRoute,
-    AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRoute:
-      AuthenticatedOrgOrgIdOfficerTrainingTrainingIdRouteWithChildren,
-    AuthenticatedOrgOrgIdOfficerTrainingNewRoute:
-      AuthenticatedOrgOrgIdOfficerTrainingNewRoute,
-    AuthenticatedOrgOrgIdOfficerElectionsIndexRoute:
-      AuthenticatedOrgOrgIdOfficerElectionsIndexRoute,
-    AuthenticatedOrgOrgIdOfficerEventsIndexRoute:
-      AuthenticatedOrgOrgIdOfficerEventsIndexRoute,
-    AuthenticatedOrgOrgIdOfficerTrainingIndexRoute:
-      AuthenticatedOrgOrgIdOfficerTrainingIndexRoute,
+    AuthenticatedOrgOrgSlugOfficerApplicationsRoute:
+      AuthenticatedOrgOrgSlugOfficerApplicationsRoute,
+    AuthenticatedOrgOrgSlugOfficerCommunicationsRoute:
+      AuthenticatedOrgOrgSlugOfficerCommunicationsRouteWithChildren,
+    AuthenticatedOrgOrgSlugOfficerDashboardRoute:
+      AuthenticatedOrgOrgSlugOfficerDashboardRoute,
+    AuthenticatedOrgOrgSlugOfficerOfficersRoute:
+      AuthenticatedOrgOrgSlugOfficerOfficersRoute,
+    AuthenticatedOrgOrgSlugOfficerPaymentsRoute:
+      AuthenticatedOrgOrgSlugOfficerPaymentsRouteWithChildren,
+    AuthenticatedOrgOrgSlugOfficerRosterRoute:
+      AuthenticatedOrgOrgSlugOfficerRosterRouteWithChildren,
+    AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRoute:
+      AuthenticatedOrgOrgSlugOfficerElectionsElectionIdRouteWithChildren,
+    AuthenticatedOrgOrgSlugOfficerElectionsNewRoute:
+      AuthenticatedOrgOrgSlugOfficerElectionsNewRoute,
+    AuthenticatedOrgOrgSlugOfficerEventsEventIdRoute:
+      AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteWithChildren,
+    AuthenticatedOrgOrgSlugOfficerEventsNewRoute:
+      AuthenticatedOrgOrgSlugOfficerEventsNewRoute,
+    AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute:
+      AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute,
+    AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute:
+      AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute,
+    AuthenticatedOrgOrgSlugOfficerSettingsChaptersRoute:
+      AuthenticatedOrgOrgSlugOfficerSettingsChaptersRoute,
+    AuthenticatedOrgOrgSlugOfficerSettingsDuesRoute:
+      AuthenticatedOrgOrgSlugOfficerSettingsDuesRoute,
+    AuthenticatedOrgOrgSlugOfficerSettingsFundsRoute:
+      AuthenticatedOrgOrgSlugOfficerSettingsFundsRoute,
+    AuthenticatedOrgOrgSlugOfficerSettingsGatewayRoute:
+      AuthenticatedOrgOrgSlugOfficerSettingsGatewayRoute,
+    AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRoute:
+      AuthenticatedOrgOrgSlugOfficerSettingsMembershipCategoriesRoute,
+    AuthenticatedOrgOrgSlugOfficerSettingsOrgRoute:
+      AuthenticatedOrgOrgSlugOfficerSettingsOrgRoute,
+    AuthenticatedOrgOrgSlugOfficerSettingsProvidersRoute:
+      AuthenticatedOrgOrgSlugOfficerSettingsProvidersRoute,
+    AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRoute:
+      AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdRouteWithChildren,
+    AuthenticatedOrgOrgSlugOfficerTrainingNewRoute:
+      AuthenticatedOrgOrgSlugOfficerTrainingNewRoute,
+    AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute:
+      AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute,
+    AuthenticatedOrgOrgSlugOfficerEventsIndexRoute:
+      AuthenticatedOrgOrgSlugOfficerEventsIndexRoute,
+    AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute:
+      AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute,
   }
 
-const AuthenticatedOrgOrgIdOfficerRouteWithChildren =
-  AuthenticatedOrgOrgIdOfficerRoute._addFileChildren(
-    AuthenticatedOrgOrgIdOfficerRouteChildren,
+const AuthenticatedOrgOrgSlugOfficerRouteWithChildren =
+  AuthenticatedOrgOrgSlugOfficerRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugOfficerRouteChildren,
+  )
+
+interface AuthenticatedOrgOrgSlugRouteRouteChildren {
+  AuthenticatedOrgOrgSlugDuesRoute: typeof AuthenticatedOrgOrgSlugDuesRoute
+  AuthenticatedOrgOrgSlugHomeRoute: typeof AuthenticatedOrgOrgSlugHomeRoute
+  AuthenticatedOrgOrgSlugMembersRoute: typeof AuthenticatedOrgOrgSlugMembersRoute
+  AuthenticatedOrgOrgSlugOfficerRoute: typeof AuthenticatedOrgOrgSlugOfficerRouteWithChildren
+  AuthenticatedOrgOrgSlugEventsEventIdRoute: typeof AuthenticatedOrgOrgSlugEventsEventIdRoute
+  AuthenticatedOrgOrgSlugTrainingTrainingIdRoute: typeof AuthenticatedOrgOrgSlugTrainingTrainingIdRoute
+  AuthenticatedOrgOrgSlugElectionsIndexRoute: typeof AuthenticatedOrgOrgSlugElectionsIndexRoute
+  AuthenticatedOrgOrgSlugEventsIndexRoute: typeof AuthenticatedOrgOrgSlugEventsIndexRoute
+  AuthenticatedOrgOrgSlugTrainingIndexRoute: typeof AuthenticatedOrgOrgSlugTrainingIndexRoute
+  AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute: typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute
+  AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute: typeof AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute
+}
+
+const AuthenticatedOrgOrgSlugRouteRouteChildren: AuthenticatedOrgOrgSlugRouteRouteChildren =
+  {
+    AuthenticatedOrgOrgSlugDuesRoute: AuthenticatedOrgOrgSlugDuesRoute,
+    AuthenticatedOrgOrgSlugHomeRoute: AuthenticatedOrgOrgSlugHomeRoute,
+    AuthenticatedOrgOrgSlugMembersRoute: AuthenticatedOrgOrgSlugMembersRoute,
+    AuthenticatedOrgOrgSlugOfficerRoute:
+      AuthenticatedOrgOrgSlugOfficerRouteWithChildren,
+    AuthenticatedOrgOrgSlugEventsEventIdRoute:
+      AuthenticatedOrgOrgSlugEventsEventIdRoute,
+    AuthenticatedOrgOrgSlugTrainingTrainingIdRoute:
+      AuthenticatedOrgOrgSlugTrainingTrainingIdRoute,
+    AuthenticatedOrgOrgSlugElectionsIndexRoute:
+      AuthenticatedOrgOrgSlugElectionsIndexRoute,
+    AuthenticatedOrgOrgSlugEventsIndexRoute:
+      AuthenticatedOrgOrgSlugEventsIndexRoute,
+    AuthenticatedOrgOrgSlugTrainingIndexRoute:
+      AuthenticatedOrgOrgSlugTrainingIndexRoute,
+    AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute:
+      AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute,
+    AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute:
+      AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute,
+  }
+
+const AuthenticatedOrgOrgSlugRouteRouteWithChildren =
+  AuthenticatedOrgOrgSlugRouteRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugRouteRouteChildren,
   )
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedOrgOrgSlugRouteRoute: typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   AuthenticatedMyDataExportRoute: typeof AuthenticatedMyDataExportRoute
   AuthenticatedMyEventsRoute: typeof AuthenticatedMyEventsRoute
   AuthenticatedMyIdCardRoute: typeof AuthenticatedMyIdCardRoute
@@ -1602,23 +1666,14 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMyTrainingRoute: typeof AuthenticatedMyTrainingRoute
   AuthenticatedMyCertificatesCertificateIdRoute: typeof AuthenticatedMyCertificatesCertificateIdRoute
   AuthenticatedMyCreditsLogRoute: typeof AuthenticatedMyCreditsLogRoute
-  AuthenticatedOrgOrgIdDuesRoute: typeof AuthenticatedOrgOrgIdDuesRoute
-  AuthenticatedOrgOrgIdHomeRoute: typeof AuthenticatedOrgOrgIdHomeRoute
-  AuthenticatedOrgOrgIdMembersRoute: typeof AuthenticatedOrgOrgIdMembersRoute
-  AuthenticatedOrgOrgIdOfficerRoute: typeof AuthenticatedOrgOrgIdOfficerRouteWithChildren
   AuthenticatedMyCertificatesIndexRoute: typeof AuthenticatedMyCertificatesIndexRoute
   AuthenticatedMyCreditsIndexRoute: typeof AuthenticatedMyCreditsIndexRoute
-  AuthenticatedOrgOrgIdEventsEventIdRoute: typeof AuthenticatedOrgOrgIdEventsEventIdRoute
-  AuthenticatedOrgOrgIdTrainingTrainingIdRoute: typeof AuthenticatedOrgOrgIdTrainingTrainingIdRoute
-  AuthenticatedOrgOrgIdElectionsIndexRoute: typeof AuthenticatedOrgOrgIdElectionsIndexRoute
-  AuthenticatedOrgOrgIdEventsIndexRoute: typeof AuthenticatedOrgOrgIdEventsIndexRoute
-  AuthenticatedOrgOrgIdTrainingIndexRoute: typeof AuthenticatedOrgOrgIdTrainingIndexRoute
-  AuthenticatedOrgOrgIdElectionsElectionIdVoteRoute: typeof AuthenticatedOrgOrgIdElectionsElectionIdVoteRoute
-  AuthenticatedOrgOrgIdElectionsElectionIdIndexRoute: typeof AuthenticatedOrgOrgIdElectionsElectionIdIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedOrgOrgSlugRouteRoute:
+    AuthenticatedOrgOrgSlugRouteRouteWithChildren,
   AuthenticatedMyDataExportRoute: AuthenticatedMyDataExportRoute,
   AuthenticatedMyEventsRoute: AuthenticatedMyEventsRoute,
   AuthenticatedMyIdCardRoute: AuthenticatedMyIdCardRoute,
@@ -1631,26 +1686,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMyCertificatesCertificateIdRoute:
     AuthenticatedMyCertificatesCertificateIdRoute,
   AuthenticatedMyCreditsLogRoute: AuthenticatedMyCreditsLogRoute,
-  AuthenticatedOrgOrgIdDuesRoute: AuthenticatedOrgOrgIdDuesRoute,
-  AuthenticatedOrgOrgIdHomeRoute: AuthenticatedOrgOrgIdHomeRoute,
-  AuthenticatedOrgOrgIdMembersRoute: AuthenticatedOrgOrgIdMembersRoute,
-  AuthenticatedOrgOrgIdOfficerRoute:
-    AuthenticatedOrgOrgIdOfficerRouteWithChildren,
   AuthenticatedMyCertificatesIndexRoute: AuthenticatedMyCertificatesIndexRoute,
   AuthenticatedMyCreditsIndexRoute: AuthenticatedMyCreditsIndexRoute,
-  AuthenticatedOrgOrgIdEventsEventIdRoute:
-    AuthenticatedOrgOrgIdEventsEventIdRoute,
-  AuthenticatedOrgOrgIdTrainingTrainingIdRoute:
-    AuthenticatedOrgOrgIdTrainingTrainingIdRoute,
-  AuthenticatedOrgOrgIdElectionsIndexRoute:
-    AuthenticatedOrgOrgIdElectionsIndexRoute,
-  AuthenticatedOrgOrgIdEventsIndexRoute: AuthenticatedOrgOrgIdEventsIndexRoute,
-  AuthenticatedOrgOrgIdTrainingIndexRoute:
-    AuthenticatedOrgOrgIdTrainingIndexRoute,
-  AuthenticatedOrgOrgIdElectionsElectionIdVoteRoute:
-    AuthenticatedOrgOrgIdElectionsElectionIdVoteRoute,
-  AuthenticatedOrgOrgIdElectionsElectionIdIndexRoute:
-    AuthenticatedOrgOrgIdElectionsElectionIdIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

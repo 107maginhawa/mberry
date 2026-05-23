@@ -39,8 +39,8 @@ interface OfficerSidebarProps {
 }
 
 export function OfficerSidebar({ orgName, userEmail, userName, role, positions }: OfficerSidebarProps) {
-  const { orgId } = useParams({ strict: false }) as { orgId: string }
-  const base = `/org/${orgId}/officer`
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
+  const base = `/org/${orgSlug}/officer`
 
   const sections: NavSection[] = [
     {

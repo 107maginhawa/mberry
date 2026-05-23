@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { Vote, Users, CheckCircle2, Clock, FileText, Ban, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
 import { listElectionsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
@@ -59,6 +59,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function ElectionList({ orgId }: ElectionListProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const { data, isLoading, error } = useQuery(
     listElectionsOptions({ query: { organizationId: orgId } }),
   )
@@ -112,8 +113,8 @@ export function ElectionList({ orgId }: ElectionListProps) {
           {elections.map((election) => (
             <Link
               key={election.id}
-              to="/org/$orgId/officer/elections/$electionId"
-              params={{ orgId, electionId: election.id }}
+              to="/org/$orgSlug/officer/elections/$electionId"
+              params={{ orgSlug, electionId: election.id }}
               className="flex items-center gap-4 border rounded-lg p-4 hover:bg-[var(--color-surface-warm)] transition-colors group"
             >
               <div className="flex-1 min-w-0">

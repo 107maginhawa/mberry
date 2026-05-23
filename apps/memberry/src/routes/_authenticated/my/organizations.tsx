@@ -97,8 +97,8 @@ function MyOrganizationsPage() {
               className="flex items-center gap-4 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-5 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all"
             >
               <Link
-                to="/org/$orgId/members"
-                params={{ orgId: normalizeOrgId(m) ?? '' }}
+                to="/org/$orgSlug/members"
+                params={{ orgSlug: normalizeOrgId(m) ?? '' }}
                 className="flex items-center gap-4 flex-1 min-w-0"
               >
                 <AvatarInitials name={m.orgName ?? 'Org'} size="md" />

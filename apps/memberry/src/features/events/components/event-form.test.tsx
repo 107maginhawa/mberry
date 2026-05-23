@@ -29,6 +29,12 @@ vi.mock('@monobase/ui', () => ({
   SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
 }))
 
+vi.mock('@/components/patterns/date-picker', () => ({
+  DateTimePicker: ({ value, onChange, ...rest }: any) => (
+    <input data-testid="datetime-picker" type="text" value={value ?? ''} onChange={(e: any) => onChange?.(e.target.value)} {...rest} />
+  ),
+}))
+
 import {
   createEventMutation,
   updateEventMutation,

@@ -24,8 +24,8 @@ interface NavSection {
 
 export function OfficerMobileNav({ orgName, userName, role, positions }: OfficerMobileNavProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const { orgId } = useParams({ strict: false }) as { orgId: string }
-  const base = `/org/${orgId}/officer`
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
+  const base = `/org/${orgSlug}/officer`
 
   const sections: NavSection[] = [
     { items: [{ to: `${base}/dashboard`, label: 'Dashboard', icon: LayoutDashboard }] },

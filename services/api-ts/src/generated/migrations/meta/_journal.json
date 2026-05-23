@@ -267,6 +267,34 @@
       "when": 1778724268962,
       "tag": "0037_last_infant_terrible",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1779724800000,
+      "tag": "0038_rename_terminated_to_removed",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1779724900000,
+      "tag": "0039_notification_type_gap_wiring",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1779811200000,
+      "tag": "0040_slug_backfill",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1779811300000,
+      "tag": "0041_slug_not_null",
+      "breakpoints": true
     }
   ]
 }

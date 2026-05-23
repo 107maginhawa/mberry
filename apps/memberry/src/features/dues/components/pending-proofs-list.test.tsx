@@ -5,6 +5,8 @@ import { PendingProofsList } from './pending-proofs-list'
 
 vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
   listPendingProofsOptions: vi.fn(),
+  listPendingProofsQueryKey: vi.fn(() => ['dues', 'pending-proofs']),
+  listDuesPaymentsQueryKey: vi.fn(() => ['dues', 'payments']),
   confirmPaymentProofMutation: vi.fn(() => ({ mutationFn: vi.fn().mockResolvedValue({}) })),
   rejectPaymentProofMutation: vi.fn(() => ({ mutationFn: vi.fn().mockResolvedValue({}) })),
 }))

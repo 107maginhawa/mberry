@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import {
   listRosterMembersOptions,
   listMembershipCategoriesOptions,
@@ -60,6 +60,7 @@ const DUES_STATUS_BADGE: Record<string, { label: string; className: string }> = 
 const PAGE_SIZE = 50
 
 export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredits = DEFAULT_REQUIRED_CREDITS }: MemberTableProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusTab, setStatusTab] = useState(initialStatus ?? 'all')
@@ -279,8 +280,8 @@ export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredit
                         />
                         <div>
                           <Link
-                            to="/org/$orgId/officer/roster/$memberId"
-                            params={{ orgId, memberId: m.id }}
+                            to="/org/$orgSlug/officer/roster/$memberId"
+                            params={{ orgSlug, memberId: m.id }}
                             className="font-medium text-[var(--color-primary)] hover:underline"
                           >
                             {m.name ?? m.personId ?? m.id}

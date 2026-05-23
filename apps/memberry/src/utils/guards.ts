@@ -38,13 +38,14 @@ export async function requireGuest({ context }: { context: RouterContext }) {
 }
 
 /**
- * Requires user to be an active officer for the org specified by $orgId route param.
- * Checks org+role (per BR-09, BR-21: roles are per-org, not global).
+ * Requires user to be an active officer for the org specified by $orgSlug route param.
+ * Resolves slug to UUID via /public/org/:slug, then checks org+role
+ * (per BR-09, BR-21: roles are per-org, not global).
  * Uses queryClient.ensureQueryData for caching — subsequent navigations
  * within the same org hit cache (staleTime from ApiProvider defaults).
  * Returns officer positions in route context for downstream use.
  */
-export async function requireOrgOfficer({ context, params }: { context: RouterContext; params: { orgId: string } }): Promise<OfficerContext> {
+export async function requireOrgOfficer({ context, params }: { context: RouterContext; params: { orgSlug: string } }): Promise<OfficerContext> {
   const user = context.auth?.user
   if (!user) {
     throw redirect({
@@ -53,9 +54,24 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
     })
   }
 
-  const orgId = params.orgId
-  if (!orgId) {
+  const orgSlug = params.orgSlug
+  if (!orgSlug) {
     throw redirect({ to: '/' })
+  }
+
+  // Resolve slug to UUID
+  let orgId: string
+  try {
+    const orgData = await context.queryClient.ensureQueryData({
+      queryKey: ['org-by-slug', orgSlug],
+      queryFn: () => api.get<any>(`/api/public/org/${orgSlug}`),
+      staleTime: Infinity,
+    })
+    orgId = orgData?.id ?? orgData?.data?.id
+    if (!orgId) throw new Error('Org not found')
+  } catch (err) {
+    if (err && typeof err === 'object' && 'to' in err) throw err
+    throw redirect({ to: '/dashboard' })
   }
 
   try {

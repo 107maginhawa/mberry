@@ -8,6 +8,7 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={String(to)}>{children}</a>
   ),
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 // Mock motion/pattern components

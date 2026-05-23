@@ -20,8 +20,8 @@ export function QuickActions({ duesOrgId, eventsOrgId }: QuickActionsProps) {
     {
       icon: <CreditCard size={20} />,
       label: duesOrgId ? 'Pay Dues' : 'Payments',
-      to: duesOrgId ? '/org/$orgId/dues' : '/my/payments',
-      params: duesOrgId ? { orgId: duesOrgId } : undefined,
+      to: duesOrgId ? '/org/$orgSlug/dues' : '/my/payments',
+      params: duesOrgId ? { orgSlug: duesOrgId } : undefined,
     },
     {
       icon: <IdCard size={20} />,
@@ -36,8 +36,8 @@ export function QuickActions({ duesOrgId, eventsOrgId }: QuickActionsProps) {
     {
       icon: <Calendar size={20} />,
       label: 'Events',
-      to: eventsOrgId ? '/org/$orgId/events' : '/my/events',
-      params: eventsOrgId ? { orgId: eventsOrgId } : undefined,
+      to: eventsOrgId ? '/org/$orgSlug/events' : '/my/events',
+      params: eventsOrgId ? { orgSlug: eventsOrgId } : undefined,
     },
     {
       icon: <BookOpen size={20} />,

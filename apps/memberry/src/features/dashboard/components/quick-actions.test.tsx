@@ -8,6 +8,7 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => (
     <a href={String(to)} data-params={JSON.stringify(params)}>{children}</a>
   ),
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 describe('QuickActions', () => {
@@ -47,14 +48,14 @@ describe('QuickActions', () => {
     renderWithProviders(<QuickActions duesOrgId="org-abc" />)
 
     const payDuesLink = screen.getByText('Pay Dues').closest('a')
-    expect(payDuesLink).toHaveAttribute('href', '/org/$orgId/dues')
+    expect(payDuesLink).toHaveAttribute('href', '/org/$orgSlug/dues')
   })
 
   test('links to org-specific events route when eventsOrgId provided', () => {
     renderWithProviders(<QuickActions eventsOrgId="org-evt-1" />)
 
     const eventsLink = screen.getByText('Events').closest('a')
-    expect(eventsLink).toHaveAttribute('href', '/org/$orgId/events')
+    expect(eventsLink).toHaveAttribute('href', '/org/$orgSlug/events')
   })
 
   test('links to /my/events when no eventsOrgId', () => {

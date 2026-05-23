@@ -80,8 +80,8 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
     <GlassCard className={`overflow-hidden ${!upcoming ? 'opacity-75' : ''}`}>
       {/* Clickable card body → event detail */}
       <Link
-        to="/org/$orgId/events/$eventId"
-        params={{ orgId: orgId ?? '', eventId: event.id }}
+        to="/org/$orgSlug/events/$eventId"
+        params={{ orgSlug: orgId ?? '', eventId: event.id }}
         className="block p-4 space-y-3 hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
       >
         <div className="flex items-start justify-between gap-2">

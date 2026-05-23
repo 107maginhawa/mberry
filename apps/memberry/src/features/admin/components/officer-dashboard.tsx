@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { Users, AlertTriangle, UserMinus, TrendingUp, CalendarDays, Bell, ClipboardList, UserX } from 'lucide-react'
 import { api } from '@/lib/api'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
@@ -27,6 +27,7 @@ interface DuesDashboard {
 }
 
 export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const members = useQuery<MemberSummary>({
     queryKey: ['member-summary', orgId],
     queryFn: async () => {
@@ -151,7 +152,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
                 icon={<Bell size={18} className="text-[var(--color-warning)]" />}
                 title={`${m!.expiringIn30Days} member${m!.expiringIn30Days !== 1 ? 's' : ''} with expiring dues`}
                 description="Send renewal reminders before they lapse"
-                href={`/org/${orgId}/officer/roster?status=active&expiring=30`}
+                href={`/org/${orgSlug}/officer/roster?status=active&expiring=30`}
                 variant="warning"
               />
             )}
@@ -162,7 +163,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
                 icon={<ClipboardList size={18} className="text-[var(--color-info)]" />}
                 title={`${applications.data!.pendingCount} pending application${applications.data!.pendingCount !== 1 ? 's' : ''}`}
                 description="Review and approve membership applications"
-                href={`/org/${orgId}/officer/applications`}
+                href={`/org/${orgSlug}/officer/applications`}
                 variant="info"
               />
             )}
@@ -173,7 +174,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
                 icon={<UserMinus size={18} className="text-[var(--color-error)]" />}
                 title={`${m!.graceCount} member${m!.graceCount !== 1 ? 's' : ''} in grace period`}
                 description="These members are at risk of lapsing — act now"
-                href={`/org/${orgId}/officer/roster?status=grace`}
+                href={`/org/${orgSlug}/officer/roster?status=grace`}
                 variant="error"
               />
             )}
@@ -184,7 +185,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
                 icon={<TrendingUp size={18} className="text-[var(--color-error)]" />}
                 title={`Collection rate is ${collectionRate}%`}
                 description="Review outstanding dues and follow up with members"
-                href={`/org/${orgId}/officer/payments`}
+                href={`/org/${orgSlug}/officer/payments`}
                 variant="error"
               />
             )}
@@ -212,10 +213,10 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
       <section className="mt-8">
         <h2 className="text-h4 mb-3">Quick Links</h2>
         <StaggerGrid className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StaggerItem><QuickLink href={`/org/${orgId}/officer/roster`} icon={<Users size={16} />} label="Roster" /></StaggerItem>
-          <StaggerItem><QuickLink href={`/org/${orgId}/officer/applications`} icon={<ClipboardList size={16} />} label="Applications" /></StaggerItem>
-          <StaggerItem><QuickLink href={`/org/${orgId}/officer/payments`} icon={<TrendingUp size={16} />} label="Payments" /></StaggerItem>
-          <StaggerItem><QuickLink href={`/org/${orgId}/officer/reports/financial`} icon={<CalendarDays size={16} />} label="Reports" /></StaggerItem>
+          <StaggerItem><QuickLink href={`/org/${orgSlug}/officer/roster`} icon={<Users size={16} />} label="Roster" /></StaggerItem>
+          <StaggerItem><QuickLink href={`/org/${orgSlug}/officer/applications`} icon={<ClipboardList size={16} />} label="Applications" /></StaggerItem>
+          <StaggerItem><QuickLink href={`/org/${orgSlug}/officer/payments`} icon={<TrendingUp size={16} />} label="Payments" /></StaggerItem>
+          <StaggerItem><QuickLink href={`/org/${orgSlug}/officer/reports/financial`} icon={<CalendarDays size={16} />} label="Reports" /></StaggerItem>
         </StaggerGrid>
       </section>
     </div>

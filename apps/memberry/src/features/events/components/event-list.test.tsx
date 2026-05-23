@@ -24,6 +24,16 @@ vi.mock('@monobase/ui', () => ({
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
 }))
 
+vi.mock('@/components/patterns/confirm-dialog', () => ({
+  ConfirmDialog: ({ children, onConfirm, title, ...rest }: any) => (
+    <div data-testid="confirm-dialog" {...rest}>
+      <span>{title}</span>
+      <button onClick={onConfirm}>Confirm</button>
+      {children}
+    </div>
+  ),
+}))
+
 vi.mock('./event-card', () => ({
   EventCard: ({ event }: any) => <div data-testid="event-card">{event.title}</div>,
 }))

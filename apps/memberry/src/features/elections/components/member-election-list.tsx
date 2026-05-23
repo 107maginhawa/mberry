@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { Vote, Users, CheckCircle2, Clock, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
 import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
@@ -47,6 +47,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function MemberElectionList({ orgId }: MemberElectionListProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [tab, setTab] = useState<TabFilter>('active')
 
   const { data, isLoading, error } = useQuery(
@@ -108,8 +109,8 @@ export function MemberElectionList({ orgId }: MemberElectionListProps) {
             return (
               <Link
                 key={election.id}
-                to="/org/$orgId/elections/$electionId"
-                params={{ orgId, electionId: election.id }}
+                to="/org/$orgSlug/elections/$electionId"
+                params={{ orgSlug, electionId: election.id }}
                 className="flex items-center gap-4 border rounded-lg p-4 hover:bg-[var(--color-surface-warm)] transition-colors group"
               >
                 <div className="flex-1 min-w-0">

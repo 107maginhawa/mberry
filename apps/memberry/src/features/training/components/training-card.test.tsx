@@ -4,6 +4,11 @@ import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { TrainingCard } from './training-card'
 
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, ...rest }: any) => <a href={String(to)} {...rest}>{children}</a>,
+  useParams: () => ({ orgSlug: 'test-org' }),
+}))
+
 describe('TrainingCard', () => {
   const baseTraining = {
     id: 'train-1',
@@ -27,7 +32,7 @@ describe('TrainingCard', () => {
 
     const link = screen.getByText('CPE Dental Seminar 2025')
     expect(link).toBeInTheDocument()
-    expect(link.closest('a')).toHaveAttribute('href', '/org/org-1/officer/training/train-1')
+    expect(link.closest('a')).toHaveAttribute('href', '/org/test-org/officer/training/train-1')
   })
 
   test('renders type badge', () => {

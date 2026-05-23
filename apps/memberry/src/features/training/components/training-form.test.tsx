@@ -5,6 +5,13 @@ import { TrainingForm } from './training-form'
 
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
+  useParams: () => ({ orgSlug: 'test-org' }),
+}))
+
+vi.mock('@/components/patterns/date-picker', () => ({
+  DateTimePicker: ({ value, onChange, ...rest }: any) => (
+    <input data-testid="datetime-picker" type="text" value={value ?? ''} onChange={(e: any) => onChange?.(e.target.value)} {...rest} />
+  ),
 }))
 
 vi.mock('@monobase/ui', () => ({

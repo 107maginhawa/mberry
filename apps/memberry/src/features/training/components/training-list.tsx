@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { Button, Input } from '@monobase/ui'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { BookOpen, Users, Award, Search, SlidersHorizontal } from 'lucide-react'
 import { TrainingCard } from './training-card'
 import {
@@ -39,6 +39,7 @@ interface TrainingListProps {
 }
 
 export function TrainingList({ orgId }: TrainingListProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [activeTab, setActiveTab] = useState('published')
   const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -191,7 +192,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
       ) : trainings.length === 0 ? (
         <div className="border rounded-xl p-12 text-center text-[var(--color-muted)]">
           No trainings found.{' '}
-          <Link to="/org/$orgId/officer/training/new" params={{ orgId }} className="text-[var(--color-primary)] hover:underline">
+          <Link to="/org/$orgSlug/officer/training/new" params={{ orgSlug }} className="text-[var(--color-primary)] hover:underline">
             Create one
           </Link>
         </div>

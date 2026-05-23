@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import {
   getRosterMemberOptions,
   getRosterMemberQueryKey,
@@ -78,6 +78,7 @@ function getInitials(name: string | undefined): string {
 }
 
 export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const queryClient = useQueryClient()
 
   const [showChangeCat, setShowChangeCat] = useState(false)
@@ -171,8 +172,8 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
       <PageHeader
         title={member.name ?? 'Member Detail'}
         breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
-          { label: 'Roster', href: `/org/${orgId}/officer/roster` },
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Roster', href: `/org/${orgSlug}/officer/roster` },
           { label: member.name ?? 'Member' },
         ]}
       />
@@ -273,8 +274,8 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           </Button>
           <Button variant="outline" size="sm" asChild>
             <Link
-              to="/org/$orgId/officer/payments/new"
-              params={{ orgId }}
+              to="/org/$orgSlug/officer/payments/new"
+              params={{ orgSlug }}
             >
               <CreditCard className="h-4 w-4 mr-2" />
               Record Payment

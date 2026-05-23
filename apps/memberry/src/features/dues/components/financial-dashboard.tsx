@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { FinancialDashboard, GetDuesFinancialDashboardData } from '@monobase/sdk-ts/generated/types.gen'
 import { Skeleton } from '@monobase/ui'
@@ -19,6 +19,7 @@ interface FinancialDashboardProps {
 }
 
 export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const { data, isLoading, error } = useQuery(
     getDuesFinancialDashboardOptions(
       { path: { organizationId: orgId }, headers: { 'x-org-id': orgId } } as unknown as GetDuesFinancialDashboardDataWithHeaders
@@ -113,8 +114,8 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
           )}
           {!hasGateway && (
             <Link
-              to="/org/$orgId/officer/settings/gateway"
-              params={{ orgId }}
+              to="/org/$orgSlug/officer/settings/gateway"
+              params={{ orgSlug }}
             >
               <GlassCard className="flex items-center gap-3 p-3 h-full">
                 <Settings className="h-5 w-5 text-[var(--color-muted)] shrink-0" />

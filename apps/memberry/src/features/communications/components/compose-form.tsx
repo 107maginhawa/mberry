@@ -3,7 +3,7 @@ import { zodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { api } from '@/lib/api'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
@@ -42,6 +42,7 @@ interface ComposeFormProps {
 }
 
 export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [serverError, setServerError] = useState<string | null>(null)
@@ -94,7 +95,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })
-      navigate({ to: `/org/${orgId}/officer/communications` })
+      navigate({ to: `/org/${orgSlug}/officer/communications` })
     },
     onError: (err: Error) => {
       setServerError(err.message)
@@ -253,7 +254,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         <Button
           type="button"
           variant="ghost"
-          onClick={() => navigate({ to: `/org/${orgId}/officer/communications` })}
+          onClick={() => navigate({ to: `/org/${orgSlug}/officer/communications` })}
           disabled={mutation.isPending}
         >
           Cancel

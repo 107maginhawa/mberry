@@ -11,6 +11,10 @@ vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
 import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 const mockSearchDirectory = searchDirectoryOptions as ReturnType<typeof vi.fn>
 
+vi.mock('@monobase/ui', () => ({
+  Input: (props: any) => <input {...props} />,
+}))
+
 // Mock components
 vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className }: { children: React.ReactNode; className?: string }) => (
@@ -67,6 +71,7 @@ describe('DirectorySearch', () => {
               id: 'p-1',
               firstName: 'Maria',
               lastName: 'Santos',
+              displayName: 'Maria Santos',
               title: 'DMD',
               specialty: 'Orthodontics',
               location: 'Manila, PH',
@@ -75,6 +80,7 @@ describe('DirectorySearch', () => {
               id: 'p-2',
               firstName: 'Jose',
               lastName: 'Cruz',
+              displayName: 'Jose Cruz',
               title: 'DDS',
               specialty: 'Periodontics',
             },
@@ -113,7 +119,7 @@ describe('DirectorySearch', () => {
       queryFn: () =>
         Promise.resolve({
           data: [
-            { id: 'p-1', firstName: 'Maria', lastName: 'Santos' },
+            { id: 'p-1', firstName: 'Maria', lastName: 'Santos', displayName: 'Maria Santos' },
           ],
         }),
     })

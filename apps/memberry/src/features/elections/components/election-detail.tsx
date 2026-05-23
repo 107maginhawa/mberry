@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { Users, Vote, Trophy, ArrowRight, CheckCircle2, Plus, Trash2, Pencil } from 'lucide-react'
 import { Button, Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
@@ -86,6 +86,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const queryClient = useQueryClient()
   const [confirmAction, setConfirmAction] = useState<string | null>(null)
   const [nominatePositionId, setNominatePositionId] = useState<string | null>(null)
@@ -213,8 +214,8 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
         <div className="flex items-center gap-2">
           {election.status === 'draft' && (
             <Link
-              to="/org/$orgId/officer/elections/$electionId/edit"
-              params={{ orgId, electionId }}
+              to="/org/$orgSlug/officer/elections/$electionId/edit"
+              params={{ orgSlug, electionId }}
               className="flex items-center gap-1.5 px-3 py-2 border rounded-md text-sm hover:bg-[var(--color-surface-warm)] transition-colors"
             >
               <Pencil className="w-3.5 h-3.5" />

@@ -70,7 +70,7 @@ export const organizations = pgTable('organization', {
   ...baseEntityFields,
   associationId: uuid('association_id').notNull(),
   name: varchar('name', { length: 255 }).notNull(),
-  slug: varchar('slug', { length: 100 }),
+  slug: varchar('slug', { length: 100 }).notNull(),
   orgType: orgTypeEnum('org_type').notNull(),
   region: varchar('region', { length: 100 }),
   contactEmail: varchar('contact_email', { length: 255 }),

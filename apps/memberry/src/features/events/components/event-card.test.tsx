@@ -10,6 +10,7 @@ vi.mock('@/components/motion/glass-card', () => ({
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, className }: any) => <a href={String(to)} className={className}>{children}</a>,
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 vi.mock('@monobase/ui', () => ({
@@ -39,7 +40,7 @@ describe('EventCard', () => {
 
     const title = screen.getByText('Annual General Assembly 2025')
     expect(title).toBeInTheDocument()
-    expect(title.closest('a')).toHaveAttribute('href', '/org/org-1/officer/events/evt-1')
+    expect(title.closest('a')).toHaveAttribute('href', '/org/test-org/officer/events/evt-1')
   })
 
   test('renders status badge', () => {
