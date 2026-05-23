@@ -77,5 +77,7 @@ export async function checkIn(ctx: Context): Promise<Response> {
     logger?.warn({ error: err, eventId }, 'Failed to enqueue attendance.confirmed job');
   }
 
+  // TODO: Post-event NPS survey trigger (deferred — survey module not yet implemented)
+
   return ctx.json({ data: attendance }, 201);
 }

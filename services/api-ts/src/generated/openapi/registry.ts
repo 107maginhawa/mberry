@@ -50,7 +50,6 @@ import { listMyCustomEvents } from '../../handlers/association:operations/listMy
 import { listCustomEventAttendance } from '../../handlers/association:operations/listCustomEventAttendance';
 import { checkInCustomEvent } from '../../handlers/association:operations/checkInCustomEvent';
 import { registerForCustomEvent } from '../../handlers/association:operations/registerForCustomEvent';
-import { registerAndPayForEvent } from '../../handlers/events/registerAndPayForEvent';
 import { listCustomEventRegistrations } from '../../handlers/association:operations/listCustomEventRegistrations';
 import { createEvent } from '../../handlers/association:operations/createEvent';
 import { searchEvents } from '../../handlers/association:operations/searchEvents';
@@ -423,7 +422,6 @@ export const registry = {
   listCustomEventAttendance,
   checkInCustomEvent,
   registerForCustomEvent,
-  registerAndPayForEvent,
   listCustomEventRegistrations,
   createEvent,
   searchEvents,

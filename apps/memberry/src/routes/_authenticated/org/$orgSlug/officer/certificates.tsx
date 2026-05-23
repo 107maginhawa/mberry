@@ -22,7 +22,7 @@ function OfficerCertificates() {
   const [verifyResult, setVerifyResult] = useState<any>(null)
 
   const bulkMutation = useMutation({
-    mutationFn: (body: any) => api.post('/certificates/bulk-issue', body, { headers: { 'x-org-id': orgId } }),
+    mutationFn: (body: any) => api.post('/api/certificates/bulk-issue', body),
     onSuccess: (data: any) => {
       const result = data?.data
       if (result?.status === 'queued') {

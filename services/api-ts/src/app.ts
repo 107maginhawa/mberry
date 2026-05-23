@@ -67,6 +67,9 @@ import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedPr
 import { unsubscribeEmail } from '@/handlers/email/unsubscribeEmail';
 import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 
+// Saved Segments — hand-wired CRUD (Wave 4β Lane C)
+import { createSavedSegment, listSavedSegments, deleteSavedSegment } from '@/handlers/communication/savedSegments';
+
 // Event lifecycle: completeEvent hand-wired (not yet in TypeSpec)
 import { completeEvent } from '@/handlers/association:operations/completeEvent';
 
@@ -283,6 +286,11 @@ export function createApp(config: Config): App {
   app.post('/association/member/compliance/:organizationId/refresh', authMiddleware(), refreshCompliance as any);
   app.get('/persons/me/credits', authMiddleware(), orgContextOptionalMiddleware(), getMyCredits as any);
   app.post('/certificates/bulk-issue', authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
+
+  // Wave 4β: Saved Segments — CRUD for audience segment presets
+  app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
+  app.get('/communications/segments', authMiddleware(), listSavedSegments as any);
+  app.delete('/communications/segments/:id', authMiddleware(), deleteSavedSegment as any);
 
   // Register WebSocket handlers
   registerWebSocketRoutes(app as App);

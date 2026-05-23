@@ -16,7 +16,7 @@ function MyCpdDashboard() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['my-credits', orgId],
-    queryFn: () => api.get(`/persons/me/credits`, { headers: { 'x-org-id': orgId } }),
+    queryFn: () => api.get(`/api/persons/me/credits`),
     enabled: !!orgId,
   })
 
@@ -118,10 +118,10 @@ function MyCpdDashboard() {
       </GlassCard>
 
       <div className="flex gap-3">
-        <Link to={'/org/$orgSlug/training' as any} params={{ orgSlug }} className="text-sm text-[var(--color-primary)] hover:underline">
+        <Link to={'/org/$orgSlug/training' as any} params={{ orgSlug } as any} className="text-sm text-[var(--color-primary)] hover:underline">
           Browse Training
         </Link>
-        <Link to={'/org/$orgSlug/events' as any} params={{ orgSlug }} className="text-sm text-[var(--color-primary)] hover:underline">
+        <Link to={'/org/$orgSlug/events' as any} params={{ orgSlug } as any} className="text-sm text-[var(--color-primary)] hover:underline">
           Browse Events
         </Link>
       </div>

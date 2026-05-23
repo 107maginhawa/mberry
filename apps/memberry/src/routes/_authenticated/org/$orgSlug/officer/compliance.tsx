@@ -20,12 +20,12 @@ function OfficerCompliance() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['compliance-report', orgId, statusFilter],
-    queryFn: () => api.get(`/association/member/compliance/${orgId}${statusFilter !== 'all' ? `?status=${statusFilter}` : ''}`, { headers: { 'x-org-id': orgId } }),
+    queryFn: () => api.get(`/api/association/member/compliance/${orgId}${statusFilter !== 'all' ? `?status=${statusFilter}` : ''}`),
     enabled: !!orgId,
   })
 
   const refreshMutation = useMutation({
-    mutationFn: () => api.post(`/association/member/compliance/${orgId}/refresh`, {}, { headers: { 'x-org-id': orgId } }),
+    mutationFn: () => api.post(`/api/association/member/compliance/${orgId}/refresh`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['compliance-report'] }),
   })
 
@@ -46,16 +46,20 @@ function OfficerCompliance() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Compliance Dashboard" subtitle="Monitor member CPD compliance">
-        <button
-          onClick={() => refreshMutation.mutate()}
-          disabled={refreshMutation.isPending}
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm hover:opacity-90 disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </PageHeader>
+      <PageHeader
+        title="Compliance Dashboard"
+        subtitle="Monitor member CPD compliance"
+        actions={
+          <button
+            onClick={() => refreshMutation.mutate()}
+            disabled={refreshMutation.isPending}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm hover:opacity-90 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <GlassCard className="p-5">

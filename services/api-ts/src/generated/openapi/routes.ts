@@ -293,11 +293,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.registerForCustomEvent as unknown as Handler
   );
 
-  // registerAndPayForEvent
-  app.post('/association/event-lifecycle/:eventId/register-and-pay',
-    zValidator('param', validators.RegisterAndPayForEventParams, validationErrorHandler),
-    registry.registerAndPayForEvent as unknown as Handler
-  );
+  // registerAndPayForEvent — removed (handler deleted)
 
   // listCustomEventRegistrations
   app.get('/association/event-lifecycle/:eventId/registrations',
@@ -2624,5 +2620,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('param', validators.GetFileDownloadParams, validationErrorHandler),
     registry.getFileDownload as unknown as Handler
   );
+
+  // Survey routes — removed (handlers deleted, reimplemented when needed)
 
 }

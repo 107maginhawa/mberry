@@ -20,7 +20,7 @@ function CpdSettings() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['cpd-config', orgId],
-    queryFn: () => api.get(`/association/member/cpd-config/${orgId}`, { headers: { 'x-org-id': orgId } }),
+    queryFn: () => api.get(`/api/association/member/cpd-config/${orgId}`),
     enabled: !!orgId,
   })
 
@@ -41,7 +41,7 @@ function CpdSettings() {
   }, [config])
 
   const updateMutation = useMutation({
-    mutationFn: (body: any) => api.patch(`/association/member/cpd-config/${orgId}`, body, { headers: { 'x-org-id': orgId } }),
+    mutationFn: (body: any) => api.patch(`/api/association/member/cpd-config/${orgId}`, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cpd-config'] })
       toast.success('CPD configuration updated')
@@ -71,9 +71,11 @@ function CpdSettings() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="CPD Settings" subtitle="Configure credit requirements and cycles">
-        <Settings className="w-5 h-5 text-[var(--color-muted)]" />
-      </PageHeader>
+      <PageHeader
+        title="CPD Settings"
+        subtitle="Configure credit requirements and cycles"
+        actions={<Settings className="w-5 h-5 text-[var(--color-muted)]" />}
+      />
 
       <GlassCard className="p-5 max-w-xl">
         <div className="space-y-5">
