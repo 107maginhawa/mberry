@@ -343,6 +343,54 @@ export class DuesRepository {
     };
   }
 
+  /**
+   * Per-member financial summary: invoices, payments, computed balance, status timeline.
+   * Balance = sum of unpaid invoice amounts (status not 'paid').
+   */
+  async getMemberFinancialSummary(organizationId: string, personId: string) {
+    const invoices = await this.db
+      .select()
+      .from(duesInvoices)
+      .where(and(
+        eq(duesInvoices.organizationId, organizationId),
+        eq(duesInvoices.personId, personId),
+      ))
+      .orderBy(desc(duesInvoices.generatedAt));
+
+    const payments = await this.listPayments({
+      organizationId,
+      personId,
+      limit: 100,
+    });
+
+    // Balance = sum of unpaid invoice amounts
+    const balance = invoices
+      .filter(inv => inv.status !== 'paid')
+      .reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+
+    // Status timeline from membership_status_history
+    const { membershipStatusHistory } = await import('./status-history.schema');
+    const statusTimeline = await this.db
+      .select({
+        fromStatus: membershipStatusHistory.fromStatus,
+        toStatus: membershipStatusHistory.toStatus,
+        changedAt: membershipStatusHistory.changedAt,
+      })
+      .from(membershipStatusHistory)
+      .where(and(
+        eq(membershipStatusHistory.organizationId, organizationId),
+        eq(membershipStatusHistory.personId, personId),
+      ))
+      .orderBy(membershipStatusHistory.changedAt);
+
+    return {
+      invoices,
+      payments: payments.data,
+      balance,
+      statusTimeline,
+    };
+  }
+
   async getMemberCount(organizationId: string): Promise<number> {
     const [result] = await this.db
       .select({ count: sql<number>`count(*)::int` })
