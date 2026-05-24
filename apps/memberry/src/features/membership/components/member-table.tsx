@@ -17,8 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Search, Users } from 'lucide-react'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 
-// TODO: Replace with dynamic value from association config (requiredCredits field)
-// once the org config API exposes CPD/CE credit requirements per membership tier.
+// TODO: Dynamic credit requirements per tier — see ROADMAP.md "Association Config API"
 const DEFAULT_REQUIRED_CREDITS = 40
 
 interface MemberTableProps {

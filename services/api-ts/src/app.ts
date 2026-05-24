@@ -261,17 +261,18 @@ export function createApp(config: Config): App {
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
 
   // ──────────────────────────────────────────────────────────────────────────
-  // HAND-WIRED ROUTES (not in TypeSpec / generated OpenAPI router)
-  // Migrate these to TypeSpec to close the 8-route backlog.
+  // PRE-MIGRATION ROUTES — 33 hand-wired routes not in TypeSpec
+  // See ROADMAP.md "TypeSpec Migration Backlog" for full inventory.
   //
-  // 1. GET  /email/unsubscribe                              — RFC 8058 public unsubscribe (middleware ordering)
-  // 2. POST /email/unsubscribe                              — RFC 8058 public unsubscribe (middleware ordering)
-  // 3. GET  /email/suppressions                             — Officer-only suppression list (middleware ordering)
-  // 4. POST /association/events/:eventId/complete           — Event lifecycle (not yet in TypeSpec)
-  // 5. GET  /accredited-providers/:organizationId           — PRC accredited providers (org-scoped training)
-  // 6. POST /accredited-providers/:organizationId           — PRC accredited providers (org-scoped training)
-  // 7. PATCH /accredited-providers/:organizationId/:providerId — PRC accredited providers (org-scoped training)
-  // 8. DELETE /accredited-providers/:organizationId/:providerId — PRC accredited providers (org-scoped training)
+  // BY DESIGN (9) — middleware ordering or public-before-auth requirements:
+  //   /public/orgs, /og/events/:slug, /credentials/lookup/:num,
+  //   /certificates/verify/:num, /pay/:token/* (2),
+  //   /email/unsubscribe (GET+POST), /email/suppressions
+  //
+  // PRE-MIGRATION (24) — should be TypeSpec, migrate when touching module:
+  //   /admin/* (3), /org/:id/payments/send-link, /accredited-providers/* (4),
+  //   /cpd-config/* (2), /credits/manual, /compliance/* (2), /persons/me/credits,
+  //   /certificates/bulk-issue, /special-assessments/* (6), /segments/* (3)
   // ──────────────────────────────────────────────────────────────────────────
 
   // completeEvent — removed hand-wired duplicate; now served via generated TypeSpec route

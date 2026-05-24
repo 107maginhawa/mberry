@@ -105,12 +105,51 @@ The `association:member` handler directory contains ~211 handlers across 7 natur
 
 ## TypeSpec Migration Backlog
 
-Routes registered directly in `services/api-ts/src/app.ts` instead of via TypeSpec-generated router. Count and classification to be finalized during Phase 3 inventory.
+33 routes registered directly in `services/api-ts/src/app.ts` instead of via TypeSpec-generated router.
 
-| Category | Description | Action |
-|----------|-------------|--------|
-| **By design** | RFC 8058 email unsubscribe, middleware ordering requirements | Keep with documented rationale |
-| **Pre-migration** | Endpoints that should be in TypeSpec but aren't yet | Migrate when touching the module |
-| **Duplicate** | Same handler at multiple paths | Remove duplicate |
+### By Design (12 routes) — keep as-is
 
-> Full inventory with per-route classification will be added after Phase 3 audit.
+These require specific middleware ordering or must be registered before auth middleware.
+
+| Route | Reason |
+|-------|--------|
+| GET `/public/orgs` | Public, no auth |
+| GET `/og/events/:slug` | Public OG meta for crawlers |
+| GET `/association/member/credentials/lookup/:credentialNumber` | Public credential lookup |
+| GET `/certificates/verify/:certificateNumber` | Public certificate verification |
+| GET `/pay/:token/validate` | Public payment token (before auth) |
+| POST `/pay/:token/checkout` | Public payment checkout |
+| GET `/email/unsubscribe` | RFC 8058 — must be before email auth |
+| POST `/email/unsubscribe` | RFC 8058 — must be before email auth |
+| GET `/email/suppressions` | Must be after email auth (ordering) |
+
+Note: auth routes (via `registerAuthRoutes`) and WebSocket routes (via `registerWebSocketRoutes`) are separate registration functions, not counted here.
+
+### Pre-migration (21 routes) — migrate when touching the module
+
+| Route | Module |
+|-------|--------|
+| GET `/admin/national-dashboard/:associationId` | platformadmin |
+| GET `/admin/committees` | platformadmin |
+| GET `/admin/committees/:id` | platformadmin |
+| POST `/org/:organizationId/payments/send-link` | dues |
+| GET `/accredited-providers/:organizationId` | training |
+| POST `/accredited-providers/:organizationId` | training |
+| PATCH `/accredited-providers/:organizationId/:providerId` | training |
+| DELETE `/accredited-providers/:organizationId/:providerId` | training |
+| GET `/association/member/cpd-config/:organizationId` | credits |
+| PATCH `/association/member/cpd-config/:organizationId` | credits |
+| POST `/association/member/credits/manual` | credits |
+| GET `/association/member/compliance/:organizationId` | credits |
+| POST `/association/member/compliance/:organizationId/refresh` | credits |
+| GET `/persons/me/credits` | credits |
+| POST `/certificates/bulk-issue` | certificates |
+| POST `/association/member/special-assessments` | dues |
+| GET `/association/member/special-assessments/:orgId` | dues |
+| PUT `/association/member/special-assessments/:id` | dues |
+| DELETE `/association/member/special-assessments/:id` | dues |
+| POST `/association/member/special-assessments/:id/apply` | dues |
+| GET `/association/member/special-assessments/:id/collection` | dues |
+| POST `/communications/segments` | communications |
+| GET `/communications/segments` | communications |
+| DELETE `/communications/segments/:id` | communications |
