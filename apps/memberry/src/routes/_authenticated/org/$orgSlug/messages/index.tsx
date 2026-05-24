@@ -37,7 +37,7 @@ function MessagesIndexPage() {
             activeRoomId={activeRoomId ?? undefined}
             onSelectRoom={setActiveRoomId}
           />
-          <Link to={`/org/${orgSlug}/messages/dm`}>
+          <Link to={`/org/${orgSlug}/messages/dm` as any}>
             <Button variant="outline" className="w-full justify-start gap-2">
               <MessageCircle className="h-4 w-4" />
               Direct Messages

@@ -6,6 +6,8 @@ import {
   listDuesInvoicesOptions,
   listDuesInvoicesQueryKey,
   markDuesInvoicePaidMutation,
+  updateDuesInvoiceMutation,
+  generateDuesInvoicesForOrgMutation,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import type { DuesInvoice } from '@monobase/sdk-ts/generated/types.gen'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -18,7 +20,8 @@ import { Button, Skeleton } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Checkbox } from '@monobase/ui'
-import { FileText, Search, Download, Bell, CheckCircle } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monobase/ui'
+import { FileText, Search, Download, Bell, CheckCircle, MoreHorizontal, Send, XCircle, FileDown, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 const invoiceSearchSchema = z.object({
@@ -105,17 +108,52 @@ function InvoicesPage() {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
-  // Bulk actions
+  // Mutations
   const invoiceQueryKey = listDuesInvoicesQueryKey()
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: invoiceQueryKey })
+
   const markPaidMut = useMutation({
     ...markDuesInvoicePaidMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: invoiceQueryKey })
-      setSelectedIds(new Set())
-      toast.success('Invoices marked as paid')
-    },
-    onError: () => toast.error('Failed to mark invoices as paid'),
+    onSuccess: () => { invalidate(); setSelectedIds(new Set()); toast.success('Invoice marked as paid') },
+    onError: () => toast.error('Failed to mark invoice as paid'),
   })
+
+  const updateStatusMut = useMutation({
+    ...updateDuesInvoiceMutation(),
+    onSuccess: () => { invalidate(); toast.success('Invoice updated') },
+    onError: () => toast.error('Failed to update invoice'),
+  })
+
+  const genInvoicesMut = useMutation({
+    ...generateDuesInvoicesForOrgMutation(),
+    onSuccess: (data: any) => {
+      invalidate()
+      const count = data?.data?.length ?? 0
+      toast.success(`${count} invoice${count !== 1 ? 's' : ''} generated`)
+    },
+    onError: () => toast.error('Failed to generate invoices'),
+  })
+
+  function handleSendInvoice(inv: DuesInvoice) {
+    updateStatusMut.mutate({ path: { invoiceId: inv.id }, body: { status: 'sent' }, headers: { 'x-org-id': orgId } } as any)
+  }
+
+  function handleVoidInvoice(inv: DuesInvoice) {
+    updateStatusMut.mutate({ path: { invoiceId: inv.id }, body: { status: 'cancelled' }, headers: { 'x-org-id': orgId } } as any)
+  }
+
+  function handleWriteOff(inv: DuesInvoice) {
+    updateStatusMut.mutate({ path: { invoiceId: inv.id }, body: { status: 'writtenOff' }, headers: { 'x-org-id': orgId } } as any)
+  }
+
+  function handleMarkPaidSingle(inv: DuesInvoice) {
+    markPaidMut.mutate({ path: { invoiceId: inv.id }, body: { paymentId: `manual-${Date.now()}`, paidAt: new Date() }, headers: { 'x-org-id': orgId } } as any)
+  }
+
+  function handleGenerateInvoices() {
+    const now = new Date()
+    genInvoicesMut.mutate({ body: { organizationId: orgId, periodStart: new Date(now.getFullYear(), 0, 1), periodEnd: new Date(now.getFullYear(), 11, 31) } } as any)
+  }
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -188,6 +226,11 @@ function InvoicesPage() {
           { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
           { label: 'Invoices' },
         ]}
+        actions={
+          <Button size="sm" onClick={handleGenerateInvoices} disabled={genInvoicesMut.isPending}>
+            <Plus className="h-4 w-4 mr-1.5" /> {genInvoicesMut.isPending ? 'Generating...' : 'Generate Invoices'}
+          </Button>
+        }
       />
 
       <GlassCard className="p-5">
@@ -230,11 +273,20 @@ function InvoicesPage() {
             ))}
           </div>
         ) : paginated.length === 0 ? (
-          <EmptyState
-            icon={<FileText className="w-10 h-10" />}
-            headline={searchQuery ? 'No matching invoices' : 'No invoices yet'}
-            description={searchQuery ? 'Try a different search term.' : 'Invoices appear here once generated.'}
-          />
+          <>
+            <EmptyState
+              icon={<FileText className="w-10 h-10" />}
+              headline={searchQuery ? 'No matching invoices' : 'No invoices yet'}
+              description={searchQuery ? 'Try a different search term.' : 'Generate invoices for all members with active dues.'}
+            />
+            {!searchQuery && (
+              <div className="flex justify-center mt-4">
+                <Button onClick={handleGenerateInvoices} disabled={genInvoicesMut.isPending}>
+                  <Plus className="h-4 w-4 mr-1.5" /> {genInvoicesMut.isPending ? 'Generating...' : 'Generate Invoices'}
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <>
             <Table className="text-sm">
@@ -253,6 +305,7 @@ function InvoicesPage() {
                   <TableHead className="px-3 py-3">Amount</TableHead>
                   <TableHead className="px-3 py-3">Status</TableHead>
                   <TableHead className="px-3 py-3">Due</TableHead>
+                  <TableHead className="px-3 py-3 w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -268,7 +321,7 @@ function InvoicesPage() {
                     <TableCell className="px-3 py-3 font-mono text-xs">
                       <Link
                         to={"/org/$orgSlug/officer/finances/invoices/$invoiceId" as any}
-                        params={{ orgSlug, invoiceId: inv.id }}
+                        params={{ orgSlug, invoiceId: inv.id } as any}
                         className="hover:underline text-[var(--color-primary)]"
                       >
                         {inv.invoiceNumber}
@@ -284,6 +337,35 @@ function InvoicesPage() {
                     </TableCell>
                     <TableCell className="px-3 py-3 text-xs">
                       {new Date(inv.periodEnd).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
+                    </TableCell>
+                    <TableCell className="px-3 py-3">
+                      {['generated', 'sent', 'overdue'].includes(inv.status) && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleMarkPaidSingle(inv)}>
+                              <CheckCircle className="h-4 w-4 mr-2" /> Mark Paid
+                            </DropdownMenuItem>
+                            {inv.status === 'generated' && (
+                              <DropdownMenuItem onClick={() => handleSendInvoice(inv)}>
+                                <Send className="h-4 w-4 mr-2" /> Send to Member
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => handleVoidInvoice(inv)}>
+                              <XCircle className="h-4 w-4 mr-2" /> Void
+                            </DropdownMenuItem>
+                            {inv.status === 'overdue' && (
+                              <DropdownMenuItem onClick={() => handleWriteOff(inv)}>
+                                <FileDown className="h-4 w-4 mr-2" /> Write Off
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

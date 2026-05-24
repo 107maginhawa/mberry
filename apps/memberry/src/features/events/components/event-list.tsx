@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Button, Input } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { EventCard } from './event-card'
-import { Calendar, Users, Clock } from 'lucide-react'
+import { StatCard } from '@/components/patterns/stat-card'
 import {
   searchEventsOptions,
   searchEventsQueryKey,
@@ -57,6 +58,8 @@ function filterEventsByTab(events: Event[], tab: StatusTab): Event[] {
 
 export function EventList({ orgId }: EventListProps) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [tab, setTab] = useState<StatusTab>('upcoming')
   const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -110,27 +113,9 @@ export function EventList({ orgId }: EventListProps) {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
-          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
-            <Calendar className="w-4 h-4" />
-            <p className="text-sm">Upcoming</p>
-          </div>
-          <p className="text-[26px] font-bold font-display">{statsData?.upcoming ?? '—'}</p>
-        </div>
-        <div className="p-4 rounded-lg border bg-[var(--color-surface)]">
-          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
-            <Clock className="w-4 h-4" />
-            <p className="text-sm">Drafts</p>
-          </div>
-          <p className="text-[26px] font-bold font-display">{statsData?.drafts ?? '—'}</p>
-        </div>
-        <div className="p-4 rounded-lg border bg-[var(--color-surface)] col-span-2 lg:col-span-1">
-          <div className="flex items-center gap-2 text-[var(--color-muted)] mb-1">
-            <Users className="w-4 h-4" />
-            <p className="text-sm">Showing</p>
-          </div>
-          <p className="text-[26px] font-bold font-display">{total}</p>
-        </div>
+        <StatCard label="Upcoming" value={statsData?.upcoming ?? '—'} />
+        <StatCard label="Drafts" value={statsData?.drafts ?? '—'} />
+        <StatCard label="Showing" value={total} />
       </div>
 
       {/* Filters */}
@@ -190,6 +175,28 @@ export function EventList({ orgId }: EventListProps) {
               event={event}
               orgId={orgId}
               onCancel={(id) => setCancelEventId(id)}
+              onDuplicate={(id) => {
+                const src = events.find((e) => e.id === id)
+                if (!src) return
+                navigate({
+                  to: '/org/$orgSlug/officer/events/new',
+                  params: { orgSlug },
+                  state: {
+                    duplicateFrom: {
+                      title: `${src.title} (Copy)`,
+                      eventType: src.eventType,
+                      description: src.description,
+                      location: src.location,
+                      registrationFee: src.registrationFee ? Number(src.registrationFee) : 0,
+                      capacity: src.capacity ? Number(src.capacity) : undefined,
+                      visibility: src.visibility,
+                      creditBearing: src.creditBearing,
+                      creditAmount: src.creditAmount ? Number(src.creditAmount) : 0,
+                      cpdActivityType: src.cpdActivityType,
+                    },
+                  } as any,
+                })
+              }}
             />
           ))}
         </div>
