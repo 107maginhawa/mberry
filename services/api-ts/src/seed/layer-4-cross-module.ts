@@ -17,7 +17,7 @@ import { orgCertificateSeq } from '@/handlers/certificates/repos/certificates.sc
 import { documents, documentVersions, documentAccessLogs } from '@/handlers/documents/repos/documents.schema';
 import { chatRooms, chatMessages } from '@/handlers/comms/repos/comms.schema';
 import { invoices, invoiceLineItems, merchantAccounts, billingConfigs } from '@/handlers/billing/repos/billing.schema';
-import { duesConfigs, duesInvoices } from '@/handlers/association:member/repos/dues.schema';
+import { duesConfigs, duesInvoices, type DuesInvoiceAllocation } from '@/handlers/association:member/repos/dues.schema';
 import { duesFunds, duesOrgConfigs } from '@/handlers/association:member/repos/dues-payments.schema';
 import { committees, committeeMembers } from '@/handlers/association:operations/repos/committee.schema';
 import { committeeTasks } from '@/handlers/association:operations/repos/committee-task.schema';
@@ -84,7 +84,7 @@ export async function seedNotifications(
     await db.insert(notifications).values({
       organizationId: orgId,
       ...row,
-    } as any);
+    });
   }
   console.log(`    ✓ ${notifRows.length} notifications seeded`);
 }
@@ -124,7 +124,7 @@ export async function seedCertificates(
         trainingId: trn.id,
         certificateNumber: `CERT-2025-${String(certNum).padStart(4, '0')}`,
         issuedAt: new Date('2025-03-01T00:00:00Z'),
-      } as any);
+      });
       certNum++;
     }
   }
@@ -168,7 +168,7 @@ export async function seedDocuments(
       ownerId: presidentPersonId,
       ownerType: 'person',
       tags: [],
-    } as any).returning({ id: documents.id });
+    }).returning({ id: documents.id });
     if (inserted) insertedDocs.push(inserted.id);
   }
   console.log(`    ✓ ${insertedDocs.length} documents seeded`);
@@ -182,7 +182,7 @@ export async function seedDocuments(
       personId: memberPersonIds[i % memberPersonIds.length]!,
       action: accessActions[i]!,
       accessedAt: new Date(Date.now() - (i + 1) * 86400000),
-    } as any);
+    });
   }
   console.log(`    ✓ 5 document access logs seeded`);
 }
@@ -237,7 +237,7 @@ export async function seedComms(
       status: room.status,
       messageCount: room.messageCount,
       lastMessageAt: new Date(Date.now() - (room.status === 'archived' ? 7 * 86400000 : 3600000)),
-    } as any).returning({ id: chatRooms.id });
+    }).returning({ id: chatRooms.id });
 
     if (insertedRoom) {
       for (let i = 0; i < room.messageCount; i++) {
@@ -249,7 +249,7 @@ export async function seedComms(
           messageType: 'text',
           message: sampleMessages[msgIdx % sampleMessages.length]!,
           timestamp: new Date(Date.now() - (room.messageCount - i) * 600000),
-        } as any);
+        });
         msgIdx++;
       }
     }
@@ -280,7 +280,7 @@ export async function seedBilling(
     person: presidentPersonId,
     active: true,
     metadata: { stripeAccountId: 'acct_seed_pda_mm', businessName: 'PDA Metro Manila Chapter' },
-  } as any).returning({ id: merchantAccounts.id });
+  }).returning({ id: merchantAccounts.id });
 
   if (!merchant) {
     console.log('    ⚠ Failed to create merchant account');
@@ -311,7 +311,7 @@ export async function seedBilling(
       paidBy: inv.paidAt ? inv.customer : null,
       voidedAt: inv.status === 'void' ? new Date('2025-03-01') : null,
       voidedBy: inv.status === 'void' ? presidentPersonId : null,
-    } as any).returning({ id: invoices.id });
+    }).returning({ id: invoices.id });
 
     if (inserted) {
       await db.insert(invoiceLineItems).values({
@@ -321,7 +321,7 @@ export async function seedBilling(
         quantity: 1,
         unitPrice: inv.total,
         amount: inv.total,
-      } as any);
+      });
     }
   }
   console.log(`    ✓ 1 merchant account + 5 invoices seeded`);
@@ -365,8 +365,8 @@ export async function seedDunningEventsAndAudit(
             stage,
             sentAt: new Date(Date.now() - (30 - stage * 10) * 86400000),
             channel: template.channel,
-            deliveryStatus: stage === 1 ? 'delivered' : 'sent',
-          } as any);
+            deliveryStatus: stage === 1 ? 'delivered' as const : 'sent' as const,
+          });
           dunningCount++;
         }
       }
@@ -416,7 +416,7 @@ export async function seedDunningEventsAndAudit(
       userType: entry.user ? 'member' : null,
       ipAddress: '203.177.71.' + (10 + i),
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    } as any);
+    });
   }
   console.log(`    ✓ ${auditData.length} audit log entries seeded`);
 }
@@ -449,7 +449,7 @@ export async function seedRemainingModules(
       contactPersonId: memberPersonIds[10]!,
       verifiedAt: new Date('2025-02-01'),
       verifiedBy: presidentPersonId,
-    } as any).returning({ id: vendors.id });
+    }).returning({ id: vendors.id });
 
     const [vendor2] = await db.insert(vendors).values({
       organizationId: orgId,
@@ -459,42 +459,42 @@ export async function seedRemainingModules(
       verificationStatus: 'pending',
       contactEmail: 'info@medtech-solutions.ph',
       contactPersonId: memberPersonIds[11]!,
-    } as any).returning({ id: vendors.id });
+    }).returning({ id: vendors.id });
 
     if (vendor1 && vendor2) {
       // Listings
       const [listing1] = await db.insert(marketplaceListings).values({
         organizationId: orgId, vendorId: vendor1.id, title: 'Composite Resin Kit (A2-A4 Shades)',
         description: 'Professional-grade composite resin kit with 6 shades, light-cure compatible.', price: '4500.00', currency: 'PHP', status: 'active', categoryTags: ['supplies', 'restorative'],
-      } as any).returning({ id: marketplaceListings.id });
+      }).returning({ id: marketplaceListings.id });
 
       const [listing2] = await db.insert(marketplaceListings).values({
         organizationId: orgId, vendorId: vendor1.id, title: 'Dental Loupes 3.5x Magnification',
         description: 'Ergonomic dental loupes with LED headlight, adjustable interpupillary distance.', price: '28000.00', currency: 'PHP', status: 'active', categoryTags: ['equipment', 'optics'],
-      } as any).returning({ id: marketplaceListings.id });
+      }).returning({ id: marketplaceListings.id });
 
       await db.insert(marketplaceListings).values({
         organizationId: orgId, vendorId: vendor2.id, title: 'ClinicOS Practice Management',
         description: 'All-in-one practice management: scheduling, records, billing, patient portal.', price: '2500.00', currency: 'PHP', status: 'active', categoryTags: ['software', 'emr'],
-      } as any);
+      });
 
       await db.insert(marketplaceListings).values({
         organizationId: orgId, vendorId: vendor1.id, title: 'Autoclave Sterilizer 23L',
         description: 'Class B autoclave sterilizer, 23-liter capacity, EU-certified.', price: '85000.00', currency: 'PHP', status: 'draft', categoryTags: ['equipment', 'sterilization'],
-      } as any);
+      });
 
       // Orders
       if (listing1) {
         await db.insert(marketplaceOrders).values({
           organizationId: orgId, listingId: listing1.id, buyerPersonId: memberPersonIds[0]!, vendorId: vendor1.id,
           quantity: 2, totalPrice: '9000.00', status: 'fulfilled', fulfilledAt: new Date('2025-03-10'),
-        } as any);
+        });
       }
       if (listing2) {
         await db.insert(marketplaceOrders).values({
           organizationId: orgId, listingId: listing2.id, buyerPersonId: memberPersonIds[1]!, vendorId: vendor1.id,
           quantity: 1, totalPrice: '28000.00', status: 'confirmed',
-        } as any);
+        });
       }
       console.log('    ✓ 2 vendors + 4 listings + 2 orders seeded');
     }
@@ -524,7 +524,7 @@ export async function seedRemainingModules(
           reviewType: r.reviewType,
           npsScore: r.npsScore,
           comment: r.comment,
-        } as any);
+        });
       }
       console.log('    ✓ 3 reviews seeded');
     } else {
@@ -556,7 +556,7 @@ export async function seedRemainingModules(
           email: inv.email,
           message: inv.message,
           metadata: { name: inv.email.split('@')[0], resendCount: 0 },
-        } as any);
+        });
       }
       console.log('    ✓ 2 invitations seeded');
     } else {
@@ -583,7 +583,7 @@ export async function seedRemainingModules(
           organizationId: orgId,
           ...f,
           status: 'available',
-        } as any);
+        });
       }
       console.log('    ✓ 5 stored files seeded');
     } else {
@@ -630,7 +630,7 @@ export async function seedDuesInfrastructure(
         ],
         effectiveDate: dateStr(daysAgo(365)),
         status: 'active',
-      } as any);
+      });
     }
     console.log(`    ✓ ${tiers.length} dues configs seeded (per tier)`);
   } else {
@@ -647,7 +647,7 @@ export async function seedDuesInfrastructure(
         { name: 'Emergency Fund', percentage: '20.00', sortOrder: 3, active: true },
       ];
       for (const fund of fundData) {
-        await db.insert(duesFunds).values({ organizationId: orgId, ...fund } as any);
+        await db.insert(duesFunds).values({ organizationId: orgId, ...fund });
       }
       console.log('    ✓ 3 dues funds seeded');
     } else {
@@ -688,7 +688,7 @@ export async function seedDuesInfrastructure(
       .limit(15);
 
     if (membershipRows.length > 0) {
-      const invoiceStatuses: Array<{ status: string; sentAt: Date | null; paidAt: Date | null }> = [
+      const invoiceStatuses: Array<{ status: 'generated' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'writtenOff'; sentAt: Date | null; paidAt: Date | null }> = [
         // 5 paid
         { status: 'paid', sentAt: daysAgo(350), paidAt: daysAgo(345) },
         { status: 'paid', sentAt: daysAgo(350), paidAt: daysAgo(340) },
@@ -731,7 +731,7 @@ export async function seedDuesInfrastructure(
           generatedAt: daysAgo(360),
           sentAt: inv.sentAt,
           paidAt: inv.paidAt,
-        } as any);
+        });
         invoiceNum++;
       }
       console.log(`    ✓ ${invoiceNum - 1} dues invoices seeded (5 paid, 3 sent, 3 generated, 2 overdue)`);
@@ -746,7 +746,7 @@ export async function seedDuesInfrastructure(
   const existingSubmitted = await db.execute(
     sql`SELECT count(*) as c FROM dues_payment WHERE status = 'submitted'`
   );
-  const submittedCount = (existingSubmitted as any).rows?.[0]?.c ?? (existingSubmitted as any)[0]?.c ?? 0;
+  const submittedCount = (existingSubmitted as unknown as { rows: Array<Record<string, unknown>> }).rows?.[0]?.['c'] ?? (existingSubmitted as unknown as Array<Record<string, unknown>>)[0]?.['c'] ?? 0;
 
   if (Number(submittedCount) === 0) {
     // Get sent/generated invoices to link proofs to
@@ -783,7 +783,7 @@ export async function seedDuesInfrastructure(
     const refundedExists = await db.execute(
       sql`SELECT count(*) as c FROM dues_payment WHERE status = 'refunded'`
     );
-    const refundedCount = Number((refundedExists as any).rows?.[0]?.c ?? (refundedExists as any)[0]?.c ?? 0);
+    const refundedCount = Number((refundedExists as unknown as { rows: Array<Record<string, unknown>> }).rows?.[0]?.['c'] ?? (refundedExists as unknown as Array<Record<string, unknown>>)[0]?.['c'] ?? 0);
     if (refundedCount === 0 && memberPersonIds.length > 2) {
       // Add 1 refunded payment
       await db.execute(sql`
@@ -806,7 +806,7 @@ export async function seedDuesInfrastructure(
     const pendingExists = await db.execute(
       sql`SELECT count(*) as c FROM dues_payment WHERE status = 'pending'`
     );
-    const pendingCount = Number((pendingExists as any).rows?.[0]?.c ?? (pendingExists as any)[0]?.c ?? 0);
+    const pendingCount = Number((pendingExists as unknown as { rows: Array<Record<string, unknown>> }).rows?.[0]?.['c'] ?? (pendingExists as unknown as Array<Record<string, unknown>>)[0]?.['c'] ?? 0);
     if (pendingCount === 0 && memberPersonIds.length >= 4) {
       // Create pending payments at various ages for aging bucket distribution
       const agingDays = [10, 25, 40, 55, 70, 85, 100, 120];
@@ -827,7 +827,7 @@ export async function seedDuesInfrastructure(
     const histExists = await db.execute(
       sql`SELECT count(*) as c FROM dues_payment WHERE receipt_number LIKE 'RCP-HIST-%'`
     );
-    const histCount = Number((histExists as any).rows?.[0]?.c ?? (histExists as any)[0]?.c ?? 0);
+    const histCount = Number((histExists as unknown as { rows: Array<Record<string, unknown>> }).rows?.[0]?.['c'] ?? (histExists as unknown as Array<Record<string, unknown>>)[0]?.['c'] ?? 0);
     if (histCount === 0 && memberPersonIds.length >= 5) {
       const methods = ['gcash', 'bankTransfer', 'cash', 'online', 'check'] as const;
       let histNum = 1;
@@ -863,7 +863,7 @@ export async function seedCommittees(
   memberPersonIds: string[],
 ) {
   console.log('  Committees...');
-  let existing: any[];
+  let existing: Array<Record<string, unknown>>;
   try {
     existing = await db.select().from(committees).limit(1);
   } catch {
@@ -892,7 +892,7 @@ export async function seedCommittees(
       organizationId: orgId,
       ...c,
       dissolvedBy: c.dissolvedAt ? presidentPersonId : null,
-    } as any).returning({ id: committees.id });
+    }).returning({ id: committees.id });
     if (inserted) insertedCommittees.push(inserted.id);
   }
 
@@ -920,7 +920,7 @@ export async function seedCommittees(
         organizationId: orgId,
         assignedAt: daysAgo(60),
         ...m,
-      } as any);
+      });
     }
     console.log(`    ✓ ${memberData.length} committee members seeded`);
 
@@ -945,7 +945,7 @@ export async function seedCommittees(
         organizationId: orgId,
         description: `Task for ${t.title.toLowerCase()}`,
         ...t,
-      } as any);
+      });
     }
     console.log(`    ✓ ${taskData.length} committee tasks seeded (2 completed, 2 in-progress, 2 pending, 1 overdue, 1 cancelled)`);
   }

@@ -40,20 +40,21 @@ export async function seedPresident(
       tierId: regularTierId, memberNumber: 'PDA-2025-001',
       startDate: MEMBERSHIP_START, duesExpiryDate: ACTIVE_EXPIRY,
       gracePeriodDays: 30, status: 'active', joinedAt: daysAgo(365),
-    } as any);
+    });
   }
 
   // DB: position + officer term
   const existingPos = await db.select().from(positions)
     .where(eq(positions.title, 'President')).limit(1);
-  let presPos: any;
+  let presPos: { id: string };
   if (existingPos.length === 0) {
-    [presPos] = await db.insert(positions).values({
+    const [inserted] = await db.insert(positions).values({
       organizationId: orgId, title: 'President',
       level: 'chapter', termLengthMonths: 12, sortOrder: 1,
-    } as any).returning();
+    }).returning({ id: positions.id });
+    presPos = inserted!;
   } else {
-    presPos = existingPos[0];
+    presPos = existingPos[0]!;
   }
 
   const existingTerm = await db.select().from(officerTerms)
@@ -63,7 +64,7 @@ export async function seedPresident(
       positionId: presPos.id, personId: client.personId,
       organizationId: orgId, status: 'active',
       startDate: TERM_START, endDate: TERM_END,
-    } as any);
+    });
   }
 
   // Platform admin
@@ -72,11 +73,11 @@ export async function seedPresident(
   if (existingAdmin.length === 0) {
     await db.insert(platformAdmins).values({
       userId: client.userId, email: o.email, name: `${o.firstName} ${o.lastName}`, role: 'super',
-    } as any);
+    });
   }
 
   // Set admin role so president can access all association endpoints
-  await db.update(userTable).set({ role: 'admin,association:admin,association:member,association:officer' } as any).where(eq(userTable.id, client.userId));
+  await db.update(userTable).set({ role: 'admin,association:admin,association:member,association:officer' }).where(eq(userTable.id, client.userId));
 
   console.log(`  ✓ Maria Santos — President, membership PDA-2025-001`);
   return client;
@@ -116,7 +117,7 @@ export async function seedOfficer(
     if (appId) {
       // DB approve: update application status + create membership
       await db.update(membershipApplications)
-        .set({ status: 'approved', reviewedAt: new Date() } as any)
+        .set({ status: 'approved', reviewedAt: new Date() })
         .where(eq(membershipApplications.id, appId));
     }
   }
@@ -131,23 +132,24 @@ export async function seedOfficer(
       startDate: MEMBERSHIP_START,
       duesExpiryDate: ACTIVE_EXPIRY,
       gracePeriodDays: 30, status: 'active', joinedAt: daysAgo(365),
-    } as any);
+    });
   }
 
   // Set officer role (needs member+officer+admin for all endpoint access)
-  await db.update(userTable).set({ role: 'association:admin,association:member,association:officer' } as any).where(eq(userTable.id, client.userId));
+  await db.update(userTable).set({ role: 'association:admin,association:member,association:officer' }).where(eq(userTable.id, client.userId));
 
   // Create position + officer term via DB (requirePosition check blocks API)
   const existingPos = await db.select().from(positions)
     .where(eq(positions.title, officer.position)).limit(1);
-  let pos: any;
+  let pos: { id: string };
   if (existingPos.length === 0) {
-    [pos] = await db.insert(positions).values({
+    const [inserted] = await db.insert(positions).values({
       organizationId: orgId, title: officer.position,
       level: 'chapter', termLengthMonths: 12, sortOrder: OFFICERS.indexOf(officer) + 1,
-    } as any).returning();
+    }).returning({ id: positions.id });
+    pos = inserted!;
   } else {
-    pos = existingPos[0];
+    pos = existingPos[0]!;
   }
 
   const existingTerm = await db.select().from(officerTerms)
@@ -157,7 +159,7 @@ export async function seedOfficer(
       positionId: pos.id, personId: client.personId,
       organizationId: orgId, status: 'active',
       startDate: TERM_START, endDate: TERM_END,
-    } as any);
+    });
   }
 
   console.log(`  ✓ ${officer.firstName} ${officer.lastName} — ${officer.position}, ${memberNum}`);
@@ -198,13 +200,13 @@ export async function seedMember(
     const appId = app.id || app.data?.id;
     if (appId) {
       await db.update(membershipApplications)
-        .set({ status: 'approved', reviewedAt: new Date() } as any)
+        .set({ status: 'approved', reviewedAt: new Date() })
         .where(eq(membershipApplications.id, appId));
     }
   }
 
   // Set member role
-  await db.update(userTable).set({ role: 'association:member' } as any).where(eq(userTable.id, client.userId));
+  await db.update(userTable).set({ role: 'association:member' }).where(eq(userTable.id, client.userId));
 
   // Create membership via DB — status-specific dates and fields
   let duesExpiry: string;
@@ -272,12 +274,12 @@ export async function seedMember(
       startDate: MEMBERSHIP_START,
       duesExpiryDate: duesExpiry,
       gracePeriodDays: 30,
-      status: dbStatus,
+      status: dbStatus as typeof memberships.$inferInsert['status'],
       joinedAt: daysAgo(365),
       suspendedAt,
       removedAt,
       removalReason,
-    } as any);
+    });
   }
 
   return client;
@@ -317,7 +319,7 @@ export async function seedApplicant(
     const appId = app.id || app.data?.id;
     if (appId) {
       await db.update(membershipApplications)
-        .set({ status: 'denied', reviewedAt: new Date() } as any)
+        .set({ status: 'denied', reviewedAt: new Date() })
         .where(eq(membershipApplications.id, appId));
     }
   }
@@ -343,7 +345,7 @@ export async function seedIdorOfficer(db: ReturnType<typeof drizzle>, org2Id: st
   });
 
   // Set role
-  await db.update(userTable).set({ role: 'association:admin' } as any).where(eq(userTable.id, client.userId));
+  await db.update(userTable).set({ role: 'association:admin' }).where(eq(userTable.id, client.userId));
 
   // Membership in org2
   const existingMbr = await db.select().from(memberships)
@@ -354,20 +356,21 @@ export async function seedIdorOfficer(db: ReturnType<typeof drizzle>, org2Id: st
       tierId, memberNumber: 'PDA-CEBU-001',
       startDate: MEMBERSHIP_START, duesExpiryDate: ACTIVE_EXPIRY,
       gracePeriodDays: 30, status: 'active', joinedAt: daysAgo(365),
-    } as any);
+    });
   }
 
   // Position + officer term in org2
   const existingPos = await db.select().from(positions)
     .where(eq(positions.title, 'IDOR Officer')).limit(1);
-  let pos: any;
+  let pos: { id: string };
   if (existingPos.length === 0) {
-    [pos] = await db.insert(positions).values({
+    const [inserted] = await db.insert(positions).values({
       organizationId: org2Id, title: 'IDOR Officer',
       level: 'chapter', termLengthMonths: 12, sortOrder: 1,
-    } as any).returning();
+    }).returning({ id: positions.id });
+    pos = inserted!;
   } else {
-    pos = existingPos[0];
+    pos = existingPos[0]!;
   }
 
   const existingTerm = await db.select().from(officerTerms)
@@ -377,7 +380,7 @@ export async function seedIdorOfficer(db: ReturnType<typeof drizzle>, org2Id: st
       positionId: pos.id, personId: client.personId,
       organizationId: org2Id, status: 'active',
       startDate: TERM_START, endDate: TERM_END,
-    } as any);
+    });
   }
 
   console.log(`  ✓ IDOR Officer — org2 (pda-cebu), ${email}`);
@@ -402,8 +405,8 @@ export async function seedMissingRoles(
 
   for (const ru of roleUsers) {
     // Check if user exists
-    const existingUser = await db.execute(sql`SELECT id FROM "user" WHERE email = ${ru.email} LIMIT 1`);
-    if ((existingUser as any).rows?.length > 0 || (existingUser as any).length > 0) {
+    const existingUser = (await db.execute(sql`SELECT id FROM "user" WHERE email = ${ru.email} LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
+    if (existingUser.rows?.length > 0) {
       console.log(`    (${ru.email} already exists, skipping)`);
       continue;
     }
@@ -421,7 +424,7 @@ export async function seedMissingRoles(
     });
 
     // Set role
-    await db.update(userTable).set({ role: ru.dbRole } as any).where(eq(userTable.id, client.userId));
+    await db.update(userTable).set({ role: ru.dbRole }).where(eq(userTable.id, client.userId));
 
     // Create membership
     await db.insert(memberships).values({
@@ -430,47 +433,51 @@ export async function seedMissingRoles(
       startDate: MEMBERSHIP_START,
       duesExpiryDate: ACTIVE_EXPIRY,
       gracePeriodDays: 30, status: 'active', joinedAt: daysAgo(365),
-    } as any);
+    });
 
     // Create position + officer term (if applicable)
     if (ru.position) {
       const existingPos = await db.select().from(positions)
         .where(eq(positions.title, ru.position)).limit(1);
-      let pos: any;
+      let pos: { id: string };
       if (existingPos.length === 0) {
-        [pos] = await db.insert(positions).values({
+        const [inserted] = await db.insert(positions).values({
           organizationId: orgId, title: ru.position,
           level: 'chapter', termLengthMonths: 12, sortOrder: 10,
-        } as any).returning();
+        }).returning({ id: positions.id });
+        pos = inserted!;
       } else {
-        pos = existingPos[0];
+        pos = existingPos[0]!;
       }
 
       await db.insert(officerTerms).values({
         positionId: pos.id, personId: client.personId,
         organizationId: orgId, status: 'active',
         startDate: TERM_START, endDate: TERM_END,
-      } as any);
+      });
     }
 
     console.log(`    ✓ ${ru.firstName} ${ru.lastName} — ${ru.position ?? 'Staff'} (${ru.email})`);
   }
 
-  // Platform admin roles (support + viewer) — DB-only, no API signup needed
-  const platformRoles = [
-    { email: 'support-admin@memberry.ph', name: 'Platform Support', adminRole: 'support' },
-    { email: 'viewer-admin@memberry.ph', name: 'Platform Viewer', adminRole: 'viewer' },
+  // Platform admin roles (support + analyst) — DB-only, no API signup needed
+  // Note: userId is required by schema but unavailable without signup; these inserts
+  // rely on raw SQL fallback at runtime if the NOT NULL constraint is enforced.
+  const platformRoles: Array<{ email: string; name: string; role: typeof platformAdmins.$inferInsert['role'] }> = [
+    { email: 'support-admin@memberry.ph', name: 'Platform Support', role: 'support' },
+    { email: 'viewer-admin@memberry.ph', name: 'Platform Viewer', role: 'analyst' },
   ];
 
   for (const pr of platformRoles) {
-    const existing = await db.execute(sql`SELECT id FROM platform_admin WHERE email = ${pr.email} LIMIT 1`);
-    if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+    const existing = (await db.execute(sql`SELECT id FROM platform_admin WHERE email = ${pr.email} LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
+    if (existing.rows?.length === 0) {
       await db.insert(platformAdmins).values({
         email: pr.email,
         name: pr.name,
-        adminRole: pr.adminRole,
-      } as any);
-      console.log(`    ✓ ${pr.name} — platform ${pr.adminRole} (${pr.email})`);
+        role: pr.role,
+        userId: '', // placeholder — these DB-only admins lack a real user signup
+      });
+      console.log(`    ✓ ${pr.name} — platform ${pr.role} (${pr.email})`);
     }
   }
 
