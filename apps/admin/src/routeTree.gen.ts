@@ -21,11 +21,15 @@ import { Route as ImpersonateIndexRouteImport } from './routes/impersonate/index
 import { Route as FeatureFlagsIndexRouteImport } from './routes/feature-flags/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as ComplianceIndexRouteImport } from './routes/compliance/index'
+import { Route as CommunicationsIndexRouteImport } from './routes/communications/index'
 import { Route as CommitteesIndexRouteImport } from './routes/committees/index'
 import { Route as AuditIndexRouteImport } from './routes/audit/index'
 import { Route as AssociationsIndexRouteImport } from './routes/associations/index'
 import { Route as OrganizationsOrganizationIdRouteImport } from './routes/organizations/$organizationId'
 import { Route as MembersPersonIdRouteImport } from './routes/members/$personId'
+import { Route as CommunicationsTemplatesRouteImport } from './routes/communications/templates'
+import { Route as CommunicationsModerationRouteImport } from './routes/communications/moderation'
+import { Route as CommunicationsEmailRouteImport } from './routes/communications/email'
 import { Route as AssociationsAssociationIdRouteImport } from './routes/associations/$associationId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -88,6 +92,11 @@ const ComplianceIndexRoute = ComplianceIndexRouteImport.update({
   path: '/compliance/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunicationsIndexRoute = CommunicationsIndexRouteImport.update({
+  id: '/communications/',
+  path: '/communications/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommitteesIndexRoute = CommitteesIndexRouteImport.update({
   id: '/committees/',
   path: '/committees/',
@@ -114,6 +123,22 @@ const MembersPersonIdRoute = MembersPersonIdRouteImport.update({
   path: '/members/$personId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunicationsTemplatesRoute = CommunicationsTemplatesRouteImport.update({
+  id: '/communications/templates',
+  path: '/communications/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunicationsModerationRoute =
+  CommunicationsModerationRouteImport.update({
+    id: '/communications/moderation',
+    path: '/communications/moderation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const CommunicationsEmailRoute = CommunicationsEmailRouteImport.update({
+  id: '/communications/email',
+  path: '/communications/email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssociationsAssociationIdRoute =
   AssociationsAssociationIdRouteImport.update({
     id: '/associations/$associationId',
@@ -124,31 +149,39 @@ const AssociationsAssociationIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/associations/$associationId': typeof AssociationsAssociationIdRoute
-  '/members/$personId': typeof MembersPersonIdRoute
-  '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
-  '/associations/': typeof AssociationsIndexRoute
-  '/audit/': typeof AuditIndexRoute
-  '/committees/': typeof CommitteesIndexRoute
-  '/compliance/': typeof ComplianceIndexRoute
-  '/events/': typeof EventsIndexRoute
-  '/feature-flags/': typeof FeatureFlagsIndexRoute
-  '/impersonate/': typeof ImpersonateIndexRoute
-  '/members/': typeof MembersIndexRoute
-  '/national-dashboard/': typeof NationalDashboardIndexRoute
-  '/operators/': typeof OperatorsIndexRoute
-  '/organizations/': typeof OrganizationsIndexRoute
-  '/surveys/': typeof SurveysIndexRoute
-  '/training/': typeof TrainingIndexRoute
-  '/verifications/': typeof VerificationsIndexRoute
-}
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/communications/email': typeof CommunicationsEmailRoute
+  '/communications/moderation': typeof CommunicationsModerationRoute
+  '/communications/templates': typeof CommunicationsTemplatesRoute
   '/members/$personId': typeof MembersPersonIdRoute
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
   '/associations': typeof AssociationsIndexRoute
   '/audit': typeof AuditIndexRoute
   '/committees': typeof CommitteesIndexRoute
+  '/communications': typeof CommunicationsIndexRoute
+  '/compliance': typeof ComplianceIndexRoute
+  '/events': typeof EventsIndexRoute
+  '/feature-flags': typeof FeatureFlagsIndexRoute
+  '/impersonate': typeof ImpersonateIndexRoute
+  '/members': typeof MembersIndexRoute
+  '/national-dashboard': typeof NationalDashboardIndexRoute
+  '/operators': typeof OperatorsIndexRoute
+  '/organizations': typeof OrganizationsIndexRoute
+  '/surveys': typeof SurveysIndexRoute
+  '/training': typeof TrainingIndexRoute
+  '/verifications': typeof VerificationsIndexRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/communications/email': typeof CommunicationsEmailRoute
+  '/communications/moderation': typeof CommunicationsModerationRoute
+  '/communications/templates': typeof CommunicationsTemplatesRoute
+  '/members/$personId': typeof MembersPersonIdRoute
+  '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
+  '/associations': typeof AssociationsIndexRoute
+  '/audit': typeof AuditIndexRoute
+  '/committees': typeof CommitteesIndexRoute
+  '/communications': typeof CommunicationsIndexRoute
   '/compliance': typeof ComplianceIndexRoute
   '/events': typeof EventsIndexRoute
   '/feature-flags': typeof FeatureFlagsIndexRoute
@@ -165,11 +198,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/communications/email': typeof CommunicationsEmailRoute
+  '/communications/moderation': typeof CommunicationsModerationRoute
+  '/communications/templates': typeof CommunicationsTemplatesRoute
   '/members/$personId': typeof MembersPersonIdRoute
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
   '/associations/': typeof AssociationsIndexRoute
   '/audit/': typeof AuditIndexRoute
   '/committees/': typeof CommitteesIndexRoute
+  '/communications/': typeof CommunicationsIndexRoute
   '/compliance/': typeof ComplianceIndexRoute
   '/events/': typeof EventsIndexRoute
   '/feature-flags/': typeof FeatureFlagsIndexRoute
@@ -187,31 +224,39 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/associations/$associationId'
-    | '/members/$personId'
-    | '/organizations/$organizationId'
-    | '/associations/'
-    | '/audit/'
-    | '/committees/'
-    | '/compliance/'
-    | '/events/'
-    | '/feature-flags/'
-    | '/impersonate/'
-    | '/members/'
-    | '/national-dashboard/'
-    | '/operators/'
-    | '/organizations/'
-    | '/surveys/'
-    | '/training/'
-    | '/verifications/'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/associations/$associationId'
+    | '/communications/email'
+    | '/communications/moderation'
+    | '/communications/templates'
     | '/members/$personId'
     | '/organizations/$organizationId'
     | '/associations'
     | '/audit'
     | '/committees'
+    | '/communications'
+    | '/compliance'
+    | '/events'
+    | '/feature-flags'
+    | '/impersonate'
+    | '/members'
+    | '/national-dashboard'
+    | '/operators'
+    | '/organizations'
+    | '/surveys'
+    | '/training'
+    | '/verifications'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/associations/$associationId'
+    | '/communications/email'
+    | '/communications/moderation'
+    | '/communications/templates'
+    | '/members/$personId'
+    | '/organizations/$organizationId'
+    | '/associations'
+    | '/audit'
+    | '/committees'
+    | '/communications'
     | '/compliance'
     | '/events'
     | '/feature-flags'
@@ -227,11 +272,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/associations/$associationId'
+    | '/communications/email'
+    | '/communications/moderation'
+    | '/communications/templates'
     | '/members/$personId'
     | '/organizations/$organizationId'
     | '/associations/'
     | '/audit/'
     | '/committees/'
+    | '/communications/'
     | '/compliance/'
     | '/events/'
     | '/feature-flags/'
@@ -248,11 +297,15 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssociationsAssociationIdRoute: typeof AssociationsAssociationIdRoute
+  CommunicationsEmailRoute: typeof CommunicationsEmailRoute
+  CommunicationsModerationRoute: typeof CommunicationsModerationRoute
+  CommunicationsTemplatesRoute: typeof CommunicationsTemplatesRoute
   MembersPersonIdRoute: typeof MembersPersonIdRoute
   OrganizationsOrganizationIdRoute: typeof OrganizationsOrganizationIdRoute
   AssociationsIndexRoute: typeof AssociationsIndexRoute
   AuditIndexRoute: typeof AuditIndexRoute
   CommitteesIndexRoute: typeof CommitteesIndexRoute
+  CommunicationsIndexRoute: typeof CommunicationsIndexRoute
   ComplianceIndexRoute: typeof ComplianceIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
   FeatureFlagsIndexRoute: typeof FeatureFlagsIndexRoute
@@ -278,98 +331,105 @@ declare module '@tanstack/react-router' {
     '/verifications/': {
       id: '/verifications/'
       path: '/verifications'
-      fullPath: '/verifications/'
+      fullPath: '/verifications'
       preLoaderRoute: typeof VerificationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/training/': {
       id: '/training/'
       path: '/training'
-      fullPath: '/training/'
+      fullPath: '/training'
       preLoaderRoute: typeof TrainingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/surveys/': {
       id: '/surveys/'
       path: '/surveys'
-      fullPath: '/surveys/'
+      fullPath: '/surveys'
       preLoaderRoute: typeof SurveysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/organizations/': {
       id: '/organizations/'
       path: '/organizations'
-      fullPath: '/organizations/'
+      fullPath: '/organizations'
       preLoaderRoute: typeof OrganizationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/operators/': {
       id: '/operators/'
       path: '/operators'
-      fullPath: '/operators/'
+      fullPath: '/operators'
       preLoaderRoute: typeof OperatorsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/national-dashboard/': {
       id: '/national-dashboard/'
       path: '/national-dashboard'
-      fullPath: '/national-dashboard/'
+      fullPath: '/national-dashboard'
       preLoaderRoute: typeof NationalDashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/members/': {
       id: '/members/'
       path: '/members'
-      fullPath: '/members/'
+      fullPath: '/members'
       preLoaderRoute: typeof MembersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/impersonate/': {
       id: '/impersonate/'
       path: '/impersonate'
-      fullPath: '/impersonate/'
+      fullPath: '/impersonate'
       preLoaderRoute: typeof ImpersonateIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feature-flags/': {
       id: '/feature-flags/'
       path: '/feature-flags'
-      fullPath: '/feature-flags/'
+      fullPath: '/feature-flags'
       preLoaderRoute: typeof FeatureFlagsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events/': {
       id: '/events/'
       path: '/events'
-      fullPath: '/events/'
+      fullPath: '/events'
       preLoaderRoute: typeof EventsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compliance/': {
       id: '/compliance/'
       path: '/compliance'
-      fullPath: '/compliance/'
+      fullPath: '/compliance'
       preLoaderRoute: typeof ComplianceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communications/': {
+      id: '/communications/'
+      path: '/communications'
+      fullPath: '/communications'
+      preLoaderRoute: typeof CommunicationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/committees/': {
       id: '/committees/'
       path: '/committees'
-      fullPath: '/committees/'
+      fullPath: '/committees'
       preLoaderRoute: typeof CommitteesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/audit/': {
       id: '/audit/'
       path: '/audit'
-      fullPath: '/audit/'
+      fullPath: '/audit'
       preLoaderRoute: typeof AuditIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/associations/': {
       id: '/associations/'
       path: '/associations'
-      fullPath: '/associations/'
+      fullPath: '/associations'
       preLoaderRoute: typeof AssociationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -387,6 +447,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MembersPersonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communications/templates': {
+      id: '/communications/templates'
+      path: '/communications/templates'
+      fullPath: '/communications/templates'
+      preLoaderRoute: typeof CommunicationsTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communications/moderation': {
+      id: '/communications/moderation'
+      path: '/communications/moderation'
+      fullPath: '/communications/moderation'
+      preLoaderRoute: typeof CommunicationsModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communications/email': {
+      id: '/communications/email'
+      path: '/communications/email'
+      fullPath: '/communications/email'
+      preLoaderRoute: typeof CommunicationsEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/associations/$associationId': {
       id: '/associations/$associationId'
       path: '/associations/$associationId'
@@ -400,11 +481,15 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssociationsAssociationIdRoute: AssociationsAssociationIdRoute,
+  CommunicationsEmailRoute: CommunicationsEmailRoute,
+  CommunicationsModerationRoute: CommunicationsModerationRoute,
+  CommunicationsTemplatesRoute: CommunicationsTemplatesRoute,
   MembersPersonIdRoute: MembersPersonIdRoute,
   OrganizationsOrganizationIdRoute: OrganizationsOrganizationIdRoute,
   AssociationsIndexRoute: AssociationsIndexRoute,
   AuditIndexRoute: AuditIndexRoute,
   CommitteesIndexRoute: CommitteesIndexRoute,
+  CommunicationsIndexRoute: CommunicationsIndexRoute,
   ComplianceIndexRoute: ComplianceIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
   FeatureFlagsIndexRoute: FeatureFlagsIndexRoute,
