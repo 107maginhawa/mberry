@@ -10,6 +10,7 @@ import { Skeleton } from '@monobase/ui'
 import { MessageSquare, WifiOff } from 'lucide-react'
 import { MessageBubble } from './message-bubble'
 import { MessageComposer } from './message-composer'
+import { TypingIndicator } from './typing-indicator'
 import { useChatWebSocket } from '../hooks/use-chat-websocket'
 
 interface ChatViewProps {
@@ -26,6 +27,7 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
   const queryClient = useQueryClient()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([])
+  const [typingUsers, setTypingUsers] = useState<Map<string, number>>(new Map())
   const prevMessageCountRef = useRef(0)
 
   const messagesQuery = useQuery({
@@ -53,13 +55,31 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
         })
       }
       if (event.type === 'chat.typing') {
-        // Phase 1: no typing indicator UI
+        const typingEvent = msg as { type: string; senderId?: string; senderName?: string }
+        const name = typingEvent.senderName ?? typingEvent.senderId
+        if (name && typingEvent.senderId !== myPersonId) {
+          setTypingUsers((prev) => {
+            const next = new Map(prev)
+            // Clear after 3s of no typing events from this user
+            const existingTimer = prev.get(name)
+            if (existingTimer) clearTimeout(existingTimer)
+            const timer = window.setTimeout(() => {
+              setTypingUsers((p) => {
+                const n = new Map(p)
+                n.delete(name)
+                return n
+              })
+            }, 3000)
+            next.set(name, timer)
+            return next
+          })
+        }
       }
     },
-    [],
+    [myPersonId],
   )
 
-  const { isConnected, isReconnecting } = useChatWebSocket(roomId, handleWsMessage)
+  const { isConnected, isReconnecting, send } = useChatWebSocket(roomId, handleWsMessage)
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -127,8 +147,11 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
         )}
       </div>
 
+      {/* Typing indicator */}
+      <TypingIndicator typers={Array.from(typingUsers.keys())} />
+
       {/* Composer */}
-      <MessageComposer roomId={roomId} onMessageSent={handleMessageSent} />
+      <MessageComposer roomId={roomId} wsSend={send} onMessageSent={handleMessageSent} />
     </GlassCard>
   )
 }

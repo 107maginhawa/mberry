@@ -8,17 +8,19 @@ import { toast } from 'sonner'
 
 interface MessageComposerProps {
   roomId: string
+  wsSend?: (type: string, data: unknown) => void
   onMessageSent?: () => void
 }
 
 /**
  * Message input with send button. Submits on Enter (Shift+Enter for newline).
- * Basic 500ms throttle after sending.
+ * Basic 500ms throttle after sending. Emits chat.typing via WebSocket on input.
  */
-export function MessageComposer({ roomId, onMessageSent }: MessageComposerProps) {
+export function MessageComposer({ roomId, wsSend, onMessageSent }: MessageComposerProps) {
   const [draft, setDraft] = useState('')
   const [throttled, setThrottled] = useState(false)
   const throttleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const typingThrottleRef = useRef<number>(0)
 
   const send = useMutation({
     ...sendChatMessageMutation(),
@@ -66,7 +68,15 @@ export function MessageComposer({ roomId, onMessageSent }: MessageComposerProps)
         aria-label="Message input"
         placeholder="Type a message..."
         value={draft}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(e) => {
+          setDraft(e.target.value)
+          // Emit typing event throttled to once per 2s
+          const now = Date.now()
+          if (wsSend && now - typingThrottleRef.current > 2000) {
+            typingThrottleRef.current = now
+            wsSend('chat.typing', { roomId })
+          }
+        }}
         onKeyDown={handleKeyDown}
         disabled={send.isPending}
         className="flex-1"
