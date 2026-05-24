@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { type ColumnDef } from '@tanstack/react-table'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { DataTable } from '@/components/patterns/data-table'
 import { TableSkeleton } from '@/components/patterns/skeleton-loader'
 import { EventForm } from '@/features/events/components/event-form'
 import { AttendanceView } from '@/features/events/components/attendance-view'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'
-import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { Button } from '@monobase/ui'
 import { getEventOptions, listCustomEventRegistrationsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -58,12 +60,77 @@ function formatDate(iso: string) {
   })
 }
 
+interface Registration {
+  id: string
+  personId?: string
+  memberName?: string
+  personName?: string
+  email?: string
+  status: string
+  createdAt: string
+  paymentStatus?: string | null
+}
+
+const REG_STATUS_STYLES: Record<string, string> = {
+  confirmed: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  waitlisted: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
+  cancelled: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
+  pending: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
+}
+
+const registrationColumns: ColumnDef<Registration, unknown>[] = [
+  {
+    accessorKey: 'memberName',
+    header: 'Member',
+    cell: ({ row }) => {
+      const name = row.original.memberName ?? row.original.personName ?? row.original.personId
+      return (
+        <div>
+          <p className="font-medium text-sm">{name}</p>
+          {row.original.email && (
+            <p className="text-xs text-[var(--color-muted)]">{row.original.email}</p>
+          )}
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ getValue }) => {
+      const status = getValue<string>()
+      return (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+          REG_STATUS_STYLES[status] ?? 'bg-[var(--color-border-light)] text-[var(--color-muted)]'
+        }`}>
+          {status}
+        </span>
+      )
+    },
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Registered',
+    cell: ({ getValue }) =>
+      new Date(getValue<string>()).toLocaleDateString('en-PH', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+  },
+  {
+    accessorKey: 'paymentStatus',
+    header: 'Payment',
+    cell: ({ getValue }) => getValue<string>() ?? '—',
+  },
+]
+
 function RegistrationsTab({ eventId, orgId }: { eventId: string; orgId: string }) {
   const { data, isLoading } = useQuery(
     listCustomEventRegistrationsOptions({ path: { eventId }, headers: { 'x-org-id': orgId } })
   )
 
-  const registrations = data?.data ?? []
+  const registrations = (data?.data ?? []) as unknown as Registration[]
 
   if (isLoading) {
     return <TableSkeleton rows={5} cols={4} />
@@ -81,37 +148,36 @@ function RegistrationsTab({ eventId, orgId }: { eventId: string; orgId: string }
 
   return (
     <GlassCard className="overflow-hidden">
-      <Table className="text-sm">
-        <TableHeader className="bg-[var(--color-surface-warm)]/50">
-          <TableRow>
-            <TableHead className="p-3">Member</TableHead>
-            <TableHead className="p-3">Status</TableHead>
-            <TableHead className="p-3">Registered At</TableHead>
-            <TableHead className="p-3">Payment</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {registrations.map((reg: any) => (
-            <TableRow key={reg.id} className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-surface-warm)]/30">
-              <TableCell className="p-3 font-mono text-xs">{reg.personId}</TableCell>
-              <TableCell className="p-3">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                  reg.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                  reg.status === 'waitlisted' ? 'bg-yellow-100 text-yellow-800' :
-                  reg.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-700'
-                }`}>
-                  {reg.status}
-                </span>
-              </TableCell>
-              <TableCell className="p-3 text-[var(--color-muted)]">
-                {new Date(reg.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </TableCell>
-              <TableCell className="p-3 text-[var(--color-muted)]">{reg.paymentStatus ?? '—'}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <DataTable
+        columns={registrationColumns}
+        data={registrations}
+        pageSize={25}
+        renderMobileCard={(reg) => (
+          <div className="px-4 py-3 space-y-1">
+            <div className="flex items-center justify-between">
+              <p className="font-medium text-sm">
+                {reg.memberName ?? reg.personName ?? reg.personId}
+              </p>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                REG_STATUS_STYLES[reg.status] ?? 'bg-[var(--color-border-light)] text-[var(--color-muted)]'
+              }`}>
+                {reg.status}
+              </span>
+            </div>
+            {reg.email && (
+              <p className="text-xs text-[var(--color-muted)]">{reg.email}</p>
+            )}
+            <p className="text-xs text-[var(--color-muted)]">
+              {new Date(reg.createdAt).toLocaleDateString('en-PH', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+              {reg.paymentStatus ? ` · ${reg.paymentStatus}` : ''}
+            </p>
+          </div>
+        )}
+      />
     </GlassCard>
   )
 }

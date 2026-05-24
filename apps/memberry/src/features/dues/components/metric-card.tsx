@@ -18,7 +18,7 @@ export function MetricCard({ label, value, format, prefix, changePercent, change
   const changeColor = isPositive ? 'text-emerald-600' : isNegative ? 'text-red-600' : 'text-[var(--color-muted)]'
 
   return (
-    <GlassCard className="p-5">
+    <GlassCard className="p-5" aria-label={label}>
       <div className="flex items-center gap-3 mb-3">
         {icon}
         <span className="text-sm font-medium text-[var(--color-muted)]">{label}</span>

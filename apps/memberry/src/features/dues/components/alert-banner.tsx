@@ -5,6 +5,7 @@ import { Button } from '@monobase/ui'
 interface AlertBannerProps {
   variant?: 'warning' | 'info'
   message: string
+  dismissKey?: string
   action?: {
     label: string
     onClick: () => void
@@ -12,8 +13,21 @@ interface AlertBannerProps {
   dismissible?: boolean
 }
 
-export function AlertBanner({ variant = 'warning', message, action, dismissible = true }: AlertBannerProps) {
-  const [dismissed, setDismissed] = useState(false)
+export function AlertBanner({ variant = 'warning', message, dismissKey, action, dismissible = true }: AlertBannerProps) {
+  const storageKey = dismissKey ? `alert-dismissed-${dismissKey}` : null
+  const [dismissed, setDismissed] = useState(() => {
+    if (storageKey) {
+      try { return localStorage.getItem(storageKey) === 'true' } catch (_) { return false }
+    }
+    return false
+  })
+
+  function handleDismiss() {
+    setDismissed(true)
+    if (storageKey) {
+      try { localStorage.setItem(storageKey, 'true') } catch (_) { /* ignore storage errors */ }
+    }
+  }
 
   if (dismissed) return null
 
@@ -41,7 +55,7 @@ export function AlertBanner({ variant = 'warning', message, action, dismissible 
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setDismissed(true)}
+          onClick={handleDismiss}
           className={`p-1 rounded hover:bg-black/5 ${textColor}`}
           aria-label="Dismiss"
         >

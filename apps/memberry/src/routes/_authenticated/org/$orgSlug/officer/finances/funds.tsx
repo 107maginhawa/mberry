@@ -131,7 +131,7 @@ function FundsPage() {
                       format={(n) => n.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                     />
                   </p>
-                  <p className="text-xs text-[var(--color-muted)] mt-1">{pct}% of dues</p>
+                  <p className="text-xs text-[var(--color-muted)] mt-1">{pct}% of dues (estimated)</p>
                 </GlassCard>
               </StaggerItem>
             )

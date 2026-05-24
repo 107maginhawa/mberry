@@ -18,7 +18,7 @@ export function CollectionsAreaChart({ data, isLoading }: CollectionsAreaChartPr
     return (
       <GlassCard className="p-5">
         <h2 className="text-h4 mb-4">Collections Over Time</h2>
-        <div className="h-[280px] flex items-center justify-center animate-pulse">
+        <div className="h-[200px] md:h-[280px] flex items-center justify-center animate-pulse">
           <div className="w-full h-full bg-gray-100 rounded" />
         </div>
       </GlassCard>
@@ -29,7 +29,7 @@ export function CollectionsAreaChart({ data, isLoading }: CollectionsAreaChartPr
     return (
       <GlassCard className="p-5">
         <h2 className="text-h4 mb-4">Collections Over Time</h2>
-        <div className="h-[280px] flex items-center justify-center text-[var(--color-muted)] text-sm" role="status">
+        <div className="h-[200px] md:h-[280px] flex items-center justify-center text-[var(--color-muted)] text-sm" role="status">
           No collection data yet. Charts appear after the first month of payment activity.
         </div>
       </GlassCard>
@@ -39,8 +39,8 @@ export function CollectionsAreaChart({ data, isLoading }: CollectionsAreaChartPr
   return (
     <GlassCard className="p-5">
       <h2 className="text-h4 mb-4">Collections Over Time</h2>
-      <div aria-label="Collections over time area chart" role="img">
-        <ResponsiveContainer width="100%" height={280}>
+      <div aria-label="Collections over time area chart" role="img" className="h-[200px] md:h-[280px]">
+        <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
               <linearGradient id="collectedGradient" x1="0" y1="0" x2="0" y2="1">

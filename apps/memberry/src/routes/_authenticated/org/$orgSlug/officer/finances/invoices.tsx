@@ -1,5 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
+import { z } from 'zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   listDuesInvoicesOptions,
@@ -20,8 +21,15 @@ import { Checkbox } from '@monobase/ui'
 import { FileText, Search, Download, Bell, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
+const invoiceSearchSchema = z.object({
+  tab: z.enum(['all', 'generated', 'sent', 'overdue', 'paid']).optional().default('all'),
+  q: z.string().optional().default(''),
+  page: z.number().optional().default(0),
+})
+
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/finances/invoices')({
   component: InvoicesPage,
+  validateSearch: (search) => invoiceSearchSchema.parse(search),
 })
 
 type TabKey = 'all' | 'generated' | 'sent' | 'overdue' | 'paid'
@@ -41,10 +49,22 @@ const PAGE_SIZE = 25
 function InvoicesPage() {
   const { orgId, orgSlug } = useOrg()
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState<TabKey>('all')
-  const [searchQuery, setSearchQuery] = useState('')
+  const navigate = useNavigate({ from: Route.fullPath })
+  const search = Route.useSearch()
+  const activeTab = search.tab ?? 'all'
+  const searchQuery = search.q ?? ''
+  const page = search.page ?? 0
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [page, setPage] = useState(0)
+
+  function setActiveTab(tab: TabKey) {
+    void navigate({ search: { ...search, tab, page: 0 }, replace: true })
+  }
+  function setSearchQuery(q: string) {
+    void navigate({ search: { ...search, q, page: 0 }, replace: true })
+  }
+  function setPage(p: number | ((prev: number) => number)) {
+    void navigate({ search: { ...search, page: typeof p === 'function' ? p(page) : p }, replace: true })
+  }
 
   const { data, isLoading, error } = useQuery({
     ...listDuesInvoicesOptions({
@@ -181,7 +201,7 @@ function InvoicesPage() {
                 key={tab}
                 variant={isActive ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => { setActiveTab(tab); setPage(0); setSelectedIds(new Set()) }}
+                onClick={() => { setActiveTab(tab); setSelectedIds(new Set()) }}
                 className={isActive ? '' : 'text-[var(--color-muted)]'}
               >
                 {TAB_LABELS[tab]} ({isLoading ? '…' : count})
