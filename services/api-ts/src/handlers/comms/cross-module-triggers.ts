@@ -101,7 +101,7 @@ export class CrossModuleTriggers {
         recipient: '*', // broadcast to org
         type: 'event.created',
         title: `New Event: ${ctx.eventName}`,
-        body: `${ctx.eventName} on ${ctx.eventDate}${ctx.venue ? ` at ${ctx.venue}` : ''}`,
+        message: `${ctx.eventName} on ${ctx.eventDate}${ctx.venue ? ` at ${ctx.venue}` : ''}`,
         data: { eventId: ctx.eventId },
         channel: 'in-app',
       });
@@ -129,7 +129,7 @@ export class CrossModuleTriggers {
           recipient: memberId,
           type: 'training.scheduled',
           title: `Training: ${ctx.sessionName}`,
-          body: `${ctx.credits} CPD credits available. Scheduled for ${ctx.scheduledDate}.`,
+          message: `${ctx.credits} CPD credits available. Scheduled for ${ctx.scheduledDate}.`,
           data: { sessionId: ctx.sessionId },
           channel: 'push',
         });
@@ -148,10 +148,10 @@ export class CrossModuleTriggers {
 
       await this.notifService.createNotification({
         organizationId: ctx.organizationId,
-        recipient: ctx.recipientId,
+        recipient: ctx.recipient,
         type: 'certificate.issued',
         title: `Certificate Ready: ${ctx.courseName}`,
-        body: `Your certificate for ${ctx.courseName} is ready for download.`,
+        message: `Your certificate for ${ctx.courseName} is ready for download.`,
         data: { certificateId: ctx.certificateId, downloadUrl: ctx.downloadUrl },
         channel: 'in-app',
       });
@@ -178,7 +178,7 @@ export class CrossModuleTriggers {
           recipient: ctx.personId,
           type: 'dues.reminder',
           title: 'Dues Payment Reminder',
-          body: `Your dues of ₱${ctx.amountDue.toLocaleString()} were due on ${ctx.dueDate}. Please settle to maintain good standing.`,
+          message: `Your dues of ₱${ctx.amountDue.toLocaleString()} were due on ${ctx.dueDate}. Please settle to maintain good standing.`,
           data: { invoiceId: ctx.invoiceId, daysOverdue: ctx.daysOverdue },
           channel,
         });
@@ -201,7 +201,7 @@ export class CrossModuleTriggers {
         recipient: ctx.personId,
         type: 'membership.welcome',
         title: 'Welcome to the Association!',
-        body: `Congratulations ${ctx.personName}! Your membership has been approved.${ctx.chapterName ? ` You've been added to ${ctx.chapterName}.` : ''}`,
+        message: `Congratulations ${ctx.personName}! Your membership has been approved.${ctx.chapterName ? ` You've been added to ${ctx.chapterName}.` : ''}`,
         data: { chapterId: ctx.chapterId },
         channel: 'in-app',
       });
@@ -212,7 +212,7 @@ export class CrossModuleTriggers {
         recipient: ctx.personId,
         type: 'membership.welcome',
         title: 'Welcome to the Association!',
-        body: `Welcome ${ctx.personName}! Your membership is now active.`,
+        message: `Welcome ${ctx.personName}! Your membership is now active.`,
         data: {},
         channel: 'email',
       });
@@ -236,7 +236,7 @@ export class CrossModuleTriggers {
           recipient: adminId,
           type: 'chapter.created',
           title: `Chapter Created: ${ctx.chapterName}`,
-          body: `Default channels (#general, #announcements) have been created for ${ctx.chapterName}.`,
+          message: `Default channels (#general, #announcements) have been created for ${ctx.chapterName}.`,
           data: { chapterId: ctx.chapterId },
           channel: 'in-app',
         });
