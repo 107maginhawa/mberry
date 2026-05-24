@@ -267,7 +267,7 @@ function InvoicesPage() {
                     </TableCell>
                     <TableCell className="px-3 py-3 font-mono text-xs">
                       <Link
-                        to="/org/$orgSlug/officer/finances/invoices/$invoiceId"
+                        to={"/org/$orgSlug/officer/finances/invoices/$invoiceId" as any}
                         params={{ orgSlug, invoiceId: inv.id }}
                         className="hover:underline text-[var(--color-primary)]"
                       >
