@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Send, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Send, CheckCircle2, Save } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
+import { useSurveyDraft } from '../hooks/use-survey-draft'
 import { NpsQuestion } from './question-renderers/nps-question'
 import { RatingQuestion } from './question-renderers/rating-question'
 import { ChoiceQuestion } from './question-renderers/choice-question'
@@ -137,6 +138,20 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
   const [submitting, setSubmitting] = useState(false)
   const [completed, setCompleted] = useState(false)
 
+  // Offline draft persistence
+  const { restoredAnswers, hasRestoredDraft, saveAnswers, clearDraft, isSaved } = useSurveyDraft({
+    surveyId: survey.id,
+    enabled: !previewMode,
+  })
+
+  // Restore draft answers on mount
+  useEffect(() => {
+    if (hasRestoredDraft && restoredAnswers) {
+      setAnswers(restoredAnswers as Record<string, AnswerValue>)
+      toast.info('Draft restored — your previous answers have been loaded')
+    }
+  }, [hasRestoredDraft, restoredAnswers])
+
   const currentQuestion = questions[currentIndex]!
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] ?? null : null
   const isLast = currentIndex === total - 1
@@ -180,6 +195,7 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
         value: answers[q.id] ?? null,
       }))
       await api.post(`/surveys/${survey.id}/responses`, { answers: formattedAnswers })
+      clearDraft()
       setCompleted(true)
       toast.success('Survey submitted successfully!')
       onComplete?.()
@@ -300,9 +316,11 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
             <QuestionRenderer
               question={currentQuestion}
               value={currentAnswer}
-              onChange={(v) =>
-                setAnswers((prev) => ({ ...prev, [currentQuestion.id]: v }))
-              }
+              onChange={(v) => {
+                const updated = { ...answers, [currentQuestion.id]: v }
+                setAnswers(updated)
+                saveAnswers(updated)
+              }}
             />
           </motion.div>
         </AnimatePresence>
@@ -345,6 +363,14 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
           </Button>
         )}
       </div>
+
+      {/* Draft saved indicator */}
+      {isSaved && !previewMode && (
+        <div className="flex items-center justify-center gap-1.5 mt-2 text-xs text-[var(--color-success)]">
+          <Save className="w-3 h-3" />
+          Draft saved
+        </div>
+      )}
 
       {/* Keyboard hint */}
       <p className="text-center text-xs text-[var(--color-muted)] mt-4 hidden md:block">

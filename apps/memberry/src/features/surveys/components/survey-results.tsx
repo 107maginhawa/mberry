@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { BarChart3, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react'
+import { BarChart3, MessageSquare, ChevronLeft, ChevronRight, Download } from 'lucide-react'
 import { Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Button } from '@monobase/ui'
 import { api } from '@/lib/api'
@@ -149,6 +149,16 @@ function YesNoBars({ yes, no }: { yes: number; no: number }) {
   )
 }
 
+function downloadCsv(surveyId: string, title: string) {
+  const url = `/api/surveys/${surveyId}/export?format=csv`
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${title.replace(/[^a-zA-Z0-9]/g, '-')}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}
+
 export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
   const [tab, setTab] = useState<TabView>('analytics')
   const [responsePage, setResponsePage] = useState(0)
@@ -196,26 +206,37 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
           <p className="text-sm text-[var(--color-muted)] mt-1">{survey.description}</p>
         )}
         <div className="flex items-center gap-3 mt-2 text-xs text-[var(--color-muted)]">
-          <span className="font-medium">{totalResponses} response{totalResponses !== 1 ? 's' : ''}</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">
-            {survey.surveyType}
-          </span>
-          <span
-            className={`inline-flex items-center px-2 py-0.5 rounded font-medium ${
-              survey.status === 'active'
-                ? 'bg-[var(--color-success-bg)] text-[var(--color-success)]'
-                : survey.status === 'closed'
-                ? 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]'
-                : 'bg-gray-100 text-gray-600'
-            }`}
-          >
-            {survey.status}
-          </span>
-          {survey.anonymous && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-medium">
-              Anonymous
+          <div className="flex items-center gap-3 flex-1">
+            <span className="font-medium">{totalResponses} response{totalResponses !== 1 ? 's' : ''}</span>
+            <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">
+              {survey.surveyType}
             </span>
-          )}
+            <span
+              className={`inline-flex items-center px-2 py-0.5 rounded font-medium ${
+                survey.status === 'active'
+                  ? 'bg-[var(--color-success-bg)] text-[var(--color-success)]'
+                  : survey.status === 'closed'
+                  ? 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]'
+                  : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              {survey.status}
+            </span>
+            {survey.anonymous && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-medium">
+                Anonymous
+              </span>
+            )}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => downloadCsv(surveyId, survey.title)}
+            className="ml-auto gap-1.5"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export CSV
+          </Button>
         </div>
       </div>
 

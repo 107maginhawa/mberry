@@ -74,13 +74,37 @@ interface SurveyBuilderProps {
   orgId: string
   onSuccess?: (survey: { id: string }) => void
   onCancel?: () => void
+  initialData?: {
+    title?: string
+    surveyType?: 'nps' | 'satisfaction' | 'poll' | 'custom'
+    questions?: Array<{
+      type: QuestionType
+      text: string
+      required: boolean
+      options?: string[]
+    }>
+  }
 }
 
-export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps) {
+export function SurveyBuilder({ orgId, onSuccess, onCancel, initialData }: SurveyBuilderProps) {
   const [step, setStep] = useState<Step>('basics')
   const [serverError, setServerError] = useState<string | null>(null)
-  const [questions, setQuestions] = useState<SurveyQuestion[]>([makeDefaultQuestion(0)])
+  const [questions, setQuestions] = useState<SurveyQuestion[]>(
+    initialData?.questions?.length
+      ? initialData.questions.map((q, i) => ({
+          id: generateId(),
+          type: q.type,
+          text: q.text,
+          required: q.required,
+          options: q.options ?? ['', ''],
+          sortOrder: i,
+        }))
+      : [makeDefaultQuestion(0)],
+  )
   const [showPreview, setShowPreview] = useState(false)
+  const [targetTiers, setTargetTiers] = useState<string[]>([])
+  const [targetChapters, setTargetChapters] = useState<string[]>([])
+  const [targetCommittees, setTargetCommittees] = useState<string[]>([])
 
   const {
     register,
@@ -92,9 +116,9 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps
     mode: 'onBlur',
     resolver: zodResolver(basicsSchema),
     defaultValues: {
-      title: '',
+      title: initialData?.title ?? '',
       description: '',
-      surveyType: 'custom',
+      surveyType: initialData?.surveyType ?? 'custom',
       anonymous: false,
       deadline: '',
     },
@@ -153,6 +177,10 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps
   }
 
   function submitForm(data: BasicsFormData) {
+    const targetAudience = (targetTiers.length || targetChapters.length || targetCommittees.length)
+      ? { tiers: targetTiers, chapters: targetChapters, committees: targetCommittees }
+      : undefined
+
     const body = {
       organizationId: orgId,
       title: data.title,
@@ -160,6 +188,11 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps
       surveyType: data.surveyType,
       anonymous: data.anonymous,
       deadline: data.deadline || undefined,
+      settings: {
+        anonymous: data.anonymous,
+        deadline: data.deadline || undefined,
+        targetAudience,
+      },
       questions: questions
         .filter((q) => q.text.trim())
         .map((q) => ({
@@ -283,6 +316,46 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps
               placeholder="Select deadline"
             />
           </div>
+
+          {/* Target Audience */}
+          <div className="space-y-3 border-t pt-4">
+            <div>
+              <Label>Target Audience (optional)</Label>
+              <p className="text-xs text-[var(--color-muted)]">
+                Leave empty to target all members
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="target-tiers" className="text-xs">Membership Tiers</Label>
+              <Input
+                id="target-tiers"
+                placeholder="e.g. Regular, Life, Associate (comma separated)"
+                value={targetTiers.join(', ')}
+                onChange={(e) => setTargetTiers(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="target-chapters" className="text-xs">Chapters</Label>
+              <Input
+                id="target-chapters"
+                placeholder="e.g. NCR, Region VII (comma separated)"
+                value={targetChapters.join(', ')}
+                onChange={(e) => setTargetChapters(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="target-committees" className="text-xs">Committees</Label>
+              <Input
+                id="target-committees"
+                placeholder="e.g. Education, Finance (comma separated)"
+                value={targetCommittees.join(', ')}
+                onChange={(e) => setTargetCommittees(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -356,6 +429,14 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps
                 </span>
               )}
             </div>
+            {(targetTiers.length > 0 || targetChapters.length > 0 || targetCommittees.length > 0) && (
+              <div className="border-t pt-3 mt-3 space-y-1 text-xs text-[var(--color-muted)]">
+                <p className="font-medium text-[var(--color-text)]">Target Audience</p>
+                {targetTiers.length > 0 && <p>Tiers: {targetTiers.join(', ')}</p>}
+                {targetChapters.length > 0 && <p>Chapters: {targetChapters.join(', ')}</p>}
+                {targetCommittees.length > 0 && <p>Committees: {targetCommittees.join(', ')}</p>}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

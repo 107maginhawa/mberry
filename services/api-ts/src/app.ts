@@ -71,6 +71,13 @@ import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 // Saved Segments — hand-wired CRUD (Wave 4β Lane C)
 import { createSavedSegment, listSavedSegments, deleteSavedSegment } from '@/handlers/communication/savedSegments';
 
+// Survey extras — hand-wired (export returns CSV, clone is convenience endpoint)
+import { exportSurveyResponses } from '@/handlers/surveys/exportSurveyResponses';
+import { cloneSurvey } from '@/handlers/surveys/cloneSurvey';
+import { getNpsTrends } from '@/handlers/surveys/getNpsTrends';
+import { listAdminSurveys } from '@/handlers/surveys/listAdminSurveys';
+import { deleteMemberResponses } from '@/handlers/surveys/deleteMemberResponses';
+
 // completeEvent now served via generated TypeSpec route (was hand-wired, duplicate removed)
 
 // One-tap payment token: public validate + checkout, officer send-link
@@ -308,6 +315,15 @@ export function createApp(config: Config): App {
   app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
   app.get('/communications/segments', authMiddleware(), listSavedSegments as any);
   app.delete('/communications/segments/:id', authMiddleware(), deleteSavedSegment as any);
+
+  // Survey module extras — hand-wired
+  app.get('/surveys/:survey/export', authMiddleware(), orgContextMiddleware(), exportSurveyResponses as any);
+  app.post('/surveys/:survey/clone', authMiddleware(), orgContextMiddleware(), cloneSurvey as any);
+  app.get('/surveys/analytics/nps-trends', authMiddleware(), orgContextMiddleware(), getNpsTrends as any);
+  app.delete('/surveys/my-responses', authMiddleware(), deleteMemberResponses as any);
+
+  // Admin survey dashboard — platform admin only
+  app.get('/admin/surveys', authMiddleware(), platformAdminAuthMiddleware(), listAdminSurveys as any);
 
   // Register WebSocket handlers
   registerWebSocketRoutes(app as App);

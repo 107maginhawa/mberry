@@ -141,6 +141,23 @@ export class SurveyRepository {
       .where(eq(surveys.id, id));
   }
 
+  async cloneSurvey(id: string, createdBy: string): Promise<Survey> {
+    const original = await this.findById(id);
+    if (!original) throw new Error('Survey not found');
+    const [row] = await this.db.insert(surveys).values({
+      organizationId: original.organizationId,
+      title: `${original.title} (Copy)`,
+      description: original.description,
+      surveyType: original.surveyType,
+      questions: original.questions,
+      settings: original.settings,
+      status: 'draft',
+      createdBy,
+      updatedBy: createdBy,
+    }).returning();
+    return row!;
+  }
+
   async findActiveNpsSurvey(organizationId: string): Promise<Survey | undefined> {
     const [row] = await this.db
       .select()
@@ -258,6 +275,22 @@ export class SurveyResponseRepository {
         and(
           eq(surveyResponses.responderId, responderId),
           gt(surveyResponses.createdAt, since)
+        )
+      );
+    return Number(result?.count ?? 0);
+  }
+
+  async countRecentForMemberInWindow(responderId: string, windowDays: number = 7): Promise<number> {
+    const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000);
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(surveyResponses)
+      .where(
+        and(
+          eq(surveyResponses.responderId, responderId),
+          gt(surveyResponses.createdAt, since),
+          // Count completed + pending (not dismissed/skipped)
+          sql`${surveyResponses.status} IN ('completed', 'pending')`
         )
       );
     return Number(result?.count ?? 0);

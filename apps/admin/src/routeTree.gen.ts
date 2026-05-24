@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerificationsIndexRouteImport } from './routes/verifications/index'
 import { Route as TrainingIndexRouteImport } from './routes/training/index'
+import { Route as SurveysIndexRouteImport } from './routes/surveys/index'
 import { Route as OrganizationsIndexRouteImport } from './routes/organizations/index'
 import { Route as OperatorsIndexRouteImport } from './routes/operators/index'
 import { Route as NationalDashboardIndexRouteImport } from './routes/national-dashboard/index'
@@ -40,6 +41,11 @@ const VerificationsIndexRoute = VerificationsIndexRouteImport.update({
 const TrainingIndexRoute = TrainingIndexRouteImport.update({
   id: '/training/',
   path: '/training/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysIndexRoute = SurveysIndexRouteImport.update({
+  id: '/surveys/',
+  path: '/surveys/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrganizationsIndexRoute = OrganizationsIndexRouteImport.update({
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/national-dashboard/': typeof NationalDashboardIndexRoute
   '/operators/': typeof OperatorsIndexRoute
   '/organizations/': typeof OrganizationsIndexRoute
+  '/surveys/': typeof SurveysIndexRoute
   '/training/': typeof TrainingIndexRoute
   '/verifications/': typeof VerificationsIndexRoute
 }
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/national-dashboard': typeof NationalDashboardIndexRoute
   '/operators': typeof OperatorsIndexRoute
   '/organizations': typeof OrganizationsIndexRoute
+  '/surveys': typeof SurveysIndexRoute
   '/training': typeof TrainingIndexRoute
   '/verifications': typeof VerificationsIndexRoute
 }
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/national-dashboard/': typeof NationalDashboardIndexRoute
   '/operators/': typeof OperatorsIndexRoute
   '/organizations/': typeof OrganizationsIndexRoute
+  '/surveys/': typeof SurveysIndexRoute
   '/training/': typeof TrainingIndexRoute
   '/verifications/': typeof VerificationsIndexRoute
 }
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/national-dashboard/'
     | '/operators/'
     | '/organizations/'
+    | '/surveys/'
     | '/training/'
     | '/verifications/'
   fileRoutesByTo: FileRoutesByTo
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/national-dashboard'
     | '/operators'
     | '/organizations'
+    | '/surveys'
     | '/training'
     | '/verifications'
   id:
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/national-dashboard/'
     | '/operators/'
     | '/organizations/'
+    | '/surveys/'
     | '/training/'
     | '/verifications/'
   fileRoutesById: FileRoutesById
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   NationalDashboardIndexRoute: typeof NationalDashboardIndexRoute
   OperatorsIndexRoute: typeof OperatorsIndexRoute
   OrganizationsIndexRoute: typeof OrganizationsIndexRoute
+  SurveysIndexRoute: typeof SurveysIndexRoute
   TrainingIndexRoute: typeof TrainingIndexRoute
   VerificationsIndexRoute: typeof VerificationsIndexRoute
 }
@@ -274,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/training'
       fullPath: '/training/'
       preLoaderRoute: typeof TrainingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/': {
+      id: '/surveys/'
+      path: '/surveys'
+      fullPath: '/surveys/'
+      preLoaderRoute: typeof SurveysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/organizations/': {
@@ -393,6 +413,7 @@ const rootRouteChildren: RootRouteChildren = {
   NationalDashboardIndexRoute: NationalDashboardIndexRoute,
   OperatorsIndexRoute: OperatorsIndexRoute,
   OrganizationsIndexRoute: OrganizationsIndexRoute,
+  SurveysIndexRoute: SurveysIndexRoute,
   TrainingIndexRoute: TrainingIndexRoute,
   VerificationsIndexRoute: VerificationsIndexRoute,
 }

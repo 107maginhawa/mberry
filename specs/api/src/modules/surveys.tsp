@@ -62,6 +62,18 @@ model SurveyQuestion {
   @minValue(1)
   @maxValue(5000)
   maxLength?: int32;
+
+  @doc("Optional skip logic for conditional branching (schema prep — renderer not yet implemented)")
+  skipLogic?: SkipLogicConfig;
+}
+
+@doc("Skip logic configuration for conditional question branching")
+model SkipLogicConfig {
+  @doc("Condition expression (e.g. 'value === yes' or 'value >= 8')")
+  condition: string;
+
+  @doc("Question ID to skip to when condition is met")
+  targetQuestionId: UUID;
 }
 
 @doc("Survey question type")
@@ -94,6 +106,18 @@ model ScaleConfig {
   max: int32;
 }
 
+@doc("Structured target audience filter")
+model TargetAudienceFilter {
+  @doc("Membership tiers to target")
+  tiers?: string[];
+
+  @doc("Chapters to target")
+  chapters?: string[];
+
+  @doc("Committees to target")
+  committees?: string[];
+}
+
 @doc("Survey settings")
 model SurveySettings {
   @doc("Whether responses are anonymous (responder identity hidden from officers)")
@@ -102,8 +126,16 @@ model SurveySettings {
   @doc("Survey deadline (UTC)")
   deadline?: utcDateTime;
 
-  @doc("Target audience filter")
-  targetAudience?: string;
+  @doc("Structured target audience filter (replaces freeform string)")
+  targetAudience?: TargetAudienceFilter;
+
+  @doc("Max surveys per member per week before fatigue throttling (default: 2)")
+  @minValue(1)
+  fatigueThreshold?: int32;
+
+  @doc("Data retention period in days (default: 1095 = 3 years). Responses purged after this period.")
+  @minValue(30)
+  retentionDays?: int32;
 }
 
 @doc("Survey status")
@@ -448,6 +480,34 @@ namespace SurveysModule {
     getSurveyAnalytics(
       @path survey: UUID
     ): ApiOkResponse<SurveyAnalytics>
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Export survey responses as CSV. Officer/admin only.")
+    @operationId("exportSurveyResponses")
+    @get
+    @route("/{survey}/export")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["officer", "admin"])
+    exportSurveyResponses(
+      @path survey: UUID,
+      @doc("Export format")
+      @query format?: string
+    ): ApiOkResponse<string>
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Clone a survey as a new draft with '(Copy)' suffix. Officer/admin only.")
+    @operationId("cloneSurvey")
+    @post
+    @route("/{survey}/clone")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["officer", "admin"])
+    cloneSurvey(
+      @path survey: UUID
+    ): ApiCreatedResponse<Survey>
       | ApiNotFoundResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;

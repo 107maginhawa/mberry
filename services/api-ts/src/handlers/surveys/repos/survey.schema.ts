@@ -20,6 +20,11 @@ import { persons } from '../../person/repos/person.schema';
 // TypeScript interfaces for JSONB columns
 // ---------------------------------------------------------------------------
 
+export interface SkipLogic {
+  condition: string; // e.g. "value === 'yes'" or "value >= 8"
+  targetQuestionId: string;
+}
+
 export interface SurveyQuestion {
   id: string;
   type: 'nps' | 'rating' | 'single_choice' | 'multi_choice' | 'text' | 'yes_no';
@@ -29,12 +34,21 @@ export interface SurveyQuestion {
   options?: string[];
   scale?: { min: number; max: number };
   maxLength?: number;
+  skipLogic?: SkipLogic; // Phase 4: schema prep for conditional logic
+}
+
+export interface TargetAudience {
+  tiers?: string[];
+  chapters?: string[];
+  committees?: string[];
 }
 
 export interface SurveySettings {
   anonymous?: boolean;
   deadline?: string; // ISO 8601 date
-  targetAudience?: string;
+  targetAudience?: string | TargetAudience; // backwards-compatible: string for old data, object for new
+  fatigueThreshold?: number; // max surveys per member per week, default 2
+  retentionDays?: number; // data retention period, default 1095 (3 years)
 }
 
 export interface QuestionBreakdown {

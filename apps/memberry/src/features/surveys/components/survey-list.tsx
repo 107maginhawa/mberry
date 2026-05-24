@@ -12,6 +12,7 @@ import {
   ChevronRight,
   MoreHorizontal,
   Users,
+  Copy,
 } from 'lucide-react'
 import { Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Button } from '@monobase/ui'
@@ -120,6 +121,15 @@ export function SurveyList() {
     onError: () => toast.error('Failed to delete survey'),
   })
 
+  const cloneMut = useMutation({
+    mutationFn: (id: string) => api.post(`/api/surveys/${id}/clone`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['surveys', orgId] })
+      toast.success('Survey duplicated')
+    },
+    onError: () => toast.error('Failed to duplicate survey'),
+  })
+
   // Stats row
   const stats = [
     { label: 'Total', value: counts.all, icon: ClipboardList },
@@ -219,6 +229,16 @@ export function SurveyList() {
                   <div className="absolute right-0 top-8 z-10 w-40 bg-popover border rounded-lg shadow-md py-1 text-sm">
                     {survey.status === 'draft' && (
                       <>
+                        <Button
+                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
+                          onClick={() => {
+                            setMenuOpenId(null)
+                            cloneMut.mutate(survey.id)
+                          }}
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          Duplicate
+                        </Button>
                         <Link
                           to="/org/$orgSlug/officer/surveys/$surveyId"
                           params={{ orgSlug, surveyId: survey.id }}
@@ -249,6 +269,16 @@ export function SurveyList() {
                     )}
                     {survey.status === 'active' && (
                       <>
+                        <Button
+                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
+                          onClick={() => {
+                            setMenuOpenId(null)
+                            cloneMut.mutate(survey.id)
+                          }}
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          Duplicate
+                        </Button>
                         <Link
                           to="/org/$orgSlug/officer/surveys/$surveyId"
                           params={{ orgSlug, surveyId: survey.id }}
@@ -269,14 +299,26 @@ export function SurveyList() {
                       </>
                     )}
                     {survey.status === 'closed' && (
-                      <Link
-                        to="/org/$orgSlug/officer/surveys/$surveyId"
-                        params={{ orgSlug, surveyId: survey.id }}
-                        className="block px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
-                        onClick={() => setMenuOpenId(null)}
-                      >
-                        View Results
-                      </Link>
+                      <>
+                        <Button
+                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
+                          onClick={() => {
+                            setMenuOpenId(null)
+                            cloneMut.mutate(survey.id)
+                          }}
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          Duplicate
+                        </Button>
+                        <Link
+                          to="/org/$orgSlug/officer/surveys/$surveyId"
+                          params={{ orgSlug, surveyId: survey.id }}
+                          className="block px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
+                          onClick={() => setMenuOpenId(null)}
+                        >
+                          View Results
+                        </Link>
+                      </>
                     )}
                   </div>
                 )}
