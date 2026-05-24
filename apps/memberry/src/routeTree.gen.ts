@@ -15,6 +15,7 @@ import { Route as JoinRouteImport } from './routes/join'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyTokenRouteImport } from './routes/verify/$token'
+import { Route as VerifyCredentialNumberRouteImport } from './routes/verify/$credentialNumber'
 import { Route as VerifyCertificateNumberRouteImport } from './routes/verify/$certificateNumber'
 import { Route as PayTokenRouteImport } from './routes/pay/$token'
 import { Route as OrgSlugRouteImport } from './routes/org/$slug'
@@ -159,6 +160,11 @@ const IndexRoute = IndexRouteImport.update({
 const VerifyTokenRoute = VerifyTokenRouteImport.update({
   id: '/verify/$token',
   path: '/verify/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyCredentialNumberRoute = VerifyCredentialNumberRouteImport.update({
+  id: '/verify/$credentialNumber',
+  path: '/verify/$credentialNumber',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerifyCertificateNumberRoute = VerifyCertificateNumberRouteImport.update({
@@ -855,6 +861,7 @@ export interface FileRoutesByFullPath {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
+  '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/my/billing': typeof AuthenticatedMyBillingRoute
@@ -978,6 +985,7 @@ export interface FileRoutesByTo {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
+  '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/my/billing': typeof AuthenticatedMyBillingRoute
@@ -1099,6 +1107,7 @@ export interface FileRoutesById {
   '/org/$slug': typeof OrgSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
+  '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/_authenticated/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/_authenticated/my/billing': typeof AuthenticatedMyBillingRoute
@@ -1224,6 +1233,7 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$certificateNumber'
+    | '/verify/$credentialNumber'
     | '/verify/$token'
     | '/org/$orgSlug'
     | '/my/billing'
@@ -1347,6 +1357,7 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$certificateNumber'
+    | '/verify/$credentialNumber'
     | '/verify/$token'
     | '/org/$orgSlug'
     | '/my/billing'
@@ -1467,6 +1478,7 @@ export interface FileRouteTypes {
     | '/org/$slug'
     | '/pay/$token'
     | '/verify/$certificateNumber'
+    | '/verify/$credentialNumber'
     | '/verify/$token'
     | '/_authenticated/org/$orgSlug'
     | '/_authenticated/my/billing'
@@ -1591,6 +1603,7 @@ export interface RootRouteChildren {
   OrgSlugRoute: typeof OrgSlugRoute
   PayTokenRoute: typeof PayTokenRoute
   VerifyCertificateNumberRoute: typeof VerifyCertificateNumberRoute
+  VerifyCredentialNumberRoute: typeof VerifyCredentialNumberRoute
   VerifyTokenRoute: typeof VerifyTokenRoute
 }
 
@@ -1636,6 +1649,13 @@ declare module '@tanstack/react-router' {
       path: '/verify/$token'
       fullPath: '/verify/$token'
       preLoaderRoute: typeof VerifyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify/$credentialNumber': {
+      id: '/verify/$credentialNumber'
+      path: '/verify/$credentialNumber'
+      fullPath: '/verify/$credentialNumber'
+      preLoaderRoute: typeof VerifyCredentialNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verify/$certificateNumber': {
@@ -2921,6 +2941,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrgSlugRoute: OrgSlugRoute,
   PayTokenRoute: PayTokenRoute,
   VerifyCertificateNumberRoute: VerifyCertificateNumberRoute,
+  VerifyCredentialNumberRoute: VerifyCredentialNumberRoute,
   VerifyTokenRoute: VerifyTokenRoute,
 }
 export const routeTree = rootRouteImport

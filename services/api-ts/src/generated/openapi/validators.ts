@@ -4093,7 +4093,11 @@ export const SurveyQuestionSchema = z.object({
   min: z.number().int(),
   max: z.number().int()
 }).optional(),
-  maxLength: z.number().int().gte(1).lte(5000).optional()
+  maxLength: z.number().int().gte(1).lte(5000).optional(),
+  skipLogic: z.object({
+  condition: z.string(),
+  targetQuestionId: z.string().uuid()
+}).optional()
 });
 
 export const CreateSurveyRequestSchema = z.object({
@@ -4104,7 +4108,13 @@ export const CreateSurveyRequestSchema = z.object({
   settings: z.object({
   anonymous: z.boolean().optional(),
   deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
-  targetAudience: z.string().optional()
+  targetAudience: z.object({
+  tiers: z.array(z.string()).optional(),
+  chapters: z.array(z.string()).optional(),
+  committees: z.array(z.string()).optional()
+}).optional(),
+  fatigueThreshold: z.number().int().gte(1).optional(),
+  retentionDays: z.number().int().gte(30).optional()
 }).optional()
 });
 
@@ -8943,6 +8953,11 @@ export const SessionUpdateSchema = z.object({
   status: z.enum(["scheduled", "in_progress", "completed", "cancelled"]).optional()
 });
 
+export const SkipLogicConfigSchema = z.object({
+  condition: z.string(),
+  targetQuestionId: z.string().uuid()
+});
+
 export const SlotStatusSchema = z.enum(["available", "booked", "blocked"]);
 
 export const SpeakerSchema = z.object({
@@ -9295,7 +9310,13 @@ export const SurveySchema = z.object({
   settings: z.object({
   anonymous: z.boolean().optional(),
   deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
-  targetAudience: z.string().optional()
+  targetAudience: z.object({
+  tiers: z.array(z.string()).optional(),
+  chapters: z.array(z.string()).optional(),
+  committees: z.array(z.string()).optional()
+}).optional(),
+  fatigueThreshold: z.number().int().gte(1).optional(),
+  retentionDays: z.number().int().gte(30).optional()
 }),
   analyticsSnapshot: z.object({
   totalResponses: z.number().int(),
@@ -9382,7 +9403,13 @@ export const SurveyResponseUpdateSchema = z.object({
 export const SurveySettingsSchema = z.object({
   anonymous: z.boolean().optional(),
   deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
-  targetAudience: z.string().optional()
+  targetAudience: z.object({
+  tiers: z.array(z.string()).optional(),
+  chapters: z.array(z.string()).optional(),
+  committees: z.array(z.string()).optional()
+}).optional(),
+  fatigueThreshold: z.number().int().gte(1).optional(),
+  retentionDays: z.number().int().gte(30).optional()
 });
 
 export const SurveyStatusSchema = z.enum(["draft", "active", "closed", "archived"]);
@@ -9404,7 +9431,13 @@ export const SurveyUpdateSchema = z.object({
   settings: z.object({
   anonymous: z.boolean().optional(),
   deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
-  targetAudience: z.string().optional()
+  targetAudience: z.object({
+  tiers: z.array(z.string()).optional(),
+  chapters: z.array(z.string()).optional(),
+  committees: z.array(z.string()).optional()
+}).optional(),
+  fatigueThreshold: z.number().int().gte(1).optional(),
+  retentionDays: z.number().int().gte(30).optional()
 }).optional(),
   analyticsSnapshot: z.object({
   totalResponses: z.number().int().optional(),
@@ -9412,6 +9445,12 @@ export const SurveyUpdateSchema = z.object({
   npsScore: z.number().optional(),
   questionBreakdown: z.record(z.string(), z.unknown()).optional()
 }).optional()
+});
+
+export const TargetAudienceFilterSchema = z.object({
+  tiers: z.array(z.string()).optional(),
+  chapters: z.array(z.string()).optional(),
+  committees: z.array(z.string()).optional()
 });
 
 export const TaxReceiptSchema = z.object({
@@ -9708,7 +9747,13 @@ export const UpdateSurveyRequestSchema = z.object({
   settings: z.object({
   anonymous: z.boolean().optional(),
   deadline: z.string().datetime().transform((str) => new Date(str)).optional(),
-  targetAudience: z.string().optional()
+  targetAudience: z.object({
+  tiers: z.array(z.string()).optional(),
+  chapters: z.array(z.string()).optional(),
+  committees: z.array(z.string()).optional()
+}).optional(),
+  fatigueThreshold: z.number().int().gte(1).optional(),
+  retentionDays: z.number().int().gte(30).optional()
 }).optional()
 });
 
@@ -13676,12 +13721,31 @@ export type GetSurveyAnalyticsParams = z.infer<typeof GetSurveyAnalyticsParams>;
 
 export const GetSurveyAnalyticsResponse = SurveyAnalyticsSchema;
 
+export const CloneSurveyParams = z.object({
+  survey: UUIDSchema,
+});
+export type CloneSurveyParams = z.infer<typeof CloneSurveyParams>;
+
+export const CloneSurveyResponse = SurveySchema;
+
 export const CloseSurveyParams = z.object({
   survey: UUIDSchema,
 });
 export type CloseSurveyParams = z.infer<typeof CloseSurveyParams>;
 
 export const CloseSurveyResponse = SurveySchema;
+
+export const ExportSurveyResponsesParams = z.object({
+  survey: UUIDSchema,
+});
+export type ExportSurveyResponsesParams = z.infer<typeof ExportSurveyResponsesParams>;
+
+export const ExportSurveyResponsesQuery = z.object({
+  format: z.string().optional(),
+});
+export type ExportSurveyResponsesQuery = z.infer<typeof ExportSurveyResponsesQuery>;
+
+export const ExportSurveyResponsesResponse = z.string();
 
 export const PublishSurveyParams = z.object({
   survey: UUIDSchema,

@@ -2891,11 +2891,26 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getSurveyAnalytics as unknown as Handler
   );
 
+  // cloneSurvey
+  app.post('/surveys/:survey/clone',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('param', validators.CloneSurveyParams, validationErrorHandler),
+    registry.cloneSurvey as unknown as Handler
+  );
+
   // closeSurvey
   app.post('/surveys/:survey/close',
     authMiddleware({ roles: ["officer", "admin"] }),
     zValidator('param', validators.CloseSurveyParams, validationErrorHandler),
     registry.closeSurvey as unknown as Handler
+  );
+
+  // exportSurveyResponses
+  app.get('/surveys/:survey/export',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    zValidator('param', validators.ExportSurveyResponsesParams, validationErrorHandler),
+    zValidator('query', validators.ExportSurveyResponsesQuery, validationErrorHandler),
+    registry.exportSurveyResponses as unknown as Handler
   );
 
   // publishSurvey

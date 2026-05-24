@@ -13345,9 +13345,30 @@ export type CreateSurveyRequest = {
          */
         deadline?: Date;
         /**
-         * Target audience filter
+         * Structured target audience filter (replaces freeform string)
          */
-        targetAudience?: string;
+        targetAudience?: {
+            /**
+             * Membership tiers to target
+             */
+            tiers?: Array<string>;
+            /**
+             * Chapters to target
+             */
+            chapters?: Array<string>;
+            /**
+             * Committees to target
+             */
+            committees?: Array<string>;
+        };
+        /**
+         * Max surveys per member per week before fatigue throttling (default: 2)
+         */
+        fatigueThreshold?: number;
+        /**
+         * Data retention period in days (default: 1095 = 3 years). Responses purged after this period.
+         */
+        retentionDays?: number;
     };
 };
 
@@ -29838,6 +29859,20 @@ export type SessionUpdate = {
 };
 
 /**
+ * Skip logic configuration for conditional question branching
+ */
+export type SkipLogicConfig = {
+    /**
+     * Condition expression (e.g. 'value === yes' or 'value >= 8')
+     */
+    condition: string;
+    /**
+     * Question ID to skip to when condition is met
+     */
+    targetQuestionId: string;
+};
+
+/**
  * Time slot availability status
  */
 export type SlotStatus = 'available' | 'booked' | 'blocked';
@@ -31078,9 +31113,30 @@ export type Survey = {
          */
         deadline?: Date;
         /**
-         * Target audience filter
+         * Structured target audience filter (replaces freeform string)
          */
-        targetAudience?: string;
+        targetAudience?: {
+            /**
+             * Membership tiers to target
+             */
+            tiers?: Array<string>;
+            /**
+             * Chapters to target
+             */
+            chapters?: Array<string>;
+            /**
+             * Committees to target
+             */
+            committees?: Array<string>;
+        };
+        /**
+         * Max surveys per member per week before fatigue throttling (default: 2)
+         */
+        fatigueThreshold?: number;
+        /**
+         * Data retention period in days (default: 1095 = 3 years). Responses purged after this period.
+         */
+        retentionDays?: number;
     };
     /**
      * Pre-computed analytics snapshot
@@ -31247,6 +31303,19 @@ export type SurveyQuestion = {
      * Max character length for text type
      */
     maxLength?: number;
+    /**
+     * Optional skip logic for conditional branching (schema prep — renderer not yet implemented)
+     */
+    skipLogic?: {
+        /**
+         * Condition expression (e.g. 'value === yes' or 'value >= 8')
+         */
+        condition: string;
+        /**
+         * Question ID to skip to when condition is met
+         */
+        targetQuestionId: string;
+    };
 };
 
 /**
@@ -31422,9 +31491,30 @@ export type SurveySettings = {
      */
     deadline?: Date;
     /**
-     * Target audience filter
+     * Structured target audience filter (replaces freeform string)
      */
-    targetAudience?: string;
+    targetAudience?: {
+        /**
+         * Membership tiers to target
+         */
+        tiers?: Array<string>;
+        /**
+         * Chapters to target
+         */
+        chapters?: Array<string>;
+        /**
+         * Committees to target
+         */
+        committees?: Array<string>;
+    };
+    /**
+     * Max surveys per member per week before fatigue throttling (default: 2)
+     */
+    fatigueThreshold?: number;
+    /**
+     * Data retention period in days (default: 1095 = 3 years). Responses purged after this period.
+     */
+    retentionDays?: number;
 };
 
 /**
@@ -31498,9 +31588,30 @@ export type SurveyUpdate = {
          */
         deadline?: Date;
         /**
-         * Target audience filter
+         * Structured target audience filter (replaces freeform string)
          */
-        targetAudience?: string;
+        targetAudience?: {
+            /**
+             * Membership tiers to target
+             */
+            tiers?: Array<string>;
+            /**
+             * Chapters to target
+             */
+            chapters?: Array<string>;
+            /**
+             * Committees to target
+             */
+            committees?: Array<string>;
+        };
+        /**
+         * Max surveys per member per week before fatigue throttling (default: 2)
+         */
+        fatigueThreshold?: number;
+        /**
+         * Data retention period in days (default: 1095 = 3 years). Responses purged after this period.
+         */
+        retentionDays?: number;
     };
     /**
      * Pre-computed analytics snapshot
@@ -31525,6 +31636,24 @@ export type SurveyUpdate = {
             [key: string]: unknown;
         };
     };
+};
+
+/**
+ * Structured target audience filter
+ */
+export type TargetAudienceFilter = {
+    /**
+     * Membership tiers to target
+     */
+    tiers?: Array<string>;
+    /**
+     * Chapters to target
+     */
+    chapters?: Array<string>;
+    /**
+     * Committees to target
+     */
+    committees?: Array<string>;
 };
 
 /**
@@ -32812,9 +32941,30 @@ export type UpdateSurveyRequest = {
          */
         deadline?: Date;
         /**
-         * Target audience filter
+         * Structured target audience filter (replaces freeform string)
          */
-        targetAudience?: string;
+        targetAudience?: {
+            /**
+             * Membership tiers to target
+             */
+            tiers?: Array<string>;
+            /**
+             * Chapters to target
+             */
+            chapters?: Array<string>;
+            /**
+             * Committees to target
+             */
+            committees?: Array<string>;
+        };
+        /**
+         * Max surveys per member per week before fatigue throttling (default: 2)
+         */
+        fatigueThreshold?: number;
+        /**
+         * Data retention period in days (default: 1095 = 3 years). Responses purged after this period.
+         */
+        retentionDays?: number;
     };
 };
 
@@ -50266,6 +50416,41 @@ export type GetSurveyAnalyticsResponses = {
 
 export type GetSurveyAnalyticsResponse = GetSurveyAnalyticsResponses[keyof GetSurveyAnalyticsResponses];
 
+export type CloneSurveyData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}/clone';
+};
+
+export type CloneSurveyErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CloneSurveyError = CloneSurveyErrors[keyof CloneSurveyErrors];
+
+export type CloneSurveyResponses = {
+    /**
+     * Resource created response
+     */
+    201: Survey;
+};
+
+export type CloneSurveyResponse = CloneSurveyResponses[keyof CloneSurveyResponses];
+
 export type CloseSurveyData = {
     body?: never;
     path: {
@@ -50300,6 +50485,46 @@ export type CloseSurveyResponses = {
 };
 
 export type CloseSurveyResponse = CloseSurveyResponses[keyof CloseSurveyResponses];
+
+export type ExportSurveyResponsesData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: {
+        /**
+         * Export format
+         */
+        format?: string;
+    };
+    url: '/surveys/{survey}/export';
+};
+
+export type ExportSurveyResponsesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ExportSurveyResponsesError = ExportSurveyResponsesErrors[keyof ExportSurveyResponsesErrors];
+
+export type ExportSurveyResponsesResponses = {
+    /**
+     * Success response with data
+     */
+    200: string;
+};
+
+export type ExportSurveyResponsesResponse = ExportSurveyResponsesResponses[keyof ExportSurveyResponsesResponses];
 
 export type PublishSurveyData = {
     body?: never;

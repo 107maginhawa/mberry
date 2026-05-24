@@ -415,7 +415,9 @@ import { getSurvey } from '../../handlers/surveys/getSurvey';
 import { updateSurvey } from '../../handlers/surveys/updateSurvey';
 import { deleteSurvey } from '../../handlers/surveys/deleteSurvey';
 import { getSurveyAnalytics } from '../../handlers/surveys/getSurveyAnalytics';
+import { cloneSurvey } from '../../handlers/surveys/cloneSurvey';
 import { closeSurvey } from '../../handlers/surveys/closeSurvey';
+import { exportSurveyResponses } from '../../handlers/surveys/exportSurveyResponses';
 import { publishSurvey } from '../../handlers/surveys/publishSurvey';
 import { submitSurveyResponse } from '../../handlers/surveys/submitSurveyResponse';
 import { listSurveyResponses } from '../../handlers/surveys/listSurveyResponses';
@@ -864,7 +866,9 @@ export const registry = {
   updateSurvey,
   deleteSurvey,
   getSurveyAnalytics,
+  cloneSurvey,
   closeSurvey,
+  exportSurveyResponses,
   publishSurvey,
   submitSurveyResponse,
   listSurveyResponses,

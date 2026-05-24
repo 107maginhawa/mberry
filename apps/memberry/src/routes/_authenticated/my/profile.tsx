@@ -12,7 +12,7 @@ import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { Button, Input, Label, Textarea } from '@monobase/ui'
-import { Shield, Lock, CreditCard, Download, UserCircle } from 'lucide-react'
+import { Shield, Lock, CreditCard, Download, UserCircle, Eye, EyeOff, Globe, Award, ShieldCheck, Plus } from 'lucide-react'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'
 import { TrustBadges, type TrustSignals } from '@/features/profile/components/trust-badges'
@@ -68,6 +68,47 @@ function MyProfilePage() {
       const res = await api.get<{ data: MembershipItem[] }>('/api/persons/me/memberships')
       return res?.data || []
     },
+  })
+
+  // Directory profile for current user (for publish/preview)
+  const { data: directoryProfile, refetch: refetchDirectory } = useQuery({
+    queryKey: ['my-directory-profile'],
+    queryFn: async () => {
+      const res = await api.get<any>('/api/association/member/directory/search?q=&limit=50')
+      const me = (res?.data ?? []).find((p: any) => p.personId === person?.id)
+      return me ?? null
+    },
+    enabled: !!person?.id,
+  })
+
+  const [previewMode, setPreviewMode] = useState(false)
+
+  const publishMutation = useMutation({
+    mutationFn: async (visibility: 'public' | 'memberOnly' | 'hidden') => {
+      if (directoryProfile?.id) {
+        await api.patch(`/api/association/member/directory/profiles/${directoryProfile.id}`, { visibility })
+      } else {
+        await api.post('/api/association/member/directory/profiles', {
+          personId: person?.id,
+          displayName: formatPersonName(person?.firstName || '', person?.lastName, person?.middleName),
+          specialty: person?.specialization || undefined,
+          visibility,
+        })
+      }
+    },
+    onSuccess: () => {
+      refetchDirectory()
+    },
+  })
+
+  // Professional licenses
+  const { data: myLicenses = [] } = useQuery({
+    queryKey: ['my-licenses'],
+    queryFn: async () => {
+      const res = await api.get<{ data: any[] }>(`/api/association/member/licenses?personId=${encodeURIComponent(person?.id || '')}`)
+      return res?.data ?? []
+    },
+    enabled: !!person?.id,
   })
 
   const mutation = useMutation({
@@ -213,6 +254,109 @@ function MyProfilePage() {
               </div>
             ) : (
               <p className="text-sm text-[var(--color-muted)] text-center py-3">No organization memberships yet</p>
+            )}
+          </GlassCard>
+
+          {/* Directory Profile */}
+          <GlassCard className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-h4 flex items-center gap-2">
+                <Globe size={18} /> Directory Profile
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPreviewMode(!previewMode)}
+                className="text-xs"
+              >
+                {previewMode ? <><EyeOff size={14} className="mr-1" /> Exit Preview</> : <><Eye size={14} className="mr-1" /> Preview Public</>}
+              </Button>
+            </div>
+
+            {previewMode ? (
+              <div className="rounded-lg border border-dashed border-[var(--color-border)] p-4 bg-[var(--color-surface)]">
+                <p className="text-xs text-[var(--color-muted)] mb-2">This is how others see your directory profile:</p>
+                <div className="flex items-center gap-3">
+                  <AvatarInitials
+                    name={formatPersonName(p?.firstName || '?', p?.lastName, p?.middleName)}
+                    size="md"
+                    photoUrl={p?.avatar?.url}
+                  />
+                  <div>
+                    <p className="font-semibold">{formatPersonName(p?.firstName || '', p?.lastName, p?.middleName)}</p>
+                    {p?.specialization && <p className="text-xs text-[var(--color-muted)]">{p.specialization}</p>}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[var(--color-muted)]">
+                    Visibility: <span className="font-medium text-[var(--color-text)]">{directoryProfile?.visibility || 'hidden'}</span>
+                  </span>
+                  {(!directoryProfile || directoryProfile.visibility === 'hidden') ? (
+                    <Button
+                      size="sm"
+                      onClick={() => publishMutation.mutate('memberOnly')}
+                      disabled={publishMutation.isPending}
+                    >
+                      {publishMutation.isPending ? 'Publishing...' : 'Publish to Directory'}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => publishMutation.mutate('hidden')}
+                      disabled={publishMutation.isPending}
+                    >
+                      {publishMutation.isPending ? 'Hiding...' : 'Hide from Directory'}
+                    </Button>
+                  )}
+                </div>
+                {directoryProfile?.visibility === 'memberOnly' && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="text-xs p-0"
+                    onClick={() => publishMutation.mutate('public')}
+                    disabled={publishMutation.isPending}
+                  >
+                    Make public (visible without login)
+                  </Button>
+                )}
+              </div>
+            )}
+          </GlassCard>
+
+          {/* Professional Licenses */}
+          <GlassCard className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-h4 flex items-center gap-2">
+                <Award size={18} /> Professional Licenses
+              </h3>
+            </div>
+            {myLicenses.length > 0 ? (
+              <div className="space-y-2">
+                {myLicenses.map((lic: any) => (
+                  <div key={lic.id} className="flex items-center justify-between p-3 rounded-lg bg-[var(--color-surface)]">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{lic.licenseType}</span>
+                        {lic.verifiedAt ? (
+                          <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" />
+                        ) : null}
+                      </div>
+                      <p className="text-xs text-[var(--color-muted)]">{lic.licenseNumber} • {lic.issuingAuthority}</p>
+                    </div>
+                    <StatusBadge status={lic.status} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--color-muted)] text-center py-3">
+                No professional licenses on record.
+                Licenses can be added by your organization's officers.
+              </p>
             )}
           </GlassCard>
 

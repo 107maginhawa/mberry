@@ -8,13 +8,19 @@ export interface DirectoryFilterValues {
   tier: string
 }
 
+interface ChapterOption {
+  id: string
+  name: string
+}
+
 interface DirectoryFiltersProps {
   filters: DirectoryFilterValues
   onChange: (filters: DirectoryFilterValues) => void
   specialties: string[]
+  chapters?: ChapterOption[]
 }
 
-export function DirectoryFilters({ filters, onChange, specialties }: DirectoryFiltersProps) {
+export function DirectoryFilters({ filters, onChange, specialties, chapters = [] }: DirectoryFiltersProps) {
   const update = (key: keyof DirectoryFilterValues, value: string) => {
     onChange({ ...filters, [key]: value === 'all' ? '' : value })
   }
@@ -37,6 +43,25 @@ export function DirectoryFilters({ filters, onChange, specialties }: DirectoryFi
           </SelectContent>
         </Select>
       </div>
+
+      {chapters.length > 0 && (
+        <div>
+          <Label className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide mb-1.5 block">
+            Chapter
+          </Label>
+          <Select value={filters.chapter || 'all'} onValueChange={(v) => update('chapter', v)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="All chapters" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All chapters</SelectItem>
+              {chapters.map((ch) => (
+                <SelectItem key={ch.id} value={ch.id}>{ch.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div>
         <Label className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide mb-1.5 block">

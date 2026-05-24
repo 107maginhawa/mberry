@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { TrustCard } from './trust-card'
 import { DirectoryFilters, type DirectoryFilterValues } from './directory-filters'
+import { api } from '@/lib/api'
 
 interface TrustDirectoryProps {
   orgId: string
@@ -39,6 +40,30 @@ export function TrustDirectory({ orgId, orgSlug }: TrustDirectoryProps) {
 
   const profiles: any[] = data?.data ?? []
 
+  // Fetch chapters for this org
+  const { data: chaptersData } = useQuery({
+    queryKey: ['org-chapters', orgId],
+    queryFn: async () => {
+      const res = await api.get<{ data: Array<{ id: string; chapterId: string; chapterName?: string }> }>(
+        '/api/association/member/chapters',
+        { 'x-org-id': orgId },
+      )
+      return res?.data ?? []
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const chapters = useMemo(() => {
+    if (!chaptersData) return []
+    const seen = new Map<string, string>()
+    chaptersData.forEach((c: any) => {
+      if (c.chapterId && !seen.has(c.chapterId)) {
+        seen.set(c.chapterId, c.chapterName || c.chapterId)
+      }
+    })
+    return Array.from(seen.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name))
+  }, [chaptersData])
+
   // Extract unique specialties from results for filter dropdown
   const specialties = useMemo(() => {
     const set = new Set<string>()
@@ -60,6 +85,7 @@ export function TrustDirectory({ orgId, orgSlug }: TrustDirectoryProps) {
             filters={filters}
             onChange={setFilters}
             specialties={specialties}
+            chapters={chapters}
           />
           {hasActiveFilters && (
             <Button
