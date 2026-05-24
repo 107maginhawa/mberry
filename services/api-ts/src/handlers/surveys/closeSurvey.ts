@@ -40,7 +40,7 @@ export async function closeSurvey(
     }
   }
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
   const repo = new SurveyRepository(db, logger);
 
   const existing = await repo.findById(surveyId);

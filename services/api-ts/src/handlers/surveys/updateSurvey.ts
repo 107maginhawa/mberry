@@ -40,7 +40,7 @@ export async function updateSurvey(
     }
   }
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
   const body = ctx.req.valid('json');
   const repo = new SurveyRepository(db, logger);
 

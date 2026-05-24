@@ -11,7 +11,7 @@ export async function getCpdConfig(ctx: Context): Promise<Response> {
   if (denied) return denied;
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
-  const organizationId = ctx.req.param('organizationId');
+  const organizationId = ctx.req.param('organizationId')!;
   const db = ctx.get('database') as DatabaseInstance;
   const existing = await db.select().from(orgCpdConfig).where(eq(orgCpdConfig.organizationId, organizationId)).limit(1);
   if (existing.length > 0) return ctx.json({ data: existing[0] });

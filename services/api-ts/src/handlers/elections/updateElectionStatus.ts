@@ -23,7 +23,7 @@ export async function updateElectionStatus(ctx: Context): Promise<Response> {
   if (denied) return denied;
 
   const db = ctx.get('database');
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const body = await ctx.req.json();
   const repo = new ElectionsRepository(db);
 

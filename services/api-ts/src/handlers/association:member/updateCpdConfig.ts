@@ -11,7 +11,7 @@ export async function updateCpdConfig(ctx: Context): Promise<Response> {
   if (denied) return denied;
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
-  const organizationId = ctx.req.param('organizationId');
+  const organizationId = ctx.req.param('organizationId')!;
   const body = await ctx.req.json();
   const db = ctx.get('database') as DatabaseInstance;
   const errors: string[] = [];

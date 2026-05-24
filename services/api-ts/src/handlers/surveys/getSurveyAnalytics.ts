@@ -41,7 +41,7 @@ export async function getSurveyAnalytics(
     }
   }
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
 
   const surveyRepo = new SurveyRepository(db, logger);
   const survey = await surveyRepo.findById(surveyId);

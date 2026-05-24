@@ -33,7 +33,7 @@ export async function submitSurveyResponse(
   const logger = ctx.get('logger');
   const organizationId = ctx.get('organizationId') as string;
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
   const body = ctx.req.valid('json');
 
   const surveyRepo = new SurveyRepository(db, logger);

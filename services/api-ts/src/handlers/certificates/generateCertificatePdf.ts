@@ -24,7 +24,7 @@ export async function generateCertificatePdf(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const certId = ctx.req.param('id');
+  const certId = ctx.req.param('id')!;
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new CertificatesRepository(db);
 

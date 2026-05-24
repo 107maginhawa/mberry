@@ -58,7 +58,7 @@ export async function deleteSavedSegment(ctx: Context): Promise<Response> {
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const organizationId = ctx.req.query('organizationId');
   if (!organizationId) {
     return ctx.json({ error: 'organizationId query parameter is required' }, 400);

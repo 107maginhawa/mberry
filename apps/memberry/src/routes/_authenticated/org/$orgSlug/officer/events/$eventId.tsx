@@ -222,7 +222,7 @@ function EventDetail() {
             ]}
             actions={
               <div className="flex items-center gap-3">
-                <StatusBadge status={event.status} />
+                <StatusBadge status={event.status as any} />
                 <Button
                   variant="outline"
                   onClick={() => {

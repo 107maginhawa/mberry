@@ -7,8 +7,8 @@ import type { Session } from '@/types/auth';
 export async function enroll(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const orgId = ctx.req.param('organizationId');
-  const trainingId = ctx.req.param('id');
+  const orgId = ctx.req.param('organizationId')!;
+  const trainingId = ctx.req.param('id')!;
   const repo = new TrainingRepository(db);
 
   const training = await repo.getByOrg(trainingId, orgId);

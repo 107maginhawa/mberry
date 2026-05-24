@@ -9,8 +9,8 @@ import { OrganizationRepository, AssociationRepository } from '../platformadmin/
 
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const trainingId = ctx.req.param('id');
-  const orgId = ctx.req.param('organizationId');
+  const trainingId = ctx.req.param('id')!;
+  const orgId = ctx.req.param('organizationId')!;
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 

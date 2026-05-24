@@ -28,7 +28,7 @@ export async function dismissSurveyResponse(
   const logger = ctx.get('logger');
   const organizationId = ctx.get('organizationId') as string;
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
 
   const surveyRepo = new SurveyRepository(db, logger);
   const responseRepo = new SurveyResponseRepository(db, logger);

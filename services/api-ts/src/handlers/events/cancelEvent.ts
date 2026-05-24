@@ -7,7 +7,7 @@ import type { Session } from '@/types/auth';
 export async function cancelEvent(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const repo = new EventsRepository(db);
   const existing = await repo.get(id);
   if (!existing) throw new NotFoundError('Event not found');

@@ -43,7 +43,7 @@ export async function listSurveyResponses(
     }
   }
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
   const query = ctx.req.valid('query');
 
   // Verify survey exists and belongs to org

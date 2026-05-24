@@ -40,7 +40,7 @@ export async function deleteSurvey(
     }
   }
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
   const repo = new SurveyRepository(db, logger);
 
   // Verify survey exists and belongs to org

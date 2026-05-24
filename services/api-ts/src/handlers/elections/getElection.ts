@@ -6,7 +6,7 @@ import { persons } from '../person/repos/person.schema';
 
 export async function getElection(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const repo = new ElectionsRepository(db);
   const election = await repo.get(id);
   if (!election) throw new NotFoundError('Election not found');

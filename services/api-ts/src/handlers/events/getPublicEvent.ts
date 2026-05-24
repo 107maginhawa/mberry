@@ -12,7 +12,7 @@ import { EventsRepository } from './repos/events.repo';
  */
 export async function getPublicEvent(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const slug = ctx.req.param('slug');
+  const slug = ctx.req.param('slug')!;
   const repo = new EventsRepository(db);
   const event = await repo.findBySlug(slug);
 

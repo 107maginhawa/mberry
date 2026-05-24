@@ -27,7 +27,7 @@ export async function getSurvey(
   const logger = ctx.get('logger');
   const organizationId = ctx.get('organizationId') as string;
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
 
   const repo = new SurveyRepository(db, logger);
   const survey = await repo.findById(surveyId);

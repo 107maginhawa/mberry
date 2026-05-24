@@ -7,7 +7,7 @@ export async function listAccreditedProviders(ctx: Context): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
   ctx.set('organizationId', orgId);
 
   const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);

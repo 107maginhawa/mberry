@@ -39,7 +39,7 @@ export async function cloneSurvey(
     }
   }
 
-  const surveyId = ctx.req.param('survey');
+  const surveyId = ctx.req.param('survey')!;
 
   const repo = new SurveyRepository(db, logger);
   const survey = await repo.findById(surveyId);

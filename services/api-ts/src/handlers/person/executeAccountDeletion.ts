@@ -25,7 +25,7 @@ import { executeCascadeDeletion } from './accountDeletionCascade';
 export async function executeAccountDeletion(
   ctx: ValidatedContext<never, never, never>
 ): Promise<Response> {
-  const personId = ctx.req.param('personId');
+  const personId = ctx.req.param('personId')!;
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new PersonRepository(db, logger);

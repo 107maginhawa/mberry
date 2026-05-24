@@ -4,7 +4,7 @@ import { CertificatesRepository } from './repos/certificates.repo';
 
 export async function getCertificate(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const user = ctx.get('user');
   const repo = new CertificatesRepository(db);
   const cert = await repo.get(id);

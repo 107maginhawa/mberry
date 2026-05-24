@@ -5,7 +5,7 @@ import type { Session } from '@/types/auth';
 export async function updateJobApplication(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const applicationId = ctx.req.param('applicationId');
+  const applicationId = ctx.req.param('applicationId')!;
   const body = await ctx.req.json();
   const repo = new JobApplicationRepository(db);
 

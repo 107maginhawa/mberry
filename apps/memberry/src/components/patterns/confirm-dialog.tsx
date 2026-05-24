@@ -22,6 +22,7 @@ interface ConfirmDialogProps {
   onConfirm: () => void
   variant?: "destructive" | "high-consequence" | "irreversible"
   confirmText?: string
+  children?: ReactNode
 }
 
 export function ConfirmDialog({
@@ -33,6 +34,7 @@ export function ConfirmDialog({
   onConfirm,
   variant = "destructive",
   confirmText,
+  children,
 }: ConfirmDialogProps) {
   const [typedText, setTypedText] = useState("")
   const canConfirm = variant === "irreversible" ? typedText === confirmText : true
@@ -46,6 +48,8 @@ export function ConfirmDialog({
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        {children}
 
         {variant === "irreversible" && confirmText && (
           <div className="my-2">

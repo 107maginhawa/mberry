@@ -14,7 +14,7 @@ const castVoteSchema = z.object({
 export async function castVote(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const electionId = ctx.req.param('id');
+  const electionId = ctx.req.param('id')!;
   const raw = await ctx.req.json();
   const parsed = castVoteSchema.safeParse(raw);
   if (!parsed.success) {

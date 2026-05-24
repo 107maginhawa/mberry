@@ -6,7 +6,7 @@ import type { Session } from '@/types/auth';
 export async function createCommittee(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
   const body = await ctx.req.json();
 
   if (!body.name) {

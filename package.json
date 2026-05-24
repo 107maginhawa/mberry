@@ -28,9 +28,9 @@
     "lint": "bun run --filter '*' lint"
   },
   "lint-staged": {
-    "services/api-ts/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config services/api-ts/eslint.config.js"],
-    "apps/memberry/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/memberry/eslint.config.js"],
-    "apps/admin/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/admin/eslint.config.js"]
+    "services/api-ts/**/*.{ts,tsx}": ["services/api-ts/node_modules/.bin/eslint --fix --quiet --config services/api-ts/eslint.config.js"],
+    "apps/memberry/**/*.{ts,tsx}": ["apps/memberry/node_modules/.bin/eslint --fix --quiet --config apps/memberry/eslint.config.js"],
+    "apps/admin/**/*.{ts,tsx}": ["apps/admin/node_modules/.bin/eslint --fix --quiet --config apps/admin/eslint.config.js"]
   },
   "engines": {
     "node": ">=18.0.0",

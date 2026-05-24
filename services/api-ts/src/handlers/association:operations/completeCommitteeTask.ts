@@ -7,7 +7,7 @@ import type { Session } from '@/types/auth';
 export async function completeCommitteeTask(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const taskRepo = new CommitteeTaskRepository(db);
 
   const existing = await taskRepo.get(id);

@@ -7,7 +7,7 @@ import type { Session } from '@/types/auth';
 export async function registerForEvent(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const eventId = ctx.req.param('id');
+  const eventId = ctx.req.param('id')!;
   const repo = new EventsRepository(db);
 
   const event = await repo.get(eventId);

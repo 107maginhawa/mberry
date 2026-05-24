@@ -3,7 +3,7 @@ import { SurveyRepository } from './repos/survey.repo';
 
 export async function listSurveys(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
   const query = ctx.req.query();
 
   const repo = new SurveyRepository(db);

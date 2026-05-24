@@ -7,7 +7,7 @@ import type { Session } from '@/types/auth';
 export async function getEvent(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const repo = new EventsRepository(db);
   const event = await repo.get(id);
   if (!event) throw new NotFoundError('Event not found');

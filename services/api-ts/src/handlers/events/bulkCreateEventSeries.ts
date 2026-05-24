@@ -9,7 +9,7 @@ const MAX_OCCURRENCES = 52;
 export async function bulkCreateEventSeries(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
   const body = await ctx.req.json();
   const repo = new EventsRepository(db);
 
@@ -65,7 +65,6 @@ export async function bulkCreateEventSeries(ctx: Context): Promise<Response> {
       coverImageUrl: template.coverImageUrl,
       status: 'draft',
       visibility: template.visibility,
-      parentEventId: body.templateEventId,
       createdBy: session.user.id,
       updatedBy: session.user.id,
     });

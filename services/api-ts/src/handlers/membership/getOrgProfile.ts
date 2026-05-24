@@ -11,7 +11,7 @@ import { OrganizationRepository } from '../platformadmin/repos/platform-admin.re
 export async function getOrgProfile(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const logger = ctx.get('logger');
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
 
   const repo = new OrganizationRepository(db, logger);
   const org = await repo.findById(orgId);

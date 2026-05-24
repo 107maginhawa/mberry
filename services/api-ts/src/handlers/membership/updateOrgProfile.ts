@@ -15,7 +15,7 @@ import { POSITION_TITLES } from '@/utils/position-titles';
 export async function updateOrgProfile(ctx: BaseContext): Promise<Response> {
   const db = ctx.get('database');
   const logger = ctx.get('logger');
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
 
   // Set orgId for requirePosition (officerAuthMiddleware doesn't set ctx orgId)
   ctx.set('organizationId', orgId);

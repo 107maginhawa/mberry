@@ -10,7 +10,7 @@ export async function getComplianceReport(ctx: Context): Promise<Response> {
   if (denied) return denied;
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
-  const organizationId = ctx.req.param('organizationId');
+  const organizationId = ctx.req.param('organizationId')!;
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new ComplianceRepository(db);
   const status = ctx.req.query('status');

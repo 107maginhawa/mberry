@@ -8,13 +8,13 @@ export async function updateAccreditedProvider(ctx: Context): Promise<Response> 
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
   ctx.set('organizationId', orgId);
 
   const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
-  const providerId = ctx.req.param('providerId');
+  const providerId = ctx.req.param('providerId')!;
   const db = ctx.get('database');
   const logger = ctx.get('logger');
   const body = await ctx.req.json();
