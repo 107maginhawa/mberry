@@ -65,32 +65,8 @@ import { directoryProfiles } from './handlers/association:member/repos/directory
 import { chapterAffiliations } from './handlers/association:member/repos/chapters.schema';
 import { notificationPreferences } from './handlers/person/repos/notification-preferences.schema';
 import { personPrivacySettings } from './handlers/person/repos/privacy-settings.schema';
-
-const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://postgres@localhost:5432/monobase';
-const API_URL = process.env['API_URL'] || 'http://localhost:7213';
-const PASSWORD = 'TestPass123!';
-
-// ═══════════════════════════════════════════════════════════════
-// Relative date helpers — all seed dates computed from NOW
-// so data never ages out
-// ═══════════════════════════════════════════════════════════════
-
-const NOW = new Date();
-const daysAgo = (d: number) => new Date(NOW.getTime() - d * 86400000);
-const daysFromNow = (d: number) => new Date(NOW.getTime() + d * 86400000);
-const dateStr = (d: Date) => d.toISOString().split('T')[0]!;
-
-/** Active member: dues expire 7 months from now */
-const ACTIVE_EXPIRY = dateStr(daysFromNow(210));
-/** Grace member: dues expired N days ago (within 30-day grace) */
-const graceExpiry = (daysBack: number) => dateStr(daysAgo(daysBack));
-/** Lapsed member: dues expired N days ago (past 30-day grace) */
-const lapsedExpiry = (daysBack: number) => dateStr(daysAgo(daysBack));
-/** Officer term: started 10 months ago, ends 2 months from now */
-const TERM_START = daysAgo(300);
-const TERM_END = daysFromNow(65);
-/** Membership start: ~1 year ago */
-const MEMBERSHIP_START = dateStr(daysAgo(365));
+import { NOW, daysAgo, daysFromNow, dateStr, ACTIVE_EXPIRY, graceExpiry, lapsedExpiry, TERM_START, TERM_END, MEMBERSHIP_START, DATABASE_URL, API_URL, PASSWORD, extractCookie, verifyEmail } from './seed/helpers';
+import type { MemberStatus } from './seed/types';
 
 // ═══════════════════════════════════════════════════════════════
 // SeedClient — fetch wrapper with auth cookie management
@@ -218,16 +194,6 @@ class SeedClient {
   }
 }
 
-function extractCookie(res: Response): string {
-  const cookies: string[] = [];
-  const setCookies = (res.headers as any).getSetCookie?.() ?? [res.headers.get('set-cookie') || ''];
-  for (const sc of setCookies) {
-    const match = sc.match(/^([^=]+=[^;]+)/);
-    if (match) cookies.push(match[1]!);
-  }
-  return cookies.join('; ');
-}
-
 // ═══════════════════════════════════════════════════════════════
 // Filipino persona data
 // ═══════════════════════════════════════════════════════════════
@@ -240,7 +206,6 @@ const OFFICERS = [
   { email: 'membership@memberry.ph', firstName: 'Sofia', lastName: 'Garcia', position: 'Membership Chair', spec: 'General Dentistry', license: '0056789' },
 ];
 
-type MemberStatus = 'active' | 'grace' | 'lapsed' | 'suspended' | 'removed' | 'pendingPayment' | 'expired' | 'resigned' | 'deceased' | 'expelled';
 
 const MEMBERS: { email: string; firstName: string; lastName: string; spec: string; license: string; status: MemberStatus }[] = [
   // Legacy test user (referenced by 6+ test files — DO NOT REMOVE)
@@ -372,10 +337,6 @@ async function bootstrapDB(db: ReturnType<typeof drizzle>) {
   }
 
   return { assocId: assoc!.id, orgId: org1!.id, org2Id: org2!.id, regularTierId: regularTier.id, associateTierId: associateTier.id, org2RegularTierId: org2RegularTier.id };
-}
-
-async function verifyEmail(db: ReturnType<typeof drizzle>, email: string) {
-  await db.update(userTable).set({ emailVerified: true } as any).where(eq(userTable.email, email));
 }
 
 // ═══════════════════════════════════════════════════════════════
