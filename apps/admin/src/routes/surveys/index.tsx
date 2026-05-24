@@ -18,7 +18,7 @@ import {
 } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
 
-export const Route = createFileRoute('/surveys/')({
+export const Route = createFileRoute('/surveys/' as any)({
   component: () => (
     <RequireRole allowed={['super', 'support', 'analyst']}>
       <SurveysPage />
