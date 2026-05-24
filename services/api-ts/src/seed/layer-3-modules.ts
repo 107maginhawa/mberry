@@ -15,10 +15,10 @@ export async function seedEvents(db: ReturnType<typeof drizzle>, orgId: string, 
   console.log('\n  Events...');
 
   const eventData = [
-    { title: 'PDA Annual Dental Convention 2025', eventType: 'generalAssembly', description: 'Annual gathering of dental professionals.', location: 'SMX Convention Center, Pasay City', startDate: new Date('2025-03-15T08:00:00Z'), endDate: new Date('2025-03-16T17:00:00Z'), capacity: 200, registrationFee: '2500', status: 'completed', visibility: 'internal' },
-    { title: 'Monthly General Assembly - May 2026', eventType: 'generalAssembly', description: 'Regular monthly meeting with updates.', location: 'PDA Metro Manila Office, Makati City', startDate: new Date('2026-05-09T14:00:00Z'), endDate: new Date('2026-05-09T17:00:00Z'), capacity: 100, registrationFee: '0', status: 'published', visibility: 'internal' },
-    { title: 'Year-End Gala Dinner', eventType: 'fellowship', description: 'Annual year-end celebration and awards night.', location: 'Manila Hotel, Rizal Ballroom', startDate: new Date('2026-08-01T18:00:00Z'), endDate: new Date('2026-08-01T23:00:00Z'), capacity: 150, registrationFee: '3500', status: 'published', visibility: 'internal' },
-    { title: 'Community Dental Mission - Tondo', eventType: 'medicalMission', description: 'Free dental services for underserved communities.', location: 'Tondo Community Center, Manila', startDate: new Date('2026-09-20T07:00:00Z'), endDate: new Date('2026-09-20T16:00:00Z'), capacity: 50, registrationFee: '0', status: 'draft', visibility: 'internal' },
+    { title: 'PDA Annual Dental Convention 2025', eventType: 'generalAssembly' as const, description: 'Annual gathering of dental professionals.', location: 'SMX Convention Center, Pasay City', startDate: new Date('2025-03-15T08:00:00Z'), endDate: new Date('2025-03-16T17:00:00Z'), capacity: 200, registrationFee: 2500, status: 'completed' as const, visibility: 'internal' as const },
+    { title: 'Monthly General Assembly - May 2026', eventType: 'generalAssembly' as const, description: 'Regular monthly meeting with updates.', location: 'PDA Metro Manila Office, Makati City', startDate: new Date('2026-05-09T14:00:00Z'), endDate: new Date('2026-05-09T17:00:00Z'), capacity: 100, registrationFee: 0, status: 'published' as const, visibility: 'internal' as const },
+    { title: 'Year-End Gala Dinner', eventType: 'fellowship' as const, description: 'Annual year-end celebration and awards night.', location: 'Manila Hotel, Rizal Ballroom', startDate: new Date('2026-08-01T18:00:00Z'), endDate: new Date('2026-08-01T23:00:00Z'), capacity: 150, registrationFee: 3500, status: 'published' as const, visibility: 'internal' as const },
+    { title: 'Community Dental Mission - Tondo', eventType: 'medicalMission' as const, description: 'Free dental services for underserved communities.', location: 'Tondo Community Center, Manila', startDate: new Date('2026-09-20T07:00:00Z'), endDate: new Date('2026-09-20T16:00:00Z'), capacity: 50, registrationFee: 0, status: 'draft' as const, visibility: 'internal' as const },
   ];
 
   for (const e of eventData) {
@@ -28,7 +28,7 @@ export async function seedEvents(db: ReturnType<typeof drizzle>, orgId: string, 
         organizationId: orgId, ...e,
         creditBearing: false, creditAmount: 0,
         createdBy: presidentId, updatedBy: presidentId,
-      } as any);
+      });
     }
     console.log(`    ✓ ${e.status}: ${e.title}`);
   }
@@ -38,9 +38,9 @@ export async function seedTraining(db: ReturnType<typeof drizzle>, orgId: string
   console.log('  Training...');
 
   const trainingData = [
-    { title: 'Advanced Implant Placement Workshop', description: 'Hands-on workshop covering modern implant techniques.', instructorName: 'Dr. Ramon Aquino', location: 'PDA Training Center, Quezon City', startDate: new Date('2025-02-01T08:00:00Z'), endDate: new Date('2025-02-02T17:00:00Z'), capacity: 30, registrationFee: '5000', creditBearing: true, creditAmount: 16, status: 'completed' },
-    { title: 'Dental Photography Seminar', description: 'Clinical photography techniques for documentation.', instructorName: 'Dr. Elena Villanueva', location: 'Makati Medical Center', startDate: new Date('2026-04-20T09:00:00Z'), endDate: new Date('2026-04-20T17:00:00Z'), capacity: 25, registrationFee: '3000', creditBearing: true, creditAmount: 8, status: 'published' },
-    { title: 'Infection Control & Sterilization Update', description: 'Updated protocols for infection prevention.', instructorName: 'Dr. Patricia Reyes', location: 'PDA Metro Manila Office', startDate: new Date('2026-07-15T09:00:00Z'), endDate: new Date('2026-07-15T16:00:00Z'), capacity: 40, registrationFee: '2000', creditBearing: true, creditAmount: 6, status: 'published' },
+    { title: 'Advanced Implant Placement Workshop', description: 'Hands-on workshop covering modern implant techniques.', instructorName: 'Dr. Ramon Aquino', location: 'PDA Training Center, Quezon City', startDate: new Date('2025-02-01T08:00:00Z'), endDate: new Date('2025-02-02T17:00:00Z'), capacity: 30, registrationFee: 5000, creditBearing: true, creditAmount: 16, status: 'completed' as const },
+    { title: 'Dental Photography Seminar', description: 'Clinical photography techniques for documentation.', instructorName: 'Dr. Elena Villanueva', location: 'Makati Medical Center', startDate: new Date('2026-04-20T09:00:00Z'), endDate: new Date('2026-04-20T17:00:00Z'), capacity: 25, registrationFee: 3000, creditBearing: true, creditAmount: 8, status: 'published' as const },
+    { title: 'Infection Control & Sterilization Update', description: 'Updated protocols for infection prevention.', instructorName: 'Dr. Patricia Reyes', location: 'PDA Metro Manila Office', startDate: new Date('2026-07-15T09:00:00Z'), endDate: new Date('2026-07-15T16:00:00Z'), capacity: 40, registrationFee: 2000, creditBearing: true, creditAmount: 6, status: 'published' as const },
   ];
 
   for (const t of trainingData) {
@@ -49,7 +49,7 @@ export async function seedTraining(db: ReturnType<typeof drizzle>, orgId: string
       await db.insert(trainings).values({
         organizationId: orgId, ...t,
         createdBy: presidentId, updatedBy: presidentId,
-      } as any);
+      });
     }
     console.log(`    ✓ ${t.status}: ${t.title}`);
   }
@@ -72,7 +72,8 @@ export async function seedElections(db: ReturnType<typeof drizzle>, orgId: strin
 
   for (const e of electionData) {
     const existing = await db.execute(sql`SELECT id FROM election WHERE title = ${e.title} LIMIT 1`);
-    if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+    const rows = (existing as unknown as { rows: Array<{ id: string }> }).rows ?? [];
+    if (rows.length === 0) {
       await db.execute(sql`
         INSERT INTO election (organization_id, title, type, status, voting_mode,
           nominations_open_at, nominations_close_at, voting_open_at, voting_close_at,
@@ -99,7 +100,8 @@ export async function seedAnnouncements(db: ReturnType<typeof drizzle>, orgId: s
 
   for (const a of annData) {
     const existing = await db.execute(sql`SELECT id FROM announcement WHERE title = ${a.title} LIMIT 1`);
-    if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+    const annRows = (existing as unknown as { rows: Array<{ id: string }> }).rows ?? [];
+    if (annRows.length === 0) {
       await db.execute(sql`
         INSERT INTO announcement (organization_id, author_id, title, content, audience_type, visibility, status, published_at)
         VALUES (${orgId}, ${presidentId}, ${a.title}, ${a.content}, ${a.audienceType}, ${a.visibility}::announcement_visibility, ${a.status}::announcement_status, ${a.publishedAt})
@@ -181,7 +183,7 @@ export async function seedRelationalData(
         await db.insert(eventRegistrations).values({
           organizationId: orgId, eventId: evt.id, personId,
           status: 'confirmed', registeredAt: new Date(),
-        } as any);
+        });
       }
     }
     console.log(`    ✓ Event registrations: ${registrants.length} people × ${publishedEvents.length} events`);
@@ -196,10 +198,10 @@ export async function seedRelationalData(
         const isCompleted = trn.status === 'completed';
         await db.insert(trainingEnrollments).values({
           organizationId: orgId, trainingId: trn.id, personId,
-          status: isCompleted ? 'completed' : 'enrolled',
+          status: isCompleted ? 'completed' as const : 'enrolled' as const,
           enrolledAt: new Date(),
           completedAt: isCompleted ? new Date() : null,
-        } as any);
+        });
       }
     }
     console.log(`    ✓ Training enrollments: ${enrollees.length} people × ${allTrainings.length} trainings`);
@@ -207,7 +209,8 @@ export async function seedRelationalData(
 
   // Dues payments — 10 payments for first 10 active members
   const existingPayments = await db.execute(sql`SELECT count(*) as c FROM dues_payment`);
-  const paymentCount = (existingPayments as any).rows?.[0]?.c ?? (existingPayments as any)[0]?.c ?? 0;
+  const paymentRows = (existingPayments as unknown as { rows: Array<{ c: string }> }).rows ?? [];
+  const paymentCount = paymentRows[0]?.c ?? 0;
   if (Number(paymentCount) === 0) {
     const paymentMembers = memberClients.slice(0, 10);
     for (let i = 0; i < paymentMembers.length; i++) {
@@ -282,7 +285,7 @@ export async function seedProfilePhotos(db: ReturnType<typeof drizzle>, allPerso
       const url = `https://randomuser.me/api/portraits/${folder}/${idx}.jpg`;
 
       await db.update(persons)
-        .set({ avatar: { url } } as any)
+        .set({ avatar: { url } })
         .where(eq(persons.id, personId));
     }
 
