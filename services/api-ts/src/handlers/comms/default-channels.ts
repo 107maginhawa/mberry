@@ -8,6 +8,7 @@
  * Called from association:member handler after chapter creation.
  */
 
+import { eq, and } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { chatRooms, chatRoomMembers } from './repos/comms.schema';
 
@@ -35,13 +36,16 @@ export async function createDefaultChannels(
 
   for (const channel of DEFAULT_CHANNELS) {
     // Check if already exists (idempotent)
-    const existing = await db.query.chatRooms.findFirst({
-      where: (rooms, { and, eq }) =>
+    const [existing] = await db
+      .select({ id: chatRooms.id })
+      .from(chatRooms)
+      .where(
         and(
-          eq(rooms.organizationId, organizationId),
-          eq(rooms.context, channel.context),
+          eq(chatRooms.organizationId, organizationId),
+          eq(chatRooms.context, channel.context),
         ),
-    });
+      )
+      .limit(1);
 
     if (existing) {
       createdIds.push(existing.id);

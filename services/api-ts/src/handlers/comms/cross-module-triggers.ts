@@ -40,7 +40,7 @@ export interface TrainingScheduledContext {
 
 export interface CertificateIssuedContext {
   organizationId: string;
-  recipientId: string;
+  recipient: string;
   certificateId: string;
   courseName: string;
   downloadUrl?: string;
@@ -74,7 +74,7 @@ export interface PlatformBroadcastContext {
   title: string;
   content: string;
   targetOrgIds?: string[]; // empty = all orgs
-  channels: ('push' | 'email' | 'in_app')[];
+  channels: ('push' | 'email' | 'in-app')[];
   sentBy: string;
 }
 
@@ -98,12 +98,12 @@ export class CrossModuleTriggers {
       // 1. Create in-app notification for org members
       await this.notifService.createNotification({
         organizationId: ctx.organizationId,
-        recipientId: '*', // broadcast to org
+        recipient: '*', // broadcast to org
         type: 'event.created',
         title: `New Event: ${ctx.eventName}`,
         body: `${ctx.eventName} on ${ctx.eventDate}${ctx.venue ? ` at ${ctx.venue}` : ''}`,
         data: { eventId: ctx.eventId },
-        channel: 'in_app',
+        channel: 'in-app',
       });
 
       // 2. Post to chapter channel if available
@@ -126,7 +126,7 @@ export class CrossModuleTriggers {
       for (const memberId of ctx.eligibleMemberIds) {
         await this.notifService.createNotification({
           organizationId: ctx.organizationId,
-          recipientId: memberId,
+          recipient: memberId,
           type: 'training.scheduled',
           title: `Training: ${ctx.sessionName}`,
           body: `${ctx.credits} CPD credits available. Scheduled for ${ctx.scheduledDate}.`,
@@ -148,12 +148,12 @@ export class CrossModuleTriggers {
 
       await this.notifService.createNotification({
         organizationId: ctx.organizationId,
-        recipientId: ctx.recipientId,
+        recipient: ctx.recipientId,
         type: 'certificate.issued',
         title: `Certificate Ready: ${ctx.courseName}`,
         body: `Your certificate for ${ctx.courseName} is ready for download.`,
         data: { certificateId: ctx.certificateId, downloadUrl: ctx.downloadUrl },
-        channel: 'in_app',
+        channel: 'in-app',
       });
     } catch (err) {
       this.logger.error({ err, certificateId: ctx.certificateId }, 'Failed cert→comms trigger');
@@ -167,15 +167,15 @@ export class CrossModuleTriggers {
     try {
       this.logger.info({ invoiceId: ctx.invoiceId, daysOverdue: ctx.daysOverdue }, 'Cross-module trigger: dues reminder');
 
-      const channels: ('push' | 'email' | 'in_app')[] =
-        ctx.daysOverdue >= 30 ? ['email', 'push', 'in_app'] :
-        ctx.daysOverdue >= 7 ? ['email', 'in_app'] :
-        ['in_app'];
+      const channels: ('push' | 'email' | 'in-app')[] =
+        ctx.daysOverdue >= 30 ? ['email', 'push', 'in-app'] :
+        ctx.daysOverdue >= 7 ? ['email', 'in-app'] :
+        ['in-app'];
 
       for (const channel of channels) {
         await this.notifService.createNotification({
           organizationId: ctx.organizationId,
-          recipientId: ctx.personId,
+          recipient: ctx.personId,
           type: 'dues.reminder',
           title: 'Dues Payment Reminder',
           body: `Your dues of ₱${ctx.amountDue.toLocaleString()} were due on ${ctx.dueDate}. Please settle to maintain good standing.`,
@@ -198,18 +198,18 @@ export class CrossModuleTriggers {
       // Welcome notification
       await this.notifService.createNotification({
         organizationId: ctx.organizationId,
-        recipientId: ctx.personId,
+        recipient: ctx.personId,
         type: 'membership.welcome',
         title: 'Welcome to the Association!',
         body: `Congratulations ${ctx.personName}! Your membership has been approved.${ctx.chapterName ? ` You've been added to ${ctx.chapterName}.` : ''}`,
         data: { chapterId: ctx.chapterId },
-        channel: 'in_app',
+        channel: 'in-app',
       });
 
       // Email welcome
       await this.notifService.createNotification({
         organizationId: ctx.organizationId,
-        recipientId: ctx.personId,
+        recipient: ctx.personId,
         type: 'membership.welcome',
         title: 'Welcome to the Association!',
         body: `Welcome ${ctx.personName}! Your membership is now active.`,
@@ -233,12 +233,12 @@ export class CrossModuleTriggers {
       for (const adminId of ctx.adminPersonIds) {
         await this.notifService.createNotification({
           organizationId: ctx.organizationId,
-          recipientId: adminId,
+          recipient: adminId,
           type: 'chapter.created',
           title: `Chapter Created: ${ctx.chapterName}`,
           body: `Default channels (#general, #announcements) have been created for ${ctx.chapterName}.`,
           data: { chapterId: ctx.chapterId },
-          channel: 'in_app',
+          channel: 'in-app',
         });
       }
     } catch (err) {
