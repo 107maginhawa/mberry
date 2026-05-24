@@ -9,6 +9,8 @@ jobs:
   lint-typecheck:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      TZ: UTC
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -39,6 +41,8 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      TZ: UTC
     services:
       postgres:
         image: postgres:16-alpine

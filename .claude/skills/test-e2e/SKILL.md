@@ -20,13 +20,13 @@ For **API contract / wire-shape verification**, use `/test-contract` instead —
 ### Run E2E Tests
 
 ```bash
-cd apps/account && bun run test:e2e
+cd apps/memberry && bun run test:e2e
 ```
 
 ### Run in UI Mode (Interactive)
 
 ```bash
-cd apps/account && bun run test:e2e:ui
+cd apps/memberry && bun run test:e2e:ui
 ```
 
 ## Test Conventions

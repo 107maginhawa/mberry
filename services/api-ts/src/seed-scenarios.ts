@@ -739,8 +739,8 @@ async function seedElections(db: ReturnType<typeof drizzle>, orgId: string, pres
           nominations_open_at, nominations_close_at, voting_open_at, voting_close_at,
           positions, created_by, updated_by)
         VALUES (${orgId}, ${e.title}, 'officer', ${e.status}, 'online',
-          ${e.nominationsOpenAt}::timestamp, ${e.nominationsCloseAt}::timestamp,
-          ${e.votingOpenAt}::timestamp, ${e.votingCloseAt}::timestamp,
+          ${e.nominationsOpenAt}::timestamptz, ${e.nominationsCloseAt}::timestamptz,
+          ${e.votingOpenAt}::timestamptz, ${e.votingCloseAt}::timestamptz,
           '["President","Treasurer","Secretary"]'::jsonb, ${presidentId}, ${presidentId})
       `);
     }
@@ -752,7 +752,7 @@ async function seedAnnouncements(db: ReturnType<typeof drizzle>, orgId: string, 
   console.log('  Announcements...');
 
   const annData = [
-    { title: 'May Dues Reminder - Please Pay Before June 1', content: '<p>Dear members, annual dues for 2025 are due. Please settle your accounts before June 1.</p>', audienceType: 'all', visibility: 'internal', status: 'sent', publishedAt: new Date('2026-05-01') },
+    { title: 'May Dues Reminder - Please Pay Before June 1', content: '<p>Dear members, annual dues for 2025 are due. Please settle your accounts before June 1.</p>', audienceType: 'all', visibility: 'internal', status: 'sent', publishedAt: new Date('2026-05-01T00:00:00Z') },
     { title: 'Upcoming Board Meeting - June 15', content: '<p>Board meeting on June 15 at 2:00 PM. Agenda: budget review, election prep, membership drive.</p>', audienceType: 'officers', visibility: 'internal', status: 'draft', publishedAt: null },
     { title: 'Annual Convention Registration Open', content: '<p>Early bird registration for the 2026 PDA Annual Convention is now open.</p>', audienceType: 'all', visibility: 'internal', status: 'scheduled', publishedAt: daysFromNow(7) },
     { title: 'April Newsletter - Community Dental Mission Recap', content: '<p>Thank you to all volunteers who participated in the Tondo dental mission.</p>', audienceType: 'all', visibility: 'internal', status: 'archived', publishedAt: daysAgo(45) },

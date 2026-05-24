@@ -7,20 +7,17 @@ faster execution than Node.js.
 
 ## Overview
 
-Memberry ships three apps on top of the Monobase platform primitives (identity,
+Memberry ships two apps on top of the Monobase platform primitives (identity,
 billing, scheduling, communications, storage, notifications). Out of the box
 you get:
 
-- **Account app** - reference Vite + TanStack Router app with auth, profile,
-  and settings flows; ships its own Radix-based component library inline
-  under `apps/account/src/components`
+- **Memberry app** - Vite + TanStack Router product app with membership, dues,
+  events, training, auth, profile, and settings (port 3004)
+- **Admin app** - Platform ops dashboard (port 3003)
 - **API service** - Hono + Drizzle backend with nine vertical-neutral modules
 - **Shared SDK** - typed API client with TanStack Query hooks
 - **TypeSpec spec** - the source of truth for the API; OpenAPI and TS types
   are generated from it
-
-Add your domain modules (e.g. `services/api-ts/src/handlers/tenant/`) and your
-product apps (e.g. `apps/admin/`) on top of this base.
 
 ## Key Features
 
@@ -35,7 +32,7 @@ product apps (e.g. `apps/admin/`) on top of this base.
 The OpenAPI document at `specs/api/dist/openapi/openapi.json` is the
 single source of truth. Every server implementation and every client SDK
 is generated from it. The TypeScript stack in this repo (`services/api-ts`,
-`packages/sdk-ts`, `apps/account`) is the reference; any language can ship
+`packages/sdk-ts`, `apps/memberry`) is the reference; any language can ship
 its own sibling workspace and stay interchangeable behind the same
 `$API_URL`. See [`specs/api/CONTRACT.md`](./specs/api/CONTRACT.md) for the
 wire contract and [`specs/api/IMPLEMENTING.md`](./specs/api/IMPLEMENTING.md)
@@ -46,9 +43,8 @@ for the playbook to add a new impl/SDK in any language.
 ```
 memberry/
 ├── apps/                      # Frontend applications
-│   ├── account/              # Auth, profile, settings (port 3002)
 │   ├── admin/                # Platform ops dashboard (port 3003)
-│   └── memberry/             # Product app — membership, dues, events (port 3004)
+│   └── memberry/             # Product app — membership, dues, events, auth, profile, settings (port 3004)
 ├── packages/                  # Shared libraries
 │   ├── eslint-config/        # Shared ESLint flat configs (base, react, next)
 │   ├── sdk-ts/               # TypeScript SDK (generated from OpenAPI + hand-written client/flows)
@@ -122,8 +118,8 @@ AUTH_SECRET=your-secret-key-here
 cd services/api-ts
 bun dev
 
-# Terminal 2 - Account App
-cd apps/account
+# Terminal 2 - Memberry App
+cd apps/memberry
 bun dev
 ```
 
@@ -150,7 +146,7 @@ bun run --filter '*' build
 bun run clean
 
 # Run specific workspace command
-cd apps/account && bun dev
+cd apps/memberry && bun dev
 ```
 
 ## Available Commands
@@ -185,10 +181,10 @@ bun run build:openapi          # Generate OpenAPI specs only
 bun run build:types            # Generate TypeScript types only
 ```
 
-### Account App (`apps/account/`)
+### Memberry App (`apps/memberry/`)
 
 ```bash
-bun dev                        # Start dev server (port 3002)
+bun dev                        # Start dev server (port 3004)
 bun run build                  # Build production bundle
 bun run typecheck              # TypeScript type checking
 bun run test:e2e               # Run Playwright E2E tests
@@ -200,12 +196,11 @@ bun run test:e2e               # Run Playwright E2E tests
 
 | App | Stack | Port | Purpose |
 |-----|-------|------|---------|
-| `apps/account` | Vite + TanStack Router | 3002 | Reference app: auth + profile + settings |
+| `apps/memberry` | Vite + TanStack Router | 3004 | Product app: membership, dues, events, auth, profile, settings |
+| `apps/admin` | Vite + TanStack Router | 3003 | Platform ops dashboard |
 
-The account app keeps its own components, hooks, and feature directories
-under `apps/account/src/`. To scaffold a new app, copy `apps/account/` and
-update `package.json` name and `vite.config.ts` port — each app owns its
-UI; nothing is shared between apps except the SDK.
+Each app owns its own components, hooks, and feature directories.
+Nothing is shared between apps except the SDK.
 
 **Development**: `cd apps/<name> && bun dev`
 
@@ -304,9 +299,9 @@ cd services/api-ts
 bun test
 ```
 
-### End-to-End Tests (account app)
+### End-to-End Tests (memberry app)
 ```bash
-cd apps/account
+cd apps/memberry
 bun run test:e2e
 ```
 

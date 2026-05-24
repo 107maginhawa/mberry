@@ -1,26 +1,26 @@
 ---
 name: dev-app
-description: Start the account app development server on port 3002. Use when you need the frontend running for development or testing.
+description: Start the memberry app development server on port 3004. Use when you need the frontend running for development or testing.
 ---
 
 # dev-app
 
-Start the account app development server.
+Start the memberry app development server.
 
 ## Workflow
 
 ### Start Server
 
 ```bash
-cd apps/account && bun dev
+cd apps/memberry && bun dev
 ```
 
-- **Port**: 3002
+- **Port**: 3004
 
 ### Troubleshooting
 
 **API connection failed**:
-Check `apps/account/.env`:
+Check `apps/memberry/.env`:
 ```
 VITE_API_URL=http://localhost:7213
 ```
@@ -34,5 +34,5 @@ rm -rf node_modules/.vite && bun dev
 **TypeScript errors after API changes**:
 ```bash
 cd specs/api && bun run build
-cd ../../apps/account && bun dev
+cd ../../apps/memberry && bun dev
 ```

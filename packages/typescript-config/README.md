@@ -12,7 +12,7 @@ This package provides standardized TypeScript configurations for different proje
 |--------|---------|---------|
 | `base.json` | Base configuration with strict type checking and ES2022 target | Extended by all other configs |
 | `api.json` | Backend API services with decorator support | `services/api-ts` |
-| `app.json` | Frontend applications built with React | `apps/account` |
+| `app.json` | Frontend applications built with React | `apps/memberry`, `apps/admin` |
 
 ## Installation
 
@@ -44,7 +44,7 @@ For React-based frontend applications:
 }
 ```
 
-**Example**: `apps/account/tsconfig.json`
+**Example**: `apps/memberry/tsconfig.json`
 
 ### API Services (Hono, Bun)
 

@@ -24,7 +24,8 @@ workspace.
 
 **Monorepo Structure**:
 - `apps/` - Frontend applications:
-  - `account/` - Vite + TanStack Router reference app (auth, profile, settings)
+  - `memberry/` - Product app — membership, dues, events, training, auth, profile, settings (port 3004)
+  - `admin/` - Platform ops dashboard (port 3003)
 - `services/` - Backend services:
   - `api-ts/` - Reference TypeScript API impl (Hono + Drizzle). Sibling impls (`api-rs`, `api-go`, …) are documented in `specs/api/IMPLEMENTING.md` but not yet present.
 
@@ -218,21 +219,21 @@ The canonical API reference is at: `specs/api/dist/openapi/openapi.json`
 
 ## Frontend Development
 
-### Account App (Vite + TanStack Router)
-- **Port**: 3002
+### Memberry App (Vite + TanStack Router)
+- **Port**: 3004
 - **Routing**: File-based in `src/routes/`
 - **Auth**: Better-Auth with TanStack integration
 - **Data Fetching**: TanStack Query
 - **UI Components**: Radix UI primitives via `@/components` (shadcn/ui patterns)
 
-To scaffold a new app, copy `apps/account/` and update `package.json` name + `vite.config.ts` port.
+The former `apps/account` features (auth, profile, settings) have been merged into `apps/memberry/`.
 
 **Standards**: See [CONTRIBUTING.md#coding-standards](./CONTRIBUTING.md#coding-standards)
 
 ## Testing Approach
 
 - **API**: Bun test framework (`cd services/api-ts && bun test`)
-- **Frontend**: Playwright E2E tests (`cd apps/account && bun run test:e2e`)
+- **Frontend**: Playwright E2E tests (`cd apps/memberry && bun run test:e2e`)
 - **Type Safety**: TypeScript checking across all workspaces
 
 **Details**: See [CONTRIBUTING.md#testing-requirements](./CONTRIBUTING.md#testing-requirements)
@@ -252,7 +253,7 @@ cd ../../services/api-ts && bun run generate  # Generate routes/validators
 
 # Start development
 cd services/api-ts && bun dev        # API on port 7213
-cd apps/account && bun dev        # Account app on port 3002
+cd apps/memberry && bun dev          # Memberry app on port 3004
 
 # Database
 cd services/api-ts && bun run db:generate  # Generate migration
@@ -260,52 +261,40 @@ cd services/api-ts && bun run db:studio    # Open Drizzle Studio
 
 # Testing
 cd services/api-ts && bun test             # API tests
-cd apps/account && bun run test:e2e     # E2E tests
+cd apps/memberry && bun run test:e2e       # E2E tests
 ```
 
 ## Important Notes
 
 ### What Exists
-- ✅ **apps/account** - Reference Vite + TanStack Router app
-- ✅ **apps/account/src/components/** - Inlined shadcn/ui primitives
+- ✅ **apps/memberry** - Product app — membership, dues, events, training, auth, profile, settings (port 3004). Includes merged account features.
+- ✅ **apps/admin** - Platform ops dashboard (port 3003)
 - ✅ **services/api-ts/** - Reference Hono + Drizzle API
 - ✅ **specs/api/** (`@monobase/api-spec`) - TypeSpec sources + generated OpenAPI + TS types
 - ✅ **packages/sdk-ts/** - Auto-generated TanStack Query hooks + hand-written client/flows/utils
 - ✅ **packages/eslint-config/** - Shared ESLint flat configs
-- ✅ **apps/admin** - Platform ops dashboard (port 3003)
-- ✅ **apps/memberry** - Product app — membership, dues, events, training (port 3004)
 - ✅ **specs/api/tests/contract/** - Hurl contract suite (97 .hurl files)
 - ✅ **.claude/skills/** - 20 Claude Code skills for end-to-end development workflow
 - ✅ **Authentication** via Better-Auth (integrated, not a separate module)
 - ✅ **25 handler directories** under `services/api-ts/src/handlers/` (~58% with TypeSpec coverage)
 
 ### Multi-App Architecture
-Production apps typically follow a 3-app pattern:
-- `apps/account` — cloud account (license, activation, storage). Boilerplate features (bookings, billing UI, etc.) will be replaced. Only auth/profile/setup are permanent.
-- `apps/{product}` — domain-specific product app (e.g., `apps/memberry`, `apps/clinic`). You create this.
-- `apps/admin` — ops/admin dashboard. You create this.
+Production apps follow a 2-app pattern:
+- `apps/memberry` (port 3004) — product app with all features: membership, dues, events, training, auth, profile, settings. The former `apps/account` has been fully merged here.
+- `apps/admin` (port 3003) — ops/admin dashboard.
 
-To scaffold a new app, copy `apps/account/` and update `package.json` name + `vite.config.ts` port. All apps share the same API and SDK.
+All apps share the same API and SDK.
 
 ### What's Intentionally Absent
 - This template ships **no domain-vertical apps or modules**. Add your own
   (e.g., `apps/admin`, `services/api-ts/src/handlers/tenant/`) on top of the base.
 
-### P0/P1 Risk Summary (from Codebase Audit)
+### Deferred Work
 
-Full audit: `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md`
+All P0/P1 risks resolved (gate satisfied 2026-05-12). Planned work tracked in [ROADMAP.md](./ROADMAP.md).
 
-**Gate Status: SATISFIED (2026-05-12).** 7/7 P0 resolved, 10/10 actionable P1 resolved. New feature work unblocked.
-
-- P0 items resolved via GAP-CLOSURE-ROADMAP Wave 2 + Phase 14 (c90f160)
-- P1 items resolved via Wave 3 + Phases 12-13 (auth middleware, RBAC)
-- P1-8 (user.email unique globally) closed as WON'T FIX — unique email is by design
-- P1-11 (association:member mega-module, 171 handlers) deferred to v1.2.0 — operational risk, not a security issue. Split plan exists at `.planning/phases/14-mega-module-split/SPLIT-PLAN.md`
-
-**Remaining deferred items** (tracked for v1.2.0):
-- TypeSpec 100% coverage (8 inline app.ts routes remain hand-wired)
-- Audit log filter bug (eventType/category params don't filter)
-- BR-35 through BR-40 (deferred in Phase 18)
+- P1-11 (association:member mega-module split) deferred to v1.2.0 — split plan at `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md`
+- 33 pre-migration routes (9 by-design, 24 pre-migration) — see ROADMAP.md
 
 ## Development Protocol
 
@@ -342,7 +331,7 @@ Key routing rules:
 
 **Memberry**
 
-A generic healthcare Association Management System (AMS) built on the Monobase monorepo template. Manages membership, dues, events, training, credits, communications, and governance for healthcare professional associations. Starts with Philippine dental associations, expands to medical and global. Three apps: account (auth/profile), admin (ops dashboard), memberry (product app).
+A generic healthcare Association Management System (AMS) built on the Monobase monorepo template. Manages membership, dues, events, training, credits, communications, and governance for healthcare professional associations. Starts with Philippine dental associations, expands to medical and global. Two apps: memberry (product app with auth/profile), admin (ops dashboard).
 
 **Core Value:** Members can manage their association membership, track continuing education credits, and stay current on dues — from any device, with minimal friction.
 

@@ -21,8 +21,8 @@ export function fakePerson(overrides: Record<string, any> = {}) {
     primaryAddress: { street1: '123 Main', city: 'Manila', state: 'NCR', postalCode: '1000', country: 'PH' },
     licenseNumber: 'PRC-12345',
     dateOfBirth: '1985-06-15',
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-06-01'),
+    createdAt: new Date('2025-01-01T00:00:00Z'),
+    updatedAt: new Date('2025-06-01T00:00:00Z'),
     ...overrides,
   };
 }
@@ -182,8 +182,8 @@ export function fakeTraining(overrides: Record<string, any> = {}) {
     description: 'CE course',
     status: 'published',
     creditHours: 8,
-    startDate: new Date('2026-06-01'),
-    endDate: new Date('2026-06-02'),
+    startDate: new Date('2026-06-01T00:00:00Z'),
+    endDate: new Date('2026-06-02T00:00:00Z'),
     location: 'Manila Convention Center',
     capacity: 50,
     createdBy: 'user-1',
@@ -227,8 +227,8 @@ export function fakeMembership(overrides: Record<string, any> = {}) {
     organizationId: 'org-1',
     status: 'active',
     tier: 'regular',
-    joinedAt: new Date('2025-01-01'),
-    expiresAt: new Date('2026-12-31'),
+    joinedAt: new Date('2025-01-01T00:00:00Z'),
+    expiresAt: new Date('2026-12-31T00:00:00Z'),
     ...overrides,
   };
 }
@@ -297,7 +297,7 @@ export function fakeDuesInvoice(overrides: Record<string, any> = {}) {
     amount: 2500,
     currency: 'PHP',
     status: 'generated',
-    dueDate: new Date('2026-12-31'),
+    dueDate: new Date('2026-12-31T00:00:00Z'),
     createdAt: new Date(),
     ...overrides,
   };

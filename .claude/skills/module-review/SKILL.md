@@ -32,7 +32,7 @@ For the module under review, verify all artifacts exist:
 - [ ] Handler files in `services/api-ts/src/handlers/{module}/`
 - [ ] Repository in `services/api-ts/src/handlers/{module}/repos/`
 - [ ] Test file(s) exist for this module's handlers (colocated or module-level)
-- [ ] Frontend route exists (if applicable) in `apps/account/src/routes/`
+- [ ] Frontend route exists (if applicable) in `apps/memberry/src/routes/`
 
 ```bash
 # Quick existence check
@@ -103,8 +103,8 @@ grep -rn ' as any' services/api-ts/src/handlers/{module}/ | grep -v '.test.ts'
 
 ```bash
 # Frontend checks (if applicable)
-grep -rn 'TODO\|FIXME\|placeholder\|lorem' apps/account/src/features/{module}/ 2>/dev/null
-grep -rn 'console\.log' apps/account/src/features/{module}/ 2>/dev/null
+grep -rn 'TODO\|FIXME\|placeholder\|lorem' apps/memberry/src/features/{module}/ 2>/dev/null
+grep -rn 'console\.log' apps/memberry/src/features/{module}/ 2>/dev/null
 ```
 
 ### 7. Project Map Gaps

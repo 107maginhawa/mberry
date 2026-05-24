@@ -56,12 +56,12 @@ bun run typecheck    # TypeScript across the whole SDK
 bun test             # unit tests
 ```
 
-Smoke-test consumer changes by typechecking and running `apps/account`:
+Smoke-test consumer changes by typechecking and running `apps/memberry`:
 
 ```bash
-cd ../../apps/account
+cd ../../apps/memberry
 bun run typecheck && bun run build
-bun dev   # http://localhost:3002
+bun dev   # http://localhost:3004
 ```
 
 ## Common pitfalls

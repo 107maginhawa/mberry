@@ -67,10 +67,10 @@ Then read `docs/project-map/gaps.generated.md` and warn about any **Critical (P0
 cd services/api-ts && bun run typecheck
 ```
 
-### 2. Type Check Account App
+### 2. Type Check Memberry App
 
 ```bash
-cd apps/account && bun run typecheck
+cd apps/memberry && bun run typecheck
 ```
 
 ### 3. Run API Tests
@@ -91,10 +91,10 @@ cd packages/sdk-ts && bun run typecheck
 cd services/api-ts && bun run build
 ```
 
-### 6. Build Account App
+### 6. Build Memberry App
 
 ```bash
-cd apps/account && bun run build
+cd apps/memberry && bun run build
 ```
 
 ### 7. Lint per workspace

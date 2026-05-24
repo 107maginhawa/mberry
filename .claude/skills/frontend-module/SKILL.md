@@ -1,11 +1,11 @@
 ---
 name: frontend-module
-description: Build a frontend feature in apps/account using the auto-generated @monobase/sdk-ts hooks. Use when implementing UI for an existing API module or a new feature spanning routes/components/forms.
+description: Build a frontend feature in apps/memberry using the auto-generated @monobase/sdk-ts hooks. Use when implementing UI for an existing API module or a new feature spanning routes/components/forms.
 ---
 
 # frontend-module
 
-Build a complete frontend feature in `apps/account/` using the SDK hooks generated from the OpenAPI spec.
+Build a complete frontend feature in `apps/memberry/` using the SDK hooks generated from the OpenAPI spec.
 
 ## Triggers
 
@@ -60,20 +60,20 @@ If the endpoint is missing, the spec hasn't been regenerated — run `cd specs/a
 
 ### 2. Add the feature folder
 
-`apps/account/src/features/{feature}/` contains the page-specific logic. Larger features get split:
+`apps/memberry/src/features/{feature}/` contains the page-specific logic. Larger features get split:
 
 ```
-apps/account/src/features/{feature}/
+apps/memberry/src/features/{feature}/
 ├── components/{form, list, detail}.tsx   # Feature-specific React components
 ├── hooks/use-{thing}.ts                  # Wrappers around SDK hooks (only if needed)
 └── schema.ts                             # Zod schemas for forms
 ```
 
-Reference existing features under `apps/account/src/features/` (booking, billing, person) for the pattern.
+Reference existing features under `apps/memberry/src/features/` (booking, billing, person) for the pattern.
 
 ### 3. Zod schema for the form
 
-`apps/account/src/features/{feature}/schema.ts`:
+`apps/memberry/src/features/{feature}/schema.ts`:
 
 ```typescript
 import { z } from 'zod'
@@ -131,7 +131,7 @@ For PATCH endpoints: use `buildPatch` from `@monobase/sdk-ts/utils/patch` to com
 
 ### 5. Route
 
-`apps/account/src/routes/_dashboard/{feature}.tsx`:
+`apps/memberry/src/routes/_dashboard/{feature}.tsx`:
 
 ```typescript
 import { createFileRoute } from '@tanstack/react-router'
@@ -163,8 +163,8 @@ cd apps/account && bun run typecheck && bun run build
 
 - File names: **kebab-case** (`foo-form.tsx`, not `FooForm.tsx`).
 - Component exports: **PascalCase** (`export function FooForm`).
-- Imports: use `@/` for everything inside `apps/account/src/`. SDK as `@monobase/sdk-ts/...`.
+- Imports: use `@/` for everything inside `apps/memberry/src/`. SDK as `@monobase/sdk-ts/...`.
 - Routes never import from generated SDK directly when the data needs derivation — wrap in a feature hook.
-- shadcn/ui primitives live at `apps/account/src/components/` (inlined, not from a shared package). Add new ones with `bunx shadcn@latest add {component}`.
+- shadcn/ui primitives live at `apps/memberry/src/components/` (inlined, not from a shared package). Add new ones with `bunx shadcn@latest add {component}`.
 - Date display: `formatDate` from `@/lib/format-date`. Date math: `date-fns`.
 - Country codes: uppercase. Language codes: lowercase. Timezones: IANA (e.g., `Asia/Manila`).

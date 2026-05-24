@@ -24,7 +24,7 @@ lsof -i :{port}
 kill -9 {PID}
 ```
 
-Common ports: API = 7213, Account app = 3002, Drizzle Studio = 4983
+Common ports: API = 7213, Memberry app = 3004, Admin app = 3003, Drizzle Studio = 4983
 
 ### Database Connection Failed
 
@@ -54,7 +54,7 @@ rm -rf node_modules && bun install
 
 ```bash
 rm -rf node_modules/.vite
-cd apps/account && bun dev
+cd apps/memberry && bun dev
 ```
 
 ### View OpenAPI Spec
