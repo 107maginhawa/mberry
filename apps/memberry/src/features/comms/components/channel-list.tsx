@@ -5,6 +5,7 @@ import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { MessageSquare } from 'lucide-react'
 import { Button, Skeleton } from '@monobase/ui'
+import { useUnreadCounts } from '../hooks/use-unread-counts'
 
 interface ChannelListProps {
   orgSlug: string
@@ -47,6 +48,7 @@ function roomDisplayName(room: ChatRoom): string {
  * sorted by last activity. Active room highlighted.
  */
 export function ChannelList({ activeRoomId, onSelectRoom }: ChannelListProps) {
+  const { hasUnread } = useUnreadCounts()
   const roomsQuery = useQuery({
     ...listChatRoomsOptions({ query: { status: 'active' } }),
     staleTime: 10_000,
@@ -91,6 +93,7 @@ export function ChannelList({ activeRoomId, onSelectRoom }: ChannelListProps) {
         <ul className="space-y-0.5">
           {sorted.map((room) => {
             const isActive = room.id === activeRoomId
+            const unread = hasUnread(room.id, room.lastMessageAt)
             return (
               <li key={room.id}>
                 <Button
@@ -104,9 +107,12 @@ export function ChannelList({ activeRoomId, onSelectRoom }: ChannelListProps) {
                   }`}
                 >
                   <MessageSquare className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-[var(--color-muted)]'}`} />
-                  <span className="text-sm font-medium truncate flex-1 text-left">
+                  <span className={`text-sm truncate flex-1 text-left ${unread && !isActive ? 'font-bold' : 'font-medium'}`}>
                     {roomDisplayName(room)}
                   </span>
+                  {unread && !isActive && (
+                    <span className="h-2 w-2 rounded-full bg-[var(--color-primary)] flex-shrink-0" aria-label="Unread messages" />
+                  )}
                   {room.lastMessageAt && (
                     <span className={`text-[10px] flex-shrink-0 ${isActive ? 'text-white/70' : 'text-[var(--color-muted)]'}`}>
                       {formatRelativeTime(room.lastMessageAt)}

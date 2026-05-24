@@ -12,6 +12,7 @@ import { MessageBubble } from './message-bubble'
 import { MessageComposer } from './message-composer'
 import { TypingIndicator } from './typing-indicator'
 import { useChatWebSocket } from '../hooks/use-chat-websocket'
+import { useUnreadCounts } from '../hooks/use-unread-counts'
 
 interface ChatViewProps {
   roomId: string
@@ -29,6 +30,12 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([])
   const [typingUsers, setTypingUsers] = useState<Map<string, number>>(new Map())
   const prevMessageCountRef = useRef(0)
+  const { markRead } = useUnreadCounts()
+
+  // Mark room as read when opened or when new messages arrive while focused
+  useEffect(() => {
+    markRead(roomId)
+  }, [roomId, markRead])
 
   const messagesQuery = useQuery({
     ...getChatMessagesOptions({ path: { room: roomId }, query: { limit: 50 } }),
@@ -81,13 +88,14 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
 
   const { isConnected, isReconnecting, send } = useChatWebSocket(roomId, handleWsMessage)
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages + mark read
   useEffect(() => {
     if (localMessages.length > prevMessageCountRef.current) {
       scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+      markRead(roomId)
     }
     prevMessageCountRef.current = localMessages.length
-  }, [localMessages.length])
+  }, [localMessages.length, markRead, roomId])
 
   const handleMessageSent = useCallback(() => {
     queryClient.invalidateQueries({
