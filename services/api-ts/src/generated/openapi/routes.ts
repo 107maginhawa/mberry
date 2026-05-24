@@ -2287,21 +2287,21 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // listChatRooms
   app.get('/comms/chat-rooms',
-    authMiddleware({ roles: ["user:participant"] }),
+    authMiddleware({ roles: ["user"] }),
     zValidator('query', validators.ListChatRoomsQuery, validationErrorHandler),
     registry.listChatRooms as unknown as Handler
   );
 
   // getChatRoom
   app.get('/comms/chat-rooms/:room',
-    authMiddleware({ roles: ["user:participant"] }),
+    authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.GetChatRoomParams, validationErrorHandler),
     registry.getChatRoom as unknown as Handler
   );
 
   // getChatMessages
   app.get('/comms/chat-rooms/:room/messages',
-    authMiddleware({ roles: ["user:participant"] }),
+    authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.GetChatMessagesParams, validationErrorHandler),
     zValidator('query', validators.GetChatMessagesQuery, validationErrorHandler),
     registry.getChatMessages as unknown as Handler
@@ -2309,7 +2309,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // sendChatMessage
   app.post('/comms/chat-rooms/:room/messages',
-    authMiddleware({ roles: ["user:participant"] }),
+    authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.SendChatMessageParams, validationErrorHandler),
     zValidator('json', validators.SendChatMessageBody, validationErrorHandler),
     registry.sendChatMessage as unknown as Handler
@@ -2324,7 +2324,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // joinVideoCall
   app.post('/comms/chat-rooms/:room/video-call/join',
-    authMiddleware({ roles: ["user:participant"] }),
+    authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.JoinVideoCallParams, validationErrorHandler),
     zValidator('json', validators.JoinVideoCallBody, validationErrorHandler),
     registry.joinVideoCall as unknown as Handler
@@ -2332,14 +2332,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // leaveVideoCall
   app.post('/comms/chat-rooms/:room/video-call/leave',
-    authMiddleware({ roles: ["user:participant"] }),
+    authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.LeaveVideoCallParams, validationErrorHandler),
     registry.leaveVideoCall as unknown as Handler
   );
 
   // updateVideoCallParticipant
   app.patch('/comms/chat-rooms/:room/video-call/participant',
-    authMiddleware({ roles: ["user:participant"] }),
+    authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.UpdateVideoCallParticipantParams, validationErrorHandler),
     zValidator('json', validators.UpdateVideoCallParticipantBody, validationErrorHandler),
     registry.updateVideoCallParticipant as unknown as Handler

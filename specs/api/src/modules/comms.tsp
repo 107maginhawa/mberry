@@ -373,7 +373,7 @@ namespace CommsModule {
     @get
     @route("/chat-rooms")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["user:participant"])
+    @extension("x-security-required-roles", #["user"])
     listChatRooms(
       @doc("Filter by room status (active, archived)")
       @query status?: ChatRoomStatus,
@@ -392,7 +392,7 @@ namespace CommsModule {
     @get
     @route("/chat-rooms/{room}")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["user:participant"])
+    @extension("x-security-required-roles", #["user"])
     getChatRoom(
       @path room: UUID
     ): ApiOkResponse<ChatRoom>
@@ -405,7 +405,7 @@ namespace CommsModule {
     @get
     @route("/chat-rooms/{room}/messages")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["user:participant"])
+    @extension("x-security-required-roles", #["user"])
     getChatMessages(
       @path room: UUID,
       @doc("Filter by message type (text, system, video_call)")
@@ -421,7 +421,7 @@ namespace CommsModule {
     @post
     @route("/chat-rooms/{room}/messages")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["user:participant"])
+    @extension("x-security-required-roles", #["user"])
     sendChatMessage(
       @path room: UUID,
       @body message: SendTextMessageRequest | StartVideoCallRequest
@@ -439,7 +439,7 @@ namespace CommsModule {
     @operationId("joinVideoCall")
     @post
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["user:participant"])
+    @extension("x-security-required-roles", #["user"])
     @route("/chat-rooms/{room}/video-call/join")
     joinVideoCall(
       @path room: UUID,
@@ -468,7 +468,7 @@ namespace CommsModule {
     @post
     @route("/chat-rooms/{room}/video-call/leave")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["user:participant"])
+    @extension("x-security-required-roles", #["user"])
     leaveVideoCall(
       @path room: UUID
     ): ApiOkResponse<LeaveVideoCallResponse>
@@ -481,7 +481,7 @@ namespace CommsModule {
     @patch(#{implicitOptionality: true})
     @route("/chat-rooms/{room}/video-call/participant")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["user:participant"])
+    @extension("x-security-required-roles", #["user"])
     updateVideoCallParticipant(
       @path room: UUID,
       @body update: UpdateParticipantRequest
