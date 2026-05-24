@@ -37,7 +37,7 @@ const patterns: Array<{ name: string; regex: RegExp }> = [
 
 // Scan all test files
 const glob = new Glob('**/*.test.{ts,tsx}');
-const testDirs = ['services/api-ts/src', 'apps/memberry/src', 'apps/account/src'];
+const testDirs = ['services/api-ts/src', 'apps/memberry/src', 'apps/admin/src'];
 
 for (const dir of testDirs) {
   for await (const file of glob.scan({ cwd: `${ROOT}/${dir}`, absolute: false })) {
