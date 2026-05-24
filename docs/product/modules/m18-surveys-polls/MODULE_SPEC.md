@@ -374,8 +374,14 @@ When implementing this module:
 
 ## 22. Downstream Impact
 
-- **DOMAIN_MODEL.md**: Needs `survey` and `survey_response` table definitions added (currently absent)
-- **DOMAIN_GLOSSARY.md**: Needs `Survey`, `Poll`, `Anonymous Survey`, `Identified Survey` term definitions
-- **ROLE_PERMISSION_MATRIX.md**: Needs section 3.x for Surveys & Polls module
-- **M07 (Communications)**: Must support survey distribution notifications (consumed event)
-- **API_CONTRACTS.md**: Survey endpoints not yet defined -- will need TypeSpec definitions
+All downstream artifacts updated as of Wave 6 implementation (2026-05-24):
+
+- **DOMAIN_MODEL.md**: ✅ Section 13 updated with actual schema fields (survey, survey_response tables)
+- **DOMAIN_GLOSSARY.md**: ✅ Survey & Poll Terms section exists (Survey, Poll, Anonymous Survey, Identified Survey defined)
+- **ROLE_PERMISSION_MATRIX.md**: ✅ Section 3.27 — Surveys & Polls module permissions defined
+- **ERROR_TAXONOMY.md**: ✅ Section 5.18 — M18 error codes defined (M18-001 through M18-006)
+- **EVENT_CONTRACTS.md**: ✅ Survey events referenced (survey.published, survey.closed)
+- **WORKFLOW_MAP.md**: ✅ Section 1.18 — WF-100 through WF-103 defined
+- **TypeSpec**: ✅ `specs/api/src/modules/surveys.tsp` — 10 operations defined and compiled
+- **M07 (Communications)**: Survey distribution notifications — deferred to Phase C (poll/distribution features)
+- **Phase C endpoints**: 7 endpoints spec'd but not yet implemented (polls CRUD, member views, export) — intentionally deferred

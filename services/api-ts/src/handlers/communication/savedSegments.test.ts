@@ -28,9 +28,7 @@ function createMockDb(store: Record<string, any[]> = {}) {
     select: (_fields?: any) => ({
       from: (_table: any) => ({
         where: (_cond: any) => ({
-          orderBy: (_order: any) => ({
-            limit: (_n: number) => segments,
-          }),
+          orderBy: (_order: any) => Promise.resolve([...segments]),
           limit: (_n: number) => segments,
         }),
       }),

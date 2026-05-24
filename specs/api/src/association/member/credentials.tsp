@@ -538,6 +538,47 @@ namespace Association.Member.Credentials {
       | ApiBadRequestResponse;
   }
 
+  @doc("Public credential lookup by credential number — no authentication required. Returns verification status with privacy-gated trust summary.")
+  model CredentialLookupResult {
+    @doc("Verification result: valid, expired, revoked, or notFound")
+    result: VerificationResult;
+
+    @doc("Credential details if found, null otherwise")
+    credential: {
+      @doc("The credential number")
+      credentialNumber: string;
+      @doc("Credential lifecycle status")
+      status: string;
+      @doc("When the credential was issued")
+      issuedAt: utcDateTime;
+      @doc("When the credential expires (if applicable)")
+      expiresAt?: utcDateTime;
+    } | null;
+
+    @doc("Holder information (privacy-gated)")
+    holder?: {
+      @doc("Display name of the credential holder")
+      displayName: string;
+      @doc("Photo URL (if public)")
+      photoUrl?: string;
+      @doc("Professional specialty")
+      specialty?: string;
+      @doc("Membership status (only shown if holder has opted in to visibility)")
+      membershipStatus?: string;
+    };
+  }
+
+  @doc("Public credential lookup endpoint — no authentication required")
+  interface CredentialLookupService {
+    @doc("Look up a digital credential by its credential number. Returns verification status and privacy-gated holder information.")
+    @operationId("lookupCredentialPublic")
+    @get
+    @route("/{credentialNumber}")
+    lookupCredentialPublic(
+      @path credentialNumber: string,
+    ): ApiOkResponse<CredentialLookupResult>;
+  }
+
   @doc("CRUD and search for professional license records")
   interface ProfessionalLicenseManagement {
     @doc("Create a professional license record.")

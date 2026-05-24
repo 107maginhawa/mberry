@@ -10,45 +10,14 @@
  * This file is regenerated on each run
  */
 
-import { inviteAdmin } from '../../handlers/platformadmin/inviteAdmin';
-import { listAdmins } from '../../handlers/platformadmin/listAdmins';
-import { updateAdmin } from '../../handlers/platformadmin/updateAdmin';
-import { revokeAdmin } from '../../handlers/platformadmin/revokeAdmin';
-import { createAssociation } from '../../handlers/platformadmin/createAssociation';
-import { listAssociations } from '../../handlers/platformadmin/listAssociations';
-import { getAssociation } from '../../handlers/platformadmin/getAssociation';
-import { updateAssociation } from '../../handlers/platformadmin/updateAssociation';
-import { deleteAssociation } from '../../handlers/platformadmin/deleteAssociation';
-import { setFeatureFlag } from '../../handlers/platformadmin/setFeatureFlag';
-import { listFeatureFlags } from '../../handlers/platformadmin/listFeatureFlags';
-import { deleteFeatureFlag } from '../../handlers/platformadmin/deleteFeatureFlag';
-import { startImpersonation } from '../../handlers/platformadmin/startImpersonation';
-import { endImpersonation } from '../../handlers/platformadmin/endImpersonation';
-import { getAdminRole } from '../../handlers/platformadmin/getAdminRole';
-import { createOrganization } from '../../handlers/platformadmin/createOrganization';
-import { listOrganizations } from '../../handlers/platformadmin/listOrganizations';
-import { getOrganization } from '../../handlers/platformadmin/getOrganization';
-import { updateOrganization } from '../../handlers/platformadmin/updateOrganization';
-import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
-import { getOrganizationBySlug } from '../../handlers/platformadmin/getOrganizationBySlug';
-import { createDocumentTag } from '../../handlers/documents/createDocumentTag';
-import { listDocumentTags } from '../../handlers/documents/listDocumentTags';
-import { getDocumentTag } from '../../handlers/documents/getDocumentTag';
-import { updateDocumentTag } from '../../handlers/documents/updateDocumentTag';
-import { deleteDocumentTag } from '../../handlers/documents/deleteDocumentTag';
-import { createDocument } from '../../handlers/documents/createDocument';
-import { searchDocuments } from '../../handlers/documents/searchDocuments';
-import { getDocument } from '../../handlers/documents/getDocument';
-import { updateDocument } from '../../handlers/documents/updateDocument';
-import { deleteDocument } from '../../handlers/documents/deleteDocument';
-import { getDocumentAccessLog } from '../../handlers/documents/getDocumentAccessLog';
-import { archiveDocument } from '../../handlers/documents/archiveDocument';
-import { uploadNewDocumentVersion } from '../../handlers/documents/uploadNewDocumentVersion';
-import { listDocumentVersions } from '../../handlers/documents/listDocumentVersions';
-import { getDocumentVersion } from '../../handlers/documents/getDocumentVersion';
+import { listOrgAccreditedProviders } from '../../handlers/association:operations/listOrgAccreditedProviders';
+import { createOrgAccreditedProvider } from '../../handlers/association:operations/createOrgAccreditedProvider';
+import { updateOrgAccreditedProvider } from '../../handlers/association:operations/updateOrgAccreditedProvider';
+import { deleteOrgAccreditedProvider } from '../../handlers/association:operations/deleteOrgAccreditedProvider';
 import { listMyCustomEvents } from '../../handlers/association:operations/listMyCustomEvents';
 import { listCustomEventAttendance } from '../../handlers/association:operations/listCustomEventAttendance';
 import { checkInCustomEvent } from '../../handlers/association:operations/checkInCustomEvent';
+import { completeEvent } from '../../handlers/association:operations/completeEvent';
 import { registerForCustomEvent } from '../../handlers/association:operations/registerForCustomEvent';
 import { registerAndPayForEvent } from '../../handlers/association:operations/registerAndPayForEvent';
 import { listCustomEventRegistrations } from '../../handlers/association:operations/listCustomEventRegistrations';
@@ -101,6 +70,46 @@ import { getTraining } from '../../handlers/association:operations/getTraining';
 import { updateTraining } from '../../handlers/association:operations/updateTraining';
 import { deleteTraining } from '../../handlers/association:operations/deleteTraining';
 import { publishTraining } from '../../handlers/association:operations/publishTraining';
+import { inviteAdmin } from '../../handlers/platformadmin/inviteAdmin';
+import { listAdmins } from '../../handlers/platformadmin/listAdmins';
+import { updateAdmin } from '../../handlers/platformadmin/updateAdmin';
+import { revokeAdmin } from '../../handlers/platformadmin/revokeAdmin';
+import { createAssociation } from '../../handlers/platformadmin/createAssociation';
+import { listAssociations } from '../../handlers/platformadmin/listAssociations';
+import { getAssociation } from '../../handlers/platformadmin/getAssociation';
+import { updateAssociation } from '../../handlers/platformadmin/updateAssociation';
+import { deleteAssociation } from '../../handlers/platformadmin/deleteAssociation';
+import { listAllCommittees } from '../../handlers/platformadmin/listAllCommittees';
+import { getCommittee } from '../../handlers/platformadmin/getCommittee';
+import { setFeatureFlag } from '../../handlers/platformadmin/setFeatureFlag';
+import { listFeatureFlags } from '../../handlers/platformadmin/listFeatureFlags';
+import { deleteFeatureFlag } from '../../handlers/platformadmin/deleteFeatureFlag';
+import { startImpersonation } from '../../handlers/platformadmin/startImpersonation';
+import { endImpersonation } from '../../handlers/platformadmin/endImpersonation';
+import { getAdminRole } from '../../handlers/platformadmin/getAdminRole';
+import { getNationalDashboard } from '../../handlers/platformadmin/getNationalDashboard';
+import { createOrganization } from '../../handlers/platformadmin/createOrganization';
+import { listOrganizations } from '../../handlers/platformadmin/listOrganizations';
+import { getOrganization } from '../../handlers/platformadmin/getOrganization';
+import { updateOrganization } from '../../handlers/platformadmin/updateOrganization';
+import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
+import { getOrganizationBySlug } from '../../handlers/platformadmin/getOrganizationBySlug';
+import { listPublicOrgs } from '../../handlers/platformadmin/listPublicOrgs';
+import { createDocumentTag } from '../../handlers/documents/createDocumentTag';
+import { listDocumentTags } from '../../handlers/documents/listDocumentTags';
+import { getDocumentTag } from '../../handlers/documents/getDocumentTag';
+import { updateDocumentTag } from '../../handlers/documents/updateDocumentTag';
+import { deleteDocumentTag } from '../../handlers/documents/deleteDocumentTag';
+import { createDocument } from '../../handlers/documents/createDocument';
+import { searchDocuments } from '../../handlers/documents/searchDocuments';
+import { getDocument } from '../../handlers/documents/getDocument';
+import { updateDocument } from '../../handlers/documents/updateDocument';
+import { deleteDocument } from '../../handlers/documents/deleteDocument';
+import { getDocumentAccessLog } from '../../handlers/documents/getDocumentAccessLog';
+import { archiveDocument } from '../../handlers/documents/archiveDocument';
+import { uploadNewDocumentVersion } from '../../handlers/documents/uploadNewDocumentVersion';
+import { listDocumentVersions } from '../../handlers/documents/listDocumentVersions';
+import { getDocumentVersion } from '../../handlers/documents/getDocumentVersion';
 import { createAffiliationTransfer } from '../../handlers/association:member/createAffiliationTransfer';
 import { listAffiliationTransfers } from '../../handlers/association:member/listAffiliationTransfers';
 import { getAffiliationTransfer } from '../../handlers/association:member/getAffiliationTransfer';
@@ -133,6 +142,10 @@ import { getChapterAffiliation } from '../../handlers/association:member/getChap
 import { updateChapterAffiliation } from '../../handlers/association:member/updateChapterAffiliation';
 import { deleteChapterAffiliation } from '../../handlers/association:member/deleteChapterAffiliation';
 import { setPrimaryChapterAffiliation } from '../../handlers/association:member/setPrimaryChapterAffiliation';
+import { getComplianceReport } from '../../handlers/association:member/getComplianceReport';
+import { refreshCompliance } from '../../handlers/association:member/refreshCompliance';
+import { getOrgCpdConfig } from '../../handlers/association:member/getOrgCpdConfig';
+import { updateOrgCpdConfig } from '../../handlers/association:member/updateOrgCpdConfig';
 import { createCredentialTemplate } from '../../handlers/association:member/createCredentialTemplate';
 import { listCredentialTemplates } from '../../handlers/association:member/listCredentialTemplates';
 import { getCredentialTemplate } from '../../handlers/association:member/getCredentialTemplate';
@@ -140,12 +153,14 @@ import { updateCredentialTemplate } from '../../handlers/association:member/upda
 import { deleteCredentialTemplate } from '../../handlers/association:member/deleteCredentialTemplate';
 import { listDigitalCredentials } from '../../handlers/association:member/listDigitalCredentials';
 import { issueDigitalCredential } from '../../handlers/association:member/issueDigitalCredential';
+import { lookupCredentialPublic } from '../../handlers/association:member/lookupCredentialPublic';
 import { verifyCredentialPublic } from '../../handlers/association:member/verifyCredentialPublic';
 import { verifyDigitalCredentialAuthenticated } from '../../handlers/association:member/verifyDigitalCredentialAuthenticated';
 import { getDigitalCredential } from '../../handlers/association:member/getDigitalCredential';
 import { updateDigitalCredential } from '../../handlers/association:member/updateDigitalCredential';
 import { deleteDigitalCredential } from '../../handlers/association:member/deleteDigitalCredential';
 import { revokeDigitalCredential } from '../../handlers/association:member/revokeDigitalCredential';
+import { awardManualCredit } from '../../handlers/association:member/awardManualCredit';
 import { createDirectoryProfile } from '../../handlers/association:member/createDirectoryProfile';
 import { listDirectoryProfiles } from '../../handlers/association:member/listDirectoryProfiles';
 import { getDirectoryProfile } from '../../handlers/association:member/getDirectoryProfile';
@@ -245,11 +260,19 @@ import { listRoyaltySplits } from '../../handlers/association:member/listRoyalty
 import { getRoyaltySplit } from '../../handlers/association:member/getRoyaltySplit';
 import { updateRoyaltySplit } from '../../handlers/association:member/updateRoyaltySplit';
 import { deleteRoyaltySplit } from '../../handlers/association:member/deleteRoyaltySplit';
+import { createSpecialAssessment } from '../../handlers/association:member/createSpecialAssessment';
+import { updateSpecialAssessment } from '../../handlers/association:member/updateSpecialAssessment';
+import { deleteSpecialAssessment } from '../../handlers/association:member/deleteSpecialAssessment';
+import { applySpecialAssessment } from '../../handlers/association:member/applySpecialAssessment';
+import { getSpecialAssessmentCollection } from '../../handlers/association:member/getSpecialAssessmentCollection';
+import { listSpecialAssessments } from '../../handlers/association:member/listSpecialAssessments';
 import { createMembershipTier } from '../../handlers/association:member/createMembershipTier';
 import { listMembershipTiers } from '../../handlers/association:member/listMembershipTiers';
 import { getMembershipTier } from '../../handlers/association:member/getMembershipTier';
 import { updateMembershipTier } from '../../handlers/association:member/updateMembershipTier';
 import { deleteMembershipTier } from '../../handlers/association:member/deleteMembershipTier';
+import { bulkIssueCertificates } from '../../handlers/association:member/bulkIssueCertificates';
+import { verifyCertificatePublic } from '../../handlers/association:member/verifyCertificatePublic';
 import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
 import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
 import { createMessageTemplate } from '../../handlers/communication/createMessageTemplate';
@@ -280,6 +303,9 @@ import { archiveAnnouncement } from '../../handlers/communication/archiveAnnounc
 import { publishAnnouncement } from '../../handlers/communication/publishAnnouncement';
 import { listAnnouncements } from '../../handlers/communication/listAnnouncements';
 import { createAnnouncement } from '../../handlers/communication/createAnnouncement';
+import { createSavedSegment } from '../../handlers/communication/createSavedSegment';
+import { listSavedSegments } from '../../handlers/communication/listSavedSegments';
+import { deleteSavedSegment } from '../../handlers/communication/deleteSavedSegment';
 import { listAuditLogs } from '../../handlers/audit/listAuditLogs';
 import { createInvoice } from '../../handlers/billing/createInvoice';
 import { listInvoices } from '../../handlers/billing/listInvoices';
@@ -326,15 +352,21 @@ import { leaveVideoCall } from '../../handlers/comms/leaveVideoCall';
 import { updateVideoCallParticipant } from '../../handlers/comms/updateVideoCallParticipant';
 import { getIceServers } from '../../handlers/comms/getIceServers';
 import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
+import { sendPaymentLink } from '../../handlers/dues/sendPaymentLink';
+import { checkoutPaymentToken } from '../../handlers/dues/checkoutPaymentToken';
+import { validatePaymentToken } from '../../handlers/dues/validatePaymentToken';
 import { listEmailQueueItems } from '../../handlers/email/listEmailQueueItems';
 import { getEmailQueueItem } from '../../handlers/email/getEmailQueueItem';
 import { cancelEmailQueueItem } from '../../handlers/email/cancelEmailQueueItem';
 import { retryEmailQueueItem } from '../../handlers/email/retryEmailQueueItem';
+import { listEmailSuppressions } from '../../handlers/email/listEmailSuppressions';
 import { listEmailTemplates } from '../../handlers/email/listEmailTemplates';
 import { createEmailTemplate } from '../../handlers/email/createEmailTemplate';
 import { getEmailTemplate } from '../../handlers/email/getEmailTemplate';
 import { updateEmailTemplate } from '../../handlers/email/updateEmailTemplate';
 import { testEmailTemplate } from '../../handlers/email/testEmailTemplate';
+import { unsubscribeEmailGet } from '../../handlers/email/unsubscribeEmailGet';
+import { unsubscribeEmailPost } from '../../handlers/email/unsubscribeEmailPost';
 import { createInvite } from '../../handlers/invite/createInvite';
 import { claimInvite } from '../../handlers/invite/claimInvite';
 import { validateInvite } from '../../handlers/invite/validateInvite';
@@ -354,6 +386,7 @@ import { cancelMyAccountDeletion } from '../../handlers/person/cancelMyAccountDe
 import { createMyCreditEntry } from '../../handlers/person/createMyCreditEntry';
 import { listMyCreditEntries } from '../../handlers/person/listMyCreditEntries';
 import { getMyCreditSummary } from '../../handlers/person/getMyCreditSummary';
+import { getMyCredits } from '../../handlers/person/getMyCredits';
 import { requestMyAccountDeletion } from '../../handlers/person/requestMyAccountDeletion';
 import { exportMyData } from '../../handlers/person/exportMyData';
 import { getMyMemberships } from '../../handlers/person/getMyMemberships';
@@ -388,50 +421,15 @@ import { submitSurveyResponse } from '../../handlers/surveys/submitSurveyRespons
 import { listSurveyResponses } from '../../handlers/surveys/listSurveyResponses';
 
 export const registry = {
-  // Platformadmin handlers
-  inviteAdmin,
-  listAdmins,
-  updateAdmin,
-  revokeAdmin,
-  createAssociation,
-  listAssociations,
-  getAssociation,
-  updateAssociation,
-  deleteAssociation,
-  setFeatureFlag,
-  listFeatureFlags,
-  deleteFeatureFlag,
-  startImpersonation,
-  endImpersonation,
-  getAdminRole,
-  createOrganization,
-  listOrganizations,
-  getOrganization,
-  updateOrganization,
-  transitionOrgStatus,
-  getOrganizationBySlug,
-
-  // Documents handlers
-  createDocumentTag,
-  listDocumentTags,
-  getDocumentTag,
-  updateDocumentTag,
-  deleteDocumentTag,
-  createDocument,
-  searchDocuments,
-  getDocument,
-  updateDocument,
-  deleteDocument,
-  getDocumentAccessLog,
-  archiveDocument,
-  uploadNewDocumentVersion,
-  listDocumentVersions,
-  getDocumentVersion,
-
   // Association:operations handlers
+  listOrgAccreditedProviders,
+  createOrgAccreditedProvider,
+  updateOrgAccreditedProvider,
+  deleteOrgAccreditedProvider,
   listMyCustomEvents,
   listCustomEventAttendance,
   checkInCustomEvent,
+  completeEvent,
   registerForCustomEvent,
   registerAndPayForEvent,
   listCustomEventRegistrations,
@@ -485,6 +483,50 @@ export const registry = {
   deleteTraining,
   publishTraining,
 
+  // Platformadmin handlers
+  inviteAdmin,
+  listAdmins,
+  updateAdmin,
+  revokeAdmin,
+  createAssociation,
+  listAssociations,
+  getAssociation,
+  updateAssociation,
+  deleteAssociation,
+  listAllCommittees,
+  getCommittee,
+  setFeatureFlag,
+  listFeatureFlags,
+  deleteFeatureFlag,
+  startImpersonation,
+  endImpersonation,
+  getAdminRole,
+  getNationalDashboard,
+  createOrganization,
+  listOrganizations,
+  getOrganization,
+  updateOrganization,
+  transitionOrgStatus,
+  getOrganizationBySlug,
+  listPublicOrgs,
+
+  // Documents handlers
+  createDocumentTag,
+  listDocumentTags,
+  getDocumentTag,
+  updateDocumentTag,
+  deleteDocumentTag,
+  createDocument,
+  searchDocuments,
+  getDocument,
+  updateDocument,
+  deleteDocument,
+  getDocumentAccessLog,
+  archiveDocument,
+  uploadNewDocumentVersion,
+  listDocumentVersions,
+  getDocumentVersion,
+
   // Association:member handlers
   createAffiliationTransfer,
   listAffiliationTransfers,
@@ -518,6 +560,10 @@ export const registry = {
   updateChapterAffiliation,
   deleteChapterAffiliation,
   setPrimaryChapterAffiliation,
+  getComplianceReport,
+  refreshCompliance,
+  getOrgCpdConfig,
+  updateOrgCpdConfig,
   createCredentialTemplate,
   listCredentialTemplates,
   getCredentialTemplate,
@@ -525,12 +571,14 @@ export const registry = {
   deleteCredentialTemplate,
   listDigitalCredentials,
   issueDigitalCredential,
+  lookupCredentialPublic,
   verifyCredentialPublic,
   verifyDigitalCredentialAuthenticated,
   getDigitalCredential,
   updateDigitalCredential,
   deleteDigitalCredential,
   revokeDigitalCredential,
+  awardManualCredit,
   createDirectoryProfile,
   listDirectoryProfiles,
   getDirectoryProfile,
@@ -630,11 +678,19 @@ export const registry = {
   getRoyaltySplit,
   updateRoyaltySplit,
   deleteRoyaltySplit,
+  createSpecialAssessment,
+  updateSpecialAssessment,
+  deleteSpecialAssessment,
+  applySpecialAssessment,
+  getSpecialAssessmentCollection,
+  listSpecialAssessments,
   createMembershipTier,
   listMembershipTiers,
   getMembershipTier,
   updateMembershipTier,
   deleteMembershipTier,
+  bulkIssueCertificates,
+  verifyCertificatePublic,
   getCreditCompliance,
   listOfficerTermsSummary,
 
@@ -667,6 +723,9 @@ export const registry = {
   publishAnnouncement,
   listAnnouncements,
   createAnnouncement,
+  createSavedSegment,
+  listSavedSegments,
+  deleteSavedSegment,
 
   // Audit handlers
   listAuditLogs,
@@ -723,17 +782,23 @@ export const registry = {
 
   // Dues handlers
   getDuesDashboard,
+  sendPaymentLink,
+  checkoutPaymentToken,
+  validatePaymentToken,
 
   // Email handlers
   listEmailQueueItems,
   getEmailQueueItem,
   cancelEmailQueueItem,
   retryEmailQueueItem,
+  listEmailSuppressions,
   listEmailTemplates,
   createEmailTemplate,
   getEmailTemplate,
   updateEmailTemplate,
   testEmailTemplate,
+  unsubscribeEmailGet,
+  unsubscribeEmailPost,
 
   // Invite handlers
   createInvite,
@@ -761,6 +826,7 @@ export const registry = {
   createMyCreditEntry,
   listMyCreditEntries,
   getMyCreditSummary,
+  getMyCredits,
   requestMyAccountDeletion,
   exportMyData,
   getMyMemberships,

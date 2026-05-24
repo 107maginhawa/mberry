@@ -36,6 +36,9 @@ import "./modules/dues-custom.tsp";
 // Invite module — officer invites, public validation, authenticated claim
 import "./modules/invite.tsp";
 
+// Surveys & NPS — Wave 6
+import "./modules/surveys.tsp";
+
 // Infrastructure endpoints (health.tsp and feature-flags.tsp removed — real
 // implementations live in core/health.ts and platformadmin/listFeatureFlags.ts)
 
@@ -62,6 +65,7 @@ import "./association/member/certification.tsp";
 import "./association/member/ethics.tsp";
 import "./association/member/awards.tsp";
 import "./association/member/fundraising.tsp";
+import "./association/member/special-assessments.tsp";
 import "./association/operations/events.tsp";
 import "./association/operations/training.tsp";
 import "./association/operations/conference.tsp";
@@ -199,6 +203,14 @@ namespace MonobaseAPI {
   @route("/email")
   interface EmailQueueManagement extends EmailModule.EmailQueueManagement {}
 
+  @tag("Email")
+  @route("/email")
+  interface EmailUnsubscribeEndpoints extends EmailModule.EmailUnsubscribeEndpoints {}
+
+  @tag("Email")
+  @route("/email")
+  interface EmailSuppressionManagement extends EmailModule.EmailSuppressionManagement {}
+
   // Booking Management - events, slots, bookings, and schedule exceptions
   @tag("Booking")
   @route("/booking")
@@ -220,6 +232,11 @@ namespace MonobaseAPI {
   @tag("Reviews")
   @route("/reviews")
   interface ReviewsManagement extends ReviewsModule.ReviewsManagement {}
+
+  // Surveys & NPS Management (Wave 6)
+  @tag("Surveys")
+  @route("/surveys")
+  interface SurveysManagement extends SurveysModule.SurveysManagement {}
 
   // =========================================================================
   // Association Domain — Membership (test: one interface)
@@ -310,6 +327,14 @@ namespace MonobaseAPI {
   interface AssocDuesReportingService extends Association.Member.Dues.DuesReportingService {}
 
   // =========================================================================
+  // Association Domain — Special Assessments (one-time charges)
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/special-assessments")
+  interface AssocSpecialAssessmentManagement extends Association.Member.SpecialAssessments.SpecialAssessmentManagement {}
+
+  // =========================================================================
   // Association Domain — Chapters
   // =========================================================================
 
@@ -361,6 +386,14 @@ namespace MonobaseAPI {
   @route("/association/member/certificates")
   interface AssocCertificateManagement extends Association.Member.Certificates.CertificateManagement {}
 
+  @tag("Association:Member")
+  @route("/certificates")
+  interface CertificateVerificationService extends Association.Member.Certificates.CertificateVerificationService {}
+
+  @tag("Association:Member")
+  @route("/certificates")
+  interface CertificateBulkIssuance extends Association.Member.Certificates.CertificateBulkIssuance {}
+
   // =========================================================================
   // Association Domain — Directory
   // =========================================================================
@@ -390,6 +423,10 @@ namespace MonobaseAPI {
   interface AssocCredentialVerificationService extends Association.Member.Credentials.CredentialVerificationService {}
 
   @tag("Association:Member")
+  @route("/association/member/credentials/lookup")
+  interface AssocCredentialLookupService extends Association.Member.Credentials.CredentialLookupService {}
+
+  @tag("Association:Member")
   @route("/association/member/licenses")
   interface AssocProfessionalLicenseManagement extends Association.Member.Credentials.ProfessionalLicenseManagement {}
 
@@ -416,6 +453,10 @@ namespace MonobaseAPI {
   @tag("Communication")
   @route("/association/person-subscriptions")
   interface AssocPersonSubscriptionManagement extends Association.Core.Communication.PersonSubscriptionManagement.PersonSubscriptionManagement {}
+
+  @tag("Communication")
+  @route("/communications/segments")
+  interface AssocSavedSegmentManagement extends Association.Core.Communication.SavedSegmentManagement.SavedSegmentManagement {}
 
   // =========================================================================
   // Association Domain — Documents
@@ -486,6 +527,46 @@ namespace MonobaseAPI {
   interface AssocTrainingLifecycleService extends Association.Operations.Training.TrainingLifecycleService {}
 
   // =========================================================================
+  // Association Domain — Accredited Providers (org-scoped training providers)
+  // =========================================================================
+
+  @tag("Association:Operations")
+  @route("/accredited-providers")
+  interface AssocOrgAccreditedProviderManagement extends Association.Operations.Training.OrgAccreditedProviderManagement {}
+
+  // =========================================================================
+  // Association Domain — CPD Config
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/cpd-config")
+  interface AssocCpdConfigManagement extends Association.Operations.Training.CpdConfigManagement {}
+
+  // =========================================================================
+  // Association Domain — Manual Credit Award
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/credits/manual")
+  interface AssocManualCreditManagement extends Association.Operations.Training.ManualCreditManagement {}
+
+  // =========================================================================
+  // Association Domain — My Credits (member-facing)
+  // =========================================================================
+
+  @tag("Person")
+  @route("/persons/me/credits")
+  interface PersonMyCreditsManagement extends Association.Operations.Training.MyCreditsManagement {}
+
+  // =========================================================================
+  // Association Domain — Compliance Reporting
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/compliance")
+  interface AssocComplianceManagement extends Association.Operations.Training.ComplianceManagement {}
+
+  // =========================================================================
   // Platform Administration (M03)
   // =========================================================================
 
@@ -526,6 +607,9 @@ namespace MonobaseAPI {
   @tag("PlatformAdmin")
   interface PlatformAdminIdentityEndpoints extends PlatformAdminCustomModule.AdminIdentityEndpoints {}
 
+  @tag("PlatformAdmin")
+  interface PlatformAdminDashboardEndpoints extends PlatformAdminCustomModule.AdminDashboardEndpoints {}
+
   // =========================================================================
   // Association Domain — Announcements
   // =========================================================================
@@ -546,6 +630,12 @@ namespace MonobaseAPI {
 
   @tag("Dues")
   interface DuesCustomManagement extends DuesCustomModule.DuesCustomManagement {}
+
+  @tag("Dues")
+  interface PaymentTokenEndpoints extends DuesCustomModule.PaymentTokenEndpoints {}
+
+  @tag("Dues")
+  interface PaymentLinkManagement extends DuesCustomModule.PaymentLinkManagement {}
 
   // =========================================================================
   // Invite Module — officer invites, public validation, authenticated claim

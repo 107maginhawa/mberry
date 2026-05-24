@@ -896,6 +896,19 @@ namespace Association.Operations.Events {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiNotFoundResponse;
+
+    @doc("Transition a published event to completed status. Only Society Officers and Presidents may complete events.")
+    @operationId("completeEvent")
+    @post
+    @route("/{eventId}/complete")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    completeEvent(
+      @path eventId: string,
+    ): ApiOkResponse<Event>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
   }
 
   /**

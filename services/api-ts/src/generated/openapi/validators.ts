@@ -177,6 +177,8 @@ export const AccreditedProviderSchema = z.object({
   maxCreditsPerActivity: z.number().int().gte(1).optional()
 });
 
+export const AccreditedProviderStatusSchema = z.enum(["active", "suspended", "expired"]);
+
 export const AccreditedProviderUpdateSchema = z.object({
   id: z.string().uuid().optional(),
   version: z.number().int().optional(),
@@ -468,6 +470,31 @@ export const AnnouncementVisibilitySchema = z.enum(["internal", "network"]);
 
 export const ApplicationStatusSchema = z.enum(["submitted", "underReview", "approved", "denied", "waitlisted"]);
 
+export const ApplySpecialAssessmentRequestSchema = z.object({
+  memberIds: z.array(z.string()).optional()
+});
+
+export const ApplySpecialAssessmentResultSchema = z.object({
+  assessment: z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  name: z.string().min(1).max(255),
+  description: z.union([z.string(), z.null()]).optional(),
+  amount: z.number().int().gte(1),
+  currency: z.string().max(3),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  fundId: z.union([z.string(), z.null()]).optional(),
+  appliesTo: z.enum(["all", "selected"]),
+  status: z.enum(["draft", "active", "closed"])
+}),
+  invoicesGenerated: z.number().int()
+});
+
 export const ArticleSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -507,6 +534,12 @@ export const ArticleUpdateSchema = z.object({
   accessLevel: z.enum(["open_access", "member_only", "subscriber", "pay_per_view"]).optional(),
   status: z.enum(["submitted", "peer_review", "accepted", "published", "retracted"]).optional()
 });
+
+export const AssessmentAppliesToSchema = z.enum(["all", "selected"]);
+
+export const AssessmentStatusSchema = z.enum(["draft", "active", "closed"]);
+
+export const AssessmentTargetStatusSchema = z.enum(["pending", "paid"]);
 
 export const AssociationCoreAssociationBaseEntitySchema = z.object({
   id: z.string().uuid(),
@@ -859,6 +892,90 @@ export const AssociationCoreCommunicationPersonSubscriptionUpdateSchema = z.obje
   personId: z.string().optional(),
   topicId: z.string().optional(),
   enabled: z.boolean().optional()
+});
+
+export const AssociationCoreCommunicationSavedSegmentSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  name: z.string().min(1).max(100),
+  filters: z.object({
+  duesStatus: z.string().optional(),
+  membershipTier: z.string().optional(),
+  chapterIds: z.array(z.string()).optional(),
+  joinedAfter: z.string().optional(),
+  joinedBefore: z.string().optional()
+})
+});
+
+export const AssociationCoreCommunicationSavedSegmentCreateRequestSchema = z.object({
+  organizationId: z.string(),
+  name: z.string().min(1).max(100),
+  filters: z.object({
+  duesStatus: z.string().optional(),
+  membershipTier: z.string().optional(),
+  chapterIds: z.array(z.string()).optional(),
+  joinedAfter: z.string().optional(),
+  joinedBefore: z.string().optional()
+})
+});
+
+export const AssociationCoreCommunicationSavedSegmentDeleteResponseSchema = z.object({
+  success: z.boolean()
+});
+
+export const AssociationCoreCommunicationSavedSegmentListResponseSchema = z.object({
+  data: z.array(AssociationCoreCommunicationSavedSegmentSchema)
+});
+
+export const AssociationCoreCommunicationSavedSegmentResponseSchema = z.object({
+  data: z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  name: z.string().min(1).max(100),
+  filters: z.object({
+  duesStatus: z.string().optional(),
+  membershipTier: z.string().optional(),
+  chapterIds: z.array(z.string()).optional(),
+  joinedAfter: z.string().optional(),
+  joinedBefore: z.string().optional()
+})
+})
+});
+
+export const AssociationCoreCommunicationSavedSegmentUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  name: z.string().min(1).max(100).optional(),
+  filters: z.object({
+  duesStatus: z.string().optional(),
+  membershipTier: z.string().optional(),
+  chapterIds: z.array(z.string()).optional(),
+  joinedAfter: z.string().optional(),
+  joinedBefore: z.string().optional()
+}).optional()
+});
+
+export const AssociationCoreCommunicationSegmentFiltersSchema = z.object({
+  duesStatus: z.string().optional(),
+  membershipTier: z.string().optional(),
+  chapterIds: z.array(z.string()).optional(),
+  joinedAfter: z.string().optional(),
+  joinedBefore: z.string().optional()
 });
 
 export const AssociationCoreCommunicationSubscriptionTopicSchema = z.object({
@@ -1729,6 +1846,22 @@ export const AssociationCoreStaffStaffMemberUpdateSchema = z.object({
 export const AssociationCoreStaffStaffRoleSchema = z.enum(["admin", "coordinator", "accountant", "executive", "support", "custom"]);
 
 export const AssociationCoreStaffStaffStatusSchema = z.enum(["invited", "active", "onLeave", "terminated"]);
+
+export const AssociationMemberCredentialsCredentialLookupResultSchema = z.object({
+  result: z.enum(["valid", "expired", "revoked", "notFound"]),
+  credential: z.union([z.object({
+  credentialNumber: z.string(),
+  status: z.string(),
+  issuedAt: z.string().datetime().transform((str) => new Date(str)),
+  expiresAt: z.string().datetime().transform((str) => new Date(str)).optional()
+}), z.null()]),
+  holder: z.object({
+  displayName: z.string(),
+  photoUrl: z.string().optional(),
+  specialty: z.string().optional(),
+  membershipStatus: z.string().optional()
+}).optional()
+});
 
 export const PlatformAdminModuleAssociationSchema = z.object({
   id: z.string(),
@@ -2791,6 +2924,33 @@ export const BulkApproveApplicationsResponseSchema = z.object({
   failed: z.array(BulkApproveFailureSchema)
 });
 
+export const BulkIssueCertificateResultSchema = z.object({
+  personId: z.string(),
+  certificateNumber: z.string(),
+  pdfUrl: z.union([z.string(), z.null()])
+});
+
+export const BulkIssueCertificatesRequestSchema = z.object({
+  organizationId: z.string(),
+  personIds: z.array(z.string()).max(100),
+  trainingTitle: z.string().min(1),
+  certificateType: z.string(),
+  cpdActivityType: z.string().optional(),
+  creditHours: z.number().optional(),
+  templateId: z.string().optional(),
+  signingOfficerId: z.string(),
+  orgCode: z.string().min(1),
+  orgBranding: z.record(z.string(), z.unknown()).optional(),
+  signatoryName: z.string().optional(),
+  signatoryTitle: z.string().optional()
+});
+
+export const BulkIssueQueuedResponseSchema = z.object({
+  status: z.string(),
+  jobId: z.string(),
+  message: z.string()
+});
+
 export const COIDisclosureSchema = z.object({
   category: z.enum(["financial", "board", "vendor", "employment", "family", "other"]),
   description: z.string().min(1).max(3000),
@@ -3079,6 +3239,16 @@ export const CertificateUpdateSchema = z.object({
   issuedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
+export const CertificateVerificationResultSchema = z.object({
+  certificateNumber: z.string(),
+  holderName: z.string(),
+  issuedAt: z.string().datetime().transform((str) => new Date(str)),
+  status: z.string(),
+  creditHours: z.number().optional(),
+  cpdActivityType: z.string().optional(),
+  isValid: z.boolean()
+});
+
 export const CertificationEnrollmentSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -3200,6 +3370,22 @@ export const ChapterAffiliationUpdateSchema = z.object({
 export const ChapterAffiliationUpdateRequestSchema = z.object({
   isPrimary: z.boolean().optional(),
   status: AffiliationStatusSchema.optional()
+});
+
+export const ChapterMetricsSchema = z.object({
+  orgId: z.string(),
+  chapterName: z.string().optional(),
+  totalMembers: z.number().int(),
+  activeMembers: z.number().int(),
+  graceMembers: z.number().int(),
+  lapsedMembers: z.number().int(),
+  suspendedMembers: z.number().int(),
+  collectionRate: z.number(),
+  totalCollected: z.number(),
+  totalExpected: z.number(),
+  cpdComplianceRate: z.number(),
+  avgCreditsPerMember: z.number(),
+  activityCount90d: z.number().int()
 });
 
 export const ChatMessageSchema = z.object({
@@ -3399,6 +3585,17 @@ export const CommitteeSchema = z.object({
   status: z.enum(["active", "suspended", "dissolved"])
 });
 
+export const CommitteeDetailSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  organizationId: z.string().optional(),
+  type: z.string().optional(),
+  memberCount: z.number().int().optional(),
+  status: z.string().optional(),
+  description: z.string().optional(),
+  members: z.array(z.record(z.string(), z.unknown())).optional()
+});
+
 export const CommitteeMeetingSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -3463,6 +3660,15 @@ export const CommitteeSeatUpdateSchema = z.object({
 
 export const CommitteeStatusSchema = z.enum(["active", "suspended", "dissolved"]);
 
+export const CommitteeSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  organizationId: z.string().optional(),
+  type: z.string().optional(),
+  memberCount: z.number().int().optional(),
+  status: z.string().optional()
+});
+
 export const CommitteeTypeSchema = z.enum(["standing", "adhoc", "taskForce"]);
 
 export const CommitteeUpdateSchema = z.object({
@@ -3484,6 +3690,31 @@ export const CommitteeUpdateSchema = z.object({
 export const ComplaintCategorySchema = z.enum(["professionalMisconduct", "codeViolation", "financialImpropriety", "conflictOfInterest", "discrimination", "harassment", "other"]);
 
 export const ComplaintStatusSchema = z.enum(["filed", "preliminaryReview", "investigation", "hearing", "decision", "appeal", "closed"]);
+
+export const ComplianceRefreshResultSchema = z.object({
+  refreshed: z.boolean(),
+  at: z.string()
+});
+
+export const ComplianceReportResponseSchema = z.object({
+  summary: z.object({
+  compliant: z.number().int(),
+  atRisk: z.number().int(),
+  nonCompliant: z.number().int(),
+  total: z.number().int(),
+  requiredCredits: z.number().int()
+}),
+  standings: z.array(z.record(z.string(), z.unknown())),
+  pagination: z.record(z.string(), z.unknown())
+});
+
+export const ComplianceReportSummarySchema = z.object({
+  compliant: z.number().int(),
+  atRisk: z.number().int(),
+  nonCompliant: z.number().int(),
+  total: z.number().int(),
+  requiredCredits: z.number().int()
+});
 
 export const ComplianceRowSchema = z.object({
   personId: z.string().uuid(),
@@ -4001,6 +4232,12 @@ export const CredentialVerificationLogUpdateSchema = z.object({
 
 export const CreditActivityTypeSchema = z.enum(["event", "training", "conference", "selfStudy", "publication", "teaching", "other"]);
 
+export const CreditCategoryBreakdownSchema = z.object({
+  general: z.number(),
+  major: z.number(),
+  selfDirected: z.number()
+});
+
 export const CreditComplianceReportSchema = z.object({
   data: z.array(ComplianceRowSchema),
   summary: z.object({
@@ -4082,6 +4319,19 @@ export const CreditEntryUpdateSchema = z.object({
   awardedBy: z.string().max(100).optional(),
   verifiedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   category: z.string().max(100).optional()
+});
+
+export const CreditHistoryEntrySchema = z.object({
+  id: z.string(),
+  activityName: z.string(),
+  provider: z.string().optional(),
+  activityDate: z.string().datetime().transform((str) => new Date(str)).optional(),
+  creditAmount: z.number().int(),
+  category: z.string().optional(),
+  sourceType: z.string().optional(),
+  verificationStatus: z.string(),
+  status: z.string().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const CreditProvenanceSchema = z.enum(["auto", "manual"]);
@@ -5049,6 +5299,19 @@ export const EmailQueueItemUpdateSchema = z.object({
 });
 
 export const EmailQueueStatusSchema = z.enum(["pending", "processing", "sent", "failed", "cancelled"]);
+
+export const EmailSuppressionSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  reason: z.string(),
+  organizationId: z.string(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const EmailSuppressionListResponseSchema = z.object({
+  data: z.array(EmailSuppressionSchema),
+  total: z.number().int()
+});
 
 export const EmailTemplateSchema = z.object({
   id: z.string().uuid(),
@@ -6126,6 +6389,23 @@ export const LicenseRenewalAlertUpdateSchema = z.object({
 
 export const LicenseStatusSchema = z.enum(["active", "expired", "suspended", "revoked", "pending"]);
 
+export const ManualCreditAwardRequestSchema = z.object({
+  personId: z.string(),
+  activityName: z.string().min(1).max(300),
+  activityDate: z.string().datetime().transform((str) => new Date(str)),
+  creditAmount: z.number().int().gte(0),
+  idempotencyKey: z.string(),
+  provider: z.string().max(300).optional(),
+  category: z.string().optional(),
+  cpdActivityType: z.string().optional(),
+  supportingDocumentId: z.string().optional()
+});
+
+export const ManualCreditAwardResponseSchema = z.object({
+  data: z.record(z.string(), z.unknown()),
+  warning: z.string().optional()
+});
+
 export const MarkAllReadResponseSchema = z.object({
   success: z.boolean()
 });
@@ -6678,6 +6958,24 @@ export const MyCreditSummarySchema = z.object({
   totalCredits: z.number().int()
 });
 
+export const MyCreditsResponseSchema = z.object({
+  totalCredits: z.number(),
+  requiredCredits: z.number().int(),
+  compliancePercent: z.number().int().gte(0).lte(100),
+  categoryBreakdown: z.object({
+  general: z.number(),
+  major: z.number(),
+  selfDirected: z.number()
+}),
+  sdlCap: z.object({
+  max: z.number().int(),
+  used: z.number(),
+  exceeded: z.boolean()
+}),
+  entryCount: z.number().int(),
+  history: z.array(CreditHistoryEntrySchema)
+});
+
 export const MyDataExportSchema = z.object({
   exportedAt: z.string(),
   categories: z.array(z.string()),
@@ -6696,6 +6994,13 @@ export const MyMembershipSchema = z.object({
   status: z.string(),
   startDate: z.string().datetime().transform((str) => new Date(str)).optional(),
   endDate: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const NationalDashboardResponseSchema = z.object({
+  associationId: z.string(),
+  snapshotMonth: z.string(),
+  aggregate: z.record(z.string(), z.unknown()),
+  chapters: z.array(ChapterMetricsSchema)
 });
 
 export const NominationStatusSchema = z.enum(["submitted", "underReview", "shortlisted", "selected", "notSelected", "withdrawn"]);
@@ -6975,6 +7280,88 @@ export const OnboardingResponseSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional()
 });
 
+export const OrgAccreditedProviderSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  name: z.string().min(1).max(300),
+  accreditationNumber: z.string().min(1).max(100),
+  status: z.enum(["active", "suspended", "expired"]),
+  expiryDate: z.string().datetime().transform((str) => new Date(str)).optional(),
+  expiringSoon: z.boolean().optional()
+});
+
+export const OrgAccreditedProviderCreateRequestSchema = z.object({
+  name: z.string().min(1).max(300),
+  accreditationNumber: z.string().min(1).max(100),
+  status: z.enum(["active", "suspended", "expired"]).optional(),
+  expiryDate: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const OrgAccreditedProviderUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  name: z.string().min(1).max(300).optional(),
+  accreditationNumber: z.string().min(1).max(100).optional(),
+  status: z.enum(["active", "suspended", "expired"]).optional(),
+  expiryDate: z.string().datetime().transform((str) => new Date(str)).optional(),
+  expiringSoon: z.boolean().optional()
+});
+
+export const OrgAccreditedProviderUpdateRequestSchema = z.object({
+  name: z.string().max(300).optional(),
+  accreditationNumber: z.string().max(100).optional(),
+  status: z.enum(["active", "suspended", "expired"]).optional(),
+  expiryDate: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional()
+});
+
+export const OrgCpdConfigSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  requiredCredits: z.number().int().gte(1),
+  cycleLengthYears: z.number().int().gte(1).lte(5),
+  sdlCapPercent: z.number().int().gte(0).lte(100),
+  activityTypeMinimums: z.record(z.string(), z.unknown()).optional(),
+  cycleStartMonth: z.number().int().gte(1).lte(12)
+});
+
+export const OrgCpdConfigUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  requiredCredits: z.number().int().gte(1).optional(),
+  cycleLengthYears: z.number().int().gte(1).lte(5).optional(),
+  sdlCapPercent: z.number().int().gte(0).lte(100).optional(),
+  activityTypeMinimums: z.record(z.string(), z.unknown()).optional(),
+  cycleStartMonth: z.number().int().gte(1).lte(12).optional()
+});
+
+export const OrgCpdConfigUpdateRequestSchema = z.object({
+  requiredCredits: z.number().int().gte(1).optional(),
+  cycleLengthYears: z.number().int().gte(1).lte(5).optional(),
+  sdlCapPercent: z.number().int().gte(0).lte(100).optional(),
+  activityTypeMinimums: z.union([z.record(z.string(), z.unknown()), z.null()]).optional(),
+  cycleStartMonth: z.number().int().gte(1).lte(12).optional()
+});
+
 export const OrgProfileSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -7120,6 +7507,10 @@ export const PatientUpdateSchema = z.object({
 }).optional()
 });
 
+export const PaymentCheckoutResponseSchema = z.object({
+  checkoutUrl: z.string()
+});
+
 export const PaymentRequestSchema = z.object({
   paymentMethod: z.string().max(255).optional(),
   metadata: z.record(z.string(), z.unknown()).optional()
@@ -7131,6 +7522,18 @@ export const PaymentResponseSchema = z.object({
 });
 
 export const PaymentStatusSchema = z.enum(["pending", "requires_capture", "processing", "succeeded", "failed", "canceled"]);
+
+export const PaymentTokenValidationSchema = z.object({
+  valid: z.boolean(),
+  invoiceId: z.string().optional(),
+  amount: z.number().int().optional(),
+  currency: z.string().optional(),
+  memberName: z.string().optional(),
+  orgName: z.string().optional(),
+  dueDate: z.string().optional(),
+  error: z.string().optional(),
+  status: z.string().optional()
+});
 
 export const PeerReviewPanelSchema = z.object({
   id: z.string().uuid(),
@@ -7801,6 +8204,15 @@ export const PublicOrganizationSchema = z.object({
   memberCount: z.number().int()
 });
 
+export const PublicOrgListResponseSchema = z.object({
+  data: z.array(PublicOrganizationSchema),
+  meta: z.object({
+  total: z.number().int(),
+  limit: z.number().int(),
+  offset: z.number().int()
+})
+});
+
 export const PublicationSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -8408,6 +8820,12 @@ export const ScheduleExceptionUpdateSchema = z.object({
 }).optional()
 });
 
+export const SdlCapInfoSchema = z.object({
+  max: z.number().int(),
+  used: z.number(),
+  exceeded: z.boolean()
+});
+
 export const SeatAllocationSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -8459,6 +8877,18 @@ export const SeatAllocationUpdateSchema = z.object({
 export const SeatStatusSchema = z.enum(["active", "revoked"]);
 
 export const SendDeliveryStatusSchema = z.enum(["sent", "delivered", "opened", "clicked", "bounced", "unsubscribed"]);
+
+export const SendPaymentLinkRequestSchema = z.object({
+  personId: z.string(),
+  amount: z.number().int().optional(),
+  invoiceId: z.string().optional()
+});
+
+export const SendPaymentLinkResponseSchema = z.object({
+  token: z.string(),
+  paymentUrl: z.string(),
+  expiresAt: z.string()
+});
 
 export const SendTextMessageRequestSchema = z.object({
   messageType: z.enum(["text"]),
@@ -8549,6 +8979,162 @@ export const SpeakerUpdateSchema = z.object({
   honorariumAmount: z.number().int().gte(0).optional(),
   travelReimbursement: z.number().int().gte(0).optional(),
   w9Submitted: z.boolean().optional()
+});
+
+export const SpecialAssessmentSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  name: z.string().min(1).max(255),
+  description: z.union([z.string(), z.null()]).optional(),
+  amount: z.number().int().gte(1),
+  currency: z.string().max(3),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  fundId: z.union([z.string(), z.null()]).optional(),
+  appliesTo: z.enum(["all", "selected"]),
+  status: z.enum(["draft", "active", "closed"])
+});
+
+export const SpecialAssessmentCollectionMetricsSchema = z.object({
+  totalTargets: z.number().int(),
+  paidCount: z.number().int(),
+  pendingCount: z.number().int(),
+  totalExpected: z.number().int(),
+  totalCollected: z.number().int(),
+  totalOutstanding: z.number().int()
+});
+
+export const SpecialAssessmentCollectionMetricsUpdateSchema = z.object({
+  totalTargets: z.number().int().optional(),
+  paidCount: z.number().int().optional(),
+  pendingCount: z.number().int().optional(),
+  totalExpected: z.number().int().optional(),
+  totalCollected: z.number().int().optional(),
+  totalOutstanding: z.number().int().optional()
+});
+
+export const SpecialAssessmentCreateRequestSchema = z.object({
+  name: z.string().min(1).max(255),
+  description: z.union([z.string(), z.null()]).optional(),
+  amount: z.number().int().gte(1),
+  currency: z.string().max(3).optional(),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  fundId: z.union([z.string(), z.null()]).optional(),
+  appliesTo: z.enum(["all", "selected"]).optional()
+});
+
+export const SpecialAssessmentWithCollectionSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string(),
+  name: z.string().min(1).max(255),
+  description: z.union([z.string(), z.null()]).optional(),
+  amount: z.number().int().gte(1),
+  currency: z.string().max(3),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
+  fundId: z.union([z.string(), z.null()]).optional(),
+  appliesTo: z.enum(["all", "selected"]),
+  status: z.enum(["draft", "active", "closed"]),
+  collection: z.union([z.object({
+  totalTargets: z.number().int(),
+  paidCount: z.number().int(),
+  pendingCount: z.number().int(),
+  totalExpected: z.number().int(),
+  totalCollected: z.number().int(),
+  totalOutstanding: z.number().int()
+}), z.null()]).optional()
+});
+
+export const SpecialAssessmentListResponseSchema = z.object({
+  assessments: z.array(SpecialAssessmentWithCollectionSchema)
+});
+
+export const SpecialAssessmentTargetSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  assessmentId: z.string(),
+  personId: z.string(),
+  invoiceId: z.union([z.string(), z.null()]).optional(),
+  status: z.enum(["pending", "paid"])
+});
+
+export const SpecialAssessmentTargetUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  assessmentId: z.string().optional(),
+  personId: z.string().optional(),
+  invoiceId: z.union([z.string(), z.null()]).optional(),
+  status: z.enum(["pending", "paid"]).optional()
+});
+
+export const SpecialAssessmentUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  name: z.string().min(1).max(255).optional(),
+  description: z.union([z.string(), z.null()]).optional(),
+  amount: z.number().int().gte(1).optional(),
+  currency: z.string().max(3).optional(),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  fundId: z.union([z.string(), z.null()]).optional(),
+  appliesTo: z.enum(["all", "selected"]).optional(),
+  status: z.enum(["draft", "active", "closed"]).optional()
+});
+
+export const SpecialAssessmentUpdateRequestSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  description: z.union([z.string(), z.null()]).optional(),
+  amount: z.number().int().gte(1).optional(),
+  currency: z.string().max(3).optional(),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  fundId: z.union([z.string(), z.null()]).optional(),
+  appliesTo: z.enum(["all", "selected"]).optional()
+});
+
+export const SpecialAssessmentWithCollectionUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().optional(),
+  name: z.string().min(1).max(255).optional(),
+  description: z.union([z.string(), z.null()]).optional(),
+  amount: z.number().int().gte(1).optional(),
+  currency: z.string().max(3).optional(),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
+  fundId: z.union([z.string(), z.null()]).optional(),
+  appliesTo: z.enum(["all", "selected"]).optional(),
+  status: z.enum(["draft", "active", "closed"]).optional(),
+  collection: z.union([z.object({
+  totalTargets: z.number().int().optional(),
+  paidCount: z.number().int().optional(),
+  pendingCount: z.number().int().optional(),
+  totalExpected: z.number().int().optional(),
+  totalCollected: z.number().int().optional(),
+  totalOutstanding: z.number().int().optional()
+}), z.null()]).optional()
 });
 
 export const SpecialInterestGroupSchema = z.object({
@@ -9480,6 +10066,54 @@ export const WebhookSubscriptionUpdateSchema = z.object({
   lastDeliveryStatus: z.string().optional()
 });
 
+export const ListOrgAccreditedProvidersParams = z.object({
+  organizationId: z.string(),
+});
+export type ListOrgAccreditedProvidersParams = z.infer<typeof ListOrgAccreditedProvidersParams>;
+
+export const ListOrgAccreditedProvidersQuery = z.object({
+  status: AccreditedProviderStatusSchema.optional(),
+});
+export type ListOrgAccreditedProvidersQuery = z.infer<typeof ListOrgAccreditedProvidersQuery>;
+
+export const ListOrgAccreditedProvidersResponse = z.object({
+  data: z.array(OrgAccreditedProviderSchema),
+  total: z.number().int()
+});
+
+export const CreateOrgAccreditedProviderParams = z.object({
+  organizationId: z.string(),
+});
+export type CreateOrgAccreditedProviderParams = z.infer<typeof CreateOrgAccreditedProviderParams>;
+
+export const CreateOrgAccreditedProviderBody = OrgAccreditedProviderCreateRequestSchema;
+export type CreateOrgAccreditedProviderBody = z.infer<typeof CreateOrgAccreditedProviderBody>;
+
+export const CreateOrgAccreditedProviderResponse = z.object({
+  data: OrgAccreditedProviderSchema
+});
+
+export const UpdateOrgAccreditedProviderParams = z.object({
+  organizationId: z.string(),
+  providerId: z.string(),
+});
+export type UpdateOrgAccreditedProviderParams = z.infer<typeof UpdateOrgAccreditedProviderParams>;
+
+export const UpdateOrgAccreditedProviderBody = OrgAccreditedProviderUpdateRequestSchema;
+export type UpdateOrgAccreditedProviderBody = z.infer<typeof UpdateOrgAccreditedProviderBody>;
+
+export const UpdateOrgAccreditedProviderResponse = z.object({
+  data: OrgAccreditedProviderSchema
+});
+
+export const DeleteOrgAccreditedProviderParams = z.object({
+  organizationId: z.string(),
+  providerId: z.string(),
+});
+export type DeleteOrgAccreditedProviderParams = z.infer<typeof DeleteOrgAccreditedProviderParams>;
+
+export const DeleteOrgAccreditedProviderResponse = z.void();
+
 export const InviteAdminBody = PlatformAdminModulePlatformAdminRequestSchema;
 export type InviteAdminBody = z.infer<typeof InviteAdminBody>;
 
@@ -9545,6 +10179,25 @@ export type DeleteAssociationParams = z.infer<typeof DeleteAssociationParams>;
 
 export const DeleteAssociationResponse = z.void();
 
+export const ListAllCommitteesQuery = z.object({
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListAllCommitteesQuery = z.infer<typeof ListAllCommitteesQuery>;
+
+export const ListAllCommitteesResponse = z.object({
+  data: z.array(CommitteeSummarySchema)
+});
+
+export const GetCommitteeParams = z.object({
+  id: z.string(),
+});
+export type GetCommitteeParams = z.infer<typeof GetCommitteeParams>;
+
+export const GetCommitteeResponse = z.object({
+  data: CommitteeDetailSchema
+});
+
 export const SetFeatureFlagBody = PlatformAdminModuleFeatureFlagRequestSchema;
 export type SetFeatureFlagBody = z.infer<typeof SetFeatureFlagBody>;
 
@@ -9581,6 +10234,20 @@ export type EndImpersonationParams = z.infer<typeof EndImpersonationParams>;
 export const EndImpersonationResponse = PlatformAdminModuleImpersonationSessionSchema;
 
 export const GetAdminRoleResponse = AdminRoleResponseSchema;
+
+export const GetNationalDashboardParams = z.object({
+  associationId: z.string(),
+});
+export type GetNationalDashboardParams = z.infer<typeof GetNationalDashboardParams>;
+
+export const GetNationalDashboardQuery = z.object({
+  snapshotMonth: z.string().optional(),
+});
+export type GetNationalDashboardQuery = z.infer<typeof GetNationalDashboardQuery>;
+
+export const GetNationalDashboardResponse = z.object({
+  data: NationalDashboardResponseSchema
+});
 
 export const CreateOrganizationBody = PlatformAdminModuleOrganizationRequestSchema;
 export type CreateOrganizationBody = z.infer<typeof CreateOrganizationBody>;
@@ -9809,6 +10476,13 @@ export const CheckInCustomEventBody = CheckInCreateRequestSchema;
 export type CheckInCustomEventBody = z.infer<typeof CheckInCustomEventBody>;
 
 export const CheckInCustomEventResponse = CheckInSchema;
+
+export const CompleteEventParams = z.object({
+  eventId: z.string(),
+});
+export type CompleteEventParams = z.infer<typeof CompleteEventParams>;
+
+export const CompleteEventResponse = EventSchema;
 
 export const RegisterForCustomEventParams = z.object({
   eventId: z.string(),
@@ -10283,6 +10957,52 @@ export type SetPrimaryChapterAffiliationParams = z.infer<typeof SetPrimaryChapte
 
 export const SetPrimaryChapterAffiliationResponse = ChapterAffiliationSchema;
 
+export const GetComplianceReportParams = z.object({
+  organizationId: z.string(),
+});
+export type GetComplianceReportParams = z.infer<typeof GetComplianceReportParams>;
+
+export const GetComplianceReportQuery = z.object({
+  status: z.string().optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type GetComplianceReportQuery = z.infer<typeof GetComplianceReportQuery>;
+
+export const GetComplianceReportResponse = z.object({
+  data: ComplianceReportResponseSchema
+});
+
+export const RefreshComplianceParams = z.object({
+  organizationId: z.string(),
+});
+export type RefreshComplianceParams = z.infer<typeof RefreshComplianceParams>;
+
+export const RefreshComplianceResponse = z.object({
+  data: ComplianceRefreshResultSchema
+});
+
+export const GetOrgCpdConfigParams = z.object({
+  organizationId: z.string(),
+});
+export type GetOrgCpdConfigParams = z.infer<typeof GetOrgCpdConfigParams>;
+
+export const GetOrgCpdConfigResponse = z.object({
+  data: OrgCpdConfigSchema
+});
+
+export const UpdateOrgCpdConfigParams = z.object({
+  organizationId: z.string(),
+});
+export type UpdateOrgCpdConfigParams = z.infer<typeof UpdateOrgCpdConfigParams>;
+
+export const UpdateOrgCpdConfigBody = OrgCpdConfigUpdateRequestSchema;
+export type UpdateOrgCpdConfigBody = z.infer<typeof UpdateOrgCpdConfigBody>;
+
+export const UpdateOrgCpdConfigResponse = z.object({
+  data: OrgCpdConfigSchema
+});
+
 export const CreateCredentialTemplateBody = CredentialTemplateCreateRequestSchema;
 export type CreateCredentialTemplateBody = z.infer<typeof CreateCredentialTemplateBody>;
 
@@ -10346,6 +11066,13 @@ export type IssueDigitalCredentialBody = z.infer<typeof IssueDigitalCredentialBo
 
 export const IssueDigitalCredentialResponse = DigitalCredentialSchema;
 
+export const LookupCredentialPublicParams = z.object({
+  credentialNumber: z.string(),
+});
+export type LookupCredentialPublicParams = z.infer<typeof LookupCredentialPublicParams>;
+
+export const LookupCredentialPublicResponse = AssociationMemberCredentialsCredentialLookupResultSchema;
+
 export const VerifyCredentialPublicBody = VerifyCredentialRequestSchema;
 export type VerifyCredentialPublicBody = z.infer<typeof VerifyCredentialPublicBody>;
 
@@ -10389,6 +11116,11 @@ export const RevokeDigitalCredentialBody = RevokeCredentialRequestSchema;
 export type RevokeDigitalCredentialBody = z.infer<typeof RevokeDigitalCredentialBody>;
 
 export const RevokeDigitalCredentialResponse = DigitalCredentialSchema;
+
+export const AwardManualCreditBody = ManualCreditAwardRequestSchema;
+export type AwardManualCreditBody = z.infer<typeof AwardManualCreditBody>;
+
+export const AwardManualCreditResponse = ManualCreditAwardResponseSchema;
 
 export const CreateDirectoryProfileBody = DirectoryProfileCreateRequestSchema;
 export type CreateDirectoryProfileBody = z.infer<typeof CreateDirectoryProfileBody>;
@@ -11283,6 +12015,52 @@ export type DeleteRoyaltySplitParams = z.infer<typeof DeleteRoyaltySplitParams>;
 
 export const DeleteRoyaltySplitResponse = z.void();
 
+export const CreateSpecialAssessmentBody = SpecialAssessmentCreateRequestSchema;
+export type CreateSpecialAssessmentBody = z.infer<typeof CreateSpecialAssessmentBody>;
+
+export const CreateSpecialAssessmentResponse = SpecialAssessmentSchema;
+
+export const UpdateSpecialAssessmentParams = z.object({
+  id: z.string(),
+});
+export type UpdateSpecialAssessmentParams = z.infer<typeof UpdateSpecialAssessmentParams>;
+
+export const UpdateSpecialAssessmentBody = SpecialAssessmentUpdateRequestSchema;
+export type UpdateSpecialAssessmentBody = z.infer<typeof UpdateSpecialAssessmentBody>;
+
+export const UpdateSpecialAssessmentResponse = SpecialAssessmentSchema;
+
+export const DeleteSpecialAssessmentParams = z.object({
+  id: z.string(),
+});
+export type DeleteSpecialAssessmentParams = z.infer<typeof DeleteSpecialAssessmentParams>;
+
+export const DeleteSpecialAssessmentResponse = z.void();
+
+export const ApplySpecialAssessmentParams = z.object({
+  id: z.string(),
+});
+export type ApplySpecialAssessmentParams = z.infer<typeof ApplySpecialAssessmentParams>;
+
+export const ApplySpecialAssessmentBody = ApplySpecialAssessmentRequestSchema;
+export type ApplySpecialAssessmentBody = z.infer<typeof ApplySpecialAssessmentBody>;
+
+export const ApplySpecialAssessmentResponse = ApplySpecialAssessmentResultSchema;
+
+export const GetSpecialAssessmentCollectionParams = z.object({
+  id: z.string(),
+});
+export type GetSpecialAssessmentCollectionParams = z.infer<typeof GetSpecialAssessmentCollectionParams>;
+
+export const GetSpecialAssessmentCollectionResponse = SpecialAssessmentCollectionMetricsSchema;
+
+export const ListSpecialAssessmentsParams = z.object({
+  orgId: z.string(),
+});
+export type ListSpecialAssessmentsParams = z.infer<typeof ListSpecialAssessmentsParams>;
+
+export const ListSpecialAssessmentsResponse = SpecialAssessmentListResponseSchema;
+
 export const CreateMembershipTierBody = MembershipTierCreateRequestSchema;
 export type CreateMembershipTierBody = z.infer<typeof CreateMembershipTierBody>;
 
@@ -12161,6 +12939,22 @@ export type GetTimeSlotQuery = z.infer<typeof GetTimeSlotQuery>;
 
 export const GetTimeSlotResponse = TimeSlotSchema;
 
+export const BulkIssueCertificatesBody = BulkIssueCertificatesRequestSchema;
+export type BulkIssueCertificatesBody = z.infer<typeof BulkIssueCertificatesBody>;
+
+export const BulkIssueCertificatesResponse = z.object({
+  data: z.array(BulkIssueCertificateResultSchema)
+});
+
+export const VerifyCertificatePublicParams = z.object({
+  certificateNumber: z.string(),
+});
+export type VerifyCertificatePublicParams = z.infer<typeof VerifyCertificatePublicParams>;
+
+export const VerifyCertificatePublicResponse = z.object({
+  data: CertificateVerificationResultSchema
+});
+
 export const CreateChatRoomBody = CreateChatRoomRequestSchema;
 export type CreateChatRoomBody = z.infer<typeof CreateChatRoomBody>;
 
@@ -12320,6 +13114,30 @@ export type CreateAnnouncementBody = z.infer<typeof CreateAnnouncementBody>;
 
 export const CreateAnnouncementResponse = AnnouncementSchema;
 
+export const CreateSavedSegmentBody = AssociationCoreCommunicationSavedSegmentCreateRequestSchema;
+export type CreateSavedSegmentBody = z.infer<typeof CreateSavedSegmentBody>;
+
+export const CreateSavedSegmentResponse = AssociationCoreCommunicationSavedSegmentResponseSchema;
+
+export const ListSavedSegmentsQuery = z.object({
+  organizationId: z.string(),
+});
+export type ListSavedSegmentsQuery = z.infer<typeof ListSavedSegmentsQuery>;
+
+export const ListSavedSegmentsResponse = AssociationCoreCommunicationSavedSegmentListResponseSchema;
+
+export const DeleteSavedSegmentParams = z.object({
+  id: z.string(),
+});
+export type DeleteSavedSegmentParams = z.infer<typeof DeleteSavedSegmentParams>;
+
+export const DeleteSavedSegmentQuery = z.object({
+  organizationId: z.string(),
+});
+export type DeleteSavedSegmentQuery = z.infer<typeof DeleteSavedSegmentQuery>;
+
+export const DeleteSavedSegmentResponse = AssociationCoreCommunicationSavedSegmentDeleteResponseSchema;
+
 export const GetCreditComplianceParams = z.object({
   organizationId: UUIDSchema,
 });
@@ -12378,6 +13196,14 @@ export type RetryEmailQueueItemParams = z.infer<typeof RetryEmailQueueItemParams
 
 export const RetryEmailQueueItemResponse = EmailQueueItemSchema;
 
+export const ListEmailSuppressionsQuery = z.object({
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListEmailSuppressionsQuery = z.infer<typeof ListEmailSuppressionsQuery>;
+
+export const ListEmailSuppressionsResponse = EmailSuppressionListResponseSchema;
+
 export const ListEmailTemplatesQuery = z.object({
   status: TemplateStatusSchema.optional(),
   tags: z.string().transform(val => val.split(",").filter(Boolean)).optional(),
@@ -12423,6 +13249,24 @@ export const TestEmailTemplateBody = TestTemplateRequestSchema;
 export type TestEmailTemplateBody = z.infer<typeof TestEmailTemplateBody>;
 
 export const TestEmailTemplateResponse = TestTemplateResultSchema;
+
+export const UnsubscribeEmailGetQuery = z.object({
+  token: z.string(),
+  email: z.string(),
+  orgId: z.string(),
+});
+export type UnsubscribeEmailGetQuery = z.infer<typeof UnsubscribeEmailGetQuery>;
+
+export const UnsubscribeEmailGetResponse = z.string();
+
+export const UnsubscribeEmailPostQuery = z.object({
+  token: z.string(),
+  email: z.string(),
+  orgId: z.string(),
+});
+export type UnsubscribeEmailPostQuery = z.infer<typeof UnsubscribeEmailPostQuery>;
+
+export const UnsubscribeEmailPostResponse = z.string();
 
 export const CreateInviteBody = CreateInviteRequestSchema;
 export type CreateInviteBody = z.infer<typeof CreateInviteBody>;
@@ -12532,6 +13376,30 @@ export const ListOfficerTermsSummaryResponse = z.object({
   data: z.array(OfficerTermRecordSchema)
 });
 
+export const SendPaymentLinkParams = z.object({
+  organizationId: z.string(),
+});
+export type SendPaymentLinkParams = z.infer<typeof SendPaymentLinkParams>;
+
+export const SendPaymentLinkBody = SendPaymentLinkRequestSchema;
+export type SendPaymentLinkBody = z.infer<typeof SendPaymentLinkBody>;
+
+export const SendPaymentLinkResponse = SendPaymentLinkResponseSchema;
+
+export const CheckoutPaymentTokenParams = z.object({
+  token: z.string(),
+});
+export type CheckoutPaymentTokenParams = z.infer<typeof CheckoutPaymentTokenParams>;
+
+export const CheckoutPaymentTokenResponse = PaymentCheckoutResponseSchema;
+
+export const ValidatePaymentTokenParams = z.object({
+  token: z.string(),
+});
+export type ValidatePaymentTokenParams = z.infer<typeof ValidatePaymentTokenParams>;
+
+export const ValidatePaymentTokenResponse = PaymentTokenValidationSchema;
+
 export const CreatePersonBody = PersonCreateRequestSchema;
 export type CreatePersonBody = z.infer<typeof CreatePersonBody>;
 
@@ -12568,6 +13436,15 @@ export const ListMyCreditEntriesResponse = z.object({
 });
 
 export const GetMyCreditSummaryResponse = MyCreditSummarySchema;
+
+export const GetMyCreditsQuery = z.object({
+  organizationId: z.string().optional(),
+});
+export type GetMyCreditsQuery = z.infer<typeof GetMyCreditsQuery>;
+
+export const GetMyCreditsResponse = z.object({
+  data: MyCreditsResponseSchema
+});
 
 export const RequestMyAccountDeletionResponse = AccountDeletionResponseSchema;
 
@@ -12650,6 +13527,15 @@ export const GetOrganizationBySlugParams = z.object({
 export type GetOrganizationBySlugParams = z.infer<typeof GetOrganizationBySlugParams>;
 
 export const GetOrganizationBySlugResponse = PublicOrganizationSchema;
+
+export const ListPublicOrgsQuery = z.object({
+  search: z.string().optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListPublicOrgsQuery = z.infer<typeof ListPublicOrgsQuery>;
+
+export const ListPublicOrgsResponse = PublicOrgListResponseSchema;
 
 export const MarkAllNotificationsReadResponse = MarkAllReadResponseSchema;
 

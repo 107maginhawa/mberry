@@ -26,7 +26,7 @@ All tables inherit 6 base entity fields from `core/database.schema.ts`:
 |-------|-------------|---------------------|-------------|
 | `person` | Core identity record for every user | 11 | `person/repos/person.schema.ts` |
 | `notification_preference` | Per-person, per-category push/email toggles | 5 | `person/repos/notification-preferences.schema.ts` |
-| `person_privacy_setting` | Directory visibility controls per person per org | 6 | `person/repos/privacy-settings.schema.ts` |
+| `person_privacy_setting` | Directory visibility controls per person per org | 9 | `person/repos/privacy-settings.schema.ts` |
 | `data_export` | GDPR-style personal data export request tracking | 6 | `person/repos/data-export.schema.ts` |
 
 ### Enums
@@ -67,6 +67,9 @@ All tables inherit 6 base entity fields from `core/database.schema.ts`:
 - `phoneVisible` boolean (default: false)
 - `photoVisible` boolean (default: true)
 - `addressVisible` boolean (default: false)
+- `credentialsVisible` boolean (default: true) — [Wave 3a addition]
+- `duesStatusVisible` boolean (default: false) — [Wave 3a addition]
+- `ceComplianceVisible` boolean (default: false) — [Wave 3a addition]
 - Unique: `(personId, organizationId)`
 
 **`data_export`**
@@ -364,6 +367,18 @@ _None — person is the root identity aggregate._
 | `quiz_attempt` | Course quiz submission | 7 | `association:operations/repos/training.schema.ts` |
 | `accredited_provider` | PRC-accredited training provider | 5 | `training/repos/accredited-provider.schema.ts` |
 
+#### Table Details (Wave 2b Additions)
+
+| Table | Description | Columns (excl. base) | Schema File | Migration |
+|-------|-------------|---------------------|-------------|-----------|
+| `org_cpd_config` | Per-org CPD cycle configuration | organization_id, required_credits (default 60), cycle_length_years (default 3), sdl_cap_percent (default 40), activity_type_minimums (jsonb), cycle_start_month (default 1) | `training/repos/cpd-config.schema.ts` | 0045_wave2b_credit_pipeline.sql |
+| `org_certificate_seq` | Per-org per-year certificate numbering sequence | organization_id, year, last_seq (default 0), org_code (varchar 20) | `certificates/repos/certificate-seq.schema.ts` | 0047_wave2b_certificate_extension.sql |
+| `compliance_standings` | Materialized view: per-person per-org CPD compliance | person_id, organization_id, total_credits, general_credits, major_credits, sdl_credits, entry_count, required_credits, sdl_cap_percent, compliance_percent, compliance_status, last_credit_at | (materialized view) | 0046_wave2b_compliance_view.sql |
+
+**Wave 2b `credit_entry` extensions:** source_type (credit_source_type enum), source_id (uuid), cpd_activity_type (cpd_activity_type enum), attestation (jsonb), status (credit_status enum, default 'active'), voided_reason (varchar 500). Unique constraint: `(source_type, source_id, person_id)`.
+
+**Wave 2b `certificate` extensions:** template_id (varchar 100), signing_officer_id (uuid), credit_hours (integer), cpd_activity_type (cpd_activity_type enum), status (certificate_status enum, default 'issued'), pdf_url (varchar 500), revoked_at (timestamp), revoked_reason (varchar 500).
+
 #### Enums
 
 | Enum | Values |
@@ -372,6 +387,9 @@ _None — person is the root identity aggregate._
 | `enrollment_status` | `enrolled`, `completed`, `cancelled`, `noShow` |
 | `course_status` | `draft`, `published`, `archived` |
 | `accredited_provider_status` | `active`, `suspended`, `expired` |
+| `credit_source_type` | `event_checkin`, `training_completion`, `course_completion`, `manual_award` |
+| `credit_status` | `active`, `voided`, `disputed` |
+| `certificate_status` | `issued`, `revoked` |
 
 ### 4c. Booking
 
@@ -1023,52 +1041,55 @@ _None — person is the root identity aggregate._
 
 ---
 
-## 13. Surveys [Spec Review]
+## 13. Surveys [Wave 6 — Implemented]
 
-| Table | Description | Columns (excl. base) | Schema File |
-|-------|-------------|---------------------|-------------|
-| `survey` | Survey/poll created by an org admin | 10 | `surveys/repos/surveys.schema.ts` |
-| `survey_response` | Individual survey response (nullable respondent for anonymous) | 5 | `surveys/repos/surveys.schema.ts` |
+| Table | Description | Columns (excl. base) | Schema File | Migration |
+|-------|-------------|---------------------|-------------|-----------|
+| `survey` | Survey/poll created by an org officer | 7 | `surveys/repos/survey.schema.ts` | 0050_wave6_surveys.sql |
+| `survey_response` | Individual survey response | 6 | `surveys/repos/survey.schema.ts` | 0050_wave6_surveys.sql |
 
 ### Enums
 
-| Enum | Values |
-|------|--------|
-| `survey_status` | `draft`, `published`, `closed`, `archived` |
+No pgEnum — status uses `varchar(20)` with application-level validation (`draft`, `active`, `closed`).
 
 ### Table Details
 
 **`survey`**
 - `organizationId` uuid NOT NULL
-- `createdByPersonId` uuid NOT NULL
-- `title` text NOT NULL
+- `title` varchar(200) NOT NULL
 - `description` text — nullable
-- `status` survey_status enum (default: draft)
-- `isAnonymous` boolean (default: false)
-- `allowReEdit` boolean (default: false)
-- `deadline` timestamptz — nullable
-- `targetAudience` jsonb — nullable (audience filter criteria)
-- `responseCount` integer (default: 0)
-- Indexes: `idx_survey_org`, `idx_survey_status`, `idx_survey_created`
+- `status` varchar(20) NOT NULL (default: 'draft') — values: draft, active, closed
+- `surveyType` varchar(20) NOT NULL — e.g. 'survey', 'nps', 'poll'
+- `questions` jsonb NOT NULL (default: []) — array of SurveyQuestion objects
+- `settings` jsonb NOT NULL (default: {}) — SurveySettings: {anonymous?, deadline?, targetAudience?}
+- `analyticsSnapshot` jsonb — nullable, cached SurveyAnalyticsSnapshot
+- `createdBy` uuid → FK `person` (from baseEntityFields, overridden with explicit FK)
+- Indexes: `surveys_org_idx`, `surveys_status_idx`, `surveys_type_idx`, `surveys_created_by_idx`
+
+**Note:** Anonymous/deadline/targetAudience are in `settings` JSONB (not discrete columns). The spec review version had discrete columns — implementation chose JSONB for flexibility.
 
 **`survey_response`**
-- `surveyId` uuid NOT NULL → FK `survey`
-- `respondentPersonId` uuid — nullable (NULL when `survey.isAnonymous = true` — cryptographic anonymity per BR-40)
-- `answers` jsonb NOT NULL
-- `submittedAt` timestamptz
-- `isDraft` boolean (default: false)
-- Indexes: `idx_survey_response_survey`, `idx_survey_response_respondent`
+- `organizationId` uuid NOT NULL
+- `surveyId` uuid NOT NULL → FK `survey` ON DELETE CASCADE
+- `responderId` uuid NOT NULL → FK `person` ON DELETE RESTRICT
+- `answers` jsonb NOT NULL (default: []) — array of QuestionAnswer objects
+- `status` varchar(20) NOT NULL (default: 'pending') — values: pending, completed
+- `completedAt` timestamp — nullable
+- `contextId` uuid — nullable (optional correlation ID)
+- Indexes: `survey_responses_org_idx`, `survey_responses_survey_idx`, `survey_responses_responder_idx`, `survey_responses_status_idx`
+- Unique: `(surveyId, responderId)` — one response per survey per responder
 
 ### Key Relationships
 
 | Source Table | FK Column | Target Table | On Delete |
 |-------------|-----------|-------------|-----------|
-| `survey` | `createdByPersonId` | `person` | — |
+| `survey` | `createdBy` | `person` | restrict |
 | `survey_response` | `surveyId` | `survey` | cascade |
+| `survey_response` | `responderId` | `person` | restrict |
 
 ### Domain Events (Inferred)
-- `survey.published` — survey goes live
-- `survey.closed` — survey deadline reached or manually closed
+- `survey.published` — survey status changes draft→active
+- `survey.closed` — survey status changes active→closed
 - `survey.response.submitted` — new response received
 
 ### Module Mapping

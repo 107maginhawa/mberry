@@ -270,8 +270,20 @@ export class CommunicationsRepository {
     await this.db.delete(announcements).where(conditions);
   }
 
-  async createStats(announcementId: string, recipients: number, organizationId: string) {
-    await this.db.insert(announcementStats).values({ announcementId, recipients, organizationId });
+  async createStats(
+    announcementId: string,
+    recipients: number,
+    organizationId: string,
+    deliveryCounts?: { emailSent?: number; pushDelivered?: number; inappViews?: number },
+  ) {
+    await this.db.insert(announcementStats).values({
+      announcementId,
+      recipients,
+      organizationId,
+      emailSent: deliveryCounts?.emailSent ?? 0,
+      pushDelivered: deliveryCounts?.pushDelivered ?? 0,
+      inappViews: deliveryCounts?.inappViews ?? 0,
+    });
   }
 
   async getStats(orgId: string) {
