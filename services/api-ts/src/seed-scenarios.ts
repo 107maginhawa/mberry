@@ -41,6 +41,17 @@ import { reviews } from './handlers/reviews/repos/review.schema';
 import { invitationTokens } from './handlers/invite/repos/invite.schema';
 import { storedFiles } from './handlers/storage/repos/file.schema';
 
+// Phase 23-29 imports (cross-module alignment)
+import { duesFundAllocations, duesReminderSchedules, duesGatewayConfigs } from './handlers/association:member/repos/dues-payments.schema';
+import { specialAssessments, specialAssessmentTargets } from './handlers/association:member/repos/special-assessments.schema';
+import { paymentTokens } from './handlers/dues/repos/payment-token.schema';
+import { chatRoomMembers, chatMessageReactions } from './handlers/comms/repos/comms.schema';
+import { surveys as surveysTable, surveyResponses as surveyResponsesTable } from './handlers/surveys/repos/survey.schema';
+import { orgCpdConfig } from './handlers/association:member/repos/credits.schema';
+import { orgCertificateSeq } from './handlers/certificates/repos/certificates.schema';
+import { savedSegments } from './handlers/communication/repos/communication.schema';
+import { jobPostings, jobApplications } from './handlers/jobs/repos/jobs.schema';
+
 // Phase 19-22 imports (gap-fill)
 import { checkIns, waitlistEntries } from './handlers/association:operations/repos/events.schema';
 import { courses, courseEnrollments, quizAttempts } from './handlers/association:operations/repos/training.schema';
@@ -2622,6 +2633,538 @@ async function seedProfileAndGovernanceGapFill(
 // Main Orchestrator
 // ═══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+// Phase 23: Finance Deep-Fill (fund allocations, assessments, payment→invoice links)
+// ═══════════════════════════════════════════════════════════════
+
+async function seedFinanceDeepFill(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+  presidentPersonId: string,
+  memberPersonIds: string[],
+) {
+  console.log('  Finance deep-fill...');
+
+  // ─── Fix orphaned payments: link completed payments to paid invoices ──
+  try {
+    const paidInvoices = await db.select({ id: duesInvoices.id, personId: duesInvoices.personId })
+      .from(duesInvoices)
+      .where(sql`${duesInvoices.status} = 'paid' AND ${duesInvoices.organizationId} = ${orgId}`);
+
+    if (paidInvoices.length > 0) {
+      let linked = 0;
+      for (const inv of paidInvoices) {
+        const result = await db.execute(sql`
+          UPDATE dues_payment SET invoice_id = ${inv.id}
+          WHERE person_id = ${inv.personId} AND organization_id = ${orgId}
+            AND status = 'completed' AND invoice_id IS NULL
+          LIMIT 1
+        `);
+        linked++;
+      }
+      console.log(`    ✓ ${linked} payments linked to paid invoices`);
+    }
+  } catch (e) {
+    console.log(`    (payment→invoice linking failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Fund allocations for completed payments ──
+  try {
+    const existing = await db.select().from(duesFundAllocations).limit(1);
+    if (existing.length === 0) {
+      const completedPayments = await db.execute(
+        sql`SELECT id, amount FROM dues_payment WHERE status = 'completed' AND organization_id = ${orgId}`
+      );
+      const payments = (completedPayments as any).rows ?? completedPayments;
+
+      const fundRows = await db.select({ id: duesFunds.id, name: duesFunds.name, percentage: duesFunds.percentage })
+        .from(duesFunds)
+        .where(eq(duesFunds.organizationId, orgId));
+
+      let allocCount = 0;
+      for (const pay of payments) {
+        const amount = Number(pay.amount ?? 0);
+        for (const fund of fundRows) {
+          const pct = Number(fund.percentage ?? 0);
+          const allocAmount = Math.round((amount * pct) / 100);
+          await db.insert(duesFundAllocations).values({
+            paymentId: pay.id,
+            fundId: fund.id,
+            amount: allocAmount,
+          } as any);
+          allocCount++;
+        }
+      }
+      console.log(`    ✓ ${allocCount} fund allocations seeded`);
+    } else {
+      console.log('    (fund allocations already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (fund allocations failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Special assessments ──
+  try {
+    const existing = await db.select().from(specialAssessments).limit(1);
+    if (existing.length === 0) {
+      const fundRows = await db.select({ id: duesFunds.id, name: duesFunds.name })
+        .from(duesFunds)
+        .where(eq(duesFunds.organizationId, orgId));
+      const buildingFund = fundRows.find(f => f.name.includes('Building'));
+
+      const [assess1] = await db.insert(specialAssessments).values({
+        organizationId: orgId,
+        name: 'Building Fund Special Levy',
+        description: 'One-time assessment for chapter office renovation. Approved by Executive Board resolution 2025-03.',
+        amount: 100000, // ₱1,000
+        currency: 'PHP',
+        dueDate: dateStr(daysFromNow(60)),
+        fundId: buildingFund?.id ?? null,
+        appliesTo: 'all',
+        status: 'active',
+      } as any).returning({ id: specialAssessments.id });
+
+      const [assess2] = await db.insert(specialAssessments).values({
+        organizationId: orgId,
+        name: 'Emergency Medical Equipment',
+        description: 'Draft assessment for dental clinic equipment donation program.',
+        amount: 50000, // ₱500
+        currency: 'PHP',
+        dueDate: dateStr(daysFromNow(120)),
+        appliesTo: 'selected',
+        status: 'draft',
+      } as any).returning({ id: specialAssessments.id });
+
+      // Targets for active assessment
+      if (assess1) {
+        for (let i = 0; i < Math.min(8, memberPersonIds.length); i++) {
+          await db.insert(specialAssessmentTargets).values({
+            assessmentId: assess1.id,
+            personId: memberPersonIds[i]!,
+            status: i < 3 ? 'paid' : 'pending',
+          } as any);
+        }
+      }
+      console.log('    ✓ 2 special assessments + 8 targets seeded');
+    } else {
+      console.log('    (special assessments already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (special assessments failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Reminder schedule ──
+  try {
+    const existing = await db.select().from(duesReminderSchedules).limit(1);
+    if (existing.length === 0) {
+      const orgConfigs = await db.select({ id: duesOrgConfigs.id })
+        .from(duesOrgConfigs)
+        .where(eq(duesOrgConfigs.organizationId, orgId))
+        .limit(1);
+      if (orgConfigs[0]) {
+        await db.insert(duesReminderSchedules).values({
+          orgConfigId: orgConfigs[0].id,
+          daysBeforeDue: 30,
+          channel: 'email',
+          templateId: null,
+          active: true,
+        } as any);
+        console.log('    ✓ 1 reminder schedule seeded');
+      }
+    } else {
+      console.log('    (reminder schedule already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (reminder schedule failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Gateway config ──
+  try {
+    const existing = await db.select().from(duesGatewayConfigs).limit(1);
+    if (existing.length === 0) {
+      await db.insert(duesGatewayConfigs).values({
+        organizationId: orgId,
+        provider: 'paymongo',
+        publicKey: 'pk_test_demo_key_not_real',
+        secretKey: 'sk_test_demo_key_not_real',
+        webhookSecret: 'whsec_demo_not_real',
+        active: true,
+      } as any);
+      console.log('    ✓ 1 gateway config seeded (PayMongo test)');
+    } else {
+      console.log('    (gateway config already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (gateway config failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 24: Comms Gap-Fill (room members, reactions, threading)
+// ═══════════════════════════════════════════════════════════════
+
+async function seedCommsGapFill(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+  presidentPersonId: string,
+  memberPersonIds: string[],
+) {
+  console.log('  Comms gap-fill...');
+
+  // ─── Chat room members ──
+  try {
+    const existing = await db.select().from(chatRoomMembers).limit(1);
+    if (existing.length === 0) {
+      const rooms = await db.select({ id: chatRooms.id }).from(chatRooms).limit(5);
+      let memberCount = 0;
+      for (const room of rooms) {
+        const participants = [presidentPersonId, ...memberPersonIds.slice(0, 4)];
+        for (const personId of participants) {
+          await db.insert(chatRoomMembers).values({
+            roomId: room.id,
+            personId,
+            role: personId === presidentPersonId ? 'admin' : 'member',
+            joinedAt: daysAgo(30),
+          } as any);
+          memberCount++;
+        }
+      }
+      console.log(`    ✓ ${memberCount} chat room members seeded`);
+    } else {
+      console.log('    (chat room members already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (chat room members failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Message reactions ──
+  try {
+    const existing = await db.select().from(chatMessageReactions).limit(1);
+    if (existing.length === 0) {
+      const msgs = await db.select({ id: chatMessages.id }).from(chatMessages).limit(5);
+      const emojis = ['👍', '❤️', '😂', '🎉', '👀'];
+      let reactionCount = 0;
+      for (let i = 0; i < Math.min(msgs.length, emojis.length); i++) {
+        await db.insert(chatMessageReactions).values({
+          messageId: msgs[i]!.id,
+          personId: memberPersonIds[i % memberPersonIds.length]!,
+          emoji: emojis[i]!,
+        } as any);
+        reactionCount++;
+      }
+      console.log(`    ✓ ${reactionCount} message reactions seeded`);
+    } else {
+      console.log('    (message reactions already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (message reactions failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Update room types ──
+  try {
+    await db.execute(sql`
+      UPDATE chat_room SET room_type = 'channel', name = 'General'
+      WHERE organization_id = ${orgId} AND room_type IS NULL
+      LIMIT 1
+    `);
+    console.log('    ✓ Room type updated to channel');
+  } catch (e) {
+    console.log(`    (room type update failed: ${(e as Error).message?.slice(0, 60)})`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 25: Surveys Module
+// ═══════════════════════════════════════════════════════════════
+
+async function seedSurveysModule(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+  presidentPersonId: string,
+  memberPersonIds: string[],
+) {
+  console.log('  Surveys module...');
+  try {
+    const existing = await db.select().from(surveysTable).limit(1);
+    if (existing.length > 0) {
+      console.log('    (surveys already seeded, skipping)');
+      return;
+    }
+
+    // NPS survey
+    const [npsSurvey] = await db.insert(surveysTable).values({
+      organizationId: orgId,
+      title: 'Member Satisfaction — Q2 2026',
+      description: 'How likely are you to recommend our association to a colleague?',
+      type: 'nps',
+      status: 'active',
+      createdBy: presidentPersonId,
+      startsAt: daysAgo(14),
+      endsAt: daysFromNow(16),
+      questions: [
+        { id: 'q1', type: 'nps', text: 'How likely are you to recommend our association to a colleague?', required: true },
+        { id: 'q2', type: 'text', text: 'What could we do better?', required: false },
+      ],
+    } as any).returning({ id: surveysTable.id });
+
+    // General feedback survey (draft)
+    await db.insert(surveysTable).values({
+      organizationId: orgId,
+      title: 'Annual Convention Feedback',
+      description: 'Help us improve next year\'s convention.',
+      type: 'general',
+      status: 'draft',
+      createdBy: presidentPersonId,
+      questions: [
+        { id: 'q1', type: 'rating', text: 'Rate the overall convention experience', required: true },
+        { id: 'q2', type: 'text', text: 'What was the highlight of the convention?', required: false },
+        { id: 'q3', type: 'text', text: 'What should we improve?', required: false },
+      ],
+    } as any);
+
+    // NPS responses
+    if (npsSurvey) {
+      const npsScores = [10, 9, 9, 8, 7, 6, 3];
+      const comments = [
+        'Excellent organization — events are always well-planned.',
+        'Great CPD programs. Keep it up!',
+        '',
+        'Good but could improve communication frequency.',
+        'Dues are a bit high for what we get.',
+        'Need more hands-on clinical workshops.',
+        'Very poor response time from officers.',
+      ];
+      for (let i = 0; i < Math.min(npsScores.length, memberPersonIds.length); i++) {
+        await db.insert(surveyResponsesTable).values({
+          surveyId: npsSurvey.id,
+          respondentId: memberPersonIds[i]!,
+          answers: {
+            q1: npsScores[i],
+            q2: comments[i] || null,
+          },
+          submittedAt: daysAgo(Math.floor(Math.random() * 14)),
+        } as any);
+      }
+      console.log(`    ✓ 2 surveys + ${Math.min(npsScores.length, memberPersonIds.length)} responses seeded`);
+    }
+  } catch (e) {
+    console.log(`    (surveys failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 26: CPD Config + Credit/Certificate Backfill
+// ═══════════════════════════════════════════════════════════════
+
+async function seedCpdBackfill(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+) {
+  console.log('  CPD config + backfill...');
+
+  // ─── org_cpd_config ──
+  try {
+    const existing = await db.select().from(orgCpdConfig).limit(1);
+    if (existing.length === 0) {
+      await db.insert(orgCpdConfig).values({
+        organizationId: orgId,
+        requiredCredits: 60,
+        cycleLengthYears: 3,
+        cycleStartMonth: 1,
+        allowCarryOver: false,
+        maxCarryOverCredits: 0,
+      } as any);
+      console.log('    ✓ 1 CPD config seeded (60 credits / 3-year cycle)');
+    } else {
+      console.log('    (CPD config already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (CPD config failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── org_certificate_seq ──
+  try {
+    const existing = await db.select().from(orgCertificateSeq).limit(1);
+    if (existing.length === 0) {
+      await db.insert(orgCertificateSeq).values({
+        organizationId: orgId,
+        year: NOW.getFullYear(),
+        lastNumber: 5,
+      } as any);
+      console.log('    ✓ 1 certificate sequence seeded');
+    } else {
+      console.log('    (certificate sequence already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (certificate sequence failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Backfill credit sourceType ──
+  try {
+    await db.execute(sql`
+      UPDATE credit_entry SET source_type = 'event_checkin'
+      WHERE source_type IS NULL AND organization_id = ${orgId}
+      LIMIT 10
+    `);
+    // Add 1 voided credit
+    await db.execute(sql`
+      UPDATE credit_entry SET status = 'voided', voided_reason = 'Duplicate entry — same event credited twice'
+      WHERE status = 'active' AND organization_id = ${orgId}
+      LIMIT 1
+    `);
+    console.log('    ✓ Credit entries backfilled (sourceType + 1 voided)');
+  } catch (e) {
+    console.log(`    (credit backfill failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+
+  // ─── Backfill certificate status ──
+  try {
+    await db.execute(sql`
+      UPDATE certificate SET status = 'issued'
+      WHERE status IS NULL
+      LIMIT 20
+    `);
+    // Add 1 revoked cert
+    await db.execute(sql`
+      UPDATE certificate SET status = 'revoked', revoked_at = ${daysAgo(30)}, revoked_reason = 'Training provider accreditation revoked — credits invalidated'
+      WHERE status = 'issued'
+      LIMIT 1
+    `);
+    console.log('    ✓ Certificates backfilled (status + 1 revoked)');
+  } catch (e) {
+    console.log(`    (certificate backfill failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 27: Saved Segments
+// ═══════════════════════════════════════════════════════════════
+
+async function seedSavedSegments(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+) {
+  console.log('  Saved segments...');
+  try {
+    const existing = await db.select().from(savedSegments).limit(1);
+    if (existing.length > 0) {
+      console.log('    (saved segments already seeded, skipping)');
+      return;
+    }
+
+    const segments = [
+      { name: 'Overdue Members', description: 'Members with overdue dues', filters: { membershipStatus: ['lapsed', 'gracePeriod'], duesStatus: 'overdue' } },
+      { name: 'New Members 2025', description: 'Members who joined in 2025', filters: { joinedAfter: '2025-01-01', joinedBefore: '2025-12-31' } },
+      { name: 'Active Dentists', description: 'Active members in dentistry category', filters: { membershipStatus: ['active'], category: 'Regular' } },
+    ];
+
+    for (const seg of segments) {
+      await db.insert(savedSegments).values({
+        organizationId: orgId,
+        name: seg.name,
+        description: seg.description,
+        filters: seg.filters,
+      } as any);
+    }
+    console.log('    ✓ 3 saved segments seeded');
+  } catch (e) {
+    console.log(`    (saved segments failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 28: Jobs Module
+// ═══════════════════════════════════════════════════════════════
+
+async function seedJobsModule(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+  presidentPersonId: string,
+  memberPersonIds: string[],
+) {
+  console.log('  Jobs module...');
+  try {
+    const existing = await db.select().from(jobPostings).limit(1);
+    if (existing.length > 0) {
+      console.log('    (jobs already seeded, skipping)');
+      return;
+    }
+
+    const [job1] = await db.insert(jobPostings).values({
+      organizationId: orgId,
+      title: 'Associate Dentist — General Practice',
+      description: 'Seeking a licensed dentist to join our growing clinic. Must have valid PRC license and 2+ years experience.',
+      type: 'fullTime',
+      status: 'active',
+      location: 'Makati City, Metro Manila',
+      salary: 'PHP 45,000 - 65,000/month',
+      postedBy: presidentPersonId,
+      postedAt: daysAgo(7),
+      expiresAt: daysFromNow(53),
+    } as any).returning({ id: jobPostings.id });
+
+    const [job2] = await db.insert(jobPostings).values({
+      organizationId: orgId,
+      title: 'Clinic Manager',
+      description: 'Office manager for busy dental practice. Experience with clinic scheduling, billing, and patient coordination.',
+      type: 'fullTime',
+      status: 'active',
+      location: 'Quezon City, Metro Manila',
+      salary: 'PHP 30,000 - 40,000/month',
+      postedBy: presidentPersonId,
+      postedAt: daysAgo(3),
+      expiresAt: daysFromNow(57),
+    } as any).returning({ id: jobPostings.id });
+
+    // Applications
+    if (job1 && memberPersonIds.length > 0) {
+      await db.insert(jobApplications).values({
+        jobId: job1.id,
+        applicantId: memberPersonIds[0]!,
+        status: 'pending',
+        coverLetter: 'I am interested in this position. I have 3 years of experience in general dentistry and specialize in endodontics.',
+        appliedAt: daysAgo(5),
+      } as any);
+    }
+    if (job2 && memberPersonIds.length > 1) {
+      await db.insert(jobApplications).values({
+        jobId: job2.id,
+        applicantId: memberPersonIds[1]!,
+        status: 'shortlisted',
+        coverLetter: 'Experienced clinic administrator with 5 years managing multi-dentist practices.',
+        appliedAt: daysAgo(2),
+      } as any);
+    }
+    console.log('    ✓ 2 job postings + 2 applications seeded');
+  } catch (e) {
+    console.log(`    (jobs failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 29: Privacy Settings Backfill
+// ═══════════════════════════════════════════════════════════════
+
+async function seedPrivacyBackfill(
+  db: ReturnType<typeof drizzle>,
+  memberPersonIds: string[],
+) {
+  console.log('  Privacy settings backfill...');
+  try {
+    // Set varied visibility for demo
+    for (let i = 0; i < Math.min(5, memberPersonIds.length); i++) {
+      await db.execute(sql`
+        UPDATE person_privacy_setting
+        SET credentials_visible = true, dues_status_visible = ${i < 3}
+        WHERE person_id = ${memberPersonIds[i]!}
+      `);
+    }
+    console.log('    ✓ Privacy settings varied for 5 members');
+  } catch (e) {
+    console.log(`    (privacy backfill failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
+}
+
 async function main() {
   console.log('╔══════════════════════════════════════════╗');
   console.log('║   SEED SCENARIOS — API-driven seeding    ║');
@@ -2774,6 +3317,34 @@ async function main() {
   // Phase 22: Profile & governance gap-fill (directory, affiliations, prefs, privacy, status history)
   console.log('\nPhase 22: Profile & governance gap-fill...');
   await seedProfileAndGovernanceGapFill(db, orgId, president.personId, memberPersonIds, allMembershipIds);
+
+  // Phase 23: Finance deep-fill (fund allocations, assessments, payment→invoice links)
+  console.log('\nPhase 23: Finance deep-fill...');
+  await seedFinanceDeepFill(db, orgId, president.personId, memberPersonIds);
+
+  // Phase 24: Comms gap-fill (room members, reactions, threading)
+  console.log('\nPhase 24: Comms gap-fill...');
+  await seedCommsGapFill(db, orgId, president.personId, memberPersonIds);
+
+  // Phase 25: Surveys module
+  console.log('\nPhase 25: Surveys module...');
+  await seedSurveysModule(db, orgId, president.personId, memberPersonIds);
+
+  // Phase 26: CPD config + credit/certificate backfill
+  console.log('\nPhase 26: CPD backfill...');
+  await seedCpdBackfill(db, orgId);
+
+  // Phase 27: Saved segments
+  console.log('\nPhase 27: Saved segments...');
+  await seedSavedSegments(db, orgId);
+
+  // Phase 28: Jobs module
+  console.log('\nPhase 28: Jobs module...');
+  await seedJobsModule(db, orgId, president.personId, memberPersonIds);
+
+  // Phase 29: Privacy settings backfill
+  console.log('\nPhase 29: Privacy backfill...');
+  await seedPrivacyBackfill(db, memberPersonIds);
 
   // Summary
   const personCount = await db.select().from(persons);
