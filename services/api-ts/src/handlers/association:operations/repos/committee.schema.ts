@@ -33,7 +33,7 @@ export const committees = pgTable('committee', {
   name: varchar('name', { length: 200 }).notNull(),
   description: text('description'),
   status: committeeStatusEnum('status').notNull().default('active'),
-  dissolvedAt: timestamp('dissolved_at'),
+  dissolvedAt: timestamp('dissolved_at', { withTimezone: true }),
   dissolvedBy: uuid('dissolved_by'),
   dissolutionReason: text('dissolution_reason'),
 }, (table) => [
@@ -47,8 +47,8 @@ export const committeeMembers = pgTable('committee_member', {
   committeeId: uuid('committee_id').notNull(),
   personId: uuid('person_id').notNull(),
   role: committeeMemberRoleEnum('role').notNull().default('member'),
-  assignedAt: timestamp('assigned_at').notNull().defaultNow(),
-  removedAt: timestamp('removed_at'),
+  assignedAt: timestamp('assigned_at', { withTimezone: true }).notNull().defaultNow(),
+  removedAt: timestamp('removed_at', { withTimezone: true }),
   active: boolean('active').notNull().default(true),
 }, (table) => [
   index('idx_committee_member_org').on(table.organizationId),

@@ -77,9 +77,9 @@ export const duesInvoices = pgTable('dues_invoice', {
   totalAmount: bigint('total_amount', { mode: 'number' }).notNull(),
   fundAllocations: jsonb('fund_allocations').$type<DuesInvoiceAllocation[]>().notNull(),
   status: duesInvoiceStatusEnum('status').default('generated').notNull(),
-  generatedAt: timestamp('generated_at').defaultNow().notNull(),
-  sentAt: timestamp('sent_at'),
-  paidAt: timestamp('paid_at'),
+  generatedAt: timestamp('generated_at', { withTimezone: true }).defaultNow().notNull(),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
   paymentId: varchar('payment_id', { length: 255 }),
 }, (table) => ({
   orgStatusIdx: index('dues_invoice_org_status_idx').on(table.organizationId, table.status),
@@ -114,7 +114,7 @@ export const duesReminderLogs = pgTable('dues_reminder_log', {
   daysOffset: integer('days_offset').notNull(),
   channel: varchar('channel', { length: 20 }).notNull(), // "in-app", "email", "push"
   notificationId: uuid('notification_id'), // nullable until notification created
-  sentAt: timestamp('sent_at').defaultNow().notNull(),
+  sentAt: timestamp('sent_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   orgIdx: index('dues_reminder_log_org_idx').on(table.organizationId),
   personIdx: index('dues_reminder_log_person_idx').on(table.personId),

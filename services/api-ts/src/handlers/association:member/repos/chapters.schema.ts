@@ -39,7 +39,7 @@ export const chapterAffiliations = pgTable('chapter_affiliation', {
   personId: uuid('person_id').notNull(),
   chapterId: uuid('chapter_id').notNull(),
   isPrimary: boolean('is_primary').default(false).notNull(),
-  affiliatedAt: timestamp('affiliated_at').notNull(),
+  affiliatedAt: timestamp('affiliated_at', { withTimezone: true }).notNull(),
   transferredFrom: uuid('transferred_from'),
   status: affiliationStatusEnum('status').default('active').notNull(),
 }, (table) => ({
@@ -55,12 +55,12 @@ export const affiliationTransfers = pgTable('affiliation_transfer', {
   personId: uuid('person_id').notNull(),
   fromChapterId: uuid('from_chapter_id').notNull(),
   toChapterId: uuid('to_chapter_id').notNull(),
-  requestedAt: timestamp('requested_at').defaultNow().notNull(),
+  requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow().notNull(),
   requestedBy: uuid('requested_by').notNull(),
   approvedBySource: uuid('approved_by_source'),
   approvedByTarget: uuid('approved_by_target'),
   status: transferStatusEnum('status').default('requested').notNull(),
-  completedAt: timestamp('completed_at'),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
 }, (table) => ({
   orgStatusIdx: index('affiliation_transfer_org_status_idx').on(table.organizationId, table.status),
 }));

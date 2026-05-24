@@ -83,8 +83,8 @@ export const messages = pgTable('message', {
   recipients: jsonb('recipients').$type<MessageRecipient[]>().default([]),
   subject: varchar('subject', { length: 500 }),
   body: text('body').notNull(),
-  scheduledAt: timestamp('scheduled_at'),
-  sentAt: timestamp('sent_at'),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
   status: messageStatusEnum('status').notNull().default('draft'),
 }, (table) => [
   index('idx_message_org').on(table.organizationId),
@@ -159,8 +159,8 @@ export const announcements = pgTable('announcement', {
   channelEmail: boolean('channel_email').notNull().default(false),
   visibility: announcementVisibilityEnum('visibility').notNull().default('internal'),
   status: announcementStatusEnum('status').notNull().default('draft'),
-  scheduledAt: timestamp('scheduled_at'),
-  publishedAt: timestamp('published_at'),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
 }, (table) => ({
   orgIdx: index('announcement_org_idx').on(table.organizationId),
   statusIdx: index('announcement_status_idx').on(table.status),

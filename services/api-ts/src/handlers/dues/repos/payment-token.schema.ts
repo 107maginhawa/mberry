@@ -38,10 +38,10 @@ export const paymentTokens = pgTable('payment_token', {
   currency: varchar('currency', { length: 3 }).notNull().default('PHP'),
 
   /** When the token expires (default: 72 hours from creation) */
-  expiresAt: timestamp('expires_at').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 
   /** When the token was used for checkout (null = unused) */
-  usedAt: timestamp('used_at'),
+  usedAt: timestamp('used_at', { withTimezone: true }),
 
   /** Officer who created this payment link */
   createdByOfficer: uuid('created_by_officer').notNull().references(() => persons.id),

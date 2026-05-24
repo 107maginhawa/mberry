@@ -23,7 +23,7 @@ export const duesPaymentStatusHistory = pgTable('dues_payment_status_history', {
   toStatus: duesPaymentStatusEnum('to_status').notNull(),
   reason: text('reason'),
   changedBy: uuid('changed_by').references(() => persons.id, { onDelete: 'restrict' }),
-  changedAt: timestamp('changed_at').defaultNow().notNull(),
+  changedAt: timestamp('changed_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   orgIdx: index('dues_payment_status_history_org_idx').on(table.organizationId),
   paymentIdx: index('dues_payment_status_history_payment_idx').on(table.paymentId),

@@ -3,26 +3,22 @@
  *
  * Covers:
  * - Event must exist and be paid
- * - Active membership required
  * - Capacity check
  * - Merchant account required with Stripe onboarding
  * - Successful registration + Stripe Checkout session creation
  */
 
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { EventRepository, EventRegistrationRepository } from './repos/events.repo';
 import { MerchantAccountRepository } from '@/handlers/billing/repos/billing.repo';
-
-// Mock the membership check module — always returns active
-mock.module('@/handlers/events/utils/membership-check', () => ({
-  checkActiveMembership: async () => true,
-}));
+import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 
 beforeEach(() => {
   restoreRepo(EventRepository);
   restoreRepo(EventRegistrationRepository);
   restoreRepo(MerchantAccountRepository);
+  restoreRepo(MembershipRepository);
 });
 
 const paidEvent = {
@@ -60,6 +56,10 @@ function setupHappyPath() {
       { id: 'merch-1', metadata: { stripeAccountId: 'acct_test123' } },
     ],
   });
+  // Stub membership check to return active
+  stubRepo(MembershipRepository, {
+    findByPersonAndOrg: async () => ({ status: 'active' }),
+  });
 }
 
 describe('registerAndPayForEvent', () => {
@@ -85,6 +85,9 @@ describe('registerAndPayForEvent', () => {
     const { registerAndPayForEvent } = await import('./registerAndPayForEvent');
     stubRepo(EventRepository, { findOneById: async () => paidEvent });
     stubRepo(EventRegistrationRepository, { count: async () => 100 });
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ status: 'active' }),
+    });
 
     const ctx = makeEventCtx();
     await expect(registerAndPayForEvent(ctx)).rejects.toThrow(/capacity/i);
@@ -95,6 +98,9 @@ describe('registerAndPayForEvent', () => {
     stubRepo(EventRepository, { findOneById: async () => paidEvent });
     stubRepo(EventRegistrationRepository, { count: async () => 10 });
     stubRepo(MerchantAccountRepository, { findMany: async () => [] });
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({ status: 'active' }),
+    });
 
     const ctx = makeEventCtx();
     await expect(registerAndPayForEvent(ctx)).rejects.toThrow(/not set up billing/i);

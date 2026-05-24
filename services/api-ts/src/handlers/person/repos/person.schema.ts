@@ -39,9 +39,9 @@ export const persons = pgTable('person', {
   preferredLanguage: varchar('preferred_language', { length: 10 }),
 
   // Account deletion (DPA 2012 / M-25 / BR-32)
-  deletionRequestedAt: timestamp('deletion_requested_at'),
-  deletionScheduledAt: timestamp('deletion_scheduled_at'),
-  deletionCompletedAt: timestamp('deletion_completed_at'),
+  deletionRequestedAt: timestamp('deletion_requested_at', { withTimezone: true }),
+  deletionScheduledAt: timestamp('deletion_scheduled_at', { withTimezone: true }),
+  deletionCompletedAt: timestamp('deletion_completed_at', { withTimezone: true }),
 }, (table) => ({
   // Indexes for search operations
   nameIdx: index('persons_name_idx').on(table.firstName, table.lastName),

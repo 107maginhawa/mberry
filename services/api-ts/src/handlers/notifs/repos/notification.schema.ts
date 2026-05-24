@@ -64,14 +64,14 @@ export const notifications = pgTable('notification', {
   message: varchar('message', { length: 1000 }).notNull(),
   
   // Scheduling and context
-  scheduledAt: timestamp('scheduled_at'), // null = immediate
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }), // null = immediate
   relatedEntityType: varchar('related_entity_type', { length: 50 }),
   relatedEntity: uuid('related_entity'),
   
   // Status tracking
   status: notificationStatusEnum('status').notNull().default('queued'),
-  sentAt: timestamp('sent_at'),
-  readAt: timestamp('read_at'), // For in-app notifications
+  sentAt: timestamp('sent_at', { withTimezone: true }),
+  readAt: timestamp('read_at', { withTimezone: true }), // For in-app notifications
   
   // Healthcare compliance
   consentValidated: boolean('consent_validated').notNull().default(false),

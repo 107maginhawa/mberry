@@ -117,7 +117,7 @@ export const surveyResponses = pgTable('survey_response', {
 
   status: varchar('status', { length: 20 }).notNull().default('pending'),
 
-  completedAt: timestamp('completed_at'),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
 
   contextId: uuid('context_id'),
 }, (table) => ({

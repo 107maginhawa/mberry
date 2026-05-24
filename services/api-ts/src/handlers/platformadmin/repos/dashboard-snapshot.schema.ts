@@ -75,8 +75,8 @@ export const nationalDashboardAccess = pgTable('national_dashboard_access', {
   associationId: uuid('association_id').notNull(),
   memberId: uuid('member_id').notNull(),
   grantedBy: uuid('granted_by').notNull(),
-  grantedAt: timestamp('granted_at').notNull().defaultNow(),
-  revokedAt: timestamp('revoked_at'),
+  grantedAt: timestamp('granted_at', { withTimezone: true }).notNull().defaultNow(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
 }, (table) => [
   index('idx_nda_association').on(table.associationId),
   index('idx_nda_member').on(table.memberId),
@@ -93,8 +93,8 @@ export const dashboardExportLogs = pgTable('dashboard_export_log', {
   reportType: reportTypeEnum('report_type').notNull(),
   /** 'all_chapters' or comma-separated org IDs */
   scope: text('scope').notNull(),
-  dateRangeStart: timestamp('date_range_start').notNull(),
-  dateRangeEnd: timestamp('date_range_end').notNull(),
+  dateRangeStart: timestamp('date_range_start', { withTimezone: true }).notNull(),
+  dateRangeEnd: timestamp('date_range_end', { withTimezone: true }).notNull(),
   outputFormat: outputFormatEnum('output_format').notNull(),
 }, (table) => [
   index('idx_export_log_association').on(table.associationId),

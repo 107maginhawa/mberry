@@ -115,11 +115,11 @@ export const bookingEvents = pgTable('booking_event', {
     .notNull()
     .default('active'),
 
-  effectiveFrom: timestamp('effective_from')
+  effectiveFrom: timestamp('effective_from', { withTimezone: true })
     .notNull()
     .defaultNow(), // Event start date and time
 
-  effectiveTo: timestamp('effective_to'), // Optional end date and time
+  effectiveTo: timestamp('effective_to', { withTimezone: true }), // Optional end date and time
 
   // Daily configurations - keyed by day names ('sun', 'mon', 'tue', etc.')
   dailyConfigs: jsonb('daily_configs')
@@ -172,8 +172,8 @@ export const timeSlots: any = pgTable('time_slot', {
   context: text('context_id'), // Optional context (inherited from event)
 
   // Slot timing (UTC timestamps)
-  startTime: timestamp('start_time').notNull(),
-  endTime: timestamp('end_time').notNull(),
+  startTime: timestamp('start_time', { withTimezone: true }).notNull(),
+  endTime: timestamp('end_time', { withTimezone: true }).notNull(),
 
   // Location configuration
   locationTypes: jsonb('location_types')
@@ -248,21 +248,21 @@ export const bookings: any = pgTable('booking', {
     .default('pending'),
   
   // Timestamps
-  bookedAt: timestamp('booked_at')
+  bookedAt: timestamp('booked_at', { withTimezone: true })
     .notNull()
     .defaultNow(),  
-  confirmationTimestamp: timestamp('confirmation_timestamp'),
-  scheduledAt: timestamp('scheduled_at').notNull(),
+  confirmationTimestamp: timestamp('confirmation_timestamp', { withTimezone: true }),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
   durationMinutes: integer('duration_minutes').notNull(),
   
   // Cancellation fields
   cancellationReason: text('cancellation_reason'),
   cancelledBy: text('cancelled_by'), // 'client' or 'host'
-  cancelledAt: timestamp('cancelled_at'),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
   
   // No-show fields
   noShowMarkedBy: text('no_show_marked_by'), // 'client' or 'host'
-  noShowMarkedAt: timestamp('no_show_marked_at'),
+  noShowMarkedAt: timestamp('no_show_marked_at', { withTimezone: true }),
   
   // Form responses (data only during creation)
   formResponses: jsonb('form_responses').$type<FormResponses>(),
@@ -319,8 +319,8 @@ export const scheduleExceptions = pgTable('schedule_exception', {
     .notNull()
     .default('America/New_York'), // Exception timezone (can differ from event timezone)
 
-  startDatetime: timestamp('start_datetime').notNull(),
-  endDatetime: timestamp('end_datetime').notNull(),
+  startDatetime: timestamp('start_datetime', { withTimezone: true }).notNull(),
+  endDatetime: timestamp('end_datetime', { withTimezone: true }).notNull(),
   reason: text('reason').notNull(),
 
   // Recurrence configuration

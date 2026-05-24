@@ -70,7 +70,7 @@ export const chatRooms = pgTable('chat_room', {
     .notNull()
     .default('active'),
   
-  lastMessageAt: timestamp('last_message_at'),
+  lastMessageAt: timestamp('last_message_at', { withTimezone: true }),
   
   messageCount: integer('message_count')
     .notNull()
@@ -110,7 +110,7 @@ export const chatMessages = pgTable('chat_message', {
   sender: uuid('sender_id')
     .notNull(), // Can be patient or provider
   
-  timestamp: timestamp('timestamp')
+  timestamp: timestamp('timestamp', { withTimezone: true })
     .notNull()
     .defaultNow(),
   

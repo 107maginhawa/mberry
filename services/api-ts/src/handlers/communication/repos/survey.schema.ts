@@ -50,7 +50,7 @@ export const surveys = pgTable(
     questions: jsonb('questions').$type<SurveyQuestion[]>().notNull(),
     distribution: surveyDistributionEnum('distribution').notNull().default('active_members'),
     categoryFilter: jsonb('category_filter').$type<string[]>(),
-    deadline: timestamp('deadline'),
+    deadline: timestamp('deadline', { withTimezone: true }),
     allowEditBeforeDeadline: boolean('allow_edit_before_deadline').notNull().default(true),
     showResultsImmediately: boolean('show_results_immediately').notNull().default(false),
     reminderSchedule: jsonb('reminder_schedule').$type<number[]>().notNull().default([]),
@@ -70,7 +70,7 @@ export const surveyResponses = pgTable(
     // CRITICAL BR-40: nullable — NULL for anonymous surveys (architectural guarantee)
     respondentId: uuid('respondent_id'),
     answers: jsonb('answers').$type<Record<string, unknown>>().notNull(),
-    submittedAt: timestamp('submitted_at').notNull().defaultNow(),
+    submittedAt: timestamp('submitted_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     index('idx_survey_response_survey').on(table.surveyId),

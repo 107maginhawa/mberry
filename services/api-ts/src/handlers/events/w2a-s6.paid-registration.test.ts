@@ -1,8 +1,8 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
-import { registerAndPayForEvent } from './registerAndPayForEvent';
-import { EventsRepository } from './repos/events.repo';
+import { registerAndPayForEvent } from '@/handlers/association:operations/registerAndPayForEvent';
+import { EventRepository, EventRegistrationRepository } from '@/handlers/association:operations/repos/events.repo';
 import { MerchantAccountRepository } from '@/handlers/billing/repos/billing.repo';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 
@@ -52,10 +52,12 @@ describe('[W2A-S6] Paid Event Registration', () => {
   });
 
   test('creates Stripe Checkout session for paid event', async () => {
-    mocks = stubRepo(EventsRepository, {
-      get: async () => paidEvent,
-      getRegistrationCount: async () => 5,
-      register: async (data: any) => ({ id: 'reg-1', ...data }),
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => paidEvent,
+    });
+    stubRepo(EventRegistrationRepository, {
+      count: async () => 5,
+      createOne: async (data: any) => ({ id: 'reg-1', ...data }),
     });
     stubRepo(MerchantAccountRepository, {
       findMany: async () => [fakeMerchant],
@@ -76,8 +78,8 @@ describe('[W2A-S6] Paid Event Registration', () => {
   });
 
   test('rejects free event', async () => {
-    mocks = stubRepo(EventsRepository, {
-      get: async () => freeEvent,
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => freeEvent,
     });
 
     const ctx = makeCtx({
@@ -89,9 +91,11 @@ describe('[W2A-S6] Paid Event Registration', () => {
   });
 
   test('rejects when at capacity', async () => {
-    mocks = stubRepo(EventsRepository, {
-      get: async () => paidEvent,
-      getRegistrationCount: async () => 100, // At capacity
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => paidEvent,
+    });
+    stubRepo(EventRegistrationRepository, {
+      count: async () => 100, // At capacity
     });
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => ({ status: 'active' }),
@@ -106,9 +110,11 @@ describe('[W2A-S6] Paid Event Registration', () => {
   });
 
   test('rejects when no merchant account', async () => {
-    mocks = stubRepo(EventsRepository, {
-      get: async () => paidEvent,
-      getRegistrationCount: async () => 5,
+    mocks = stubRepo(EventRepository, {
+      findOneById: async () => paidEvent,
+    });
+    stubRepo(EventRegistrationRepository, {
+      count: async () => 5,
     });
     stubRepo(MerchantAccountRepository, {
       findMany: async () => [],

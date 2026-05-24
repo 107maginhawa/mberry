@@ -24,7 +24,7 @@ export const membershipStatusHistory = pgTable('membership_status_history', {
   toStatus: membershipStatusEnum('to_status').notNull(),
   reason: text('reason'),
   changedBy: uuid('changed_by').references(() => persons.id, { onDelete: 'restrict' }),
-  changedAt: timestamp('changed_at').defaultNow().notNull(),
+  changedAt: timestamp('changed_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   orgIdx: index('membership_status_history_org_idx').on(table.organizationId),
   membershipIdx: index('membership_status_history_membership_idx').on(table.membershipId),

@@ -34,7 +34,7 @@ export const storedFiles = pgTable('stored_file', {
   owner: uuid('owner').notNull(),
   
   // File-specific timestamp
-  uploadedAt: timestamp('uploaded_at').defaultNow(),
+  uploadedAt: timestamp('uploaded_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
   orgIdx: index('stored_files_org_idx').on(table.organizationId),
   ownerIdx: index('stored_files_owner_idx').on(table.owner),

@@ -61,7 +61,7 @@ export const vendors = pgTable('vendor', {
   websiteUrl: text('website_url'),
   contactEmail: text('contact_email').notNull(),
   contactPersonId: uuid('contact_person_id'),
-  verifiedAt: timestamp('verified_at'),
+  verifiedAt: timestamp('verified_at', { withTimezone: true }),
   verifiedBy: uuid('verified_by'),
 }, (table) => ({
   orgIdx: index('vendors_org_idx').on(table.organizationId),
@@ -105,7 +105,7 @@ export const marketplaceOrders = pgTable('marketplace_order', {
   totalPrice: numeric('total_price', { precision: 10, scale: 2 }).notNull(),
   status: orderStatusEnum('status').notNull().default('pending'),
   notes: text('notes'),
-  fulfilledAt: timestamp('fulfilled_at'),
+  fulfilledAt: timestamp('fulfilled_at', { withTimezone: true }),
 }, (table) => ({
   orgIdx: index('orders_org_idx').on(table.organizationId),
   buyerIdx: index('orders_buyer_idx').on(table.buyerPersonId),

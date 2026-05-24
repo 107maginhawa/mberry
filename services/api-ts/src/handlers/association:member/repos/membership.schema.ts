@@ -117,9 +117,9 @@ export const memberships = pgTable(
     duesExpiryDate: date('dues_expiry_date'),
     gracePeriodDays: integer('grace_period_days').notNull().default(30),
     status: membershipStatusEnum('status').notNull().default('pendingPayment'),
-    joinedAt: timestamp('joined_at').notNull(),
-    suspendedAt: timestamp('suspended_at'),
-    removedAt: timestamp('removed_at'),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull(),
+    suspendedAt: timestamp('suspended_at', { withTimezone: true }),
+    removedAt: timestamp('removed_at', { withTimezone: true }),
     removalReason: varchar('removal_reason', { length: 500 }),
     dateOfDeath: date('date_of_death'),               // LIF-04: recorded on deceased
     note: text('note'),
@@ -150,7 +150,7 @@ export const membershipApplications = pgTable(
     applicationDate: date('application_date').notNull(),
     status: applicationStatusEnum('status').notNull().default('submitted'),
     reviewedBy: uuid('reviewed_by').references(() => persons.id),
-    reviewedAt: timestamp('reviewed_at'),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     denialReason: text('denial_reason'),
   },
   (table) => ({

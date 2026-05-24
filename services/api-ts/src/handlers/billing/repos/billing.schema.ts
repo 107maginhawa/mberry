@@ -85,23 +85,23 @@ export const invoices = pgTable('invoice', {
   paymentCaptureMethod: captureMethodEnum('payment_capture_method').notNull().default('automatic'),
 
   // Payment due date
-  paymentDueAt: timestamp('payment_due_at'),
+  paymentDueAt: timestamp('payment_due_at', { withTimezone: true }),
 
   // Payment status
   paymentStatus: paymentStatusEnum('payment_status'),
 
   // Payment lifecycle timestamps and actors
-  paidAt: timestamp('paid_at'),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
   paidBy: uuid('paid_by'),
 
-  voidedAt: timestamp('voided_at'),
+  voidedAt: timestamp('voided_at', { withTimezone: true }),
   voidedBy: uuid('voided_by'),
 
   // Void threshold in minutes for charge protection
   voidThresholdMinutes: integer('void_threshold_minutes'),
 
   // Authorization tracking
-  authorizedAt: timestamp('authorized_at'),
+  authorizedAt: timestamp('authorized_at', { withTimezone: true }),
   authorizedBy: uuid('authorized_by'),
 
   // Metadata (includes Stripe IDs, etc.)

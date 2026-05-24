@@ -75,8 +75,8 @@ export const organizations = pgTable('organization', {
   region: varchar('region', { length: 100 }),
   contactEmail: varchar('contact_email', { length: 255 }),
   status: orgLifecycleStatusEnum('status').notNull().default('trial'),
-  trialStartDate: timestamp('trial_start_date'),
-  trialEndDate: timestamp('trial_end_date'),
+  trialStartDate: timestamp('trial_start_date', { withTimezone: true }),
+  trialEndDate: timestamp('trial_end_date', { withTimezone: true }),
   featureFlags: jsonb('feature_flags').$type<Record<string, boolean>>(),
 }, (table) => [
   index('idx_org_association').on(table.associationId),
@@ -111,9 +111,9 @@ export const impersonationSessions = pgTable('impersonation_session', {
   targetUserId: uuid('target_user_id').notNull(),
   targetOrgId: uuid('target_org_id'),
   sessionToken: varchar('session_token', { length: 255 }).notNull(),
-  startedAt: timestamp('started_at').notNull().defaultNow(),
-  expiresAt: timestamp('expires_at').notNull(),
-  endedAt: timestamp('ended_at'),
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
 }, (table) => [
   index('idx_impersonation_admin').on(table.adminId),
   index('idx_impersonation_target').on(table.targetUserId),

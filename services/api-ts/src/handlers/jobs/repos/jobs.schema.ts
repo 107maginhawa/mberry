@@ -53,8 +53,8 @@ export const jobPostings = pgTable('job_posting', {
   salary: varchar('salary', { length: 255 }),
   description: text('description'),
   requirements: jsonb('requirements').$type<string[]>(),
-  postedAt: timestamp('posted_at'),
-  expiresAt: timestamp('expires_at'),
+  postedAt: timestamp('posted_at', { withTimezone: true }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
   status: jobPostingStatusEnum('status').notNull().default('draft'),
   postedBy: uuid('posted_by'),
 }, (table) => [
@@ -70,7 +70,7 @@ export const jobApplications = pgTable('job_application', {
   personId: uuid('person_id').notNull(),
   resumeRef: varchar('resume_ref', { length: 500 }),
   coverLetter: text('cover_letter'),
-  appliedAt: timestamp('applied_at').notNull().defaultNow(),
+  appliedAt: timestamp('applied_at', { withTimezone: true }).notNull().defaultNow(),
   status: jobApplicationStatusEnum('status').notNull().default('applied'),
 }, (table) => [
   index('idx_job_app_posting').on(table.postingId),

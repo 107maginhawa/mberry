@@ -46,7 +46,7 @@ export const emailSuppressions = pgTable(
     reason: suppressionReasonEnum('reason').notNull(),
 
     // When suppression was added (may differ from createdAt in imports)
-    suppressedAt: timestamp('suppressed_at').notNull().defaultNow(),
+    suppressedAt: timestamp('suppressed_at', { withTimezone: true }).notNull().defaultNow(),
 
     // Who added the suppression (null = system/automated)
     suppressedBy: uuid('suppressed_by'),

@@ -14,7 +14,7 @@ export const accreditedProviders = pgTable('accredited_provider', {
   name: varchar('name', { length: 300 }).notNull(),
   accreditationNumber: varchar('accreditation_number', { length: 100 }).notNull(),
   status: providerStatusEnum('status').notNull().default('active'),
-  expiryDate: timestamp('expiry_date'),
+  expiryDate: timestamp('expiry_date', { withTimezone: true }),
 }, (table) => [
   index('idx_accredited_provider_org').on(table.organizationId),
   index('idx_accredited_provider_status').on(table.status),
