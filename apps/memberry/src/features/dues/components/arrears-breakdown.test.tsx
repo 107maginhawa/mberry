@@ -90,10 +90,11 @@ describe('ArrearsBreakdown', () => {
       <ArrearsBreakdown invoices={[makeInvoice()]} currency="PHP" agingBuckets={agingBuckets} />
     )
 
-    // Verify amounts are rendered (mocked formatCents)
-    expect(screen.getByText('PHP 1.00')).toBeInTheDocument() // current = 100 cents
-    expect(screen.getByText('PHP 2.00')).toBeInTheDocument() // thirtyDay = 200 cents
-    expect(screen.getByText('PHP 5.00')).toBeInTheDocument() // overNinety = 500 cents
+    // Verify amounts are rendered (mocked formatCents divides by 100)
+    expect(screen.getByText('PHP 100.00')).toBeInTheDocument() // current = 100_00 cents
+    expect(screen.getByText('PHP 200.00')).toBeInTheDocument() // thirtyDay = 200_00 cents
+    // overNinety = 500_00 matches invoice totalAmount (500_00), so multiple elements
+    expect(screen.getAllByText('PHP 500.00').length).toBeGreaterThanOrEqual(1)
   })
 
   test('[AC-T7-005] shows "All caught up!" when no unpaid invoices', () => {

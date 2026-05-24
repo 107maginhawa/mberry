@@ -64,9 +64,11 @@ function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
   })
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   )
+  Wrapper.displayName = 'TestQueryWrapper'
+  return Wrapper
 }
 
 // ---------------------------------------------------------------------------
@@ -110,17 +112,6 @@ describe('Analytics Dashboard — KPI cards', () => {
     ]
 
     mockGet.mockResolvedValue({ data: mockAnnouncements, total: 3 })
-
-    // Dynamic import to avoid module-level route registration issues
-    const { default: AnalyticsPage } = await import(
-      './analytics-page-wrapper'
-    ).catch(() => {
-      // Fallback: render the component logic directly
-      return { default: null }
-    })
-
-    // Since we can't easily import the route component, test the logic directly
-    const { AudiencePicker } = await import('../components/audience-picker')
 
     // Verify the KPI aggregation logic works correctly
     const announcements = mockAnnouncements
@@ -194,10 +185,9 @@ describe('AudiencePicker — Saved Segments', () => {
       { wrapper: createWrapper() },
     )
 
-    // Wait for segments to load
+    // Wait for segments to load (option must be rendered)
     await waitFor(() => {
-      const select = screen.getByTestId('saved-segment-select')
-      expect(select).toBeInTheDocument()
+      expect(screen.getByText('Active Fellows')).toBeInTheDocument()
     })
 
     // Select segment

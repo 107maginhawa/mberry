@@ -5,6 +5,19 @@ import { renderWithProviders } from '@/test/utils'
 import { NotificationPreferences } from '../components/notification-preferences'
 import { AnnouncementContent } from '../components/announcement-content'
 
+// Mock @monobase/ui Switch so role="switch" renders in happy-dom
+vi.mock('@monobase/ui', async (importOriginal) => {
+  const actual = await importOriginal() as any
+  return {
+    ...actual,
+    Switch: ({ checked, onCheckedChange, id, ...props }: any) => (
+      <button role="switch" id={id} aria-checked={!!checked} onClick={() => onCheckedChange?.(!checked)} {...props}>
+        {checked ? 'ON' : 'OFF'}
+      </button>
+    ),
+  }
+})
+
 // Mock api module
 vi.mock('@/lib/api', () => ({
   api: {
@@ -28,8 +41,12 @@ describe('NotificationPreferences', () => {
       <NotificationPreferences orgId="org-1" personId="person-1" />
     )
 
+    // Wait for loading to finish
+    await waitFor(() => {
+      expect(screen.getByText('Dues')).toBeInTheDocument()
+    })
+
     // 5 category labels
-    expect(screen.getByText('Dues')).toBeInTheDocument()
     expect(screen.getByText('Events')).toBeInTheDocument()
     expect(screen.getByText('Training')).toBeInTheDocument()
     expect(screen.getByText('Announcements')).toBeInTheDocument()
@@ -52,7 +69,13 @@ describe('NotificationPreferences', () => {
       <NotificationPreferences orgId="org-1" personId="person-1" />
     )
 
-    const switches = screen.getAllByRole('switch')
+    // Wait for loading to finish and switches to appear
+    const switches = await waitFor(() => {
+      const s = screen.getAllByRole('switch')
+      expect(s.length).toBeGreaterThan(0)
+      return s
+    })
+
     // Click the first switch to toggle it
     await user.click(switches[0])
 

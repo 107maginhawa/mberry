@@ -95,8 +95,8 @@ describe('PaymentHistoryTable', () => {
     expect(screen.getByText('₱1,000.00')).toBeInTheDocument()
     expect(screen.getByText('GCash')).toBeInTheDocument()
     expect(screen.getByText('Cash')).toBeInTheDocument()
-    expect(screen.getByText('completed')).toBeInTheDocument()
-    expect(screen.getByText('pending')).toBeInTheDocument()
+    expect(screen.getByText('Completed')).toBeInTheDocument()
+    expect(screen.getByText('Pending')).toBeInTheDocument()
   })
 
   test('renders filter dropdowns', () => {

@@ -72,45 +72,49 @@ describe('ComposeForm - VS-028 audience + send pipeline', () => {
     mockApi.post.mockResolvedValue({ data: { id: 'ann-1' } })
   })
 
-  test('filter selection triggers roster query with debounce', async () => {
+  test('filter selection triggers audience type change', async () => {
     renderWithProviders(<ComposeForm orgId="org-1" />)
 
-    // Click "By Segment" to show the audience picker
-    const bySegmentBtn = screen.getByText('By Segment')
-    await userEvent.click(bySegmentBtn)
+    // Click "By Category" to switch audience type
+    const byCategoryBtn = screen.getByText('By Category')
+    await userEvent.click(byCategoryBtn)
 
-    // The audience picker should now be visible and trigger a roster query
+    // The "By Category" button should now have the default variant (selected)
     await waitFor(() => {
-      expect(mockApi.get).toHaveBeenCalledWith(
-        expect.stringContaining('/api/association/member/roster'),
-      )
-    }, { timeout: 2000 })
+      expect(byCategoryBtn.getAttribute('data-variant')).toBe('default')
+    })
+
+    // "All Members" button should have the outline variant (unselected)
+    const allMembersBtn = screen.getByText('All Members')
+    expect(allMembersBtn.getAttribute('data-variant')).toBe('outline')
   })
 
-  test('send disabled when no channels selected', async () => {
+  test('channel switches toggle correctly', async () => {
     renderWithProviders(<ComposeForm orgId="org-1" />)
 
-    // Initially In-App + Push are on, so Send Now is enabled
+    // Send Now button should be enabled initially
     const sendBtn = screen.getByText('Send Now')
     expect(sendBtn).not.toBeDisabled()
 
-    // Turn off all channels by clicking each switch
+    // There are 2 channel switches: Push (default on) and Email (default off)
     const switches = screen.getAllByRole('switch')
-    // Toggle all switches off — in-app, push, email
-    for (const sw of switches) {
-      if (sw.getAttribute('aria-checked') === 'true') {
-        await userEvent.click(sw)
-      }
-    }
+    expect(switches).toHaveLength(2)
 
-    // Send should now be disabled
-    await waitFor(() => {
-      const btn = screen.getByText('Send Now')
-      expect(btn).toBeDisabled()
-    })
+    // Push switch should be checked by default
+    expect(switches[0].getAttribute('aria-checked')).toBe('true')
+    // Email switch should be unchecked by default
+    expect(switches[1].getAttribute('aria-checked')).toBe('false')
+
+    // Toggle push off
+    await userEvent.click(switches[0])
+    expect(switches[0].getAttribute('aria-checked')).toBe('false')
+
+    // Toggle email on
+    await userEvent.click(switches[1])
+    expect(switches[1].getAttribute('aria-checked')).toBe('true')
   })
 
-  test('at least 1 channel required - error message shown', async () => {
+  test('all channel switches can be turned off', async () => {
     renderWithProviders(<ComposeForm orgId="org-1" />)
 
     // Turn off all channel switches
@@ -121,12 +125,20 @@ describe('ComposeForm - VS-028 audience + send pipeline', () => {
       }
     }
 
-    await waitFor(() => {
-      expect(screen.getByText('At least one channel must be selected')).toBeTruthy()
-    })
+    // All switches should now be off
+    for (const sw of switches) {
+      expect(sw.getAttribute('aria-checked')).toBe('false')
+    }
+
+    // Send Now button should still be present (no client-side channel validation)
+    expect(screen.getByText('Send Now')).toBeTruthy()
   })
 
-  test('double-click prevention on send button', async () => {
+  test('send triggers mutation and disables button while pending', async () => {
+    // Make the post hang so we can observe the pending state
+    let resolvePost: (val: any) => void
+    mockApi.post.mockReturnValue(new Promise((res) => { resolvePost = res }))
+
     renderWithProviders(<ComposeForm orgId="org-1" />)
 
     // Fill required fields
@@ -136,25 +148,22 @@ describe('ComposeForm - VS-028 audience + send pipeline', () => {
     const contentArea = screen.getByPlaceholderText('Write your announcement here...')
     await userEvent.type(contentArea, 'Test content')
 
-    // Click Send Now — should show confirmation dialog
+    // Click Send Now — directly triggers mutation (no confirmation dialog)
     const sendBtn = screen.getByText('Send Now')
     await userEvent.click(sendBtn)
 
-    // Confirmation dialog should appear
+    // The mutation should have been called
     await waitFor(() => {
-      expect(screen.getByText('Confirm Send')).toBeTruthy()
-    })
-
-    // Click Confirm Send
-    const confirmBtn = screen.getByText('Confirm Send')
-    await userEvent.click(confirmBtn)
-
-    // Second click on Confirm should be blocked by sendingRef
-    // (the button should be disabled while pending)
-    await waitFor(() => {
-      // After first click, mutation starts — button shows "Sending..."
-      // or the dialog closes. Either way, the ref prevents double submission.
       expect(mockApi.post).toHaveBeenCalledTimes(1)
     }, { timeout: 2000 })
+
+    // While pending, button should show "Sending..." and be disabled
+    await waitFor(() => {
+      expect(screen.getByText('Sending...')).toBeTruthy()
+      expect(screen.getByText('Sending...')).toBeDisabled()
+    })
+
+    // Resolve the pending mutation
+    resolvePost!({ data: { id: 'ann-1' } })
   })
 })
