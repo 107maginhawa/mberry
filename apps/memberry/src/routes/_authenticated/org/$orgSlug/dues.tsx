@@ -147,12 +147,12 @@ function MemberDuesPage() {
       />
 
       {/* Dues Status Summary Card */}
-      {duesStatus && expiryDate && (
+      {duesStatus && (
         <DuesStatusCard
           status={duesStatus}
-          expiryDate={expiryDate.toISOString()}
+          expiryDate={expiryDate?.toISOString()}
           nextPaymentAmount={unpaidInvoices[0]?.totalAmount}
-          nextPaymentDueDate={unpaidInvoices[0]?.periodEnd}
+          nextPaymentDueDate={unpaidInvoices[0]?.dueDate ?? unpaidInvoices[0]?.periodEnd}
           currency={duesConfig?.currency ?? 'PHP'}
           onPayNow={unpaidInvoices.length > 0 ? () => {
             document.getElementById('pay-dues-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -239,7 +239,7 @@ function MemberDuesPage() {
                             <ProofUploadForm
                               invoiceId={inv.id}
                               invoiceAmount={inv.totalAmount}
-                              currency="PHP"
+                              currency={duesConfig?.currency ?? 'PHP'}
                               orgId={orgId}
                             />
                           </div>
@@ -253,7 +253,7 @@ function MemberDuesPage() {
                         <ProofUploadForm
                           invoiceId={inv.id}
                           invoiceAmount={inv.totalAmount}
-                          currency="PHP"
+                          currency={duesConfig?.currency ?? 'PHP'}
                           orgId={orgId}
                         />
                       </div>
@@ -382,7 +382,7 @@ function MemberDuesPage() {
                           {formatCents(p.amount, p.currency)}
                         </span>
                         <span className="text-[12px] text-[var(--color-muted)]">
-                          {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}
+                          {p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                         </span>
                       </div>
                     </div>

@@ -17,6 +17,10 @@ vi.mock('@monobase/ui', () => ({
   Button: ({ children, onClick, disabled, className, 'aria-label': ariaLabel, ...props }: any) => (
     <button onClick={onClick} disabled={disabled} className={className} aria-label={ariaLabel} {...props}>{children}</button>
   ),
+  DropdownMenu: ({ children }: any) => <div>{children}</div>,
+  DropdownMenuTrigger: ({ children, asChild }: any) => <div>{children}</div>,
+  DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
+  DropdownMenuItem: ({ children, onClick }: any) => <div onClick={onClick}>{children}</div>,
 }))
 
 describe('EventCard', () => {
@@ -92,7 +96,7 @@ describe('EventCard', () => {
       />,
     )
 
-    await user.click(screen.getByLabelText('Actions'))
+    await user.click(screen.getByLabelText('Event actions'))
 
     expect(screen.getByText('View Details')).toBeInTheDocument()
     expect(screen.getByText('Edit')).toBeInTheDocument()
@@ -108,7 +112,7 @@ describe('EventCard', () => {
       <EventCard event={cancelled} orgId="org-1" onCancel={vi.fn()} />,
     )
 
-    await user.click(screen.getByLabelText('Actions'))
+    await user.click(screen.getByLabelText('Event actions'))
     expect(screen.queryByText('Cancel')).not.toBeInTheDocument()
   })
 
