@@ -264,6 +264,10 @@ export function createApp(config: Config): App {
   app.use('/invite/claim/*', authMiddleware());
   // /invite/validate/* intentionally has no auth — public endpoint
 
+  // Accredited Providers — auth middleware applied here BEFORE generated routes
+  // (generated routes omit authMiddleware due to codegen gap)
+  app.use('/accredited-providers/*', authMiddleware());
+
   // Register API routes
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
 

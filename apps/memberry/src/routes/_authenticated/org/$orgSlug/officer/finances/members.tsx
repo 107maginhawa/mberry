@@ -110,11 +110,11 @@ function FinancialMembersPage() {
   function handleExportCsv() {
     const headers = ['Name', 'Category', 'Status', 'Outstanding', 'Member Since']
     const rows = members.map((m: any) => {
-      const name = [m.person?.firstName, m.person?.lastName].filter(Boolean).join(' ') || m.personId
+      const name = [m.firstName, m.lastName].filter(Boolean).join(' ') || m.personId
       const outstanding = outstandingByPerson.get(m.personId) ?? 0
       return [
         name,
-        m.category?.name ?? '—',
+        m.categoryName ?? '—',
         m.status,
         formatCents(outstanding),
         m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '—',
@@ -215,7 +215,7 @@ function FinancialMembersPage() {
               </TableHeader>
               <TableBody>
                 {members.map((m: any) => {
-                  const name = [m.person?.firstName, m.person?.lastName].filter(Boolean).join(' ')
+                  const name = [m.firstName, m.lastName].filter(Boolean).join(' ')
                   const outstanding = outstandingByPerson.get(m.personId) ?? 0
                   const badge = STATUS_BADGE[m.status] ?? { label: m.status, className: 'bg-gray-100 text-gray-600' }
 
@@ -237,11 +237,11 @@ function FinancialMembersPage() {
                           <AvatarInitials name={name || '?'} size="sm" />
                           <div className="min-w-0">
                             <p className="font-medium truncate">{name || 'Unknown'}</p>
-                            <p className="text-xs text-[var(--color-muted)] truncate">{m.person?.email ?? m.personId}</p>
+                            <p className="text-xs text-[var(--color-muted)] truncate">{m.email ?? m.personId}</p>
                           </div>
                         </Link>
                       </TableCell>
-                      <TableCell className="px-3 py-3 text-xs">{m.category?.name ?? '—'}</TableCell>
+                      <TableCell className="px-3 py-3 text-xs">{m.categoryName ?? '—'}</TableCell>
                       <TableCell className="px-3 py-3">
                         <Badge className={`text-xs ${badge.className}`}>{badge.label}</Badge>
                       </TableCell>

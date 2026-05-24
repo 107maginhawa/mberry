@@ -98,7 +98,7 @@ function InvoicesPage() {
       result = result.filter(
         (inv) =>
           inv.invoiceNumber.toLowerCase().includes(q) ||
-          inv.personId.toLowerCase().includes(q)
+          ((inv as any).memberName ?? inv.personId).toLowerCase().includes(q)
       )
     }
     return result
@@ -186,10 +186,10 @@ function InvoicesPage() {
   }
 
   function handleExportCsv() {
-    const headers = ['Invoice #', 'Person ID', 'Period Start', 'Period End', 'Amount', 'Status', 'Due Date']
+    const headers = ['Invoice #', 'Member', 'Period Start', 'Period End', 'Amount', 'Status', 'Due Date']
     const rows = filtered.map((inv) => [
       inv.invoiceNumber,
-      inv.personId,
+      (inv as any).memberName ?? inv.personId,
       new Date(inv.periodStart).toLocaleDateString(),
       new Date(inv.periodEnd).toLocaleDateString(),
       formatCents(Number(inv.totalAmount)),
@@ -327,7 +327,7 @@ function InvoicesPage() {
                         {inv.invoiceNumber}
                       </Link>
                     </TableCell>
-                    <TableCell className="px-3 py-3 text-xs text-[var(--color-muted)]">{inv.personId}</TableCell>
+                    <TableCell className="px-3 py-3 text-xs">{(inv as any).memberName ?? inv.personId}</TableCell>
                     <TableCell className="px-3 py-3 text-xs">
                       {new Date(inv.periodStart).toLocaleDateString('en-PH', { month: 'short', year: 'numeric' })} — {new Date(inv.periodEnd).toLocaleDateString('en-PH', { month: 'short', year: 'numeric' })}
                     </TableCell>

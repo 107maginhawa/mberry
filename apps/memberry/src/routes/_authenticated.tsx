@@ -60,6 +60,10 @@ function AuthenticatedLayout() {
   // Detect if we're inside an officer route to avoid double-wrapping.
   const isOfficerRoute = matches.some((m) => m.routeId.includes("/officer"))
 
+  // Detect if user is an officer in the currently active org (for sidebar link)
+  const activeOrg = orgs.find((o) => o.orgSlug && location.pathname.startsWith(`/org/${o.orgSlug}`))
+  const isOfficerForActiveOrg = activeOrg ? officerOrgIds.has(activeOrg.organizationId) : false
+
   if (isOfficerRoute) {
     return <Outlet />
   }
@@ -73,7 +77,7 @@ function AuthenticatedLayout() {
         Skip to main content
       </a>
       <OrgIconRail officerOrgIds={officerOrgIds} />
-      <MemberSidebar userEmail={user?.email} />
+      <MemberSidebar userEmail={user?.email} isOfficer={isOfficerForActiveOrg} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MemberHeader userName={user?.name} />
         <main id="main-content" className="flex-1 overflow-auto pb-[var(--bottom-nav-height)] md:pb-0">

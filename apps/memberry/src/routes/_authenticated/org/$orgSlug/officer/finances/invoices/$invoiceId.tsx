@@ -216,6 +216,7 @@ function InvoiceDetailPage() {
         <div className="w-full lg:w-[280px] shrink-0 space-y-4">
           <GlassCard className="p-5">
             <h3 className="text-sm font-medium mb-2">Member</h3>
+            <p className="text-sm font-medium">{(invoice as any).memberName ?? 'Unknown'}</p>
             <p className="text-xs text-[var(--color-muted)] font-mono">{invoice.personId}</p>
             <Link
               to="/org/$orgSlug/officer/finances/members/$memberId"

@@ -100,7 +100,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
           <TableBody>
             {payments.map((p: DuesPayment, idx: number) => (
               <TableRow key={p.id} className={`hover:bg-[var(--color-surface-warm)] cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
-                {scope === 'org' && <TableCell className="px-3 py-2 text-body-sm">{(p as any).memberName ?? (p.personId?.slice(0, 8) + '...')}</TableCell>}
+                {scope === 'org' && <TableCell className="px-3 py-2 text-body-sm">{[(p as any).person?.firstName, (p as any).person?.lastName].filter(Boolean).join(' ') || (p.personId?.slice(0, 8) + '...')}</TableCell>}
                 <TableCell className="px-3 py-2 text-body-sm tabular-nums">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</TableCell>
                 <TableCell className="px-3 py-2 text-mono tabular-nums">{p.receiptNumber}</TableCell>
                 <TableCell className="px-3 py-2 text-mono tabular-nums">{formatCents(Number(p.amount), p.currency)}</TableCell>
