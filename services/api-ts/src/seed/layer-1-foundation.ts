@@ -47,9 +47,9 @@ export async function bootstrapDB(db: ReturnType<typeof drizzle>) {
   let regularTier: any, associateTier: any;
   if (existingTiers.length === 0) {
     const tierRows = await db.insert(membershipTiers).values([
-      { organizationId: org1!.id, name: 'Regular', code: 'REGULAR', annualFee: '3000', currency: 'PHP', benefits: ['Voting rights', 'CPD credits', 'Event discounts'], status: 'active', sortOrder: 1 },
-      { organizationId: org1!.id, name: 'Associate', code: 'ASSOCIATE', annualFee: '1500', currency: 'PHP', benefits: ['CPD credits', 'Event access'], status: 'active', sortOrder: 2 },
-    ] as any).returning();
+      { organizationId: org1!.id, name: 'Regular', code: 'REGULAR', annualFee: 3000, currency: 'PHP', benefits: ['Voting rights', 'CPD credits', 'Event discounts'], status: 'active' },
+      { organizationId: org1!.id, name: 'Associate', code: 'ASSOCIATE', annualFee: 1500, currency: 'PHP', benefits: ['CPD credits', 'Event access'], status: 'active' },
+    ]).returning();
     regularTier = tierRows[0]; associateTier = tierRows[1];
   } else {
     regularTier = existingTiers.find((t: any) => t.code === 'REGULAR');
@@ -63,7 +63,7 @@ export async function bootstrapDB(db: ReturnType<typeof drizzle>) {
     await db.insert(membershipCategories).values([
       { organizationId: org1!.id, name: 'Regular', applicableTiers: [regularTier.id] },
       { organizationId: org1!.id, name: 'Associate', applicableTiers: [associateTier.id] },
-    ] as any);
+    ]);
   }
   console.log(`  ✓ Categories: Regular, Associate`);
 
@@ -72,8 +72,8 @@ export async function bootstrapDB(db: ReturnType<typeof drizzle>) {
   let org2RegularTier: any;
   if (existingOrg2Tiers.length === 0) {
     const [t] = await db.insert(membershipTiers).values([
-      { organizationId: org2!.id, name: 'Regular', code: 'REGULAR', annualFee: '3000', currency: 'PHP', benefits: ['Voting rights', 'CPD credits'], status: 'active', sortOrder: 1 },
-    ] as any).returning();
+      { organizationId: org2!.id, name: 'Regular', code: 'REGULAR', annualFee: 3000, currency: 'PHP', benefits: ['Voting rights', 'CPD credits'], status: 'active' },
+    ]).returning();
     org2RegularTier = t;
   } else {
     org2RegularTier = existingOrg2Tiers[0];
