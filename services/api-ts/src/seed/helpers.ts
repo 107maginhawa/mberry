@@ -38,7 +38,7 @@ export const MEMBERSHIP_START = dateStr(daysAgo(365));
 
 export function extractCookie(res: Response): string {
   const cookies: string[] = [];
-  const setCookies = (res.headers as any).getSetCookie?.() ?? [res.headers.get('set-cookie') || ''];
+  const setCookies = (res.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie?.() ?? [res.headers.get('set-cookie') || ''];
   for (const sc of setCookies) {
     const match = sc.match(/^([^=]+=[^;]+)/);
     if (match) cookies.push(match[1]!);
@@ -47,5 +47,5 @@ export function extractCookie(res: Response): string {
 }
 
 export async function verifyEmail(db: ReturnType<typeof drizzle>, email: string) {
-  await db.update(userTable).set({ emailVerified: true } as any).where(eq(userTable.email, email));
+  await db.update(userTable).set({ emailVerified: true }).where(eq(userTable.email, email));
 }
