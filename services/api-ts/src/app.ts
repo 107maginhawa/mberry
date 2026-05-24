@@ -71,8 +71,7 @@ import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 // Saved Segments — hand-wired CRUD (Wave 4β Lane C)
 import { createSavedSegment, listSavedSegments, deleteSavedSegment } from '@/handlers/communication/savedSegments';
 
-// Event lifecycle: completeEvent hand-wired (not yet in TypeSpec)
-import { completeEvent } from '@/handlers/association:operations/completeEvent';
+// completeEvent now served via generated TypeSpec route (was hand-wired, duplicate removed)
 
 // One-tap payment token: public validate + checkout, officer send-link
 import { sendPaymentLink } from '@/handlers/dues/sendPaymentLink';
@@ -275,8 +274,8 @@ export function createApp(config: Config): App {
   // 8. DELETE /accredited-providers/:organizationId/:providerId — PRC accredited providers (org-scoped training)
   // ──────────────────────────────────────────────────────────────────────────
 
-  // completeEvent — hand-wired (not yet in TypeSpec), follows cancelEvent pattern
-  app.post('/association/events/:eventId/complete', authMiddleware(), completeEvent as any);
+  // completeEvent — removed hand-wired duplicate; now served via generated TypeSpec route
+  // (see generated/openapi/routes.ts)
 
   // One-tap payment send-link — officer generates payment link (auth required)
   app.post('/org/:organizationId/payments/send-link', authMiddleware(), orgContextMiddleware(), sendPaymentLink as any);

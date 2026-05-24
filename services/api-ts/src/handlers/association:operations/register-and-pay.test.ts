@@ -1,35 +1,113 @@
 /**
  * Tests for registerAndPayForEvent handler
  *
- * This handler is a deferred stub (Wave 2) — throws DeferredScopeError.
- * Tests document the current interface contract and expected behavior
- * when implementation is completed.
- *
  * Covers:
- * - Current: DeferredScopeError thrown (expected for Wave 2 stub)
- * - Expected future: auth + event validation + payment integration
+ * - Event must exist and be paid
+ * - Active membership required
+ * - Capacity check
+ * - Merchant account required with Stripe onboarding
+ * - Successful registration + Stripe Checkout session creation
  */
 
-import { describe, test, expect } from 'bun:test';
-import { makeCtx } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { EventRepository, EventRegistrationRepository } from './repos/events.repo';
+import { MerchantAccountRepository } from '@/handlers/billing/repos/billing.repo';
 
-describe('registerAndPayForEvent (Wave 2 stub)', () => {
-  test('throws DeferredScopeError — implementation deferred to Wave 2', async () => {
+// Mock the membership check module — always returns active
+mock.module('@/handlers/events/utils/membership-check', () => ({
+  checkActiveMembership: async () => true,
+}));
+
+beforeEach(() => {
+  restoreRepo(EventRepository);
+  restoreRepo(EventRegistrationRepository);
+  restoreRepo(MerchantAccountRepository);
+});
+
+const paidEvent = {
+  id: 'evt-1',
+  title: 'Annual Conference',
+  organizationId: 'org-1',
+  registrationFee: 5000,
+  currency: 'PHP',
+  capacity: 100,
+  status: 'published',
+};
+
+const mockBilling = {
+  createPaymentIntent: async () => ({ checkoutUrl: 'https://checkout.stripe.com/pay' }),
+};
+
+function makeEventCtx(overrides: Record<string, any> = {}) {
+  return makeCtx({
+    _params: { eventId: 'evt-1' },
+    billing: mockBilling,
+    ...overrides,
+  });
+}
+
+function setupHappyPath() {
+  stubRepo(EventRepository, {
+    findOneById: async () => paidEvent,
+  });
+  stubRepo(EventRegistrationRepository, {
+    count: async () => 10,
+    createOne: async (data: any) => ({ id: 'reg-1', ...data }),
+  });
+  stubRepo(MerchantAccountRepository, {
+    findMany: async () => [
+      { id: 'merch-1', metadata: { stripeAccountId: 'acct_test123' } },
+    ],
+  });
+}
+
+describe('registerAndPayForEvent', () => {
+  test('throws NotFoundError when event does not exist', async () => {
     const { registerAndPayForEvent } = await import('./registerAndPayForEvent');
-    const ctx = makeCtx({
-      _params: { eventId: 'evt-1' },
-    });
-    // The handler intentionally throws DeferredScopeError until Wave 2 is implemented
-    await expect(registerAndPayForEvent(ctx)).rejects.toThrow(/registerAndPayForEvent/i);
+    stubRepo(EventRepository, { findOneById: async () => null });
+
+    const ctx = makeEventCtx();
+    await expect(registerAndPayForEvent(ctx)).rejects.toThrow(/not found/i);
   });
 
-  test('stub surfaces eventId param from path', async () => {
+  test('throws BusinessLogicError for free events', async () => {
     const { registerAndPayForEvent } = await import('./registerAndPayForEvent');
-    // Even in stub form, handler should at least parse params without crashing on that step
-    const ctx = makeCtx({
-      _params: { eventId: 'evt-test' },
+    stubRepo(EventRepository, {
+      findOneById: async () => ({ ...paidEvent, registrationFee: 0 }),
     });
-    // Expect the deferred error to mention the operation name
-    await expect(registerAndPayForEvent(ctx)).rejects.toThrow();
+
+    const ctx = makeEventCtx();
+    await expect(registerAndPayForEvent(ctx)).rejects.toThrow(/free event/i);
+  });
+
+  test('throws BusinessLogicError when event is at capacity', async () => {
+    const { registerAndPayForEvent } = await import('./registerAndPayForEvent');
+    stubRepo(EventRepository, { findOneById: async () => paidEvent });
+    stubRepo(EventRegistrationRepository, { count: async () => 100 });
+
+    const ctx = makeEventCtx();
+    await expect(registerAndPayForEvent(ctx)).rejects.toThrow(/capacity/i);
+  });
+
+  test('throws BusinessLogicError when no merchant account', async () => {
+    const { registerAndPayForEvent } = await import('./registerAndPayForEvent');
+    stubRepo(EventRepository, { findOneById: async () => paidEvent });
+    stubRepo(EventRegistrationRepository, { count: async () => 10 });
+    stubRepo(MerchantAccountRepository, { findMany: async () => [] });
+
+    const ctx = makeEventCtx();
+    await expect(registerAndPayForEvent(ctx)).rejects.toThrow(/not set up billing/i);
+  });
+
+  test('returns 201 with checkoutUrl and registrationId on success', async () => {
+    const { registerAndPayForEvent } = await import('./registerAndPayForEvent');
+    setupHappyPath();
+
+    const ctx = makeEventCtx();
+    const response = await registerAndPayForEvent(ctx);
+    expect((response as any).status).toBe(201);
+    expect((response as any).body.data.checkoutUrl).toBe('https://checkout.stripe.com/pay');
+    expect((response as any).body.data.registrationId).toBe('reg-1');
   });
 });
