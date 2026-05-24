@@ -8,6 +8,8 @@ vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
   searchDocumentsQueryKey: vi.fn(() => ['documents']),
   createDocumentMutation: vi.fn(() => ({})),
   archiveDocumentMutation: vi.fn(() => ({})),
+  updateDocumentMutation: vi.fn(() => ({})),
+  deleteDocumentMutation: vi.fn(() => ({})),
 }))
 
 vi.mock('@monobase/ui', () => ({

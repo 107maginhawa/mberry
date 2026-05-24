@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VerificationsIndexRouteImport } from './routes/verifications/index'
 import { Route as TrainingIndexRouteImport } from './routes/training/index'
 import { Route as OrganizationsIndexRouteImport } from './routes/organizations/index'
 import { Route as OperatorsIndexRouteImport } from './routes/operators/index'
@@ -18,15 +19,22 @@ import { Route as MembersIndexRouteImport } from './routes/members/index'
 import { Route as ImpersonateIndexRouteImport } from './routes/impersonate/index'
 import { Route as FeatureFlagsIndexRouteImport } from './routes/feature-flags/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
+import { Route as ComplianceIndexRouteImport } from './routes/compliance/index'
 import { Route as CommitteesIndexRouteImport } from './routes/committees/index'
 import { Route as AuditIndexRouteImport } from './routes/audit/index'
 import { Route as AssociationsIndexRouteImport } from './routes/associations/index'
 import { Route as OrganizationsOrganizationIdRouteImport } from './routes/organizations/$organizationId'
+import { Route as MembersPersonIdRouteImport } from './routes/members/$personId'
 import { Route as AssociationsAssociationIdRouteImport } from './routes/associations/$associationId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerificationsIndexRoute = VerificationsIndexRouteImport.update({
+  id: '/verifications/',
+  path: '/verifications/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrainingIndexRoute = TrainingIndexRouteImport.update({
@@ -69,6 +77,11 @@ const EventsIndexRoute = EventsIndexRouteImport.update({
   path: '/events/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComplianceIndexRoute = ComplianceIndexRouteImport.update({
+  id: '/compliance/',
+  path: '/compliance/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommitteesIndexRoute = CommitteesIndexRouteImport.update({
   id: '/committees/',
   path: '/committees/',
@@ -90,6 +103,11 @@ const OrganizationsOrganizationIdRoute =
     path: '/organizations/$organizationId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MembersPersonIdRoute = MembersPersonIdRouteImport.update({
+  id: '/members/$personId',
+  path: '/members/$personId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssociationsAssociationIdRoute =
   AssociationsAssociationIdRouteImport.update({
     id: '/associations/$associationId',
@@ -100,10 +118,12 @@ const AssociationsAssociationIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/members/$personId': typeof MembersPersonIdRoute
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
   '/associations/': typeof AssociationsIndexRoute
   '/audit/': typeof AuditIndexRoute
   '/committees/': typeof CommitteesIndexRoute
+  '/compliance/': typeof ComplianceIndexRoute
   '/events/': typeof EventsIndexRoute
   '/feature-flags/': typeof FeatureFlagsIndexRoute
   '/impersonate/': typeof ImpersonateIndexRoute
@@ -112,14 +132,17 @@ export interface FileRoutesByFullPath {
   '/operators/': typeof OperatorsIndexRoute
   '/organizations/': typeof OrganizationsIndexRoute
   '/training/': typeof TrainingIndexRoute
+  '/verifications/': typeof VerificationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/members/$personId': typeof MembersPersonIdRoute
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
   '/associations': typeof AssociationsIndexRoute
   '/audit': typeof AuditIndexRoute
   '/committees': typeof CommitteesIndexRoute
+  '/compliance': typeof ComplianceIndexRoute
   '/events': typeof EventsIndexRoute
   '/feature-flags': typeof FeatureFlagsIndexRoute
   '/impersonate': typeof ImpersonateIndexRoute
@@ -128,15 +151,18 @@ export interface FileRoutesByTo {
   '/operators': typeof OperatorsIndexRoute
   '/organizations': typeof OrganizationsIndexRoute
   '/training': typeof TrainingIndexRoute
+  '/verifications': typeof VerificationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/associations/$associationId': typeof AssociationsAssociationIdRoute
+  '/members/$personId': typeof MembersPersonIdRoute
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
   '/associations/': typeof AssociationsIndexRoute
   '/audit/': typeof AuditIndexRoute
   '/committees/': typeof CommitteesIndexRoute
+  '/compliance/': typeof ComplianceIndexRoute
   '/events/': typeof EventsIndexRoute
   '/feature-flags/': typeof FeatureFlagsIndexRoute
   '/impersonate/': typeof ImpersonateIndexRoute
@@ -145,16 +171,19 @@ export interface FileRoutesById {
   '/operators/': typeof OperatorsIndexRoute
   '/organizations/': typeof OrganizationsIndexRoute
   '/training/': typeof TrainingIndexRoute
+  '/verifications/': typeof VerificationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/associations/$associationId'
+    | '/members/$personId'
     | '/organizations/$organizationId'
     | '/associations/'
     | '/audit/'
     | '/committees/'
+    | '/compliance/'
     | '/events/'
     | '/feature-flags/'
     | '/impersonate/'
@@ -163,14 +192,17 @@ export interface FileRouteTypes {
     | '/operators/'
     | '/organizations/'
     | '/training/'
+    | '/verifications/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/associations/$associationId'
+    | '/members/$personId'
     | '/organizations/$organizationId'
     | '/associations'
     | '/audit'
     | '/committees'
+    | '/compliance'
     | '/events'
     | '/feature-flags'
     | '/impersonate'
@@ -179,14 +211,17 @@ export interface FileRouteTypes {
     | '/operators'
     | '/organizations'
     | '/training'
+    | '/verifications'
   id:
     | '__root__'
     | '/'
     | '/associations/$associationId'
+    | '/members/$personId'
     | '/organizations/$organizationId'
     | '/associations/'
     | '/audit/'
     | '/committees/'
+    | '/compliance/'
     | '/events/'
     | '/feature-flags/'
     | '/impersonate/'
@@ -195,15 +230,18 @@ export interface FileRouteTypes {
     | '/operators/'
     | '/organizations/'
     | '/training/'
+    | '/verifications/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssociationsAssociationIdRoute: typeof AssociationsAssociationIdRoute
+  MembersPersonIdRoute: typeof MembersPersonIdRoute
   OrganizationsOrganizationIdRoute: typeof OrganizationsOrganizationIdRoute
   AssociationsIndexRoute: typeof AssociationsIndexRoute
   AuditIndexRoute: typeof AuditIndexRoute
   CommitteesIndexRoute: typeof CommitteesIndexRoute
+  ComplianceIndexRoute: typeof ComplianceIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
   FeatureFlagsIndexRoute: typeof FeatureFlagsIndexRoute
   ImpersonateIndexRoute: typeof ImpersonateIndexRoute
@@ -212,6 +250,7 @@ export interface RootRouteChildren {
   OperatorsIndexRoute: typeof OperatorsIndexRoute
   OrganizationsIndexRoute: typeof OrganizationsIndexRoute
   TrainingIndexRoute: typeof TrainingIndexRoute
+  VerificationsIndexRoute: typeof VerificationsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -221,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verifications/': {
+      id: '/verifications/'
+      path: '/verifications'
+      fullPath: '/verifications/'
+      preLoaderRoute: typeof VerificationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/training/': {
@@ -279,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compliance/': {
+      id: '/compliance/'
+      path: '/compliance'
+      fullPath: '/compliance/'
+      preLoaderRoute: typeof ComplianceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/committees/': {
       id: '/committees/'
       path: '/committees'
@@ -307,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationsOrganizationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/members/$personId': {
+      id: '/members/$personId'
+      path: '/members/$personId'
+      fullPath: '/members/$personId'
+      preLoaderRoute: typeof MembersPersonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/associations/$associationId': {
       id: '/associations/$associationId'
       path: '/associations/$associationId'
@@ -320,10 +380,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssociationsAssociationIdRoute: AssociationsAssociationIdRoute,
+  MembersPersonIdRoute: MembersPersonIdRoute,
   OrganizationsOrganizationIdRoute: OrganizationsOrganizationIdRoute,
   AssociationsIndexRoute: AssociationsIndexRoute,
   AuditIndexRoute: AuditIndexRoute,
   CommitteesIndexRoute: CommitteesIndexRoute,
+  ComplianceIndexRoute: ComplianceIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
   FeatureFlagsIndexRoute: FeatureFlagsIndexRoute,
   ImpersonateIndexRoute: ImpersonateIndexRoute,
@@ -332,6 +394,7 @@ const rootRouteChildren: RootRouteChildren = {
   OperatorsIndexRoute: OperatorsIndexRoute,
   OrganizationsIndexRoute: OrganizationsIndexRoute,
   TrainingIndexRoute: TrainingIndexRoute,
+  VerificationsIndexRoute: VerificationsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

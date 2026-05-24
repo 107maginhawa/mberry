@@ -84,6 +84,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
       <Link
         to="/org/$orgSlug/events/$eventId"
         params={{ orgSlug, eventId: event.id }}
+        search={{}}
         className="block p-4 space-y-3 hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
       >
         <div className="flex items-start justify-between gap-2">

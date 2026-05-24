@@ -285,7 +285,14 @@ function AccessLogTab({ documentId, orgId }: { documentId: string; orgId: string
         <TableBody>
           {entries.map((entry, i) => (
             <TableRow key={i} className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-surface-warm)]/30">
-              <TableCell className="p-3 font-mono text-xs">{entry.accessedBy}</TableCell>
+              <TableCell className="p-3">
+                <span
+                  className="font-mono text-xs text-[var(--color-muted)] cursor-default"
+                  title={entry.accessedBy}
+                >
+                  {entry.accessedBy ? `${entry.accessedBy.slice(0, 8)}...` : '—'}
+                </span>
+              </TableCell>
               <TableCell className="p-3">
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                   entry.action === 'download' ? 'bg-[var(--color-primary-bg)] text-[var(--color-primary)]' :
@@ -385,6 +392,7 @@ function TagManager({ document: doc, orgId }: { document: RuntimeDocument; orgId
       {suggestedTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           <span className="text-xs text-[var(--color-muted)]">Suggestions:</span>
+          {/* eslint-disable no-restricted-syntax -- tag suggestion chips need custom styling */}
           {suggestedTags.map((tag) => (
             <button
               key={tag}
@@ -394,6 +402,7 @@ function TagManager({ document: doc, orgId }: { document: RuntimeDocument; orgId
               {tag}
             </button>
           ))}
+          {/* eslint-enable no-restricted-syntax */}
         </div>
       )}
     </div>

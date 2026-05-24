@@ -13,7 +13,7 @@ import {
   BarChart3,
   File,
 } from 'lucide-react'
-import { Input, Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
+import { Button, Input, Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { searchDocumentsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface DocumentBrowserProps {
@@ -89,10 +89,16 @@ export function DocumentBrowser({ orgId }: DocumentBrowserProps) {
     [debounceRef],
   )
 
+  const [offset, setOffset] = useState(0)
+  const LIMIT = 100
+
   const queryParams: Record<string, unknown> = {
     ownerId: orgId,
     ownerType: 'organization',
-    limit: 100,
+    limit: LIMIT,
+    offset,
+    // API-side access filter — only public and member-level documents
+    accessLevel: 'tenantOnly',
   }
   if (category !== 'all') queryParams.category = category
   if (debouncedSearch) queryParams.q = debouncedSearch
@@ -101,21 +107,54 @@ export function DocumentBrowser({ orgId }: DocumentBrowserProps) {
     searchDocumentsOptions({ query: queryParams as any }),
   )
 
+  // Also pass public access separately via a second query and merge client-side
+  const publicQueryParams: Record<string, unknown> = {
+    ownerId: orgId,
+    ownerType: 'organization',
+    limit: LIMIT,
+    offset,
+    accessLevel: 'public',
+  }
+  if (category !== 'all') publicQueryParams.category = category
+  if (debouncedSearch) publicQueryParams.q = debouncedSearch
+
+  const { data: publicData } = useQuery(
+    searchDocumentsOptions({ query: publicQueryParams as any }),
+  )
+
+  const [extraPages, setExtraPages] = useState<DocumentRow[][]>([])
+
   const documents = useMemo(() => {
-    const raw = ((data as any)?.data as DocumentRow[] | undefined) ?? []
-    return raw.filter((doc) => MEMBER_ACCESS_LEVELS.has(doc.accessLevel))
-  }, [data])
+    const tenantDocs = ((data as any)?.data as DocumentRow[] | undefined) ?? []
+    const publicDocs = ((publicData as any)?.data as DocumentRow[] | undefined) ?? []
+    const merged = [...tenantDocs, ...publicDocs]
+    // Deduplicate by id
+    const seen = new Set<string>()
+    const deduped = merged.filter((doc) => {
+      if (seen.has(doc.id)) return false
+      seen.add(doc.id)
+      return true
+    })
+    // Safety fallback: client-side filter
+    const filtered = deduped.filter((doc) => MEMBER_ACCESS_LEVELS.has(doc.accessLevel))
+    // Append extra pages from load-more
+    const allExtra = extraPages.flat()
+    const allExtraSeen = new Set(filtered.map((d) => d.id))
+    const additionalDocs = allExtra.filter((d) => !allExtraSeen.has(d.id))
+    return [...filtered, ...additionalDocs]
+  }, [data, publicData, extraPages])
+
+  const totalReturnedCount = ((data as any)?.data?.length ?? 0) + ((publicData as any)?.data?.length ?? 0)
+  const hasMore = totalReturnedCount >= LIMIT
 
   const counts = useMemo(() => {
-    const all = ((data as any)?.data as DocumentRow[] | undefined) ?? []
-    const memberDocs = all.filter((d) => MEMBER_ACCESS_LEVELS.has(d.accessLevel))
-    const map: Record<string, number> = { all: memberDocs.length }
-    for (const doc of memberDocs) {
+    const map: Record<string, number> = { all: documents.length }
+    for (const doc of documents) {
       const cat = doc.category || 'other'
       map[cat] = (map[cat] || 0) + 1
     }
     return map
-  }, [data])
+  }, [documents])
 
   return (
     <div className="space-y-6">
@@ -197,6 +236,16 @@ export function DocumentBrowser({ orgId }: DocumentBrowserProps) {
               <ChevronRight className="w-4 h-4 text-[var(--color-muted)] group-hover:text-[var(--color-text)] transition-colors shrink-0" />
             </Link>
           ))}
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="ghost"
+                onClick={() => setOffset((prev) => prev + LIMIT)}
+              >
+                Load More
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

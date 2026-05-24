@@ -137,6 +137,7 @@ function OrgHome() {
               <Link
                 to="/org/$orgSlug/events/$eventId"
                 params={{ orgSlug, eventId: event.id }}
+                search={{}}
                 className="block"
               >
                 <GlassCard className="p-4 space-y-2">

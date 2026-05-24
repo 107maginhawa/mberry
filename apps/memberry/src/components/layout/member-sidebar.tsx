@@ -1,12 +1,15 @@
 import { Link, useParams } from "@tanstack/react-router"
-import { Home, MessageSquare, Calendar, Award, User, Vote, FileText, ClipboardList } from "lucide-react"
+import { Home, MessageSquare, Calendar, CalendarDays, Award, User, Vote, FileText, ClipboardList, ScrollText, Settings } from "lucide-react"
 
 const MAIN_NAV_ITEMS = [
   { to: "/dashboard", label: "Home", icon: Home },
   { to: "/messages", label: "Messages", icon: MessageSquare, orgScoped: true },
   { to: "/my/events", label: "My Events", icon: Calendar },
+  { to: "/my/calendar", label: "My Calendar", icon: CalendarDays },
   { to: "/my/credits", label: "Credits", icon: Award },
   { to: "/my/profile", label: "Profile", icon: User },
+  { to: "/my/certificates", label: "Certificates", icon: ScrollText },
+  { to: "/my/settings", label: "Settings", icon: Settings },
 ] as const
 
 interface MemberSidebarProps {

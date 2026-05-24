@@ -16,6 +16,7 @@ import { Shield, Lock, CreditCard, Download, UserCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'
 import { TrustBadges, type TrustSignals } from '@/features/profile/components/trust-badges'
+import { StandingMeter } from '@/features/profile/components/standing-meter'
 
 export const Route = createFileRoute('/_authenticated/my/profile')({
   component: MyProfilePage,
@@ -120,7 +121,7 @@ function MyProfilePage() {
             <AvatarInitials
               name={formatPersonName(p?.firstName || '?', p?.lastName, p?.middleName)}
               size="lg"
-              photoUrl={p?.avatar?.url || (p as unknown as { photoUrl?: string })?.photoUrl}
+              photoUrl={p?.avatar?.url}
             />
           </div>
           <h2 className="text-h3 mt-3 text-center md:text-left">
@@ -147,13 +148,27 @@ function MyProfilePage() {
         </div>
 
         <div className="md:w-2/3 space-y-4">
+          {/* Standing meter */}
+          <StandingMeter
+            person={p}
+            duesStatus={memberships.some((m: MembershipItem) => m.status === 'active') ? 'current' : null}
+            onAction={() => setEditing(true)}
+          />
+
           {/* Bio */}
-          {p?.bio && (
-            <GlassCard className="p-5">
-              <h3 className="text-h4 mb-2">About</h3>
+          <GlassCard className="p-5">
+            <h3 className="text-h4 mb-2">About</h3>
+            {p?.bio ? (
               <p className="text-sm text-[var(--color-muted)] whitespace-pre-line">{p.bio}</p>
-            </GlassCard>
-          )}
+            ) : (
+              <div className="text-center py-3">
+                <p className="text-sm text-[var(--color-muted)] mb-2">Tell others about your practice</p>
+                <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                  Add Bio
+                </Button>
+              </div>
+            )}
+          </GlassCard>
 
           {/* Contact */}
           <GlassCard className="p-5">
@@ -185,9 +200,9 @@ function MyProfilePage() {
           )}
 
           {/* Memberships */}
-          {memberships.length > 0 && (
-            <GlassCard className="p-5">
-              <h3 className="text-h4 mb-3">Organizations</h3>
+          <GlassCard className="p-5">
+            <h3 className="text-h4 mb-3">Organizations</h3>
+            {memberships.length > 0 ? (
               <div className="space-y-2">
                 {memberships.map((m: any) => (
                   <div key={m.id} className="flex items-center justify-between py-1">
@@ -196,8 +211,10 @@ function MyProfilePage() {
                   </div>
                 ))}
               </div>
-            </GlassCard>
-          )}
+            ) : (
+              <p className="text-sm text-[var(--color-muted)] text-center py-3">No organization memberships yet</p>
+            )}
+          </GlassCard>
 
           {/* Quick Links */}
           <div className="grid grid-cols-2 gap-3">

@@ -23,6 +23,8 @@ import {
   searchDocumentsQueryKey,
   createDocumentMutation,
   archiveDocumentMutation,
+  deleteDocumentMutation,
+  updateDocumentMutation,
 } from '@monobase/sdk-ts/generated/react-query'
 import type {
   AssociationCoreDocumentsDocument,
@@ -95,10 +97,13 @@ function AccessLevelIcon({ level }: { level: string }) {
 
 interface DocumentCardProps {
   document: AssociationCoreDocumentsDocument
+  orgId: string
   onArchive?: (id: string) => void
+  onDelete?: (id: string) => void
+  onPublish?: (id: string) => void
 }
 
-function DocumentCard({ document: doc, onArchive }: DocumentCardProps) {
+function DocumentCard({ document: doc, orgId, onArchive, onDelete, onPublish }: DocumentCardProps) {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -133,14 +138,32 @@ function DocumentCard({ document: doc, onArchive }: DocumentCardProps) {
               >
                 View Details
               </Link>
+              {/* eslint-disable no-restricted-syntax -- dropdown menu items use custom styling */}
+              {onPublish && (doc as any).status === 'draft' && (
+                <button
+                  onClick={() => { onPublish(doc.id); setMenuOpen(false) }}
+                  className="w-full text-left px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)] text-[var(--color-success)]"
+                >
+                  Publish
+                </button>
+              )}
               {onArchive && (doc as any).status !== 'archived' && (
                 <button
                   onClick={() => { onArchive(doc.id); setMenuOpen(false) }}
-                  className="w-full text-left px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)] rounded-b-[8px] text-[var(--color-error)]"
+                  className="w-full text-left px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)] text-[var(--color-error)]"
                 >
                   Archive
                 </button>
               )}
+              {onDelete && (
+                <button
+                  onClick={() => { onDelete(doc.id); setMenuOpen(false) }}
+                  className="w-full text-left px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)] rounded-b-[8px] text-[var(--color-error)]"
+                >
+                  Delete
+                </button>
+              )}
+              {/* eslint-enable no-restricted-syntax */}
             </div>
           )}
         </div>
@@ -197,19 +220,24 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
   const [statusFilter, setStatusFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [archiveId, setArchiveId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [publishId, setPublishId] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [uploadTitle, setUploadTitle] = useState('')
   const [uploadCategory, setUploadCategory] = useState<string>('other')
   const [uploadAccessLevel, setUploadAccessLevel] = useState<string>('tenantOnly')
   const [showUploadForm, setShowUploadForm] = useState(false)
+  const [offset, setOffset] = useState(0)
+  const LIMIT = 50
 
   const queryParams = {
     organizationId: orgId,
     category: category !== 'all' ? category : undefined,
     status: statusFilter !== 'all' ? statusFilter : undefined,
     q: search || undefined,
-    limit: 50,
+    limit: LIMIT,
+    offset,
   }
 
   const { data, isLoading, error } = useQuery(
@@ -226,6 +254,25 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
       queryClient.invalidateQueries({ queryKey: searchDocumentsQueryKey({ query: { organizationId: orgId } as any }) })
     },
     onError: (err) => toast.error(err.message || 'Failed to archive document'),
+  })
+
+  const doDelete = useMutation({
+    ...deleteDocumentMutation(),
+    onSuccess: () => {
+      toast.success('Document deleted')
+      queryClient.invalidateQueries({ queryKey: searchDocumentsQueryKey({ query: { organizationId: orgId } as any }) })
+    },
+    onError: (err) => toast.error((err as unknown as Error).message || 'Failed to delete document'),
+  })
+
+  const doPublish = useMutation({
+    ...updateDocumentMutation(),
+    onSuccess: () => {
+      toast.success('Document published')
+      setPublishId(null)
+      queryClient.invalidateQueries({ queryKey: searchDocumentsQueryKey({ query: { organizationId: orgId } as any }) })
+    },
+    onError: (err) => toast.error((err as unknown as Error).message || 'Failed to publish document'),
   })
 
   const doCreate = useMutation({
@@ -346,6 +393,7 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
         }`}
       >
         <Upload className="w-8 h-8 mx-auto mb-2 text-[var(--color-muted)]" />
+        {/* eslint-disable no-restricted-syntax -- file input + form labels need native elements */}
         <p className="text-sm text-[var(--color-muted)] mb-2">
           Drag and drop a file here, or{' '}
           <label className="text-[var(--color-primary)] cursor-pointer hover:underline">
@@ -415,6 +463,7 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
           </div>
         </GlassCard>
       )}
+      {/* eslint-enable no-restricted-syntax */}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
@@ -464,16 +513,43 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
             : 'No documents yet. Upload your first document above.'}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {documents.map((doc: AssociationCoreDocumentsDocument) => (
-            <DocumentCard
-              key={doc.id}
-              document={doc}
-              onArchive={(id) => setArchiveId(id)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {documents.map((doc: AssociationCoreDocumentsDocument) => (
+              <DocumentCard
+                key={doc.id}
+                document={doc}
+                orgId={orgId}
+                onArchive={(id) => setArchiveId(id)}
+                onDelete={(id) => setDeleteId(id)}
+                onPublish={(id) => setPublishId(id)}
+              />
+            ))}
+          </div>
+          {documents.length >= LIMIT && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="ghost"
+                onClick={() => setOffset((prev) => prev + LIMIT)}
+              >
+                Load More
+              </Button>
+            </div>
+          )}
+        </>
       )}
+
+      <ConfirmDialog
+        open={publishId !== null}
+        onOpenChange={(open) => { if (!open) setPublishId(null) }}
+        title="Publish Document"
+        description="This will make the document visible to members. Are you sure?"
+        confirmLabel="Publish"
+        onConfirm={() => {
+          if (publishId) doPublish.mutate({ path: { documentId: publishId }, body: { status: 'published' } as any, headers: { 'x-org-id': orgId } })
+          setPublishId(null)
+        }}
+      />
 
       <ConfirmDialog
         open={archiveId !== null}
@@ -485,6 +561,19 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
         onConfirm={() => {
           if (archiveId) doArchive.mutate({ path: { documentId: archiveId }, headers: { 'x-org-id': orgId } })
           setArchiveId(null)
+        }}
+      />
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteId(null) }}
+        title="Delete Document"
+        description="This will permanently delete the document. This cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteId) doDelete.mutate({ path: { documentId: deleteId }, headers: { 'x-org-id': orgId } })
+          setDeleteId(null)
         }}
       />
     </div>
