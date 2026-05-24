@@ -240,7 +240,7 @@ const OFFICERS = [
   { email: 'membership@memberry.ph', firstName: 'Sofia', lastName: 'Garcia', position: 'Membership Chair', spec: 'General Dentistry', license: '0056789' },
 ];
 
-type MemberStatus = 'active' | 'grace' | 'lapsed' | 'suspended' | 'removed' | 'pendingPayment' | 'expired' | 'resigned';
+type MemberStatus = 'active' | 'grace' | 'lapsed' | 'suspended' | 'removed' | 'pendingPayment' | 'expired' | 'resigned' | 'deceased' | 'expelled';
 
 const MEMBERS: { email: string; firstName: string; lastName: string; spec: string; license: string; status: MemberStatus }[] = [
   // Legacy test user (referenced by 6+ test files — DO NOT REMOVE)
