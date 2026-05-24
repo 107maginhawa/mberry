@@ -2451,6 +2451,51 @@ When existing code, docs, and specs disagree, resolve using this order:
 
 ---
 
+## Cross-Module Import Rules
+
+Handler modules follow a strict dependency direction. Violating this creates circular imports and tight coupling that makes testing and refactoring expensive.
+
+### Allowed Imports
+
+| Importing module | May import from |
+|-----------------|-----------------|
+| Any module | `person` (core PII hub) |
+| Any module | `association:member` (membership state) |
+| `dues` | `billing` (payment processing) |
+| `events`, `training` | `booking` (scheduling primitives) |
+| `communication`, `comms` | `person`, `association:member` |
+| `audit` | Any module (read-only, write-once) |
+
+### Forbidden
+
+- **Domain modules must NOT import each other directly.** `dues` must not import `events`; `training` must not import `dues`. Use event emitters for side effects (e.g., emit `dues.paid` → training awards credit).
+- **No upward imports.** Core modules (`person`, `association:member`) must NOT import domain modules.
+- **No peer imports between domain modules** (`dues ↔ events`, `training ↔ elections`, etc.).
+
+### Known Accepted Cycles
+
+Three bi-directional relationships involving `association:member` are accepted as architectural seams (not clean but unavoidable given the mega-module scope):
+
+1. `association:member` ↔ `membership` — member state drives membership tier; membership approvals update member records
+2. `association:member` ↔ `dues` — dues ledger is scoped to members; member lifecycle triggers due generation
+3. `association:member` ↔ `communication` — bulk comms target member lists; member events trigger communications
+
+These are documented as **provisional** pending the v1.2.0 mega-module split (see `.planning/phases/14-mega-module-split/SPLIT-PLAN.md`). Do not introduce new bi-directional links.
+
+### Cross-Module Side Effects
+
+Use the `EventEmitter` (see `services/api-ts/src/core/events.ts`) for async fan-out:
+
+```typescript
+// dues handler — emits event, does NOT import training module
+events.emit('dues.paid', { personId, organizationId, invoiceId });
+
+// training handler — listens, awards credit independently
+events.on('dues.paid', async ({ personId }) => { ... });
+```
+
+---
+
 ## Thank You!
 
 Thank you for contributing to Monobase Application Platform. Your work helps improve healthcare access and user management.

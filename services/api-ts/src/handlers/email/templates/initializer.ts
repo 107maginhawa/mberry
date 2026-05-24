@@ -20,6 +20,7 @@ import { EmailTemplateTags } from '../repos/email.schema';
 import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { InternalError } from '@/core/errors';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -187,7 +188,7 @@ async function loadTemplateContent(templatePath: string): Promise<{ html: string
     
     return { html, text };
   } catch (error) {
-    throw new Error(`Failed to load template content for ${templatePath}: ${error}`);
+    throw new InternalError(`Failed to load template content for ${templatePath}: ${error}`);
   }
 }
 

@@ -5,6 +5,7 @@
  */
 
 import { createHmac, randomBytes } from 'crypto';
+import { InternalError } from '@/core/errors';
 
 const PAYMENT_TOKEN_EXPIRY_HOURS = 72;
 
@@ -48,7 +49,7 @@ export function isPaymentTokenExpired(expiresAt: Date): boolean {
 export function getPaymentTokenSecret(): string {
   const secret = process.env['PAYMENT_TOKEN_SECRET'] || process.env['INVITE_TOKEN_SECRET'];
   if (!secret) {
-    throw new Error(
+    throw new InternalError(
       'Payment token secret not configured. Set PAYMENT_TOKEN_SECRET or INVITE_TOKEN_SECRET environment variable.'
     );
   }

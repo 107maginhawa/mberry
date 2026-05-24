@@ -5,6 +5,7 @@
  */
 
 import type { JobScheduler, JobContext } from '@/core/jobs';
+import { NotFoundError } from '@/core/errors';
 import type { NotificationService } from '@/core/notifs';
 import type { EmailService } from '@/core/email';
 import type { DatabaseInstance } from '@/core/database';
@@ -87,7 +88,7 @@ export async function processAnnouncementSend(
   const repo = new CommunicationsRepository(db);
   const announcement = await repo.get(announcementId);
   if (!announcement) {
-    throw new Error(`Announcement ${announcementId} not found`);
+    throw new NotFoundError(`Announcement ${announcementId} not found`, { resourceType: 'announcement', resource: announcementId });
   }
 
   const recipients = await resolveRecipients(db, announcement.organizationId, (announcement as any).segmentFilters);

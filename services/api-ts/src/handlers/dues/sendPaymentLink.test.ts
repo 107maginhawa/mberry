@@ -81,6 +81,7 @@ describe('[VS-W0B-003] sendPaymentLink', () => {
     const ctx = makeCtx({ organizationId: null, _body: { personId: 'member-1' } });
     const res = await sendPaymentLink(ctx);
     expect(res.status).toBe(403);
+    expect((res as any).body.error).toBeDefined();
   });
 
   // ── Validation ───────────────────────────────────────
@@ -93,6 +94,7 @@ describe('[VS-W0B-003] sendPaymentLink', () => {
     });
     const res = await sendPaymentLink(ctx);
     expect(res.status).toBe(400);
+    expect((res as any).body.error).toBeDefined();
   });
 
   // ── Happy Path ───────────────────────────────────────
@@ -185,5 +187,6 @@ describe('[VS-W0B-003] sendPaymentLink', () => {
     });
     const res = await sendPaymentLink(ctx);
     expect(res.status).toBe(400);
+    expect((res as any).body.error).toBeDefined();
   });
 });

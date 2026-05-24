@@ -1,11 +1,12 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { 
+import {
   UnauthorizedError,
   ForbiddenError,
   NotFoundError,
   ValidationError,
-  BusinessLogicError
+  BusinessLogicError,
+  DeferredScopeError
 } from '@/core/errors';
 import type { RegisterAndPayForEventParams } from '@/generated/openapi/validators';
 
@@ -33,5 +34,5 @@ export async function registerAndPayForEvent(
   // throw new ValidationError('Invalid input');
   // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
   
-  throw new Error('Not implemented: registerAndPayForEvent');
+  throw new DeferredScopeError('registerAndPayForEvent', 'Wave 2');
 }

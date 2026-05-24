@@ -67,6 +67,7 @@ describe('updateBookingEvent', () => {
 
     const res = await updateBookingEvent(ctx);
     expect(res.status).toBe(404);
+    expect(res.body.error).toBeDefined();
   });
 
   test('returns 403 when non-owner tries to update', async () => {
@@ -82,6 +83,7 @@ describe('updateBookingEvent', () => {
 
     const res = await updateBookingEvent(ctx);
     expect(res.status).toBe(403);
+    expect(res.body.error).toBeDefined();
   });
 
   test('returns 400 when validation fails', async () => {
@@ -98,5 +100,8 @@ describe('updateBookingEvent', () => {
 
     const res = await updateBookingEvent(ctx);
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Validation failed');
+    expect(res.body.details).toBeArray();
+    expect(res.body.details[0]).toBe('Invalid duration');
   });
 });
