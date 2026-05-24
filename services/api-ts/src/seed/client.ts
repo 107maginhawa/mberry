@@ -27,7 +27,7 @@ export class SeedClient {
       console.error(`  ✗ Sign-up failed for ${email}: ${res.status} ${text.slice(0, 200)}`);
       return false;
     }
-    const data = await res.json() as any;
+    const data = await res.json() as { user?: { id: string }; id?: string };
     this.userId = data.user?.id || data.id || '';
     this.cookie = extractCookie(res);
     return true;
@@ -44,7 +44,7 @@ export class SeedClient {
       console.error(`  ✗ Sign-in failed for ${email}: ${res.status}`);
       return false;
     }
-    const data = await res.json() as any;
+    const data = await res.json() as { user?: { id: string }; id?: string };
     this.userId = data.user?.id || data.id || '';
     this.cookie = extractCookie(res);
     return true;
