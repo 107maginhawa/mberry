@@ -4,6 +4,7 @@ import { Badge } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
+import { DeliveryFunnel } from '@/features/communications/components/delivery-funnel'
 import { useOrg } from '@/hooks/useOrg'
 import { api } from '@/lib/api'
 
@@ -114,6 +115,16 @@ function AnalyticsDashboardPage() {
           </p>
         </GlassCard>
       </div>
+
+      {/* Delivery Funnel */}
+      {!isLoading && (
+        <DeliveryFunnel
+          sent={totalRecipients}
+          delivered={totalEmailDelivered + totalPushDelivered}
+          opened={announcements.reduce((s, a) => s + (a.stats?.inappViews ?? 0), 0)}
+          clicked={0}
+        />
+      )}
 
       {/* Announcements Table */}
       {isLoading ? (
