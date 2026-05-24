@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { GraduationCap, Search } from 'lucide-react'
 import { useState } from 'react'
 import {
+  Button,
   Input,
   Table,
   TableHeader,
@@ -36,19 +37,24 @@ interface CourseItem {
   provider?: string
 }
 
+const PAGE_SIZE = 25
+
 function TrainingPage() {
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
 
   const { data, isLoading, error } = useQuery(
     searchCoursesOptions({
       query: {
         ...(search.length >= 2 ? { q: search } : {}),
-        limit: 50,
+        limit: PAGE_SIZE,
+        offset: page * PAGE_SIZE,
       },
     })
   )
 
   const courses = (data?.data ?? []) as unknown as CourseItem[]
+  const hasMore = courses.length === PAGE_SIZE
 
   return (
     <div className="p-8">
@@ -80,6 +86,15 @@ function TrainingPage() {
         <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
           {error instanceof Error ? error.message : 'Failed to load courses'}
         </div>
+      )}
+
+      {/* Summary */}
+      {!isLoading && !error && (
+        <p className="text-sm text-muted-foreground mb-4">
+          {courses.length === 0
+            ? 'No courses'
+            : `Showing ${page * PAGE_SIZE + 1}–${page * PAGE_SIZE + courses.length} courses`}
+        </p>
       )}
 
       {/* Table */}
@@ -155,6 +170,29 @@ function TrainingPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {(page > 0 || hasMore) && (
+        <div className="flex items-center justify-between mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+          >
+            ← Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">Page {page + 1}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={!hasMore}
+          >
+            Next →
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

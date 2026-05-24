@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Users2, Search } from 'lucide-react'
 import { useState } from 'react'
 import {
+  Button,
   Input,
   Table,
   TableHeader,
@@ -32,8 +33,11 @@ interface CommitteeItem {
   dissolvedAt?: string
 }
 
+const PAGE_SIZE = 25
+
 function CommitteesPage() {
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
 
   const { data, isLoading, error } = useQuery<{ data: CommitteeItem[] }>({
     queryKey: ['admin-committees'],
@@ -45,13 +49,16 @@ function CommitteesPage() {
   })
 
   const allCommittees = data?.data ?? []
-  const committees = search.length >= 2
+  const filtered = search.length >= 2
     ? allCommittees.filter(
         (c) =>
           c.name.toLowerCase().includes(search.toLowerCase()) ||
           c.description?.toLowerCase().includes(search.toLowerCase())
       )
     : allCommittees
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const committees = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   const activeCount = allCommittees.filter((c) => c.status === 'active').length
 
@@ -163,6 +170,31 @@ function CommitteesPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+          >
+            ← Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {page + 1} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page >= totalPages - 1}
+          >
+            Next →
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

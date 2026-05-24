@@ -199,8 +199,8 @@ function FeatureFlagsPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
-                  Loading...
+                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground animate-pulse">
+                  Loading feature flags...
                 </TableCell>
               </TableRow>
             ) : !flags || flags.length === 0 ? (
