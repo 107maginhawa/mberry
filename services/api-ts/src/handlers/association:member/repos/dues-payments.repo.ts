@@ -125,8 +125,32 @@ export class DuesRepository {
 
     const [data, countResult] = await Promise.all([
       this.db
-        .select()
+        .select({
+          id: duesPayments.id,
+          organizationId: duesPayments.organizationId,
+          personId: duesPayments.personId,
+          invoiceId: duesPayments.invoiceId,
+          receiptNumber: duesPayments.receiptNumber,
+          amount: duesPayments.amount,
+          currency: duesPayments.currency,
+          paymentMethod: duesPayments.paymentMethod,
+          status: duesPayments.status,
+          referenceNumber: duesPayments.referenceNumber,
+          paidAt: duesPayments.paidAt,
+          createdAt: duesPayments.createdAt,
+          updatedAt: duesPayments.updatedAt,
+          proofStorageKey: duesPayments.proofStorageKey,
+          proofFileName: duesPayments.proofFileName,
+          proofMimeType: duesPayments.proofMimeType,
+          refundedAmount: duesPayments.refundedAmount,
+          refundDate: duesPayments.refundDate,
+          refundReason: duesPayments.refundReason,
+          rejectionReason: duesPayments.rejectionReason,
+          personFirstName: persons.firstName,
+          personLastName: persons.lastName,
+        })
         .from(duesPayments)
+        .leftJoin(persons, eq(persons.id, duesPayments.personId))
         .where(where)
         .orderBy(desc(duesPayments.paidAt))
         .limit(filters.limit ?? 25)
@@ -137,7 +161,13 @@ export class DuesRepository {
         .where(where),
     ]);
 
-    return { data, total: countResult[0]?.count ?? 0 };
+    // Shape data with nested person object for frontend consumption
+    const shaped = data.map((row) => ({
+      ...row,
+      person: row.personFirstName ? { firstName: row.personFirstName, lastName: row.personLastName } : null,
+    }));
+
+    return { data: shaped as any, total: countResult[0]?.count ?? 0 };
   }
 
   async getPayment(id: string): Promise<DuesPayment | undefined> {

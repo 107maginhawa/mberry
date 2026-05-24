@@ -1812,6 +1812,35 @@ async function seedDuesInfrastructure(
   } catch (e) {
     console.log(`    (aging payments failed: ${(e as Error).message?.slice(0, 80)})`);
   }
+
+  // ─── Historical completed payments (24 months for chart timeline) ──
+  try {
+    const histExists = await db.execute(
+      sql`SELECT count(*) as c FROM dues_payment WHERE receipt_number LIKE 'RCP-HIST-%'`
+    );
+    const histCount = Number((histExists as any).rows?.[0]?.c ?? (histExists as any)[0]?.c ?? 0);
+    if (histCount === 0 && memberPersonIds.length >= 5) {
+      const methods = ['gcash', 'bankTransfer', 'cash', 'online', 'check'] as const;
+      let histNum = 1;
+      // 24 months of payments, 3-5 per month
+      for (let monthsBack = 24; monthsBack >= 1; monthsBack--) {
+        const paymentsThisMonth = 3 + (monthsBack % 3); // 3-5 per month
+        for (let j = 0; j < paymentsThisMonth; j++) {
+          const personIdx = (histNum - 1) % memberPersonIds.length;
+          const dayInMonth = 5 + (j * 7); // spread across month
+          const paidDate = new Date(NOW.getTime() - monthsBack * 30 * 86400000 + dayInMonth * 86400000);
+          await db.execute(sql`
+            INSERT INTO dues_payment (organization_id, person_id, receipt_number, amount, currency, payment_method, status, paid_at, created_at)
+            VALUES (${orgId}, ${memberPersonIds[personIdx]!}, ${`RCP-HIST-${String(histNum).padStart(3, '0')}`}, 300000, 'PHP', ${methods[j % methods.length]}::dues_payment_method, 'completed'::dues_payment_status, ${paidDate}, ${paidDate})
+          `);
+          histNum++;
+        }
+      }
+      console.log(`    ✓ ${histNum - 1} historical payments seeded (24 months for chart)`);
+    }
+  } catch (e) {
+    console.log(`    (historical payments failed: ${(e as Error).message?.slice(0, 80)})`);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
