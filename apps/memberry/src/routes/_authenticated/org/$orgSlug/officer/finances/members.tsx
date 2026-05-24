@@ -230,7 +230,7 @@ function FinancialMembersPage() {
                       </TableCell>
                       <TableCell className="px-3 py-3">
                         <Link
-                          to="/org/$orgSlug/officer/dues/member/$memberId"
+                          to="/org/$orgSlug/officer/finances/members/$memberId"
                           params={{ orgSlug, memberId: m.id }}
                           className="flex items-center gap-2.5 hover:underline"
                         >
