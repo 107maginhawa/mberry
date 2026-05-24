@@ -15,6 +15,7 @@ import { Button, Input, Label, Textarea } from '@monobase/ui'
 import { Shield, Lock, CreditCard, Download, UserCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'
+import { TrustBadges, type TrustSignals } from '@/features/profile/components/trust-badges'
 
 export const Route = createFileRoute('/_authenticated/my/profile')({
   component: MyProfilePage,
@@ -135,6 +136,14 @@ function MyProfilePage() {
               {formatLicenseDisplay(p.licenseNumber, p.prcId)}
             </p>
           )}
+          <TrustBadges
+            signals={{
+              duesStatus: memberships.some((m: MembershipItem) => m.status === 'active') ? 'current' : null,
+              credentialCount: 0,
+              ceCreditsEarned: 0,
+              hasVerifiedLicense: !!p?.licenseNumber,
+            }}
+          />
         </div>
 
         <div className="md:w-2/3 space-y-4">
