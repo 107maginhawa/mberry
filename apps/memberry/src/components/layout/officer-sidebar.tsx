@@ -7,7 +7,6 @@ import {
   Upload,
   Settings,
   CreditCard,
-  PieChart,
   BarChart3,
   Calendar,
   BookOpen,
@@ -20,6 +19,11 @@ import {
   ArrowLeft,
   Vote,
   FileSpreadsheet,
+  TrendingUp,
+  Receipt,
+  UserCheck,
+  Wallet,
+  CalendarClock,
 } from "lucide-react"
 
 interface NavSection {
@@ -60,10 +64,13 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
     {
       label: "FINANCES",
       items: [
-        { to: `${base}/settings/dues`, label: "Dues Config", icon: Settings },
-        { to: `${base}/payments`, label: "Payment Records", icon: CreditCard },
-        { to: `${base}/settings/funds`, label: "Fund Allocation", icon: PieChart },
-        { to: `${base}/dues/assessments`, label: "Assessments", icon: FileSpreadsheet },
+        { to: `${base}/finances`, label: "Overview", icon: TrendingUp },
+        { to: `${base}/finances/invoices`, label: "Invoices", icon: Receipt },
+        { to: `${base}/payments`, label: "Payments", icon: CreditCard },
+        { to: `${base}/finances/members`, label: "Members", icon: UserCheck },
+        { to: `${base}/finances/dues`, label: "Dues Schedule", icon: CalendarClock },
+        { to: `${base}/finances/assessments`, label: "Assessments", icon: FileSpreadsheet },
+        { to: `${base}/finances/funds`, label: "Funds", icon: Wallet },
         { to: `${base}/reports/financial`, label: "Reports", icon: BarChart3 },
       ],
     },
