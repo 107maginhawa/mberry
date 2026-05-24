@@ -8,7 +8,7 @@ const MAX_IMAGES = 4;
 export async function createFeedPost(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
   const body = await ctx.req.json();
 
   if (!body.bodyText || typeof body.bodyText !== 'string') {

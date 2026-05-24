@@ -44,6 +44,19 @@ export const eventVisibilityEnum = pgEnum('event_visibility', [
   'network',
 ]);
 
+export const cpdActivityTypeEnum = pgEnum('cpd_activity_type', [
+  'seminar',
+  'workshop',
+  'conference',
+  'webinar',
+  'hands_on',
+  'community',
+  'research',
+  'mentorship',
+  'self_directed',
+  'other',
+]);
+
 export const eventTypeEnum = pgEnum('event_type', [
   'generalAssembly', 'inductionCeremony', 'fellowship', 'medicalMission',
   'boardMeeting', 'committeeMeeting', 'fundraiser', 'other',
@@ -56,20 +69,24 @@ export const events = pgTable('event', {
   eventType: eventTypeEnum('event_type').default('other'),
   description: text('description'),
   location: varchar('location', { length: 500 }),
-  startDate: timestamp('start_date').notNull(),
-  endDate: timestamp('end_date').notNull(),
+  startDate: timestamp('start_date', { withTimezone: true }).notNull(),
+  endDate: timestamp('end_date', { withTimezone: true }).notNull(),
   capacity: integer('capacity'),
   registrationFee: bigint('registration_fee', { mode: 'number' }).default(0),
   currency: varchar('currency', { length: 3 }).default('PHP'),
   creditBearing: boolean('credit_bearing').default(false),
   creditAmount: integer('credit_amount').default(0),
+  cpdActivityType: cpdActivityTypeEnum('cpd_activity_type'),
+  eventSlug: varchar('event_slug', { length: 300 }).unique(),
+  coverImageUrl: varchar('cover_image_url', { length: 2048 }),
   status: eventStatusEnum('status').notNull().default('draft'),
   visibility: eventVisibilityEnum('visibility').notNull().default('internal'),
-  publishedAt: timestamp('published_at'),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
 }, (table) => [
   index('idx_event_org').on(table.organizationId),
   index('idx_event_status').on(table.status),
   index('idx_event_start').on(table.startDate),
+  index('idx_event_slug').on(table.eventSlug),
 ]);
 
 export const eventRegistrations = pgTable('event_registration', {
@@ -78,9 +95,9 @@ export const eventRegistrations = pgTable('event_registration', {
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   status: registrationStatusEnum('status').notNull().default('confirmed'),
-  registeredAt: timestamp('registered_at').notNull().defaultNow(),
-  cancelledAt: timestamp('cancelled_at'),
-  refundedAt: timestamp('refunded_at'),
+  registeredAt: timestamp('registered_at', { withTimezone: true }).notNull().defaultNow(),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  refundedAt: timestamp('refunded_at', { withTimezone: true }),
 }, (table) => [
   index('idx_event_reg_org').on(table.organizationId),
   index('idx_event_reg_event').on(table.eventId),
@@ -93,8 +110,14 @@ export const checkIns = pgTable('check_in', {
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   method: checkInMethodEnum('method').notNull(),
-  checkedInAt: timestamp('checked_in_at').notNull().defaultNow(),
+  checkedInAt: timestamp('checked_in_at', { withTimezone: true }).notNull().defaultNow(),
   checkedInBy: uuid('checked_in_by'),
+  attestation: jsonb('attestation').$type<{
+    officerId: string;
+    method: string;
+    deviceInfo?: string;
+    timestamp: string;
+  }>(),
 }, (table) => [
   index('idx_checkin_org').on(table.organizationId),
   index('idx_checkin_event').on(table.eventId),
@@ -107,8 +130,8 @@ export const waitlistEntries = pgTable('waitlist_entry', {
   eventId: uuid('event_id').notNull(),
   personId: uuid('person_id').notNull(),
   position: integer('position').notNull(),
-  joinedAt: timestamp('joined_at').notNull().defaultNow(),
-  promotedAt: timestamp('promoted_at'),
+  joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  promotedAt: timestamp('promoted_at', { withTimezone: true }),
 }, (table) => [
   index('idx_waitlist_org').on(table.organizationId),
   index('idx_waitlist_event').on(table.eventId),

@@ -1,561 +1,233 @@
 /**
- * Seed script for Phase 1 development data.
+ * Seed entry point — orchestrates all seed layers in dependency order.
  *
- * Creates: 1 association, 2 orgs, membership tiers, categories,
- * 2 test users with persons and memberships.
+ * Modular architecture:
+ *   seed/types.ts              — SeedContext, MemberStatus
+ *   seed/helpers.ts            — Date math, constants, utilities
+ *   seed/client.ts             — SeedClient API wrapper
+ *   seed/data.ts               — OFFICERS, MEMBERS, APPLICANTS arrays
+ *   seed/layer-1-foundation.ts — Org, tiers, categories
+ *   seed/layer-2-users.ts      — President, officers, members, applicants
+ *   seed/layer-3-modules.ts    — Events, training, elections, announcements, credits
+ *   seed/layer-4-cross-module.ts — Notifications, certs, docs, comms, billing, committees
+ *   seed/layer-5-gap-fill.ts   — Gap-fill phases 19-29
+ *   seed/layer-6-states.ts     — State coverage (all enum values)
  *
- * Requires: API server running on port 7213 (for auth sign-up).
+ * Requires: API server running on port 7213.
+ * Idempotent — safe to re-run.
+ *
  * Run: cd services/api-ts && bun run db:seed
  */
 
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 import { Pool } from 'pg';
-import { associations, organizations, platformAdmins } from './handlers/platformadmin/repos/platform-admin.schema';
-import { membershipTiers, membershipCategories, memberships } from './handlers/association:member/repos/membership.schema';
-import { positions, officerTerms } from './handlers/association:member/repos/governance.schema';
+import { memberships } from './handlers/association:member/repos/membership.schema';
 import { persons } from './handlers/person/repos/person.schema';
-import { user as userTable } from './generated/better-auth/schema';
 
-const DATABASE_URL = process.env['DATABASE_URL'] || 'postgres://postgres@localhost:5432/monobase';
-const API_URL = process.env['API_URL'] || 'http://localhost:7213';
+// Retained for main summary
+import { notifications } from './handlers/notifs/repos/notification.schema';
+import { certificates } from './handlers/certificates/repos/certificates.schema';
+import { documents } from './handlers/documents/repos/documents.schema';
+import { courses } from './handlers/association:operations/repos/training.schema';
+import { DATABASE_URL, API_URL } from './seed/helpers';
 
-// Test credentials
-const TEST_USERS = [
-  {
-    email: 'test@memberry.ph',
-    password: 'TestPass123!',
-    name: 'Maria Santos',
-    firstName: 'Maria',
-    lastName: 'Santos',
-    specialization: 'Orthodontics',
-    licenseNumber: '0012345',
-    dbRole: 'admin,association:admin,association:member',
-  },
-  {
-    email: 'member@memberry.ph',
-    password: 'TestPass123!',
-    name: 'Juan Cruz',
-    firstName: 'Juan',
-    lastName: 'Cruz',
-    specialization: 'General Dentistry',
-    licenseNumber: '0067890',
-    dbRole: 'association:member',
-  },
-  {
-    email: 'treasurer@memberry.ph',
-    password: 'TestPass123!',
-    name: 'Jose Reyes',
-    firstName: 'Jose',
-    lastName: 'Reyes',
-    specialization: 'Prosthodontics',
-    licenseNumber: '0054321',
-    dbRole: 'association:admin,association:member',
-  },
-  {
-    email: 'secretary@memberry.ph',
-    password: 'TestPass123!',
-    name: 'Ana Lim',
-    firstName: 'Ana',
-    lastName: 'Lim',
-    specialization: 'Pediatric Dentistry',
-    licenseNumber: '0078901',
-    dbRole: 'association:admin,association:member',
-  },
-  {
-    email: 'society@memberry.ph',
-    password: 'TestPass123!',
-    name: 'Lito Tan',
-    firstName: 'Lito',
-    lastName: 'Tan',
-    specialization: 'Endodontics',
-    licenseNumber: '0098765',
-    dbRole: 'association:admin,association:member',
-  },
-  {
-    email: 'idor-officer@memberry.ph',
-    password: 'TestPass123!',
-    name: 'Carlos Dizon',
-    firstName: 'Carlos',
-    lastName: 'Dizon',
-    specialization: 'Oral Surgery',
-    licenseNumber: '0011223',
-    dbRole: 'association:admin,association:member',
-  },
-];
+import { SeedClient } from './seed/client';
+import { OFFICERS, MEMBERS, APPLICANTS } from './seed/data';
+import { bootstrapDB } from './seed/layer-1-foundation';
+import { seedPresident, seedOfficer, seedMember, seedApplicant, seedIdorOfficer, seedMissingRoles } from './seed/layer-2-users';
+import { seedEvents, seedTraining, seedElections, seedAnnouncements, seedCredits, seedRelationalData, seedProfilePhotos } from './seed/layer-3-modules';
+import { seedNotifications, seedCertificates, seedDocuments, seedComms, seedBilling, seedDunningEventsAndAudit, seedRemainingModules, seedDuesInfrastructure, seedCommittees } from './seed/layer-4-cross-module';
+import { seedEventsGapFill, seedTrainingGapFill, seedCredentialsGapFill, seedProfileAndGovernanceGapFill, seedFinanceDeepFill, seedCommsGapFill, seedSurveysModule, seedCpdBackfill, seedSavedSegments, seedJobsModule, seedPrivacyBackfill } from './seed/layer-5-gap-fill';
+import { seedStateCoverage } from './seed/layer-6-states';
 
-/** Mark a user's email as verified directly in DB (seed users skip email flow) */
-async function verifyEmail(db: ReturnType<typeof drizzle>, email: string): Promise<void> {
-  await db.update(userTable).set({ emailVerified: true }).where(eq(userTable.email, email));
-}
+async function main() {
+  console.log('╔══════════════════════════════════════════╗');
+  console.log('║   SEED — modular API-driven seeding      ║');
+  console.log('║   Requires: API server on port 7213      ║');
+  console.log('╚══════════════════════════════════════════╝\n');
 
-async function signUpUser(db: ReturnType<typeof drizzle>, email: string, password: string, name: string): Promise<{ userId: string; cookie: string } | null> {
-  const res = await fetch(`${API_URL}/auth/sign-up/email`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, name }),
-  });
-
-  if (res.status === 409 || res.status === 422) {
-    // User already exists — verify email and sign in
-    await verifyEmail(db, email);
-    const signIn = await fetch(`${API_URL}/auth/sign-in/email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!signIn.ok) {
-      console.log(`  ⚠ User ${email} exists but sign-in failed (${signIn.status}). Skipping.`);
-      return null;
-    }
-    const data = await signIn.json() as any;
-    const cookie = extractSessionCookie(signIn);
-    return { userId: data.user?.id || data.id, cookie };
+  // Verify API is reachable
+  try {
+    const health = await fetch(`${API_URL}/auth/ok`);
+    if (!health.ok) throw new Error(`API returned ${health.status}`);
+  } catch (err) {
+    console.error(`✗ Cannot reach API at ${API_URL}. Start the server first: bun dev`);
+    process.exit(1);
   }
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.log(`  ⚠ Sign-up failed for ${email}: ${res.status} ${text.slice(0, 200)}`);
-    return null;
-  }
-
-  const data = await res.json() as any;
-  // Mark email verified for seed user (skip verification flow)
-  await verifyEmail(db, email);
-  const cookie = extractSessionCookie(res);
-  return { userId: data.user?.id || data.id, cookie };
-}
-
-/** Extract session cookie value from set-cookie headers */
-function extractSessionCookie(res: Response): string {
-  const cookies: string[] = [];
-  // Bun's Headers.getSetCookie() returns array of set-cookie values
-  const setCookies = (res.headers as any).getSetCookie?.() ?? [res.headers.get('set-cookie') || ''];
-  for (const sc of setCookies) {
-    const match = sc.match(/^([^=]+=[^;]+)/);
-    if (match) cookies.push(match[1]!);
-  }
-  return cookies.join('; ');
-}
-
-async function createPerson(
-  cookie: string,
-  data: { firstName: string; lastName: string; specialization: string; licenseNumber: string; email: string },
-): Promise<string | null> {
-  const res = await fetch(`${API_URL}/persons`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Cookie: cookie,
-    },
-    body: JSON.stringify({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      specialization: data.specialization,
-      licenseNumber: data.licenseNumber,
-      contactInfo: { email: data.email },
-    }),
-  });
-
-  if (res.status === 409) {
-    console.log(`  ⚠ Person for ${data.email} already exists. Skipping.`);
-    return null;
-  }
-
-  if (!res.ok) {
-    const text = await res.text();
-    console.log(`  ⚠ Create person failed for ${data.email}: ${res.status} ${text.slice(0, 200)}`);
-    return null;
-  }
-
-  const body = await res.json() as any;
-  return body.id || body.data?.id || null;
-}
-
-async function seed() {
   const pool = new Pool({ connectionString: DATABASE_URL });
   const db = drizzle(pool);
 
-  console.log('Seeding Phase 1 data...\n');
+  // ═══ Layer 1: Foundation ═══
+  const { orgId, org2Id, regularTierId, associateTierId, org2RegularTierId } = await bootstrapDB(db);
 
-  // ─── 1. Association (idempotent) ───
-  const existingAssoc = await db.select().from(associations).where(eq(associations.name, 'Philippine Dental Association')).limit(1);
-  let assoc: any;
+  // ═══ Layer 2: Users ═══
+  const president = await seedPresident(db, orgId, regularTierId);
 
-  if (existingAssoc.length > 0) {
-    assoc = existingAssoc[0];
-    console.log(`  Association: ${assoc.name} (exists: ${assoc.id})`);
-  } else {
-    [assoc] = await db.insert(associations).values({
-      name: 'Philippine Dental Association',
-      country: 'PH',
-      currency: 'PHP',
-      locale: 'en',
-      licenseFormatRegex: '^\\d{4,7}$',
-      creditCyclePeriod: 36,
-      requiredCreditsPerCycle: 60,
-      carryoverEnabled: true,
-      status: 'active',
-    }).returning();
-    console.log(`  Association: ${assoc.name} (${assoc.id})`);
+  console.log('\nPhase 2: Officers...');
+  const officerClients: SeedClient[] = [president];
+  for (let i = 1; i < OFFICERS.length; i++) {
+    const o = OFFICERS[i]!;
+    const memberNum = `PDA-2025-${String(i + 1).padStart(3, '0')}`;
+    const client = await seedOfficer(db, o, orgId, regularTierId, president, memberNum);
+    officerClients.push(client);
   }
 
-  // ─── 2. Organizations (idempotent) ───
-  const existingOrg1 = await db.select().from(organizations).where(eq(organizations.slug, 'pda-metro-manila')).limit(1);
-  let org1: any;
+  console.log('\nPhase 3: Regular Members...');
+  const memberClients: SeedClient[] = [];
+  for (let i = 0; i < MEMBERS.length; i++) {
+    const m = MEMBERS[i]!;
+    const memberNum = `PDA-2025-${String(i + 6).padStart(3, '0')}`;
+    const client = await seedMember(db, m, orgId, regularTierId, president, memberNum);
+    memberClients.push(client);
+    process.stdout.write('.');
+  }
+  console.log(` done (${MEMBERS.length} members)`);
 
-  if (existingOrg1.length > 0) {
-    org1 = existingOrg1[0];
-    console.log(`  Org 1: ${org1.name} (exists: ${org1.id})`);
-  } else {
-    [org1] = await db.insert(organizations).values({
-      id: 'ed8e3a96-8126-4341-be42-e6eb7940c562',
-      associationId: assoc.id,
-      name: 'PDA Metro Manila Chapter',
-      slug: 'pda-metro-manila',
-      orgType: 'chapter',
-      region: 'NCR',
-      contactEmail: 'metromanila@pda.ph',
-      status: 'active',
-    }).returning();
-    console.log(`  Org 1: ${org1.name} (${org1.id})`);
+  console.log('\nPhase 4: Pending Applicants...');
+  for (const a of APPLICANTS) {
+    await seedApplicant(db, a, orgId, regularTierId, president);
   }
 
-  const existingOrg2 = await db.select().from(organizations).where(eq(organizations.slug, 'pda-cebu')).limit(1);
-  let org2: any;
+  console.log('\nPhase 4b: IDOR Officer (org2)...');
+  await seedIdorOfficer(db, org2Id, org2RegularTierId);
 
-  if (existingOrg2.length > 0) {
-    org2 = existingOrg2[0];
-    console.log(`  Org 2: ${org2.name} (exists: ${org2.id})`);
-  } else {
-    [org2] = await db.insert(organizations).values({
-      associationId: assoc.id,
-      name: 'PDA Cebu Chapter',
-      slug: 'pda-cebu',
-      orgType: 'chapter',
-      region: 'Region VII',
-      contactEmail: 'cebu@pda.ph',
-      status: 'active',
-    }).returning();
-    console.log(`  Org 2: ${org2.name} (${org2.id})`);
+  // ═══ Layer 3: Core Modules ═══
+  console.log('\nPhase 5: Activities...');
+  await seedEvents(db, orgId, president.personId);
+  await seedTraining(db, orgId, president.personId);
+
+  console.log('\nPhase 6: Governance...');
+  await seedElections(db, orgId, president.personId);
+  await seedAnnouncements(db, orgId, president.personId);
+
+  console.log('\nPhase 7: Credits...');
+  await seedCredits(db, memberClients, orgId);
+
+  console.log('\nPhase 8: Relational data...');
+  await seedRelationalData(db, orgId, president, memberClients);
+
+  console.log('\nPhase 9: Profile photos...');
+  const allClients = [president, ...officerClients.slice(1), ...memberClients];
+  const genderMap: Record<string, string> = {};
+  for (const o of OFFICERS) {
+    const c = allClients.find(c => c.email === o.email);
+    if (c) genderMap[c.personId] = ['Juan', 'Carlos'].includes(o.firstName) ? 'male' : 'female';
   }
-
-  // ─── 3. Membership Tiers (idempotent) ───
-  const existingTiers = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, org1.id));
-  let regularTier: any;
-  let associateTier: any;
-
-  if (existingTiers.length >= 2) {
-    regularTier = existingTiers.find((t: any) => t.code === 'REGULAR') || existingTiers[0];
-    associateTier = existingTiers.find((t: any) => t.code === 'ASSOCIATE') || existingTiers[1];
-    console.log(`  Tiers: exist (${existingTiers.length} found)`);
-  } else {
-    [regularTier] = await db.insert(membershipTiers).values({
-      organizationId: org1.id,
-      name: 'Regular Member',
-      code: 'REGULAR',
-      description: 'Standard membership for licensed dentists',
-      annualFee: 250000,
-      currency: 'PHP',
-      benefits: ['Directory listing', 'Event discounts', 'CPD tracking'],
-      status: 'active',
-    }).returning();
-
-    [associateTier] = await db.insert(membershipTiers).values({
-      organizationId: org1.id,
-      name: 'Associate Member',
-      code: 'ASSOCIATE',
-      description: 'For dental students and recent graduates',
-      annualFee: 100000,
-      currency: 'PHP',
-      benefits: ['Directory listing', 'Event access'],
-      status: 'active',
-    }).returning();
-    console.log(`  Tier: ${regularTier.name} - PHP ${regularTier.annualFee / 100}`);
-    console.log(`  Tier: ${associateTier.name} - PHP ${associateTier.annualFee / 100}`);
+  const femaleNames = ['Isabella', 'Patricia', 'Carmen', 'Teresa', 'Rosa', 'Lucia', 'Gabriela', 'Andrea', 'Valeria', 'Catalina', 'Mariana', 'Daniela', 'Claudia', 'Beatriz', 'Miguel'];
+  for (const m of MEMBERS) {
+    const c = allClients.find(c => c.email === m.email);
+    if (c) genderMap[c.personId] = femaleNames.includes(m.firstName) ? 'female' : 'male';
   }
+  await seedProfilePhotos(db, allClients.filter(c => c.personId).map(c => c.personId), genderMap);
 
-  // ─── 4. Membership Categories (idempotent) ───
-  const existingCats = await db.select().from(membershipCategories).where(eq(membershipCategories.organizationId, org1.id));
+  // ═══ Layer 4: Cross-Module ═══
+  const allPersonIds = allClients.filter(c => c.personId).map(c => c.personId);
+  const memberPersonIds = memberClients.filter(c => c.personId).map(c => c.personId);
 
-  if (existingCats.length >= 2) {
-    console.log(`  Categories: exist (${existingCats.length} found)`);
-  } else {
-    await db.insert(membershipCategories).values({
-      organizationId: org1.id,
-      name: 'Practicing Dentist',
-      description: 'Licensed and actively practicing',
-      applicableTiers: [regularTier.id],
-    });
-    await db.insert(membershipCategories).values({
-      organizationId: org1.id,
-      name: 'Student',
-      description: 'Currently enrolled in dental school',
-      applicableTiers: [associateTier.id],
-    });
-    console.log(`  Categories: created (Practicing Dentist, Student)`);
-  }
+  console.log('\nPhase 10: Notifications...');
+  await seedNotifications(db, orgId, memberPersonIds, president.personId);
 
-  // ─── 5. Test Users (via API — requires server running) ───
-  console.log('\n  Creating test users (requires API on port 7213)...');
+  console.log('\nPhase 11: Certificates...');
+  await seedCertificates(db, orgId, [president.personId, ...memberPersonIds.slice(0, 4)]);
 
-  const personIds: string[] = [];
-  const userRecords: { userId: string; email: string; name: string }[] = [];
-  const personIdMap = new Map<string, string>();
+  console.log('\nPhase 12: Documents...');
+  await seedDocuments(db, orgId, president.personId, memberPersonIds);
 
-  for (const user of TEST_USERS) {
-    const auth = await signUpUser(db, user.email, user.password, user.name);
-    if (!auth) {
-      console.log(`  ⚠ Skipping ${user.email}`);
-      continue;
-    }
-    console.log(`  User: ${user.email} (${auth.userId})`);
-    userRecords.push({ userId: auth.userId, email: user.email, name: user.name });
+  console.log('\nPhase 13: Comms...');
+  await seedComms(db, orgId, president.personId, memberPersonIds);
 
-    // Create person FIRST (uses original session cookie before role change)
-    const personId = await createPerson(auth.cookie, {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      specialization: user.specialization,
-      licenseNumber: user.licenseNumber,
-      email: user.email,
-    });
+  console.log('\nPhase 14: Billing...');
+  await seedBilling(db, orgId, president.personId, memberPersonIds);
 
-    if (personId) {
-      personIds.push(personId);
-      personIdMap.set(user.email, personId);
-      console.log(`  Person: ${user.firstName} ${user.lastName} (${personId})`);
-    } else {
-      // Person creation failed (403 on re-seed) — look up existing person by auth user ID
-      const existing = await db.select().from(persons).where(eq(persons.id, auth.userId)).limit(1);
-      if (existing.length > 0) {
-        personIds.push(existing[0]!.id);
-        personIdMap.set(user.email, existing[0]!.id);
-        console.log(`  Person: ${user.firstName} ${user.lastName} (${existing[0]!.id}) [existing]`);
-      }
-    }
+  console.log('\nPhase 15: Dunning events & audit...');
+  await seedDunningEventsAndAudit(db, orgId, president.personId, memberPersonIds);
 
-    // Assign proper roles AFTER person creation
-    await db.update(userTable)
-      .set({ role: user.dbRole })
-      .where(eq(userTable.email, user.email));
-    console.log(`  Role: ${user.dbRole}`);
-  }
+  console.log('\nPhase 16: Remaining modules...');
+  await seedRemainingModules(db, orgId, president.personId, memberPersonIds);
 
-  // ─── 6. Memberships (direct DB insert) ───
-  // Only seed org1 memberships for non-IDOR users (idor-officer gets org2 membership in section 8)
-  const org1PersonIds = personIds.filter((_, i) => TEST_USERS[i]?.email !== 'idor-officer@memberry.ph');
-  if (org1PersonIds.length > 0) {
-    const existingMemberships = await db.select().from(memberships).where(eq(memberships.organizationId, org1.id));
+  console.log('\nPhase 17: Dues infrastructure...');
+  await seedDuesInfrastructure(db, orgId, president.personId, memberPersonIds);
 
-    if (existingMemberships.length === 0) {
-      for (let i = 0; i < org1PersonIds.length; i++) {
-        // First user (admin) gets regular tier; all others get regular tier too (officers are regular members)
-        const tier = regularTier;
-        await db.insert(memberships).values({
-          organizationId: org1.id,
-          personId: org1PersonIds[i]!,
-          tierId: tier.id,
-          memberNumber: `PDA-2025-${String(i + 1).padStart(3, '0')}`,
-          startDate: '2025-01-01',
-          duesExpiryDate: '2025-12-31',
-          gracePeriodDays: 30,
-          status: 'active',
-          joinedAt: new Date(),
-        });
-        const orgUserEmail = TEST_USERS.filter(u => u.email !== 'idor-officer@memberry.ph')[i]?.email ?? '';
-        console.log(`  Membership: PDA-2025-${String(i + 1).padStart(3, '0')} (${orgUserEmail})`);
-      }
-    } else {
-      console.log(`  Memberships: exist (${existingMemberships.length} found)`);
-    }
-  }
+  console.log('\nPhase 18: Committees...');
+  await seedCommittees(db, orgId, president.personId, memberPersonIds);
 
-  // ─── 7. Officer Positions + Terms ───
-  if (personIdMap.size > 0) {
-    const OFFICER_POSITIONS = [
-      { title: 'President', email: 'test@memberry.ph', sortOrder: 1 },
-      { title: 'Treasurer', email: 'treasurer@memberry.ph', sortOrder: 2 },
-      { title: 'Secretary', email: 'secretary@memberry.ph', sortOrder: 3 },
-      { title: 'Society Officer', email: 'society@memberry.ph', sortOrder: 4 },
-    ];
+  // ═══ Layer 5: Gap-Fill ═══
+  const allMembershipRows = await db.select({ id: memberships.id })
+    .from(memberships)
+    .where(eq(memberships.organizationId, orgId));
+  const allMembershipIds = allMembershipRows.map((r: any) => r.id);
 
-    // Ensure positions exist (idempotent — upsert by title+org)
-    const existingPositions = await db.select().from(positions).where(eq(positions.organizationId, org1.id));
-    const positionMap = new Map(existingPositions.map((p: any) => [p.title, p]));
+  console.log('\nPhase 19: Events gap-fill...');
+  await seedEventsGapFill(db, orgId, president.personId, memberPersonIds);
 
-    for (const pos of OFFICER_POSITIONS) {
-      if (!positionMap.has(pos.title)) {
-        const [created] = await db.insert(positions).values({
-          organizationId: org1.id,
-          title: pos.title,
-          description: `${pos.title} of PDA Metro Manila`,
-          level: 'chapter',
-          termLengthMonths: 24,
-          sortOrder: pos.sortOrder,
-        }).returning();
-        if (created) positionMap.set(pos.title, created);
-        console.log(`  Position: ${pos.title} (created)`);
-      }
-    }
+  console.log('\nPhase 20: Training gap-fill...');
+  await seedTrainingGapFill(db, orgId, president.personId, memberPersonIds);
 
-    // Ensure officer terms exist (idempotent — check per person+org)
-    const existingTerms = await db.select().from(officerTerms).where(eq(officerTerms.organizationId, org1.id));
-    const termPersonIds = new Set(existingTerms.map((t: any) => t.personId));
+  console.log('\nPhase 21: Credentials gap-fill...');
+  await seedCredentialsGapFill(db, orgId, president.personId, memberPersonIds, allMembershipIds);
 
-    for (const pos of OFFICER_POSITIONS) {
-      const personId = personIdMap.get(pos.email);
-      const position = positionMap.get(pos.title);
-      if (personId && position && !termPersonIds.has(personId)) {
-        await db.insert(officerTerms).values({
-          positionId: position.id,
-          personId,
-          organizationId: org1.id,
-          status: 'active',
-          startDate: new Date('2025-01-01'),
-          endDate: new Date('2026-12-31'),
-        });
-        console.log(`  Officer: ${pos.email} -> ${pos.title} (active term)`);
-      } else if (personId && termPersonIds.has(personId)) {
-        console.log(`  Officer: ${pos.email} -> ${pos.title} (term exists)`);
-      }
-    }
-  }
+  console.log('\nPhase 22: Profile & governance gap-fill...');
+  await seedProfileAndGovernanceGapFill(db, orgId, president.personId, memberPersonIds, allMembershipIds);
 
-  // ─── 8. Org 2 Officer (for IDOR/cross-org tests — D-03/D-04) ───
-  const org2PersonId = personIdMap.get('idor-officer@memberry.ph');
-  if (org2PersonId) {
-    // Create a tier for org2 (required — tierId is NOT NULL)
-    const existingOrg2Tiers = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, org2.id));
-    let org2Tier: any;
-    if (existingOrg2Tiers.length > 0) {
-      org2Tier = existingOrg2Tiers[0];
-      console.log(`  Org 2 tier: exists (${org2Tier.id})`);
-    } else {
-      [org2Tier] = await db.insert(membershipTiers).values({
-        organizationId: org2.id,
-        name: 'Regular Member',
-        code: 'REGULAR',
-        description: 'Standard membership for licensed dentists',
-        annualFee: 250000,
-        currency: 'PHP',
-        benefits: ['Directory listing', 'Event discounts', 'CPD tracking'],
-        status: 'active',
-      }).returning();
-      console.log(`  Org 2 tier: ${org2Tier.name} (${org2Tier.id})`);
-    }
+  console.log('\nPhase 23: Finance deep-fill...');
+  await seedFinanceDeepFill(db, orgId, president.personId, memberPersonIds);
 
-    // Create membership in org2
-    const existingOrg2Memberships = await db.select().from(memberships).where(eq(memberships.organizationId, org2.id));
-    if (existingOrg2Memberships.length === 0) {
-      await db.insert(memberships).values({
-        organizationId: org2.id,
-        personId: org2PersonId,
-        tierId: org2Tier.id,
-        memberNumber: 'PDA-CEBU-001',
-        startDate: '2025-01-01',
-        duesExpiryDate: '2025-12-31',
-        gracePeriodDays: 30,
-        status: 'active',
-        joinedAt: new Date(),
-      });
-      console.log('  Membership: PDA-CEBU-001 (idor-officer@memberry.ph in org2)');
-    } else {
-      console.log(`  Org 2 memberships: exist (${existingOrg2Memberships.length} found)`);
-    }
+  console.log('\nPhase 24: Comms gap-fill...');
+  await seedCommsGapFill(db, orgId, president.personId, memberPersonIds);
 
-    // Create position + active officer term in org2 (idempotent)
-    const existingOrg2Positions = await db.select().from(positions).where(eq(positions.organizationId, org2.id));
-    let org2Position: any = existingOrg2Positions.find((p: any) => p.title === 'President');
+  console.log('\nPhase 25: Surveys module...');
+  await seedSurveysModule(db, orgId, president.personId, memberPersonIds);
 
-    if (!org2Position) {
-      [org2Position] = await db.insert(positions).values({
-        organizationId: org2.id,
-        title: 'President',
-        description: 'President of PDA Cebu',
-        level: 'chapter',
-        termLengthMonths: 24,
-        sortOrder: 1,
-      }).returning();
-      console.log('  Position: President of PDA Cebu (created)');
-    }
+  console.log('\nPhase 26: CPD backfill...');
+  await seedCpdBackfill(db, orgId);
 
-    if (org2Position) {
-      const existingOrg2Terms = await db.select().from(officerTerms).where(eq(officerTerms.organizationId, org2.id));
-      const hasterm = existingOrg2Terms.some((t: any) => t.personId === org2PersonId);
-      if (!hasterm) {
-        await db.insert(officerTerms).values({
-          positionId: org2Position.id,
-          personId: org2PersonId,
-          organizationId: org2.id,
-          status: 'active',
-          startDate: new Date('2025-01-01'),
-          endDate: new Date('2026-12-31'),
-        });
-        console.log('  Officer: idor-officer@memberry.ph -> President of PDA Cebu (active term)');
-      } else {
-        console.log('  Officer: idor-officer@memberry.ph -> President of PDA Cebu (term exists)');
-      }
-    }
-  }
+  console.log('\nPhase 27: Saved segments...');
+  await seedSavedSegments(db, orgId);
 
-  // ─── Platform Admin (idempotent) ───
-  // Make the first test user (test@memberry.ph) a platform admin
-  if (userRecords[0]) {
-    const existingAdmin = await db.select().from(platformAdmins).where(eq(platformAdmins.email, 'test@memberry.ph')).limit(1);
-    if (existingAdmin.length > 0) {
-      console.log(`  Platform Admin: test@memberry.ph (exists)`);
-    } else {
-      await db.insert(platformAdmins).values({
-        userId: userRecords[0].userId,
-        email: 'test@memberry.ph',
-        name: 'Maria Santos',
-        role: 'super',
-      });
-      console.log(`  Platform Admin: test@memberry.ph (created as super)`);
-    }
-  }
+  console.log('\nPhase 28: Jobs module...');
+  await seedJobsModule(db, orgId, president.personId, memberPersonIds);
 
-  // ─── Summary ───
-  console.log('\n╔══════════════════════════════════════════╗');
-  console.log('║         SEED COMPLETE                    ║');
-  console.log('╠══════════════════════════════════════════╣');
-  console.log('║  App:  http://localhost:3004             ║');
-  console.log('║                                         ║');
-  console.log('║  Officer/Admin account:                 ║');
-  console.log('║    Email:    test@memberry.ph            ║');
-  console.log('║    Password: TestPass123!               ║');
-  console.log('║    Position: President                  ║');
-  console.log('║                                         ║');
-  console.log('║  Member account:                        ║');
-  console.log('║    Email:    member@memberry.ph          ║');
-  console.log('║    Password: TestPass123!               ║');
-  console.log('║                                         ║');
-  console.log('║  Treasurer account:                     ║');
-  console.log('║    Email:    treasurer@memberry.ph       ║');
-  console.log('║    Password: TestPass123!               ║');
-  console.log('║    Position: Treasurer                  ║');
-  console.log('║                                         ║');
-  console.log('║  Secretary account:                     ║');
-  console.log('║    Email:    secretary@memberry.ph       ║');
-  console.log('║    Password: TestPass123!               ║');
-  console.log('║    Position: Secretary                  ║');
-  console.log('║                                         ║');
-  console.log('║  Society Officer account:               ║');
-  console.log('║    Email:    society@memberry.ph         ║');
-  console.log('║    Password: TestPass123!               ║');
-  console.log('║    Position: Society Officer            ║');
-  console.log('╠══════════════════════════════════════════╣');
-  console.log(`║  Org 1 ID: ${org1.id}  ║`);
-  console.log('║  Public: /org/pda-metro-manila          ║');
-  console.log(`║  Org 2 ID: ${org2.id}  ║`);
-  console.log('║  IDOR Officer: idor-officer@memberry.ph ║');
-  console.log('╚══════════════════════════════════════════╝');
+  console.log('\nPhase 29: Privacy backfill...');
+  await seedPrivacyBackfill(db, memberPersonIds);
+
+  // ═══ Layer 6: State Coverage ═══
+  console.log('\nPhase 30: State coverage...');
+  await seedStateCoverage(db, orgId, president.personId, memberPersonIds);
+
+  console.log('\nPhase 31: Missing role users...');
+  await seedMissingRoles(db, orgId, regularTierId);
+
+  // ═══ Summary ═══
+  const personCount = await db.select().from(persons);
+  const membershipCount = await db.select().from(memberships);
+  const notifCount = await db.select().from(notifications);
+  const certCount = await db.select().from(certificates);
+  const docCount = await db.select().from(documents);
+  const courseCount = await db.select().from(courses);
+
+  console.log('\n╔══════════════════════════════════════════════╗');
+  console.log('║           SEED COMPLETE                      ║');
+  console.log('╠══════════════════════════════════════════════╣');
+  console.log(`║  Persons:         ${String(personCount.length).padStart(4)}                     ║`);
+  console.log(`║  Memberships:     ${String(membershipCount.length).padStart(4)}                     ║`);
+  console.log(`║  Officers:           5 + 3 (VP/Board/Staff)  ║`);
+  console.log(`║  Applicants:         2 (1 pending, 1 reject) ║`);
+  console.log(`║  Notifications:   ${String(notifCount.length).padStart(4)}                     ║`);
+  console.log(`║  Certificates:    ${String(certCount.length).padStart(4)}                     ║`);
+  console.log(`║  Documents:       ${String(docCount.length).padStart(4)}                     ║`);
+  console.log(`║  Courses:         ${String(courseCount.length).padStart(4)}                     ║`);
+  console.log('╠══════════════════════════════════════════════╣');
+  console.log('║  Member Status: all 11 enum values covered   ║');
+  console.log('║  Payment Status: all 10 enum values covered  ║');
+  console.log('║  Roles: all 11 role variants seeded          ║');
+  console.log('╚══════════════════════════════════════════════╝');
 
   await pool.end();
 }
 
-seed().catch(err => {
+main().catch(err => {
   console.error('Seed failed:', err);
   process.exit(1);
 });

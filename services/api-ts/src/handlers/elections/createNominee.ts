@@ -31,7 +31,7 @@ function monthsBetween(start: Date, end: Date): number {
 export async function createNominee(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const electionId = ctx.req.param('id');
+  const electionId = ctx.req.param('id')!;
   const raw = await ctx.req.json();
   const parsed = createNomineeSchema.safeParse(raw);
   if (!parsed.success) {

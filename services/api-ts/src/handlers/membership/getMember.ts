@@ -5,8 +5,8 @@ import { computeMembershipStatus } from '@/handlers/association:member/utils/com
 
 export async function getMember(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('organizationId');
-  const memberId = ctx.req.param('memberId');
+  const orgId = ctx.req.param('organizationId')!;
+  const memberId = ctx.req.param('memberId')!;
 
   const repo = new MembershipRepository(db);
   // Try by personId first, then by membership ID

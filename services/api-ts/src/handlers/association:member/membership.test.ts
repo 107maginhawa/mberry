@@ -7,10 +7,9 @@ import { BusinessLogicError } from '@/core/errors';
 // M02: getMyMemberships should return all memberships for the authenticated user
 describe('getMyMemberships', () => {
   test('returns 401 without user', async () => {
-    const { getMyMemberships } = await import('./getMyMemberships');
-    const ctx = makeCtx({ user: null });
-    const response = await getMyMemberships(ctx);
-    expect(response.status).toBe(401);
+    const { getMyMemberships } = await import('../person/getMyMemberships');
+    const ctx = makeCtx({ user: null, session: null });
+    await expect(getMyMemberships(ctx)).rejects.toThrow('Unauthorized');
   });
 
   test('uses authenticated user ID, not a param', () => {

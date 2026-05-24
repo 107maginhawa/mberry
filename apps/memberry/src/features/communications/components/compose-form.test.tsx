@@ -8,6 +8,7 @@ import { ComposeForm } from './compose-form'
 const mockNavigate = vi.fn()
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mockNavigate,
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 // Mock @monobase/ui
@@ -29,6 +30,13 @@ vi.mock('@monobase/ui', () => ({
     <button onClick={onClick} type={type} disabled={disabled} className={className} data-variant={variant}>
       {children}
     </button>
+  ),
+}))
+
+// Mock date-picker
+vi.mock('@/components/patterns/date-picker', () => ({
+  DateTimePicker: ({ value, onChange, ...rest }: any) => (
+    <input data-testid="datetime-picker" type="text" value={value ?? ''} onChange={(e: any) => onChange?.(e.target.value)} {...rest} />
   ),
 }))
 
@@ -128,7 +136,7 @@ describe('ComposeForm', () => {
 
   test('shows schedule input field', () => {
     renderWithProviders(<ComposeForm orgId="org-1" />)
-    expect(screen.getByLabelText('Schedule (optional)')).toBeInTheDocument()
+    expect(screen.getByText('Schedule (optional)')).toBeInTheDocument()
     expect(screen.getByText('Leave empty to send immediately or save as draft')).toBeInTheDocument()
   })
 })

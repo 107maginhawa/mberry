@@ -53,17 +53,17 @@ export function CertificateList() {
               <div className="h-1.5 w-16 rounded-full bg-[var(--color-primary)]" />
 
               <div className="space-y-1">
-                <p className="font-semibold text-[14px] line-clamp-2">Training Certificate</p>
-                <p className="text-[12px] text-[var(--color-muted)]">Training ID: {cert.trainingId?.slice(0, 8) ?? 'N/A'}...</p>
+                <p className="font-semibold text-sm line-clamp-2">Training Certificate</p>
+                <p className="text-xs text-[var(--color-muted)]">Training ID: {cert.trainingId?.slice(0, 8) ?? 'N/A'}...</p>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
                   {cert.certificateNumber}
                 </span>
               </div>
 
-              <div className="pt-1 border-t border-[var(--color-border-light)] text-[12px] text-[var(--color-muted)]">
+              <div className="pt-1 border-t border-[var(--color-border-light)] text-xs text-[var(--color-muted)]">
                 Issued {formatDate(cert.issuedAt)}
               </div>
             </GlassCard>

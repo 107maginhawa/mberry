@@ -1,3 +1,0 @@
-# Bun configuration for the account app
-# Unit tests run via vitest (see vitest.config.ts)
-# E2E tests run via Playwright: bun run test:e2e

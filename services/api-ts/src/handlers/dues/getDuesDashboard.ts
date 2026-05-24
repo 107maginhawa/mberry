@@ -2,9 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { GetDuesDashboardParams } from '@/generated/openapi/validators';
-import { DuesRepository } from './repos/dues.repo';
-import { events } from '@/handlers/association:operations/repos/events.schema';
-import { eq, gte, and, sql } from 'drizzle-orm';
+import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -15,7 +13,7 @@ import { POSITION_TITLES } from '@/utils/position-titles';
  * OperationId: getDuesDashboard
  *
  * Aggregated dues dashboard statistics for an organisation.
- * Includes dues totals + upcoming activity count from events.
+ * Returns collection totals, payment counts, collection rate, and member count.
  *
  * Position-restricted: TREASURER, PRESIDENT only (D-03).
  * Also enforces org-scoping (officer must belong to target org).
@@ -36,19 +34,20 @@ export async function getDuesDashboard(
   if (denied) return denied;
 
   const repo = new DuesRepository(db);
-  const stats = await repo.getDashboardStats(orgId);
-
-  const [activityCount] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(events)
-    .where(and(eq(events.organizationId, orgId), gte(events.startDate, new Date())));
+  const [stats, memberCount] = await Promise.all([
+    repo.getFullDashboardStats(orgId),
+    repo.getMemberCount(orgId),
+  ]);
 
   return ctx.json({
     data: {
-      ...stats,
       totalCollected: Number(stats.totalCollected),
       totalOutstanding: Number(stats.totalOutstanding),
-      upcomingActivities: Number(activityCount?.count ?? 0),
+      paidCount: stats.paidCount,
+      unpaidCount: stats.unpaidCount,
+      overdueCount: stats.overdueCount,
+      collectionRate: stats.collectionRate,
+      memberCount,
     },
   }, 200);
 }

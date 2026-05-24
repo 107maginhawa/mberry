@@ -1,5 +1,6 @@
 import { MoreHorizontal, Calendar, Users, Award, MapPin } from 'lucide-react'
 import { useState } from 'react'
+import { useParams } from '@tanstack/react-router'
 import { Button } from '@monobase/ui'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -30,6 +31,7 @@ interface TrainingCardProps {
 }
 
 export function TrainingCard({ training, orgId, onCancel, onDuplicate }: TrainingCardProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -42,7 +44,7 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <a
-              href={`/org/${orgId}/officer/training/${training.id}`}
+              href={`/org/${orgSlug}/officer/training/${training.id}`}
               className="font-semibold text-sm line-clamp-2 hover:underline"
             >
               {training.title}
@@ -60,7 +62,7 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
             {menuOpen && (
               <div className="absolute right-0 top-7 z-10 w-36 bg-popover border rounded-lg shadow-md py-1 text-sm">
                 <a
-                  href={`/org/${orgId}/officer/training/${training.id}`}
+                  href={`/org/${orgSlug}/officer/training/${training.id}`}
                   className="block px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
                   onClick={() => setMenuOpen(false)}
                 >

@@ -11,10 +11,10 @@
  */
 
 import type { DatabaseInstance } from '@/core/database';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
-import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
-import { allocateFunds } from '@/handlers/dues/utils/fund-math';
-import { computeNewExpiry, type BillingCycle } from '@/handlers/dues/utils/expiry-extension';
+import { DuesRepository } from '../repos/dues-payments.repo';
+import { MembershipRepository } from '../repos/membership.repo';
+import { allocateFunds } from './fund-math';
+import { computeNewExpiry, type BillingCycle } from './expiry-extension';
 import { computeMembershipStatus, type ComputedMembershipStatus } from './compute-membership-status';
 import type { Membership } from '../repos/membership.schema';
 

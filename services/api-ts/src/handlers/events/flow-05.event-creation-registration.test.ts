@@ -13,6 +13,7 @@ const ORG = 'org-flow-05';
 function defaultStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
   return stubRepo(EventsRepository, {
     create: async (data: any) => ({ id: 'event-1', ...data }),
+    findBySlug: async () => undefined,
     ...overrides,
   });
 }

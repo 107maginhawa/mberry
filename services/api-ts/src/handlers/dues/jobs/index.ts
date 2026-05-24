@@ -7,6 +7,7 @@ import type { JobScheduler, JobContext } from '@/core/jobs';
 import { DeferredScopeError } from '@/core/errors';
 import { processDuesReminders } from './reminderProcessor';
 import { processWebhookRetry } from './webhookRetryProcessor';
+import { generateAutoInvoices } from './autoInvoiceGenerator';
 
 /**
  * Register all dues module jobs with the scheduler
@@ -15,6 +16,11 @@ export function registerDuesJobs(scheduler: JobScheduler): void {
   // Process dues reminders daily at midnight
   scheduler.registerCron('dues.reminderProcessor', '0 0 * * *', async (context: JobContext) => {
     await processDuesReminders({ db: context.db, logger: context.logger });
+  });
+
+  // Auto-generate invoices daily at 1 AM UTC on billing cycle dates
+  scheduler.registerCron('dues.autoInvoiceGenerator', '0 1 * * *', async (context: JobContext) => {
+    await generateAutoInvoices({ db: context.db, logger: context.logger });
   });
 
   // Process webhook retries every minute (slice 009, GAP-009)

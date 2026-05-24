@@ -1,5 +1,7 @@
-import { eq, and, desc, sql, gte, lte, type SQL } from 'drizzle-orm';
+import { eq, and, desc, sql, gte, lte, type SQL, count } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { memberships } from '@/handlers/association:member/repos/membership.schema';
+import { duesInvoices } from '@/handlers/association:member/repos/dues.schema';
 
 /** Valid dues payment status transitions — used by handlers for guard logic. */
 export const VALID_PAYMENT_TRANSITIONS: Record<string, string[]> = {
@@ -30,8 +32,13 @@ import {
   type NewDuesFundAllocation,
   type DuesReminderSchedule,
   type DuesGatewayConfig,
-} from './dues-payments.schema';
+} from '../../association:member/repos/dues-payments.schema';
 
+/**
+ * @deprecated Use `DuesRepository` from `@/handlers/association:member/repos/dues-payments.repo`
+ * instead. This legacy repo has a collectionRate bug (returns 0.00-1.00 instead of 0-100)
+ * and duplicates methods available in the canonical repo. Will be removed in v1.2.0.
+ */
 export class DuesRepository {
   constructor(private db: DatabaseInstance) {}
 
@@ -203,27 +210,48 @@ export class DuesRepository {
   // ─── Dashboard Stats ──────────────────────────────────
 
   async getDashboardStats(organizationId: string) {
-    const [stats] = await this.db
+    // Payment stats from duesPayments table
+    const [paymentStats] = await this.db
       .select({
         totalCollected: sql<number>`COALESCE(SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END), 0)::int`,
-        totalOutstanding: sql<number>`COALESCE(SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END), 0)::int`,
-        pendingCount: sql<number>`COUNT(CASE WHEN status = 'pending' THEN 1 END)::int`,
-        completedCount: sql<number>`COUNT(CASE WHEN status = 'completed' THEN 1 END)::int`,
-        totalCount: sql<number>`COUNT(*)::int`,
+        paidCount: sql<number>`COUNT(CASE WHEN status = 'completed' THEN 1 END)::int`,
       })
       .from(duesPayments)
       .where(eq(duesPayments.organizationId, organizationId));
 
+    // Outstanding invoices from duesInvoices table
+    const [invoiceStats] = await this.db
+      .select({
+        totalOutstanding: sql<number>`COALESCE(SUM(CASE WHEN status IN ('generated', 'sent', 'overdue') THEN total_amount ELSE 0 END), 0)::int`,
+        unpaidCount: sql<number>`COUNT(CASE WHEN status IN ('generated', 'sent') THEN 1 END)::int`,
+        overdueCount: sql<number>`COUNT(CASE WHEN status = 'overdue' THEN 1 END)::int`,
+      })
+      .from(duesInvoices)
+      .where(eq(duesInvoices.organizationId, organizationId));
+
+    const totalCollected = paymentStats?.totalCollected ?? 0;
+    const totalOutstanding = invoiceStats?.totalOutstanding ?? 0;
+    const total = totalCollected + totalOutstanding;
+
     return {
-      totalCollected: stats?.totalCollected ?? 0,
-      totalOutstanding: stats?.totalOutstanding ?? 0,
-      pendingCount: stats?.pendingCount ?? 0,
-      completedCount: stats?.completedCount ?? 0,
-      totalCount: stats?.totalCount ?? 0,
-      collectionRate: stats?.totalCount
-        ? Math.round(((stats?.completedCount ?? 0) / stats.totalCount) * 100)
-        : 0,
+      totalCollected,
+      totalOutstanding,
+      paidCount: paymentStats?.paidCount ?? 0,
+      unpaidCount: invoiceStats?.unpaidCount ?? 0,
+      overdueCount: invoiceStats?.overdueCount ?? 0,
+      collectionRate: total > 0 ? +(totalCollected / total).toFixed(2) : 0,
     };
+  }
+
+  async getMemberCount(organizationId: string): Promise<number> {
+    const [result] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(memberships)
+      .where(and(
+        eq(memberships.organizationId, organizationId),
+        eq(memberships.status, 'active'),
+      ));
+    return result?.count ?? 0;
   }
 
   // ─── Reminders ────────────────────────────────────────

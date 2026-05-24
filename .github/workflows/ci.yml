@@ -9,6 +9,8 @@ jobs:
   lint-typecheck:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      TZ: UTC
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -39,6 +41,8 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      TZ: UTC
     services:
       postgres:
         image: postgres:16-alpine
@@ -136,28 +140,6 @@ jobs:
       - name: Run Admin E2E tests
         run: cd apps/admin && bun run test:e2e
 
-      - name: Install Playwright browsers (account)
-        run: cd apps/account && bunx playwright install --with-deps chromium
-
-      - name: Start Account app
-        run: |
-          cd apps/account
-          bun dev > /tmp/account.log 2>&1 &
-          echo $! > /tmp/account.pid
-
-      - name: Wait for Account app
-        run: |
-          for i in $(seq 1 30); do
-            curl -fsS "http://localhost:3002" > /dev/null 2>&1 && exit 0
-            sleep 1
-          done
-          echo "Account app never became ready"
-          tail -100 /tmp/account.log
-          exit 1
-
-      - name: Run Account E2E tests
-        run: cd apps/account && bun run test:e2e
-
       - name: Upload Memberry test results
         if: failure()
         uses: actions/upload-artifact@v4
@@ -171,13 +153,6 @@ jobs:
         with:
           name: playwright-report-admin
           path: apps/admin/playwright-report/
-
-      - name: Upload Account test results
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-account
-          path: apps/account/playwright-report/
 
   build-api:
     runs-on: ubuntu-latest
@@ -236,8 +211,6 @@ jobs:
         run: cd apps/memberry && bun run build
       - name: Build Admin app
         run: cd apps/admin && bun run build
-      - name: Build Account app
-        run: cd apps/account && bun run build
       - name: Upload frontend-memberry artifact
         uses: actions/upload-artifact@v4
         with:
@@ -248,12 +221,6 @@ jobs:
         with:
           name: frontend-admin
           path: apps/admin/dist/
-      - name: Upload frontend-account artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-account
-          path: apps/account/dist/
-
   artifact-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -274,14 +241,9 @@ jobs:
         with:
           name: frontend-admin
           path: apps/admin/dist/
-      - name: Download frontend-account artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-account
-          path: apps/account/dist/
       - name: Verify built artifacts exist and have content
         run: |
-          for app in memberry admin account; do
+          for app in memberry admin; do
             INDEX="apps/$app/dist/index.html"
             if [ ! -f "$INDEX" ]; then
               echo "::error::Missing $INDEX in built artifact"
@@ -443,8 +405,6 @@ jobs:
         run: cd services/api-ts && bun test
       - name: Run frontend unit tests (with coverage)
         run: cd apps/memberry && bun run test -- --coverage
-      - name: Run account unit tests (with coverage)
-        run: cd apps/account && bun run test -- --coverage
       - name: Run SDK unit tests
         run: cd packages/sdk-ts && bun run test
 

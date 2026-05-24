@@ -22,6 +22,30 @@ vi.mock('@monobase/ui', () => ({
   SelectItem: ({ children, value }: any) => <div data-value={value}>{children}</div>,
   SelectTrigger: ({ children }: any) => <div>{children}</div>,
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
+  DropdownMenu: ({ children }: any) => <div>{children}</div>,
+  DropdownMenuTrigger: ({ children }: any) => <div>{children}</div>,
+  DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
+  DropdownMenuItem: ({ children, onClick }: any) => <div onClick={onClick}>{children}</div>,
+}))
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => vi.fn(),
+  useParams: () => ({ orgSlug: 'test-org' }),
+  Link: ({ children, to, className }: any) => <a href={String(to)} className={className}>{children}</a>,
+}))
+
+vi.mock('./event-calendar', () => ({
+  EventCalendar: () => <div data-testid="event-calendar" />,
+}))
+
+vi.mock('@/components/patterns/confirm-dialog', () => ({
+  ConfirmDialog: ({ children, onConfirm, title, ...rest }: any) => (
+    <div data-testid="confirm-dialog" {...rest}>
+      <span>{title}</span>
+      <button onClick={onConfirm}>Confirm</button>
+      {children}
+    </div>
+  ),
 }))
 
 vi.mock('./event-card', () => ({

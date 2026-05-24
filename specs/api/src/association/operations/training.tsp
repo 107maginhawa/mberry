@@ -332,6 +332,319 @@ model QuizAttempt extends BaseEntity {
 }
 
 // ---------------------------------------------------------------------------
+// Accredited Provider (Org-scoped) Models
+// ---------------------------------------------------------------------------
+
+@doc("Status of an accredited training provider")
+enum AccreditedProviderStatus {
+  @doc("Provider is actively accredited")
+  active: "active",
+
+  @doc("Provider accreditation has been suspended")
+  suspended: "suspended",
+
+  @doc("Provider accreditation has expired")
+  expired: "expired",
+}
+
+@doc("A PRC-accredited training provider scoped to an organization")
+model OrgAccreditedProvider extends BaseEntity {
+
+  @doc("Organization this provider is associated with")
+  organizationId: string;
+
+  @doc("Provider display name")
+  @minLength(1)
+  @maxLength(300)
+  name: string;
+
+  @doc("Official accreditation number")
+  @minLength(1)
+  @maxLength(100)
+  accreditationNumber: string;
+
+  @doc("Current accreditation status")
+  status: AccreditedProviderStatus;
+
+  @doc("Date when accreditation expires")
+  expiryDate?: utcDateTime;
+
+  @doc("Whether the provider's accreditation is expiring within 30 days")
+  expiringSoon?: boolean;
+}
+
+@doc("Request to create an org-scoped accredited provider")
+model OrgAccreditedProviderCreateRequest {
+  @doc("Provider display name")
+  @minLength(1)
+  @maxLength(300)
+  name: string;
+
+  @doc("Official accreditation number")
+  @minLength(1)
+  @maxLength(100)
+  accreditationNumber: string;
+
+  @doc("Initial accreditation status")
+  status?: AccreditedProviderStatus;
+
+  @doc("Date when accreditation expires")
+  expiryDate?: utcDateTime;
+}
+
+@doc("Request to update an org-scoped accredited provider")
+model OrgAccreditedProviderUpdateRequest {
+  @doc("Provider display name")
+  @maxLength(300)
+  name?: string;
+
+  @doc("Official accreditation number")
+  @maxLength(100)
+  accreditationNumber?: string;
+
+  @doc("Accreditation status")
+  status?: AccreditedProviderStatus;
+
+  @doc("Date when accreditation expires")
+  expiryDate?: utcDateTime | null;
+}
+
+// ---------------------------------------------------------------------------
+// CPD Config Models
+// ---------------------------------------------------------------------------
+
+@doc("Organization-level CPD configuration")
+model OrgCpdConfig extends BaseEntity {
+
+  @doc("Organization this config belongs to")
+  organizationId: string;
+
+  @doc("Total CPD credits required per compliance cycle")
+  @minValue(1)
+  requiredCredits: int32;
+
+  @doc("Length of the compliance cycle in years")
+  @minValue(1)
+  @maxValue(5)
+  cycleLengthYears: int32;
+
+  @doc("Maximum percentage of credits that may come from self-directed learning")
+  @minValue(0)
+  @maxValue(100)
+  sdlCapPercent: int32;
+
+  @doc("Activity type minimum requirements (JSON)")
+  activityTypeMinimums?: Record<unknown>;
+
+  @doc("Month (1-12) when the compliance cycle starts")
+  @minValue(1)
+  @maxValue(12)
+  cycleStartMonth: int32;
+}
+
+@doc("Request to update CPD configuration")
+model OrgCpdConfigUpdateRequest {
+  @doc("Total CPD credits required per compliance cycle")
+  @minValue(1)
+  requiredCredits?: int32;
+
+  @doc("Length of the compliance cycle in years")
+  @minValue(1)
+  @maxValue(5)
+  cycleLengthYears?: int32;
+
+  @doc("Maximum percentage of credits from self-directed learning")
+  @minValue(0)
+  @maxValue(100)
+  sdlCapPercent?: int32;
+
+  @doc("Activity type minimum requirements (JSON)")
+  activityTypeMinimums?: Record<unknown> | null;
+
+  @doc("Month (1-12) when the compliance cycle starts")
+  @minValue(1)
+  @maxValue(12)
+  cycleStartMonth?: int32;
+}
+
+// ---------------------------------------------------------------------------
+// Manual Credit Award Models
+// ---------------------------------------------------------------------------
+
+@doc("Request to award a manual CPD credit entry")
+model ManualCreditAwardRequest {
+  @doc("Person receiving the credit")
+  personId: string;
+
+  @doc("Name of the activity")
+  @minLength(1)
+  @maxLength(300)
+  activityName: string;
+
+  @doc("Date the activity was completed")
+  activityDate: utcDateTime;
+
+  @doc("Number of credits to award")
+  @minValue(0)
+  creditAmount: int32;
+
+  @doc("Idempotency key to prevent duplicate awards")
+  idempotencyKey: string;
+
+  @doc("CPD activity provider name")
+  @maxLength(300)
+  provider?: string;
+
+  @doc("Credit category (General, Major, Self-Directed)")
+  category?: string;
+
+  @doc("CPD activity type")
+  cpdActivityType?: string;
+
+  @doc("Supporting document ID")
+  supportingDocumentId?: string;
+}
+
+@doc("Response from a manual credit award including optional SDL cap warning")
+model ManualCreditAwardResponse {
+  @doc("The created credit entry")
+  data: Record<unknown>;
+
+  @doc("Warning message if SDL cap is exceeded (officer override)")
+  warning?: string;
+}
+
+// ---------------------------------------------------------------------------
+// My Credits Models
+// ---------------------------------------------------------------------------
+
+@doc("Category breakdown of CPD credits")
+model CreditCategoryBreakdown {
+  @doc("General category credits")
+  general: float64;
+
+  @doc("Major category credits")
+  major: float64;
+
+  @doc("Self-directed learning credits")
+  selfDirected: float64;
+}
+
+@doc("SDL cap usage information")
+model SdlCapInfo {
+  @doc("Maximum SDL credits allowed")
+  max: int32;
+
+  @doc("SDL credits used")
+  used: float64;
+
+  @doc("Whether the SDL cap has been exceeded")
+  exceeded: boolean;
+}
+
+@doc("A single credit history entry")
+model CreditHistoryEntry {
+  @doc("Credit entry ID")
+  id: string;
+
+  @doc("Activity name")
+  activityName: string;
+
+  @doc("Provider name")
+  provider?: string;
+
+  @doc("Date the activity occurred")
+  activityDate?: utcDateTime;
+
+  @doc("Number of credits")
+  creditAmount: int32;
+
+  @doc("Credit category")
+  category?: string;
+
+  @doc("How the credit was sourced")
+  sourceType?: string;
+
+  @doc("Verification status")
+  verificationStatus: string;
+
+  @doc("Credit status")
+  status?: string;
+
+  @doc("When the credit entry was created")
+  createdAt?: utcDateTime;
+}
+
+@doc("Full credit summary for the authenticated user")
+model MyCreditsResponse {
+  @doc("Total credits earned")
+  totalCredits: float64;
+
+  @doc("Credits required for compliance")
+  requiredCredits: int32;
+
+  @doc("Compliance percentage (0-100)")
+  @minValue(0)
+  @maxValue(100)
+  compliancePercent: int32;
+
+  @doc("Breakdown by credit category")
+  categoryBreakdown: CreditCategoryBreakdown;
+
+  @doc("SDL cap usage")
+  sdlCap: SdlCapInfo;
+
+  @doc("Number of credit entries")
+  entryCount: int32;
+
+  @doc("Credit history entries")
+  history: CreditHistoryEntry[];
+}
+
+// ---------------------------------------------------------------------------
+// Compliance Report Models
+// ---------------------------------------------------------------------------
+
+@doc("Compliance report summary statistics")
+model ComplianceReportSummary {
+  @doc("Number of compliant members")
+  compliant: int32;
+
+  @doc("Number of at-risk members")
+  atRisk: int32;
+
+  @doc("Number of non-compliant members")
+  nonCompliant: int32;
+
+  @doc("Total members in the report")
+  total: int32;
+
+  @doc("Required credits for compliance")
+  requiredCredits: int32;
+}
+
+@doc("Full compliance report for an organization")
+model ComplianceReportResponse {
+  @doc("Compliance summary statistics")
+  summary: ComplianceReportSummary;
+
+  @doc("Individual member compliance standings")
+  standings: Record<unknown>[];
+
+  @doc("Pagination metadata")
+  pagination: Record<unknown>;
+}
+
+@doc("Result of a compliance data refresh")
+model ComplianceRefreshResult {
+  @doc("Whether the refresh was successful")
+  refreshed: boolean;
+
+  @doc("ISO timestamp of when the refresh occurred")
+  at: string;
+}
+
+// ---------------------------------------------------------------------------
 // Request / Response Models
 // ---------------------------------------------------------------------------
 
@@ -999,5 +1312,163 @@ namespace Association.Operations.Training {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiNotFoundResponse;
+  }
+
+  /**
+   * Organization-scoped accredited training provider management.
+   * Routes: /accredited-providers/{organizationId}
+   */
+  @useAuth(bearerAuth)
+  interface OrgAccreditedProviderManagement {
+    @doc("List accredited training providers for an organization.")
+    @operationId("listOrgAccreditedProviders")
+    @get
+    @route("/{organizationId}")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    listOrgAccreditedProviders(
+      @path organizationId: string,
+      @query status?: AccreditedProviderStatus
+    ): ApiOkResponse<{ data: OrgAccreditedProvider[]; total: int32 }>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Create an accredited training provider for an organization.")
+    @operationId("createOrgAccreditedProvider")
+    @post
+    @route("/{organizationId}")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    createOrgAccreditedProvider(
+      @path organizationId: string,
+      @body body: OrgAccreditedProviderCreateRequest
+    ): ApiCreatedResponse<{ data: OrgAccreditedProvider }>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Update an accredited training provider.")
+    @operationId("updateOrgAccreditedProvider")
+    @patch(#{implicitOptionality: true})
+    @route("/{organizationId}/{providerId}")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    updateOrgAccreditedProvider(
+      @path organizationId: string,
+      @path providerId: string,
+      @body body: OrgAccreditedProviderUpdateRequest
+    ): ApiOkResponse<{ data: OrgAccreditedProvider }>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+
+    @doc("Delete an accredited training provider.")
+    @operationId("deleteOrgAccreditedProvider")
+    @delete
+    @route("/{organizationId}/{providerId}")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    deleteOrgAccreditedProvider(
+      @path organizationId: string,
+      @path providerId: string
+    ): ApiNoContentResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+  }
+
+  /**
+   * Organization-scoped CPD configuration management.
+   * Routes: /association/member/cpd-config/{organizationId}
+   */
+  @useAuth(bearerAuth)
+  interface CpdConfigManagement {
+    @doc("Get CPD configuration for an organization. Creates a default config if none exists.")
+    @operationId("getOrgCpdConfig")
+    @get
+    @route("/{organizationId}")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    getOrgCpdConfig(
+      @path organizationId: string
+    ): ApiOkResponse<{ data: OrgCpdConfig }>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Update CPD configuration for an organization. Creates if not exists.")
+    @operationId("updateOrgCpdConfig")
+    @patch(#{implicitOptionality: true})
+    @route("/{organizationId}")
+    @extension("x-security-required-roles", #["association:admin"])
+    updateOrgCpdConfig(
+      @path organizationId: string,
+      @body body: OrgCpdConfigUpdateRequest
+    ): ApiOkResponse<{ data: OrgCpdConfig }>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+  }
+
+  /**
+   * Officer-level manual credit award.
+   * Route: /association/member/credits/manual
+   */
+  @useAuth(bearerAuth)
+  interface ManualCreditManagement {
+    @doc("Award a manual CPD credit entry to a member. Officers only.")
+    @operationId("awardManualCredit")
+    @post
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    awardManualCredit(
+      @body body: ManualCreditAwardRequest
+    ): ApiCreatedResponse<ManualCreditAwardResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiConflictResponse;
+  }
+
+  /**
+   * Member-facing credit summary.
+   * Route: /persons/me/credits
+   */
+  @useAuth(bearerAuth)
+  interface MyCreditsManagement {
+    @doc("Get CPD credit summary and history for the authenticated user.")
+    @operationId("getMyCredits")
+    @get
+    @extension("x-security-required-roles", #["user"])
+    getMyCredits(
+      @query organizationId?: string
+    ): ApiOkResponse<{ data: MyCreditsResponse }>
+      | ApiUnauthorizedResponse;
+  }
+
+  /**
+   * Organization-level CPD compliance reporting.
+   * Routes: /association/member/compliance/{organizationId}
+   */
+  @useAuth(bearerAuth)
+  interface ComplianceManagement {
+    @doc("Get CPD compliance report for all members in an organization.")
+    @operationId("getComplianceReport")
+    @get
+    @route("/{organizationId}")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    getComplianceReport(
+      @path organizationId: string,
+      @query status?: string,
+      @query limit?: int32,
+      @query offset?: int32
+    ): ApiOkResponse<{ data: ComplianceReportResponse }>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Refresh the compliance materialized view for an organization.")
+    @operationId("refreshCompliance")
+    @post
+    @route("/{organizationId}/refresh")
+    @extension("x-security-required-roles", #["association:admin"])
+    refreshCompliance(
+      @path organizationId: string
+    ): ApiOkResponse<{ data: ComplianceRefreshResult }>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
   }
 }

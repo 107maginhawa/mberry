@@ -22,9 +22,10 @@ vi.mock('./nominee-picker-dialog', () => ({
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params, className }: any) => {
-    const href = to?.replace('$orgId', params?.orgId || '').replace('$electionId', params?.electionId || '')
+    const href = to?.replace('$orgSlug', params?.orgSlug || '').replace('$electionId', params?.electionId || '')
     return <a href={href} className={className}>{children}</a>
   },
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 vi.mock('sonner', () => ({
@@ -112,7 +113,7 @@ describe('ElectionDetail', () => {
       expect(screen.getByText('2025 Board Election')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Draft')).toBeInTheDocument()
+    expect(screen.getAllByText('Draft').length).toBeGreaterThan(0)
     expect(screen.getByText('officer')).toBeInTheDocument()
     expect(screen.getByText('online')).toBeInTheDocument()
   })
@@ -239,10 +240,10 @@ describe('ElectionDetail', () => {
     renderWithProviders(<ElectionDetail electionId="elec-1" orgId="org-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Nominations Open')).toBeInTheDocument()
-      expect(screen.getByText('Nominations Close')).toBeInTheDocument()
-      expect(screen.getByText('Voting Opens')).toBeInTheDocument()
-      expect(screen.getByText('Voting Closes')).toBeInTheDocument()
+      expect(screen.getAllByText('Nominations Open').length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/Nominations Close/i).length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/Voting Open/i).length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/Voting Close/i).length).toBeGreaterThan(0)
     })
   })
 })

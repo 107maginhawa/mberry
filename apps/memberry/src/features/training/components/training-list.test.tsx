@@ -5,10 +5,17 @@ import { TrainingList } from './training-list'
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params, className }: any) => {
-    const href = to?.replace('$orgId', params?.orgId || '').replace('$trainingId', params?.trainingId || '')
+    const href = to?.replace('$orgSlug', params?.orgSlug || '').replace('$trainingId', params?.trainingId || '')
     return <a href={href} className={className}>{children}</a>
   },
   useNavigate: () => vi.fn(),
+  useParams: () => ({ orgSlug: 'test-org' }),
+}))
+
+vi.mock('@/components/patterns/confirm-dialog', () => ({
+  ConfirmDialog: ({ children, onConfirm, title }: any) => (
+    <div data-testid="confirm-dialog"><span>{title}</span><button onClick={onConfirm}>Confirm</button>{children}</div>
+  ),
 }))
 
 vi.mock('@monobase/ui', () => ({
@@ -79,7 +86,7 @@ describe('TrainingList', () => {
     })
 
     const createLink = screen.getByText('Create one')
-    expect(createLink.closest('a')).toHaveAttribute('href', '/org/org-1/officer/training/new')
+    expect(createLink.closest('a')).toHaveAttribute('href', '/org/test-org/officer/training/new')
   })
 
   test('renders training cards when data exists', async () => {

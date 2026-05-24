@@ -168,22 +168,22 @@ export const emailQueue = pgTable('email_queue', {
   priority: integer('priority').notNull().default(5),
   
   // Scheduled send time (null for immediate)
-  scheduledAt: timestamp('scheduled_at'),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
   
   // Number of send attempts
   attempts: integer('attempts').notNull().default(0),
   
   // Last attempt timestamp
-  lastAttemptAt: timestamp('last_attempt_at'),
+  lastAttemptAt: timestamp('last_attempt_at', { withTimezone: true }),
   
   // Next retry timestamp
-  nextRetryAt: timestamp('next_retry_at'),
+  nextRetryAt: timestamp('next_retry_at', { withTimezone: true }),
   
   // Last error message if failed
   lastError: text('last_error'),
   
   // Timestamp when email was sent
-  sentAt: timestamp('sent_at'),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
   
   // Email provider used
   provider: emailProviderEnum('provider'),
@@ -192,7 +192,7 @@ export const emailQueue = pgTable('email_queue', {
   providerMessageId: varchar('provider_message_id', { length: 255 }),
   
   // Cancellation timestamp
-  cancelledAt: timestamp('cancelled_at'),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
   
   // User who cancelled the email
   cancelledBy: uuid('cancelled_by'),

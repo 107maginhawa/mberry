@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { GetDuesGatewayConfigParams } from '@/generated/openapi/validators';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 
 /**
  * getDuesGatewayConfig

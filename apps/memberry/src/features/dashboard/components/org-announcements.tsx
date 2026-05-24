@@ -29,7 +29,7 @@ export function OrgAnnouncements({ announcements, orgNames, isError }: OrgAnnoun
       </div>
 
       {isError ? (
-        <p role="alert" aria-live="polite" className="text-[13px] text-red-600">Unable to load announcements</p>
+        <p role="alert" aria-live="polite" className="text-sm text-[var(--color-error)]">Unable to load announcements</p>
       ) : announcements.length === 0 ? (
         <EmptyState
           headline="No recent announcements"
@@ -42,22 +42,22 @@ export function OrgAnnouncements({ announcements, orgNames, isError }: OrgAnnoun
               key={a.id}
               className="py-2.5 px-2 rounded-lg"
             >
-              <p className="text-[13px] font-semibold line-clamp-1">{a.subject || a.title}</p>
+              <p className="text-sm font-semibold line-clamp-1">{a.subject || a.title}</p>
               {a.content && (
-                <p className="text-[12px] text-[var(--color-muted)] line-clamp-1 mt-0.5">
+                <p className="text-xs text-[var(--color-muted)] line-clamp-1 mt-0.5">
                   {a.content.replace(/<[^>]*>/g, '').slice(0, 120)}
                 </p>
               )}
               <div className="flex items-center gap-2 mt-0.5">
                 {a.organizationId && orgNames[a.organizationId] && (
-                  <span className="text-[11px] text-[var(--color-muted)]">
+                  <span className="text-xs text-[var(--color-muted)]">
                     {orgNames[a.organizationId]}
                   </span>
                 )}
                 {a.createdAt && (
                   <>
-                    <span className="text-[11px] text-[var(--color-muted)]">·</span>
-                    <span className="text-[11px] text-[var(--color-muted)]">
+                    <span className="text-xs text-[var(--color-muted)]">·</span>
+                    <span className="text-xs text-[var(--color-muted)]">
                       {formatDate(a.createdAt)}
                     </span>
                   </>

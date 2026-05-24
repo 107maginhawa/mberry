@@ -3,6 +3,8 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import type { GetDuesInvoiceParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
+import { sql } from 'drizzle-orm';
+import { persons } from '../person/repos/person.schema';
 
 /**
  * getDuesInvoice
@@ -27,5 +29,17 @@ export async function getDuesInvoice(
   if (!invoice) throw new NotFoundError('DuesInvoice');
   if (invoice.organizationId !== orgId) throw new ForbiddenError();
 
-  return ctx.json(invoice, 200);
+  let memberName: string | null = null;
+  if (invoice.personId) {
+    const [person] = await db
+      .select({ firstName: persons.firstName, lastName: persons.lastName })
+      .from(persons)
+      .where(sql`${persons.id} = ${invoice.personId}::uuid`)
+      .limit(1);
+    if (person) {
+      memberName = [person.firstName, person.lastName].filter(Boolean).join(' ') || null;
+    }
+  }
+
+  return ctx.json({ ...invoice, memberName }, 200);
 }

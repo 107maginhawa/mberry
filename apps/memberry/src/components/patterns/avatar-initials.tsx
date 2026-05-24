@@ -1,6 +1,6 @@
 const SIZES = {
-  sm: { container: "h-[34px] w-[34px]", text: "text-[12px]" },
-  md: { container: "h-[42px] w-[42px]", text: "text-[16px]" },
+  sm: { container: "h-[34px] w-[34px]", text: "text-xs" },
+  md: { container: "h-[42px] w-[42px]", text: "text-base" },
   lg: { container: "h-[56px] w-[56px]", text: "text-[22px]" },
 } as const
 

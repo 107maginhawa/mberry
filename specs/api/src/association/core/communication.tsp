@@ -665,3 +665,114 @@ namespace PersonSubscriptionManagement {
       | ApiForbiddenResponse;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Saved Segments — audience segment presets for targeted communications
+// ---------------------------------------------------------------------------
+
+@doc("Segment filter criteria for audience targeting")
+model SegmentFilters {
+  @doc("Filter by dues payment status")
+  duesStatus?: string;
+
+  @doc("Filter by membership tier")
+  membershipTier?: string;
+
+  @doc("Filter by chapter IDs")
+  chapterIds?: string[];
+
+  @doc("Filter by join date — members who joined after this date")
+  joinedAfter?: string;
+
+  @doc("Filter by join date — members who joined before this date")
+  joinedBefore?: string;
+}
+
+@doc("A saved audience segment preset")
+model SavedSegment extends BaseEntity {
+  @doc("ID of the association organization")
+  organizationId: string;
+
+  @doc("Human-readable name for this segment")
+  @minLength(1)
+  @maxLength(100)
+  name: string;
+
+  @doc("Filter criteria defining this segment")
+  filters: SegmentFilters;
+}
+
+@doc("Request to create a saved segment")
+model SavedSegmentCreateRequest {
+  @doc("ID of the association organization")
+  organizationId: string;
+
+  @doc("Human-readable name for this segment")
+  @minLength(1)
+  @maxLength(100)
+  name: string;
+
+  @doc("Filter criteria defining this segment")
+  filters: SegmentFilters;
+}
+
+@doc("List response wrapper for saved segments")
+model SavedSegmentListResponse {
+  @doc("List of saved segments")
+  data: SavedSegment[];
+}
+
+@doc("Single saved segment response wrapper")
+model SavedSegmentResponse {
+  @doc("Created saved segment")
+  data: SavedSegment;
+}
+
+@doc("Success response for segment deletion")
+model SavedSegmentDeleteResponse {
+  @doc("Whether deletion succeeded")
+  success: boolean;
+}
+
+namespace SavedSegmentManagement {
+  @doc("CRUD for saved audience segments used in targeted communications")
+  interface SavedSegmentManagement {
+    @doc("Create a saved audience segment.")
+    @operationId("createSavedSegment")
+    @post
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["admin", "coordinator"])
+    createSavedSegment(
+      @body body: SavedSegmentCreateRequest
+    ): ApiCreatedResponse<SavedSegmentResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("List saved segments for an organization.")
+    @operationId("listSavedSegments")
+    @get
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["admin", "coordinator"])
+    listSavedSegments(
+      @query organizationId: string
+    ): ApiOkResponse<SavedSegmentListResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Delete a saved segment.")
+    @operationId("deleteSavedSegment")
+    @delete
+    @route("/{id}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["admin", "coordinator"])
+    deleteSavedSegment(
+      @path id: string,
+      @query organizationId: string
+    ): ApiOkResponse<SavedSegmentDeleteResponse>
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+  }
+}

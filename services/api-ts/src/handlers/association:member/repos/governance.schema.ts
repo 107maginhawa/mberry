@@ -50,8 +50,8 @@ export const officerTerms = pgTable('officer_term', {
   personId: uuid('person_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   status: termStatusEnum('status').notNull().default('upcoming'),
-  startDate: timestamp('start_date').notNull(),
-  endDate: timestamp('end_date'),
+  startDate: timestamp('start_date', { withTimezone: true }).notNull(),
+  endDate: timestamp('end_date', { withTimezone: true }),
   notes: text('notes'),
 }, (table) => [
   index('idx_officer_term_org').on(table.organizationId),
@@ -73,7 +73,7 @@ export const transitionChecklists = pgTable('transition_checklist', {
   organizationId: uuid('organization_id').notNull(),
   item: varchar('item', { length: 500 }).notNull(),
   status: transitionChecklistStatusEnum('status').notNull().default('pending'),
-  completedAt: timestamp('completed_at'),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
   completedBy: uuid('completed_by'),
   notes: text('notes'),
 }, (table) => [
@@ -97,8 +97,8 @@ export const disciplinaryActions = pgTable('disciplinary_action', {
   issuedBy: uuid('issued_by').notNull(),
   actionType: disciplinaryActionTypeEnum('action_type').notNull(),
   reason: text('reason').notNull(), // M4-R4: mandatory reason
-  effectiveDate: timestamp('effective_date').notNull(),
-  expiresAt: timestamp('expires_at'),
+  effectiveDate: timestamp('effective_date', { withTimezone: true }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
   notes: text('notes'),
   // M4-R4: immutable — no update allowed after creation
 }, (table) => [

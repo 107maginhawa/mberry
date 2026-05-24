@@ -90,14 +90,15 @@ function OrganizationsPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
-                  Loading...
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground animate-pulse">
+                  Loading organizations...
                 </TableCell>
               </TableRow>
             ) : organizations.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
-                  No organizations found.
+                  <Building className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                  <p>No organizations found.</p>
                 </TableCell>
               </TableRow>
             ) : (

@@ -267,6 +267,111 @@
       "when": 1778724268962,
       "tag": "0037_last_infant_terrible",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1779724800000,
+      "tag": "0038_rename_terminated_to_removed",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1779724900000,
+      "tag": "0039_notification_type_gap_wiring",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1779811200000,
+      "tag": "0040_slug_backfill",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1779811300000,
+      "tag": "0041_slug_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1779897600000,
+      "tag": "0042_event_cpd_slug_cover",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1779897700000,
+      "tag": "0043_checkin_attestation",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1779984000000,
+      "tag": "0044_wave3a_trust_privacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1780070400000,
+      "tag": "0045_wave2b_credit_pipeline",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1780070500000,
+      "tag": "0046_wave2b_compliance_view",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1780156800000,
+      "tag": "0047_wave2b_certificate_extension",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1780243200000,
+      "tag": "0048_wave4b_saved_segments",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1780329600000,
+      "tag": "0049_special_assessments",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1779588752460,
+      "tag": "0050_timestamptz-migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1779594727516,
+      "tag": "0051_eminent_gravity",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1779596629366,
+      "tag": "0052_lyrical_dust",
+      "breakpoints": true
     }
   ]
 }

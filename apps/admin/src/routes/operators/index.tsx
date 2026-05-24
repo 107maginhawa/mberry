@@ -174,8 +174,8 @@ function OperatorsPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
-                  Loading...
+                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground animate-pulse">
+                  Loading operators...
                 </TableCell>
               </TableRow>
             ) : !admins || admins.length === 0 ? (

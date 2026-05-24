@@ -8,7 +8,7 @@ import { POSITION_TITLES } from '@/utils/position-titles';
 import { eq, and } from 'drizzle-orm';
 import { duesInvoices, duesConfigs } from './repos/dues.schema';
 import { memberships } from './repos/membership.schema';
-import { processDuesReminders } from '../dues/jobs/reminderProcessor';
+import { processDuesReminders } from './jobs/reminderProcessor';
 
 /**
  * generateDuesInvoicesForOrg

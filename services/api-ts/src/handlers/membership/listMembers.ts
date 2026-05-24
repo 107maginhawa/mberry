@@ -4,7 +4,7 @@ import { computeMembershipStatus } from '@/handlers/association:member/utils/com
 
 export async function listMembers(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const orgId = ctx.req.param('organizationId');
+  const orgId = ctx.req.param('organizationId')!;
   const status = ctx.req.query('status');
   const categoryId = ctx.req.query('categoryId');
   const search = ctx.req.query('search');

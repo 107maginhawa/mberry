@@ -1,10 +1,11 @@
 # Spec Consistency Report: Memberry
 
 ---
-oli_version: "1.0"
+oli_version: "1.1"
 artifact_type: consistency_report
 generated_by: /oli-spec-consistency
-report_date: 2026-05-21
+report_date: 2026-05-24
+previous_report: 2026-05-21
 artifacts_checked: 82
 modules_validated: 19
 ---
@@ -14,14 +15,42 @@ modules_validated: 19
 | Metric | Count |
 |--------|-------|
 | Total checks performed | 9 + NFR |
-| Confirmed consistent | 67+ entities, 200+ endpoints, 40 BRs |
-| Conflicts — HIGH | 8 → **0 (all resolved)** |
-| Conflicts — MEDIUM | 21 → **0 (18 resolved, 3 false flags)** |
-| Conflicts — LOW | 14 → **0 (8 resolved, 6 no-action/intentional)** |
-| NFR tensions | 7 → **0 (5 resolved, 2 already consistent)** |
+| Confirmed consistent | 67+ entities, 200+ endpoints, 51 BRs |
+| Conflicts — HIGH | 8 → **0 (all resolved, no regression)** |
+| Conflicts — MEDIUM | 21 → **1 NEW (M18 §22 stale metadata)** |
+| Conflicts — LOW | 14 → **0 (no regression)** |
+| NFR tensions | 7 → **0 (no regression)** |
 | Missing artifacts | 0 |
 
-**Gate Decision: FULLY PASSED** — All conflicts resolved on 2026-05-21. 12 items confirmed as false flags or intentional design (no action needed). 30 real issues fixed across 5 waves.
+**Gate Decision: PASSED** — Previous 42 conflicts remain resolved. 1 new MEDIUM finding (M18 stale downstream impact section). No HIGH blockers. Delta check triggered by waves 0b, 1, 2a, 2b, 3a, 3b, 6 commits post-2026-05-21.
+
+---
+
+## Delta Check (2026-05-24) — Post-Wave Implementation
+
+Waves 0-6 shipped code between 2026-05-21 and 2026-05-24. This delta verifies spec-vs-spec consistency was not broken by implementation.
+
+### New Findings
+
+| # | Severity | Check | Conflict | Resolution |
+|---|----------|-------|----------|------------|
+| D-1 | MEDIUM | 2 (entity) | M18 MODULE_SPEC §22 (Downstream Impact) says DOMAIN_MODEL, DOMAIN_GLOSSARY, ROLE_PERMISSION_MATRIX, ERROR_TAXONOMY "need" survey definitions added — but all already exist (Glossary: 4 refs, Domain Model: 29 refs, Role Matrix: M18 section, Error Taxonomy: 5.18, Event Contracts: 2 refs, Workflow Map: 9 refs) | Update §22 to reflect artifacts are complete; remove "needs" language |
+
+### Verified No Regression
+
+| Check | Modules Affected by Waves | Result |
+|-------|--------------------------|--------|
+| Wave 3a (Trust Directory) | M02, M05 | Privacy settings, directory schema, trust signals, credential tokens — all align with MODULE_SPEC. DOMAIN_MODEL §13 includes trust entities. No naming conflicts. |
+| Wave 3b (Profile/Settings) | M02 | Settings merge, officer credentials — consistent with M02 MODULE_SPEC workflows. |
+| Wave 6 (Surveys & NPS) | M18 | 10 TypeSpec operations match 10 handler files. API_CONTRACTS defines 17 endpoints (7 are spec-ahead-of-code: polls, member views, export). Spec-vs-spec: API_CONTRACTS and MODULE_SPEC agree on all 17. TypeSpec implements a subset. No spec-vs-spec conflict. |
+| Wave 2a (Events UX) | M08 | 9 vertical slices implemented. No spec changes needed — all implementation matches existing MODULE_SPEC. |
+| Wave 2b (Training+Certs) | M09, M10, M11 | Credit pipeline, CPD compliance, certificate extensions — all consistent with MODULE_SPECs. |
+| Impersonation write block | M03 | AC-M03-007 implemented (middleware/impersonation-guard.ts). Spec and code aligned. |
+| HMAC/QR verification | M11 | WF-072 (Public Verification) implemented. Route registered. Spec and code aligned. |
+
+### Regression Anchors — ALL STILL CONSISTENT
+
+All 19 regression anchors from the 2026-05-21 report verified. BR coverage updated from 40 to 51 (11 new BRs from Cycle 3).
 
 ---
 
@@ -219,11 +248,17 @@ M-3, M-7, M-8, M-14, M-20, L-2, L-7, L-9, L-10, L-12, NFR-2, NFR-7
 
 ## What's Next
 
-**STATUS: FULLY PASSED — ALL CONFLICTS RESOLVED**
+**STATUS: PASSED — 1 MEDIUM finding (non-blocking)**
 
-All 42 items addressed (30 fixed, 12 confirmed no-action). Proceed to next pipeline steps:
-1. `/oli-trace` — traceability graph (Wave 4 step 2)
-2. `/oli-audit-compliance` — compliance gate, target score >= 9.0 (Wave 5)
-3. `/oli-confidence-stack` — test confidence, target score >= 9.0 (Wave 5)
+43 items total (30 fixed, 12 no-action, 1 new MEDIUM). Proceed to next pipeline steps:
+1. Fix D-1 (update M18 §22) during module spec refresh
+2. `/oli-audit-compliance --all` — compliance re-audit post-wave implementations
+3. `/oli-confidence-stack` — test confidence (Wave 6 zero-test gap critical)
+4. `/oli-trace` — traceability refresh including waves 5-6
 
-**Pipeline position:** Phase B → `/oli-spec-consistency` ✅ FULLY PASSED → `/oli-trace` → `/oli-audit-compliance` → `/oli-confidence-stack`
+**Pipeline position:** `/oli-spec-consistency` ✅ PASSED → `/oli-module-specs --update` → `/oli-audit-compliance` → `/oli-confidence-stack` → `/oli-trace`
+
+**Code-level gaps found during consistency check (not spec-vs-spec, forwarded to compliance audit):**
+- M18: No Drizzle migration for survey/survey_response tables (schema exists, migration missing)
+- M18: Zero test files for 10 handler files
+- M18: 7 endpoints defined in spec but not yet in TypeSpec/handlers (polls, member views, export)

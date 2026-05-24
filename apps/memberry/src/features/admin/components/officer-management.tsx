@@ -95,7 +95,7 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
-        <p className="text-[14px] text-[var(--color-muted)]">
+        <p className="text-sm text-[var(--color-muted)]">
           {officers.length} officer{officers.length !== 1 ? 's' : ''} assigned
         </p>
         <Button size="sm" onClick={() => setShowModal(true)}>
@@ -106,16 +106,16 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
 
       {/* Officer table */}
       <GlassCard className="overflow-hidden">
-        <Table className="text-[14px]">
+        <Table className="text-sm">
           <TableHeader className="bg-[var(--color-surface-warm)]">
             <TableRow>
-              <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide">
+              <TableHead className="px-5 py-3 font-semibold text-xs uppercase tracking-wide">
                 Role
               </TableHead>
-              <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide">
+              <TableHead className="px-5 py-3 font-semibold text-xs uppercase tracking-wide">
                 Name
               </TableHead>
-              <TableHead className="px-5 py-3 font-semibold text-[12px] uppercase tracking-wide hidden md:table-cell">
+              <TableHead className="px-5 py-3 font-semibold text-xs uppercase tracking-wide hidden md:table-cell">
                 Assigned Date
               </TableHead>
               <TableHead className="px-5 py-3 w-16"></TableHead>
@@ -147,7 +147,7 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
                   <TableCell className="px-5 py-3.5">
                     <div>
                       <p className="font-medium">{o.name}</p>
-                      {o.email && <p className="text-[12px] text-[var(--color-muted)]">{o.email}</p>}
+                      {o.email && <p className="text-xs text-[var(--color-muted)]">{o.email}</p>}
                     </div>
                   </TableCell>
                   <TableCell className="px-5 py-3.5 text-[var(--color-muted)] hidden md:table-cell">
@@ -185,7 +185,7 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
             <DialogHeader>
               <DialogTitle>Remove Officer</DialogTitle>
             </DialogHeader>
-            <p className="text-[14px]">
+            <p className="text-sm">
               Remove <strong>{confirmRemove.name}</strong> from the role of{' '}
               <strong>{confirmRemove.role}</strong>? This action cannot be undone.
             </p>

@@ -57,11 +57,10 @@ export async function triggerSlotGeneration(
   const { regenerateEventSlots } = await import('./slotGenerator');
   
   if (ownerId) {
-    // Note: regenerateEventSlots takes eventId, not ownerId
-    // This function signature may need to be updated
+    // DEFERRED: regenerateEventSlots takes eventId, not ownerId — needs API redesign or a lookup join. Wave 2.
     throw new DeferredScopeError('triggerSlotGeneration with ownerId');
   } else {
-    // Trigger the full job
+    // DEFERRED: Manual full-job trigger endpoint not yet exposed in TypeSpec. Wave 2.
     throw new DeferredScopeError('Full job trigger');
   }
 }

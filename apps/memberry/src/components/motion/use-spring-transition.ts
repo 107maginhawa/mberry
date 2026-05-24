@@ -3,16 +3,16 @@ import type { Transition, Variants } from 'framer-motion'
 /** Shared spring config — matches DESIGN.md motion spec */
 export const SPRING_CONFIG: Transition = {
   type: 'spring',
-  damping: 25,
-  stiffness: 300,
-  mass: 0.5,
+  damping: 30,
+  stiffness: 400,
+  mass: 0.4,
 }
 
 /** Page-level fade+slide transition variants */
 export const pageTransitionVariants: Variants = {
-  initial: { opacity: 0, y: 8 },
+  initial: { opacity: 0, y: 6 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -4 },
+  exit: { opacity: 0, y: -3 },
 }
 
 /**

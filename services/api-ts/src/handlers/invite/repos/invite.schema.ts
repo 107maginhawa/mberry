@@ -46,10 +46,10 @@ export const invitationTokens = pgTable('invitation_token', {
   status: inviteStatusEnum('status').notNull().default('pending'),
 
   /** When the token expires (default: 7 days from creation) */
-  expiresAt: timestamp('expires_at').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 
   /** When the token was claimed */
-  claimedAt: timestamp('claimed_at'),
+  claimedAt: timestamp('claimed_at', { withTimezone: true }),
 
   /** Officer who created this invite */
   createdByOfficer: uuid('created_by_officer').notNull(),

@@ -10,7 +10,7 @@ import { ScheduleExceptionRepository } from './repos/scheduleException.repo';
 export async function updateScheduleException(c: ValidatedContext<any, any, any>) {
   const db = c.get('database') as DatabaseInstance;
   const user = c.get('user') as User;
-  const exceptionId = c.req.param('exceptionId');
+  const exceptionId = c.req.param('exceptionId')!;
   const body = await c.req.json();
 
   const personId = user?.id;

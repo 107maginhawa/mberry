@@ -21,12 +21,12 @@ export const Route = createFileRoute('/_authenticated/my/events')({
 })
 
 const REG_STATUS_STYLES: Record<string, { bg: string; label: string }> = {
-  confirmed: { bg: 'bg-emerald-100 text-emerald-800', label: 'Confirmed' },
-  waitlisted: { bg: 'bg-amber-100 text-amber-800', label: 'Waitlisted' },
-  cancelled: { bg: 'bg-red-100 text-red-800', label: 'Cancelled' },
-  pendingPayment: { bg: 'bg-orange-100 text-orange-800', label: 'Pending Payment' },
-  refunded: { bg: 'bg-gray-100 text-gray-600', label: 'Refunded' },
-  noShow: { bg: 'bg-gray-100 text-gray-600', label: 'No Show' },
+  confirmed: { bg: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', label: 'Confirmed' },
+  waitlisted: { bg: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', label: 'Waitlisted' },
+  cancelled: { bg: 'bg-[var(--color-error-bg)] text-[var(--color-error)]', label: 'Cancelled' },
+  pendingPayment: { bg: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', label: 'Pending Payment' },
+  refunded: { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: 'Refunded' },
+  noShow: { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: 'No Show' },
 }
 
 function formatEventDate(startDate: string) {
@@ -57,6 +57,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
   const { registration, event } = item
   const upcoming = isUpcoming(event.startDate)
   const orgId = event.organizationId
+  const orgSlug = event.orgSlug || orgId || ''
   const queryClient = useQueryClient()
 
   const cancelMutation = useMutation({
@@ -71,37 +72,39 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
     },
   })
 
-  const regStatus = REG_STATUS_STYLES[registration.status] ?? { bg: 'bg-gray-100 text-gray-600', label: registration.status }
+  const regStatus = REG_STATUS_STYLES[registration.status] ?? { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: registration.status }
   const canCancel = upcoming && registration.status !== 'cancelled' && registration.status !== 'refunded'
   const countdown = upcoming ? formatCountdown(event.startDate) : null
-  const credits = event.cpdCredits ?? event.cpd_credits ?? event.credits ?? null
+  const credits = event.creditAmount ?? event.cpdCredits ?? event.cpd_credits ?? event.credits ?? null
+  const isPendingCheckIn = upcoming && event.creditBearing && credits && credits > 0
 
   return (
     <GlassCard className={`overflow-hidden ${!upcoming ? 'opacity-75' : ''}`}>
       {/* Clickable card body → event detail */}
       <Link
-        to="/org/$orgId/events/$eventId"
-        params={{ orgId: orgId ?? '', eventId: event.id }}
+        to="/org/$orgSlug/events/$eventId"
+        params={{ orgSlug, eventId: event.id }}
+        search={{ payment: undefined, session_id: undefined }}
         className="block p-4 space-y-3 hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${regStatus.bg}`}>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${regStatus.bg}`}>
               {regStatus.label}
             </span>
             {credits != null && credits > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-primary-bg)] text-[var(--color-primary)]">
                 <Award size={10} />
-                {credits} CPD
+                {credits} CPD{isPendingCheckIn ? ' (pending check-in)' : ''}
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
             {countdown && (
-              <span className="text-[11px] font-semibold text-[var(--color-primary)]">{countdown}</span>
+              <span className="text-xs font-semibold text-[var(--color-primary)]">{countdown}</span>
             )}
             {!upcoming && (
-              <span className="text-[11px] text-[var(--color-muted)]">Past</span>
+              <span className="text-xs text-[var(--color-muted)]">Past</span>
             )}
             <ExternalLink size={12} className="text-[var(--color-muted)]" />
           </div>
@@ -109,7 +112,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
 
         <h3 className="text-h4">{event.title}</h3>
 
-        <div className="space-y-1.5 text-[13px] text-[var(--color-muted)]">
+        <div className="space-y-1.5 text-sm text-[var(--color-muted)]">
           <div className="flex items-center gap-2">
             <Calendar size={13} className="shrink-0" />
             <span>{formatEventDate(event.startDate)}</span>
@@ -132,7 +135,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-[12px] text-red-600 border-red-200 hover:bg-red-50"
+            className="h-7 text-xs text-[var(--color-error)] border-[var(--color-error)] hover:bg-[var(--color-error-bg)]"
             disabled={cancelMutation.isPending}
             onClick={(e) => {
               e.preventDefault()

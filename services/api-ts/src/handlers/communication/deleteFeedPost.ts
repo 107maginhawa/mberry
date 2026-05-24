@@ -6,7 +6,7 @@ import { auditAction } from '@/utils/audit';
 export async function deleteFeedPost(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const body = await ctx.req.json().catch(() => ({}));
 
   const repo = new FeedPostRepository(db);

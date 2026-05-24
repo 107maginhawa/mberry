@@ -6,7 +6,7 @@ import type { Session } from '@/types/auth';
 export async function reviewApplication(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const appId = ctx.req.param('appId');
+  const appId = ctx.req.param('appId')!;
   const body = await ctx.req.json();
 
   // Map old status values to new schema enums

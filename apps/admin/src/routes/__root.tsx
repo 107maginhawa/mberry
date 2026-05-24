@@ -6,10 +6,20 @@ import {
   Building2,
   Building,
   Users,
+  Users2,
   UserCog,
   ToggleLeft,
   ShieldCheck,
   Shield,
+  Calendar,
+  GraduationCap,
+  BarChart3,
+  ClipboardCheck,
+  ClipboardList,
+  Radio,
+  Mail,
+  ShieldAlert,
+  FileText,
 } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import type { RouterContext } from '@/router'
@@ -47,15 +57,62 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootComponent,
 })
 
-const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/associations', label: 'Associations', icon: Building2 },
-  { to: '/organizations', label: 'Organizations', icon: Building },
-  { to: '/members', label: 'Members', icon: Users },
-  { to: '/operators', label: 'Operators', icon: ShieldCheck },
-  { to: '/impersonate', label: 'Impersonate', icon: UserCog },
-  { to: '/feature-flags', label: 'Feature Flags', icon: ToggleLeft },
-  { to: '/audit', label: 'Audit Log', icon: Shield },
+interface NavItem {
+  to: string
+  label: string
+  icon: typeof LayoutDashboard
+}
+
+interface NavSection {
+  title: string
+  items: NavItem[]
+}
+
+const navSections: NavSection[] = [
+  {
+    title: 'Platform',
+    items: [
+      { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/associations', label: 'Associations', icon: Building2 },
+      { to: '/organizations', label: 'Organizations', icon: Building },
+      { to: '/operators', label: 'Operators', icon: ShieldCheck },
+    ],
+  },
+  {
+    title: 'Operations',
+    items: [
+      { to: '/national-dashboard', label: 'National Dashboard', icon: BarChart3 },
+      { to: '/members', label: 'Members', icon: Users },
+      { to: '/verifications', label: 'Verifications', icon: ShieldCheck },
+      { to: '/compliance', label: 'Compliance', icon: ClipboardCheck },
+      { to: '/events', label: 'Events', icon: Calendar },
+      { to: '/training', label: 'Training', icon: GraduationCap },
+      { to: '/committees', label: 'Committees', icon: Users2 },
+    ],
+  },
+  {
+    title: 'Communications',
+    items: [
+      { to: '/communications', label: 'Broadcasts', icon: Radio },
+      { to: '/communications/moderation', label: 'Moderation', icon: ShieldAlert },
+      { to: '/communications/templates', label: 'Templates', icon: FileText },
+      { to: '/communications/email', label: 'Email Health', icon: Mail },
+    ],
+  },
+  {
+    title: 'Engagement',
+    items: [
+      { to: '/surveys', label: 'Surveys', icon: ClipboardList },
+    ],
+  },
+  {
+    title: 'System',
+    items: [
+      { to: '/audit', label: 'Audit Log', icon: Shield },
+      { to: '/feature-flags', label: 'Feature Flags', icon: ToggleLeft },
+      { to: '/impersonate', label: 'Impersonate', icon: UserCog },
+    ],
+  },
 ]
 
 function MobileGate() {
@@ -72,10 +129,16 @@ function MobileGate() {
 
 function RootComponent() {
   const user = useAdminUser()
-  const visibleNavItems = navItems.filter((item) => {
-    const allowed = ROUTE_ROLES[item.to]
-    return !allowed || allowed.includes(user.role)
-  })
+
+  const visibleSections = navSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => {
+        const allowed = ROUTE_ROLES[item.to]
+        return !allowed || allowed.includes(user.role)
+      }),
+    }))
+    .filter((section) => section.items.length > 0)
 
   return (
     <>
@@ -96,24 +159,35 @@ function RootComponent() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {visibleNavItems.map((item) => (
-            <Link
-              key={item.label}
-              to={item.to}
-              className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-              activeProps={{
-                className: 'bg-white/10 text-white',
-              }}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-            </Link>
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+          {visibleSections.map((section, idx) => (
+            <div key={section.title} className={idx > 0 ? 'mt-6' : ''}>
+              <p className="px-3 mb-2 text-[11px] font-medium uppercase tracking-wider text-white/60">
+                {section.title}
+              </p>
+              <div className="space-y-1">
+                {section.items.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    activeOptions={{ exact: item.to === '/' }}
+                    className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                    activeProps={{
+                      className: 'bg-white/15 text-white border-l-2 border-white',
+                      'aria-current': 'page' as const,
+                    }}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-white/10 text-xs text-white/40">
+        <div className="px-5 py-4 border-t border-white/10 text-xs text-white/60">
           <span className="capitalize">{user.role}</span> — {user.email}
         </div>
       </aside>

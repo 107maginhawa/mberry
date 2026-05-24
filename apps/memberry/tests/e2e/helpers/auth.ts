@@ -74,6 +74,85 @@ export async function signUp(page: Page) {
 }
 
 /**
+ * Sign up a fresh user for onboarding testing.
+ * Creates auth user WITHOUT person profile, then verifies email via admin API.
+ * The resulting user can access /onboarding (passes requireNoPerson + requireEmailVerified).
+ */
+export async function signUpForOnboarding(page: Page) {
+  const timestamp = Date.now()
+  const random = Math.floor(Math.random() * 10000)
+  const email = `test-onboard-${timestamp}-${random}@example.com`
+  const password = TEST_PASSWORD
+  const name = `Onboard User ${timestamp}`
+
+  // Step 1: Sign up (creates auth user, no person)
+  await page.goto('/auth/sign-up')
+  await page.waitForLoadState('networkidle')
+
+  const submit = page.getByRole('button', { name: /create an account|sign up|register/i })
+  await expect(submit).toBeVisible({ timeout: 10000 })
+
+  await page.getByLabel('Name', { exact: true }).fill(name)
+  await page.getByLabel('Email', { exact: true }).fill(email)
+
+  const passwordInput = page.getByLabel('Password', { exact: true })
+  await passwordInput.click()
+  await passwordInput.pressSequentially(password, { delay: 10 })
+
+  const signupResponse = page.waitForResponse(
+    (resp) => resp.url().includes('/auth/sign-up') && resp.request().method() === 'POST',
+    { timeout: 10000 },
+  ).catch(() => null)
+
+  await submit.click()
+  const response = await signupResponse
+  if (response && response.status() >= 400) {
+    const body = await response.text().catch(() => '<unreadable>')
+    throw new Error(`Sign-up failed ${response.status()}: ${body.slice(0, 500)}`)
+  }
+
+  await page.waitForTimeout(2000)
+  await page.waitForLoadState('networkidle')
+
+  // Step 2: Sign in as officer (has admin role) to verify email via admin API
+  // Officer uses admin list-users to find the new user, then sets emailVerified
+  await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+
+  const verifyResult = await page.evaluate(async ({ apiBase, targetEmail }) => {
+    // Find user by email via admin API
+    const listRes = await fetch(
+      `${apiBase}/auth/admin/list-users?searchValue=${encodeURIComponent(targetEmail)}&searchField=email`,
+      { credentials: 'include' },
+    )
+    if (!listRes.ok) return { ok: false, error: `list-users: ${listRes.status}` }
+    const listData = await listRes.json()
+    const users = listData?.users ?? listData?.data ?? listData
+    const targetUser = Array.isArray(users)
+      ? users.find((u: any) => u.email === targetEmail)
+      : null
+    if (!targetUser) return { ok: false, error: 'user not found in admin list' }
+
+    // Set emailVerified via admin API
+    const setRes = await fetch(`${apiBase}/auth/admin/update-user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ userId: targetUser.id, data: { emailVerified: true } }),
+    })
+    return { ok: setRes.ok, error: setRes.ok ? null : `set-user: ${setRes.status}` }
+  }, { apiBase: API_BASE, targetEmail: email })
+
+  if (!verifyResult.ok) {
+    throw new Error(`Failed to verify email: ${verifyResult.error}`)
+  }
+
+  // Step 3: Sign back in as onboarding user
+  await signIn(page, email, password)
+
+  return { email, password, name }
+}
+
+/**
  * Sign in an existing user via the UI.
  */
 export async function signIn(page: Page, email: string, password: string) {

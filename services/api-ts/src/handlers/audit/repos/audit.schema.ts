@@ -102,9 +102,9 @@ export const auditLogEntries = pgTable('audit_log_entry', {
   // Enhanced fields for integrity and retention
   integrityHash: varchar('integrity_hash', { length: 64 }), // SHA-256 hash
   retentionStatus: auditRetentionStatusEnum('retention_status').notNull().default('active'),
-  archivedAt: timestamp('archived_at'),
+  archivedAt: timestamp('archived_at', { withTimezone: true }),
   archivedBy: text('archived_by').references(() => user.id), // User who archived the log
-  purgeAfter: timestamp('purge_after'),
+  purgeAfter: timestamp('purge_after', { withTimezone: true }),
 }, (table) => ({
   // Performance indexes for common queries
   orgIdx: index('audit_organization_id_idx').on(table.organizationId),

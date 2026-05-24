@@ -39,6 +39,9 @@ export async function getMyPrivacySettings(
       phoneVisible: false,
       photoVisible: true,
       addressVisible: false,
+      credentialsVisible: false,
+      duesStatusVisible: false,
+      ceComplianceVisible: false,
     }, 200);
   }
 

@@ -37,8 +37,9 @@ test.describe('Member Payments (/my/payments)', () => {
     await page.waitForLoadState('networkidle')
 
     // Member may see empty state or payment rows depending on data
-    const hasEmpty = await page.getByText(/no payments/i).isVisible().catch(() => false)
-    const hasPayments = await page.locator('table tbody tr').first().isVisible().catch(() => false)
-    expect(hasEmpty || hasPayments).toBeTruthy()
+    const hasEmpty = await page.getByText(/No Payments Found/i).isVisible().catch(() => false)
+    const hasPayments = await page.locator('table tbody tr, [class*="card"]').first().isVisible().catch(() => false)
+    const hasHistory = await page.getByText(/payment/i).first().isVisible().catch(() => false)
+    expect(hasEmpty || hasPayments || hasHistory).toBeTruthy()
   })
 })

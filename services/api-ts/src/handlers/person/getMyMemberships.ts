@@ -20,14 +20,11 @@ export async function getMyMemberships(ctx: BaseContext): Promise<Response> {
   const db = ctx.get('database') as DatabaseInstance;
   const personId = session.user.id;
 
+  // Select only fields needed by frontend consumers — excludes PII-adjacent
+  // fields (createdBy, updatedBy, note, removalReason) from member-tier response
   const rows = await db
     .select({
       id: memberships.id,
-      createdAt: memberships.createdAt,
-      updatedAt: memberships.updatedAt,
-      version: memberships.version,
-      createdBy: memberships.createdBy,
-      updatedBy: memberships.updatedBy,
       organizationId: memberships.organizationId,
       personId: memberships.personId,
       tierId: memberships.tierId,
@@ -38,10 +35,8 @@ export async function getMyMemberships(ctx: BaseContext): Promise<Response> {
       gracePeriodDays: memberships.gracePeriodDays,
       status: memberships.status,
       joinedAt: memberships.joinedAt,
-      removedAt: memberships.removedAt,
-      removalReason: memberships.removalReason,
-      note: memberships.note,
       orgName: organizations.name,
+      orgSlug: organizations.slug,
     })
     .from(memberships)
     .leftJoin(organizations, eq(memberships.organizationId, organizations.id))

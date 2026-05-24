@@ -15,10 +15,10 @@ interface ActionWidgetProps {
 }
 
 const statusDot: Record<string, string> = {
-  success: 'bg-emerald-500',
-  warning: 'bg-amber-500',
-  error: 'bg-red-500',
-  neutral: 'bg-gray-400',
+  success: 'bg-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]',
+  neutral: 'bg-[var(--color-muted)]',
 }
 
 const statusDefaults: Record<string, string> = {
@@ -34,10 +34,10 @@ export function ActionWidget({ icon, label, value, subtitle, status, statusLabel
       <div role="alert" aria-live="polite" className="rounded-[12px] border border-red-200/60 bg-[var(--color-error-bg)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] p-4 flex flex-col justify-between min-h-[130px]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-red-400" aria-hidden="true">{icon}</span>
-            <p className="text-[12px] font-medium text-red-400 uppercase tracking-wide">{label}</p>
+            <span className="text-[var(--color-error)]" aria-hidden="true">{icon}</span>
+            <p className="text-xs font-medium text-[var(--color-error)] uppercase tracking-wide">{label}</p>
           </div>
-          <p className="text-[13px] font-medium text-red-600">{errorMessage}</p>
+          <p className="text-sm font-medium text-[var(--color-error)]">{errorMessage}</p>
         </div>
       </div>
     )
@@ -48,7 +48,7 @@ export function ActionWidget({ icon, label, value, subtitle, status, statusLabel
       <div>
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[var(--color-muted)]" aria-hidden="true">{icon}</span>
-          <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wide">{label}</p>
+          <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">{label}</p>
           {status && (
             <>
               <span
@@ -62,11 +62,11 @@ export function ActionWidget({ icon, label, value, subtitle, status, statusLabel
         </div>
         {children ?? (
           <>
-            <p className="text-[24px] font-bold font-display leading-tight text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <p className="text-2xl font-bold font-display leading-tight text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {value}
             </p>
             {subtitle && (
-              <p className="text-[12px] font-medium text-[var(--color-muted)] mt-0.5">{subtitle}</p>
+              <p className="text-xs font-medium text-[var(--color-muted)] mt-0.5">{subtitle}</p>
             )}
           </>
         )}
@@ -75,7 +75,7 @@ export function ActionWidget({ icon, label, value, subtitle, status, statusLabel
         <Link
           to={action.to}
           params={action.params ?? {}}
-          className="mt-3 inline-flex items-center text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
+          className="mt-3 inline-flex items-center text-xs font-semibold text-[var(--color-primary)] hover:underline"
         >
           {action.label} &rarr;
         </Link>

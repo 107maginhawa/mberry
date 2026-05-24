@@ -153,8 +153,8 @@ function AuditPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="p-8 text-center text-muted-foreground">
-                  Loading...
+                <TableCell colSpan={7} className="p-8 text-center text-muted-foreground animate-pulse">
+                  Loading audit log...
                 </TableCell>
               </TableRow>
             ) : (data?.data ?? []).length === 0 ? (

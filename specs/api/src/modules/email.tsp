@@ -398,6 +398,37 @@ model CancelEmailRequest {
 
 
 // ============================================================================
+// UNSUBSCRIBE / SUPPRESSION MODELS
+// ============================================================================
+
+@doc("Email suppression record — an email address that has opted out of communications")
+model EmailSuppression {
+  @doc("Suppression record ID")
+  id: string;
+
+  @doc("Suppressed email address")
+  email: string;
+
+  @doc("Reason for suppression (unsubscribe, bounce, complaint)")
+  reason: string;
+
+  @doc("Organisation that the suppression applies to")
+  organizationId: string;
+
+  @doc("When the suppression was created")
+  createdAt?: utcDateTime;
+}
+
+@doc("Paginated email suppression list response")
+model EmailSuppressionListResponse {
+  @doc("Suppression records")
+  data: EmailSuppression[];
+
+  @doc("Total number of suppression records")
+  total: int32;
+}
+
+// ============================================================================
 // API INTERFACES
 // ============================================================================
 
@@ -552,6 +583,78 @@ namespace EmailModule {
     ): ApiOkResponse<EmailQueueItem>
       | ApiNotFoundResponse
       | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+  }
+
+  /**
+   * RFC 8058 one-click unsubscribe endpoint (public — no auth required).
+   * Users click links from their email client without being logged in.
+   * HMAC-SHA256 token verification prevents tampering.
+   *
+   * NOTE: This endpoint returns HTML, not JSON. TypeSpec models the query
+   * parameters and status codes; the actual response body is text/html.
+   */
+  interface EmailUnsubscribeEndpoints {
+    @doc("Handle GET unsubscribe request (RFC 8058). Returns HTML confirmation or error page. Query params are HMAC-verified.")
+    @operationId("unsubscribeEmailGet")
+    @get
+    @route("/unsubscribe")
+    unsubscribeEmailGet(
+      @doc("HMAC-SHA256 token for tamper protection")
+      @query token: string,
+      @doc("Email address to unsubscribe")
+      @query email: string,
+      @doc("Organization ID scope")
+      @query orgId: string,
+    ): {
+      @statusCode statusCode: 200;
+      @header contentType: "text/html";
+      @body body: string;
+    } | {
+      @statusCode statusCode: 400;
+      @header contentType: "text/html";
+      @body body: string;
+    };
+
+    @doc("Handle POST unsubscribe request (RFC 8058). Returns HTML confirmation or error page. Query params are HMAC-verified.")
+    @operationId("unsubscribeEmailPost")
+    @post
+    @route("/unsubscribe")
+    unsubscribeEmailPost(
+      @doc("HMAC-SHA256 token for tamper protection")
+      @query token: string,
+      @doc("Email address to unsubscribe")
+      @query email: string,
+      @doc("Organization ID scope")
+      @query orgId: string,
+    ): {
+      @statusCode statusCode: 200;
+      @header contentType: "text/html";
+      @body body: string;
+    } | {
+      @statusCode statusCode: 400;
+      @header contentType: "text/html";
+      @body body: string;
+    };
+  }
+
+  /**
+   * Email suppression list management (admin only).
+   */
+  interface EmailSuppressionManagement {
+    @doc("List email suppressions for the current organisation. Admin only.")
+    @operationId("listEmailSuppressions")
+    @get
+    @route("/suppressions")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["admin"])
+    listEmailSuppressions(
+      @doc("Page size (1-200, default 50)")
+      @query limit?: int32,
+      @doc("Offset for pagination (default 0)")
+      @query offset?: int32,
+    ): ApiOkResponse<EmailSuppressionListResponse>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
   }

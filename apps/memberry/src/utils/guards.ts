@@ -38,13 +38,14 @@ export async function requireGuest({ context }: { context: RouterContext }) {
 }
 
 /**
- * Requires user to be an active officer for the org specified by $orgId route param.
- * Checks org+role (per BR-09, BR-21: roles are per-org, not global).
+ * Requires user to be an active officer for the org specified by $orgSlug route param.
+ * Resolves slug to UUID via /public/org/:slug, then checks org+role
+ * (per BR-09, BR-21: roles are per-org, not global).
  * Uses queryClient.ensureQueryData for caching — subsequent navigations
  * within the same org hit cache (staleTime from ApiProvider defaults).
  * Returns officer positions in route context for downstream use.
  */
-export async function requireOrgOfficer({ context, params }: { context: RouterContext; params: { orgId: string } }): Promise<OfficerContext> {
+export async function requireOrgOfficer({ context, params }: { context: RouterContext; params: { orgSlug: string } }): Promise<OfficerContext> {
   const user = context.auth?.user
   if (!user) {
     throw redirect({
@@ -53,9 +54,24 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
     })
   }
 
-  const orgId = params.orgId
-  if (!orgId) {
+  const orgSlug = params.orgSlug
+  if (!orgSlug) {
     throw redirect({ to: '/' })
+  }
+
+  // Resolve slug to UUID
+  let orgId: string
+  try {
+    const orgData = await context.queryClient.ensureQueryData({
+      queryKey: ['org-by-slug', orgSlug],
+      queryFn: () => api.get<any>(`/api/public/org/${orgSlug}`),
+      staleTime: Infinity,
+    })
+    orgId = orgData?.id ?? orgData?.data?.id
+    if (!orgId) throw new Error('Org not found')
+  } catch (err) {
+    if (err && typeof err === 'object' && 'to' in err) throw err
+    throw redirect({ to: '/dashboard' })
   }
 
   try {
@@ -70,6 +86,46 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
     return { officerPositions: positions.map((p: any) => ({ title: p.positionTitle, ...p })), orgId }
   } catch (err) {
     if (err && typeof err === 'object' && 'to' in err) throw err
+    throw redirect({ to: '/dashboard' })
+  }
+}
+
+/**
+ * Requires user to have a person profile. Redirects to onboarding if missing.
+ */
+export async function requirePerson({ context }: { context: RouterContext }) {
+  if (!context.auth.person) {
+    throw redirect({ to: '/onboarding' })
+  }
+  return { person: context.auth.person }
+}
+
+/**
+ * Requires user to NOT have a person profile (for onboarding).
+ * Redirects to dashboard if person already exists.
+ */
+export async function requireNoPerson({ context }: { context: RouterContext }) {
+  if (context.auth.person) {
+    throw redirect({ to: '/dashboard' })
+  }
+}
+
+/**
+ * Requires user to have a verified email.
+ * Redirects to verify-email if not verified.
+ */
+export async function requireEmailVerified({ context }: { context: RouterContext }) {
+  if (!context.auth.user?.emailVerified) {
+    throw redirect({ to: '/verify-email' })
+  }
+}
+
+/**
+ * Requires user to NOT have a verified email (for verify-email page).
+ * Redirects to dashboard if already verified.
+ */
+export async function requireNotEmailVerified({ context }: { context: RouterContext }) {
+  if (context.auth.user?.emailVerified) {
     throw redirect({ to: '/dashboard' })
   }
 }

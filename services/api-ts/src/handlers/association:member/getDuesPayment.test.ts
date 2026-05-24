@@ -7,7 +7,7 @@
  */
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { getDuesPayment } from './getDuesPayment';
 
 describe('[SEC-02] getDuesPayment — org isolation', () => {

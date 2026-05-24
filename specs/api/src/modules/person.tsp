@@ -76,6 +76,10 @@ model Person extends BaseEntity {
 
   @doc("Preferred language for communications")
   preferredLanguage?: LanguageCode;
+
+  @doc("Short biography or practice description")
+  @maxLength(2000)
+  bio?: string;
 }
 
 /**
@@ -226,6 +230,10 @@ model PersonCreateRequest {
 
   @doc("Preferred language for communications")
   preferredLanguage?: LanguageCode;
+
+  @doc("Short biography or practice description")
+  @maxLength(2000)
+  bio?: string;
 }
 
 /**
@@ -282,6 +290,10 @@ model PersonUpdateRequest {
 
   @doc("Preferred language - can be null to clear")
   preferredLanguage?: LanguageCode | null;
+
+  @doc("Short biography - can be null to clear")
+  @maxLength(2000)
+  bio?: string | null;
 }
 
 

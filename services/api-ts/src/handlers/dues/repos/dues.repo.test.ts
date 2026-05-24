@@ -620,47 +620,51 @@ describe('DuesRepository.getNextReceiptSequence', () => {
 
 describe('DuesRepository.getDashboardStats', () => {
   test('returns aggregated stats', async () => {
-    const statsRow = {
+    const paymentRow = {
       totalCollected: 50000,
-      totalOutstanding: 10000,
-      pendingCount: 2,
-      completedCount: 10,
-      totalCount: 12,
+      paidCount: 10,
     };
-    const db = makeDb({ selectRows: [statsRow] });
+    const invoiceRow = {
+      totalOutstanding: 10000,
+      unpaidCount: 2,
+      overdueCount: 3,
+    };
+    const db = makeDb({ selectRowsSets: [[paymentRow], [invoiceRow]] });
     const repo = safeRepo(db as any);
 
     const result = await repo.getDashboardStats('org-1');
     expect(result.totalCollected).toBe(50000);
     expect(result.totalOutstanding).toBe(10000);
-    expect(result.pendingCount).toBe(2);
-    expect(result.completedCount).toBe(10);
-    expect(result.totalCount).toBe(12);
-    expect(result.collectionRate).toBe(83); // Math.round(10/12 * 100)
+    expect(result.paidCount).toBe(10);
+    expect(result.unpaidCount).toBe(2);
+    expect(result.overdueCount).toBe(3);
+    expect(result.collectionRate).toBe(0.83); // 50000 / (50000 + 10000)
   });
 
   test('returns zeros when no payments exist', async () => {
-    const emptyStats = {
+    const emptyPayments = {
       totalCollected: 0,
-      totalOutstanding: 0,
-      pendingCount: 0,
-      completedCount: 0,
-      totalCount: 0,
+      paidCount: 0,
     };
-    const db = makeDb({ selectRows: [emptyStats] });
+    const emptyInvoices = {
+      totalOutstanding: 0,
+      unpaidCount: 0,
+      overdueCount: 0,
+    };
+    const db = makeDb({ selectRowsSets: [[emptyPayments], [emptyInvoices]] });
     const repo = safeRepo(db as any);
 
     const result = await repo.getDashboardStats('org-1');
     expect(result.totalCollected).toBe(0);
     expect(result.totalOutstanding).toBe(0);
-    expect(result.pendingCount).toBe(0);
-    expect(result.completedCount).toBe(0);
-    expect(result.totalCount).toBe(0);
+    expect(result.paidCount).toBe(0);
+    expect(result.unpaidCount).toBe(0);
+    expect(result.overdueCount).toBe(0);
     expect(result.collectionRate).toBe(0);
   });
 
   test('handles null stats row gracefully', async () => {
-    const db = makeDb({ selectRows: [undefined] });
+    const db = makeDb({ selectRowsSets: [[undefined], [undefined]] });
     const repo = safeRepo(db as any);
 
     const result = await repo.getDashboardStats('org-1');

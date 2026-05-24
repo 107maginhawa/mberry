@@ -1,158 +1,330 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { Button, Checkbox, Input } from '@monobase/ui'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { Button } from '@monobase/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
+import { Progress } from '@monobase/ui'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
 import {
-  updatePersonMutation,
   createPersonMutation,
   getPersonQueryKey,
 } from '@monobase/sdk-ts/generated/react-query'
-
-export const Route = createFileRoute('/onboarding')({
-  component: MemberOnboarding,
-})
+import { composeGuards, requireAuth, requireEmailVerified, requireNoPerson } from '@/utils/guards'
+import { detectTimezone } from '@/lib/detect-timezone'
+import { detectCountry } from '@/lib/detect-country'
+import { detectLanguage } from '@/lib/detect-language'
+import { PersonalInfoForm } from '@/features/person/components/personal-info-form'
+import { AddressForm } from '@/features/person/components/address-form'
+import type { PersonalInfo, OptionalAddress } from '@/features/person/schemas'
+import type { PersonCreateRequest } from '@monobase/sdk-ts/generated/types.gen'
 
 /**
- * Member onboarding — optional profile completion after first login.
- * Not a gate: members can dismiss and return later from /my/settings.
- * PRD M-7: prompted on dashboard, dismissible after 3 times.
+ * Format a Date as YYYY-MM-DD. The OpenAPI spec marks `dateOfBirth` as
+ * TypeSpec `plainDate`, which serializes as `YYYY-MM-DD`. The generated types
+ * are `Date` (from @hey-api/transformers handling response shape), but on the
+ * request side JSON.stringify produces the full ISO datetime — which the
+ * server-side validator rejects. We have to format manually before sending
+ * and cast around the generated type.
  */
-function MemberOnboarding() {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const [step, setStep] = useState(1)
-  const [specialization, setSpecialization] = useState('')
-  const [privacyDirectoryVisible, setPrivacyDirectoryVisible] = useState(true)
+function toPlainDateString(d: Date | undefined): string | undefined {
+  if (!d) return undefined
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
 
-  const updatePerson = useMutation({
-    ...updatePersonMutation(),
-  })
+const VALID_GENDERS: ReadonlyArray<NonNullable<PersonCreateRequest['gender']>> = [
+  'male',
+  'female',
+  'non-binary',
+  'other',
+  'prefer-not-to-say',
+]
+
+function normalizeGender(value: string | undefined): PersonCreateRequest['gender'] | undefined {
+  if (!value) return undefined
+  return VALID_GENDERS.includes(value as never) ? (value as PersonCreateRequest['gender']) : undefined
+}
+
+export const Route = createFileRoute('/onboarding')({
+  beforeLoad: composeGuards(requireAuth, requireEmailVerified, requireNoPerson),
+  component: OnboardingPage,
+})
+
+function OnboardingPage() {
+  const navigate = useNavigate()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
+  // Get user from route context - guaranteed to exist because of requireAuth guard
+  const { auth } = Route.useRouteContext()
+  const user = auth.user!
+  const [currentStep, setCurrentStep] = useState(1)
   const createPerson = useMutation({
     ...createPersonMutation(),
+    meta: {
+      toast: {
+        success: 'Profile created!',
+        error: (err: unknown) =>
+          err instanceof Error ? err.message : 'Failed to create profile',
+      },
+    },
   })
 
-  const handleComplete = async () => {
-    try {
-      // Try update first; if person doesn't exist, create it
-      try {
-        await updatePerson.mutateAsync({
-          path: { person: 'me' },
-          body: {
-            specialization: specialization || undefined,
-          },
-        })
-      } catch {
-        // Person doesn't exist yet — create it
-        await createPerson.mutateAsync({
-          body: {
-            firstName: 'Member',
-            specialization: specialization || undefined,
-          },
-        })
+  // Store form data across steps with proper types
+  // Initialize with empty/detected values
+  const [formData, setFormData] = useState<{
+    personal?: Partial<PersonalInfo>
+    address?: OptionalAddress
+  }>({
+    personal: {
+      firstName: '',
+      lastName: '',
+      middleName: '',
+      dateOfBirth: undefined,
+      gender: '',
+    },
+    address: {
+      street1: '',
+      street2: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: detectCountry(),
+    }
+  })
+
+  // Update formData when user data becomes available
+  useEffect(() => {
+    if (user?.name) {
+      setFormData(prev => ({
+        ...prev,
+        personal: {
+          ...prev.personal!,
+          firstName: user.name.split(' ')[0] || '',
+          lastName: user.name.split(' ').slice(1).join(' ') || '',
+        }
+      }))
+    }
+  }, [user?.name])
+
+  const totalSteps = 2
+
+  const handlePersonalInfoSubmit = (data: PersonalInfo) => {
+    setFormData(prev => ({ ...prev, personal: data }))
+    setCurrentStep(2)
+  }
+
+  const handleAddressSubmit = async (data: OptionalAddress) => {
+    setFormData(prev => ({ ...prev, address: data }))
+
+    // Submit the complete profile
+    if (!formData.personal) {
+      return
+    }
+
+    // User is guaranteed to exist from requireAuth guard
+    if (!user.email) {
+      return
+    }
+
+    // Build address if provided
+    let primaryAddress: PersonCreateRequest['primaryAddress'] | undefined
+    if (data && data.street1 && data.city &&
+        data.state && data.postalCode && data.country) {
+      primaryAddress = {
+        street1: data.street1,
+        street2: data.street2,
+        city: data.city,
+        state: data.state,
+        postalCode: data.postalCode,
+        country: data.country, // Already a 2-letter code
       }
-      await queryClient.invalidateQueries({
-        queryKey: getPersonQueryKey({ path: { person: 'me' } }),
-      })
-      navigate({ to: '/' })
-    } catch {
-      // Non-blocking — navigate anyway
-      navigate({ to: '/' })
+    }
+
+    const personal = formData.personal as PersonalInfo
+    const personData: PersonCreateRequest = {
+      firstName: personal.firstName,
+      lastName: personal.lastName,
+      middleName: personal.middleName || undefined,
+      // Cast: the generated type says Date, but the wire format must be
+      // YYYY-MM-DD per the spec's `plainDate` mapping. See toPlainDateString.
+      dateOfBirth: toPlainDateString(personal.dateOfBirth) as unknown as Date,
+      gender: normalizeGender(personal.gender),
+      primaryAddress,
+      contactInfo: {
+        email: user.email,
+      },
+      languagesSpoken: [detectLanguage()],
+      timezone: detectTimezone(),
+      licenseNumber: personal.licenseNumber || undefined,
+      specialization: personal.specialization || undefined,
+      prcId: personal.prcId || undefined,
+    } as PersonCreateRequest
+
+    createPerson.mutate({ body: personData }, {
+      onSuccess: async () => {
+        await queryClient.refetchQueries({
+          queryKey: getPersonQueryKey({ path: { person: 'me' } }),
+        })
+        await new Promise(resolve => setTimeout(resolve, 100))
+        navigate({ to: '/dashboard' })
+      },
+    })
+  }
+
+  const handleSkipAddress = async () => {
+    // Submit without address
+    if (!formData.personal) {
+      return
+    }
+
+    // User is guaranteed to exist from requireAuth guard
+    if (!user.email) {
+      return
+    }
+
+    const personal = formData.personal as PersonalInfo
+    const personData = {
+      firstName: personal.firstName,
+      lastName: personal.lastName,
+      middleName: personal.middleName || undefined,
+      dateOfBirth: toPlainDateString(personal.dateOfBirth) as unknown as Date,
+      gender: normalizeGender(personal.gender),
+      contactInfo: {
+        email: user.email,
+      },
+      languagesSpoken: [detectLanguage()],
+      timezone: detectTimezone(),
+      licenseNumber: personal.licenseNumber || undefined,
+      specialization: personal.specialization || undefined,
+      prcId: personal.prcId || undefined,
+    } as PersonCreateRequest
+
+    createPerson.mutate({ body: personData }, {
+      onSuccess: async () => {
+        await queryClient.refetchQueries({
+          queryKey: getPersonQueryKey({ path: { person: 'me' } }),
+        })
+        await new Promise(resolve => setTimeout(resolve, 100))
+        navigate({ to: '/dashboard' })
+      },
+    })
+  }
+
+  const goBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
     }
   }
 
-  const handleSkip = () => {
-    navigate({ to: '/' })
-  }
-
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="max-w-lg w-full border rounded-lg p-6 space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-h2">Complete Your Profile</h1>
-          <p className="text-sm text-[var(--color-muted)]">
-            Step {step} of 2 — you can skip and come back later
-          </p>
-          <div className="w-full bg-[var(--color-surface-warm)] rounded-full h-2">
-            <div
-              className="bg-[var(--color-primary)] h-2 rounded-full transition-all"
-              style={{ width: `${(step / 2) * 100}%` }}
-            />
+    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-2xl space-y-6">
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <h1 className="text-h1 text-[var(--color-primary)]">Memberry</h1>
           </div>
+          <h2 className="text-h2 text-foreground">Welcome to Memberry</h2>
+          <p className="text-[var(--color-muted)] mt-2">Let's set up your profile</p>
         </div>
 
-        {step === 1 && (
-          <div className="space-y-4">
-            <h2 className="text-h3">Specialization</h2>
-            <p className="text-sm text-[var(--color-muted)]">
-              What is your area of professional practice?
-            </p>
-            <Input
-              type="text"
-              value={specialization}
-              onChange={(e) => setSpecialization(e.target.value)}
-              placeholder="e.g. General Dentistry, Orthodontics"
-              className="w-full px-3 py-2 border rounded-md text-sm"
-            />
-            <div className="flex justify-between">
-              <Button
-                variant="ghost"
-                onClick={handleSkip}
-              >
-                Skip for now
-              </Button>
-              <Button
-                onClick={() => setStep(2)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
+        <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
 
-        {step === 2 && (
-          <div className="space-y-4">
-            <h2 className="text-h3">Privacy Preferences</h2>
-            <p className="text-sm text-[var(--color-muted)]">
-              Control how your information appears in the member directory.
-            </p>
-            {/* eslint-disable-next-line no-restricted-syntax */}
-            <label className="flex items-center gap-3 p-3 border rounded-md cursor-pointer">
-              <Checkbox
-                checked={privacyDirectoryVisible}
-                onCheckedChange={(val) => setPrivacyDirectoryVisible(val === true)}
-                className="h-4 w-4"
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Step {currentStep} of {totalSteps}: {' '}
+              {currentStep === 1 && 'Personal Information'}
+              {currentStep === 2 && 'Address (Optional)'}
+            </CardTitle>
+            <CardDescription>
+              {currentStep === 1 && 'Tell us about yourself'}
+              {currentStep === 2 && 'Where can we reach you? You can skip this step for now.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {currentStep === 1 && (
+              <PersonalInfoForm
+                onSubmit={handlePersonalInfoSubmit}
+                defaultValues={formData.personal}
+                mode="create"
+                showButtons={false}
+                formId="step-1-form"
               />
-              <div>
-                <p className="text-sm font-medium">Show in member directory</p>
-                <p className="text-xs text-[var(--color-muted)]">
-                  Other members can find your name and specialization
-                </p>
-              </div>
-            </label>
-            <div className="flex justify-between">
-              <Button
-                variant="ghost"
-                onClick={() => setStep(1)}
-              >
-                Back
-              </Button>
-              <div className="flex gap-2">
+            )}
+            {currentStep === 2 && (
+              <AddressForm
+                onSubmit={handleAddressSubmit}
+                onSkip={handleSkipAddress}
+                defaultValues={formData.address}
+                mode="create"
+                showButtons={false}
+              />
+            )}
+
+            {/* Custom navigation buttons for multi-step form */}
+            <div className="flex justify-between mt-6">
+              {currentStep > 1 && (
                 <Button
-                  variant="ghost"
-                  onClick={handleSkip}
+                  type="button"
+                  variant="outline"
+                  onClick={goBack}
+                  disabled={createPerson.isPending}
                 >
-                  Skip
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back
                 </Button>
+              )}
+              {currentStep === 1 && (
                 <Button
-                  onClick={handleComplete}
-                  disabled={updatePerson.isPending}
+                  type="submit"
+                  form="step-1-form"
+                  className="ml-auto"
+                  onClick={() => {
+                    // Trigger form submission for current step
+                    const forms = document.querySelectorAll('form')
+                    if (forms[0]) {
+                      forms[0].requestSubmit()
+                    }
+                  }}
                 >
-                  {updatePerson.isPending ? 'Saving...' : 'Complete'}
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
-              </div>
+              )}
+              {currentStep === 2 && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="ml-auto mr-2"
+                    onClick={handleSkipAddress}
+                    disabled={createPerson.isPending}
+                  >
+                    Skip for now
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={createPerson.isPending}
+                    onClick={() => {
+                      // Trigger form submission for final step
+                      const forms = document.querySelectorAll('form')
+                      if (forms[0]) {
+                        forms[0].requestSubmit()
+                      }
+                    }}
+                  >
+                    {createPerson.isPending ? 'Creating Profile...' : 'Complete Setup'}
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </>
+              )}
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

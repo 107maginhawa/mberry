@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { Button } from '@monobase/ui'
+import { useSession } from '@monobase/sdk-ts/react/hooks/use-auth'
 import {
   validateInviteToken,
   claimInviteToken,
@@ -15,11 +16,12 @@ export const Route = createFileRoute('/invite/$token')({
 function InvitePage() {
   const { token } = Route.useParams()
   const navigate = useNavigate()
+  const { data: session, isPending: sessionPending } = useSession()
+  const isAuthenticated = !!session?.user
   const [loading, setLoading] = useState(true)
   const [claiming, setClaiming] = useState(false)
   const [invite, setInvite] = useState<InviteValidation | null>(null)
   const [error, setError] = useState<InviteError | null>(null)
-  const [errorStatus, setErrorStatus] = useState(0)
 
   useEffect(() => {
     validateInviteToken(token).then((result) => {
@@ -27,7 +29,6 @@ function InvitePage() {
         setInvite(result.data)
       } else {
         setError(result.error)
-        setErrorStatus(result.status)
       }
       setLoading(false)
     })
@@ -37,14 +38,23 @@ function InvitePage() {
     setClaiming(true)
     const result = await claimInviteToken(token)
     if (result.ok) {
-      navigate({ to: '/my/organizations' })
+      const slug = result.data.organizationSlug
+      if (slug) {
+        navigate({ to: '/org/$orgSlug/home', params: { orgSlug: slug } })
+      } else {
+        navigate({ to: '/my/organizations' })
+      }
     } else {
       setError({ error: result.error })
       setClaiming(false)
     }
   }
 
-  if (loading) {
+  const handleSignIn = () => {
+    window.location.href = `/auth/sign-in?redirect=/invite/${encodeURIComponent(token)}`
+  }
+
+  if (loading || sessionPending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -73,7 +83,7 @@ function InvitePage() {
           )}
           {isClaimed && (
             <a
-              href="/login"
+              href="/auth/sign-in"
               className="inline-block px-4 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-medium"
             >
               Log in instead
@@ -115,13 +125,27 @@ function InvitePage() {
           </div>
         )}
 
-        <Button
-          className="w-full"
-          onClick={handleClaim}
-          disabled={claiming}
-        >
-          {claiming ? 'Accepting...' : 'Accept Invitation'}
-        </Button>
+        {isAuthenticated ? (
+          <Button
+            className="w-full"
+            onClick={handleClaim}
+            disabled={claiming}
+          >
+            {claiming ? 'Accepting...' : 'Accept Invitation'}
+          </Button>
+        ) : (
+          <div className="space-y-3">
+            <Button
+              className="w-full"
+              onClick={handleSignIn}
+            >
+              Sign in to accept invitation
+            </Button>
+            <p className="text-xs text-center text-[var(--color-muted)]">
+              You need to sign in or create an account to accept this invitation.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

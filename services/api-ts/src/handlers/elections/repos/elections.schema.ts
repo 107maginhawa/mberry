@@ -16,13 +16,13 @@ export const elections = pgTable('election', {
   type: electionTypeEnum('type').notNull().default('officer'),
   status: electionStatusEnum('status').notNull().default('draft'),
   votingMode: votingModeEnum('voting_mode').notNull().default('online'),
-  nominationsOpenAt: timestamp('nominations_open_at'),
-  nominationsCloseAt: timestamp('nominations_close_at'),
-  votingOpenAt: timestamp('voting_open_at'),
-  votingCloseAt: timestamp('voting_close_at'),
+  nominationsOpenAt: timestamp('nominations_open_at', { withTimezone: true }),
+  nominationsCloseAt: timestamp('nominations_close_at', { withTimezone: true }),
+  votingOpenAt: timestamp('voting_open_at', { withTimezone: true }),
+  votingCloseAt: timestamp('voting_close_at', { withTimezone: true }),
   passageThreshold: integer('passage_threshold'), // percentage for bylaws
   positions: jsonb('positions').$type<{ id: string; title: string; sortOrder: number }[]>(),
-  publishedAt: timestamp('published_at'),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
 }, (table) => ({
   orgIdx: index('election_org_idx').on(table.organizationId),
   statusIdx: index('election_status_idx').on(table.status),

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { Info, MapPin } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
@@ -25,6 +25,7 @@ const TYPES = [
 ]
 
 export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isEdit = !!trainingId
@@ -73,7 +74,7 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['trainings', orgId] })
-      navigate({ to: '/org/$orgId/officer/training/$trainingId', params: { orgId, trainingId: (data.data as { id: string }).id } })
+      navigate({ to: '/org/$orgSlug/officer/training/$trainingId', params: { orgSlug, trainingId: (data.data as { id: string }).id } })
     },
     onError: (err) => toast.error(err.message || 'Failed to save training'),
   })

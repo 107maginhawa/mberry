@@ -22,16 +22,16 @@ Run TypeScript type checking.
 cd services/api-ts && bun run typecheck
 ```
 
-### Check Account App
+### Check Memberry App
 
 ```bash
-cd apps/account && bun run typecheck
+cd apps/memberry && bun run typecheck
 ```
 
 ### Check Both (Pre-Commit)
 
 ```bash
-cd services/api-ts && bun run typecheck && cd ../../apps/account && bun run typecheck
+cd services/api-ts && bun run typecheck && cd ../../apps/memberry && bun run typecheck
 ```
 
 ## Troubleshooting

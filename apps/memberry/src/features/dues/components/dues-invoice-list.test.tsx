@@ -133,9 +133,9 @@ describe('DuesInvoiceList', () => {
     expect(screen.getByText('₱2,500.00')).toBeInTheDocument()
     expect(screen.getByText('₱1,500.00')).toBeInTheDocument()
 
-    // Status text
-    expect(screen.getByText('sent')).toBeInTheDocument()
-    expect(screen.getByText('paid')).toBeInTheDocument()
+    // Status text (DuesStatusBadge renders capitalized labels)
+    expect(screen.getByText('Sent')).toBeInTheDocument()
+    expect(screen.getByText('Paid')).toBeInTheDocument()
   })
 
   test('shows Mark Paid button for sent invoices, not for paid ones', async () => {

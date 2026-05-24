@@ -121,7 +121,7 @@ export function NotificationInbox() {
   return (
     <div className="space-y-5">
       {error && (
-        <div className="rounded-[12px] border border-[var(--color-error)]/20 bg-[var(--color-error)]/5 p-4 text-[14px] text-[var(--color-error)]">
+        <div className="rounded-[12px] border border-[var(--color-error)]/20 bg-[var(--color-error)]/5 p-4 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}
@@ -130,7 +130,7 @@ export function NotificationInbox() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {unreadCount > 0 && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-bold bg-[var(--color-primary)] text-white">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)] text-white">
               {unreadCount} unread
             </span>
           )}
@@ -213,14 +213,14 @@ function NotifRow({
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-3">
-          <p className={`text-[14px] leading-snug ${!n.read ? 'font-semibold' : 'font-medium text-[var(--color-muted)]'}`}>
+          <p className={`text-sm leading-snug ${!n.read ? 'font-semibold' : 'font-medium text-[var(--color-muted)]'}`}>
             {n.title}
           </p>
-          <span className="shrink-0 text-[11px] text-[var(--color-muted)] mt-0.5 whitespace-nowrap">
+          <span className="shrink-0 text-xs text-[var(--color-muted)] mt-0.5 whitespace-nowrap">
             {formatRelative(n.createdAt)}
           </span>
         </div>
-        <p className="text-[12px] text-[var(--color-muted)] mt-1 line-clamp-2">{n.body}</p>
+        <p className="text-xs text-[var(--color-muted)] mt-1 line-clamp-2">{n.body}</p>
       </div>
     </div>
   )

@@ -8,13 +8,14 @@ import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
 import { Button } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Switch } from '@monobase/ui'
 import { DateTimePicker } from '@/components/patterns/date-picker'
 import {
   createEventMutation,
   updateEventMutation,
   searchEventsQueryKey,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
-import type { EventType } from '@monobase/sdk-ts/generated/types.gen'
+import type { EventType, CpdActivityType } from '@monobase/sdk-ts/generated/types.gen'
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Event title is required'),
@@ -30,9 +31,26 @@ const eventSchema = z.object({
   capacity: z.union([z.number().int().positive('Capacity must be a positive integer'), z.nan()]).optional(),
   visibility: z.string().default('internal'),
   status: z.string().default('draft'),
+  creditBearing: z.boolean().default(false),
+  creditAmount: z.number().min(0).max(40, 'Max 40 CPD hours').default(0),
+  cpdActivityType: z.string().optional(),
+  coverImageUrl: z.string().optional(),
 })
 
 type EventFormData = z.infer<typeof eventSchema>
+
+const CPD_ACTIVITY_TYPES = [
+  { value: 'seminar', label: 'Seminar' },
+  { value: 'workshop', label: 'Workshop' },
+  { value: 'conference', label: 'Conference' },
+  { value: 'webinar', label: 'Webinar' },
+  { value: 'hands_on', label: 'Hands-on Training' },
+  { value: 'community', label: 'Community Service' },
+  { value: 'research', label: 'Research' },
+  { value: 'mentorship', label: 'Mentorship' },
+  { value: 'self_directed', label: 'Self-Directed Learning' },
+  { value: 'other', label: 'Other' },
+] as const
 
 interface EventFormProps {
   orgId: string
@@ -48,6 +66,10 @@ interface EventFormProps {
     capacity?: number | null
     visibility?: string | null
     status: string
+    creditBearing?: boolean
+    creditAmount?: number | null
+    cpdActivityType?: string | null
+    coverImageUrl?: string | null
   }
   onSuccess?: (event: { id: string }) => void
   onCancel?: () => void
@@ -67,6 +89,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<EventFormData>({
     mode: 'onBlur',
@@ -82,8 +105,14 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       capacity: event?.capacity ?? undefined,
       visibility: event?.visibility ?? 'internal',
       status: event?.status ?? 'draft',
+      creditBearing: event?.creditBearing ?? false,
+      creditAmount: event?.creditAmount ?? 0,
+      cpdActivityType: event?.cpdActivityType ?? '',
+      coverImageUrl: event?.coverImageUrl ?? '',
     },
   })
+
+  const creditBearing = watch('creditBearing')
 
   const createMutOpts = createEventMutation()
   const createMut = useMutation({
@@ -112,7 +141,6 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
     const body = {
       title: data.title,
       organizationId: orgId,
-      // Form stores eventType as string; cast to the generated union for the API call
       eventType: data.eventType as EventType,
       description: data.description || undefined,
       startDate: new Date(data.startDate),
@@ -120,7 +148,13 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       location: data.location || undefined,
       registrationFee: BigInt(Math.round((data.registrationFee ?? 0) * 100)),
       capacity: data.capacity && !Number.isNaN(data.capacity) ? data.capacity : undefined,
-      creditBearing: false,
+      creditBearing: data.creditBearing,
+      creditAmount: data.creditBearing ? data.creditAmount : 0,
+      cpdActivityType: data.creditBearing && data.cpdActivityType
+        ? (data.cpdActivityType as CpdActivityType)
+        : undefined,
+      coverImageUrl: data.coverImageUrl || undefined,
+      visibility: data.visibility as 'internal' | 'network',
     }
     if (isEdit) {
       updateMut.mutate({ path: { eventId: event!.id }, body })
@@ -137,6 +171,22 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       {serverError && (
         <div role="alert" aria-live="polite" className="p-3 rounded-md bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">{serverError}</div>
       )}
+
+      {/* Cover image */}
+      <div className="space-y-4">
+        <h3 className="text-section-label text-[var(--color-muted)]">Cover Image</h3>
+        <div className="space-y-2">
+          <Label htmlFor="coverImageUrl">Image URL</Label>
+          <Input
+            id="coverImageUrl"
+            placeholder="https://... (jpg, png, webp — max 5MB)"
+            {...register('coverImageUrl')}
+          />
+          <p className="text-xs text-[var(--color-muted)]">
+            Upload via Storage module, then paste the URL here. Max 5MB, jpg/png/webp.
+          </p>
+        </div>
+      </div>
 
       {/* Basic info */}
       <div className="space-y-4">
@@ -259,6 +309,75 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
         </div>
       </div>
 
+      {/* CPD / Credits */}
+      <div className="space-y-4">
+        <h3 className="text-section-label text-[var(--color-muted)]">
+          CPD Credits
+        </h3>
+
+        <div className="flex items-center gap-3">
+          <Controller
+            name="creditBearing"
+            control={control}
+            render={({ field }) => (
+              <Switch
+                id="creditBearing"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            )}
+          />
+          <Label htmlFor="creditBearing">This event awards CPD credits</Label>
+        </div>
+
+        {creditBearing && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="cpdActivityType">Activity Type</Label>
+              <Controller
+                name="cpdActivityType"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="cpdActivityType" className="w-full">
+                      <SelectValue placeholder="Select activity type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CPD_ACTIVITY_TYPES.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>
+                          {t.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="creditAmount">Credit Hours</Label>
+              <Input
+                id="creditAmount"
+                type="number"
+                min="0.5"
+                max="40"
+                step="0.5"
+                placeholder="e.g. 4"
+                aria-describedby={errors.creditAmount ? 'creditAmount-error' : undefined}
+                {...register('creditAmount', { valueAsNumber: true })}
+              />
+              {errors.creditAmount && (
+                <p id="creditAmount-error" role="alert" className="text-xs text-[var(--color-error)]">
+                  {errors.creditAmount.message}
+                </p>
+              )}
+              <p className="text-xs text-[var(--color-muted)]">
+                0.5 increments, max 40 hours. 1 unit = 1 hour of learning.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Registration */}
       <div className="space-y-4">
         <h3 className="text-section-label text-[var(--color-muted)]">
@@ -273,7 +392,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
               type="number"
               min="0"
               step="0.01"
-              placeholder="0"
+              placeholder="0 = Free"
               aria-describedby={errors.registrationFee ? 'registrationFee-error' : undefined}
               {...register('registrationFee', { valueAsNumber: true })}
             />
@@ -307,8 +426,8 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
                   <SelectValue placeholder="Select visibility" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="internal">Internal (this org only)</SelectItem>
-                  <SelectItem value="network">Network-Wide (all orgs in association)</SelectItem>
+                  <SelectItem value="internal">Members Only</SelectItem>
+                  <SelectItem value="network">Public</SelectItem>
                 </SelectContent>
               </Select>
             )}

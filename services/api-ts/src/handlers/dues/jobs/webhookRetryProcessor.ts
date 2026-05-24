@@ -83,7 +83,7 @@ interface ProcessRetryContext {
 // These map to the Drizzle schema defined in dues-payments.schema.ts.
 import {
   webhookRetryLogs,
-} from '../repos/dues-payments.schema';
+} from '../../association:member/repos/dues-payments.schema';
 import { eq, and, lte } from 'drizzle-orm';
 
 // ---------------------------------------------------------------------------

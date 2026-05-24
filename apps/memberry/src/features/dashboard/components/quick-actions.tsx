@@ -9,19 +9,19 @@ interface QuickAction {
 }
 
 interface QuickActionsProps {
-  /** Org with unpaid dues (prioritized), falling back to first org */
-  duesOrgId?: string
-  /** First org for event browsing */
-  eventsOrgId?: string
+  /** Org slug with unpaid dues (prioritized), falling back to first org */
+  duesOrgSlug?: string
+  /** First org slug for event browsing */
+  eventsOrgSlug?: string
 }
 
-export function QuickActions({ duesOrgId, eventsOrgId }: QuickActionsProps) {
+export function QuickActions({ duesOrgSlug, eventsOrgSlug }: QuickActionsProps) {
   const actions: QuickAction[] = [
     {
       icon: <CreditCard size={20} />,
-      label: duesOrgId ? 'Pay Dues' : 'Payments',
-      to: duesOrgId ? '/org/$orgId/dues' : '/my/payments',
-      params: duesOrgId ? { orgId: duesOrgId } : undefined,
+      label: duesOrgSlug ? 'Pay Dues' : 'Payments',
+      to: duesOrgSlug ? '/org/$orgSlug/dues' : '/my/payments',
+      params: duesOrgSlug ? { orgSlug: duesOrgSlug } : undefined,
     },
     {
       icon: <IdCard size={20} />,
@@ -36,8 +36,8 @@ export function QuickActions({ duesOrgId, eventsOrgId }: QuickActionsProps) {
     {
       icon: <Calendar size={20} />,
       label: 'Events',
-      to: eventsOrgId ? '/org/$orgId/events' : '/my/events',
-      params: eventsOrgId ? { orgId: eventsOrgId } : undefined,
+      to: eventsOrgSlug ? '/org/$orgSlug/events' : '/my/events',
+      params: eventsOrgSlug ? { orgSlug: eventsOrgSlug } : undefined,
     },
     {
       icon: <BookOpen size={20} />,
@@ -63,7 +63,7 @@ export function QuickActions({ duesOrgId, eventsOrgId }: QuickActionsProps) {
             className="flex flex-col items-center gap-1.5 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-3 hover:bg-[var(--color-surface-elevated-hover)] hover:border-[var(--color-cream-dark)] transition-colors shadow-[var(--shadow-soft)]"
           >
             <span className="text-[var(--color-primary)]" aria-hidden="true">{action.icon}</span>
-            <span className="text-[11px] font-semibold text-center">{action.label}</span>
+            <span className="text-xs font-semibold text-center">{action.label}</span>
           </Link>
         ))}
       </div>

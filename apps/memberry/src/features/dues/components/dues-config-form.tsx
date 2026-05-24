@@ -25,7 +25,7 @@ interface HandwiredDuesConfig {
   annualAmount?: number | bigint
   defaultAmount?: number | bigint
   currency?: string
-  billingFrequency?: 'annual' | 'quarterly'
+  billingFrequency?: 'annual' | 'semi-annual' | 'quarterly'
   dueDateMonth?: number
   dueDateDay?: number
   gracePeriodDays?: number
@@ -84,11 +84,34 @@ const DEFAULT_REMINDERS: ReminderRow[] = [
   { daysOffset: 30, enabled: true, channelInapp: true, channelPush: false, channelEmail: true, isCustom: false },
 ]
 
+function getBillingDates(frequency: string, cycleStartMonth: number, dueDateDay: number): string {
+  const month = Math.max(1, Math.min(12, cycleStartMonth))
+  const day = Math.max(1, Math.min(28, dueDateDay))
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  const ordinal = (d: number) => d + (['th','st','nd','rd'][(d % 100 - 20) % 10] || ['th','st','nd','rd'][d % 100] || 'th')
+  const dayStr = ordinal(day)
+
+  switch (frequency) {
+    case 'annual':
+      return `Dues due on the ${dayStr} of ${months[month - 1]} each year`
+    case 'semi-annual': {
+      const m2 = (month + 5) % 12 // +6 months, 0-indexed
+      return `Dues due on the ${dayStr} of ${months[month - 1]} and ${months[m2]}`
+    }
+    case 'quarterly': {
+      const qMonths = [0, 3, 6, 9].map(offset => months[(month - 1 + offset) % 12])
+      return `Dues due on the ${dayStr} of ${qMonths.join(', ')}`
+    }
+    default:
+      return ''
+  }
+}
+
 export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
   const queryClient = useQueryClient()
 
   const [currency, setCurrency] = useState('PHP')
-  const [billingFrequency, setBillingFrequency] = useState<'annual' | 'quarterly'>('annual')
+  const [billingFrequency, setBillingFrequency] = useState<'annual' | 'semi-annual' | 'quarterly'>('annual')
   const [dueDateMonth, setDueDateMonth] = useState('1')
   const [dueDateDay, setDueDateDay] = useState('1')
   const [reminders, setReminders] = useState<ReminderRow[]>(DEFAULT_REMINDERS)
@@ -134,7 +157,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
     setValue('defaultAmount', Number(configAmount) / 100)
     setValue('gracePeriodDays', config.gracePeriodDays ?? 30)
     setCurrency(config.currency ?? 'PHP')
-    setBillingFrequency(config.billingFrequency ?? 'annual')
+    setBillingFrequency((config.billingFrequency as 'annual' | 'semi-annual' | 'quarterly') ?? 'annual')
     setDueDateMonth(String(config.dueDateMonth ?? 1))
     setDueDateDay(String(config.dueDateDay ?? 1))
     if ((config.reminderSchedules?.length ?? 0) > 0) {
@@ -200,7 +223,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
           <h3 className="text-h3">Default Dues</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="defaultAmount">Default Amount</Label>
+              <Label htmlFor="defaultAmount">Annual Dues Amount</Label>
               <Input
                 id="defaultAmount"
                 type="number"
@@ -210,10 +233,16 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
                 aria-describedby={errors.defaultAmount ? 'defaultAmount-error' : undefined}
                 {...register('defaultAmount', { valueAsNumber: true, onChange: () => setHasChanges(true) })}
               />
-              {errors.defaultAmount && (
+              {errors.defaultAmount ? (
                 <p id="defaultAmount-error" role="alert" className="text-xs text-[var(--color-error)] mt-1">
                   {errors.defaultAmount.message}
                 </p>
+              ) : billingFrequency !== 'annual' && (
+                <PerPeriodBreakdown
+                  annualAmount={Number(configAmount ?? 0) / 100}
+                  frequency={billingFrequency}
+                  currency={currency}
+                />
               )}
             </div>
             <div>
@@ -230,10 +259,11 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Billing Frequency</Label>
-              <Select value={billingFrequency} onValueChange={(v) => { setBillingFrequency(v as 'annual' | 'quarterly'); setHasChanges(true) }}>
+              <Select value={billingFrequency} onValueChange={(v) => { setBillingFrequency(v as 'annual' | 'semi-annual' | 'quarterly'); setHasChanges(true) }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="annual">Annual</SelectItem>
+                  <SelectItem value="semi-annual">Semi-Annual</SelectItem>
                   <SelectItem value="quarterly">Quarterly</SelectItem>
                 </SelectContent>
               </Select>
@@ -241,7 +271,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
             <div>
               <Label>Due Date</Label>
               <div className="flex gap-2">
-                {billingFrequency === 'annual' && (
+                {(billingFrequency === 'annual' || billingFrequency === 'semi-annual' || billingFrequency === 'quarterly') && (
                   <Select value={dueDateMonth} onValueChange={(v) => { setDueDateMonth(v); setHasChanges(true) }}>
                     <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -256,7 +286,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
                 <Input
                   type="number"
                   min="1"
-                  max="31"
+                  max="28"
                   value={dueDateDay}
                   onChange={(e) => { setDueDateDay(e.target.value); setHasChanges(true) }}
                   className="w-20"
@@ -264,6 +294,11 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
               </div>
             </div>
           </div>
+          {getBillingDates(billingFrequency, Number(dueDateMonth), Number(dueDateDay)) && (
+            <p className="text-sm text-muted-foreground mt-2">
+              {getBillingDates(billingFrequency, Number(dueDateMonth), Number(dueDateDay))}
+            </p>
+          )}
           <div>
             <Label htmlFor="gracePeriodDays">Grace Period (days)</Label>
             <Input
@@ -306,5 +341,17 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
         </div>
       </form>
     </div>
+  )
+}
+
+function PerPeriodBreakdown({ annualAmount, frequency, currency }: { annualAmount: number; frequency: string; currency: string }) {
+  if (!annualAmount || annualAmount <= 0) return null
+  const divisor = frequency === 'quarterly' ? 4 : frequency === 'semi-annual' ? 2 : 1
+  const perPeriod = annualAmount / divisor
+  const label = frequency === 'quarterly' ? 'quarter' : 'half-year'
+  return (
+    <p className="text-xs text-muted-foreground mt-1" aria-label={`Per-period breakdown`}>
+      {currency} {annualAmount.toLocaleString()}/year = {currency} {perPeriod.toLocaleString()}/{label}
+    </p>
   )
 }

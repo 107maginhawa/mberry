@@ -3,7 +3,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeDuesConfig as createFakeDuesConfig } from '@/test-utils/factories';
 import { getDuesConfig } from './getDuesConfig';
 import { DuesConfigRepository } from './repos/dues.repo';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 

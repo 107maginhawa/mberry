@@ -74,8 +74,8 @@ export const campaigns = pgTable('ad_campaign', {
   spentCents: integer('spent_cents').notNull().default(0),
 
   // Schedule
-  startsAt: timestamp('starts_at'),
-  endsAt: timestamp('ends_at'),
+  startsAt: timestamp('starts_at', { withTimezone: true }),
+  endsAt: timestamp('ends_at', { withTimezone: true }),
 
   // Slots
   adSlot: adSlotEnum('ad_slot').notNull().default('feed_banner'),
@@ -102,7 +102,7 @@ export const creatives = pgTable('ad_creative', {
   // Review status (M16-R1: admin approval before display)
   status: creativeStatusEnum('status').notNull().default('pending'),
   reviewedBy: uuid('reviewed_by'),
-  reviewedAt: timestamp('reviewed_at'),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
   rejectionReason: text('rejection_reason'),
 
   // M16-R3: must be labeled "Sponsored"
@@ -118,7 +118,7 @@ export const memberAdOptOuts = pgTable('member_ad_opt_out', {
 
   organizationId: uuid('organization_id').notNull(),
   personId: uuid('person_id').notNull(),
-  optedOutAt: timestamp('opted_out_at').notNull().defaultNow(),
+  optedOutAt: timestamp('opted_out_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   personIdx: index('ad_opt_out_person_idx').on(table.personId),
   orgPersonIdx: index('ad_opt_out_org_person_idx').on(table.organizationId, table.personId),

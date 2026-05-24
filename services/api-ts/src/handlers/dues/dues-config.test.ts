@@ -13,7 +13,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { DuesRepository } from './repos/dues.repo';
+import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { getDuesDashboard } from './getDuesDashboard';
 import {
@@ -22,7 +22,7 @@ import {
   isWithinRetentionPeriod,
   FINANCIAL_RETENTION_YEARS,
   type FundSplit,
-} from './utils/fund-math';
+} from '../association:member/utils/fund-math';
 
 // ─── Factories ────────────────────────────────────────────
 
@@ -75,13 +75,15 @@ afterEach(() => {
 describe('Dues config permission enforcement', () => {
   test('Treasurer can access dues dashboard', async () => {
     stubRepo(DuesRepository, {
-      getDashboardStats: async () => ({
+      getFullDashboardStats: async () => ({
         totalCollected: '50000',
         totalOutstanding: '10000',
         paidCount: 10,
         unpaidCount: 5,
         overdueCount: 2,
+        collectionRate: 0.83,
       }),
+      getMemberCount: async () => 15,
     });
     stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }],
@@ -89,13 +91,6 @@ describe('Dues config permission enforcement', () => {
 
     const ctx = makeCtx({
       _params: { organizationId: 'org-1' },
-      database: {
-        select: () => ({
-          from: () => ({
-            where: async () => [{ count: 0 }],
-          }),
-        }),
-      },
     });
 
     const res = await getDuesDashboard(ctx as any);
@@ -103,18 +98,20 @@ describe('Dues config permission enforcement', () => {
     const body = res.body as any;
     expect(body.data.totalCollected).toBe(50000);
     expect(body.data.totalOutstanding).toBe(10000);
-    expect(body.data.upcomingActivities).toBe(0);
+    expect(body.data.memberCount).toBe(15);
   });
 
   test('President can access dues dashboard', async () => {
     stubRepo(DuesRepository, {
-      getDashboardStats: async () => ({
+      getFullDashboardStats: async () => ({
         totalCollected: '30000',
         totalOutstanding: '5000',
         paidCount: 6,
         unpaidCount: 2,
         overdueCount: 1,
+        collectionRate: 0.86,
       }),
+      getMemberCount: async () => 8,
     });
     stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ id: 'term-2', positionTitle: 'President' }],
@@ -122,13 +119,6 @@ describe('Dues config permission enforcement', () => {
 
     const ctx = makeCtx({
       _params: { organizationId: 'org-1' },
-      database: {
-        select: () => ({
-          from: () => ({
-            where: async () => [{ count: 1 }],
-          }),
-        }),
-      },
     });
 
     const res = await getDuesDashboard(ctx as any);
@@ -136,7 +126,7 @@ describe('Dues config permission enforcement', () => {
     const body = res.body as any;
     expect(body.data.totalCollected).toBe(30000);
     expect(body.data.totalOutstanding).toBe(5000);
-    expect(body.data.upcomingActivities).toBe(1);
+    expect(body.data.memberCount).toBe(8);
   });
 
   test('unauthenticated request throws', async () => {

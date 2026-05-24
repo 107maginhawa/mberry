@@ -2,7 +2,7 @@ import type { ValidatedContext, BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { ListDuesPaymentsQuery } from '@/generated/openapi/validators';
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from './repos/dues-payments.repo';
 import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**

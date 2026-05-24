@@ -18,6 +18,11 @@ vi.mock('@monobase/ui', () => ({
       {children}
     </button>
   ),
+  Switch: ({ checked, onCheckedChange, id, ...props }: any) => (
+    <button role="switch" id={id} aria-checked={checked} onClick={() => onCheckedChange?.(!checked)} {...props}>
+      {checked ? 'ON' : 'OFF'}
+    </button>
+  ),
   Select: ({ children, value, onValueChange }: any) => (
     <select value={value} onChange={(e) => onValueChange(e.target.value)}>
       {children}
@@ -27,6 +32,12 @@ vi.mock('@monobase/ui', () => ({
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
   SelectContent: ({ children }: any) => <>{children}</>,
   SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
+}))
+
+vi.mock('@/components/patterns/date-picker', () => ({
+  DateTimePicker: ({ value, onChange, ...rest }: any) => (
+    <input data-testid="datetime-picker" type="text" value={value ?? ''} onChange={(e: any) => onChange?.(e.target.value)} {...rest} />
+  ),
 }))
 
 import {
@@ -119,7 +130,7 @@ describe('EventForm', () => {
     renderWithProviders(<EventForm orgId="org-1" />)
 
     expect(screen.getByLabelText('Visibility')).toBeInTheDocument()
-    expect(screen.getByText('Internal (this org only)')).toBeInTheDocument()
-    expect(screen.getByText('Network-Wide (all orgs in association)')).toBeInTheDocument()
+    expect(screen.getByText('Members Only')).toBeInTheDocument()
+    expect(screen.getByText('Public')).toBeInTheDocument()
   })
 })

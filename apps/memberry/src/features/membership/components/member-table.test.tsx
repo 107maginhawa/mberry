@@ -9,6 +9,7 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => (
     <a href={to}>{children}</a>
   ),
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 // Mock SDK generated options

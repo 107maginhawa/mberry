@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Button, Skeleton } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { api } from '@/lib/api'
+import { useParams } from '@tanstack/react-router'
 
 interface AnnouncementListProps {
   orgId: string
@@ -32,6 +33,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function AnnouncementList({ orgId }: AnnouncementListProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [activeTab, setActiveTab] = useState<StatusTab>('all')
   const [search, setSearch] = useState('')
 
@@ -117,7 +119,7 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
           {announcements.map((ann: any) => (
             <a
               key={ann.id}
-              href={`/org/${orgId}/officer/communications/${ann.id}`}
+              href={`/org/${orgSlug}/officer/communications/${ann.id}`}
               className="flex items-center justify-between p-4 hover:bg-[var(--color-surface-warm)] transition-colors"
             >
               <div className="min-w-0 flex-1">

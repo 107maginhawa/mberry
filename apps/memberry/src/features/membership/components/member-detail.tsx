@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import {
   getRosterMemberOptions,
   getRosterMemberQueryKey,
@@ -36,6 +36,7 @@ import { AlertTriangle, ArrowLeft, CreditCard, Heart, Mail, Phone, RefreshCw, Sh
 import { GlassCard } from '@/components/motion/glass-card'
 import { PageHeader } from '@/components/patterns/page-header'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
+import { CredentialList } from './credential-list'
 
 interface MemberDetailProps {
   orgId: string
@@ -78,6 +79,7 @@ function getInitials(name: string | undefined): string {
 }
 
 export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const queryClient = useQueryClient()
 
   const [showChangeCat, setShowChangeCat] = useState(false)
@@ -171,8 +173,8 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
       <PageHeader
         title={member.name ?? 'Member Detail'}
         breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgId}/officer/dashboard` },
-          { label: 'Roster', href: `/org/${orgId}/officer/roster` },
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Roster', href: `/org/${orgSlug}/officer/roster` },
           { label: member.name ?? 'Member' },
         ]}
       />
@@ -263,6 +265,9 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
         </GlassCard>
       </div>
 
+      {/* Credentials (professional licenses) */}
+      <CredentialList personId={member.personId ?? memberId} orgId={orgId} />
+
       {/* Actions panel */}
       <GlassCard className="p-5 space-y-3">
         <h2 className="text-section-label text-[var(--color-muted)]">Actions</h2>
@@ -273,8 +278,8 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
           </Button>
           <Button variant="outline" size="sm" asChild>
             <Link
-              to="/org/$orgId/officer/payments/new"
-              params={{ orgId }}
+              to="/org/$orgSlug/officer/payments/new"
+              params={{ orgSlug }}
             >
               <CreditCard className="h-4 w-4 mr-2" />
               Record Payment

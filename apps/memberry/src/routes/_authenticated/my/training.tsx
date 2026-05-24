@@ -87,14 +87,14 @@ function MyTraining() {
                 <s.icon className={`w-5 h-5 ${s.color}`} />
               </div>
               <div>
-                <p className="text-[20px] font-bold font-display" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <p className="text-xl font-bold font-display" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {s.isFloat ? (
                     <CountUp value={s.value} format={(n) => n.toFixed(1)} />
                   ) : (
                     <CountUp value={s.value} />
                   )}
                 </p>
-                <p className="text-[12px] text-[var(--color-muted)]">{s.label}</p>
+                <p className="text-xs text-[var(--color-muted)]">{s.label}</p>
               </div>
             </GlassCard>
           </StaggerItem>
@@ -115,15 +115,15 @@ function MyTraining() {
         />
       ) : (
         <GlassCard className="overflow-hidden">
-          <Table className="text-[13px] min-w-[700px]">
+          <Table className="text-sm min-w-[700px]">
             <TableHeader className="bg-[var(--color-surface-warm)]">
               <TableRow>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Training</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Type</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Date</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Credits</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Enrollment</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Status</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Training</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Type</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Date</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Credits</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Enrollment</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -140,7 +140,7 @@ function MyTraining() {
                   </TableCell>
                   <TableCell className="px-4 py-3">
                     {Number(item.training.creditAmount) > 0 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
                         <Award className="w-3 h-3" />
                         {item.training.creditAmount} CPE
                       </span>
@@ -149,12 +149,12 @@ function MyTraining() {
                     )}
                   </TableCell>
                   <TableCell className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_STYLES[item.enrollment.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[item.enrollment.status] ?? 'bg-gray-100 text-gray-700'}`}>
                       {item.enrollment.status.replace('_', ' ')}
                     </span>
                   </TableCell>
                   <TableCell className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${TRAINING_STATUS_STYLES[item.training.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${TRAINING_STATUS_STYLES[item.training.status] ?? 'bg-gray-100 text-gray-700'}`}>
                       {item.training.status.replace('_', ' ')}
                     </span>
                   </TableCell>
@@ -169,14 +169,14 @@ function MyTraining() {
       {((availableData as unknown as ApiListResponse<{ id: string; title?: string; type?: string; startDate?: string; startAt?: string; creditAmount?: number; creditValue?: number }>)?.data ?? []).length > 0 && (
         <section>
           <h2 className="text-h4 mb-3">Available Trainings</h2>
-          <p className="text-[13px] text-[var(--color-muted)] mb-4">Network-wide trainings from across all organizations</p>
+          <p className="text-sm text-[var(--color-muted)] mb-4">Network-wide trainings from across all organizations</p>
           <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {((availableData as unknown as ApiListResponse<{ id: string; title?: string; type?: string; startDate?: string; startAt?: string; creditAmount?: number; creditValue?: number }>)?.data ?? []).slice(0, 6).map((t) => (
               <StaggerItem key={t.id}>
                 <GlassCard className="p-4 hover:bg-[var(--color-surface-elevated-hover)] transition-colors">
-                  <p className="font-semibold text-[14px] line-clamp-1">{t.title}</p>
-                  <p className="text-[12px] text-[var(--color-muted)] mt-1 capitalize">{t.type?.replace('_', ' ')}</p>
-                  <div className="flex items-center gap-3 mt-2 text-[12px] text-[var(--color-muted)]">
+                  <p className="font-semibold text-sm line-clamp-1">{t.title}</p>
+                  <p className="text-xs text-[var(--color-muted)] mt-1 capitalize">{t.type?.replace('_', ' ')}</p>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-[var(--color-muted)]">
                     <span>{formatDate(t.startDate ?? t.startAt)}</span>
                     {Number(t.creditAmount ?? t.creditValue ?? 0) > 0 && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 font-medium">

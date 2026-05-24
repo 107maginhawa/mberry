@@ -29,6 +29,7 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface TrainingFilters {
+  id?: string;
   organizationId?: string;
   status?: string;
 }
@@ -42,6 +43,9 @@ export class TrainingRepository extends DatabaseRepository<Training, NewTraining
     if (!filters) return undefined;
     const conditions = [];
 
+    if (filters.id) {
+      conditions.push(eq(trainings.id, filters.id));
+    }
     if (filters.organizationId) {
       conditions.push(eq(trainings.organizationId, filters.organizationId));
     }

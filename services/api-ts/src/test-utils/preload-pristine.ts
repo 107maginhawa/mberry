@@ -47,7 +47,7 @@ import { CommunicationsRepository, MessageRepository, MessageTemplateRepository,
 import { DocumentRepository, DocumentVersionRepository, DocumentAccessLogRepository, DocumentTagRepository } from '@/handlers/documents/repos/documents.repo';
 
 // --- dues repos ---
-import { DuesRepository } from '@/handlers/dues/repos/dues.repo';
+import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 
 // --- elections repos ---
 import { ElectionsRepository } from '@/handlers/elections/repos/elections.repo';

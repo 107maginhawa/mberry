@@ -1,188 +1,168 @@
-<!-- oli:ui-blueprint v1.0 | generated 2026-05-21 -->
-# UI Blueprint --- Interaction States: Events (M08)
+<!-- oli:ui-blueprint v2.0 | generated 2026-05-23 | source: MODULE_SPEC.md, Wave 2a design doc -->
 
-> Module-wide interaction state patterns. Each screen implements all 9 states.
+# UI Blueprint — Interaction States: Events (M08) — Wave 2a
 
----
-
-## State 1: Loading
-
-**Trigger:** Initial fetch, event list, registration, check-in attendee list.
-
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | Skeleton UI. Tables: row skeletons. Cards: gray rectangles. Scanner: camera loading indicator. |
-| Duration | 200-500ms typical. Check-in: < 1s (critical path per spec Section 16). |
-| ARIA | `aria-busy="true"`. `aria-live="polite"` announces "Loading events..." |
-| Interaction | Controls disabled. Scanner deactivated during load. Navigation functional. |
-| Fallback | > 3s: text indicator. Check-in > 2s: "Verifying..." text beside scanner. |
-
-**Per-screen variants:**
-- Events Dashboard: 5-row skeleton table + skeleton stats
-- Create/Edit: skeleton form fields (edit mode)
-- Check-In: scanner camera loading + skeleton attendee list
-- Event Detail: skeleton hero + detail placeholders
-- My Events: 4 skeleton event cards
+> 9 canonical states per screen. Completeness scored per screen.
 
 ---
 
-## State 2: Empty
+## State Definitions
 
-**Trigger:** Zero records for current view.
-
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | Centered illustration + heading + CTA. |
-| ARIA | `role="status"` |
-| Interaction | CTA functional. |
-
-**Per-screen messages:**
-- Dashboard: "No events yet. Create your first one." CTA: Create Event
-- Check-In: "No registrations for this event." (event with 0 registrations)
-- My Events: "No events yet. Browse your organization's events to get started." Link to browse.
-- Event Detail: N/A (always has data if event exists; 404 otherwise)
+| # | State | Description |
+|---|-------|-------------|
+| 1 | Empty | No data exists yet |
+| 2 | Loading | Data being fetched |
+| 3 | Loaded | Data displayed normally |
+| 4 | Error | Fetch or action failed |
+| 5 | Partial | Some data loaded, some failed |
+| 6 | Submitting | Form or action in progress |
+| 7 | Success | Action completed successfully |
+| 8 | Stale | Data may be outdated |
+| 9 | Offline | No network connection |
 
 ---
 
-## State 3: Success
+## Screen 1: Events Dashboard (Officer)
 
-**Trigger:** Data loaded or mutation completed.
+| State | Trigger | Display | Recovery |
+|-------|---------|---------|----------|
+| Empty | No events in org | EmptyState: "No events yet" + "Create your first event" CTA | Create button |
+| Loading | Initial fetch | 4-6 skeleton cards in grid | Auto |
+| Loaded | Data returned | Event cards in StaggerGrid | — |
+| Error | API failure | EmptyState: "Failed to load events" | Retry button |
+| Submitting | Publishing/cancelling | Action button shows Loader2 spinner | — |
+| Success | Action completed | sonner toast + list refresh | — |
 
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | Populated UI. Status and type badges colored. Capacity indicators functional. |
-| ARIA | `aria-busy="false"`. |
-| Interaction | All controls enabled. Scanner active for check-in. |
-
-**Mutation feedback (via sonner):**
-- Event created: "Event saved as draft." (gray, 3s)
-- Event published: "Event published! Members will be notified." (green, 5s)
-- Registration: "Registered! Check your email for details." (green, 5s)
-- Waitlisted: "Added to waitlist (position N). You'll be notified when a spot opens." (blue, 5s)
-- Check-in (QR): Green flash with member name (1.5s). No toast (visual flash is primary feedback).
-- Check-in (manual): sonner: "[Name] checked in." (green, 3s)
-- Event cancelled: "Event cancelled. N members will be notified." (amber, persistent)
-- Event completed: "Event marked as completed. N attended, M no-shows." (blue, persistent)
-- Registration cancelled: "Registration cancelled." (gray, 3s)
+**Completeness: 6/9** (partial, stale, offline not explicitly handled)
 
 ---
 
-## State 4: Validation Error
+## Screen 2: Create/Edit Event
 
-**Trigger:** Invalid form input or business rule violation.
+| State | Trigger | Display | Recovery |
+|-------|---------|---------|----------|
+| Empty | New event form | All fields empty, defaults applied | — |
+| Loading | Edit mode fetch | Skeleton form | Auto |
+| Loaded | Edit mode data | Form populated with existing values | — |
+| Error | Save failed | Red alert banner with error message | Fix + retry |
+| Submitting | Save/publish clicked | Button text → "Saving..." / "Publishing...", disabled | — |
+| Success | Save completed | sonner: "Draft saved" / "Event published", redirect | — |
 
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | Red border + inline error text. |
-| ARIA | `aria-invalid="true"`. `aria-describedby` to error. |
-| Interaction | Submit enabled. Focus on first error. |
+**Completeness: 6/9**
 
-**Per-screen errors:**
-- Create Event: "Title is required." "Start date must be in the future." (M08-003). "End date must be after start date." "Fee requires payment gateway configuration."
-- Registration: "Event at full capacity." (M08-001, if waitlist disabled). "Registration deadline passed." (M08-002). "You are already registered for this event." (M08-005).
-- Check-In: "Person not registered for this event." (M08-005). "Event completed -- check-ins locked." (M08-006).
+### Validation States
 
----
-
-## State 5: Permission Error
-
-**Trigger:** Insufficient role.
-
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | 403 page or redirect. |
-| ARIA | `role="alert"`. |
-| Interaction | Back button or alternative link. |
-
-**Per-screen messages:**
-- Dashboard (non-officer): redirect to public event list `/org/[id]/events`
-- Create (non-officer): "Creating events requires an officer role."
-- Check-In (non-officer): "Check-in requires an officer role." (BR-17)
-- Event Detail (internal, non-member): "This event is only available to organization members." (M8-R4)
-- My Events: N/A (own data, all authenticated)
+| Field | Validation | Timing | Display |
+|-------|-----------|--------|---------|
+| Title | Required, 1-200 chars | onBlur | Red text below field |
+| Start/End date | Required | onBlur | Red text below picker |
+| Credit hours | 0.5 increments, max 40 | onBlur | Red text: "Must be in 0.5 increments" / "Max 40 hours" |
+| Registration fee | >= 0 | onBlur | Red text: "Cannot be negative" |
+| Publish guard | Paid event + no Stripe | onPublish | BusinessLogicError: "Set up billing to charge for events" |
 
 ---
 
-## State 6: Unexpected Error
+## Screen 3: Event Check-In (Officer)
 
-**Trigger:** API failure, camera error, network timeout.
+| State | Trigger | Display | Recovery |
+|-------|---------|---------|----------|
+| Empty | No attendees | EmptyState: "No registrations yet" | — |
+| Loading | Fetch attendees | Skeleton table | Auto |
+| Loaded | Data returned | Attendee table + attendance counter | — |
+| Error | API failure | EmptyState: "Failed to load" | Retry |
+| Submitting | Check-in in progress | Button shows spinner | — |
+| Success | Check-in confirmed | Green flash animation: "[Name] ✓" (2s) | — |
 
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | Error boundary with retry. Camera error: fallback message. |
-| ARIA | `role="alert"`. |
-| Interaction | Retry button. Manual check-in as fallback for camera errors. |
+### Check-In Error States
 
-**Per-screen messages:**
-- Dashboard: "Couldn't load events. Please try again."
-- Create: "Couldn't save event. Your changes are preserved."
-- Check-In (camera): "Camera not available. Use manual check-in below."
-- Check-In (API): "Check-in failed. Please try again."
-- Event Detail: "Couldn't load event details." + Retry
-- Registration: "Registration failed. Please try again."
+| Error | Display | Duration |
+|-------|---------|----------|
+| Already checked in | ConflictError → "Already checked in at [time]" | 3s flash |
+| Not registered | NotFoundError → "Not registered for this event" | Persistent toast |
+| Event completed | BusinessLogicError → banner: "Event completed — check-in locked" | Permanent |
+| Camera permission denied | "Camera access required for QR scanning" + manual fallback | Until dismissed |
 
----
-
-## State 7: Conflict/Duplicate
-
-**Trigger:** Business rule conflict.
-
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | Inline alert or modified UI state. |
-| ARIA | `role="alert"` or `role="status"`. |
-| Interaction | Alternative action offered. |
-
-**Scenarios:**
-- Event full: Register button changes to "Join Waitlist" (M8-R1, BR-27)
-- Already registered: "You are already registered for this event." (M08-005). Register button disabled.
-- Duplicate QR scan: Blue flash "Already checked in." (idempotent, not an error)
-- Edit completed event: "This event has ended. No further changes allowed." (M8-R6)
-- Cancel completed event: "Cannot cancel a completed event." (M08-006)
+**Completeness: 7/9**
 
 ---
 
-## State 8: Confirmation/Warning
+## Screen 4: Event Detail (Member)
 
-**Trigger:** Destructive or significant actions.
+| State | Trigger | Display | Recovery |
+|-------|---------|---------|----------|
+| Empty | N/A (event always exists if routed) | — | — |
+| Loading | Fetch event | Skeleton: title bar, detail card, button | Auto |
+| Loaded | Data returned | Full event detail with cover image | — |
+| Error | Event not found | EmptyState: "Failed to load event" | Back to events list |
+| Submitting | Register/cancel in progress | Button shows Loader2 spinner | — |
+| Success (register) | Registration confirmed | sonner: "Registered!" + show calendar button | — |
+| Success (waitlist) | Waitlisted | sonner: "Added to waitlist" + status card | — |
+| Success (cancel) | Cancelled | sonner: "Cancelled" + show register button | — |
 
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | Alert dialog with description. Destructive uses red button. |
-| ARIA | `role="alertdialog"`. Focus trapped. |
-| Interaction | Cancel/Confirm. Escape = cancel. |
+### Payment Flow States
 
-**Confirmations:**
-- Publish event: "Publish [title]? Members will be notified and registration will open." [Cancel] [Publish]
-- Cancel event: "Cancel [title]? All registered members (N) will be notified. Paid registrations will be refunded." [Keep Event] [Cancel Event] (red)
-- Complete event: "Mark [title] as completed? Check-in and registration will be locked." [Cancel] [Complete]
-- Register (paid): "This event has a registration fee of PHP [amount]. You'll be redirected to payment." [Cancel] [Continue to Payment]
-- Cancel registration: "Cancel your registration for [title]?" [Keep Registration] [Cancel Registration]
-- Leave create form: "You have unsaved changes. Leave anyway?" [Stay] [Leave]
+| State | Trigger | Display |
+|-------|---------|---------|
+| Pre-payment | Click "Register and Pay" | Button shows spinner, redirects to Stripe |
+| Payment success | Return with `?payment=success` | sonner: "Payment confirmed!" |
+| Payment cancelled | Return with `?payment=cancelled` | sonner: "Payment not completed. Try again." |
+| Payment error | Stripe error | sonner error toast |
+
+**Completeness: 8/9**
 
 ---
 
-## State 9: Offline/Sync
+## Screen 5: Public Event Page (Unauthenticated)
 
-**Trigger:** Network lost.
+| State | Trigger | Display | Recovery |
+|-------|---------|---------|----------|
+| Loading | Fetch by slug | Skeleton | Auto |
+| Loaded | Published event | Full details + "Join to register" CTA | — |
+| Not found | Draft/cancelled/invalid slug | 404 page | — |
+| Completed | Event status = completed | Read-only + "This event has ended" banner | — |
 
-| Aspect | Implementation |
-|--------|---------------|
-| Visual | Amber banner. |
-| ARIA | `role="status"`. |
-| Interaction | Read from cache. Writes disabled. QR codes work offline. |
+**Completeness: 4/9** (not yet implemented)
 
-**Per-screen behavior:**
-- Dashboard: Cached event list. "You're offline." Create disabled.
-- Create: "Creating events requires an internet connection." Save disabled. Local form state preserved.
-- Check-In: "Check-in requires an internet connection." Scanner disabled. Cached attendee list shown. Note: future enhancement could support offline check-in queue.
-- Event Detail: Cached event data. Register disabled.
-- My Events: Cached cards. QR codes still work (generated client-side from registrationId). Cancel disabled.
+---
 
-**Recovery:**
-1. Banner: "Back online. Refreshing..."
-2. Active queries invalidated
-3. Banner dismissed
-4. Scanner reactivated (check-in screen)
+## Screen 6: My Events
 
-**QR code offline note:** QR codes for check-in are generated client-side from the registration ID. The QR image displays correctly offline. However, the check-in action (API call) requires connectivity.
+| State | Trigger | Display | Recovery |
+|-------|---------|---------|----------|
+| Empty | No registrations | EmptyState: "No upcoming events" / "No events found" | Browse events link |
+| Loading | Fetch | 4 skeleton cards in grid | Auto |
+| Loaded | Data returned | EventRegistrationCard grid in StaggerGrid | — |
+| Error | API failure | EmptyState: "Failed to load events" | Retry |
+| Submitting | Cancel in progress | Cancel button shows Loader2 | — |
+| Success | Cancelled | sonner: "Registration cancelled", list refreshes | — |
+
+**Completeness: 6/9**
+
+---
+
+## Screen 7: Discover Events (Public)
+
+| State | Trigger | Display | Recovery |
+|-------|---------|---------|----------|
+| Empty | No matching events | EmptyState: "No public events found" | Clear filters |
+| Loading | Fetch | 6 skeleton cards in grid | Auto |
+| Loaded | Data returned | PublicEventCard grid | — |
+| Error | API failure | EmptyState: "Failed to load events" | Retry |
+
+**Completeness: 4/9** (minimal — public read-only page)
+
+---
+
+## Overall Completeness
+
+| Screen | Score | Notes |
+|--------|-------|-------|
+| Events Dashboard | 6/9 | Missing: partial, stale, offline |
+| Create/Edit Event | 6/9 | Missing: partial, stale, offline |
+| Event Check-In | 7/9 | Missing: stale, offline |
+| Event Detail (Member) | 8/9 | Missing: offline |
+| Public Event Page | 4/9 | Not yet implemented |
+| My Events | 6/9 | Missing: partial, stale, offline |
+| Discover Events | 4/9 | Minimal for public page |
+
+**Average: 5.9/9** — Good for alpha. Offline/stale handling is a post-v1 concern (TanStack Query handles stale-while-revalidate automatically).

@@ -10,9 +10,8 @@
 ```
 memberry/
 ├── apps/
-│   ├── account/          # Auth, profile, settings (Vite + TanStack Router)
-│   ├── admin/            # Platform ops dashboard
-│   └── memberry/         # Product app — membership, dues, events, training
+│   ├── admin/            # Platform ops dashboard (port 3003)
+│   └── memberry/         # Product app — membership, dues, events, training, auth, profile, settings (port 3004)
 ├── services/
 │   └── api-ts/           # Reference Hono + Drizzle API
 ├── specs/
@@ -35,9 +34,8 @@ memberry/
 | App | Port | Location | Purpose |
 |-----|------|----------|---------|
 | api-ts | 7213 | `services/api-ts/` | Hono + Drizzle backend API |
-| account | 3002 | `apps/account/` | Auth, profile, settings |
 | admin | 3003 | `apps/admin/` | Platform ops dashboard |
-| memberry | 3004 | `apps/memberry/` | Product app |
+| memberry | 3004 | `apps/memberry/` | Product app (includes auth, profile, settings) |
 
 Ports are configured in each app's `vite.config.ts` and `services/api-ts/src/core/config.ts` (`SERVER_PORT` env, default 7213).
 
@@ -67,7 +65,7 @@ Ports are configured in each app's `vite.config.ts` and `services/api-ts/src/cor
 ```
 ┌─────────────────────────────────────────────────────┐
 │                    Frontend Apps                      │
-│  account (:3002)  admin (:3003)  memberry (:3004)    │
+│            admin (:3003)  memberry (:3004)            │
 │         Vite dev server + proxy → /api → :7213       │
 └──────────────────────┬──────────────────────────────┘
                        │ HTTP (proxy strips /api prefix)
@@ -124,8 +122,6 @@ proxy: {
   },
 }
 ```
-
-Note: `apps/account/vite.config.ts` does **not** configure a proxy — it uses the SDK client directly.
 
 Frontend calls `fetch('/api/persons/me')` → proxy rewrites to `GET /persons/me` → Hono handler.
 

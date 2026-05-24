@@ -2,6 +2,8 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { ConflictError, NotFoundError, ValidationError, BusinessLogicError } from '@/core/errors';
 import { InviteRepository } from './repos/invite.repo';
+import { MembershipRepository } from '../membership/repos/membership.repo';
+import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { hashToken, isExpired } from './utils/token';
 import { auditAction } from '@/utils/audit';
 
@@ -10,6 +12,7 @@ import { auditAction } from '@/utils/audit';
  *
  * Claims an invitation token, activating the user's membership.
  * The user must already be authenticated (account created via registration).
+ * Automatically creates a membership record in the organization.
  */
 export async function claimInvite(
   ctx: ValidatedContext<any, never, { token: string }>
@@ -56,12 +59,62 @@ export async function claimInvite(
     description: `Invitation claimed by user ${user.id} for org ${invite.organizationId}`,
   });
 
-  // DEFERRED(M05): Create membership record for the user in the org.
-  // Blocked on M05 Membership module — will wire createMembership() here.
+  // Create membership record for the user in the org
+  const membershipRepo = new MembershipRepository(db);
+  const existingMembership = await membershipRepo.getMember(invite.organizationId, user.id);
+
+  if (existingMembership) {
+    throw new ConflictError('Already a member of this organization');
+  }
+
+  const metadata = invite.metadata as {
+    membershipTierId?: string;
+    membershipCategoryId?: string;
+    licenseNumber?: string;
+  } | null;
+
+  const now = new Date();
+  const oneYearFromNow = new Date(now);
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+  const membership = await membershipRepo.addMember({
+    organizationId: invite.organizationId,
+    personId: user.id,
+    tierId: metadata?.membershipTierId ?? null as any,
+    categoryId: metadata?.membershipCategoryId ?? null,
+    memberNumber: metadata?.licenseNumber ?? null,
+    startDate: now.toISOString().split('T')[0]!,
+    duesExpiryDate: oneYearFromNow.toISOString().split('T')[0]!,
+    gracePeriodDays: 30,
+    status: 'active',
+    joinedAt: now,
+    createdBy: user.id,
+    updatedBy: user.id,
+  });
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'membership',
+    resourceId: membership.id,
+    description: `Membership created for user ${user.id} in org ${invite.organizationId} via invite claim`,
+  });
+
+  // Look up org slug for frontend redirect (non-critical — don't fail claim if lookup fails)
+  let organizationSlug: string | null = null;
+  try {
+    const orgRepo = new OrganizationRepository(db, logger);
+    const org = await orgRepo.findById(invite.organizationId);
+    organizationSlug = org?.slug ?? null;
+  } catch {
+    // Slug lookup is best-effort; frontend falls back to /my/organizations
+  }
 
   return ctx.json({
     claimed: true,
     organizationId: invite.organizationId,
+    organizationSlug,
     metadata: invite.metadata,
+    membershipStatus: 'joined',
+    membershipId: membership.id,
   });
 }

@@ -1,11 +1,16 @@
 import { createFileRoute, Outlet, useMatches, Link, useLocation } from "@tanstack/react-router"
+import { useMemo } from "react"
+import { useQueries } from "@tanstack/react-query"
 import { requireAuth } from "@/utils/guards"
 import { MemberSidebar } from "@/components/layout/member-sidebar"
 import { MemberBottomNav } from "@/components/layout/member-bottom-nav"
 import { MemberHeader } from "@/components/layout/member-header"
+import { OrgIconRail } from "@/components/layout/org-icon-rail"
 import { ErrorBoundary } from "@/components/patterns/error-boundary"
 import { AnimatePresence, motion } from "framer-motion"
 import { useSpringTransition } from "@/components/motion/use-spring-transition"
+import { useMyOrgs } from "@/hooks/useMyOrgs"
+import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: requireAuth,
@@ -29,10 +34,35 @@ function AuthenticatedLayout() {
   const matches = useMatches()
   const location = useLocation()
   const springProps = useSpringTransition()
+  const { orgs } = useMyOrgs()
+
+  // Parallel officer-role queries for each org — cached, N is small (1-3 orgs)
+  const officerQueries = useQueries({
+    queries: orgs.map((org) => ({
+      queryKey: ['me-officer-role', org.organizationId],
+      queryFn: () => api.get<any>(`/api/persons/me/officer-role/${org.organizationId}`),
+      enabled: !!org.organizationId,
+      retry: false,
+      staleTime: 5 * 60_000,
+    })),
+  })
+
+  const officerOrgIds = useMemo(() => {
+    const set = new Set<string>()
+    officerQueries.forEach((q, i) => {
+      const positions = Array.isArray(q.data?.data) ? q.data.data : []
+      if (positions.length > 0 && orgs[i]) set.add(orgs[i].organizationId)
+    })
+    return set
+  }, [officerQueries, orgs])
 
   // Officer routes render their own shell via the officer layout route.
   // Detect if we're inside an officer route to avoid double-wrapping.
   const isOfficerRoute = matches.some((m) => m.routeId.includes("/officer"))
+
+  // Detect if user is an officer in the currently active org (for sidebar link)
+  const activeOrg = orgs.find((o) => o.orgSlug && location.pathname.startsWith(`/org/${o.orgSlug}`))
+  const isOfficerForActiveOrg = activeOrg ? officerOrgIds.has(activeOrg.organizationId) : false
 
   if (isOfficerRoute) {
     return <Outlet />
@@ -46,10 +76,11 @@ function AuthenticatedLayout() {
       >
         Skip to main content
       </a>
-      <MemberSidebar userEmail={user?.email} />
+      <OrgIconRail officerOrgIds={officerOrgIds} />
+      <MemberSidebar userEmail={user?.email} isOfficer={isOfficerForActiveOrg} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MemberHeader userName={user?.name} />
-        <main id="main-content" className="flex-1 overflow-auto pb-[68px] md:pb-0">
+        <main id="main-content" className="flex-1 overflow-auto pb-[var(--bottom-nav-height)] md:pb-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

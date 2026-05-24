@@ -1,90 +1,84 @@
-<!-- oli:ui-blueprint v1.0 | generated 2026-05-21 | source: MODULE_SPEC.md, API_CONTRACTS.md -->
-# UI Blueprint --- Screens: Events (M08)
+<!-- oli:ui-blueprint v2.0 | generated 2026-05-23 | source: MODULE_SPEC.md, API_CONTRACTS.md, Wave 2a design doc -->
+<!-- upstream: MODULE_SPEC.md, API_CONTRACTS.md, Wave 2a design doc, ROLE_PERMISSION_MATRIX.md -->
+<!-- supersedes: v1.0 (2026-05-21) — adds Wave 2a screens (public page, discovery, CPD fields, paid registration) -->
+
+# UI Blueprint — Screens: Events (M08) — Wave 2a
 
 > Tech: React 19, TanStack Router, TanStack Query, Radix UI (shadcn), Tailwind CSS, sonner toasts
 > Apps: memberry (3004) for all event screens
+> Design: Luma/Eventbrite-quality, glass morphism cards, mobile-first
 
 ---
 
 ## Screen 1: Events Dashboard (Officer)
 
-**Route:** `/org/[organizationId]/officer/events`
-**Purpose:** Event management: list, create, view attendance stats
+**Route:** `/org/$orgSlug/officer/events`
+**Purpose:** Officer event management — list, filter, quick actions
 **App:** memberry (3004)
 
 ### ARIA Landmarks
 
 | Landmark | Role | Label |
 |----------|------|-------|
-| Page | `main` | "Events Management" |
-| Tabs | `tablist` | "Event time range" |
-| Event list | `table` | "Organization events" |
+| Page | `main` | "Event Management" |
+| Filters | `search` | "Filter events" |
+| Event list | `region` | "Events" |
 | Stats | `region` | "Event statistics" |
 
 ### Focus Management
 
-- Page load: focus on Create Event button
-- After creating event: redirect to event detail with sonner toast
-- Tab switch: focus on first event in new tab
-- After cancel/complete: focus on sonner toast, then list
+- Page load: focus on search/filter bar
+- After create: redirect to new event form
+- After status change: sonner toast, list refreshes
 
 ### Fields
 
-| Field | Type | Source | Display | Sortable | Filterable |
-|-------|------|--------|---------|----------|------------|
-| title | text | GET /org/:id/events | Linked title | No | Via search |
-| eventType | enum | GET /org/:id/events | Type badge | No | Yes |
-| status | enum | GET /org/:id/events | Status badge | No | Yes |
-| visibility | enum | GET /org/:id/events | Badge | No | Yes |
-| startDate | date-time | GET /org/:id/events | Formatted date | Yes (default) | Yes (date range) |
-| registrationCount | integer | GET /org/:id/events | "N/[capacity]" or "N" | No | No |
-| waitlistCount | integer | GET /org/:id/events | Badge if > 0 | No | No |
+| Field | Source | Display | Notes |
+|-------|--------|---------|-------|
+| Title | `event.title` | Card heading, link to detail | Line-clamp 2 |
+| Status | `event.status` | `EventStatusBadge` | draft/published/cancelled/completed |
+| Cover image | `event.coverImageUrl` | Card hero (h-40) with date badge overlay | Fallback: no image section |
+| Date | `event.startDate`, `event.endDate` | "Jun 15, 2026 · 09:00–17:00" | Locale en-PH |
+| Location | `event.location` | MapPin icon + text | Fallback: "In-person" |
+| Price | `event.registrationFee`, `event.currency` | `PriceBadge` | "Free" or "PHP 500" |
+| CPD hours | `event.creditAmount` | `CpdBadge` | Only if creditBearing=true |
+| Registration count | computed | "5 / 100 registered" | Users icon |
+| Visibility | `event.visibility` | Label in badge row | Map internal→"Members Only", network→"Public" |
 
 ### Actions
 
 | Action | Trigger | API Call | Auth | Feedback |
 |--------|---------|----------|------|----------|
-| Create event | Button click | Navigate to /org/:id/officer/events/new | Officers | Page transition |
-| View event | Row click | Navigate to event detail | Officers | Page transition |
-| Filter by status | Dropdown | GET /org/:id/events?status= | Officers | List updates |
-| Filter by type | Dropdown | GET /org/:id/events?eventType= | Officers | List updates |
-| Switch tab (upcoming/past) | Tab click | GET /org/:id/events?from=&to= | Officers | List updates |
+| Create event | Button click | Navigate to `/officer/events/new` | Officers | Page transition |
+| View event | Card click | Navigate to event detail | Officers | Page transition |
+| Filter by status | Dropdown | `searchEvents({ status })` | Officers | List updates |
+| Filter by type | Dropdown | `searchEvents({ eventType })` | Officers | List updates |
+| Publish | Quick action menu | `POST /{eventId}/publish` | Officers | sonner: "Event published" |
+| Cancel | Quick action menu | `POST /{eventId}/cancel` | Officers | Confirm dialog → sonner |
+| Duplicate | Quick action menu | Navigate to new form with prefill | Officers | Page transition |
 
 ### Role-Variant Matrix
 
-| Element | President | Officer | Staff | Member |
-|---------|-----------|---------|-------|--------|
-| View list | Yes | Yes | -- | Redirect to public events |
-| Create button | Yes (2FA) | Yes | -- | -- |
-| Attendance stats | Yes | Yes | -- | -- |
-| Cancel event | Yes (2FA) | Yes | -- | -- |
+| Element | Officer | Member | Unauthenticated |
+|---------|---------|--------|-----------------|
+| Dashboard | Full CRUD | Not accessible | Not accessible |
+| Create button | Visible | Hidden | N/A |
+| Quick actions | Visible | Hidden | N/A |
 
 ### Responsive Breakpoints
 
 | Breakpoint | Layout | Adaptations |
 |------------|--------|-------------|
-| >= 1024px (lg) | Full table with all columns + stats sidebar | All visible |
-| 768-1023px (md) | Table with scroll, stats above | Visibility column hidden |
-| < 768px (sm) | Event cards (title + date + status + count) | Tap to expand |
-
-### Interaction States
-
-1. **Loading:** Skeleton table (5 rows) + skeleton stats cards. `aria-busy="true"`.
-2. **Empty:** "No events yet. Create your first one." Illustration + Create Event CTA.
-3. **Success:** Populated table. Status badges: gray (Draft), green (Published), blue (Completed), red (Cancelled).
-4. **Validation Error:** N/A for list.
-5. **Permission Error:** Non-officer: redirect to `/org/[id]/events` (public list).
-6. **Unexpected Error:** "Couldn't load events." + Retry.
-7. **Conflict/Duplicate:** N/A.
-8. **Confirmation/Warning:** Cancel event: "Cancel [event title]? All registered members will be notified. Paid registrations will be refunded." [Keep Event] [Cancel Event] (red).
-9. **Offline/Sync:** Cached event list shown. "You're offline." Create button disabled.
+| >= 1024px (lg) | 3-column card grid | Full cards with cover images |
+| 768-1023px (md) | 2-column card grid | Slightly narrower |
+| < 768px (sm) | Single column | Stack cards, compact layout |
 
 ---
 
 ## Screen 2: Create/Edit Event
 
-**Route:** `/org/[organizationId]/officer/events/new` (or `/org/[organizationId]/officer/events/[eventId]/edit`)
-**Purpose:** Event creation and editing form
+**Route:** `/org/$orgSlug/officer/events/new` (create), `/org/$orgSlug/officer/events/$eventId` (edit)
+**Purpose:** Event creation form with CPD config, pricing, cover image
 **App:** memberry (3004)
 
 ### ARIA Landmarks
@@ -93,73 +87,57 @@
 |----------|------|-------|
 | Page | `main` | "Create Event" / "Edit Event" |
 | Form | `form` | "Event details" |
-| Capacity section | `region` | "Registration settings" |
-| Fee section | `region` | "Fee settings" |
+| Cover section | `region` | "Cover image" |
+| CPD section | `region` | "CPD credits" |
+| Registration section | `region` | "Registration settings" |
 
 ### Focus Management
 
 - Page load: focus on title input
-- After save: sonner toast, remain on form (draft) or redirect (publish)
-- Validation error: focus on first invalid field
+- Validation error: focus first invalid field
+- Save success: redirect to event detail, sonner toast
+- Publish: if paid event + no Stripe, block with "Set up billing" prompt
 
 ### Fields
 
-| Field | Type | Source | Display | Validation |
-|-------|------|--------|---------|------------|
-| title | text | User input | Text input | Required, max 300 chars |
-| eventType | enum | User input | Select dropdown | Required, 8 values |
-| description | rich text | User input | Rich text editor | Optional |
-| startDate | date-time | User input | Date-time picker | Required, must be future (M08-003) |
-| endDate | date-time | User input | Date-time picker | Required, must be after startDate |
-| location | text | User input | Text input | Optional, max 500 chars |
-| coverImage | file/url | User input | Image upload | Optional, via Storage (M15) |
-| visibility | enum | User input | Toggle switch | Default: internal (BR-16) |
-| capacityLimit | integer | User input | Number input | Optional, positive integer. Null = unlimited |
-| feeAmount | decimal | User input | Currency input | Optional, positive. Null = free |
-| currency | text | User input | Dropdown | Default: PHP |
+| Field | Type | Validation | Default | Notes |
+|-------|------|------------|---------|-------|
+| Cover image URL | text input | optional, max 2048 chars | — | Upload via Storage module, paste URL. Future: drag-drop component |
+| Title | text | required, 1-200 chars | — | Auto-generates slug on first save (immutable after) |
+| Event type | select | required | "other" | 8 types: GA, ceremony, fellowship, mission, board, committee, fundraiser, other |
+| Description | textarea | optional, max 10000 chars | — | 4 rows |
+| Start date/time | datetime | required | — | DateTimePicker component |
+| End date/time | datetime | required, after start | — | DateTimePicker component |
+| Location | text | optional | — | Venue name or virtual URL |
+| **CPD Credits toggle** | switch | — | false | Shows/hides CPD fields below |
+| CPD activity type | select | required if CPD on | — | 10 types: seminar, workshop, conference, webinar, hands_on, community, research, mentorship, self_directed, other |
+| Credit hours | number | 0.5 increments, max 40 | 0 | Step=0.5, min=0.5 when CPD on |
+| Registration fee | number | >= 0 | 0 | Display currency, stored as cents. 0 = Free |
+| Capacity | number | optional, >= 1 | unlimited | Leave blank = unlimited |
+| Visibility | select | required | "internal" | "Members Only" (internal) / "Public" (network) |
 
 ### Actions
 
 | Action | Trigger | API Call | Auth | Feedback |
 |--------|---------|----------|------|----------|
-| Save as draft | Button click | POST /org/:id/events or PUT /org/:id/events/:id | Officers | sonner: "Event saved as draft." |
-| Publish | Button click | PUT /org/:id/events/:id/publish | Officers | sonner: "Event published! Members will be notified." |
-| Upload cover | File input | POST via Storage (M15) | Officers | Image preview updates |
-| Cancel (leave form) | Button/back | Navigate back | Officers | Unsaved changes warning |
-
-### Role-Variant Matrix
-
-| Element | President | Officer | All Others |
-|---------|-----------|---------|------------|
-| Full form | Yes (2FA) | Yes | 403 redirect |
-| Publish | Yes (2FA) | Yes | -- |
+| Save Draft | Submit button | `createEvent()` / `updateEvent()` | Officers | sonner: "Draft saved" |
+| Publish | Publish button | create then `publishEvent()` | Officers | sonner: "Event published" |
+| Publish guard | Publish paid event | Check org Stripe account | Officers | Block: "Set up billing to charge for events" |
+| Cancel form | Cancel button | Navigate back | Officers | No save |
 
 ### Responsive Breakpoints
 
 | Breakpoint | Layout | Adaptations |
 |------------|--------|-------------|
-| >= 1024px (lg) | Two-column: details left, settings right | Cover image preview beside |
-| 768-1023px (md) | Single column, sections stacked | Full-width fields |
-| < 768px (sm) | Stacked, compact inputs | Date pickers use native mobile |
-
-### Interaction States
-
-1. **Loading:** Skeleton form (edit mode, loading existing event data).
-2. **Empty (Draft):** Clean form with defaults (visibility: internal, fee: 0).
-3. **Success (Saved):** sonner: "Event saved as draft." Form remains editable. sonner: "Event published!" redirects to dashboard.
-4. **Validation Error:** "Title is required." "Start date must be in the future." (M08-003). "End date must be after start date." "Fee requires payment gateway configuration." Inline red borders.
-5. **Permission Error:** "Creating events requires an officer role."
-6. **Unexpected Error:** "Couldn't save event. Your changes are preserved." Form state kept.
-7. **Conflict/Duplicate:** Edit completed event: "This event has ended. No further changes allowed." (M8-R6)
-8. **Confirmation/Warning:** Publish: "Publish [title]? Members will be notified and registration will open." [Cancel] [Publish]. Leave with changes: "You have unsaved changes." [Stay] [Leave].
-9. **Offline/Sync:** "Creating events requires an internet connection." Save disabled.
+| >= 768px | 2-column grid for date fields | Side-by-side start/end |
+| < 768px | Single column | All fields stacked |
 
 ---
 
-## Screen 3: Event Check-In
+## Screen 3: Event Check-In (Officer)
 
-**Route:** `/org/[organizationId]/officer/events/[eventId]/attendance`
-**Purpose:** QR scanner + manual check-in + real-time attendance
+**Route:** `/org/$orgSlug/officer/events/$eventId/attendance`
+**Purpose:** Manual name lookup (primary) + QR scanner (enhancement) + real-time attendance
 **App:** memberry (3004)
 
 ### ARIA Landmarks
@@ -167,83 +145,62 @@
 | Landmark | Role | Label |
 |----------|------|-------|
 | Page | `main` | "Event Check-In" |
+| Search | `search` | "Search attendees" |
 | Scanner | `region` | "QR Scanner" |
-| Manual search | `search` | "Search attendee" |
-| Attendance list | `table` | "Attendance list" |
-| Stats | `status` | "Attendance count" |
+| Attendance list | `region` | "Attendance" |
+| Stats | `region` | "Attendance statistics" |
 
 ### Focus Management
 
-- Page load: activate camera for QR scanner
-- After successful scan: green flash + member name + focus returns to scanner
-- After failed scan: red flash + error message + focus returns to scanner
-- Manual search: focus on search input
-- Tab between scanner and manual search
+- Page load: focus on manual search input (primary path)
+- QR scanner: behind toggle/expandable panel, camera permission prompt on activate
+- After successful check-in: green flash + member name animation, focus returns to search
+- After failed check-in: red flash + error message, focus returns to search
+- Event completed: all check-in actions disabled, "Event completed — check-in locked" banner
 
 ### Fields
 
-| Field | Type | Source | Display | Notes |
-|-------|------|--------|---------|-------|
-| attendeeList | array | GET /org/:id/events/:id/attendees | Table with check-in status | Real-time update |
-| personName | text | Attendee data | Name column | -- |
-| registrationStatus | enum | Attendee data | Badge | confirmed/waitlisted/cancelled/noShow |
-| checkedIn | boolean | Attendee data | Checkmark icon | -- |
-| checkInMethod | enum | Attendee data | Icon (QR/Manual) | -- |
-| checkedInAt | date-time | Attendee data | Time | -- |
-| attendanceCount | integer | Computed | Large stat | "N / [total registered]" |
-| attendancePercentage | percentage | Computed | Progress bar | -- |
+| Field | Source | Display | Notes |
+|-------|--------|---------|-------|
+| Attendance counter | computed | "42 / 100 checked in (42%)" | `AttendanceCounter` with progress bar |
+| Search input | user input | Name/email autocomplete | Filters registered attendees |
+| Attendee list | `GET /{eventId}/attendance` | Table: name, reg status, check-in time, method badge | Sort by name default |
+| QR scanner | camera | `html5-qrcode` in expandable panel | Optional — manual is primary |
+| Check-in confirmation | animation | Green flash with member name + "✓" | 2s duration |
+| Attestation | auto | Hidden JSONB — officerId, method, deviceInfo, timestamp | Compliance record |
 
 ### Actions
 
 | Action | Trigger | API Call | Auth | Feedback |
 |--------|---------|----------|------|----------|
-| QR scan | Camera detects code | POST /org/:id/events/:id/checkin {method: "qr"} | Officers | Green flash: "[Name] checked in!" |
-| Manual search | Type name | Local filter on attendee list | Officers | Filtered results |
-| Manual check-in | Button click | POST /org/:id/events/:id/checkin {method: "manual"} | Officers | sonner: "[Name] checked in." |
-| Mark no-show | Button click | PATCH registration status | Officers | Badge updates to "No Show" |
-| Filter attendees | Dropdown | GET /org/:id/events/:id/attendees?checkedIn= | Officers | List filters |
+| Manual search | Type name | Client-side filter on registered list | Officers | Filtered results |
+| Manual check-in | "Check In" button next to name | `POST /checkin { method: "manual" }` | Officers | Green flash: "[Name] ✓" |
+| QR scan | Camera detects code | `POST /checkin { method: "qr" }` | Officers | Green flash: "[Name] ✓" |
+| Toggle QR scanner | "Open Scanner" button | — | Officers | Camera panel expands |
+| Mark no-show | Button | PATCH registration status | Officers | Badge → "No Show" |
 
-### Role-Variant Matrix
+### Validation Rules
 
-| Element | President | Officer | All Others |
-|---------|-----------|---------|------------|
-| Scanner access | Yes (2FA) | Yes | 403 redirect |
-| Manual check-in | Yes (2FA) | Yes | -- |
-| Mark no-show | Yes (2FA) | Yes | -- |
+| Rule | Error | Recovery |
+|------|-------|----------|
+| Already checked in | ConflictError | Flash shows existing check-in time |
+| Not registered | NotFoundError | Prompt to register first |
+| Event completed [M8-R6] | BusinessLogicError | All actions disabled, banner |
+| Invalid QR | Error | Red flash, retry from search |
 
 ### Responsive Breakpoints
 
 | Breakpoint | Layout | Adaptations |
 |------------|--------|-------------|
-| >= 1024px (lg) | Scanner left (40%), attendee list right (60%) | Full table |
-| 768-1023px (md) | Scanner top, list below | Table scrolls |
-| < 768px (sm) | Full-screen scanner with toggle to list | Optimized for handheld scanning |
-
-### Interaction States
-
-1. **Loading:** Skeleton list. Scanner camera loading spinner.
-2. **Empty:** "No registrations yet." (event with 0 registrations)
-3. **Success (Check-in):** Green flash animation with member name (1.5s). Attendance count increments. Sound feedback (optional).
-4. **Validation Error (Not Registered):** Red flash: "Member not registered for this event." (M08-005). Sound: error tone.
-5. **Permission Error:** "Check-in requires an officer role." (BR-17)
-6. **Unexpected Error (Invalid QR):** "Invalid QR code. Try manual check-in." Red flash.
-7. **Conflict/Duplicate (Already Checked In):** Blue flash: "Already checked in." (idempotent, no error). No duplicate record.
-8. **Confirmation/Warning (Event Completed):** "Event check-in is closed. This event has been completed." (M8-R6). Scanner disabled.
-9. **Offline/Sync:** "Check-in requires an internet connection." Scanner disabled. Cached list shown read-only.
-
-### Validation Rules
-
-- QR check-in: authenticated scanner + valid event + registered member (BR-18)
-- Manual check-in: must select registered member
-- Duplicate scan: idempotent, return success (no error)
-- Event completed: all check-in actions disabled (M8-R6)
+| >= 1024px | Search + scanner left, attendee list right | Side-by-side |
+| < 1024px | Search on top, list below | QR scanner in expandable panel |
 
 ---
 
-## Screen 4: Event Detail (Public)
+## Screen 4: Event Detail (Member)
 
-**Route:** `/org/[organizationId]/events/[eventId]`
-**Purpose:** Public event page for members to view details and register
+**Route:** `/org/$orgSlug/events/$eventId`
+**Purpose:** Member-facing event detail with registration, payment, calendar download
 **App:** memberry (3004)
 
 ### ARIA Landmarks
@@ -251,77 +208,111 @@
 | Landmark | Role | Label |
 |----------|------|-------|
 | Page | `main` | "[Event Title]" |
+| Cover | `img` | "Event cover image" |
+| Badges | `region` | "Event badges" |
 | Details | `region` | "Event details" |
 | Registration | `region` | "Registration" |
 
 ### Focus Management
 
-- Page load: focus on event title heading
-- Register button: primary CTA, prominent focus
-- After registration: focus on confirmation with QR code info
+- Page load: scroll to register button
+- After register: show "Add to Calendar" button, focus on it
+- After cancel: confirmation, focus returns to register button
+- Payment return: `?payment=success` → sonner "Payment confirmed!", `?payment=cancelled` → sonner "Payment not completed"
 
 ### Fields
 
-| Field | Type | Source | Display | Notes |
-|-------|------|--------|---------|-------|
-| title | text | Event data | H1 heading | -- |
-| eventType | enum | Event data | Type badge | -- |
-| description | rich text | Event data | Rendered HTML | -- |
-| startDate + endDate | date-time | Event data | Formatted date range | -- |
-| location | text | Event data | With map icon | Link if URL |
-| coverImage | image | Event data | Hero image | -- |
-| capacityLimit | integer | Event data | "N spots remaining" / "Unlimited" | -- |
-| feeAmount + currency | currency | Event data | "PHP 2,500" or "Free" | -- |
-| registrationCount | integer | Event data | "N registered" | -- |
-| waitlistCount | integer | Event data | "N on waitlist" | -- |
+| Field | Source | Display | Notes |
+|-------|--------|---------|-------|
+| Cover image | `event.coverImageUrl` | Hero banner (h-48 sm:h-64, rounded-xl) | Full-width, omit if null |
+| Title | `event.title` | PageHeader h1 | — |
+| Status | `event.status` | Subtitle | — |
+| Price badge | `event.registrationFee` | "Free" (green) or "PHP 500" (neutral) | DollarSign icon |
+| CPD badge | `event.creditAmount` | "4 CPD hours" + "(pending check-in)" if registered | Award icon, primary color |
+| Start | `event.startDate` | Full locale with weekday | Calendar icon |
+| End | `event.endDate` | Full locale | Clock icon |
+| Location | `event.location` | Text | MapPin icon |
+| Capacity | computed | "N of M spots remaining" with CountUp | Users icon |
+| Description | `event.description` | Whitespace-pre-wrap | — |
 
 ### Actions
 
-| Action | Trigger | API Call | Auth | Feedback |
-|--------|---------|----------|------|----------|
-| Register | Button click | POST /org/:id/events/:id/register | Authenticated | sonner: "Registered! Check your email for details." or redirect to payment |
-| Join waitlist | Button click (at capacity) | POST /org/:id/events/:id/register | Authenticated | sonner: "Added to waitlist (position N)." |
-| Cancel registration | Button click | DELETE /org/:id/events/:id/register/:regId | Self or officer | sonner: "Registration cancelled." |
+| Action | Trigger | Condition | API Call | Feedback |
+|--------|---------|-----------|----------|----------|
+| Register (free) | "Register" button | Free + not full | `registerForCustomEvent()` | sonner: "Registered!" |
+| Register & Pay | "Register and Pay" button | Paid + not full | `registerAndPayForEvent()` | Redirect to Stripe Checkout |
+| Join Waitlist | "Join Waitlist" button | At capacity | `registerForCustomEvent()` | sonner: "Added to waitlist" |
+| Add to Calendar | CalendarPlus button | Registered | Client-side .ics download | File download |
+| Cancel | "Cancel Registration" button | Registered/waitlisted | `cancelEventRegistration()` | sonner: "Cancelled" |
 
 ### Role-Variant Matrix
 
-| Element | Officer | Member | Non-member (internal event) |
-|---------|---------|--------|---------------------------|
-| View details | Full | Full | 403 (M8-R4) |
-| Register | Yes | Yes | -- |
-| Cancel registration | Own + others | Own only | -- |
+| Element | Registered Member | Unregistered Member | Non-Member (public) |
+|---------|-------------------|---------------------|---------------------|
+| Event details | Full view | Full view | Full view |
+| Register button | Hidden (show status card) | Visible | "Join [Org] to register" CTA |
+| Cancel button | Visible | Hidden | Hidden |
+| Add to Calendar | Visible | Hidden | Hidden |
+| CPD badge | "pending check-in" suffix | Hours only | Hours only |
 
 ### Responsive Breakpoints
 
 | Breakpoint | Layout | Adaptations |
 |------------|--------|-------------|
-| >= 1024px (lg) | Hero image + details left, registration card right (sticky) | Full layout |
-| 768-1023px (md) | Image above, details + registration stacked | Registration card not sticky |
-| < 768px (sm) | Full-width stacked | Register button sticky bottom |
-
-### Interaction States
-
-1. **Loading:** Skeleton hero + detail placeholders.
-2. **Empty:** N/A (event always has data if found).
-3. **Success (Published):** Full details with Register button enabled. Capacity indicator.
-4. **Validation Error:** N/A for read view.
-5. **Permission Error (Internal):** Non-org-member for internal event: "This event is only available to organization members."
-6. **Unexpected Error:** "Couldn't load event details." + Retry.
-7. **Conflict/Duplicate (Full):** "Event is full." Register button changes to "Join Waitlist" with queue position info.
-8. **Confirmation/Warning:** Registration for paid event: "This event has a registration fee of PHP [amount]. You'll be redirected to payment." [Cancel] [Continue to Payment]. Cancel registration: "Cancel your registration for [title]?" [Keep] [Cancel Registration].
-9. **Offline/Sync:** Cached event data shown. Register button disabled. "Registration requires an internet connection."
-
-**Additional states:**
-- **Registered:** Register button replaced with "Registered" badge + QR code link + Cancel option.
-- **Completed:** "This event has ended." Read-only. No registration actions.
-- **Cancelled:** "This event has been cancelled." Red notice banner.
+| >= 1024px (lg) | Cover hero, details + registration side-by-side | Registration card sticky |
+| 768-1023px (md) | Cover above, stacked below | — |
+| < 768px (sm) | Full-width stacked | Register button sticky bottom bar |
 
 ---
 
-## Screen 5: My Events
+## Screen 5: Public Event Page (Unauthenticated)
+
+**Route:** `/events/$eventSlug` (needs new route — currently only OG meta at `/og/events/:slug`)
+**Purpose:** Shareable event page for WhatsApp/Facebook. No auth required.
+**App:** memberry (3004)
+**Status:** **NOT YET IMPLEMENTED** — needs frontend route
+
+### ARIA Landmarks
+
+| Landmark | Role | Label |
+|----------|------|-------|
+| Page | `main` | "[Event Title]" |
+| Details | `region` | "Event information" |
+| CTA | `region` | "Registration" |
+
+### Fields
+
+Same as Screen 4 but sourced from `getPublicEvent({ slug })` — no auth header.
+
+### Actions
+
+| Action | Trigger | Condition | Feedback |
+|--------|---------|-----------|----------|
+| Join to register | "Join [Org Name] to register" CTA | Not authenticated | Navigate to `/join` or `/invite/$token` |
+| Sign in | "Sign in to register" link | Has account but not logged in | Navigate to `/auth/sign-in?redirect=/events/$slug` |
+
+### OG Meta (served by `/og/events/:slug` backend route)
+
+```html
+<meta property="og:title" content="[Event Title]" />
+<meta property="og:description" content="[Location] | [Date] | [CPD hours]" />
+<meta property="og:image" content="[coverImageUrl]" />
+```
+
+### States
+
+| State | Display |
+|-------|---------|
+| Published/Registration Open | Full details + CTA |
+| Completed | Read-only + "This event has ended" banner |
+| Draft/Cancelled | 404 |
+
+---
+
+## Screen 6: My Events
 
 **Route:** `/my/events`
-**Purpose:** Member's registrations across all organizations
+**Purpose:** Member's registered events across all organizations
 **App:** memberry (3004)
 
 ### ARIA Landmarks
@@ -329,66 +320,85 @@
 | Landmark | Role | Label |
 |----------|------|-------|
 | Page | `main` | "My Events" |
-| Tabs | `tablist` | "Event time range" |
-| Event list | `list` | "Registered events" |
-
-### Focus Management
-
-- Page load: focus on first upcoming event card
-- Tab switch: focus on first event in tab
-- QR code: focus on QR modal when opened
+| Stats | `region` | "Event statistics" |
+| Filter | `tablist` | "View filter" |
+| Event list | `region` | "Your events" |
 
 ### Fields
 
-| Field | Type | Source | Display | Notes |
-|-------|------|--------|---------|-------|
-| event.title | text | GET /my/events | Card title | Linked to event detail |
-| event.eventType | enum | GET /my/events | Type badge | -- |
-| event.startDate | date-time | GET /my/events | Formatted date | -- |
-| event.location | text | GET /my/events | Location line | -- |
-| event.organizationName | text | GET /my/events | Org badge | -- |
-| status | enum | GET /my/events | Registration status badge | confirmed/waitlisted/cancelled |
-| registrationId | uuid | GET /my/events | Hidden (for QR) | -- |
+| Field | Source | Display | Notes |
+|-------|--------|---------|-------|
+| Upcoming count | computed | CountUp stat card | — |
+| Past count | computed | CountUp stat card | — |
+| Registration status | `registration.status` | `RegistrationStatusBadge` | confirmed/waitlisted/cancelled |
+| CPD hours | `event.creditAmount` | Badge: "4 CPD (pending check-in)" if upcoming | Award icon, primary color |
+| Event title | `event.title` | Card heading, link to detail | — |
+| Date | `event.startDate` | Locale format | Calendar icon |
+| Location | `event.location` | Text | Building icon |
+| Countdown | computed | "In 3 days" / "Tomorrow" / "Today" | Upcoming only |
+| Attendance | `registration.checkedIn` | "Attended" / "Did not attend" / "Not recorded" | Past only |
 
 ### Actions
 
-| Action | Trigger | API Call | Auth | Feedback |
-|--------|---------|----------|------|----------|
-| View event detail | Card click | Navigate to event page | Authenticated | Page transition |
-| Show QR code | QR button on card | Local render (registrationId-based) | Authenticated | QR modal opens |
-| Cancel registration | Card action | DELETE /org/:id/events/:id/register/:regId | Authenticated | sonner: "Registration cancelled." |
-| Switch tab | Tab click | GET /my/events?upcoming=true/false | Authenticated | List updates |
-
-### Role-Variant Matrix
-
-| Element | All Authenticated |
-|---------|------------------|
-| View own events | Yes |
-| QR code | Yes (for confirmed registrations) |
-| Cancel registration | Yes (if event not completed) |
+| Action | Trigger | API Call | Feedback |
+|--------|---------|----------|----------|
+| Toggle upcoming/all | Tab buttons | Client-side filter | List updates |
+| View event | Card click | Navigate to event detail | Page transition |
+| Cancel registration | Cancel button | `cancelEventRegistration()` | sonner: "Cancelled" |
+| Add to Calendar | Button | Client-side .ics download | File download |
 
 ### Responsive Breakpoints
 
 | Breakpoint | Layout | Adaptations |
 |------------|--------|-------------|
-| >= 1024px (lg) | 2-column card grid | Full event cards |
-| 768-1023px (md) | 2-column card grid | Slightly narrower cards |
-| < 768px (sm) | Single-column card list | Compact cards, QR button prominent |
+| >= 1024px (lg) | 3-column card grid | Full cards |
+| 768-1023px (md) | 2-column card grid | — |
+| < 768px (sm) | Single column | Compact cards |
 
-### Interaction States
+---
 
-1. **Loading:** Skeleton event cards (4). Tab bar enabled.
-2. **Empty:** "No events yet. Browse your organization's events to get started." Link to org events.
-3. **Success:** Event cards with status badges and QR buttons.
-4. **Validation Error:** N/A.
-5. **Permission Error:** N/A (own registrations).
-6. **Unexpected Error:** "Couldn't load your events." + Retry.
-7. **Conflict/Duplicate:** N/A.
-8. **Confirmation/Warning:** Cancel registration: "Cancel your registration for [title]?" [Keep Registration] [Cancel].
-9. **Offline/Sync:** Cached event cards shown. QR codes work offline (generated client-side). Cancel disabled.
+## Screen 7: Discover Events (Public)
 
-### Edge Cases
+**Route:** `/discover/events`
+**Purpose:** Cross-org public event discovery with filters
+**App:** memberry (3004)
+**Status:** **Implemented**
 
-- Registration for event in another org (network event): org name shown on card
-- Waitlisted registration: card shows position and "You'll be notified when a spot opens"
-- Past event with noShow status: shown in Past tab with "Did Not Attend" badge
+### ARIA Landmarks
+
+| Landmark | Role | Label |
+|----------|------|-------|
+| Page | `main` | "Discover Events" |
+| Filters | `search` | "Filter events" |
+| Results | `region` | "Public events" |
+
+### Fields
+
+| Field | Source | Display | Notes |
+|-------|--------|---------|-------|
+| Search | user input | Input with Search icon, pl-9 | Keyword in title |
+| Event type | select | "All Types", Seminar, Social, Fundraiser, Governance, Custom | — |
+| Pricing | select | All, Free, Paid | — |
+| Event cards | `listPublicEvents()` | `PublicEventCard` in StaggerGrid | Cover, title, date, location, price, CPD |
+
+### Responsive Breakpoints
+
+| Breakpoint | Layout | Adaptations |
+|------------|--------|-------------|
+| >= 1024px (lg) | 3-column card grid | Full cards with covers |
+| 768-1023px (md) | 2-column card grid | — |
+| < 768px (sm) | Single column | Stacked cards |
+
+---
+
+## Screen Inventory — Implementation Status
+
+| # | Screen | Route | Status | Gap |
+|---|--------|-------|--------|-----|
+| 1 | Events Dashboard | `/officer/events` | ✅ Upgraded | — |
+| 2 | Create/Edit Event | `/officer/events/new` | ✅ Upgraded | Image upload is URL-only (no drag-drop) |
+| 3 | Event Check-In | `/officer/events/$id/attendance` | ⚠️ Backend ready | **Frontend scanner UI not built** |
+| 4 | Event Detail (Member) | `/events/$eventId` | ✅ Upgraded | — |
+| 5 | Public Event Page | `/events/$eventSlug` | ❌ Missing | **Needs unauthenticated frontend route** |
+| 6 | My Events | `/my/events` | ✅ Upgraded | — |
+| 7 | Discover Events | `/discover/events` | ✅ Implemented | — |

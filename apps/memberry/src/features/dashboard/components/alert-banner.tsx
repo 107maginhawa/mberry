@@ -10,7 +10,7 @@ interface AlertItem {
 }
 
 interface AlertBannerProps {
-  memberships: Array<{ orgId?: string; organizationId?: string; orgName?: string; status?: string; duesExpiryDate?: string }>
+  memberships: Array<{ orgId?: string; organizationId?: string; orgSlug?: string; orgName?: string; status?: string; duesExpiryDate?: string }>
   invoices: Array<{ status: string; organizationId?: string }>
   elections: Array<{ id?: string; title?: string; status?: string; votingStart?: string; votingEnd?: string; organizationId?: string }>
 }
@@ -18,6 +18,13 @@ interface AlertBannerProps {
 export function AlertBanner({ memberships, invoices, elections }: AlertBannerProps) {
   const alerts: AlertItem[] = []
   const now = new Date()
+
+  // Build orgId → slug lookup for navigation
+  const slugOf = (orgId?: string): string => {
+    if (!orgId) return ''
+    const m = memberships.find((mb) => (mb.orgId ?? mb.organizationId) === orgId)
+    return m?.orgSlug || orgId
+  }
 
   // Check overdue invoices
   const overdueInvoices = invoices.filter((inv) => inv.status === 'overdue')
@@ -28,7 +35,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
       variant: 'error',
       icon: <AlertTriangle size={16} />,
       message: `Dues overdue — ${overdueInvoices.length} unpaid invoice${overdueInvoices.length > 1 ? 's' : ''}`,
-      action: orgId ? { label: 'Pay now', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+      action: orgId ? { label: 'Pay now', to: '/org/$orgSlug/dues', params: { orgSlug: slugOf(orgId) } } : undefined,
     })
   }
 
@@ -53,7 +60,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         variant: 'error',
         icon: <AlertTriangle size={16} />,
         message: `Dues expired for ${m.orgName ?? 'your organization'}`,
-        action: orgId ? { label: 'Renew now', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+        action: orgId ? { label: 'Renew now', to: '/org/$orgSlug/dues', params: { orgSlug: slugOf(orgId) } } : undefined,
       })
     } else if (daysLeft <= 0 && !orgHasUnpaid && overdueInvoices.length === 0) {
       // Period ended but all invoices paid — renewal invoice not yet generated
@@ -62,7 +69,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         variant: 'info',
         icon: <Clock size={16} />,
         message: `Membership period ended for ${m.orgName ?? 'your organization'} — renewal invoice pending`,
-        action: orgId ? { label: 'View status', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+        action: orgId ? { label: 'View status', to: '/org/$orgSlug/dues', params: { orgSlug: slugOf(orgId) } } : undefined,
       })
     } else if (daysLeft > 0 && daysLeft <= 30) {
       alerts.push({
@@ -70,7 +77,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         variant: 'warning',
         icon: <Clock size={16} />,
         message: `Dues expire in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} for ${m.orgName ?? 'your organization'}`,
-        action: orgId ? { label: 'Renew now', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+        action: orgId ? { label: 'Renew now', to: '/org/$orgSlug/dues', params: { orgSlug: slugOf(orgId) } } : undefined,
       })
     } else if (daysLeft > 30 && daysLeft <= 60) {
       alerts.push({
@@ -78,7 +85,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         variant: 'info',
         icon: <Clock size={16} />,
         message: `Dues expire in ${daysLeft} days for ${m.orgName ?? 'your organization'}`,
-        action: orgId ? { label: 'View dues', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+        action: orgId ? { label: 'View dues', to: '/org/$orgSlug/dues', params: { orgSlug: slugOf(orgId) } } : undefined,
       })
     }
   }
@@ -104,9 +111,9 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
         ? `Vote now — "${topElection.title}" closes in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
         : `Vote now — "${topElection.title}"`,
       action: topElection.organizationId && topElection.id
-        ? { label: 'Vote', to: '/org/$orgId/elections/$electionId/vote', params: { orgId: topElection.organizationId, electionId: topElection.id } }
+        ? { label: 'Vote', to: '/org/$orgSlug/elections/$electionId/vote', params: { orgSlug: slugOf(topElection.organizationId), electionId: topElection.id } }
         : topElection.organizationId
-        ? { label: 'Vote', to: '/org/$orgId/elections', params: { orgId: topElection.organizationId } }
+        ? { label: 'Vote', to: '/org/$orgSlug/elections', params: { orgSlug: slugOf(topElection.organizationId) } }
         : undefined,
     })
   }
@@ -120,7 +127,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
       variant: 'info',
       icon: <FileCheck size={16} />,
       message: `${pendingInvoices.length} pending invoice${pendingInvoices.length > 1 ? 's' : ''} awaiting payment`,
-      action: orgId ? { label: 'Pay dues', to: '/org/$orgId/dues', params: { orgId } } : undefined,
+      action: orgId ? { label: 'Pay dues', to: '/org/$orgSlug/dues', params: { orgSlug: slugOf(orgId) } } : undefined,
     })
   }
 
@@ -132,9 +139,9 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
   if (!alert) return null
 
   const variantStyles = {
-    error: 'bg-red-50 border-red-200 text-red-800',
-    warning: 'bg-amber-50 border-amber-200 text-amber-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-700',
+    error: 'bg-[var(--color-error-bg)] border-[var(--color-error)] text-[var(--color-error)]',
+    warning: 'bg-[var(--color-warning-bg)] border-[var(--color-warning)] text-[var(--color-warning)]',
+    info: 'bg-[var(--color-info-bg)] border-[var(--color-info)] text-[var(--color-info)]',
   }
 
   return (
@@ -144,13 +151,13 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
     >
       <div className="flex items-center gap-2.5">
         <span className="shrink-0" aria-hidden="true">{alert.icon}</span>
-        <p className="text-[13px] font-semibold">{alert.message}</p>
+        <p className="text-sm font-semibold">{alert.message}</p>
       </div>
       {alert.action && (
         <Link
           to={alert.action.to}
           params={alert.action.params ?? {}}
-          className="shrink-0 text-[12px] font-bold underline underline-offset-2 hover:no-underline"
+          className="shrink-0 text-xs font-bold underline underline-offset-2 hover:no-underline"
         >
           {alert.action.label}
         </Link>

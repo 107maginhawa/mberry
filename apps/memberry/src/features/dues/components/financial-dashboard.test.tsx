@@ -24,6 +24,7 @@ vi.mock('@/components/motion/stagger-grid', () => ({
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, ...props }: any) => <a href={props.to}>{children}</a>,
+  useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
 import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'

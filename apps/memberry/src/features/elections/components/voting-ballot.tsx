@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { Vote, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button, Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
@@ -25,6 +25,7 @@ interface PositionRecord {
 interface NomineeRecord {
   id: string
   personId: string
+  personName?: string
   positionId: string
   status: string
   bio?: string
@@ -52,11 +53,14 @@ const NOMINEE_STATUS_COLORS: Record<string, string> = {
 }
 
 export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [selections, setSelections] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [votedPositions, setVotedPositions] = useState<Set<string>>(new Set())
 
   const { data, isLoading, error } = useQuery(
     getElectionOptions({ path: { electionId } }),
@@ -106,7 +110,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
         </p>
         <Button
           variant="link"
-          onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
+          onClick={() => navigate({ to: '/org/$orgSlug/elections/$electionId', params: { orgSlug, electionId } })}
         >
           ← Back to election
         </Button>
@@ -123,7 +127,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
         <p className="text-sm text-[var(--color-muted)]">Your vote has been recorded. You cannot vote again.</p>
         <Button
           variant="link"
-          onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
+          onClick={() => navigate({ to: '/org/$orgSlug/elections/$electionId', params: { orgSlug, electionId } })}
         >
           ← View election details
         </Button>
@@ -137,33 +141,53 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
 
   const allPositionsSelected = positions.every((p) => selections[p.id])
 
-  async function handleSubmit() {
+  function handleSubmitClick() {
+    setShowConfirm(true)
+  }
+
+  async function handleConfirmedSubmit() {
+    setShowConfirm(false)
     setSubmitting(true)
     setSubmitError(null)
 
+    const failedPositions: string[] = []
+    const newVoted = new Set(votedPositions)
+
     try {
-      // Cast one ballot per position sequentially
       for (const position of positions) {
         const candidateId = selections[position.id]
         if (!candidateId) continue
+        if (newVoted.has(position.id)) continue
 
-        await castBallot({
-          body: {
-            electionId,
-            positionId: position.id,
-            candidateId,
-            isProxy: false,
-          },
-          throwOnError: true,
-        })
+        try {
+          await castBallot({
+            body: {
+              electionId,
+              positionId: position.id,
+              candidateId,
+              isProxy: false,
+            },
+            throwOnError: true,
+          })
+          newVoted.add(position.id)
+        } catch {
+          failedPositions.push(position.title)
+        }
       }
 
-      // Invalidate queries
+      setVotedPositions(newVoted)
+
+      if (failedPositions.length > 0) {
+        setSubmitError(`Failed to cast vote for: ${failedPositions.join(', ')}. Your other votes were recorded. Please retry.`)
+        toast.error(`${failedPositions.length} position(s) failed — retry to complete your ballot`)
+        return
+      }
+
       queryClient.invalidateQueries({ queryKey: getElectionOptions({ path: { electionId } }).queryKey })
       queryClient.invalidateQueries({ queryKey: ['my-ballots', electionId] })
 
       toast.success('Your votes have been cast!')
-      navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })
+      navigate({ to: '/org/$orgSlug/elections/$electionId', params: { orgSlug, electionId } })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to cast vote. Please try again.')
       toast.error('Failed to cast vote')
@@ -225,7 +249,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium truncate">{nominee.personId}</p>
+                            <p className="text-sm font-medium truncate">{nominee.personName ?? nominee.personId}</p>
                             <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${NOMINEE_STATUS_COLORS[nominee.status] ?? ''}`}>
                               {nominee.status}
                             </span>
@@ -259,18 +283,46 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
       <div className="flex items-center justify-between pt-2 border-t">
         <Button
           variant="ghost"
-          onClick={() => navigate({ to: '/org/$orgId/elections/$electionId', params: { orgId, electionId } })}
+          onClick={() => navigate({ to: '/org/$orgSlug/elections/$electionId', params: { orgSlug, electionId } })}
         >
           Cancel
         </Button>
         <Button
-          onClick={handleSubmit}
+          onClick={handleSubmitClick}
           disabled={!allPositionsSelected || submitting}
         >
           <Vote className="w-4 h-4 mr-2" />
-          {submitting ? 'Submitting...' : 'Submit Ballot'}
+          {submitting ? 'Submitting...' : 'Review & Submit'}
         </Button>
       </div>
+
+      {/* Vote confirmation dialog */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowConfirm(false)}>
+          <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-light)] p-6 max-w-md w-full mx-4 shadow-lg" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold mb-4">Confirm Your Ballot</h3>
+            <div className="space-y-2 mb-4" id="dialog-description">
+              {positions.map(p => {
+                const selected = nominees.find(n => n.id === selections[p.id])
+                return (
+                  <div key={p.id} className="flex justify-between text-sm">
+                    <span className="text-[var(--color-muted)]">{p.title}:</span>
+                    <span className="font-medium">{selected?.personName ?? selected?.personId ?? '—'}</span>
+                  </div>
+                )
+              })}
+            </div>
+            <p className="text-xs text-[var(--color-warning)] mb-4">⚠ Your vote cannot be changed after submission.</p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" onClick={() => setShowConfirm(false)}>Cancel</Button>
+              <Button onClick={handleConfirmedSubmit}>
+                <Vote className="w-4 h-4 mr-2" />
+                Submit Ballot
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

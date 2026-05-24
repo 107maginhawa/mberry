@@ -28,7 +28,7 @@ const DEFAULT_CHECKLIST_ITEMS = [
 
 export async function certifyElection(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
 
   const electionRepo = new ElectionsRepository(db);
   const termRepo = new OfficerTermRepository(db);

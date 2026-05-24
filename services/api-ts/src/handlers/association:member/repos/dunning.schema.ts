@@ -58,7 +58,7 @@ export const dunningEvents = pgTable('dunning_event', {
   personId: varchar('person_id', { length: 255 }).notNull(),
   templateId: varchar('template_id', { length: 255 }).notNull(),
   stage: integer('stage').notNull(),
-  sentAt: timestamp('sent_at').notNull(),
+  sentAt: timestamp('sent_at', { withTimezone: true }).notNull(),
   channel: dunningChannelEnum('channel').notNull(),
   deliveryStatus: dunningDeliveryStatusEnum('delivery_status').default('pending').notNull(),
 }, (table) => ({

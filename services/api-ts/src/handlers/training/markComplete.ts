@@ -1,4 +1,5 @@
 import type { Context } from 'hono';
+import type { JobScheduler } from '@/core/jobs';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
@@ -8,8 +9,8 @@ import { OrganizationRepository, AssociationRepository } from '../platformadmin/
 
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const trainingId = ctx.req.param('id');
-  const orgId = ctx.req.param('organizationId');
+  const trainingId = ctx.req.param('id')!;
+  const orgId = ctx.req.param('organizationId')!;
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 
@@ -103,6 +104,23 @@ export async function markComplete(ctx: Context): Promise<Response> {
           cycleStart: cycle.cycleStart,
           cycleEnd: cycle.cycleEnd,
         });
+      }
+      // Wave 2b: Trigger credit.issue job for pipeline processing
+      const jobs = ctx.get('jobs') as JobScheduler | undefined;
+      if (jobs) {
+        try {
+          await jobs.trigger('credit.issue', {
+            sourceType: 'training_completion',
+            sourceId: training.id,
+            personId: body.personId,
+            organizationId: training.organizationId,
+            creditAmount: training.creditAmount,
+            activityName: training.title,
+            cpdActivityType: (training as any).cpdActivityType ?? null,
+          });
+        } catch {
+          // Job trigger failure should not block marking complete
+        }
       }
     } catch {
       // Credit creation failure should not block marking complete

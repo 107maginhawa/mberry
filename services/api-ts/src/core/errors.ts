@@ -57,7 +57,7 @@ export class ConflictError extends AppError {
 
 export class DeferredScopeError extends AppError {
   constructor(handlerName: string, wave: string = 'Wave 2') {
-    super(`${handlerName} is planned for ${wave}`, 'DEFERRED_SCOPE', 501);
+    super(`${handlerName} is planned for ${wave}. See ROADMAP.md for status.`, 'DEFERRED_SCOPE', 501);
   }
 }
 

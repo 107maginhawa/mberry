@@ -28,10 +28,9 @@
     "lint": "bun run --filter '*' lint"
   },
   "lint-staged": {
-    "services/api-ts/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config services/api-ts/eslint.config.js"],
-    "apps/account/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/account/eslint.config.js"],
-    "apps/memberry/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/memberry/eslint.config.js"],
-    "apps/admin/**/*.{ts,tsx}": ["bunx eslint --fix --quiet --config apps/admin/eslint.config.js"]
+    "services/api-ts/**/*.{ts,tsx}": ["services/api-ts/node_modules/.bin/eslint --fix --quiet --config services/api-ts/eslint.config.js"],
+    "apps/memberry/**/*.{ts,tsx}": ["apps/memberry/node_modules/.bin/eslint --fix --quiet --config apps/memberry/eslint.config.js"],
+    "apps/admin/**/*.{ts,tsx}": ["apps/admin/node_modules/.bin/eslint --fix --quiet --config apps/admin/eslint.config.js"]
   },
   "engines": {
     "node": ">=18.0.0",
@@ -40,11 +39,12 @@
   "overrides": {
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
-    "csstype": "3.2.3"
+    "csstype": "3.2.3",
+    "@playwright/test": "1.58.2",
+    "playwright": "1.58.2",
+    "playwright-core": "1.58.2"
   },
   "devDependencies": {
-    "@esbuild/darwin-arm64": "^0.25.0",
-    "@esbuild/linux-x64": "^0.25.0",
     "@rollup/rollup-darwin-arm64": "^4.52.3",
     "@rollup/rollup-linux-x64-gnu": "^4.52.3",
     "husky": "^9.1.7",

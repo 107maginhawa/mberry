@@ -34,7 +34,7 @@ describe('[FLOW-07] Member Import → Bulk Creation', () => {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
     stubRepo(DuesConfigRepository, {
-      findAll: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
+      findMany: async () => [{ id: 'dc-1', gracePeriodDays: 30 }],
     });
   });
 

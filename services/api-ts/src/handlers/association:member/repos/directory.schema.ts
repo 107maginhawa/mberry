@@ -39,8 +39,8 @@ export const directoryProfiles = pgTable('directory_profile', {
   website: varchar('website', { length: 2048 }),
   socialLinks: jsonb('social_links').$type<Record<string, string>>(),
   visibility: directoryVisibilityEnum('visibility').default('hidden').notNull(),
-  publishedAt: timestamp('published_at'),
-  lastUpdatedAt: timestamp('last_updated_at').defaultNow().notNull(),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
+  lastUpdatedAt: timestamp('last_updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   orgPersonIdx: index('directory_profile_org_person_idx').on(table.organizationId, table.personId),
   orgVisibilityIdx: index('directory_profile_org_visibility_idx').on(table.organizationId, table.visibility),

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { FinancialDashboard, GetDuesFinancialDashboardData } from '@monobase/sdk-ts/generated/types.gen'
 import { Skeleton } from '@monobase/ui'
@@ -19,6 +19,7 @@ interface FinancialDashboardProps {
 }
 
 export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const { data, isLoading, error } = useQuery(
     getDuesFinancialDashboardOptions(
       { path: { organizationId: orgId }, headers: { 'x-org-id': orgId } } as unknown as GetDuesFinancialDashboardDataWithHeaders
@@ -58,7 +59,7 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
       <StaggerGrid className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StaggerItem>
           <GlassCard className="p-4">
-            <p className="text-[13px] text-[var(--color-muted)]">Collection Rate</p>
+            <p className="text-sm text-[var(--color-muted)]">Collection Rate</p>
             <p className={`text-h2 font-display font-bold tabular-nums ${rateColor}`}>
               <CountUp value={collectionRate} format={(n) => `${Math.round(n)}%`} />
             </p>
@@ -66,7 +67,7 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-4">
-            <p className="text-[13px] text-[var(--color-muted)]">Total Collected</p>
+            <p className="text-sm text-[var(--color-muted)]">Total Collected</p>
             <p className="text-h2 font-display font-bold tabular-nums">
               <CountUp value={totalCollected / 100} prefix="₱" format={(n) => n.toLocaleString('en-PH', { minimumFractionDigits: 2 })} />
             </p>
@@ -74,7 +75,7 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-4">
-            <p className="text-[13px] text-[var(--color-muted)]">Outstanding</p>
+            <p className="text-sm text-[var(--color-muted)]">Outstanding</p>
             <p className="text-h2 font-display font-bold tabular-nums">
               <CountUp value={totalOutstanding / 100} prefix="₱" format={(n) => n.toLocaleString('en-PH', { minimumFractionDigits: 2 })} />
             </p>
@@ -82,7 +83,7 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-4">
-            <p className="text-[13px] text-[var(--color-muted)]">Pending Payments</p>
+            <p className="text-sm text-[var(--color-muted)]">Pending Payments</p>
             <p className="text-h2 font-display font-bold tabular-nums">
               <CountUp value={pendingCount} />
             </p>
@@ -96,31 +97,31 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
           {expiringCount > 0 && (
             <GlassCard className="flex items-center gap-3 p-3 border-amber-200/50">
               <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
-              <div className="flex-1 text-[14px]">
+              <div className="flex-1 text-sm">
                 <p className="font-semibold text-amber-900">{expiringCount} members with expiring dues</p>
-                <p className="text-amber-700 text-[13px]">Send reminders before they lapse</p>
+                <p className="text-amber-700 text-sm">Send reminders before they lapse</p>
               </div>
             </GlassCard>
           )}
           {pendingCount > 0 && (
             <GlassCard className="flex items-center gap-3 p-3 border-blue-200/50">
               <CreditCard className="h-5 w-5 text-blue-600 shrink-0" />
-              <div className="flex-1 text-[14px]">
+              <div className="flex-1 text-sm">
                 <p className="font-semibold text-blue-900">{pendingCount} pending payments</p>
-                <p className="text-blue-700 text-[13px]">Review and confirm</p>
+                <p className="text-blue-700 text-sm">Review and confirm</p>
               </div>
             </GlassCard>
           )}
           {!hasGateway && (
             <Link
-              to="/org/$orgId/officer/settings/gateway"
-              params={{ orgId }}
+              to="/org/$orgSlug/officer/settings/gateway"
+              params={{ orgSlug }}
             >
               <GlassCard className="flex items-center gap-3 p-3 h-full">
                 <Settings className="h-5 w-5 text-[var(--color-muted)] shrink-0" />
-                <div className="flex-1 text-[14px]">
+                <div className="flex-1 text-sm">
                   <p className="font-semibold">Gateway not configured</p>
-                  <p className="text-[var(--color-muted)] text-[13px]">Set up online payments</p>
+                  <p className="text-[var(--color-muted)] text-sm">Set up online payments</p>
                 </div>
               </GlassCard>
             </Link>

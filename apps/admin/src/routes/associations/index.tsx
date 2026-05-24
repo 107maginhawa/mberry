@@ -188,14 +188,16 @@ function AssociationsPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
-                  Loading...
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground animate-pulse">
+                  Loading associations...
                 </TableCell>
               </TableRow>
             ) : associations.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
-                  No associations found.
+                  <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                  <p>No associations found.</p>
+                  <p className="text-xs mt-1">Create one to get started</p>
                 </TableCell>
               </TableRow>
             ) : (

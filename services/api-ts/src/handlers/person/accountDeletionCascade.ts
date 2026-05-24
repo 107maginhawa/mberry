@@ -71,7 +71,7 @@ import { chapterAffiliations, affiliationTransfers } from '../association:member
 import { invitationTokens } from '../invite/repos/invite.schema';
 
 // M06: Dues payments (BR-32: anonymize proof only, preserve amounts)
-import { duesPayments } from '../dues/repos/dues-payments.schema';
+import { duesPayments } from '../association:member/repos/dues-payments.schema';
 
 // M13: Billing (BR-32: anonymize payer info, preserve invoice records)
 import { invoices, merchantAccounts } from '../billing/repos/billing.schema';

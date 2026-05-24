@@ -185,6 +185,15 @@ model PrivacySettings {
 
   @doc("Whether address is visible to other members in the directory")
   addressVisible: boolean;
+
+  @doc("Whether verified credentials are visible in the directory")
+  credentialsVisible: boolean;
+
+  @doc("Whether dues standing is visible in the directory")
+  duesStatusVisible: boolean;
+
+  @doc("Whether CE compliance status is visible in the directory")
+  ceComplianceVisible: boolean;
 }
 
 @doc("Request body for updating privacy settings")
@@ -203,6 +212,15 @@ model UpdatePrivacySettingsRequest {
 
   @doc("Whether address is visible to other members in the directory")
   addressVisible?: boolean;
+
+  @doc("Whether verified credentials are visible in the directory")
+  credentialsVisible?: boolean;
+
+  @doc("Whether dues standing is visible in the directory")
+  duesStatusVisible?: boolean;
+
+  @doc("Whether CE compliance status is visible in the directory")
+  ceComplianceVisible?: boolean;
 }
 
 @doc("Notification preference for a single category")

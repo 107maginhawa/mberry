@@ -4,7 +4,7 @@ import { NotFoundError } from '@/core/errors';
 
 export async function getCommittee(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const id = ctx.req.param('id');
+  const id = ctx.req.param('id')!;
   const repo = new CommitteeRepository(db);
 
   const committee = await repo.get(id);

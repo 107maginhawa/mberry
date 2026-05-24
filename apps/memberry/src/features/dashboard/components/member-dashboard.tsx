@@ -136,15 +136,15 @@ export function MemberDashboard() {
                 <CardSkeleton />
               </div>
             ) : upcomingEvents.length === 0 ? (
-              <p className="text-[13px] text-[var(--color-muted)] p-4">No upcoming events</p>
+              <p className="text-sm text-[var(--color-muted)] p-4">No upcoming events</p>
             ) : (
               upcomingEvents.map((e) => (
                 <div key={e.id} className="px-4 py-3">
-                  <p className="text-[13px] font-semibold line-clamp-1">{e.title}</p>
-                  <p className="text-[12px] text-[var(--color-muted)] mt-0.5">
+                  <p className="text-sm font-semibold line-clamp-1">{e.title}</p>
+                  <p className="text-xs text-[var(--color-muted)] mt-0.5">
                     {new Date(e.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
-                  <p className="text-[11px] text-[var(--color-muted)]">{e.orgName}</p>
+                  <p className="text-xs text-[var(--color-muted)]">{e.orgName}</p>
                 </div>
               ))
             )}
@@ -164,19 +164,19 @@ export function MemberDashboard() {
                 <CardSkeleton />
               </div>
             ) : upcomingTrainings.length === 0 ? (
-              <p className="text-[13px] text-[var(--color-muted)] p-4">No upcoming trainings</p>
+              <p className="text-sm text-[var(--color-muted)] p-4">No upcoming trainings</p>
             ) : (
               upcomingTrainings.map((t) => (
                 <div key={t.id} className="px-4 py-3">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-[13px] font-semibold line-clamp-1">{t.title}</p>
+                    <p className="text-sm font-semibold line-clamp-1">{t.title}</p>
                     {t.cpdCredits > 0 && (
-                      <span className="shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-info-bg)] text-[var(--color-info)]">
+                      <span className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--color-info-bg)] text-[var(--color-info)]">
                         {t.cpdCredits} CPD
                       </span>
                     )}
                   </div>
-                  <p className="text-[12px] text-[var(--color-muted)] mt-0.5">
+                  <p className="text-xs text-[var(--color-muted)] mt-0.5">
                     {new Date(t.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
                 </div>
@@ -198,12 +198,12 @@ export function MemberDashboard() {
                 <CardSkeleton />
               </div>
             ) : recentNotifs.length === 0 ? (
-              <p className="text-[13px] text-[var(--color-muted)] p-4">No notifications</p>
+              <p className="text-sm text-[var(--color-muted)] p-4">No notifications</p>
             ) : (
               recentNotifs.map((n) => (
                 <div key={n.id} className={`px-4 py-3 ${!n.read ? 'border-l-2 border-l-[var(--color-primary)]' : ''}`}>
-                  <p className={`text-[13px] line-clamp-2 ${!n.read ? 'font-semibold' : 'font-medium'}`}>{n.title}</p>
-                  <p className="text-[11px] text-[var(--color-muted)] mt-0.5">
+                  <p className={`text-sm line-clamp-2 ${!n.read ? 'font-semibold' : 'font-medium'}`}>{n.title}</p>
+                  <p className="text-xs text-[var(--color-muted)] mt-0.5">
                     {new Date(n.createdAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -241,9 +241,9 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
         <div className="flex items-center gap-3">
           <AvatarInitials name={m.orgName} size="md" />
           <div>
-            <p className="text-[14px] font-semibold">{m.orgName}</p>
+            <p className="text-sm font-semibold">{m.orgName}</p>
             {m.memberNumber && (
-              <p className="text-[12px] text-[var(--color-muted)]">#{m.memberNumber}</p>
+              <p className="text-xs text-[var(--color-muted)]">#{m.memberNumber}</p>
             )}
           </div>
         </div>
@@ -251,7 +251,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
       </div>
 
       {m.duesExpiryDate && (
-        <p className="text-[12px] text-[var(--color-muted)] mt-3">
+        <p className="text-xs text-[var(--color-muted)] mt-3">
           Dues expire: {new Date(m.duesExpiryDate).toLocaleDateString()}
         </p>
       )}
@@ -260,7 +260,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
         {isOfficer && (
           <Link
             to={`/org/${m.orgId}/officer/dashboard` as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white px-4 py-1.5 rounded-[8px] transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white px-4 py-1.5 rounded-[8px] transition-colors"
           >
             <Shield size={13} />
             {officerRole} Dashboard
@@ -269,7 +269,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
         {needsPay && (
           <Link
             to="/my/payments"
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-mid)] px-4 py-1.5 rounded-[8px] transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-mid)] px-4 py-1.5 rounded-[8px] transition-colors"
           >
             <CreditCard size={13} />
             Pay Dues
@@ -298,7 +298,7 @@ function SectionHeading({
       {linkTo && (
         <Link
           to={linkTo as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
-          className="flex items-center gap-0.5 text-[12px] font-semibold text-[var(--color-primary)] hover:underline"
+          className="flex items-center gap-0.5 text-xs font-semibold text-[var(--color-primary)] hover:underline"
         >
           View all <ChevronRight size={13} />
         </Link>

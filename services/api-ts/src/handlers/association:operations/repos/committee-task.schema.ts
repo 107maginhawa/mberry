@@ -37,8 +37,8 @@ export const committeeTasks = pgTable('committee_task', {
   assigneeId: uuid('assignee_id'),
   status: committeeTaskStatusEnum('status').notNull().default('pending'),
   priority: committeeTaskPriorityEnum('priority').notNull().default('medium'),
-  dueDate: timestamp('due_date'),
-  completedAt: timestamp('completed_at'),
+  dueDate: timestamp('due_date', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
   completedBy: uuid('completed_by'),
 }, (table) => [
   index('idx_committee_task_org').on(table.organizationId),

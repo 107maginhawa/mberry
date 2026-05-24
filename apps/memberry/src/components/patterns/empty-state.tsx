@@ -14,7 +14,7 @@ export function EmptyState({ icon, headline, description, action }: EmptyStatePr
       {icon && <div className="text-[var(--color-primary-lighter)] mb-4">{icon}</div>}
       <h3 className="text-h3 text-[var(--color-primary)]">{headline}</h3>
       {description && (
-        <p className="text-[14px] text-[var(--color-muted)] mt-2 max-w-[400px]">{description}</p>
+        <p className="text-sm text-[var(--color-muted)] mt-2 max-w-[400px]">{description}</p>
       )}
       {action && (
         <Button

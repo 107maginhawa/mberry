@@ -34,6 +34,23 @@ export async function publishEvent(
     throw new BusinessLogicError('Only draft events can be published', 'INVALID_STATUS');
   }
 
+  // [S6] Block publishing paid events if org has no Stripe account
+  if (existing.registrationFee && existing.registrationFee > 0) {
+    const { MerchantAccountRepository } = await import('@/handlers/billing/repos/billing.repo');
+    const merchantRepo = new MerchantAccountRepository(db);
+    const merchants = await merchantRepo.findMany({ organizationId: existing.organizationId, active: true });
+    const merchant = merchants[0];
+    const stripeAccountId = merchant?.metadata
+      ? (merchant.metadata as Record<string, unknown>)?.['stripeAccountId']
+      : undefined;
+    if (!stripeAccountId) {
+      throw new BusinessLogicError(
+        'Set up billing before publishing a paid event. Go to Settings → Billing to connect your Stripe account.',
+        'STRIPE_NOT_ONBOARDED'
+      );
+    }
+  }
+
   const published = await repo.publish(params.eventId);
 
   await auditAction(ctx, {

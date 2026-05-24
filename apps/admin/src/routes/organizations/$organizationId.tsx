@@ -58,7 +58,7 @@ function OrganizationDetailPage() {
       )}
 
       {isLoading ? (
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground animate-pulse">Loading organization...</div>
       ) : !org ? (
         <div className="text-muted-foreground">Organization not found.</div>
       ) : (

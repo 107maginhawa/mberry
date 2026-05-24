@@ -89,7 +89,7 @@ function MyCredits() {
         actions={
           <Link
             to="/my/credits/log"
-            className="px-[16px] py-[8px] rounded-[8px] bg-[var(--color-primary)] text-white text-[13px] font-semibold hover:bg-[var(--color-primary-mid)] transition-colors"
+            className="px-[16px] py-[8px] rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-mid)] transition-colors"
           >
             Log Manual Credit
           </Link>
@@ -100,8 +100,8 @@ function MyCredits() {
         {stats.map((s) => (
           <StaggerItem key={s.label}>
             <GlassCard className="p-4">
-              <p className="text-[13px] text-[var(--color-muted)]">{s.label}</p>
-              <p className={`text-[24px] font-bold font-display ${s.highlight ? 'text-[var(--color-primary)]' : ''}`} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <p className="text-sm text-[var(--color-muted)]">{s.label}</p>
+              <p className={`text-2xl font-bold font-display ${s.highlight ? 'text-[var(--color-primary)]' : ''}`} style={{ fontVariantNumeric: 'tabular-nums' }}>
                 <CountUp value={s.value} />
               </p>
             </GlassCard>
@@ -122,13 +122,13 @@ function MyCredits() {
         />
       ) : (
         <GlassCard className="overflow-hidden">
-          <Table className="text-[13px] min-w-[500px]">
+          <Table className="text-sm min-w-[500px]">
             <TableHeader className="bg-[var(--color-surface-warm)]">
               <TableRow>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Activity</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Date</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-[12px] uppercase tracking-wide">Type</TableHead>
-                <TableHead className="px-4 py-3 text-right font-semibold text-[12px] uppercase tracking-wide">Credits</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Activity</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Date</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Type</TableHead>
+                <TableHead className="px-4 py-3 text-right font-semibold text-xs uppercase tracking-wide">Credits</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

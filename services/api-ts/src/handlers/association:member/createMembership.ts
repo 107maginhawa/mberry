@@ -1,5 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
+import type { JobScheduler } from '@/core/jobs';
 import { NotFoundError, UnauthorizedError, ConflictError, BusinessLogicError } from '@/core/errors';
 import type { CreateMembershipBody } from '@/generated/openapi/validators';
 import { MembershipTierRepository, MembershipRepository } from './repos/membership.repo';
@@ -65,6 +66,17 @@ export async function createMembership(
     resourceId: membership.id,
     description: 'Membership created',
   });
+
+  // Trigger directory profile auto-populate (Wave 3a)
+  try {
+    const jobs = ctx.get('jobs') as JobScheduler | undefined;
+    if (jobs) {
+      await jobs.trigger('directory.autoPopulate', { personId: body.personId, organizationId: orgId });
+    }
+  } catch (error) {
+    const logger = ctx.get('logger');
+    logger?.warn({ error, personId: body.personId }, 'Failed to trigger directory auto-populate');
+  }
 
   return ctx.json(membership, 201);
 }

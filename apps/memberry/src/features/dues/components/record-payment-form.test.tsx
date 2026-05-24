@@ -19,6 +19,38 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
+vi.mock('@/hooks/use-mutation-feedback', () => ({
+  useMutationFeedback: ({ mutationFn }: any) => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  }),
+}))
+
+vi.mock('@/components/patterns/combobox', () => ({
+  Combobox: ({ value, onValueChange, placeholder, ...rest }: any) => (
+    <input data-testid="combobox" value={value ?? ''} placeholder={placeholder} onChange={(e: any) => onValueChange?.(e.target.value)} {...rest} />
+  ),
+}))
+
+vi.mock('@/components/patterns/date-picker', () => ({
+  DatePicker: ({ value, onChange, ...rest }: any) => (
+    <input data-testid="date-picker" type="date" value={value ?? ''} onChange={(e: any) => onChange?.(e.target.value)} {...rest} />
+  ),
+}))
+
+vi.mock('@/components/patterns/form-field', () => ({
+  FormField: ({ label, children, error, description, required }: any) => (
+    <div data-testid="form-field">
+      <label>{label}{!required && description ? ' (optional)' : ''}</label>
+      {children}
+      {error && <span className="error">{error}</span>}
+    </div>
+  ),
+}))
+
 vi.mock('./fund-allocation-preview', () => ({
   FundAllocationPreview: ({ amountCents }: any) => (
     <div data-testid="fund-preview">Preview: {amountCents}</div>

@@ -27,25 +27,21 @@ test.describe('Member Events (/my/events)', () => {
   })
 
   test('tab switching filters event list', async ({ page }) => {
-    // Upcoming tab active by default
-    const upcomingTab = page.getByRole('tab', { name: /upcoming/i })
-      .or(page.getByRole('button', { name: /upcoming/i }))
-      .first()
-    await expect(upcomingTab).toBeVisible({ timeout: 10000 })
+    // Upcoming button active by default
+    const upcomingBtn = page.getByRole('button', { name: /upcoming/i }).first()
+    await expect(upcomingBtn).toBeVisible({ timeout: 10000 })
 
-    // Switch to Past tab and verify list updates
-    const pastTab = page.getByRole('tab', { name: /past/i })
-      .or(page.getByRole('button', { name: /past/i }))
-      .first()
-    await pastTab.click()
+    // Switch to All view and verify list updates
+    const allBtn = page.getByRole('button', { name: /all/i }).first()
+    await allBtn.click()
     await page.waitForLoadState('networkidle')
 
-    // Should show either past events or empty state — not loading forever
-    const hasPastContent = await page.getByText(/no past events|completed|attended/i)
+    // Should show either events or empty state — not loading forever
+    const hasContent = await page.getByText(/no.*events|completed|attended/i)
       .first().isVisible({ timeout: 5000 }).catch(() => false)
     const hasEventCards = await page.locator('[class*="card"], [class*="event"]')
       .first().isVisible({ timeout: 5000 }).catch(() => false)
-    expect(hasPastContent || hasEventCards).toBeTruthy()
+    expect(hasContent || hasEventCards).toBeTruthy()
   })
 
   test('[BR-27] event card shows registration status or capacity info', async ({ page }) => {

@@ -48,15 +48,15 @@ export const trainings = pgTable('training', {
   instructorName: varchar('instructor_name', { length: 200 }),
   instructorId: uuid('instructor_id'),
   location: varchar('location', { length: 500 }),
-  startDate: timestamp('start_date').notNull(),
-  endDate: timestamp('end_date').notNull(),
+  startDate: timestamp('start_date', { withTimezone: true }).notNull(),
+  endDate: timestamp('end_date', { withTimezone: true }).notNull(),
   capacity: integer('capacity'),
   registrationFee: bigint('registration_fee', { mode: 'number' }).default(0),
   currency: varchar('currency', { length: 3 }).default('PHP'),
   creditBearing: boolean('credit_bearing').default(false),
   creditAmount: integer('credit_amount').default(0),
   status: trainingStatusEnum('status').notNull().default('draft'),
-  publishedAt: timestamp('published_at'),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
   /** PRC accreditation number for this training */
   prcAccreditationNumber: varchar('prc_accreditation_number', { length: 100 }),
   /** Reference to the accredited provider (no DB FK — validated in handler) */
@@ -72,9 +72,9 @@ export const trainingEnrollments = pgTable('training_enrollment', {
   trainingId: uuid('training_id').notNull(),
   personId: uuid('person_id').notNull(),
   status: enrollmentStatusEnum('status').notNull().default('enrolled'),
-  enrolledAt: timestamp('enrolled_at').notNull().defaultNow(),
-  completedAt: timestamp('completed_at'),
-  cancelledAt: timestamp('cancelled_at'),
+  enrolledAt: timestamp('enrolled_at', { withTimezone: true }).notNull().defaultNow(),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
 }, (table) => [
   index('idx_training_enroll_org').on(table.organizationId),
   index('idx_training_enroll_training').on(table.trainingId),
@@ -88,7 +88,7 @@ export const courses = pgTable('course', {
   description: text('description'),
   creditAmount: integer('credit_amount').default(0),
   status: courseStatusEnum('status').notNull().default('draft'),
-  publishedAt: timestamp('published_at'),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
 }, (table) => [
   index('idx_course_org').on(table.organizationId),
 ]);
@@ -99,7 +99,7 @@ export const courseEnrollments = pgTable('course_enrollment', {
   courseId: uuid('course_id').notNull(),
   personId: uuid('person_id').notNull(),
   progress: real('progress').default(0),
-  completedAt: timestamp('completed_at'),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
   status: enrollmentStatusEnum('status').notNull().default('enrolled'),
 }, (table) => [
   index('idx_course_enroll_org').on(table.organizationId),
@@ -115,7 +115,7 @@ export const quizAttempts = pgTable('quiz_attempt', {
   score: real('score'),
   maxScore: real('max_score'),
   passed: boolean('passed'),
-  attemptedAt: timestamp('attempted_at').notNull().defaultNow(),
+  attemptedAt: timestamp('attempted_at', { withTimezone: true }).notNull().defaultNow(),
   answers: jsonb('answers').$type<Record<string, unknown>>(),
 }, (table) => [
   index('idx_quiz_org').on(table.organizationId),

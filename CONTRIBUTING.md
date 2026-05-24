@@ -51,7 +51,7 @@ AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 ```
 
-**Account App** (`apps/account/.env`):
+**Memberry App** (`apps/memberry/.env`):
 ```bash
 VITE_API_URL=http://localhost:7213
 ```
@@ -69,8 +69,8 @@ bun run db:generate  # Generate initial schema
 # Start API service
 cd services/api-ts && bun dev
 
-# In another terminal, start account app
-cd apps/account && bun dev
+# In another terminal, start memberry app
+cd apps/memberry && bun dev
 
 # Verify API is running
 curl http://localhost:7213/health
@@ -83,7 +83,8 @@ curl http://localhost:7213/health
 ```
 monobase/
 ├── apps/                      # Frontend applications
-│   └── account/              # Reference app (Vite + TanStack)
+│   ├── admin/                # Platform ops dashboard (port 3003)
+│   └── memberry/             # Product app (Vite + TanStack, port 3004)
 │       │                      # — owns its own components/hooks/lib/features
 ├── packages/                  # Shared packages
 │   ├── eslint-config/        # Shared ESLint flat configs
@@ -234,7 +235,7 @@ export default personRouter;
 Import generated types in your frontend apps:
 
 ```typescript
-// apps/account/src/lib/api.ts
+// apps/memberry/src/lib/api.ts
 import type { Person, CreatePersonRequest } from '@monobase/api-spec';
 
 export async function createPerson(data: CreatePersonRequest): Promise<Person> {
@@ -423,6 +424,32 @@ export function PersonCard({ person, onSelect }: PersonCardProps) {
   );
 }
 ```
+
+### Frontend Error Handling
+
+Use **sonner toast** (`toast.error()` / `toast.success()`) for all user-facing error and success feedback. Use `extractErrorMessage()` from `@/utils/error` to extract the message consistently.
+
+```typescript
+// In TanStack Query mutations (standard pattern)
+import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
+
+const mutation = useMutation({
+  mutationFn: (data) => sdk.someEndpoint(data),
+  onSuccess: () => toast.success('Saved'),
+  onError: (err) => toast.error(extractErrorMessage(err, 'Save failed')),
+})
+
+// In imperative code (file uploads, multi-step flows)
+try {
+  await upload(file)
+  toast.success('Uploaded')
+} catch (err) {
+  toast.error(extractErrorMessage(err, 'Upload failed'))
+}
+```
+
+**Do not** use `window.alert()`, `console.error()` as user feedback, or inline error state unless the error is contextual to a specific form field. The `ErrorBoundary` in `_authenticated.tsx` catches unhandled crashes — do not add more ErrorBoundary wrappers unless isolating a specific widget.
 
 ### API Handlers
 
@@ -848,7 +875,7 @@ const isInRange = isWithinInterval(date, {
 
 When working with language, country, and timezone data, strict casing standards MUST be followed for system interoperability.
 
-**Constants Location**: `apps/account/src/constants/`
+**Constants Location**: `apps/memberry/src/constants/`
 
 #### Language Codes (ISO 639-1)
 
@@ -866,7 +893,7 @@ When working with language, country, and timezone data, strict casing standards 
 - **HTML lang Attributes**: `<html lang="en">`
 - **i18n Libraries**: Most expect lowercase ISO 639-1 codes
 
-**Reference**: `apps/account/src/constants/languages.ts`
+**Reference**: `apps/memberry/src/constants/languages.ts`
 
 #### Country Codes (ISO 3166-1 alpha-2)
 
@@ -884,7 +911,7 @@ When working with language, country, and timezone data, strict casing standards 
 - **Banking Standards**: IBAN, SWIFT use uppercase country codes
 - **Geographic APIs**: Most expect uppercase ISO 3166-1 alpha-2
 
-**Reference**: `apps/account/src/constants/countries.ts`
+**Reference**: `apps/memberry/src/constants/countries.ts`
 
 #### Timezone Identifiers (IANA)
 
@@ -902,7 +929,7 @@ When working with language, country, and timezone data, strict casing standards 
 - **Backend Libraries**: dayjs, date-fns, luxon expect IANA format
 - **Cross-platform Consistency**: Works across all environments
 
-**Reference**: `apps/account/src/constants/timezones.ts`
+**Reference**: `apps/memberry/src/constants/timezones.ts`
 
 #### Validation in Code Reviews
 
@@ -1428,7 +1455,7 @@ export async function signInAsUser(page: Page, email: string, password: string) 
 **Current state:**
 - API service uses `.test.ts` ✅
 - Website app E2E uses `.spec.ts` ✅
-- Account app E2E uses `.spec.ts` ✅
+- Memberry app E2E uses `.spec.ts` ✅
 
 **For new code:**
 - Unit tests: Use `.test.ts`, colocate with source files
@@ -1477,7 +1504,7 @@ describe('ClientService', () => {
 ### E2E Tests (Frontend Apps)
 
 ```bash
-cd apps/account
+cd apps/memberry
 bun run test:e2e
 ```
 
@@ -1490,7 +1517,7 @@ Write E2E tests for:
 
 **Example E2E Test (Playwright)**:
 ```typescript
-// apps/account/e2e/booking.spec.ts
+// apps/memberry/tests/e2e/booking.spec.ts
 import { test, expect } from '@playwright/test';
 
 test('client can book appointment', async ({ page }) => {
@@ -1517,8 +1544,8 @@ Always run type checking before committing:
 # Check API service
 cd services/api-ts && bun run typecheck
 
-# Check account app
-cd apps/account && bun run typecheck
+# Check memberry app
+cd apps/memberry && bun run typecheck
 ```
 
 ### Test Coverage Requirements
@@ -1871,7 +1898,7 @@ cd specs/api
 bun run build
 
 # Restart dev server
-cd apps/account
+cd apps/memberry
 bun dev
 ```
 
@@ -1937,7 +1964,7 @@ bun run build  # Errors will show TypeSpec compilation issues
 
 ## Frontend Development Patterns
 
-This section covers patterns for frontend applications built with TanStack Router, React 19, and the Bun runtime — including the reference `apps/account` and any new app you scaffold.
+This section covers patterns for frontend applications built with TanStack Router, React 19, and the Bun runtime — including `apps/memberry` (product app) and `apps/admin` (ops dashboard).
 
 **Note**: For app-specific details (domain modules, routes, features), see each app's individual CONTRIBUTING.md file.
 
@@ -2067,7 +2094,7 @@ import { Button } from '@/components/ui/button'
 ```
 
 **For complete details and code examples**, see individual app documentation:
-- Account App: `apps/account/CONTRIBUTING.md`
+- Memberry App: `apps/memberry/CONTRIBUTING.md`
 
 ### Hook Architecture Patterns
 
@@ -2422,6 +2449,51 @@ When existing code, docs, and specs disagree, resolve using this order:
 6. `CONTRIBUTING.md` (this file)
 7. `CLAUDE.md`
 8. Existing code patterns
+
+---
+
+## Cross-Module Import Rules
+
+Handler modules follow a strict dependency direction. Violating this creates circular imports and tight coupling that makes testing and refactoring expensive.
+
+### Allowed Imports
+
+| Importing module | May import from |
+|-----------------|-----------------|
+| Any module | `person` (core PII hub) |
+| Any module | `association:member` (membership state) |
+| `dues` | `billing` (payment processing) |
+| `events`, `training` | `booking` (scheduling primitives) |
+| `communication`, `comms` | `person`, `association:member` |
+| `audit` | Any module (read-only, write-once) |
+
+### Forbidden
+
+- **Domain modules must NOT import each other directly.** `dues` must not import `events`; `training` must not import `dues`. Use event emitters for side effects (e.g., emit `dues.paid` → training awards credit).
+- **No upward imports.** Core modules (`person`, `association:member`) must NOT import domain modules.
+- **No peer imports between domain modules** (`dues ↔ events`, `training ↔ elections`, etc.).
+
+### Known Accepted Cycles
+
+Three bi-directional relationships involving `association:member` are accepted as architectural seams (not clean but unavoidable given the mega-module scope):
+
+1. `association:member` ↔ `membership` — member state drives membership tier; membership approvals update member records
+2. `association:member` ↔ `dues` — dues ledger is scoped to members; member lifecycle triggers due generation
+3. `association:member` ↔ `communication` — bulk comms target member lists; member events trigger communications
+
+These are documented as **provisional** pending the v1.2.0 mega-module split (see `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md`). Do not introduce new bi-directional links.
+
+### Cross-Module Side Effects
+
+Use the `EventEmitter` (see `services/api-ts/src/core/events.ts`) for async fan-out:
+
+```typescript
+// dues handler — emits event, does NOT import training module
+events.emit('dues.paid', { personId, organizationId, invoiceId });
+
+// training handler — listens, awards credit independently
+events.on('dues.paid', async ({ personId }) => { ... });
+```
 
 ---
 

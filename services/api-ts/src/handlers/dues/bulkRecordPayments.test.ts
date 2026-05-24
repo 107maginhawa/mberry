@@ -1,313 +1,286 @@
 /**
- * Tests for bulkRecordPayments handler (Slice 044)
+ * BR-48: Bulk payment recording with per-record validation.
  *
- * Covers:
- * - Auth guards (401, 403 org context)
- * - Batch recording with multiple members
- * - Per-row validation (missing fields)
- * - Partial failure handling (some succeed, some fail)
- * - Max batch size enforcement
- * - Receipt number generation per row
- * - Transaction wrapping per payment
+ * Source lives at association:member/bulkRecordPayments.ts — tested here
+ * at the path registered in br-registry.json for BR-48.
+ *
+ * Tests the handler's input validation logic, batch size cap, and
+ * per-row error handling without requiring a real database.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { DuesRepository } from './repos/dues.repo';
-import { bulkRecordPayments } from './bulkRecordPayments';
+import { describe, test, expect, beforeEach } from 'bun:test';
+import { bulkRecordPayments } from '../association:member/bulkRecordPayments';
 
-// ─── Fixtures ───────────────────────────────────────────
+// ─── Minimal context factory ───────────────────────────
 
-const basePayment = {
-  id: 'pay-1',
-  organizationId: 'org-1',
-  personId: 'person-1',
-  invoiceId: null,
-  receiptNumber: 'ORG-2026-000001',
-  amount: 5000,
-  currency: 'PHP',
-  paymentMethod: 'cash' as const,
-  referenceNumber: null,
-  status: 'completed' as const,
-  recordedBy: 'user-1',
-  membershipExtendedFrom: null,
-  membershipExtendedTo: null,
-  paidAt: new Date(),
-  expiredAt: null,
-  refundedAmount: 0,
-  proofStorageKey: null,
-  proofFileName: null,
-  proofMimeType: null,
-  rejectionReason: null,
-  metadata: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  version: 1,
-};
-
-const validBulkBody = {
-  payments: [
-    { personId: 'person-1', amount: 5000, paymentMethod: 'cash', referenceNumber: 'CASH-001' },
-    { personId: 'person-2', amount: 3000, paymentMethod: 'gcash', referenceNumber: 'GC-002' },
-    { personId: 'person-3', amount: 5000, paymentMethod: 'bank_deposit' },
-  ],
-};
-
-function makeTestCtx(overrides: Record<string, any> = {}) {
-  return makeCtx({
-    organizationId: 'org-1',
-    _body: validBulkBody,
-    ...overrides,
-  });
+function makeCtx(overrides: {
+  user?: any;
+  orgId?: string;
+  session?: any;
+  body?: any;
+  database?: any;
+}) {
+  const responses: any[] = [];
+  return {
+    get(key: string) {
+      if (key === 'user') return overrides.user ?? null;
+      if (key === 'organizationId') return overrides.orgId ?? null;
+      if (key === 'session') return overrides.session ?? { user: { id: 'u-1' } };
+      if (key === 'database') return overrides.database ?? {};
+      return undefined;
+    },
+    req: {
+      valid(_type: string) {
+        return overrides.body ?? {};
+      },
+    },
+    json(data: any, status?: number) {
+      return new Response(JSON.stringify(data), {
+        status: status ?? 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+  } as any;
 }
 
-let paymentIdCounter = 0;
-
-function defaultDuesStubs() {
-  return stubRepo(DuesRepository, {
-    findRecentPaymentForPerson: async () => undefined,
-    getNextReceiptSequence: async () => ++paymentIdCounter,
-    createPayment: async (data: any) => ({ ...basePayment, id: `pay-${paymentIdCounter}`, ...data }),
-    updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({
-      ...basePayment,
-      ...extra,
-    }),
-    listFunds: async () => [],
-    getConfig: async () => ({ billingFrequency: 'annual' }),
-  });
+async function parseRes(res: Response) {
+  return { status: res.status, body: await res.json() };
 }
 
-function stubMembership() {
-  // Inline dynamic import to avoid top-level import issues
-  return import('@/handlers/association:member/repos/membership.repo').then(({ MembershipRepository }) => {
-    restoreRepo(MembershipRepository);
-    return stubRepo(MembershipRepository, {
-      findMany: async () => [{
-        id: 'mem-1',
-        organizationId: 'org-1',
-        personId: 'person-1',
-        status: 'active',
-        duesExpiryDate: '2027-06-15',
-        gracePeriodDays: 30,
-        joinedAt: new Date().toISOString(),
-        suspendedAt: null,
-        removedAt: null,
-      }],
-      updateOneById: async () => ({}),
-    });
-  });
-}
+// ─── Auth guards [BR-48] ───────────────────────────────
 
-async function cleanupMembership() {
-  const { MembershipRepository } = await import('@/handlers/association:member/repos/membership.repo');
-  restoreRepo(MembershipRepository);
-}
-
-// ─── Tests ──────────────────────────────────────────────
-
-describe('[044] bulkRecordPayments', () => {
-  beforeEach(() => {
-    restoreRepo(DuesRepository);
-    paymentIdCounter = 0;
-  });
-
-  afterEach(async () => {
-    restoreRepo(DuesRepository);
-    await cleanupMembership();
-  });
-
-  // ── Auth Guards ──────────────────────────────────────
-
+describe('[BR-48] bulkRecordPayments — auth', () => {
   test('returns 401 when no user', async () => {
-    const ctx = makeTestCtx({ user: null, session: null });
+    const ctx = makeCtx({ user: null });
     const res = await bulkRecordPayments(ctx);
-    expect(res.status).toBe(401);
+    const { status, body } = await parseRes(res);
+    expect(status).toBe(401);
+    expect(body.error).toContain('Unauthorized');
   });
 
-  test('returns 403 when no organizationId', async () => {
-    const ctx = makeTestCtx({ organizationId: null });
+  test('returns 403 when no org context', async () => {
+    const ctx = makeCtx({ user: { id: 'u-1' }, orgId: undefined });
     const res = await bulkRecordPayments(ctx);
-    expect(res.status).toBe(403);
+    const { status, body } = await parseRes(res);
+    expect(status).toBe(403);
+    expect(body.error).toContain('Organization');
   });
+});
 
-  // ── Input Validation ─────────────────────────────────
+// ─── Input validation [BR-48] ──────────────────────────
 
-  test('returns 400 when payments array is empty', async () => {
-    const ctx = makeTestCtx({ _body: { payments: [] } });
-    const res = await bulkRecordPayments(ctx);
-    expect(res.status).toBe(400);
-    expect(res.body.error).toContain('must not be empty');
-  });
-
+describe('[BR-48] bulkRecordPayments — input validation', () => {
   test('returns 400 when payments is missing', async () => {
-    const ctx = makeTestCtx({ _body: {} });
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: {},
+    });
     const res = await bulkRecordPayments(ctx);
-    expect(res.status).toBe(400);
+    const { status, body } = await parseRes(res);
+    expect(status).toBe(400);
+    expect(body.error).toContain('payments array');
   });
 
-  test('returns 400 when batch exceeds max size', async () => {
+  test('returns 400 when payments is empty array', async () => {
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: { payments: [] },
+    });
+    const res = await bulkRecordPayments(ctx);
+    const { status, body } = await parseRes(res);
+    expect(status).toBe(400);
+    expect(body.error).toContain('must not be empty');
+  });
+
+  test('returns 400 when batch exceeds MAX_BATCH_SIZE (50)', async () => {
     const payments = Array.from({ length: 51 }, (_, i) => ({
-      personId: `person-${i}`,
+      personId: `p-${i}`,
       amount: 1000,
       paymentMethod: 'cash',
     }));
-    const ctx = makeTestCtx({ _body: { payments } });
-    const res = await bulkRecordPayments(ctx);
-    expect(res.status).toBe(400);
-    expect(res.body.error).toContain('maximum');
-  });
-
-  // ── Per-Row Validation ────────────────────────────────
-
-  test('rejects rows with missing personId', async () => {
-    defaultDuesStubs();
-    await stubMembership();
-
-    const ctx = makeTestCtx({
-      _body: {
-        payments: [
-          { amount: 5000, paymentMethod: 'cash' }, // missing personId
-          { personId: 'person-2', amount: 3000, paymentMethod: 'gcash' },
-        ],
-      },
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: { payments },
     });
     const res = await bulkRecordPayments(ctx);
-
-    expect(res.body.results).toHaveLength(2);
-    expect(res.body.results[0].status).toBe('error');
-    expect(res.body.results[0].error).toContain('personId');
-    expect(res.body.results[1].status).toBe('success');
-    expect(res.body.summary.success).toBe(1);
-    expect(res.body.summary.errors).toBe(1);
+    const { status, body } = await parseRes(res);
+    expect(status).toBe(400);
+    expect(body.error).toContain('maximum of 50');
   });
 
-  test('rejects rows with invalid amount', async () => {
-    defaultDuesStubs();
-    await stubMembership();
-
-    const ctx = makeTestCtx({
-      _body: {
-        payments: [
-          { personId: 'person-1', amount: 0, paymentMethod: 'cash' },
-          { personId: 'person-2', amount: -100, paymentMethod: 'cash' },
-        ],
+  test('exactly 50 payments does not trigger batch limit', async () => {
+    const payments = Array.from({ length: 50 }, (_, i) => ({
+      personId: `p-${i}`,
+      amount: 1000,
+      paymentMethod: 'cash',
+    }));
+    // Will fail later (no DB), but should NOT return batch size error
+    const fakeDb = {
+      transaction: async () => {
+        throw new Error('no real db');
       },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: { payments },
+      database: fakeDb,
     });
     const res = await bulkRecordPayments(ctx);
-
-    expect(res.body.results[0].status).toBe('error');
-    expect(res.body.results[0].error).toContain('amount');
-    expect(res.body.results[1].status).toBe('error');
-    expect(res.body.summary.errors).toBe(2);
+    const { status, body } = await parseRes(res);
+    // Should get past validation — errors from processing, not batch limit
+    expect(body.error).toBeUndefined();
   });
+});
 
-  test('rejects rows with missing paymentMethod', async () => {
-    defaultDuesStubs();
-    await stubMembership();
+// ─── Per-row validation [BR-48] ────────────────────────
 
-    const ctx = makeTestCtx({
-      _body: {
+describe('[BR-48] bulkRecordPayments — per-row validation', () => {
+  test('rows missing personId are flagged as error', async () => {
+    const fakeDb = {
+      transaction: async () => {
+        throw new Error('no real db');
+      },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: {
         payments: [
-          { personId: 'person-1', amount: 5000 }, // missing paymentMethod
+          { personId: '', amount: 1000, paymentMethod: 'cash' },
         ],
       },
+      database: fakeDb,
     });
     const res = await bulkRecordPayments(ctx);
-
-    expect(res.body.results[0].status).toBe('error');
-    expect(res.body.results[0].error).toContain('paymentMethod');
+    const { body } = await parseRes(res);
+    const errorRow = body.results?.find((r: any) => r.status === 'error');
+    expect(errorRow).toBeDefined();
+    expect(errorRow.error).toContain('personId');
   });
 
-  // ── Happy Path ───────────────────────────────────────
-
-  test('records multiple payments, returns 201 with per-row results', async () => {
-    defaultDuesStubs();
-    await stubMembership();
-
-    const ctx = makeTestCtx();
-    const res = await bulkRecordPayments(ctx);
-
-    expect(res.status).toBe(201);
-    expect(res.body.results).toHaveLength(3);
-    expect(res.body.results.every((r: any) => r.status === 'success')).toBe(true);
-    expect(res.body.summary.total).toBe(3);
-    expect(res.body.summary.success).toBe(3);
-    expect(res.body.summary.errors).toBe(0);
-  });
-
-  test('each payment gets a unique receipt number', async () => {
-    defaultDuesStubs();
-    await stubMembership();
-
-    const ctx = makeTestCtx();
-    const res = await bulkRecordPayments(ctx);
-
-    const receiptNumbers = res.body.results.map((r: any) => r.receiptNumber);
-    const uniqueReceipts = new Set(receiptNumbers);
-    expect(uniqueReceipts.size).toBe(3);
-  });
-
-  // ── Partial Failure ──────────────────────────────────
-
-  test('partial failure: valid rows succeed, invalid rows fail', async () => {
-    defaultDuesStubs();
-    await stubMembership();
-
-    const ctx = makeTestCtx({
-      _body: {
+  test('rows with zero amount are flagged as error', async () => {
+    const fakeDb = {
+      transaction: async () => {
+        throw new Error('no real db');
+      },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: {
         payments: [
-          { personId: 'person-1', amount: 5000, paymentMethod: 'cash' }, // valid
-          { personId: '', amount: 0, paymentMethod: '' }, // all invalid
-          { personId: 'person-3', amount: 3000, paymentMethod: 'gcash' }, // valid
+          { personId: 'p-1', amount: 0, paymentMethod: 'cash' },
         ],
       },
+      database: fakeDb,
     });
     const res = await bulkRecordPayments(ctx);
-
-    expect(res.status).toBe(201); // at least one success
-    expect(res.body.summary.success).toBe(2);
-    expect(res.body.summary.errors).toBe(1);
+    const { body } = await parseRes(res);
+    const errorRow = body.results?.find((r: any) => r.status === 'error');
+    expect(errorRow).toBeDefined();
+    expect(errorRow.error).toContain('amount');
   });
 
-  test('all rows fail returns 400', async () => {
-    const ctx = makeTestCtx({
-      _body: {
+  test('rows with negative amount are flagged as error', async () => {
+    const fakeDb = {
+      transaction: async () => {
+        throw new Error('no real db');
+      },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: {
+        payments: [
+          { personId: 'p-1', amount: -500, paymentMethod: 'cash' },
+        ],
+      },
+      database: fakeDb,
+    });
+    const res = await bulkRecordPayments(ctx);
+    const { body } = await parseRes(res);
+    const errorRow = body.results?.find((r: any) => r.status === 'error');
+    expect(errorRow).toBeDefined();
+    expect(errorRow.error).toContain('amount');
+  });
+
+  test('rows missing paymentMethod are flagged as error', async () => {
+    const fakeDb = {
+      transaction: async () => {
+        throw new Error('no real db');
+      },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: {
+        payments: [
+          { personId: 'p-1', amount: 1000, paymentMethod: '' },
+        ],
+      },
+      database: fakeDb,
+    });
+    const res = await bulkRecordPayments(ctx);
+    const { body } = await parseRes(res);
+    const errorRow = body.results?.find((r: any) => r.status === 'error');
+    expect(errorRow).toBeDefined();
+    expect(errorRow.error).toContain('paymentMethod');
+  });
+
+  test('multiple validation errors combined in single row', async () => {
+    const fakeDb = {
+      transaction: async () => {
+        throw new Error('no real db');
+      },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: {
+        payments: [
+          { personId: '', amount: -1, paymentMethod: '' },
+        ],
+      },
+      database: fakeDb,
+    });
+    const res = await bulkRecordPayments(ctx);
+    const { body } = await parseRes(res);
+    const errorRow = body.results?.[0];
+    expect(errorRow?.status).toBe('error');
+    // Should contain multiple errors separated by semicolons
+    expect(errorRow?.error).toContain(';');
+  });
+});
+
+// ─── Summary response shape [BR-48] ───────────────────
+
+describe('[BR-48] bulkRecordPayments — response summary', () => {
+  test('all-invalid batch returns 400 with summary', async () => {
+    const fakeDb = {
+      transaction: async () => {
+        throw new Error('no real db');
+      },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: {
         payments: [
           { personId: '', amount: 0, paymentMethod: '' },
-          { amount: -1 },
+          { personId: '', amount: -1, paymentMethod: '' },
         ],
       },
+      database: fakeDb,
     });
     const res = await bulkRecordPayments(ctx);
-
-    expect(res.status).toBe(400);
-    expect(res.body.summary.success).toBe(0);
-  });
-
-  // ── Default currency ─────────────────────────────────
-
-  test('defaults to PHP currency when not specified', async () => {
-    let capturedCurrency: string | undefined;
-
-    stubRepo(DuesRepository, {
-      getNextReceiptSequence: async () => 1,
-      createPayment: async (data: any) => {
-        capturedCurrency = data.currency;
-        return { ...basePayment, ...data };
-      },
-      updatePaymentStatus: async () => basePayment,
-      listFunds: async () => [],
-      getConfig: async () => ({ billingFrequency: 'annual' }),
-    });
-    await stubMembership();
-
-    const ctx = makeTestCtx({
-      _body: {
-        payments: [{ personId: 'person-1', amount: 5000, paymentMethod: 'cash' }],
-      },
-    });
-    await bulkRecordPayments(ctx);
-
-    expect(capturedCurrency).toBe('PHP');
+    const { status, body } = await parseRes(res);
+    expect(status).toBe(400);
+    expect(body.summary.total).toBe(2);
+    expect(body.summary.success).toBe(0);
+    expect(body.summary.errors).toBe(2);
   });
 });

@@ -8,7 +8,7 @@ import type { Session } from '@/types/auth';
 export async function createCommitteeTask(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
-  const committeeId = ctx.req.param('committeeId');
+  const committeeId = ctx.req.param('committeeId')!;
   const body = await ctx.req.json();
 
   if (!body.title) {

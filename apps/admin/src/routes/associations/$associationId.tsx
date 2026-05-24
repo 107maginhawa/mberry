@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Building2, ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Building2, ArrowLeft, Pencil, Plus, Trash2, X, Users, TrendingUp, GraduationCap, Calendar, BarChart3 } from 'lucide-react'
 import { Button, Input, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -11,6 +11,9 @@ import {
   listAssociationsQueryKey,
   updateAssociationMutation,
   deleteAssociationMutation,
+  listOrganizationsOptions,
+  searchEventsOptions,
+  searchCoursesOptions,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/associations/$associationId')({
@@ -34,6 +37,22 @@ interface Organization {
   type?: string
   status?: string
   memberCount?: number
+}
+
+interface NationalDashboardAggregate {
+  chapterCount: number
+  totalMembers: number
+  collectionRate: number
+  cpdComplianceRate: number
+  totalActivityCount90d: number
+}
+
+interface NationalDashboardResponse {
+  data: {
+    associationId: string
+    snapshotMonth: string
+    aggregate: NationalDashboardAggregate
+  }
 }
 
 function AssociationDetailPage() {
@@ -80,6 +99,49 @@ function AssociationDetailPage() {
     },
   })
 
+  // Fetch organizations for this association
+  const { data: orgsData, isLoading: orgsLoading } = useQuery(
+    listOrganizationsOptions({ query: { associationId, limit: 100 } })
+  )
+  const orgs = (orgsData?.data ?? []) as Organization[]
+
+  // Fetch national dashboard data for chapter health KPIs
+  const currentMonth = new Date().toISOString().slice(0, 7)
+  const { data: dashboardData, isLoading: dashLoading } = useQuery<NationalDashboardResponse>({
+    queryKey: ['national-dashboard', associationId, currentMonth],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/national-dashboard/${associationId}?snapshotMonth=${currentMonth}`)
+      if (!res.ok) throw new Error(`Failed to load dashboard: ${res.statusText}`)
+      return res.json()
+    },
+    enabled: !!associationId,
+  })
+  const aggregate = dashboardData?.data?.aggregate
+
+  // Fetch recent events for this association's orgs
+  const { data: recentEventsData } = useQuery(
+    searchEventsOptions({ query: { limit: 5 } })
+  )
+  const recentEvents = (recentEventsData?.data ?? []) as unknown as Array<{
+    id: string; title: string; startDate?: string; status?: string; organizationName?: string
+  }>
+
+  // Fetch recent training for this association's orgs
+  const { data: recentCoursesData } = useQuery(
+    searchCoursesOptions({ query: { limit: 5 } })
+  )
+  const recentCourses = (recentCoursesData?.data ?? []) as unknown as Array<{
+    id: string; title?: string; name?: string; startDate?: string; createdAt?: string; status?: string; organizationName?: string
+  }>
+
+  // Merge and sort recent activity
+  const recentActivity = [
+    ...recentEvents.map((e) => ({ type: 'event' as const, title: e.title, date: e.startDate, status: e.status, org: e.organizationName })),
+    ...recentCourses.map((c) => ({ type: 'training' as const, title: c.title || c.name || 'Untitled', date: c.startDate || c.createdAt, status: c.status, org: c.organizationName })),
+  ]
+    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+    .slice(0, 10)
+
   const startEdit = () => {
     if (association) {
       setEditName(association.name)
@@ -90,6 +152,10 @@ function AssociationDetailPage() {
   }
 
   const createdDate = association?.createdAt || association?.created_at
+
+  function formatPercent(value: number): string {
+    return `${(value * 100).toFixed(1)}%`
+  }
 
   return (
     <div className="p-8">
@@ -108,9 +174,25 @@ function AssociationDetailPage() {
       )}
 
       {isLoading ? (
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="space-y-4">
+          <div className="rounded-lg border bg-card p-6 space-y-3">
+            <div className="h-6 w-[40%] rounded bg-muted animate-pulse" />
+            <div className="h-4 w-[25%] rounded bg-muted animate-pulse" />
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-lg border bg-card p-4 space-y-2">
+                <div className="h-3 w-[50%] rounded bg-muted animate-pulse" />
+                <div className="h-8 w-[30%] rounded bg-muted animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : !association ? (
-        <div className="text-muted-foreground">Association not found.</div>
+        <div className="rounded-lg border bg-card p-12 text-center text-muted-foreground">
+          <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
+          <p>Association not found.</p>
+        </div>
       ) : (
         <>
           <div className="flex items-center justify-between mb-8">
@@ -122,6 +204,18 @@ function AssociationDetailPage() {
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
                   ID: {associationId}
+                  {association.status && (
+                    <span className={`ml-3 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                      association.status === 'active' ? 'bg-green-100 text-green-700'
+                        : association.status === 'pending' ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}>
+                      {association.status}
+                    </span>
+                  )}
+                  {createdDate && (
+                    <span className="ml-3">Since {new Date(createdDate).toLocaleDateString('en-PH', { month: 'short', year: 'numeric' })}</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -136,6 +230,67 @@ function AssociationDetailPage() {
               </Button>
             </div>
           </div>
+
+          {/* Chapter Health KPI Cards */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">Members</p>
+              </div>
+              {dashLoading ? (
+                <p className="text-2xl font-bold text-muted-foreground animate-pulse">...</p>
+              ) : (
+                <p className="text-2xl font-bold">{aggregate?.totalMembers?.toLocaleString() ?? '--'}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">{aggregate?.chapterCount ?? '--'} chapters</p>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">Collection Rate</p>
+              </div>
+              {dashLoading ? (
+                <p className="text-2xl font-bold text-muted-foreground animate-pulse">...</p>
+              ) : (
+                <p className="text-2xl font-bold">{aggregate ? formatPercent(aggregate.collectionRate) : '--'}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">this month</p>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">CPD Compliance</p>
+              </div>
+              {dashLoading ? (
+                <p className="text-2xl font-bold text-muted-foreground animate-pulse">...</p>
+              ) : (
+                <p className="text-2xl font-bold">{aggregate ? formatPercent(aggregate.cpdComplianceRate) : '--'}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">compliant</p>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">Activity (90d)</p>
+              </div>
+              {dashLoading ? (
+                <p className="text-2xl font-bold text-muted-foreground animate-pulse">...</p>
+              ) : (
+                <p className="text-2xl font-bold">{aggregate?.totalActivityCount90d ?? '--'}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">events + training</p>
+            </div>
+          </div>
+
+          {/* Link to National Dashboard */}
+          <Link
+            to="/national-dashboard"
+            className="inline-flex items-center gap-2 text-sm text-primary hover:underline mb-8"
+          >
+            <BarChart3 className="w-4 h-4" />
+            View National Dashboard →
+          </Link>
 
           {/* Edit Dialog */}
           {editing && (
@@ -242,42 +397,24 @@ function AssociationDetailPage() {
                 <p className="text-sm font-medium mt-1">{association.currency}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Status</p>
-                <p className="text-sm font-medium mt-1">
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                    association.status === 'active'
-                      ? 'bg-green-100 text-green-700'
-                      : association.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {association.status ?? 'unknown'}
-                  </span>
-                </p>
-              </div>
-              <div>
                 <p className="text-sm text-muted-foreground">Created</p>
                 <p className="text-sm font-medium mt-1">
                   {createdDate ? new Date(createdDate).toLocaleDateString() : '--'}
                 </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Members</p>
-                <p className="text-sm font-medium mt-1">{association.memberCount ?? '--'}</p>
               </div>
             </div>
           </div>
 
           {/* Organizations within this association */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-h2">Organizations</h2>
+            <h2 className="text-h2">Organizations ({orgs.length})</h2>
             <Button variant="outline" size="sm">
               <Plus className="w-4 h-4" />
               Add Organization
             </Button>
           </div>
 
-          <div className="rounded-lg border bg-card">
+          <div className="rounded-lg border bg-card mb-8">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -285,17 +422,88 @@ function AssociationDetailPage() {
                   <TableHead className="p-4 text-sm">Type</TableHead>
                   <TableHead className="p-4 text-sm">Status</TableHead>
                   <TableHead className="p-4 text-sm">Members</TableHead>
-                  <TableHead className="text-right p-4 text-sm">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
-                    No organizations found for this association.
-                  </TableCell>
-                </TableRow>
+                {orgsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="p-8 text-center text-muted-foreground animate-pulse">
+                      Loading organizations...
+                    </TableCell>
+                  </TableRow>
+                ) : orgs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="p-8 text-center text-muted-foreground">
+                      <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                      <p>No organizations found for this association.</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  orgs.map((org) => (
+                    <TableRow key={org.id}>
+                      <TableCell className="p-4 text-sm font-medium">
+                        <Link to="/organizations/$organizationId" params={{ organizationId: org.id }} className="hover:underline text-primary">
+                          {org.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="p-4 text-sm text-muted-foreground">{org.type ?? '--'}</TableCell>
+                      <TableCell className="p-4 text-sm">
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                          org.status === 'active' ? 'bg-green-100 text-green-700'
+                            : org.status === 'pending' ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {org.status ?? 'unknown'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="p-4 text-sm text-muted-foreground">{org.memberCount ?? '--'}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="mb-8">
+            <h2 className="text-h2 mb-4">Recent Activity</h2>
+            <div className="rounded-lg border bg-card divide-y">
+              {recentActivity.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground">
+                  <Calendar className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">No recent events or training found.</p>
+                </div>
+              ) : (
+                recentActivity.map((item, i) => (
+                  <div key={i} className="flex items-start gap-3 px-4 py-3">
+                    {item.type === 'event' ? (
+                      <Calendar className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                    ) : (
+                      <GraduationCap className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-foreground truncate">
+                        <span className="text-xs uppercase text-muted-foreground mr-2">{item.type}</span>
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {item.date ? new Date(item.date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : '--'}
+                        {item.org && <span className="ml-2">· {item.org}</span>}
+                        {item.status && (
+                          <span className={`ml-2 ${
+                            item.status === 'published' || item.status === 'completed' ? 'text-green-600'
+                              : item.status === 'cancelled' ? 'text-red-600'
+                              : 'text-muted-foreground'
+                          }`}>
+                            {item.status}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </>
       )}

@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { eq } from 'drizzle-orm';
 import { UnauthorizedError } from '@/core/errors';
 import type { UpsertDuesGatewayConfigBody, UpsertDuesGatewayConfigParams } from '@/generated/openapi/validators';
-import { duesGatewayConfigs } from '@/handlers/dues/repos/dues-payments.schema';
+import { duesGatewayConfigs } from './repos/dues-payments.schema';
 import { auditAction } from '@/utils/audit';
 
 /**

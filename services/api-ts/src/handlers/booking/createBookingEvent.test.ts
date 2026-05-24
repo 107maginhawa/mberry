@@ -40,6 +40,7 @@ describe('createBookingEvent', () => {
 
     const res = await createBookingEvent(ctx as any);
     expect(res.status).toBe(403);
+    expect((res as any).body.error).toBeDefined();
   });
 
   test('throws ValidationError for invalid config', async () => {
@@ -55,7 +56,7 @@ describe('createBookingEvent', () => {
     await expect(createBookingEvent(ctx as any)).rejects.toThrow('Invalid booking event configuration');
   });
 
-  test('creates event and returns 201', async () => {
+  test('creates event and returns 201 with event data', async () => {
     mocks = stubRepo(BookingEventRepository, {
       validateEventConfig: () => [],
       createWithSmartDefaults: async () => EVENT,
@@ -70,5 +71,10 @@ describe('createBookingEvent', () => {
 
     const res = await createBookingEvent(ctx as any);
     expect(res.status).toBe(201);
+    const body = (res as any).body;
+    expect(body.id).toBe('event-1');
+    expect(body.title).toBe('Consultation');
+    expect(body.status).toBe('active');
+    expect(body.ownerId).toBe('user-1');
   });
 });

@@ -23,9 +23,10 @@ import { registerEmailJobs } from '@/handlers/email/jobs';
 import { registerNotifsJobs } from '@/handlers/notifs/jobs';
 import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
-import { registerDuesJobs } from '@/handlers/dues/jobs';
+import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
+import { registerSurveyJobs } from '@/handlers/surveys/jobs';
 
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
@@ -67,9 +68,54 @@ import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedPr
 import { unsubscribeEmail } from '@/handlers/email/unsubscribeEmail';
 import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 
-// Event lifecycle: completeEvent hand-wired (not yet in TypeSpec)
-import { completeEvent } from '@/handlers/association:operations/completeEvent';
+// Saved Segments — hand-wired CRUD (Wave 4β Lane C)
+import { createSavedSegment, listSavedSegments, deleteSavedSegment } from '@/handlers/communication/savedSegments';
 
+// Survey extras — hand-wired (export returns CSV, clone is convenience endpoint)
+import { exportSurveyResponses } from '@/handlers/surveys/exportSurveyResponses';
+import { cloneSurvey } from '@/handlers/surveys/cloneSurvey';
+import { getNpsTrends } from '@/handlers/surveys/getNpsTrends';
+import { listAdminSurveys } from '@/handlers/surveys/listAdminSurveys';
+import { deleteMemberResponses } from '@/handlers/surveys/deleteMemberResponses';
+
+// completeEvent now served via generated TypeSpec route (was hand-wired, duplicate removed)
+
+// One-tap payment token: public validate + checkout, officer send-link
+import { sendPaymentLink } from '@/handlers/dues/sendPaymentLink';
+import { validatePaymentToken } from '@/handlers/dues/validatePaymentToken';
+import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
+
+// Public org discovery — hand-wired (not yet in TypeSpec)
+import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
+
+// Platform admin: national dashboard + cross-org committee list (dark handlers → now wired)
+import { getNationalDashboard } from '@/handlers/platformadmin/getNationalDashboard';
+import { listAllCommittees } from '@/handlers/platformadmin/listAllCommittees';
+import { getCommittee } from '@/handlers/association:operations/getCommittee';
+
+// OG meta route for social sharing crawlers (WhatsApp, Facebook, Twitter)
+import { serveEventOgMeta } from '@/handlers/events/serveEventOgMeta';
+
+// Public credential lookup (Wave 3a — Trust Directory)
+import { lookupCredentialPublic } from '@/handlers/association:member/lookupCredentialPublic';
+
+// Wave 2b: Credit pipeline, CPD config, compliance, certificates
+import { getCpdConfig } from '@/handlers/association:member/getCpdConfig';
+import { updateCpdConfig } from '@/handlers/association:member/updateCpdConfig';
+import { awardManualCredit } from '@/handlers/association:member/awardManualCredit';
+import { getComplianceReport } from '@/handlers/association:member/getComplianceReport';
+import { refreshCompliance } from '@/handlers/association:member/refreshCompliance';
+import { getMyCredits } from '@/handlers/person/getMyCredits';
+import { bulkIssueCertificates } from '@/handlers/certificates/bulkIssueCertificates';
+import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
+
+// Wave 1 Financial: Special Assessments CRUD (T8)
+import { createSpecialAssessment } from '@/handlers/association:member/createSpecialAssessment';
+import { listSpecialAssessments } from '@/handlers/association:member/listSpecialAssessments';
+import { updateSpecialAssessment } from '@/handlers/association:member/updateSpecialAssessment';
+import { deleteSpecialAssessment } from '@/handlers/association:member/deleteSpecialAssessment';
+import { applySpecialAssessment } from '@/handlers/association:member/applySpecialAssessment';
+import { getSpecialAssessmentCollection } from '@/handlers/association:member/getSpecialAssessmentCollection';
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -135,11 +181,33 @@ export function createApp(config: Config): App {
   // Register feature flags endpoint (public, no auth)
   registerFeatureFlagRoutes(app as App);
 
+  // Public org discovery — no auth required
+  app.get('/public/orgs', listPublicOrgs as any);
+
+  // OG meta for event social sharing — serves HTML with og:meta for crawlers
+  app.get('/og/events/:slug', serveEventOgMeta as any);
+
+  // Public credential lookup by credential number (Wave 3a — Trust Directory)
+  app.get('/association/member/credentials/lookup/:credentialNumber', lookupCredentialPublic as any);
+
+  // Public certificate verification (Wave 2b)
+  app.get('/certificates/verify/:certificateNumber', verifyCertificatePublic as any);
+
   // Register auth routes
   registerAuthRoutes(app as App);
 
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
+
+  // Platform admin: national dashboard + cross-org committees (hand-wired, under /admin/*)
+  app.get('/admin/national-dashboard/:associationId', getNationalDashboard as any);
+  app.get('/admin/committees', listAllCommittees as any);
+  app.get('/admin/committees/:id', getCommittee as any);
+
+  // One-tap payment token: PUBLIC endpoints (member clicks from email, no auth)
+  // Registered before any wildcard auth middleware to avoid interception
+  app.get('/pay/:token/validate', validatePaymentToken as any);
+  app.post('/pay/:token/checkout', checkoutPaymentToken as any);
 
   // Public unsubscribe endpoint — registered BEFORE /email/* auth middleware
   // RFC 8058: users click from email client without being logged in
@@ -157,6 +225,7 @@ export function createApp(config: Config): App {
   // Public association endpoints that must NOT have auth middleware
   const ASSOCIATION_PUBLIC_PATHS = [
     '/association/member/credentials/public-verify',
+    '/association/member/credentials/lookup',
     '/association/member/ethics/public-complaints',
     '/association/member/ethics/public-complaint',
     '/association/member/directory/public',
@@ -187,17 +256,78 @@ export function createApp(config: Config): App {
     app.use(prefix, orgContextOptionalMiddleware());
   }
 
+  // Invite routes middleware:
+  // - /invite/validate/:token is PUBLIC (no auth) — user clicks link before logging in
+  // - /invite/claim/:token requires auth — user must be logged in
+  // - POST /invite requires auth + org context — officer invites member
+  app.use('/invite', authMiddleware(), orgContextMiddleware());
+  app.use('/invite/claim/*', authMiddleware());
+  // /invite/validate/* intentionally has no auth — public endpoint
+
+  // Accredited Providers — auth middleware applied here BEFORE generated routes
+  // (generated routes omit authMiddleware due to codegen gap)
+  app.use('/accredited-providers/*', authMiddleware());
+
   // Register API routes
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
 
-  // completeEvent — hand-wired (not yet in TypeSpec), follows cancelEvent pattern
-  app.post('/association/events/:eventId/complete', authMiddleware(), completeEvent as any);
+  // ──────────────────────────────────────────────────────────────────────────
+  // PRE-MIGRATION ROUTES — 33 hand-wired routes not in TypeSpec
+  // See ROADMAP.md "TypeSpec Migration Backlog" for full inventory.
+  //
+  // BY DESIGN (9) — middleware ordering or public-before-auth requirements:
+  //   /public/orgs, /og/events/:slug, /credentials/lookup/:num,
+  //   /certificates/verify/:num, /pay/:token/* (2),
+  //   /email/unsubscribe (GET+POST), /email/suppressions
+  //
+  // PRE-MIGRATION (24) — should be TypeSpec, migrate when touching module:
+  //   /admin/* (3), /org/:id/payments/send-link, /accredited-providers/* (4),
+  //   /cpd-config/* (2), /credits/manual, /compliance/* (2), /persons/me/credits,
+  //   /certificates/bulk-issue, /special-assessments/* (6), /segments/* (3)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // completeEvent — removed hand-wired duplicate; now served via generated TypeSpec route
+  // (see generated/openapi/routes.ts)
+
+  // One-tap payment send-link — officer generates payment link (auth required)
+  app.post('/org/:organizationId/payments/send-link', authMiddleware(), orgContextMiddleware(), sendPaymentLink as any);
 
   // PRC Accredited Providers — hand-wired, org-scoped (no /api prefix per CLAUDE.md)
   app.get('/accredited-providers/:organizationId', authMiddleware(), listAccreditedProviders);
   app.post('/accredited-providers/:organizationId', authMiddleware(), createAccreditedProvider);
   app.patch('/accredited-providers/:organizationId/:providerId', authMiddleware(), updateAccreditedProvider);
   app.delete('/accredited-providers/:organizationId/:providerId', authMiddleware(), deleteAccreditedProvider);
+
+  // Wave 2b: CPD config, manual credit, compliance, bulk certificates
+  app.get('/association/member/cpd-config/:organizationId', authMiddleware(), getCpdConfig as any);
+  app.patch('/association/member/cpd-config/:organizationId', authMiddleware(), updateCpdConfig as any);
+  app.post('/association/member/credits/manual', authMiddleware(), orgContextMiddleware(), awardManualCredit as any);
+  app.get('/association/member/compliance/:organizationId', authMiddleware(), getComplianceReport as any);
+  app.post('/association/member/compliance/:organizationId/refresh', authMiddleware(), refreshCompliance as any);
+  app.get('/persons/me/credits', authMiddleware(), orgContextOptionalMiddleware(), getMyCredits as any);
+  app.post('/certificates/bulk-issue', authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
+
+  // Wave 1 Financial: Special Assessments CRUD (T8)
+  app.post('/association/member/special-assessments', authMiddleware(), createSpecialAssessment as any);
+  app.get('/association/member/special-assessments/:orgId', authMiddleware(), listSpecialAssessments as any);
+  app.put('/association/member/special-assessments/:id', authMiddleware(), updateSpecialAssessment as any);
+  app.delete('/association/member/special-assessments/:id', authMiddleware(), deleteSpecialAssessment as any);
+  app.post('/association/member/special-assessments/:id/apply', authMiddleware(), applySpecialAssessment as any);
+  app.get('/association/member/special-assessments/:id/collection', authMiddleware(), getSpecialAssessmentCollection as any);
+
+  // Wave 4β: Saved Segments — CRUD for audience segment presets
+  app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
+  app.get('/communications/segments', authMiddleware(), listSavedSegments as any);
+  app.delete('/communications/segments/:id', authMiddleware(), deleteSavedSegment as any);
+
+  // Survey module extras — hand-wired
+  app.get('/surveys/:survey/export', authMiddleware(), orgContextMiddleware(), exportSurveyResponses as any);
+  app.post('/surveys/:survey/clone', authMiddleware(), orgContextMiddleware(), cloneSurvey as any);
+  app.get('/surveys/analytics/nps-trends', authMiddleware(), orgContextMiddleware(), getNpsTrends as any);
+  app.delete('/surveys/my-responses', authMiddleware(), deleteMemberResponses as any);
+
+  // Admin survey dashboard — platform admin only
+  app.get('/admin/surveys', authMiddleware(), platformAdminAuthMiddleware(), listAdminSurveys as any);
 
   // Register WebSocket handlers
   registerWebSocketRoutes(app as App);
@@ -257,6 +387,7 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerDuesJobs(jobs);
   registerPersonJobs(jobs);
   registerMembershipJobs(jobs, app.notifs);
+  registerSurveyJobs(jobs, app.notifs);
 
   logger.debug('Starting background job scheduler...');
   await jobs.start();

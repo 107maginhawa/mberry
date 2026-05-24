@@ -36,6 +36,9 @@ export async function getPrivacySettings(ctx: HandlerContext): Promise<Response>
       phoneVisible: false,
       photoVisible: true,
       addressVisible: false,
+      credentialsVisible: false,
+      duesStatusVisible: false,
+      ceComplianceVisible: false,
     }, 200);
   }
 

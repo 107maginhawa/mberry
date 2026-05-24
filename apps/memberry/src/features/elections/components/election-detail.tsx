@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { Users, Vote, Trophy, ArrowRight, CheckCircle2, Plus, Trash2, Pencil } from 'lucide-react'
 import { Button, Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
@@ -15,6 +15,7 @@ import {
 import type { OpenElectionNominationsData, OpenElectionVotingData, CertifyElectionData } from '@monobase/sdk-ts/generated/types.gen'
 import type { Options } from '@monobase/sdk-ts/generated/sdk.gen'
 import { NomineePickerDialog } from './nominee-picker-dialog'
+import { ElectionTimeline } from './election-timeline'
 
 /** Runtime election shape from API (SDK Election type has Date fields; runtime uses strings + extra fields) */
 interface RuntimeElection {
@@ -86,6 +87,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const queryClient = useQueryClient()
   const [confirmAction, setConfirmAction] = useState<string | null>(null)
   const [nominatePositionId, setNominatePositionId] = useState<string | null>(null)
@@ -213,8 +215,8 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
         <div className="flex items-center gap-2">
           {election.status === 'draft' && (
             <Link
-              to="/org/$orgId/officer/elections/$electionId/edit"
-              params={{ orgId, electionId }}
+              to="/org/$orgSlug/officer/elections/$electionId/edit"
+              params={{ orgSlug, electionId }}
               className="flex items-center gap-1.5 px-3 py-2 border rounded-md text-sm hover:bg-[var(--color-surface-warm)] transition-colors"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -254,7 +256,19 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
         </div>
       </div>
 
-      {/* Timeline */}
+      {/* Election progress timeline */}
+      <div className="border rounded-lg p-4">
+        <ElectionTimeline
+          status={election.status}
+          nominationsOpenAt={election.nominationStart ?? election.nominationsOpenAt}
+          nominationsCloseAt={election.nominationEnd ?? election.nominationsCloseAt}
+          votingOpenAt={election.votingStart ?? election.votingOpenAt}
+          votingCloseAt={election.votingEnd ?? election.votingCloseAt}
+          publishedAt={election.publishedAt}
+        />
+      </div>
+
+      {/* Date cards grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
         {[
           { label: 'Nominations Open', value: election.nominationStart },
@@ -334,7 +348,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 {isWinner && <Trophy className="w-4 h-4 text-emerald-600 shrink-0" />}
-                                <p className="font-mono text-xs truncate text-[var(--color-muted)]">{nominee.personId}</p>
+                                <p className="text-sm font-medium truncate">{(nominee as any).personName ?? nominee.personId}</p>
                                 <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${NOMINEE_STATUS_COLORS[nominee.status] ?? ''}`}>
                                   {nominee.status}
                                 </span>

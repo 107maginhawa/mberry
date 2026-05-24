@@ -74,7 +74,7 @@ export const documentAccessLogs = pgTable('document_access_log', {
   documentId: uuid('document_id').notNull(),
   personId: uuid('person_id').notNull(),
   action: varchar('action', { length: 50 }).notNull(), // 'view', 'download', 'edit'
-  accessedAt: timestamp('accessed_at').notNull().defaultNow(),
+  accessedAt: timestamp('accessed_at', { withTimezone: true }).notNull().defaultNow(),
   ipAddress: varchar('ip_address', { length: 45 }),
 }, (table) => [
   index('idx_docaccess_org').on(table.organizationId),
