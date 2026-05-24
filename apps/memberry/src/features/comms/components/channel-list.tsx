@@ -11,6 +11,8 @@ interface ChannelListProps {
   orgSlug: string
   activeRoomId?: string
   onSelectRoom: (roomId: string) => void
+  isOfficer?: boolean
+  onCreateChannel?: () => void
 }
 
 function formatRelativeTime(d?: Date): string {
@@ -47,7 +49,7 @@ function roomDisplayName(room: ChatRoom): string {
  * Channel list sidebar. Shows chat rooms the user is in,
  * sorted by last activity. Active room highlighted.
  */
-export function ChannelList({ activeRoomId, onSelectRoom }: ChannelListProps) {
+export function ChannelList({ activeRoomId, onSelectRoom, isOfficer = false, onCreateChannel }: ChannelListProps) {
   const { hasUnread } = useUnreadCounts()
   const roomsQuery = useQuery({
     ...listChatRoomsOptions({ query: { status: 'active' } }),
@@ -78,11 +80,20 @@ export function ChannelList({ activeRoomId, onSelectRoom }: ChannelListProps) {
   if (sorted.length === 0) {
     return (
       <GlassCard className="p-4">
-        <EmptyState
-          icon={<MessageSquare className="h-8 w-8" />}
-          headline="No conversations yet"
-          description="Start a new conversation to get going."
-        />
+        {isOfficer ? (
+          <EmptyState
+            icon={<MessageSquare className="h-8 w-8" />}
+            headline="Set up your channels"
+            description="Create a space for your members to collaborate. Start with #general for everyday discussions."
+            action={onCreateChannel ? { label: 'Create Channel', onClick: onCreateChannel } : undefined}
+          />
+        ) : (
+          <EmptyState
+            icon={<MessageSquare className="h-8 w-8" />}
+            headline="No channels yet"
+            description="Your association hasn't set up chat channels yet. Check back soon!"
+          />
+        )}
       </GlassCard>
     )
   }

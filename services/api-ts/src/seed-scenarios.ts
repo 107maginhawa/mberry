@@ -2925,15 +2925,14 @@ async function seedSurveysModule(
       organizationId: orgId,
       title: 'Member Satisfaction — Q2 2026',
       description: 'How likely are you to recommend our association to a colleague?',
-      type: 'nps',
+      surveyType: 'nps',
       status: 'active',
       createdBy: presidentPersonId,
-      startsAt: daysAgo(14),
-      endsAt: daysFromNow(16),
       questions: [
-        { id: 'q1', type: 'nps', text: 'How likely are you to recommend our association to a colleague?', required: true },
-        { id: 'q2', type: 'text', text: 'What could we do better?', required: false },
+        { id: 'q1', type: 'nps', text: 'How likely are you to recommend our association to a colleague?', required: true, order: 1 },
+        { id: 'q2', type: 'text', text: 'What could we do better?', required: false, order: 2 },
       ],
+      settings: { anonymous: false, fatigueThreshold: 2 },
     } as any).returning({ id: surveysTable.id });
 
     // General feedback survey (draft)
@@ -2941,14 +2940,15 @@ async function seedSurveysModule(
       organizationId: orgId,
       title: 'Annual Convention Feedback',
       description: 'Help us improve next year\'s convention.',
-      type: 'general',
+      surveyType: 'general',
       status: 'draft',
       createdBy: presidentPersonId,
       questions: [
-        { id: 'q1', type: 'rating', text: 'Rate the overall convention experience', required: true },
-        { id: 'q2', type: 'text', text: 'What was the highlight of the convention?', required: false },
-        { id: 'q3', type: 'text', text: 'What should we improve?', required: false },
+        { id: 'q1', type: 'rating', text: 'Rate the overall convention experience', required: true, order: 1, scale: { min: 1, max: 5 } },
+        { id: 'q2', type: 'text', text: 'What was the highlight of the convention?', required: false, order: 2 },
+        { id: 'q3', type: 'text', text: 'What should we improve?', required: false, order: 3 },
       ],
+      settings: { anonymous: true },
     } as any);
 
     // NPS responses
@@ -2965,13 +2965,15 @@ async function seedSurveysModule(
       ];
       for (let i = 0; i < Math.min(npsScores.length, memberPersonIds.length); i++) {
         await db.insert(surveyResponsesTable).values({
+          organizationId: orgId,
           surveyId: npsSurvey.id,
-          respondentId: memberPersonIds[i]!,
-          answers: {
-            q1: npsScores[i],
-            q2: comments[i] || null,
-          },
-          submittedAt: daysAgo(Math.floor(Math.random() * 14)),
+          responderId: memberPersonIds[i]!,
+          answers: [
+            { questionId: 'q1', value: npsScores[i] },
+            ...(comments[i] ? [{ questionId: 'q2', value: comments[i] }] : []),
+          ],
+          status: 'completed',
+          completedAt: daysAgo(Math.floor(Math.random() * 14)),
         } as any);
       }
       console.log(`    ✓ 2 surveys + ${Math.min(npsScores.length, memberPersonIds.length)} responses seeded`);

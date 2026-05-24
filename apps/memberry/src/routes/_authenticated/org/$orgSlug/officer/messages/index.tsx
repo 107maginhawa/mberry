@@ -5,8 +5,10 @@ import { getPersonOptions } from '@monobase/sdk-ts/generated/react-query'
 import { PageHeader } from '@/components/patterns/page-header'
 import { ChannelList } from '@/features/comms/components/channel-list'
 import { ChatView } from '@/features/comms/components/chat-view'
+import { CreateChannelDialog } from '@/features/comms/components/create-channel-dialog'
 import { EmptyState } from '@/components/patterns/empty-state'
-import { MessageSquare } from 'lucide-react'
+import { Button } from '@monobase/ui'
+import { MessageSquare, Plus } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/messages/')({
   component: OfficerMessagesPage,
@@ -15,6 +17,7 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/messa
 function OfficerMessagesPage() {
   const { orgSlug } = Route.useParams()
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   const person = useQuery({
     ...getPersonOptions({ path: { person: 'me' } }),
@@ -26,7 +29,14 @@ function OfficerMessagesPage() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="px-6 pt-6">
-        <PageHeader title="Channels" />
+        <PageHeader
+          title="Channels"
+          actions={
+            <Button onClick={() => setShowCreateDialog(true)} size="sm">
+              <Plus className="h-4 w-4 mr-1" /> Create Channel
+            </Button>
+          }
+        />
       </div>
       <div className="flex-1 flex gap-4 p-6 pt-2 overflow-hidden">
         {/* Channel list sidebar */}
@@ -35,6 +45,8 @@ function OfficerMessagesPage() {
             orgSlug={orgSlug}
             activeRoomId={activeRoomId ?? undefined}
             onSelectRoom={setActiveRoomId}
+            isOfficer
+            onCreateChannel={() => setShowCreateDialog(true)}
           />
         </div>
 
@@ -56,6 +68,12 @@ function OfficerMessagesPage() {
           )}
         </div>
       </div>
+
+      <CreateChannelDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onCreated={(roomId) => setActiveRoomId(roomId)}
+      />
     </div>
   )
 }
