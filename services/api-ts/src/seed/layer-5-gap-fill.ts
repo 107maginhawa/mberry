@@ -18,7 +18,7 @@ import { accreditedProviders } from '@/handlers/training/repos/accredited-provid
 import { electionNominees, electionVotes, elections } from '@/handlers/elections/repos/elections.schema';
 import { positions } from '@/handlers/association:member/repos/governance.schema';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
-import { membershipStatusHistory } from '@/handlers/association:member/repos/status-history.schema';
+import { membershipStatusHistory, type NewMembershipStatusHistory } from '@/handlers/association:member/repos/status-history.schema';
 import { professionalLicenses, licenseRenewalAlerts, credentialTemplates, digitalCredentials } from '@/handlers/association:member/repos/credentials.schema';
 import { directoryProfiles } from '@/handlers/association:member/repos/directory.schema';
 import { chapterAffiliations } from '@/handlers/association:member/repos/chapters.schema';
@@ -47,12 +47,14 @@ export async function seedEventsGapFill(
   console.log('  Events gap-fill (check-ins + waitlist + nominees + votes)...');
 
   // ─── Check-ins ────────────────────────────────────────────────
-  let existingCheckIns: any[];
+  let existingCheckIns: Array<Record<string, unknown>>;
+  let skipCheckIns = false;
   try {
     existingCheckIns = await db.select().from(checkIns).limit(1);
   } catch {
     console.log('    (check_in table not migrated yet, skipping)');
-    existingCheckIns = [{ _skip: true }];
+    existingCheckIns = [];
+    skipCheckIns = true;
   }
   if (existingCheckIns.length === 0) {
     // Attach to completed past events
@@ -85,23 +87,25 @@ export async function seedEventsGapFill(
           method: ci.method,
           checkedInAt: ci.checkedInAt,
           checkedInBy: presidentPersonId,
-        } as any);
+        });
       }
       console.log(`    ✓ ${checkInData.length} check-in records seeded`);
     } else {
       console.log('    (no completed events found, skipping check-ins)');
     }
-  } else if (!(existingCheckIns[0] as any)._skip) {
+  } else if (!skipCheckIns) {
     console.log('    (check-ins already seeded, skipping)');
   }
 
   // ─── Waitlist entries ─────────────────────────────────────────
-  let existingWaitlist: any[];
+  let existingWaitlist: Array<Record<string, unknown>>;
+  let skipWaitlist = false;
   try {
     existingWaitlist = await db.select().from(waitlistEntries).limit(1);
   } catch {
     console.log('    (waitlist_entry table not migrated yet, skipping)');
-    existingWaitlist = [{ _skip: true }];
+    existingWaitlist = [];
+    skipWaitlist = true;
   }
   if (existingWaitlist.length === 0) {
     const publishedEvents = await db.select({ id: events.id })
@@ -121,18 +125,18 @@ export async function seedEventsGapFill(
         promotedAt: idx === 0 ? daysAgo(2) : null, // first one was promoted
       }));
       for (const w of waitlistData) {
-        await db.insert(waitlistEntries).values(w as any);
+        await db.insert(waitlistEntries).values(w);
       }
       console.log(`    ✓ ${waitlistData.length} waitlist entries seeded (1 promoted)`);
     } else {
       console.log('    (no published events found, skipping waitlist)');
     }
-  } else if (!(existingWaitlist[0] as any)._skip) {
+  } else if (!skipWaitlist) {
     console.log('    (waitlist entries already seeded, skipping)');
   }
 
   // ─── Election nominees + votes ────────────────────────────────
-  let existingNominees: any[];
+  let existingNominees: Array<Record<string, unknown>>;
   try {
     existingNominees = await db.select().from(electionNominees).limit(1);
   } catch {
@@ -153,8 +157,8 @@ export async function seedEventsGapFill(
         .where(sql`${positions.organizationId} = ${orgId}`)
         .limit(3);
       if (positionRows.length > 0) {
-        const presidentPos = positionRows.find((p: any) => p.title === 'President') || positionRows[0]!;
-        const treasurerPos = positionRows.find((p: any) => p.title === 'Treasurer') || positionRows[Math.min(1, positionRows.length - 1)]!;
+        const presidentPos = positionRows.find(p => p.title === 'President') || positionRows[0]!;
+        const treasurerPos = positionRows.find(p => p.title === 'Treasurer') || positionRows[Math.min(1, positionRows.length - 1)]!;
         // 3 nominees: president (elected), 2 others for treasurer
         const nomineeData = [
           { electionId, organizationId: orgId, positionId: presidentPos.id, personId: presidentPersonId, nominatedBy: presidentPersonId, status: 'elected' as const },
@@ -163,7 +167,7 @@ export async function seedEventsGapFill(
         ];
         const insertedNominees: string[] = [];
         for (const n of nomineeData) {
-          const [inserted] = await db.insert(electionNominees).values(n as any).returning({ id: electionNominees.id });
+          const [inserted] = await db.insert(electionNominees).values(n).returning({ id: electionNominees.id });
           if (inserted) insertedNominees.push(inserted.id);
         }
         console.log(`    ✓ ${insertedNominees.length} election nominees seeded`);
@@ -180,19 +184,21 @@ export async function seedEventsGapFill(
             votesData.push({ electionId, organizationId: orgId, positionId: treasurerPos.id, nomineeId: insertedNominees[1], voterId: memberPersonIds[i]! });
           }
         }
-        let existingVotes: any[];
+        let existingVotes: Array<Record<string, unknown>>;
+        let skipVotes = false;
         try {
           existingVotes = await db.select().from(electionVotes).limit(1);
         } catch {
           console.log('    (election_vote table not migrated yet, skipping votes)');
-          existingVotes = [{ _skip: true }];
+          existingVotes = [];
+          skipVotes = true;
         }
         if (existingVotes.length === 0) {
           for (const v of votesData) {
-            await db.insert(electionVotes).values(v as any).onConflictDoNothing();
+            await db.insert(electionVotes).values(v).onConflictDoNothing();
           }
           console.log(`    ✓ ${votesData.length} election votes seeded`);
-        } else if (!(existingVotes[0] as any)._skip) {
+        } else if (!skipVotes) {
           console.log('    (election votes already seeded, skipping)');
         }
       } else {
@@ -224,12 +230,14 @@ export async function seedTrainingGapFill(
   const daysFromNow = (d: number) => new Date(now.getTime() + d * 86400000);
 
   // ─── Accredited providers ─────────────────────────────────────
-  let existingProviders: any[];
+  let existingProviders: Array<Record<string, unknown>>;
+  let skipProviders = false;
   try {
     existingProviders = await db.select().from(accreditedProviders).limit(1);
   } catch {
     console.log('    (accredited_provider table not migrated yet, skipping providers)');
-    existingProviders = [{ _skip: true }];
+    existingProviders = [];
+    skipProviders = true;
   }
   const seededProviderIds: string[] = [];
   if (existingProviders.length === 0) {
@@ -239,18 +247,18 @@ export async function seedTrainingGapFill(
       { organizationId: orgId, name: 'DOH Region VII Training Unit', accreditationNumber: 'DOH-R7-055', status: 'suspended' as const, expiryDate: daysAgo(30) },
     ];
     for (const p of providerData) {
-      const [inserted] = await db.insert(accreditedProviders).values(p as any).returning({ id: accreditedProviders.id });
+      const [inserted] = await db.insert(accreditedProviders).values(p).returning({ id: accreditedProviders.id });
       if (inserted) seededProviderIds.push(inserted.id);
     }
     console.log(`    ✓ ${seededProviderIds.length} accredited providers seeded`);
-  } else if (!(existingProviders[0] as any)._skip) {
+  } else if (!skipProviders) {
     console.log('    (accredited providers already seeded, skipping)');
     const rows = await db.select({ id: accreditedProviders.id }).from(accreditedProviders).limit(3);
-    seededProviderIds.push(...rows.map((r: any) => r.id));
+    seededProviderIds.push(...rows.map(r => r.id));
   }
 
   // ─── Courses (self-paced online) ──────────────────────────────
-  let existingCourses: any[];
+  let existingCourses: Array<Record<string, unknown>>;
   try {
     existingCourses = await db.select().from(courses).limit(1);
   } catch {
@@ -266,18 +274,18 @@ export async function seedTrainingGapFill(
       { organizationId: orgId, title: 'Advanced Periodontal Techniques', description: 'Coming soon — advanced surgical protocols.', creditAmount: 8, status: 'draft' as const },
     ];
     for (const c of courseData) {
-      const [inserted] = await db.insert(courses).values(c as any).returning({ id: courses.id });
+      const [inserted] = await db.insert(courses).values(c).returning({ id: courses.id });
       if (inserted) seededCourseIds.push(inserted.id);
     }
     console.log(`    ✓ ${seededCourseIds.length} courses seeded`);
   } else {
     console.log('    (courses already seeded, skipping)');
     const rows = await db.select({ id: courses.id }).from(courses).limit(4);
-    seededCourseIds.push(...rows.map((r: any) => r.id));
+    seededCourseIds.push(...rows.map(r => r.id));
   }
 
   // ─── Course enrollments ───────────────────────────────────────
-  let existingEnrollments: any[];
+  let existingEnrollments: Array<Record<string, unknown>>;
   try {
     existingEnrollments = await db.select().from(courseEnrollments).limit(1);
   } catch {
@@ -304,7 +312,7 @@ export async function seedTrainingGapFill(
       enrollmentData.push({ organizationId: orgId, courseId: seededCourseIds[0], personId: presidentPersonId, progress: 100, status: 'completed', completedAt: daysAgo(15) });
     }
     for (const e of enrollmentData) {
-      await db.insert(courseEnrollments).values(e as any);
+      await db.insert(courseEnrollments).values(e);
     }
     console.log(`    ✓ ${enrollmentData.length} course enrollments seeded (4 completed, 3 in-progress)`);
   } else if (existingEnrollments.length > 0) {
@@ -312,7 +320,7 @@ export async function seedTrainingGapFill(
   }
 
   // ─── Quiz attempts ────────────────────────────────────────────
-  let existingAttempts: any[];
+  let existingAttempts: Array<Record<string, unknown>>;
   try {
     existingAttempts = await db.select().from(quizAttempts).limit(1);
   } catch {
@@ -332,7 +340,7 @@ export async function seedTrainingGapFill(
       { organizationId: orgId, courseId: seededCourseIds[0]!, personId: presidentPersonId, score: 95, maxScore: 100, passed: true, attemptedAt: daysAgo(14), answers: { q1: 'a', q2: 'b', q3: 'c' } },
     ];
     for (const a of attemptData) {
-      await db.insert(quizAttempts).values(a as any);
+      await db.insert(quizAttempts).values(a);
     }
     console.log(`    ✓ ${attemptData.length} quiz attempts seeded (4 pass, 1 fail)`);
   } else if (existingAttempts.length > 0) {
@@ -359,7 +367,7 @@ export async function seedCredentialsGapFill(
   const daysFromNow = (d: number) => new Date(now.getTime() + d * 86400000);
 
   // ─── Professional licenses ────────────────────────────────────
-  let existingLicenses: any[];
+  let existingLicenses: Array<Record<string, unknown>>;
   try {
     existingLicenses = await db.select().from(professionalLicenses).limit(1);
   } catch {
@@ -385,13 +393,13 @@ export async function seedCredentialsGapFill(
     }));
     const insertedLicenses: string[] = [];
     for (const l of licenseData) {
-      const [ins] = await db.insert(professionalLicenses).values(l as any).returning({ id: professionalLicenses.id });
+      const [ins] = await db.insert(professionalLicenses).values(l).returning({ id: professionalLicenses.id });
       if (ins) insertedLicenses.push(ins.id);
     }
     console.log(`    ✓ ${insertedLicenses.length} professional licenses seeded (6 active, 2 expired)`);
 
     // ─── Renewal alerts for expiring licenses ─────────────────
-    let existingAlerts: any[];
+    let existingAlerts: Array<Record<string, unknown>>;
     try {
       existingAlerts = await db.select().from(licenseRenewalAlerts).limit(1);
     } catch {
@@ -408,7 +416,7 @@ export async function seedCredentialsGapFill(
         { organizationId: orgId, licenseId: insertedLicenses[3]!, personId: licensePersonIds[3]!, alertDate: daysAgo(20).toISOString().slice(0, 10), daysUntilExpiry: 110, status: 'acknowledged' as const },
       ];
       for (const a of alertData) {
-        await db.insert(licenseRenewalAlerts).values(a as any);
+        await db.insert(licenseRenewalAlerts).values(a);
       }
       console.log(`    ✓ ${alertData.length} license renewal alerts seeded`);
     }
@@ -417,7 +425,7 @@ export async function seedCredentialsGapFill(
   }
 
   // ─── Credential template ──────────────────────────────────────
-  let existingTemplates: any[];
+  let existingTemplates: Array<Record<string, unknown>>;
   try {
     existingTemplates = await db.select().from(credentialTemplates).limit(1);
   } catch {
@@ -437,16 +445,16 @@ export async function seedCredentialsGapFill(
       design: templateDesign,
       validityPeriod: 365,
       status: 'active',
-    } as any).returning({ id: credentialTemplates.id });
+    }).returning({ id: credentialTemplates.id });
     templateId = inserted?.id ?? null;
     console.log(`    ✓ Credential template seeded`);
   } else {
-    templateId = existingTemplates[0]?.id ?? null;
+    templateId = (existingTemplates[0]?.['id'] as string) ?? null;
     console.log('    (credential template already seeded, skipping)');
   }
 
   // ─── Digital credentials (member ID cards) ───────────────────
-  let existingDCs: any[];
+  let existingDCs: Array<Record<string, unknown>>;
   try {
     existingDCs = await db.select().from(digitalCredentials).limit(1);
   } catch {
@@ -472,7 +480,7 @@ export async function seedCredentialsGapFill(
       revocationReason: idx >= 5 ? 'Membership lapsed — credential suspended.' : null,
     }));
     for (const dc of dcData) {
-      await db.insert(digitalCredentials).values(dc as any);
+      await db.insert(digitalCredentials).values(dc);
     }
     console.log(`    ✓ ${dcData.length} digital credentials (member IDs) seeded`);
   } else if (existingDCs.length > 0) {
@@ -499,12 +507,14 @@ export async function seedProfileAndGovernanceGapFill(
   const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000);
 
   // ─── Directory profiles ───────────────────────────────────────
-  let existingProfiles: any[];
+  let existingProfiles: Array<Record<string, unknown>>;
+  let skipProfiles = false;
   try {
     existingProfiles = await db.select().from(directoryProfiles).limit(1);
   } catch {
     console.log('    (directory_profile table not migrated yet, skipping)');
-    existingProfiles = [{ _skip: true }];
+    existingProfiles = [];
+    skipProfiles = true;
   }
   if (existingProfiles.length === 0) {
     const profilePersonIds = [presidentPersonId, ...memberPersonIds.slice(0, 8)];
@@ -527,20 +537,22 @@ export async function seedProfileAndGovernanceGapFill(
       lastUpdatedAt: daysAgo(10),
     }));
     for (const p of profileData) {
-      await db.insert(directoryProfiles).values(p as any);
+      await db.insert(directoryProfiles).values(p);
     }
     console.log(`    ✓ ${profileData.length} directory profiles seeded (3 public, 4 memberOnly, 2 hidden)`);
-  } else if (!(existingProfiles[0] as any)._skip) {
+  } else if (!skipProfiles) {
     console.log('    (directory profiles already seeded, skipping)');
   }
 
   // ─── Chapter affiliations ─────────────────────────────────────
-  let existingAffiliations: any[];
+  let existingAffiliations: Array<Record<string, unknown>>;
+  let skipAffiliations = false;
   try {
     existingAffiliations = await db.select().from(chapterAffiliations).limit(1);
   } catch {
     console.log('    (chapter_affiliation table not migrated yet, skipping)');
-    existingAffiliations = [{ _skip: true }];
+    existingAffiliations = [];
+    skipAffiliations = true;
   }
   if (existingAffiliations.length === 0) {
     const affiliationPersonIds = [presidentPersonId, ...memberPersonIds.slice(0, 10)];
@@ -553,20 +565,22 @@ export async function seedProfileAndGovernanceGapFill(
       status: idx >= 9 ? 'transferred' as const : 'active' as const,
     }));
     for (const a of affiliationData) {
-      await db.insert(chapterAffiliations).values(a as any);
+      await db.insert(chapterAffiliations).values(a);
     }
     console.log(`    ✓ ${affiliationData.length} chapter affiliations seeded`);
-  } else if (!(existingAffiliations[0] as any)._skip) {
+  } else if (!skipAffiliations) {
     console.log('    (chapter affiliations already seeded, skipping)');
   }
 
   // ─── Notification preferences ─────────────────────────────────
-  let existingPrefs: any[];
+  let existingPrefs: Array<Record<string, unknown>>;
+  let skipPrefs = false;
   try {
     existingPrefs = await db.select().from(notificationPreferences).limit(1);
   } catch {
     console.log('    (notification_preference table not migrated yet, skipping)');
-    existingPrefs = [{ _skip: true }];
+    existingPrefs = [];
+    skipPrefs = true;
   }
   if (existingPrefs.length === 0) {
     const prefPersonIds = [presidentPersonId, ...memberPersonIds.slice(0, 5)];
@@ -584,20 +598,22 @@ export async function seedProfileAndGovernanceGapFill(
       }
     }
     for (const p of prefData) {
-      await db.insert(notificationPreferences).values(p as any).onConflictDoNothing();
+      await db.insert(notificationPreferences).values(p).onConflictDoNothing();
     }
     console.log(`    ✓ ${prefData.length} notification preferences seeded (${prefPersonIds.length} persons × ${categories.length} categories)`);
-  } else if (!(existingPrefs[0] as any)._skip) {
+  } else if (!skipPrefs) {
     console.log('    (notification preferences already seeded, skipping)');
   }
 
   // ─── Privacy settings ─────────────────────────────────────────
-  let existingPrivacy: any[];
+  let existingPrivacy: Array<Record<string, unknown>>;
+  let skipPrivacy = false;
   try {
     existingPrivacy = await db.select().from(personPrivacySettings).limit(1);
   } catch {
     console.log('    (person_privacy_setting table not migrated yet, skipping)');
-    existingPrivacy = [{ _skip: true }];
+    existingPrivacy = [];
+    skipPrivacy = true;
   }
   if (existingPrivacy.length === 0) {
     const privacyPersonIds = [presidentPersonId, ...memberPersonIds.slice(0, 8)];
@@ -611,15 +627,15 @@ export async function seedProfileAndGovernanceGapFill(
       addressVisible: idx === 0, // only president shows address
     }));
     for (const p of privacyData) {
-      await db.insert(personPrivacySettings).values(p as any).onConflictDoNothing();
+      await db.insert(personPrivacySettings).values(p).onConflictDoNothing();
     }
     console.log(`    ✓ ${privacyData.length} privacy settings seeded`);
-  } else if (!(existingPrivacy[0] as any)._skip) {
+  } else if (!skipPrivacy) {
     console.log('    (privacy settings already seeded, skipping)');
   }
 
   // ─── Membership status history ────────────────────────────────
-  let existingHistory: any[];
+  let existingHistory: Array<Record<string, unknown>>;
   try {
     existingHistory = await db.select().from(membershipStatusHistory).limit(1);
   } catch {
@@ -628,11 +644,7 @@ export async function seedProfileAndGovernanceGapFill(
   }
   if (existingHistory.length === 0 && allMembershipIds.length > 0) {
     // Build transition history for first 5 memberships + grace/lapsed ones
-    const historyData: Array<{
-      organizationId: string; membershipId: string; personId: string;
-      fromStatus: string | null; toStatus: string; reason: string | null;
-      changedBy: string; changedAt: Date;
-    }> = [];
+    const historyData: NewMembershipStatusHistory[] = [];
 
     // Active members: pendingPayment → active (initial activation)
     for (let i = 0; i < Math.min(5, allMembershipIds.length); i++) {
@@ -740,7 +752,7 @@ export async function seedProfileAndGovernanceGapFill(
     // (they are in initial state, only have null → pendingPayment which is implicit)
 
     for (const h of historyData) {
-      await db.insert(membershipStatusHistory).values(h as any);
+      await db.insert(membershipStatusHistory).values(h);
     }
     console.log(`    ✓ ${historyData.length} membership status history entries seeded`);
   } else if (existingHistory.length > 0) {
@@ -794,7 +806,7 @@ export async function seedFinanceDeepFill(
       const completedPayments = await db.execute(
         sql`SELECT id, amount FROM dues_payment WHERE status = 'completed' AND organization_id = ${orgId}`
       );
-      const payments = (completedPayments as any).rows ?? completedPayments;
+      const payments = (completedPayments as unknown as { rows: Array<Record<string, unknown>> }).rows ?? (completedPayments as unknown as Array<Record<string, unknown>>);
 
       const fundRows = await db.select({ id: duesFunds.id, name: duesFunds.name, percentage: duesFunds.percentage })
         .from(duesFunds)
@@ -802,15 +814,16 @@ export async function seedFinanceDeepFill(
 
       let allocCount = 0;
       for (const pay of payments) {
-        const amount = Number(pay.amount ?? 0);
+        const amount = Number(pay['amount'] ?? 0);
         for (const fund of fundRows) {
           const pct = Number(fund.percentage ?? 0);
           const allocAmount = Math.round((amount * pct) / 100);
           await db.insert(duesFundAllocations).values({
-            paymentId: pay.id,
+            organizationId: orgId,
+            paymentId: pay['id'] as string,
             fundId: fund.id,
             amount: allocAmount,
-          } as any);
+          });
           allocCount++;
         }
       }
@@ -841,7 +854,7 @@ export async function seedFinanceDeepFill(
         fundId: buildingFund?.id ?? null,
         appliesTo: 'all',
         status: 'active',
-      } as any).returning({ id: specialAssessments.id });
+      }).returning({ id: specialAssessments.id });
 
       const [assess2] = await db.insert(specialAssessments).values({
         organizationId: orgId,
@@ -852,7 +865,7 @@ export async function seedFinanceDeepFill(
         dueDate: dateStr(daysFromNow(120)),
         appliesTo: 'selected',
         status: 'draft',
-      } as any).returning({ id: specialAssessments.id });
+      }).returning({ id: specialAssessments.id });
 
       // Targets for active assessment
       if (assess1) {
@@ -860,8 +873,8 @@ export async function seedFinanceDeepFill(
           await db.insert(specialAssessmentTargets).values({
             assessmentId: assess1.id,
             personId: memberPersonIds[i]!,
-            status: i < 3 ? 'paid' : 'pending',
-          } as any);
+            status: i < 3 ? 'paid' as const : 'pending' as const,
+          });
         }
       }
       console.log('    ✓ 2 special assessments + 8 targets seeded');
@@ -882,12 +895,11 @@ export async function seedFinanceDeepFill(
         .limit(1);
       if (orgConfigs[0]) {
         await db.insert(duesReminderSchedules).values({
-          orgConfigId: orgConfigs[0].id,
-          daysBeforeDue: 30,
-          channel: 'email',
-          templateId: null,
-          active: true,
-        } as any);
+          organizationId: orgId,
+          duesConfigId: orgConfigs[0].id,
+          daysOffset: -30,
+          enabled: true,
+        });
         console.log('    ✓ 1 reminder schedule seeded');
       }
     } else {
@@ -905,10 +917,9 @@ export async function seedFinanceDeepFill(
         organizationId: orgId,
         provider: 'paymongo',
         publicKey: 'pk_test_demo_key_not_real',
-        secretKey: 'sk_test_demo_key_not_real',
-        webhookSecret: 'whsec_demo_not_real',
-        active: true,
-      } as any);
+        encryptedSecret: 'sk_test_demo_key_not_real',
+        connected: true,
+      });
       console.log('    ✓ 1 gateway config seeded (PayMongo test)');
     } else {
       console.log('    (gateway config already seeded, skipping)');
@@ -940,11 +951,11 @@ export async function seedCommsGapFill(
         const participants = [presidentPersonId, ...memberPersonIds.slice(0, 4)];
         for (const personId of participants) {
           await db.insert(chatRoomMembers).values({
-            roomId: room.id,
+            chatRoomId: room.id,
             personId,
-            role: personId === presidentPersonId ? 'admin' : 'member',
+            role: personId === presidentPersonId ? 'admin' as const : 'member' as const,
             joinedAt: daysAgo(30),
-          } as any);
+          });
           memberCount++;
         }
       }
@@ -968,7 +979,7 @@ export async function seedCommsGapFill(
           messageId: msgs[i]!.id,
           personId: memberPersonIds[i % memberPersonIds.length]!,
           emoji: emojis[i]!,
-        } as any);
+        });
         reactionCount++;
       }
       console.log(`    ✓ ${reactionCount} message reactions seeded`);
@@ -1023,7 +1034,7 @@ export async function seedSurveysModule(
         { id: 'q2', type: 'text', text: 'What could we do better?', required: false, order: 2 },
       ],
       settings: { anonymous: false, fatigueThreshold: 2 },
-    } as any).returning({ id: surveysTable.id });
+    }).returning({ id: surveysTable.id });
 
     // General feedback survey (draft)
     await db.insert(surveysTable).values({
@@ -1039,7 +1050,7 @@ export async function seedSurveysModule(
         { id: 'q3', type: 'text', text: 'What should we improve?', required: false, order: 3 },
       ],
       settings: { anonymous: true },
-    } as any);
+    });
 
     // NPS responses
     if (npsSurvey) {
@@ -1059,12 +1070,12 @@ export async function seedSurveysModule(
           surveyId: npsSurvey.id,
           responderId: memberPersonIds[i]!,
           answers: [
-            { questionId: 'q1', value: npsScores[i] },
-            ...(comments[i] ? [{ questionId: 'q2', value: comments[i] }] : []),
+            { questionId: 'q1', value: npsScores[i]! },
+            ...(comments[i] ? [{ questionId: 'q2', value: comments[i]! }] : []),
           ],
           status: 'completed',
           completedAt: daysAgo(Math.floor(Math.random() * 14)),
-        } as any);
+        });
       }
       console.log(`    ✓ 2 surveys + ${Math.min(npsScores.length, memberPersonIds.length)} responses seeded`);
     }
@@ -1092,9 +1103,7 @@ export async function seedCpdBackfill(
         requiredCredits: 60,
         cycleLengthYears: 3,
         cycleStartMonth: 1,
-        allowCarryOver: false,
-        maxCarryOverCredits: 0,
-      } as any);
+      });
       console.log('    ✓ 1 CPD config seeded (60 credits / 3-year cycle)');
     } else {
       console.log('    (CPD config already seeded, skipping)');
@@ -1110,8 +1119,9 @@ export async function seedCpdBackfill(
       await db.insert(orgCertificateSeq).values({
         organizationId: orgId,
         year: NOW.getFullYear(),
-        lastNumber: 5,
-      } as any);
+        lastSeq: 5,
+        orgCode: 'PDA-MM',
+      });
       console.log('    ✓ 1 certificate sequence seeded');
     } else {
       console.log('    (certificate sequence already seeded, skipping)');
@@ -1174,18 +1184,17 @@ export async function seedSavedSegments(
     }
 
     const segments = [
-      { name: 'Overdue Members', description: 'Members with overdue dues', filters: { membershipStatus: ['lapsed', 'gracePeriod'], duesStatus: 'overdue' } },
-      { name: 'New Members 2025', description: 'Members who joined in 2025', filters: { joinedAfter: '2025-01-01', joinedBefore: '2025-12-31' } },
-      { name: 'Active Dentists', description: 'Active members in dentistry category', filters: { membershipStatus: ['active'], category: 'Regular' } },
+      { name: 'Overdue Members', filters: { membershipStatus: ['lapsed', 'gracePeriod'], duesStatus: 'overdue' } },
+      { name: 'New Members 2025', filters: { joinedAfter: '2025-01-01', joinedBefore: '2025-12-31' } },
+      { name: 'Active Dentists', filters: { membershipStatus: ['active'], category: 'Regular' } },
     ];
 
     for (const seg of segments) {
       await db.insert(savedSegments).values({
         organizationId: orgId,
         name: seg.name,
-        description: seg.description,
         filters: seg.filters,
-      } as any);
+      });
     }
     console.log('    ✓ 3 saved segments seeded');
   } catch (e) {
@@ -1213,48 +1222,50 @@ export async function seedJobsModule(
 
     const [job1] = await db.insert(jobPostings).values({
       organizationId: orgId,
+      organizationName: 'PDA Metro Manila Chapter',
       title: 'Associate Dentist — General Practice',
       description: 'Seeking a licensed dentist to join our growing clinic. Must have valid PRC license and 2+ years experience.',
-      type: 'fullTime',
+      type: 'full_time',
       status: 'active',
       location: 'Makati City, Metro Manila',
       salary: 'PHP 45,000 - 65,000/month',
       postedBy: presidentPersonId,
       postedAt: daysAgo(7),
       expiresAt: daysFromNow(53),
-    } as any).returning({ id: jobPostings.id });
+    }).returning({ id: jobPostings.id });
 
     const [job2] = await db.insert(jobPostings).values({
       organizationId: orgId,
+      organizationName: 'PDA Metro Manila Chapter',
       title: 'Clinic Manager',
       description: 'Office manager for busy dental practice. Experience with clinic scheduling, billing, and patient coordination.',
-      type: 'fullTime',
+      type: 'full_time',
       status: 'active',
       location: 'Quezon City, Metro Manila',
       salary: 'PHP 30,000 - 40,000/month',
       postedBy: presidentPersonId,
       postedAt: daysAgo(3),
       expiresAt: daysFromNow(57),
-    } as any).returning({ id: jobPostings.id });
+    }).returning({ id: jobPostings.id });
 
     // Applications
     if (job1 && memberPersonIds.length > 0) {
       await db.insert(jobApplications).values({
-        jobId: job1.id,
-        applicantId: memberPersonIds[0]!,
-        status: 'pending',
+        postingId: job1.id,
+        personId: memberPersonIds[0]!,
+        status: 'applied',
         coverLetter: 'I am interested in this position. I have 3 years of experience in general dentistry and specialize in endodontics.',
         appliedAt: daysAgo(5),
-      } as any);
+      });
     }
     if (job2 && memberPersonIds.length > 1) {
       await db.insert(jobApplications).values({
-        jobId: job2.id,
-        applicantId: memberPersonIds[1]!,
-        status: 'shortlisted',
+        postingId: job2.id,
+        personId: memberPersonIds[1]!,
+        status: 'screening',
         coverLetter: 'Experienced clinic administrator with 5 years managing multi-dentist practices.',
         appliedAt: daysAgo(2),
-      } as any);
+      });
     }
     console.log('    ✓ 2 job postings + 2 applications seeded');
   } catch (e) {
