@@ -182,6 +182,23 @@ export const chatMessages = pgTable('chat_message', {
     .on(table.parentMessageId),
 }));
 
+// Chat Message Reactions — emoji reactions on messages
+export const chatMessageReactions = pgTable('chat_message_reaction', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  messageId: uuid('message_id')
+    .notNull()
+    .references(() => chatMessages.id, { onDelete: 'cascade' }),
+  personId: uuid('person_id').notNull(),
+  emoji: text('emoji').notNull(), // e.g. "👍", "❤️", "😂"
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  messageIdx: index('chat_message_reactions_message_idx').on(table.messageId),
+  uniqueReaction: unique('chat_message_reactions_unique').on(table.messageId, table.personId, table.emoji),
+}));
+
+export type ChatMessageReaction = typeof chatMessageReactions.$inferSelect;
+export type NewChatMessageReaction = typeof chatMessageReactions.$inferInsert;
+
 // TypeScript interfaces for video call data structure
 export interface VideoCallData {
   status: 'starting' | 'active' | 'ended' | 'cancelled';

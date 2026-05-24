@@ -1,11 +1,21 @@
 import type { ChatMessage } from '@monobase/sdk-ts/generated/types.gen'
 import { Button } from '@monobase/ui'
 import { MessageSquare } from 'lucide-react'
+import { MessageReactions } from './message-reactions'
+
+interface ReactionData {
+  emoji: string
+  count: number
+  reacted: boolean
+}
 
 interface MessageBubbleProps {
   message: ChatMessage
   isOwn: boolean
   onOpenThread?: (message: ChatMessage) => void
+  reactions?: ReactionData[]
+  onReact?: (messageId: string, emoji: string) => void
+  onRemoveReaction?: (messageId: string, emoji: string) => void
 }
 
 function formatTime(d: Date): string {
@@ -20,7 +30,7 @@ function truncateId(id: string): string {
  * Individual message display. Own messages right-aligned with primary bg,
  * others left-aligned with surface bg. System messages centered with muted styling.
  */
-export function MessageBubble({ message, isOwn, onOpenThread }: MessageBubbleProps) {
+export function MessageBubble({ message, isOwn, onOpenThread, reactions = [], onReact, onRemoveReaction }: MessageBubbleProps) {
   const replyCount = (message as ChatMessage & { replyCount?: number }).replyCount ?? 0
   // System messages: centered, muted
   if (message.messageType === 'system') {
@@ -36,7 +46,7 @@ export function MessageBubble({ message, isOwn, onOpenThread }: MessageBubblePro
   return (
     <div
       role="listitem"
-      className={`flex ${isOwn ? 'justify-end' : 'justify-start'} py-1`}
+      className={`group flex ${isOwn ? 'justify-end' : 'justify-start'} py-1`}
     >
       <div
         className={`max-w-[75%] rounded-xl px-3 py-2 ${
@@ -68,6 +78,13 @@ export function MessageBubble({ message, isOwn, onOpenThread }: MessageBubblePro
             <MessageSquare className="h-3 w-3" />
             {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
           </Button>
+        )}
+        {(reactions.length > 0 || onReact) && (
+          <MessageReactions
+            reactions={reactions}
+            onReact={(emoji) => onReact?.(message.id, emoji)}
+            onRemoveReaction={(emoji) => onRemoveReaction?.(message.id, emoji)}
+          />
         )}
       </div>
     </div>
