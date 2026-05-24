@@ -16,6 +16,10 @@ import {
   BarChart3,
   ClipboardCheck,
   ClipboardList,
+  Radio,
+  Mail,
+  ShieldAlert,
+  FileText,
 } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import type { RouterContext } from '@/router'
@@ -84,6 +88,15 @@ const navSections: NavSection[] = [
       { to: '/events', label: 'Events', icon: Calendar },
       { to: '/training', label: 'Training', icon: GraduationCap },
       { to: '/committees', label: 'Committees', icon: Users2 },
+    ],
+  },
+  {
+    title: 'Communications',
+    items: [
+      { to: '/communications', label: 'Broadcasts', icon: Radio },
+      { to: '/communications/moderation', label: 'Moderation', icon: ShieldAlert },
+      { to: '/communications/templates', label: 'Templates', icon: FileText },
+      { to: '/communications/email', label: 'Email Health', icon: Mail },
     ],
   },
   {

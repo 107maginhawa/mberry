@@ -70,4 +70,8 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   '/feature-flags': ['super'],
   '/audit': ['super', 'support'],
   '/surveys': ['super', 'support', 'analyst'],
+  '/communications': ['super', 'support'],
+  '/communications/moderation': ['super', 'support'],
+  '/communications/templates': ['super'],
+  '/communications/email': ['super', 'support', 'analyst'],
 }
