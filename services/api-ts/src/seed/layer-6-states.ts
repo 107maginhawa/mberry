@@ -35,7 +35,23 @@ export async function seedStateCoverage(
     const existingPayments = await db.select().from(duesPayments).limit(1);
     // Only seed if duesPayments table has some data (means base payments exist)
     if (existingPayments.length > 0) {
-      const paymentStates = [
+      type DuesPaymentStatus = typeof duesPayments.$inferInsert['status'];
+      type DuesPaymentMethod = typeof duesPayments.$inferInsert['paymentMethod'];
+      interface PaymentSeed {
+        status: NonNullable<DuesPaymentStatus>;
+        receiptNumber: string;
+        amount: number;
+        method: NonNullable<DuesPaymentMethod>;
+        paidAt: Date | null;
+        expiredAt: Date | null;
+        referenceNumber: string | null;
+        metadata?: Record<string, unknown> | null;
+        rejectionReason?: string | null;
+        proofStorageKey?: string | null;
+        proofFileName?: string | null;
+        proofMimeType?: string | null;
+      }
+      const paymentStates: PaymentSeed[] = [
         { status: 'failed', receiptNumber: 'STATE-FAIL-001', amount: 200000, method: 'online', paidAt: null, expiredAt: daysAgo(10), referenceNumber: 'GW-FAIL-TIMEOUT', metadata: { failureReason: 'Gateway timeout', gatewayCode: 'TIMEOUT' } },
         { status: 'expired', receiptNumber: 'STATE-EXP-001', amount: 200000, method: 'online', paidAt: null, expiredAt: daysAgo(5), referenceNumber: null, metadata: { expiryReason: '24h payment window elapsed' } },
         { status: 'refunded', receiptNumber: 'STATE-REF-001', amount: 200000, method: 'bankTransfer', paidAt: daysAgo(20), expiredAt: null, referenceNumber: 'REF-2025-001', metadata: { refundReason: 'Duplicate payment', refundedAt: daysAgo(15).toISOString() } },
@@ -48,8 +64,8 @@ export async function seedStateCoverage(
       for (let i = 0; i < paymentStates.length; i++) {
         const ps = paymentStates[i]!;
         const personId = memberPersonIds[i % memberPersonIds.length]!;
-        const existing = await db.execute(sql`SELECT id FROM dues_payment WHERE receipt_number = ${ps.receiptNumber} LIMIT 1`);
-        if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+        const existing = (await db.execute(sql`SELECT id FROM dues_payment WHERE receipt_number = ${ps.receiptNumber} LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
+        if (existing.rows?.length === 0) {
           await db.insert(duesPayments).values({
             organizationId: orgId,
             personId,
@@ -61,13 +77,13 @@ export async function seedStateCoverage(
             referenceNumber: ps.referenceNumber,
             paidAt: ps.paidAt,
             expiredAt: ps.expiredAt,
-            rejectionReason: (ps as any).rejectionReason ?? null,
-            proofStorageKey: (ps as any).proofStorageKey ?? null,
-            proofFileName: (ps as any).proofFileName ?? null,
-            proofMimeType: (ps as any).proofMimeType ?? null,
+            rejectionReason: ps.rejectionReason ?? null,
+            proofStorageKey: ps.proofStorageKey ?? null,
+            proofFileName: ps.proofFileName ?? null,
+            proofMimeType: ps.proofMimeType ?? null,
             metadata: ps.metadata ?? null,
             recordedBy: ps.method === 'cash' || ps.method === 'check' ? presidentPersonId : null,
-          } as any);
+          });
         }
       }
       console.log('    ✓ 7 payment state-coverage records (failed, expired, refunded, partiallyRefunded, underReview, confirmed, rejected)');
@@ -85,8 +101,8 @@ export async function seedStateCoverage(
     ];
 
     for (const e of electionStates) {
-      const existing = await db.execute(sql`SELECT id FROM election WHERE title = ${e.title} LIMIT 1`);
-      if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+      const existing = (await db.execute(sql`SELECT id FROM election WHERE title = ${e.title} LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
+      if (existing.rows?.length === 0) {
         await db.execute(sql`
           INSERT INTO election (organization_id, title, description, election_type, voting_mode, status,
             nominations_open_at, nominations_close_at, voting_open_at, voting_close_at)
@@ -109,15 +125,14 @@ export async function seedStateCoverage(
         organizationId: orgId,
         title: 'Dental Health Day 2025 (Cancelled)',
         description: 'Community outreach event cancelled due to venue unavailability.',
-        eventDate: daysAgo(30),
+        startDate: daysAgo(30),
         endDate: daysAgo(30),
         location: 'Rizal Park, Manila',
-        maxCapacity: 200,
+        capacity: 200,
         status: 'cancelled',
         visibility: 'internal',
-        eventType: 'seminar',
-        createdBy: presidentPersonId,
-      } as any);
+        eventType: 'other',
+      });
       console.log('    ✓ 1 cancelled event');
     }
   } catch (e) {
@@ -126,21 +141,20 @@ export async function seedStateCoverage(
 
   // ─── Event: 1 capacity-limited (BR-27: waitlist scenario) ──
   try {
-    const existing = await db.execute(sql`SELECT id FROM event WHERE title = 'Hands-On Composite Workshop (Full)' LIMIT 1`);
-    if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+    const existing = (await db.execute(sql`SELECT id FROM event WHERE title = 'Hands-On Composite Workshop (Full)' LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
+    if (existing.rows?.length === 0) {
       const [fullEvent] = await db.insert(events).values({
         organizationId: orgId,
         title: 'Hands-On Composite Workshop (Full)',
         description: 'Limited capacity workshop — exercises BR-27 waitlist behavior.',
-        eventDate: daysFromNow(14),
+        startDate: daysFromNow(14),
         endDate: daysFromNow(14),
         location: 'PDA Training Center, Makati',
-        maxCapacity: 3,
+        capacity: 3,
         status: 'published',
         visibility: 'internal',
-        eventType: 'workshop',
-        createdBy: presidentPersonId,
-      } as any).returning({ id: events.id });
+        eventType: 'other',
+      }).returning({ id: events.id });
 
       if (fullEvent) {
         // 3 confirmed (at capacity) + 2 waitlisted
@@ -152,7 +166,7 @@ export async function seedStateCoverage(
             personId,
             status: i < 3 ? 'confirmed' : 'waitlisted',
             registeredAt: daysAgo(7 - i),
-          } as any);
+          });
         }
         // 1 cancelled registration
         await db.insert(eventRegistrations).values({
@@ -161,7 +175,7 @@ export async function seedStateCoverage(
           personId: memberPersonIds[5]!,
           status: 'cancelled',
           registeredAt: daysAgo(6),
-        } as any);
+        });
         console.log('    ✓ 1 capacity-limited event (3 confirmed, 2 waitlisted, 1 cancelled registration)');
       }
     }
@@ -181,10 +195,9 @@ export async function seedStateCoverage(
         endDate: daysAgo(14),
         location: 'PDA Metro Manila Office',
         status: 'cancelled',
-        maxParticipants: 20,
+        capacity: 20,
         creditAmount: 8,
-        createdBy: presidentPersonId,
-      } as any).returning({ id: trainings.id });
+      }).returning({ id: trainings.id });
 
       // 1 cancelled enrollment (dropped)
       if (cancelledTraining) {
@@ -194,7 +207,7 @@ export async function seedStateCoverage(
           personId: memberPersonIds[0]!,
           status: 'cancelled',
           enrolledAt: daysAgo(21),
-        } as any);
+        });
       }
       console.log('    ✓ 1 cancelled training + 1 cancelled enrollment');
     }
@@ -205,12 +218,12 @@ export async function seedStateCoverage(
   // ─── Notification: failed + expired states ──
   try {
     const notifStates = [
-      { type: 'system.alert', status: 'failed', title: 'Failed delivery test', body: 'This notification failed to deliver via push.' },
-      { type: 'system.alert', status: 'expired', title: 'Expired notification test', body: 'This notification expired before delivery.' },
+      { type: 'system' as const, status: 'failed' as const, title: 'Failed delivery test', message: 'This notification failed to deliver via push.' },
+      { type: 'system' as const, status: 'expired' as const, title: 'Expired notification test', message: 'This notification expired before delivery.' },
     ];
     for (const n of notifStates) {
-      const existing = await db.execute(sql`SELECT id FROM notification WHERE title = ${n.title} LIMIT 1`);
-      if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+      const existing = (await db.execute(sql`SELECT id FROM notification WHERE title = ${n.title} LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
+      if (existing.rows?.length === 0) {
         await db.insert(notifications).values({
           organizationId: orgId,
           recipient: memberPersonIds[0]!,
@@ -218,8 +231,8 @@ export async function seedStateCoverage(
           channel: 'push',
           status: n.status,
           title: n.title,
-          body: n.body,
-        } as any);
+          message: n.message,
+        });
       }
     }
     console.log('    ✓ 2 notification state-coverage records (failed, expired)');
@@ -229,8 +242,8 @@ export async function seedStateCoverage(
 
   // ─── Announcement: scheduledFailed state ──
   try {
-    const existing = await db.execute(sql`SELECT id FROM announcement WHERE status = 'scheduledFailed' LIMIT 1`);
-    if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+    const existing = (await db.execute(sql`SELECT id FROM announcement WHERE status = 'scheduledFailed' LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
+    if (existing.rows?.length === 0) {
       await db.insert(announcements).values({
         organizationId: orgId,
         authorId: presidentPersonId,
@@ -239,7 +252,7 @@ export async function seedStateCoverage(
         audienceType: 'all',
         visibility: 'internal',
         status: 'scheduledFailed',
-      } as any);
+      });
       console.log('    ✓ 1 scheduledFailed announcement');
     }
   } catch (e) {
@@ -248,12 +261,12 @@ export async function seedStateCoverage(
 
   // ─── Dues Payment Status History (audit trail for state-coverage payments) ──
   try {
-    const statePayments = await db.execute(sql`
+    const statePayments = (await db.execute(sql`
       SELECT id, person_id, status FROM dues_payment
       WHERE receipt_number LIKE 'STATE-%'
       LIMIT 7
-    `);
-    const rows = (statePayments as any).rows ?? statePayments;
+    `)) as unknown as { rows: Array<{ id: string; person_id: string; status: string }> };
+    const rows = statePayments.rows ?? [];
     if (rows.length > 0) {
       const existingHistory = await db.select().from(duesPaymentStatusHistory).limit(1);
       if (existingHistory.length === 0) {
@@ -263,10 +276,10 @@ export async function seedStateCoverage(
             paymentId: p.id,
             personId: p.person_id,
             fromStatus: 'pending',
-            toStatus: p.status,
+            toStatus: p.status as typeof duesPaymentStatusHistory.$inferInsert['toStatus'],
             reason: `State coverage seed — ${p.status}`,
             changedBy: presidentPersonId,
-          } as any);
+          });
         }
         console.log(`    ✓ ${rows.length} payment status history records`);
       }
