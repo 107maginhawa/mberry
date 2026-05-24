@@ -11,6 +11,27 @@ vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
+// Mock session for greeting
+vi.mock('@monobase/sdk-ts/react/hooks/use-auth', () => ({
+  useSession: () => ({ data: { user: { name: 'Jane Doe' } } }),
+}))
+
+// Mock SDK query options
+vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
+  listElectionsOptions: vi.fn(() => ({
+    queryKey: ['elections'],
+    queryFn: () => Promise.resolve({ data: [] }),
+  })),
+  searchDocumentsOptions: vi.fn(() => ({
+    queryKey: ['documents'],
+    queryFn: () => Promise.resolve({ data: [] }),
+  })),
+  searchEventsOptions: vi.fn(() => ({
+    queryKey: ['events'],
+    queryFn: () => Promise.resolve({ data: [] }),
+  })),
+}))
+
 // Mock motion/pattern components
 vi.mock('@/components/patterns/skeleton-loader', () => ({
   CardSkeleton: () => <div data-testid="card-skeleton">Loading...</div>,
@@ -78,10 +99,10 @@ describe('OfficerDashboard', () => {
     vi.clearAllMocks()
   })
 
-  test('renders page header', () => {
+  test('renders greeting with user name', () => {
     setupApiResponses()
     renderWithProviders(<OfficerDashboard orgId="org-1" />)
-    expect(screen.getByText('Officer Dashboard')).toBeInTheDocument()
+    expect(screen.getByText(/Good (morning|afternoon|evening), Jane/)).toBeInTheDocument()
   })
 
   test('shows loading skeletons while data fetches', () => {
@@ -91,7 +112,7 @@ describe('OfficerDashboard', () => {
     expect(skeletons.length).toBeGreaterThan(0)
   })
 
-  test('displays metric values after loading', async () => {
+  test('displays KPI values after loading', async () => {
     setupApiResponses({
       members: {
         data: [
@@ -113,10 +134,9 @@ describe('OfficerDashboard', () => {
     // Metric values rendered via CountUp mock
     expect(screen.getByText('2')).toBeInTheDocument() // active
     expect(screen.getByText('72%')).toBeInTheDocument() // collection rate
-    expect(screen.getByText('5')).toBeInTheDocument() // upcoming activities
   })
 
-  test('shows "All clear" when no action items needed', async () => {
+  test('shows "All clear" when no P0/P1 action items', async () => {
     setupApiResponses({
       members: { data: [{ status: 'active' }] },
       applications: { data: [] },
@@ -145,7 +165,7 @@ describe('OfficerDashboard', () => {
 
   test('shows pending applications action card', async () => {
     setupApiResponses({
-      members: { data: [] },
+      members: { data: [{ status: 'active' }] },
       applications: { data: [{ id: '1' }, { id: '2' }, { id: '3' }] },
       dues: { data: { collectionRate: 85, upcomingActivities: 0 } },
     })
@@ -157,17 +177,38 @@ describe('OfficerDashboard', () => {
     })
   })
 
-  test('renders quick links section', async () => {
-    setupApiResponses()
+  test('renders module summary cards', async () => {
+    setupApiResponses({
+      members: { data: [{ status: 'active' }] },
+    })
+    renderWithProviders(<OfficerDashboard orgId="org-1" />)
+
+    // Wait for queries to resolve and module cards to render
+    await waitFor(() => {
+      expect(screen.getAllByText('Members').length).toBeGreaterThan(0)
+    })
+
+    expect(screen.getAllByText('Finances').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Events').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Elections').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Documents').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Communications').length).toBeGreaterThan(0)
+  })
+
+  test('shows onboarding state for zero members', async () => {
+    setupApiResponses({
+      members: { data: [] },
+      applications: { data: [] },
+      dues: { data: { collectionRate: 0, upcomingActivities: 0 } },
+    })
+
     renderWithProviders(<OfficerDashboard orgId="org-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Quick Links')).toBeInTheDocument()
+      expect(screen.getByText('Get started with your association')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Roster')).toBeInTheDocument()
-    expect(screen.getByText('Applications')).toBeInTheDocument()
-    expect(screen.getByText('Payments')).toBeInTheDocument()
-    expect(screen.getByText('Reports')).toBeInTheDocument()
+    expect(screen.getByText('Import Roster')).toBeInTheDocument()
+    expect(screen.getByText('Add Member')).toBeInTheDocument()
   })
 })
