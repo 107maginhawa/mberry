@@ -3,7 +3,7 @@
  * Uses Drizzle ORM with PostgreSQL
  */
 
-import { pgTable, varchar, timestamp, date, jsonb, pgEnum, index } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, timestamp, date, jsonb, pgEnum, index, text } from 'drizzle-orm/pg-core';
 import { baseEntityFields } from '@/core/database.schema';
 
 // Gender enum - matches TypeSpec definition
@@ -37,6 +37,7 @@ export const persons = pgTable('person', {
   specialization: varchar('specialization', { length: 100 }),
   prcId: varchar('prc_id', { length: 50 }),
   preferredLanguage: varchar('preferred_language', { length: 10 }),
+  bio: text('bio'),
 
   // Account deletion (DPA 2012 / M-25 / BR-32)
   deletionRequestedAt: timestamp('deletion_requested_at', { withTimezone: true }),
@@ -117,6 +118,7 @@ export interface PersonCreateRequest {
   specialization?: string;
   prcId?: string;
   preferredLanguage?: string;
+  bio?: string;
 }
 
 // Update request - matches TypeSpec PersonUpdateRequest
@@ -135,5 +137,6 @@ export interface PersonUpdateRequest {
   specialization?: string | null;
   prcId?: string | null;
   preferredLanguage?: string | null;
+  bio?: string | null;
 }
 

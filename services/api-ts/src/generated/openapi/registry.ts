@@ -419,6 +419,7 @@ import { closeSurvey } from '../../handlers/surveys/closeSurvey';
 import { publishSurvey } from '../../handlers/surveys/publishSurvey';
 import { submitSurveyResponse } from '../../handlers/surveys/submitSurveyResponse';
 import { listSurveyResponses } from '../../handlers/surveys/listSurveyResponses';
+import { dismissSurveyResponse } from '../../handlers/surveys/dismissSurveyResponse';
 
 export const registry = {
   // Association:operations handlers
@@ -867,5 +868,6 @@ export const registry = {
   publishSurvey,
   submitSurveyResponse,
   listSurveyResponses,
+  dismissSurveyResponse,
 
 };

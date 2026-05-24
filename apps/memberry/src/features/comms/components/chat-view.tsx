@@ -11,6 +11,7 @@ import { MessageSquare, WifiOff } from 'lucide-react'
 import { MessageBubble } from './message-bubble'
 import { MessageComposer } from './message-composer'
 import { TypingIndicator } from './typing-indicator'
+import { ThreadPanel } from './thread-panel'
 import { useChatWebSocket } from '../hooks/use-chat-websocket'
 import { useUnreadCounts } from '../hooks/use-unread-counts'
 
@@ -29,6 +30,7 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([])
   const [typingUsers, setTypingUsers] = useState<Map<string, number>>(new Map())
+  const [threadMessage, setThreadMessage] = useState<ChatMessage | null>(null)
   const prevMessageCountRef = useRef(0)
   const { markRead } = useUnreadCounts()
 
@@ -104,7 +106,8 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
   }, [queryClient, roomId])
 
   return (
-    <GlassCard className="flex flex-col h-full">
+    <div className="flex h-full">
+    <GlassCard className="flex flex-col h-full flex-1 min-w-0">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border-light)]">
         <MessageSquare className="h-4 w-4 text-[var(--color-muted)]" />
@@ -145,11 +148,14 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
             <p className="text-sm text-[var(--color-muted)]">No messages yet. Say hello!</p>
           </div>
         ) : (
-          localMessages.map((msg) => (
+          localMessages
+            .filter((msg) => !(msg as ChatMessage & { parentMessageId?: string }).parentMessageId)
+            .map((msg) => (
             <MessageBubble
               key={msg.id}
               message={msg}
               isOwn={msg.sender === myPersonId}
+              onOpenThread={setThreadMessage}
             />
           ))
         )}
@@ -161,5 +167,16 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
       {/* Composer */}
       <MessageComposer roomId={roomId} wsSend={send} onMessageSent={handleMessageSent} />
     </GlassCard>
+
+    {/* Thread panel */}
+    {threadMessage && (
+      <ThreadPanel
+        roomId={roomId}
+        parentMessage={threadMessage}
+        myPersonId={myPersonId}
+        onClose={() => setThreadMessage(null)}
+      />
+    )}
+    </div>
   )
 }

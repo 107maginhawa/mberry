@@ -148,10 +148,10 @@ function MyProfilePage() {
 
         <div className="md:w-2/3 space-y-4">
           {/* Bio */}
-          {(p as any)?.bio && (
+          {p?.bio && (
             <GlassCard className="p-5">
               <h3 className="text-h4 mb-2">About</h3>
-              <p className="text-sm text-[var(--color-muted)] whitespace-pre-line">{(p as any).bio}</p>
+              <p className="text-sm text-[var(--color-muted)] whitespace-pre-line">{p.bio}</p>
             </GlassCard>
           )}
 
@@ -268,7 +268,7 @@ function ProfileEditForm({
       specialization: person?.specialization || '',
       licenseNumber: person?.licenseNumber || '',
       prcId: person?.prcId || '',
-      bio: (person as any)?.bio || '',
+      bio: person?.bio || '',
       phone: person?.contactInfo?.phone || '',
       timezone: person?.timezone || '',
       preferredLanguage: person?.preferredLanguage || '',

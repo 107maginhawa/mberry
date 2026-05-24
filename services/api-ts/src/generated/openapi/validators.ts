@@ -2538,7 +2538,8 @@ export const PersonSchema = z.object({
   licenseNumber: z.string().max(50).optional(),
   specialization: z.string().max(100).optional(),
   prcId: z.string().max(50).optional(),
-  preferredLanguage: z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }).optional()
+  preferredLanguage: z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }).optional(),
+  bio: z.string().max(2000).optional()
 });
 
 export const LocationTypeSchema = z.enum(["video", "phone", "in-person"]);
@@ -2754,7 +2755,8 @@ export const PersonUpdateSchema = z.object({
   licenseNumber: z.string().max(50).optional(),
   specialization: z.string().max(100).optional(),
   prcId: z.string().max(50).optional(),
-  preferredLanguage: z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }).optional()
+  preferredLanguage: z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }).optional(),
+  bio: z.string().max(2000).optional()
 });
 
 export const DailyConfigUpdateSchema = z.object({
@@ -7597,7 +7599,8 @@ export const PersonCreateRequestSchema = z.object({
   licenseNumber: z.string().max(50).optional(),
   specialization: z.string().max(100).optional(),
   prcId: z.string().max(50).optional(),
-  preferredLanguage: z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }).optional()
+  preferredLanguage: z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }).optional(),
+  bio: z.string().max(2000).optional()
 });
 
 export const PersonListResponseSchema = z.object({
@@ -7672,7 +7675,8 @@ export const PersonUpdateRequestSchema = z.object({
   licenseNumber: z.union([z.string().max(50), z.null()]).optional(),
   specialization: z.union([z.string().max(100), z.null()]).optional(),
   prcId: z.union([z.string().max(50), z.null()]).optional(),
-  preferredLanguage: z.union([z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }), z.null()]).optional()
+  preferredLanguage: z.union([z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }), z.null()]).optional(),
+  bio: z.union([z.string().max(2000), z.null()]).optional()
 });
 
 export const PharmacyInfoSchema = z.object({
@@ -8500,7 +8504,7 @@ export const ResourceUpdateSchema = z.object({
   status: z.enum(["draft", "published", "archived"]).optional()
 });
 
-export const ResponseStatusSchema = z.enum(["pending", "completed", "skipped"]);
+export const ResponseStatusSchema = z.enum(["pending", "completed", "skipped", "dismissed"]);
 
 export const ReviewSchema = z.object({
   id: z.string().uuid(),
@@ -9339,9 +9343,9 @@ export const SurveyResponseSchema = z.object({
   updatedAt: z.string().datetime().transform((str) => new Date(str)),
   updatedBy: z.string().uuid().optional(),
   surveyId: z.string().uuid(),
-  responderId: z.string().uuid(),
+  responderId: z.string().uuid().optional(),
   answers: z.array(QuestionAnswerSchema),
-  status: z.enum(["pending", "completed", "skipped"]),
+  status: z.enum(["pending", "completed", "skipped", "dismissed"]),
   completedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   contextId: z.string().uuid().optional()
 });
@@ -9370,7 +9374,7 @@ export const SurveyResponseUpdateSchema = z.object({
   surveyId: z.string().uuid().optional(),
   responderId: z.string().uuid().optional(),
   answers: z.array(QuestionAnswerSchema).optional(),
-  status: z.enum(["pending", "completed", "skipped"]).optional(),
+  status: z.enum(["pending", "completed", "skipped", "dismissed"]).optional(),
   completedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   contextId: z.string().uuid().optional()
 });
@@ -13712,3 +13716,10 @@ export const ListSurveyResponsesQuery = z.object({
 export type ListSurveyResponsesQuery = z.infer<typeof ListSurveyResponsesQuery>;
 
 export const ListSurveyResponsesResponse = SurveyResponseListResponseSchema;
+
+export const DismissSurveyResponseParams = z.object({
+  survey: UUIDSchema,
+});
+export type DismissSurveyResponseParams = z.infer<typeof DismissSurveyResponseParams>;
+
+export const DismissSurveyResponseResponse = z.void();

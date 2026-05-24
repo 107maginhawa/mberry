@@ -413,6 +413,11 @@ export type AccreditedProvider = {
 };
 
 /**
+ * Status of an accredited training provider
+ */
+export type AccreditedProviderStatus = 'active' | 'suspended' | 'expired';
+
+/**
  * An organization accredited to deliver continuing education activities
  */
 export type AccreditedProviderUpdate = {
@@ -1424,6 +1429,91 @@ export type AnnouncementVisibility = 'internal' | 'network';
 export type ApplicationStatus = 'submitted' | 'underReview' | 'approved' | 'denied' | 'waitlisted';
 
 /**
+ * Request to apply a special assessment — generates invoices for target members
+ */
+export type ApplySpecialAssessmentRequest = {
+    /**
+     * Optional list of person IDs when appliesTo is 'selected'
+     */
+    memberIds?: Array<string>;
+};
+
+/**
+ * Result of applying a special assessment
+ */
+export type ApplySpecialAssessmentResult = {
+    /**
+     * The updated assessment (now active)
+     */
+    assessment: {
+        /**
+         * Unique identifier
+         */
+        id: string;
+        /**
+         * Entity version for optimistic locking
+         */
+        version: number;
+        /**
+         * Creation timestamp
+         */
+        createdAt: Date;
+        /**
+         * User who created the entity
+         */
+        createdBy?: string;
+        /**
+         * Last update timestamp
+         */
+        updatedAt: Date;
+        /**
+         * User who last updated the entity
+         */
+        updatedBy?: string;
+        /**
+         * ID of the association organization
+         */
+        organizationId: string;
+        /**
+         * Name of the special assessment
+         */
+        name: string;
+        /**
+         * Description of the assessment purpose
+         */
+        description?: string | null;
+        /**
+         * Amount in minor currency units (e.g. cents)
+         */
+        amount: bigint;
+        /**
+         * ISO 4217 currency code
+         */
+        currency: string;
+        /**
+         * Due date for the assessment
+         */
+        dueDate: Date;
+        /**
+         * Optional fund to allocate collected amounts
+         */
+        fundId?: string | null;
+        /**
+         * Whether assessment applies to all members or selected members
+         */
+        appliesTo: 'all' | 'selected';
+        /**
+         * Lifecycle status
+         */
+        status: 'draft' | 'active' | 'closed';
+    };
+    /**
+     * Number of invoices generated
+     */
+    invoicesGenerated: number;
+};
+
+/**
  * An article within a publication issue
  */
 export type Article = {
@@ -1564,6 +1654,21 @@ export type ArticleUpdate = {
      */
     status?: 'submitted' | 'peer_review' | 'accepted' | 'published' | 'retracted';
 };
+
+/**
+ * Who the special assessment applies to
+ */
+export type AssessmentAppliesTo = 'all' | 'selected';
+
+/**
+ * Lifecycle status of a special assessment
+ */
+export type AssessmentStatus = 'draft' | 'active' | 'closed';
+
+/**
+ * Payment status of an assessment target
+ */
+export type AssessmentTargetStatus = 'pending' | 'paid';
 
 /**
  * Base entity for association domain models; extends BaseEntity with multi-organization isolation.
@@ -2777,6 +2882,285 @@ export type AssociationCoreCommunicationPersonSubscriptionUpdate = {
      * Whether the person wants to receive messages on this topic.
      */
     enabled?: boolean;
+};
+
+/**
+ * A saved audience segment preset
+ */
+export type AssociationCoreCommunicationSavedSegment = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * Human-readable name for this segment
+     */
+    name: string;
+    /**
+     * Filter criteria defining this segment
+     */
+    filters: {
+        /**
+         * Filter by dues payment status
+         */
+        duesStatus?: string;
+        /**
+         * Filter by membership tier
+         */
+        membershipTier?: string;
+        /**
+         * Filter by chapter IDs
+         */
+        chapterIds?: Array<string>;
+        /**
+         * Filter by join date — members who joined after this date
+         */
+        joinedAfter?: string;
+        /**
+         * Filter by join date — members who joined before this date
+         */
+        joinedBefore?: string;
+    };
+};
+
+/**
+ * Request to create a saved segment
+ */
+export type AssociationCoreCommunicationSavedSegmentCreateRequest = {
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * Human-readable name for this segment
+     */
+    name: string;
+    /**
+     * Filter criteria defining this segment
+     */
+    filters: {
+        /**
+         * Filter by dues payment status
+         */
+        duesStatus?: string;
+        /**
+         * Filter by membership tier
+         */
+        membershipTier?: string;
+        /**
+         * Filter by chapter IDs
+         */
+        chapterIds?: Array<string>;
+        /**
+         * Filter by join date — members who joined after this date
+         */
+        joinedAfter?: string;
+        /**
+         * Filter by join date — members who joined before this date
+         */
+        joinedBefore?: string;
+    };
+};
+
+/**
+ * Success response for segment deletion
+ */
+export type AssociationCoreCommunicationSavedSegmentDeleteResponse = {
+    /**
+     * Whether deletion succeeded
+     */
+    success: boolean;
+};
+
+/**
+ * List response wrapper for saved segments
+ */
+export type AssociationCoreCommunicationSavedSegmentListResponse = {
+    /**
+     * List of saved segments
+     */
+    data: Array<AssociationCoreCommunicationSavedSegment>;
+};
+
+/**
+ * Single saved segment response wrapper
+ */
+export type AssociationCoreCommunicationSavedSegmentResponse = {
+    /**
+     * Created saved segment
+     */
+    data: {
+        /**
+         * Unique identifier
+         */
+        id: string;
+        /**
+         * Entity version for optimistic locking
+         */
+        version: number;
+        /**
+         * Creation timestamp
+         */
+        createdAt: Date;
+        /**
+         * User who created the entity
+         */
+        createdBy?: string;
+        /**
+         * Last update timestamp
+         */
+        updatedAt: Date;
+        /**
+         * User who last updated the entity
+         */
+        updatedBy?: string;
+        /**
+         * ID of the association organization
+         */
+        organizationId: string;
+        /**
+         * Human-readable name for this segment
+         */
+        name: string;
+        /**
+         * Filter criteria defining this segment
+         */
+        filters: {
+            /**
+             * Filter by dues payment status
+             */
+            duesStatus?: string;
+            /**
+             * Filter by membership tier
+             */
+            membershipTier?: string;
+            /**
+             * Filter by chapter IDs
+             */
+            chapterIds?: Array<string>;
+            /**
+             * Filter by join date — members who joined after this date
+             */
+            joinedAfter?: string;
+            /**
+             * Filter by join date — members who joined before this date
+             */
+            joinedBefore?: string;
+        };
+    };
+};
+
+/**
+ * A saved audience segment preset
+ */
+export type AssociationCoreCommunicationSavedSegmentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * Human-readable name for this segment
+     */
+    name?: string;
+    /**
+     * Filter criteria defining this segment
+     */
+    filters?: {
+        /**
+         * Filter by dues payment status
+         */
+        duesStatus?: string;
+        /**
+         * Filter by membership tier
+         */
+        membershipTier?: string;
+        /**
+         * Filter by chapter IDs
+         */
+        chapterIds?: Array<string>;
+        /**
+         * Filter by join date — members who joined after this date
+         */
+        joinedAfter?: string;
+        /**
+         * Filter by join date — members who joined before this date
+         */
+        joinedBefore?: string;
+    };
+};
+
+/**
+ * Segment filter criteria for audience targeting
+ */
+export type AssociationCoreCommunicationSegmentFilters = {
+    /**
+     * Filter by dues payment status
+     */
+    duesStatus?: string;
+    /**
+     * Filter by membership tier
+     */
+    membershipTier?: string;
+    /**
+     * Filter by chapter IDs
+     */
+    chapterIds?: Array<string>;
+    /**
+     * Filter by join date — members who joined after this date
+     */
+    joinedAfter?: string;
+    /**
+     * Filter by join date — members who joined before this date
+     */
+    joinedBefore?: string;
 };
 
 /**
@@ -5859,6 +6243,58 @@ export type AssociationCoreStaffStaffRole = 'admin' | 'coordinator' | 'accountan
  * Lifecycle status of a staff member record.
  */
 export type AssociationCoreStaffStaffStatus = 'invited' | 'active' | 'onLeave' | 'terminated';
+
+/**
+ * Public credential lookup by credential number — no authentication required. Returns verification status with privacy-gated trust summary.
+ */
+export type AssociationMemberCredentialsCredentialLookupResult = {
+    /**
+     * Verification result: valid, expired, revoked, or notFound
+     */
+    result: 'valid' | 'expired' | 'revoked' | 'notFound';
+    /**
+     * Credential details if found, null otherwise
+     */
+    credential: {
+        /**
+         * The credential number
+         */
+        credentialNumber: string;
+        /**
+         * Credential lifecycle status
+         */
+        status: string;
+        /**
+         * When the credential was issued
+         */
+        issuedAt: Date;
+        /**
+         * When the credential expires (if applicable)
+         */
+        expiresAt?: Date;
+    } | null;
+    /**
+     * Holder information (privacy-gated)
+     */
+    holder?: {
+        /**
+         * Display name of the credential holder
+         */
+        displayName: string;
+        /**
+         * Photo URL (if public)
+         */
+        photoUrl?: string;
+        /**
+         * Professional specialty
+         */
+        specialty?: string;
+        /**
+         * Membership status (only shown if holder has opted in to visibility)
+         */
+        membershipStatus?: string;
+    };
+};
 
 /**
  * Offset-based paginated response with page navigation
@@ -8951,6 +9387,98 @@ export type BulkApproveFailure = {
 };
 
 /**
+ * Result of an individual certificate issuance
+ */
+export type BulkIssueCertificateResult = {
+    /**
+     * Person ID the certificate was issued to
+     */
+    personId: string;
+    /**
+     * Generated certificate number (or ERROR if failed)
+     */
+    certificateNumber: string;
+    /**
+     * URL to the generated PDF (null if not yet generated)
+     */
+    pdfUrl: string | null;
+};
+
+/**
+ * Request body for bulk certificate issuance
+ */
+export type BulkIssueCertificatesRequest = {
+    /**
+     * Organization ID issuing the certificates
+     */
+    organizationId: string;
+    /**
+     * Person IDs to issue certificates to (max 100)
+     */
+    personIds: Array<string>;
+    /**
+     * Title of the training activity
+     */
+    trainingTitle: string;
+    /**
+     * Type of certificate: attendance, completion, or speaker
+     */
+    certificateType: string;
+    /**
+     * CPD activity type categorization
+     */
+    cpdActivityType?: string;
+    /**
+     * Number of CPD credit hours
+     */
+    creditHours?: number;
+    /**
+     * Template ID for certificate generation
+     */
+    templateId?: string;
+    /**
+     * ID of the signing officer
+     */
+    signingOfficerId: string;
+    /**
+     * Organization code for certificate numbering
+     */
+    orgCode: string;
+    /**
+     * Organization branding overrides
+     */
+    orgBranding?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Signatory name override
+     */
+    signatoryName?: string;
+    /**
+     * Signatory title override
+     */
+    signatoryTitle?: string;
+};
+
+/**
+ * Bulk issuance response when queued as a background job
+ */
+export type BulkIssueQueuedResponse = {
+    /**
+     * Processing status
+     */
+    status: string;
+    /**
+     * Background job ID for tracking
+     */
+    jobId: string;
+    /**
+     * Human-readable message
+     */
+    message: string;
+};
+
+/**
  * A conflict-of-interest attestation submitted by a member
  */
 export type CoiAttestation = {
@@ -9893,6 +10421,40 @@ export type CertificateUpdate = {
 };
 
 /**
+ * Public certificate verification result
+ */
+export type CertificateVerificationResult = {
+    /**
+     * Certificate number
+     */
+    certificateNumber: string;
+    /**
+     * Name of the certificate holder
+     */
+    holderName: string;
+    /**
+     * When the certificate was issued
+     */
+    issuedAt: Date;
+    /**
+     * Certificate status (issued, revoked)
+     */
+    status: string;
+    /**
+     * Number of CPD credit hours awarded
+     */
+    creditHours?: number;
+    /**
+     * CPD activity type
+     */
+    cpdActivityType?: string;
+    /**
+     * Whether the certificate is currently valid (not revoked)
+     */
+    isValid: boolean;
+};
+
+/**
  * A member's enrollment record in a certification program
  */
 export type CertificationEnrollment = {
@@ -10304,6 +10866,64 @@ export type ChapterAffiliationUpdate = {
 export type ChapterAffiliationUpdateRequest = {
     isPrimary?: boolean;
     status?: AffiliationStatus;
+};
+
+/**
+ * Chapter-level aggregate metrics for the national dashboard
+ */
+export type ChapterMetrics = {
+    /**
+     * Organization (chapter) ID
+     */
+    orgId: string;
+    /**
+     * Chapter display name
+     */
+    chapterName?: string;
+    /**
+     * Total members in the chapter
+     */
+    totalMembers: number;
+    /**
+     * Active (paid) members
+     */
+    activeMembers: number;
+    /**
+     * Members in grace period
+     */
+    graceMembers: number;
+    /**
+     * Lapsed members
+     */
+    lapsedMembers: number;
+    /**
+     * Suspended members
+     */
+    suspendedMembers: number;
+    /**
+     * Dues collection rate (0-1)
+     */
+    collectionRate: number;
+    /**
+     * Total dues collected in the period
+     */
+    totalCollected: number;
+    /**
+     * Total dues expected in the period
+     */
+    totalExpected: number;
+    /**
+     * CPD compliance rate (0-1)
+     */
+    cpdComplianceRate: number;
+    /**
+     * Average credits per member
+     */
+    avgCreditsPerMember: number;
+    /**
+     * Activity count in the last 90 days
+     */
+    activityCount90d: number;
 };
 
 /**
@@ -10991,6 +11611,46 @@ export type Committee = {
 };
 
 /**
+ * Committee detail with member list
+ */
+export type CommitteeDetail = {
+    /**
+     * Committee ID
+     */
+    id: string;
+    /**
+     * Committee name
+     */
+    name: string;
+    /**
+     * Organization ID
+     */
+    organizationId?: string;
+    /**
+     * Committee type or category
+     */
+    type?: string;
+    /**
+     * Number of members in the committee
+     */
+    memberCount?: number;
+    /**
+     * Committee status
+     */
+    status?: string;
+    /**
+     * Description of the committee's purpose
+     */
+    description?: string;
+    /**
+     * Committee member list
+     */
+    members?: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * A scheduled or completed committee meeting
  */
 export type CommitteeMeeting = {
@@ -11214,6 +11874,36 @@ export type CommitteeSeatUpdate = {
 export type CommitteeStatus = 'active' | 'suspended' | 'dissolved';
 
 /**
+ * Committee summary for cross-org committee listing
+ */
+export type CommitteeSummary = {
+    /**
+     * Committee ID
+     */
+    id: string;
+    /**
+     * Committee name
+     */
+    name: string;
+    /**
+     * Organization ID
+     */
+    organizationId?: string;
+    /**
+     * Committee type or category
+     */
+    type?: string;
+    /**
+     * Number of members in the committee
+     */
+    memberCount?: number;
+    /**
+     * Committee status
+     */
+    status?: string;
+};
+
+/**
  * Type of committee
  */
 export type CommitteeType = 'standing' | 'adhoc' | 'taskForce';
@@ -11285,6 +11975,89 @@ export type ComplaintCategory = 'professionalMisconduct' | 'codeViolation' | 'fi
  * Lifecycle status of an ethics complaint
  */
 export type ComplaintStatus = 'filed' | 'preliminaryReview' | 'investigation' | 'hearing' | 'decision' | 'appeal' | 'closed';
+
+/**
+ * Result of a compliance data refresh
+ */
+export type ComplianceRefreshResult = {
+    /**
+     * Whether the refresh was successful
+     */
+    refreshed: boolean;
+    /**
+     * ISO timestamp of when the refresh occurred
+     */
+    at: string;
+};
+
+/**
+ * Full compliance report for an organization
+ */
+export type ComplianceReportResponse = {
+    /**
+     * Compliance summary statistics
+     */
+    summary: {
+        /**
+         * Number of compliant members
+         */
+        compliant: number;
+        /**
+         * Number of at-risk members
+         */
+        atRisk: number;
+        /**
+         * Number of non-compliant members
+         */
+        nonCompliant: number;
+        /**
+         * Total members in the report
+         */
+        total: number;
+        /**
+         * Required credits for compliance
+         */
+        requiredCredits: number;
+    };
+    /**
+     * Individual member compliance standings
+     */
+    standings: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Compliance report summary statistics
+ */
+export type ComplianceReportSummary = {
+    /**
+     * Number of compliant members
+     */
+    compliant: number;
+    /**
+     * Number of at-risk members
+     */
+    atRisk: number;
+    /**
+     * Number of non-compliant members
+     */
+    nonCompliant: number;
+    /**
+     * Total members in the report
+     */
+    total: number;
+    /**
+     * Required credits for compliance
+     */
+    requiredCredits: number;
+};
 
 /**
  * A single member row in a credit compliance report
@@ -12540,6 +13313,45 @@ export type CreateReviewRequest = {
 };
 
 /**
+ * Request to create a survey
+ */
+export type CreateSurveyRequest = {
+    /**
+     * Survey title
+     */
+    title: string;
+    /**
+     * Survey description
+     */
+    description?: string;
+    /**
+     * Survey type
+     */
+    surveyType: 'nps' | 'satisfaction' | 'poll' | 'custom';
+    /**
+     * Questions (can be empty for draft)
+     */
+    questions?: Array<SurveyQuestion>;
+    /**
+     * Survey settings
+     */
+    settings?: {
+        /**
+         * Whether responses are anonymous (responder identity hidden from officers)
+         */
+        anonymous?: boolean;
+        /**
+         * Survey deadline (UTC)
+         */
+        deadline?: Date;
+        /**
+         * Target audience filter
+         */
+        targetAudience?: string;
+    };
+};
+
+/**
  * Request to create a new email template
  */
 export type CreateTemplateRequest = {
@@ -12890,6 +13702,24 @@ export type CredentialVerificationLogUpdate = {
 export type CreditActivityType = 'event' | 'training' | 'conference' | 'selfStudy' | 'publication' | 'teaching' | 'other';
 
 /**
+ * Category breakdown of CPD credits
+ */
+export type CreditCategoryBreakdown = {
+    /**
+     * General category credits
+     */
+    general: number;
+    /**
+     * Major category credits
+     */
+    major: number;
+    /**
+     * Self-directed learning credits
+     */
+    selfDirected: number;
+};
+
+/**
  * Credit compliance report response
  */
 export type CreditComplianceReport = {
@@ -13186,6 +14016,52 @@ export type CreditEntryUpdate = {
      * Subcategory used for reporting (e.g. ethics, clinical, leadership)
      */
     category?: string;
+};
+
+/**
+ * A single credit history entry
+ */
+export type CreditHistoryEntry = {
+    /**
+     * Credit entry ID
+     */
+    id: string;
+    /**
+     * Activity name
+     */
+    activityName: string;
+    /**
+     * Provider name
+     */
+    provider?: string;
+    /**
+     * Date the activity occurred
+     */
+    activityDate?: Date;
+    /**
+     * Number of credits
+     */
+    creditAmount: number;
+    /**
+     * Credit category
+     */
+    category?: string;
+    /**
+     * How the credit was sourced
+     */
+    sourceType?: string;
+    /**
+     * Verification status
+     */
+    verificationStatus: string;
+    /**
+     * Credit status
+     */
+    status?: string;
+    /**
+     * When the credit entry was created
+     */
+    createdAt?: Date;
 };
 
 /**
@@ -16384,6 +17260,46 @@ export type EmailQueueItemUpdate = {
  * Email processing status in queue
  */
 export type EmailQueueStatus = 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled';
+
+/**
+ * Email suppression record — an email address that has opted out of communications
+ */
+export type EmailSuppression = {
+    /**
+     * Suppression record ID
+     */
+    id: string;
+    /**
+     * Suppressed email address
+     */
+    email: string;
+    /**
+     * Reason for suppression (unsubscribe, bounce, complaint)
+     */
+    reason: string;
+    /**
+     * Organisation that the suppression applies to
+     */
+    organizationId: string;
+    /**
+     * When the suppression was created
+     */
+    createdAt?: Date;
+};
+
+/**
+ * Paginated email suppression list response
+ */
+export type EmailSuppressionListResponse = {
+    /**
+     * Suppression records
+     */
+    data: Array<EmailSuppression>;
+    /**
+     * Total number of suppression records
+     */
+    total: number;
+};
 
 /**
  * Email template with variable support
@@ -20108,6 +21024,64 @@ export type LicenseStatus = 'active' | 'expired' | 'suspended' | 'revoked' | 'pe
 export type LocationType = 'video' | 'phone' | 'in-person';
 
 /**
+ * Request to award a manual CPD credit entry
+ */
+export type ManualCreditAwardRequest = {
+    /**
+     * Person receiving the credit
+     */
+    personId: string;
+    /**
+     * Name of the activity
+     */
+    activityName: string;
+    /**
+     * Date the activity was completed
+     */
+    activityDate: Date;
+    /**
+     * Number of credits to award
+     */
+    creditAmount: number;
+    /**
+     * Idempotency key to prevent duplicate awards
+     */
+    idempotencyKey: string;
+    /**
+     * CPD activity provider name
+     */
+    provider?: string;
+    /**
+     * Credit category (General, Major, Self-Directed)
+     */
+    category?: string;
+    /**
+     * CPD activity type
+     */
+    cpdActivityType?: string;
+    /**
+     * Supporting document ID
+     */
+    supportingDocumentId?: string;
+};
+
+/**
+ * Response from a manual credit award including optional SDL cap warning
+ */
+export type ManualCreditAwardResponse = {
+    /**
+     * The created credit entry
+     */
+    data: {
+        [key: string]: unknown;
+    };
+    /**
+     * Warning message if SDL cap is exceeded (officer override)
+     */
+    warning?: string;
+};
+
+/**
  * Response body returned when all notifications are marked read
  */
 export type MarkAllReadResponse = {
@@ -21979,6 +22953,66 @@ export type MyCreditSummary = {
 };
 
 /**
+ * Full credit summary for the authenticated user
+ */
+export type MyCreditsResponse = {
+    /**
+     * Total credits earned
+     */
+    totalCredits: number;
+    /**
+     * Credits required for compliance
+     */
+    requiredCredits: number;
+    /**
+     * Compliance percentage (0-100)
+     */
+    compliancePercent: number;
+    /**
+     * Breakdown by credit category
+     */
+    categoryBreakdown: {
+        /**
+         * General category credits
+         */
+        general: number;
+        /**
+         * Major category credits
+         */
+        major: number;
+        /**
+         * Self-directed learning credits
+         */
+        selfDirected: number;
+    };
+    /**
+     * SDL cap usage
+     */
+    sdlCap: {
+        /**
+         * Maximum SDL credits allowed
+         */
+        max: number;
+        /**
+         * SDL credits used
+         */
+        used: number;
+        /**
+         * Whether the SDL cap has been exceeded
+         */
+        exceeded: boolean;
+    };
+    /**
+     * Number of credit entries
+     */
+    entryCount: number;
+    /**
+     * Credit history entries
+     */
+    history: Array<CreditHistoryEntry>;
+};
+
+/**
  * DPA 2012 personal data export envelope
  */
 export type MyDataExport = {
@@ -22046,6 +23080,30 @@ export type MyMembership = {
      * Date the membership expires
      */
     endDate?: Date;
+};
+
+/**
+ * National dashboard response with cross-chapter aggregates
+ */
+export type NationalDashboardResponse = {
+    /**
+     * Association ID
+     */
+    associationId: string;
+    /**
+     * Snapshot month (YYYY-MM)
+     */
+    snapshotMonth: string;
+    /**
+     * Association-level aggregate metrics
+     */
+    aggregate: {
+        [key: string]: unknown;
+    };
+    /**
+     * Per-chapter metrics (small chapters anonymised)
+     */
+    chapters: Array<ChapterMetrics>;
 };
 
 /**
@@ -22971,6 +24029,298 @@ export type OnboardingResponse = {
 };
 
 /**
+ * A PRC-accredited training provider scoped to an organization
+ */
+export type OrgAccreditedProvider = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organization this provider is associated with
+     */
+    organizationId: string;
+    /**
+     * Provider display name
+     */
+    name: string;
+    /**
+     * Official accreditation number
+     */
+    accreditationNumber: string;
+    /**
+     * Current accreditation status
+     */
+    status: 'active' | 'suspended' | 'expired';
+    /**
+     * Date when accreditation expires
+     */
+    expiryDate?: Date;
+    /**
+     * Whether the provider's accreditation is expiring within 30 days
+     */
+    expiringSoon?: boolean;
+};
+
+/**
+ * Request to create an org-scoped accredited provider
+ */
+export type OrgAccreditedProviderCreateRequest = {
+    /**
+     * Provider display name
+     */
+    name: string;
+    /**
+     * Official accreditation number
+     */
+    accreditationNumber: string;
+    /**
+     * Initial accreditation status
+     */
+    status?: 'active' | 'suspended' | 'expired';
+    /**
+     * Date when accreditation expires
+     */
+    expiryDate?: Date;
+};
+
+/**
+ * A PRC-accredited training provider scoped to an organization
+ */
+export type OrgAccreditedProviderUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organization this provider is associated with
+     */
+    organizationId?: string;
+    /**
+     * Provider display name
+     */
+    name?: string;
+    /**
+     * Official accreditation number
+     */
+    accreditationNumber?: string;
+    /**
+     * Current accreditation status
+     */
+    status?: 'active' | 'suspended' | 'expired';
+    /**
+     * Date when accreditation expires
+     */
+    expiryDate?: Date;
+    /**
+     * Whether the provider's accreditation is expiring within 30 days
+     */
+    expiringSoon?: boolean;
+};
+
+/**
+ * Request to update an org-scoped accredited provider
+ */
+export type OrgAccreditedProviderUpdateRequest = {
+    /**
+     * Provider display name
+     */
+    name?: string;
+    /**
+     * Official accreditation number
+     */
+    accreditationNumber?: string;
+    /**
+     * Accreditation status
+     */
+    status?: 'active' | 'suspended' | 'expired';
+    /**
+     * Date when accreditation expires
+     */
+    expiryDate?: Date | null;
+};
+
+/**
+ * Organization-level CPD configuration
+ */
+export type OrgCpdConfig = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organization this config belongs to
+     */
+    organizationId: string;
+    /**
+     * Total CPD credits required per compliance cycle
+     */
+    requiredCredits: number;
+    /**
+     * Length of the compliance cycle in years
+     */
+    cycleLengthYears: number;
+    /**
+     * Maximum percentage of credits that may come from self-directed learning
+     */
+    sdlCapPercent: number;
+    /**
+     * Activity type minimum requirements (JSON)
+     */
+    activityTypeMinimums?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Month (1-12) when the compliance cycle starts
+     */
+    cycleStartMonth: number;
+};
+
+/**
+ * Organization-level CPD configuration
+ */
+export type OrgCpdConfigUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organization this config belongs to
+     */
+    organizationId?: string;
+    /**
+     * Total CPD credits required per compliance cycle
+     */
+    requiredCredits?: number;
+    /**
+     * Length of the compliance cycle in years
+     */
+    cycleLengthYears?: number;
+    /**
+     * Maximum percentage of credits that may come from self-directed learning
+     */
+    sdlCapPercent?: number;
+    /**
+     * Activity type minimum requirements (JSON)
+     */
+    activityTypeMinimums?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Month (1-12) when the compliance cycle starts
+     */
+    cycleStartMonth?: number;
+};
+
+/**
+ * Request to update CPD configuration
+ */
+export type OrgCpdConfigUpdateRequest = {
+    /**
+     * Total CPD credits required per compliance cycle
+     */
+    requiredCredits?: number;
+    /**
+     * Length of the compliance cycle in years
+     */
+    cycleLengthYears?: number;
+    /**
+     * Maximum percentage of credits from self-directed learning
+     */
+    sdlCapPercent?: number;
+    /**
+     * Activity type minimum requirements (JSON)
+     */
+    activityTypeMinimums?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Month (1-12) when the compliance cycle starts
+     */
+    cycleStartMonth?: number;
+};
+
+/**
  * Organisation profile as returned by the membership module
  */
 export type OrgProfile = {
@@ -23409,6 +24759,16 @@ export type PatientUpdate = {
 };
 
 /**
+ * Payment checkout response with Stripe redirect URL
+ */
+export type PaymentCheckoutResponse = {
+    /**
+     * Stripe Checkout session URL to redirect the member to
+     */
+    checkoutUrl: string;
+};
+
+/**
  * Request to initiate payment
  */
 export type PaymentRequest = {
@@ -23444,6 +24804,48 @@ export type PaymentResponse = {
  * Payment processing status
  */
 export type PaymentStatus = 'pending' | 'requires_capture' | 'processing' | 'succeeded' | 'failed' | 'canceled';
+
+/**
+ * Payment token validation result — public endpoint response
+ */
+export type PaymentTokenValidation = {
+    /**
+     * Whether the token is valid for use
+     */
+    valid: boolean;
+    /**
+     * Associated invoice ID (if applicable)
+     */
+    invoiceId?: string;
+    /**
+     * Payment amount in minor units (centavos)
+     */
+    amount?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Member display name
+     */
+    memberName?: string;
+    /**
+     * Organization display name
+     */
+    orgName?: string;
+    /**
+     * Token expiry date (ISO 8601)
+     */
+    dueDate?: string;
+    /**
+     * Error message when token is invalid
+     */
+    error?: string;
+    /**
+     * Status hint: already_paid, expired, etc.
+     */
+    status?: string;
+};
 
 /**
  * A peer review panel convened to deliberate on an ethics complaint
@@ -23697,6 +25099,10 @@ export type Person = {
      * Preferred language for communications
      */
     preferredLanguage?: string;
+    /**
+     * Short biography or practice description
+     */
+    bio?: string;
 };
 
 /**
@@ -23819,6 +25225,10 @@ export type PersonCreateRequest = {
      * Preferred language for communications
      */
     preferredLanguage?: string;
+    /**
+     * Short biography or practice description
+     */
+    bio?: string;
 };
 
 /**
@@ -24115,6 +25525,10 @@ export type PersonUpdate = {
      * Preferred language for communications
      */
     preferredLanguage?: string;
+    /**
+     * Short biography or practice description
+     */
+    bio?: string;
 };
 
 /**
@@ -24237,6 +25651,10 @@ export type PersonUpdateRequest = {
      * Preferred language - can be null to clear
      */
     preferredLanguage?: string | null;
+    /**
+     * Short biography - can be null to clear
+     */
+    bio?: string | null;
 };
 
 /**
@@ -25122,6 +26540,18 @@ export type PrivacySettings = {
      * Whether address is visible to other members in the directory
      */
     addressVisible: boolean;
+    /**
+     * Whether verified credentials are visible in the directory
+     */
+    credentialsVisible: boolean;
+    /**
+     * Whether dues standing is visible in the directory
+     */
+    duesStatusVisible: boolean;
+    /**
+     * Whether CE compliance status is visible in the directory
+     */
+    ceComplianceVisible: boolean;
 };
 
 /**
@@ -25830,6 +27260,33 @@ export type PublicDirectoryProfile = {
 };
 
 /**
+ * Paginated list of public organisations with metadata
+ */
+export type PublicOrgListResponse = {
+    /**
+     * Array of public organisation profiles
+     */
+    data: Array<PublicOrganization>;
+    /**
+     * Pagination metadata
+     */
+    meta: {
+        /**
+         * Total matching organisations
+         */
+        total: number;
+        /**
+         * Applied page size
+         */
+        limit: number;
+        /**
+         * Applied offset
+         */
+        offset: number;
+    };
+};
+
+/**
  * Public organisation profile returned from the slug lookup
  */
 export type PublicOrganization = {
@@ -26113,6 +27570,20 @@ export type PublicationUpdate = {
      * Current lifecycle status
      */
     status?: 'active' | 'suspended' | 'retired';
+};
+
+/**
+ * Answer to a single survey question
+ */
+export type QuestionAnswer = {
+    /**
+     * Question ID this answer is for
+     */
+    questionId: string;
+    /**
+     * Answer value (type depends on question type)
+     */
+    value: unknown;
 };
 
 /**
@@ -26857,6 +28328,11 @@ export type ResourceUpdate = {
      */
     status?: 'draft' | 'published' | 'archived';
 };
+
+/**
+ * Response status
+ */
+export type ResponseStatus = 'pending' | 'completed' | 'skipped' | 'dismissed';
 
 /**
  * Review with NPS score and optional feedback
@@ -27629,6 +29105,20 @@ export type SanctionRecordUpdate = {
 };
 
 /**
+ * Scale configuration for NPS and rating questions
+ */
+export type ScaleConfig = {
+    /**
+     * Minimum value
+     */
+    min: number;
+    /**
+     * Maximum value
+     */
+    max: number;
+};
+
+/**
  * Event-specific blocked time periods
  */
 export type ScheduleException = {
@@ -27925,6 +29415,24 @@ export type ScheduleExceptionUpdate = {
 };
 
 /**
+ * SDL cap usage information
+ */
+export type SdlCapInfo = {
+    /**
+     * Maximum SDL credits allowed
+     */
+    max: number;
+    /**
+     * SDL credits used
+     */
+    used: number;
+    /**
+     * Whether the SDL cap has been exceeded
+     */
+    exceeded: boolean;
+};
+
+/**
  * Allocation of one institutional membership seat to an individual
  */
 export type SeatAllocation = {
@@ -28120,6 +29628,42 @@ export type SegmentRule = {
  * Delivery status for a campaign send record
  */
 export type SendDeliveryStatus = 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'unsubscribed';
+
+/**
+ * Request body for sending a payment link to a member
+ */
+export type SendPaymentLinkRequest = {
+    /**
+     * Person ID of the member to send the payment link to
+     */
+    personId: string;
+    /**
+     * Payment amount in minor units. If omitted, uses org dues config default.
+     */
+    amount?: bigint;
+    /**
+     * Invoice ID to associate with the payment (optional)
+     */
+    invoiceId?: string;
+};
+
+/**
+ * Response after generating a payment link
+ */
+export type SendPaymentLinkResponse = {
+    /**
+     * Raw token for constructing the payment URL
+     */
+    token: string;
+    /**
+     * Full payment URL path
+     */
+    paymentUrl: string;
+    /**
+     * Token expiry timestamp (ISO 8601)
+     */
+    expiresAt: string;
+};
 
 /**
  * Send text message request
@@ -28441,6 +29985,558 @@ export type SpeakerUpdate = {
      * Whether the speaker has submitted IRS Form W-9
      */
     w9Submitted?: boolean;
+};
+
+/**
+ * A special assessment — a one-time charge created by an officer
+ */
+export type SpecialAssessment = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * Name of the special assessment
+     */
+    name: string;
+    /**
+     * Description of the assessment purpose
+     */
+    description?: string | null;
+    /**
+     * Amount in minor currency units (e.g. cents)
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency: string;
+    /**
+     * Due date for the assessment
+     */
+    dueDate: Date;
+    /**
+     * Optional fund to allocate collected amounts
+     */
+    fundId?: string | null;
+    /**
+     * Whether assessment applies to all members or selected members
+     */
+    appliesTo: 'all' | 'selected';
+    /**
+     * Lifecycle status
+     */
+    status: 'draft' | 'active' | 'closed';
+};
+
+/**
+ * Collection metrics for a special assessment
+ */
+export type SpecialAssessmentCollectionMetrics = {
+    /**
+     * Total number of targeted members
+     */
+    totalTargets: number;
+    /**
+     * Number of members who have paid
+     */
+    paidCount: number;
+    /**
+     * Number of members with pending payment
+     */
+    pendingCount: number;
+    /**
+     * Total amount expected (in minor currency units)
+     */
+    totalExpected: bigint;
+    /**
+     * Total amount collected (in minor currency units)
+     */
+    totalCollected: bigint;
+    /**
+     * Total amount outstanding (in minor currency units)
+     */
+    totalOutstanding: bigint;
+};
+
+/**
+ * Collection metrics for a special assessment
+ */
+export type SpecialAssessmentCollectionMetricsUpdate = {
+    /**
+     * Total number of targeted members
+     */
+    totalTargets?: number;
+    /**
+     * Number of members who have paid
+     */
+    paidCount?: number;
+    /**
+     * Number of members with pending payment
+     */
+    pendingCount?: number;
+    /**
+     * Total amount expected (in minor currency units)
+     */
+    totalExpected?: bigint;
+    /**
+     * Total amount collected (in minor currency units)
+     */
+    totalCollected?: bigint;
+    /**
+     * Total amount outstanding (in minor currency units)
+     */
+    totalOutstanding?: bigint;
+};
+
+/**
+ * Request to create a special assessment
+ */
+export type SpecialAssessmentCreateRequest = {
+    /**
+     * Name of the special assessment
+     */
+    name: string;
+    /**
+     * Description of the assessment purpose
+     */
+    description?: string | null;
+    /**
+     * Amount in minor currency units (e.g. cents)
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Due date for the assessment
+     */
+    dueDate: Date;
+    /**
+     * Optional fund ID to allocate collected amounts
+     */
+    fundId?: string | null;
+    /**
+     * Whether assessment applies to all or selected members
+     */
+    appliesTo?: 'all' | 'selected';
+};
+
+/**
+ * List response for special assessments with collection summaries
+ */
+export type SpecialAssessmentListResponse = {
+    /**
+     * List of assessments with collection data
+     */
+    assessments: Array<SpecialAssessmentWithCollection>;
+};
+
+/**
+ * A target member for a special assessment
+ */
+export type SpecialAssessmentTarget = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the special assessment
+     */
+    assessmentId: string;
+    /**
+     * ID of the target person
+     */
+    personId: string;
+    /**
+     * ID of the generated invoice, if any
+     */
+    invoiceId?: string | null;
+    /**
+     * Payment status
+     */
+    status: 'pending' | 'paid';
+};
+
+/**
+ * A target member for a special assessment
+ */
+export type SpecialAssessmentTargetUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the special assessment
+     */
+    assessmentId?: string;
+    /**
+     * ID of the target person
+     */
+    personId?: string;
+    /**
+     * ID of the generated invoice, if any
+     */
+    invoiceId?: string | null;
+    /**
+     * Payment status
+     */
+    status?: 'pending' | 'paid';
+};
+
+/**
+ * A special assessment — a one-time charge created by an officer
+ */
+export type SpecialAssessmentUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * Name of the special assessment
+     */
+    name?: string;
+    /**
+     * Description of the assessment purpose
+     */
+    description?: string | null;
+    /**
+     * Amount in minor currency units (e.g. cents)
+     */
+    amount?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Due date for the assessment
+     */
+    dueDate?: Date;
+    /**
+     * Optional fund to allocate collected amounts
+     */
+    fundId?: string | null;
+    /**
+     * Whether assessment applies to all members or selected members
+     */
+    appliesTo?: 'all' | 'selected';
+    /**
+     * Lifecycle status
+     */
+    status?: 'draft' | 'active' | 'closed';
+};
+
+/**
+ * Request to update a special assessment (draft status only)
+ */
+export type SpecialAssessmentUpdateRequest = {
+    /**
+     * Name of the special assessment
+     */
+    name?: string;
+    /**
+     * Description of the assessment purpose
+     */
+    description?: string | null;
+    /**
+     * Amount in minor currency units
+     */
+    amount?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Due date for the assessment
+     */
+    dueDate?: Date;
+    /**
+     * Optional fund ID
+     */
+    fundId?: string | null;
+    /**
+     * Whether assessment applies to all or selected members
+     */
+    appliesTo?: 'all' | 'selected';
+};
+
+/**
+ * Special assessment with embedded collection metrics
+ */
+export type SpecialAssessmentWithCollection = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId: string;
+    /**
+     * Name of the special assessment
+     */
+    name: string;
+    /**
+     * Description of the assessment purpose
+     */
+    description?: string | null;
+    /**
+     * Amount in minor currency units (e.g. cents)
+     */
+    amount: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency: string;
+    /**
+     * Due date for the assessment
+     */
+    dueDate: Date;
+    /**
+     * Optional fund to allocate collected amounts
+     */
+    fundId?: string | null;
+    /**
+     * Whether assessment applies to all members or selected members
+     */
+    appliesTo: 'all' | 'selected';
+    /**
+     * Lifecycle status
+     */
+    status: 'draft' | 'active' | 'closed';
+    /**
+     * Collection summary metrics
+     */
+    collection?: {
+        /**
+         * Total number of targeted members
+         */
+        totalTargets: number;
+        /**
+         * Number of members who have paid
+         */
+        paidCount: number;
+        /**
+         * Number of members with pending payment
+         */
+        pendingCount: number;
+        /**
+         * Total amount expected (in minor currency units)
+         */
+        totalExpected: bigint;
+        /**
+         * Total amount collected (in minor currency units)
+         */
+        totalCollected: bigint;
+        /**
+         * Total amount outstanding (in minor currency units)
+         */
+        totalOutstanding: bigint;
+    } | null;
+};
+
+/**
+ * Special assessment with embedded collection metrics
+ */
+export type SpecialAssessmentWithCollectionUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * ID of the association organization
+     */
+    organizationId?: string;
+    /**
+     * Name of the special assessment
+     */
+    name?: string;
+    /**
+     * Description of the assessment purpose
+     */
+    description?: string | null;
+    /**
+     * Amount in minor currency units (e.g. cents)
+     */
+    amount?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Due date for the assessment
+     */
+    dueDate?: Date;
+    /**
+     * Optional fund to allocate collected amounts
+     */
+    fundId?: string | null;
+    /**
+     * Whether assessment applies to all members or selected members
+     */
+    appliesTo?: 'all' | 'selected';
+    /**
+     * Lifecycle status
+     */
+    status?: 'draft' | 'active' | 'closed';
+    /**
+     * Collection summary metrics
+     */
+    collection?: {
+        /**
+         * Total number of targeted members
+         */
+        totalTargets?: number;
+        /**
+         * Number of members who have paid
+         */
+        paidCount?: number;
+        /**
+         * Number of members with pending payment
+         */
+        pendingCount?: number;
+        /**
+         * Total amount expected (in minor currency units)
+         */
+        totalExpected?: bigint;
+        /**
+         * Total amount collected (in minor currency units)
+         */
+        totalCollected?: bigint;
+        /**
+         * Total amount outstanding (in minor currency units)
+         */
+        totalOutstanding?: bigint;
+    } | null;
 };
 
 /**
@@ -28795,6 +30891,20 @@ export type SubmitPaymentProofRequest = {
 };
 
 /**
+ * Request to submit a survey response
+ */
+export type SubmitResponseRequest = {
+    /**
+     * Answers to survey questions
+     */
+    answers: Array<QuestionAnswer>;
+    /**
+     * Optional context (event/booking that triggered this)
+     */
+    contextId?: string;
+};
+
+/**
  * A contact suppressed from receiving marketing communications
  */
 export type SuppressionList = {
@@ -28906,6 +31016,516 @@ export type SuppressionListUpdate = {
  * Reason a contact was added to the suppression list
  */
 export type SuppressionReason = 'unsubscribed' | 'bounced' | 'complaint' | 'manual';
+
+/**
+ * Survey with questions and settings
+ */
+export type Survey = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * Person who created the survey
+     */
+    createdBy: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Survey title
+     */
+    title: string;
+    /**
+     * Survey description
+     */
+    description?: string;
+    /**
+     * Current status
+     */
+    status: 'draft' | 'active' | 'closed' | 'archived';
+    /**
+     * Survey type classification
+     */
+    surveyType: 'nps' | 'satisfaction' | 'poll' | 'custom';
+    /**
+     * Ordered list of questions
+     */
+    questions: Array<SurveyQuestion>;
+    /**
+     * Survey configuration
+     */
+    settings: {
+        /**
+         * Whether responses are anonymous (responder identity hidden from officers)
+         */
+        anonymous?: boolean;
+        /**
+         * Survey deadline (UTC)
+         */
+        deadline?: Date;
+        /**
+         * Target audience filter
+         */
+        targetAudience?: string;
+    };
+    /**
+     * Pre-computed analytics snapshot
+     */
+    analyticsSnapshot?: {
+        /**
+         * Total number of responses
+         */
+        totalResponses: number;
+        /**
+         * Completion rate (0-100)
+         */
+        completionRate: number;
+        /**
+         * NPS score (-100 to 100, only for NPS surveys)
+         */
+        npsScore?: number;
+        /**
+         * Per-question breakdown
+         */
+        questionBreakdown: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+/**
+ * Pre-computed survey analytics
+ */
+export type SurveyAnalytics = {
+    /**
+     * Total number of responses
+     */
+    totalResponses: number;
+    /**
+     * Completion rate (0-100)
+     */
+    completionRate: number;
+    /**
+     * NPS score (-100 to 100, only for NPS surveys)
+     */
+    npsScore?: number;
+    /**
+     * Per-question breakdown
+     */
+    questionBreakdown: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Pre-computed survey analytics
+ */
+export type SurveyAnalyticsUpdate = {
+    /**
+     * Total number of responses
+     */
+    totalResponses?: number;
+    /**
+     * Completion rate (0-100)
+     */
+    completionRate?: number;
+    /**
+     * NPS score (-100 to 100, only for NPS surveys)
+     */
+    npsScore?: number;
+    /**
+     * Per-question breakdown
+     */
+    questionBreakdown?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type SurveyListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<Survey>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Individual survey question definition
+ */
+export type SurveyQuestion = {
+    /**
+     * Stable question identifier
+     */
+    id: string;
+    /**
+     * Question type
+     */
+    type: 'nps' | 'rating' | 'single_choice' | 'multi_choice' | 'text' | 'yes_no';
+    /**
+     * Question text
+     */
+    text: string;
+    /**
+     * Whether response is required
+     */
+    required: boolean;
+    /**
+     * Display order (0-based)
+     */
+    order: number;
+    /**
+     * Options for single_choice and multi_choice types
+     */
+    options?: Array<string>;
+    /**
+     * Scale range for nps and rating types
+     */
+    scale?: {
+        /**
+         * Minimum value
+         */
+        min: number;
+        /**
+         * Maximum value
+         */
+        max: number;
+    };
+    /**
+     * Max character length for text type
+     */
+    maxLength?: number;
+};
+
+/**
+ * Survey question type
+ */
+export type SurveyQuestionType = 'nps' | 'rating' | 'single_choice' | 'multi_choice' | 'text' | 'yes_no';
+
+/**
+ * Member's response to a survey
+ */
+export type SurveyResponse = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Survey this response belongs to
+     */
+    surveyId: string;
+    /**
+     * Person who responded (null for anonymous surveys)
+     */
+    responderId?: string;
+    /**
+     * Answers to survey questions
+     */
+    answers: Array<QuestionAnswer>;
+    /**
+     * Response status
+     */
+    status: 'pending' | 'completed' | 'skipped' | 'dismissed';
+    /**
+     * When the response was completed
+     */
+    completedAt?: Date;
+    /**
+     * Context that triggered this survey (event ID, booking ID, etc.)
+     */
+    contextId?: string;
+};
+
+/**
+ * Offset-based paginated response with page navigation
+ */
+export type SurveyResponseListResponse = {
+    /**
+     * Response data items
+     */
+    data: Array<SurveyResponse>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Current offset
+         */
+        offset: number;
+        /**
+         * Items per page
+         */
+        limit: number;
+        /**
+         * Number of items in current page
+         */
+        count: number;
+        /**
+         * Total number of items
+         */
+        totalCount: number;
+        /**
+         * Total number of pages
+         */
+        totalPages: number;
+        /**
+         * Current page number (1-based)
+         */
+        currentPage: number;
+        /**
+         * Whether there are more pages
+         */
+        hasNextPage: boolean;
+        /**
+         * Whether there are previous pages
+         */
+        hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Member's response to a survey
+ */
+export type SurveyResponseUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Survey this response belongs to
+     */
+    surveyId?: string;
+    /**
+     * Person who responded (null for anonymous surveys)
+     */
+    responderId?: string;
+    /**
+     * Answers to survey questions
+     */
+    answers?: Array<QuestionAnswer>;
+    /**
+     * Response status
+     */
+    status?: 'pending' | 'completed' | 'skipped' | 'dismissed';
+    /**
+     * When the response was completed
+     */
+    completedAt?: Date;
+    /**
+     * Context that triggered this survey (event ID, booking ID, etc.)
+     */
+    contextId?: string;
+};
+
+/**
+ * Survey settings
+ */
+export type SurveySettings = {
+    /**
+     * Whether responses are anonymous (responder identity hidden from officers)
+     */
+    anonymous?: boolean;
+    /**
+     * Survey deadline (UTC)
+     */
+    deadline?: Date;
+    /**
+     * Target audience filter
+     */
+    targetAudience?: string;
+};
+
+/**
+ * Survey status
+ */
+export type SurveyStatus = 'draft' | 'active' | 'closed' | 'archived';
+
+/**
+ * Survey type classification
+ */
+export type SurveyType = 'nps' | 'satisfaction' | 'poll' | 'custom';
+
+/**
+ * Survey with questions and settings
+ */
+export type SurveyUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * Person who created the survey
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Survey title
+     */
+    title?: string;
+    /**
+     * Survey description
+     */
+    description?: string;
+    /**
+     * Current status
+     */
+    status?: 'draft' | 'active' | 'closed' | 'archived';
+    /**
+     * Survey type classification
+     */
+    surveyType?: 'nps' | 'satisfaction' | 'poll' | 'custom';
+    /**
+     * Ordered list of questions
+     */
+    questions?: Array<SurveyQuestion>;
+    /**
+     * Survey configuration
+     */
+    settings?: {
+        /**
+         * Whether responses are anonymous (responder identity hidden from officers)
+         */
+        anonymous?: boolean;
+        /**
+         * Survey deadline (UTC)
+         */
+        deadline?: Date;
+        /**
+         * Target audience filter
+         */
+        targetAudience?: string;
+    };
+    /**
+     * Pre-computed analytics snapshot
+     */
+    analyticsSnapshot?: {
+        /**
+         * Total number of responses
+         */
+        totalResponses?: number;
+        /**
+         * Completion rate (0-100)
+         */
+        completionRate?: number;
+        /**
+         * NPS score (-100 to 100, only for NPS surveys)
+         */
+        npsScore?: number;
+        /**
+         * Per-question breakdown
+         */
+        questionBreakdown?: {
+            [key: string]: unknown;
+        };
+    };
+};
 
 /**
  * A tax receipt issued to a donor for one or more donations
@@ -30145,6 +32765,57 @@ export type UpdatePrivacySettingsRequest = {
      * Whether address is visible to other members in the directory
      */
     addressVisible?: boolean;
+    /**
+     * Whether verified credentials are visible in the directory
+     */
+    credentialsVisible?: boolean;
+    /**
+     * Whether dues standing is visible in the directory
+     */
+    duesStatusVisible?: boolean;
+    /**
+     * Whether CE compliance status is visible in the directory
+     */
+    ceComplianceVisible?: boolean;
+};
+
+/**
+ * Request to update a draft survey
+ */
+export type UpdateSurveyRequest = {
+    /**
+     * Updated title
+     */
+    title?: string;
+    /**
+     * Updated description
+     */
+    description?: string;
+    /**
+     * Updated survey type
+     */
+    surveyType?: 'nps' | 'satisfaction' | 'poll' | 'custom';
+    /**
+     * Updated questions
+     */
+    questions?: Array<SurveyQuestion>;
+    /**
+     * Updated settings
+     */
+    settings?: {
+        /**
+         * Whether responses are anonymous (responder identity hidden from officers)
+         */
+        anonymous?: boolean;
+        /**
+         * Survey deadline (UTC)
+         */
+        deadline?: Date;
+        /**
+         * Target audience filter
+         */
+        targetAudience?: string;
+    };
 };
 
 /**
@@ -31649,6 +34320,157 @@ export type TrainingSearchParamsStatus = TrainingStatus;
  */
 export type TrainingSearchParamsType = TrainingType;
 
+export type ListOrgAccreditedProvidersData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: {
+        status?: AccreditedProviderStatus;
+    };
+    url: '/accredited-providers/{organizationId}';
+};
+
+export type ListOrgAccreditedProvidersErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListOrgAccreditedProvidersError = ListOrgAccreditedProvidersErrors[keyof ListOrgAccreditedProvidersErrors];
+
+export type ListOrgAccreditedProvidersResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<OrgAccreditedProvider>;
+        total: number;
+    };
+};
+
+export type ListOrgAccreditedProvidersResponse = ListOrgAccreditedProvidersResponses[keyof ListOrgAccreditedProvidersResponses];
+
+export type CreateOrgAccreditedProviderData = {
+    body: OrgAccreditedProviderCreateRequest;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/accredited-providers/{organizationId}';
+};
+
+export type CreateOrgAccreditedProviderErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateOrgAccreditedProviderError = CreateOrgAccreditedProviderErrors[keyof CreateOrgAccreditedProviderErrors];
+
+export type CreateOrgAccreditedProviderResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: OrgAccreditedProvider;
+    };
+};
+
+export type CreateOrgAccreditedProviderResponse = CreateOrgAccreditedProviderResponses[keyof CreateOrgAccreditedProviderResponses];
+
+export type DeleteOrgAccreditedProviderData = {
+    body?: never;
+    path: {
+        organizationId: string;
+        providerId: string;
+    };
+    query?: never;
+    url: '/accredited-providers/{organizationId}/{providerId}';
+};
+
+export type DeleteOrgAccreditedProviderErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteOrgAccreditedProviderError = DeleteOrgAccreditedProviderErrors[keyof DeleteOrgAccreditedProviderErrors];
+
+export type DeleteOrgAccreditedProviderResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteOrgAccreditedProviderResponse = DeleteOrgAccreditedProviderResponses[keyof DeleteOrgAccreditedProviderResponses];
+
+export type UpdateOrgAccreditedProviderData = {
+    body: OrgAccreditedProviderUpdateRequest;
+    path: {
+        organizationId: string;
+        providerId: string;
+    };
+    query?: never;
+    url: '/accredited-providers/{organizationId}/{providerId}';
+};
+
+export type UpdateOrgAccreditedProviderErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateOrgAccreditedProviderError = UpdateOrgAccreditedProviderErrors[keyof UpdateOrgAccreditedProviderErrors];
+
+export type UpdateOrgAccreditedProviderResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: OrgAccreditedProvider;
+    };
+};
+
+export type UpdateOrgAccreditedProviderResponse = UpdateOrgAccreditedProviderResponses[keyof UpdateOrgAccreditedProviderResponses];
+
 export type ListAdminsData = {
     body?: never;
     path?: never;
@@ -31945,6 +34767,83 @@ export type UpdateAssociationResponses = {
 
 export type UpdateAssociationResponse = UpdateAssociationResponses[keyof UpdateAssociationResponses];
 
+export type ListAllCommitteesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size (1-500, default 100)
+         */
+        limit?: number;
+        /**
+         * Offset for pagination (default 0)
+         */
+        offset?: number;
+    };
+    url: '/admin/committees';
+};
+
+export type ListAllCommitteesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListAllCommitteesError = ListAllCommitteesErrors[keyof ListAllCommitteesErrors];
+
+export type ListAllCommitteesResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<CommitteeSummary>;
+    };
+};
+
+export type ListAllCommitteesResponse = ListAllCommitteesResponses[keyof ListAllCommitteesResponses];
+
+export type GetCommitteeData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/committees/{id}';
+};
+
+export type GetCommitteeErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetCommitteeError = GetCommitteeErrors[keyof GetCommitteeErrors];
+
+export type GetCommitteeResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: CommitteeDetail;
+    };
+};
+
+export type GetCommitteeResponse = GetCommitteeResponses[keyof GetCommitteeResponses];
+
 export type ListFeatureFlagsData = {
     body?: never;
     path?: never;
@@ -32120,6 +35019,48 @@ export type GetAdminRoleResponses = {
 };
 
 export type GetAdminRoleResponse = GetAdminRoleResponses[keyof GetAdminRoleResponses];
+
+export type GetNationalDashboardData = {
+    body?: never;
+    path: {
+        associationId: string;
+    };
+    query?: {
+        /**
+         * Snapshot month in YYYY-MM format (defaults to current month)
+         */
+        snapshotMonth?: string;
+    };
+    url: '/admin/national-dashboard/{associationId}';
+};
+
+export type GetNationalDashboardErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GetNationalDashboardError = GetNationalDashboardErrors[keyof GetNationalDashboardErrors];
+
+export type GetNationalDashboardResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: NationalDashboardResponse;
+    };
+};
+
+export type GetNationalDashboardResponse = GetNationalDashboardResponses[keyof GetNationalDashboardResponses];
 
 export type ListOrganizationsData = {
     body?: never;
@@ -33080,6 +36021,45 @@ export type CheckInCustomEventResponses = {
 };
 
 export type CheckInCustomEventResponse = CheckInCustomEventResponses[keyof CheckInCustomEventResponses];
+
+export type CompleteEventData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/event-lifecycle/{eventId}/complete';
+};
+
+export type CompleteEventErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CompleteEventError = CompleteEventErrors[keyof CompleteEventErrors];
+
+export type CompleteEventResponses = {
+    /**
+     * Success response with data
+     */
+    200: Event;
+};
+
+export type CompleteEventResponse = CompleteEventResponses[keyof CompleteEventResponses];
 
 export type RegisterForCustomEventData = {
     body?: never;
@@ -35284,6 +38264,146 @@ export type SetPrimaryChapterAffiliationResponses = {
 
 export type SetPrimaryChapterAffiliationResponse = SetPrimaryChapterAffiliationResponses[keyof SetPrimaryChapterAffiliationResponses];
 
+export type GetComplianceReportData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: {
+        status?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/association/member/compliance/{organizationId}';
+};
+
+export type GetComplianceReportErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GetComplianceReportError = GetComplianceReportErrors[keyof GetComplianceReportErrors];
+
+export type GetComplianceReportResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: ComplianceReportResponse;
+    };
+};
+
+export type GetComplianceReportResponse = GetComplianceReportResponses[keyof GetComplianceReportResponses];
+
+export type RefreshComplianceData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/compliance/{organizationId}/refresh';
+};
+
+export type RefreshComplianceErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type RefreshComplianceError = RefreshComplianceErrors[keyof RefreshComplianceErrors];
+
+export type RefreshComplianceResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: ComplianceRefreshResult;
+    };
+};
+
+export type RefreshComplianceResponse = RefreshComplianceResponses[keyof RefreshComplianceResponses];
+
+export type GetOrgCpdConfigData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/cpd-config/{organizationId}';
+};
+
+export type GetOrgCpdConfigErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GetOrgCpdConfigError = GetOrgCpdConfigErrors[keyof GetOrgCpdConfigErrors];
+
+export type GetOrgCpdConfigResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: OrgCpdConfig;
+    };
+};
+
+export type GetOrgCpdConfigResponse = GetOrgCpdConfigResponses[keyof GetOrgCpdConfigResponses];
+
+export type UpdateOrgCpdConfigData = {
+    body: OrgCpdConfigUpdateRequest;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/association/member/cpd-config/{organizationId}';
+};
+
+export type UpdateOrgCpdConfigErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type UpdateOrgCpdConfigError = UpdateOrgCpdConfigErrors[keyof UpdateOrgCpdConfigErrors];
+
+export type UpdateOrgCpdConfigResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: OrgCpdConfig;
+    };
+};
+
+export type UpdateOrgCpdConfigResponse = UpdateOrgCpdConfigResponses[keyof UpdateOrgCpdConfigResponses];
+
 export type ListCredentialTemplatesData = {
     body?: never;
     path?: never;
@@ -35572,6 +38692,24 @@ export type IssueDigitalCredentialResponses = {
 
 export type IssueDigitalCredentialResponse = IssueDigitalCredentialResponses[keyof IssueDigitalCredentialResponses];
 
+export type LookupCredentialPublicData = {
+    body?: never;
+    path: {
+        credentialNumber: string;
+    };
+    query?: never;
+    url: '/association/member/credentials/lookup/{credentialNumber}';
+};
+
+export type LookupCredentialPublicResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationMemberCredentialsCredentialLookupResult;
+};
+
+export type LookupCredentialPublicResponse = LookupCredentialPublicResponses[keyof LookupCredentialPublicResponses];
+
 export type VerifyCredentialPublicData = {
     body: VerifyCredentialRequest;
     path?: never;
@@ -35773,6 +38911,43 @@ export type RevokeDigitalCredentialResponses = {
 };
 
 export type RevokeDigitalCredentialResponse = RevokeDigitalCredentialResponses[keyof RevokeDigitalCredentialResponses];
+
+export type AwardManualCreditData = {
+    body: ManualCreditAwardRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/credits/manual';
+};
+
+export type AwardManualCreditErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type AwardManualCreditError = AwardManualCreditErrors[keyof AwardManualCreditErrors];
+
+export type AwardManualCreditResponses = {
+    /**
+     * Resource created response
+     */
+    201: ManualCreditAwardResponse;
+};
+
+export type AwardManualCreditResponse = AwardManualCreditResponses[keyof AwardManualCreditResponses];
 
 export type ListDirectoryProfilesData = {
     body?: never;
@@ -39661,6 +42836,226 @@ export type UpdateRoyaltySplitResponses = {
 
 export type UpdateRoyaltySplitResponse = UpdateRoyaltySplitResponses[keyof UpdateRoyaltySplitResponses];
 
+export type CreateSpecialAssessmentData = {
+    body: SpecialAssessmentCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/special-assessments';
+};
+
+export type CreateSpecialAssessmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateSpecialAssessmentError = CreateSpecialAssessmentErrors[keyof CreateSpecialAssessmentErrors];
+
+export type CreateSpecialAssessmentResponses = {
+    /**
+     * Resource created response
+     */
+    201: SpecialAssessment;
+};
+
+export type CreateSpecialAssessmentResponse = CreateSpecialAssessmentResponses[keyof CreateSpecialAssessmentResponses];
+
+export type DeleteSpecialAssessmentData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/association/member/special-assessments/{id}';
+};
+
+export type DeleteSpecialAssessmentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteSpecialAssessmentError = DeleteSpecialAssessmentErrors[keyof DeleteSpecialAssessmentErrors];
+
+export type DeleteSpecialAssessmentResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteSpecialAssessmentResponse = DeleteSpecialAssessmentResponses[keyof DeleteSpecialAssessmentResponses];
+
+export type UpdateSpecialAssessmentData = {
+    body: SpecialAssessmentUpdateRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/association/member/special-assessments/{id}';
+};
+
+export type UpdateSpecialAssessmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type UpdateSpecialAssessmentError = UpdateSpecialAssessmentErrors[keyof UpdateSpecialAssessmentErrors];
+
+export type UpdateSpecialAssessmentResponses = {
+    /**
+     * Success response with data
+     */
+    200: SpecialAssessment;
+};
+
+export type UpdateSpecialAssessmentResponse = UpdateSpecialAssessmentResponses[keyof UpdateSpecialAssessmentResponses];
+
+export type ApplySpecialAssessmentData = {
+    body: ApplySpecialAssessmentRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/association/member/special-assessments/{id}/apply';
+};
+
+export type ApplySpecialAssessmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type ApplySpecialAssessmentError = ApplySpecialAssessmentErrors[keyof ApplySpecialAssessmentErrors];
+
+export type ApplySpecialAssessmentResponses = {
+    /**
+     * Success response with data
+     */
+    200: ApplySpecialAssessmentResult;
+};
+
+export type ApplySpecialAssessmentResponse = ApplySpecialAssessmentResponses[keyof ApplySpecialAssessmentResponses];
+
+export type GetSpecialAssessmentCollectionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/association/member/special-assessments/{id}/collection';
+};
+
+export type GetSpecialAssessmentCollectionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetSpecialAssessmentCollectionError = GetSpecialAssessmentCollectionErrors[keyof GetSpecialAssessmentCollectionErrors];
+
+export type GetSpecialAssessmentCollectionResponses = {
+    /**
+     * Success response with data
+     */
+    200: SpecialAssessmentCollectionMetrics;
+};
+
+export type GetSpecialAssessmentCollectionResponse = GetSpecialAssessmentCollectionResponses[keyof GetSpecialAssessmentCollectionResponses];
+
+export type ListSpecialAssessmentsData = {
+    body?: never;
+    path: {
+        orgId: string;
+    };
+    query?: never;
+    url: '/association/member/special-assessments/{orgId}';
+};
+
+export type ListSpecialAssessmentsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListSpecialAssessmentsError = ListSpecialAssessmentsErrors[keyof ListSpecialAssessmentsErrors];
+
+export type ListSpecialAssessmentsResponses = {
+    /**
+     * Success response with data
+     */
+    200: SpecialAssessmentListResponse;
+};
+
+export type ListSpecialAssessmentsResponse = ListSpecialAssessmentsResponses[keyof ListSpecialAssessmentsResponses];
+
 export type ListMembershipTiersData = {
     body?: never;
     path?: never;
@@ -43464,6 +46859,76 @@ export type GetTimeSlotResponses = {
 
 export type GetTimeSlotResponse = GetTimeSlotResponses[keyof GetTimeSlotResponses];
 
+export type BulkIssueCertificatesData = {
+    body: BulkIssueCertificatesRequest;
+    path?: never;
+    query?: never;
+    url: '/certificates/bulk-issue';
+};
+
+export type BulkIssueCertificatesErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type BulkIssueCertificatesError = BulkIssueCertificatesErrors[keyof BulkIssueCertificatesErrors];
+
+export type BulkIssueCertificatesResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: {
+        data: Array<BulkIssueCertificateResult>;
+    };
+    /**
+     * The request has been accepted for processing, but processing has not yet completed.
+     */
+    202: {
+        data: BulkIssueQueuedResponse;
+    };
+};
+
+export type BulkIssueCertificatesResponse = BulkIssueCertificatesResponses[keyof BulkIssueCertificatesResponses];
+
+export type VerifyCertificatePublicData = {
+    body?: never;
+    path: {
+        certificateNumber: string;
+    };
+    query?: never;
+    url: '/certificates/verify/{certificateNumber}';
+};
+
+export type VerifyCertificatePublicErrors = {
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type VerifyCertificatePublicError = VerifyCertificatePublicErrors[keyof VerifyCertificatePublicErrors];
+
+export type VerifyCertificatePublicResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: CertificateVerificationResult;
+    };
+};
+
+export type VerifyCertificatePublicResponse = VerifyCertificatePublicResponses[keyof VerifyCertificatePublicResponses];
+
 export type ListChatRoomsData = {
     body?: never;
     path?: never;
@@ -44150,6 +47615,111 @@ export type CreateAnnouncementResponses = {
 
 export type CreateAnnouncementResponse = CreateAnnouncementResponses[keyof CreateAnnouncementResponses];
 
+export type ListSavedSegmentsData = {
+    body?: never;
+    path?: never;
+    query: {
+        organizationId: string;
+    };
+    url: '/communications/segments';
+};
+
+export type ListSavedSegmentsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListSavedSegmentsError = ListSavedSegmentsErrors[keyof ListSavedSegmentsErrors];
+
+export type ListSavedSegmentsResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationSavedSegmentListResponse;
+};
+
+export type ListSavedSegmentsResponse = ListSavedSegmentsResponses[keyof ListSavedSegmentsResponses];
+
+export type CreateSavedSegmentData = {
+    body: AssociationCoreCommunicationSavedSegmentCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/communications/segments';
+};
+
+export type CreateSavedSegmentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateSavedSegmentError = CreateSavedSegmentErrors[keyof CreateSavedSegmentErrors];
+
+export type CreateSavedSegmentResponses = {
+    /**
+     * Resource created response
+     */
+    201: AssociationCoreCommunicationSavedSegmentResponse;
+};
+
+export type CreateSavedSegmentResponse = CreateSavedSegmentResponses[keyof CreateSavedSegmentResponses];
+
+export type DeleteSavedSegmentData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/communications/segments/{id}';
+};
+
+export type DeleteSavedSegmentErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteSavedSegmentError = DeleteSavedSegmentErrors[keyof DeleteSavedSegmentErrors];
+
+export type DeleteSavedSegmentResponses = {
+    /**
+     * Success response with data
+     */
+    200: AssociationCoreCommunicationSavedSegmentDeleteResponse;
+};
+
+export type DeleteSavedSegmentResponse = DeleteSavedSegmentResponses[keyof DeleteSavedSegmentResponses];
+
 export type GetCreditComplianceData = {
     body?: never;
     path: {
@@ -44415,6 +47985,44 @@ export type RetryEmailQueueItemResponses = {
 
 export type RetryEmailQueueItemResponse = RetryEmailQueueItemResponses[keyof RetryEmailQueueItemResponses];
 
+export type ListEmailSuppressionsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size (1-200, default 50)
+         */
+        limit?: number;
+        /**
+         * Offset for pagination (default 0)
+         */
+        offset?: number;
+    };
+    url: '/email/suppressions';
+};
+
+export type ListEmailSuppressionsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListEmailSuppressionsError = ListEmailSuppressionsErrors[keyof ListEmailSuppressionsErrors];
+
+export type ListEmailSuppressionsResponses = {
+    /**
+     * Success response with data
+     */
+    200: EmailSuppressionListResponse;
+};
+
+export type ListEmailSuppressionsResponse = ListEmailSuppressionsResponses[keyof ListEmailSuppressionsResponses];
+
 export type ListEmailTemplatesData = {
     body?: never;
     path?: never;
@@ -44626,6 +48234,82 @@ export type TestEmailTemplateResponses = {
 };
 
 export type TestEmailTemplateResponse = TestEmailTemplateResponses[keyof TestEmailTemplateResponses];
+
+export type UnsubscribeEmailGetData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * HMAC-SHA256 token for tamper protection
+         */
+        token: string;
+        /**
+         * Email address to unsubscribe
+         */
+        email: string;
+        /**
+         * Organization ID scope
+         */
+        orgId: string;
+    };
+    url: '/email/unsubscribe';
+};
+
+export type UnsubscribeEmailGetErrors = {
+    /**
+     * The server could not understand the request due to invalid syntax.
+     */
+    400: string;
+};
+
+export type UnsubscribeEmailGetError = UnsubscribeEmailGetErrors[keyof UnsubscribeEmailGetErrors];
+
+export type UnsubscribeEmailGetResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: string;
+};
+
+export type UnsubscribeEmailGetResponse = UnsubscribeEmailGetResponses[keyof UnsubscribeEmailGetResponses];
+
+export type UnsubscribeEmailPostData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * HMAC-SHA256 token for tamper protection
+         */
+        token: string;
+        /**
+         * Email address to unsubscribe
+         */
+        email: string;
+        /**
+         * Organization ID scope
+         */
+        orgId: string;
+    };
+    url: '/email/unsubscribe';
+};
+
+export type UnsubscribeEmailPostErrors = {
+    /**
+     * The server could not understand the request due to invalid syntax.
+     */
+    400: string;
+};
+
+export type UnsubscribeEmailPostError = UnsubscribeEmailPostErrors[keyof UnsubscribeEmailPostErrors];
+
+export type UnsubscribeEmailPostResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: string;
+};
+
+export type UnsubscribeEmailPostResponse = UnsubscribeEmailPostResponses[keyof UnsubscribeEmailPostResponses];
 
 export type CreateInviteData = {
     body: CreateInviteRequest;
@@ -45106,6 +48790,86 @@ export type ListOfficerTermsSummaryResponses = {
 
 export type ListOfficerTermsSummaryResponse = ListOfficerTermsSummaryResponses[keyof ListOfficerTermsSummaryResponses];
 
+export type SendPaymentLinkData = {
+    body: SendPaymentLinkRequest;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/org/{organizationId}/payments/send-link';
+};
+
+export type SendPaymentLinkErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type SendPaymentLinkError = SendPaymentLinkErrors[keyof SendPaymentLinkErrors];
+
+export type SendPaymentLinkResponses = {
+    /**
+     * Resource created response
+     */
+    201: SendPaymentLinkResponse;
+};
+
+export type SendPaymentLinkResponse2 = SendPaymentLinkResponses[keyof SendPaymentLinkResponses];
+
+export type CheckoutPaymentTokenData = {
+    body?: never;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/pay/{token}/checkout';
+};
+
+export type CheckoutPaymentTokenErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+};
+
+export type CheckoutPaymentTokenError = CheckoutPaymentTokenErrors[keyof CheckoutPaymentTokenErrors];
+
+export type CheckoutPaymentTokenResponses = {
+    /**
+     * Success response with data
+     */
+    200: PaymentCheckoutResponse;
+};
+
+export type CheckoutPaymentTokenResponse = CheckoutPaymentTokenResponses[keyof CheckoutPaymentTokenResponses];
+
+export type ValidatePaymentTokenData = {
+    body?: never;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/pay/{token}/validate';
+};
+
+export type ValidatePaymentTokenResponses = {
+    /**
+     * Success response with data
+     */
+    200: PaymentTokenValidation;
+};
+
+export type ValidatePaymentTokenResponse = ValidatePaymentTokenResponses[keyof ValidatePaymentTokenResponses];
+
 export type ListPersonsData = {
     body?: never;
     path?: never;
@@ -45343,6 +49107,35 @@ export type GetMyCreditSummaryResponses = {
 };
 
 export type GetMyCreditSummaryResponse = GetMyCreditSummaryResponses[keyof GetMyCreditSummaryResponses];
+
+export type GetMyCreditsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: string;
+    };
+    url: '/persons/me/credits';
+};
+
+export type GetMyCreditsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetMyCreditsError = GetMyCreditsErrors[keyof GetMyCreditsErrors];
+
+export type GetMyCreditsResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: MyCreditsResponse;
+    };
+};
+
+export type GetMyCreditsResponse = GetMyCreditsResponses[keyof GetMyCreditsResponses];
 
 export type RequestMyAccountDeletionData = {
     body?: never;
@@ -45772,6 +49565,35 @@ export type GetOrganizationBySlugResponses = {
 
 export type GetOrganizationBySlugResponse = GetOrganizationBySlugResponses[keyof GetOrganizationBySlugResponses];
 
+export type ListPublicOrgsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Search term to filter organisation names
+         */
+        search?: string;
+        /**
+         * Page size (1-100, default 25)
+         */
+        limit?: number;
+        /**
+         * Offset for pagination (default 0)
+         */
+        offset?: number;
+    };
+    url: '/public/orgs';
+};
+
+export type ListPublicOrgsResponses = {
+    /**
+     * Success response with data
+     */
+    200: PublicOrgListResponse;
+};
+
+export type ListPublicOrgsResponse = ListPublicOrgsResponses[keyof ListPublicOrgsResponses];
+
 export type MarkAllNotificationsReadData = {
     body?: never;
     path?: never;
@@ -46200,3 +50022,458 @@ export type GetFileDownloadResponses = {
 };
 
 export type GetFileDownloadResponse = GetFileDownloadResponses[keyof GetFileDownloadResponses];
+
+export type ListSurveysData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by status
+         */
+        status?: SurveyStatus;
+        /**
+         * Filter by survey type
+         */
+        surveyType?: SurveyType;
+        /**
+         * Show only my assigned surveys
+         */
+        mine?: boolean;
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/surveys/';
+};
+
+export type ListSurveysErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListSurveysError = ListSurveysErrors[keyof ListSurveysErrors];
+
+export type ListSurveysResponses = {
+    /**
+     * Success response with data
+     */
+    200: SurveyListResponse;
+};
+
+export type ListSurveysResponse = ListSurveysResponses[keyof ListSurveysResponses];
+
+export type CreateSurveyData = {
+    body: CreateSurveyRequest;
+    path?: never;
+    query?: never;
+    url: '/surveys/';
+};
+
+export type CreateSurveyErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateSurveyError = CreateSurveyErrors[keyof CreateSurveyErrors];
+
+export type CreateSurveyResponses = {
+    /**
+     * Resource created response
+     */
+    201: Survey;
+};
+
+export type CreateSurveyResponse = CreateSurveyResponses[keyof CreateSurveyResponses];
+
+export type DeleteSurveyData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}';
+};
+
+export type DeleteSurveyErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteSurveyError = DeleteSurveyErrors[keyof DeleteSurveyErrors];
+
+export type DeleteSurveyResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteSurveyResponse = DeleteSurveyResponses[keyof DeleteSurveyResponses];
+
+export type GetSurveyData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}';
+};
+
+export type GetSurveyErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetSurveyError = GetSurveyErrors[keyof GetSurveyErrors];
+
+export type GetSurveyResponses = {
+    /**
+     * Success response with data
+     */
+    200: Survey;
+};
+
+export type GetSurveyResponse = GetSurveyResponses[keyof GetSurveyResponses];
+
+export type UpdateSurveyData = {
+    body: UpdateSurveyRequest;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}';
+};
+
+export type UpdateSurveyErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateSurveyError = UpdateSurveyErrors[keyof UpdateSurveyErrors];
+
+export type UpdateSurveyResponses = {
+    /**
+     * Success response with data
+     */
+    200: Survey;
+};
+
+export type UpdateSurveyResponse = UpdateSurveyResponses[keyof UpdateSurveyResponses];
+
+export type GetSurveyAnalyticsData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}/analytics';
+};
+
+export type GetSurveyAnalyticsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetSurveyAnalyticsError = GetSurveyAnalyticsErrors[keyof GetSurveyAnalyticsErrors];
+
+export type GetSurveyAnalyticsResponses = {
+    /**
+     * Success response with data
+     */
+    200: SurveyAnalytics;
+};
+
+export type GetSurveyAnalyticsResponse = GetSurveyAnalyticsResponses[keyof GetSurveyAnalyticsResponses];
+
+export type CloseSurveyData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}/close';
+};
+
+export type CloseSurveyErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CloseSurveyError = CloseSurveyErrors[keyof CloseSurveyErrors];
+
+export type CloseSurveyResponses = {
+    /**
+     * Success response with data
+     */
+    200: Survey;
+};
+
+export type CloseSurveyResponse = CloseSurveyResponses[keyof CloseSurveyResponses];
+
+export type PublishSurveyData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}/publish';
+};
+
+export type PublishSurveyErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type PublishSurveyError = PublishSurveyErrors[keyof PublishSurveyErrors];
+
+export type PublishSurveyResponses = {
+    /**
+     * Success response with data
+     */
+    200: Survey;
+};
+
+export type PublishSurveyResponse = PublishSurveyResponses[keyof PublishSurveyResponses];
+
+export type ListSurveyResponsesData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: {
+        /**
+         * Number of items to skip
+         */
+        offset?: number;
+        /**
+         * Number of items to return (1-100)
+         */
+        limit?: number;
+        /**
+         * Page number (1-based) - alternative to offset
+         */
+        page?: number;
+        /**
+         * Items per page (1-100) - alternative to limit
+         */
+        pageSize?: number;
+        /**
+         * Search query string
+         */
+        q?: SafeQueryString;
+        /**
+         * Sort specifications (comma-separated field:direction pairs)
+         */
+        sort?: SafeQueryString;
+    };
+    url: '/surveys/{survey}/responses';
+};
+
+export type ListSurveyResponsesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ListSurveyResponsesError = ListSurveyResponsesErrors[keyof ListSurveyResponsesErrors];
+
+export type ListSurveyResponsesResponses = {
+    /**
+     * Success response with data
+     */
+    200: SurveyResponseListResponse;
+};
+
+export type ListSurveyResponsesResponse = ListSurveyResponsesResponses[keyof ListSurveyResponsesResponses];
+
+export type SubmitSurveyResponseData = {
+    body: SubmitResponseRequest;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}/responses';
+};
+
+export type SubmitSurveyResponseErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type SubmitSurveyResponseError = SubmitSurveyResponseErrors[keyof SubmitSurveyResponseErrors];
+
+export type SubmitSurveyResponseResponses = {
+    /**
+     * Resource created response
+     */
+    201: SurveyResponse;
+};
+
+export type SubmitSurveyResponseResponse = SubmitSurveyResponseResponses[keyof SubmitSurveyResponseResponses];
+
+export type DismissSurveyResponseData = {
+    body?: never;
+    path: {
+        survey: Uuid;
+    };
+    query?: never;
+    url: '/surveys/{survey}/responses/dismiss';
+};
+
+export type DismissSurveyResponseErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DismissSurveyResponseError = DismissSurveyResponseErrors[keyof DismissSurveyResponseErrors];
+
+export type DismissSurveyResponseResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DismissSurveyResponseResponse = DismissSurveyResponseResponses[keyof DismissSurveyResponseResponses];

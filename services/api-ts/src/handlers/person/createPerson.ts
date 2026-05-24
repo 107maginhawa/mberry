@@ -53,6 +53,7 @@ export async function createPerson(
     primaryAddress: body.primaryAddress || null,
     languagesSpoken: body.languagesSpoken || [],
     timezone: body.timezone || null,
+    bio: body.bio || null,
     createdBy: user.id // Audit trail
   });
 

@@ -82,6 +82,7 @@ export async function updatePerson(
   if ((body as Record<string, unknown>)['licenseNumber'] !== undefined) updateData.licenseNumber = (body as Record<string, unknown>)['licenseNumber'] as string;
   if ((body as Record<string, unknown>)['specialization'] !== undefined) updateData.specialization = (body as Record<string, unknown>)['specialization'] as string;
   if ((body as Record<string, unknown>)['prcId'] !== undefined) updateData.prcId = (body as Record<string, unknown>)['prcId'] as string;
+  if ((body as Record<string, unknown>)['bio'] !== undefined) updateData.bio = (body as Record<string, unknown>)['bio'] as string | null;
   if ((body as Record<string, unknown>)['preferredLanguage'] !== undefined) updateData.preferredLanguage = (body as Record<string, unknown>)['preferredLanguage'] as string;
 
   // Update person record

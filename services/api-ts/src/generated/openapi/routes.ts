@@ -2921,4 +2921,11 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.listSurveyResponses as unknown as Handler
   );
 
+  // dismissSurveyResponse
+  app.post('/surveys/:survey/responses/dismiss',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.DismissSurveyResponseParams, validationErrorHandler),
+    registry.dismissSurveyResponse as unknown as Handler
+  );
+
 }

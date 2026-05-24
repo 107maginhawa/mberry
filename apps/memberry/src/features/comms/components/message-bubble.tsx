@@ -1,8 +1,11 @@
 import type { ChatMessage } from '@monobase/sdk-ts/generated/types.gen'
+import { Button } from '@monobase/ui'
+import { MessageSquare } from 'lucide-react'
 
 interface MessageBubbleProps {
   message: ChatMessage
   isOwn: boolean
+  onOpenThread?: (message: ChatMessage) => void
 }
 
 function formatTime(d: Date): string {
@@ -17,7 +20,8 @@ function truncateId(id: string): string {
  * Individual message display. Own messages right-aligned with primary bg,
  * others left-aligned with surface bg. System messages centered with muted styling.
  */
-export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
+export function MessageBubble({ message, isOwn, onOpenThread }: MessageBubbleProps) {
+  const replyCount = (message as ChatMessage & { replyCount?: number }).replyCount ?? 0
   // System messages: centered, muted
   if (message.messageType === 'system') {
     return (
@@ -54,6 +58,17 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
         >
           {formatTime(message.timestamp)}
         </p>
+        {replyCount > 0 && onOpenThread && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onOpenThread(message)}
+            className="flex items-center gap-1 mt-1 h-auto p-0 text-[10px] text-[var(--color-primary)] hover:underline"
+          >
+            <MessageSquare className="h-3 w-3" />
+            {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+          </Button>
+        )}
       </div>
     </div>
   )

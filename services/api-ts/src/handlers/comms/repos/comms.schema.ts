@@ -153,9 +153,13 @@ export const chatMessages = pgTable('chat_message', {
   messageType: messageTypeEnum('message_type')
     .notNull(),
   
+  // Threading support
+  parentMessageId: uuid('parent_message_id'),
+  replyCount: integer('reply_count').notNull().default(0),
+
   // Text content (for text and system messages)
   message: text('message'), // maxLength validation in repository (5000 chars)
-  
+
   // Video call data (for video_call messages)
   videoCallData: jsonb('video_call_data').$type<VideoCallData>(),
 }, (table) => ({
@@ -174,6 +178,8 @@ export const chatMessages = pgTable('chat_message', {
     .on(table.chatRoom, table.messageType),
   senderTimestampIdx: index('chat_messages_sender_timestamp_idx')
     .on(table.sender, table.timestamp),
+  parentMessageIdx: index('chat_messages_parent_message_idx')
+    .on(table.parentMessageId),
 }));
 
 // TypeScript interfaces for video call data structure
