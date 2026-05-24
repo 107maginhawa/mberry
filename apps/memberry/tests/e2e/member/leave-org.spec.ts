@@ -25,8 +25,8 @@ test.describe('M-27: Leave Organization', () => {
     const leaveBtn = page.getByRole('button', { name: /leave/i }).first()
     await leaveBtn.click()
 
-    // Confirmation dialog should appear
-    await expect(page.getByRole('heading', { name: /leave this organization/i })).toBeVisible({ timeout: 5000 })
+    // Confirmation dialog should appear (heading may include org name)
+    await expect(page.getByRole('heading', { name: /leave.*\?/i })).toBeVisible({ timeout: 5000 })
     // Dialog body warns about consequences
     await expect(page.getByText(/lose access/i)).toBeVisible({ timeout: 5000 })
     await expect(page.getByRole('button', { name: /leave organization/i })).toBeVisible()

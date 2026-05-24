@@ -39,11 +39,12 @@
   "overrides": {
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
-    "csstype": "3.2.3"
+    "csstype": "3.2.3",
+    "@playwright/test": "1.58.2",
+    "playwright": "1.58.2",
+    "playwright-core": "1.58.2"
   },
   "devDependencies": {
-    "@esbuild/darwin-arm64": "^0.25.0",
-    "@esbuild/linux-x64": "^0.25.0",
     "@rollup/rollup-darwin-arm64": "^4.52.3",
     "@rollup/rollup-linux-x64-gnu": "^4.52.3",
     "husky": "^9.1.7",

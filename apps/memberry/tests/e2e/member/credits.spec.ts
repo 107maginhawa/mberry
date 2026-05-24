@@ -25,7 +25,7 @@ test.describe('Member Credits (/my/credits)', () => {
     await page.waitForLoadState('networkidle')
 
     await expect(
-      page.getByText(/Manual Entry/i),
+      page.getByText(/Log Manual Credit/i),
     ).toBeVisible({ timeout: 10000 })
   })
 

@@ -958,7 +958,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // listDuesInvoices
   app.get('/association/member/dues-invoices',
-    authMiddleware({ roles: ["association:admin"] }),
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
     zValidator('query', validators.ListDuesInvoicesQuery, validationErrorHandler),
     registry.listDuesInvoices as unknown as Handler
   );

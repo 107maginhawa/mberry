@@ -66,10 +66,15 @@ test.describe('[BR-49] Grace Period Access', () => {
     expect(hasContent).toBeTruthy()
   })
 
-  test('member can access payments page', {
-    // Payments API may 500 on fresh seed data — known issue
-  }, async ({ page }) => {
-    test.fixme(true, 'Payments API returns 500 on fresh seed — tracked for fix')
+  test('member can access payments page', async ({ page }) => {
+    await signInAsMember(page)
+    await page.goto('/my/payments')
+    await page.waitForLoadState('networkidle')
+
+    await expect(page).toHaveURL(/\/my\/payments/)
+    // Payments page should show payment list or empty state
+    const hasContent = await page.getByText(/payment|No Payments Found/i).first().isVisible({ timeout: 10000 }).catch(() => false)
+    expect(hasContent).toBeTruthy()
   })
 
   test('member status badge shows on organizations page', async ({ page }) => {
