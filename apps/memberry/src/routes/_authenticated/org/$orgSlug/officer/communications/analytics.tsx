@@ -36,7 +36,7 @@ function AnalyticsDashboardPage() {
     queryKey: ['announcements-analytics', orgId],
     queryFn: () =>
       api.get<{ data: AnnouncementWithStats[]; total: number }>(
-        `/api/communications/announcements?organizationId=${orgId}&status=sent`,
+        `/api/communications/announcements/${orgId}?status=sent`,
       ),
   })
 

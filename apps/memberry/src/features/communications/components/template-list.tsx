@@ -35,12 +35,12 @@ export function TemplateList({ orgId, onEdit, onNew }: TemplateListProps) {
     queryKey: ['templates', orgId],
     queryFn: () =>
       api.get<{ data: Template[] }>(
-        `/api/communications/templates?organizationId=${orgId}`
+        `/api/association/message-templates?organizationId=${orgId}`
       ),
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/api/communications/templates/${id}`),
+    mutationFn: (id: string) => api.delete(`/api/association/message-templates/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['templates', orgId] })
       toast.success('Template deleted')

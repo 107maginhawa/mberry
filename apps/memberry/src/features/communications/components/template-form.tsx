@@ -129,9 +129,9 @@ export function TemplateForm({ orgId, existingTemplate, onSuccess }: TemplateFor
         status: data.status,
       }
       if (existingTemplate?.id) {
-        return api.patch(`/api/communications/templates/${existingTemplate.id}`, payload)
+        return api.patch(`/api/association/message-templates/${existingTemplate.id}`, payload)
       }
-      return api.post('/api/communications/templates', payload)
+      return api.post('/api/association/message-templates', payload)
     },
     onSuccess: () => {
       toast.success(existingTemplate ? 'Template updated' : 'Template created')
