@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { isDismissed } from '../components/nps-modal'
+import { isDismissedLocally } from '../components/nps-modal'
 
 interface NpsSurveyResponse {
   id: string
@@ -23,7 +23,9 @@ export function usePendingNps() {
   })
 
   const surveys = data?.data ?? []
-  const firstPending = surveys.find((s) => !isDismissed(s.id)) ?? null
+  // Server already filters by status=pending, so dismissed surveys won't appear.
+  // Local check is a fallback for the current session before server state refreshes.
+  const firstPending = surveys.find((s) => !isDismissedLocally(s.id)) ?? null
 
   return {
     pendingNps: firstPending,

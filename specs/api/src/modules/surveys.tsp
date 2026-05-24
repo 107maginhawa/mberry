@@ -176,8 +176,11 @@ enum ResponseStatus {
   @doc("Member submitted response")
   completed: "completed",
 
-  @doc("Expired or dismissed without response")
+  @doc("Expired without response")
   skipped: "skipped",
+
+  @doc("Member explicitly dismissed the prompt")
+  dismissed: "dismissed",
 }
 
 /**
@@ -200,8 +203,8 @@ model SurveyResponse extends BaseEntity {
   @doc("Survey this response belongs to")
   surveyId: UUID;
 
-  @doc("Person who responded")
-  responderId: UUID;
+  @doc("Person who responded (null for anonymous surveys)")
+  responderId?: UUID;
 
   @doc("Answers to survey questions")
   answers: QuestionAnswer[];
@@ -405,6 +408,19 @@ namespace SurveysModule {
     ): ApiCreatedResponse<SurveyResponse>
       | ApiConflictResponse
       | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Dismiss an NPS/survey prompt. Records dismissed status server-side so it persists across devices.")
+    @operationId("dismissSurveyResponse")
+    @post
+    @route("/{survey}/responses/dismiss")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["user"])
+    dismissSurveyResponse(
+      @path survey: UUID
+    ): ApiNoContentResponse
       | ApiNotFoundResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;

@@ -19,9 +19,9 @@ interface NpsModalProps {
   onComplete: () => void
 }
 
-// ── localStorage helpers ─────────────────────────────────────────────
+// ── Dismiss helpers ─────────────────────────────────────────────────
 
-export function isDismissed(surveyId: string): boolean {
+export function isDismissedLocally(surveyId: string): boolean {
   try {
     return localStorage.getItem(`nps-dismissed-${surveyId}`) === 'true'
   } catch {
@@ -29,11 +29,21 @@ export function isDismissed(surveyId: string): boolean {
   }
 }
 
-export function markDismissed(surveyId: string): void {
+function markDismissedLocally(surveyId: string): void {
   try {
     localStorage.setItem(`nps-dismissed-${surveyId}`, 'true')
   } catch {
     // localStorage not available
+  }
+}
+
+async function dismissOnServer(surveyId: string): Promise<void> {
+  try {
+    await api.post(`/surveys/${surveyId}/responses/dismiss`)
+    markDismissedLocally(surveyId)
+  } catch {
+    // Fallback: still mark locally so user isn't re-prompted this session
+    markDismissedLocally(surveyId)
   }
 }
 
@@ -51,7 +61,7 @@ export function NpsModal({ survey, onDismiss, onComplete }: NpsModalProps) {
   }, [])
 
   const handleDismiss = useCallback(() => {
-    markDismissed(survey.id)
+    dismissOnServer(survey.id)
     onDismiss()
   }, [survey.id, onDismiss])
 
@@ -66,7 +76,7 @@ export function NpsModal({ survey, onDismiss, onComplete }: NpsModalProps) {
         ],
       })
       toast.success('Thanks for your feedback!')
-      markDismissed(survey.id)
+      markDismissedLocally(survey.id)
       onComplete()
     } catch {
       toast.error('Failed to submit. Please try again.')
@@ -106,11 +116,14 @@ export function NpsModal({ survey, onDismiss, onComplete }: NpsModalProps) {
           </p>
 
           {/* NPS Scale — compact */}
-          <div className="flex gap-1">
+          <div className="flex gap-1" role="radiogroup" aria-label="NPS score from 0 to 10">
             {Array.from({ length: 11 }, (_, i) => (
               <Button
                 key={i}
                 type="button"
+                role="radio"
+                aria-checked={score === i}
+                aria-label={`${i} - ${i === 0 ? 'Not at all likely' : i <= 2 ? 'Not likely' : i <= 4 ? 'Unlikely' : i === 5 ? 'Neutral' : i === 6 ? 'Somewhat likely' : i <= 8 ? 'Likely' : i === 9 ? 'Very likely' : 'Extremely likely'}`}
                 onClick={() => handleSelectScore(i)}
                 className={`flex-1 h-8 text-xs font-semibold rounded-[4px] transition-all
                   ${

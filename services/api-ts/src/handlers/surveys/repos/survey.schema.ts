@@ -110,7 +110,6 @@ export const surveyResponses = pgTable('survey_response', {
     .references(() => surveys.id, { onDelete: 'cascade' }),
 
   responderId: uuid('responder_id')
-    .notNull()
     .references(() => persons.id, { onDelete: 'restrict' }),
 
   answers: jsonb('answers').$type<QuestionAnswer[]>().notNull().default([]),

@@ -50,7 +50,7 @@ export async function submitSurveyResponse(
   }
 
   // Check deadline
-  const settings = survey.settings as { deadline?: string } | null;
+  const settings = survey.settings as { anonymous?: boolean; deadline?: string } | null;
   if (settings?.deadline) {
     const deadline = new Date(settings.deadline);
     if (new Date() > deadline) {
@@ -64,10 +64,13 @@ export async function submitSurveyResponse(
     throw new ConflictError('You have already responded to this survey');
   }
 
+  const isAnonymous = settings?.anonymous === true;
+
   const response = await responseRepo.submitResponse({
     organizationId,
     surveyId,
-    responderId: userId,
+    // P0 privacy fix: strip responderId for anonymous surveys
+    responderId: isAnonymous ? null : userId,
     answers: (body.answers ?? []) as any,
     contextId: body.contextId ?? null,
     createdBy: userId,

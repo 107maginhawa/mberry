@@ -1,10 +1,10 @@
 import { Link, useParams } from "@tanstack/react-router"
-import { Home, MessageSquare, Calendar, Award, User, Vote, FileText } from "lucide-react"
+import { Home, MessageSquare, Calendar, Award, User, Vote, FileText, ClipboardList } from "lucide-react"
 
 const MAIN_NAV_ITEMS = [
   { to: "/dashboard", label: "Home", icon: Home },
   { to: "/messages", label: "Messages", icon: MessageSquare, orgScoped: true },
-  { to: "/my/events", label: "Activities", icon: Calendar },
+  { to: "/my/events", label: "My Events", icon: Calendar },
   { to: "/my/credits", label: "Credits", icon: Award },
   { to: "/my/profile", label: "Profile", icon: User },
 ] as const
@@ -80,6 +80,23 @@ export function MemberSidebar({ userEmail }: MemberSidebarProps) {
             ))}
           </>
         )}
+        {/* Feedback */}
+        <div className="mx-5 my-2 border-t border-[var(--color-border-light)]" />
+        <div className="px-5 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[1.5px] text-[var(--color-muted)]">
+          Feedback
+        </div>
+        <Link
+          to="/my/surveys"
+          className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-warm)] transition-colors duration-150"
+          activeProps={{
+            className:
+              "flex items-center gap-2.5 px-5 py-2.5 text-sm text-[var(--color-primary)] font-semibold border-l-[3px] border-[var(--color-primary)] pl-[calc(1.25rem-3px)]",
+          }}
+          activeOptions={{ exact: false }}
+        >
+          <ClipboardList size={18} className="shrink-0" />
+          My Surveys
+        </Link>
       </nav>
 
       {/* User */}

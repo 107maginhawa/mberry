@@ -123,9 +123,11 @@ function QuestionRenderer({
 interface SurveyFlowProps {
   survey: Survey
   onComplete?: () => void
+  /** Preview mode — disables submission and shows preview banner */
+  previewMode?: boolean
 }
 
-export function SurveyFlow({ survey, onComplete }: SurveyFlowProps) {
+export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps) {
   const { questions } = survey
   const total = questions.length
 
@@ -165,6 +167,11 @@ export function SurveyFlow({ survey, onComplete }: SurveyFlowProps) {
   }, [currentIndex])
 
   const handleSubmit = useCallback(async () => {
+    if (previewMode) {
+      setCompleted(true)
+      toast.info('Preview complete — this is how members will see your survey.')
+      return
+    }
     if (submitting) return
     setSubmitting(true)
     try {
@@ -181,7 +188,7 @@ export function SurveyFlow({ survey, onComplete }: SurveyFlowProps) {
     } finally {
       setSubmitting(false)
     }
-  }, [submitting, questions, answers, survey.id, onComplete])
+  }, [previewMode, submitting, questions, answers, survey.id, onComplete])
 
   // Keyboard navigation
   useEffect(() => {
@@ -222,9 +229,13 @@ export function SurveyFlow({ survey, onComplete }: SurveyFlowProps) {
           transition={{ delay: 0.3 }}
           className="space-y-2"
         >
-          <h2 className="text-h2">Thank you for your feedback!</h2>
+          <h2 className="text-h2">
+            {previewMode ? 'End of Preview' : 'Thank you for your feedback!'}
+          </h2>
           <p className="text-body-sm text-[var(--color-muted)]">
-            Your responses have been recorded.
+            {previewMode
+              ? 'This is the completion screen members will see after submitting.'
+              : 'Your responses have been recorded.'}
           </p>
         </motion.div>
       </div>
@@ -237,6 +248,13 @@ export function SurveyFlow({ survey, onComplete }: SurveyFlowProps) {
 
   return (
     <div className="flex flex-col min-h-[60vh]">
+      {/* Preview banner */}
+      {previewMode && (
+        <div className="mb-4 px-4 py-2.5 rounded-[var(--radius-md)] bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium text-center">
+          Preview Mode — This is how members will see your survey
+        </div>
+      )}
+
       {/* Progress */}
       <div className="w-full mb-8">
         <div className="flex items-center justify-between mb-2">

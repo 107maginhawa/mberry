@@ -7,8 +7,8 @@
  * NOTE: This is UX convenience only. Backend requirePosition() is the real security guard.
  */
 export const POSITION_NAV_CONFIG: Record<string, string[]> = {
-  'president': ['MEMBERS', 'FINANCES', 'ACTIVITIES', 'COMMUNICATIONS', 'GOVERNANCE', 'DOCUMENTS', 'SETTINGS'],
+  'president': ['MEMBERS', 'FINANCES', 'ACTIVITIES', 'COMMUNICATIONS', 'GOVERNANCE', 'FEEDBACK', 'DOCUMENTS', 'SETTINGS'],
   'treasurer': ['FINANCES', 'DOCUMENTS', 'SETTINGS'],
-  'secretary': ['MEMBERS', 'COMMUNICATIONS', 'SETTINGS'],
-  'society officer': ['ACTIVITIES', 'DOCUMENTS', 'SETTINGS'],
+  'secretary': ['MEMBERS', 'COMMUNICATIONS', 'FEEDBACK', 'SETTINGS'],
+  'society officer': ['ACTIVITIES', 'FEEDBACK', 'DOCUMENTS', 'SETTINGS'],
 }

@@ -3,11 +3,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { useMutation } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
+import { Plus, Eye } from 'lucide-react'
 import { Button, Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Switch } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@monobase/ui'
+import { SurveyFlow } from './survey-flow'
 import { DateTimePicker } from '@/components/patterns/date-picker'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
@@ -78,6 +80,7 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps
   const [step, setStep] = useState<Step>('basics')
   const [serverError, setServerError] = useState<string | null>(null)
   const [questions, setQuestions] = useState<SurveyQuestion[]>([makeDefaultQuestion(0)])
+  const [showPreview, setShowPreview] = useState(false)
 
   const {
     register,
@@ -390,6 +393,33 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps
         </div>
       )}
 
+      {/* Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Survey Preview</DialogTitle>
+          </DialogHeader>
+          <SurveyFlow
+            survey={{
+              id: 'preview',
+              title: formValues.title || 'Untitled Survey',
+              description: formValues.description,
+              questions: questions
+                .filter((q) => q.text.trim())
+                .map((q) => ({
+                  id: q.id,
+                  type: q.type,
+                  text: q.text.trim(),
+                  required: q.required,
+                  options: q.options,
+                  maxLength: q.maxLength,
+                })),
+            }}
+            previewMode
+          />
+        </DialogContent>
+      </Dialog>
+
       {serverError && (
         <p role="alert" aria-live="polite" className="text-sm text-[var(--color-error)]">
           {serverError}
@@ -409,6 +439,18 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel }: SurveyBuilderProps
               onClick={() => setStep(STEPS[stepIndex - 1]!.key)}
             >
               Back
+            </Button>
+          )}
+          {step === 'review' && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowPreview(true)}
+              disabled={!questions.some((q) => q.text.trim())}
+              className="gap-1.5"
+            >
+              <Eye size={16} />
+              Preview as Member
             </Button>
           )}
           {stepIndex < STEPS.length - 1 ? (

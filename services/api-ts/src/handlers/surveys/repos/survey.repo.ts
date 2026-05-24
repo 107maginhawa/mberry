@@ -270,6 +270,21 @@ export class SurveyResponseRepository {
       .where(eq(surveyResponses.id, id));
   }
 
+  async markAsDismissed(id: string): Promise<void> {
+    await this.db
+      .update(surveyResponses)
+      .set({ status: 'dismissed', updatedAt: new Date() })
+      .where(eq(surveyResponses.id, id));
+  }
+
+  async createDismissedResponse(data: NewSurveyResponse): Promise<SurveyResponseRecord> {
+    const [row] = await this.db
+      .insert(surveyResponses)
+      .values({ ...data, status: 'dismissed' })
+      .returning();
+    return row!;
+  }
+
   async markPendingAsSkippedBefore(cutoff: Date): Promise<number> {
     const result = await this.db
       .update(surveyResponses)

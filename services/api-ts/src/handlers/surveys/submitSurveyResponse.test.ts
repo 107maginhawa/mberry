@@ -190,6 +190,75 @@ describe('submitSurveyResponse', () => {
     expect(res.status).toBe(201);
   });
 
+  test('strips responderId for anonymous surveys (BR-40 privacy)', async () => {
+    const anonymousSurvey = {
+      ...activeSurvey,
+      settings: { anonymous: true },
+    };
+    let capturedData: any;
+    stubRepo(SurveyRepository, {
+      findById: async () => anonymousSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      submitResponse: async (data: any) => {
+        capturedData = data;
+        return { ...fakeResponse, responderId: null };
+      },
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Anonymous feedback' }] },
+    });
+
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(201);
+    expect(capturedData.responderId).toBeNull();
+  });
+
+  test('preserves responderId for non-anonymous surveys', async () => {
+    let capturedData: any;
+    stubRepo(SurveyRepository, {
+      findById: async () => activeSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      submitResponse: async (data: any) => {
+        capturedData = data;
+        return fakeResponse;
+      },
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Identified feedback' }] },
+    });
+
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(201);
+    expect(capturedData.responderId).toBe('user-1');
+  });
+
+  test('still checks dedup before stripping responderId on anonymous survey', async () => {
+    const anonymousSurvey = {
+      ...activeSurvey,
+      settings: { anonymous: true },
+    };
+    stubRepo(SurveyRepository, {
+      findById: async () => anonymousSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => fakeResponse,
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Duplicate' }] },
+    });
+    await expect(submitSurveyResponse(ctx)).rejects.toThrow('You have already responded');
+  });
+
   test('triggers analytics aggregation job when jobs scheduler available', async () => {
     stubRepo(SurveyRepository, {
       findById: async () => activeSurvey,
