@@ -30,7 +30,7 @@ export function DeliveryFunnel({ sent, delivered, opened, clicked }: DeliveryFun
     Math.round((clicked / sent) * 100),
   ]
 
-  const openRate = rates[2]
+  const openRate = rates[2] ?? 0
   const openRateColor =
     openRate > 50 ? 'text-[var(--color-success)]' :
     openRate < 20 ? 'text-[var(--color-warning)]' :
@@ -51,7 +51,7 @@ export function DeliveryFunnel({ sent, delivered, opened, clicked }: DeliveryFun
             <div className="flex items-center justify-between text-xs">
               <span className="text-[var(--color-muted)]">{stage}</span>
               <span className="font-medium tabular-nums">
-                {values[i].toLocaleString()} {i > 0 && <span className="text-[var(--color-muted)]">({rates[i]}%)</span>}
+                {(values[i] ?? 0).toLocaleString()} {i > 0 && <span className="text-[var(--color-muted)]">({rates[i] ?? 0}%)</span>}
               </span>
             </div>
             <div className="h-2 bg-[var(--color-surface-warm)] rounded-full overflow-hidden">
