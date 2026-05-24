@@ -1,12 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
-import { Users, AlertTriangle, UserMinus, TrendingUp, CalendarDays, Bell, ClipboardList, UserX } from 'lucide-react'
+import { Users, UserMinus, TrendingUp, CalendarDays, Bell, ClipboardList, Vote, FileText } from 'lucide-react'
 import { api } from '@/lib/api'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
+import {
+  listElectionsOptions,
+  searchDocumentsOptions,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface OfficerDashboardProps {
   orgId: string
@@ -70,6 +74,24 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
     retry: false,
   })
 
+  const elections = useQuery(
+    listElectionsOptions({ query: { organizationId: orgId } }),
+  )
+
+  const documents = useQuery(
+    searchDocumentsOptions({ query: { ownerId: orgId, ownerType: 'organization' } }),
+  )
+
+  // Active elections: nominations open, voting open, or awaiting confirmation
+  const activeElectionsCount = (elections.data?.data ?? []).filter(
+    (e) => ['nominationsOpen', 'votingOpen', 'awaitingConfirmation'].includes(e.status),
+  ).length
+
+  // Draft documents: documents with no active version attached yet (currentVersionId absent)
+  const draftDocumentsCount = (documents.data?.data ?? []).filter(
+    (d) => !d.currentVersionId,
+  ).length
+
   const isLoading = members.isLoading || dues.isLoading || applications.isLoading
   const hasError = members.error || dues.error || applications.error
 
@@ -96,7 +118,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
       <section className="mb-8">
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
-            {Array.from({ length: 5 }).map((_, i) => <CardSkeleton key={i} />)}
+            {Array.from({ length: 7 }).map((_, i) => <CardSkeleton key={i} />)}
           </div>
         ) : (
           <StaggerGrid className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
@@ -128,6 +150,24 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
               <GlassCard className="p-4 text-center">
                 <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Upcoming Activities</p>
                 <p className="text-[28px] font-bold font-display mt-1"><CountUp value={upcomingActivities} /></p>
+              </GlassCard>
+            </StaggerItem>
+            <StaggerItem>
+              <GlassCard className="p-4 text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <Vote size={12} className="text-[var(--color-primary)]" />
+                  <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Active Elections</p>
+                </div>
+                <p className="text-[28px] font-bold font-display"><CountUp value={activeElectionsCount} /></p>
+              </GlassCard>
+            </StaggerItem>
+            <StaggerItem>
+              <GlassCard className="p-4 text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <FileText size={12} className="text-[var(--color-info)]" />
+                  <p className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Draft Docs</p>
+                </div>
+                <p className="text-[28px] font-bold font-display"><CountUp value={draftDocumentsCount} /></p>
               </GlassCard>
             </StaggerItem>
           </StaggerGrid>

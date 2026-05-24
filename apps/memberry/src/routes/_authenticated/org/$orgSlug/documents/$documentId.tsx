@@ -226,11 +226,6 @@ function MemberDocumentDetailPage() {
               </div>
             )}
 
-            {isPdf && (
-              <p className="text-xs text-[var(--color-muted)] italic">
-                PDF document — download to view contents.
-              </p>
-            )}
           </div>
 
           <div className="shrink-0">
@@ -246,6 +241,17 @@ function MemberDocumentDetailPage() {
           </div>
         </div>
       </GlassCard>
+
+      {/* Inline PDF preview */}
+      {isPdf && (
+        <GlassCard className="p-0 overflow-hidden">
+          <iframe
+            src={`/api/association/documents/${documentId}/download`}
+            className="w-full h-[600px] border-0"
+            title={`Preview of ${doc.title}`}
+          />
+        </GlassCard>
+      )}
 
       {/* Version history */}
       <GlassCard className="p-6">

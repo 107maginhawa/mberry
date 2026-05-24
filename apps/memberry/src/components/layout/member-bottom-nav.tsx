@@ -4,7 +4,7 @@ import { Home, MessageSquare, Calendar, Award, User, Vote } from "lucide-react"
 const MAIN_NAV_ITEMS = [
   { to: "/dashboard", label: "Home", icon: Home },
   { to: "/messages", label: "Messages", icon: MessageSquare, orgScoped: true },
-  { to: "/my/events", label: "Activities", icon: Calendar },
+  { to: "/my/events", label: "My Events", icon: Calendar },
   { to: "/my/credits", label: "Credits", icon: Award },
   { to: "/my/profile", label: "Profile", icon: User },
 ] as const

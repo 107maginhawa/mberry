@@ -155,7 +155,10 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
     const body: ElectionCreateRequest = {
       organizationId: orgId,
       title: data.title,
-      // Form uses 'bylaw'/'officer'; API uses ElectionType union — map to nearest value
+      // NOTE: Form uses 'officer'/'bylaw' (Drizzle schema enums).
+      // TypeSpec API expects 'general'/'special' (governance.tsp ElectionType).
+      // This mapping bridges the schema/TypeSpec enum drift.
+      // To fix: align Drizzle enum with TypeSpec, then remove this mapping.
       electionType: (data.type === 'bylaw' ? 'special' : 'general') as ElectionType,
       positions: positions.filter((p) => p.title.trim()).map((p) => p.title.trim()),
       nominationStart: data.nominationsOpenAt ? new Date(data.nominationsOpenAt) : new Date(),
