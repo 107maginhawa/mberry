@@ -1,19 +1,18 @@
 import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getPersonOptions } from '@monobase/sdk-ts/generated/react-query'
 import { PageHeader } from '@/components/patterns/page-header'
-import { ChannelList } from '@/features/comms/components/channel-list'
+import { DmList } from '@/features/comms/components/dm-list'
 import { ChatView } from '@/features/comms/components/chat-view'
 import { EmptyState } from '@/components/patterns/empty-state'
-import { Button } from '@monobase/ui'
-import { MessageSquare, MessageCircle } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 
-export const Route = createFileRoute('/_authenticated/org/$orgSlug/messages/')({
-  component: MessagesIndexPage,
+export const Route = createFileRoute('/_authenticated/org/$orgSlug/messages/dm/')({
+  component: DmIndexPage,
 })
 
-function MessagesIndexPage() {
+function DmIndexPage() {
   const { orgSlug } = Route.useParams()
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
 
@@ -27,22 +26,22 @@ function MessagesIndexPage() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="px-6 pt-6">
-        <PageHeader title="Messages" />
+        <PageHeader
+          title="Direct Messages"
+          breadcrumbs={[
+            { label: 'Messages', href: `/org/${orgSlug}/messages` },
+            { label: 'Direct Messages' },
+          ]}
+        />
       </div>
       <div className="flex-1 flex gap-4 p-6 pt-2 overflow-hidden">
-        {/* Sidebar: channels + DM link */}
-        <div className="w-64 flex-shrink-0 overflow-y-auto hidden md:flex md:flex-col gap-3">
-          <ChannelList
-            orgSlug={orgSlug}
+        {/* DM list sidebar */}
+        <div className="w-64 flex-shrink-0 overflow-y-auto hidden md:block">
+          <DmList
             activeRoomId={activeRoomId ?? undefined}
             onSelectRoom={setActiveRoomId}
+            myPersonId={myPersonId}
           />
-          <Link to={`/org/${orgSlug}/messages/dm`}>
-            <Button variant="outline" className="w-full justify-start gap-2">
-              <MessageCircle className="h-4 w-4" />
-              Direct Messages
-            </Button>
-          </Link>
         </div>
 
         {/* Chat area */}
@@ -51,13 +50,14 @@ function MessagesIndexPage() {
             <ChatView
               roomId={activeRoomId}
               myPersonId={myPersonId}
+              roomName="Direct Message"
             />
           ) : (
             <div className="h-full flex items-center justify-center">
               <EmptyState
-                icon={<MessageSquare className="w-10 h-10" />}
+                icon={<MessageCircle className="w-10 h-10" />}
                 headline="Select a conversation"
-                description="Choose a channel from the sidebar or open your direct messages."
+                description="Choose a direct message from the sidebar, or start a new one."
               />
             </div>
           )}
