@@ -44,6 +44,17 @@ export const participantTypeEnum = pgEnum('participant_type', [
   'host'
 ]);
 
+export const chatRoomTypeEnum = pgEnum('chat_room_type', [
+  'channel',
+  'dm',
+  'group'
+]);
+
+export const chatRoomMemberRoleEnum = pgEnum('chat_room_member_role', [
+  'member',
+  'admin'
+]);
+
 // Chat Rooms - Flexible communication rooms supporting any number of participants
 export const chatRooms = pgTable('chat_room', {
   // Base entity fields (includes id, timestamps, version, audit fields)
@@ -52,7 +63,12 @@ export const chatRooms = pgTable('chat_room', {
   // Multi-tenant scoping (P0-7: chat data isolation between orgs)
   organizationId: uuid('organization_id').notNull(),
 
-  // Flexible participant and admin arrays
+  // Room identity
+  name: text('name'), // Channel name (e.g., "general", "events"). Null for DMs.
+  roomType: chatRoomTypeEnum('room_type').notNull().default('group'),
+
+  // Legacy JSONB arrays — kept for backward compat with existing handlers.
+  // New code should use chatRoomMembers join table.
   participants: jsonb('participants')
     .$type<string[]>()
     .notNull(),
@@ -64,18 +80,18 @@ export const chatRooms = pgTable('chat_room', {
   // Generic context linking (bookings, billing sessions, etc.)
   context: text('context_id'),
     // Note: Generic reference - can link to bookings, billing, etc.
-  
+
   // Room status and metadata
   status: chatRoomStatusEnum('status')
     .notNull()
     .default('active'),
-  
+
   lastMessageAt: timestamp('last_message_at', { withTimezone: true }),
-  
+
   messageCount: integer('message_count')
     .notNull()
     .default(0),
-  
+
   // Efficiency reference for active video call
   activeVideoCallMessage: uuid('active_video_call_message_id'),
 }, (table) => ({
@@ -87,11 +103,31 @@ export const chatRooms = pgTable('chat_room', {
   statusIdx: index('chat_rooms_status_idx').on(table.status),
   lastMessageAtIdx: index('chat_rooms_last_message_at_idx').on(table.lastMessageAt),
   activeVideoCallIdx: index('chat_rooms_active_video_call_idx').on(table.activeVideoCallMessage),
-
+  roomTypeIdx: index('chat_rooms_room_type_idx').on(table.roomType),
 
   // Compound indexes for common queries
   statusLastMessageIdx: index('chat_rooms_status_last_message_idx')
     .on(table.status, table.lastMessageAt),
+  orgRoomTypeIdx: index('chat_rooms_org_room_type_idx')
+    .on(table.organizationId, table.roomType),
+}));
+
+// Chat Room Members — join table replacing JSONB participants for scalable membership + read tracking
+export const chatRoomMembers = pgTable('chat_room_member', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  chatRoomId: uuid('chat_room_id')
+    .notNull()
+    .references(() => chatRooms.id, { onDelete: 'cascade' }),
+  personId: uuid('person_id').notNull(),
+  role: chatRoomMemberRoleEnum('role').notNull().default('member'),
+  joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  lastReadAt: timestamp('last_read_at', { withTimezone: true }),
+  mutedUntil: timestamp('muted_until', { withTimezone: true }),
+}, (table) => ({
+  roomIdx: index('chat_room_members_room_idx').on(table.chatRoomId),
+  personIdx: index('chat_room_members_person_idx').on(table.personId),
+  uniqueMember: unique('chat_room_members_unique').on(table.chatRoomId, table.personId),
+  roomRoleIdx: index('chat_room_members_room_role_idx').on(table.chatRoomId, table.role),
 }));
 
 // Chat Messages - Immutable messages with optional video call data
@@ -167,6 +203,9 @@ export type NewChatRoom = typeof chatRooms.$inferInsert;
 
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
+
+export type ChatRoomMember = typeof chatRoomMembers.$inferSelect;
+export type NewChatRoomMember = typeof chatRoomMembers.$inferInsert;
 
 // Request/Response types for handlers
 export interface ChatRoomFilters {
