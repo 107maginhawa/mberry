@@ -11,6 +11,8 @@ import {
   Calendar,
   BookOpen,
   Megaphone,
+  MessageSquare,
+  FileBarChart,
   Building,
   Building2,
   Shield,
@@ -19,11 +21,14 @@ import {
   ArrowLeft,
   Vote,
   FileSpreadsheet,
+  FileText,
   TrendingUp,
   Receipt,
   UserCheck,
   Wallet,
   CalendarClock,
+  ClipboardList,
+  Star,
 } from "lucide-react"
 
 interface NavSection {
@@ -84,7 +89,9 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
     {
       label: "COMMUNICATIONS",
       items: [
+        { to: `${base}/messages`, label: "Channels", icon: MessageSquare },
         { to: `${base}/communications`, label: "Announcements", icon: Megaphone },
+        { to: `${base}/communications/templates`, label: "Templates", icon: FileBarChart },
       ],
     },
     {
@@ -94,8 +101,16 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
       ],
     },
     {
+      label: "FEEDBACK",
+      items: [
+        { to: `${base}/surveys`, label: "Surveys", icon: ClipboardList },
+        { to: `${base}/reviews`, label: "Reviews", icon: Star },
+      ],
+    },
+    {
       label: "DOCUMENTS",
       items: [
+        { to: `${base}/documents`, label: "Document Library", icon: FileText },
         { to: `${base}/reports/credits`, label: "Credit Reports", icon: Award },
       ],
     },
