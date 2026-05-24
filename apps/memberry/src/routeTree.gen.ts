@@ -53,6 +53,8 @@ import { Route as AuthenticatedMyCreditsLogRouteImport } from './routes/_authent
 import { Route as AuthenticatedMyCertificatesCertificateIdRouteImport } from './routes/_authenticated/my/certificates/$certificateId'
 import { Route as AuthenticatedMyBookingsBookingIdRouteImport } from './routes/_authenticated/my/bookings/$bookingId'
 import { Route as AuthenticatedOrgOrgSlugTrainingIndexRouteImport } from './routes/_authenticated/org/$orgSlug/training/index'
+import { Route as AuthenticatedOrgOrgSlugMessagesIndexRouteImport } from './routes/_authenticated/org/$orgSlug/messages/index'
+import { Route as AuthenticatedOrgOrgSlugGovernanceIndexRouteImport } from './routes/_authenticated/org/$orgSlug/governance/index'
 import { Route as AuthenticatedOrgOrgSlugEventsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/events/index'
 import { Route as AuthenticatedOrgOrgSlugElectionsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/elections/index'
 import { Route as AuthenticatedOrgOrgSlugDocumentsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/documents/index'
@@ -74,6 +76,7 @@ import { Route as AuthenticatedOrgOrgSlugOfficerTrainingIndexRouteImport } from 
 import { Route as AuthenticatedOrgOrgSlugOfficerSurveysIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/surveys/index'
 import { Route as AuthenticatedOrgOrgSlugOfficerRosterIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/roster/index'
 import { Route as AuthenticatedOrgOrgSlugOfficerPaymentsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/payments/index'
+import { Route as AuthenticatedOrgOrgSlugOfficerMessagesIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/messages/index'
 import { Route as AuthenticatedOrgOrgSlugOfficerFinancesIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/finances/index'
 import { Route as AuthenticatedOrgOrgSlugOfficerEventsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/events/index'
 import { Route as AuthenticatedOrgOrgSlugOfficerElectionsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/elections/index'
@@ -116,9 +119,11 @@ import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsAnalyticsRouteImpo
 import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsAnnouncementIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications/$announcementId'
 import { Route as AuthenticatedOrgOrgSlugElectionsElectionIdVoteRouteImport } from './routes/_authenticated/org/$orgSlug/elections/$electionId/vote'
 import { Route as AuthenticatedMyBookingsHostPersonIdSlotIdRouteImport } from './routes/_authenticated/my/bookings/host.$personId.$slotId'
+import { Route as AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/finances/invoices/index'
 import { Route as AuthenticatedOrgOrgSlugOfficerCommunicationsTemplatesIndexRouteImport } from './routes/_authenticated/org/$orgSlug/officer/communications/templates/index'
 import { Route as AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRouteImport } from './routes/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance'
 import { Route as AuthenticatedOrgOrgSlugOfficerFinancesMembersMemberIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/finances/members/$memberId'
+import { Route as AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId'
 import { Route as AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRouteImport } from './routes/_authenticated/org/$orgSlug/officer/events/$eventId/attendance'
 import { Route as AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRouteImport } from './routes/_authenticated/org/$orgSlug/officer/elections/$electionId/edit'
 import { Route as AuthenticatedOrgOrgSlugOfficerDuesMemberMemberIdRouteImport } from './routes/_authenticated/org/$orgSlug/officer/dues/member.$memberId'
@@ -365,6 +370,18 @@ const AuthenticatedOrgOrgSlugTrainingIndexRoute =
     path: '/training/',
     getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
   } as any)
+const AuthenticatedOrgOrgSlugMessagesIndexRoute =
+  AuthenticatedOrgOrgSlugMessagesIndexRouteImport.update({
+    id: '/messages/',
+    path: '/messages/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugGovernanceIndexRoute =
+  AuthenticatedOrgOrgSlugGovernanceIndexRouteImport.update({
+    id: '/governance/',
+    path: '/governance/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugRouteRoute,
+  } as any)
 const AuthenticatedOrgOrgSlugEventsIndexRoute =
   AuthenticatedOrgOrgSlugEventsIndexRouteImport.update({
     id: '/events/',
@@ -490,6 +507,12 @@ const AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedOrgOrgSlugOfficerPaymentsRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerMessagesIndexRoute =
+  AuthenticatedOrgOrgSlugOfficerMessagesIndexRouteImport.update({
+    id: '/messages/',
+    path: '/messages/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerRoute,
   } as any)
 const AuthenticatedOrgOrgSlugOfficerFinancesIndexRoute =
   AuthenticatedOrgOrgSlugOfficerFinancesIndexRouteImport.update({
@@ -743,6 +766,12 @@ const AuthenticatedMyBookingsHostPersonIdSlotIdRoute =
     path: '/$slotId',
     getParentRoute: () => AuthenticatedMyBookingsHostPersonIdRoute,
   } as any)
+const AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRoute =
+  AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute,
+  } as any)
 const AuthenticatedOrgOrgSlugOfficerCommunicationsTemplatesIndexRoute =
   AuthenticatedOrgOrgSlugOfficerCommunicationsTemplatesIndexRouteImport.update({
     id: '/templates/',
@@ -760,6 +789,12 @@ const AuthenticatedOrgOrgSlugOfficerFinancesMembersMemberIdRoute =
     id: '/$memberId',
     path: '/$memberId',
     getParentRoute: () => AuthenticatedOrgOrgSlugOfficerFinancesMembersRoute,
+  } as any)
+const AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRoute =
+  AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRouteImport.update({
+    id: '/$invoiceId',
+    path: '/$invoiceId',
+    getParentRoute: () => AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute,
   } as any)
 const AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute =
   AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRouteImport.update({
@@ -847,6 +882,8 @@ export interface FileRoutesByFullPath {
   '/org/$orgSlug/documents': typeof AuthenticatedOrgOrgSlugDocumentsIndexRoute
   '/org/$orgSlug/elections': typeof AuthenticatedOrgOrgSlugElectionsIndexRoute
   '/org/$orgSlug/events': typeof AuthenticatedOrgOrgSlugEventsIndexRoute
+  '/org/$orgSlug/governance': typeof AuthenticatedOrgOrgSlugGovernanceIndexRoute
+  '/org/$orgSlug/messages': typeof AuthenticatedOrgOrgSlugMessagesIndexRoute
   '/org/$orgSlug/training': typeof AuthenticatedOrgOrgSlugTrainingIndexRoute
   '/my/bookings/host/$personId/$slotId': typeof AuthenticatedMyBookingsHostPersonIdSlotIdRoute
   '/org/$orgSlug/elections/$electionId/vote': typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute
@@ -864,7 +901,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgSlug/officer/finances/assessments': typeof AuthenticatedOrgOrgSlugOfficerFinancesAssessmentsRoute
   '/org/$orgSlug/officer/finances/dues': typeof AuthenticatedOrgOrgSlugOfficerFinancesDuesRoute
   '/org/$orgSlug/officer/finances/funds': typeof AuthenticatedOrgOrgSlugOfficerFinancesFundsRoute
-  '/org/$orgSlug/officer/finances/invoices': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute
+  '/org/$orgSlug/officer/finances/invoices': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteWithChildren
   '/org/$orgSlug/officer/finances/members': typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersRouteWithChildren
   '/org/$orgSlug/officer/payments/$paymentId': typeof AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute
   '/org/$orgSlug/officer/payments/new': typeof AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute
@@ -890,6 +927,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgSlug/officer/elections': typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute
   '/org/$orgSlug/officer/events': typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRoute
   '/org/$orgSlug/officer/finances': typeof AuthenticatedOrgOrgSlugOfficerFinancesIndexRoute
+  '/org/$orgSlug/officer/messages': typeof AuthenticatedOrgOrgSlugOfficerMessagesIndexRoute
   '/org/$orgSlug/officer/payments/': typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute
   '/org/$orgSlug/officer/roster/': typeof AuthenticatedOrgOrgSlugOfficerRosterIndexRoute
   '/org/$orgSlug/officer/surveys': typeof AuthenticatedOrgOrgSlugOfficerSurveysIndexRoute
@@ -898,9 +936,11 @@ export interface FileRoutesByFullPath {
   '/org/$orgSlug/officer/dues/member/$memberId': typeof AuthenticatedOrgOrgSlugOfficerDuesMemberMemberIdRoute
   '/org/$orgSlug/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute
   '/org/$orgSlug/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute
+  '/org/$orgSlug/officer/finances/invoices/$invoiceId': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRoute
   '/org/$orgSlug/officer/finances/members/$memberId': typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersMemberIdRoute
   '/org/$orgSlug/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute
   '/org/$orgSlug/officer/communications/templates': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsTemplatesIndexRoute
+  '/org/$orgSlug/officer/finances/invoices/': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -959,6 +999,8 @@ export interface FileRoutesByTo {
   '/org/$orgSlug/documents': typeof AuthenticatedOrgOrgSlugDocumentsIndexRoute
   '/org/$orgSlug/elections': typeof AuthenticatedOrgOrgSlugElectionsIndexRoute
   '/org/$orgSlug/events': typeof AuthenticatedOrgOrgSlugEventsIndexRoute
+  '/org/$orgSlug/governance': typeof AuthenticatedOrgOrgSlugGovernanceIndexRoute
+  '/org/$orgSlug/messages': typeof AuthenticatedOrgOrgSlugMessagesIndexRoute
   '/org/$orgSlug/training': typeof AuthenticatedOrgOrgSlugTrainingIndexRoute
   '/my/bookings/host/$personId/$slotId': typeof AuthenticatedMyBookingsHostPersonIdSlotIdRoute
   '/org/$orgSlug/elections/$electionId/vote': typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute
@@ -976,7 +1018,6 @@ export interface FileRoutesByTo {
   '/org/$orgSlug/officer/finances/assessments': typeof AuthenticatedOrgOrgSlugOfficerFinancesAssessmentsRoute
   '/org/$orgSlug/officer/finances/dues': typeof AuthenticatedOrgOrgSlugOfficerFinancesDuesRoute
   '/org/$orgSlug/officer/finances/funds': typeof AuthenticatedOrgOrgSlugOfficerFinancesFundsRoute
-  '/org/$orgSlug/officer/finances/invoices': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute
   '/org/$orgSlug/officer/finances/members': typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersRouteWithChildren
   '/org/$orgSlug/officer/payments/$paymentId': typeof AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute
   '/org/$orgSlug/officer/payments/new': typeof AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute
@@ -1002,6 +1043,7 @@ export interface FileRoutesByTo {
   '/org/$orgSlug/officer/elections': typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute
   '/org/$orgSlug/officer/events': typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRoute
   '/org/$orgSlug/officer/finances': typeof AuthenticatedOrgOrgSlugOfficerFinancesIndexRoute
+  '/org/$orgSlug/officer/messages': typeof AuthenticatedOrgOrgSlugOfficerMessagesIndexRoute
   '/org/$orgSlug/officer/payments': typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute
   '/org/$orgSlug/officer/roster': typeof AuthenticatedOrgOrgSlugOfficerRosterIndexRoute
   '/org/$orgSlug/officer/surveys': typeof AuthenticatedOrgOrgSlugOfficerSurveysIndexRoute
@@ -1010,9 +1052,11 @@ export interface FileRoutesByTo {
   '/org/$orgSlug/officer/dues/member/$memberId': typeof AuthenticatedOrgOrgSlugOfficerDuesMemberMemberIdRoute
   '/org/$orgSlug/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute
   '/org/$orgSlug/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute
+  '/org/$orgSlug/officer/finances/invoices/$invoiceId': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRoute
   '/org/$orgSlug/officer/finances/members/$memberId': typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersMemberIdRoute
   '/org/$orgSlug/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute
   '/org/$orgSlug/officer/communications/templates': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsTemplatesIndexRoute
+  '/org/$orgSlug/officer/finances/invoices': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1076,6 +1120,8 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgSlug/documents/': typeof AuthenticatedOrgOrgSlugDocumentsIndexRoute
   '/_authenticated/org/$orgSlug/elections/': typeof AuthenticatedOrgOrgSlugElectionsIndexRoute
   '/_authenticated/org/$orgSlug/events/': typeof AuthenticatedOrgOrgSlugEventsIndexRoute
+  '/_authenticated/org/$orgSlug/governance/': typeof AuthenticatedOrgOrgSlugGovernanceIndexRoute
+  '/_authenticated/org/$orgSlug/messages/': typeof AuthenticatedOrgOrgSlugMessagesIndexRoute
   '/_authenticated/org/$orgSlug/training/': typeof AuthenticatedOrgOrgSlugTrainingIndexRoute
   '/_authenticated/my/bookings/host/$personId/$slotId': typeof AuthenticatedMyBookingsHostPersonIdSlotIdRoute
   '/_authenticated/org/$orgSlug/elections/$electionId/vote': typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute
@@ -1093,7 +1139,7 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgSlug/officer/finances/assessments': typeof AuthenticatedOrgOrgSlugOfficerFinancesAssessmentsRoute
   '/_authenticated/org/$orgSlug/officer/finances/dues': typeof AuthenticatedOrgOrgSlugOfficerFinancesDuesRoute
   '/_authenticated/org/$orgSlug/officer/finances/funds': typeof AuthenticatedOrgOrgSlugOfficerFinancesFundsRoute
-  '/_authenticated/org/$orgSlug/officer/finances/invoices': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute
+  '/_authenticated/org/$orgSlug/officer/finances/invoices': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteWithChildren
   '/_authenticated/org/$orgSlug/officer/finances/members': typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersRouteWithChildren
   '/_authenticated/org/$orgSlug/officer/payments/$paymentId': typeof AuthenticatedOrgOrgSlugOfficerPaymentsPaymentIdRoute
   '/_authenticated/org/$orgSlug/officer/payments/new': typeof AuthenticatedOrgOrgSlugOfficerPaymentsNewRoute
@@ -1119,6 +1165,7 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgSlug/officer/elections/': typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute
   '/_authenticated/org/$orgSlug/officer/events/': typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRoute
   '/_authenticated/org/$orgSlug/officer/finances/': typeof AuthenticatedOrgOrgSlugOfficerFinancesIndexRoute
+  '/_authenticated/org/$orgSlug/officer/messages/': typeof AuthenticatedOrgOrgSlugOfficerMessagesIndexRoute
   '/_authenticated/org/$orgSlug/officer/payments/': typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRoute
   '/_authenticated/org/$orgSlug/officer/roster/': typeof AuthenticatedOrgOrgSlugOfficerRosterIndexRoute
   '/_authenticated/org/$orgSlug/officer/surveys/': typeof AuthenticatedOrgOrgSlugOfficerSurveysIndexRoute
@@ -1127,9 +1174,11 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgSlug/officer/dues/member/$memberId': typeof AuthenticatedOrgOrgSlugOfficerDuesMemberMemberIdRoute
   '/_authenticated/org/$orgSlug/officer/elections/$electionId/edit': typeof AuthenticatedOrgOrgSlugOfficerElectionsElectionIdEditRoute
   '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance': typeof AuthenticatedOrgOrgSlugOfficerEventsEventIdAttendanceRoute
+  '/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRoute
   '/_authenticated/org/$orgSlug/officer/finances/members/$memberId': typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersMemberIdRoute
   '/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance': typeof AuthenticatedOrgOrgSlugOfficerTrainingTrainingIdAttendanceRoute
   '/_authenticated/org/$orgSlug/officer/communications/templates/': typeof AuthenticatedOrgOrgSlugOfficerCommunicationsTemplatesIndexRoute
+  '/_authenticated/org/$orgSlug/officer/finances/invoices/': typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1193,6 +1242,8 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/documents'
     | '/org/$orgSlug/elections'
     | '/org/$orgSlug/events'
+    | '/org/$orgSlug/governance'
+    | '/org/$orgSlug/messages'
     | '/org/$orgSlug/training'
     | '/my/bookings/host/$personId/$slotId'
     | '/org/$orgSlug/elections/$electionId/vote'
@@ -1236,6 +1287,7 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/officer/elections'
     | '/org/$orgSlug/officer/events'
     | '/org/$orgSlug/officer/finances'
+    | '/org/$orgSlug/officer/messages'
     | '/org/$orgSlug/officer/payments/'
     | '/org/$orgSlug/officer/roster/'
     | '/org/$orgSlug/officer/surveys'
@@ -1244,9 +1296,11 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/officer/dues/member/$memberId'
     | '/org/$orgSlug/officer/elections/$electionId/edit'
     | '/org/$orgSlug/officer/events/$eventId/attendance'
+    | '/org/$orgSlug/officer/finances/invoices/$invoiceId'
     | '/org/$orgSlug/officer/finances/members/$memberId'
     | '/org/$orgSlug/officer/training/$trainingId/attendance'
     | '/org/$orgSlug/officer/communications/templates'
+    | '/org/$orgSlug/officer/finances/invoices/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1305,6 +1359,8 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/documents'
     | '/org/$orgSlug/elections'
     | '/org/$orgSlug/events'
+    | '/org/$orgSlug/governance'
+    | '/org/$orgSlug/messages'
     | '/org/$orgSlug/training'
     | '/my/bookings/host/$personId/$slotId'
     | '/org/$orgSlug/elections/$electionId/vote'
@@ -1322,7 +1378,6 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/officer/finances/assessments'
     | '/org/$orgSlug/officer/finances/dues'
     | '/org/$orgSlug/officer/finances/funds'
-    | '/org/$orgSlug/officer/finances/invoices'
     | '/org/$orgSlug/officer/finances/members'
     | '/org/$orgSlug/officer/payments/$paymentId'
     | '/org/$orgSlug/officer/payments/new'
@@ -1348,6 +1403,7 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/officer/elections'
     | '/org/$orgSlug/officer/events'
     | '/org/$orgSlug/officer/finances'
+    | '/org/$orgSlug/officer/messages'
     | '/org/$orgSlug/officer/payments'
     | '/org/$orgSlug/officer/roster'
     | '/org/$orgSlug/officer/surveys'
@@ -1356,9 +1412,11 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/officer/dues/member/$memberId'
     | '/org/$orgSlug/officer/elections/$electionId/edit'
     | '/org/$orgSlug/officer/events/$eventId/attendance'
+    | '/org/$orgSlug/officer/finances/invoices/$invoiceId'
     | '/org/$orgSlug/officer/finances/members/$memberId'
     | '/org/$orgSlug/officer/training/$trainingId/attendance'
     | '/org/$orgSlug/officer/communications/templates'
+    | '/org/$orgSlug/officer/finances/invoices'
   id:
     | '__root__'
     | '/'
@@ -1421,6 +1479,8 @@ export interface FileRouteTypes {
     | '/_authenticated/org/$orgSlug/documents/'
     | '/_authenticated/org/$orgSlug/elections/'
     | '/_authenticated/org/$orgSlug/events/'
+    | '/_authenticated/org/$orgSlug/governance/'
+    | '/_authenticated/org/$orgSlug/messages/'
     | '/_authenticated/org/$orgSlug/training/'
     | '/_authenticated/my/bookings/host/$personId/$slotId'
     | '/_authenticated/org/$orgSlug/elections/$electionId/vote'
@@ -1464,6 +1524,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/$orgSlug/officer/elections/'
     | '/_authenticated/org/$orgSlug/officer/events/'
     | '/_authenticated/org/$orgSlug/officer/finances/'
+    | '/_authenticated/org/$orgSlug/officer/messages/'
     | '/_authenticated/org/$orgSlug/officer/payments/'
     | '/_authenticated/org/$orgSlug/officer/roster/'
     | '/_authenticated/org/$orgSlug/officer/surveys/'
@@ -1472,9 +1533,11 @@ export interface FileRouteTypes {
     | '/_authenticated/org/$orgSlug/officer/dues/member/$memberId'
     | '/_authenticated/org/$orgSlug/officer/elections/$electionId/edit'
     | '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance'
+    | '/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId'
     | '/_authenticated/org/$orgSlug/officer/finances/members/$memberId'
     | '/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance'
     | '/_authenticated/org/$orgSlug/officer/communications/templates/'
+    | '/_authenticated/org/$orgSlug/officer/finances/invoices/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1803,6 +1866,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgOrgSlugTrainingIndexRouteImport
       parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
     }
+    '/_authenticated/org/$orgSlug/messages/': {
+      id: '/_authenticated/org/$orgSlug/messages/'
+      path: '/messages'
+      fullPath: '/org/$orgSlug/messages'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugMessagesIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
+    }
+    '/_authenticated/org/$orgSlug/governance/': {
+      id: '/_authenticated/org/$orgSlug/governance/'
+      path: '/governance'
+      fullPath: '/org/$orgSlug/governance'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugGovernanceIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugRouteRoute
+    }
     '/_authenticated/org/$orgSlug/events/': {
       id: '/_authenticated/org/$orgSlug/events/'
       path: '/events'
@@ -1949,6 +2026,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/org/$orgSlug/officer/payments/'
       preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsIndexRouteImport
       parentRoute: typeof AuthenticatedOrgOrgSlugOfficerPaymentsRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/messages/': {
+      id: '/_authenticated/org/$orgSlug/officer/messages/'
+      path: '/messages'
+      fullPath: '/org/$orgSlug/officer/messages'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerMessagesIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerRoute
     }
     '/_authenticated/org/$orgSlug/officer/finances/': {
       id: '/_authenticated/org/$orgSlug/officer/finances/'
@@ -2244,6 +2328,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyBookingsHostPersonIdSlotIdRouteImport
       parentRoute: typeof AuthenticatedMyBookingsHostPersonIdRoute
     }
+    '/_authenticated/org/$orgSlug/officer/finances/invoices/': {
+      id: '/_authenticated/org/$orgSlug/officer/finances/invoices/'
+      path: '/'
+      fullPath: '/org/$orgSlug/officer/finances/invoices/'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute
+    }
     '/_authenticated/org/$orgSlug/officer/communications/templates/': {
       id: '/_authenticated/org/$orgSlug/officer/communications/templates/'
       path: '/templates'
@@ -2264,6 +2355,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/org/$orgSlug/officer/finances/members/$memberId'
       preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersMemberIdRouteImport
       parentRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersRoute
+    }
+    '/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId': {
+      id: '/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId'
+      path: '/$invoiceId'
+      fullPath: '/org/$orgSlug/officer/finances/invoices/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute
     }
     '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance': {
       id: '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance'
@@ -2416,6 +2514,24 @@ const AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteWithChildren =
     AuthenticatedOrgOrgSlugOfficerEventsEventIdRouteChildren,
   )
 
+interface AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteChildren {
+  AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRoute
+  AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRoute
+}
+
+const AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteChildren: AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteChildren =
+  {
+    AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRoute:
+      AuthenticatedOrgOrgSlugOfficerFinancesInvoicesInvoiceIdRoute,
+    AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRoute:
+      AuthenticatedOrgOrgSlugOfficerFinancesInvoicesIndexRoute,
+  }
+
+const AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteWithChildren =
+  AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute._addFileChildren(
+    AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteChildren,
+  )
+
 interface AuthenticatedOrgOrgSlugOfficerFinancesMembersRouteChildren {
   AuthenticatedOrgOrgSlugOfficerFinancesMembersMemberIdRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersMemberIdRoute
 }
@@ -2465,7 +2581,7 @@ interface AuthenticatedOrgOrgSlugOfficerRouteChildren {
   AuthenticatedOrgOrgSlugOfficerFinancesAssessmentsRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesAssessmentsRoute
   AuthenticatedOrgOrgSlugOfficerFinancesDuesRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesDuesRoute
   AuthenticatedOrgOrgSlugOfficerFinancesFundsRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesFundsRoute
-  AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute
+  AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteWithChildren
   AuthenticatedOrgOrgSlugOfficerFinancesMembersRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesMembersRouteWithChildren
   AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute: typeof AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute
   AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute: typeof AuthenticatedOrgOrgSlugOfficerReportsFinancialRoute
@@ -2485,6 +2601,7 @@ interface AuthenticatedOrgOrgSlugOfficerRouteChildren {
   AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerElectionsIndexRoute
   AuthenticatedOrgOrgSlugOfficerEventsIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerEventsIndexRoute
   AuthenticatedOrgOrgSlugOfficerFinancesIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerFinancesIndexRoute
+  AuthenticatedOrgOrgSlugOfficerMessagesIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerMessagesIndexRoute
   AuthenticatedOrgOrgSlugOfficerSurveysIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerSurveysIndexRoute
   AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute: typeof AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute
   AuthenticatedOrgOrgSlugOfficerDuesMemberMemberIdRoute: typeof AuthenticatedOrgOrgSlugOfficerDuesMemberMemberIdRoute
@@ -2529,7 +2646,7 @@ const AuthenticatedOrgOrgSlugOfficerRouteChildren: AuthenticatedOrgOrgSlugOffice
     AuthenticatedOrgOrgSlugOfficerFinancesFundsRoute:
       AuthenticatedOrgOrgSlugOfficerFinancesFundsRoute,
     AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute:
-      AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRoute,
+      AuthenticatedOrgOrgSlugOfficerFinancesInvoicesRouteWithChildren,
     AuthenticatedOrgOrgSlugOfficerFinancesMembersRoute:
       AuthenticatedOrgOrgSlugOfficerFinancesMembersRouteWithChildren,
     AuthenticatedOrgOrgSlugOfficerReportsCreditsRoute:
@@ -2568,6 +2685,8 @@ const AuthenticatedOrgOrgSlugOfficerRouteChildren: AuthenticatedOrgOrgSlugOffice
       AuthenticatedOrgOrgSlugOfficerEventsIndexRoute,
     AuthenticatedOrgOrgSlugOfficerFinancesIndexRoute:
       AuthenticatedOrgOrgSlugOfficerFinancesIndexRoute,
+    AuthenticatedOrgOrgSlugOfficerMessagesIndexRoute:
+      AuthenticatedOrgOrgSlugOfficerMessagesIndexRoute,
     AuthenticatedOrgOrgSlugOfficerSurveysIndexRoute:
       AuthenticatedOrgOrgSlugOfficerSurveysIndexRoute,
     AuthenticatedOrgOrgSlugOfficerTrainingIndexRoute:
@@ -2596,6 +2715,8 @@ interface AuthenticatedOrgOrgSlugRouteRouteChildren {
   AuthenticatedOrgOrgSlugDocumentsIndexRoute: typeof AuthenticatedOrgOrgSlugDocumentsIndexRoute
   AuthenticatedOrgOrgSlugElectionsIndexRoute: typeof AuthenticatedOrgOrgSlugElectionsIndexRoute
   AuthenticatedOrgOrgSlugEventsIndexRoute: typeof AuthenticatedOrgOrgSlugEventsIndexRoute
+  AuthenticatedOrgOrgSlugGovernanceIndexRoute: typeof AuthenticatedOrgOrgSlugGovernanceIndexRoute
+  AuthenticatedOrgOrgSlugMessagesIndexRoute: typeof AuthenticatedOrgOrgSlugMessagesIndexRoute
   AuthenticatedOrgOrgSlugTrainingIndexRoute: typeof AuthenticatedOrgOrgSlugTrainingIndexRoute
   AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute: typeof AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute
   AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute: typeof AuthenticatedOrgOrgSlugElectionsElectionIdIndexRoute
@@ -2627,6 +2748,10 @@ const AuthenticatedOrgOrgSlugRouteRouteChildren: AuthenticatedOrgOrgSlugRouteRou
       AuthenticatedOrgOrgSlugElectionsIndexRoute,
     AuthenticatedOrgOrgSlugEventsIndexRoute:
       AuthenticatedOrgOrgSlugEventsIndexRoute,
+    AuthenticatedOrgOrgSlugGovernanceIndexRoute:
+      AuthenticatedOrgOrgSlugGovernanceIndexRoute,
+    AuthenticatedOrgOrgSlugMessagesIndexRoute:
+      AuthenticatedOrgOrgSlugMessagesIndexRoute,
     AuthenticatedOrgOrgSlugTrainingIndexRoute:
       AuthenticatedOrgOrgSlugTrainingIndexRoute,
     AuthenticatedOrgOrgSlugElectionsElectionIdVoteRoute:
