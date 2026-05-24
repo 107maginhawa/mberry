@@ -42,7 +42,9 @@ import { invitationTokens } from './handlers/invite/repos/invite.schema';
 import { storedFiles } from './handlers/storage/repos/file.schema';
 
 // Phase 23-29 imports (cross-module alignment)
-import { duesFundAllocations, duesReminderSchedules, duesGatewayConfigs } from './handlers/association:member/repos/dues-payments.schema';
+import { duesFundAllocations, duesReminderSchedules, duesGatewayConfigs, duesPayments } from './handlers/association:member/repos/dues-payments.schema';
+import { duesPaymentStatusHistory } from './handlers/association:member/repos/dues-payment-status-history.schema';
+import { announcements } from './handlers/communication/repos/communication.schema';
 import { specialAssessments, specialAssessmentTargets } from './handlers/association:member/repos/special-assessments.schema';
 import { paymentTokens } from './handlers/dues/repos/payment-token.schema';
 import { chatRoomMembers, chatMessageReactions } from './handlers/comms/repos/comms.schema';
@@ -278,6 +280,10 @@ const MEMBERS: { email: string; firstName: string; lastName: string; spec: strin
   { email: 'member26@memberry.ph', firstName: 'Ramon', lastName: 'Villanueva', spec: 'General Dentistry', license: '0100026', status: 'expired' },
   // 1 resigned (voluntary departure)
   { email: 'member27@memberry.ph', firstName: 'Elena', lastName: 'Santos', spec: 'Prosthodontics', license: '0100027', status: 'resigned' },
+  // 1 deceased (terminal state — LIF-04)
+  { email: 'member28@memberry.ph', firstName: 'Gregorio', lastName: 'Padilla', spec: 'General Dentistry', license: '0100028', status: 'deceased' },
+  // 1 expelled (terminal state — disciplinary removal)
+  { email: 'member29@memberry.ph', firstName: 'Vivian', lastName: 'Ramos', spec: 'Oral Surgery', license: '0100029', status: 'expelled' },
 ];
 
 const APPLICANTS = [
@@ -612,6 +618,16 @@ async function seedMember(
     case 'pendingPayment':
       duesExpiry = ACTIVE_EXPIRY;
       dbStatus = 'pendingPayment';
+      break;
+    case 'deceased':
+      duesExpiry = ACTIVE_EXPIRY;
+      dbStatus = 'deceased';
+      break;
+    case 'expelled':
+      duesExpiry = ACTIVE_EXPIRY;
+      dbStatus = 'expelled';
+      removedAt = daysAgo(45);
+      removalReason = 'Expelled after disciplinary hearing — violations of professional ethics code';
       break;
     default:
       duesExpiry = ACTIVE_EXPIRY;
@@ -3196,6 +3212,362 @@ async function seedPrivacyBackfill(
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Phase 30: State Coverage — fill every state machine gap
+// Ensures every enum value has at least 1 record for UI testing
+// ═══════════════════════════════════════════════════════════════
+
+async function seedStateCoverage(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+  presidentPersonId: string,
+  memberPersonIds: string[],
+) {
+  console.log('  State coverage (filling enum gaps)...');
+
+  // ─── Payment States (7 missing: failed, expired, refunded, partiallyRefunded, underReview, confirmed, rejected) ──
+  try {
+    const existingPayments = await db.select().from(duesPayments).limit(1);
+    // Only seed if duesPayments table has some data (means base payments exist)
+    if (existingPayments.length > 0) {
+      const paymentStates = [
+        { status: 'failed', receiptNumber: 'STATE-FAIL-001', amount: 200000, method: 'online', paidAt: null, expiredAt: daysAgo(10), referenceNumber: 'GW-FAIL-TIMEOUT', metadata: { failureReason: 'Gateway timeout', gatewayCode: 'TIMEOUT' } },
+        { status: 'expired', receiptNumber: 'STATE-EXP-001', amount: 200000, method: 'online', paidAt: null, expiredAt: daysAgo(5), referenceNumber: null, metadata: { expiryReason: '24h payment window elapsed' } },
+        { status: 'refunded', receiptNumber: 'STATE-REF-001', amount: 200000, method: 'bankTransfer', paidAt: daysAgo(20), expiredAt: null, referenceNumber: 'REF-2025-001', metadata: { refundReason: 'Duplicate payment', refundedAt: daysAgo(15).toISOString() } },
+        { status: 'partiallyRefunded', receiptNumber: 'STATE-PREF-001', amount: 200000, method: 'gcash', paidAt: daysAgo(25), expiredAt: null, referenceNumber: 'PREF-2025-001', metadata: { partialRefundAmount: 100000, refundReason: 'Overpayment adjustment' } },
+        { status: 'underReview', receiptNumber: 'STATE-REV-001', amount: 200000, method: 'cash', paidAt: null, expiredAt: null, referenceNumber: null, proofStorageKey: 'proofs/manual-payment-001.jpg', proofFileName: 'deposit-slip.jpg', proofMimeType: 'image/jpeg' },
+        { status: 'confirmed', receiptNumber: 'STATE-CONF-001', amount: 200000, method: 'check', paidAt: daysAgo(3), expiredAt: null, referenceNumber: 'CHK-0012345', metadata: { confirmedBy: presidentPersonId, confirmNote: 'Verified via bank statement' } },
+        { status: 'rejected', receiptNumber: 'STATE-REJ-001', amount: 200000, method: 'cash', paidAt: null, expiredAt: null, referenceNumber: null, rejectionReason: 'Proof of payment is illegible — please resubmit a clear photo', proofStorageKey: 'proofs/blurry-receipt.jpg', proofFileName: 'receipt-blurry.jpg', proofMimeType: 'image/jpeg' },
+      ];
+
+      for (let i = 0; i < paymentStates.length; i++) {
+        const ps = paymentStates[i]!;
+        const personId = memberPersonIds[i % memberPersonIds.length]!;
+        const existing = await db.execute(sql`SELECT id FROM dues_payment WHERE receipt_number = ${ps.receiptNumber} LIMIT 1`);
+        if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+          await db.insert(duesPayments).values({
+            organizationId: orgId,
+            personId,
+            receiptNumber: ps.receiptNumber,
+            amount: ps.amount,
+            currency: 'PHP',
+            paymentMethod: ps.method,
+            status: ps.status,
+            referenceNumber: ps.referenceNumber,
+            paidAt: ps.paidAt,
+            expiredAt: ps.expiredAt,
+            rejectionReason: (ps as any).rejectionReason ?? null,
+            proofStorageKey: (ps as any).proofStorageKey ?? null,
+            proofFileName: (ps as any).proofFileName ?? null,
+            proofMimeType: (ps as any).proofMimeType ?? null,
+            metadata: ps.metadata ?? null,
+            recordedBy: ps.method === 'cash' || ps.method === 'check' ? presidentPersonId : null,
+          } as any);
+        }
+      }
+      console.log('    ✓ 7 payment state-coverage records (failed, expired, refunded, partiallyRefunded, underReview, confirmed, rejected)');
+    }
+  } catch (e) {
+    console.log(`    (payment state coverage failed: ${(e as Error).message?.slice(0, 100)})`);
+  }
+
+  // ─── Election States (3 missing: awaitingConfirmation, published, cancelled) ──
+  try {
+    const electionStates = [
+      { title: 'Board Election 2024 (Results Published)', status: 'published', year: 2024 },
+      { title: 'Special Election — VP Vacancy (Cancelled)', status: 'cancelled', year: 2025 },
+      { title: 'Board Election 2025 (Awaiting Confirmation)', status: 'awaitingConfirmation', year: 2025 },
+    ];
+
+    for (const e of electionStates) {
+      const existing = await db.execute(sql`SELECT id FROM election WHERE title = ${e.title} LIMIT 1`);
+      if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+        await db.execute(sql`
+          INSERT INTO election (organization_id, title, description, election_type, voting_mode, status,
+            nominations_open_at, nominations_close_at, voting_open_at, voting_close_at)
+          VALUES (${orgId}, ${e.title}, ${'State coverage seed — ' + e.status},
+            'officer'::election_type, 'online'::voting_mode, ${e.status}::election_status,
+            ${daysAgo(120)}, ${daysAgo(90)}, ${daysAgo(60)}, ${daysAgo(30)})
+        `);
+      }
+    }
+    console.log('    ✓ 3 election state-coverage records (published, cancelled, awaitingConfirmation)');
+  } catch (e) {
+    console.log(`    (election state coverage failed: ${(e as Error).message?.slice(0, 100)})`);
+  }
+
+  // ─── Event: 1 cancelled ──
+  try {
+    const existing = await db.select({ id: events.id }).from(events).where(eq(events.status, 'cancelled')).limit(1);
+    if (existing.length === 0) {
+      await db.insert(events).values({
+        organizationId: orgId,
+        title: 'Dental Health Day 2025 (Cancelled)',
+        description: 'Community outreach event cancelled due to venue unavailability.',
+        eventDate: daysAgo(30),
+        endDate: daysAgo(30),
+        location: 'Rizal Park, Manila',
+        maxCapacity: 200,
+        status: 'cancelled',
+        visibility: 'internal',
+        eventType: 'seminar',
+        createdBy: presidentPersonId,
+      } as any);
+      console.log('    ✓ 1 cancelled event');
+    }
+  } catch (e) {
+    console.log(`    (cancelled event failed: ${(e as Error).message?.slice(0, 100)})`);
+  }
+
+  // ─── Event: 1 capacity-limited (BR-27: waitlist scenario) ──
+  try {
+    const existing = await db.execute(sql`SELECT id FROM event WHERE title = 'Hands-On Composite Workshop (Full)' LIMIT 1`);
+    if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+      const [fullEvent] = await db.insert(events).values({
+        organizationId: orgId,
+        title: 'Hands-On Composite Workshop (Full)',
+        description: 'Limited capacity workshop — exercises BR-27 waitlist behavior.',
+        eventDate: daysFromNow(14),
+        endDate: daysFromNow(14),
+        location: 'PDA Training Center, Makati',
+        maxCapacity: 3,
+        status: 'published',
+        visibility: 'internal',
+        eventType: 'workshop',
+        createdBy: presidentPersonId,
+      } as any).returning({ id: events.id });
+
+      if (fullEvent) {
+        // 3 confirmed (at capacity) + 2 waitlisted
+        for (let i = 0; i < 5; i++) {
+          const personId = memberPersonIds[i]!;
+          await db.insert(eventRegistrations).values({
+            organizationId: orgId,
+            eventId: fullEvent.id,
+            personId,
+            status: i < 3 ? 'confirmed' : 'waitlisted',
+            registeredAt: daysAgo(7 - i),
+          } as any);
+        }
+        // 1 cancelled registration
+        await db.insert(eventRegistrations).values({
+          organizationId: orgId,
+          eventId: fullEvent.id,
+          personId: memberPersonIds[5]!,
+          status: 'cancelled',
+          registeredAt: daysAgo(6),
+        } as any);
+        console.log('    ✓ 1 capacity-limited event (3 confirmed, 2 waitlisted, 1 cancelled registration)');
+      }
+    }
+  } catch (e) {
+    console.log(`    (capacity event failed: ${(e as Error).message?.slice(0, 100)})`);
+  }
+
+  // ─── Training: 1 cancelled ──
+  try {
+    const existing = await db.select({ id: trainings.id }).from(trainings).where(eq(trainings.status, 'cancelled')).limit(1);
+    if (existing.length === 0) {
+      const [cancelledTraining] = await db.insert(trainings).values({
+        organizationId: orgId,
+        title: 'Advanced Prosthodontics Workshop (Cancelled)',
+        description: 'Cancelled due to insufficient enrollment.',
+        startDate: daysAgo(14),
+        endDate: daysAgo(14),
+        location: 'PDA Metro Manila Office',
+        status: 'cancelled',
+        maxParticipants: 20,
+        creditAmount: 8,
+        createdBy: presidentPersonId,
+      } as any).returning({ id: trainings.id });
+
+      // 1 cancelled enrollment (dropped)
+      if (cancelledTraining) {
+        await db.insert(trainingEnrollments).values({
+          organizationId: orgId,
+          trainingId: cancelledTraining.id,
+          personId: memberPersonIds[0]!,
+          status: 'cancelled',
+          enrolledAt: daysAgo(21),
+        } as any);
+      }
+      console.log('    ✓ 1 cancelled training + 1 cancelled enrollment');
+    }
+  } catch (e) {
+    console.log(`    (cancelled training failed: ${(e as Error).message?.slice(0, 100)})`);
+  }
+
+  // ─── Notification: failed + expired states ──
+  try {
+    const notifStates = [
+      { type: 'system.alert', status: 'failed', title: 'Failed delivery test', body: 'This notification failed to deliver via push.' },
+      { type: 'system.alert', status: 'expired', title: 'Expired notification test', body: 'This notification expired before delivery.' },
+    ];
+    for (const n of notifStates) {
+      const existing = await db.execute(sql`SELECT id FROM notification WHERE title = ${n.title} LIMIT 1`);
+      if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+        await db.insert(notifications).values({
+          organizationId: orgId,
+          recipient: memberPersonIds[0]!,
+          type: n.type,
+          channel: 'push',
+          status: n.status,
+          title: n.title,
+          body: n.body,
+        } as any);
+      }
+    }
+    console.log('    ✓ 2 notification state-coverage records (failed, expired)');
+  } catch (e) {
+    console.log(`    (notification state coverage failed: ${(e as Error).message?.slice(0, 100)})`);
+  }
+
+  // ─── Announcement: scheduledFailed state ──
+  try {
+    const existing = await db.execute(sql`SELECT id FROM announcement WHERE status = 'scheduledFailed' LIMIT 1`);
+    if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+      await db.insert(announcements).values({
+        organizationId: orgId,
+        authorId: presidentPersonId,
+        title: 'System Maintenance Notice (Failed to Send)',
+        content: '<p>Scheduled announcement that failed to deliver.</p>',
+        audienceType: 'all',
+        visibility: 'internal',
+        status: 'scheduledFailed',
+      } as any);
+      console.log('    ✓ 1 scheduledFailed announcement');
+    }
+  } catch (e) {
+    console.log(`    (announcement state coverage failed: ${(e as Error).message?.slice(0, 100)})`);
+  }
+
+  // ─── Dues Payment Status History (audit trail for state-coverage payments) ──
+  try {
+    const statePayments = await db.execute(sql`
+      SELECT id, person_id, status FROM dues_payment
+      WHERE receipt_number LIKE 'STATE-%'
+      LIMIT 7
+    `);
+    const rows = (statePayments as any).rows ?? statePayments;
+    if (rows.length > 0) {
+      const existingHistory = await db.select().from(duesPaymentStatusHistory).limit(1);
+      if (existingHistory.length === 0) {
+        for (const p of rows) {
+          await db.insert(duesPaymentStatusHistory).values({
+            organizationId: orgId,
+            paymentId: p.id,
+            personId: p.person_id,
+            fromStatus: 'pending',
+            toStatus: p.status,
+            reason: `State coverage seed — ${p.status}`,
+            changedBy: presidentPersonId,
+          } as any);
+        }
+        console.log(`    ✓ ${rows.length} payment status history records`);
+      }
+    }
+  } catch (e) {
+    console.log(`    (payment status history failed: ${(e as Error).message?.slice(0, 100)})`);
+  }
+
+  console.log('  State coverage complete.');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 31: Missing Role Users
+// Adds: vice-president, board-member, staff, platform admin (support/viewer)
+// ═══════════════════════════════════════════════════════════════
+
+async function seedMissingRoles(
+  db: ReturnType<typeof drizzle>,
+  orgId: string,
+  regularTierId: string,
+) {
+  console.log('  Missing role users...');
+
+  const roleUsers = [
+    { email: 'vicepresident@memberry.ph', firstName: 'Miguel', lastName: 'Torres', position: 'Vice President', dbRole: 'association:admin,association:member,association:officer', spec: 'Orthodontics', license: '0300001', memberNum: 'MM-030' },
+    { email: 'boardmember@memberry.ph', firstName: 'Celeste', lastName: 'Mendoza', position: 'Board Member', dbRole: 'association:admin,association:member', spec: 'Pediatric Dentistry', license: '0300002', memberNum: 'MM-031' },
+    { email: 'staff@memberry.ph', firstName: 'Renato', lastName: 'Soriano', position: null, dbRole: 'association:member', spec: 'General Dentistry', license: '0300003', memberNum: 'MM-032' },
+  ];
+
+  for (const ru of roleUsers) {
+    // Check if user exists
+    const existingUser = await db.execute(sql`SELECT id FROM "user" WHERE email = ${ru.email} LIMIT 1`);
+    if ((existingUser as any).rows?.length > 0 || (existingUser as any).length > 0) {
+      console.log(`    (${ru.email} already exists, skipping)`);
+      continue;
+    }
+
+    // Sign up via API
+    const client = new SeedClient(orgId);
+    await client.signUp(ru.email, `${ru.firstName} ${ru.lastName}`);
+    await verifyEmail(db, ru.email);
+    await client.signIn(ru.email);
+
+    await client.createPerson({
+      firstName: ru.firstName, lastName: ru.lastName,
+      specialization: ru.spec, licenseNumber: ru.license,
+      dateOfBirth: '1978-03-15', gender: ['Celeste'].includes(ru.firstName) ? 'female' : 'male',
+    });
+
+    // Set role
+    await db.update(userTable).set({ role: ru.dbRole } as any).where(eq(userTable.id, client.userId));
+
+    // Create membership
+    await db.insert(memberships).values({
+      organizationId: orgId, personId: client.personId,
+      tierId: regularTierId, memberNumber: ru.memberNum,
+      startDate: MEMBERSHIP_START,
+      duesExpiryDate: ACTIVE_EXPIRY,
+      gracePeriodDays: 30, status: 'active', joinedAt: daysAgo(365),
+    } as any);
+
+    // Create position + officer term (if applicable)
+    if (ru.position) {
+      const existingPos = await db.select().from(positions)
+        .where(eq(positions.title, ru.position)).limit(1);
+      let pos: any;
+      if (existingPos.length === 0) {
+        [pos] = await db.insert(positions).values({
+          organizationId: orgId, title: ru.position,
+          level: 'chapter', termLengthMonths: 12, sortOrder: 10,
+        } as any).returning();
+      } else {
+        pos = existingPos[0];
+      }
+
+      await db.insert(officerTerms).values({
+        positionId: pos.id, personId: client.personId,
+        organizationId: orgId, status: 'active',
+        startDate: TERM_START, endDate: TERM_END,
+      } as any);
+    }
+
+    console.log(`    ✓ ${ru.firstName} ${ru.lastName} — ${ru.position ?? 'Staff'} (${ru.email})`);
+  }
+
+  // Platform admin roles (support + viewer) — DB-only, no API signup needed
+  const platformRoles = [
+    { email: 'support-admin@memberry.ph', name: 'Platform Support', adminRole: 'support' },
+    { email: 'viewer-admin@memberry.ph', name: 'Platform Viewer', adminRole: 'viewer' },
+  ];
+
+  for (const pr of platformRoles) {
+    const existing = await db.execute(sql`SELECT id FROM platform_admin WHERE email = ${pr.email} LIMIT 1`);
+    if ((existing as any).rows?.length === 0 || (existing as any).length === 0) {
+      await db.insert(platformAdmins).values({
+        email: pr.email,
+        name: pr.name,
+        adminRole: pr.adminRole,
+      } as any);
+      console.log(`    ✓ ${pr.name} — platform ${pr.adminRole} (${pr.email})`);
+    }
+  }
+
+  console.log('  Missing roles complete.');
+}
+
 async function main() {
   console.log('╔══════════════════════════════════════════╗');
   console.log('║   SEED SCENARIOS — API-driven seeding    ║');
@@ -3377,6 +3749,14 @@ async function main() {
   console.log('\nPhase 29: Privacy backfill...');
   await seedPrivacyBackfill(db, memberPersonIds);
 
+  // Phase 30: State coverage (fill all state machine gaps)
+  console.log('\nPhase 30: State coverage...');
+  await seedStateCoverage(db, orgId, president.personId, memberPersonIds);
+
+  // Phase 31: Missing role users (VP, board member, staff, platform support/viewer)
+  console.log('\nPhase 31: Missing role users...');
+  await seedMissingRoles(db, orgId, regularTierId);
+
   // Summary
   const personCount = await db.select().from(persons);
   const membershipCount = await db.select().from(memberships);
@@ -3398,12 +3778,22 @@ async function main() {
   console.log(`║  Courses:         ${String(courseCount.length).padStart(4)}                     ║`);
   console.log('╠══════════════════════════════════════════════╣');
   console.log('║  Member Status Distribution:                 ║');
-  console.log('║    Active:          16 (5 officers + 11 reg) ║');
+  console.log('║    Active:          19 (8 officers + 11 reg) ║');
   console.log('║    Grace Period:     3                       ║');
   console.log('║    Lapsed:           2                       ║');
   console.log('║    Suspended:        2                       ║');
   console.log('║    Removed:          1                       ║');
   console.log('║    Pending Payment:  2                       ║');
+  console.log('║    Resigned:         1                       ║');
+  console.log('║    Deceased:         1                       ║');
+  console.log('║    Expelled:         1                       ║');
+  console.log('╠══════════════════════════════════════════════╣');
+  console.log('║  State Coverage (Phase 30):                  ║');
+  console.log('║    Payment states:   7 (all enum values)     ║');
+  console.log('║    Election states:  3 (published/cancel/aw) ║');
+  console.log('║    Cancelled event:  1                       ║');
+  console.log('║    Waitlist event:   1 (3+2+1 regs)          ║');
+  console.log('║    Cancelled train:  1                       ║');
   console.log('╚══════════════════════════════════════════════╝');
 
   await pool.end();
