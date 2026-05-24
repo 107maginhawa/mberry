@@ -50,8 +50,8 @@ async function checkIdentity() {
   const persons = await count('person');
   const users = await count('user');
 
-  if (persons === 0) report('Identity', 'CRITICAL', 'No persons', `person table has ${persons} rows`, 'Run seed-scenarios');
-  if (users === 0) report('Identity', 'CRITICAL', 'No users', `user table has ${users} rows`, 'Run seed-scenarios');
+  if (persons === 0) report('Identity', 'CRITICAL', 'No persons', `person table has ${persons} rows`, 'Run db:seed');
+  if (users === 0) report('Identity', 'CRITICAL', 'No users', `user table has ${users} rows`, 'Run db:seed');
 
   // Orphaned users (no person) — check via email match
   try {
@@ -80,7 +80,7 @@ async function checkMembership() {
   const categories = await count('membership_category');
   const apps = await count('membership_application');
 
-  if (memberships === 0) report('Membership', 'CRITICAL', 'No memberships', '', 'Run seed-scenarios');
+  if (memberships === 0) report('Membership', 'CRITICAL', 'No memberships', '', 'Run db:seed');
 
   // Memberships with no person
   try {
@@ -105,7 +105,7 @@ async function checkDuesInvoices() {
   const invoices = await count('dues_invoice');
 
   if (invoices === 0) {
-    report('Dues/Invoices', 'CRITICAL', 'No invoices', '', 'Run seed-scenarios Phase 17');
+    report('Dues/Invoices', 'CRITICAL', 'No invoices', '', 'Run db:seed Phase 17');
     return;
   }
 
@@ -144,7 +144,7 @@ async function checkDuesPayments() {
   const payments = await count('dues_payment');
 
   if (payments === 0) {
-    report('Dues/Payments', 'CRITICAL', 'No payments', '', 'Run seed-scenarios');
+    report('Dues/Payments', 'CRITICAL', 'No payments', '', 'Run db:seed');
     return;
   }
 
@@ -186,7 +186,7 @@ async function checkDuesFunds() {
   const allocations = await count('dues_fund_allocation');
 
   if (funds === 0) {
-    report('Dues/Funds', 'HIGH', 'No funds configured', '', 'Run seed-scenarios Phase 17');
+    report('Dues/Funds', 'HIGH', 'No funds configured', '', 'Run db:seed Phase 17');
   }
 
   if (allocations === 0 && funds > 0) {
@@ -230,8 +230,8 @@ async function checkDuesConfig() {
   const gatewayConfigs = await count('dues_gateway_config');
   const reminderSchedules = await count('dues_reminder_schedule');
 
-  if (configs === 0) report('Dues/Config', 'HIGH', 'No dues configs', '', 'Run seed-scenarios Phase 17');
-  if (orgConfigs === 0) report('Dues/Config', 'HIGH', 'No org dues config', '', 'Run seed-scenarios Phase 17');
+  if (configs === 0) report('Dues/Config', 'HIGH', 'No dues configs', '', 'Run db:seed Phase 17');
+  if (orgConfigs === 0) report('Dues/Config', 'HIGH', 'No org dues config', '', 'Run db:seed Phase 17');
 
   console.log(`  ✓ Dues config: ${configs} tier configs, ${orgConfigs} org configs, ${gatewayConfigs} gateways, ${reminderSchedules} reminders`);
 }
@@ -241,7 +241,7 @@ async function checkEvents() {
   const regs = await count('event_registration');
   const checkins = await count('check_in');
 
-  if (evts === 0) report('Events', 'HIGH', 'No events', '', 'Run seed-scenarios');
+  if (evts === 0) report('Events', 'HIGH', 'No events', '', 'Run db:seed');
 
   // Registrations with no person
   if (regs > 0) {
@@ -265,7 +265,7 @@ async function checkTraining() {
   const courseEnrollments = await count('course_enrollment');
   const providers = await count('accredited_provider');
 
-  if (trainings === 0) report('Training', 'HIGH', 'No trainings', '', 'Run seed-scenarios');
+  if (trainings === 0) report('Training', 'HIGH', 'No trainings', '', 'Run db:seed');
 
   console.log(`  ✓ Training: ${trainings} trainings, ${enrollments} enrollments, ${courses} courses, ${courseEnrollments} course enrollments, ${providers} providers`);
 }
@@ -274,7 +274,7 @@ async function checkCredits() {
   const credits = await count('credit_entry');
   const cpdConfig = await count('org_cpd_config');
 
-  if (credits === 0) report('Credits', 'HIGH', 'No credit entries', '', 'Run seed-scenarios');
+  if (credits === 0) report('Credits', 'HIGH', 'No credit entries', '', 'Run db:seed');
   if (cpdConfig === 0) report('Credits', 'MEDIUM', 'No CPD config', 'CPD compliance features won\'t work', 'Run seed Phase 26');
 
   // Credits with no source_type
@@ -294,7 +294,7 @@ async function checkCertificates() {
   const certs = await count('certificate');
   const seqs = await count('org_certificate_seq');
 
-  if (certs === 0) report('Certificates', 'HIGH', 'No certificates', '', 'Run seed-scenarios');
+  if (certs === 0) report('Certificates', 'HIGH', 'No certificates', '', 'Run db:seed');
 
   // Certs with no status
   if (certs > 0) {
@@ -314,7 +314,7 @@ async function checkGovernance() {
   const positions = await count('position');
   const officers = await count('officer_term');
 
-  if (elections === 0) report('Governance', 'MEDIUM', 'No elections', '', 'Run seed-scenarios Phase 19');
+  if (elections === 0) report('Governance', 'MEDIUM', 'No elections', '', 'Run db:seed Phase 19');
 
   console.log(`  ✓ Governance: ${elections} elections, ${nominees} nominees, ${votes} votes, ${positions} positions, ${officers} officer terms`);
 }
@@ -367,7 +367,7 @@ async function checkDocuments() {
   const versions = await count('document_version');
   const accessLogs = await count('document_access_log');
 
-  if (docs === 0) report('Documents', 'MEDIUM', 'No documents', '', 'Run seed-scenarios');
+  if (docs === 0) report('Documents', 'MEDIUM', 'No documents', '', 'Run db:seed');
 
   console.log(`  ✓ Documents: ${docs} documents, ${versions} versions, ${accessLogs} access logs`);
 }
