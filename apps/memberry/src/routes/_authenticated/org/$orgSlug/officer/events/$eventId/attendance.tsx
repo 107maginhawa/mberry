@@ -277,7 +277,6 @@ function QrScannerView({ onScan, onClose }: { onScan: (data: string) => void; on
     async function startScanner() {
       try {
         // Dynamic import — html5-qrcode is optional
-        // @ts-expect-error html5-qrcode is an optional peer dependency
         const { Html5Qrcode } = await import('html5-qrcode' /* webpackChunkName: "qr-scanner" */)
         if (!mounted || !scannerRef.current) return
 

@@ -1103,7 +1103,7 @@ async function seedCertificates(
         personId,
         trainingId: trn.id,
         certificateNumber: `CERT-2025-${String(certNum).padStart(4, '0')}`,
-        issuedAt: new Date('2025-03-01'),
+        issuedAt: new Date('2025-03-01T00:00:00Z'),
       } as any);
       certNum++;
     }

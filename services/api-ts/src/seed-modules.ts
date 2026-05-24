@@ -49,6 +49,30 @@ async function seedModules() {
   const officerId = officerPerson.id;
   const memberId = memberPerson!.id;
 
+  // ─── Profile Photos (avatars for all persons) ────────────
+  console.log('  Profile photos...');
+  const firstPerson = await db.select({ id: persons.id, avatar: persons.avatar }).from(persons).limit(1);
+  if (!firstPerson[0]?.avatar) {
+    const genderNames: Record<string, string> = {
+      Maria: 'female', Ana: 'female', Sophia: 'female', Luz: 'female', Rosa: 'female',
+      Juan: 'male', Jose: 'male', Lito: 'male', Carlos: 'male', Pedro: 'male',
+    };
+    let maleIdx = 1;
+    let femaleIdx = 1;
+    for (const p of allPersons) {
+      const gender = genderNames[(p as any).firstName] || 'male';
+      const folder = gender === 'female' ? 'women' : 'men';
+      const idx = gender === 'female' ? femaleIdx++ : maleIdx++;
+      const url = `https://randomuser.me/api/portraits/${folder}/${idx}.jpg`;
+      await db.update(persons)
+        .set({ avatar: { url } } as any)
+        .where(eq(persons.id, p.id));
+    }
+    console.log(`    ✓ ${allPersons.length} profile photos assigned`);
+  } else {
+    console.log('    (photos already seeded, skipping)');
+  }
+
   // ─── F2: Dues Config + Funds + Payments ───────────────────
   console.log('  F2: Dues & Payments...');
 
@@ -73,12 +97,22 @@ async function seedModules() {
     ]);
     console.log('    Funds: General (33%), Education (33%), Building (34%)');
 
-    // Sample payments
-    const payments = [
-      { personId: memberId, amount: 150000, status: 'completed' as const, method: 'cash' as const, receipt: 'PDA-2026-000001', paidAt: new Date('2026-01-15') },
-      { personId: officerId, amount: 150000, status: 'completed' as const, method: 'gcash' as const, receipt: 'PDA-2026-000002', paidAt: new Date('2026-02-01') },
-      { personId: memberId, amount: 150000, status: 'pending' as const, method: 'online' as const, receipt: 'PDA-2026-000003', paidAt: null },
-    ];
+    // Sample payments — spread across all available members
+    const paymentMethods: Array<'cash' | 'gcash' | 'bankTransfer' | 'online' | 'check'> = ['cash', 'gcash', 'bankTransfer', 'online', 'check'];
+    const payments = allPersons.map((p, i) => ({
+      personId: p.id,
+      amount: 150000,
+      status: (i < 4 ? 'completed' : i < 6 ? 'pending' : 'submitted') as 'completed' | 'pending' | 'submitted',
+      method: paymentMethods[i % paymentMethods.length]!,
+      receipt: `PDA-2026-${String(i + 1).padStart(6, '0')}`,
+      paidAt: i < 4 ? new Date(Date.now() - (30 + i * 10) * 86400000) : null,
+      // Payment proofs for submitted payments
+      ...(i >= 6 ? {
+        proofStorageKey: `proofs/receipt-${i + 1}.jpg`,
+        proofFileName: `payment-receipt-${i + 1}.jpg`,
+        proofMimeType: 'image/jpeg',
+      } : {}),
+    }));
 
     for (const p of payments) {
       await db.insert(duesPayments).values({
@@ -91,9 +125,14 @@ async function seedModules() {
         status: p.status,
         recordedBy: officerId,
         paidAt: p.paidAt,
+        ...(p.proofStorageKey ? {
+          proofStorageKey: p.proofStorageKey,
+          proofFileName: p.proofFileName,
+          proofMimeType: p.proofMimeType,
+        } : {}),
       });
     }
-    console.log('    Payments: 3 (2 completed, 1 pending)');
+    console.log(`    Payments: ${payments.length} (4 completed, 2 pending, ${allPersons.length - 6 > 0 ? allPersons.length - 6 : 0} submitted with proofs)`);
   } else {
     console.log('    (exists, skipping)');
   }
@@ -361,7 +400,7 @@ async function seedModules() {
   console.log('\n╔══════════════════════════════════════════╗');
   console.log('║      MODULE SEED COMPLETE                ║');
   console.log('╠══════════════════════════════════════════╣');
-  console.log('║  Dues: config + 3 funds + 3 payments    ║');
+  console.log('║  Dues: config + 3 funds + payments/member║');
   console.log('║  Membership: 4 categories               ║');
   console.log('║  Events: 3 events + 1 registration      ║');
   console.log('║  Training: 3 programs + 2 enrollments   ║');
