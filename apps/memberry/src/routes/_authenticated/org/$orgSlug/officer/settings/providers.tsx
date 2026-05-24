@@ -63,7 +63,7 @@ function ProvidersPage() {
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null)
   const [deletingProvider, setDeletingProvider] = useState<Provider | null>(null)
 
-  const { data, isLoading } = useQuery<{ data: Provider[]; total: number }>({
+  const { data, isLoading, error } = useQuery<{ data: Provider[]; total: number }>({
     queryKey: ['accredited-providers', orgId],
     queryFn: () => api.get(`/api/accredited-providers/${orgId}`),
   })
@@ -122,6 +122,27 @@ function ProvidersPage() {
           ]}
         />
         <TableSkeleton />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Accredited Providers"
+          breadcrumbs={[
+            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+            { label: 'Settings' },
+            { label: 'Providers' },
+          ]}
+        />
+        <GlassCard className="p-8">
+          <EmptyState
+            headline="Failed to load providers"
+            description="There was an error loading accredited providers. Please try again."
+          />
+        </GlassCard>
       </div>
     )
   }
