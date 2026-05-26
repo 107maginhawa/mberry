@@ -3,7 +3,7 @@ import { UnauthorizedError, ValidationError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import type { JobScheduler } from '@/core/jobs';
 import { certificates } from './repos/certificates.schema';
-import { getNextCertificateNumber } from './utils/certificate-numbering';
+import { getNextCertificateNumber, reserveCertificateRange } from './utils/certificate-numbering';
 import { renderCertificateHtml, type CertificateTemplateData, type OrgBranding } from './utils/certificate-template';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -28,14 +28,48 @@ export async function bulkIssueCertificates(ctx: Context): Promise<Response> {
 export async function generateCertificates(db: DatabaseInstance, body: BulkIssueBody, requestedBy: string, ctx?: Context) {
   const results: Array<{ personId: string; certificateNumber: string; pdfUrl: string | null }> = [];
   const logger = ctx?.get('logger');
-  for (const personId of body.personIds) {
+  const count = body.personIds.length;
+
+  // Reserve a contiguous range of certificate sequence numbers in one query (fixes N+1)
+  const { startSeq, year, orgCode } = await reserveCertificateRange(db, body.organizationId, body.orgCode, count);
+
+  const now = new Date();
+  const certRows: Array<typeof certificates.$inferInsert> = [];
+
+  for (let i = 0; i < count; i++) {
+    const personId = body.personIds[i];
+    const seq = startSeq + i;
+    const certificateNumber = `${orgCode}-${year}-${String(seq).padStart(4, '0')}`;
+
     try {
-      const { certificateNumber } = await getNextCertificateNumber(db, body.organizationId, body.orgCode);
-      const templateData: CertificateTemplateData = { certificateNumber, recipientName: personId, trainingTitle: body.trainingTitle, issuedAt: new Date(), organizationName: body.orgBranding?.orgName ?? 'Organization', certificateType: body.certificateType, creditAmount: body.creditHours, creditCategory: body.cpdActivityType };
+      const templateData: CertificateTemplateData = { certificateNumber, recipientName: personId, trainingTitle: body.trainingTitle, issuedAt: now, organizationName: body.orgBranding?.orgName ?? 'Organization', certificateType: body.certificateType, creditAmount: body.creditHours, creditCategory: body.cpdActivityType };
       renderCertificateHtml(templateData, { ...body.orgBranding, signatoryName: body.signatoryName, signatoryTitle: body.signatoryTitle });
-      await db.insert(certificates).values({ organizationId: body.organizationId, personId, trainingId: body.organizationId, certificateNumber, issuedAt: new Date(), templateId: body.templateId ?? null, signingOfficerId: body.signingOfficerId, creditHours: body.creditHours ?? null, cpdActivityType: body.cpdActivityType as any ?? null, status: 'issued', pdfUrl: null, createdBy: requestedBy, updatedBy: requestedBy });
+      certRows.push({ organizationId: body.organizationId, personId, trainingId: body.organizationId, certificateNumber, issuedAt: now, templateId: body.templateId ?? null, signingOfficerId: body.signingOfficerId, creditHours: body.creditHours ?? null, cpdActivityType: body.cpdActivityType as any ?? null, status: 'issued' as const, pdfUrl: null, createdBy: requestedBy, updatedBy: requestedBy });
       results.push({ personId, certificateNumber, pdfUrl: null });
-    } catch (err) { logger?.error({ error: err, personId }, 'Failed to issue cert'); results.push({ personId, certificateNumber: 'ERROR', pdfUrl: null }); }
+    } catch (err) {
+      logger?.error({ error: err, personId }, 'Failed to prepare cert');
+      results.push({ personId, certificateNumber: 'ERROR', pdfUrl: null });
+    }
   }
+
+  // Batch-insert all certificates in one query instead of N individual inserts
+  if (certRows.length > 0) {
+    try {
+      await db.insert(certificates).values(certRows);
+    } catch (err) {
+      logger?.error({ error: err }, 'Batch certificate insert failed, falling back to individual inserts');
+      // Fallback: insert one-by-one so partial success is possible
+      for (const row of certRows) {
+        try {
+          await db.insert(certificates).values(row);
+        } catch (individualErr) {
+          logger?.error({ error: individualErr, personId: row.personId }, 'Individual cert insert failed');
+          const idx = results.findIndex(r => r.personId === row.personId && r.certificateNumber !== 'ERROR');
+          if (idx >= 0) results[idx].certificateNumber = 'ERROR';
+        }
+      }
+    }
+  }
+
   return results;
 }
