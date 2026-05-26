@@ -8,7 +8,7 @@ export async function createEvent(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId')!;
-  const body = await ctx.req.json();
+  const body = ctx.req.valid('json');
   const repo = new EventsRepository(db);
 
   // Validate credit hours: 0.5 increments, max 40
