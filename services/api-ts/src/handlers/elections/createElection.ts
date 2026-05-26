@@ -1,38 +1,40 @@
 import type { Context } from 'hono';
-import { sql } from 'drizzle-orm';
+import { ForbiddenError, UnauthorizedError } from '@/core/errors';
+import { ElectionsRepository } from './repos/elections.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import type { Session } from '@/types/auth';
 
 export async function createElection(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
+  if (!session) throw new UnauthorizedError();
+
   const orgId = ctx.req.param('organizationId');
   const body = await ctx.req.json();
 
-  try {
-    const result = await db.execute(sql`
-      INSERT INTO election (
-        organization_id, title, type, status, voting_mode,
-        nominations_open_at, nominations_close_at,
-        voting_open_at, voting_close_at,
-        positions, created_by, updated_by
-      ) VALUES (
-        ${orgId},
-        ${body.title},
-        ${['officer', 'bylaw'].includes(body.type) ? body.type : 'officer'},
-        'draft',
-        ${body.votingMode ?? 'online'},
-        ${body.nominationsOpenAt || null},
-        ${body.nominationsCloseAt || null},
-        ${body.votingOpenAt || null},
-        ${body.votingCloseAt || null},
-        ${JSON.stringify(body.positions || [])}::jsonb,
-        ${session.user.id},
-        ${session.user.id}
-      ) RETURNING *
-    `);
-    const rows = (result as Record<string, unknown>)['rows'] as unknown[] || result;
-    return ctx.json({ data: rows[0] || result }, 201);
-  } catch (err: any) {
-    return ctx.json({ error: err.message || 'Failed to create election' }, 500);
+  // Officer authorization — only officers can create elections
+  const officerRepo = new OfficerTermRepository(db);
+  const terms = await officerRepo.findActiveByPersonAndOrg(session.user.id, orgId!);
+  if (terms.length === 0) {
+    throw new ForbiddenError('Officer access required to create elections');
   }
+
+  // Use Drizzle ORM repo instead of raw SQL to prevent SQL injection
+  const electionRepo = new ElectionsRepository(db);
+  const election = await electionRepo.create({
+    organizationId: orgId!,
+    title: body.title,
+    type: ['officer', 'bylaw'].includes(body.type) ? body.type : 'officer',
+    status: 'draft',
+    votingMode: body.votingMode ?? 'online',
+    nominationsOpenAt: body.nominationsOpenAt || null,
+    nominationsCloseAt: body.nominationsCloseAt || null,
+    votingOpenAt: body.votingOpenAt || null,
+    votingCloseAt: body.votingCloseAt || null,
+    positions: body.positions || [],
+    createdBy: session.user.id,
+    updatedBy: session.user.id,
+  });
+
+  return ctx.json({ data: election }, 201);
 }

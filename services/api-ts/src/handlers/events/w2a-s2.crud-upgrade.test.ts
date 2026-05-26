@@ -4,7 +4,7 @@ import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { createEvent } from './createEvent';
 import { updateEvent } from './updateEvent';
 import { EventsRepository } from './repos/events.repo';
-import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 const fakeEvent = createFakeEvent({
   id: 'event-1',
@@ -18,12 +18,19 @@ const fakeEvent = createFakeEvent({
 
 describe('[W2A-S2] CRUD Upgrade — createEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  const stubOfficer = () => stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('auto-generates slug from title', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
@@ -44,6 +51,7 @@ describe('[W2A-S2] CRUD Upgrade — createEvent', () => {
   });
 
   test('accepts cpdActivityType field', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
@@ -69,6 +77,7 @@ describe('[W2A-S2] CRUD Upgrade — createEvent', () => {
   });
 
   test('accepts coverImageUrl field', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
@@ -90,6 +99,7 @@ describe('[W2A-S2] CRUD Upgrade — createEvent', () => {
   });
 
   test('rejects credit amount > 40', async () => {
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
       findBySlug: async () => undefined,
@@ -109,6 +119,7 @@ describe('[W2A-S2] CRUD Upgrade — createEvent', () => {
   });
 
   test('rejects credit amount not in 0.5 increments', async () => {
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
       findBySlug: async () => undefined,
@@ -128,6 +139,7 @@ describe('[W2A-S2] CRUD Upgrade — createEvent', () => {
   });
 
   test('defaults visibility to internal', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
@@ -150,18 +162,22 @@ describe('[W2A-S2] CRUD Upgrade — createEvent', () => {
 
 describe('[W2A-S2] CRUD Upgrade — updateEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  const stubOfficer = () => stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('rejects slug change (immutable)', async () => {
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (id: string, data: any) => ({ ...fakeEvent, ...data }),
-    });
-    stubRepo(MembershipRepository, {
-      getMember: async () => ({ id: 'member-1', role: 'admin' }),
     });
 
     const ctx = makeCtx({
@@ -173,13 +189,11 @@ describe('[W2A-S2] CRUD Upgrade — updateEvent', () => {
   });
 
   test('accepts cpdActivityType and coverImageUrl update', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (id: string, data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
-    });
-    stubRepo(MembershipRepository, {
-      getMember: async () => ({ id: 'member-1', role: 'admin' }),
     });
 
     const ctx = makeCtx({
@@ -197,12 +211,10 @@ describe('[W2A-S2] CRUD Upgrade — updateEvent', () => {
   });
 
   test('validates credit hours on update', async () => {
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (id: string, data: any) => ({ ...fakeEvent, ...data }),
-    });
-    stubRepo(MembershipRepository, {
-      getMember: async () => ({ id: 'member-1', role: 'admin' }),
     });
 
     const ctx = makeCtx({

@@ -1,10 +1,13 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
-import { fakeAttendance as createFakeAttendance } from '@/test-utils/factories';
+import { fakeAttendance as createFakeAttendance, fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { listAttendance } from './listAttendance';
 import { EventsRepository } from './repos/events.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
+
+const fakeEvent = createFakeEvent({ organizationId: 'org-1' });
 
 const attendanceList = [
   createFakeAttendance({ id: 'att-1', eventId: 'evt-1', personId: 'person-1', method: 'qr', checkedInAt: new Date() }),
@@ -17,13 +20,21 @@ const fakeStats = { total: 2, qr: 1, manual: 1 };
 
 describe('listAttendance', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
+
+  const stubMembership = () => stubRepo(MembershipRepository, {
+    getMember: async () => ({ id: 'mem-1', personId: 'user-1', organizationId: 'org-1', status: 'active' }),
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('returns attendance list with stats and 200', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
       listAttendance: async () => attendanceList,
       getAttendanceStats: async () => fakeStats,
     });
@@ -39,7 +50,9 @@ describe('listAttendance', () => {
   });
 
   test('returns empty attendance list', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
       listAttendance: async () => [],
       getAttendanceStats: async () => ({ total: 0, qr: 0, manual: 0 }),
     });
@@ -54,9 +67,9 @@ describe('listAttendance', () => {
     expect(response.body.meta.total).toBe(0);
   });
 
-  test('no session does not crash (no auth in handler)', async () => {
-    // listAttendance does not access session.
+  test('throws UnauthorizedError when no session', async () => {
     mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
       listAttendance: async () => [],
       getAttendanceStats: async () => ({ total: 0, qr: 0, manual: 0 }),
     });
@@ -67,7 +80,6 @@ describe('listAttendance', () => {
       _params: { id: 'evt-1' },
     });
 
-    const response = await listAttendance(ctx);
-    expect(response.status).toBe(200);
+    await expect(listAttendance(ctx)).rejects.toThrow();
   });
 });

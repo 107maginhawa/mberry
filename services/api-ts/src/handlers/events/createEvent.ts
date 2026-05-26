@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
-import { ValidationError } from '@/core/errors';
+import { ValidationError, ForbiddenError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { generateEventSlug, ensureUniqueEventSlug } from './utils/event-slug';
 import type { Session } from '@/types/auth';
 
@@ -10,6 +11,13 @@ export async function createEvent(ctx: Context): Promise<Response> {
   const orgId = ctx.req.param('organizationId')!;
   const body = await ctx.req.json();
   const repo = new EventsRepository(db);
+
+  // Officer authorization — only officers can create events
+  const officerRepo = new OfficerTermRepository(db);
+  const terms = await officerRepo.findActiveByPersonAndOrg(session.user.id, orgId);
+  if (terms.length === 0) {
+    throw new ForbiddenError('Officer access required to create events');
+  }
 
   // Validate credit hours: 0.5 increments, max 40
   const creditAmount = body.creditAmount ?? 0;

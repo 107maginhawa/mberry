@@ -3,7 +3,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { updateEvent } from './updateEvent';
 import { EventsRepository } from './repos/events.repo';
-import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -20,19 +20,19 @@ const fakeEvent = createFakeEvent({
 
 describe('updateEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
-  let memberMocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
 
-  const stubMembership = () => stubRepo(MembershipRepository, {
-    getMember: async () => ({ id: 'mem-1', personId: 'user-1', organizationId: 'org-1', status: 'active' }),
+  const stubOfficer = () => stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('updates event and returns 200', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -49,7 +49,7 @@ describe('updateEvent', () => {
   });
 
   test('maps alternative field names (startAt/endAt/fee/locationDetails)', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
@@ -74,7 +74,7 @@ describe('updateEvent', () => {
   });
 
   test('strips unsupported fields from body', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
@@ -106,7 +106,7 @@ describe('updateEvent', () => {
   });
 
   test('throws NotFoundError for non-existent event', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => undefined,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -121,7 +121,7 @@ describe('updateEvent', () => {
   });
 
   test('throws STATUS_UPDATE_NOT_ALLOWED if status provided in body', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -136,7 +136,7 @@ describe('updateEvent', () => {
   });
 
   test('does not pass status to repo when status not in body', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
@@ -153,7 +153,7 @@ describe('updateEvent', () => {
   });
 
   test('crashes without session (no auth)', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
