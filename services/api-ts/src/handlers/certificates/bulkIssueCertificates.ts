@@ -42,13 +42,13 @@ export async function generateCertificates(db: DatabaseInstance, body: BulkIssue
     const certificateNumber = `${orgCode}-${year}-${String(seq).padStart(4, '0')}`;
 
     try {
-      const templateData: CertificateTemplateData = { certificateNumber, recipientName: personId, trainingTitle: body.trainingTitle, issuedAt: now, organizationName: (body.orgBranding as OrgBranding | undefined)?.orgName ?? 'Organization', certificateType: body.certificateType, creditAmount: body.creditHours, creditCategory: body.cpdActivityType };
-      renderCertificateHtml(templateData, { ...body.orgBranding, signatoryName: body.signatoryName ?? undefined, signatoryTitle: body.signatoryTitle ?? undefined } as OrgBranding);
+      const templateData: CertificateTemplateData = { certificateNumber, recipientName: personId ?? '', trainingTitle: body.trainingTitle ?? '', issuedAt: now, organizationName: (body.orgBranding as OrgBranding | undefined)?.orgName ?? 'Organization', certificateType: body.certificateType ?? 'attendance', creditAmount: body.creditHours, creditCategory: body.cpdActivityType };
+      renderCertificateHtml(templateData, { ...body.orgBranding, signatoryName: body.signatoryName ?? '', signatoryTitle: body.signatoryTitle ?? '' } as OrgBranding);
       certRows.push({ organizationId: body.organizationId, personId: personId!, trainingId: body.organizationId, certificateNumber, issuedAt: now, templateId: body.templateId ?? null, signingOfficerId: body.signingOfficerId, creditHours: body.creditHours ?? null, cpdActivityType: (body.cpdActivityType ?? null) as any, status: 'issued' as const, pdfUrl: null, createdBy: requestedBy, updatedBy: requestedBy });
-      results.push({ personId, certificateNumber, pdfUrl: null });
+      results.push({ personId: personId ?? '', certificateNumber, pdfUrl: null });
     } catch (err) {
       logger?.error({ error: err, personId }, 'Failed to prepare cert');
-      results.push({ personId, certificateNumber: 'ERROR', pdfUrl: null });
+      results.push({ personId: personId ?? '', certificateNumber: 'ERROR', pdfUrl: null });
     }
   }
 

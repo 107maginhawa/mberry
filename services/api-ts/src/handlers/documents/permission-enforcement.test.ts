@@ -1,33 +1,22 @@
 /**
  * Permission enforcement tests for Documents module.
  *
- * Tests authentication enforcement (401 without session) and documents
- * that the current handlers do NOT enforce org-scope or officer checks
- * (flagging these as missing security controls for future hardening).
- *
- * Current enforcement:
- * - getDocument: 401 without session (UnauthorizedError)
- * - deleteDocument: 401 without session (UnauthorizedError)
- * - archiveDocument: 401 without user (returns 401 JSON)
- * - updateDocument: 401 without session (UnauthorizedError)
- * - searchDocuments: 401 without session (UnauthorizedError)
- *
- * Missing enforcement (documented as negative test expectations):
- * - No org-scope check on getDocument (IDOR risk)
- * - No officer check on delete/archive/update
- * - No privileged access downgrade on search
+ * Tests authentication enforcement (401 without session),
+ * org-scope IDOR prevention, and officer role requirements
+ * added in Wave A auth hardening.
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDocument } from '@/test-utils/factories';
 import { DocumentRepository, DocumentAccessLogRepository } from './repos/documents.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { getDocument } from './getDocument';
 import { deleteDocument } from './deleteDocument';
 import { archiveDocument } from './archiveDocument';
 import { updateDocument } from './updateDocument';
 import { searchDocuments } from './searchDocuments';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -43,17 +32,25 @@ function stubDocRepo(doc: any) {
   });
 }
 
+function stubOfficer(isOfficer: boolean) {
+  stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => isOfficer ? [{ id: 'term-1' }] : [],
+  });
+}
+
 beforeEach(() => {
   restoreRepo(DocumentRepository);
   restoreRepo(DocumentAccessLogRepository);
+  restoreRepo(OfficerTermRepository);
 });
 
 afterEach(() => {
   restoreRepo(DocumentRepository);
   restoreRepo(DocumentAccessLogRepository);
+  restoreRepo(OfficerTermRepository);
 });
 
-// ─── getDocument: authentication enforcement ───────────
+// ─── getDocument: authentication + org-scope ─────────────
 
 describe('getDocument — authentication enforcement', () => {
   test('throws UnauthorizedError without session', async () => {
@@ -66,7 +63,7 @@ describe('getDocument — authentication enforcement', () => {
     await expect(getDocument(ctx)).rejects.toBeInstanceOf(UnauthorizedError);
   });
 
-  test('returns document when authenticated', async () => {
+  test('returns document when authenticated and same org', async () => {
     stubDocRepo(docInOrg);
 
     const ctx = makeCtx({
@@ -78,9 +75,7 @@ describe('getDocument — authentication enforcement', () => {
     expect(res.status).toBe(200);
   });
 
-  test('SECURITY GAP: cross-org access is not blocked (IDOR risk)', async () => {
-    // This test documents that the current handler does NOT check org scope.
-    // A proper handler should throw ForbiddenError here.
+  test('blocks cross-org access (IDOR prevention)', async () => {
     stubDocRepo(docOtherOrg);
 
     const ctx = makeCtx({
@@ -88,13 +83,11 @@ describe('getDocument — authentication enforcement', () => {
       _params: { documentId: 'doc-cross-org' },
     });
 
-    // Currently succeeds — handler does not check organizationId match
-    const res = await getDocument(ctx);
-    expect(res.status).toBe(200);
+    await expect(getDocument(ctx)).rejects.toBeInstanceOf(ForbiddenError);
   });
 });
 
-// ─── deleteDocument: authentication enforcement ────────
+// ─── deleteDocument: authentication + officer ────────────
 
 describe('deleteDocument — authentication enforcement', () => {
   test('throws UnauthorizedError without session', async () => {
@@ -107,8 +100,9 @@ describe('deleteDocument — authentication enforcement', () => {
     await expect(deleteDocument(ctx)).rejects.toBeInstanceOf(UnauthorizedError);
   });
 
-  test('deletes document when authenticated (no officer check)', async () => {
+  test('deletes document when officer', async () => {
     stubDocRepo(docInOrg);
+    stubOfficer(true);
 
     const ctx = makeCtx({
       organizationId: 'tenant-1',
@@ -120,7 +114,7 @@ describe('deleteDocument — authentication enforcement', () => {
   });
 });
 
-// ─── archiveDocument: authentication enforcement ───────
+// ─── archiveDocument: authentication + officer ───────────
 
 describe('archiveDocument — authentication enforcement', () => {
   test('returns 401 without user', async () => {
@@ -134,8 +128,9 @@ describe('archiveDocument — authentication enforcement', () => {
     expect(res.status).toBe(401);
   });
 
-  test('archives document when authenticated (no officer check)', async () => {
+  test('archives document when officer', async () => {
     stubDocRepo(docInOrg);
+    stubOfficer(true);
 
     const ctx = makeCtx({
       organizationId: 'tenant-1',
@@ -147,7 +142,7 @@ describe('archiveDocument — authentication enforcement', () => {
   });
 });
 
-// ─── updateDocument: authentication enforcement ────────
+// ─── updateDocument: authentication + officer ────────────
 
 describe('updateDocument — authentication enforcement', () => {
   test('throws UnauthorizedError without session', async () => {
@@ -161,8 +156,9 @@ describe('updateDocument — authentication enforcement', () => {
     await expect(updateDocument(ctx)).rejects.toBeInstanceOf(UnauthorizedError);
   });
 
-  test('updates document when authenticated (no officer check)', async () => {
+  test('updates document when officer', async () => {
     stubDocRepo(docInOrg);
+    stubOfficer(true);
 
     const ctx = makeCtx({
       organizationId: 'tenant-1',
@@ -175,7 +171,7 @@ describe('updateDocument — authentication enforcement', () => {
   });
 });
 
-// ─── searchDocuments: authentication enforcement ───────
+// ─── searchDocuments: authentication enforcement ─────────
 
 describe('searchDocuments — authentication enforcement', () => {
   test('throws UnauthorizedError without session', async () => {

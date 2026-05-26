@@ -13,10 +13,17 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeCertificate } from '@/test-utils/factories';
 import { CertificatesRepository } from './repos/certificates.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { getCertificate } from './getCertificate';
 import { generateCertificatePdf } from './generateCertificatePdf';
 import { batchGenerateCertificates } from './batchGenerateCertificates';
 import { ForbiddenError } from '@/core/errors';
+
+function stubOfficer(isOfficer: boolean) {
+  stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => isOfficer ? [{ id: 'term-1' }] : [],
+  });
+}
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -102,15 +109,15 @@ describe('generateCertificatePdf — member cannot generate for others', () => {
 // ─── getCertificate: owner-only ────────────────────────
 
 describe('getCertificate — cross-user access blocked', () => {
-  test('throws ForbiddenError when non-owner accesses certificate', async () => {
+  test('throws ForbiddenError when cross-org non-owner accesses certificate', async () => {
     stubRepo(CertificatesRepository, {
-      get: async () => otherUserCert,
+      get: async () => crossOrgCert,
     });
 
-    // user-1 trying to access other-user's cert
+    // user-1 in tenant-1 trying to access cert from other-org
     const ctx = makeCtx({
       organizationId: 'tenant-1',
-      _params: { id: 'cert-other' },
+      _params: { id: 'cert-cross-org' },
     });
 
     await expect(getCertificate(ctx)).rejects.toBeInstanceOf(ForbiddenError);
@@ -164,6 +171,7 @@ describe('batchGenerateCertificates — authentication', () => {
   });
 
   test('cross-org certificate is reported as error in batch results', async () => {
+    stubOfficer(true);
     stubRepo(CertificatesRepository, {
       get: async () => crossOrgCert,
     });
@@ -188,6 +196,7 @@ describe('batchGenerateCertificates — authentication', () => {
   });
 
   test('same-org certificate succeeds in batch', async () => {
+    stubOfficer(true);
     stubRepo(CertificatesRepository, {
       get: async () => ownedCert,
     });

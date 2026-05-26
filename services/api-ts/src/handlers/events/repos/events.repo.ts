@@ -135,15 +135,13 @@ export class EventsRepository {
 
   // Registrations
   async listRegistrations(eventId: string, opts?: { limit?: number; offset?: number }) {
-    let query = this.db
+    return this.db
       .select()
       .from(eventRegistrations)
       .where(eq(eventRegistrations.eventId, eventId))
       .orderBy(eventRegistrations.createdAt)
-      .$dynamic();
-    if (opts?.limit) query = query.limit(opts.limit);
-    if (opts?.offset) query = query.offset(opts.offset);
-    return query;
+      .limit(opts?.limit ?? 50)
+      .offset(opts?.offset ?? 0);
   }
 
   async register(data: NewEventRegistration): Promise<EventRegistration> {
@@ -166,15 +164,13 @@ export class EventsRepository {
 
   // Check-ins (attendance)
   async listAttendance(eventId: string, opts?: { limit?: number; offset?: number }) {
-    let query = this.db
+    return this.db
       .select()
       .from(checkIns)
       .where(eq(checkIns.eventId, eventId))
       .orderBy(desc(checkIns.checkedInAt))
-      .$dynamic();
-    if (opts?.limit) query = query.limit(opts.limit);
-    if (opts?.offset) query = query.offset(opts.offset);
-    return query;
+      .limit(opts?.limit ?? 50)
+      .offset(opts?.offset ?? 0);
   }
 
   async checkIn(data: NewCheckIn): Promise<CheckIn> {

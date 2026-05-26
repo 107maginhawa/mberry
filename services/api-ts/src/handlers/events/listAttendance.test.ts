@@ -46,7 +46,7 @@ describe('listAttendance', () => {
     const response = await listAttendance(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data).toHaveLength(2);
-    expect(response.body.meta).toEqual(fakeStats);
+    expect(response.body.meta).toEqual({ ...fakeStats, limit: 50, offset: 0 });
   });
 
   test('returns empty attendance list', async () => {
