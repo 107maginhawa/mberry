@@ -8,6 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "test": "bash ../../scripts/with-esbuild-wasm.sh vitest run",
+    "test:watch": "bash ../../scripts/with-esbuild-wasm.sh vitest",
     "test:e2e": "bunx playwright test",
     "lint": "eslint src"
   },
@@ -38,14 +40,21 @@
     "@monobase/typescript-config": "workspace:*",
     "@playwright/test": "^1.59.1",
     "@tanstack/router-plugin": "^1.132.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
+    "@vitest/coverage-v8": "^4.1.6",
+    "eslint": "^9.28.0",
     "autoprefixer": "^10.4.21",
     "bun-types": "^1.2.21",
+    "happy-dom": "^19.0.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^3",
     "typescript": "^5.9.2",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.1.5"
   }
 }
