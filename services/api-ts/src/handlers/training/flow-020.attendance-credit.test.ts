@@ -18,6 +18,7 @@ import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -99,7 +100,12 @@ describe('[AC-M09-001] Auto-credit on attendance confirmation', () => {
     restoreRepo(MembershipRepository);
     restoreRepo(OrganizationRepository);
     restoreRepo(AssociationRepository);
+    restoreRepo(OfficerTermRepository);
     stubOrgAssoc();
+    // Default officer stub — all tests assume caller is an officer
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
   });
 
   afterEach(() => {
@@ -194,7 +200,12 @@ describe('[AC-M10-002] No duplicate AUTO credits', () => {
     restoreRepo(MembershipRepository);
     restoreRepo(OrganizationRepository);
     restoreRepo(AssociationRepository);
+    restoreRepo(OfficerTermRepository);
     stubOrgAssoc();
+    // Default officer stub — all tests assume caller is an officer
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
   });
 
   afterEach(() => {
@@ -286,7 +297,12 @@ describe('[FLOW-6.3] Attendance → Credit Entry → Certificate eligibility', (
     restoreRepo(MembershipRepository);
     restoreRepo(OrganizationRepository);
     restoreRepo(AssociationRepository);
+    restoreRepo(OfficerTermRepository);
     stubOrgAssoc();
+    // Default officer stub — all tests assume caller is an officer
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
   });
 
   afterEach(() => {

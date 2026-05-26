@@ -1,8 +1,9 @@
 import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeTraining as createFakeTraining } from '@/test-utils/factories';
 import { createTraining } from './createTraining';
 import { TrainingRepository } from './repos/training.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 const fakeTraining = createFakeTraining({
   organizationId: 'org-1',
@@ -24,11 +25,19 @@ const fakeTraining = createFakeTraining({
 describe('[BR-15] createTraining', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  function stubOfficer() {
+    return stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
+  }
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('creates training and returns 201', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       create: async (data: any) => ({ ...fakeTraining, ...data }),
     });
@@ -56,6 +65,7 @@ describe('[BR-15] createTraining', () => {
   });
 
   test('sets createdBy and updatedBy from session', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
@@ -77,6 +87,7 @@ describe('[BR-15] createTraining', () => {
   });
 
   test('defaults status to draft when not provided', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
@@ -118,6 +129,7 @@ describe('[BR-15] createTraining', () => {
   // --- PRC-01: PRC accreditation fields ---
 
   test('[PRC-01] stores prcAccreditationNumber and accreditedProviderId', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },
@@ -141,6 +153,7 @@ describe('[BR-15] createTraining', () => {
   });
 
   test('[PRC-01] backward compatible — works without PRC fields', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeTraining, ...data }; },

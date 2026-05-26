@@ -9,6 +9,7 @@ import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -95,7 +96,12 @@ describe('[FLOW-02] Training Completion → Credit Award', () => {
     restoreRepo(MembershipRepository);
     restoreRepo(OrganizationRepository);
     restoreRepo(AssociationRepository);
+    restoreRepo(OfficerTermRepository);
     stubOrgAssoc();
+    // Default officer stub — all tests assume caller is an officer
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
   });
 
   afterEach(() => {

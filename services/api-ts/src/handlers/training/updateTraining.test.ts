@@ -1,8 +1,9 @@
 import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeTraining as createFakeTraining } from '@/test-utils/factories';
 import { updateTraining } from './updateTraining';
 import { TrainingRepository } from './repos/training.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 const fakeTraining = createFakeTraining({
   title: 'CPD Seminar',
@@ -16,11 +17,19 @@ const fakeTraining = createFakeTraining({
 describe('updateTraining', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  function stubOfficer() {
+    return stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
+  }
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('updates training and returns 200', async () => {
+    stubOfficer();
     const updated = { ...fakeTraining, title: 'Updated Seminar' };
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -38,6 +47,7 @@ describe('updateTraining', () => {
   });
 
   test('throws NotFoundError when training does not exist', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => undefined,
       update: async () => fakeTraining,
@@ -52,6 +62,7 @@ describe('updateTraining', () => {
   });
 
   test('maps startAt to startDate', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -68,6 +79,7 @@ describe('updateTraining', () => {
   });
 
   test('maps fee to registrationFee', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -84,6 +96,7 @@ describe('updateTraining', () => {
   });
 
   test('sets updatedBy from session', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -101,6 +114,7 @@ describe('updateTraining', () => {
   });
 
   test('throws STATUS_UPDATE_NOT_ALLOWED if status provided in body', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
       update: async (_id: string, data: any) => ({ ...fakeTraining, ...data }),
@@ -115,6 +129,7 @@ describe('updateTraining', () => {
   });
 
   test('does not pass status to repo when status not in body', async () => {
+    stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -149,6 +164,7 @@ describe('updateTraining', () => {
   // --- PRC-01: PRC accreditation fields ---
 
   test('[PRC-01] passes prcAccreditationNumber through to repo', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -166,6 +182,7 @@ describe('updateTraining', () => {
   });
 
   test('[PRC-01] passes accreditedProviderId through to repo', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -185,6 +202,7 @@ describe('updateTraining', () => {
   // --- SO-8: Regulatory approval maintenance ---
 
   test('[SO-8] updates regulatory approval status', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -206,6 +224,7 @@ describe('updateTraining', () => {
   });
 
   test('[SO-8] updates regulatory expiration date', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -226,6 +245,7 @@ describe('updateTraining', () => {
   });
 
   test('[SO-8] updates basic and regulatory fields together', async () => {
+    stubOfficer();
     let capturedData: any;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,

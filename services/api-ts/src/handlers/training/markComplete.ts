@@ -1,16 +1,27 @@
 import type { Context } from 'hono';
 import type { JobScheduler } from '@/core/jobs';
-import { NotFoundError, ConflictError } from '@/core/errors';
+import { NotFoundError, ConflictError, ForbiddenError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { getCycleForDateWithConfig, type CreditCycleConfig } from '../association:member/utils/credit-cycle';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
+import type { Session } from '@/types/auth';
 
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const trainingId = ctx.req.param('id')!;
+  const session = ctx.get('session') as Session;
+
+  // [P0-AUTH] Officer role check — only officers can award CPD credits
   const orgId = ctx.req.param('organizationId')!;
+  const officerRepo = new OfficerTermRepository(db);
+  const terms = await officerRepo.findActiveByPersonAndOrg(session.user.id, orgId);
+  if (terms.length === 0) {
+    throw new ForbiddenError('Officer access required to mark training complete');
+  }
+
+  const trainingId = ctx.req.param('id')!;
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 
