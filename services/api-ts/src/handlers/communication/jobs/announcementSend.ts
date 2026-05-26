@@ -129,19 +129,31 @@ export async function processAnnouncementSend(
     }
   }
 
-  // Email fan-out — fetch email from user table via personId mapping
+  // Email fan-out — batch-fetch emails from user table, then queue
   if (channels.email && emailService) {
     try {
       for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
         const batch = recipients.slice(i, i + BATCH_SIZE);
+        const personIds = batch.map((r) => r.personId);
+
+        // Batch-fetch all emails for this batch in one query (fixes N+1)
+        let emailMap: Map<string, string> = new Map();
+        try {
+          const emailResult = await db.execute(
+            sql`SELECT id, email FROM "user" WHERE id = ANY(${personIds})`
+          );
+          const rows = (emailResult as any).rows ?? emailResult;
+          for (const row of rows) {
+            if (row.email) emailMap.set(row.id, row.email);
+          }
+        } catch (err) {
+          console.error('Batch email lookup failed:', err);
+          continue;
+        }
+
         for (const recipient of batch) {
           try {
-            // Fetch user email via raw SQL (user table from Better-Auth, linked by person_id)
-            const emailResult = await db.execute(
-              sql`SELECT email FROM "user" WHERE id = ${recipient.personId} LIMIT 1`
-            );
-            const userEmail = (emailResult as any).rows?.[0]?.email;
-
+            const userEmail = emailMap.get(recipient.personId);
             if (userEmail) {
               await emailService.queueEmail({
                 templateTags: ['announcement'],
