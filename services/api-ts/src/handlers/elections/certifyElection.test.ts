@@ -142,6 +142,7 @@ describe('[025] Election Certification Flow', () => {
       },
     });
     stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
       findActiveByPosition: async () => undefined,
       create: async (data: any) => ({ id: 'new-term', ...data }),
     });
@@ -166,6 +167,7 @@ describe('[025] Election Certification Flow', () => {
       update: async (_id: string, data: any) => ({ ...baseElection, ...data }),
     });
     stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
       findActiveByPosition: async () => undefined,
       create: async (data: any) => {
         const term = { id: `term-${createdTerms.length}`, ...data };
@@ -207,6 +209,7 @@ describe('[025] Election Certification Flow', () => {
       update: async (_id: string, data: any) => ({ ...baseElection, ...data }),
     });
     stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
       findActiveByPosition: async (posId: string) => {
         if (posId === POSITION_PRESIDENT) return outgoingTermPres;
         if (posId === POSITION_TREASURER) return outgoingTermTreas;
@@ -247,6 +250,7 @@ describe('[025] Election Certification Flow', () => {
       update: async (_id: string, data: any) => ({ ...baseElection, ...data }),
     });
     stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
       findActiveByPosition: async (posId: string) => {
         if (posId === POSITION_PRESIDENT) return outgoingTermPres;
         return undefined; // treasurer has no outgoing
@@ -279,6 +283,9 @@ describe('[025] Election Certification Flow', () => {
     stubRepo(ElectionsRepository, {
       get: async () => ({ ...baseElection, status: 'votingOpen' }),
     });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
+    });
 
     const { certifyElection } = await import('./certifyElection');
     const ctx = makeCtx({ _params: { id: ELECTION_ID } });
@@ -296,6 +303,9 @@ describe('[025] Election Certification Flow', () => {
         { ...electedNominees[1], status: 'declined' },
       ],
     });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
+    });
 
     const { certifyElection } = await import('./certifyElection');
     const ctx = makeCtx({ _params: { id: ELECTION_ID } });
@@ -309,6 +319,7 @@ describe('[025] Election Certification Flow', () => {
     stubRepo(ElectionsRepository, {
       get: async () => undefined,
     });
+    // Note: officer check happens AFTER loading election, so no OfficerTermRepository stub needed for NotFoundError
 
     const { certifyElection } = await import('./certifyElection');
     const ctx = makeCtx({ _params: { id: 'nonexistent' } });
@@ -325,6 +336,7 @@ describe('[025] Election Certification Flow', () => {
       update: async (_id: string, data: any) => ({ ...baseElection, ...data }),
     });
     stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
       findActiveByPosition: async () => undefined, // no outgoing officer
       update: async (id: string, data: any) => {
         updatedTerms.push({ id, ...data });
@@ -352,6 +364,7 @@ describe('[025] Election Certification Flow', () => {
       update: async (_id: string, data: any) => ({ ...baseElection, ...data }),
     });
     stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
       findActiveByPosition: async (posId: string) => {
         if (posId === POSITION_PRESIDENT) return outgoingTermPres;
         return undefined;
@@ -395,6 +408,7 @@ describe('[025] Cross-module flow 6.5 integrity', () => {
       update: async (_id: string, data: any) => ({ ...baseElection, ...data }),
     });
     stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
       findActiveByPosition: async () => undefined,
       create: async (data: any) => {
         const term = { id: 'new-term', ...data };
@@ -417,6 +431,9 @@ describe('[025] Cross-module flow 6.5 integrity', () => {
   test('already-published election rejects re-certification', async () => {
     stubRepo(ElectionsRepository, {
       get: async () => ({ ...baseElection, status: 'published', publishedAt: new Date() }),
+    });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-acting-officer' }],
     });
 
     const { certifyElection } = await import('./certifyElection');

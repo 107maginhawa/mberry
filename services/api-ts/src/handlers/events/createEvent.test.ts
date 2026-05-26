@@ -3,6 +3,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { createEvent } from './createEvent';
 import { EventsRepository } from './repos/events.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -22,12 +23,19 @@ const fakeEvent = createFakeEvent({
 
 describe('[BR-15] createEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  const stubOfficer = () => stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('creates event and returns 201', async () => {
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
       findBySlug: async () => undefined,
@@ -52,6 +60,7 @@ describe('[BR-15] createEvent', () => {
   });
 
   test('maps alternative field names (startAt/endAt/fee)', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
@@ -77,6 +86,7 @@ describe('[BR-15] createEvent', () => {
   });
 
   test('defaults creditBearing to false and creditAmount to 0', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
@@ -98,6 +108,7 @@ describe('[BR-15] createEvent', () => {
   });
 
   test('defaults status to draft', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },
@@ -118,6 +129,7 @@ describe('[BR-15] createEvent', () => {
   });
 
   test('accepts start date in the past (no validation in handler)', async () => {
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
       findBySlug: async () => undefined,
@@ -138,6 +150,7 @@ describe('[BR-15] createEvent', () => {
   });
 
   test('accepts end date before start date (no validation in handler)', async () => {
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => ({ ...fakeEvent, ...data }),
       findBySlug: async () => undefined,
@@ -158,6 +171,7 @@ describe('[BR-15] createEvent', () => {
   });
 
   test('accepts zero capacity (no validation in handler)', async () => {
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       create: async (data: any) => { capturedData = data; return { ...fakeEvent, ...data }; },

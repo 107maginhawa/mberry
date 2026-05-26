@@ -1,8 +1,11 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
-import { fakeRegistration as createFakeRegistration } from '@/test-utils/factories';
+import { fakeRegistration as createFakeRegistration, fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { EventsRepository } from './repos/events.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 import { listRegistrations } from './listRegistrations';
+
+const fakeEvent = createFakeEvent({ organizationId: 'org-1' });
 
 const fakeRegistration = createFakeRegistration({
   eventId: 'event-1',
@@ -12,13 +15,21 @@ const fakeRegistration = createFakeRegistration({
 
 describe('listRegistrations', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let memberMocks: ReturnType<typeof stubRepo>;
+
+  const stubMembership = () => stubRepo(MembershipRepository, {
+    getMember: async () => ({ id: 'mem-1', personId: 'user-1', organizationId: 'org-1', status: 'active' }),
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
   });
 
   test('returns registrations for event', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
       listRegistrations: async () => [fakeRegistration],
     });
 
@@ -33,7 +44,9 @@ describe('listRegistrations', () => {
   });
 
   test('returns empty array when no registrations', async () => {
+    memberMocks = stubMembership();
     mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
       listRegistrations: async () => [],
     });
 
@@ -47,8 +60,10 @@ describe('listRegistrations', () => {
   });
 
   test('uses event ID from path params', async () => {
+    memberMocks = stubMembership();
     let capturedEventId: string | undefined;
     mocks = stubRepo(EventsRepository, {
+      get: async () => fakeEvent,
       listRegistrations: async (eventId: string) => {
         capturedEventId = eventId;
         return [];

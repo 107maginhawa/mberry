@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import { NotFoundError, ForbiddenError, BusinessLogicError, ValidationError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
-import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import type { Session } from '@/types/auth';
 
 export async function updateEvent(ctx: Context): Promise<Response> {
@@ -13,9 +13,13 @@ export async function updateEvent(ctx: Context): Promise<Response> {
 
   const existing = await repo.get(id);
   if (!existing) throw new NotFoundError('Event not found');
-  const membershipRepo = new MembershipRepository(db);
-  const membership = await membershipRepo.getMember(existing.organizationId, session.user.id);
-  if (!membership) throw new ForbiddenError('Access denied to this resource');
+
+  // Officer authorization — only officers can update events
+  const officerRepo = new OfficerTermRepository(db);
+  const terms = await officerRepo.findActiveByPersonAndOrg(session.user.id, existing.organizationId);
+  if (terms.length === 0) {
+    throw new ForbiddenError('Officer access required to update events');
+  }
 
   // Status can only be changed via dedicated endpoints (publish, cancel, complete)
   if (body.status !== undefined) {

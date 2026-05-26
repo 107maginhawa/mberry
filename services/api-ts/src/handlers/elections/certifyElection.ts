@@ -14,9 +14,10 @@
  */
 
 import type { Context } from 'hono';
-import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError, ForbiddenError, UnauthorizedError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
 import { OfficerTermRepository, TransitionChecklistRepository } from '../association:member/repos/governance.repo';
+import type { Session } from '@/types/auth';
 
 const DEFAULT_CHECKLIST_ITEMS = [
   'Hand over account credentials and passwords',
@@ -28,6 +29,9 @@ const DEFAULT_CHECKLIST_ITEMS = [
 
 export async function certifyElection(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
+  const session = ctx.get('session') as Session;
+  if (!session) throw new UnauthorizedError();
+
   const id = ctx.req.param('id')!;
 
   const electionRepo = new ElectionsRepository(db);
@@ -37,6 +41,12 @@ export async function certifyElection(ctx: Context): Promise<Response> {
   // 1. Load and validate election
   const election = await electionRepo.get(id);
   if (!election) throw new NotFoundError('Election not found');
+
+  // Officer authorization — only officers of this org can certify elections
+  const officerTerms = await termRepo.findActiveByPersonAndOrg(session.user.id, election.organizationId);
+  if (officerTerms.length === 0) {
+    throw new ForbiddenError('Officer access required to certify elections');
+  }
 
   if (election.status !== 'awaitingConfirmation') {
     throw new BusinessLogicError(
