@@ -7,6 +7,13 @@ import { MembershipRepository } from '../association:member/repos/membership.rep
 import { getCycleForDateWithConfig, type CreditCycleConfig } from '../association:member/utils/credit-cycle';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
 
+/**
+ * Fallback credit cycle defaults when no association config exists.
+ * Prefer reading from association.requiredCreditsPerCycle at runtime.
+ */
+const DEFAULT_CYCLE_PERIOD_YEARS = 2;
+const DEFAULT_REQUIRED_CREDITS = 40;
+
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const trainingId = ctx.req.param('id')!;
@@ -72,8 +79,8 @@ export async function markComplete(ctx: Context): Promise<Response> {
         const orgRepo = new OrganizationRepository(db);
         const org = await orgRepo.findById(training.organizationId);
         let cycleConfig: CreditCycleConfig = {
-          cyclePeriodYears: 2,
-          requiredCredits: 40,
+          cyclePeriodYears: DEFAULT_CYCLE_PERIOD_YEARS,
+          requiredCredits: DEFAULT_REQUIRED_CREDITS,
           carryoverEnabled: false,
         };
         if (org) {
@@ -81,8 +88,8 @@ export async function markComplete(ctx: Context): Promise<Response> {
           const assoc = await assocRepo.findById(org.associationId);
           if (assoc) {
             cycleConfig = {
-              cyclePeriodYears: assoc.creditCyclePeriod ?? 2,
-              requiredCredits: assoc.requiredCreditsPerCycle ?? 40,
+              cyclePeriodYears: assoc.creditCyclePeriod ?? DEFAULT_CYCLE_PERIOD_YEARS,
+              requiredCredits: assoc.requiredCreditsPerCycle ?? DEFAULT_REQUIRED_CREDITS,
               carryoverEnabled: assoc.carryoverEnabled ?? false,
               cycleStartMonth: assoc.cycleStartMonth,
               cycleStartDay: assoc.cycleStartDay,

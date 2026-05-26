@@ -10,6 +10,7 @@ export async function bulkCreateEventSeries(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId')!;
+  // Hand-wired route (no generated validator) — ctx.req.json() is correct here
   const body = await ctx.req.json();
   const repo = new EventsRepository(db);
 
