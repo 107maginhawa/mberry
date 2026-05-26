@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DocumentRepository } from './repos/documents.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { deleteDocument } from './deleteDocument';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 
@@ -9,14 +10,20 @@ const existingDoc = { id: 'doc-1', organizationId: 'tenant-1', title: 'Test Doc'
 describe('deleteDocument', () => {
   beforeEach(() => {
     restoreRepo(DocumentRepository);
+    restoreRepo(OfficerTermRepository);
     stubRepo(DocumentRepository, {
       findOneById: async () => existingDoc,
       deleteOneById: async () => {},
+    });
+    // Stub officer check to allow access in unit tests
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
     });
   });
 
   afterEach(() => {
     restoreRepo(DocumentRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('throws UnauthorizedError without session', async () => {
@@ -35,6 +42,9 @@ describe('deleteDocument', () => {
     stubRepo(DocumentRepository, {
       findOneById: async () => null,
       deleteOneById: async () => {},
+    });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
     });
     const ctx = makeCtx({ _params: { documentId: 'nonexistent' } });
     await expect(deleteDocument(ctx)).rejects.toBeInstanceOf(NotFoundError);

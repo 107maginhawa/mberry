@@ -13,6 +13,13 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDocument as createFakeDocument } from '@/test-utils/factories';
 import { DocumentRepository, DocumentVersionRepository, DocumentAccessLogRepository } from './repos/documents.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+
+// Stub officer check globally so all handler tests pass the new auth guards.
+// Auth enforcement is tested separately in auth-enforcement.test.ts.
+stubRepo(OfficerTermRepository, {
+  findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+});
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
 
@@ -180,7 +187,7 @@ describe('updateDocument', () => {
     });
 
     const { updateDocument } = await import('./updateDocument');
-    const ctx = makeCtx({ _params: { documentId: 'missing' }, _body: { title: 'New' } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: 'missing' }, _body: { title: 'New' } });
     const err = await updateDocument(ctx).catch((e: any) => e);
     expect(err.code).toBe('NOT_FOUND');
   });
@@ -194,6 +201,7 @@ describe('updateDocument', () => {
 
     const { updateDocument } = await import('./updateDocument');
     const ctx = makeCtx({
+      organizationId: ORG_ID,
       _params: { documentId: DOC_ID },
       _body: { title: 'Updated Title' },
     });
@@ -213,7 +221,7 @@ describe('updateDocument', () => {
     });
 
     const { updateDocument } = await import('./updateDocument');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _body: {} });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _body: {} });
     await updateDocument(ctx);
     expect(capturedId).toBe(DOC_ID);
   });
@@ -238,7 +246,7 @@ describe('archiveDocument', () => {
     });
 
     const { archiveDocument } = await import('./archiveDocument');
-    const ctx = makeCtx({ _params: { documentId: 'missing' } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: 'missing' } });
     const err = await archiveDocument(ctx).catch((e: any) => e);
     expect(err.code).toBe('NOT_FOUND');
   });
@@ -249,7 +257,7 @@ describe('archiveDocument', () => {
     });
 
     const { archiveDocument } = await import('./archiveDocument');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID } });
     const err = await archiveDocument(ctx).catch((e: any) => e);
     expect(err.code).toBe('ALREADY_ARCHIVED');
   });
@@ -262,7 +270,7 @@ describe('archiveDocument', () => {
     });
 
     const { archiveDocument } = await import('./archiveDocument');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID } });
     const res = await archiveDocument(ctx);
     expect(res.status).toBe(200);
     expect((res as any).body.status).toBe('archived');
@@ -279,7 +287,7 @@ describe('archiveDocument', () => {
     });
 
     const { archiveDocument } = await import('./archiveDocument');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID } });
     await archiveDocument(ctx);
     expect(capturedPatch.status).toBe('archived');
   });
@@ -292,7 +300,7 @@ describe('archiveDocument', () => {
     });
 
     const { archiveDocument } = await import('./archiveDocument');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID } });
     const res = await archiveDocument(ctx);
     expect((res as any).body.id).toBe(DOC_ID);
   });
@@ -316,7 +324,7 @@ describe('deleteDocument', () => {
     });
 
     const { deleteDocument } = await import('./deleteDocument');
-    const ctx = makeCtx({ _params: { documentId: 'missing' } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: 'missing' } });
     const err = await deleteDocument(ctx).catch((e: any) => e);
     expect(err.code).toBe('NOT_FOUND');
   });
@@ -328,7 +336,7 @@ describe('deleteDocument', () => {
     });
 
     const { deleteDocument } = await import('./deleteDocument');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID } });
     const res = await deleteDocument(ctx);
     expect(res.status).toBe(204);
     expect((res as any).body).toBeNull();
@@ -344,7 +352,7 @@ describe('deleteDocument', () => {
     });
 
     const { deleteDocument } = await import('./deleteDocument');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID } });
     await deleteDocument(ctx);
     expect(deletedId).toBe(DOC_ID);
   });
@@ -539,7 +547,7 @@ describe('getDocumentAccessLog', () => {
     });
 
     const { getDocumentAccessLog } = await import('./getDocumentAccessLog');
-    const ctx = makeCtx({ _params: { documentId: 'missing' }, _query: {} });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: 'missing' }, _query: {} });
     const err = await getDocumentAccessLog(ctx).catch((e: any) => e);
     expect(err.code).toBe('NOT_FOUND');
   });
@@ -554,7 +562,7 @@ describe('getDocumentAccessLog', () => {
     });
 
     const { getDocumentAccessLog } = await import('./getDocumentAccessLog');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _query: {} });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _query: {} });
     const res = await getDocumentAccessLog(ctx);
     expect(res.status).toBe(200);
     const body = (res as any).body;
@@ -572,7 +580,7 @@ describe('getDocumentAccessLog', () => {
     });
 
     const { getDocumentAccessLog } = await import('./getDocumentAccessLog');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _query: { offset: '0', limit: '20' } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _query: { offset: '0', limit: '20' } });
     const res = await getDocumentAccessLog(ctx);
     const { pagination } = (res as any).body;
     expect(pagination.totalCount).toBe(40);
@@ -596,7 +604,7 @@ describe('getDocumentAccessLog', () => {
     });
 
     const { getDocumentAccessLog } = await import('./getDocumentAccessLog');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _query: {} });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _query: {} });
     await getDocumentAccessLog(ctx);
     expect(capturedLogEntry.action).toBe('view_access_log');
     expect(capturedLogEntry.personId).toBe(USER_ID);
@@ -613,7 +621,7 @@ describe('getDocumentAccessLog', () => {
     });
 
     const { getDocumentAccessLog } = await import('./getDocumentAccessLog');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _query: {} });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _query: {} });
     // Should NOT throw despite createOne failing
     const res = await getDocumentAccessLog(ctx);
     expect(res.status).toBe(200);
@@ -633,7 +641,7 @@ describe('getDocumentAccessLog', () => {
     });
 
     const { getDocumentAccessLog } = await import('./getDocumentAccessLog');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _query: {} });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _query: {} });
     const res = await getDocumentAccessLog(ctx);
     expect((res as any).body.data[0].accessedAt).toBe('2026-03-15T14:30:00.000Z');
   });
@@ -652,7 +660,7 @@ describe('getDocumentAccessLog', () => {
     });
 
     const { getDocumentAccessLog } = await import('./getDocumentAccessLog');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _query: { offset: '40', limit: '10' } });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _query: { offset: '40', limit: '10' } });
     await getDocumentAccessLog(ctx);
     expect(capturedPagination.offset).toBe(40);
     expect(capturedPagination.limit).toBe(10);

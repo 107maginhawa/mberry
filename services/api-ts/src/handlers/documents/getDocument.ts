@@ -1,7 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { GetDocumentParams } from '@/generated/openapi/validators';
-import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
 
 /**
@@ -22,6 +22,12 @@ export async function getDocument(
 
   const document = await repo.findOneById(params.documentId);
   if (!document) throw new NotFoundError('Document');
+
+  // P0-01: Org-scope check to prevent IDOR
+  const orgId = ctx.get('organizationId');
+  if (document.organizationId !== orgId) {
+    throw new ForbiddenError('Access denied to this document');
+  }
 
   return ctx.json(document, 200);
 }

@@ -426,6 +426,22 @@ export function fakeCertificate(overrides: Record<string, any> = {}) {
   };
 }
 
+// ─── Storage Files ──────────────────────────────────────
+
+export function fakeStoredFile(overrides: Record<string, any> = {}) {
+  return {
+    id: 'file-1',
+    organizationId: 'tenant-1',
+    filename: 'test-upload.pdf',
+    mimeType: 'application/pdf',
+    size: 2048,
+    status: 'uploading',
+    owner: 'user-1',
+    uploadedAt: new Date(),
+    ...overrides,
+  };
+}
+
 // ─── Notifications ──────────────────────────────────────
 
 export function fakeNotification(overrides: Record<string, any> = {}) {

@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { SearchDocumentsQuery } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * searchDocuments
@@ -21,6 +22,19 @@ export async function searchDocuments(
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
 
+  // P0-04: Override caller-provided accessLevel based on role.
+  // Members can only see 'public' and 'internal' documents.
+  // Only officers/admins can access 'privileged' or 'restricted'.
+  const PRIVILEGED_LEVELS = ['privileged', 'restricted', 'confidential'];
+  let effectiveAccessLevel = query.accessLevel;
+  if (effectiveAccessLevel && PRIVILEGED_LEVELS.includes(effectiveAccessLevel)) {
+    const officerDenied = await requireOfficerTerm(ctx);
+    if (officerDenied) {
+      // Downgrade to 'tenantOnly' — don't expose privileged docs to non-officers
+      effectiveAccessLevel = 'tenantOnly';
+    }
+  }
+
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DocumentRepository(db, ctx.get('logger'));
 
@@ -29,7 +43,7 @@ export async function searchDocuments(
       organizationId: orgId,
       ownerId: query.ownerId,
       ownerType: query.ownerType,
-      accessLevel: query.accessLevel,
+      accessLevel: effectiveAccessLevel,
       category: query.category,
       q: query.q,
     },
