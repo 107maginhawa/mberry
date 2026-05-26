@@ -146,7 +146,7 @@ function OfficerCertificates() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-[var(--color-muted)]">Status</span>
-                  <span className={`font-medium ${verifyResult.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`font-medium ${verifyResult.isValid ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
                     {verifyResult.isValid ? 'Valid' : 'Revoked'}
                   </span>
                 </div>

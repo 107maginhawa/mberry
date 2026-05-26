@@ -23,9 +23,9 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/setti
 })
 
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
-  active: { label: 'Active', className: 'bg-green-100 text-green-800' },
-  suspended: { label: 'Suspended', className: 'bg-yellow-100 text-yellow-800' },
-  expired: { label: 'Expired', className: 'bg-red-100 text-red-800' },
+  active: { label: 'Active', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)]' },
+  suspended: { label: 'Suspended', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]' },
+  expired: { label: 'Expired', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)]' },
 }
 
 function daysUntil(dateStr: string | null): number | null {
@@ -187,7 +187,7 @@ function ProvidersPage() {
               </TableRow>
             ) : (
               providers.map((p) => {
-                const badge = STATUS_BADGE[p.status] ?? { label: p.status, className: 'bg-gray-100 text-gray-800' }
+                const badge = STATUS_BADGE[p.status] ?? { label: p.status, className: 'bg-muted text-muted-foreground' }
                 const days = daysUntil(p.expiryDate)
                 return (
                   <TableRow key={p.id} className="border-t hover:bg-[var(--color-surface-warm)]">
@@ -208,7 +208,7 @@ function ProvidersPage() {
                           <span className="text-[var(--color-muted)]">—</span>
                         )}
                         {p.expiringSoon && days !== null && (
-                          <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-warning-bg)] text-[var(--color-warning)]">
                             Expiring in {days}d
                           </span>
                         )}

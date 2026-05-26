@@ -168,12 +168,12 @@ function LicenseStatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     active: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
     expired: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
-    suspended: 'bg-gray-100 text-gray-800',
+    suspended: 'bg-muted text-muted-foreground',
     revoked: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
     pending: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
   }
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${styles[status] ?? 'bg-gray-100 text-gray-700'}`}>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${styles[status] ?? 'bg-muted text-muted-foreground'}`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   )

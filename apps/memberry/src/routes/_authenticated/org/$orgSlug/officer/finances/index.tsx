@@ -51,7 +51,7 @@ function FinancesOverviewPage() {
   const pendingCount = dashboard?.pendingCount ?? 0
   const expiringCount = dashboard?.expiringThisMonth ?? 0
 
-  const rateColor = collectionRate > 80 ? 'text-emerald-600' : collectionRate > 50 ? 'text-amber-600' : 'text-red-600'
+  const rateColor = collectionRate > 80 ? 'text-[var(--color-success)]' : collectionRate > 50 ? 'text-[var(--color-warning)]' : 'text-[var(--color-error)]'
 
   const monthlyData: MonthlyData[] = metricsData?.monthlyBreakdown ?? []
 
@@ -80,7 +80,7 @@ function FinancesOverviewPage() {
             value={collectionRate}
             format={(n) => `${Math.round(n)}%`}
             icon={
-              <div className={`w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center`}>
+              <div className={`w-9 h-9 rounded-lg bg-[var(--color-success)]/10 flex items-center justify-center`}>
                 <TrendingUp className={`h-5 w-5 ${rateColor}`} />
               </div>
             }
@@ -91,8 +91,8 @@ function FinancesOverviewPage() {
             prefix="₱"
             format={(n) => n.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
             icon={
-              <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Banknote className="h-5 w-5 text-blue-600" />
+              <div className="w-9 h-9 rounded-lg bg-[var(--color-info)]/10 flex items-center justify-center">
+                <Banknote className="h-5 w-5 text-[var(--color-info)]" />
               </div>
             }
           />
@@ -102,8 +102,8 @@ function FinancesOverviewPage() {
             prefix="₱"
             format={(n) => n.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
             icon={
-              <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <AlertCircle className="h-5 w-5 text-amber-600" />
+              <div className="w-9 h-9 rounded-lg bg-[var(--color-warning)]/10 flex items-center justify-center">
+                <AlertCircle className="h-5 w-5 text-[var(--color-warning)]" />
               </div>
             }
           />
