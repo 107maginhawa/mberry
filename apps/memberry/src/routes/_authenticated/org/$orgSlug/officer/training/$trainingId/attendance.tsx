@@ -122,7 +122,7 @@ function TrainingAttendance() {
                   </div>
                   <div className="flex items-center gap-2">
                     {isPresent ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-success-bg)] text-[var(--color-success)]">
                         <UserCheck className="w-3 h-3" /> Present
                       </span>
                     ) : (

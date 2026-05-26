@@ -120,10 +120,10 @@ function EventAttendance() {
       {checkInFlash && (
         <div
           className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none ${
-            checkInFlash.success ? 'bg-green-500/20' : 'bg-red-500/20'
+            checkInFlash.success ? 'bg-[var(--color-success)]/20' : 'bg-[var(--color-error)]/20'
           } animate-pulse`}
         >
-          <div className={`text-3xl font-bold ${checkInFlash.success ? 'text-green-700' : 'text-red-700'}`}>
+          <div className={`text-3xl font-bold ${checkInFlash.success ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
             {checkInFlash.success ? `${checkInFlash.name} ✓` : checkInFlash.name}
           </div>
         </div>

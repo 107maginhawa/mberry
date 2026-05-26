@@ -16,9 +16,9 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/repor
 })
 
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
-  compliant: { label: 'Compliant', className: 'bg-green-100 text-green-800' },
-  at_risk: { label: 'At Risk', className: 'bg-yellow-100 text-yellow-800' },
-  non_compliant: { label: 'Non-Compliant', className: 'bg-red-100 text-red-800' },
+  compliant: { label: 'Compliant', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)]' },
+  at_risk: { label: 'At Risk', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]' },
+  non_compliant: { label: 'Non-Compliant', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)]' },
 }
 
 function CreditReport() {
@@ -77,25 +77,25 @@ function CreditReport() {
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-2">
-            <Button variant="ghost" onClick={() => setFilter('compliant')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'compliant' ? 'ring-2 ring-green-500' : ''}`}>
+            <Button variant="ghost" onClick={() => setFilter('compliant')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'compliant' ? 'ring-2 ring-[var(--color-success)]' : ''}`}>
               <p className="text-sm text-[var(--color-muted)]">Compliant</p>
-              <p className="text-[26px] font-display font-bold text-green-600"><CountUp value={summary.compliant} /></p>
+              <p className="text-[26px] font-display font-bold text-[var(--color-success)]"><CountUp value={summary.compliant} /></p>
             </Button>
           </GlassCard>
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-2">
-            <Button variant="ghost" onClick={() => setFilter('at_risk')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'at_risk' ? 'ring-2 ring-yellow-500' : ''}`}>
+            <Button variant="ghost" onClick={() => setFilter('at_risk')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'at_risk' ? 'ring-2 ring-[var(--color-warning)]' : ''}`}>
               <p className="text-sm text-[var(--color-muted)]">At Risk</p>
-              <p className="text-[26px] font-display font-bold text-yellow-600"><CountUp value={summary.atRisk} /></p>
+              <p className="text-[26px] font-display font-bold text-[var(--color-warning)]"><CountUp value={summary.atRisk} /></p>
             </Button>
           </GlassCard>
         </StaggerItem>
         <StaggerItem>
           <GlassCard className="p-2">
-            <Button variant="ghost" onClick={() => setFilter('non_compliant')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'non_compliant' ? 'ring-2 ring-red-500' : ''}`}>
+            <Button variant="ghost" onClick={() => setFilter('non_compliant')} className={`w-full text-left p-2 h-auto flex-col items-start ${filter === 'non_compliant' ? 'ring-2 ring-[var(--color-error)]' : ''}`}>
               <p className="text-sm text-[var(--color-muted)]">Non-Compliant</p>
-              <p className="text-[26px] font-display font-bold text-red-600"><CountUp value={summary.nonCompliant} /></p>
+              <p className="text-[26px] font-display font-bold text-[var(--color-error)]"><CountUp value={summary.nonCompliant} /></p>
             </Button>
           </GlassCard>
         </StaggerItem>
@@ -131,7 +131,7 @@ function CreditReport() {
               </TableRow>
             ) : (
               members.map((m: any) => {
-                const badge = STATUS_BADGE[m.compliance_status] ?? { label: 'Unknown', className: 'bg-gray-100 text-gray-800' }
+                const badge = STATUS_BADGE[m.compliance_status] ?? { label: 'Unknown', className: 'bg-muted text-muted-foreground' }
                 const pct = m.required > 0 ? Math.min(100, Math.round((m.earned / m.required) * 100)) : 0
                 return (
                   <TableRow key={m.person_id} className="border-t hover:bg-[var(--color-surface-warm)]">
@@ -143,7 +143,7 @@ function CreditReport() {
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-16 h-1.5 rounded-full bg-[var(--color-surface-warm)] overflow-hidden">
                           <div
-                            className={`h-full rounded-full ${pct >= 100 ? 'bg-green-500' : pct >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                            className={`h-full rounded-full ${pct >= 100 ? 'bg-[var(--color-success)]' : pct >= 50 ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-error)]'}`}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
