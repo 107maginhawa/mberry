@@ -65,10 +65,15 @@ export async function generateCertificatePdf(
 
   const html = renderCertificateHtml(templateData, branding);
 
-  return ctx.json({
-    certificateId: cert.id,
-    certificateNumber: cert.certificateNumber,
-    html,
-    contentType: 'text/html',
-  }, 200);
+  // Return HTML directly with proper content type.
+  // Clients can render this in a browser/webview and use window.print()
+  // or a downstream service (e.g. Puppeteer, wkhtmltopdf) to convert to PDF.
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Certificate-Id': cert.id,
+      'X-Certificate-Number': cert.certificateNumber,
+    },
+  });
 }
