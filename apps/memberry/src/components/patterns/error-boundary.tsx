@@ -38,10 +38,29 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 function ErrorFallback({ error, onRetry }: { error: Error | null; onRetry: () => void }) {
   const retryRef = useRef<HTMLButtonElement>(null)
+  const is401 = error?.message?.includes('401') || error?.message?.includes('Unauthorized')
 
   useEffect(() => {
+    if (is401) {
+      window.location.href = '/auth/sign-in'
+      return
+    }
     retryRef.current?.focus()
-  }, [])
+  }, [is401])
+
+  if (is401) {
+    return (
+      <div
+        role="alert"
+        className="flex flex-col items-center justify-center gap-4 py-16 px-6 text-center"
+      >
+        <AlertCircle className="h-12 w-12" style={{ color: 'var(--color-error)' }} />
+        <p className="text-body-sm text-[var(--color-text-secondary)]">
+          Session expired. Redirecting to sign in...
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -53,8 +72,6 @@ function ErrorFallback({ error, onRetry }: { error: Error | null; onRetry: () =>
       <p className="text-body-sm text-[var(--color-text-secondary)] max-w-md">
         {error?.message?.includes('fetch')
           ? 'Unable to connect. Check your internet connection and try again.'
-          : error?.message?.includes('401') || error?.message?.includes('Unauthorized')
-          ? 'Your session has expired. Please sign in again.'
           : error?.message || 'An unexpected error occurred. Please try again.'}
       </p>
       <Button

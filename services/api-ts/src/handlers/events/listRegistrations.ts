@@ -10,6 +10,8 @@ export async function listRegistrations(ctx: Context): Promise<Response> {
   if (!session) throw new UnauthorizedError();
 
   const eventId = ctx.req.param('id')!;
+  const limit = parseInt(ctx.req.query('limit') ?? '50', 10);
+  const offset = parseInt(ctx.req.query('offset') ?? '0', 10);
   const repo = new EventsRepository(db);
 
   const event = await repo.get(eventId);
@@ -20,6 +22,6 @@ export async function listRegistrations(ctx: Context): Promise<Response> {
   const membership = await membershipRepo.getMember(event.organizationId, session.user.id);
   if (!membership) throw new ForbiddenError('Access denied');
 
-  const registrations = await repo.listRegistrations(eventId);
-  return ctx.json({ data: registrations }, 200);
+  const registrations = await repo.listRegistrations(eventId, { limit, offset });
+  return ctx.json({ data: registrations, meta: { limit, offset } }, 200);
 }

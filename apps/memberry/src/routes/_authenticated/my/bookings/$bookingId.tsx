@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getBookingOptions,
@@ -20,6 +20,7 @@ import { VideoCallPanel } from '@/features/comms/components/video-call-panel'
 import { Button } from '@monobase/ui'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
 import { Loader2, ExternalLink } from 'lucide-react'
+import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 
 export const Route = createFileRoute('/_authenticated/my/bookings/$bookingId')({
   component: BookingDetailPage,
@@ -164,6 +165,16 @@ function BookingDetailPage() {
     return delta <= VIDEO_WINDOW_MS
   }, [booking])
 
+  const [showDeclineDialog, setShowDeclineDialog] = useState(false)
+
+  const handleHostAction = useCallback((action: 'confirm' | 'reject') => {
+    const m = action === 'confirm' ? confirm : reject
+    m.mutate(
+      { path: { booking: bookingId }, body: { reason: '' } },
+      { onSettled: invalidateBooking },
+    )
+  }, [confirm, reject, bookingId, invalidateBooking])
+
   if (bookingQuery.isPending) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -185,14 +196,6 @@ function BookingDetailPage() {
     : nameOf(booking.client, 'Client')
   const myDisplayName =
     [auth.user?.name].filter(Boolean).join(' ') || auth.user?.email || 'Me'
-
-  const handleHostAction = (action: 'confirm' | 'reject') => {
-    const m = action === 'confirm' ? confirm : reject
-    m.mutate(
-      { path: { booking: bookingId }, body: { reason: '' } },
-      { onSettled: invalidateBooking },
-    )
-  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -234,7 +237,7 @@ function BookingDetailPage() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => handleHostAction('reject')}
+                onClick={() => setShowDeclineDialog(true)}
                 disabled={reject.isPending}
               >
                 Decline
@@ -242,6 +245,15 @@ function BookingDetailPage() {
             </CardContent>
           </Card>
         )}
+
+        <ConfirmDialog
+          open={showDeclineDialog}
+          onOpenChange={setShowDeclineDialog}
+          title="Decline this booking?"
+          description="This will reject the booking request. The client will be notified."
+          confirmLabel="Decline"
+          onConfirm={() => handleHostAction('reject')}
+        />
 
         {checkoutUrl && (
           <Card>

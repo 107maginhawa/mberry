@@ -54,8 +54,8 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
       set(key, e.target.value),
   })
 
-  const createMutOpts = createTrainingMutation()
-  const updateMutOpts = updateTrainingMutation()
+  const createMut = useMutation(createTrainingMutation())
+  const updateMut = useMutation(updateTrainingMutation())
 
   const saveMutation = useMutation({
     mutationFn: async (status: 'draft' | 'published') => {
@@ -72,9 +72,9 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         description: form.description || undefined,
       }
       if (isEdit && trainingId) {
-        return updateMutOpts.mutationFn!({ path: { trainingId }, body: payload })
+        return updateMut.mutateAsync({ path: { trainingId }, body: payload } as any)
       } else {
-        return createMutOpts.mutationFn!({ body: payload })
+        return createMut.mutateAsync({ body: payload } as any)
       }
     },
     onSuccess: (data: any) => {

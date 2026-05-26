@@ -20,7 +20,7 @@ export async function checkIn(ctx: Context): Promise<Response> {
   }
 
   const eventId = ctx.req.param('id')!;
-  const body = ctx.req.valid('json');
+  const body = await ctx.req.json();
   const repo = new EventsRepository(db);
 
   const event = await repo.get(eventId);

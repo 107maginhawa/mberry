@@ -8,7 +8,7 @@ export async function updateEvent(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const id = ctx.req.param('id')!;
-  const body = ctx.req.valid('json');
+  const body = await ctx.req.json();
   const repo = new EventsRepository(db);
 
   const existing = await repo.get(id);

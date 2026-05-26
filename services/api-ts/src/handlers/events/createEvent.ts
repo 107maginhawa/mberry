@@ -9,7 +9,7 @@ export async function createEvent(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId')!;
-  const body = ctx.req.valid('json');
+  const body = await ctx.req.json();
   const repo = new EventsRepository(db);
 
   // Officer authorization — only officers can create events
