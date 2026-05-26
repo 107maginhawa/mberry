@@ -4,6 +4,12 @@
  * Anonymizes person PII after 30-day grace period expires.
  * Called by a scheduled job or admin action — NOT by the user directly.
  *
+ * SECURITY NOTE: This handler is NOT HTTP-exposed. It has no route
+ * registration in routes.ts or app.ts. It is invoked only by:
+ *   - The deletion cron job (deletionProcessor)
+ *   - Admin-tier internal calls
+ * If this ever gets an HTTP route, it MUST have admin-only auth.
+ *
  * Per BR-32:
  * - Payment records retained 7 years with anonymized person reference
  * - Person record kept (anonymized) so payment personId FK still resolves

@@ -1,10 +1,13 @@
-import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@monobase/ui'
 import { Calendar, Award, DollarSign, Clock, BookOpen, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { getTrainingOptions, enrollInCustomTrainingMutation } from '@monobase/sdk-ts/generated/react-query'
+import {
+  getTrainingOptions,
+  enrollInCustomTrainingMutation,
+  listMyCustomTrainingsOptions,
+} from '@monobase/sdk-ts/generated/react-query'
 import { PageHeader } from '@/components/patterns/page-header'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -50,21 +53,29 @@ function TrainingDetail() {
   const { orgId, orgSlug } = useOrg()
   const { trainingId } = Route.useParams()
   const queryClient = useQueryClient()
-  const [enrolled, setEnrolled] = useState(false)
 
   const { data: training, isLoading, error } = useQuery({
     ...getTrainingOptions({ path: { trainingId } }),
     select: (d) => ((d as RuntimeTraining)?.data ?? d) as RuntimeTraining,
   })
 
+  // Query server for enrollment status instead of using local state
+  const { data: myTrainings } = useQuery({
+    ...listMyCustomTrainingsOptions({ query: { organizationId: orgId } }),
+    select: (d) => (d as any)?.data ?? d,
+  })
+  const enrolled = Array.isArray(myTrainings)
+    ? myTrainings.some((t: any) => t.id === trainingId || t.trainingId === trainingId)
+    : false
+
   const enrollMutOpts = enrollInCustomTrainingMutation()
   const enrollMutation = useMutation({
     mutationFn: () => (enrollMutOpts.mutationFn as (...args: any[]) => any)({ path: { trainingId }, query: { organizationId: orgId } }),
     onSuccess: () => {
       toast.success('Successfully enrolled in this training!')
-      setEnrolled(true)
+      // Invalidate enrollment query to refresh enrolled state from server
+      queryClient.invalidateQueries({ queryKey: listMyCustomTrainingsOptions({ query: { organizationId: orgId } }).queryKey })
       queryClient.invalidateQueries({ queryKey: ['training-detail', trainingId] })
-      queryClient.invalidateQueries({ queryKey: ['my-trainings'] })
     },
     onError: (err: any) => {
       toast.error(err?.body?.message ?? err?.message ?? 'Enrollment failed')

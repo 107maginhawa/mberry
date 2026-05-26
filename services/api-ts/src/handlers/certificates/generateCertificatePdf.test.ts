@@ -75,12 +75,13 @@ describe('[042] generateCertificatePdf', () => {
     const res = await generateCertificatePdf(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.certificateId).toBe('cert-1');
-    expect(res.body.certificateNumber).toBe('CERT-2026-000001');
-    expect(res.body.html).toContain('Dr. Maria Santos');
-    expect(res.body.html).toContain('Advanced Implants');
-    expect(res.body.html).toContain('Certificate of Attendance');
-    expect(res.body.contentType).toBe('text/html');
+    expect(res.headers.get('Content-Type')).toBe('text/html; charset=utf-8');
+    expect(res.headers.get('X-Certificate-Id')).toBe('cert-1');
+    expect(res.headers.get('X-Certificate-Number')).toBe('CERT-2026-000001');
+    const html = await res.text();
+    expect(html).toContain('Dr. Maria Santos');
+    expect(html).toContain('Advanced Implants');
+    expect(html).toContain('Certificate of Attendance');
   });
 
   test('applies org branding (logo, color, signatory)', async () => {
@@ -103,10 +104,11 @@ describe('[042] generateCertificatePdf', () => {
     const res = await generateCertificatePdf(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.html).toContain('https://example.com/logo.png');
-    expect(res.body.html).toContain('#ff0000');
-    expect(res.body.html).toContain('Dr. President');
-    expect(res.body.html).toContain('Certificate of Completion');
+    const html = await res.text();
+    expect(html).toContain('https://example.com/logo.png');
+    expect(html).toContain('#ff0000');
+    expect(html).toContain('Dr. President');
+    expect(html).toContain('Certificate of Completion');
   });
 
   test('includes credit information when provided', async () => {
@@ -127,7 +129,8 @@ describe('[042] generateCertificatePdf', () => {
     const res = await generateCertificatePdf(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.html).toContain('8 CPD Credits');
-    expect(res.body.html).toContain('(Major)');
+    const html = await res.text();
+    expect(html).toContain('8 CPD Credits');
+    expect(html).toContain('(Major)');
   });
 });
