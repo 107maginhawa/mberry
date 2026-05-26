@@ -12,7 +12,13 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { CertificatesRepository } from './repos/certificates.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { batchGenerateCertificates } from './batchGenerateCertificates';
+
+// Stub officer check globally — auth enforcement tested in auth-enforcement.test.ts
+stubRepo(OfficerTermRepository, {
+  findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+});
 
 // ─── Fixtures ───────────────────────────────────────────
 

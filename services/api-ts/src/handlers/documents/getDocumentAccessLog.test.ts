@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDocument } from '@/test-utils/factories';
 import { DocumentRepository, DocumentAccessLogRepository } from './repos/documents.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { getDocumentAccessLog } from './getDocumentAccessLog';
 import { NotFoundError } from '@/core/errors';
 
@@ -14,16 +15,21 @@ describe('getDocumentAccessLog', () => {
   beforeEach(() => {
     restoreRepo(DocumentRepository);
     restoreRepo(DocumentAccessLogRepository);
+    restoreRepo(OfficerTermRepository);
     stubRepo(DocumentRepository, { findOneById: async () => existingDoc });
     stubRepo(DocumentAccessLogRepository, {
       findManyWithPagination: async () => ({ data: fakeLogs, totalCount: 1 }),
       createOne: async () => ({}),
+    });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
     });
   });
 
   afterEach(() => {
     restoreRepo(DocumentRepository);
     restoreRepo(DocumentAccessLogRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -42,6 +48,9 @@ describe('getDocumentAccessLog', () => {
   test('throws NotFoundError when document not found', async () => {
     restoreRepo(DocumentRepository);
     stubRepo(DocumentRepository, { findOneById: async () => null });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+    });
     const ctx = makeCtx({ _params: { documentId: 'nonexistent' }, _query: {} });
     await expect(getDocumentAccessLog(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });

@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DocumentRepository } from './repos/documents.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { archiveDocument } from './archiveDocument';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 
@@ -10,14 +11,19 @@ const archivedDoc = { ...publishedDoc, status: 'archived' };
 describe('archiveDocument', () => {
   beforeEach(() => {
     restoreRepo(DocumentRepository);
+    restoreRepo(OfficerTermRepository);
     stubRepo(DocumentRepository, {
       findOneById: async () => publishedDoc,
       updateOneById: async () => archivedDoc,
+    });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
     });
   });
 
   afterEach(() => {
     restoreRepo(DocumentRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns 401 without user', async () => {
@@ -39,6 +45,9 @@ describe('archiveDocument', () => {
       findOneById: async () => null,
       updateOneById: async () => archivedDoc,
     });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+    });
     const ctx = makeCtx({ _params: { documentId: 'nonexistent' } });
     await expect(archiveDocument(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
@@ -48,6 +57,9 @@ describe('archiveDocument', () => {
     stubRepo(DocumentRepository, {
       findOneById: async () => archivedDoc,
       updateOneById: async () => archivedDoc,
+    });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
     });
     const ctx = makeCtx({ _params: { documentId: 'doc-1' } });
     await expect(archiveDocument(ctx)).rejects.toBeInstanceOf(BusinessLogicError);

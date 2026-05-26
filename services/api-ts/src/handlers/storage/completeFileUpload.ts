@@ -40,6 +40,12 @@ export async function completeFileUpload(
     });
   }
   
+  // P0-03: Ownership check — only the file owner or admin can complete upload
+  const user = ctx.get('user');
+  if (user && file.owner !== user.id && user.role !== 'admin') {
+    throw new ForbiddenError('You can only complete your own uploads');
+  }
+
   // Check if file is in uploading status
   if (file.status !== 'uploading') {
     throw new ValidationError(`File is in ${file.status} status, cannot complete upload`);

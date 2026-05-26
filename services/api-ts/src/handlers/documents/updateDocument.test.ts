@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DocumentRepository } from './repos/documents.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { updateDocument } from './updateDocument';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 
@@ -10,14 +11,19 @@ const updatedDoc = { ...existingDoc, title: 'New Title' };
 describe('updateDocument', () => {
   beforeEach(() => {
     restoreRepo(DocumentRepository);
+    restoreRepo(OfficerTermRepository);
     stubRepo(DocumentRepository, {
       findOneById: async () => existingDoc,
       updateOneById: async () => updatedDoc,
+    });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
     });
   });
 
   afterEach(() => {
     restoreRepo(DocumentRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('throws UnauthorizedError without session', async () => {
@@ -37,6 +43,9 @@ describe('updateDocument', () => {
     stubRepo(DocumentRepository, {
       findOneById: async () => null,
       updateOneById: async () => updatedDoc,
+    });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
     });
     const ctx = makeCtx({ _params: { documentId: 'nonexistent' }, _body: {} });
     await expect(updateDocument(ctx)).rejects.toBeInstanceOf(NotFoundError);
