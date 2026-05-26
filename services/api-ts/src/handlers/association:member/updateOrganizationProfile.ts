@@ -27,7 +27,7 @@ export async function updateOrganizationProfile(
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
 
-  const existing = await db.select().from(organizations).where(eq(organizations.id, params.organizationId));
+  const existing = await db.select().from(organizations).where(eq(organizations.id, params.organizationId)).limit(1);
   if (!existing.length) throw new NotFoundError('Organization');
 
   const updated = await db

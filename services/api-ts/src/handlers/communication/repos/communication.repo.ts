@@ -177,7 +177,8 @@ export class PersonSubscriptionRepository {
 
   async findByPerson(personId: string, organizationId: string): Promise<PersonSubscription[]> {
     return this.db.select().from(personSubscriptions)
-      .where(and(eq(personSubscriptions.personId, personId), eq(personSubscriptions.organizationId, organizationId)));
+      .where(and(eq(personSubscriptions.personId, personId), eq(personSubscriptions.organizationId, organizationId)))
+      .limit(100);
   }
 
   async findByPersonAndTopic(personId: string, topicId: string): Promise<PersonSubscription | undefined> {
@@ -310,7 +311,8 @@ export class SavedSegmentRepository {
   async list(organizationId: string): Promise<SavedSegment[]> {
     return this.db.select().from(savedSegments)
       .where(eq(savedSegments.organizationId, organizationId))
-      .orderBy(desc(savedSegments.createdAt));
+      .orderBy(desc(savedSegments.createdAt))
+      .limit(100);
   }
 
   async delete(id: string, organizationId: string): Promise<void> {

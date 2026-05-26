@@ -46,7 +46,7 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
    * Find all invoices (unfiltered). Used by webhook handlers to search by metadata fields.
    */
   async findAll(): Promise<Invoice[]> {
-    return await this.db.select().from(invoices) as Invoice[];
+    return await this.db.select().from(invoices).limit(500) as Invoice[];
   }
 
   /**
@@ -110,7 +110,8 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
     const lineItems = await this.db
       .select()
       .from(invoiceLineItems)
-      .where(eq(invoiceLineItems.invoice, id));
+      .where(eq(invoiceLineItems.invoice, id))
+      .limit(100);
 
     return {
       ...invoice,
@@ -127,7 +128,8 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
     const items = await this.db
       .select()
       .from(invoiceLineItems)
-      .where(inArray(invoiceLineItems.invoice, invoiceIds));
+      .where(inArray(invoiceLineItems.invoice, invoiceIds))
+      .limit(1000);
 
     const map = new Map<string, InvoiceLineItem[]>();
     for (const item of items) {

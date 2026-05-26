@@ -12,7 +12,7 @@ export class CertificatesRepository {
     if (pagination) {
       return query.limit(pagination.limit).offset(pagination.offset);
     }
-    return query;
+    return query.limit(100);
   }
 
   async get(id: string): Promise<Certificate | undefined> {

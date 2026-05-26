@@ -33,7 +33,7 @@ export class AssociationRepository {
   }
 
   async findAll(): Promise<Association[]> {
-    return this.db.select().from(associations);
+    return this.db.select().from(associations).limit(100);
   }
 
   async update(id: string, data: Partial<Association>): Promise<Association | undefined> {
@@ -60,7 +60,7 @@ export class OrganizationRepository {
   }
 
   async findByAssociation(associationId: string): Promise<Organization[]> {
-    return this.db.select().from(organizations).where(eq(organizations.associationId, associationId));
+    return this.db.select().from(organizations).where(eq(organizations.associationId, associationId)).limit(100);
   }
 
   async findByNameInAssociation(name: string, associationId: string): Promise<Organization | undefined> {
@@ -72,9 +72,9 @@ export class OrganizationRepository {
 
   async findAll(status?: string): Promise<Organization[]> {
     if (status) {
-      return this.db.select().from(organizations).where(eq(organizations.status, status as Organization['status']));
+      return this.db.select().from(organizations).where(eq(organizations.status, status as Organization['status'])).limit(100);
     }
-    return this.db.select().from(organizations);
+    return this.db.select().from(organizations).limit(100);
   }
 
   async findBySlug(slug: string): Promise<Organization | undefined> {
@@ -119,8 +119,8 @@ export class FeatureFlagRepository {
     const conditions = [];
     if (targetType) conditions.push(eq(featureFlags.targetType, targetType));
     if (targetId) conditions.push(eq(featureFlags.targetId, targetId));
-    if (conditions.length === 0) return this.db.select().from(featureFlags);
-    return this.db.select().from(featureFlags).where(and(...conditions));
+    if (conditions.length === 0) return this.db.select().from(featureFlags).limit(100);
+    return this.db.select().from(featureFlags).where(and(...conditions)).limit(100);
   }
 
   async delete(id: string): Promise<void> {
@@ -157,7 +157,7 @@ export class PlatformAdminRepository {
   }
 
   async findAll(): Promise<PlatformAdmin[]> {
-    return this.db.select().from(platformAdmins);
+    return this.db.select().from(platformAdmins).limit(100);
   }
 
   async update(id: string, data: Partial<PlatformAdmin>): Promise<PlatformAdmin | undefined> {
@@ -170,7 +170,7 @@ export class PlatformAdminRepository {
   }
 
   async countByRole(role: string): Promise<number> {
-    const rows = await this.db.select().from(platformAdmins).where(eq(platformAdmins.role, role as PlatformAdmin['role']));
+    const rows = await this.db.select().from(platformAdmins).where(eq(platformAdmins.role, role as PlatformAdmin['role'])).limit(1000);
     return rows.length;
   }
 }

@@ -92,7 +92,8 @@ export class OfficerTermRepository {
         eq(officerTerms.personId, personId),
         eq(officerTerms.organizationId, orgId),
         eq(officerTerms.status, 'active'),
-      ));
+      ))
+      .limit(100);
     return rows;
   }
 
@@ -107,7 +108,8 @@ export class OfficerTermRepository {
         eq(officerTerms.personId, personId),
         eq(officerTerms.organizationId, orgId),
         eq(officerTerms.status, 'active'),
-      ));
+      ))
+      .limit(100);
   }
 
   async delete(id: string): Promise<void> {
@@ -127,7 +129,8 @@ export class TransitionChecklistRepository {
 
   async findByTerm(officerTermId: string): Promise<TransitionChecklist[]> {
     return this.db.select().from(transitionChecklists)
-      .where(eq(transitionChecklists.officerTermId, officerTermId));
+      .where(eq(transitionChecklists.officerTermId, officerTermId))
+      .limit(100);
   }
 
   async findPendingByTerm(officerTermId: string): Promise<TransitionChecklist[]> {
@@ -135,7 +138,8 @@ export class TransitionChecklistRepository {
       .where(and(
         eq(transitionChecklists.officerTermId, officerTermId),
         eq(transitionChecklists.status, 'pending'),
-      ));
+      ))
+      .limit(100);
   }
 
   async markCompleted(id: string, completedBy: string): Promise<TransitionChecklist | undefined> {
