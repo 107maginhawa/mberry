@@ -54,5 +54,9 @@ EXPOSE 7213
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-7213}/readyz || exit 1
 
+# Run as non-root user
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 appuser
+USER appuser
+
 # Start the application
 CMD ["bun", "run", "start"]
