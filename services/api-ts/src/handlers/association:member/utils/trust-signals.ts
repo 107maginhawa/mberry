@@ -53,7 +53,8 @@ export async function batchLoadTrustSignals(
       .where(and(eq(professionalLicenses.organizationId, organizationId), inArray(professionalLicenses.personId, personIds), eq(professionalLicenses.status, 'active'), sql`${professionalLicenses.verifiedAt} IS NOT NULL`)),
 
     db.select().from(personPrivacySettings)
-      .where(and(eq(personPrivacySettings.organizationId, organizationId), inArray(personPrivacySettings.personId, personIds))),
+      .where(and(eq(personPrivacySettings.organizationId, organizationId), inArray(personPrivacySettings.personId, personIds)))
+      .limit(1000),
   ]);
 
   const membershipMap = new Map(membershipRows.map(r => [r.personId, r.status]));

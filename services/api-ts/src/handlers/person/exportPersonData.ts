@@ -48,7 +48,7 @@ export async function exportPersonData(
   try {
     const { memberships: membershipTable } = await import('@/handlers/association:member/repos/membership.schema');
     const { eq } = await import('drizzle-orm');
-    memberships = await db.select().from(membershipTable).where(eq(membershipTable.personId, user.id));
+    memberships = await db.select().from(membershipTable).where(eq(membershipTable.personId, user.id)).limit(1000);
   } catch (e) {
     logger?.warn({ error: e }, 'Could not fetch memberships for export');
   }
@@ -58,7 +58,7 @@ export async function exportPersonData(
   try {
     const { duesPayments } = await import('@/handlers/association:member/repos/dues-payments.schema');
     const { eq } = await import('drizzle-orm');
-    payments = await db.select().from(duesPayments).where(eq(duesPayments.personId, user.id));
+    payments = await db.select().from(duesPayments).where(eq(duesPayments.personId, user.id)).limit(1000);
   } catch (e) {
     logger?.warn({ error: e }, 'Could not fetch payments for export');
   }
@@ -68,7 +68,7 @@ export async function exportPersonData(
   try {
     const { creditEntries } = await import('@/handlers/association:member/repos/credits.schema');
     const { eq } = await import('drizzle-orm');
-    credits = await db.select().from(creditEntries).where(eq(creditEntries.personId, user.id));
+    credits = await db.select().from(creditEntries).where(eq(creditEntries.personId, user.id)).limit(1000);
   } catch (e) {
     logger?.warn({ error: e }, 'Could not fetch credits for export');
   }
@@ -78,7 +78,7 @@ export async function exportPersonData(
   try {
     const { notifications: notifsTable } = await import('@/handlers/notifs/repos/notification.schema');
     const { eq } = await import('drizzle-orm');
-    notifications = await db.select().from(notifsTable).where(eq(notifsTable.recipient, user.id));
+    notifications = await db.select().from(notifsTable).where(eq(notifsTable.recipient, user.id)).limit(1000);
   } catch (e) {
     logger?.warn({ error: e }, 'Could not fetch notifications for export');
   }
@@ -88,7 +88,7 @@ export async function exportPersonData(
   try {
     const { certificates: certsTable } = await import('@/handlers/certificates/repos/certificates.schema');
     const { eq } = await import('drizzle-orm');
-    certificates = await db.select().from(certsTable).where(eq(certsTable.personId, user.id));
+    certificates = await db.select().from(certsTable).where(eq(certsTable.personId, user.id)).limit(1000);
   } catch (e) {
     logger?.warn({ error: e }, 'Could not fetch certificates for export');
   }
@@ -98,7 +98,7 @@ export async function exportPersonData(
   try {
     const { eventRegistrations } = await import('@/handlers/association:operations/repos/events.schema');
     const { eq } = await import('drizzle-orm');
-    events = await db.select().from(eventRegistrations).where(eq(eventRegistrations.personId, user.id));
+    events = await db.select().from(eventRegistrations).where(eq(eventRegistrations.personId, user.id)).limit(1000);
   } catch (e) {
     logger?.warn({ error: e }, 'Could not fetch events for export');
   }

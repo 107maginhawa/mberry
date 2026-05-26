@@ -20,7 +20,7 @@ export async function getOrganizationProfile(
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
 
-  const rows = await db.select().from(organizations).where(eq(organizations.id, params.organizationId));
+  const rows = await db.select().from(organizations).where(eq(organizations.id, params.organizationId)).limit(1);
   if (!rows.length) throw new NotFoundError('Organization');
 
   return ctx.json(rows[0], 200);
