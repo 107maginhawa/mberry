@@ -76,6 +76,9 @@ export class PayMongoAdapter implements GatewayAdapter {
     const sig = liveSig || testSig;
     if (!timestamp || !sig) return null;
 
+    // Validate hex format before Buffer.from to prevent silent truncation
+    if (!/^[0-9a-f]{64}$/i.test(sig)) return null;
+
     const payload = `${timestamp}.${body}`;
     const expected = createHmac('sha256', this.webhookSecret).update(payload).digest('hex');
 

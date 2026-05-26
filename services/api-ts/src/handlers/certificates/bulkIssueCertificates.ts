@@ -30,46 +30,49 @@ export async function generateCertificates(db: DatabaseInstance, body: BulkIssue
   const logger = ctx?.get('logger');
   const count = body.personIds.length;
 
-  // Reserve a contiguous range of certificate sequence numbers in one query (fixes N+1)
-  const { startSeq, year, orgCode } = await reserveCertificateRange(db, body.organizationId, body.orgCode, count);
+  // Wrap in transaction so FOR UPDATE in reserveCertificateRange actually locks the row
+  return await db.transaction(async (tx) => {
+    // Reserve a contiguous range of certificate sequence numbers in one query (fixes N+1)
+    const { startSeq, year, orgCode } = await reserveCertificateRange(tx, body.organizationId, body.orgCode, count);
 
-  const now = new Date();
-  const certRows: Array<typeof certificates.$inferInsert> = [];
+    const now = new Date();
+    const certRows: Array<typeof certificates.$inferInsert> = [];
 
-  for (let i = 0; i < count; i++) {
-    const personId = body.personIds[i];
-    const seq = startSeq + i;
-    const certificateNumber = `${orgCode}-${year}-${String(seq).padStart(4, '0')}`;
+    for (let i = 0; i < count; i++) {
+      const personId = body.personIds[i];
+      const seq = startSeq + i;
+      const certificateNumber = `${orgCode}-${year}-${String(seq).padStart(4, '0')}`;
 
-    try {
-      const templateData: CertificateTemplateData = { certificateNumber, recipientName: personId ?? '', trainingTitle: body.trainingTitle ?? '', issuedAt: now, organizationName: (body.orgBranding as OrgBranding | undefined)?.orgName ?? 'Organization', certificateType: body.certificateType ?? 'attendance', creditAmount: body.creditHours, creditCategory: body.cpdActivityType };
-      renderCertificateHtml(templateData, { ...body.orgBranding, signatoryName: body.signatoryName ?? '', signatoryTitle: body.signatoryTitle ?? '' } as OrgBranding);
-      certRows.push({ organizationId: body.organizationId, personId: personId!, trainingId: body.organizationId, certificateNumber, issuedAt: now, templateId: body.templateId ?? null, signingOfficerId: body.signingOfficerId, creditHours: body.creditHours ?? null, cpdActivityType: (body.cpdActivityType ?? null) as any, status: 'issued' as const, pdfUrl: null, createdBy: requestedBy, updatedBy: requestedBy });
-      results.push({ personId: personId ?? '', certificateNumber, pdfUrl: null });
-    } catch (err) {
-      logger?.error({ error: err, personId }, 'Failed to prepare cert');
-      results.push({ personId: personId ?? '', certificateNumber: 'ERROR', pdfUrl: null });
+      try {
+        const templateData: CertificateTemplateData = { certificateNumber, recipientName: personId ?? '', trainingTitle: body.trainingTitle ?? '', issuedAt: now, organizationName: (body.orgBranding as OrgBranding | undefined)?.orgName ?? 'Organization', certificateType: body.certificateType ?? 'attendance', creditAmount: body.creditHours, creditCategory: body.cpdActivityType };
+        renderCertificateHtml(templateData, { ...body.orgBranding, signatoryName: body.signatoryName ?? '', signatoryTitle: body.signatoryTitle ?? '' } as OrgBranding);
+        certRows.push({ organizationId: body.organizationId, personId: personId!, trainingId: body.organizationId, certificateNumber, issuedAt: now, templateId: body.templateId ?? null, signingOfficerId: body.signingOfficerId, creditHours: body.creditHours ?? null, cpdActivityType: (body.cpdActivityType ?? null) as any, status: 'issued' as const, pdfUrl: null, createdBy: requestedBy, updatedBy: requestedBy });
+        results.push({ personId: personId ?? '', certificateNumber, pdfUrl: null });
+      } catch (err) {
+        logger?.error({ error: err, personId }, 'Failed to prepare cert');
+        results.push({ personId: personId ?? '', certificateNumber: 'ERROR', pdfUrl: null });
+      }
     }
-  }
 
-  // Batch-insert all certificates in one query instead of N individual inserts
-  if (certRows.length > 0) {
-    try {
-      await db.insert(certificates).values(certRows);
-    } catch (err) {
-      logger?.error({ error: err }, 'Batch certificate insert failed, falling back to individual inserts');
-      // Fallback: insert one-by-one so partial success is possible
-      for (const row of certRows) {
-        try {
-          await db.insert(certificates).values(row);
-        } catch (individualErr) {
-          logger?.error({ error: individualErr, personId: row.personId }, 'Individual cert insert failed');
-          const idx = results.findIndex(r => r.personId === row.personId && r.certificateNumber !== 'ERROR');
-          if (idx >= 0) results[idx]!.certificateNumber = 'ERROR';
+    // Batch-insert all certificates in one query instead of N individual inserts
+    if (certRows.length > 0) {
+      try {
+        await tx.insert(certificates).values(certRows);
+      } catch (err) {
+        logger?.error({ error: err }, 'Batch certificate insert failed, falling back to individual inserts');
+        // Fallback: insert one-by-one so partial success is possible
+        for (const row of certRows) {
+          try {
+            await tx.insert(certificates).values(row);
+          } catch (individualErr) {
+            logger?.error({ error: individualErr, personId: row.personId }, 'Individual cert insert failed');
+            const idx = results.findIndex(r => r.personId === row.personId && r.certificateNumber !== 'ERROR');
+            if (idx >= 0) results[idx]!.certificateNumber = 'ERROR';
+          }
         }
       }
     }
-  }
 
-  return results;
+    return results;
+  });
 }

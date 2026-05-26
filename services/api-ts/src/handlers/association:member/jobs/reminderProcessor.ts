@@ -119,6 +119,26 @@ export async function processDuesReminders(ctx: ReminderContext): Promise<Remind
           if (schedule.channelEmail) channels.push('email');
           if (schedule.channelPush) channels.push('push');
 
+          // Batch-fetch all existing reminder logs for this schedule+period (fixes N+1)
+          const memberPersonIds = expiringMembers.map(m => m.personId);
+          const existingLogs = await db
+            .select({
+              personId: duesReminderLogs.personId,
+              channel: duesReminderLogs.channel,
+            })
+            .from(duesReminderLogs)
+            .where(
+              and(
+                inArray(duesReminderLogs.personId, memberPersonIds),
+                eq(duesReminderLogs.scheduleId, schedule.id),
+                eq(duesReminderLogs.periodKey, periodKey),
+                eq(duesReminderLogs.daysOffset, schedule.daysOffset),
+              ),
+            );
+
+          // Build a set of "personId:channel" keys for O(1) lookup
+          const sentSet = new Set(existingLogs.map(l => `${l.personId}:${l.channel}`));
+
           for (const member of expiringMembers) {
             // 1b. Check suppression — skip suppressed members entirely
             if (ctx.checkSuppression) {
@@ -144,20 +164,8 @@ export async function processDuesReminders(ctx: ReminderContext): Promise<Remind
 
             for (const channel of channels) {
               try {
-                // 2. Check idempotency — has this reminder already been sent?
-                const existing = await db
-                  .select()
-                  .from(duesReminderLogs)
-                  .where(
-                    and(
-                      eq(duesReminderLogs.personId, member.personId),
-                      eq(duesReminderLogs.scheduleId, schedule.id),
-                      eq(duesReminderLogs.periodKey, periodKey),
-                      eq(duesReminderLogs.daysOffset, schedule.daysOffset),
-                    ),
-                  );
-
-                if (existing.length > 0) {
+                // 2. Check idempotency — O(1) Set lookup instead of per-member query
+                if (sentSet.has(`${member.personId}:${channel}`)) {
                   result.skipped++;
                   logger?.debug({
                     msg: 'Reminder already sent, skipping',

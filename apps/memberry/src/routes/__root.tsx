@@ -63,9 +63,7 @@ function RootComponent() {
       )}
       credentials
     >
-      <div id="main-content">
-        <Outlet />
-      </div>
+      <Outlet />
       <Toaster position="top-right" richColors closeButton expand duration={4000} />
     </AuthUIProviderTanstack>
     </>

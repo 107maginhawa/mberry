@@ -69,7 +69,7 @@ function OfficerLayout() {
         role={primaryRole}
         positions={positions}
       />
-      <main id="main-content" className="flex-1 overflow-auto flex flex-col">
+      <div className="flex-1 overflow-auto flex flex-col">
         <div className="max-w-[1200px] mx-auto px-5 md:px-7 py-5 md:py-7 flex-1 w-full">
           <ErrorBoundary>
             <Outlet />
@@ -78,7 +78,7 @@ function OfficerLayout() {
         <div className="mt-auto pointer-events-none select-none" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 40%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 40%)' }}>
           <img src="/memberry-bg.png" alt="" className="w-full opacity-30" />
         </div>
-      </main>
+      </div>
     </div>
   )
 }
