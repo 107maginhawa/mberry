@@ -8,6 +8,7 @@ import { getCycleForDateWithConfig, type CreditCycleConfig } from '../associatio
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import type { Session } from '@/types/auth';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * Fallback credit cycle defaults when no association config exists.
@@ -122,6 +123,14 @@ export async function markComplete(ctx: Context): Promise<Response> {
           cycleStart: cycle.cycleStart,
           cycleEnd: cycle.cycleEnd,
         });
+        // Emit credit.awarded domain event
+        domainEvents.emit('credit.awarded', {
+          personId: body.personId,
+          organizationId: training.organizationId,
+          trainingId: training.id,
+          creditAmount: training.creditAmount,
+          activityName: training.title,
+        }).catch(() => {});
       }
       // Wave 2b: Trigger credit.issue job for pipeline processing
       const jobs = ctx.get('jobs') as JobScheduler | undefined;
@@ -144,6 +153,13 @@ export async function markComplete(ctx: Context): Promise<Response> {
       // Credit creation failure should not block marking complete
     }
   }
+
+  // Emit domain event for training completion
+  domainEvents.emit('training.completed', {
+    trainingId: training.id,
+    organizationId: training.organizationId,
+    completedBy: body.personId,
+  }).catch(() => {});
 
   return ctx.json({ data: updated }, 201);
 }

@@ -6,6 +6,7 @@
  */
 
 import type { DatabaseInstance } from '@/core/database';
+import { domainEvents } from '@/core/domain-events';
 import {
   membershipLifecycle,
   toBillingCycle,
@@ -38,5 +39,16 @@ export async function settlePayment(input: SettlePaymentInput): Promise<SettlePa
     return membershipLifecycle.settlePayment(tx, { orgId, personId, paymentId, amount });
   };
 
-  return outerTx ? execute(outerTx) : db.transaction(execute);
+  const result = outerTx ? await execute(outerTx) : await db.transaction(execute);
+
+  // Emit domain event after successful settlement (fire-and-forget)
+  domainEvents.emit('dues.payment.recorded', {
+    paymentId,
+    personId,
+    organizationId: orgId,
+    amount,
+    newExpiryDate: result.membershipExtendedTo,
+  }).catch(() => {}); // swallow — bus already logs errors
+
+  return result;
 }

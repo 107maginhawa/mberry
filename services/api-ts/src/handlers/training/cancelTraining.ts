@@ -3,6 +3,7 @@ import { NotFoundError, BusinessLogicError, ForbiddenError } from '@/core/errors
 import { TrainingRepository } from './repos/training.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import type { Session } from '@/types/auth';
+import { domainEvents } from '@/core/domain-events';
 
 export async function cancelTraining(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -30,5 +31,12 @@ export async function cancelTraining(ctx: Context): Promise<Response> {
   }
 
   const updated = await repo.update(id, { status: 'cancelled' });
+
+  domainEvents.emit('training.cancelled', {
+    trainingId: id,
+    organizationId: orgId,
+    cancelledBy: session.user.id,
+  }).catch(() => {});
+
   return ctx.json({ data: updated }, 200);
 }

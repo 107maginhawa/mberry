@@ -6,6 +6,7 @@ import { MembershipRepository } from '../membership/repos/membership.repo';
 import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { hashToken, isExpired } from './utils/token';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * claimInvite
@@ -98,6 +99,21 @@ export async function claimInvite(
     resourceId: membership.id,
     description: `Membership created for user ${user.id} in org ${invite.organizationId} via invite claim`,
   });
+
+  // Emit domain events for invite claim + membership creation
+  domainEvents.emit('invite.claimed', {
+    inviteId: invite.id,
+    personId: user.id,
+    organizationId: invite.organizationId,
+    membershipId: membership.id,
+  }).catch(() => {});
+
+  domainEvents.emit('membership.created', {
+    membershipId: membership.id,
+    personId: user.id,
+    organizationId: invite.organizationId,
+    source: 'invite',
+  }).catch(() => {});
 
   // Look up org slug for frontend redirect (non-critical — don't fail claim if lookup fails)
   let organizationSlug: string | null = null;

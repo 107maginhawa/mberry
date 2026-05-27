@@ -11,6 +11,7 @@ import {
 } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
 import { validatedDateOfBirth } from '@/utils/date';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createPerson
@@ -56,6 +57,11 @@ export async function createPerson(
     bio: body.bio || null,
     createdBy: user.id // Audit trail
   });
+
+  domainEvents.emit('person.created', {
+    personId: person.id,
+    createdBy: user.id,
+  }).catch(() => {});
 
   // Log audit trail for compliance
   const audit = ctx.get('audit');

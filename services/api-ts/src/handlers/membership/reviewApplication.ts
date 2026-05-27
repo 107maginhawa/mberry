@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { MembershipRepository } from './repos/membership.repo';
 import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 import type { Session } from '@/types/auth';
+import { domainEvents } from '@/core/domain-events';
 
 export async function reviewApplication(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -24,7 +25,7 @@ export async function reviewApplication(ctx: Context): Promise<Response> {
     const duesConfigs = await duesRepo.findMany({ organizationId: updated.organizationId, tierId: updated.tierId, status: 'active' });
     const gracePeriodDays = duesConfigs[0]?.gracePeriodDays ?? 30;
 
-    await repo.addMember({
+    const membership = await repo.addMember({
       organizationId: updated.organizationId,
       personId: updated.personId!,
       tierId: updated.tierId,
@@ -36,6 +37,13 @@ export async function reviewApplication(ctx: Context): Promise<Response> {
       createdBy: session.user.id,
       updatedBy: session.user.id,
     });
+
+    domainEvents.emit('membership.created', {
+      membershipId: membership.id,
+      personId: updated.personId!,
+      organizationId: updated.organizationId,
+      source: 'application',
+    }).catch(() => {});
   }
 
   return ctx.json({ data: updated }, 200);

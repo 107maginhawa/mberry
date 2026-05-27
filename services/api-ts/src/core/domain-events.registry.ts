@@ -7,12 +7,24 @@
  */
 
 export interface DomainEventMap {
-  'dues.payment.recorded': {
-    paymentId: string;
+  // ── Identity Context ──────────────────────────────────────────────────
+  'person.created': {
+    personId: string;
+    createdBy: string;
+  };
+
+  'person.updated': {
+    personId: string;
+    updatedBy: string;
+    updatedFields: string[];
+  };
+
+  // ── Membership Context ────────────────────────────────────────────────
+  'membership.created': {
+    membershipId: string;
     personId: string;
     organizationId: string;
-    amount: number;
-    newExpiryDate: string | null;
+    source: 'application' | 'invite' | 'manual';
   };
 
   'membership.status.changed': {
@@ -30,12 +42,69 @@ export interface DomainEventMap {
     membershipId: string;
   };
 
+  // ── Financial Context ─────────────────────────────────────────────────
+  'dues.payment.recorded': {
+    paymentId: string;
+    personId: string;
+    organizationId: string;
+    amount: number;
+    newExpiryDate: string | null;
+  };
+
+  'credit.awarded': {
+    personId: string;
+    organizationId: string;
+    trainingId: string;
+    creditAmount: number;
+    activityName: string;
+  };
+
+  // ── Booking Context ───────────────────────────────────────────────────
+  'booking.created': {
+    bookingId: string;
+    clientId: string;
+    slotId: string;
+    organizationId: string;
+  };
+
+  'booking.confirmed': {
+    bookingId: string;
+    hostId: string;
+    clientId: string;
+    organizationId: string;
+  };
+
+  'booking.rejected': {
+    bookingId: string;
+    hostId: string;
+    clientId: string;
+    organizationId: string;
+    reason: string;
+  };
+
+  'booking.cancelled': {
+    bookingId: string;
+    cancelledBy: 'host' | 'client';
+    organizationId: string;
+    reason: string;
+  };
+
+  // ── Activities Context ────────────────────────────────────────────────
+  'event.registered': {
+    eventId: string;
+    personId: string;
+    organizationId: string;
+    status: 'confirmed' | 'waitlisted';
+  };
+
+  // ── Communications Context ────────────────────────────────────────────
   'announcement.published': {
     announcementId: string;
     organizationId: string;
     publishedBy: string;
   };
 
+  // ── Training Context ──────────────────────────────────────────────────
   'training.published': {
     trainingId: string;
     organizationId: string;

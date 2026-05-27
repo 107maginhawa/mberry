@@ -11,6 +11,7 @@ import {
 import { PersonRepository } from './repos/person.repo';
 import { type PersonUpdateRequest } from './repos/person.schema';
 import { validateDateOfBirth } from '@/utils/date';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * updatePerson
@@ -87,6 +88,12 @@ export async function updatePerson(
 
   // Update person record
   const updatedPerson = await repo.updateOneById(personId, updateData);
+
+  domainEvents.emit('person.updated', {
+    personId: updatedPerson.id,
+    updatedBy: user.id,
+    updatedFields: Object.keys(updateData).filter(key => key !== 'updatedBy'),
+  }).catch(() => {});
 
   // Log audit trail for compliance
   const audit = ctx.get('audit');

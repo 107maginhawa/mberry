@@ -12,6 +12,7 @@ import {
 import { BookingRepository } from './repos/booking.repo';
 import type { BookingActionRequest } from './repos/booking.schema';
 import { getBookingUserType } from './utils/ownership';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * cancelBooking
@@ -75,6 +76,13 @@ export async function cancelBooking(
     body.reason.trim()
   );
   
+  domainEvents.emit('booking.cancelled', {
+    bookingId: cancelledBooking.id,
+    cancelledBy: userType as 'host' | 'client',
+    organizationId,
+    reason: body.reason.trim(),
+  }).catch(() => {});
+
   // Log audit trail
   logger?.info({
     bookingId: cancelledBooking.id,

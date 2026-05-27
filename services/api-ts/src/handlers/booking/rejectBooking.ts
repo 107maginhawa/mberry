@@ -12,6 +12,7 @@ import {
 import { BookingRepository } from './repos/booking.repo';
 import type { BookingActionRequest } from './repos/booking.schema';
 import { checkBookingHostOwnership } from './utils/ownership';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * rejectBooking
@@ -93,6 +94,14 @@ export async function rejectBooking(
     })
     .where(eq(timeSlots.id, booking.slot));
   
+  domainEvents.emit('booking.rejected', {
+    bookingId: rejectedBooking.id,
+    hostId: user.id,
+    clientId: booking.client,
+    organizationId,
+    reason: body.reason || 'Rejected by host',
+  }).catch(() => {});
+
   // Log audit trail
   logger?.info({
     bookingId: rejectedBooking.id,
