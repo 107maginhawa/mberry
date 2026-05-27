@@ -1,19 +1,11 @@
 /**
  * Notification Service Interface
- * Provides a thin abstraction layer over NotificationRepository for module integration
- * This service is injected into the app context for use by other modules
+ * Provides a thin abstraction layer for module integration.
+ * Depends on an injected NotifRepo — no direct handler imports.
  */
 
-import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import type { WebSocketService } from '@/core/ws';
-import { NotificationRepository } from '@/handlers/notifs/repos/notification.repo';
-import { PersonRepository } from '@/handlers/person/repos/person.repo';
-import type {
-  Notification,
-  CreateNotificationRequest,
-  InternalNotificationRequest
-} from '@/handlers/notifs/repos/notification.schema';
 
 /**
  * OneSignal configuration
@@ -31,68 +23,89 @@ export interface NotificationConfig {
   onesignal?: OneSignalConfig;
 }
 
+/** Minimal shape for notifications flowing through the service. */
+export interface NotificationEntry {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  relatedEntityType: string | null;
+  relatedEntity: string | null;
+  createdAt: Date;
+  [key: string]: unknown;
+}
+
+/** Request payload for creating a notification (public API). */
+export interface CreateNotificationRequest {
+  organizationId: string;
+  recipient: string;
+  type: 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message' | 'waitlist.promoted' | 'event.late-cancellation' | 'dunning.escalation' | 'task.overdue';
+  channel: 'email' | 'push' | 'in-app';
+  title: string;
+  message: string;
+  scheduledAt?: Date;
+  relatedEntityType?: string;
+  relatedEntity?: string;
+  consentValidated?: boolean;
+  targetApp?: string;
+}
+
+/** Extended request for internal module use. */
+export interface InternalNotificationRequest {
+  organizationId?: string;
+  recipient: string;
+  type: string;
+  title: string;
+  message: string;
+  scheduledAt?: Date;
+  relatedEntityType?: string;
+  relatedEntity?: string;
+  consentValidated?: boolean;
+  targetApp?: string;
+  data?: Record<string, unknown>;
+  channels?: Array<'email' | 'push' | 'in-app' | 'sms'>;
+  channel?: 'email' | 'push' | 'in-app';
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+}
+
+/**
+ * Repo contract the notification service delegates to.
+ * Implemented by NotificationRepository in handlers/notifs/repos/.
+ */
+export interface NotifRepo {
+  createNotificationForModule(request: CreateNotificationRequest | InternalNotificationRequest): Promise<NotificationEntry>;
+  processScheduledNotifications(): Promise<void>;
+  getUnreadCount(recipientId: string): Promise<number>;
+  cleanupExpiredNotifications(daysOld?: number): Promise<number>;
+}
+
 /**
  * Minimal notification service interface
  * Exposes only the essential features needed by other modules
  */
 export interface NotificationService {
-  /**
-   * Create a notification (for module integration)
-   * This is the primary method other modules will use
-   */
-  createNotification(request: CreateNotificationRequest | InternalNotificationRequest): Promise<Notification>;
-  
-  /**
-   * Process scheduled notifications (for job scheduler)
-   * Called periodically by the background job system
-   */
+  createNotification(request: CreateNotificationRequest | InternalNotificationRequest): Promise<NotificationEntry>;
   processScheduledNotifications(): Promise<void>;
-  
-  /**
-   * Get unread notification count (for UI badges)
-   * Returns the count of unread notifications for a recipient
-   */
   getUnreadCount(recipientId: string): Promise<number>;
-  
-  /**
-   * Clean up expired notifications (maintenance task)
-   * Called periodically to remove old notifications
-   */
   cleanupExpiredNotifications(daysOld?: number): Promise<number>;
 }
 
 /**
- * NotificationService implementation
- * Wraps NotificationRepository and sends real-time WebSocket notifications
+ * NotificationService implementation — delegates to injected NotifRepo
+ * Adds real-time WebSocket push on top of repo persistence.
  */
 class NotificationServiceImpl implements NotificationService {
-  private repo: NotificationRepository;
-  private ws: WebSocketService;
-  private logger: Logger;
-
   constructor(
-    db: DatabaseInstance,
-    logger: Logger,
-    notifConfig: NotificationConfig,
-    ws: WebSocketService
+    private repo: NotifRepo,
+    private ws: WebSocketService,
+    private logger: Logger,
   ) {
-    const personRepo = new PersonRepository(db, logger);
-    // Extract OneSignal config from notification config
-    const oneSignalConfig = notifConfig.onesignal;
-    this.repo = new NotificationRepository(db, personRepo, logger, oneSignalConfig);
-    this.ws = ws;
-    this.logger = logger;
-
-    // Bind methods after repository is created
     this.processScheduledNotifications = this.repo.processScheduledNotifications.bind(this.repo);
     this.getUnreadCount = this.repo.getUnreadCount.bind(this.repo);
     this.cleanupExpiredNotifications = this.repo.cleanupExpiredNotifications.bind(this.repo);
   }
 
-  /**
-   * Create notification and send real-time WebSocket update
-   */
-  async createNotification(request: CreateNotificationRequest | InternalNotificationRequest): Promise<Notification> {
+  async createNotification(request: CreateNotificationRequest | InternalNotificationRequest): Promise<NotificationEntry> {
     const notification = await this.repo.createNotificationForModule(request);
 
     // Send real-time notification to user's WebSocket connection
@@ -113,21 +126,18 @@ class NotificationServiceImpl implements NotificationService {
     return notification;
   }
 
-  // Method declarations
   processScheduledNotifications: NotificationService['processScheduledNotifications'];
   getUnreadCount: NotificationService['getUnreadCount'];
   cleanupExpiredNotifications: NotificationService['cleanupExpiredNotifications'];
 }
 
 /**
- * Create a notification service instance
- * Factory function following the pattern of storage and jobs services
+ * Create a notification service instance from an injected repo
  */
 export function createNotificationService(
-  db: DatabaseInstance,
+  repo: NotifRepo,
+  ws: WebSocketService,
   logger: Logger,
-  notifConfig: NotificationConfig,
-  ws: WebSocketService
 ): NotificationService {
-  return new NotificationServiceImpl(db, logger, notifConfig, ws);
+  return new NotificationServiceImpl(repo, ws, logger);
 }

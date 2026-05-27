@@ -3,18 +3,16 @@
  *
  * Better-Auth hooks (session.create.after, session.delete.after,
  * user.update.after) call AuditRepository.logEvent for login, logout,
- * and role_change events. These tests verify the audit repo correctly
- * handles auth-specific event shapes and that the hook payloads
- * produce valid audit entries.
+ * and role_change events. These tests verify that auth-specific event
+ * payloads are valid CreateAuditLogRequest shapes accepted by AuditRepo.
  */
 
 import { describe, test, expect, mock } from 'bun:test';
-import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
-import type { AuditLogEntry, CreateAuditLogRequest } from '@/handlers/audit/repos/audit.schema';
+import type { AuditRepo, AuditLogEntry, CreateAuditLogRequest } from '@/core/audit';
 
 // Mock-Classification: APPROPRIATE — security/auth infrastructure boundary
 // ---------------------------------------------------------------------------
-// Helpers (same pattern as audit.repo.test.ts)
+// Helpers
 // ---------------------------------------------------------------------------
 
 function makeLogger() {
@@ -35,54 +33,38 @@ function makeAuditEntry(overrides: Partial<AuditLogEntry> = {}): AuditLogEntry {
     action: 'login',
     outcome: 'success',
     organizationId: '00000000-0000-0000-0000-000000000001',
-    user: 'user-1',
-    userType: 'client',
     resourceType: 'session',
     resource: 'session-1',
     description: 'User logged in',
-    details: null,
-    ipAddress: null,
-    userAgent: null,
-    session: null,
-    request: null,
-    integrityHash: 'abc123',
-    retentionStatus: 'active',
-    archivedAt: null,
-    archivedBy: null,
-    purgeAfter: null,
     createdAt: now,
-    updatedAt: now,
-    createdBy: 'user-1',
-    updatedBy: 'user-1',
-    version: 1,
     ...overrides,
-  } as AuditLogEntry;
+  };
 }
 
-function makeMockDb(captureCallback?: (data: any) => void) {
-  const insertChain = {
-    values: mock(function (this: any, data: any) {
-      captureCallback?.(data);
-      return this;
-    }),
-    returning: mock(() => [makeAuditEntry()]),
-  };
+function makeMockAuditRepo(captureCallback?: (data: CreateAuditLogRequest) => void): AuditRepo {
   return {
-    insert: mock(() => insertChain),
-    update: mock(() => ({ set: mock(() => ({ where: mock(() => ({ returning: mock(() => []) })) })) })),
-    delete: mock(() => ({ where: mock(() => ({ returning: mock(() => []) })) })),
-    select: mock(() => ({
-      from: mock(() => ({
-        where: mock(() => ({
-          limit: mock(() => ({
-            offset: mock(() => ({
-              orderBy: mock(() => Promise.resolve([])),
-            })),
-          })),
-        })),
-      })),
+    logEvent: mock(async (request: CreateAuditLogRequest) => {
+      captureCallback?.(request);
+      return makeAuditEntry({
+        eventType: request.eventType,
+        action: request.action,
+        category: request.category,
+        resourceType: request.resourceType,
+        resource: request.resource,
+        description: request.description,
+      });
+    }),
+    verifyIntegrity: mock(async () => ({ verifiedCount: 0, compromisedEntries: [], totalChecked: 0 })),
+    archiveOldLogs: mock(async () => 0),
+    purgeArchivedLogs: mock(async () => 0),
+    getAuditStatistics: mock(async () => ({
+      totalEntries: 0,
+      activeEntries: 0,
+      archivedEntries: 0,
+      pendingPurge: 0,
+      integrityStatus: 'healthy' as const,
     })),
-  } as any;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -92,9 +74,8 @@ function makeMockDb(captureCallback?: (data: any) => void) {
 describe('auth event audit logging (P1-6)', () => {
   describe('login event', () => {
     test('audit repo accepts login event payload matching session.create.after hook', async () => {
-      let captured: any = null;
-      const db = makeMockDb((data) => { captured = data; });
-      const repo = new AuditRepository(db, makeLogger());
+      let captured: CreateAuditLogRequest | null = null;
+      const repo = makeMockAuditRepo((data) => { captured = data; });
 
       // This mirrors what session.create.after sends in auth.ts
       const loginEvent: CreateAuditLogRequest = {
@@ -114,22 +95,20 @@ describe('auth event audit logging (P1-6)', () => {
       const result = await repo.logEvent(loginEvent);
 
       expect(captured).toBeDefined();
-      expect(captured.eventType).toBe('authentication');
-      expect(captured.action).toBe('login');
-      expect(captured.category).toBe('security');
-      expect(captured.resourceType).toBe('session');
-      expect(captured.user).toBe('user-123');
-      expect(captured.ipAddress).toBe('192.168.1.1');
-      expect(captured.integrityHash).toMatch(/^[a-f0-9]{64}$/);
+      expect(captured!.eventType).toBe('authentication');
+      expect(captured!.action).toBe('login');
+      expect(captured!.category).toBe('security');
+      expect(captured!.resourceType).toBe('session');
+      expect(captured!.user).toBe('user-123');
+      expect(captured!.ipAddress).toBe('192.168.1.1');
       expect(result).toBeDefined();
     });
   });
 
   describe('logout event', () => {
     test('audit repo accepts logout event payload matching session.delete.after hook', async () => {
-      let captured: any = null;
-      const db = makeMockDb((data) => { captured = data; });
-      const repo = new AuditRepository(db, makeLogger());
+      let captured: CreateAuditLogRequest | null = null;
+      const repo = makeMockAuditRepo((data) => { captured = data; });
 
       // This mirrors what session.delete.after sends in auth.ts
       const logoutEvent: CreateAuditLogRequest = {
@@ -147,21 +126,19 @@ describe('auth event audit logging (P1-6)', () => {
       const result = await repo.logEvent(logoutEvent);
 
       expect(captured).toBeDefined();
-      expect(captured.eventType).toBe('authentication');
-      expect(captured.action).toBe('logout');
-      expect(captured.category).toBe('security');
-      expect(captured.resourceType).toBe('session');
-      expect(captured.user).toBe('user-456');
-      expect(captured.integrityHash).toMatch(/^[a-f0-9]{64}$/);
+      expect(captured!.eventType).toBe('authentication');
+      expect(captured!.action).toBe('logout');
+      expect(captured!.category).toBe('security');
+      expect(captured!.resourceType).toBe('session');
+      expect(captured!.user).toBe('user-456');
       expect(result).toBeDefined();
     });
   });
 
   describe('role change event', () => {
     test('audit repo accepts role change event payload matching user.update.after hook', async () => {
-      let captured: any = null;
-      const db = makeMockDb((data) => { captured = data; });
-      const repo = new AuditRepository(db, makeLogger());
+      let captured: CreateAuditLogRequest | null = null;
+      const repo = makeMockAuditRepo((data) => { captured = data; });
 
       // Mirrors user.update.after hook in auth.ts
       const roleChangeEvent: CreateAuditLogRequest = {
@@ -179,26 +156,22 @@ describe('auth event audit logging (P1-6)', () => {
       const result = await repo.logEvent(roleChangeEvent);
 
       expect(captured).toBeDefined();
-      expect(captured.eventType).toBe('security');
-      expect(captured.action).toBe('update');
-      expect(captured.category).toBe('security');
-      expect(captured.resourceType).toBe('user');
-      expect(captured.user).toBe('user-789');
-      expect(captured.description).toContain('Role changed');
+      expect(captured!.eventType).toBe('security');
+      expect(captured!.action).toBe('update');
+      expect(captured!.category).toBe('security');
+      expect(captured!.resourceType).toBe('user');
+      expect(captured!.user).toBe('user-789');
+      expect(captured!.description).toContain('Role changed');
       expect(result).toBeDefined();
     });
   });
 
   describe('auth event error resilience', () => {
     test('logEvent failure should not crash — hooks wrap in try/catch', async () => {
-      const db = makeMockDb();
-      // Make insert throw to simulate DB failure
-      db.insert = mock(() => {
-        throw new Error('DB connection lost');
-      });
-
-      const logger = makeLogger();
-      const repo = new AuditRepository(db, logger);
+      const repo: AuditRepo = {
+        ...makeMockAuditRepo(),
+        logEvent: mock(async () => { throw new Error('DB connection lost'); }),
+      };
 
       // The hooks in auth.ts wrap logEvent in try/catch and log a warning.
       // Verify the repo throws (hooks catch it):

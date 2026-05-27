@@ -8,9 +8,10 @@
  */
 
 import type { ValidatedContext } from '@/types/app';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import { PaymentTokenRepository } from './repos/payment-token.repo';
 import { DuesRepository } from '../association:member/repos/dues-payments.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import {
   generatePaymentToken,
   defaultPaymentTokenExpiry,
@@ -31,6 +32,14 @@ export async function sendPaymentLink(
     return ctx.json({ error: 'Organization context required' }, 403);
   }
 
+  // P0: Verify caller is an officer (treasurer, president, admin)
+  const db = ctx.get('database');
+  const officerRepo = new OfficerTermRepository(db);
+  const terms = await officerRepo.findActiveByPersonAndOrg(user.id, orgId);
+  if (terms.length === 0) {
+    throw new ForbiddenError('Officer access required to send payment links');
+  }
+
   const body = await ctx.req.json();
   const { personId, amount: providedAmount, invoiceId } = body as {
     personId?: string;
@@ -47,7 +56,6 @@ export async function sendPaymentLink(
   let currency = 'PHP';
 
   if (!amount) {
-    const db = ctx.get('database');
     const duesRepo = new DuesRepository(db);
     const config = await duesRepo.getConfig(orgId);
     if (!config) {
@@ -63,7 +71,6 @@ export async function sendPaymentLink(
   const expiresAt = defaultPaymentTokenExpiry();
 
   // Store token hash in database
-  const db = ctx.get('database');
   const tokenRepo = new PaymentTokenRepository(db);
   await tokenRepo.create({
     tokenHash: hash,

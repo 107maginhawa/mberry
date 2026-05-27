@@ -26,7 +26,7 @@ describe('createAssociation', () => {
   });
 
   test('returns 201 on successful creation', async () => {
-    const ctx = makeCtx({ _body: { name: 'New Dental Assoc', country: 'PH', currency: 'PHP' } });
+    const ctx = makeCtx({ _body: { name: 'New Dental Assoc', country: 'PH', currency: 'PHP' }, platformAdmin: { id: 'pa-1', role: 'super' } });
     const res = await createAssociation(ctx);
     expect(res.status).toBe(201);
     expect((res as any).body?.name).toBe('New Dental Assoc');
@@ -38,7 +38,7 @@ describe('createAssociation', () => {
       findByName: async () => newAssoc,
       create: async () => newAssoc,
     });
-    const ctx = makeCtx({ _body: { name: 'New Dental Assoc', country: 'PH', currency: 'PHP' } });
+    const ctx = makeCtx({ _body: { name: 'New Dental Assoc', country: 'PH', currency: 'PHP' }, platformAdmin: { id: 'pa-1', role: 'super' } });
     await expect(createAssociation(ctx)).rejects.toBeInstanceOf(ConflictError);
   });
 });

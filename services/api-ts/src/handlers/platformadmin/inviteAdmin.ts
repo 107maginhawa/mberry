@@ -17,6 +17,12 @@ export async function inviteAdmin(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  // P0: Only super admins can invite new admins
+  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
+  if (!callerAdmin || callerAdmin.role !== 'super') {
+    return ctx.json({ error: 'Super admin access required' }, 403);
+  }
+
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');

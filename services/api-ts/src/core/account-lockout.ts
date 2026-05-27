@@ -11,10 +11,15 @@
 
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
+import type { CreateAuditLogRequest } from '@/core/audit';
 import { maskEmail } from '@/core/logger';
 import * as schema from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
-import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
+
+/** Minimal audit repo contract — only logEvent needed for lockout auditing. */
+export interface LockoutAuditRepo {
+  logEvent(request: CreateAuditLogRequest): Promise<unknown>;
+}
 
 // --- Constants -----------------------------------------------------------
 
@@ -103,6 +108,7 @@ export async function applyLockout(
   database: DatabaseInstance,
   email: string,
   logger?: Logger,
+  auditRepo?: LockoutAuditRepo,
 ): Promise<void> {
   const banExpires = new Date(Date.now() + LOCKOUT_DURATION_MS);
 
@@ -119,20 +125,21 @@ export async function applyLockout(
     logger?.warn({ email: maskEmail(email), banExpires }, 'AC-M01-005: Account locked after failed login attempts');
 
     // Audit log the lockout event
-    try {
-      const auditRepo = new AuditRepository(database, logger);
-      await auditRepo.logEvent({
-        eventType: 'security',
-        category: 'security',
-        action: 'update',
-        outcome: 'success',
-        userType: 'system',
-        resourceType: 'user',
-        resource: email,
-        description: `Account locked for 15 minutes after ${MAX_FAILED_ATTEMPTS} failed login attempts`,
-      });
-    } catch (auditErr) {
-      logger?.warn({ error: auditErr, email: maskEmail(email) }, 'Failed to audit lockout event');
+    if (auditRepo) {
+      try {
+        await auditRepo.logEvent({
+          eventType: 'security',
+          category: 'security',
+          action: 'update',
+          outcome: 'success',
+          userType: 'system',
+          resourceType: 'user',
+          resource: email,
+          description: `Account locked for 15 minutes after ${MAX_FAILED_ATTEMPTS} failed login attempts`,
+        });
+      } catch (auditErr) {
+        logger?.warn({ error: auditErr, email: maskEmail(email) }, 'Failed to audit lockout event');
+      }
     }
   } catch (err) {
     logger?.error({ error: err, email: maskEmail(email) }, 'Failed to apply account lockout');

@@ -73,7 +73,7 @@ export function DataExport() {
 
     setIsRequesting(true)
     try {
-      const data = await api.get<any>('/api/persons/me/export')
+      const data = await api.post<any>('/api/persons/me/export')
 
       // Create downloadable JSON blob
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })

@@ -17,6 +17,18 @@ import { createStorageProvider } from '@/core/storage';
 import { createNotificationService } from '@/core/notifs';
 import { createEmailService } from '@/core/email';
 import { createAuditService } from '@/core/audit';
+import { bindMembershipsTable } from '@/core/org-scoped-persons';
+import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
+import { NotificationRepository } from '@/handlers/notifs/repos/notification.repo';
+import { PersonRepository } from '@/handlers/person/repos/person.repo';
+import { EmailTemplateRepository } from '@/handlers/email/repos/template.repo';
+import { EmailQueueRepository } from '@/handlers/email/repos/queue.repo';
+import { SuppressionRepository } from '@/handlers/email/repos/suppression.repo';
+import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { memberships } from '@/handlers/association:member/repos/membership.schema';
+import { BulkRateLimiter } from '@/handlers/email/utils/bulk-rate-limiter';
+import { generateUnsubToken } from '@/handlers/email/utils/unsub-token';
+import { initializeEmailTemplates } from '@/handlers/email/templates/initializer';
 import { createWebSocketService } from '@/core/ws';
 import { createBillingService } from '@/core/billing';
 import { registerEmailJobs } from '@/handlers/email/jobs';
@@ -27,6 +39,7 @@ import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
+import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
 
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
@@ -131,14 +144,38 @@ export function createApp(config: Config): App {
   // Create core dependencies with config
   const logger = createLogger(config);
   const database = createDatabase(config.database);
-  const email = createEmailService(database, config, logger);
-  const auth = createAuth(database, config, logger, email);
+
+  // Construct repos here, inject into services (P1-2: core→handler dependency inversion)
+  const auditRepo = new AuditRepository(database, logger);
+  const personRepo = new PersonRepository(database, logger);
+  const emailTemplateRepo = new EmailTemplateRepository(database, logger);
+  const emailQueueRepo = new EmailQueueRepository(database, logger);
+  const suppressionRepo = new SuppressionRepository(database, logger);
+  const membershipRepo = new MembershipRepository(database, logger);
+  const notifRepo = new NotificationRepository(database, personRepo, logger, config.notifs.onesignal);
+
+  // Bind Drizzle table refs for core modules (P1-2: avoids core→handler schema imports)
+  bindMembershipsTable(memberships as any);
+
+  // Register domain event consumers (cross-module event bus)
+  registerDomainEventConsumers({ membershipRepo }, logger);
+
+  const email = createEmailService(config, logger, database, {
+    templateRepo: emailTemplateRepo,
+    queueRepo: emailQueueRepo,
+    suppressionRepo,
+    membershipLookup: membershipRepo,
+    bulkRateLimiter: new BulkRateLimiter(),
+    generateUnsubToken,
+    initializeTemplates: initializeEmailTemplates,
+  });
+  const auth = createAuth(database, config, logger, email, { auditRepo, personRepo });
   const storage = createStorageProvider(config.storage, logger);
   const jobs = createJobScheduler(database, logger);
   const ws = createWebSocketService(logger);
 
-  const notifs = createNotificationService(database, logger, config.notifs, ws);
-  const audit = createAuditService(database, logger);
+  const notifs = createNotificationService(notifRepo, ws, logger);
+  const audit = createAuditService(auditRepo);
   const billing = createBillingService(config.billing, database, logger);
 
   // Attach dependencies to the app instance early for access throughout

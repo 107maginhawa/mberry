@@ -67,16 +67,9 @@ export const emailCategoryEnum = pgEnum('email_category', ['bulk', 'transactiona
 export const emailProviderEnum = pgEnum('email_provider', ['smtp', 'postmark', 'onesignal']);
 
 /**
- * Email template tags for identifying templates
+ * Email template tags — canonical definition in core/email-types.ts, re-exported here for backward compat.
  */
-export enum EmailTemplateTags {
-  // Auth templates
-  AUTH_EMAIL_VERIFY = 'auth.email-verify',
-  AUTH_PASSWORD_RESET = 'auth.password-reset',
-  AUTH_2FA = 'auth.2fa',
-  AUTH_WELCOME = 'auth.welcome',
-  AUTH_MAGIC_LINK = 'auth.magic-link',
-}
+export { EmailTemplateTags } from '@/core/email-types';
 
 /**
  * Email templates table - stores runtime-configurable templates
@@ -254,64 +247,9 @@ export interface EmailTemplateFilters {
 }
 
 /**
- * Queue email request interface
+ * Pure interfaces — canonical definitions in core/email-types.ts, re-exported here for backward compat.
  */
-export interface QueueEmailRequest {
-  template?: string; // Direct template ID (alternative to templateTags)
-  templateTags?: string[]; // Template tags for dynamic resolution (alternative to template)
-  recipient: string;
-  recipientName?: string;
-  variables: Record<string, any>;
-  metadata?: Record<string, any>;
-  priority?: number;
-  scheduledAt?: Date;
-  organizationId?: string;
-  emailCategory?: 'bulk' | 'transactional';
-}
-
-/**
- * Send email request interface (internal)
- */
-export interface SendEmailRequest {
-  to: string;
-  subject: string;
-  html: string;
-  text?: string;
-  from?: {
-    name?: string;
-    email?: string;
-  };
-  replyTo?: {
-    email?: string;
-    name?: string;
-  };
-  /** Additional email headers (e.g. List-Unsubscribe for RFC 8058 compliance) */
-  headers?: Record<string, string>;
-  /** Context for generating unsubscribe token (injected by processEmail) */
-  unsubscribeContext?: {
-    email: string;
-    orgId: string;
-  };
-}
-
-/**
- * Email send result interface
- */
-export interface EmailSendResult {
-  success: boolean;
-  messageId?: string;
-  provider: 'smtp' | 'postmark' | 'onesignal';
-  error?: string;
-}
-
-/**
- * Template preview result interface
- */
-export interface TemplatePreviewResult {
-  subject: string;
-  bodyHtml: string;
-  bodyText?: string;
-}
+export type { QueueEmailRequest, SendEmailRequest, EmailSendResult, TemplatePreviewResult } from '@/core/email-types';
 
 /**
  * Template test result interface

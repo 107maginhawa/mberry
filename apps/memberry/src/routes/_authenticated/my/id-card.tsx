@@ -129,7 +129,7 @@ function MyIdCard() {
           </GlassCard>
 
           <div className="text-center mt-6">
-            <Button disabled>
+            <Button onClick={() => window.print()}>
               Download PDF
             </Button>
           </div>

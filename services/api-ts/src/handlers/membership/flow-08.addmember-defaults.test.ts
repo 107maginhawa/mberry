@@ -5,6 +5,7 @@ import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { addMember } from './addMember';
 import { MembershipRepository } from './repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -24,10 +25,15 @@ describe('[FLOW-08] Officer/Member Addition → Active Membership', () => {
 
   beforeEach(() => {
     restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('new member starts with active status', async () => {

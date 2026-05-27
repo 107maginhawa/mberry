@@ -32,7 +32,7 @@ export async function createTraining(ctx: Context): Promise<Response> {
     capacity: body.capacity,
     creditBearing: body.creditBearing ?? false,
     creditAmount: body.creditAmount ?? body.creditValue ?? 0,
-    status: body.status ?? 'draft',
+    status: 'draft',
     prcAccreditationNumber: body.prcAccreditationNumber,
     accreditedProviderId: body.accreditedProviderId,
     createdBy: session.user.id,

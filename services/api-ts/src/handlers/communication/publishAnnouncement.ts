@@ -3,6 +3,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { DatabaseInstance } from '@/core/database';
 import type { PublishAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -36,6 +37,13 @@ export async function publishAnnouncement(
 
   const published = await repo.updateStatus(params.id, 'sent', {
     publishedAt: new Date(),
+  });
+
+  const orgId = ctx.get('organizationId');
+  await domainEvents.emit('announcement.published', {
+    announcementId: params.id,
+    organizationId: orgId ?? '',
+    publishedBy: session.user.id,
   });
 
   await auditAction(ctx, {

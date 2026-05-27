@@ -15,9 +15,8 @@ import type { Logger } from '@/types/logger';
 import type { EmailService } from '@/core/email';
 import { maskEmail } from '@/core/logger';
 import type { AuthInstance } from '@/utils/auth';
-import { EmailTemplateTags } from '@/handlers/email/repos/email.schema';
-import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
-import { PersonRepository } from '@/handlers/person/repos/person.repo';
+import { EmailTemplateTags } from '@/core/email-types';
+import type { CreateAuditLogRequest } from '@/core/audit';
 import * as schema from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
 import { createTrustedOriginsList, determineCookieConfig } from '@/utils/cors';
@@ -32,6 +31,29 @@ import {
 } from '@/core/account-lockout';
 import { enforceSessionLimit, DEFAULT_SESSION_LIMIT } from '@/core/session-limit';
 
+/**
+ * Repo contract for audit logging within auth hooks.
+ * Implemented by AuditRepository in handlers/audit/repos/.
+ */
+export interface AuthAuditRepo {
+  logEvent(request: CreateAuditLogRequest): Promise<unknown>;
+}
+
+/**
+ * Repo contract for person creation on signup.
+ * Implemented by PersonRepository in handlers/person/repos/.
+ */
+export interface AuthPersonRepo {
+  findOneById(id: string): Promise<{ id: string } | null>;
+  createOne(data: {
+    id: string;
+    firstName: string;
+    lastName: string | null;
+    contactInfo: { email: string };
+    createdBy: string;
+  }): Promise<unknown>;
+}
+
 // Re-export auth instance type for type safety
 // AuthInstance type re-exported for convenience
 export type { AuthInstance };
@@ -43,7 +65,14 @@ export type { AuthInstance };
  * @param logger - Optional logger instance for plugin logging
  * @param emailService - Email service instance for authentication emails
  */
-export function createAuth(database: DatabaseInstance, config: Config, logger: Logger | undefined, emailService: EmailService): AuthInstance {
+export function createAuth(
+  database: DatabaseInstance,
+  config: Config,
+  logger: Logger | undefined,
+  emailService: EmailService,
+  deps: { auditRepo: AuthAuditRepo; personRepo: AuthPersonRepo },
+): AuthInstance {
+  const { auditRepo, personRepo } = deps;
   // Generate trusted origins and cookie config based on CORS settings
   const trustedOrigins = createTrustedOriginsList(config.cors);
   const cookieConfig = determineCookieConfig(config.cors, config.auth);
@@ -162,7 +191,6 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
           after: async (user) => {
             // Auto-create person record so profile/dashboard work immediately
             try {
-              const personRepo = new PersonRepository(database, logger);
               const existing = await personRepo.findOneById(user.id);
               if (!existing) {
                 const nameParts = (user.name || '').trim().split(/\s+/);
@@ -202,7 +230,6 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
 
                   // Audit the role change
                   try {
-                    const auditRepo = new AuditRepository(database, logger);
                     await auditRepo.logEvent({
                       eventType: 'security',
                       category: 'security',
@@ -244,7 +271,6 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
             }
 
             try {
-              const auditRepo = new AuditRepository(database, logger);
               await auditRepo.logEvent({
                 eventType: 'authentication',
                 category: 'security',
@@ -274,7 +300,6 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
         delete: {
           after: async (session: { id: string; userId: string }) => {
             try {
-              const auditRepo = new AuditRepository(database, logger);
               await auditRepo.logEvent({
                 eventType: 'authentication',
                 category: 'security',
@@ -454,7 +479,7 @@ export function createAuth(database: DatabaseInstance, config: Config, logger: L
           logger?.info({ email: maskEmail(email), failedAttempts: count }, 'Failed login attempt recorded');
 
           if (count >= MAX_FAILED_ATTEMPTS) {
-            await applyLockout(database, email, logger);
+            await applyLockout(database, email, logger, auditRepo);
           }
         } catch (hookErr) {
           logger?.warn({ error: hookErr }, 'AC-M01-005: Error in lockout tracking hook');
