@@ -120,7 +120,8 @@ export interface DomainEventMap {
     eventId: string;
     personId: string;
     organizationId: string;
-    cancelledBy: string;
+    cancelledBy?: string;
+    hadPayment?: boolean;
   };
 
   // ── Communications Context ────────────────────────────────────────────
@@ -160,6 +161,48 @@ export interface DomainEventMap {
   };
 
   // ── Governance Context ────────────────────────────────────────────────
+  'officer.assigned': {
+    termId: string;
+    personId: string;
+    positionId: string;
+    organizationId: string;
+    assignedBy: string;
+  };
+
+  'officer.removed': {
+    termId: string;
+    personId: string;
+    positionId: string;
+    organizationId: string;
+    removedBy: string;
+  };
+
+  'officer.transitioned': {
+    outgoingTermId: string;
+    newTermId: string;
+    outgoingPersonId: string;
+    successorPersonId: string;
+    positionId: string;
+    organizationId: string;
+    transitionedBy: string;
+  };
+
+  'member.suspended': {
+    disciplinaryActionId: string;
+    personId: string;
+    organizationId: string;
+    actionType: string;
+    issuedBy: string;
+    expiresAt: string | null;
+  };
+
+  'member.removed': {
+    disciplinaryActionId: string;
+    personId: string;
+    organizationId: string;
+    issuedBy: string;
+  };
+
   'election.created': {
     electionId: string;
     organizationId: string;

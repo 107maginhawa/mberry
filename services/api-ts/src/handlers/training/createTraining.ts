@@ -1,8 +1,10 @@
 import type { Context } from 'hono';
-import { ForbiddenError } from '@/core/errors';
+import { ForbiddenError, ValidationError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import type { Session } from '@/types/auth';
+
+const VALID_TRAINING_TYPES = ['seminar', 'workshop', 'convention', 'onlineCourse', 'skillsTraining'] as const;
 
 export async function createTraining(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -17,6 +19,14 @@ export async function createTraining(ctx: Context): Promise<Response> {
   }
 
   const body = await ctx.req.json();
+
+  // [M9-R1] Enforce platform-defined training types — not org-customizable
+  if (body.trainingType !== undefined && !VALID_TRAINING_TYPES.includes(body.trainingType)) {
+    throw new ValidationError(
+      `Invalid training type "${body.trainingType}". Must be one of: ${VALID_TRAINING_TYPES.join(', ')}`
+    );
+  }
+
   const repo = new TrainingRepository(db);
 
   const training = await repo.create({

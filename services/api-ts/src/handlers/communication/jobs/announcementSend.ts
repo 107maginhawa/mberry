@@ -12,9 +12,10 @@ import type { DatabaseInstance } from '@/core/database';
 import { CommunicationsRepository } from '../repos/communication.repo';
 import { MembershipRepository } from '../../membership/repos/membership.repo';
 import { notifications } from '../../notifs/repos/notification.schema';
-import { sql } from 'drizzle-orm';
+import { sql, eq, and, inArray } from 'drizzle-orm';
 import { SYSTEM_USER_ID } from '@/core/constants';
 import type { SegmentFilters } from '../repos/communication.schema';
+import { personSubscriptions } from '../repos/communication.schema';
 import Handlebars from 'handlebars';
 
 const BATCH_SIZE = 50;
@@ -53,6 +54,12 @@ export async function resolveRecipients(
   });
 
   let recipients = result.data;
+
+  // [M7-R5] Filter out deceased and suppressed members
+  recipients = recipients.filter((row) => {
+    const status = (row.membership as any).status;
+    return status !== 'deceased' && status !== 'suspended' && status !== 'removed';
+  });
 
   // Apply filters not supported by listMembers query
   if (filters?.chapterIds?.length) {
@@ -129,15 +136,37 @@ export async function processAnnouncementSend(
     }
   }
 
-  // Email fan-out — batch-fetch emails from user table, then queue
+  // [M7-R2] Email fan-out — respects opt-out preferences
   if (channels.email && emailService) {
+    // Batch-load email opt-outs for all recipients
+    const allPersonIds = recipients.map((r) => r.personId);
+    const optedOutPersonIds = new Set<string>();
+    try {
+      if (allPersonIds.length > 0) {
+        const optOuts = await db.select({ personId: personSubscriptions.personId })
+          .from(personSubscriptions)
+          .where(and(
+            eq(personSubscriptions.organizationId, announcement.organizationId),
+            eq(personSubscriptions.enabled, false),
+            inArray(personSubscriptions.personId, allPersonIds),
+          ));
+        for (const row of optOuts) {
+          optedOutPersonIds.add(row.personId);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load email opt-outs, proceeding without filter:', err);
+    }
+
     try {
       for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
-        const batch = recipients.slice(i, i + BATCH_SIZE);
+        const batch = recipients.slice(i, i + BATCH_SIZE)
+          .filter((r) => !optedOutPersonIds.has(r.personId));
+        if (batch.length === 0) continue;
         const personIds = batch.map((r) => r.personId);
 
         // Batch-fetch all emails for this batch in one query (fixes N+1)
-        let emailMap: Map<string, string> = new Map();
+        const emailMap: Map<string, string> = new Map();
         try {
           const emailResult = await db.execute(
             sql`SELECT id, email FROM "user" WHERE id = ANY(${personIds})`

@@ -19,7 +19,18 @@ describe('requestMyAccountDeletion', () => {
       findOneById: async () => ({ id: 'user-1', deletionRequestedAt: null }),
       updateOneById: async () => ({ id: 'user-1' }),
     });
-    const ctx = makeCtx();
+    // Mock db.select chain for M2-R5 guards (no pending payments, no sole officer)
+    const mockQuery = { from: () => ({ where: () => ({ limit: () => Promise.resolve([]) }) }) };
+    const mockQueryNoLimit = { from: () => ({ where: () => Promise.resolve([]) }) };
+    const ctx = makeCtx({ dbOverrides: { select: () => mockQuery } });
+    // Override db.select to handle both guard queries (payments with limit, terms without)
+    const db = ctx.get('database');
+    let callCount = 0;
+    (db as any).select = () => {
+      callCount++;
+      if (callCount === 1) return mockQuery; // pending payments query (has .limit)
+      return mockQueryNoLimit; // officer terms query (no .limit)
+    };
     const res = await requestMyAccountDeletion(ctx);
     expect(res.status).toBe(202);
   });

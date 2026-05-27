@@ -4,6 +4,7 @@ import { DisciplinaryActionRepository } from './repos/governance.repo';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createDisciplinaryAction
@@ -55,6 +56,24 @@ export async function createDisciplinaryAction(
     description: `Disciplinary action (${body.actionType}) issued`,
     details: { targetPersonId: body.targetPersonId, actionType: body.actionType },
   });
+
+  if (body.actionType === 'suspension') {
+    domainEvents.emit('member.suspended', {
+      disciplinaryActionId: action.id,
+      personId: body.targetPersonId,
+      organizationId: orgId,
+      actionType: body.actionType,
+      issuedBy: user.id,
+      expiresAt: body.expiresAt ?? null,
+    }).catch(() => {});
+  } else if (body.actionType === 'removal' || body.actionType === 'expulsion') {
+    domainEvents.emit('member.removed', {
+      disciplinaryActionId: action.id,
+      personId: body.targetPersonId,
+      organizationId: orgId,
+      issuedBy: user.id,
+    }).catch(() => {});
+  }
 
   return ctx.json(action, 201);
 }

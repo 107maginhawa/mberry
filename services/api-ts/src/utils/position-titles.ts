@@ -10,6 +10,7 @@ export const POSITION_TITLES = {
   TREASURER: 'Treasurer',
   SECRETARY: 'Secretary',
   SOCIETY_OFFICER: 'Society Officer',
+  BOARD_MEMBER: 'Board Member',
 } as const;
 
 export type PositionTitle = typeof POSITION_TITLES[keyof typeof POSITION_TITLES];

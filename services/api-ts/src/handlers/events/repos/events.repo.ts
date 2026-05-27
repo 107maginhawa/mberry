@@ -201,6 +201,39 @@ export class EventsRepository {
     return stats;
   }
 
+  async getRegistration(registrationId: string): Promise<EventRegistration | undefined> {
+    const [reg] = await this.db
+      .select()
+      .from(eventRegistrations)
+      .where(eq(eventRegistrations.id, registrationId))
+      .limit(1);
+    return reg;
+  }
+
+  async getFirstWaitlisted(eventId: string): Promise<EventRegistration | undefined> {
+    const [reg] = await this.db
+      .select()
+      .from(eventRegistrations)
+      .where(
+        and(
+          eq(eventRegistrations.eventId, eventId),
+          eq(eventRegistrations.status, 'waitlisted'),
+        ),
+      )
+      .orderBy(eventRegistrations.createdAt)
+      .limit(1);
+    return reg;
+  }
+
+  async updateRegistration(registrationId: string, data: Partial<EventRegistration>): Promise<EventRegistration> {
+    const [result] = await this.db
+      .update(eventRegistrations)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(eventRegistrations.id, registrationId))
+      .returning();
+    return result!;
+  }
+
   // Member view
   async listByPerson(personId: string) {
     return this.db

@@ -6,6 +6,7 @@ import { PlatformAdminRepository } from '@/handlers/platformadmin/repos/platform
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createOfficerTerm
@@ -43,13 +44,18 @@ export async function createOfficerTerm(
     }
   }
 
-  // M4-R1: One person per role — check no active holder exists for this position
-  const existingHolder = await repo.findActiveByPosition(body.positionId);
-  if (existingHolder) {
-    return ctx.json(
-      { error: 'Position already has an active officer. Remove the current officer before assigning a new one.' },
-      409,
-    );
+  // M4-R1: One person per role — check no active holder exists for this position.
+  // Exception: Board Member allows multiple simultaneous holders.
+  const isBoardMember =
+    targetPosition?.title.toLowerCase() === POSITION_TITLES.BOARD_MEMBER.toLowerCase();
+  if (!isBoardMember) {
+    const existingHolder = await repo.findActiveByPosition(body.positionId);
+    if (existingHolder) {
+      return ctx.json(
+        { error: 'Position already has an active officer. Remove the current officer before assigning a new one.' },
+        409,
+      );
+    }
   }
 
   // M4-R1: One role per person per org — check person doesn't already hold a role
@@ -79,6 +85,14 @@ export async function createOfficerTerm(
     details: { positionId: body.positionId, personId: body.personId },
     eventSubType: 'governance.officer-appointed',
   });
+
+  domainEvents.emit('officer.assigned', {
+    termId: term.id,
+    personId: body.personId,
+    positionId: body.positionId,
+    organizationId: orgId,
+    assignedBy: user.id,
+  }).catch(() => {});
 
   return ctx.json(term, 201);
 }

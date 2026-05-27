@@ -6,6 +6,7 @@ import { OfficerTermRepository } from './repos/governance.repo';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * deleteOfficerTerm
@@ -45,6 +46,14 @@ export async function deleteOfficerTerm(
     resourceId: termId,
     description: 'Officer term deleted',
   });
+
+  domainEvents.emit('officer.removed', {
+    termId,
+    personId: existing.personId,
+    positionId: existing.positionId,
+    organizationId: orgId,
+    removedBy: user.id,
+  }).catch(() => {});
 
   // P1-4: Invalidate removed officer's sessions so they re-authenticate without officer role
   try {

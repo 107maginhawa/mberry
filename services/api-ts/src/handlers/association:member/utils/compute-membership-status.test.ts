@@ -313,6 +313,112 @@ describe('[M5-R1] state machine transitions', () => {
   });
 });
 
+// ── [BR-01-INCOMPLETE] Terminal states: deceased, expelled, resigned, expired ─
+describe('[BR-01] terminal states (LIF-04)', () => {
+  test('returns "deceased" when dateOfDeath is set', () => {
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2027-01-01', // would be active
+      gracePeriodDays: 30,
+      suspendedAt: null,
+      removedAt: null,
+      dateOfDeath: '2026-01-10',
+    }, today);
+    expect(status).toBe('deceased');
+  });
+
+  test('deceased takes precedence over all other states', () => {
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2025-01-01', // lapsed
+      gracePeriodDays: 30,
+      suspendedAt: new Date('2026-01-08'),
+      removedAt: new Date('2026-01-09'),
+      expelledAt: new Date('2026-01-10'),
+      resignedAt: new Date('2026-01-11'),
+      dateOfDeath: '2026-01-12',
+    }, today);
+    expect(status).toBe('deceased');
+  });
+
+  test('returns "expelled" when expelledAt is set', () => {
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2027-01-01',
+      gracePeriodDays: 30,
+      suspendedAt: null,
+      removedAt: null,
+      expelledAt: new Date('2026-01-10'),
+    }, today);
+    expect(status).toBe('expelled');
+  });
+
+  test('expelled takes precedence over resigned, removed, suspended', () => {
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2027-01-01',
+      gracePeriodDays: 30,
+      suspendedAt: new Date('2026-01-08'),
+      removedAt: new Date('2026-01-09'),
+      resignedAt: new Date('2026-01-10'),
+      expelledAt: new Date('2026-01-11'),
+    }, today);
+    expect(status).toBe('expelled');
+  });
+
+  test('returns "resigned" when resignedAt is set', () => {
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2027-01-01',
+      gracePeriodDays: 30,
+      suspendedAt: null,
+      removedAt: null,
+      resignedAt: new Date('2026-01-10'),
+    }, today);
+    expect(status).toBe('resigned');
+  });
+
+  test('resigned takes precedence over removed and suspended', () => {
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2027-01-01',
+      gracePeriodDays: 30,
+      suspendedAt: new Date('2026-01-08'),
+      removedAt: new Date('2026-01-09'),
+      resignedAt: new Date('2026-01-10'),
+    }, today);
+    expect(status).toBe('resigned');
+  });
+
+  test('returns "expired" when isExpired is true', () => {
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2025-01-01', // in past
+      gracePeriodDays: 30,
+      suspendedAt: null,
+      removedAt: null,
+      isExpired: true,
+    }, today);
+    expect(status).toBe('expired');
+  });
+
+  test('expired takes precedence over date-based lapsed/gracePeriod', () => {
+    // Would be lapsed based on dates, but isExpired flag overrides
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2025-06-01',
+      gracePeriodDays: 30,
+      suspendedAt: null,
+      removedAt: null,
+      isExpired: true,
+    }, today);
+    expect(status).toBe('expired');
+  });
+
+  test('suspended takes precedence over expired', () => {
+    const status = computeMembershipStatus({
+      duesExpiryDate: '2025-01-01',
+      gracePeriodDays: 30,
+      suspendedAt: new Date('2026-01-10'),
+      removedAt: null,
+      isExpired: true,
+    }, today);
+    expect(status).toBe('suspended');
+  });
+});
+
 // ── [M5-R10] Cross-org independence ──────────────────────────────────
 describe('[M5-R10] cross-org independence', () => {
   test('same person different orgs can have different statuses', () => {

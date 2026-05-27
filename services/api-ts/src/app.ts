@@ -75,8 +75,9 @@ import { createAccreditedProvider } from '@/handlers/training/createAccreditedPr
 import { updateAccreditedProvider } from '@/handlers/training/updateAccreditedProvider';
 import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedProvider';
 
-// Training entity lifecycle — completeTraining transitions training status (not enrollment)
+// Training entity lifecycle — completeTraining/publishTraining transition training status (not enrollment)
 import { completeTraining } from '@/handlers/training/completeTraining';
+import { publishTraining } from '@/handlers/training/publishTraining';
 
 // Elections: nominee status update (hand-wired, not in TypeSpec)
 import { updateNomineeStatus } from '@/handlers/elections/updateNomineeStatus';
@@ -114,6 +115,7 @@ import { getCommittee } from '@/handlers/association:operations/getCommittee';
 
 // OG meta route for social sharing crawlers (WhatsApp, Facebook, Twitter)
 import { serveEventOgMeta } from '@/handlers/events/serveEventOgMeta';
+import { cancelRegistration } from '@/handlers/events/cancelRegistration';
 
 // Public credential lookup (Wave 3a — Trust Directory)
 import { lookupCredentialPublic } from '@/handlers/association:member/lookupCredentialPublic';
@@ -135,6 +137,9 @@ import { updateSpecialAssessment } from '@/handlers/association:member/updateSpe
 import { deleteSpecialAssessment } from '@/handlers/association:member/deleteSpecialAssessment';
 import { applySpecialAssessment } from '@/handlers/association:member/applySpecialAssessment';
 import { getSpecialAssessmentCollection } from '@/handlers/association:member/getSpecialAssessmentCollection';
+
+// Officer transition — hand-wired (M4-R3 checklist-based handover, not in TypeSpec)
+import { transitionOfficerTerm } from '@/handlers/association:member/transitionOfficerTerm';
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -353,6 +358,7 @@ export function createApp(config: Config): App {
 
   // Training entity lifecycle — transition training status (not enrollment)
   app.post('/organizations/:organizationId/training/:id/complete', authMiddleware(), completeTraining as any);
+  app.put('/org/:organizationId/trainings/:id/publish', authMiddleware(), publishTraining as any);
 
   // Elections: nominee status update (accept/decline nomination)
   app.patch('/association/member/elections/:electionId/nominees/:nomineeId', authMiddleware(), updateNomineeStatus as any);
@@ -374,10 +380,17 @@ export function createApp(config: Config): App {
   app.post('/association/member/special-assessments/:id/apply', authMiddleware(), applySpecialAssessment as any);
   app.get('/association/member/special-assessments/:id/collection', authMiddleware(), getSpecialAssessmentCollection as any);
 
+  // Officer transition — M4-R3 checklist-based handover
+  app.post('/association/member/org/:organizationId/officers/:termId/transition', authMiddleware(), orgContextMiddleware(), transitionOfficerTerm as any);
+
   // Wave 4β: Saved Segments — CRUD for audience segment presets
   app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
   app.get('/communications/segments', authMiddleware(), listSavedSegments as any);
   app.delete('/communications/segments/:id', authMiddleware(), deleteSavedSegment as any);
+
+  // Events: cancel registration (DELETE /org/:orgId/events/:eventId/register/:registrationId)
+  // Hand-wired — org-scoped path per API_CONTRACTS spec. Allows registrant or officer to cancel.
+  app.delete('/org/:orgId/events/:eventId/register/:registrationId', authMiddleware(), cancelRegistration as any);
 
   // Survey module extras — hand-wired
   app.get('/surveys/:survey/export', authMiddleware(), orgContextMiddleware(), exportSurveyResponses as any);
