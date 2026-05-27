@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { ForbiddenError, UnauthorizedError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
+import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';
 
 export async function createElection(ctx: Context): Promise<Response> {
@@ -35,6 +36,12 @@ export async function createElection(ctx: Context): Promise<Response> {
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });
+
+  domainEvents.emit('election.created', {
+    electionId: election.id,
+    organizationId: orgId!,
+    createdBy: session.user.id,
+  }).catch(() => {});
 
   return ctx.json({ data: election }, 201);
 }

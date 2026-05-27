@@ -3,6 +3,7 @@ import { NotFoundError, BusinessLogicError, UnauthorizedError } from '@/core/err
 import { ElectionsRepository } from './repos/elections.repo';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -54,6 +55,14 @@ export async function updateElectionStatus(ctx: Context): Promise<Response> {
   if (body.status === 'published') extra.publishedAt = new Date();
 
   const updated = await repo.update(id, { status: body.status, ...extra });
+
+  domainEvents.emit('election.status.changed', {
+    electionId: id,
+    organizationId: existing.organizationId,
+    oldStatus: existing.status,
+    newStatus: body.status,
+    changedBy: session.user.id,
+  }).catch(() => {});
 
   await auditAction(ctx, {
     action: 'update',

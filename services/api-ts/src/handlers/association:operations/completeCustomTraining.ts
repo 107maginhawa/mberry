@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CompleteCustomTrainingBody, CompleteCustomTrainingQuery, CompleteCustomTrainingParams } from '@/generated/openapi/validators';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -50,6 +51,12 @@ export async function completeCustomTraining(
     status: 'completed',
     completedAt: new Date(),
   });
+
+  domainEvents.emit('training.completed', {
+    trainingId: training.id,
+    organizationId: training.organizationId,
+    completedBy: user.id,
+  }).catch(() => {});
 
   await auditAction(ctx, {
     action: 'update',

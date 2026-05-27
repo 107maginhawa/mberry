@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CancelCustomTrainingQuery, CancelCustomTrainingParams } from '@/generated/openapi/validators';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -50,6 +51,12 @@ export async function cancelCustomTraining(
     status: 'cancelled',
     cancelledAt: new Date(),
   });
+
+  domainEvents.emit('training.cancelled', {
+    trainingId: training.id,
+    organizationId: training.organizationId,
+    cancelledBy: user.id,
+  }).catch(() => {});
 
   await auditAction(ctx, {
     action: 'update',

@@ -75,6 +75,12 @@ import { createAccreditedProvider } from '@/handlers/training/createAccreditedPr
 import { updateAccreditedProvider } from '@/handlers/training/updateAccreditedProvider';
 import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedProvider';
 
+// Training entity lifecycle — completeTraining transitions training status (not enrollment)
+import { completeTraining } from '@/handlers/training/completeTraining';
+
+// Elections: nominee status update (hand-wired, not in TypeSpec)
+import { updateNomineeStatus } from '@/handlers/elections/updateNomineeStatus';
+
 // Email: hand-wired for middleware ordering reasons.
 // - unsubscribeEmail: MUST be registered BEFORE /email/* auth middleware (RFC 8058 public access)
 // - listEmailSuppressions: registered AFTER /email/* auth middleware (officer-only)
@@ -334,6 +340,12 @@ export function createApp(config: Config): App {
   app.post('/accredited-providers/:organizationId', authMiddleware(), createAccreditedProvider);
   app.patch('/accredited-providers/:organizationId/:providerId', authMiddleware(), updateAccreditedProvider);
   app.delete('/accredited-providers/:organizationId/:providerId', authMiddleware(), deleteAccreditedProvider);
+
+  // Training entity lifecycle — transition training status (not enrollment)
+  app.post('/organizations/:organizationId/training/:id/complete', authMiddleware(), completeTraining as any);
+
+  // Elections: nominee status update (accept/decline nomination)
+  app.patch('/association/member/elections/:electionId/nominees/:nomineeId', authMiddleware(), updateNomineeStatus as any);
 
   // Wave 2b: CPD config, manual credit, compliance, bulk certificates
   app.get('/association/member/cpd-config/:organizationId', authMiddleware(), getCpdConfig as any);

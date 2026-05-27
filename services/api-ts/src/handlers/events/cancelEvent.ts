@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { NotFoundError, ForbiddenError, BusinessLogicError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
+import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';
 
 export async function cancelEvent(ctx: Context): Promise<Response> {
@@ -26,5 +27,12 @@ export async function cancelEvent(ctx: Context): Promise<Response> {
   }
 
   const updated = await repo.update(id, { status: 'cancelled' });
+
+  domainEvents.emit('event.cancelled', {
+    eventId: id,
+    organizationId: existing.organizationId,
+    cancelledBy: session.user.id,
+  }).catch(() => {});
+
   return ctx.json({ data: updated }, 200);
 }

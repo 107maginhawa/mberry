@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { PublishTrainingParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -35,6 +36,12 @@ export async function publishTraining(
   }
 
   const published = await repo.publish(params.trainingId);
+
+  domainEvents.emit('training.published', {
+    trainingId: published.id,
+    organizationId: published.organizationId,
+    publishedBy: user.id,
+  }).catch(() => {});
 
   await auditAction(ctx, {
     action: 'update',

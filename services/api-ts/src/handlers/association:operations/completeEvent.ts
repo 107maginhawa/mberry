@@ -2,6 +2,7 @@ import type { HandlerContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -33,6 +34,12 @@ export async function completeEvent(ctx: HandlerContext): Promise<Response> {
   }
 
   const completed = await repo.complete(eventId);
+
+  domainEvents.emit('event.completed', {
+    eventId: completed.id,
+    organizationId: completed.organizationId,
+    completedBy: user.id,
+  }).catch(() => {});
 
   await auditAction(ctx, {
     action: 'update',

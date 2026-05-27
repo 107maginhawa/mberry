@@ -90,11 +90,37 @@ export interface DomainEventMap {
   };
 
   // ── Activities Context ────────────────────────────────────────────────
+  'event.published': {
+    eventId: string;
+    organizationId: string;
+    publishedBy: string;
+  };
+
+  'event.completed': {
+    eventId: string;
+    organizationId: string;
+    completedBy: string;
+  };
+
+  'event.cancelled': {
+    eventId: string;
+    organizationId: string;
+    cancelledBy: string;
+  };
+
   'event.registered': {
     eventId: string;
     personId: string;
     organizationId: string;
     status: 'confirmed' | 'waitlisted';
+  };
+
+  'event.registration.cancelled': {
+    registrationId: string;
+    eventId: string;
+    personId: string;
+    organizationId: string;
+    cancelledBy: string;
   };
 
   // ── Communications Context ────────────────────────────────────────────
@@ -121,6 +147,39 @@ export interface DomainEventMap {
     trainingId: string;
     organizationId: string;
     cancelledBy: string;
+  };
+
+  // ── Financial Context (Credits) ───────────────────────────────────────
+  'credit.adjusted': {
+    creditEntryId: string;
+    personId: string;
+    organizationId: string;
+    adjustedBy: string;
+    creditAmount: number;
+    reason: string;
+  };
+
+  // ── Governance Context ────────────────────────────────────────────────
+  'election.created': {
+    electionId: string;
+    organizationId: string;
+    createdBy: string;
+  };
+
+  'election.status.changed': {
+    electionId: string;
+    organizationId: string;
+    oldStatus: string;
+    newStatus: string;
+    changedBy: string;
+  };
+
+  'nomination.submitted': {
+    nomineeId: string;
+    electionId: string;
+    personId: string;
+    positionId: string;
+    organizationId: string;
   };
 }
 
