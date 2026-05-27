@@ -184,6 +184,53 @@ export const ticketComments = pgTable('ticket_comment', {
 });
 
 // ---------------------------------------------------------------------------
+// Subscription System (UJ-M03)
+// ---------------------------------------------------------------------------
+
+export const subscriptionStatusEnum = pgEnum('subscription_status', ['trial', 'active', 'past_due', 'cancelled', 'expired']);
+export const billingCycleEnum = pgEnum('billing_cycle', ['monthly', 'annual']);
+
+export const pricingTiers = pgTable('pricing_tier', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+  slug: varchar('slug', { length: 50 }).notNull().unique(),
+  monthlyPrice: integer('monthly_price').notNull().default(0), // in cents
+  annualPrice: integer('annual_price').notNull().default(0),
+  currency: varchar('currency', { length: 3 }).notNull().default('PHP'),
+  maxMembers: integer('max_members'), // null = unlimited
+  trialDays: integer('trial_days').notNull().default(30),
+  features: jsonb('features').$type<string[]>().default([]),
+  isActive: boolean('is_active').notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdBy: uuid('created_by').notNull(),
+  updatedBy: uuid('updated_by').notNull(),
+});
+
+export const subscriptions = pgTable('subscription', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  organizationId: uuid('organization_id').notNull(),
+  pricingTierId: uuid('pricing_tier_id').notNull().references(() => pricingTiers.id),
+  status: subscriptionStatusEnum('status').notNull().default('trial'),
+  billingCycle: billingCycleEnum('billing_cycle').notNull().default('monthly'),
+  currentPeriodStart: timestamp('current_period_start', { withTimezone: true }),
+  currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+  trialEndsAt: timestamp('trial_ends_at', { withTimezone: true }),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  cancelReason: text('cancel_reason'),
+  stripeSubscriptionId: varchar('stripe_subscription_id', { length: 100 }),
+  stripeCustomerId: varchar('stripe_customer_id', { length: 100 }),
+  lastStripeEventId: varchar('last_stripe_event_id', { length: 100 }), // idempotency
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdBy: uuid('created_by').notNull(),
+  updatedBy: uuid('updated_by').notNull(),
+}, (table) => [
+  uniqueIndex('subscription_org_unique').on(table.organizationId),
+]);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -203,3 +250,7 @@ export type SupportTicket = typeof supportTickets.$inferSelect;
 export type NewSupportTicket = typeof supportTickets.$inferInsert;
 export type TicketComment = typeof ticketComments.$inferSelect;
 export type NewTicketComment = typeof ticketComments.$inferInsert;
+export type PricingTier = typeof pricingTiers.$inferSelect;
+export type NewPricingTier = typeof pricingTiers.$inferInsert;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type NewSubscription = typeof subscriptions.$inferInsert;

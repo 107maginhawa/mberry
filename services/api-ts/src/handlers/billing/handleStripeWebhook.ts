@@ -1,12 +1,13 @@
 import type { BaseContext } from '@/types/app';
 import type { NotificationService } from '@/core/notifs';
-import { 
+import {
   ValidationError,
   BusinessLogicError
 } from '@/core/errors';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 // invoices table import removed — use invoiceRepo.findAll() instead
 import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
+import { subscriptions } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { eq } from 'drizzle-orm';
 import type Stripe from 'stripe';
 
@@ -61,7 +62,7 @@ export async function handleStripeWebhook(
     const merchantAccountRepo = new MerchantAccountRepository(database, logger);
     
     // Handle different webhook event types
-    switch (event.type) {
+    switch (event.type as string) {
       // Payment Intent events
       case 'payment_intent.succeeded':
         await handlePaymentIntentSucceeded(event, invoiceRepo, logger, notificationService);
@@ -107,10 +108,27 @@ export async function handleStripeWebhook(
         await handleTransferCreated(event, invoiceRepo, logger);
         break;
         
-      case 'transfer.failed' as any: // structural: Stripe type gap — transfer.failed not in Stripe.Event['type'] union
+      case 'transfer.failed': // structural: Stripe type gap — transfer.failed not in Stripe.Event['type'] union
         await handleTransferFailed(event, invoiceRepo, logger);
         break;
-      
+
+      // Subscription lifecycle events (UJ-M03)
+      case 'customer.subscription.updated':
+        await handleSubscriptionUpdated(event, database, logger);
+        break;
+
+      case 'customer.subscription.deleted':
+        await handleSubscriptionDeleted(event, database, logger);
+        break;
+
+      case 'invoice.payment_succeeded':
+        await handleInvoicePaymentSucceeded(event, invoiceRepo, database, logger);
+        break;
+
+      case 'invoice.payment_failed':
+        await handleInvoicePaymentFailed(event, database, logger);
+        break;
+
       default:
         logger.info(
           { eventType: event.type, eventId: event.id }, 
@@ -722,12 +740,222 @@ async function handleTransferFailed(
   // Mark invoice as having transfer issues (might need manual review)
   for (const invoice of foundInvoices) {
     logger.error(
-      { 
+      {
         invoiceId: invoice.id,
         transferId: transfer.id,
         failureMessage: (transfer as any).failure_message // structural: Stripe type gap — failure_message not in Stripe.Transfer type
-      }, 
+      },
       'Transfer failed for invoice - requires manual review'
     );
   }
+}
+
+// ── Subscription lifecycle handlers (UJ-M03) ─────────────────────────────────
+
+/**
+ * Handle customer.subscription.updated — sync status from Stripe to local subscription.
+ */
+async function handleSubscriptionUpdated(
+  event: Stripe.Event,
+  database: any,
+  logger: any,
+) {
+  const stripeSub = event.data.object as Stripe.Subscription;
+  const stripeEventId = event.id;
+
+  // Find local subscription by stripeSubscriptionId
+  const [local] = await database
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.stripeSubscriptionId, stripeSub.id))
+    .limit(1);
+
+  if (!local) {
+    logger.warn({ stripeSubscriptionId: stripeSub.id }, 'No local subscription found for Stripe subscription update');
+    return;
+  }
+
+  // Idempotency guard
+  if (local.lastStripeEventId === stripeEventId) {
+    logger.debug({ stripeEventId, subscriptionId: local.id }, 'Duplicate Stripe event — skipping');
+    return;
+  }
+
+  // Map Stripe status to local status
+  const stripeStatusMap: Record<string, string> = {
+    active: 'active',
+    past_due: 'past_due',
+    canceled: 'cancelled',
+    unpaid: 'past_due',
+    trialing: 'trial',
+    paused: 'past_due',
+    incomplete: 'past_due',
+    incomplete_expired: 'expired',
+  };
+
+  const newStatus = stripeStatusMap[stripeSub.status] ?? 'past_due';
+  const now = new Date();
+
+  const stripeSubAny = stripeSub as any; // structural: Stripe 2025 API type gap — current_period_start/end moved
+  await database
+    .update(subscriptions)
+    .set({
+      status: newStatus,
+      currentPeriodStart: stripeSubAny.current_period_start
+        ? new Date(stripeSubAny.current_period_start * 1000)
+        : local.currentPeriodStart,
+      currentPeriodEnd: stripeSubAny.current_period_end
+        ? new Date(stripeSubAny.current_period_end * 1000)
+        : local.currentPeriodEnd,
+      lastStripeEventId: stripeEventId,
+      updatedAt: now,
+    })
+    .where(eq(subscriptions.id, local.id));
+
+  logger.info(
+    { subscriptionId: local.id, stripeStatus: stripeSub.status, localStatus: newStatus },
+    'Subscription synced from Stripe update',
+  );
+}
+
+/**
+ * Handle customer.subscription.deleted — mark local subscription as cancelled.
+ */
+async function handleSubscriptionDeleted(
+  event: Stripe.Event,
+  database: any,
+  logger: any,
+) {
+  const stripeSub = event.data.object as Stripe.Subscription;
+  const stripeEventId = event.id;
+
+  const [local] = await database
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.stripeSubscriptionId, stripeSub.id))
+    .limit(1);
+
+  if (!local) {
+    logger.warn({ stripeSubscriptionId: stripeSub.id }, 'No local subscription found for Stripe subscription deletion');
+    return;
+  }
+
+  if (local.lastStripeEventId === stripeEventId) {
+    logger.debug({ stripeEventId }, 'Duplicate Stripe event — skipping');
+    return;
+  }
+
+  const now = new Date();
+  await database
+    .update(subscriptions)
+    .set({
+      status: 'cancelled',
+      cancelledAt: now,
+      cancelReason: 'Cancelled via Stripe (subscription deleted)',
+      lastStripeEventId: stripeEventId,
+      updatedAt: now,
+    })
+    .where(eq(subscriptions.id, local.id));
+
+  logger.info({ subscriptionId: local.id }, 'Subscription cancelled via Stripe deletion event');
+}
+
+/**
+ * Handle invoice.payment_succeeded — extend currentPeriodEnd and set status=active.
+ * Also handles dues invoices (existing behaviour preserved via fallback).
+ */
+async function handleInvoicePaymentSucceeded(
+  event: Stripe.Event,
+  invoiceRepo: InvoiceRepository,
+  database: any,
+  logger: any,
+) {
+  const invoice = event.data.object as Stripe.Invoice;
+  const stripeEventId = event.id;
+
+  // Try to match a platform subscription via subscription ID
+  const stripeSubscriptionId = (invoice as any).subscription as string | null;
+  if (stripeSubscriptionId) {
+    const [local] = await database
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId))
+      .limit(1);
+
+    if (local) {
+      if (local.lastStripeEventId === stripeEventId) {
+        logger.debug({ stripeEventId }, 'Duplicate invoice.payment_succeeded — skipping');
+        return;
+      }
+
+      const lines = (invoice as any).lines?.data ?? [];
+      const periodEnd = lines[0]?.period?.end
+        ? new Date(lines[0].period.end * 1000)
+        : null;
+
+      const now = new Date();
+      await database
+        .update(subscriptions)
+        .set({
+          status: 'active',
+          currentPeriodStart: invoice.period_start ? new Date(invoice.period_start * 1000) : local.currentPeriodStart,
+          currentPeriodEnd: periodEnd ?? local.currentPeriodEnd,
+          lastStripeEventId: stripeEventId,
+          updatedAt: now,
+        })
+        .where(eq(subscriptions.id, local.id));
+
+      logger.info({ subscriptionId: local.id }, 'Subscription activated on payment success');
+      return;
+    }
+  }
+
+  // Fallback: not a platform subscription invoice — ignore (dues handled elsewhere)
+  logger.debug({ invoiceId: invoice.id }, 'invoice.payment_succeeded — no matching platform subscription');
+}
+
+/**
+ * Handle invoice.payment_failed — set subscription to past_due.
+ */
+async function handleInvoicePaymentFailed(
+  event: Stripe.Event,
+  database: any,
+  logger: any,
+) {
+  const invoice = event.data.object as Stripe.Invoice;
+  const stripeEventId = event.id;
+
+  const stripeSubscriptionId = (invoice as any).subscription as string | null;
+  if (!stripeSubscriptionId) {
+    logger.debug({ invoiceId: invoice.id }, 'invoice.payment_failed — no subscription ID, skipping');
+    return;
+  }
+
+  const [local] = await database
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId))
+    .limit(1);
+
+  if (!local) {
+    logger.debug({ stripeSubscriptionId }, 'invoice.payment_failed — no matching platform subscription');
+    return;
+  }
+
+  if (local.lastStripeEventId === stripeEventId) {
+    logger.debug({ stripeEventId }, 'Duplicate invoice.payment_failed — skipping');
+    return;
+  }
+
+  const now = new Date();
+  await database
+    .update(subscriptions)
+    .set({
+      status: 'past_due',
+      lastStripeEventId: stripeEventId,
+      updatedAt: now,
+    })
+    .where(eq(subscriptions.id, local.id));
+
+  logger.info({ subscriptionId: local.id }, 'Subscription set to past_due on invoice payment failure');
 }

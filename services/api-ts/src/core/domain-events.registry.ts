@@ -249,6 +249,32 @@ export interface DomainEventMap {
     notificationDeadline: string;
     description: string;
   };
+
+  // ── Subscription Context (UJ-M03) ─────────────────────────────────────
+  'subscription.created': {
+    subscriptionId: string;
+    organizationId: string;
+    tierId: string;
+    status: string;
+  };
+
+  'subscription.upgraded': {
+    subscriptionId: string;
+    organizationId: string;
+    fromTierId: string;
+    toTierId: string;
+  };
+
+  'subscription.cancelled': {
+    subscriptionId: string;
+    organizationId: string;
+    reason: string;
+  };
+
+  'subscription.payment_failed': {
+    subscriptionId: string;
+    organizationId: string;
+  };
 }
 
 export type DomainEventName = keyof DomainEventMap;

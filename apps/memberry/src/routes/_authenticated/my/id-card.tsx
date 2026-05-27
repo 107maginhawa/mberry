@@ -76,6 +76,14 @@ function MyIdCard() {
     ? new Date(membership.duesExpiryDate).toLocaleDateString()
     : '—'
 
+  const orgId: string | null = membership?.organizationId ?? null
+
+  function handleDownloadPdf() {
+    if (!orgId) return
+    const url = `/api/persons/me/id-card/${orgId}/pdf`
+    window.open(url, '_blank')
+  }
+
   return (
     <div>
       <PageHeader
@@ -129,7 +137,7 @@ function MyIdCard() {
           </GlassCard>
 
           <div className="text-center mt-6">
-            <Button onClick={() => window.print()}>
+            <Button onClick={handleDownloadPdf} disabled={!orgId}>
               Download PDF
             </Button>
           </div>

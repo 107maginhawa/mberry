@@ -39,7 +39,7 @@ import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
-import { registerBreachJobs, registerTicketJobs } from '@/handlers/platformadmin/jobs';
+import { registerBreachJobs, registerTicketJobs, registerTrialExpiryMonitor, registerPastDueMonitor } from '@/handlers/platformadmin/jobs';
 import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
 
 // Routes
@@ -133,6 +133,10 @@ import { cancelRegistration } from '@/handlers/events/cancelRegistration';
 // Public credential lookup (Wave 3a — Trust Directory)
 import { lookupCredentialPublic } from '@/handlers/association:member/lookupCredentialPublic';
 
+// ID card — JSON + PDF download (UJ-M02)
+import { getMyIdCard } from '@/handlers/person/getMyIdCard';
+import { getMyIdCardPdf } from '@/handlers/person/getMyIdCardPdf';
+
 // Wave 2b: Credit pipeline, CPD config, compliance, certificates
 import { getCpdConfig } from '@/handlers/association:member/getCpdConfig';
 import { updateCpdConfig } from '@/handlers/association:member/updateCpdConfig';
@@ -156,6 +160,17 @@ import { transitionOfficerTerm } from '@/handlers/association:member/transitionO
 
 // Org-wide dashboard — M4-DASHBOARD AC-M04-005 (hand-wired, not in TypeSpec)
 import { getOrgDashboard } from '@/handlers/association:member/getOrgDashboard';
+
+// Subscription system (UJ-M03) — pricing tier management and org subscriptions
+import { listPricingTiers } from '@/handlers/platformadmin/listPricingTiers';
+import { createPricingTier } from '@/handlers/platformadmin/createPricingTier';
+import { updatePricingTier } from '@/handlers/platformadmin/updatePricingTier';
+import { listSubscriptions } from '@/handlers/platformadmin/listSubscriptions';
+import { getSubscription } from '@/handlers/platformadmin/getSubscription';
+import { cancelSubscription } from '@/handlers/platformadmin/cancelSubscription';
+import { getMySubscription } from '@/handlers/association:member/getMySubscription';
+import { upgradeSubscription } from '@/handlers/association:member/upgradeSubscription';
+import { createSubscriptionCheckout } from '@/handlers/association:member/createSubscriptionCheckout';
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -400,6 +415,8 @@ export function createApp(config: Config): App {
   app.get('/association/member/compliance/:organizationId', authMiddleware(), getComplianceReport as any);
   app.post('/association/member/compliance/:organizationId/refresh', authMiddleware(), refreshCompliance as any);
   app.get('/persons/me/credits', authMiddleware(), orgContextOptionalMiddleware(), getMyCredits as any);
+  app.get('/persons/me/id-card/:orgId', authMiddleware(), getMyIdCard as any);
+  app.get('/persons/me/id-card/:orgId/pdf', authMiddleware(), getMyIdCardPdf as any);
   app.post('/certificates/bulk-issue', authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
 
   // Wave 1 Financial: Special Assessments CRUD (T8)
@@ -415,6 +432,21 @@ export function createApp(config: Config): App {
 
   // Org-wide dashboard — M4-DASHBOARD AC-M04-005
   app.get('/association/member/org/:organizationId/dashboard', getOrgDashboard as any);
+
+  // Subscription system (UJ-M03) — admin pricing tier management (under /admin/* auth middleware)
+  app.get('/admin/pricing', listPricingTiers as any);
+  app.post('/admin/pricing', createPricingTier as any);
+  app.put('/admin/pricing/:tierId', updatePricingTier as any);
+
+  // Subscription system (UJ-M03) — admin subscription management
+  app.get('/admin/subscriptions', listSubscriptions as any);
+  app.get('/admin/subscriptions/:id', getSubscription as any);
+  app.put('/admin/subscriptions/:id/cancel', cancelSubscription as any);
+
+  // Subscription system (UJ-M03) — org-facing subscription routes (under /association/* auth middleware)
+  app.get('/association/member/org/:organizationId/subscription', getMySubscription as any);
+  app.post('/association/member/org/:organizationId/subscription/upgrade', upgradeSubscription as any);
+  app.post('/association/member/org/:organizationId/subscription/checkout', createSubscriptionCheckout as any);
 
   // Wave 4β: Saved Segments — CRUD for audience segment presets
   app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
@@ -495,6 +527,8 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerSurveyJobs(jobs, app.notifs);
   registerBreachJobs(jobs, app.notifs);
   registerTicketJobs(jobs, app.notifs);
+  registerTrialExpiryMonitor(jobs);
+  registerPastDueMonitor(jobs);
 
   logger.debug('Starting background job scheduler...');
   await jobs.start();
