@@ -327,6 +327,16 @@ export function createApp(config: Config): App {
   //   /admin/* (3), /org/:id/payments/send-link, /accredited-providers/* (4),
   //   /cpd-config/* (2), /credits/manual, /compliance/* (2), /persons/me/credits,
   //   /certificates/bulk-issue, /special-assessments/* (6), /segments/* (3)
+  //
+  // HANDLER CONSOLIDATION STATUS (Wave 4):
+  //   m05 membership/: query-rich repo (JOINs, search) — complementary to
+  //       association:member/ CRUD repo. Both use same schema. No consolidation needed.
+  //   m06 dues/: deprecated dues.repo.ts removed (zero consumers).
+  //       Handlers import canonical association:member/repos/dues-payments.repo.
+  //       Payment-token repos are unique to dues/ (no overlap).
+  //   m09/m10 training/: hand-wired CRUD repo, shares schema with
+  //       association:operations/ TypeSpec repo. Complementary bounded contexts.
+  //   m12 elections/: entirely hand-wired. TypeSpec migration deferred.
   // ──────────────────────────────────────────────────────────────────────────
 
   // completeEvent — removed hand-wired duplicate; now served via generated TypeSpec route

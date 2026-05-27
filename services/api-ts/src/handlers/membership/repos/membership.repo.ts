@@ -14,6 +14,17 @@ import {
 } from '../../association:member/repos/membership.schema';
 import { persons } from '../../person/repos/person.schema';
 
+// ── Module Boundary ─────────────────────────────────────────────────────
+// Schema canonical home: association:member/repos/membership.schema.ts
+// TypeSpec-generated repo: association:member/repos/membership.repo.ts
+//   → Atomic CRUD via DatabaseRepository base class (used by TypeSpec handlers)
+// This repo (hand-wired): rich JOIN queries (person data, categories),
+//   search, pagination, officer/dues/compliance enrichment.
+//   → Used by 9+ modules: invite, events, communication, association:member
+// Both repos share the same schema — no data divergence.
+// Preferred import: @/handlers/membership/repos/membership.repo
+// ─────────────────────────────────────────────────────────────────────────
+
 // organizationId is the canonical ID used for all org-scoped queries.
 export class MembershipRepository {
   constructor(private db: DatabaseInstance) {}
