@@ -5,8 +5,9 @@ const OFFICER_TERM = { positionTitle: 'President' };
 
 function buildMockDb(insertBehavior: 'success' | 'error' = 'success', selectResults: any[][] = []) {
   let selectIdx = 0;
+  let insertCallCount = 0;
   const insertSpy = mock((_v: any) => {});
-  const db = {
+  const makeDbLike = (behavior: 'success' | 'error') => ({
     select: (..._a: any[]) => ({
       from: (_t: any) => {
         const idx = selectIdx++;
@@ -29,8 +30,11 @@ function buildMockDb(insertBehavior: 'success' | 'error' = 'success', selectResu
     }),
     insert: (_t: any) => ({
       values: (v: any) => {
+        insertCallCount++;
         insertSpy(v);
-        if (insertBehavior === 'error') return Promise.reject(new Error('DB error'));
+        // For 'error' mode: let the first insert (reserveCertificateRange seq) succeed,
+        // but fail subsequent inserts (certificate batch insert)
+        if (behavior === 'error' && insertCallCount > 1) return Promise.reject(new Error('DB error'));
         return Promise.resolve();
       },
     }),
@@ -40,6 +44,13 @@ function buildMockDb(insertBehavior: 'success' | 'error' = 'success', selectResu
         where: (_c: any) => Promise.resolve(),
       }),
     }),
+  });
+  const db = {
+    ...makeDbLike(insertBehavior),
+    transaction: async (fn: any) => {
+      insertCallCount = 0;
+      return fn(makeDbLike(insertBehavior));
+    },
   };
   return { db, insertSpy };
 }
@@ -72,7 +83,8 @@ describe('generateCertificates', () => {
   test('creates certificate records in DB via insert', async () => {
     const { db, insertSpy } = buildMockDb();
     await generateCertificates(db as any, validBody, 'user-1');
-    expect(insertSpy).toHaveBeenCalledTimes(4);
+    // 1 insert for reserveCertificateRange (seq row) + 1 batch insert for all certs
+    expect(insertSpy).toHaveBeenCalledTimes(2);
   });
 
   test('returns ERROR certificateNumber on failure', async () => {

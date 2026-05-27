@@ -152,8 +152,6 @@ function buildService(stubs: {
   sendResult?: { success: boolean; provider?: string; messageId?: string; error?: string };
 }) {
   const logger = makeLogger();
-  const service = createEmailService(fakeDb, fakeConfig, logger as any);
-  const impl = service as any; // access private fields
 
   // Stub queueRepo
   const markAsProcessingMock = mock(async (_id: string) => {});
@@ -161,38 +159,53 @@ function buildService(stubs: {
   const markAsSentMock = mock(async (_id: string, _provider: string, _msgId: string) => {});
   const updateOneByIdMock = mock(async (_id: string, _data: any) => {});
 
-  impl.queueRepo = {
-    getPendingEmails: mock(async () => stubs.pendingEmails ?? []),
-    markAsProcessing: markAsProcessingMock,
-    markAsFailed: markAsFailedMock,
-    markAsSent: markAsSentMock,
-    updateOneById: updateOneByIdMock,
-  };
-
-  // Stub templateRepo
-  impl.templateRepo = {
+  const templateRepoStub = {
     findMany: mock(async () => [makeTemplate()]),
     renderTemplate: mock(async () => ({
       subject: 'Welcome Test',
       bodyHtml: '<p>Hello</p>',
       bodyText: 'Hello',
     })),
+    previewTemplate: mock(async () => ({
+      subject: 'Welcome Test',
+      bodyHtml: '<p>Hello</p>',
+      bodyText: 'Hello',
+    })),
   };
 
-  // Stub suppressionRepo
-  impl.suppressionRepo = {
+  const queueRepoStub = {
+    getPendingEmails: mock(async () => stubs.pendingEmails ?? []),
+    queueEmail: mock(async (req: any) => req),
+    markAsProcessing: markAsProcessingMock,
+    markAsFailed: markAsFailedMock,
+    markAsSent: markAsSentMock,
+    updateOneById: updateOneByIdMock,
+  };
+
+  const suppressionRepoStub = {
     isSuppressed: mock(async () => stubs.isSuppressed ?? false),
   };
 
-  // Stub membershipRepo
-  impl.membershipRepo = {
+  const membershipLookupStub = {
     findByPersonAndOrg: mock(async () => stubs.membership === undefined ? null : stubs.membership),
   };
 
-  // Stub bulkRateLimiter
-  impl.bulkRateLimiter = {
+  const bulkRateLimiterStub = {
     canSend: mock(() => stubs.canSend ?? true),
   };
+
+  const deps = {
+    templateRepo: templateRepoStub,
+    queueRepo: queueRepoStub,
+    suppressionRepo: suppressionRepoStub,
+    membershipLookup: membershipLookupStub,
+    bulkRateLimiter: bulkRateLimiterStub,
+    generateUnsubToken: (_email: string, _orgId: string) => 'fake-unsub-token',
+    initializeTemplates: mock(async () => {}),
+  };
+
+  const service = createEmailService(fakeConfig, logger as any, fakeDb, deps);
+  const impl = service as any; // access private fields
 
   // Stub the actual provider send so no real network calls happen
   const providerSendMock = mock(async (_req: any) => stubs.sendResult ?? { success: true, provider: 'smtp', messageId: 'msg-001' });
@@ -206,9 +219,9 @@ function buildService(stubs: {
       markAsFailed: markAsFailedMock,
       markAsSent: markAsSentMock,
       updateOneById: updateOneByIdMock,
-      isSuppressed: impl.suppressionRepo.isSuppressed as ReturnType<typeof mock>,
-      findByPersonAndOrg: impl.membershipRepo.findByPersonAndOrg as ReturnType<typeof mock>,
-      canSend: impl.bulkRateLimiter.canSend as ReturnType<typeof mock>,
+      isSuppressed: suppressionRepoStub.isSuppressed as ReturnType<typeof mock>,
+      findByPersonAndOrg: membershipLookupStub.findByPersonAndOrg as ReturnType<typeof mock>,
+      canSend: bulkRateLimiterStub.canSend as ReturnType<typeof mock>,
       send: providerSendMock,
     },
     logger,

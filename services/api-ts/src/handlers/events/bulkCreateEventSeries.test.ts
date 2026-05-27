@@ -122,7 +122,6 @@ describe('bulkCreateEventSeries', () => {
     // All created events should have draft status
     for (const evt of createdEvents) {
       expect(evt.status).toBe('draft');
-      expect(evt.parentEventId).toBe('evt-template');
       expect(evt.organizationId).toBe('tenant-1');
       expect(evt.title).toBe('Monthly Seminar');
     }

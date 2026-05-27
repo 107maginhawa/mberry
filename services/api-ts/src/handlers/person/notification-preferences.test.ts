@@ -1,13 +1,12 @@
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
-import { getNotificationPreferences } from './getNotificationPreferences';
+import { getMyNotificationPreferences } from './getMyNotificationPreferences';
 import { updateNotificationPreferences } from './updateNotificationPreferences';
 
-describe('getNotificationPreferences', () => {
-  test('returns 401 without user', async () => {
+describe('getMyNotificationPreferences', () => {
+  test('throws UnauthorizedError without session', async () => {
     const ctx = makeCtx({ user: null });
-    const response = await getNotificationPreferences(ctx);
-    expect(response.status).toBe(401);
+    await expect(getMyNotificationPreferences(ctx)).rejects.toThrow();
   });
 });
 

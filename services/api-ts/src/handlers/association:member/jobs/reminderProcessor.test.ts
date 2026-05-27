@@ -150,7 +150,7 @@ describe('processDuesReminders', () => {
     const mockMembers = [
       { id: 'mem-1', personId: 'person-1', organizationId: 'org-1', duesExpiryDate: '2026-06-12' },
     ];
-    const existingLog = [{ personId: 'person-1', scheduleId: 'sched-1', periodKey: '2026', daysOffset: -30 }];
+    const existingLog = [{ personId: 'person-1', channel: 'in-app', scheduleId: 'sched-1', periodKey: '2026', daysOffset: -30 }];
 
     // Call sequence:
     // 1. configs
@@ -597,7 +597,7 @@ describe('processDuesReminders', () => {
       [{ id: 'config-1', organizationId: 'org-1' }],
       whereResponse(mockSchedules),
       whereResponse(mockMembers),
-      whereResponse([{ personId: 'person-1', scheduleId: 'sched-1', periodKey: '2026', daysOffset: -30 }]),
+      whereResponse([{ personId: 'person-1', channel: 'in-app', scheduleId: 'sched-1', periodKey: '2026', daysOffset: -30 }]),
     ]);
 
     const result2 = await processDuesReminders({ db: db2 as any, logger: mockLogger });
