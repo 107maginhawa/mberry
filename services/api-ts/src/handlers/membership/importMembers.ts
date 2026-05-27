@@ -1,5 +1,4 @@
 import type { BaseContext } from '@/types/app';
-import { z } from 'zod';
 import { eq, ilike, or, sql } from 'drizzle-orm';
 import { MembershipRepository } from './repos/membership.repo';
 import { DuesConfigRepository } from '../association:member/repos/dues.repo';
@@ -7,36 +6,13 @@ import { persons } from '../person/repos/person.schema';
 import type { Session } from '@/types/auth';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { importMemberRowSchema, importMembersSchema, normalizeLicense, type ImportMemberRow } from './import-types';
+
+// Re-export shared types/schemas for backward compatibility
+export { importMemberRowSchema, importMembersSchema, normalizeLicense, type ImportMemberRow } from './import-types';
 
 // Re-export CSV import utilities for unified API surface
 export { parseCSV, previewCSVImport, bulkCSVImport, validateImportRows } from './csvImport';
-
-// ─── Zod Validation Schema (V-08) ─────────────────────────
-
-export const importMemberRowSchema = z.object({
-  personId: z.string().min(1).optional(),
-  email: z.string().email().optional(),
-  licenseNumber: z.string().min(1).optional(),
-  firstName: z.string().min(1).optional(),
-  lastName: z.string().min(1).optional(),
-  tierId: z.string().min(1),
-  categoryId: z.string().min(1).optional(),
-  memberNumber: z.string().optional(),
-  startDate: z.string().optional(),
-  duesExpiryDate: z.string().optional(),
-});
-
-export const importMembersSchema = z.object({
-  members: z.array(importMemberRowSchema).min(0),
-});
-
-export type ImportMemberRow = z.infer<typeof importMemberRowSchema>;
-
-// ─── License Normalization (BR-23) ─────────────────────────
-
-export function normalizeLicense(license: string): string {
-  return license.toLowerCase().replace(/[\s-]/g, '').replace(/^0+/, '');
-}
 
 // ─── Match Result Types ────────────────────────────────────
 

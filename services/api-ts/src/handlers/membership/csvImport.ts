@@ -14,7 +14,7 @@ import { sql } from 'drizzle-orm';
 import { MembershipRepository } from './repos/membership.repo';
 import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 import { persons } from '../person/repos/person.schema';
-import { importMemberRowSchema, normalizeLicense, type ImportMemberRow } from './importMembers';
+import { importMemberRowSchema, normalizeLicense, type ImportMemberRow } from './import-types';
 import type { Session } from '@/types/auth';
 
 // ─── Constants ───────────────────────────────────────────

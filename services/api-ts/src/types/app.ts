@@ -8,7 +8,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import type { User, Session, AdminLevel } from '@/types/auth';
 import type { PlatformAdmin } from '@/handlers/platformadmin/repos/platform-admin.schema';
-import type { AuthInstance } from '@/core/auth';
+import type { AuthInstance } from '@/utils/auth';
 import type { StorageProvider } from '@/core/storage';
 import type { JobScheduler } from '@/core/jobs';
 import type { NotificationService } from '@/core/notifs';

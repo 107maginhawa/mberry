@@ -7,9 +7,9 @@ import type { AuthConfig, VersionedSecret } from '@/types/auth';
 import { DEFAULT_ICE_SERVERS, parseIceServerUrls, type IceServer } from '@/utils/webrtc';
 import type { DatabaseConfig } from './database';
 import type { StorageConfig } from './storage';
-import type { EmailConfig } from './email';
+import type { EmailConfig } from './email-types';
 import type { NotificationConfig } from './notifs';
-import type { BillingConfig } from './billing';
+import type { BillingConfig } from './billing-types';
 
 export interface Config {
   // Server configuration

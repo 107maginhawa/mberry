@@ -13,45 +13,15 @@ import type {
   TemplatePreviewResult,
   EmailQueueEntry,
   EmailTemplateEntry,
+  EmailConfig,
 } from '@/core/email-types';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import postmark from 'postmark';
 import * as OneSignal from '@onesignal/node-onesignal';
 
-/**
- * Email configuration
- */
-export interface EmailConfig {
-  provider: 'smtp' | 'postmark' | 'onesignal';
-  from: {
-    name: string;
-    email: string;
-  };
-
-  // SMTP configuration
-  smtp?: {
-    host: string;
-    port: number;
-    secure: boolean;
-    auth: {
-      user: string;
-      pass: string;
-    };
-  };
-
-  // Postmark configuration
-  postmark?: {
-    apiKey: string;
-    messageStream?: string;
-  };
-
-  // OneSignal configuration
-  onesignal?: {
-    appId: string;
-    apiKey: string;
-  };
-}
+// Re-export EmailConfig from canonical location for backward compatibility
+export type { EmailConfig } from '@/core/email-types';
 
 /**
  * Email provider interface

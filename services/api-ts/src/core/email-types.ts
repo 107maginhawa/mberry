@@ -104,3 +104,37 @@ export interface EmailTemplateEntry {
   replyToEmail: string | null;
   replyToName: string | null;
 }
+
+/**
+ * Email configuration
+ */
+export interface EmailConfig {
+  provider: 'smtp' | 'postmark' | 'onesignal';
+  from: {
+    name: string;
+    email: string;
+  };
+
+  // SMTP configuration
+  smtp?: {
+    host: string;
+    port: number;
+    secure: boolean;
+    auth: {
+      user: string;
+      pass: string;
+    };
+  };
+
+  // Postmark configuration
+  postmark?: {
+    apiKey: string;
+    messageStream?: string;
+  };
+
+  // OneSignal configuration
+  onesignal?: {
+    appId: string;
+    apiKey: string;
+  };
+}

@@ -6,24 +6,11 @@
 import Stripe from 'stripe';
 import type { Logger } from 'pino';
 import type { DatabaseInstance } from './database';
-import { maskEmail } from './logger';
+import { maskEmail } from '@/utils/mask';
 
-/**
- * Stripe configuration
- */
-export interface StripeConfig {
-  secretKey?: string;
-  webhookSecret?: string;
-  url?: string; // Custom Stripe API URL for testing
-}
-
-/**
- * Billing configuration
- */
-export interface BillingConfig {
-  provider: 'stripe';
-  stripe?: StripeConfig;
-}
+// Re-export billing types from canonical location for backward compatibility
+export type { StripeConfig, BillingConfig } from './billing-types';
+import type { StripeConfig, BillingConfig } from './billing-types';
 
 export interface PaymentIntentData {
   amount: number; // Amount in cents

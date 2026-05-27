@@ -12,7 +12,7 @@
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import type { CreateAuditLogRequest } from '@/core/audit';
-import { maskEmail } from '@/core/logger';
+import { maskEmail } from '@/utils/mask';
 import * as schema from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
 

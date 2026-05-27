@@ -13,7 +13,7 @@ import type { App } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import type { EmailService } from '@/core/email';
-import { maskEmail } from '@/core/logger';
+import { maskEmail } from '@/utils/mask';
 import type { AuthInstance } from '@/utils/auth';
 import { EmailTemplateTags } from '@/core/email-types';
 import type { CreateAuditLogRequest } from '@/core/audit';
