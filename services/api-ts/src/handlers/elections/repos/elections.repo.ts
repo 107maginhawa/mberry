@@ -34,7 +34,7 @@ export class ElectionsRepository {
   }
 
   async listNominees(electionId: string): Promise<ElectionNominee[]> {
-    return this.db.select().from(electionNominees).where(eq(electionNominees.electionId, electionId));
+    return this.db.select().from(electionNominees).where(eq(electionNominees.electionId, electionId)).limit(100);
   }
 
   async addNominee(data: { electionId: string; positionId: string; personId: string; nominatedBy: string; organizationId: string }) {

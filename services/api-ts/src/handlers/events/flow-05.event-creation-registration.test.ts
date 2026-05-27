@@ -5,12 +5,18 @@ import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { createEvent } from './createEvent';
 import { EventsRepository } from './repos/events.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
 const ORG = 'org-flow-05';
 
+let officerMocks: ReturnType<typeof stubRepo>;
+
 function defaultStubs(overrides: Record<string, (...args: any[]) => any> = {}) {
+  officerMocks = stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+  });
   return stubRepo(EventsRepository, {
     create: async (data: any) => ({ id: 'event-1', ...data }),
     findBySlug: async () => undefined,
@@ -25,10 +31,12 @@ describe('[FLOW-05] Event Creation → Registration Open', () => {
 
   beforeEach(() => {
     restoreRepo(EventsRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('event created with registration capacity', async () => {

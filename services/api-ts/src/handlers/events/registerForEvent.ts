@@ -3,6 +3,7 @@ import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
 import { checkActiveMembership } from './utils/membership-check';
 import type { Session } from '@/types/auth';
+import { domainEvents } from '@/core/domain-events';
 
 export async function registerForEvent(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -38,6 +39,13 @@ export async function registerForEvent(ctx: Context): Promise<Response> {
     createdBy: session.user.id,
     updatedBy: session.user.id,
   });
+
+  domainEvents.emit('event.registered', {
+    eventId,
+    personId: session.user.id,
+    organizationId: event.organizationId,
+    status: isWaitlisted ? 'waitlisted' : 'confirmed',
+  }).catch(() => {});
 
   return ctx.json({ data: registration }, 201);
 }

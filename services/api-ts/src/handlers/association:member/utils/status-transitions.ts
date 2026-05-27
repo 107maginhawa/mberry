@@ -27,6 +27,7 @@ export const PAYMENT_VALID_TRANSITIONS: Record<string, string[]> = {
   failed: [],              // terminal
   rejected: [],            // terminal
   expired: [],             // terminal
+  cancelled: [],           // terminal
 };
 
 export function isValidInvoiceTransition(from: string, to: string): boolean {
@@ -59,4 +60,106 @@ export function paymentTransitionError(from: string, to: string): string {
   }
   const allowedStr = allowed.length > 0 ? allowed.join(', ') : 'none (terminal state)';
   return `Cannot transition payment from '${from}' to '${to}'. Allowed: ${allowedStr}`;
+}
+
+// ---------------------------------------------------------------------------
+// Membership status transitions
+// ---------------------------------------------------------------------------
+
+/**
+ * Valid state transitions for membership status.
+ *
+ * Membership statuses: pendingPayment | active | gracePeriod | lapsed |
+ *                      expired | suspended | removed | resigned | deceased | expelled
+ *
+ * Notes:
+ * - pendingPayment → active is the approval path
+ * - active → gracePeriod and gracePeriod → lapsed are automatic (computed from dues_expiry_date)
+ * - lapsed → active happens via payment recording (BR-07)
+ * - removed/resigned/deceased/expelled are terminal states
+ */
+export const MEMBERSHIP_VALID_TRANSITIONS: Record<string, string[]> = {
+  pendingPayment: ['active', 'removed', 'expired'],
+  active: ['gracePeriod', 'suspended', 'removed', 'resigned', 'deceased', 'expelled'],
+  gracePeriod: ['active', 'lapsed', 'suspended', 'removed', 'resigned', 'deceased', 'expelled'],
+  lapsed: ['active', 'suspended', 'removed', 'resigned', 'deceased', 'expelled'],
+  expired: ['active', 'removed'],
+  suspended: ['active', 'removed', 'resigned', 'expelled'],
+  removed: [],      // terminal
+  resigned: [],     // terminal
+  deceased: [],     // terminal
+  expelled: [],     // terminal
+};
+
+export function isValidMembershipTransition(from: string, to: string): boolean {
+  return MEMBERSHIP_VALID_TRANSITIONS[from]?.includes(to) ?? false;
+}
+
+export function membershipTransitionError(from: string, to: string): string {
+  const allowed = MEMBERSHIP_VALID_TRANSITIONS[from];
+  if (allowed === undefined) {
+    return `Unknown membership status '${from}'`;
+  }
+  const allowedStr = allowed.length > 0 ? allowed.join(', ') : 'none (terminal state)';
+  return `Cannot transition membership from '${from}' to '${to}'. Allowed: ${allowedStr}`;
+}
+
+// ---------------------------------------------------------------------------
+// License status transitions
+// ---------------------------------------------------------------------------
+
+/**
+ * Valid state transitions for professional license/credential status.
+ *
+ * License statuses: pending | active | expired | suspended | revoked
+ */
+export const LICENSE_VALID_TRANSITIONS: Record<string, string[]> = {
+  pending: ['active', 'revoked'],
+  active: ['expired', 'suspended', 'revoked'],
+  expired: ['active', 'revoked'],
+  suspended: ['active', 'revoked'],
+  revoked: [],  // terminal
+};
+
+export function isValidLicenseTransition(from: string, to: string): boolean {
+  return LICENSE_VALID_TRANSITIONS[from]?.includes(to) ?? false;
+}
+
+export function licenseTransitionError(from: string, to: string): string {
+  const allowed = LICENSE_VALID_TRANSITIONS[from];
+  if (allowed === undefined) {
+    return `Unknown license status '${from}'`;
+  }
+  const allowedStr = allowed.length > 0 ? allowed.join(', ') : 'none (terminal state)';
+  return `Cannot transition license from '${from}' to '${to}'. Allowed: ${allowedStr}`;
+}
+
+// ---------------------------------------------------------------------------
+// Officer term status transitions
+// ---------------------------------------------------------------------------
+
+/**
+ * Valid state transitions for officer term status.
+ *
+ * Term statuses: upcoming | active | completed | resigned | removed
+ */
+export const TERM_VALID_TRANSITIONS: Record<string, string[]> = {
+  upcoming: ['active', 'removed'],
+  active: ['completed', 'resigned', 'removed'],
+  completed: [],   // terminal
+  resigned: [],    // terminal
+  removed: [],     // terminal
+};
+
+export function isValidTermTransition(from: string, to: string): boolean {
+  return TERM_VALID_TRANSITIONS[from]?.includes(to) ?? false;
+}
+
+export function termTransitionError(from: string, to: string): string {
+  const allowed = TERM_VALID_TRANSITIONS[from];
+  if (allowed === undefined) {
+    return `Unknown term status '${from}'`;
+  }
+  const allowedStr = allowed.length > 0 ? allowed.join(', ') : 'none (terminal state)';
+  return `Cannot transition term from '${from}' to '${to}'. Allowed: ${allowedStr}`;
 }

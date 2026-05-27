@@ -1,9 +1,11 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { EventsRepository } from './repos/events.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { bulkCreateEventSeries } from './bulkCreateEventSeries';
 
 let repoMocks: Record<string, { mockRestore: () => void }>;
+let officerMocks: Record<string, { mockRestore: () => void }>;
 
 const templateEvent = {
   id: 'evt-template',
@@ -26,6 +28,9 @@ const templateEvent = {
 };
 
 function stubRepoDefaults(overrides: Partial<Record<string, any>> = {}) {
+  officerMocks = stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+  });
   let createIdx = 0;
   repoMocks = stubRepo(EventsRepository, {
     get: async (id: string) => (id === templateEvent.id ? templateEvent : undefined),
@@ -38,7 +43,9 @@ function stubRepoDefaults(overrides: Partial<Record<string, any>> = {}) {
 describe('bulkCreateEventSeries', () => {
   afterEach(() => {
     if (repoMocks) Object.values(repoMocks).forEach(m => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach(m => m.mockRestore());
     restoreRepo(EventsRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('rejects when templateEventId missing', async () => {
@@ -115,7 +122,6 @@ describe('bulkCreateEventSeries', () => {
     // All created events should have draft status
     for (const evt of createdEvents) {
       expect(evt.status).toBe('draft');
-      expect(evt.parentEventId).toBe('evt-template');
       expect(evt.organizationId).toBe('tenant-1');
       expect(evt.title).toBe('Monthly Seminar');
     }

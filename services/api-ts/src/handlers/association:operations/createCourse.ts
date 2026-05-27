@@ -9,6 +9,9 @@ import { POSITION_TITLES } from '@/utils/position-titles';
 /**
  * createCourse
  *
+ * Courses sub-module: routes generated and backend handlers implemented,
+ * but no frontend UI built yet. Planned feature for a future wave.
+ *
  * Path: POST /association/training/courses
  * OperationId: createCourse
  */

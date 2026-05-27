@@ -66,21 +66,21 @@ describe('parseList — via CORS_ORIGINS', () => {
     }
   });
 
-  test('empty string returns default (["*"])', () => {
+  test('empty string returns default dev origins', () => {
     const restore = withEnv({ CORS_ORIGINS: '' });
     try {
       const cfg = parseConfig();
-      expect(cfg.cors.origins).toEqual(['*']);
+      expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004']);
     } finally {
       restore();
     }
   });
 
-  test('undefined returns default (["*"])', () => {
+  test('undefined returns default dev origins', () => {
     const restore = withEnv({ CORS_ORIGINS: undefined });
     try {
       const cfg = parseConfig();
-      expect(cfg.cors.origins).toEqual(['*']);
+      expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004']);
     } finally {
       restore();
     }
@@ -319,6 +319,8 @@ describe('parseConfig — default values (clean environment)', () => {
 
   beforeEach(() => {
     restore = withEnv(Object.fromEntries(KEYS_TO_CLEAR.map(k => [k, undefined])));
+    // AUTH_SECRET is now required in all environments — set a test value
+    process.env['AUTH_SECRET'] = 'test-secret-for-defaults-suite';
     cfg = parseConfig();
   });
 
@@ -352,8 +354,8 @@ describe('parseConfig — default values (clean environment)', () => {
     expect(cfg.database.ssl).toBe(false);
   });
 
-  test('cors.origins defaults to ["*"]', () => {
-    expect(cfg.cors.origins).toEqual(['*']);
+  test('cors.origins defaults to explicit dev origins (not wildcard)', () => {
+    expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004']);
   });
 
   test('cors.credentials defaults to true', () => {
@@ -620,7 +622,7 @@ describe('production config validation — fail fast on missing vars', () => {
     }
   });
 
-  test('does NOT throw in development even without required vars', () => {
+  test('throws in development when AUTH_SECRET missing (no hardcoded fallback)', () => {
     const restore = withEnv({
       NODE_ENV: 'development',
       AUTH_SECRET: undefined,
@@ -628,7 +630,7 @@ describe('production config validation — fail fast on missing vars', () => {
       INTERNAL_SERVICE_TOKEN: undefined,
     });
     try {
-      expect(() => parseConfig()).not.toThrow();
+      expect(() => parseConfig()).toThrow('AUTH_SECRET');
     } finally {
       restore();
     }

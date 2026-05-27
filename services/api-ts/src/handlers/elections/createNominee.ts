@@ -13,6 +13,7 @@ import { and, eq } from 'drizzle-orm';
 import { NotFoundError, ConflictError, ValidationError, BusinessLogicError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
 import { memberships } from '../association:member/repos/membership.schema';
+import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';
 
 const createNomineeSchema = z.object({
@@ -110,6 +111,14 @@ export async function createNominee(ctx: Context): Promise<Response> {
     nominatedBy: session.user.id,
     organizationId: orgId,
   });
+
+  domainEvents.emit('nomination.submitted', {
+    nomineeId: nominee.id,
+    electionId,
+    personId: nomineePersonId,
+    positionId: body.positionId,
+    organizationId: orgId,
+  }).catch(() => {});
 
   return ctx.json({ data: nominee }, 201);
 }

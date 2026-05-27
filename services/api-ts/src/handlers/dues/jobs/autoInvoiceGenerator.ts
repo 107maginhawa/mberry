@@ -160,7 +160,7 @@ export async function generateAutoInvoices(ctx: AutoInvoiceContext): Promise<Aut
 
   try {
     // 1. Get all org configs
-    const configs = await db.select().from(duesOrgConfigs);
+    const configs = await db.select().from(duesOrgConfigs).limit(500);
 
     for (const config of configs) {
       try {

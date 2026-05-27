@@ -13,6 +13,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeMember as createFakeMember } from '@/test-utils/factories';
 import { addMember } from './addMember';
 import { MembershipRepository } from './repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -38,10 +39,15 @@ describe('[BR-16] Activity Visibility', () => {
 describe('[BR-23] License Number Format', () => {
   beforeEach(() => {
     restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
   });
 
   afterEach(() => {
     restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
   });
 
   test('addMember stores memberNumber from body (original format preserved)', async () => {

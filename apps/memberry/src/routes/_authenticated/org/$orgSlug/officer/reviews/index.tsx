@@ -94,7 +94,7 @@ function OfficerReviews() {
                 className="border rounded-lg p-4 hover:bg-[var(--color-surface-warm)] transition-colors"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-info-bg)] text-[var(--color-info)]">
                     {formatReviewType(review.reviewType)}
                   </span>
                   <span className="text-2xl font-bold font-display">

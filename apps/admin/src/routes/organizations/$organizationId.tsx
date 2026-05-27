@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building, ArrowLeft, Pencil, Play, Pause, Archive } from 'lucide-react'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { toast } from 'sonner'
 import { getOrganizationOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/organizations/$organizationId')({
@@ -30,6 +31,7 @@ interface Organization {
 
 function OrganizationDetailPage() {
   const { organizationId } = Route.useParams()
+  const queryClient = useQueryClient()
 
   const { data: sdkOrg, isLoading, error } = useQuery(
     getOrganizationOptions({ path: { organizationId } })
@@ -40,6 +42,21 @@ function OrganizationDetailPage() {
   const createdDate = org?.createdAt || org?.created_at
   const assocName = org?.associationName || org?.association?.name || '--'
   const members = org?.members ?? []
+
+  async function transitionOrgStatus(newStatus: string) {
+    try {
+      const res = await fetch(`/api/admin/organizations/${organizationId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      toast.success(`Organization ${newStatus}`)
+      queryClient.invalidateQueries({ queryKey: getOrganizationOptions({ path: { organizationId } }).queryKey })
+    } catch {
+      toast.error(`Failed to ${newStatus} organization`)
+    }
+  }
 
   return (
     <div className="p-8">
@@ -128,15 +145,15 @@ function OrganizationDetailPage() {
           <div className="rounded-lg border bg-card p-6 mb-8">
             <h2 className="text-h2 mb-4">Lifecycle Controls</h2>
             <div className="flex items-center gap-3">
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => transitionOrgStatus('active')}>
                 <Play className="w-4 h-4" />
                 Activate
               </Button>
-              <Button className="bg-yellow-600 hover:bg-yellow-700">
+              <Button className="bg-yellow-600 hover:bg-yellow-700" onClick={() => transitionOrgStatus('suspended')}>
                 <Pause className="w-4 h-4" />
                 Suspend
               </Button>
-              <Button variant="destructive">
+              <Button variant="destructive" onClick={() => transitionOrgStatus('archived')}>
                 <Archive className="w-4 h-4" />
                 Archive
               </Button>

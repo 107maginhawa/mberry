@@ -3,7 +3,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
 import { cancelEvent } from './cancelEvent';
 import { EventsRepository } from './repos/events.repo';
-import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -13,19 +13,19 @@ const fakeEvent = createFakeEvent();
 
 describe('cancelEvent', () => {
   let mocks: ReturnType<typeof stubRepo>;
-  let memberMocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
 
-  const stubMembership = () => stubRepo(MembershipRepository, {
-    getMember: async () => ({ id: 'mem-1', personId: 'user-1', organizationId: 'org-1', status: 'active' }),
+  const stubOfficer = () => stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
   });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('cancels event and returns 200', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -41,7 +41,7 @@ describe('cancelEvent', () => {
   });
 
   test('passes cancelled status to repo.update', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     let capturedData: any = null;
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
@@ -59,7 +59,7 @@ describe('cancelEvent', () => {
   test('cancels event even with registrations (no guard in handler)', async () => {
     // Handler does not check for existing registrations before cancelling.
     // This documents the current behavior.
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => ({ ...fakeEvent, registrationCount: 50 }),
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -75,7 +75,7 @@ describe('cancelEvent', () => {
   });
 
   test('throws EVENT_ALREADY_CANCELLED if event is already cancelled', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => ({ ...fakeEvent, status: 'cancelled' }),
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -86,7 +86,7 @@ describe('cancelEvent', () => {
   });
 
   test('throws EVENT_COMPLETED if event is completed', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => ({ ...fakeEvent, status: 'completed' }),
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -97,7 +97,7 @@ describe('cancelEvent', () => {
   });
 
   test('throws NotFoundError for non-existent event', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => undefined,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),
@@ -111,7 +111,7 @@ describe('cancelEvent', () => {
   });
 
   test('crashes without session (org ownership requires session)', async () => {
-    memberMocks = stubMembership();
+    officerMocks = stubOfficer();
     mocks = stubRepo(EventsRepository, {
       get: async () => fakeEvent,
       update: async (_id: string, data: any) => ({ ...fakeEvent, ...data }),

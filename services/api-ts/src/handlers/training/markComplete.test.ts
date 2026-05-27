@@ -7,6 +7,7 @@ import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 const fakeTraining = createFakeTraining({
   organizationId: 'org-1',
@@ -28,8 +29,16 @@ const fakeEnrollment = createFakeEnrollment({
 describe('markComplete', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  // Default officer stub — all tests assume caller is an officer (auth-enforcement.test.ts covers non-officer case)
+  function stubOfficer() {
+    return stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
+  }
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
     restoreRepo(MembershipRepository);
     restoreRepo(OrganizationRepository);
     restoreRepo(AssociationRepository);
@@ -55,6 +64,7 @@ describe('markComplete', () => {
   }
 
   test('marks enrollment as completed and returns 201', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 1,
@@ -76,6 +86,7 @@ describe('markComplete', () => {
   });
 
   test('throws NotFoundError when training does not exist', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => undefined,
       getEnrollmentCount: async () => 0,
@@ -92,6 +103,7 @@ describe('markComplete', () => {
   });
 
   test('throws ConflictError when no active enrollment exists', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 0,
@@ -108,6 +120,7 @@ describe('markComplete', () => {
   });
 
   test('throws NotFoundError when person is not enrolled', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 1,
@@ -124,6 +137,7 @@ describe('markComplete', () => {
   });
 
   test('throws ConflictError when already completed', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
       getEnrollmentCount: async () => 1,
@@ -146,6 +160,7 @@ describe('markComplete', () => {
   // ─── [BR-13] Auto-credit creation ─────────────────────
 
   test('[BR-13] creates auto credit entry for credit-bearing training', async () => {
+    stubOfficer();
     let creditCreated: any = null;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -194,6 +209,7 @@ describe('markComplete', () => {
   });
 
   test('[BR-13] skips credit creation for non-credit-bearing training', async () => {
+    stubOfficer();
     let creditCreated = false;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({ ...fakeTraining, creditAmount: 0 }),
@@ -223,6 +239,7 @@ describe('markComplete', () => {
   // ─── [M9-R7] Duplicate credit prevention (idempotent) ──────
 
   test('[M9-R7] already-completed enrollment prevents duplicate credit award', async () => {
+    stubOfficer();
     let creditCallCount = 0;
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
@@ -256,6 +273,7 @@ describe('markComplete', () => {
   // ─── [BR-20] Cancelled training blocks completion ──────────
 
   test('[BR-20] cancelled training blocks markComplete', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({ ...fakeTraining, status: 'cancelled' }),
       getEnrollmentCount: async () => 1,
@@ -274,6 +292,7 @@ describe('markComplete', () => {
   // ─── [BR-20] Future end date blocks completion ──────────
 
   test('[BR-20] future end date blocks markComplete', async () => {
+    stubOfficer();
     const futureDate = new Date();
     futureDate.setFullYear(futureDate.getFullYear() + 1);
     mocks = stubRepo(TrainingRepository, {
@@ -294,6 +313,7 @@ describe('markComplete', () => {
   // ─── [V-12] Credit cycle anchored to member registration date ──────
 
   test('[V-12] credit cycle is anchored to member registration date, not activity date', async () => {
+    stubOfficer();
     let creditCreated: any = null;
 
     // Member registered Jan 2023, training ends Dec 2025
@@ -355,6 +375,7 @@ describe('markComplete', () => {
   });
 
   test('[V-12] two members get different cycles based on their registration dates', async () => {
+    stubOfficer();
     const creditEntries: any[] = [];
 
     const trainingDec2025 = {
@@ -460,6 +481,7 @@ describe('markComplete', () => {
   });
 
   test('[V-12] falls back to activity date when no membership found', async () => {
+    stubOfficer();
     let creditCreated: any = null;
     const trainingDec2025 = {
       ...fakeTraining,
@@ -508,6 +530,7 @@ describe('markComplete', () => {
   // ─── [BR-11] Credit cycle configurable per association ──────
 
   test('[BR-11] uses association creditCyclePeriod instead of hardcoded 2', async () => {
+    stubOfficer();
     let creditCreated: any = null;
 
     // Association configured with 3-year cycle
@@ -565,6 +588,7 @@ describe('markComplete', () => {
   });
 
   test('[BR-11] uses fixed cycleStartMonth when configured on association', async () => {
+    stubOfficer();
     let creditCreated: any = null;
 
     const trainingPast = {
@@ -621,6 +645,7 @@ describe('markComplete', () => {
   });
 
   test('[BR-11] defaults to 2-year cycle when association has no creditCyclePeriod', async () => {
+    stubOfficer();
     let creditCreated: any = null;
 
     mocks = stubRepo(TrainingRepository, {

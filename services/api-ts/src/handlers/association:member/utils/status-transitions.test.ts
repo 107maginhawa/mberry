@@ -2,10 +2,19 @@ import { describe, it, expect } from 'bun:test';
 import {
   INVOICE_VALID_TRANSITIONS,
   PAYMENT_VALID_TRANSITIONS,
+  MEMBERSHIP_VALID_TRANSITIONS,
+  LICENSE_VALID_TRANSITIONS,
+  TERM_VALID_TRANSITIONS,
   isValidInvoiceTransition,
   isValidPaymentTransition,
+  isValidMembershipTransition,
+  isValidLicenseTransition,
+  isValidTermTransition,
   invoiceTransitionError,
   paymentTransitionError,
+  membershipTransitionError,
+  licenseTransitionError,
+  termTransitionError,
 } from './status-transitions';
 // Factory N/A: utility function test — primitive inputs/outputs, no domain entities
 
@@ -423,8 +432,8 @@ describe('INVOICE_VALID_TRANSITIONS map integrity', () => {
 });
 
 describe('PAYMENT_VALID_TRANSITIONS map integrity', () => {
-  it('covers all 10 payment statuses', () => {
-    expect(Object.keys(PAYMENT_VALID_TRANSITIONS)).toHaveLength(10);
+  it('covers all 11 payment statuses', () => {
+    expect(Object.keys(PAYMENT_VALID_TRANSITIONS)).toHaveLength(11);
   });
 
   it('all target statuses are known payment statuses (or "cancelled")', () => {
@@ -432,6 +441,292 @@ describe('PAYMENT_VALID_TRANSITIONS map integrity', () => {
     for (const [, targets] of Object.entries(PAYMENT_VALID_TRANSITIONS)) {
       for (const t of targets) {
         expect(known.has(t)).toBe(true);
+      }
+    }
+  });
+});
+
+// ===========================================================================
+// Membership status transitions
+// ===========================================================================
+
+const MEMBERSHIP_STATUSES = [
+  'pendingPayment', 'active', 'gracePeriod', 'lapsed', 'expired',
+  'suspended', 'removed', 'resigned', 'deceased', 'expelled',
+] as const;
+
+describe('isValidMembershipTransition', () => {
+  describe('valid transitions', () => {
+    it('pendingPayment → active', () => expect(isValidMembershipTransition('pendingPayment', 'active')).toBe(true));
+    it('pendingPayment → removed', () => expect(isValidMembershipTransition('pendingPayment', 'removed')).toBe(true));
+    it('pendingPayment → expired', () => expect(isValidMembershipTransition('pendingPayment', 'expired')).toBe(true));
+
+    it('active → gracePeriod', () => expect(isValidMembershipTransition('active', 'gracePeriod')).toBe(true));
+    it('active → suspended', () => expect(isValidMembershipTransition('active', 'suspended')).toBe(true));
+    it('active → removed', () => expect(isValidMembershipTransition('active', 'removed')).toBe(true));
+    it('active → resigned', () => expect(isValidMembershipTransition('active', 'resigned')).toBe(true));
+    it('active → deceased', () => expect(isValidMembershipTransition('active', 'deceased')).toBe(true));
+    it('active → expelled', () => expect(isValidMembershipTransition('active', 'expelled')).toBe(true));
+
+    it('gracePeriod → active', () => expect(isValidMembershipTransition('gracePeriod', 'active')).toBe(true));
+    it('gracePeriod → lapsed', () => expect(isValidMembershipTransition('gracePeriod', 'lapsed')).toBe(true));
+    it('gracePeriod → suspended', () => expect(isValidMembershipTransition('gracePeriod', 'suspended')).toBe(true));
+
+    it('lapsed → active', () => expect(isValidMembershipTransition('lapsed', 'active')).toBe(true));
+    it('lapsed → suspended', () => expect(isValidMembershipTransition('lapsed', 'suspended')).toBe(true));
+
+    it('expired → active', () => expect(isValidMembershipTransition('expired', 'active')).toBe(true));
+    it('expired → removed', () => expect(isValidMembershipTransition('expired', 'removed')).toBe(true));
+
+    it('suspended → active', () => expect(isValidMembershipTransition('suspended', 'active')).toBe(true));
+    it('suspended → removed', () => expect(isValidMembershipTransition('suspended', 'removed')).toBe(true));
+    it('suspended → resigned', () => expect(isValidMembershipTransition('suspended', 'resigned')).toBe(true));
+    it('suspended → expelled', () => expect(isValidMembershipTransition('suspended', 'expelled')).toBe(true));
+  });
+
+  describe('terminal states — no outgoing transitions', () => {
+    for (const terminal of ['removed', 'resigned', 'deceased', 'expelled'] as const) {
+      for (const target of MEMBERSHIP_STATUSES) {
+        it(`${terminal} → ${target} is false`, () =>
+          expect(isValidMembershipTransition(terminal, target)).toBe(false));
+      }
+    }
+  });
+
+  describe('invalid transitions (non-terminal sources)', () => {
+    it('pendingPayment → gracePeriod (skip)', () => expect(isValidMembershipTransition('pendingPayment', 'gracePeriod')).toBe(false));
+    it('pendingPayment → suspended (skip)', () => expect(isValidMembershipTransition('pendingPayment', 'suspended')).toBe(false));
+    it('pendingPayment → lapsed (skip)', () => expect(isValidMembershipTransition('pendingPayment', 'lapsed')).toBe(false));
+    it('pendingPayment → pendingPayment (self)', () => expect(isValidMembershipTransition('pendingPayment', 'pendingPayment')).toBe(false));
+
+    it('active → pendingPayment (backwards)', () => expect(isValidMembershipTransition('active', 'pendingPayment')).toBe(false));
+    it('active → active (self)', () => expect(isValidMembershipTransition('active', 'active')).toBe(false));
+    it('active → lapsed (skip grace)', () => expect(isValidMembershipTransition('active', 'lapsed')).toBe(false));
+    it('active → expired (skip)', () => expect(isValidMembershipTransition('active', 'expired')).toBe(false));
+
+    it('suspended → gracePeriod (invalid)', () => expect(isValidMembershipTransition('suspended', 'gracePeriod')).toBe(false));
+    it('suspended → lapsed (invalid)', () => expect(isValidMembershipTransition('suspended', 'lapsed')).toBe(false));
+    it('suspended → deceased (invalid)', () => expect(isValidMembershipTransition('suspended', 'deceased')).toBe(false));
+  });
+
+  describe('unknown status', () => {
+    it('unknown from returns false', () => expect(isValidMembershipTransition('bogus', 'active')).toBe(false));
+    it('unknown to returns false', () => expect(isValidMembershipTransition('active', 'bogus')).toBe(false));
+    it('both unknown returns false', () => expect(isValidMembershipTransition('foo', 'bar')).toBe(false));
+    it('empty string returns false', () => expect(isValidMembershipTransition('', 'active')).toBe(false));
+  });
+});
+
+describe('membershipTransitionError', () => {
+  it('includes from and to in message', () => {
+    const msg = membershipTransitionError('active', 'lapsed');
+    expect(msg).toContain('active');
+    expect(msg).toContain('lapsed');
+  });
+
+  it('lists allowed transitions', () => {
+    const msg = membershipTransitionError('active', 'lapsed');
+    expect(msg).toContain('gracePeriod');
+    expect(msg).toContain('suspended');
+  });
+
+  it('says "terminal state" for terminal status', () => {
+    const msg = membershipTransitionError('removed', 'active');
+    expect(msg).toContain('terminal');
+  });
+
+  it('handles unknown from status', () => {
+    const msg = membershipTransitionError('bogus', 'active');
+    expect(msg).toContain('bogus');
+  });
+});
+
+describe('Membership happy-path transitions', () => {
+  it('pendingPayment → active → gracePeriod → lapsed → active: full lifecycle', () => {
+    expect(isValidMembershipTransition('pendingPayment', 'active')).toBe(true);
+    expect(isValidMembershipTransition('active', 'gracePeriod')).toBe(true);
+    expect(isValidMembershipTransition('gracePeriod', 'lapsed')).toBe(true);
+    expect(isValidMembershipTransition('lapsed', 'active')).toBe(true);
+  });
+
+  it('active → suspended → active: reinstatement after suspension', () => {
+    expect(isValidMembershipTransition('active', 'suspended')).toBe(true);
+    expect(isValidMembershipTransition('suspended', 'active')).toBe(true);
+  });
+
+  it('active → resigned: voluntary exit is terminal', () => {
+    expect(isValidMembershipTransition('active', 'resigned')).toBe(true);
+    expect(isValidMembershipTransition('resigned', 'active')).toBe(false);
+  });
+});
+
+describe('MEMBERSHIP_VALID_TRANSITIONS map integrity', () => {
+  it('covers all 10 membership statuses', () => {
+    expect(Object.keys(MEMBERSHIP_VALID_TRANSITIONS)).toHaveLength(10);
+  });
+
+  it('all target statuses are known membership statuses', () => {
+    const known = new Set(MEMBERSHIP_STATUSES);
+    for (const [, targets] of Object.entries(MEMBERSHIP_VALID_TRANSITIONS)) {
+      for (const t of targets) {
+        expect(known.has(t as typeof MEMBERSHIP_STATUSES[number])).toBe(true);
+      }
+    }
+  });
+});
+
+// ===========================================================================
+// License status transitions
+// ===========================================================================
+
+const LICENSE_STATUSES = ['pending', 'active', 'expired', 'suspended', 'revoked'] as const;
+
+describe('isValidLicenseTransition', () => {
+  describe('valid transitions', () => {
+    it('pending → active', () => expect(isValidLicenseTransition('pending', 'active')).toBe(true));
+    it('pending → revoked', () => expect(isValidLicenseTransition('pending', 'revoked')).toBe(true));
+
+    it('active → expired', () => expect(isValidLicenseTransition('active', 'expired')).toBe(true));
+    it('active → suspended', () => expect(isValidLicenseTransition('active', 'suspended')).toBe(true));
+    it('active → revoked', () => expect(isValidLicenseTransition('active', 'revoked')).toBe(true));
+
+    it('expired → active', () => expect(isValidLicenseTransition('expired', 'active')).toBe(true));
+    it('expired → revoked', () => expect(isValidLicenseTransition('expired', 'revoked')).toBe(true));
+
+    it('suspended → active', () => expect(isValidLicenseTransition('suspended', 'active')).toBe(true));
+    it('suspended → revoked', () => expect(isValidLicenseTransition('suspended', 'revoked')).toBe(true));
+  });
+
+  describe('terminal states — no outgoing transitions', () => {
+    for (const target of LICENSE_STATUSES) {
+      it(`revoked → ${target} is false`, () =>
+        expect(isValidLicenseTransition('revoked', target)).toBe(false));
+    }
+  });
+
+  describe('invalid transitions', () => {
+    it('pending → expired (skip)', () => expect(isValidLicenseTransition('pending', 'expired')).toBe(false));
+    it('pending → suspended (skip)', () => expect(isValidLicenseTransition('pending', 'suspended')).toBe(false));
+    it('pending → pending (self)', () => expect(isValidLicenseTransition('pending', 'pending')).toBe(false));
+    it('active → pending (backwards)', () => expect(isValidLicenseTransition('active', 'pending')).toBe(false));
+    it('active → active (self)', () => expect(isValidLicenseTransition('active', 'active')).toBe(false));
+    it('expired → suspended (lateral)', () => expect(isValidLicenseTransition('expired', 'suspended')).toBe(false));
+    it('expired → pending (backwards)', () => expect(isValidLicenseTransition('expired', 'pending')).toBe(false));
+    it('suspended → expired (lateral)', () => expect(isValidLicenseTransition('suspended', 'expired')).toBe(false));
+    it('suspended → pending (backwards)', () => expect(isValidLicenseTransition('suspended', 'pending')).toBe(false));
+  });
+
+  describe('unknown status', () => {
+    it('unknown from returns false', () => expect(isValidLicenseTransition('bogus', 'active')).toBe(false));
+    it('unknown to returns false', () => expect(isValidLicenseTransition('active', 'bogus')).toBe(false));
+    it('empty string returns false', () => expect(isValidLicenseTransition('', 'active')).toBe(false));
+  });
+});
+
+describe('licenseTransitionError', () => {
+  it('includes from and to in message', () => {
+    const msg = licenseTransitionError('active', 'pending');
+    expect(msg).toContain('active');
+    expect(msg).toContain('pending');
+  });
+
+  it('says "terminal state" for revoked', () => {
+    const msg = licenseTransitionError('revoked', 'active');
+    expect(msg).toContain('terminal');
+  });
+});
+
+describe('LICENSE_VALID_TRANSITIONS map integrity', () => {
+  it('covers all 5 license statuses', () => {
+    expect(Object.keys(LICENSE_VALID_TRANSITIONS)).toHaveLength(5);
+  });
+
+  it('all target statuses are known license statuses', () => {
+    const known = new Set(LICENSE_STATUSES);
+    for (const [, targets] of Object.entries(LICENSE_VALID_TRANSITIONS)) {
+      for (const t of targets) {
+        expect(known.has(t as typeof LICENSE_STATUSES[number])).toBe(true);
+      }
+    }
+  });
+});
+
+// ===========================================================================
+// Officer term status transitions
+// ===========================================================================
+
+const TERM_STATUSES = ['upcoming', 'active', 'completed', 'resigned', 'removed'] as const;
+
+describe('isValidTermTransition', () => {
+  describe('valid transitions', () => {
+    it('upcoming → active', () => expect(isValidTermTransition('upcoming', 'active')).toBe(true));
+    it('upcoming → removed', () => expect(isValidTermTransition('upcoming', 'removed')).toBe(true));
+
+    it('active → completed', () => expect(isValidTermTransition('active', 'completed')).toBe(true));
+    it('active → resigned', () => expect(isValidTermTransition('active', 'resigned')).toBe(true));
+    it('active → removed', () => expect(isValidTermTransition('active', 'removed')).toBe(true));
+  });
+
+  describe('terminal states — no outgoing transitions', () => {
+    for (const terminal of ['completed', 'resigned', 'removed'] as const) {
+      for (const target of TERM_STATUSES) {
+        it(`${terminal} → ${target} is false`, () =>
+          expect(isValidTermTransition(terminal, target)).toBe(false));
+      }
+    }
+  });
+
+  describe('invalid transitions', () => {
+    it('upcoming → completed (skip)', () => expect(isValidTermTransition('upcoming', 'completed')).toBe(false));
+    it('upcoming → resigned (skip)', () => expect(isValidTermTransition('upcoming', 'resigned')).toBe(false));
+    it('upcoming → upcoming (self)', () => expect(isValidTermTransition('upcoming', 'upcoming')).toBe(false));
+    it('active → upcoming (backwards)', () => expect(isValidTermTransition('active', 'upcoming')).toBe(false));
+    it('active → active (self)', () => expect(isValidTermTransition('active', 'active')).toBe(false));
+  });
+
+  describe('unknown status', () => {
+    it('unknown from returns false', () => expect(isValidTermTransition('bogus', 'active')).toBe(false));
+    it('unknown to returns false', () => expect(isValidTermTransition('active', 'bogus')).toBe(false));
+    it('empty string returns false', () => expect(isValidTermTransition('', 'active')).toBe(false));
+  });
+});
+
+describe('termTransitionError', () => {
+  it('includes from and to in message', () => {
+    const msg = termTransitionError('upcoming', 'completed');
+    expect(msg).toContain('upcoming');
+    expect(msg).toContain('completed');
+  });
+
+  it('says "terminal state" for completed', () => {
+    const msg = termTransitionError('completed', 'active');
+    expect(msg).toContain('terminal');
+  });
+});
+
+describe('Term happy-path transitions', () => {
+  it('upcoming → active → completed: standard term lifecycle', () => {
+    expect(isValidTermTransition('upcoming', 'active')).toBe(true);
+    expect(isValidTermTransition('active', 'completed')).toBe(true);
+    expect(isValidTermTransition('completed', 'upcoming')).toBe(false);
+  });
+
+  it('active → resigned: voluntary resignation is terminal', () => {
+    expect(isValidTermTransition('active', 'resigned')).toBe(true);
+    expect(isValidTermTransition('resigned', 'active')).toBe(false);
+  });
+});
+
+describe('TERM_VALID_TRANSITIONS map integrity', () => {
+  it('covers all 5 term statuses', () => {
+    expect(Object.keys(TERM_VALID_TRANSITIONS)).toHaveLength(5);
+  });
+
+  it('all target statuses are known term statuses', () => {
+    const known = new Set(TERM_STATUSES);
+    for (const [, targets] of Object.entries(TERM_VALID_TRANSITIONS)) {
+      for (const t of targets) {
+        expect(known.has(t as typeof TERM_STATUSES[number])).toBe(true);
       }
     }
   });

@@ -9,12 +9,6 @@ function buildMockDb(selectResponses: any[][] = []) {
         const idx = selectIdx++;
         const result = idx < selectResponses.length ? selectResponses[idx] : [];
         return {
-          leftJoin: (_t2: any, _c2: any) => ({
-            where: (_c: any) => ({
-              limit: (_n: number) => Promise.resolve(result),
-              then: (r: any, j?: any) => Promise.resolve(result).then(r, j),
-            }),
-          }),
           where: (_c: any) => ({
             limit: (_n: number) => Promise.resolve(result),
             then: (r: any, j?: any) => Promise.resolve(result).then(r, j),
@@ -58,8 +52,6 @@ describe('verifyCertificatePublic', () => {
           status: 'issued',
           creditHours: 8,
           cpdActivityType: 'seminar',
-          firstName: 'Juan',
-          lastName: 'Cruz',
         },
       ],
     ]);
@@ -70,9 +62,9 @@ describe('verifyCertificatePublic', () => {
     const res = await verifyCertificatePublic(ctx);
     const json = await res.json();
     expect(json.data.certificateNumber).toBe('PDA-2025-0001');
-    expect(json.data.holderName).toBe('Juan Cruz');
     expect(json.data.isValid).toBe(true);
     expect(json.data.creditHours).toBe(8);
+    expect(json.data.holderName).toBeUndefined();
   });
 
   test('throws NotFoundError for invalid certificate number', async () => {
@@ -93,8 +85,6 @@ describe('verifyCertificatePublic', () => {
           status: 'revoked',
           creditHours: 4,
           cpdActivityType: 'lecture',
-          firstName: 'Maria',
-          lastName: 'Santos',
         },
       ],
     ]);
@@ -108,7 +98,7 @@ describe('verifyCertificatePublic', () => {
     expect(json.data.isValid).toBe(false);
   });
 
-  test('does not expose PII (no email, no memberId)', async () => {
+  test('does not expose PII (no email, no memberId, no holderName)', async () => {
     const { db } = buildMockDb([
       [
         {
@@ -117,8 +107,6 @@ describe('verifyCertificatePublic', () => {
           status: 'issued',
           creditHours: 2,
           cpdActivityType: 'workshop',
-          firstName: 'Ana',
-          lastName: 'Reyes',
         },
       ],
     ]);
@@ -131,9 +119,10 @@ describe('verifyCertificatePublic', () => {
     expect(json.data.email).toBeUndefined();
     expect(json.data.memberId).toBeUndefined();
     expect(json.data.personId).toBeUndefined();
+    expect(json.data.holderName).toBeUndefined();
   });
 
-  test('constructs holderName from firstName + lastName', async () => {
+  test('response contains only safe fields (no PII)', async () => {
     const { db } = buildMockDb([
       [
         {
@@ -142,8 +131,6 @@ describe('verifyCertificatePublic', () => {
           status: 'issued',
           creditHours: 3,
           cpdActivityType: null,
-          firstName: null,
-          lastName: 'Garcia',
         },
       ],
     ]);
@@ -153,6 +140,11 @@ describe('verifyCertificatePublic', () => {
     });
     const res = await verifyCertificatePublic(ctx);
     const json = await res.json();
-    expect(json.data.holderName).toBe('Garcia');
+    const keys = Object.keys(json.data);
+    expect(keys).toContain('certificateNumber');
+    expect(keys).toContain('isValid');
+    expect(keys).not.toContain('holderName');
+    expect(keys).not.toContain('firstName');
+    expect(keys).not.toContain('lastName');
   });
 });

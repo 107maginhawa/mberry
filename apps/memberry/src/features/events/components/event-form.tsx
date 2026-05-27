@@ -32,7 +32,10 @@ const eventSchema = z.object({
   visibility: z.string().default('internal'),
   status: z.string().default('draft'),
   creditBearing: z.boolean().default(false),
-  creditAmount: z.number().min(0).max(40, 'Max 40 CPD hours').default(0),
+  creditAmount: z.number().min(0).max(40, 'Max 40 CPD hours').refine(
+    (val) => val === 0 || (val * 2) % 1 === 0,
+    { message: 'Credit amount must be in 0.5 increments' }
+  ).default(0),
   cpdActivityType: z.string().optional(),
   coverImageUrl: z.string().optional(),
 })

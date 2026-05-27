@@ -11,3 +11,34 @@ export async function getNextCertificateNumber(db: DatabaseInstance, organizatio
   else { nextSeq = 1; await db.insert(orgCertificateSeq).values({ organizationId, year: currentYear, lastSeq: 1, orgCode }); }
   return { certificateNumber: `${orgCode}-${currentYear}-${String(nextSeq).padStart(4, '0')}`, seq: nextSeq };
 }
+
+/**
+ * Reserve a contiguous range of certificate sequence numbers in one query.
+ * Used by bulkIssueCertificates to avoid N+1 getNextCertificateNumber calls.
+ */
+export async function reserveCertificateRange(
+  db: DatabaseInstance,
+  organizationId: string,
+  orgCode: string,
+  count: number,
+  year?: number,
+): Promise<{ startSeq: number; year: number; orgCode: string }> {
+  const currentYear = year ?? new Date().getFullYear();
+  const existing = await db.execute(
+    sql`SELECT id, last_seq FROM org_certificate_seq WHERE organization_id = ${organizationId} AND year = ${currentYear} FOR UPDATE`
+  );
+  const rows = (existing as any).rows ?? existing;
+
+  let startSeq: number;
+  if (rows.length > 0) {
+    startSeq = Number(rows[0].last_seq) + 1;
+    await db.update(orgCertificateSeq)
+      .set({ lastSeq: startSeq + count - 1, updatedAt: new Date() })
+      .where(and(eq(orgCertificateSeq.organizationId, organizationId), eq(orgCertificateSeq.year, currentYear)));
+  } else {
+    startSeq = 1;
+    await db.insert(orgCertificateSeq).values({ organizationId, year: currentYear, lastSeq: count, orgCode });
+  }
+
+  return { startSeq, year: currentYear, orgCode };
+}

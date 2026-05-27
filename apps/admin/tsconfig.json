@@ -9,5 +9,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "postcss.config.ts"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "src/test/**", "vitest.config.ts", "postcss.config.ts"]
 }

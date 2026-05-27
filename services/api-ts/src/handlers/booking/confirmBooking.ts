@@ -12,6 +12,7 @@ import {
 import { BookingRepository } from './repos/booking.repo';
 import type { BookingActionRequest } from './repos/booking.schema';
 import { checkBookingHostOwnership } from './utils/ownership';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * confirmBooking
@@ -62,6 +63,13 @@ export async function confirmBooking(
   // Repository handles timing validation and status transitions
   const confirmedBooking = await repo.confirmBooking(params.booking);
   
+  domainEvents.emit('booking.confirmed', {
+    bookingId: confirmedBooking.id,
+    hostId: user.id,
+    clientId: booking.client,
+    organizationId,
+  }).catch(() => {});
+
   // Log audit trail
   logger?.info({
     bookingId: confirmedBooking.id,

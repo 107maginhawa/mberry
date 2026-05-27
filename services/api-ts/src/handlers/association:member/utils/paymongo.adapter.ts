@@ -5,7 +5,7 @@
  * API docs: https://developers.paymongo.com/reference
  */
 
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { ExternalServiceError } from '@/core/errors';
 import type {
   GatewayAdapter,
@@ -76,10 +76,15 @@ export class PayMongoAdapter implements GatewayAdapter {
     const sig = liveSig || testSig;
     if (!timestamp || !sig) return null;
 
+    // Validate hex format before Buffer.from to prevent silent truncation
+    if (!/^[0-9a-f]{64}$/i.test(sig)) return null;
+
     const payload = `${timestamp}.${body}`;
     const expected = createHmac('sha256', this.webhookSecret).update(payload).digest('hex');
 
-    if (sig !== expected) return null;
+    const sigBuf = Buffer.from(sig, 'hex');
+    const expectedBuf = Buffer.from(expected, 'hex');
+    if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) return null;
 
     try {
       const event = JSON.parse(body);

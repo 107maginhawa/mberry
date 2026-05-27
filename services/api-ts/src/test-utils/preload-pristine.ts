@@ -14,6 +14,11 @@
  * MUST be listed here. Run this to find missing repos:
  *   grep -roh 'stubRepo([A-Z][A-Za-z]*' src/ --include='*.test.ts' | sed 's/stubRepo(//' | sort -u
  */
+// Ensure AUTH_SECRET is set for all tests (required since hardcoded fallback was removed)
+if (!process.env['AUTH_SECRET']) {
+  process.env['AUTH_SECRET'] = 'test-secret-for-automated-tests-minimum-32-chars';
+}
+
 import { ensurePristine } from './make-ctx';
 
 // --- association:member repos ---

@@ -7,9 +7,9 @@ import type { AuthConfig, VersionedSecret } from '@/types/auth';
 import { DEFAULT_ICE_SERVERS, parseIceServerUrls, type IceServer } from '@/utils/webrtc';
 import type { DatabaseConfig } from './database';
 import type { StorageConfig } from './storage';
-import type { EmailConfig } from './email';
+import type { EmailConfig } from './email-types';
 import type { NotificationConfig } from './notifs';
-import type { BillingConfig } from './billing';
+import type { BillingConfig } from './billing-types';
 
 export interface Config {
   // Server configuration
@@ -186,7 +186,7 @@ export function parseConfig(): Config {
     
     // CORS configuration
     cors: {
-      origins: parseList(process.env['CORS_ORIGINS'], ['*']),
+      origins: parseList(process.env['CORS_ORIGINS'], ['http://localhost:3003', 'http://localhost:3004']),
       credentials: parseBool(process.env['CORS_CREDENTIALS'], true),
       allowLocalNetwork: parseBool(process.env['CORS_ALLOW_LOCAL_NETWORK'], true),
       allowTunneling: parseBool(process.env['CORS_ALLOW_TUNNELING'], true),
@@ -202,7 +202,17 @@ export function parseConfig(): Config {
     // Authentication configuration
     auth: {
       baseUrl: process.env['AUTH_BASE_URL'] || publicUrl || `http://${serverHost}:${serverPort}`,
-      secret: authSecret || 'development-secret-change-in-production',
+      secret: (() => {
+        if (authSecret) return authSecret;
+        if (isProduction) {
+          // Already caught above, but defense-in-depth
+          throw new Error('AUTH_SECRET is required');
+        }
+        throw new Error(
+          'AUTH_SECRET environment variable is required. ' +
+          'Set it in your .env file (e.g. AUTH_SECRET=$(openssl rand -hex 32)).'
+        );
+      })(),
       secrets,
       sessionExpiresIn: parseIntValue(process.env['AUTH_SESSION_EXPIRES_IN'], 60 * 60 * 24), // 24 hours (P0-2: reduced from 7d to limit token exposure window)
       rateLimitEnabled: parseBool(process.env['AUTH_RATE_LIMIT_ENABLED'], true),

@@ -1,8 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { GetDocumentAccessLogQuery, GetDocumentAccessLogParams } from '@/generated/openapi/validators';
-import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { DocumentRepository, DocumentAccessLogRepository } from './repos/documents.repo';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * getDocumentAccessLog
@@ -18,6 +19,10 @@ export async function getDocumentAccessLog(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  // P0-02: Officer/admin restriction — access logs are compliance data
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
+
   const params = ctx.req.valid('param');
   const query = ctx.req.valid('query');
   const offset = Number(query.offset ?? 0);
@@ -27,10 +32,15 @@ export async function getDocumentAccessLog(
   const logger = ctx.get('logger');
   const documentId = params.documentId;
 
-  // Verify document exists
+  // Verify document exists and belongs to caller's org
   const docRepo = new DocumentRepository(db, logger);
   const document = await docRepo.findOneById(documentId);
   if (!document) throw new NotFoundError('Document');
+
+  const orgId = ctx.get('organizationId');
+  if (document.organizationId !== orgId) {
+    throw new ForbiddenError('Access denied to this document');
+  }
 
   const accessLogRepo = new DocumentAccessLogRepository(db, logger);
 

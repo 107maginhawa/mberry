@@ -34,7 +34,13 @@ function buildSequencedDb(responses: any[], insertSpy?: (val: any) => void) {
         if (Array.isArray(resp)) {
           const result = Promise.resolve(resp);
           (result as any).where = () => Promise.resolve(resp);
+          (result as any).limit = () => Promise.resolve(resp);
           return result;
+        }
+        // Add limit chaining for whereResponse objects too
+        const original = resp;
+        if (original && typeof original.where === 'function') {
+          original.limit = () => Promise.resolve([]);
         }
         return resp;
       },

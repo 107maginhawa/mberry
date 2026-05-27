@@ -1,8 +1,9 @@
-import { describe, test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { updateMember } from './updateMember';
 import { MembershipRepository } from './repos/membership.repo';
 import { NotFoundError, ValidationError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -36,8 +37,13 @@ const updatedMember = {
 describe('updateMember [BR-03]', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  beforeEach(() => {
+    domainEvents.reset();
+  });
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    domainEvents.reset();
   });
 
   test('updates member and returns 200', async () => {
@@ -271,9 +277,8 @@ describe('updateMember [BR-03]', () => {
         const response = await updateMember(ctx);
         // [BR-03] Invalid transitions: no error, no state change
         expect(response.status).toBe(200);
-        // Handler maps 'grace' → 'gracePeriod' on DB write (line 68 of updateMember.ts)
-        const expectedDbStatus = from === 'grace' ? 'gracePeriod' : from;
-        expect(capturedStatus).toBe(expectedDbStatus); // status unchanged (DB enum)
+        // When transition is rejected, currentStatus is written back unchanged
+        expect(capturedStatus).toBe(from); // status unchanged
       });
     }
 

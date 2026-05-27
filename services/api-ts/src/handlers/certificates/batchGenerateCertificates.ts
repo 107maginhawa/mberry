@@ -7,6 +7,7 @@ import {
   type CertificateTemplateData,
   type OrgBranding,
 } from './utils/certificate-template';
+import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * batchGenerateCertificates
@@ -49,6 +50,10 @@ export async function batchGenerateCertificates(
 
   const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  // P1: Officer restriction — batch certificate generation is an admin action
+  const denied = await requireOfficerTerm(ctx);
+  if (denied) return denied;
 
   const body: BatchCertificateRequest = ctx.req.valid('json');
 

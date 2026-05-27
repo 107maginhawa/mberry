@@ -1,13 +1,12 @@
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
-import { getPrivacySettings } from './getPrivacySettings';
+import { getMyPrivacySettings as getPrivacySettings } from './getMyPrivacySettings';
 import { updatePrivacySettings } from './updatePrivacySettings';
 
 describe('getPrivacySettings', () => {
-  test('returns 401 without user', async () => {
+  test('throws UnauthorizedError without user', async () => {
     const ctx = makeCtx({ user: null });
-    const response = await getPrivacySettings(ctx);
-    expect(response.status).toBe(401);
+    expect(getPrivacySettings(ctx)).rejects.toThrow('Unauthorized');
   });
 });
 

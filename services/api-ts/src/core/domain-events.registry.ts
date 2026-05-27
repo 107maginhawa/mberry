@@ -7,12 +7,24 @@
  */
 
 export interface DomainEventMap {
-  'dues.payment.recorded': {
-    paymentId: string;
+  // ── Identity Context ──────────────────────────────────────────────────
+  'person.created': {
+    personId: string;
+    createdBy: string;
+  };
+
+  'person.updated': {
+    personId: string;
+    updatedBy: string;
+    updatedFields: string[];
+  };
+
+  // ── Membership Context ────────────────────────────────────────────────
+  'membership.created': {
+    membershipId: string;
     personId: string;
     organizationId: string;
-    amount: number;
-    newExpiryDate: string | null;
+    source: 'application' | 'invite' | 'manual';
   };
 
   'membership.status.changed': {
@@ -28,6 +40,146 @@ export interface DomainEventMap {
     personId: string;
     organizationId: string;
     membershipId: string;
+  };
+
+  // ── Financial Context ─────────────────────────────────────────────────
+  'dues.payment.recorded': {
+    paymentId: string;
+    personId: string;
+    organizationId: string;
+    amount: number;
+    newExpiryDate: string | null;
+  };
+
+  'credit.awarded': {
+    personId: string;
+    organizationId: string;
+    trainingId: string;
+    creditAmount: number;
+    activityName: string;
+  };
+
+  // ── Booking Context ───────────────────────────────────────────────────
+  'booking.created': {
+    bookingId: string;
+    clientId: string;
+    slotId: string;
+    organizationId: string;
+  };
+
+  'booking.confirmed': {
+    bookingId: string;
+    hostId: string;
+    clientId: string;
+    organizationId: string;
+  };
+
+  'booking.rejected': {
+    bookingId: string;
+    hostId: string;
+    clientId: string;
+    organizationId: string;
+    reason: string;
+  };
+
+  'booking.cancelled': {
+    bookingId: string;
+    cancelledBy: 'host' | 'client';
+    organizationId: string;
+    reason: string;
+  };
+
+  // ── Activities Context ────────────────────────────────────────────────
+  'event.published': {
+    eventId: string;
+    organizationId: string;
+    publishedBy: string;
+  };
+
+  'event.completed': {
+    eventId: string;
+    organizationId: string;
+    completedBy: string;
+  };
+
+  'event.cancelled': {
+    eventId: string;
+    organizationId: string;
+    cancelledBy: string;
+  };
+
+  'event.registered': {
+    eventId: string;
+    personId: string;
+    organizationId: string;
+    status: 'confirmed' | 'waitlisted';
+  };
+
+  'event.registration.cancelled': {
+    registrationId: string;
+    eventId: string;
+    personId: string;
+    organizationId: string;
+    cancelledBy: string;
+  };
+
+  // ── Communications Context ────────────────────────────────────────────
+  'announcement.published': {
+    announcementId: string;
+    organizationId: string;
+    publishedBy: string;
+  };
+
+  // ── Training Context ──────────────────────────────────────────────────
+  'training.published': {
+    trainingId: string;
+    organizationId: string;
+    publishedBy: string;
+  };
+
+  'training.completed': {
+    trainingId: string;
+    organizationId: string;
+    completedBy: string;
+  };
+
+  'training.cancelled': {
+    trainingId: string;
+    organizationId: string;
+    cancelledBy: string;
+  };
+
+  // ── Financial Context (Credits) ───────────────────────────────────────
+  'credit.adjusted': {
+    creditEntryId: string;
+    personId: string;
+    organizationId: string;
+    adjustedBy: string;
+    creditAmount: number;
+    reason: string;
+  };
+
+  // ── Governance Context ────────────────────────────────────────────────
+  'election.created': {
+    electionId: string;
+    organizationId: string;
+    createdBy: string;
+  };
+
+  'election.status.changed': {
+    electionId: string;
+    organizationId: string;
+    oldStatus: string;
+    newStatus: string;
+    changedBy: string;
+  };
+
+  'nomination.submitted': {
+    nomineeId: string;
+    electionId: string;
+    personId: string;
+    positionId: string;
+    organizationId: string;
   };
 }
 

@@ -6,16 +6,20 @@
  */
 
 import { domainEvents } from './domain-events';
-import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
-import type { DatabaseInstance } from './database';
 import type { Logger } from '@/types/logger';
+
+/** Minimal contract for the membership repo used by domain event consumers. */
+export interface DomainEventMembershipRepo {
+  findByPersonAndOrg(personId: string, organizationId: string): Promise<{ id: string } | null>;
+  updateOneById(id: string, data: Record<string, unknown>): Promise<unknown>;
+}
 
 /**
  * Register all domain event consumers.
  * Call this once during app initialization (in initializeApp).
  */
 export function registerDomainEventConsumers(
-  db: DatabaseInstance,
+  deps: { membershipRepo: DomainEventMembershipRepo },
   logger: Logger,
 ): void {
   domainEvents.setLogger(logger);
@@ -32,8 +36,7 @@ export function registerDomainEventConsumers(
       return;
     }
 
-    const memberRepo = new MembershipRepository(db, logger);
-    const membership = await memberRepo.findByPersonAndOrg(
+    const membership = await deps.membershipRepo.findByPersonAndOrg(
       payload.personId,
       payload.organizationId,
     );
@@ -46,7 +49,7 @@ export function registerDomainEventConsumers(
       return;
     }
 
-    await memberRepo.updateOneById(membership.id, {
+    await deps.membershipRepo.updateOneById(membership.id, {
       duesExpiryDate: payload.newExpiryDate,
     } as any);
 

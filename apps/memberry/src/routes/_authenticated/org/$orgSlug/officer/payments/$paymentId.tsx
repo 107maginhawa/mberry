@@ -15,16 +15,16 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/payme
 })
 
 const STATUS_COLORS: Record<string, string> = {
-  completed: 'bg-green-100 text-green-800',
-  pending: 'bg-yellow-100 text-yellow-800',
-  failed: 'bg-red-100 text-red-800',
-  refunded: 'bg-gray-100 text-gray-600',
-  partiallyRefunded: 'bg-gray-100 text-gray-600',
-  submitted: 'bg-blue-100 text-blue-800',
-  underReview: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-green-100 text-green-800',
-  rejected: 'bg-red-100 text-red-800',
-  expired: 'bg-orange-100 text-orange-800',
+  completed: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  pending: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
+  failed: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
+  refunded: 'bg-muted text-muted-foreground',
+  partiallyRefunded: 'bg-muted text-muted-foreground',
+  submitted: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
+  underReview: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
+  confirmed: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  rejected: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
+  expired: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
 }
 
 function PaymentDetailPage() {

@@ -1,16 +1,35 @@
 import type { Context } from 'hono';
 import type { JobScheduler } from '@/core/jobs';
-import { NotFoundError, ConflictError } from '@/core/errors';
+import { NotFoundError, ConflictError, ForbiddenError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { getCycleForDateWithConfig, type CreditCycleConfig } from '../association:member/utils/credit-cycle';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
+import type { Session } from '@/types/auth';
+import { domainEvents } from '@/core/domain-events';
+
+/**
+ * Fallback credit cycle defaults when no association config exists.
+ * Prefer reading from association.requiredCreditsPerCycle at runtime.
+ */
+const DEFAULT_CYCLE_PERIOD_YEARS = 2;
+const DEFAULT_REQUIRED_CREDITS = 40;
 
 export async function markComplete(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
-  const trainingId = ctx.req.param('id')!;
+  const session = ctx.get('session') as Session;
+
+  // [P0-AUTH] Officer role check — only officers can award CPD credits
   const orgId = ctx.req.param('organizationId')!;
+  const officerRepo = new OfficerTermRepository(db);
+  const terms = await officerRepo.findActiveByPersonAndOrg(session.user.id, orgId);
+  if (terms.length === 0) {
+    throw new ForbiddenError('Officer access required to mark training complete');
+  }
+
+  const trainingId = ctx.req.param('id')!;
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 
@@ -72,8 +91,8 @@ export async function markComplete(ctx: Context): Promise<Response> {
         const orgRepo = new OrganizationRepository(db);
         const org = await orgRepo.findById(training.organizationId);
         let cycleConfig: CreditCycleConfig = {
-          cyclePeriodYears: 2,
-          requiredCredits: 40,
+          cyclePeriodYears: DEFAULT_CYCLE_PERIOD_YEARS,
+          requiredCredits: DEFAULT_REQUIRED_CREDITS,
           carryoverEnabled: false,
         };
         if (org) {
@@ -81,8 +100,8 @@ export async function markComplete(ctx: Context): Promise<Response> {
           const assoc = await assocRepo.findById(org.associationId);
           if (assoc) {
             cycleConfig = {
-              cyclePeriodYears: assoc.creditCyclePeriod ?? 2,
-              requiredCredits: assoc.requiredCreditsPerCycle ?? 40,
+              cyclePeriodYears: assoc.creditCyclePeriod ?? DEFAULT_CYCLE_PERIOD_YEARS,
+              requiredCredits: assoc.requiredCreditsPerCycle ?? DEFAULT_REQUIRED_CREDITS,
               carryoverEnabled: assoc.carryoverEnabled ?? false,
               cycleStartMonth: assoc.cycleStartMonth,
               cycleStartDay: assoc.cycleStartDay,
@@ -104,6 +123,14 @@ export async function markComplete(ctx: Context): Promise<Response> {
           cycleStart: cycle.cycleStart,
           cycleEnd: cycle.cycleEnd,
         });
+        // Emit credit.awarded domain event
+        domainEvents.emit('credit.awarded', {
+          personId: body.personId,
+          organizationId: training.organizationId,
+          trainingId: training.id,
+          creditAmount: training.creditAmount,
+          activityName: training.title,
+        }).catch(() => {});
       }
       // Wave 2b: Trigger credit.issue job for pipeline processing
       const jobs = ctx.get('jobs') as JobScheduler | undefined;
@@ -126,6 +153,13 @@ export async function markComplete(ctx: Context): Promise<Response> {
       // Credit creation failure should not block marking complete
     }
   }
+
+  // Emit domain event for training completion
+  domainEvents.emit('training.completed', {
+    trainingId: training.id,
+    organizationId: training.organizationId,
+    completedBy: body.personId,
+  }).catch(() => {});
 
   return ctx.json({ data: updated }, 201);
 }

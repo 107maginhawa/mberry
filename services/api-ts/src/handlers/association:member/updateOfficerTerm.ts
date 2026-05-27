@@ -1,11 +1,12 @@
 import type { ValidatedContext } from '@/types/app';
 import type { BetterAuthInternalApi } from '@/types/auth';
 import type { DatabaseInstance } from '@/core/database';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { OfficerTermRepository } from './repos/governance.repo';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { isValidTermTransition, termTransitionError } from './utils/status-transitions';
 
 /**
  * updateOfficerTerm
@@ -36,6 +37,15 @@ export async function updateOfficerTerm(
   const existing = await repo.findById(termId);
   if (!existing || existing.organizationId !== orgId) {
     throw new NotFoundError('Officer term');
+  }
+
+  if (body.status && body.status !== existing.status) {
+    if (!isValidTermTransition(existing.status, body.status)) {
+      throw new BusinessLogicError(
+        termTransitionError(existing.status, body.status),
+        'INVALID_TERM_TRANSITION',
+      );
+    }
   }
 
   const updated = await repo.update(termId, body);

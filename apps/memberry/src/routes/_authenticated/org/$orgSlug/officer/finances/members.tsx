@@ -30,8 +30,8 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
   gracePeriod: { label: 'Due Soon', className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]' },
   lapsed: { label: 'Overdue', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)]' },
   pendingPayment: { label: 'Pending', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)]' },
-  suspended: { label: 'Suspended', className: 'bg-gray-100 text-gray-600' },
-  expired: { label: 'Expired', className: 'bg-gray-100 text-gray-500' },
+  suspended: { label: 'Suspended', className: 'bg-muted text-muted-foreground' },
+  expired: { label: 'Expired', className: 'bg-muted text-muted-foreground' },
 }
 
 const PAGE_SIZE = 25
@@ -217,7 +217,7 @@ function FinancialMembersPage() {
                 {members.map((m: any) => {
                   const name = [m.firstName, m.lastName].filter(Boolean).join(' ')
                   const outstanding = outstandingByPerson.get(m.personId) ?? 0
-                  const badge = STATUS_BADGE[m.status] ?? { label: m.status, className: 'bg-gray-100 text-gray-600' }
+                  const badge = STATUS_BADGE[m.status] ?? { label: m.status, className: 'bg-muted text-muted-foreground' }
 
                   return (
                     <TableRow key={m.id} className="hover:bg-[var(--color-surface-warm)] cursor-pointer">

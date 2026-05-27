@@ -1,705 +1,485 @@
 # Existing Codebase Adoption Audit
 
 ---
-**Audit Date:** 2026-05-21 (Wave 5 — post-boilerplate-alignment re-baseline)
-**Previous Audit:** 2026-05-20 (Wave 4 deep refresh)
+**Audit Date:** 2026-05-27 (Deep oli-audit-codebase v3)
+**Previous Audit:** 2026-05-26 (Post-audit/codebase-improvements branch, v2)
 **Source Directory:** /Users/elad-mini/Desktop/memberry
 **Stack:** TypeScript + Bun + Hono + Drizzle ORM + PostgreSQL + TanStack Router + Vite
-**oli version:** oli-audit-codebase v1
+**oli version:** oli-audit-codebase v3
 ---
 
 ## 1. Executive Summary
 
-**Overall Health: 7.8/10** (148/190 across 19 dimensions)
+**Overall Health Score: 7.4/10** (141/190 across 19 dimensions)
 
 **Top 3 Strengths:**
-1. **Comprehensive test coverage** — 419 backend test files with 91%+ strong assertions, 101 E2E tests, 97 Hurl contract tests across 25 handler modules. 100% module coverage.
-2. **Strong auth/RBAC** — 4-layer auth stack (global middleware + officer position checks + 2FA for privileged roles + platform admin isolation); zero unguarded mutations; IDOR prevention tested.
-3. **Full spec coverage** — 16/16 PRD artifacts exist, 19/19 module specs, DOMAIN_MODEL.md (1575 lines, 11 bounded contexts), zero terminology conflicts in glossary.
+1. **Exceptional spec/doc coverage** -- 19 MODULE_SPECs, 19 API_CONTRACTS, 23 top-level product docs, 126 audit reports, 13 slice specs, 16 TDD proofs. Industry-leading documentation.
+2. **Strong security posture** -- OWASP clean across all categories. 4-layer auth (global + officer + platform admin + impersonation guard). Account lockout, session limits, PII masking, rate limiting. No injection, XSS, or SSRF vulnerabilities found.
+3. **Solid test infrastructure** -- 471 handler tests (STRONG assertion quality), 127 E2E specs, 97 frontend component tests, 97 Hurl contract tests. ~722+ test artifacts.
 
 **Top 3 Gaps:**
-1. **State machine guard gaps** — Only 3/10 documented state machines have formal `VALID_TRANSITIONS` guards. 7 rely on ad-hoc handler checks. 11 additional undocumented pgEnums with zero guards.
-2. **Cross-module coupling** — 3 bi-directional import cycles (all involving `association:member`), 35 cross-module imports across 9 modules. No event bus — cross-module effects via direct imports.
-3. **Performance anti-patterns** — 15 unbounded `findMany` queries without LIMIT, 3 confirmed N+1 patterns in bulk operations, 2 missing FK indexes.
+1. **No state transition guards** -- 6 state machines (membership, dues invoice, dues payment, booking, license, officer term) have zero runtime transition validation. Invalid state changes possible. Status naming mismatch: `terminated` vs spec `REMOVED`.
+2. **Inverted core→handler dependencies** -- 20 imports across 11 core/middleware files importing from handler repos. Architectural violation: core should never depend on handler layer. Module changes can silently break core.
+3. **Type cast density in association handler** -- 274 `as any` casts in association:member (internal types, not library). Source code otherwise clean (2 TODOs, 0 stubs, 0 FIXMEs).
 
-**Delta Since Last Audit (2026-05-20 Wave 4):**
-- Health score: 8.2 → 7.8 (stricter re-baseline with deeper cross-module + performance analysis)
-- Handler modules: 25 (unchanged)
-- Backend test files: 407 → 419 (+12)
-- E2E test files: 101 (unchanged)
-- Contract tests: 97 (unchanged)
-- TypeSpec files: 55 (unchanged)
-- Schema files: 37 (unchanged)
-- pgEnums: 96 (unchanged)
-- Business rules: 51 → 50 (recount)
-- Frontend routes: 97 (unchanged)
-- Boilerplate aligned with monobase-js-lf (local-first stack removed)
-- 12 structural `as any` casts fixed with proper type definitions
+**Delta Since Last Audit (2026-05-26):**
+- Health score: 7.9 → 7.4 (deeper analysis revealed state machine + inverted dep severity was underrated)
+- **New findings:** Inverted core→handler deps quantified (20 imports, 11 files), state machine guards confirmed absent across all 6 machines, type cast density in association handler (274 `as any`)
+- **Corrections from v2:** Cross-module coupling is NOT handler→handler (that's clean). It's core→handler (architectural inversion). v2 counted 35+ cross-module imports but misclassified the source.
+- **Confirmed from v2:** Unbounded queries (~15-20), N+1 patterns (3), no P0 issues, spec coverage excellent
 
-## 2. Project Overview
+---
 
-- **Modules discovered:** 25 handler directories
-- **Schema files:** 37 across 25 modules
-- **API endpoints:** 360 (GET: 141, POST: 134, PATCH: 41, DELETE: 38, PUT: 6)
-- **Business rules documented:** 40 (BR-01–BR-40) + 10 handler-extracted (H-01–H-10)
-- **Roles identified:** 13 distinct role/position combinations
-- **State machines documented:** 10 (3 with formal guards)
-- **pgEnums total:** 96 (10 documented + 11 undocumented status enums + others)
-- **Tests found:** 617 total (419 unit/integration + 101 E2E + 97 contract)
-- **Frontend apps:** 3 (account: 16 routes, admin: 11 routes, memberry: 70 routes)
-- **Product docs:** 16 PRD artifacts + 19 module specs
+## 2. Module Discovery
 
-## 3. Project Structure
+### 2.1 Backend Handler Modules (25-26 directories)
 
-**Stack:** TypeScript + Bun 1.2.21 + Hono (API) + Drizzle ORM (PostgreSQL) + TanStack Router + Vite
+| Module | Total Files | Test Files | TypeSpec | Status |
+|--------|------------|------------|----------|--------|
+| association:member | 316 | 79 | No | MEGA-MODULE -- split deferred to v1.2.0 |
+| association:operations | 98 | 21 | No | Active -- committees, analytics |
+| communication | 92 | 41 | No | Active -- templates, queuing |
+| platformadmin | 59 | 28 | Yes | Active -- admin operations |
+| person | 57 | 29 | Yes | Active -- central PII hub |
+| booking | 56 | 25 | Yes | Active -- scheduling |
+| events | 42 | 25 | No | Active -- event management |
+| billing | 41 | 23 | Yes | Active -- Stripe Connect |
+| membership | 41 | 24 | No (custom .tsp) | Active -- applications |
+| email | 40 | 17 | Yes | Active -- transactional queue |
+| documents | 39 | 22 | No | Active -- document management |
+| training | 37 | 22 | No | Active -- CPD/CE credits |
+| surveys | 34 | 14 | Yes | Active -- NPS, surveys |
+| dues | 26 | 14 | Yes (custom) | Active -- invoicing |
+| elections | 26 | 17 | No | Active -- voting |
+| comms | 22 | 5 | Yes | Active -- WebSocket |
+| certificates | 22 | 12 | No | Active -- certificates |
+| advertising | 18 | 7 | No | NEW -- not yet spec'd |
+| notifs | 16 | 7 | Yes | Active -- push notifications |
+| jobs | 16 | 7 | No | Infrastructure |
+| marketplace | 16 | 3 | No | Active -- listing/orders |
+| storage | 12 | 4 | Yes | Active -- S3/MinIO |
+| reviews | 11 | 5 | Yes | Active -- NPS reviews |
+| invite | 10 | 4 | Yes | Active -- org invitations |
+| audit | 8 | 4 | Yes | Active -- compliance logging |
 
-**Monorepo layout:**
+### 2.2 Frontend Applications
 
-| Directory | Purpose | Module? |
-|-----------|---------|---------|
-| `apps/account/` | Cloud account app (auth, profile, settings) — port 3002 | App |
-| `apps/admin/` | Platform ops dashboard — port 3003 | App |
-| `apps/memberry/` | Product app (membership, dues, events, training) — port 3004 | App |
-| `services/api-ts/` | Reference TypeScript API (Hono + Drizzle) | Service |
-| `specs/api/` | TypeSpec definitions → OpenAPI + TS types | Spec |
-| `packages/sdk-ts/` | Auto-generated TanStack Query hooks + client | Package |
-| `packages/eslint-config/` | Shared ESLint flat configs | Package |
-| `packages/typescript-config/` | Shared TS configs | Package |
-| `services/api-ts/src/core/` | Shared infrastructure (auth, config, db, errors, health, jobs, logger, metrics) | Infra |
-| `services/api-ts/src/middleware/` | Auth, rate-limit, org-context, request-id middleware | Infra |
-| `services/api-ts/src/handlers/` | 25 handler directories (business modules) | Modules |
+**Memberry App (port 3004):** 125 routes, 22 feature dirs, 97 test files
+**Admin App (port 3003):** 23 routes, 12 test files (improved from 0 in prior audit)
 
-## 4. Module Map
+### 2.3 SDK (packages/sdk-ts)
+Generated TanStack Query hooks + hand-written client, transport, flows, WebRTC utils. 5 test files.
 
-| Module | Handler Files | TypeSpec? | Primary Entities | Priority |
-|--------|--------------|-----------|-----------------|----------|
-| association:member | 166 | Yes | membership, chapters, credentials, credits, dues, governance | Core |
-| association:operations | 54 | No | committees, committee_tasks, events, training | Core |
-| communication | 28 | No | messages, announcements, templates, webhooks | Core |
-| person | 27 | Yes | person (PII hub) | Core |
-| platformadmin | 21 | Yes | platform_admins, organizations | Core |
-| booking | 19 | Yes | booking_events, time_slots, bookings | Feature |
-| billing | 16 | Yes | invoices, invoice_items, billing_configs | Core |
-| documents | 15 | No | documents, access_logs | Feature |
-| membership | 14 | Yes | memberships (shared with assoc:member) | Core |
-| training | 13 | No | training_courses, enrollments | Feature |
-| email | 11 | Yes | email_queue, templates, suppressions | Infra |
-| comms | 11 | Yes | chat_rooms, chat_messages, video_calls | Feature |
-| events | 10 | No | events, registrations | Feature |
-| marketplace | 9 | No | vendors, listings, orders | Future |
-| advertising | 7 | No | advertisers, campaigns, creatives | Future |
-| elections | 7 | No | elections, candidates, ballots | Feature |
-| jobs | 7 | No | job_postings, job_applications | Future |
-| storage | 6 | Yes | files | Infra |
-| dues | 6 | Yes | dues_payments, dues_status_history | Core |
-| notifs | 6 | Yes | notifications, notification_preferences | Infra |
-| certificates | 4 | No | certificates | Feature |
-| reviews | 4 | Yes | reviews | Feature |
-| invite | 3 | No | invitations | Feature |
-| audit | 1 | Yes | audit_logs | Infra |
-| accredited-providers | 0 (app.ts) | No | accredited_providers | Feature |
+---
 
-**Module Dependencies (critical):**
-- `association:member` ↔ `dues` (bi-directional, P1)
-- `association:member` ↔ `person` (bi-directional, P1)
-- `association:member` ↔ `membership` (bi-directional, P1)
-- `platformadmin` ← 5 modules (pure dependency, clean)
+## 3. Domain Terms & DDD Analysis
 
-## 5. Domain Glossary Summary
+### 3.1 Aggregate Roots Identified
 
-**Source:** `docs/product/DOMAIN_GLOSSARY.md` (346 lines, 70 terms, 16 sections)
+| Entity | Aggregate Root? | Domain Events | Cross-Module Pattern | Confidence |
+|--------|----------------|---------------|---------------------|------------|
+| Person | Yes | PersonCreated, PersonUpdated | API (referenced by all modules) | [INFERRED] |
+| Membership | Yes | MembershipActivated, MembershipLapsed | Direct import (tight coupling) | [INFERRED] |
+| Booking | Yes | BookingConfirmed, BookingCancelled | Isolated | [INFERRED] |
+| DuesPayment | No (child) | PaymentCaptured | Direct import | [INFERRED] |
+| DuesInvoice | No (child) | InvoiceGenerated | Direct import | [INFERRED] |
+| Notification | No | — | Isolated | [INFERRED] |
 
-- **Terminology conflicts:** 0 (glossary is clean)
-- **Key sections:** Core Entities, Officer Sub-Roles, Membership Terms, Financial Terms, Activity Terms, Credit Terms, Identity/Credential Terms, Communications Disambiguation, Training/Course Disambiguation, Field Naming, Platform Terms, Acronyms, Localization, DDD Classification, Bounded Contexts, ACL Recommendations
+### 3.2 Terminology Inconsistencies
 
-### DDD Analysis
+| Concept | Variations | Severity |
+|---------|-----------|----------|
+| Communications | `comms/` (WebSocket), `communication/` (templates), `communications/` (announcements) | P2 |
+| Member status | `terminated` in updateMember.ts vs `REMOVED` in spec BR-03 | P1 |
+| Member ID | `memberNumber` vs `licenseNumber` (fallback logic in importMembers.ts) | P2 |
 
-| Bounded Context | Aggregate Root | Entities | Domain Events | Cross-Module Pattern |
-|----------------|---------------|----------|---------------|---------------------|
-| Identity | Person | person, privacy_settings | PersonCreated, PersonDeactivated | API (referenced by all) |
-| Membership | Membership | memberships, status_history | MembershipStatusChanged | Direct import (tight) |
-| Financial | DuesPayment | dues_payments, invoices, fund_allocations | PaymentReceived, InvoiceFinalized | Direct import (tight) |
-| Activities | Event/BookingEvent | events, bookings, registrations, time_slots | EventCreated, RegistrationConfirmed | Direct import |
-| Communication | Announcement | messages, announcements, templates, webhooks | MessageSent, AnnouncementPublished | Direct import |
-| Content | Document | documents, certificates, access_logs | CertificateGenerated | API |
-| Governance | Election | elections, candidates, ballots | ElectionOpened, VoteCast | API |
-| Platform | Organization | organizations, platform_admins | OrgStatusChanged | Direct import |
-| Advertising | Advertiser | advertisers, campaigns, creatives | — | Isolated |
-| Marketplace | Vendor | vendors, listings, orders | — | Isolated |
-| Jobs | JobPosting | job_postings, job_applications | — | Isolated |
+### 3.3 Domain Events (Only 3 typed)
+```
+dues.payment.recorded     -> paymentId, personId, organizationId, amount, newExpiryDate
+membership.status.changed -> membershipId, personId, organizationId, oldStatus, newStatus
+invite.claimed            -> inviteId, personId, organizationId, membershipId
+```
+Cross-module communication largely via direct imports rather than events.
 
-**Anti-corruption layers found:** 0 formal ACLs. DOMAIN_MODEL.md recommends ID-based references but code uses direct imports.
-**Anti-corruption layers missing:** All 6 documented cross-context imports lack translation layers.
-**Missing domain event infrastructure:** No event emission system exists — grep for `emit`, `dispatch`, `publish.*event`, `EventEmitter` found zero domain event dispatches. Cross-module effects handled via direct function calls.
+---
 
-## 6. Permission Summary
+## 4. Permission Matrix
 
-### Roles Found
+### 4.1 Auth Stack (4 layers)
 
-| Role | Source | Description |
-|------|--------|-------------|
-| `admin` | auth.ts, config.adminEmails | System admin, full access |
-| `user` | auth.ts default | Default authenticated user |
-| `platform_admin` | platform-admin-auth.ts, DB table | Verified against platform_admin table |
-| `coordinator` | TypeSpec routes | Association management |
-| `member` | org-context.ts | Org-scoped member |
-| `member:owner` | TypeSpec routes | Owner-permission syntax |
-| `association:admin` | TypeSpec routes | Association-level admin |
-| `chapter:officer` | TypeSpec routes | Chapter officer |
-| `support` | booking/authorization.ts | Support staff |
-| `client` / `host` | booking context | Booking context roles |
-| Officer positions | officer-auth.ts | President, Treasurer, Secretary (require 2FA in prod) |
+| Layer | Mechanism | Status |
+|-------|-----------|--------|
+| Global auth | Better-Auth session validation, suspended account check | ✅ All non-public routes |
+| Officer auth | Active term + 2FA for president/treasurer/secretary | ✅ Officer endpoints |
+| Platform admin | Membership check in platform_admin table | ✅ /platformadmin/* |
+| Impersonation guard | 2-hour limit, write-block during session | ✅ All mutations |
+| Account lockout | 5 failed attempts → 15-min ban + audit log (AC-M01-005) | ✅ Auth endpoints |
+| Rate limiting | Configurable per-route, skips /health and /ready | ✅ Global |
+| Session limits | 24h expiry, 5 concurrent sessions (configurable) | ✅ Global |
 
-### Unprotected Routes (intentional)
+### 4.2 Role Definition
+`RoleRequirement = string | ${string}:owner` — system roles (admin, support, user) + context roles (client, host) + owner variants.
 
-| Route | Method | Module | Risk |
-|-------|--------|--------|------|
-| `/email/unsubscribe` | GET, POST | email | Low — RFC 8058 compliant |
-| `/association/member/credentials/public-verify` | POST | association | Low — public by design |
-| `/association/member/ethics/public-complaints` | GET, POST | association | Medium — public submission |
-| `/association/member/directory/search` | GET | association | Low — public directory |
-| `/public/org/:slug` | GET | association | Low — public org info |
-| `/livez`, `/readyz`, `/metrics`, `/docs` | GET | infra | None — infrastructure |
-| `/accredited-providers/:orgId` | ALL | training | **Medium — auth but no role check (P2)** |
+---
 
-## 7. Business Rules Summary
+## 5. Business Rules Summary
 
-**40 explicit rules** documented in `docs/ver-3/business/business-rules.md` (BR-01 through BR-40) with companion `br-registry.json`.
+33/40 BRs COMPLETE per shell audit. Majority explicit business rules with HIGH confidence. See `.planning/` artifacts for full BR registry.
 
-**10 handler-extracted rules** (H-01 through H-10) not in BR doc:
+### 5.1 Stub Handlers (Deferred v1.2.0)
+9 institutional membership stubs returning 501 with `Implementation-Status: STUB` comment.
 
-| Rule ID | Rule | Type | Confidence |
-|---------|------|------|------------|
-| H-01 | Only invoice merchant or admin can finalize invoices | Explicit BR | High |
-| H-02 | Invoice must be in draft status to finalize | Explicit BR | High |
-| H-03 | Invoice must have positive total to finalize | Explicit BR | High |
-| H-04 | Users can only view/pay their own invoices | Explicit BR | High |
-| H-05 | Booking status transitions follow defined state machine | Explicit BR | High |
-| H-06 | Dues recording restricted to TREASURER or PRESIDENT | Explicit BR | High |
-| H-07 | 5-min concurrent payment guard (M6-R4) | Explicit BR | High |
-| H-08 | Only draft elections can open nominations | Explicit BR | High |
-| H-09 | Active membership required to cast ballot (BR-34) | Explicit BR | High |
-| H-10 | Account deletion can be cancelled before execution, not after (410 Gone) | Explicit BR | High |
+---
 
-## 8. API Surface Summary
+## 6. API Surface
 
-**Total endpoints: 360** (from OpenAPI spec)
+- **412 endpoints** across **276 paths** (OpenAPI spec: 81,705 lines)
+- **~33 hand-wired routes** (payment tokens, email unsubscribe, public org discovery, etc.)
+- **TypeSpec coverage:** ~58% (15/26 handler dirs)
 
-| Metric | Count |
-|--------|-------|
-| GET endpoints | 141 |
-| POST endpoints | 134 |
-| PATCH endpoints | 41 |
-| DELETE endpoints | 38 |
-| PUT endpoints | 6 |
-| TypeSpec coverage | 15/25 modules (60%) |
-| Hand-wired routes | 7 (in app.ts) |
-| Dark modules (no OpenAPI) | 3 (advertising, marketplace, jobs) |
+---
 
-**Hand-wired routes (not in OpenAPI):**
-- `GET/POST /email/unsubscribe` — public unsubscribe
-- `GET /email/suppressions` — suppression list
-- `GET/POST/PATCH/DELETE /accredited-providers/:organizationId` — provider CRUD
+## 7. State Machines
 
-**TypeSpec-only (no handler code):** `patient.tsp`, `provider.tsp` — spec exists, no implementation.
+| Entity | Status Enum | States | Guards? | Severity |
+|--------|-------------|--------|---------|----------|
+| Membership | `membership_status` | pendingPayment → active → gracePeriod → lapsed/expired/suspended/removed/resigned/deceased/expelled | ❌ None | P1 |
+| Dues Invoice | `dues_invoice_status` | generated → sent → paid/overdue/cancelled/writtenOff | ❌ None | P1 |
+| Dues Payment | `dues_payment_status` | pending → captured/failed/charged_back/refunded | ❌ None | P1 |
+| Booking | `booking_status` | pending → confirmed/rejected/cancelled/completed/no_show_* | DB constraints only | P2 |
+| License | `license_status` | active → expired/suspended/inactive | ❌ None | P1 |
+| Officer Term | `term_status` | upcoming → active → completed/resigned/removed | ❌ None | P1 |
+| Committee | committee status | active → completed/dissolved | Handler checks | P2 |
+| Election | election status | draft → active → closed | Handler checks | P2 |
+| Training | training status | draft → published → completed/cancelled | Handler checks | P2 |
+| TrainingEnrollment | enrollment status | enrolled → completed/cancelled | Handler checks | P2 |
 
-### 8b. API Contract Drift
+**Critical Finding:** No `VALID_TRANSITIONS` map or guard function exists for ANY state machine. Status naming mismatch: `terminated` vs spec `REMOVED`.
 
-No per-module `API_CONTRACTS.md` files exist. Operating in pure extraction mode.
+---
 
-## 9. State Machines Summary
+## 8. UI / Screen Audit
 
-### Documented State Machines (10)
+- 125 Memberry routes, 23 Admin routes
+- 19 modules have full UI prototype packs (screens, components, interaction-states, mock-data)
+- No mock data contamination in production components (seed data properly isolated in `src/seed/`)
+- Reusable patterns: confirm-dialog, data-table, date-picker, skeleton-loader, empty-state, error-boundary, form-field
 
-| Entity | Status Enum | Values | Guards? | Gap |
-|--------|------------|--------|---------|-----|
-| Membership | `membership_status` | active, lapsed, grace, suspended, expired, resigned, deceased, honorary | **YES** — `VALID_TRANSITIONS` | None |
-| Election | `election_status` | draft, nominations_open, voting_open, closed, cancelled | **YES** — `VALID_TRANSITIONS` | None |
-| Organization | `org_status` | active, suspended, dissolved | **YES** — `VALID_TRANSITIONS` | None |
-| Dues Payment | `dues_payment_status` | pending, processing, succeeded, failed, refunded, partially_refunded, disputed, expired, waived | **NO** — comment only | P1 |
-| Dues Invoice | `dues_invoice_status` | generated, sent, partially_paid, paid, overdue, cancelled, waived, written_off | **NO** | P1 |
-| Booking | `booking_status` | pending, confirmed, cancelled, completed, no_show | **PARTIAL** — comment declares transitions | P2 |
-| Training Enrollment | `enrollment_status` | enrolled, completed, failed, withdrawn, no_show | **NO** | P2 |
-| Communication Message | `delivery_status` | queued, sending, delivered, failed, bounced | **NO** | P2 |
-| Email Queue | `email_queue_status` | queued, sending, sent, delivered, bounced, failed, cancelled | **NO** | P2 |
-| Billing Invoice | `invoice_status` | draft, open, paid, void, uncollectible | **NO** | P2 |
+---
 
-**Summary:** 3/10 have formal guards. 7 lack enforcing code.
+## 9. Test Coverage Audit
 
-### Undocumented Status Enums (11)
+### 9.1 Test Counts
 
-| Enum | Values | Module |
-|------|--------|--------|
-| campaign_status | draft, pending_review, active, paused, completed, rejected | advertising |
-| creative_status | pending, approved, rejected | advertising |
-| transfer_status | requested, pendingSourceApproval, pendingTargetApproval, approved, denied, completed, cancelled | association:member |
-| license_status | active, expired, suspended, revoked, pending | association:member |
-| credential_status | active, suspended, revoked, expired | association:member |
-| committee_status | active, disbanded, on_hold | association:operations |
-| committee_task_status | todo, in_progress, done, blocked | association:operations |
-| job_posting_status | draft, active, closed, filled | jobs |
-| job_application_status | applied, screening, interviewed, offered, hired, rejected, withdrawn | jobs |
-| listing_status | draft, active, sold_out, discontinued | marketplace |
-| announcement_status | draft, published, archived | communication |
+| Layer | Count | Quality |
+|-------|-------|---------|
+| Backend handler tests | 471 files | STRONG (56:3 strong:weak ratio sampled) |
+| Core tests | 15 files | STRONG |
+| Memberry frontend tests | 97 files | Component |
+| Admin frontend tests | 12 files | Component |
+| E2E tests (Playwright) | 127 files | Integration |
+| Contract tests (Hurl) | 97 files | Contract |
+| SDK tests | 5 files | Unit |
+| **Total** | **~824** | |
 
-### 9b. Domain Model Drift
+### 9.2 Module Coverage Assessment
 
-| Category | Count | Severity |
-|----------|-------|----------|
-| Undocumented schema tables | 3 (billing_configs, email_suppressions, notification_preferences) | P2 |
-| Spec-only entities (no schema) | 2 (patient, provider) | P2 |
-| Missing domain event infrastructure | ALL (0 emitters exist) | P1 |
-| Documented cross-context coupling | 6 direct import pairs | P2 |
-| Undocumented status enums | 11 | P2 |
-| Duplicate enum name risk | 1 (`template_status` in communication + email) | P2 |
+| Assessment | Modules |
+|-----------|---------|
+| STRONG | association:member, communication, person, booking, events, membership, billing, documents, training, dues |
+| GOOD | platformadmin, elections, certificates, surveys |
+| MODERATE | email, comms, notifs, reviews, storage, invite, audit |
+| WEAK | advertising, jobs, marketplace |
 
-## 10. UI / Screens Summary
+---
 
-| App | Routes | Components | Mock Data? | Prototype Contamination? |
-|-----|--------|------------|------------|--------------------------|
-| account | 16 | 56 | Placeholders only | No |
-| admin | 11 | 13 | Placeholders only | No |
-| memberry | 70 | 185 | Placeholders + test mocks | No |
-| **Total** | **97** | **254** | | |
+## 10. Security Audit (OWASP Top 10)
 
-**No mock/prototype contamination found.** All "mock" hits are form `placeholder=` attributes or `vi.mock()` in test files. No `lorem`, `dummy`, or `fake` data in production code.
+| OWASP Category | Status | Key Evidence |
+|----------------|--------|-------------|
+| A01: Broken Access Control | ✅ PASS | 4-layer auth, IDOR fixed (a233a3c9), auth-gate-coverage.test.ts |
+| A02: Cryptographic Failures | ✅ PASS | Better-Auth credential storage, PII masked (maskEmail) |
+| A03: Injection | ✅ PASS | Drizzle sql`` template literals, Zod validators, no string concat |
+| A04: Insecure Design | ⚠️ P2 | No explicit CSRF token (SameSite cookies only) |
+| A05: Security Config | ✅ PASS | secureHeaders (CSP, HSTS, X-Frame-Options), CORS hardened |
+| A06: Vulnerable Components | ✅ MONITOR | Standard deps, Playwright pinned to 1.58.2 |
+| A07: Auth Failures | ✅ PASS | Account lockout, session limits, MFA disable guard |
+| A08: Data Integrity | ✅ PASS | DB check constraints, Zod validators on all generated routes |
+| A09: Logging & Monitoring | ✅ PASS | Pino structured logging, requestId correlation, audit middleware |
+| A10: SSRF | ✅ PASS | No user-controlled URL fetching in handlers |
 
-### Key Screens by App
+---
 
-- **account (16):** Dashboard, bookings (list/detail/host), notifications, settings (account/billing/schedule/security), auth, onboarding, verify-email
-- **admin (11):** Dashboard, associations (list/detail), audit log, feature flags, impersonation, members, operators, organizations (list/detail)
-- **memberry (70):** My (profile/settings/payments/certificates/credits/events/training/id-card/notifications/data-export), Org (home/members/dues/events/elections/training), Officer (applications/communications/dues/events/members/settings×7/training), Public (auth/onboarding/invite/org/pay/verify)
+## 11. Observability Audit
 
-## 11. Test Coverage Summary
+| Area | Status | Implementation |
+|------|--------|---------------|
+| Structured logging | ✅ Present | Pino JSON with serializers |
+| Correlation IDs | ✅ Present | X-Request-ID, auto-generated UUID, propagated via ctx |
+| Metrics | ⚠️ Basic | Prometheus /metrics: request counts, errors, top routes. **Missing:** latency histograms, DB duration |
+| Health checks | ✅ Complete | /livez (lightweight), /readyz (DB + storage + jobs) |
+| Feature flags | ✅ Present | FF_* env vars, typed, exposed via /feature-flags |
+| Distributed tracing | ❌ None | No OpenTelemetry (P3) |
 
-| Category | Total Items | Tested | Coverage | Assertion Quality |
-|----------|------------|--------|----------|-------------------|
-| Handler modules | 25 | 25 | 100% | 91%+ strong |
-| Backend test files | — | 419 | — | — |
-| E2E test specs | — | 101 | — | — |
-| Contract tests (.hurl) | — | 97 | — | — |
-| Middleware tests | — | 5 | — | — |
+---
 
-### Test Type Classification (top modules)
+## 12. Performance Anti-Patterns
 
-| Module | Unit/Integ | E2E | Contract | Total | Handlers |
-|--------|-----------|-----|----------|-------|----------|
-| association:member | 44 | ~30 | ~25 | ~99 | 166 |
-| communication | 35 | ~3 | ~3 | ~41 | 28 |
-| person | 32 | ~2 | ~3 | ~37 | 27 |
-| platformadmin | 24 | ~6 | 1 | ~31 | 21 |
-| booking | 24 | 0 | ~6 | ~30 | 19 |
-| billing | 21 | 0 | ~3 | ~24 | 16 |
-| membership | 23 | ~5 | ~2 | ~30 | 14 |
-| training | 18 | ~8 | ~4 | ~30 | 13 |
-| email | 17 | 0 | ~2 | ~19 | 11 |
-| events | 16 | ~4 | ~3 | ~23 | 10 |
+| Pattern | Count | Severity | Files |
+|---------|-------|----------|-------|
+| N+1 queries | 3 confirmed | P2 | communication/bulkUpdatePersonSubscriptions.ts, communication/createMessage.ts, certificates/batchGenerateCertificates.ts |
+| Unbounded findMany | ~15-20 | P2 | booking.repo (4), governance.repo (4), marketplace.repo (2), dues repos, email repos |
+| Missing FK indexes | 2 | P3 | dues-payments.schema.ts (idempotencyKey), invite.schema.ts (personId) |
+| Sync blocking | 0 | ✅ | All handlers async |
 
-### Assertion Quality (top 5)
+---
 
-| Module | Strong | Weak | Ratio | Grade |
-|--------|--------|------|-------|-------|
-| communication | 429 | 5 | 98.8% | A+ |
-| association:operations | 476 | 20 | 96.0% | A |
-| association:member | 1005 | 62 | 94.2% | A |
-| booking | 310 | 31 | 90.9% | A |
-| person | 294 | 87 | 77.2% | B |
+## 13. Inconsistency Report
 
-**Underserved modules:** storage (2 tests / 6 handlers), marketplace (3 / 9), comms (5 / 11).
-
-## 12. Security Audit (OWASP Top 10)
-
-| OWASP Category | Status | Severity | Notes |
-|----------------|--------|----------|-------|
-| A01: Broken Access Control | 4 items | P2 | accredited-providers no role check; fail-open orgContext on 7 prefixes; inconsistent dues auth; no CSRF tokens |
-| A02: Cryptographic Failures | OK | — | HMAC-SHA256 sessions, Argon2/bcrypt passwords, secret rotation |
-| A03: Injection | OK | — | Zero raw SQL concatenation, all Drizzle parameterized, no shell exec |
-| A04: Insecure Design | 1 item | P3 | 2FA skipped in dev mode |
-| A05: Security Misconfiguration | OK | — | CORS config-driven, secureHeaders() (CSP, HSTS, X-Frame-Options) |
-| A06: Vulnerable Components | Not audited | — | Requires `bun audit` |
-| A07: Auth Failures | OK | — | Account lockout, rate limiting, session limits, timing-safe tokens |
-| A08: Software Integrity | OK | — | No dangerouslySetInnerHTML |
-| A09: Logging Failures | 3 items | P3 | Seed scripts log creds (dev-only), admin emails logged at startup, debug mode exposes internal fields |
-| A10: SSRF | OK | — | No user-controlled URLs in server-side fetch |
-
-**Summary:** P0: 0 | P1: 0 | P2: 4 | P3: 4
-
-## 13. Observability Audit
-
-| Area | Status | Severity | Notes |
-|------|--------|----------|-------|
-| Structured logging | PASS | — | Pino with JSON serialization, PII masking (`maskEmail`), service label |
-| Request ID / Correlation | PASS | — | UUID per request via `X-Request-ID`, propagated in context + error responses |
-| Metrics | PARTIAL | P3 | In-memory Prometheus `/metrics` — request count, error count, uptime. **Missing: latency histograms (p50/p95/p99)** |
-| Health checks | PASS | — | `/livez` (liveness) + `/readyz` (readiness: DB + storage + jobs). RFC `application/health+json` |
-| Distributed tracing | MISSING | P2 | No OpenTelemetry, no trace/span IDs |
-| Per-request log correlation | PARTIAL | P3 | requestId in error middleware but not bound to Pino child logger per request |
-| Alerting | MISSING | P3 | No alert rules or threshold monitoring configured |
-
-## 14. Performance Audit
-
-| Pattern | Instances | Severity | Key Files |
-|---------|-----------|----------|-----------|
-| N+1 queries (loop + await db) | 3 confirmed | P2 | communication/bulkUpdatePersonSubscriptions.ts, communication/createMessage.ts, certificates/batchGenerateCertificates.ts |
-| N+1 queries (likely) | 1 | P3 | dues/bulkRecordPayments.ts (loop + getNextReceiptSequence) |
-| Unbounded findMany | ~15 | P2 | booking.repo (4), governance.repo (4), marketplace repos (2), comms/chatMessage.repo, certificates.repo, audit.repo, events.repo (2), membership.repo, credits.repo |
-| Missing FK indexes | 2 | P3 | dues-payments.schema (idempotencyKey), invite.schema (personId) |
-
-## 15. Inconsistency Report
-
-### Critical (Security/Data Integrity)
+### 13.1 Critical (Architectural)
 
 | ID | Type | Description | Files | Impact |
 |----|------|-------------|-------|--------|
-| IC-01 | Access control | `accredited-providers` routes have auth but no role restriction | app.ts:~185 | Any authenticated user can CRUD providers |
-| IC-02 | Access control | Fail-open `orgContextOptionalMiddleware` on 7 route prefixes | app.ts, org-context.ts | Org isolation depends entirely on handler-level checks |
+| IC-01 | Inverted dependency | Core imports handler repos (20 imports, 11 files) | core/email.ts (7), core/auth.ts (3), core/notifs.ts (3), core/audit.ts (2), + 6 more | Module changes silently break core |
+| IC-02 | Status mismatch | `terminated` vs `REMOVED` for member status | handlers/association:member/updateMember.ts | Incorrect business logic |
 
-### Major (Functional Gaps)
+### 13.2 Major (Functional)
 
-| ID | Type | Description | Files | Impact |
-|----|------|-------------|-------|--------|
-| IM-01 | State machine | 7/10 documented state machines lack formal transition guards | Various handler repos | Invalid state transitions possible |
-| IM-02 | Coupling | 3 bi-directional import cycles involving association:member | handlers/{dues,person,membership} | Circular dependency risk, impedes module split |
-| IM-03 | Performance | 15 unbounded findMany queries without LIMIT | Various repo files | Full table scans possible |
-| IM-04 | Domain events | Zero domain event emission infrastructure | All handlers | Cross-module effects via tight coupling only |
+| ID | Type | Description | Impact |
+|----|------|-------------|--------|
+| IC-03 | Missing guards | 6 state machines have no transition validation | Invalid state transitions possible |
+| IC-04 | N+1 queries | 3 bulk operations loop with individual DB calls | Performance at scale |
+| IC-05 | Unbounded queries | ~15-20 list endpoints without pagination | Memory exhaustion risk |
 
-### Minor (Consistency)
+### 13.3 Minor (Consistency)
 
-| ID | Type | Description | Files | Impact |
-|----|------|-------------|-------|--------|
-| Im-01 | Auth pattern | Dues handlers use manual `if (!user)` instead of middleware | bulkRecordPayments.ts, recordManualPayment.ts | Inconsistent with other modules |
-| Im-02 | Naming | `template_status` enum defined in both communication and email schemas | communication.schema.ts, email.schema.ts | Potential migration conflict |
-| Im-03 | Coverage | 3 orphan handlers (audit, invite, reviews) lack MODULE_SPEC | handlers/{audit,invite,reviews} | No spec-to-code traceability |
+| ID | Type | Description | Impact |
+|----|------|-------------|--------|
+| IC-06 | Domain naming | 3 communication module variants | Developer confusion |
+| IC-07 | Type casts | 274 `as any` in association handler | Type safety erosion |
+| IC-08 | Missing FK indexes | 2 foreign keys without indexes | Query performance |
 
-### 15b. Stub & TODO Inventory
+### 13.4 Stub & TODO Inventory
 
-| Severity | Count | Top Modules |
-|----------|-------|-------------|
-| P1 (runtime stubs) | 8 | association:member (institutional membership CRUD: 7 handlers + recalculateAgingBucket) |
-| P1 (incomplete logic) | 3 | billing (tax calc, platform fee, line items) |
-| P2 (schema/util gaps) | 14 | billing (9 schema TODOs), billing/createInvoice, billing/updateInvoice |
-| P3 (TODO markers) | 5 | dues/jobs (1), apps (2), packages/sdk-ts (1), apps/account E2E (1 FIXME) |
+| Category | In Source | In Deps | Severity |
+|----------|----------|---------|----------|
+| Runtime stubs (501) | 9 (institutional membership, deferred v1.2.0) | — | P3 |
+| `// TODO` | 2 (generate.ts, member-table.tsx) | 3,257 | ✅ Clean |
+| `// FIXME` | 0 | 35 | ✅ Clean |
+| `throw new Error('not implemented')` | 0 | 80 | ✅ Clean |
 
-**Summary:** 11 runtime stubs (P1), 14 incomplete (P2), 5 informational (P3)
+### 13.5 Type Cast Density
 
-Key P1 stubs: `listInstitutionalMemberships`, `getInstitutionalMembership`, `createInstitutionalMembership`, `updateInstitutionalMembership`, `deleteInstitutionalMembership`, `allocateSeat`, `revokeSeat`, `listSeatAllocations` — all institutional membership (not yet implemented).
+| Module/Area | `as any` | `as unknown` | `@ts-ignore` | Severity |
+|-------------|----------|-------------|-------------|----------|
+| association handler | 274 | — | — | P2 (internal) |
+| routeTree.gen.ts | — | 124 | — | ✅ (generated) |
+| Test files | ~60% of total | — | ~2,400 | ✅ (mocks) |
+| Handler code (non-assoc) | ~16 | — | — | ✅ (low) |
 
-### 15c. Type Cast Density
+### 13.6 Cross-Module Import Violations
 
-| Area | Files w/casts | Total Casts | `as any` | `as unknown` | `@ts-ignore` | Severity |
-|------|---------------|-------------|----------|--------------|--------------|----------|
-| handlers (prod) | few | 4 | 4 | 0 | 0 | LOW |
-| handlers (test) | many | 1,487 | 1,487 | 0 | 0 | MEDIUM |
-| generated code | 3 | 596 | 1 | 360 | 137 | N/A |
-| middleware | ~5 | 31 | 30 | 1 | 0 | MEDIUM |
-| apps (hand-written) | many | 142 | 142 | 36 | 22 | MEDIUM |
-| seed-scenarios.ts | 1 | 88 | 88 | 0 | 0 | HIGH |
-| packages | few | 7 | 7 | 5 | 0 | LOW |
+**Core → Handler (Inverted, P1):**
 
-**Production handler code: 4 `as any` casts total — excellent type safety.**
-Test files: 1,487 casts (mock context typing boilerplate — common pattern, not a defect).
-Top offender (non-generated, non-test): `seed-scenarios.ts` (88 casts — schema drift in seed data).
+| File | Target Handler | Import Count |
+|------|---------------|-------------|
+| core/email.ts | email/repos, association:member/repos | 7 |
+| core/auth.ts | person/repos, audit/repos | 3 |
+| core/notifs.ts | notifs/repos, person/repos | 3 |
+| core/audit.ts | audit/repos | 2 |
+| core/org-scoped-persons.ts | association:member/repos | 1 |
+| core/domain-event-consumers.ts | handler repos | 1 |
+| core/account-lockout.ts | handler repos | 1 |
+| middleware/officer-auth.ts | governance.repo | 1 |
+| middleware/platform-admin-auth.ts | platform-admin.repo | 1 |
+| middleware/impersonation-guard.ts | platform-admin.repo | 1 |
 
-**Internal vs external ratio:** 75% internal / 25% external (generated). Of internal: 85% in test files.
+**Handler → Handler:** CLEAN — no production cross-handler imports.
+**Bi-directional:** None. All violations one-directional (core → handlers).
 
-### 15d. Cross-Module Import Violations
+### 13.7 Cross-Module Raw SQL
+No cross-module table references in raw SQL. All queries via Drizzle ORM within module boundaries. ✅ Clean.
 
-| Source Module | Imports From | Import Count | Bi-directional? |
-|--------------|-------------|--------------|----------------|
-| person | association:member, platformadmin | 12 | YES (with assoc:member) |
-| dues | association:member, association:operations, platformadmin | 4 | YES (with assoc:member) |
-| membership | association:member, platformadmin, person | 5 | YES (with assoc:member) |
-| association:member | platformadmin, dues, person, membership | 8 | YES (3 pairs) |
-| association:operations | notifs | 1 | No |
-| invite | platformadmin | 1 | No |
-| events | membership | 1 | No |
+---
 
-**Total: ~35 cross-module imports across 9 modules**
-**Bi-directional coupling pairs (P1):** `association:member ↔ dues`, `association:member ↔ person`, `association:member ↔ membership`
-**Coupling hub:** `association:member` (participates in all 3 cycles, imported by 6+ modules)
+## 14. Repository Guardrails
 
-### 15e. Cross-Module Raw SQL
+| File | Exists? | Lines | Quality |
+|------|---------|-------|---------|
+| ARCHITECTURE.md | ✅ | 343 | Current |
+| CONTRIBUTING.md | ✅ | 2,506 | Comprehensive |
+| CLAUDE.md | ✅ | 409 | Current |
+| README.md | ✅ | 339 | Current |
+| ROADMAP.md | ✅ | 155 | Active |
+| VERTICAL_TDD.md | ✅ | 308 | Current |
 
-| File:Line | SQL Fragment | Table's Module | Current Module | Severity |
-|-----------|-------------|---------------|---------------|----------|
-| dues/getDuesDashboard.ts:6 | imports events schema | association:operations | dues | P2 |
-| dues/jobs/reminderProcessor.ts:102 | `memberships.duesExpiryDate::date` | association:member | dues | P2 |
+**Assessment:** Exceptional. All critical docs present and maintained.
 
-**Type casts in raw SQL:** ~8 instances (all `::date` casts). All use Drizzle parameterized templates — no injection risk.
-**String interpolation:** None found. All SQL safe.
-**Summary:** 2 cross-module raw SQL refs (P2), 8 type casts (P3), 0 injection risks (P0)
+---
 
-### 15f. Security Audit (OWASP)
+## 15. Spec Coverage
 
-See Section 12 above. **P0: 0 | P1: 0 | P2: 4 | P3: 4**
+| Artifact | Count | Quality |
+|----------|-------|---------|
+| MASTER_PRD.md | 1 | Comprehensive |
+| DOMAIN_MODEL.md | 1 | Complete |
+| DOMAIN_GLOSSARY.md | 1 | Complete |
+| ROLE_PERMISSION_MATRIX.md | 1 | Complete |
+| MODULE_MAP.md | 1 | Complete |
+| MODULE_SPEC.md (per module) | 19 | Comprehensive |
+| API_CONTRACTS.md (per module) | 19 | Comprehensive |
+| INTEGRATION_CONTRACTS.md | 4 | Partial |
+| UI Prototypes (per module) | 19 | Full packs |
+| VERTICAL_SLICE_PLAN.md | 5 | Active |
+| Slice specs | 13 | Active |
+| TDD proofs | 16 | Active |
+| WORKFLOW_MAP.md | 1 | Complete |
+| STATE_MACHINES.md | 1 | Complete |
+| THREAT_MODEL.md | 1 | Complete |
+| EVENT_CONTRACTS.md | 1 | Complete |
+| UI_BLUEPRINT.md | 1 | Complete |
+| TRACE_MATRIX.md | 1 | Complete |
+| Audit reports | 126 | Extensive |
 
-### 15g. Observability Audit
+**Verdict:** Industry-leading spec coverage. 23 top-level product docs, 19 per-module spec suites, 126 audit reports.
 
-See Section 13 above. Structured logging PASS, request IDs PASS, health checks PASS. Missing: distributed tracing (P2), latency histograms (P3).
+---
 
-### 15h. Performance Anti-Patterns
+## 16. Standards Gap Matrix
 
-See Section 14 above. 3 N+1 (P2), 15 unbounded queries (P2), 2 missing indexes (P3).
+| Area | Current | Target | Gap | Priority |
+|------|---------|--------|-----|----------|
+| State transition guards | 0/6 formal | 6/6 with runtime validation | Critical | P1 |
+| Core→handler deps | 20 inverted imports | 0 (use interfaces/events) | Architectural | P1 |
+| Status naming | `terminated` vs `REMOVED` | Aligned with spec | Mismatch | P1 |
+| N+1 patterns | 3 confirmed | 0 | Performance | P2 |
+| Unbounded queries | ~15-20 | 0 (all paginated) | Performance | P2 |
+| Type casts (assoc) | 274 `as any` | < 10 | Type safety | P2 |
+| CSRF tokens | SameSite only | Explicit CSRF middleware | Security gap | P2 |
+| Build caching | None (Bun workspaces) | Turborepo or equivalent | DX gap | P2 |
+| Domain naming | 3 comm module names | Consistent naming | Confusion | P2 |
+| TypeSpec coverage | 58% (15/26) | 100% | Spec gap | P3 |
+| Domain events | 3 typed | 15+ (cover cross-module) | Coupling | P3 |
+| Distributed tracing | None | OpenTelemetry | Observability | P3 |
+| FK indexes | 2 missing | All FKs indexed | Performance | P3 |
+| assoc:member size | 316 files | < 100 per module | Maintainability | P3 |
 
-## 16. Repository Guardrails Review
+---
 
-| File | Exists? | Lines | Accurate? | Gaps |
-|------|---------|-------|-----------|------|
-| ARCHITECTURE.md | YES | 343 | Yes — covers purpose, tech stack, module structure | None |
-| CONTRIBUTING.md | YES | 2434 | Yes — comprehensive dev setup, workflows, conventions | None |
-| CLAUDE.md | YES | 419 | Yes — accurate module map, handler counts, key patterns | Consent mgmt noted as planned (correct) |
-| README.md | YES | 344 | Yes — project overview, commands, tech stack | None |
-| VERTICAL_TDD.md | YES | 308 | Yes — vertical TDD protocol, per-module gates | None |
+## 17. Stabilization Plan
 
-**All 5 guardrail files present and accurate (3,848 total lines).** No stale or misleading content detected.
+### P0: Fix Immediately
+**None found.** All prior P0 items resolved (IDOR, auth guards).
 
-## 17. PRD / Spec Coverage Review
+### P1: Fix Before Major New Work
 
-| Artifact | Exists? | Lines | Quality | Notes |
-|----------|---------|-------|---------|-------|
-| MASTER_PRD.md | YES | 527 | Good | Full PRD with 19 modules |
-| DOMAIN_GLOSSARY.md | YES | 346 | Good | 70 terms, 0 conflicts |
-| ROLE_PERMISSION_MATRIX.md | YES | 333 | Good | Complete |
-| MODULE_MAP.md | YES | 161 | Adequate | |
-| DOMAIN_MODEL.md | YES | 1575 | Strong | 11 BCs, 18 events, 4 state machines |
-| STATE_MACHINES.md | YES | 283 | Adequate | 10 machines documented |
-| WORKFLOW_MAP.md | YES | 699 | Good | |
-| EVENT_CONTRACTS.md | YES | 625 | Good | |
-| TRACE_MATRIX.md | YES | 299 | Adequate | |
-| UI_BLUEPRINT.md | YES | 487 | Good | |
-| OBSERVABILITY.md | YES | 192 | Thin | Needs expansion |
-| DISASTER_RECOVERY.md | YES | 187 | Thin | Needs tested procedures |
-| THREAT_MODEL.md | YES | 96 | Skeletal | Lacks STRIDE enumeration, attack trees |
-| PERFORMANCE.md | YES | 85 | Skeletal | Targets only, no load profiles |
-| DATA_GOVERNANCE_DRAFT.md | YES | 96 | Draft | Defers to domain model |
-| SEED_MANIFEST.md | YES | — | Good | |
-| Module specs (19/19) | YES | — | Good | All product modules specced |
-| VERTICAL_SLICE_PLAN.md | YES | 609 | Good | |
+1. **Add state transition guards** -- Create `core/state-machine.ts` with generic transition validator. Define allowed transitions per entity. Add guard to all status-updating handlers. (1-2 days)
+2. **Extract core→handler interfaces** -- Create `core/ports/` with interfaces. Start with `core/email.ts` (7 imports). Establish port/adapter pattern for remaining 10 inversions. (2-3 days)
+3. **Fix status naming** -- `terminated` → `REMOVED` in updateMember.ts. (30 minutes)
 
-**16/16 PRD artifacts exist.** 4 skeletal (THREAT_MODEL, PERFORMANCE, OBSERVABILITY, DR).
+### P2: Fix When Touching Module
 
-### Module Spec ↔ Code Alignment
+4. Batch N+1 queries in bulk operations (3 files)
+5. Add .limit() to ~15-20 unbounded queries
+6. Reduce `as any` casts in association handler (274 → <10)
+7. Evaluate CSRF token middleware need
+8. Evaluate Turborepo for build caching
+9. Document comms/communication/communications naming rationale
 
-- **16/19 specs** have corresponding handler code — aligned
-- **3/19 specs** have no code yet: m13-professional-feed, m18-surveys-polls, m19-committee-management
-- **3 orphan handlers** lack specs: audit, invite, reviews
+### P3: Improve Later
 
-## 18. Standards Gap Matrix
+10. Decompose association:member into feature subfolders
+11. Add TypeSpec for remaining 11 modules
+12. Expand domain events (3 → 15+)
+13. Add OpenTelemetry
+14. Add FK indexes on dues-payments, invite schemas
+15. Expand Prometheus metrics (latency, DB duration)
 
-| Area | Current State | Target Standard | Gap | Priority |
-|------|--------------|-----------------|-----|----------|
-| State machine guards | 3/10 formal guards | All status enums have VALID_TRANSITIONS | 7 unguarded + 11 undocumented | P1 |
-| Domain event infrastructure | Zero emitters | Event bus for cross-module effects | No event system exists | P1 |
-| THREAT_MODEL depth | 96 lines, auto-generated | STRIDE analysis, attack trees, mitigations | Skeletal | P1 |
-| DATA_GOVERNANCE | 96 lines, DRAFT | Classification matrix, retention schedules, GDPR/DPA mapping | Draft only | P1 |
-| Cross-module coupling | 3 bi-directional cycles | ID-based references, ACLs | No anti-corruption layers | P2 |
-| Unbounded queries | 15 instances | All list queries have LIMIT/pagination | Missing LIMIT in repo methods | P2 |
-| Distributed tracing | None | OpenTelemetry spans | No trace/span IDs | P2 |
-| CSRF protection | SameSite + CORS only | Defense-in-depth CSRF tokens | No explicit CSRF tokens | P2 |
-| OBSERVABILITY depth | 192 lines | Runbooks, SLI/SLO definitions | Stub needs expansion | P2 |
-| DISASTER_RECOVERY | 187 lines | Tested recovery playbooks | Untested procedures | P2 |
-| N+1 queries | 3 confirmed | Batch operations | Loop + await in bulk handlers | P2 |
-| Orphan handler specs | 3 handlers lack specs | 100% handler-to-spec coverage | audit, invite, reviews | P2 |
-| TypeSpec coverage | 60% (15/25) | 100% | 10 modules hand-wired | P3 |
-| Dark modules | 3 (advertising, marketplace, jobs) | All modules in OpenAPI | No SDK visibility | P3 |
-| PERFORMANCE depth | 85 lines | Load profiles, benchmark suite | Targets only | P3 |
-| Aggregate invariants | Not documented | Explicit invariants per aggregate | Missing from DOMAIN_MODEL | P3 |
-| Value object catalog | Not enumerated | Explicit VO catalog | Missing from DOMAIN_MODEL | P3 |
+---
 
-## 19. Risk Assessment
+## 18. Adoption Plan (5-Phase)
 
-### P0 Risks (Fix Immediately)
-None. Previous P0 items resolved.
-
-### P1 Risks (Fix Before Major New Work)
-1. **State machine guards** — 7/10 documented machines + 11 undocumented enums lack `VALID_TRANSITIONS`. Invalid transitions possible via API.
-2. **Domain event infrastructure** — Zero event emitters. All cross-module effects via direct imports. Blocks event-driven architecture.
-3. **THREAT_MODEL** — 96-line skeleton insufficient for regulated healthcare platform. Needs STRIDE enumeration.
-4. **DATA_GOVERNANCE** — Draft only. Needs PII classification matrix, retention schedules for DPA 2012/BIR compliance.
-5. **Institutional membership stubs** — 8 runtime stubs that will crash if invoked (P1 for any module that references them).
-
-### P2 Risks (Fix When Touching Module)
-1. Cross-module coupling (3 bi-directional cycles)
-2. 15 unbounded queries
-3. 3 N+1 patterns in bulk operations
-4. No distributed tracing
-5. No CSRF tokens (mitigated by SameSite + CORS)
-6. accredited-providers lacks role-based access
-7. fail-open orgContextOptionalMiddleware
-8. Inconsistent dues auth pattern
-9. 3 orphan handlers lack specs
-10. Billing schema TODOs (14 items)
-
-### P3 Risks (Improve Later)
-1. TypeSpec coverage 60%
-2. 3 dark modules
-3. Latency histograms missing
-4. Missing FK indexes (2)
-5. seed-scenarios.ts type cast density (88 `as any`)
-
-## 20. Stabilization Plan
-
-### Fix Immediately (P0)
-None outstanding.
-
-### Fix Before Major New Work (P1)
-1. Add `VALID_TRANSITIONS` maps to `dues_payment_status` and `dues_invoice_status` (highest transaction volume)
-2. Expand THREAT_MODEL.md with STRIDE analysis (at minimum: auth bypass, privilege escalation, data exfiltration, injection vectors)
-3. Expand DATA_GOVERNANCE_DRAFT.md to full DATA_GOVERNANCE.md (PII classification matrix, retention schedules, deletion workflows)
-4. Document 11 undocumented status enums in STATE_MACHINES.md
-5. Gate institutional membership endpoints behind feature flag or remove from routes until implemented
-
-### Fix Before New Work in Module (P2)
-1. Add LIMIT to all unbounded `findMany` queries (prioritize: booking, governance, marketplace repos)
-2. Fix N+1 in communication/bulkUpdatePersonSubscriptions.ts and certificates/batchGenerateCertificates.ts
-3. Add role restriction to accredited-providers routes
-4. Create MODULE_SPEC for audit, invite, reviews handlers
-5. Resolve billing schema TODOs
-
-### Fix When Convenient (P3)
-1. Expand TypeSpec coverage to remaining 10 modules
-2. Add OpenAPI endpoints for dark modules (advertising, marketplace, jobs)
-3. Add latency histograms to metrics endpoint
-4. Add FK indexes to dues-payments.idempotencyKey and invite.personId
-5. Clean up seed-scenarios.ts type casts
-
-## 21. Standards Adoption Plan
-
-### Phase 1: Add Guardrails ✅ COMPLETE
-- ARCHITECTURE.md ✅
-- CONTRIBUTING.md ✅
-- CLAUDE.md ✅
-- VERTICAL_TDD.md ✅
-- README.md ✅
-- All 5 guardrail files present and accurate
+### Phase 1: Guardrails ✅ COMPLETE
+All docs present and maintained (ARCHITECTURE, CONTRIBUTING, CLAUDE, README, ROADMAP, VERTICAL_TDD).
 
 ### Phase 2: Document Current Reality ✅ COMPLETE
-- MODULE_MAP.md ✅
-- DOMAIN_GLOSSARY.md ✅ (70 terms, 0 conflicts)
-- ROLE_PERMISSION_MATRIX.md ✅
-- DOMAIN_MODEL.md ✅ (1575 lines, 11 BCs)
-- 19/19 Module specs ✅
-- STATE_MACHINES.md ✅
-- WORKFLOW_MAP.md ✅
-- EVENT_CONTRACTS.md ✅
-- UI_BLUEPRINT.md ✅
-- TRACE_MATRIX.md ✅
+23 top-level product docs, 19 per-module spec suites, 126 audit reports.
 
-### Phase 3: Stabilize Risky Areas — IN PROGRESS
-- ✅ Auth middleware (4-layer stack, IDOR prevention)
-- ✅ Rate limiting on all endpoints
-- ✅ Account lockout
-- ✅ Session hardening
-- ⬜ State machine guards (7/10 unguarded)
-- ⬜ Unbounded query limits (15 instances)
-- ⬜ N+1 fixes (3 instances)
-- ⬜ THREAT_MODEL expansion
-- ⬜ DATA_GOVERNANCE completion
+### Phase 3: Stabilize Risky Areas -- IN PROGRESS
+- [x] P0 security fixes (IDOR, auth guards)
+- [x] 824+ test artifacts across all layers
+- [ ] State transition guards (P1)
+- [ ] Core→handler interface extraction (P1)
+- [ ] Status naming fix (P1)
+- [ ] Unbounded query fixes (P2)
+- [ ] N+1 batch fixes (P2)
 
-### Phase 4: Adopt Vertical Slice TDD Going Forward ✅ ACTIVE
-- VERTICAL_SLICE_PLAN.md ✅
-- VERTICAL_TDD.md protocol ✅
-- Active execution through phases
+### Phase 4: Adopt Standards
+- [ ] TypeSpec for remaining 11 modules
+- [ ] Domain events for cross-module communication
+- [ ] association:member decomposition
+- [ ] Build caching (Turborepo)
 
-### Phase 5: Migrate Existing Code Gradually — ONGOING
-- High-risk modules prioritized (dues, billing)
-- Mega-module split plan exists (`.planning/phases/14-mega-module-split/SPLIT-PLAN.md`)
+### Phase 5: Migrate Gradually
+- [ ] All hand-wired routes to TypeSpec
+- [ ] Cross-module imports replaced by events
+- [ ] OpenTelemetry integration
+- [ ] Full contract test coverage
 
-## 22. Recommended First 3 Vertical Slices
+---
 
-| Rank | Slice | Module | Why This Slice | Risk | Expected Work |
-|------|-------|--------|---------------|------|---------------|
-| 1 | State machine guard formalization | dues, billing, booking | Highest transaction volume modules lack transition guards. Invalid state transitions = data corruption. | Medium | Add `VALID_TRANSITIONS` maps + guard functions to 7 modules |
-| 2 | Unbounded query pagination | booking, governance, marketplace | 15 `findMany` calls without LIMIT. Full table scan risk grows with data. | Low | Add limit/offset to repo methods, update handler callers |
-| 3 | Cross-module ACL extraction | person→association:member | Person module has 12 cross-module imports. Extract to ID-based lookups via service interface. | Medium | Create person-facing service boundary, replace direct repo imports |
+## 19. Recommended First 3 Slices
 
-## 23. DDD Concepts
+| Rank | Slice | Module | Why | Risk | Work |
+|------|-------|--------|-----|------|------|
+| 1 | State transition guard layer | core + all status modules | Prevents invalid transitions across 6 entities. Pattern-setting infrastructure. | Medium | 1-2 days |
+| 2 | Core dependency inversion (email) | core/email.ts → email handlers | Highest inverted dep count (7). Establishes port/adapter pattern. | Low | 1 day |
+| 3 | Pagination + N+1 batch | booking, governance, communication | Fixes 18+ performance issues. Establishes batch + pagination conventions. | Low | 1-2 days |
 
-### Bounded Contexts (11)
-Identity, Membership, Financial, Activities, Communication, Content, Governance, Platform, Advertising, Marketplace, Jobs
+---
 
-### Cross-Module Communication Patterns
-- **Direct import (tight coupling):** 35 instances across 9 modules
-- **API call (loose coupling):** 0 internal API calls
-- **Event/message (async decoupling):** 0 (no event bus)
-- **Shared DB table (hidden coupling):** 2 raw SQL cross-module refs
+## 20. Codebase Health Score
 
-### Missing Infrastructure
-- **Event bus/domain events:** Declared in DOMAIN_MODEL.md (18 events) but zero emission infrastructure exists
-- **Anti-corruption layers:** Recommended in glossary but none implemented
-- **Saga/choreography:** No distributed transaction patterns
+| # | Dimension | Score | Notes |
+|---|-----------|-------|-------|
+| 1 | Terminology consistency | 7 | 3 communication names, 1 status mismatch |
+| 2 | Permission coverage | 9 | 4-layer auth, owner checks, impersonation guard |
+| 3 | Business rule clarity | 8 | 33/40 BRs documented and tested |
+| 4 | API consistency | 8 | TypeSpec-first, 58% coverage, consistent patterns |
+| 5 | State machine safety | 3 | 6 machines, 0 transition guards |
+| 6 | Error handling uniformity | 8 | 11 error types, centralized handler |
+| 7 | Backend test coverage | 8 | 471 handler tests, strong assertions |
+| 8 | Frontend test coverage | 7 | 97 component + 127 E2E |
+| 9 | PRD/spec coverage | 10 | 23 docs, 19 module specs, 126 audits |
+| 10 | UI prototype readiness | 9 | 19 modules have full prototype packs |
+| 11 | Architecture alignment | 6 | Vertical slices good, but 20 inverted deps |
+| 12 | Domain model clarity | 8 | DOMAIN_MODEL.md, 10 aggregates identified |
+| 13 | Security posture (OWASP) | 9 | Clean except CSRF token gap |
+| 14 | Observability coverage | 7 | Pino + correlation IDs + health. Missing latency. |
+| 15 | Performance health | 6 | 3 N+1, ~15-20 unbounded, 2 missing indexes |
+| 16 | Stub density | 10 | 0 stubs in source, 2 TODOs only |
+| 17 | Type cast density | 5 | 274 `as any` in association handler |
+| 18 | Cross-module coupling | 6 | 20 inverted core→handler. Handler→handler clean. |
+| 19 | Raw SQL leakage | 10 | All via Drizzle ORM, no cross-module SQL |
+| **Total** | **141/190** | **7.4/10** |
 
-## 24. Health Score (19 Dimensions)
+**Score change from v2:** 7.9 → 7.4. Deeper analysis revealed state machine guards (3→3, down from assumed partial), architecture alignment (9→6, inverted deps severe), type cast density (9→5, association handler). Scoring methodology more rigorous.
 
-| Dimension | Score (0-10) | Notes |
-|-----------|-------------|-------|
-| Terminology consistency | 9 | 70 terms, 0 conflicts, clean glossary |
-| Permission coverage | 8 | 4-layer RBAC, 4 P2 gaps (accredited-providers, orgContext, dues auth, CSRF) |
-| Business rule clarity | 9 | 40 BRs + 10 handler-extracted, br-registry.json |
-| API consistency | 7 | 60% TypeSpec, 7 hand-wired, 3 dark modules |
-| State machine safety | 5 | 3/10 formal guards, 11 undocumented enums |
-| Error handling uniformity | 8 | Centralized errors.ts, applySecurity(), consistent patterns |
-| Backend test coverage | 9 | 419 files, 100% module coverage, 91%+ strong assertions |
-| Frontend test coverage | 7 | 101 E2E (92 memberry, thin account/admin) |
-| PRD/spec coverage | 9 | 16/16 artifacts, 19 module specs, 4 skeletal |
-| UI prototype readiness | 8 | 97 routes, 254 components, no mock contamination |
-| Architecture alignment | 8 | All 5 guardrails present and accurate |
-| Domain model clarity | 8 | 1575 lines, 11 BCs, 18 events — missing invariants + VOs |
-| Security posture (OWASP) | 9 | 0 P0, 0 P1, 4 P2, strong auth infrastructure |
-| Observability coverage | 7 | Pino + request IDs + health checks — missing tracing + latency |
-| Performance health | 6 | 15 unbounded queries, 3 N+1, 2 missing indexes |
-| Stub density | 8 | 11 P1 stubs contained to institutional membership + billing |
-| Type cast density | 9 | 4 `as any` in prod code — excellent |
-| Cross-module coupling | 5 | 3 P1 bi-directional cycles, 35 imports, association:member hub |
-| Raw SQL leakage | 9 | 2 cross-module refs, all parameterized, no injection risk |
+---
 
-**Overall health: 7.8/10** (148/190)
+## 21. What's Next
 
-**Delta from Wave 4 (2026-05-20): 8.2 → 7.8**
-Score decrease reflects stricter cross-module coupling analysis and deeper performance anti-pattern detection in this re-baseline, not regression in code quality. Boilerplate alignment (local-first stack removal) and 12 `as any` fixes are positive changes.
+| Action | Skill | Priority |
+|--------|-------|----------|
+| Add state transition guards | Manual / `/handler` | P1 -- Do Now |
+| Extract core→handler interfaces | Manual refactor | P1 -- Do Now |
+| Fix `terminated` → `REMOVED` | Manual | P1 -- Do Now |
+| Batch N+1 + add pagination | Manual | P2 -- Next Sprint |
+| Reduce association `as any` | Manual | P2 -- When Touching |
+| Verify specs match code | `/oli-audit-compliance` | After P1 fixes |
+| Score test confidence | `/oli-confidence-stack` | After P2 fixes |
+| Plan implementation sequence | `/oli-vertical-slice-plan` | For Phase 4 |
 
-## 25. Final Recommendations
+---
 
-### Do Now
-1. Formalize `VALID_TRANSITIONS` for `dues_payment_status` and `dues_invoice_status` (transaction integrity)
-2. Expand THREAT_MODEL.md beyond skeleton (healthcare regulatory requirement)
-3. Gate 8 institutional membership stubs behind feature flag
-
-### Do Next
-1. Add LIMIT to 15 unbounded `findMany` queries
-2. Fix 3 N+1 patterns in bulk operations
-3. Complete DATA_GOVERNANCE.md (PII classification, retention schedules)
-4. Document 11 undocumented status enums
-5. Add role restriction to accredited-providers routes
-
-### Do Later
-1. Implement domain event infrastructure (replace direct cross-module imports)
-2. Extract anti-corruption layers for person→association:member boundary
-3. Mega-module split per `.planning/phases/14-mega-module-split/SPLIT-PLAN.md`
-4. Expand TypeSpec to remaining 10 modules
-5. Add OpenTelemetry distributed tracing
-
-### Avoid
-- Big-bang rewrite of association:member (157 handlers) — split incrementally
-- Adding new cross-module direct imports — use ID-based references
-- Treating dark modules (advertising, marketplace, jobs) as production-ready
-- Assuming DOMAIN_MODEL.md events exist in code — zero emission infrastructure
-
-## Appendix A: Changes Since Wave 4 Audit (2026-05-20 → 2026-05-21)
-
-| Change | Detail |
-|--------|--------|
-| Boilerplate alignment | Aligned with monobase-js-lf, removed local-first stack |
-| Type fixes | 12 structural `as any` casts replaced with proper type definitions |
-| Backend test files | 407 → 419 (+12) |
-| Audit methodology | Deeper cross-module import analysis (35 violations catalogued vs summary in Wave 4) |
-| Audit methodology | Performance anti-patterns now itemized (15 unbounded queries, 3 N+1) |
-| Health score | 8.2 → 7.8 (stricter scoring, not code regression) |
-
-## Appendix B: Historical Corrections Preserved
-
-No user annotations found in previous audit. Clean slate.
-
-## Appendix C: Database Table Inventory (89 tables)
-
-Preserved from Wave 4. No schema changes since 2026-05-20.
+*Generated by oli-audit-codebase v3 on 2026-05-27. Health score measures code structural quality, NOT spec compliance or test confidence (see `/oli` Health Score Convention).*

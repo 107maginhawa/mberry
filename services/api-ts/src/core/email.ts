@@ -4,63 +4,24 @@
  * This service is injected into the app context for use by other modules
  */
 
-import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import type { Config } from '@/core/config';
-import { EmailTemplateRepository } from '@/handlers/email/repos/template.repo';
-import { EmailQueueRepository } from '@/handlers/email/repos/queue.repo';
-import { initializeEmailTemplates } from '@/handlers/email/templates/initializer';
-import {
-  EmailTemplateTags,
-  type QueueEmailRequest,
-  type EmailQueueItem,
-  type EmailTemplate,
-  type SendEmailRequest,
-  type EmailSendResult,
-  type TemplatePreviewResult
-} from '@/handlers/email/repos/email.schema';
-import { SuppressionRepository } from '@/handlers/email/repos/suppression.repo';
-import { BulkRateLimiter } from '@/handlers/email/utils/bulk-rate-limiter';
-import { generateUnsubToken } from '@/handlers/email/utils/unsub-token';
-import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import type {
+  QueueEmailRequest,
+  SendEmailRequest,
+  EmailSendResult,
+  TemplatePreviewResult,
+  EmailQueueEntry,
+  EmailTemplateEntry,
+  EmailConfig,
+} from '@/core/email-types';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import postmark from 'postmark';
 import * as OneSignal from '@onesignal/node-onesignal';
 
-/**
- * Email configuration
- */
-export interface EmailConfig {
-  provider: 'smtp' | 'postmark' | 'onesignal';
-  from: {
-    name: string;
-    email: string;
-  };
-
-  // SMTP configuration
-  smtp?: {
-    host: string;
-    port: number;
-    secure: boolean;
-    auth: {
-      user: string;
-      pass: string;
-    };
-  };
-
-  // Postmark configuration
-  postmark?: {
-    apiKey: string;
-    messageStream?: string;
-  };
-
-  // OneSignal configuration
-  onesignal?: {
-    appId: string;
-    apiKey: string;
-  };
-}
+// Re-export EmailConfig from canonical location for backward compatibility
+export type { EmailConfig } from '@/core/email-types';
 
 /**
  * Email provider interface
@@ -268,6 +229,63 @@ class OneSignalProvider implements EmailProvider {
 }
 
 
+// ─── Repo contracts (implemented by handler repos, injected at construction) ──
+
+/**
+ * Template repo contract — subset used by the email service.
+ */
+export interface EmailTemplateRepo {
+  previewTemplate(templateId: string, variables?: Record<string, any>): Promise<TemplatePreviewResult>;
+  renderTemplate(templateId: string, variables: Record<string, any>): Promise<TemplatePreviewResult>;
+  findMany(filters?: Record<string, unknown>): Promise<EmailTemplateEntry[]>;
+}
+
+/**
+ * Queue repo contract — subset used by the email service.
+ */
+export interface EmailQueueRepo {
+  queueEmail(request: QueueEmailRequest): Promise<EmailQueueEntry>;
+  getPendingEmails(limit: number): Promise<EmailQueueEntry[]>;
+  markAsProcessing(id: string): Promise<unknown>;
+  markAsSent(id: string, provider: string, messageId: string): Promise<unknown>;
+  markAsFailed(id: string, error: string, attempts: number): Promise<unknown>;
+  updateOneById(id: string, data: Record<string, unknown>): Promise<unknown>;
+}
+
+/**
+ * Suppression repo contract — subset used by the email service.
+ */
+export interface EmailSuppressionRepo {
+  isSuppressed(email: string, organizationId: string): Promise<boolean>;
+}
+
+/**
+ * Membership lookup contract — checks member status for send-time guards.
+ */
+export interface EmailMembershipLookup {
+  findByPersonAndOrg(personId: string, organizationId: string): Promise<{ status: string } | null>;
+}
+
+/**
+ * Bulk rate limiter contract.
+ */
+export interface EmailBulkRateLimiter {
+  canSend(orgId: string): boolean;
+}
+
+/**
+ * Dependencies injected into createEmailService.
+ */
+export interface EmailServiceDeps {
+  templateRepo: EmailTemplateRepo;
+  queueRepo: EmailQueueRepo;
+  suppressionRepo: EmailSuppressionRepo;
+  membershipLookup: EmailMembershipLookup;
+  bulkRateLimiter: EmailBulkRateLimiter;
+  generateUnsubToken: (email: string, orgId: string) => string;
+  initializeTemplates: (...args: any[]) => Promise<void>;
+}
+
 /**
  * Email service interface
  */
@@ -276,11 +294,11 @@ export interface EmailService {
    * Initialize default email templates
    */
   initializeDefaultTemplates(): Promise<void>;
-  
+
   /**
    * Queue an email for sending (modern templateId-based)
    */
-  queueEmail(request: QueueEmailRequest): Promise<EmailQueueItem>;
+  queueEmail(request: QueueEmailRequest): Promise<EmailQueueEntry>;
   
   /**
    * Send an email immediately (used by job processor)
@@ -311,32 +329,37 @@ export interface EmailService {
 const BLOCKED_MEMBERSHIP_STATUSES = ['deceased', 'resigned', 'expelled', 'lapsed'] as const;
 
 class EmailServiceImpl implements EmailService {
-  private templateRepo: EmailTemplateRepository;
-  private queueRepo: EmailQueueRepository;
-  private suppressionRepo: SuppressionRepository;
-  private membershipRepo: MembershipRepository;
-  private bulkRateLimiter: BulkRateLimiter;
+  private templateRepo: EmailTemplateRepo;
+  private queueRepo: EmailQueueRepo;
+  private suppressionRepo: EmailSuppressionRepo;
+  private membershipLookup: EmailMembershipLookup;
+  private bulkRateLimiter: EmailBulkRateLimiter;
+  private _generateUnsubToken: (email: string, orgId: string) => string;
+  private _initializeTemplates: (...args: any[]) => Promise<void>;
   private provider: EmailProvider | null = null;
   private config: Config['email'];
   private fullConfig: Config;
-  private db: DatabaseInstance;
+  private db: unknown;
   private logger: Logger;
-  
+
   constructor(
-    db: DatabaseInstance,
     config: Config,
-    logger: Logger
+    logger: Logger,
+    db: unknown,
+    deps: EmailServiceDeps,
   ) {
     this.db = db;
     this.logger = logger;
-    this.templateRepo = new EmailTemplateRepository(db, logger);
-    this.queueRepo = new EmailQueueRepository(db, logger);
-    this.suppressionRepo = new SuppressionRepository(db, logger);
-    this.membershipRepo = new MembershipRepository(db, logger);
-    this.bulkRateLimiter = new BulkRateLimiter();
+    this.templateRepo = deps.templateRepo;
+    this.queueRepo = deps.queueRepo;
+    this.suppressionRepo = deps.suppressionRepo;
+    this.membershipLookup = deps.membershipLookup;
+    this.bulkRateLimiter = deps.bulkRateLimiter;
+    this._generateUnsubToken = deps.generateUnsubToken;
+    this._initializeTemplates = deps.initializeTemplates;
     this.config = config.email;
     this.fullConfig = config;
-    
+
     // Bind methods to maintain context
     this.initializeDefaultTemplates = this.initializeDefaultTemplates.bind(this);
     this.queueEmail = this.queueEmail.bind(this);
@@ -350,7 +373,7 @@ class EmailServiceImpl implements EmailService {
    * Initialize default email templates
    */
   async initializeDefaultTemplates(): Promise<void> {
-    await initializeEmailTemplates(this.db, this.logger);
+    await this._initializeTemplates(this.db, this.logger);
   }
   
   /**
@@ -394,7 +417,7 @@ class EmailServiceImpl implements EmailService {
     // Inject unsubscribe headers (RFC 8058 one-click unsubscribe)
     const ctx = request.unsubscribeContext;
     if (ctx) {
-      const token = generateUnsubToken(ctx.email, ctx.orgId);
+      const token = this._generateUnsubToken(ctx.email, ctx.orgId);
       const appUrl = ((this.fullConfig as unknown as Record<string, unknown>)?.['app'] as Record<string, unknown>)?.['url'] as string ?? 'https://example.com';
       const unsubUrl = `${appUrl}/email/unsubscribe?token=${encodeURIComponent(token)}&email=${encodeURIComponent(ctx.email)}&org=${encodeURIComponent(ctx.orgId)}`;
       request.headers = {
@@ -410,7 +433,7 @@ class EmailServiceImpl implements EmailService {
   /**
    * Queue an email for sending with template tags
    */
-  async queueEmail(request: QueueEmailRequest): Promise<EmailQueueItem> {
+  async queueEmail(request: QueueEmailRequest): Promise<EmailQueueEntry> {
     // Validate that template tags are provided
     if (!request.templateTags || request.templateTags.length === 0) {
       throw new Error('Template tags are required');
@@ -456,7 +479,7 @@ class EmailServiceImpl implements EmailService {
    * Guards fire BEFORE template resolution to avoid unnecessary DB work.
    * Every guard skip is logged for audit trail (T-25-04).
    */
-  private async processEmail(email: EmailQueueItem): Promise<void> {
+  private async processEmail(email: EmailQueueEntry): Promise<void> {
     try {
       // Mark as processing
       await this.queueRepo.markAsProcessing(email.id);
@@ -481,7 +504,7 @@ class EmailServiceImpl implements EmailService {
       // -----------------------------------------------------------------------
       const recipientPersonId = (email.metadata as Record<string, any> | null)?.['recipientPersonId'] as string | undefined;
       if (recipientPersonId) {
-        const membership = await this.membershipRepo.findByPersonAndOrg(recipientPersonId, email.organizationId);
+        const membership = await this.membershipLookup.findByPersonAndOrg(recipientPersonId, email.organizationId);
         if (membership && (BLOCKED_MEMBERSHIP_STATUSES as readonly string[]).includes(membership.status)) {
           await this.queueRepo.markAsFailed(
             email.id,
@@ -504,7 +527,7 @@ class EmailServiceImpl implements EmailService {
       if (email.emailCategory === 'bulk') {
         if (!this.bulkRateLimiter.canSend(email.organizationId)) {
           // Reschedule 60 seconds forward; reset status to pending
-          await (this.queueRepo as unknown as { updateOneById: (id: string, data: Record<string, unknown>) => Promise<unknown> }).updateOneById(email.id, { // structural: protected member access
+          await this.queueRepo.updateOneById(email.id, {
             scheduledAt: new Date(Date.now() + 60_000),
             status: 'pending',
           });
@@ -582,7 +605,7 @@ class EmailServiceImpl implements EmailService {
   /**
    * Resolve template by tags
    */
-  private async resolveTemplateByTags(tags: string[]): Promise<EmailTemplate | null> {
+  private async resolveTemplateByTags(tags: string[]): Promise<EmailTemplateEntry | null> {
     // Find template by checking if any of the tags match
     const templates = await this.templateRepo.findMany({
       status: 'active'
@@ -602,9 +625,10 @@ class EmailServiceImpl implements EmailService {
  * Factory function following the pattern of other services
  */
 export function createEmailService(
-  db: DatabaseInstance,
   config: Config,
-  logger: Logger
+  logger: Logger,
+  db: unknown,
+  deps: EmailServiceDeps,
 ): EmailService {
-  return new EmailServiceImpl(db, config, logger);
+  return new EmailServiceImpl(config, logger, db, deps);
 }

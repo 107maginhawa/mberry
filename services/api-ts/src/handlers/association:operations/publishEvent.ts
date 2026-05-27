@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { PublishEventParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -52,6 +53,12 @@ export async function publishEvent(
   }
 
   const published = await repo.publish(params.eventId);
+
+  domainEvents.emit('event.published', {
+    eventId: published.id,
+    organizationId: published.organizationId,
+    publishedBy: user.id,
+  }).catch(() => {});
 
   await auditAction(ctx, {
     action: 'update',

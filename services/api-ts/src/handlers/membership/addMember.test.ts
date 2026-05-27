@@ -1,8 +1,9 @@
 import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeMember as createFakeMember } from '@/test-utils/factories';
 import { addMember } from './addMember';
 import { MembershipRepository } from './repos/membership.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -26,12 +27,18 @@ const fakeMember = createFakeMember({
 
 describe('addMember', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('creates member and returns 201', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     mocks = stubRepo(MembershipRepository, {
       addMember: async (data: any) => ({ ...fakeMember, ...data }),
     });
@@ -53,6 +60,9 @@ describe('addMember', () => {
   });
 
   test('crashes without session (no auth)', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     mocks = stubRepo(MembershipRepository, {
       addMember: async (data: any) => ({ ...fakeMember, ...data }),
     });
@@ -70,6 +80,9 @@ describe('addMember', () => {
 
   test('scopes member to orgId from route param', async () => {
     let captured: any = null;
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     mocks = stubRepo(MembershipRepository, {
       addMember: async (data: any) => { captured = data; return { ...fakeMember, ...data }; },
     });
@@ -85,6 +98,9 @@ describe('addMember', () => {
 
   test('defaults startDate to today when not provided', async () => {
     let captured: any = null;
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     mocks = stubRepo(MembershipRepository, {
       addMember: async (data: any) => { captured = data; return { ...fakeMember, ...data }; },
     });
@@ -101,6 +117,9 @@ describe('addMember', () => {
 
   test('uses licenseNumber as memberNumber fallback', async () => {
     let captured: any = null;
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     mocks = stubRepo(MembershipRepository, {
       addMember: async (data: any) => { captured = data; return { ...fakeMember, ...data }; },
     });
@@ -116,6 +135,9 @@ describe('addMember', () => {
 
   test('sets createdBy and updatedBy to session user id', async () => {
     let captured: any = null;
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     mocks = stubRepo(MembershipRepository, {
       addMember: async (data: any) => { captured = data; return { ...fakeMember, ...data }; },
     });

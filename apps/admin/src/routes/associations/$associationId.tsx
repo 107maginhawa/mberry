@@ -12,6 +12,8 @@ import {
   updateAssociationMutation,
   deleteAssociationMutation,
   listOrganizationsOptions,
+  listOrganizationsQueryKey,
+  createOrganizationMutation,
   searchEventsOptions,
   searchCoursesOptions,
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
@@ -64,6 +66,9 @@ function AssociationDetailPage() {
   const [editCountry, setEditCountry] = useState('')
   const [editCurrency, setEditCurrency] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [addingOrg, setAddingOrg] = useState(false)
+  const [newOrgName, setNewOrgName] = useState('')
+  const [newOrgType, setNewOrgType] = useState('')
 
   const { data: sdkAssociation, isLoading, error } = useQuery(
     getAssociationOptions({ path: { associationId } })
@@ -95,6 +100,22 @@ function AssociationDetailPage() {
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Failed to delete association'
+      toast.error(msg)
+    },
+  })
+
+  const sdkCreateOrganization = createOrganizationMutation()
+  const createOrgMut = useMutation({
+    mutationFn: sdkCreateOrganization.mutationFn,
+    onSuccess: () => {
+      toast.success('Organization created')
+      queryClient.invalidateQueries({ queryKey: listOrganizationsQueryKey({ query: { associationId } }) })
+      setAddingOrg(false)
+      setNewOrgName('')
+      setNewOrgType('')
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to create organization'
       toast.error(msg)
     },
   })
@@ -380,6 +401,57 @@ function AssociationDetailPage() {
             </div>
           )}
 
+          {/* Add Organization Dialog */}
+          {addingOrg && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setAddingOrg(false)}>
+              <div className="bg-card border rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-h2">Add Organization</h2>
+                  <Button variant="ghost" size="icon" onClick={() => setAddingOrg(false)} aria-label="Close">
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    createOrgMut.mutate({ body: { associationId, name: newOrgName, type: newOrgType || undefined } as any })
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <Label className="block text-sm font-medium mb-1">Name</Label>
+                    <Input
+                      type="text"
+                      value={newOrgName}
+                      onChange={(e) => setNewOrgName(e.target.value)}
+                      required
+                      placeholder="Chapter name"
+                      className="w-full px-3 py-2 rounded-md border bg-background text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="block text-sm font-medium mb-1">Type (optional)</Label>
+                    <Input
+                      type="text"
+                      value={newOrgType}
+                      onChange={(e) => setNewOrgType(e.target.value)}
+                      placeholder="e.g. chapter, branch"
+                      className="w-full px-3 py-2 rounded-md border bg-background text-sm"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button type="button" variant="outline" onClick={() => setAddingOrg(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={createOrgMut.isPending}>
+                      {createOrgMut.isPending ? 'Creating...' : 'Create'}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
           {/* Detail Card */}
           <div className="rounded-lg border bg-card p-6 mb-8">
             <h2 className="text-h2 mb-4">Details</h2>
@@ -408,7 +480,7 @@ function AssociationDetailPage() {
           {/* Organizations within this association */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-h2">Organizations ({orgs.length})</h2>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setAddingOrg(true)}>
               <Plus className="w-4 h-4" />
               Add Organization
             </Button>

@@ -1,7 +1,8 @@
 import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeTraining as createFakeTraining, fakeEnrollment as createFakeEnrollment } from '@/test-utils/factories';
 import { TrainingRepository } from './repos/training.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { listEnrollments } from './listEnrollments';
 
 const fakeTraining = createFakeTraining({
@@ -26,11 +27,19 @@ const fakeStats = {
 describe('listEnrollments', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
+  function stubOfficer() {
+    return stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+    });
+  }
+
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
   });
 
   test('returns enrollments and stats when training exists', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
       listEnrollments: async () => [fakeEnrollment],
@@ -48,6 +57,7 @@ describe('listEnrollments', () => {
   });
 
   test('throws NotFoundError when training not found', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => undefined,
       listEnrollments: async () => [],
@@ -62,6 +72,7 @@ describe('listEnrollments', () => {
   });
 
   test('returns empty enrollments when training has no enrollees', async () => {
+    stubOfficer();
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => fakeTraining,
       listEnrollments: async () => [],

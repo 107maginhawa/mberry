@@ -11,6 +11,7 @@ import {
 } from '@/core/errors';
 import { BookingRepository } from './repos/booking.repo';
 import type { BookingCreateRequest } from './repos/booking.schema';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createBooking
@@ -41,6 +42,13 @@ export async function createBooking(
   // Create booking with slot validation
   const booking = await repo.createBooking(user.id, body.slot, body, organizationId);
   
+  domainEvents.emit('booking.created', {
+    bookingId: booking['id'],
+    clientId: user.id,
+    slotId: body.slot,
+    organizationId,
+  }).catch(() => {});
+
   // Log audit trail
   logger?.info({
     bookingId: booking['id'],

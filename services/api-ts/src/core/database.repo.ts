@@ -24,6 +24,9 @@ export interface PaginationOptions {
   limit: number;
 }
 
+/** Safety cap for queries without explicit pagination */
+export const DEFAULT_QUERY_LIMIT = 100;
+
 /**
  * Find many options interface
  */
@@ -219,10 +222,12 @@ export abstract class DatabaseRepository<TEntity, TNewEntity, TFilters = Record<
       query.orderBy((this.table as unknown as BaseTableColumns).createdAt!);
     }
 
-    // Apply pagination
+    // Apply pagination — always enforce a limit to prevent unbounded result sets
     if (options?.pagination) {
       query.limit(options.pagination.limit);
       query.offset(options.pagination.offset);
+    } else {
+      query.limit(DEFAULT_QUERY_LIMIT);
     }
 
     const records = await query;

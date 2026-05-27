@@ -13,6 +13,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { PaymentTokenRepository } from './repos/payment-token.repo';
 import { DuesRepository } from '../association:member/repos/dues-payments.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { sendPaymentLink } from './sendPaymentLink';
 
 // ─── Fixtures ───────────────────────────────────────────
@@ -47,6 +48,9 @@ const duesConfig = {
 };
 
 function defaultStubs() {
+  stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+  });
   stubRepo(PaymentTokenRepository, {
     create: async (data: any) => ({ ...createdToken, ...data }),
   });
@@ -59,12 +63,14 @@ function defaultStubs() {
 
 describe('[VS-W0B-003] sendPaymentLink', () => {
   beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(PaymentTokenRepository);
     restoreRepo(DuesRepository);
     process.env['PAYMENT_TOKEN_SECRET'] = 'test-secret-key-for-hmac';
   });
 
   afterEach(() => {
+    restoreRepo(OfficerTermRepository);
     restoreRepo(PaymentTokenRepository);
     restoreRepo(DuesRepository);
     delete process.env['PAYMENT_TOKEN_SECRET'];
@@ -115,6 +121,9 @@ describe('[VS-W0B-003] sendPaymentLink', () => {
 
   test('uses dues config amount when no amount provided', async () => {
     let capturedData: any = null;
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     stubRepo(PaymentTokenRepository, {
       create: async (data: any) => {
         capturedData = data;
@@ -135,6 +144,9 @@ describe('[VS-W0B-003] sendPaymentLink', () => {
 
   test('uses provided amount over config default', async () => {
     let capturedData: any = null;
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     stubRepo(PaymentTokenRepository, {
       create: async (data: any) => {
         capturedData = data;
@@ -155,6 +167,9 @@ describe('[VS-W0B-003] sendPaymentLink', () => {
 
   test('passes invoiceId when provided', async () => {
     let capturedData: any = null;
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     stubRepo(PaymentTokenRepository, {
       create: async (data: any) => {
         capturedData = data;
@@ -174,6 +189,9 @@ describe('[VS-W0B-003] sendPaymentLink', () => {
   });
 
   test('returns 400 when no amount and no dues config', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
     stubRepo(PaymentTokenRepository, {
       create: async (data: any) => ({ ...createdToken, ...data }),
     });

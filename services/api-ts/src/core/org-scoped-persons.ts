@@ -15,23 +15,46 @@
 
 import { eq, and, inArray } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
-import { memberships } from '@/handlers/association:member/repos/membership.schema';
+import type { PgTableWithColumns } from 'drizzle-orm/pg-core';
 
 /** Membership statuses that grant active org membership */
 const ACTIVE_MEMBERSHIP_STATUSES = ['active', 'gracePeriod', 'pendingPayment'] as const;
+
+/**
+ * Minimal contract for the memberships table columns used by org-scoping.
+ * Avoids importing the handler schema directly into core.
+ */
+export interface MembershipsTableRef {
+  personId: any;
+  organizationId: any;
+  status: any;
+}
+
+/** Lazily-bound memberships table ref — set once at app startup. */
+let _membershipsTable: (PgTableWithColumns<any> & MembershipsTableRef) | null = null;
+
+/**
+ * Bind the memberships table reference. Call once at app startup (app.ts).
+ */
+export function bindMembershipsTable(table: PgTableWithColumns<any> & MembershipsTableRef): void {
+  _membershipsTable = table;
+}
 
 /**
  * Returns a subquery of person IDs that belong to the given org
  * via an active membership.
  */
 export function orgScopedPersonIds(db: DatabaseInstance, organizationId: string) {
+  if (!_membershipsTable) {
+    throw new Error('orgScopedPersonIds: memberships table not bound — call bindMembershipsTable() at startup');
+  }
   return db
-    .select({ personId: memberships.personId })
-    .from(memberships)
+    .select({ personId: _membershipsTable.personId })
+    .from(_membershipsTable)
     .where(
       and(
-        eq(memberships.organizationId, organizationId),
-        inArray(memberships.status, [...ACTIVE_MEMBERSHIP_STATUSES]),
+        eq(_membershipsTable.organizationId, organizationId),
+        inArray(_membershipsTable.status, [...ACTIVE_MEMBERSHIP_STATUSES]),
       ),
     );
 }

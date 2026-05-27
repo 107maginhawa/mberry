@@ -73,27 +73,27 @@ function OfficerCompliance() {
         </GlassCard>
         <GlassCard className="p-5">
           <div className="flex items-center gap-3">
-            <CheckCircle className="w-6 h-6 text-green-600" />
+            <CheckCircle className="w-6 h-6 text-[var(--color-success)]" />
             <div>
-              <p className="text-2xl font-bold text-green-600">{summary.compliant}</p>
+              <p className="text-2xl font-bold text-[var(--color-success)]">{summary.compliant}</p>
               <p className="text-xs text-[var(--color-muted)]">Compliant</p>
             </div>
           </div>
         </GlassCard>
         <GlassCard className="p-5">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="w-6 h-6 text-amber-600" />
+            <AlertTriangle className="w-6 h-6 text-[var(--color-warning)]" />
             <div>
-              <p className="text-2xl font-bold text-amber-600">{summary.atRisk}</p>
+              <p className="text-2xl font-bold text-[var(--color-warning)]">{summary.atRisk}</p>
               <p className="text-xs text-[var(--color-muted)]">At Risk</p>
             </div>
           </div>
         </GlassCard>
         <GlassCard className="p-5">
           <div className="flex items-center gap-3">
-            <XCircle className="w-6 h-6 text-red-600" />
+            <XCircle className="w-6 h-6 text-[var(--color-error)]" />
             <div>
-              <p className="text-2xl font-bold text-red-600">{summary.nonCompliant}</p>
+              <p className="text-2xl font-bold text-[var(--color-error)]">{summary.nonCompliant}</p>
               <p className="text-xs text-[var(--color-muted)]">Non-Compliant</p>
             </div>
           </div>
@@ -135,18 +135,18 @@ function OfficerCompliance() {
                     <td className="py-2">{s.totalCredits}</td>
                     <td className="py-2">{s.requiredCredits}</td>
                     <td className="py-2">
-                      <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div className="w-24 bg-muted rounded-full h-2">
                         <div
-                          className={`h-2 rounded-full ${s.complianceStatus === 'compliant' ? 'bg-green-500' : s.complianceStatus === 'at_risk' ? 'bg-amber-500' : 'bg-red-500'}`}
+                          className={`h-2 rounded-full ${s.complianceStatus === 'compliant' ? 'bg-[var(--color-success)]' : s.complianceStatus === 'at_risk' ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-error)]'}`}
                           style={{ width: `${Math.min(s.compliancePercent, 100)}%` }}
                         />
                       </div>
                     </td>
                     <td className="py-2">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        s.complianceStatus === 'compliant' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
-                        s.complianceStatus === 'at_risk' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400' :
-                        'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                        s.complianceStatus === 'compliant' ? 'bg-[var(--color-success-bg)] text-[var(--color-success)]' :
+                        s.complianceStatus === 'at_risk' ? 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]' :
+                        'bg-[var(--color-error-bg)] text-[var(--color-error)]'
                       }`}>
                         {s.complianceStatus?.replace('_', ' ')}
                       </span>

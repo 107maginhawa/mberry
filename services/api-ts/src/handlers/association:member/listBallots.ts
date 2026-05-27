@@ -26,8 +26,8 @@ export async function listBallots(
 
   const baseQuery = db.select().from(electionVotes);
   const items = conditions.length > 0
-    ? await baseQuery.where(and(...conditions))
-    : await baseQuery;
+    ? await baseQuery.where(and(...conditions)).limit(100)
+    : await baseQuery.limit(100);
 
   return ctx.json({ data: items }, 200);
 }

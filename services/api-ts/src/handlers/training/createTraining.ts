@@ -1,11 +1,21 @@
 import type { Context } from 'hono';
+import { ForbiddenError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import type { Session } from '@/types/auth';
 
 export async function createTraining(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId')!;
+
+  // [P0-AUTH] Officer role check — only officers can create training
+  const officerRepo = new OfficerTermRepository(db);
+  const terms = await officerRepo.findActiveByPersonAndOrg(session.user.id, orgId);
+  if (terms.length === 0) {
+    throw new ForbiddenError('Officer access required to create training');
+  }
+
   const body = await ctx.req.json();
   const repo = new TrainingRepository(db);
 
@@ -22,7 +32,7 @@ export async function createTraining(ctx: Context): Promise<Response> {
     capacity: body.capacity,
     creditBearing: body.creditBearing ?? false,
     creditAmount: body.creditAmount ?? body.creditValue ?? 0,
-    status: body.status ?? 'draft',
+    status: 'draft',
     prcAccreditationNumber: body.prcAccreditationNumber,
     accreditedProviderId: body.accreditedProviderId,
     createdBy: session.user.id,

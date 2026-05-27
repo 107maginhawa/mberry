@@ -4,6 +4,7 @@ import type { NotificationService } from '@/core/notifs';
 import type { CancelEventRegistrationParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRegistrationRepository, WaitlistEntryRepository, EventRepository } from './repos/events.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { notifyLateCancellation } from '@/handlers/notifs/notification-triggers';
 
@@ -35,6 +36,14 @@ export async function cancelEventRegistration(
     status: 'cancelled',
     cancelledAt: new Date(),
   });
+
+  domainEvents.emit('event.registration.cancelled', {
+    registrationId: cancelled.id,
+    eventId: existing.eventId,
+    personId: existing.personId,
+    organizationId: existing.organizationId,
+    cancelledBy: user.id,
+  }).catch(() => {});
 
   // [BR-27] Promote next waitlisted entry if a confirmed registration was cancelled
   if (existing.status === 'confirmed') {

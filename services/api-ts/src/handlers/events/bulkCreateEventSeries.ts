@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
-import { ValidationError, NotFoundError } from '@/core/errors';
+import { ValidationError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { generateEventSlug } from './utils/event-slug';
 import type { Session } from '@/types/auth';
 
@@ -10,8 +11,16 @@ export async function bulkCreateEventSeries(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId')!;
+  // Hand-wired route (no generated validator) — ctx.req.json() is correct here
   const body = await ctx.req.json();
   const repo = new EventsRepository(db);
+
+  // Officer authorization — only officers can bulk-create events
+  const officerRepo = new OfficerTermRepository(db);
+  const terms = await officerRepo.findActiveByPersonAndOrg(session.user.id, orgId);
+  if (terms.length === 0) {
+    throw new ForbiddenError('Officer access required to create event series');
+  }
 
   if (!body.templateEventId) throw new ValidationError('templateEventId required');
   if (!Array.isArray(body.dates) || body.dates.length === 0) throw new ValidationError('dates[] required');

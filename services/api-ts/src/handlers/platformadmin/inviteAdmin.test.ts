@@ -26,7 +26,7 @@ describe('inviteAdmin', () => {
   });
 
   test('returns 201 on success', async () => {
-    const ctx = makeCtx({ _body: { email: 'new@example.com', name: 'New Admin', role: 'support' } });
+    const ctx = makeCtx({ _body: { email: 'new@example.com', name: 'New Admin', role: 'support' }, platformAdmin: { id: 'pa-1', role: 'super' } });
     const res = await inviteAdmin(ctx);
     expect(res.status).toBe(201);
     expect((res as any).body?.email).toBe('new@example.com');
@@ -38,7 +38,7 @@ describe('inviteAdmin', () => {
       findByEmail: async () => newAdmin,
       create: async () => newAdmin,
     });
-    const ctx = makeCtx({ _body: { email: 'new@example.com', name: 'X', role: 'support' } });
+    const ctx = makeCtx({ _body: { email: 'new@example.com', name: 'X', role: 'support' }, platformAdmin: { id: 'pa-1', role: 'super' } });
     await expect(inviteAdmin(ctx)).rejects.toBeInstanceOf(ConflictError);
   });
 });

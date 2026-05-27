@@ -17,6 +17,18 @@ import { createStorageProvider } from '@/core/storage';
 import { createNotificationService } from '@/core/notifs';
 import { createEmailService } from '@/core/email';
 import { createAuditService } from '@/core/audit';
+import { bindMembershipsTable } from '@/core/org-scoped-persons';
+import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
+import { NotificationRepository } from '@/handlers/notifs/repos/notification.repo';
+import { PersonRepository } from '@/handlers/person/repos/person.repo';
+import { EmailTemplateRepository } from '@/handlers/email/repos/template.repo';
+import { EmailQueueRepository } from '@/handlers/email/repos/queue.repo';
+import { SuppressionRepository } from '@/handlers/email/repos/suppression.repo';
+import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { memberships } from '@/handlers/association:member/repos/membership.schema';
+import { BulkRateLimiter } from '@/handlers/email/utils/bulk-rate-limiter';
+import { generateUnsubToken } from '@/handlers/email/utils/unsub-token';
+import { initializeEmailTemplates } from '@/handlers/email/templates/initializer';
 import { createWebSocketService } from '@/core/ws';
 import { createBillingService } from '@/core/billing';
 import { registerEmailJobs } from '@/handlers/email/jobs';
@@ -27,6 +39,7 @@ import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
+import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
 
 // Routes
 import { registerRoutes as registerOpenAPIRoutes } from '@/generated/openapi/routes';
@@ -61,6 +74,12 @@ import { listAccreditedProviders } from '@/handlers/training/listAccreditedProvi
 import { createAccreditedProvider } from '@/handlers/training/createAccreditedProvider';
 import { updateAccreditedProvider } from '@/handlers/training/updateAccreditedProvider';
 import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedProvider';
+
+// Training entity lifecycle — completeTraining transitions training status (not enrollment)
+import { completeTraining } from '@/handlers/training/completeTraining';
+
+// Elections: nominee status update (hand-wired, not in TypeSpec)
+import { updateNomineeStatus } from '@/handlers/elections/updateNomineeStatus';
 
 // Email: hand-wired for middleware ordering reasons.
 // - unsubscribeEmail: MUST be registered BEFORE /email/* auth middleware (RFC 8058 public access)
@@ -131,14 +150,38 @@ export function createApp(config: Config): App {
   // Create core dependencies with config
   const logger = createLogger(config);
   const database = createDatabase(config.database);
-  const email = createEmailService(database, config, logger);
-  const auth = createAuth(database, config, logger, email);
+
+  // Construct repos here, inject into services (P1-2: core→handler dependency inversion)
+  const auditRepo = new AuditRepository(database, logger);
+  const personRepo = new PersonRepository(database, logger);
+  const emailTemplateRepo = new EmailTemplateRepository(database, logger);
+  const emailQueueRepo = new EmailQueueRepository(database, logger);
+  const suppressionRepo = new SuppressionRepository(database, logger);
+  const membershipRepo = new MembershipRepository(database, logger);
+  const notifRepo = new NotificationRepository(database, personRepo, logger, config.notifs.onesignal);
+
+  // Bind Drizzle table refs for core modules (P1-2: avoids core→handler schema imports)
+  bindMembershipsTable(memberships as any);
+
+  // Register domain event consumers (cross-module event bus)
+  registerDomainEventConsumers({ membershipRepo }, logger);
+
+  const email = createEmailService(config, logger, database, {
+    templateRepo: emailTemplateRepo,
+    queueRepo: emailQueueRepo,
+    suppressionRepo,
+    membershipLookup: membershipRepo,
+    bulkRateLimiter: new BulkRateLimiter(),
+    generateUnsubToken,
+    initializeTemplates: initializeEmailTemplates,
+  });
+  const auth = createAuth(database, config, logger, email, { auditRepo, personRepo });
   const storage = createStorageProvider(config.storage, logger);
   const jobs = createJobScheduler(database, logger);
   const ws = createWebSocketService(logger);
 
-  const notifs = createNotificationService(database, logger, config.notifs, ws);
-  const audit = createAuditService(database, logger);
+  const notifs = createNotificationService(notifRepo, ws, logger);
+  const audit = createAuditService(auditRepo);
   const billing = createBillingService(config.billing, database, logger);
 
   // Attach dependencies to the app instance early for access throughout
@@ -284,6 +327,16 @@ export function createApp(config: Config): App {
   //   /admin/* (3), /org/:id/payments/send-link, /accredited-providers/* (4),
   //   /cpd-config/* (2), /credits/manual, /compliance/* (2), /persons/me/credits,
   //   /certificates/bulk-issue, /special-assessments/* (6), /segments/* (3)
+  //
+  // HANDLER CONSOLIDATION STATUS (Wave 4):
+  //   m05 membership/: query-rich repo (JOINs, search) — complementary to
+  //       association:member/ CRUD repo. Both use same schema. No consolidation needed.
+  //   m06 dues/: deprecated dues.repo.ts removed (zero consumers).
+  //       Handlers import canonical association:member/repos/dues-payments.repo.
+  //       Payment-token repos are unique to dues/ (no overlap).
+  //   m09/m10 training/: hand-wired CRUD repo, shares schema with
+  //       association:operations/ TypeSpec repo. Complementary bounded contexts.
+  //   m12 elections/: entirely hand-wired. TypeSpec migration deferred.
   // ──────────────────────────────────────────────────────────────────────────
 
   // completeEvent — removed hand-wired duplicate; now served via generated TypeSpec route
@@ -297,6 +350,12 @@ export function createApp(config: Config): App {
   app.post('/accredited-providers/:organizationId', authMiddleware(), createAccreditedProvider);
   app.patch('/accredited-providers/:organizationId/:providerId', authMiddleware(), updateAccreditedProvider);
   app.delete('/accredited-providers/:organizationId/:providerId', authMiddleware(), deleteAccreditedProvider);
+
+  // Training entity lifecycle — transition training status (not enrollment)
+  app.post('/organizations/:organizationId/training/:id/complete', authMiddleware(), completeTraining as any);
+
+  // Elections: nominee status update (accept/decline nomination)
+  app.patch('/association/member/elections/:electionId/nominees/:nomineeId', authMiddleware(), updateNomineeStatus as any);
 
   // Wave 2b: CPD config, manual credit, compliance, bulk certificates
   app.get('/association/member/cpd-config/:organizationId', authMiddleware(), getCpdConfig as any);

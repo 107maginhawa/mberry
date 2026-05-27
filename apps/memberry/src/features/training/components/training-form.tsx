@@ -9,6 +9,11 @@ import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { DateTimePicker } from '@/components/patterns/date-picker'
+import {
+  createTrainingMutation,
+  updateTrainingMutation,
+  searchTrainingsQueryKey,
+} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 interface TrainingFormProps {
   orgId: string
@@ -49,32 +54,35 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
       set(key, e.target.value),
   })
 
+  const createMut = useMutation(createTrainingMutation())
+  const updateMut = useMutation(updateTrainingMutation())
+
   const saveMutation = useMutation({
     mutationFn: async (status: 'draft' | 'published') => {
       const payload = {
-        ...form,
-        startDate: form.startDate ? new Date(form.startDate).toISOString() : undefined,
-        endDate: form.endDate ? new Date(form.endDate).toISOString() : undefined,
+        title: form.title,
+        organizationId: orgId,
+        type: form.type as 'seminar' | 'workshop' | 'webinar' | 'self_paced' | 'hands_on',
+        startDate: form.startDate ? new Date(form.startDate) : new Date(),
+        endDate: form.endDate ? new Date(form.endDate) : undefined,
+        location: form.location || undefined,
         creditAmount: parseFloat(String(form.creditAmount)) || 0,
-        registrationFee: parseInt(String(form.registrationFee)) || 0,
+        registrationFee: BigInt(Math.round((parseInt(String(form.registrationFee)) || 0) * 100)),
         capacity: form.capacity ? parseInt(String(form.capacity)) : undefined,
-        status,
+        description: form.description || undefined,
       }
-      const url = isEdit
-        ? `/api/training/update/${orgId}/${trainingId}`
-        : `/api/training/create/${orgId}`
-      const method = isEdit ? 'PUT' : 'POST'
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) throw new Error('Failed to save training')
-      return res.json()
+      if (isEdit && trainingId) {
+        return updateMut.mutateAsync({ path: { trainingId }, body: payload } as any)
+      } else {
+        return createMut.mutateAsync({ body: payload } as any)
+      }
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['trainings', orgId] })
-      navigate({ to: '/org/$orgSlug/officer/training/$trainingId', params: { orgSlug, trainingId: (data.data as { id: string }).id } })
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: searchTrainingsQueryKey() })
+      const id = data?.id ?? data?.data?.id ?? trainingId
+      if (id) {
+        navigate({ to: '/org/$orgSlug/officer/training/$trainingId', params: { orgSlug, trainingId: id } })
+      }
     },
     onError: (err) => toast.error(err.message || 'Failed to save training'),
   })

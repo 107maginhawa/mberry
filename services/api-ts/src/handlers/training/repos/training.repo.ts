@@ -9,6 +9,15 @@ import {
   type NewTrainingEnrollment,
 } from '../../association:operations/repos/training.schema';
 
+// ── Module Boundary ─────────────────────────────────────────────────────
+// Schema canonical home: association:operations/repos/training.schema.ts
+// TypeSpec-generated repo: association:operations/repos/training.repo.ts
+//   → CRUD + courses + quizzes (used by TypeSpec handlers)
+// This repo (hand-wired): search, pagination, org-scoped queries
+//   → Used by training/ CRUD handlers (listTrainings, createTraining, etc.)
+// Both repos share the same schema — no data divergence.
+// ─────────────────────────────────────────────────────────────────────────
+
 export class TrainingRepository {
   constructor(private db: DatabaseInstance) {}
 

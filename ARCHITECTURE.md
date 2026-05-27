@@ -39,9 +39,8 @@ Package Mgr:    Bun workspaces
 ```
 monobase/
 ├── apps/
-│   ├── account/              # Cloud account app (auth, profile, settings) [port 3002]
 │   ├── admin/                # Platform ops dashboard [port 3003]
-│   └── memberry/             # Product app (membership, dues, events) [port 3004]
+│   └── memberry/             # Product app (membership, dues, events, auth, profile, settings) [port 3004]
 ├── packages/
 │   ├── eslint-config/        # Shared ESLint flat configs
 │   ├── sdk-ts/               # Generated TS client SDK + TanStack Query hooks
@@ -178,7 +177,7 @@ Full error hierarchy in `services/api-ts/src/core/errors.ts`:
 | Type | Tool | Command | When |
 |---|---|---|---|
 | Unit/Integration | Bun test | `cd services/api-ts && bun test` | Business logic, repos, utils |
-| E2E | Playwright | `cd apps/account && bun run test:e2e` | Critical user flows |
+| E2E | Playwright | `cd apps/memberry && bun run test:e2e` | Critical user flows |
 | Contract | Hurl | `bun run test:contract` | API shape compliance |
 | Fuzz | Schemathesis | `bun run test:contract:fuzz` | Spec/impl drift detection |
 

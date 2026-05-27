@@ -3,6 +3,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import { UnauthorizedError, ValidationError, ConflictError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { creditEntries, orgCpdConfig } from './repos/credits.schema';
+import { domainEvents } from '@/core/domain-events';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -33,6 +34,14 @@ export async function awardManualCredit(ctx: Context): Promise<Response> {
 
   try {
     const [entry] = await db.insert(creditEntries).values({ personId: body.personId, organizationId: orgId, type: 'manual', activityName: body.activityName, provider: body.provider ?? null, activityDate: ad, creditAmount: body.creditAmount, cycleStart, cycleEnd, supportingDocumentId: body.supportingDocumentId ?? null, category: body.category ?? null, verificationStatus: 'verified', sourceType: 'manual_award', sourceId: body.idempotencyKey, cpdActivityType: body.cpdActivityType as any ?? null, status: 'active', createdBy: session.user.id, updatedBy: session.user.id }).returning();
+    domainEvents.emit('credit.adjusted', {
+      creditEntryId: entry!.id,
+      personId: body.personId,
+      organizationId: orgId,
+      adjustedBy: session.user.id,
+      creditAmount: body.creditAmount,
+      reason: body.activityName,
+    }).catch(() => {});
     try { await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY compliance_standings`); } catch { /* view may not exist */ }
     return ctx.json({ data: entry, ...(sdlCapWarning && { warning: sdlCapWarning }) }, 201);
   } catch (err: any) {
