@@ -1,6 +1,6 @@
 {
-  "id": "de5a6c30-33c0-45af-8b98-83bf3c49ae54",
-  "prevId": "f9f00443-28be-4130-b7ad-492a2dbca323",
+  "id": "26eace94-7683-409a-b26d-f16ff67d9852",
+  "prevId": "de5a6c30-33c0-45af-8b98-83bf3c49ae54",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -8225,12 +8225,6 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
-        },
-        "parent_event_id": {
-          "name": "parent_event_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -8284,21 +8278,6 @@
           "columns": [
             {
               "expression": "event_slug",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_event_parent": {
-          "name": "idx_event_parent",
-          "columns": [
-            {
-              "expression": "parent_event_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -18871,6 +18850,120 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.breach_incident": {
+      "name": "breach_incident",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reported_by": {
+          "name": "reported_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "discovered_at": {
+          "name": "discovered_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "affected_records_count": {
+          "name": "affected_records_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data_categories": {
+          "name": "data_categories",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notification_deadline": {
+          "name": "notification_deadline",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "breach_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'reported'"
+        },
+        "notified_at": {
+          "name": "notified_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "npc_reference_number": {
+          "name": "npc_reference_number",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.feature_flag": {
       "name": "feature_flag",
       "schema": "",
@@ -20970,6 +21063,16 @@
         "super",
         "support",
         "analyst"
+      ]
+    },
+    "public.breach_status": {
+      "name": "breach_status",
+      "schema": "public",
+      "values": [
+        "reported",
+        "investigating",
+        "notified",
+        "resolved"
       ]
     },
     "public.org_lifecycle_status": {

@@ -224,6 +224,16 @@ export interface DomainEventMap {
     positionId: string;
     organizationId: string;
   };
+
+  // ── Compliance Context ────────────────────────────────────────────────
+  'breach.reported': {
+    breachId: string;
+    organizationId: string | null;
+    reportedBy: string;
+    discoveredAt: string;
+    notificationDeadline: string;
+    description: string;
+  };
 }
 
 export type DomainEventName = keyof DomainEventMap;

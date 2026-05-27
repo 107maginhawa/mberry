@@ -1,0 +1,76 @@
+/**
+ * reportBreach
+ *
+ * Path: POST /admin/breaches
+ * Records a new personal data breach incident under DPA 2012 / M3-R11.
+ * Computes the 72-hour NPC notification deadline from discoveredAt.
+ */
+
+import type { Context } from 'hono';
+import type { DatabaseInstance } from '@/core/database';
+import { ValidationError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
+import { breachIncidents } from './repos/platform-admin.schema';
+
+export async function reportBreach(ctx: Context): Promise<Response> {
+  const session = ctx.get('session');
+  if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const admin = ctx.get('platformAdmin');
+  if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+
+  const body = await ctx.req.json();
+  const { organizationId, discoveredAt, description, affectedRecordsCount, dataCategories } = body;
+
+  if (!discoveredAt || !description) {
+    throw new ValidationError('discoveredAt and description are required');
+  }
+
+  const discovered = new Date(discoveredAt);
+  if (Number.isNaN(discovered.getTime())) {
+    throw new ValidationError('discoveredAt must be a valid ISO date');
+  }
+  if (discovered > new Date()) {
+    throw new ValidationError('discoveredAt cannot be in the future');
+  }
+
+  // DPA 2012: 72-hour deadline for NPC notification
+  const notificationDeadline = new Date(discovered.getTime() + 72 * 60 * 60 * 1000);
+  const now = new Date();
+
+  const [breach] = await db.insert(breachIncidents).values({
+    organizationId: organizationId ?? null,
+    reportedBy: admin.userId,
+    discoveredAt: discovered,
+    description,
+    affectedRecordsCount: affectedRecordsCount ?? null,
+    dataCategories: dataCategories ?? null,
+    notificationDeadline,
+    status: 'reported',
+    createdBy: admin.userId,
+    updatedBy: admin.userId,
+  }).returning();
+
+  if (!breach) {
+    logger.error('Failed to insert breach incident');
+    return ctx.json({ error: 'Failed to create breach incident' }, 500);
+  }
+
+  const hoursRemaining = (breach.notificationDeadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+  await domainEvents.emit('breach.reported', {
+    breachId: breach.id,
+    reportedBy: breach.reportedBy,
+    organizationId: breach.organizationId ?? null,
+    discoveredAt: breach.discoveredAt.toISOString(),
+    notificationDeadline: breach.notificationDeadline.toISOString(),
+    description: breach.description,
+  });
+
+  logger.info({ breachId: breach.id, hoursRemaining }, 'Breach incident reported');
+
+  return ctx.json({ data: breach, hoursRemaining: Math.max(0, hoursRemaining) }, 201);
+}

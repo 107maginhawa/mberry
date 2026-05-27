@@ -9,6 +9,11 @@ import { describe, test, expect, mock, beforeEach } from 'bun:test';
 import { DomainEventBus, domainEvents } from './domain-events';
 import { registerDomainEventConsumers, type DomainEventMembershipRepo } from './domain-event-consumers';
 
+const mockDb = {
+  insert: () => ({ values: () => Promise.resolve() }),
+  select: () => ({ from: () => ({ where: () => ({ limit: () => Promise.resolve([]) }) }) }),
+} as any;
+
 // Mock-Classification: APPROPRIATE — cross-module domain event glue layer
 
 // ---------------------------------------------------------------------------
@@ -48,7 +53,7 @@ describe('registerDomainEventConsumers', () => {
     const mockFindByPersonAndOrg = mock(async () => null);
     const membershipRepo = makeMembershipRepo({ findByPersonAndOrg: mockFindByPersonAndOrg });
 
-    registerDomainEventConsumers({ membershipRepo }, logger as any);
+    registerDomainEventConsumers({ membershipRepo, db: mockDb }, logger as any);
 
     await domainEvents.emit('dues.payment.recorded', {
       paymentId: 'pay-1',
@@ -65,7 +70,7 @@ describe('registerDomainEventConsumers', () => {
     const mockFindByPersonAndOrg = mock(async () => null);
     const membershipRepo = makeMembershipRepo({ findByPersonAndOrg: mockFindByPersonAndOrg });
 
-    registerDomainEventConsumers({ membershipRepo }, logger as any);
+    registerDomainEventConsumers({ membershipRepo, db: mockDb }, logger as any);
 
     await domainEvents.emit('dues.payment.recorded', {
       paymentId: 'pay-2',
@@ -81,7 +86,7 @@ describe('registerDomainEventConsumers', () => {
   test('logs warning when membership not found for person+org', async () => {
     const membershipRepo = makeMembershipRepo();
 
-    registerDomainEventConsumers({ membershipRepo }, logger as any);
+    registerDomainEventConsumers({ membershipRepo, db: mockDb }, logger as any);
 
     await domainEvents.emit('dues.payment.recorded', {
       paymentId: 'pay-3',
@@ -101,7 +106,7 @@ describe('registerDomainEventConsumers', () => {
       updateOneById: mockUpdateOneById,
     });
 
-    registerDomainEventConsumers({ membershipRepo }, logger as any);
+    registerDomainEventConsumers({ membershipRepo, db: mockDb }, logger as any);
 
     await domainEvents.emit('dues.payment.recorded', {
       paymentId: 'pay-4',

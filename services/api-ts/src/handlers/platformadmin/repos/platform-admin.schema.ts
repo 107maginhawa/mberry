@@ -120,6 +120,31 @@ export const impersonationSessions = pgTable('impersonation_session', {
 ]);
 
 // ---------------------------------------------------------------------------
+// Compliance — Breach Incidents (DPA 2012 / M3-R11)
+// ---------------------------------------------------------------------------
+
+export const breachStatusEnum = pgEnum('breach_status', ['reported', 'investigating', 'notified', 'resolved']);
+
+export const breachIncidents = pgTable('breach_incident', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  organizationId: uuid('organization_id'),  // nullable for platform-wide
+  reportedBy: uuid('reported_by').notNull(),
+  discoveredAt: timestamp('discovered_at', { withTimezone: true }).notNull(),
+  description: text('description').notNull(),
+  affectedRecordsCount: integer('affected_records_count'),
+  dataCategories: jsonb('data_categories').$type<string[]>(),
+  notificationDeadline: timestamp('notification_deadline', { withTimezone: true }).notNull(),
+  status: breachStatusEnum('status').notNull().default('reported'),
+  notifiedAt: timestamp('notified_at', { withTimezone: true }),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  npcReferenceNumber: varchar('npc_reference_number', { length: 100 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdBy: uuid('created_by').notNull(),
+  updatedBy: uuid('updated_by').notNull(),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -133,3 +158,5 @@ export type PlatformAdmin = typeof platformAdmins.$inferSelect;
 export type NewPlatformAdmin = typeof platformAdmins.$inferInsert;
 export type ImpersonationSession = typeof impersonationSessions.$inferSelect;
 export type NewImpersonationSession = typeof impersonationSessions.$inferInsert;
+export type BreachIncident = typeof breachIncidents.$inferSelect;
+export type NewBreachIncident = typeof breachIncidents.$inferInsert;

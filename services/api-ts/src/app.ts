@@ -39,6 +39,7 @@ import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
+import { registerBreachJobs } from '@/handlers/platformadmin/jobs';
 import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
 
 // Routes
@@ -108,6 +109,11 @@ import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
 // Public org discovery — hand-wired (not yet in TypeSpec)
 import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
 
+// Breach notification handlers — DPA 2012 / M3-R11
+import { reportBreach } from '@/handlers/platformadmin/reportBreach';
+import { listBreaches } from '@/handlers/platformadmin/listBreaches';
+import { updateBreachStatus } from '@/handlers/platformadmin/updateBreachStatus';
+
 // Platform admin: national dashboard + cross-org committee list (dark handlers → now wired)
 import { getNationalDashboard } from '@/handlers/platformadmin/getNationalDashboard';
 import { listAllCommittees } from '@/handlers/platformadmin/listAllCommittees';
@@ -169,7 +175,7 @@ export function createApp(config: Config): App {
   bindMembershipsTable(memberships as any);
 
   // Register domain event consumers (cross-module event bus)
-  registerDomainEventConsumers({ membershipRepo }, logger);
+  registerDomainEventConsumers({ membershipRepo, db: database }, logger);
 
   const email = createEmailService(config, logger, database, {
     templateRepo: emailTemplateRepo,
@@ -251,6 +257,11 @@ export function createApp(config: Config): App {
   app.get('/admin/national-dashboard/:associationId', getNationalDashboard as any);
   app.get('/admin/committees', listAllCommittees as any);
   app.get('/admin/committees/:id', getCommittee as any);
+
+  // Breach notification endpoints — DPA 2012 / M3-R11 (under /admin/* auth middleware)
+  app.post('/admin/breaches', reportBreach as any);
+  app.get('/admin/breaches', listBreaches as any);
+  app.put('/admin/breaches/:id', updateBreachStatus as any);
 
   // One-tap payment token: PUBLIC endpoints (member clicks from email, no auth)
   // Registered before any wildcard auth middleware to avoid interception
@@ -460,6 +471,7 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerPersonJobs(jobs);
   registerMembershipJobs(jobs, app.notifs);
   registerSurveyJobs(jobs, app.notifs);
+  registerBreachJobs(jobs, app.notifs);
 
   logger.debug('Starting background job scheduler...');
   await jobs.start();
