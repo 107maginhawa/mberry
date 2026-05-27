@@ -225,6 +225,21 @@ export interface DomainEventMap {
     organizationId: string;
   };
 
+  // ── Support Ticket Context ────────────────────────────────────────────
+  'ticket.created': {
+    ticketId: string;
+    organizationId: string | null;
+    reportedBy: string;
+    priority: string;
+    subject: string;
+  };
+
+  'ticket.escalated': {
+    ticketId: string;
+    reason: string;
+    escalatedTo: string;
+  };
+
   // ── Compliance Context ────────────────────────────────────────────────
   'breach.reported': {
     breachId: string;

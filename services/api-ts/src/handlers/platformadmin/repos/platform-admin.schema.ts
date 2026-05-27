@@ -145,6 +145,45 @@ export const breachIncidents = pgTable('breach_incident', {
 });
 
 // ---------------------------------------------------------------------------
+// Support Tickets — SLA-tracked helpdesk system (M3-R12)
+// ---------------------------------------------------------------------------
+
+export const ticketCategoryEnum = pgEnum('ticket_category', ['billing', 'technical', 'membership', 'general']);
+export const ticketPriorityEnum = pgEnum('ticket_priority', ['low', 'standard', 'high', 'critical']);
+export const ticketStatusEnum = pgEnum('ticket_status', ['open', 'in_progress', 'waiting_customer', 'resolved', 'closed']);
+
+export const supportTickets = pgTable('support_ticket', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  organizationId: uuid('organization_id'),
+  reportedBy: uuid('reported_by').notNull(),
+  assignedTo: uuid('assigned_to'),
+  subject: varchar('subject', { length: 200 }).notNull(),
+  description: text('description').notNull(),
+  category: ticketCategoryEnum('category').notNull().default('general'),
+  priority: ticketPriorityEnum('priority').notNull().default('standard'),
+  status: ticketStatusEnum('status').notNull().default('open'),
+  slaFirstResponseDeadline: timestamp('sla_first_response_deadline', { withTimezone: true }).notNull(),
+  slaResolutionDeadline: timestamp('sla_resolution_deadline', { withTimezone: true }).notNull(),
+  firstRespondedAt: timestamp('first_responded_at', { withTimezone: true }),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  closedAt: timestamp('closed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdBy: uuid('created_by').notNull(),
+  updatedBy: uuid('updated_by').notNull(),
+});
+
+export const ticketComments = pgTable('ticket_comment', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  ticketId: uuid('ticket_id').notNull().references(() => supportTickets.id),
+  authorId: uuid('author_id').notNull(),
+  content: text('content').notNull(),
+  isInternal: boolean('is_internal').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -160,3 +199,7 @@ export type ImpersonationSession = typeof impersonationSessions.$inferSelect;
 export type NewImpersonationSession = typeof impersonationSessions.$inferInsert;
 export type BreachIncident = typeof breachIncidents.$inferSelect;
 export type NewBreachIncident = typeof breachIncidents.$inferInsert;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type NewSupportTicket = typeof supportTickets.$inferInsert;
+export type TicketComment = typeof ticketComments.$inferSelect;
+export type NewTicketComment = typeof ticketComments.$inferInsert;

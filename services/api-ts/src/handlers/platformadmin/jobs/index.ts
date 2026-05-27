@@ -3,3 +3,4 @@
  */
 
 export { registerBreachJobs } from './breachDeadlineMonitor';
+export { registerTicketJobs } from './ticketSlaMonitor';

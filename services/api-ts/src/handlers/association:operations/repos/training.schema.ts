@@ -20,6 +20,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { baseEntityFields } from '@/core/database.schema';
 
+export const trainingVisibilityEnum = pgEnum('training_visibility', ['internal', 'network']);
+
 export const trainingStatusEnum = pgEnum('training_status', [
   'draft',
   'published',
@@ -56,6 +58,7 @@ export const trainings = pgTable('training', {
   creditBearing: boolean('credit_bearing').default(false),
   creditAmount: integer('credit_amount').default(0),
   status: trainingStatusEnum('status').notNull().default('draft'),
+  visibility: trainingVisibilityEnum('visibility').notNull().default('network'),
   publishedAt: timestamp('published_at', { withTimezone: true }),
   /** PRC accreditation number for this training */
   prcAccreditationNumber: varchar('prc_accreditation_number', { length: 100 }),

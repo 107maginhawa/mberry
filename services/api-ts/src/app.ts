@@ -39,7 +39,7 @@ import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
-import { registerBreachJobs } from '@/handlers/platformadmin/jobs';
+import { registerBreachJobs, registerTicketJobs } from '@/handlers/platformadmin/jobs';
 import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
 
 // Routes
@@ -114,6 +114,13 @@ import { reportBreach } from '@/handlers/platformadmin/reportBreach';
 import { listBreaches } from '@/handlers/platformadmin/listBreaches';
 import { updateBreachStatus } from '@/handlers/platformadmin/updateBreachStatus';
 
+// Support ticket SLA system — M3-R12
+import { createTicket } from '@/handlers/platformadmin/createTicket';
+import { listTickets } from '@/handlers/platformadmin/listTickets';
+import { getTicket } from '@/handlers/platformadmin/getTicket';
+import { updateTicketStatus } from '@/handlers/platformadmin/updateTicketStatus';
+import { addTicketComment } from '@/handlers/platformadmin/addTicketComment';
+
 // Platform admin: national dashboard + cross-org committee list (dark handlers → now wired)
 import { getNationalDashboard } from '@/handlers/platformadmin/getNationalDashboard';
 import { listAllCommittees } from '@/handlers/platformadmin/listAllCommittees';
@@ -146,6 +153,9 @@ import { getSpecialAssessmentCollection } from '@/handlers/association:member/ge
 
 // Officer transition — hand-wired (M4-R3 checklist-based handover, not in TypeSpec)
 import { transitionOfficerTerm } from '@/handlers/association:member/transitionOfficerTerm';
+
+// Org-wide dashboard — M4-DASHBOARD AC-M04-005 (hand-wired, not in TypeSpec)
+import { getOrgDashboard } from '@/handlers/association:member/getOrgDashboard';
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -262,6 +272,15 @@ export function createApp(config: Config): App {
   app.post('/admin/breaches', reportBreach as any);
   app.get('/admin/breaches', listBreaches as any);
   app.put('/admin/breaches/:id', updateBreachStatus as any);
+
+  // Support ticket endpoints — M3-R12
+  // createTicket: any authenticated user (no platformAdmin check)
+  app.post('/support/tickets', authMiddleware(), createTicket as any);
+  // Admin-only ticket management (covered by /admin/* middleware above)
+  app.get('/admin/tickets', listTickets as any);
+  app.get('/admin/tickets/:id', getTicket as any);
+  app.put('/admin/tickets/:id', updateTicketStatus as any);
+  app.post('/admin/tickets/:id/comments', addTicketComment as any);
 
   // One-tap payment token: PUBLIC endpoints (member clicks from email, no auth)
   // Registered before any wildcard auth middleware to avoid interception
@@ -394,6 +413,9 @@ export function createApp(config: Config): App {
   // Officer transition — M4-R3 checklist-based handover
   app.post('/association/member/org/:organizationId/officers/:termId/transition', authMiddleware(), orgContextMiddleware(), transitionOfficerTerm as any);
 
+  // Org-wide dashboard — M4-DASHBOARD AC-M04-005
+  app.get('/association/member/org/:organizationId/dashboard', getOrgDashboard as any);
+
   // Wave 4β: Saved Segments — CRUD for audience segment presets
   app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
   app.get('/communications/segments', authMiddleware(), listSavedSegments as any);
@@ -472,6 +494,7 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerMembershipJobs(jobs, app.notifs);
   registerSurveyJobs(jobs, app.notifs);
   registerBreachJobs(jobs, app.notifs);
+  registerTicketJobs(jobs, app.notifs);
 
   logger.debug('Starting background job scheduler...');
   await jobs.start();

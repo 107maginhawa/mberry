@@ -50,7 +50,6 @@ export async function updateTraining(ctx: Context): Promise<Response> {
     coverImage: _coverImage,
     creditValueLocked: _creditValueLocked,
     enrollmentMode: _enrollmentMode,
-    visibility: _visibility,
     status: _status,
     regulatoryApproval,
     regulatoryReference,
@@ -64,6 +63,7 @@ export async function updateTraining(ctx: Context): Promise<Response> {
 
   const updated = await repo.update(id, {
     ...rest,
+    ...(body.visibility !== undefined && { visibility: body.visibility }),
     ...(locationDetails !== undefined && { location: locationDetails }),
     ...(fee !== undefined && { registrationFee: fee }),
     ...(creditValue !== undefined && { creditAmount: creditValue }),
