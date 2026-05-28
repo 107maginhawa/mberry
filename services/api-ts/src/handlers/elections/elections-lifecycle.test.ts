@@ -19,7 +19,7 @@ import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
-import { BusinessLogicError } from '@/core/errors';
+import { BusinessLogicError, ConflictError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -114,8 +114,8 @@ describe('[024] Election Full Lifecycle Chain', () => {
     });
 
     const err = await updateElectionStatus(ctx).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(BusinessLogicError);
-    expect((err as BusinessLogicError).code).toBe('INVALID_ELECTION_TRANSITION');
+    expect(err).toBeInstanceOf(ConflictError);
+    expect((err as ConflictError).message).toContain('Cannot transition election');
   });
 
   test('cannot skip lifecycle stages (nominationsOpen → published blocked)', async () => {
@@ -130,8 +130,8 @@ describe('[024] Election Full Lifecycle Chain', () => {
     });
 
     const err = await updateElectionStatus(ctx).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(BusinessLogicError);
-    expect((err as BusinessLogicError).code).toBe('INVALID_ELECTION_TRANSITION');
+    expect(err).toBeInstanceOf(ConflictError);
+    expect((err as ConflictError).message).toContain('Cannot transition election');
   });
 
   test('cannot skip lifecycle stages (draft → awaitingConfirmation blocked)', async () => {
@@ -146,8 +146,8 @@ describe('[024] Election Full Lifecycle Chain', () => {
     });
 
     const err = await updateElectionStatus(ctx).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(BusinessLogicError);
-    expect((err as BusinessLogicError).code).toBe('INVALID_ELECTION_TRANSITION');
+    expect(err).toBeInstanceOf(ConflictError);
+    expect((err as ConflictError).message).toContain('Cannot transition election');
   });
 
   test('any non-terminal state can transition to cancelled', async () => {

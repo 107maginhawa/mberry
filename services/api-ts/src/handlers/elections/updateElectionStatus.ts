@@ -5,15 +5,7 @@ import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
-
-const VALID_TRANSITIONS: Record<string, string[]> = {
-  draft: ['nominationsOpen', 'cancelled'],
-  nominationsOpen: ['votingOpen', 'cancelled'],
-  votingOpen: ['awaitingConfirmation', 'cancelled'],
-  awaitingConfirmation: ['published', 'cancelled'],
-  published: [],  // terminal state
-  cancelled: [],  // terminal state
-};
+import { assertValidTransition, ELECTION_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 export async function updateElectionStatus(ctx: Context): Promise<Response> {
   const session = ctx.get('session');
@@ -31,13 +23,7 @@ export async function updateElectionStatus(ctx: Context): Promise<Response> {
   const existing = await repo.get(id);
   if (!existing) throw new NotFoundError('Election not found');
 
-  const allowed = VALID_TRANSITIONS[existing.status] ?? [];
-  if (!allowed.includes(body.status)) {
-    throw new BusinessLogicError(
-      `Cannot transition election from '${existing.status}' to '${body.status}'. Allowed: ${allowed.length > 0 ? allowed.join(', ') : 'none (terminal state)'}`,
-      'INVALID_ELECTION_TRANSITION',
-    );
-  }
+  assertValidTransition(ELECTION_VALID_TRANSITIONS, existing.status, body.status, 'election');
 
   // BR-33: Minimum 2 candidates per position before voting opens
   if (body.status === 'votingOpen') {

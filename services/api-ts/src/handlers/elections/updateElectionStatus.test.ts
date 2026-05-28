@@ -4,7 +4,7 @@ import { fakeElection as createFakeElection } from '@/test-utils/factories';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
-import { BusinessLogicError } from '@/core/errors';
+import { BusinessLogicError, ConflictError } from '@/core/errors';
 
 mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
 
@@ -130,7 +130,7 @@ describe('updateElectionStatus', () => {
     expect(response.body.data.status).toBe('votingOpen');
   });
 
-  test('invalid: draft → published throws INVALID_ELECTION_TRANSITION', async () => {
+  test('invalid: draft → published throws ConflictError', async () => {
     mocks = stubRepo(ElectionsRepository, {
       get: async () => fakeElection,
       update: async (_id: string, data: any) => ({ ...fakeElection, ...data }),
@@ -142,11 +142,11 @@ describe('updateElectionStatus', () => {
     });
 
     const err = await updateElectionStatus(ctx).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(BusinessLogicError);
-    expect((err as BusinessLogicError).code).toBe('INVALID_ELECTION_TRANSITION');
+    expect(err).toBeInstanceOf(ConflictError);
+    expect((err as ConflictError).message).toContain('Cannot transition election');
   });
 
-  test('invalid: draft → votingOpen throws INVALID_ELECTION_TRANSITION', async () => {
+  test('invalid: draft → votingOpen throws ConflictError', async () => {
     mocks = stubRepo(ElectionsRepository, {
       get: async () => fakeElection,
       update: async (_id: string, data: any) => ({ ...fakeElection, ...data }),
@@ -158,11 +158,11 @@ describe('updateElectionStatus', () => {
     });
 
     const err = await updateElectionStatus(ctx).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(BusinessLogicError);
-    expect((err as BusinessLogicError).code).toBe('INVALID_ELECTION_TRANSITION');
+    expect(err).toBeInstanceOf(ConflictError);
+    expect((err as ConflictError).message).toContain('Cannot transition election');
   });
 
-  test('terminal: cancelled → draft throws INVALID_ELECTION_TRANSITION', async () => {
+  test('terminal: cancelled → draft throws ConflictError', async () => {
     mocks = stubRepo(ElectionsRepository, {
       get: async () => ({ ...fakeElection, status: 'cancelled' }),
       update: async (_id: string, data: any) => ({ ...fakeElection, ...data }),
@@ -174,11 +174,11 @@ describe('updateElectionStatus', () => {
     });
 
     const err = await updateElectionStatus(ctx).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(BusinessLogicError);
-    expect((err as BusinessLogicError).code).toBe('INVALID_ELECTION_TRANSITION');
+    expect(err).toBeInstanceOf(ConflictError);
+    expect((err as ConflictError).message).toContain('terminal');
   });
 
-  test('terminal: published → cancelled throws INVALID_ELECTION_TRANSITION', async () => {
+  test('terminal: published → cancelled throws ConflictError', async () => {
     mocks = stubRepo(ElectionsRepository, {
       get: async () => ({ ...fakeElection, status: 'published' }),
       update: async (_id: string, data: any) => ({ ...fakeElection, ...data }),
@@ -190,8 +190,8 @@ describe('updateElectionStatus', () => {
     });
 
     const err = await updateElectionStatus(ctx).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(BusinessLogicError);
-    expect((err as BusinessLogicError).code).toBe('INVALID_ELECTION_TRANSITION');
+    expect(err).toBeInstanceOf(ConflictError);
+    expect((err as ConflictError).message).toContain('terminal');
   });
 
   // ─── [V-07 / BR-33] Min-candidate guard tests ────────────
