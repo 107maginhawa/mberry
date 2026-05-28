@@ -96,6 +96,11 @@ import { createSavedSegment, listSavedSegments, deleteSavedSegment } from '@/han
 import { scheduleAnnouncement } from '@/handlers/communication/scheduleAnnouncement';
 import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementStats';
 
+// Dues: receipt download (hand-wired, Cycle 8)
+import { downloadReceipt } from '@/handlers/dues/downloadReceipt';
+// National dashboard export (hand-wired, Cycle 8)
+import { exportNationalDashboard } from '@/handlers/association:operations/exportNationalDashboard';
+
 // Survey extras — hand-wired (export returns CSV, clone is convenience endpoint)
 import { exportSurveyResponses } from '@/handlers/surveys/exportSurveyResponses';
 import { cloneSurvey } from '@/handlers/surveys/cloneSurvey';
@@ -399,6 +404,11 @@ export function createApp(config: Config): App {
 
   // One-tap payment send-link — officer generates payment link (auth required)
   app.post('/org/:organizationId/payments/send-link', authMiddleware(), orgContextMiddleware(), sendPaymentLink as any);
+  // Receipt PDF download — member (own) or officer (any in org) (Cycle 8, M6-R6)
+  app.get('/org/:organizationId/payments/:paymentId/receipt', authMiddleware(), downloadReceipt as any);
+
+  // National dashboard export — CSV/JSON for national officers (Cycle 8, BR-36)
+  app.post('/admin/national-dashboard/:associationId/export', authMiddleware(), exportNationalDashboard as any);
 
   // PRC Accredited Providers — MIGRATED: now in generated routes.ts with authMiddleware.
   // Wildcard app.use('/accredited-providers/*', authMiddleware()) at line 362 provides
