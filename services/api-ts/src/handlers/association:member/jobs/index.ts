@@ -4,19 +4,20 @@
  */
 
 import type { JobScheduler, JobContext } from '@/core/jobs';
-import { DeferredScopeError } from '@/core/errors';
+import type { BillingService } from '@/core/billing';
 import { processDuesReminders } from './reminderProcessor';
 import { processWebhookRetry } from './webhookRetryProcessor';
 import { processCreditIssue } from './creditIssue';
 import { processComplianceThreshold } from './complianceThreshold';
 import { registerStatusRecomputeJob } from './statusRecomputeCron';
+import { createProcessPayment } from '../../dues/jobs/processStripePayment';
 
 export { registerStatusRecomputeJob };
 
 /**
  * Register all dues module jobs with the scheduler
  */
-export function registerDuesJobs(scheduler: JobScheduler): void {
+export function registerDuesJobs(scheduler: JobScheduler, billing: BillingService): void {
   // Process dues reminders daily at midnight
   scheduler.registerCron('dues.reminderProcessor', '0 0 * * *', async (context: JobContext) => {
     await processDuesReminders({ db: context.db, logger: context.logger });
@@ -29,11 +30,7 @@ export function registerDuesJobs(scheduler: JobScheduler): void {
       db: context.db,
       logger: context.logger,
       now: new Date(),
-      processPayment: async (_payload) => {
-        // Deferred: wire to payment gateway processor — dues v2 integration. Tracked: GAP-BACKLOG.md
-        // Integration point where gateway settlement handler will be called.
-        throw new DeferredScopeError('Payment processor');
-      },
+      processPayment: createProcessPayment(billing, context.db, context.logger),
     });
   });
 
