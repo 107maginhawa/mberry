@@ -154,7 +154,7 @@ import { awardManualCredit } from '@/handlers/association:member/awardManualCred
 import { getComplianceReport } from '@/handlers/association:member/getComplianceReport';
 import { refreshCompliance } from '@/handlers/association:member/refreshCompliance';
 import { getMyCredits } from '@/handlers/person/getMyCredits';
-import { bulkIssueCertificates } from '@/handlers/certificates/bulkIssueCertificates';
+// bulkIssueCertificates — now in generated routes (Phase 35)
 import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
 
 // Special Assessments — now in generated routes (Phase 35)
@@ -469,11 +469,7 @@ export function createApp(config: Config): App {
   const orgIdShortParam = zValidator('param', z.object({ orgId: z.string().uuid() }), validationErrorHandler);
   app.get('/persons/me/id-card/:orgId', orgIdShortParam, authMiddleware(), getMyIdCard as unknown as Handler);
   app.get('/persons/me/id-card/:orgId/pdf', orgIdShortParam, authMiddleware(), getMyIdCardPdf as unknown as Handler);
-  const bulkIssueBody = zValidator('json', z.object({
-    personIds: z.array(z.string().uuid()).min(1).max(500),
-    templateId: z.string().uuid().optional(),
-  }).passthrough(), validationErrorHandler);
-  app.post('/certificates/bulk-issue', bulkIssueBody, authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as unknown as Handler);
+  // bulkIssueCertificates — migrated to generated routes (Phase 35)
 
   // special-assessments CRUD — migrated to generated routes (Phase 35)
 
