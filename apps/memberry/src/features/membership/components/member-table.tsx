@@ -17,9 +17,6 @@ import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Search, Users } from 'lucide-react'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 
-// TODO: Dynamic credit requirements per tier — see ROADMAP.md "Association Config API"
-const DEFAULT_REQUIRED_CREDITS = 40
-
 interface MemberTableProps {
   orgId: string
   initialStatus?: string
@@ -58,7 +55,7 @@ const DUES_STATUS_BADGE: Record<string, { label: string; className: string }> = 
 
 const PAGE_SIZE = 50
 
-export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredits = DEFAULT_REQUIRED_CREDITS }: MemberTableProps) {
+export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredits = 60 }: MemberTableProps) {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')

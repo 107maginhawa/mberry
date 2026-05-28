@@ -10,8 +10,9 @@ import { Label } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { addRosterMemberMutation } from '@monobase/sdk-ts/generated/react-query'
+import { addRosterMemberMutation, getOrgCpdConfigOptions } from '@monobase/sdk-ts/generated/react-query'
 import { PageHeader } from '@/components/patterns/page-header'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -39,6 +40,7 @@ function RosterPage() {
   const [showAdd, setShowAdd] = useState(false)
 
   const initialStatus = status ? (STATUS_MAP[status] ?? status) : undefined
+  const { data: cpdConfig } = useQuery(getOrgCpdConfigOptions({ path: { organizationId: orgId } }))
 
   return (
     <div className="space-y-6">
@@ -56,7 +58,7 @@ function RosterPage() {
           </Button>
         }
       />
-      <MemberTable orgId={orgId} initialStatus={initialStatus} expiringDays={expiring} />
+      <MemberTable orgId={orgId} initialStatus={initialStatus} expiringDays={expiring} requiredCredits={cpdConfig?.data?.requiredCredits} />
       <AddMemberDialog open={showAdd} onClose={() => setShowAdd(false)} orgId={orgId} />
     </div>
   )
