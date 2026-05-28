@@ -128,4 +128,65 @@ describe('exportNationalDashboard', () => {
     });
     await expect(exportNationalDashboard(ctx)).rejects.toThrow('Unauthorized');
   });
+
+  // ─── EF-M14-004: CSV formula injection prevention ─────────
+
+  test('[EF-M14-004] CSV output escapes formula-injected chapter names', async () => {
+    const maliciousSnapshots = [
+      {
+        ...chapterSnapshots[0],
+        chapterName: '=CMD|echo exploit',
+      },
+      {
+        ...chapterSnapshots[1],
+        chapterName: '+cmd|evil',
+      },
+    ];
+
+    stubRepo(DashboardRepository, {
+      listChapterSnapshots: async () => maliciousSnapshots,
+      createExportLog: async (data: any) => ({ id: 'log-1', ...data, createdAt: new Date() }),
+      isDesignatedNationalOfficer: async () => true,
+    });
+
+    const ctx = makeCtx({
+      _params: { associationId: 'assoc-1' },
+      _body: { snapshotMonth: '2026-05', format: 'csv' },
+    });
+    const response = await exportNationalDashboard(ctx);
+
+    expect(response.status).toBe(200);
+    const csv = response.body.data.csv;
+    // Formula characters must be neutralized with a leading single-quote
+    expect(csv).not.toContain(',=CMD');
+    expect(csv).not.toContain(',+cmd');
+    expect(csv).toContain("'=CMD");
+    expect(csv).toContain("'+cmd");
+  });
+
+  test('[EF-M14-004] CSV output handles values with commas correctly', async () => {
+    const snapshotsWithCommas = [
+      {
+        ...chapterSnapshots[0],
+        chapterName: 'Metro Manila, NCR Chapter',
+      },
+    ];
+
+    stubRepo(DashboardRepository, {
+      listChapterSnapshots: async () => snapshotsWithCommas,
+      createExportLog: async (data: any) => ({ id: 'log-1', ...data, createdAt: new Date() }),
+      isDesignatedNationalOfficer: async () => true,
+    });
+
+    const ctx = makeCtx({
+      _params: { associationId: 'assoc-1' },
+      _body: { snapshotMonth: '2026-05', format: 'csv' },
+    });
+    const response = await exportNationalDashboard(ctx);
+
+    expect(response.status).toBe(200);
+    const csv = response.body.data.csv;
+    // Values with commas must be quoted
+    expect(csv).toContain('"Metro Manila, NCR Chapter"');
+  });
 });

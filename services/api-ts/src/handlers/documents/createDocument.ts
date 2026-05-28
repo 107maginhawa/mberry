@@ -1,9 +1,10 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateDocumentBody } from '@/generated/openapi/validators';
-import { UnauthorizedError } from '@/core/errors';
+import { UnauthorizedError, ValidationError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
 import { auditAction } from '@/utils/audit';
+import { isBlockedDocumentFile } from '@/utils/sanitize';
 
 /**
  * createDocument
@@ -21,6 +22,12 @@ export async function createDocument(
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
   const body = ctx.req.valid('json');
+
+  // EF-M11-004: Block SVG uploads (XSS vector — script tags, event handlers, foreignObject)
+  if (isBlockedDocumentFile(body.fileName, body.mimeType)) {
+    throw new ValidationError('SVG files are not allowed due to security risks. Please convert to PNG or PDF.');
+  }
+
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new DocumentRepository(db, logger);

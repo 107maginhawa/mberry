@@ -3,6 +3,7 @@ import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { DashboardRepository } from '../platformadmin/repos/dashboard.repo';
 import { auditAction } from '@/utils/audit';
+import { escapeCsvValue } from '@/utils/sanitize';
 import type { Session } from '@/types/auth';
 
 function snapshotsToCsv(snapshots: Record<string, any>[]): string {
@@ -16,10 +17,7 @@ function snapshotsToCsv(snapshots: Record<string, any>[]): string {
   ];
 
   const rows = snapshots.map(s =>
-    headers.map(h => {
-      const val = s[h];
-      return typeof val === 'string' && val.includes(',') ? `"${val}"` : String(val ?? '');
-    }).join(',')
+    headers.map(h => escapeCsvValue(s[h])).join(',')
   );
 
   return [headers.join(','), ...rows].join('\n');

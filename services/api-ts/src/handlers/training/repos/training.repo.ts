@@ -1,5 +1,6 @@
 import { eq, and, desc, like, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { escapeLikePattern } from '@/utils/sanitize';
 import {
   trainings,
   trainingEnrollments,
@@ -34,7 +35,7 @@ export class TrainingRepository {
       eq(trainings.organizationId, orgId),
     ];
     if (filters?.status) conditions.push(eq(trainings.status, filters.status as Training['status']));
-    if (filters?.search) conditions.push(like(trainings.title, `%${filters.search}%`));
+    if (filters?.search) conditions.push(like(trainings.title, `%${escapeLikePattern(filters.search)}%`));
 
     const [data, countResult] = await Promise.all([
       this.db

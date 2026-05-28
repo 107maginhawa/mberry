@@ -1,3 +1,4 @@
+import { createHmac } from 'crypto';
 import type { ValidatedContext } from '@/types/app';
 import type { JoinVideoCallBody, JoinVideoCallParams } from '@/generated/openapi/validators';
 import type { DatabaseInstance } from '@/core/database';
@@ -126,10 +127,10 @@ export async function joinVideoCall(
     finalMessage = await messageRepo.updateVideoCallData(activeCall.id, {
       status: 'active',
       roomUrl: generateWebRTCRoomUrl(params.room, config.auth.baseUrl),
-      token: generateWebRTCToken(user.id, activeCall.id)
+      token: generateWebRTCToken(user.id, activeCall.id, config.auth.secret)
     });
   }
-  
+
   // Send notifications to other participants already in the call
   // Use finalMessage (updated data) instead of activeCall (stale data)
   const notifs = ctx.get('notifs');
@@ -182,7 +183,7 @@ export async function joinVideoCall(
   // Return WebRTC connection info
   const response: VideoCallJoinResponse = {
     roomUrl: finalMessage.videoCallData?.roomUrl || generateWebRTCRoomUrl(params.room, config.auth.baseUrl),
-    token: finalMessage.videoCallData?.token || generateWebRTCToken(user.id, activeCall.id),
+    token: finalMessage.videoCallData?.token || generateWebRTCToken(user.id, activeCall.id, config.auth.secret),
     callStatus: finalMessage.videoCallData?.status || 'active',
     participants: finalMessage.videoCallData?.participants || []
   };
@@ -203,16 +204,17 @@ function generateWebRTCRoomUrl(roomId: string, baseUrl: string): string {
 }
 
 /**
- * Generate authentication token for WebRTC signaling
+ * Generate HMAC-signed authentication token for WebRTC signaling.
  *
- * NOTE: The WebSocket signaling server expects the client's session token
- * via the Authorization header. Clients should use their existing session token
- * when connecting to the WebSocket URL.
+ * EF-M07: Replaced hardcoded sentinel with a cryptographically signed token
+ * that binds the user to the specific call. The WebSocket signaling server
+ * can verify the token by recomputing the HMAC with the same secret.
  *
- * Deferred: generate short-lived JWT for WebRTC — security hardening v1.2.0
+ * Token format: base64url(userId:callMessageId:timestamp).hmac-sha256-hex
  */
-function generateWebRTCToken(userId: string, callMessageId: string): string {
-  // Return placeholder - client should use their session token
-  // The WebSocket server validates via Authorization: Bearer <session-token>
-  return 'USE_SESSION_TOKEN'; // Sentinel value
+function generateWebRTCToken(userId: string, callMessageId: string, secret?: string): string {
+  const signingKey = secret || process.env['WEBRTC_TOKEN_SECRET'] || process.env['AUTH_SECRET'] || 'dev-fallback';
+  const payload = `${userId}:${callMessageId}:${Date.now()}`;
+  const signature = createHmac('sha256', signingKey).update(payload).digest('hex');
+  return `${Buffer.from(payload).toString('base64url')}.${signature}`;
 }

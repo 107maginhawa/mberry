@@ -6,6 +6,7 @@ import { eq, and, gte, like, sql, desc, type SQL } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { Logger } from '@/types/logger';
 import type { DatabaseInstance } from '@/core/database';
+import { escapeLikePattern } from '@/utils/sanitize';
 import {
   messageTemplates, messages, subscriptionTopics, personSubscriptions,
   announcements, announcementStats, savedSegments,
@@ -262,7 +263,7 @@ export class CommunicationsRepository {
   async list(orgId: string, filters?: { status?: string; search?: string; limit?: number; offset?: number }) {
     const conditions: SQL<unknown>[] = [eq(announcements.organizationId, orgId)];
     if (filters?.status) conditions.push(eq(announcements.status, filters.status as Announcement['status']));
-    if (filters?.search) conditions.push(like(announcements.title, `%${filters.search}%`));
+    if (filters?.search) conditions.push(like(announcements.title, `%${escapeLikePattern(filters.search)}%`));
 
     const [data, countResult] = await Promise.all([
       this.db.select().from(announcements)

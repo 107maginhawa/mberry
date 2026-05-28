@@ -1,5 +1,6 @@
 import { eq, and, desc, gte, lte, like, sql, inArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { escapeLikePattern } from '@/utils/sanitize';
 import {
   events,
   eventRegistrations,
@@ -39,7 +40,7 @@ export class EventsRepository {
       }
     }
     if (filters?.type) conditions.push(eq(events.eventType, filters.type as NonNullable<Event['eventType']>));
-    if (filters?.search) conditions.push(like(events.title, `%${filters.search}%`));
+    if (filters?.search) conditions.push(like(events.title, `%${escapeLikePattern(filters.search)}%`));
     if (filters?.from) conditions.push(gte(events.startDate, filters.from));
     if (filters?.to) conditions.push(lte(events.startDate, filters.to));
 
@@ -81,7 +82,7 @@ export class EventsRepository {
     if (filters?.eventType) conditions.push(eq(events.eventType, filters.eventType as NonNullable<Event['eventType']>));
     if (filters?.dateFrom) conditions.push(gte(events.startDate, filters.dateFrom));
     if (filters?.dateTo) conditions.push(lte(events.startDate, filters.dateTo));
-    if (filters?.search) conditions.push(like(events.title, `%${filters.search}%`));
+    if (filters?.search) conditions.push(like(events.title, `%${escapeLikePattern(filters.search)}%`));
     if (filters?.pricing === 'free') conditions.push(eq(events.registrationFee, 0));
     if (filters?.pricing === 'paid') conditions.push(sql`${events.registrationFee} > 0`);
 

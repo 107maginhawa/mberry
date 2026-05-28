@@ -1,5 +1,6 @@
 import { eq, and, desc, gte, lte, like, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { escapeLikePattern } from '@/utils/sanitize';
 import { NotFoundError, ValidationError } from '@/core/errors';
 import {
   jobPostings,
@@ -36,7 +37,7 @@ export class JobPostingRepository {
       conditions.push(eq(jobPostings.type, filters.type as JobPosting['type']));
     }
     if (filters?.search) {
-      conditions.push(like(jobPostings.title, `%${filters.search}%`));
+      conditions.push(like(jobPostings.title, `%${escapeLikePattern(filters.search)}%`));
     }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;

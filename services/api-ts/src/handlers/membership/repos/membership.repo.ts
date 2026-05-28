@@ -1,5 +1,6 @@
 import { eq, and, or, ilike, desc, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { escapeLikePattern } from '@/utils/sanitize';
 import {
   memberships,
   membershipCategories,
@@ -46,10 +47,11 @@ export class MembershipRepository {
     if (filters.status) conditions.push(eq(memberships.status, filters.status as Membership['status']));
     if (filters.categoryId) conditions.push(eq(memberships.categoryId, filters.categoryId));
     if (filters.search) {
+      const escaped = escapeLikePattern(filters.search);
       conditions.push(or(
-        ilike(persons.firstName, `%${filters.search}%`),
-        ilike(persons.lastName, `%${filters.search}%`),
-        ilike(memberships.memberNumber, `%${filters.search}%`),
+        ilike(persons.firstName, `%${escaped}%`),
+        ilike(persons.lastName, `%${escaped}%`),
+        ilike(memberships.memberNumber, `%${escaped}%`),
       )!);
     }
 
@@ -115,10 +117,11 @@ export class MembershipRepository {
     if (filters.status) conditions.push(eq(memberships.status, filters.status as Membership['status']));
     if (filters.categoryId) conditions.push(eq(memberships.categoryId, filters.categoryId));
     if (filters.search) {
+      const escaped = escapeLikePattern(filters.search);
       conditions.push(or(
-        ilike(persons.firstName, `%${filters.search}%`),
-        ilike(persons.lastName, `%${filters.search}%`),
-        ilike(memberships.memberNumber, `%${filters.search}%`),
+        ilike(persons.firstName, `%${escaped}%`),
+        ilike(persons.lastName, `%${escaped}%`),
+        ilike(memberships.memberNumber, `%${escaped}%`),
       )!);
     }
 

@@ -122,6 +122,8 @@ export function createAuth(
       requireEmailVerification: config.auth.requireEmailVerification ?? true,
       minPasswordLength: 8,
       maxPasswordLength: 128,
+      // EF-M02: Revoke all sessions when password is reset via email link
+      revokeSessionsOnPasswordReset: true,
       sendResetPassword: async ({ user, url, token }) => {
         try {
           await emailService.queueEmail({
@@ -509,6 +511,56 @@ export function createAuth(
  */
 export function registerRoutes(app: App): void {
   const { auth, database, logger } = app;
+
+  // EF-M02: Force session revocation on password change
+  // Better-Auth's changePassword endpoint accepts revokeOtherSessions as a body param.
+  // We intercept to force it true so clients cannot opt out of session invalidation.
+  app.post('/auth/change-password', async (c) => {
+    try {
+      const body = await c.req.json();
+      // Force revokeOtherSessions regardless of what the client sent
+      const patchedBody = { ...body, revokeOtherSessions: true };
+
+      // Clone the request with the patched body
+      const patchedRequest = new Request(c.req.raw.url, {
+        method: c.req.raw.method,
+        headers: c.req.raw.headers,
+        body: JSON.stringify(patchedBody),
+      });
+
+      const result = await auth.handler(patchedRequest);
+
+      // Audit the password change session revocation
+      if (result.ok) {
+        const session = c.get('session');
+        const userId = session?.userId;
+        if (userId) {
+          try {
+            const { AuditRepository } = await import('@/handlers/audit/repos/audit.repo');
+            const auditRepo = new AuditRepository(database, logger);
+            await auditRepo.logEvent({
+              eventType: 'security',
+              category: 'security',
+              action: 'update',
+              outcome: 'success',
+              user: userId,
+              userType: 'client',
+              resourceType: 'user',
+              resource: userId,
+              description: 'Password changed — other sessions revoked (EF-M02)',
+            });
+          } catch (auditErr) {
+            logger?.warn({ error: auditErr }, 'EF-M02: Failed to audit password change');
+          }
+        }
+      }
+
+      return result;
+    } catch {
+      // If body parsing fails, pass through to Better-Auth for its own error handling
+      return auth.handler(c.req.raw);
+    }
+  });
 
   // M3-R7: Block platform admins from disabling 2FA
   // Must be registered BEFORE the catch-all /auth/* handler
