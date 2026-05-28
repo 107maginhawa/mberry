@@ -309,7 +309,14 @@ export function createApp(config: Config): App {
   app.get('/admin/committees/:id', getCommittee as any);
 
   // Breach notification endpoints — DPA 2012 / M3-R11 (under /admin/* auth middleware)
-  app.post('/admin/breaches', reportBreach as any);
+  const reportBreachBody = zValidator('json', z.object({
+    organizationId: z.string().uuid().optional(),
+    discoveredAt: z.string().min(1),
+    description: z.string().min(1).max(5000),
+    affectedRecordsCount: z.number().int().nonnegative().optional(),
+    dataCategories: z.array(z.enum(['personal', 'sensitive_personal', 'health', 'financial', 'biometric', 'genetic', 'criminal'])).optional(),
+  }), validationErrorHandler);
+  app.post('/admin/breaches', reportBreachBody, reportBreach as any);
   app.get('/admin/breaches', listBreaches as any);
   app.put('/admin/breaches/:id', updateBreachStatus as any);
 
