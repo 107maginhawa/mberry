@@ -34,7 +34,7 @@ export async function processCreditIssue(context: JobContext): Promise<CreditIss
       activityName: payload.activityName ?? sourceLabels[payload.sourceType] ?? 'Credit award',
       activityDate: now, creditAmount: payload.creditAmount, cycleStart, cycleEnd,
       verificationStatus: 'verified', sourceType: payload.sourceType, sourceId: payload.sourceId,
-      cpdActivityType: payload.cpdActivityType as any, attestation: payload.attestation ?? null,
+      cpdActivityType: (payload.cpdActivityType ?? null) as typeof creditEntries.cpdActivityType.enumValues[number] | null, attestation: payload.attestation ?? null,
       status: 'active', category: payload.category ?? null,
     });
     logger.info({ sourceType: payload.sourceType, sourceId: payload.sourceId, personId: payload.personId }, 'credit.issue: created');

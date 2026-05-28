@@ -37,8 +37,9 @@ export async function updateOrganizationProfile(
       throw new ValidationError('SVG logos are not allowed — use PNG, JPEG, GIF, or WebP');
     }
   }
-  if ((body as any).logoMimeType && typeof (body as any).logoMimeType === 'string') {
-    const mime = ((body as any).logoMimeType as string).toLowerCase();
+  const bodyRecord = body as Record<string, unknown>;
+  if (bodyRecord['logoMimeType'] && typeof bodyRecord['logoMimeType'] === 'string') {
+    const mime = (bodyRecord['logoMimeType'] as string).toLowerCase();
     if (mime.includes('svg') || !ALLOWED_LOGO_MIME_PREFIXES.some(p => mime.startsWith(p))) {
       throw new ValidationError('Logo must be PNG, JPEG, GIF, or WebP format');
     }

@@ -44,7 +44,8 @@ export async function searchDirectory(
 
   // Batch-load trust signals (context-injectable for test isolation)
   const personIds = data.map(p => p.personId);
-  const loadTrustSignals = ((ctx as any).get('_batchLoadTrustSignals') as typeof batchLoadTrustSignals | undefined) ?? batchLoadTrustSignals;
+  // Test-injectable override for trust signals loader (uses unknown cast — ctx.var doesn't include test-only keys)
+  const loadTrustSignals = ((ctx as unknown as { get(k: string): unknown }).get('_batchLoadTrustSignals') as typeof batchLoadTrustSignals | undefined) ?? batchLoadTrustSignals;
   const trustMap = await loadTrustSignals(db, personIds, orgId!, isAdmin);
 
   const enrichedData = data.map(profile => ({

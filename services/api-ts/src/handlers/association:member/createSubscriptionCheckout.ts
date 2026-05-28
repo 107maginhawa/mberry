@@ -81,21 +81,20 @@ export async function createSubscriptionCheckout(
 		.where(eq(subscriptions.organizationId, orgId))
 		.limit(1);
 
-	const stripe = (billing as any)["ensureStripeInitialized"]
-		? (billing as any)["ensureStripeInitialized"]()
-		: null;
-
-	// Access raw Stripe SDK via the billing service's private method
-	// We need to create checkout sessions directly as billing.ts doesn't expose subscription checkout
-	const billingConfig = (billing as any)["config"] as
-		| { secretKey?: string; url?: string }
-		| undefined;
+	// Access billing service internals for Stripe checkout session creation.
+	// billing.ts doesn't expose subscription checkout — use typed accessor.
+	const billingInternal = billing as unknown as {
+		ensureStripeInitialized?: () => unknown;
+		config?: { secretKey?: string; url?: string };
+	};
+	const stripe = billingInternal.ensureStripeInitialized?.() ?? null;
+	const billingConfig = billingInternal.config;
 	if (!billingConfig?.secretKey) {
 		return ctx.json({ error: "Stripe is not configured" }, 503);
 	}
 
 	const stripeOptions: Stripe.StripeConfig = {
-		apiVersion: "2025-10-29.clover" as any,
+		apiVersion: "2025-10-29.clover" as Stripe.LatestApiVersion,
 		typescript: true,
 		timeout: 10000,
 	};

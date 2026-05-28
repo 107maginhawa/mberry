@@ -33,7 +33,7 @@ export async function awardManualCredit(ctx: Context): Promise<Response> {
   const cycleStart = new Date(asy, csm - 1, 1); const cycleEnd = new Date(asy + cly, csm - 1, 1);
 
   try {
-    const [entry] = await db.insert(creditEntries).values({ personId: body.personId, organizationId: orgId, type: 'manual', activityName: body.activityName, provider: body.provider ?? null, activityDate: ad, creditAmount: body.creditAmount, cycleStart, cycleEnd, supportingDocumentId: body.supportingDocumentId ?? null, category: body.category ?? null, verificationStatus: 'verified', sourceType: 'manual_award', sourceId: body.idempotencyKey, cpdActivityType: body.cpdActivityType as any ?? null, status: 'active', createdBy: session.user.id, updatedBy: session.user.id }).returning();
+    const [entry] = await db.insert(creditEntries).values({ personId: body.personId, organizationId: orgId, type: 'manual', activityName: body.activityName, provider: body.provider ?? null, activityDate: ad, creditAmount: body.creditAmount, cycleStart, cycleEnd, supportingDocumentId: body.supportingDocumentId ?? null, category: body.category ?? null, verificationStatus: 'verified', sourceType: 'manual_award', sourceId: body.idempotencyKey, cpdActivityType: (body.cpdActivityType ?? null) as typeof creditEntries.cpdActivityType.enumValues[number] | null, status: 'active', createdBy: session.user.id, updatedBy: session.user.id }).returning();
     domainEvents.emit('credit.adjusted', {
       creditEntryId: entry!.id,
       personId: body.personId,

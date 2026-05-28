@@ -60,8 +60,8 @@ export function registerDuesJobs(scheduler: JobScheduler): void {
 
   scheduler.registerDelayed('certificate.bulk_generate', 0, async (context: JobContext) => {
     const { generateCertificates } = await import('../../certificates/bulkIssueCertificates');
-    const data = context.data as any;
-    await generateCertificates(context.db, data, data.requestedBy);
+    const data = context.data as Parameters<typeof generateCertificates>[1];
+    await generateCertificates(context.db, data, (context.data as Record<string, unknown>)['requestedBy'] as string);
     context.logger.info({ count: data.personIds?.length, orgId: data.organizationId }, 'certificate.bulk_generate: done');
   });
 }

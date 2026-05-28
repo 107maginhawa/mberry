@@ -24,7 +24,7 @@ export async function upsertDuesGatewayConfig(
 
   const [result] = await db
     .insert(duesGatewayConfigs)
-    .values({ ...body, organizationId } as any) // structural: Drizzle insert type gap
+    .values({ ...body, organizationId } as unknown as typeof duesGatewayConfigs.$inferInsert)
     .onConflictDoUpdate({
       target: [duesGatewayConfigs.organizationId],
       set: { ...body, updatedAt: new Date() } as Record<string, unknown>,

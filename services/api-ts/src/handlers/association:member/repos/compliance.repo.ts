@@ -1,6 +1,15 @@
 import { sql } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 
+/** Extract rows from Drizzle execute() result — handles both {rows: [...]} and direct array formats. */
+function extractRows(result: unknown): Record<string, unknown>[] {
+  if (Array.isArray(result)) return result;
+  if (result && typeof result === 'object' && 'rows' in result && Array.isArray((result as { rows: unknown[] }).rows)) {
+    return (result as { rows: Record<string, unknown>[] }).rows;
+  }
+  return [];
+}
+
 export interface ComplianceStanding {
   personId: string; organizationId: string; totalCredits: number; generalCredits: number; majorCredits: number; sdlCredits: number; entryCount: number; requiredCredits: number; sdlCapPercent: number; compliancePercent: number; complianceStatus: 'compliant' | 'at_risk' | 'non_compliant'; lastCreditAt: Date | null;
 }
@@ -12,16 +21,16 @@ export class ComplianceRepository {
     let wc = sql`organization_id = ${organizationId}`;
     if (opts?.status) wc = sql`${wc} AND compliance_status = ${opts.status}`;
     const cr = await this.db.execute(sql`SELECT COUNT(*) as count FROM compliance_standings WHERE ${wc}`);
-    const total = Number((cr as any).rows?.[0]?.count ?? (cr as any)[0]?.count ?? 0);
+    const total = Number(extractRows(cr)[0]?.['count'] ?? 0);
     const rows = await this.db.execute(sql`SELECT * FROM compliance_standings WHERE ${wc} ORDER BY compliance_percent ASC LIMIT ${limit} OFFSET ${offset}`);
-    const data = ((rows as any).rows ?? (rows as unknown as any[])).map((r: any) => this.mapRow(r));
+    const data = extractRows(rows).map((r) => this.mapRow(r));
     return { data, total };
   }
   async getOrgSummary(organizationId: string) {
     const r = await this.db.execute(sql`SELECT COUNT(*) AS total_members, COUNT(*) FILTER (WHERE compliance_status='compliant') AS compliant, COUNT(*) FILTER (WHERE compliance_status='at_risk') AS at_risk, COUNT(*) FILTER (WHERE compliance_status='non_compliant') AS non_compliant FROM compliance_standings WHERE organization_id = ${organizationId}`);
-    const row = (r as any).rows?.[0] ?? (r as any)[0] ?? {};
-    const tm = Number(row.total_members ?? 0);
-    return { totalMembers: tm, compliant: Number(row.compliant ?? 0), atRisk: Number(row.at_risk ?? 0), nonCompliant: Number(row.non_compliant ?? 0), complianceRate: tm > 0 ? Math.round((Number(row.compliant ?? 0) / tm) * 100) : 0 };
+    const row = extractRows(r)[0] ?? {};
+    const tm = Number(row['total_members'] ?? 0);
+    return { totalMembers: tm, compliant: Number(row['compliant'] ?? 0), atRisk: Number(row['at_risk'] ?? 0), nonCompliant: Number(row['non_compliant'] ?? 0), complianceRate: tm > 0 ? Math.round((Number(row['compliant'] ?? 0) / tm) * 100) : 0 };
   }
   async refresh() { await this.db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY compliance_standings`); }
   private mapRow(row: any): ComplianceStanding {
