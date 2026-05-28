@@ -289,13 +289,16 @@ export function createApp(config: Config): App {
   app.get('/public/orgs', listPublicOrgs as any);
 
   // @hand-wired reason="HTML og:meta for social crawlers, not REST" wave="by-design"
-  app.get('/og/events/:slug', serveEventOgMeta as any);
+  const slugParam = zValidator('param', z.object({ slug: z.string().min(1).max(512) }), validationErrorHandler);
+  app.get('/og/events/:slug', slugParam, serveEventOgMeta as any);
 
   // @hand-wired reason="public credential lookup, no auth by design" wave="Wave-3a"
-  app.get('/association/member/credentials/lookup/:credentialNumber', lookupCredentialPublic as any);
+  const credentialNumberParam = zValidator('param', z.object({ credentialNumber: z.string().min(1).max(512) }), validationErrorHandler);
+  app.get('/association/member/credentials/lookup/:credentialNumber', credentialNumberParam, lookupCredentialPublic as any);
 
   // @hand-wired reason="public certificate verification, no auth by design" wave="Wave-2b"
-  app.get('/certificates/verify/:certificateNumber', verifyCertificatePublic as any);
+  const certificateNumberParam = zValidator('param', z.object({ certificateNumber: z.string().min(1).max(512) }), validationErrorHandler);
+  app.get('/certificates/verify/:certificateNumber', certificateNumberParam, verifyCertificatePublic as any);
 
   // Register auth routes
   registerAuthRoutes(app as App);
@@ -304,9 +307,11 @@ export function createApp(config: Config): App {
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
 
   // @hand-wired reason="national dashboard + cross-org committees, not in TypeSpec" wave="M4-DASHBOARD"
-  app.get('/admin/national-dashboard/:associationId', getNationalDashboard as any);
+  const assocIdParam = zValidator('param', z.object({ associationId: z.string().uuid() }), validationErrorHandler);
+  const uuidIdParam = zValidator('param', z.object({ id: z.string().uuid() }), validationErrorHandler);
+  app.get('/admin/national-dashboard/:associationId', assocIdParam, getNationalDashboard as any);
   app.get('/admin/committees', listAllCommittees as any);
-  app.get('/admin/committees/:id', getCommittee as any);
+  app.get('/admin/committees/:id', uuidIdParam, getCommittee as any);
 
   // @hand-wired reason="DPA 2012 breach notification, admin-only" wave="M3-R11"
   const reportBreachBody = zValidator('json', z.object({
@@ -318,14 +323,34 @@ export function createApp(config: Config): App {
   }), validationErrorHandler);
   app.post('/admin/breaches', reportBreachBody, reportBreach as any);
   app.get('/admin/breaches', listBreaches as any);
-  app.put('/admin/breaches/:id', updateBreachStatus as any);
+  const breachStatusBody = zValidator('json', z.object({
+    status: z.enum(['investigating', 'notified', 'resolved']),
+    npcReferenceNumber: z.string().min(1).max(255).optional(),
+  }), validationErrorHandler);
+  app.put('/admin/breaches/:id', uuidIdParam, breachStatusBody, updateBreachStatus as any);
 
   // @hand-wired reason="support ticket SLA system, not in TypeSpec" wave="M3-R12"
-  app.post('/support/tickets', authMiddleware(), createTicket as any);
+  const createTicketBody = zValidator('json', z.object({
+    subject: z.string().min(1).max(500),
+    description: z.string().min(1).max(10000),
+    category: z.enum(['general', 'billing', 'technical', 'account', 'compliance']).optional(),
+    priority: z.enum(['critical', 'high', 'standard', 'low']).optional(),
+    organizationId: z.string().uuid().optional(),
+  }), validationErrorHandler);
+  app.post('/support/tickets', authMiddleware(), createTicketBody, createTicket as any);
   app.get('/admin/tickets', listTickets as any);
-  app.get('/admin/tickets/:id', getTicket as any);
-  app.put('/admin/tickets/:id', updateTicketStatus as any);
-  app.post('/admin/tickets/:id/comments', addTicketComment as any);
+  app.get('/admin/tickets/:id', uuidIdParam, getTicket as any);
+  const ticketStatusBody = zValidator('json', z.object({
+    status: z.string().min(1).max(50),
+    assignedTo: z.string().uuid().optional(),
+    resolution: z.string().max(5000).optional(),
+  }).passthrough(), validationErrorHandler);
+  app.put('/admin/tickets/:id', uuidIdParam, ticketStatusBody, updateTicketStatus as any);
+  const ticketCommentBody = zValidator('json', z.object({
+    comment: z.string().min(1).max(5000),
+    internal: z.boolean().optional(),
+  }).passthrough(), validationErrorHandler);
+  app.post('/admin/tickets/:id/comments', uuidIdParam, ticketCommentBody, addTicketComment as any);
 
   // @hand-wired reason="public payment token, must precede auth middleware" wave="by-design"
   const paymentTokenParam = zValidator('param', z.object({ token: z.string().min(1).max(512) }), validationErrorHandler);
@@ -333,8 +358,13 @@ export function createApp(config: Config): App {
   app.post('/pay/:token/checkout', paymentTokenParam, checkoutPaymentToken as any);
 
   // @hand-wired reason="RFC 8058 unsubscribe, must precede /email/* auth" wave="by-design"
-  app.get('/email/unsubscribe', unsubscribeEmail);
-  app.post('/email/unsubscribe', unsubscribeEmail);
+  const unsubQuery = zValidator('query', z.object({
+    token: z.string().min(1).max(512),
+    email: z.string().email().max(320),
+    orgId: z.string().uuid(),
+  }), validationErrorHandler);
+  app.get('/email/unsubscribe', unsubQuery, unsubscribeEmail);
+  app.post('/email/unsubscribe', unsubQuery, unsubscribeEmail);
 
   // Org-context for email routes (admin creates templates per-org)
   // Auth middleware sets user/session; orgContextMiddleware sets orgId from request
@@ -423,74 +453,129 @@ export function createApp(config: Config): App {
   // (see generated/openapi/routes.ts)
 
   // @hand-wired reason="officer payment link generation, not in TypeSpec" wave="pre-migration"
-  app.post('/org/:organizationId/payments/send-link', authMiddleware(), orgContextMiddleware(), sendPaymentLink as any);
+  const orgIdParam = zValidator('param', z.object({ organizationId: z.string().uuid() }), validationErrorHandler);
+  app.post('/org/:organizationId/payments/send-link', orgIdParam, authMiddleware(), orgContextMiddleware(), sendPaymentLink as any);
   // @hand-wired reason="receipt PDF download, not in TypeSpec" wave="Cycle-8"
-  app.get('/org/:organizationId/payments/:paymentId/receipt', authMiddleware(), downloadReceipt as any);
+  const receiptParams = zValidator('param', z.object({ organizationId: z.string().uuid(), paymentId: z.string().uuid() }), validationErrorHandler);
+  app.get('/org/:organizationId/payments/:paymentId/receipt', receiptParams, authMiddleware(), downloadReceipt as any);
 
   // @hand-wired reason="national dashboard CSV/JSON export, admin-only" wave="Cycle-8"
-  app.post('/admin/national-dashboard/:associationId/export', authMiddleware(), exportNationalDashboard as any);
+  app.post('/admin/national-dashboard/:associationId/export', assocIdParam, authMiddleware(), exportNationalDashboard as any);
 
   // PRC Accredited Providers — MIGRATED: now in generated routes.ts with authMiddleware.
   // Wildcard app.use('/accredited-providers/*', authMiddleware()) at line 362 provides
   // defense-in-depth. Hand-wired duplicates removed (Cycle 8 auth guard fix).
 
   // @hand-wired reason="training lifecycle transitions, hand-wired CRUD" wave="pre-migration"
-  app.post('/organizations/:organizationId/training/:id/complete', authMiddleware(), completeTraining as any);
-  app.put('/org/:organizationId/trainings/:id/publish', authMiddleware(), publishTraining as any);
+  const orgAndIdParams = zValidator('param', z.object({ organizationId: z.string().uuid(), id: z.string().uuid() }), validationErrorHandler);
+  app.post('/organizations/:organizationId/training/:id/complete', orgAndIdParams, authMiddleware(), completeTraining as any);
+  app.put('/org/:organizationId/trainings/:id/publish', orgAndIdParams, authMiddleware(), publishTraining as any);
 
   // @hand-wired reason="elections module entirely hand-wired, TypeSpec deferred" wave="pre-migration"
-  app.patch('/association/member/elections/:electionId/nominees/:nomineeId', authMiddleware(), updateNomineeStatus as any);
-  app.delete('/association/member/elections/:id', authMiddleware(), deleteElection as any);
+  const nomineeParams = zValidator('param', z.object({ electionId: z.string().uuid(), nomineeId: z.string().uuid() }), validationErrorHandler);
+  const nomineeStatusBody = zValidator('json', z.object({
+    status: z.enum(['accepted', 'declined']),
+  }), validationErrorHandler);
+  app.patch('/association/member/elections/:electionId/nominees/:nomineeId', nomineeParams, nomineeStatusBody, authMiddleware(), updateNomineeStatus as any);
+  app.delete('/association/member/elections/:id', uuidIdParam, authMiddleware(), deleteElection as any);
 
   // @hand-wired reason="ID card + bulk certificate issue, not in TypeSpec" wave="Wave-2b"
-  app.get('/persons/me/id-card/:orgId', authMiddleware(), getMyIdCard as any);
-  app.get('/persons/me/id-card/:orgId/pdf', authMiddleware(), getMyIdCardPdf as any);
-  app.post('/certificates/bulk-issue', authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
+  const orgIdShortParam = zValidator('param', z.object({ orgId: z.string().uuid() }), validationErrorHandler);
+  app.get('/persons/me/id-card/:orgId', orgIdShortParam, authMiddleware(), getMyIdCard as any);
+  app.get('/persons/me/id-card/:orgId/pdf', orgIdShortParam, authMiddleware(), getMyIdCardPdf as any);
+  const bulkIssueBody = zValidator('json', z.object({
+    personIds: z.array(z.string().uuid()).min(1).max(500),
+    templateId: z.string().uuid().optional(),
+  }).passthrough(), validationErrorHandler);
+  app.post('/certificates/bulk-issue', bulkIssueBody, authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
 
   // @hand-wired reason="special assessments CRUD, not in TypeSpec" wave="Wave-1"
-  app.post('/association/member/special-assessments', authMiddleware(), createSpecialAssessment as any);
-  app.get('/association/member/special-assessments/:orgId', authMiddleware(), listSpecialAssessments as any);
-  app.put('/association/member/special-assessments/:id', authMiddleware(), updateSpecialAssessment as any);
-  app.delete('/association/member/special-assessments/:id', authMiddleware(), deleteSpecialAssessment as any);
-  app.post('/association/member/special-assessments/:id/apply', authMiddleware(), applySpecialAssessment as any);
-  app.get('/association/member/special-assessments/:id/collection', authMiddleware(), getSpecialAssessmentCollection as any);
+  const saCreateBody = zValidator('json', z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().max(2000).nullish(),
+    amount: z.number().positive(),
+    currency: z.string().length(3).optional(),
+    dueDate: z.string().min(1),
+    fundId: z.string().uuid().nullish(),
+    appliesTo: z.enum(['all', 'active', 'custom']).optional(),
+  }), validationErrorHandler);
+  const saUpdateBody = zValidator('json', z.object({
+    name: z.string().min(1).max(255).optional(),
+    description: z.string().max(2000).nullish(),
+    amount: z.number().positive().optional(),
+    currency: z.string().length(3).optional(),
+    dueDate: z.string().min(1).optional(),
+    fundId: z.string().uuid().nullish(),
+    appliesTo: z.enum(['all', 'active', 'custom']).optional(),
+  }), validationErrorHandler);
+  app.post('/association/member/special-assessments', authMiddleware(), saCreateBody, createSpecialAssessment as any);
+  app.get('/association/member/special-assessments/:orgId', orgIdShortParam, authMiddleware(), listSpecialAssessments as any);
+  app.put('/association/member/special-assessments/:id', uuidIdParam, authMiddleware(), saUpdateBody, updateSpecialAssessment as any);
+  app.delete('/association/member/special-assessments/:id', uuidIdParam, authMiddleware(), deleteSpecialAssessment as any);
+  app.post('/association/member/special-assessments/:id/apply', uuidIdParam, authMiddleware(), applySpecialAssessment as any);
+  app.get('/association/member/special-assessments/:id/collection', uuidIdParam, authMiddleware(), getSpecialAssessmentCollection as any);
 
   // @hand-wired reason="officer transition checklist handover, not in TypeSpec" wave="M4-R3"
-  app.post('/association/member/org/:organizationId/officers/:termId/transition', authMiddleware(), orgContextMiddleware(), transitionOfficerTerm as any);
+  const transitionParams = zValidator('param', z.object({ organizationId: z.string().uuid(), termId: z.string().uuid() }), validationErrorHandler);
+  const transitionBody = zValidator('json', z.object({
+    successorPersonId: z.string().uuid(),
+    checklistItems: z.array(z.string().min(1).max(500)).optional(),
+  }), validationErrorHandler);
+  app.post('/association/member/org/:organizationId/officers/:termId/transition', transitionParams, transitionBody, authMiddleware(), orgContextMiddleware(), transitionOfficerTerm as any);
 
   // @hand-wired reason="org-wide dashboard, not in TypeSpec" wave="M4-DASHBOARD"
-  app.get('/association/member/org/:organizationId/dashboard', authMiddleware(), getOrgDashboard as any);
+  app.get('/association/member/org/:organizationId/dashboard', orgIdParam, authMiddleware(), getOrgDashboard as any);
 
   // @hand-wired reason="admin pricing tier CRUD, not in TypeSpec" wave="UJ-M03"
+  const pricingBody = zValidator('json', z.object({
+    name: z.string().min(1).max(255),
+    amount: z.number().nonnegative(),
+    currency: z.string().length(3).optional(),
+    interval: z.enum(['monthly', 'quarterly', 'annually']).optional(),
+    features: z.array(z.string()).optional(),
+  }).passthrough(), validationErrorHandler);
+  const tierIdParam = zValidator('param', z.object({ tierId: z.string().uuid() }), validationErrorHandler);
   app.get('/admin/pricing', listPricingTiers as any);
-  app.post('/admin/pricing', createPricingTier as any);
-  app.put('/admin/pricing/:tierId', updatePricingTier as any);
+  app.post('/admin/pricing', pricingBody, createPricingTier as any);
+  app.put('/admin/pricing/:tierId', tierIdParam, pricingBody, updatePricingTier as any);
 
   // @hand-wired reason="admin subscription management, not in TypeSpec" wave="UJ-M03"
   app.get('/admin/subscriptions', listSubscriptions as any);
-  app.get('/admin/subscriptions/:id', getSubscription as any);
-  app.put('/admin/subscriptions/:id/cancel', cancelSubscription as any);
+  app.get('/admin/subscriptions/:id', uuidIdParam, getSubscription as any);
+  app.put('/admin/subscriptions/:id/cancel', uuidIdParam, cancelSubscription as any);
 
   // @hand-wired reason="org-facing subscription routes, not in TypeSpec" wave="UJ-M03"
-  app.get('/association/member/org/:organizationId/subscription', getMySubscription as any);
-  app.post('/association/member/org/:organizationId/subscription/upgrade', upgradeSubscription as any);
-  app.post('/association/member/org/:organizationId/subscription/checkout', createSubscriptionCheckout as any);
+  app.get('/association/member/org/:organizationId/subscription', orgIdParam, getMySubscription as any);
+  const subscriptionBody = zValidator('json', z.object({
+    tierId: z.string().uuid(),
+  }).passthrough(), validationErrorHandler);
+  app.post('/association/member/org/:organizationId/subscription/upgrade', orgIdParam, subscriptionBody, upgradeSubscription as any);
+  app.post('/association/member/org/:organizationId/subscription/checkout', orgIdParam, subscriptionBody, createSubscriptionCheckout as any);
 
   // @hand-wired reason="saved segment CRUD, not in TypeSpec" wave="Wave-4b"
-  app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
+  const segmentBody = zValidator('json', z.object({
+    name: z.string().min(1).max(255),
+    filters: z.record(z.string(), z.unknown()).optional(),
+  }).passthrough(), validationErrorHandler);
+  app.post('/communications/segments', authMiddleware(), segmentBody, createSavedSegment as any);
   app.get('/communications/segments', authMiddleware(), listSavedSegments as any);
-  app.delete('/communications/segments/:id', authMiddleware(), deleteSavedSegment as any);
+  app.delete('/communications/segments/:id', uuidIdParam, authMiddleware(), deleteSavedSegment as any);
 
   // @hand-wired reason="announcement scheduling + stats, not in TypeSpec" wave="Cycle-8"
-  app.post('/communications/announcements/:id/schedule', authMiddleware(), scheduleAnnouncement as any);
-  app.get('/communications/announcements/:id/stats', authMiddleware(), getAnnouncementStats as any);
+  const scheduleBody = zValidator('json', z.object({
+    scheduledAt: z.string().min(1),
+  }).passthrough(), validationErrorHandler);
+  app.post('/communications/announcements/:id/schedule', uuidIdParam, authMiddleware(), scheduleBody, scheduleAnnouncement as any);
+  app.get('/communications/announcements/:id/stats', uuidIdParam, authMiddleware(), getAnnouncementStats as any);
 
   // @hand-wired reason="event registration cancel, org-scoped path per API_CONTRACTS" wave="pre-migration"
-  app.delete('/org/:orgId/events/:eventId/register/:registrationId', authMiddleware(), cancelRegistration as any);
+  const cancelRegParams = zValidator('param', z.object({ orgId: z.string().uuid(), eventId: z.string().uuid(), registrationId: z.string().uuid() }), validationErrorHandler);
+  app.delete('/org/:orgId/events/:eventId/register/:registrationId', cancelRegParams, authMiddleware(), cancelRegistration as any);
 
   // @hand-wired reason="survey export/clone/analytics, not in TypeSpec" wave="pre-migration"
-  app.get('/surveys/:survey/export', authMiddleware(), orgContextMiddleware(), exportSurveyResponses as any);
-  app.post('/surveys/:survey/clone', authMiddleware(), orgContextMiddleware(), cloneSurvey as any);
+  const surveyParam = zValidator('param', z.object({ survey: z.string().uuid() }), validationErrorHandler);
+  app.get('/surveys/:survey/export', surveyParam, authMiddleware(), orgContextMiddleware(), exportSurveyResponses as any);
+  app.post('/surveys/:survey/clone', surveyParam, authMiddleware(), orgContextMiddleware(), cloneSurvey as any);
   app.get('/surveys/analytics/nps-trends', authMiddleware(), orgContextMiddleware(), getNpsTrends as any);
   app.delete('/surveys/my-responses', authMiddleware(), deleteMemberResponses as any);
 
