@@ -93,6 +93,23 @@ describe('getElection', () => {
     expect(response.body.data.tallies).toEqual([]);
   });
 
+  test('throws UnauthorizedError when no session', async () => {
+    mocks = stubRepo(ElectionsRepository, {
+      get: async () => fakeElection,
+      listNominees: async () => fakeNominees,
+      getVoterCount: async () => 0,
+      getVoteTallies: async () => [],
+    });
+
+    const ctx = makeCtx({
+      user: null,
+      session: null,
+      _params: { id: 'election-1' },
+    });
+
+    await expect(getElection(ctx)).rejects.toThrow();
+  });
+
   test('throws NotFoundError when election does not exist', async () => {
     mocks = stubRepo(ElectionsRepository, {
       get: async () => undefined,

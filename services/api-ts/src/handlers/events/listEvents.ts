@@ -1,8 +1,11 @@
 import type { Context } from 'hono';
+import { UnauthorizedError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
 
 export async function listEvents(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
+  const session = ctx.get('session');
+  if (!session) throw new UnauthorizedError();
   const orgId = ctx.req.param('organizationId')!;
   const repo = new EventsRepository(db);
   const result = await repo.list(orgId, {

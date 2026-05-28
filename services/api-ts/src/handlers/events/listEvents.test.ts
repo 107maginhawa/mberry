@@ -76,9 +76,7 @@ describe('listEvents', () => {
     expect(capturedFilters.offset).toBe(5);
   });
 
-  test('no session does not crash (no auth required in handler)', async () => {
-    // listEvents does not access session — it only reads orgId from param.
-    // Auth middleware is responsible for gating. Handler itself won't crash.
+  test('throws UnauthorizedError when no session', async () => {
     mocks = stubRepo(EventsRepository, {
       list: async () => ({ data: [], total: 0 }),
     });
@@ -89,7 +87,6 @@ describe('listEvents', () => {
       _params: { organizationId: 'org-1' },
     });
 
-    const response = await listEvents(ctx);
-    expect(response.status).toBe(200);
+    await expect(listEvents(ctx)).rejects.toThrow();
   });
 });

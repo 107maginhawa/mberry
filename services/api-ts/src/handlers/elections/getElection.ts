@@ -1,11 +1,13 @@
 import type { Context } from 'hono';
 import { eq } from 'drizzle-orm';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
 import { persons } from '../person/repos/person.schema';
 
 export async function getElection(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
+  const session = ctx.get('session');
+  if (!session) throw new UnauthorizedError();
   const id = ctx.req.param('id')!;
   const repo = new ElectionsRepository(db);
   const election = await repo.get(id);
