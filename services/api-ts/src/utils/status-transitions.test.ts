@@ -234,16 +234,24 @@ describe('MEMBERSHIP_VALID_TRANSITIONS', () => {
     expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'suspended', 'active')).toBe(true);
   });
 
-  it('any state → removed is valid', () => {
+  it('any non-terminal state → removed is valid', () => {
     expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'active', 'removed')).toBe(true);
     expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'suspended', 'removed')).toBe(true);
     expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'gracePeriod', 'removed')).toBe(true);
     expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'pendingPayment', 'removed')).toBe(true);
   });
 
-  it('removed is terminal', () => {
-    expect(MEMBERSHIP_VALID_TRANSITIONS['removed']).toEqual([]);
-    expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'removed', 'active')).toBe(false);
+  it('active → resigned/deceased/expelled are valid (LIF-04)', () => {
+    expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'active', 'resigned')).toBe(true);
+    expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'active', 'deceased')).toBe(true);
+    expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'active', 'expelled')).toBe(true);
+  });
+
+  it('all terminal states have no transitions', () => {
+    for (const terminal of ['removed', 'resigned', 'deceased', 'expelled']) {
+      expect(MEMBERSHIP_VALID_TRANSITIONS[terminal]).toEqual([]);
+      expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, terminal, 'active')).toBe(false);
+    }
   });
 
   it('pendingPayment → suspended is invalid (must activate first)', () => {
@@ -252,6 +260,18 @@ describe('MEMBERSHIP_VALID_TRANSITIONS', () => {
 
   it('pendingPayment → gracePeriod is invalid', () => {
     expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'pendingPayment', 'gracePeriod')).toBe(false);
+  });
+
+  it('lapsed → active is valid (renewal)', () => {
+    expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'lapsed', 'active')).toBe(true);
+  });
+
+  it('expired → removed is valid', () => {
+    expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'expired', 'removed')).toBe(true);
+  });
+
+  it('expired → active is invalid (must go through admin)', () => {
+    expect(isValidTransition(MEMBERSHIP_VALID_TRANSITIONS, 'expired', 'active')).toBe(false);
   });
 });
 

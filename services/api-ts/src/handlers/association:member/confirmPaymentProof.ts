@@ -62,7 +62,7 @@ export async function confirmPaymentProof(
   });
 
   // Update payment status to confirmed
-  const updatedPayment = await repo.updatePaymentStatus(payment.id, 'confirmed', {
+  const updatedPayment = await repo.updatePaymentStatus(payment.id, payment.status, 'confirmed', {
     recordedBy: session.user.id,
     membershipExtendedFrom: settlement.membershipExtendedFrom,
     membershipExtendedTo: settlement.membershipExtendedTo,

@@ -3,20 +3,10 @@ import type { DatabaseInstance } from '@/core/database';
 import { memberships } from '../../association:member/repos/membership.schema';
 import { duesInvoices } from './dues.schema';
 import { persons } from '../../person/repos/person.schema';
+import { assertValidTransition, DUES_PAYMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
-/** Valid dues payment status transitions — used by handlers for guard logic. */
-export const VALID_PAYMENT_TRANSITIONS: Record<string, string[]> = {
-  pending: ['completed', 'failed', 'expired'],
-  submitted: ['underReview', 'confirmed', 'rejected'],
-  underReview: ['confirmed', 'rejected'],
-  confirmed: ['completed', 'refunded', 'partiallyRefunded'],
-  completed: ['refunded', 'partiallyRefunded'],
-  partiallyRefunded: ['refunded'],
-  failed: ['pending'],       // retry
-  rejected: ['pending'],     // resubmit
-  refunded: [],              // terminal
-  expired: [],               // terminal
-};
+/** @deprecated Use DUES_PAYMENT_VALID_TRANSITIONS from @/utils/status-transitions instead. */
+export const VALID_PAYMENT_TRANSITIONS = DUES_PAYMENT_VALID_TRANSITIONS;
 import {
   duesOrgConfigs,
   duesCategoryOverrides,
@@ -184,10 +174,11 @@ export class DuesRepository {
     return result!;
   }
 
-  async updatePaymentStatus(id: string, status: string, extra?: Partial<DuesPayment>): Promise<DuesPayment> {
+  async updatePaymentStatus(id: string, currentStatus: string, newStatus: string, extra?: Partial<DuesPayment>): Promise<DuesPayment> {
+    assertValidTransition(DUES_PAYMENT_VALID_TRANSITIONS, currentStatus, newStatus, 'dues payment');
     const [result] = await this.db
       .update(duesPayments)
-      .set({ status: status as DuesPayment['status'], ...extra, updatedAt: new Date() })
+      .set({ status: newStatus as DuesPayment['status'], ...extra, updatedAt: new Date() })
       .where(eq(duesPayments.id, id))
       .returning();
     return result!;

@@ -63,7 +63,7 @@ export async function refundDuesPayment(
     const newRefundedAmount = (payment.refundedAmount ?? 0) + refundAmount;
     const newStatus = newRefundedAmount >= payment.amount ? 'refunded' : 'partiallyRefunded';
 
-    const updatedPayment = await txRepo.updatePaymentStatus(paymentId, newStatus, {
+    const updatedPayment = await txRepo.updatePaymentStatus(paymentId, payment.status, newStatus, {
       refundedAmount: newRefundedAmount,
       refundReason: bodyRecord['reason'] as string,
     } as Record<string, unknown>);

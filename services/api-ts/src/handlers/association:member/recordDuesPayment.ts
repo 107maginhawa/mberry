@@ -102,7 +102,7 @@ export async function recordDuesPayment(
 
     // Update payment with extension dates
     if (settle.membershipExtendedTo) {
-      await txRepo.updatePaymentStatus(pay.id, 'completed', {
+      await txRepo.updatePaymentStatus(pay.id, pay.status, 'completed', {
         membershipExtendedFrom: settle.membershipExtendedFrom,
         membershipExtendedTo: settle.membershipExtendedTo,
       } as Partial<DuesPayment>);

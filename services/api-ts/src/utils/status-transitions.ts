@@ -67,10 +67,15 @@ export function assertValidTransition(
 
 export const MEMBERSHIP_VALID_TRANSITIONS: Record<string, string[]> = {
   pendingPayment: ['active', 'removed'],
-  active: ['gracePeriod', 'suspended', 'removed'],
-  gracePeriod: ['active', 'suspended', 'removed'],
-  suspended: ['active', 'removed'],
-  removed: [],  // terminal
+  active: ['gracePeriod', 'lapsed', 'suspended', 'removed', 'resigned', 'deceased', 'expelled'],
+  gracePeriod: ['active', 'lapsed', 'suspended', 'removed', 'resigned', 'deceased', 'expelled'],
+  lapsed: ['active', 'suspended', 'removed', 'resigned', 'deceased', 'expelled'],
+  expired: ['removed', 'resigned', 'deceased', 'expelled'],
+  suspended: ['active', 'removed', 'resigned', 'deceased', 'expelled'],
+  removed: [],     // terminal
+  resigned: [],    // terminal
+  deceased: [],    // terminal
+  expelled: [],    // terminal
 };
 
 // ─── Dues Payments (centralized — replaces per-repo copy) ───────────

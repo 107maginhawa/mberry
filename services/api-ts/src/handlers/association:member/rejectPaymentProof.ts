@@ -49,7 +49,7 @@ export async function rejectPaymentProof(
     );
   }
 
-  const updatedPayment = await repo.updatePaymentStatus(payment.id, 'rejected', {
+  const updatedPayment = await repo.updatePaymentStatus(payment.id, payment.status, 'rejected', {
     rejectionReason: body.reason,
     recordedBy: session.user.id,
   } as Partial<DuesPayment>);

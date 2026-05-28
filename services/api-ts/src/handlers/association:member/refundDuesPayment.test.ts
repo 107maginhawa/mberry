@@ -94,7 +94,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
       getPayment: async () => ({ ...fakePayment }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async (allocs: any[]) => { capturedReversals = allocs; },
-      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
         ...fakePayment, status, ...extra,
       }),
     });
@@ -137,7 +137,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
       }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
-      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
         ...fakePayment, status, ...extra,
       }),
     });
@@ -170,7 +170,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
       getPayment: async () => ({ ...fakePayment, amount: 5000 }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async (allocs: any[]) => { capturedReversals = allocs; },
-      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
         ...fakePayment, status, ...extra,
       }),
     });
@@ -211,7 +211,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
       }),
       getFundAllocations: async () => [],
       createFundAllocations: async () => {},
-      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
         ...fakePayment, status, ...extra,
       }),
     });
@@ -257,7 +257,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
       getPayment: async () => ({ ...fakePayment }),
       getFundAllocations: async () => [],
       createFundAllocations: async () => {},
-      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
         ...fakePayment, status, ...extra,
       }),
     });
@@ -311,7 +311,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
       getPayment: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
-      updatePaymentStatus: async (_id: string, status: string, extra: any) => {
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {
         capturedStatus = status;
         return { ...fakePayment, status, ...extra };
       },
@@ -338,7 +338,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
       getPayment: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
-      updatePaymentStatus: async (_id: string, status: string, extra: any) => {
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {
         capturedStatus = status;
         return { ...fakePayment, status, ...extra };
       },
@@ -380,7 +380,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
       getPayment: async () => ({ ...fakePayment }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
-      updatePaymentStatus: async (_id: string, status: string, extra: any) => ({
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
         ...fakePayment, status, ...extra,
       }),
     });

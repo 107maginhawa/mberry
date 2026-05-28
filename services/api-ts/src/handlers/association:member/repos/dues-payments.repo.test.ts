@@ -483,7 +483,7 @@ describe('DuesRepository.updatePaymentStatus', () => {
     const db = makeDb({ updateRow: updated });
     const repo = safeRepo(db as any);
 
-    const result = await repo.updatePaymentStatus('pay-1', 'refunded');
+    const result = await repo.updatePaymentStatus('pay-1', 'completed', 'refunded');
     expect(result.status).toBe('refunded');
   });
 
@@ -504,13 +504,42 @@ describe('DuesRepository.updatePaymentStatus', () => {
     };
 
     const repo = safeRepo(db);
-    const result = await repo.updatePaymentStatus('pay-1', 'refunded', {
+    const result = await repo.updatePaymentStatus('pay-1', 'completed', 'refunded', {
       refundedAmount: 5000,
     } as any);
 
     expect(result.refundedAmount).toBe(5000);
     expect(capturedData.refundedAmount).toBe(5000);
     expect(capturedData.updatedAt).toBeInstanceOf(Date);
+  });
+
+  test('throws ConflictError for invalid transition', () => {
+    const db = makeDb({ updateRow: makePayment() });
+    const repo = safeRepo(db as any);
+
+    // pending → refunded is invalid (must complete first)
+    expect(
+      repo.updatePaymentStatus('pay-1', 'pending', 'refunded')
+    ).rejects.toThrow(/Cannot transition/);
+  });
+
+  test('throws ConflictError from terminal state', () => {
+    const db = makeDb({ updateRow: makePayment() });
+    const repo = safeRepo(db as any);
+
+    // refunded is terminal
+    expect(
+      repo.updatePaymentStatus('pay-1', 'refunded', 'pending')
+    ).rejects.toThrow(/terminal/);
+  });
+
+  test('allows valid transition submitted → confirmed', async () => {
+    const updated = makePayment({ status: 'confirmed' });
+    const db = makeDb({ updateRow: updated });
+    const repo = safeRepo(db as any);
+
+    const result = await repo.updatePaymentStatus('pay-1', 'submitted', 'confirmed');
+    expect(result.status).toBe('confirmed');
   });
 });
 
