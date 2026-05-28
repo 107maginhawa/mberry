@@ -1,16 +1,12 @@
 import { describe, test, expect, mock } from 'bun:test';
 import { createProcessPayment } from './processStripePayment';
 
-// Mock settle-payment module
+// Injected via DI (4th param) — no mock.module needed, avoids cross-file pollution
 const mockSettlePayment = mock(() => Promise.resolve({
   fundAllocations: [{ fundName: 'general', amount: 5000 }],
   membershipExtendedFrom: '2026-01-01',
   membershipExtendedTo: '2027-01-01',
-}));
-
-mock.module('../../association:member/utils/settle-payment', () => ({
-  settlePayment: mockSettlePayment,
-}));
+})) as any;
 
 function createMockBilling() {
   return {
@@ -47,7 +43,7 @@ describe('createProcessPayment', () => {
     const billing = createMockBilling();
     const logger = createMockLogger();
 
-    const processPayment = createProcessPayment(billing, mockDb, logger);
+    const processPayment = createProcessPayment(billing, mockDb, logger, mockSettlePayment);
 
     const result = await processPayment({
       id: 'pi_test_123',
@@ -77,7 +73,7 @@ describe('createProcessPayment', () => {
     const billing = createMockBilling();
     const logger = createMockLogger();
 
-    const processPayment = createProcessPayment(billing, mockDb, logger);
+    const processPayment = createProcessPayment(billing, mockDb, logger, mockSettlePayment);
 
     const result = await processPayment({
       id: 'pi_test_456',
@@ -98,7 +94,7 @@ describe('createProcessPayment', () => {
     const billing = createMockBilling();
     const logger = createMockLogger();
 
-    const processPayment = createProcessPayment(billing, mockDb, logger);
+    const processPayment = createProcessPayment(billing, mockDb, logger, mockSettlePayment);
 
     await expect(
       processPayment({ id: 'pi_no_meta', status: 'succeeded', amount: 100 }),
@@ -109,7 +105,7 @@ describe('createProcessPayment', () => {
     const billing = createMockBilling();
     const logger = createMockLogger();
 
-    const processPayment = createProcessPayment(billing, mockDb, logger);
+    const processPayment = createProcessPayment(billing, mockDb, logger, mockSettlePayment);
 
     await expect(
       processPayment({
@@ -125,7 +121,7 @@ describe('createProcessPayment', () => {
     const billing = createMockBilling();
     const logger = createMockLogger();
 
-    const processPayment = createProcessPayment(billing, mockDb, logger);
+    const processPayment = createProcessPayment(billing, mockDb, logger, mockSettlePayment);
 
     await expect(
       processPayment({ status: 'succeeded', metadata: { orgId: 'o', personId: 'p' } }),
@@ -137,7 +133,7 @@ describe('createProcessPayment', () => {
     const logger = createMockLogger();
     mockSettlePayment.mockImplementationOnce(() => Promise.reject(new Error('DB connection failed')));
 
-    const processPayment = createProcessPayment(billing, mockDb, logger);
+    const processPayment = createProcessPayment(billing, mockDb, logger, mockSettlePayment);
 
     await expect(
       processPayment({

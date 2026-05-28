@@ -15,10 +15,9 @@ mock.module('./jobs/webhookRetryProcessor', () => ({
   BACKOFF_SCHEDULE_MS: [60000, 300000, 900000, 3600000],
 }));
 
-// Mock settle-payment to prevent actual DB calls
-mock.module('./jobs/processStripePayment', () => ({
-  createProcessPayment: () => mock(() => Promise.resolve({ success: true })),
-}));
+// Note: createProcessPayment is called inside the handler but handleIncomingWebhook
+// is mocked above, so createProcessPayment's callback never actually executes.
+// No mock.module needed — avoids cross-file module pollution.
 
 function createMockBilling(shouldVerify = true) {
   return {

@@ -8,7 +8,7 @@
 import type { BillingService } from '@/core/billing';
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from 'pino';
-import { settlePayment } from '../../association:member/utils/settle-payment';
+import { settlePayment as defaultSettlePayment } from '../../association:member/utils/settle-payment';
 
 /**
  * Creates a processPayment callback bound to the given dependencies.
@@ -18,11 +18,14 @@ import { settlePayment } from '../../association:member/utils/settle-payment';
  * - `payment_intent.requires_capture` — capture via Stripe first, then settle
  *
  * Payload shape follows Stripe's `data.object` for PaymentIntent events.
+ *
+ * @param settle - Injectable for testing. Defaults to real settlePayment.
  */
 export function createProcessPayment(
   billing: BillingService,
   db: DatabaseInstance,
   logger: Logger,
+  settle: typeof defaultSettlePayment = defaultSettlePayment,
 ): (payload: Record<string, unknown>) => Promise<{ success: boolean }> {
   return async (payload: Record<string, unknown>): Promise<{ success: boolean }> => {
     // The payload is the Stripe event's data.object (a PaymentIntent)
@@ -66,7 +69,7 @@ export function createProcessPayment(
     }
 
     // Settle the payment in our database (fund allocation + membership extension)
-    await settlePayment({
+    await settle({
       db,
       orgId,
       personId,
