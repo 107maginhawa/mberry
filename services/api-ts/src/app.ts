@@ -4,6 +4,7 @@
  */
 
 import { Hono } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
 import type { Variables, App } from '@/types/app';
 import type { Config } from '@/core/config';
 
@@ -251,6 +252,12 @@ export function createApp(config: Config): App {
 
   // CORS - Required early for preflight
   app.use('*', createCorsMiddleware(config, logger));
+
+  // Body size limits — prevent large payload DoS
+  app.use('*', bodyLimit({ maxSize: 1 * 1024 * 1024, onError: (c) => c.json({ error: 'Payload too large', code: 'PAYLOAD_TOO_LARGE', maxSize: '1MB' }, 413) }));
+  // Upload routes get higher limit (10MB)
+  app.use('/storage/*', bodyLimit({ maxSize: 10 * 1024 * 1024, onError: (c) => c.json({ error: 'Payload too large', code: 'PAYLOAD_TOO_LARGE', maxSize: '10MB' }, 413) }));
+  app.use('/documents/*', bodyLimit({ maxSize: 10 * 1024 * 1024, onError: (c) => c.json({ error: 'Payload too large', code: 'PAYLOAD_TOO_LARGE', maxSize: '10MB' }, 413) }));
 
   // P1-5: Global rate limiting for custom endpoints (auth routes handled by Better-Auth)
   app.use('*', createRateLimiter());
