@@ -1,13 +1,24 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { SubscriptionTopicRepository } from './repos/communication.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { createSubscriptionTopic } from './createSubscriptionTopic';
 
 mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
 
 describe('createSubscriptionTopic', () => {
-  beforeEach(() => { restoreRepo(SubscriptionTopicRepository); });
-  afterEach(() => { restoreRepo(SubscriptionTopicRepository); });
+  beforeEach(() => {
+    restoreRepo(SubscriptionTopicRepository);
+    restoreRepo(OfficerTermRepository);
+    // Handler requires president/secretary via requirePosition()
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+  });
+  afterEach(() => {
+    restoreRepo(SubscriptionTopicRepository);
+    restoreRepo(OfficerTermRepository);
+  });
 
   test('returns 401 when unauthenticated', async () => {
     const ctx = makeCtx({ user: null, session: null });
