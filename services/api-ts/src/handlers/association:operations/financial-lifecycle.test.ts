@@ -162,7 +162,7 @@ describe('publishTraining — lifecycle gate', () => {
     });
     const { publishTraining } = await import('./publishTraining');
     const ctx = makeCtx({ _params: { trainingId: 'tr-1' } });
-    await expect(publishTraining(ctx)).rejects.toThrow('Only draft trainings can be published');
+    await expect(publishTraining(ctx)).rejects.toThrow(/Cannot transition training/);
   });
 
   test('publishes draft training and returns 200', async () => {

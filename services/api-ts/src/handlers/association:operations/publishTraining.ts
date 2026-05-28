@@ -1,12 +1,13 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { PublishTrainingParams } from '@/generated/openapi/validators';
-import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { assertValidTransition, TRAINING_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 /**
  * publishTraining
@@ -31,9 +32,7 @@ export async function publishTraining(
   const existing = await repo.findOneById(params.trainingId);
   if (!existing) throw new NotFoundError('Training not found');
 
-  if (existing.status !== 'draft') {
-    throw new BusinessLogicError('Only draft trainings can be published', 'INVALID_STATUS');
-  }
+  assertValidTransition(TRAINING_VALID_TRANSITIONS, existing.status, 'published', 'training');
 
   const published = await repo.publish(params.trainingId);
 
