@@ -393,6 +393,20 @@
       "when": 1779922786228,
       "tag": "0055_tough_hairball",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1779944343470,
+      "tag": "0056_polite_terrax",
+      "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1779969629420,
+      "tag": "0057_smart_bushwacker",
+      "breakpoints": true
     }
   ]
 }
