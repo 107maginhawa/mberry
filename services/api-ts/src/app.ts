@@ -95,8 +95,7 @@ import { deleteElection } from '@/handlers/elections/deleteElection';
 import { unsubscribeEmail } from '@/handlers/email/unsubscribeEmail';
 import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 
-// Saved Segments — hand-wired CRUD (Wave 4β Lane C)
-import { createSavedSegment, listSavedSegments, deleteSavedSegment } from '@/handlers/communication/savedSegments';
+// Saved Segments — now in generated routes (Phase 35)
 // Communications: schedule + stats (hand-wired, Cycle 8)
 import { scheduleAnnouncement } from '@/handlers/communication/scheduleAnnouncement';
 import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementStats';
@@ -115,8 +114,7 @@ import { deleteMemberResponses } from '@/handlers/surveys/deleteMemberResponses'
 
 // completeEvent now served via generated TypeSpec route (was hand-wired, duplicate removed)
 
-// One-tap payment token: public validate + checkout, officer send-link
-import { sendPaymentLink } from '@/handlers/dues/sendPaymentLink';
+// One-tap payment token: public validate + checkout (sendPaymentLink now in generated routes)
 import { validatePaymentToken } from '@/handlers/dues/validatePaymentToken';
 import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
 
@@ -135,10 +133,7 @@ import { getTicket } from '@/handlers/platformadmin/getTicket';
 import { updateTicketStatus } from '@/handlers/platformadmin/updateTicketStatus';
 import { addTicketComment } from '@/handlers/platformadmin/addTicketComment';
 
-// Platform admin: national dashboard + cross-org committee list (dark handlers → now wired)
-import { getNationalDashboard } from '@/handlers/platformadmin/getNationalDashboard';
-import { listAllCommittees } from '@/handlers/platformadmin/listAllCommittees';
-import { getCommittee } from '@/handlers/association:operations/getCommittee';
+// getNationalDashboard, listAllCommittees, getCommittee — served via generated routes (Phase 35)
 
 // OG meta route for social sharing crawlers (WhatsApp, Facebook, Twitter)
 import { serveEventOgMeta } from '@/handlers/events/serveEventOgMeta';
@@ -158,16 +153,10 @@ import { awardManualCredit } from '@/handlers/association:member/awardManualCred
 import { getComplianceReport } from '@/handlers/association:member/getComplianceReport';
 import { refreshCompliance } from '@/handlers/association:member/refreshCompliance';
 import { getMyCredits } from '@/handlers/person/getMyCredits';
-import { bulkIssueCertificates } from '@/handlers/certificates/bulkIssueCertificates';
+// bulkIssueCertificates — now in generated routes (Phase 35)
 import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
 
-// Wave 1 Financial: Special Assessments CRUD (T8)
-import { createSpecialAssessment } from '@/handlers/association:member/createSpecialAssessment';
-import { listSpecialAssessments } from '@/handlers/association:member/listSpecialAssessments';
-import { updateSpecialAssessment } from '@/handlers/association:member/updateSpecialAssessment';
-import { deleteSpecialAssessment } from '@/handlers/association:member/deleteSpecialAssessment';
-import { applySpecialAssessment } from '@/handlers/association:member/applySpecialAssessment';
-import { getSpecialAssessmentCollection } from '@/handlers/association:member/getSpecialAssessmentCollection';
+// Special Assessments — now in generated routes (Phase 35)
 
 // Officer transition — hand-wired (M4-R3 checklist-based handover, not in TypeSpec)
 import { transitionOfficerTerm } from '@/handlers/association:member/transitionOfficerTerm';
@@ -306,12 +295,9 @@ export function createApp(config: Config): App {
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
 
-  // @hand-wired reason="national dashboard + cross-org committees, not in TypeSpec" wave="M4-DASHBOARD"
+  // getNationalDashboard, listAllCommittees, getCommittee — migrated to generated routes (Phase 35)
   const assocIdParam = zValidator('param', z.object({ associationId: z.string().uuid() }), validationErrorHandler);
   const uuidIdParam = zValidator('param', z.object({ id: z.string().uuid() }), validationErrorHandler);
-  app.get('/admin/national-dashboard/:associationId', assocIdParam, getNationalDashboard as unknown as Handler);
-  app.get('/admin/committees', listAllCommittees as unknown as Handler);
-  app.get('/admin/committees/:id', uuidIdParam, getCommittee as unknown as Handler);
 
   // @hand-wired reason="DPA 2012 breach notification, admin-only" wave="M3-R11"
   const reportBreachBody = zValidator('json', z.object({
@@ -423,7 +409,7 @@ export function createApp(config: Config): App {
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
 
   // ──────────────────────────────────────────────────────────────────────────
-  // PRE-MIGRATION ROUTES — 33 hand-wired routes not in TypeSpec
+  // HAND-WIRED ROUTES — remaining routes not served via generated OpenAPI routes
   // See ROADMAP.md "TypeSpec Migration Backlog" for full inventory.
   //
   // BY DESIGN (9) — middleware ordering or public-before-auth requirements:
@@ -431,12 +417,11 @@ export function createApp(config: Config): App {
   //   /certificates/verify/:num, /pay/:token/* (2),
   //   /email/unsubscribe (GET+POST), /email/suppressions
   //
-  // PRE-MIGRATION (14) — should be TypeSpec, migrate when touching module:
-  //   /admin/* (3), /org/:id/payments/send-link,
-  //   /certificates/bulk-issue, /special-assessments/* (6), /segments/* (3)
-  //
-  // MIGRATED TO GENERATED (Cycle 8): accredited-providers (4), cpd-config (2),
-  //   credits/manual, compliance (2), persons/me/credits — 10 routes removed
+  // ALL PRE-MIGRATION ROUTES MIGRATED (Cycle 8 + Phase 35):
+  //   Cycle 8: accredited-providers (4), cpd-config (2),
+  //     credits/manual, compliance (2), persons/me/credits — 10 routes
+  //   Phase 35: admin/* (3), send-link, special-assessments (6),
+  //     bulk-issue, segments (3) — 14 routes
   //
   // HANDLER CONSOLIDATION STATUS (Wave 4):
   //   m05 membership/: query-rich repo (JOINs, search) — complementary to
@@ -452,9 +437,8 @@ export function createApp(config: Config): App {
   // completeEvent — removed hand-wired duplicate; now served via generated TypeSpec route
   // (see generated/openapi/routes.ts)
 
-  // @hand-wired reason="officer payment link generation, not in TypeSpec" wave="pre-migration"
+  // sendPaymentLink — migrated to generated routes (Phase 35)
   const orgIdParam = zValidator('param', z.object({ organizationId: z.string().uuid() }), validationErrorHandler);
-  app.post('/org/:organizationId/payments/send-link', orgIdParam, authMiddleware(), orgContextMiddleware(), sendPaymentLink as unknown as Handler);
   // @hand-wired reason="receipt PDF download, not in TypeSpec" wave="Cycle-8"
   const receiptParams = zValidator('param', z.object({ organizationId: z.string().uuid(), paymentId: z.string().uuid() }), validationErrorHandler);
   app.get('/org/:organizationId/payments/:paymentId/receipt', receiptParams, authMiddleware(), downloadReceipt as unknown as Handler);
@@ -483,37 +467,9 @@ export function createApp(config: Config): App {
   const orgIdShortParam = zValidator('param', z.object({ orgId: z.string().uuid() }), validationErrorHandler);
   app.get('/persons/me/id-card/:orgId', orgIdShortParam, authMiddleware(), getMyIdCard as unknown as Handler);
   app.get('/persons/me/id-card/:orgId/pdf', orgIdShortParam, authMiddleware(), getMyIdCardPdf as unknown as Handler);
-  const bulkIssueBody = zValidator('json', z.object({
-    personIds: z.array(z.string().uuid()).min(1).max(500),
-    templateId: z.string().uuid().optional(),
-  }).passthrough(), validationErrorHandler);
-  app.post('/certificates/bulk-issue', bulkIssueBody, authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as unknown as Handler);
+  // bulkIssueCertificates — migrated to generated routes (Phase 35)
 
-  // @hand-wired reason="special assessments CRUD, not in TypeSpec" wave="Wave-1"
-  const saCreateBody = zValidator('json', z.object({
-    name: z.string().min(1).max(255),
-    description: z.string().max(2000).nullish(),
-    amount: z.number().positive(),
-    currency: z.string().length(3).optional(),
-    dueDate: z.string().min(1),
-    fundId: z.string().uuid().nullish(),
-    appliesTo: z.enum(['all', 'active', 'custom']).optional(),
-  }), validationErrorHandler);
-  const saUpdateBody = zValidator('json', z.object({
-    name: z.string().min(1).max(255).optional(),
-    description: z.string().max(2000).nullish(),
-    amount: z.number().positive().optional(),
-    currency: z.string().length(3).optional(),
-    dueDate: z.string().min(1).optional(),
-    fundId: z.string().uuid().nullish(),
-    appliesTo: z.enum(['all', 'active', 'custom']).optional(),
-  }), validationErrorHandler);
-  app.post('/association/member/special-assessments', authMiddleware(), saCreateBody, createSpecialAssessment as unknown as Handler);
-  app.get('/association/member/special-assessments/:orgId', orgIdShortParam, authMiddleware(), listSpecialAssessments as unknown as Handler);
-  app.put('/association/member/special-assessments/:id', uuidIdParam, authMiddleware(), saUpdateBody, updateSpecialAssessment as unknown as Handler);
-  app.delete('/association/member/special-assessments/:id', uuidIdParam, authMiddleware(), deleteSpecialAssessment as unknown as Handler);
-  app.post('/association/member/special-assessments/:id/apply', uuidIdParam, authMiddleware(), applySpecialAssessment as unknown as Handler);
-  app.get('/association/member/special-assessments/:id/collection', uuidIdParam, authMiddleware(), getSpecialAssessmentCollection as unknown as Handler);
+  // special-assessments CRUD — migrated to generated routes (Phase 35)
 
   // @hand-wired reason="officer transition checklist handover, not in TypeSpec" wave="M4-R3"
   const transitionParams = zValidator('param', z.object({ organizationId: z.string().uuid(), termId: z.string().uuid() }), validationErrorHandler);
@@ -552,14 +508,7 @@ export function createApp(config: Config): App {
   app.post('/association/member/org/:organizationId/subscription/upgrade', orgIdParam, subscriptionBody, upgradeSubscription as unknown as Handler);
   app.post('/association/member/org/:organizationId/subscription/checkout', orgIdParam, subscriptionBody, createSubscriptionCheckout as unknown as Handler);
 
-  // @hand-wired reason="saved segment CRUD, not in TypeSpec" wave="Wave-4b"
-  const segmentBody = zValidator('json', z.object({
-    name: z.string().min(1).max(255),
-    filters: z.record(z.string(), z.unknown()).optional(),
-  }).passthrough(), validationErrorHandler);
-  app.post('/communications/segments', authMiddleware(), segmentBody, createSavedSegment as unknown as Handler);
-  app.get('/communications/segments', authMiddleware(), listSavedSegments as unknown as Handler);
-  app.delete('/communications/segments/:id', uuidIdParam, authMiddleware(), deleteSavedSegment as unknown as Handler);
+  // savedSegments CRUD — migrated to generated routes (Phase 35)
 
   // @hand-wired reason="announcement scheduling + stats, not in TypeSpec" wave="Cycle-8"
   const scheduleBody = zValidator('json', z.object({
