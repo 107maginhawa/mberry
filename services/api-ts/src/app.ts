@@ -135,10 +135,7 @@ import { getTicket } from '@/handlers/platformadmin/getTicket';
 import { updateTicketStatus } from '@/handlers/platformadmin/updateTicketStatus';
 import { addTicketComment } from '@/handlers/platformadmin/addTicketComment';
 
-// Platform admin: national dashboard + cross-org committee list (dark handlers → now wired)
-import { getNationalDashboard } from '@/handlers/platformadmin/getNationalDashboard';
-import { listAllCommittees } from '@/handlers/platformadmin/listAllCommittees';
-import { getCommittee } from '@/handlers/association:operations/getCommittee';
+// getNationalDashboard, listAllCommittees, getCommittee — served via generated routes (Phase 35)
 
 // OG meta route for social sharing crawlers (WhatsApp, Facebook, Twitter)
 import { serveEventOgMeta } from '@/handlers/events/serveEventOgMeta';
@@ -306,12 +303,9 @@ export function createApp(config: Config): App {
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
 
-  // @hand-wired reason="national dashboard + cross-org committees, not in TypeSpec" wave="M4-DASHBOARD"
+  // getNationalDashboard, listAllCommittees, getCommittee — migrated to generated routes (Phase 35)
   const assocIdParam = zValidator('param', z.object({ associationId: z.string().uuid() }), validationErrorHandler);
   const uuidIdParam = zValidator('param', z.object({ id: z.string().uuid() }), validationErrorHandler);
-  app.get('/admin/national-dashboard/:associationId', assocIdParam, getNationalDashboard as unknown as Handler);
-  app.get('/admin/committees', listAllCommittees as unknown as Handler);
-  app.get('/admin/committees/:id', uuidIdParam, getCommittee as unknown as Handler);
 
   // @hand-wired reason="DPA 2012 breach notification, admin-only" wave="M3-R11"
   const reportBreachBody = zValidator('json', z.object({
