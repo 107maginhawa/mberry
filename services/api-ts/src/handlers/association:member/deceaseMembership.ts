@@ -4,6 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { DeceaseMembershipBody, DeceaseMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
+import { withComputedStatus } from './utils/membership-status-middleware';
 import type { Membership } from './repos/membership.schema';
 import { duesInvoices } from './repos/dues.schema';
 import { auditAction } from '@/utils/audit';
@@ -30,8 +31,9 @@ export async function deceaseMembership(
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+  const enriched = withComputedStatus(membership);
 
-  if (TERMINAL_STATUSES.includes(membership.status)) {
+  if (TERMINAL_STATUSES.includes(enriched.status)) {
     throw new BusinessLogicError(
       'Membership is already in a terminal state.',
       'ALREADY_TERMINAL',

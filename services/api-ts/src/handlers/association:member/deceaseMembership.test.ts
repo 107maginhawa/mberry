@@ -7,6 +7,8 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 
 // ─── Fixtures ───────────────────────────────────────────
 
+const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
 const fakeMembership = createFakeMembership({
   id: 'mem-1',
   personId: 'person-1',
@@ -15,17 +17,19 @@ const fakeMembership = createFakeMembership({
   removalReason: null,
   dateOfDeath: null,
   startDate: '2025-01-01',
-  duesExpiryDate: '2026-01-01',
+  duesExpiryDate: FUTURE_EXPIRY,
 });
 
 /** Fake DB that supports transactions and raw drizzle-style update chains */
-const makeInvoiceNoOp = () => ({
-  set: () => ({ where: async () => [] }),
+const makeUpdateChain = (rows: any[] = []) => ({
+  set: (_d: any) => makeUpdateChain(rows),
+  where: (_c: any) => makeUpdateChain(rows),
+  returning: async () => rows,
 });
 
 const txDb = {
   transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
-  update: () => makeInvoiceNoOp(),
+  update: (_table: any) => makeUpdateChain(),
 };
 
 // ─── Tests ──────────────────────────────────────────────
@@ -89,7 +93,7 @@ describe('deceaseMembership', () => {
 
   // Test 4: throws BusinessLogicError when membership already in terminal state
   test('throws BusinessLogicError when membership already resigned', async () => {
-    const resignedMembership = { ...fakeMembership, status: 'resigned' };
+    const resignedMembership = { ...fakeMembership, resignedAt: new Date('2025-01-01'), removedAt: null, suspendedAt: null };
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => resignedMembership,
     });
@@ -104,7 +108,7 @@ describe('deceaseMembership', () => {
   });
 
   test('throws BusinessLogicError when membership already deceased', async () => {
-    const deceasedMembership = { ...fakeMembership, status: 'deceased' };
+    const deceasedMembership = { ...fakeMembership, dateOfDeath: '2025-01-01', removedAt: null, suspendedAt: null };
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => deceasedMembership,
     });
@@ -119,7 +123,7 @@ describe('deceaseMembership', () => {
   });
 
   test('throws BusinessLogicError when membership already removed', async () => {
-    const removedMembership = { ...fakeMembership, status: 'removed' };
+    const removedMembership = { ...fakeMembership, removedAt: new Date('2025-01-01'), suspendedAt: null };
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => removedMembership,
     });

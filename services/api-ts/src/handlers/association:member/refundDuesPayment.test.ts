@@ -1,6 +1,6 @@
 // Business Rules: [BR-08]
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
-import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { makeCtx, makeMockDb, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDuesPayment as createFakeDuesPayment, fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { refundDuesPayment } from './refundDuesPayment';
 import { DuesRepository } from './repos/dues-payments.repo';
@@ -29,18 +29,36 @@ const fakeAllocations = [
   { id: 'alloc-3', paymentId: 'pay-1', fundId: 'fund-3', amount: 750, isReversal: false, organizationId: 'org-1' },
 ];
 
+const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
+
 const fakeMembership = createFakeMembership({
   id: 'mem-1',
   personId: 'person-1',
-  duesExpiryDate: '2026-06-30',
+  duesExpiryDate: FUTURE_EXPIRY,
   suspendedAt: null,
   removedAt: null,
 });
 
-/** Fake DB that passes tx through to callback (simulates transaction) */
-const txDb = {
-  transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
-};
+/** Fake DB supporting persistWithComputedStatus (db.update chain) + transactions */
+const txDb = makeMockDb();
+
+/**
+ * Capturing DB mock: intercepts db.update().set().where().returning() calls
+ * so tests can verify what was written (status, duesExpiryDate) by persistWithComputedStatus.
+ */
+function makeCapturingDb(onSet: (data: any) => void) {
+  const base = makeMockDb();
+  return {
+    ...base,
+    transaction: async (fn: any) => fn(makeCapturingDb(onSet)),
+    update: (_table: any) => ({
+      set: (data: any) => {
+        onSet(data);
+        return { where: (_c: any) => ({ returning: async () => [data] }) };
+      },
+    }),
+  };
+}
 
 // ─── Helpers ────────────────────────────────────────────
 
@@ -108,7 +126,8 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
   });
 
   test('full refund resets duesExpiryDate to pre-payment value', async () => {
-    let updatedMembership: any;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((data) => { capturedSetData = data; });
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({
@@ -127,23 +146,21 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
         ...fakeMembership,
         duesExpiryDate: '2026-06-30', // current (post-payment)
       }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedMembership = updates;
-        return fakeMembership;
-      },
+      updateOneById: async () => fakeMembership,
     });
 
     const ctx = makeCtx({
-      database: txDb,
+      database: capturingDb,
       _params: { paymentId: 'pay-1' },
       _body: {},
     });
 
     await refundDuesPayment(ctx);
 
+    // persistWithComputedStatus writes duesExpiryDate via db.update (not repo.updateOneById)
     // Should reset to pre-payment expiry (membershipExtendedFrom)
-    expect(updatedMembership).toBeDefined();
-    expect(updatedMembership.duesExpiryDate).toBe('2025-06-30');
+    expect(capturedSetData).toBeDefined();
+    expect(capturedSetData.duesExpiryDate).toBe('2025-06-30');
   });
 
   test('partial refund creates proportional reversal entries', async () => {
@@ -183,7 +200,8 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
   });
 
   test('refund recomputes membership status via computeMembershipStatus', async () => {
-    let updatedMembership: any;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((data) => { capturedSetData = data; });
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({
@@ -204,34 +222,35 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
         suspendedAt: null,
         removedAt: null,
       }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedMembership = updates;
-        return fakeMembership;
-      },
+      updateOneById: async () => fakeMembership,
     });
 
     const ctx = makeCtx({
-      database: txDb,
+      database: capturingDb,
       _params: { paymentId: 'pay-1' },
       _body: {},
     });
 
     await refundDuesPayment(ctx);
 
+    // persistWithComputedStatus writes duesExpiryDate + status via db.update (not repo.updateOneById)
     // Pre-payment expiry was 2024-01-01 (past) — after reversal should be lapsed
-    expect(updatedMembership).toBeDefined();
-    expect(updatedMembership.duesExpiryDate).toBe('2024-01-01');
-    expect(updatedMembership.status).toBe('lapsed');
+    expect(capturedSetData).toBeDefined();
+    expect(capturedSetData.duesExpiryDate).toBe('2024-01-01');
+    expect(capturedSetData.status).toBe('lapsed');
   });
 
   test('all operations wrapped in db.transaction()', async () => {
     let transactionCalled = false;
 
-    const txDbTracking = {
+    const txDbTracking: any = {
       transaction: async (fn: (tx: any) => Promise<any>) => {
         transactionCalled = true;
         return fn(txDbTracking);
       },
+      update: (_table: any) => ({
+        set: (data: any) => ({ where: (_c: any) => ({ returning: async () => [data] }) }),
+      }),
     };
 
     stubRepo(DuesRepository, {
@@ -342,11 +361,19 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
   test('rolls back all operations when membership update fails', async () => {
     let transactionCalled = false;
 
-    const txDbTracking = {
+    // DB that throws during update (simulates write failure triggering rollback)
+    const txDbTracking: any = {
       transaction: async (fn: (tx: any) => Promise<any>) => {
         transactionCalled = true;
         return fn(txDbTracking);
       },
+      update: (_table: any) => ({
+        set: (_data: any) => ({
+          where: (_c: any) => ({
+            returning: async () => { throw new Error('Membership update failed'); },
+          }),
+        }),
+      }),
     };
 
     stubRepo(DuesRepository, {
@@ -359,7 +386,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
     });
     stubRepo(MembershipRepository, {
       findMany: async () => [{ ...fakeMembership }],
-      updateOneById: async () => { throw new Error('Membership update failed'); },
+      updateOneById: async () => fakeMembership,
     });
 
     const ctx = makeCtx({

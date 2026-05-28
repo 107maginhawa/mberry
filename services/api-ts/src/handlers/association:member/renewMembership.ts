@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { RenewMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
+import { withComputedStatus, persistWithComputedStatus } from './utils/membership-status-middleware';
 import type { Membership } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 
@@ -24,11 +25,12 @@ export async function renewMembership(
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+  const enriched = withComputedStatus(membership);
 
   const renewableStatuses = ['active', 'gracePeriod', 'lapsed'];
-  if (!renewableStatuses.includes(membership.status)) {
+  if (!renewableStatuses.includes(enriched.status)) {
     throw new BusinessLogicError(
-      `Cannot renew a membership with status '${membership.status}'. Must be active, gracePeriod, or lapsed.`,
+      `Cannot renew a membership with status '${enriched.status}'. Must be active, gracePeriod, or lapsed.`,
       'MEMBERSHIP_NOT_RENEWABLE',
     );
   }
@@ -38,10 +40,9 @@ export async function renewMembership(
   currentExpiry.setFullYear(currentExpiry.getFullYear() + 1);
   const newExpiryDate = currentExpiry.toISOString().split('T')[0];
 
-  const updated = await repo.updateOneById(membershipId, {
+  const updated = await persistWithComputedStatus(db, membershipId, membership, {
     duesExpiryDate: newExpiryDate,
-    status: 'active',
-  } as Partial<Membership>);
+  });
 
   await auditAction(ctx, {
     action: 'renew',

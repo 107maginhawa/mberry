@@ -35,7 +35,7 @@ import { registerEmailJobs } from '@/handlers/email/jobs';
 import { registerNotifsJobs } from '@/handlers/notifs/jobs';
 import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
-import { registerDuesJobs } from '@/handlers/association:member/jobs';
+import { registerDuesJobs, registerStatusRecomputeJob } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs } from '@/handlers/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
@@ -522,6 +522,7 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerAuditJobs(jobs);
   registerBookingJobs(jobs, app.notifs);
   registerDuesJobs(jobs);
+  registerStatusRecomputeJob(jobs);
   registerPersonJobs(jobs);
   registerMembershipJobs(jobs, app.notifs);
   registerSurveyJobs(jobs, app.notifs);

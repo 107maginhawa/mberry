@@ -6,6 +6,29 @@ import { enroll } from './enroll';
 import { TrainingRepository } from './repos/training.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 
+// BR-01: membership mocks need flag fields for withComputedStatus to compute correctly
+const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+const YESTERDAY = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+const ACTIVE_MEMBERSHIP = {
+  status: 'active',
+  duesExpiryDate: FUTURE_EXPIRY,
+  suspendedAt: null, removedAt: null, dateOfDeath: null,
+  expelledAt: null, resignedAt: null, isPendingPayment: false, gracePeriodDays: 30,
+};
+const GRACE_MEMBERSHIP = {
+  status: 'gracePeriod',
+  duesExpiryDate: YESTERDAY,
+  suspendedAt: null, removedAt: null, dateOfDeath: null,
+  expelledAt: null, resignedAt: null, isPendingPayment: false, gracePeriodDays: 30,
+};
+const LAPSED_MEMBERSHIP = {
+  status: 'lapsed',
+  duesExpiryDate: '2020-01-01',
+  suspendedAt: null, removedAt: null, dateOfDeath: null,
+  expelledAt: null, resignedAt: null, isPendingPayment: false, gracePeriodDays: 30,
+};
+
 const fakeTraining = createFakeTraining({
   organizationId: 'org-1',
   title: 'CPD Seminar',
@@ -36,7 +59,7 @@ describe('enroll', () => {
       getEnrollmentCount: async () => 10,
       enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
     });
-    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ACTIVE_MEMBERSHIP });
 
     const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
@@ -52,7 +75,7 @@ describe('enroll', () => {
       getEnrollmentCount: async () => 20,
       enroll: async (data: any) => { capturedData = data; return { ...fakeEnrollment, ...data }; },
     });
-    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ACTIVE_MEMBERSHIP });
 
     const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
@@ -68,7 +91,7 @@ describe('enroll', () => {
       getEnrollmentCount: async () => 999,
       enroll: async (data: any) => { capturedData = data; return { ...fakeEnrollment, ...data }; },
     });
-    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ACTIVE_MEMBERSHIP });
 
     const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
@@ -131,7 +154,7 @@ describe('enroll', () => {
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
     });
-    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ACTIVE_MEMBERSHIP });
 
     const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
@@ -145,7 +168,7 @@ describe('enroll', () => {
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => ({ ...fakeEnrollment, ...data }),
     });
-    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ACTIVE_MEMBERSHIP });
 
     const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
@@ -159,7 +182,7 @@ describe('enroll', () => {
       getEnrollmentCount: async () => 10,
       enroll: async (data: any) => ({ ...fakeEnrollment, ...data, id: 'enroll-2' }),
     });
-    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'active' }) });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ACTIVE_MEMBERSHIP });
 
     const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     const response = await enroll(ctx);
@@ -175,7 +198,7 @@ describe('enroll', () => {
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => fakeEnrollment,
     });
-    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'gracePeriod' }) });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => GRACE_MEMBERSHIP });
 
     const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Active membership required');
@@ -188,7 +211,7 @@ describe('enroll', () => {
       getEnrollmentCount: async () => 0,
       enroll: async (data: any) => fakeEnrollment,
     });
-    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ status: 'suspended' }) });
+    const mm = stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ ...ACTIVE_MEMBERSHIP, status: 'suspended', suspendedAt: new Date('2025-01-01'), duesExpiryDate: FUTURE_EXPIRY }) });
 
     const ctx = makeCtx({ _params: { organizationId: 'org-1', id: 'training-1' } });
     await expect(enroll(ctx)).rejects.toThrow('Active membership required');

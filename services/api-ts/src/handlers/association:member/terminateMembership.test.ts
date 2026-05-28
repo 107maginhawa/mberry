@@ -7,6 +7,8 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 
 // ─── Fixtures ───────────────────────────────────────────
 
+const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
 const fakeMembership = createFakeMembership({
   id: 'mem-1',
   organizationId: 'tenant-1',
@@ -15,7 +17,7 @@ const fakeMembership = createFakeMembership({
   removedAt: null,
   terminationReason: null,
   startDate: '2025-01-01',
-  duesExpiryDate: '2026-01-01',
+  duesExpiryDate: FUTURE_EXPIRY,
 });
 
 // ─── Tests ──────────────────────────────────────────────
@@ -143,7 +145,7 @@ describe('terminateMembership', () => {
   // ─── [BR-03] Status guard: cannot terminate pending memberships ──
 
   test('[BR-03] throws BusinessLogicError when terminating pendingPayment membership', async () => {
-    const pendingMembership = { ...fakeMembership, status: 'pendingPayment' };
+    const pendingMembership = { ...fakeMembership, isPendingPayment: true, duesExpiryDate: null, suspendedAt: null, removedAt: null };
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => pendingMembership,
     });

@@ -5,6 +5,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { ResignMembershipBody, ResignMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
+import { withComputedStatus } from './utils/membership-status-middleware';
 import { duesInvoices } from './repos/dues.schema';
 import { auditAction } from '@/utils/audit';
 import { eq, and, notInArray } from 'drizzle-orm';
@@ -30,8 +31,9 @@ export async function resignMembership(
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+  const enriched = withComputedStatus(membership);
 
-  if (TERMINAL_STATUSES.includes(membership.status)) {
+  if (TERMINAL_STATUSES.includes(enriched.status)) {
     throw new BusinessLogicError(
       'Membership is already in a terminal state.',
       'ALREADY_TERMINAL',

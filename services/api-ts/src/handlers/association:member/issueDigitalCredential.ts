@@ -5,6 +5,7 @@ import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors'
 import { CredentialTemplateRepository, DigitalCredentialRepository } from './repos/credentials.repo';
 import type { DigitalCredential } from './repos/credentials.schema';
 import { MembershipRepository } from './repos/membership.repo';
+import { withComputedStatus } from './utils/membership-status-middleware';
 import { createCredentialToken } from './utils/credential-token';
 import { auditAction } from '@/utils/audit';
 
@@ -34,9 +35,10 @@ export async function issueDigitalCredential(
     const membershipRepo = new MembershipRepository(db, logger);
     const membership = await membershipRepo.findOneById(body.membershipId);
     if (!membership) throw new NotFoundError('Membership');
-    if (membership.status !== 'active') {
+    const enriched = withComputedStatus(membership);
+    if (enriched.status !== 'active') {
       throw new ForbiddenError(
-        `Cannot issue credential: membership status is "${membership.status}". Only active memberships are eligible.`
+        `Cannot issue credential: membership status is "${enriched.status}". Only active memberships are eligible.`
       );
     }
   } else if (body.personId) {
@@ -44,9 +46,10 @@ export async function issueDigitalCredential(
     const membershipRepo = new MembershipRepository(db, logger);
     const membership = await membershipRepo.findByPersonAndOrg(body.personId, orgId);
     if (!membership) throw new ForbiddenError('Cannot issue credential: no membership found for this person');
-    if (membership.status !== 'active') {
+    const enriched = withComputedStatus(membership);
+    if (enriched.status !== 'active') {
       throw new ForbiddenError(
-        `Cannot issue credential: membership status is "${membership.status}". Only active memberships are eligible.`
+        `Cannot issue credential: membership status is "${enriched.status}". Only active memberships are eligible.`
       );
     }
   }

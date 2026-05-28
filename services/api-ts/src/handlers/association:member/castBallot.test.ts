@@ -103,7 +103,8 @@ describe('[BR-33] Voter eligibility — active member check', () => {
       castVote: async () => ({ ...fakeVote }),
     });
     stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ ...fakeMembership, status: 'lapsed' }),
+      // lapsed: duesExpiryDate in past beyond grace period
+      findByPersonAndOrg: async () => ({ ...fakeMembership, status: 'lapsed', duesExpiryDate: '2020-01-01', suspendedAt: null, removedAt: null }),
     });
 
     const ctx = makeCtx({
@@ -126,7 +127,8 @@ describe('[BR-33] Voter eligibility — active member check', () => {
       castVote: async () => ({ ...fakeVote }),
     });
     stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ ...fakeMembership, status: 'suspended' }),
+      // suspended: suspendedAt flag is set
+      findByPersonAndOrg: async () => ({ ...fakeMembership, status: 'suspended', suspendedAt: new Date('2025-01-01'), removedAt: null }),
     });
 
     const ctx = makeCtx({

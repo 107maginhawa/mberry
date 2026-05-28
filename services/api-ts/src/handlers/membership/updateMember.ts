@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { NotFoundError, ValidationError } from '@/core/errors';
 import { domainEvents } from '@/core/domain-events';
 import { MembershipRepository } from './repos/membership.repo';
+import { persistWithComputedStatus } from '../association:member/utils/membership-status-middleware';
+import type { DatabaseInstance } from '@/core/database';
 import type { Session } from '@/types/auth';
 
 // [V-20] Zod schema for updateMember request body
@@ -38,7 +40,7 @@ const updateMemberSchema = z.object({
 }).passthrough();
 
 export async function updateMember(ctx: Context): Promise<Response> {
-  const db = ctx.get('database');
+  const db = ctx.get('database') as DatabaseInstance;
   const session = ctx.get('session') as Session;
   const orgId = ctx.req.param('organizationId')!;
   const memberId = ctx.req.param('memberId')!;
@@ -69,16 +71,41 @@ export async function updateMember(ctx: Context): Promise<Response> {
     ? requestedDbStatus
     : currentStatus;
 
-  const updated = await repo.updateMember(existing.membership.id, {
+  // [BR-01] Map requested status to flag fields — never write status directly.
+  const flagUpdates: { suspendedAt?: Date | null; removedAt?: Date | null } = {};
+  if (status !== currentStatus) {
+    if (status === 'suspended') {
+      flagUpdates.suspendedAt = new Date();
+    } else if (status === 'removed') {
+      flagUpdates.removedAt = new Date();
+    } else if (status === 'active') {
+      // Reinstate: clear suspension and removal flags
+      flagUpdates.suspendedAt = null;
+      flagUpdates.removedAt = null;
+    }
+  }
+
+  // Write status-affecting flag fields via persistWithComputedStatus (BR-01).
+  let computedStatus: string | undefined;
+  if (Object.keys(flagUpdates).length > 0) {
+    const persisted = await persistWithComputedStatus(db, existing.membership.id, existing.membership, flagUpdates);
+    computedStatus = persisted.status;
+  }
+
+  // Write non-status fields separately.
+  const updatedNonStatus = await repo.updateMember(existing.membership.id, {
     categoryId: body.categoryId ?? existing.membership.categoryId,
     tierId: body.tierId ?? existing.membership.tierId,
-    status,
     memberNumber: body.memberNumber ?? body.licenseNumber ?? existing.membership.memberNumber,
     note: body.note ?? existing.membership.note,
-    removedAt: status === 'removed' ? new Date() : existing.membership.removedAt,
     removalReason: body.removalReason ?? existing.membership.removalReason,
     updatedBy: session.user.id,
   });
+
+  // Merge computed status into response so callers see the actual current status.
+  const updated = computedStatus
+    ? { ...updatedNonStatus, status: computedStatus }
+    : updatedNonStatus;
 
   // Emit domain event when status actually changed
   if (status !== currentStatus) {

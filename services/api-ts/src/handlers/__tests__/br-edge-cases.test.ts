@@ -14,6 +14,7 @@ import { startImpersonation } from '../platformadmin/startImpersonation';
 import { PlatformAdminRepository, ImpersonationSessionRepository } from '../platformadmin/repos/platform-admin.repo';
 import { updateEvent } from '../events/updateEvent';
 import { EventsRepository } from '../events/repos/events.repo';
+import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { getOrganizationBySlug } from '../platformadmin/getOrganizationBySlug';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { issueDigitalCredential } from '../association:member/issueDigitalCredential';
@@ -23,6 +24,8 @@ import { MembershipRepository as CustomMembershipRepository } from '../membershi
 import { markComplete } from '../training/markComplete';
 import { TrainingRepository } from '../training/repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
+
+const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
 
 // ─── [BR-10] Impersonation Audit Context ─────────────────
 
@@ -91,14 +94,20 @@ describe('[BR-10] Impersonation session includes impersonator ID in audit contex
 describe('[BR-16] Changing visibility from network-wide to internal warns about external registrants', () => {
   let mocks: ReturnType<typeof stubRepo>;
   let memberMocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
     if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('[BR-16] updateEvent persists visibility field', async () => {
     // Visibility is now passed through to repo.update() (no longer stripped).
+    // updateEvent checks officer access via OfficerTermRepository.findActiveByPersonAndOrg (db.select)
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
     memberMocks = stubRepo(CustomMembershipRepository, {
       getMember: async () => ({ id: 'mem-1', personId: 'user-1', orgId: 'org-1', status: 'active' }),
     });
@@ -106,7 +115,6 @@ describe('[BR-16] Changing visibility from network-wide to internal warns about 
     mocks = stubRepo(EventsRepository, {
       get: async () => ({
         id: 'evt-1',
-        orgId: 'org-1',
         orgId: 'org-1',
         title: 'Network Event',
         status: 'published',
@@ -142,8 +150,15 @@ describe('[BR-19] ID card generation blocked for lapsed/suspended members', () =
   });
 
   test('[BR-19] returns 403 when member status is lapsed', async () => {
+    // BR-01: withComputedStatus recomputes from flag fields — must provide flags
     mocks = stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1', status: 'lapsed' }),
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1',
+        status: 'lapsed',
+        duesExpiryDate: '2020-01-01', // past (well beyond grace) → lapsed
+        suspendedAt: null, removedAt: null, dateOfDeath: null,
+        expelledAt: null, resignedAt: null, isPendingPayment: false, gracePeriodDays: 30,
+      }),
     });
     const tmplMocks = stubRepo(CredentialTemplateRepository, {
       findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
@@ -158,8 +173,15 @@ describe('[BR-19] ID card generation blocked for lapsed/suspended members', () =
   });
 
   test('[BR-19] returns 403 when member status is suspended', async () => {
+    // BR-01: need suspendedAt flag set for withComputedStatus to compute 'suspended'
     mocks = stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1', status: 'suspended' }),
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1',
+        status: 'suspended',
+        duesExpiryDate: FUTURE_EXPIRY,
+        suspendedAt: new Date('2025-01-01'), removedAt: null, dateOfDeath: null,
+        expelledAt: null, resignedAt: null, isPendingPayment: false, gracePeriodDays: 30,
+      }),
     });
     const tmplMocks = stubRepo(CredentialTemplateRepository, {
       findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
@@ -175,7 +197,13 @@ describe('[BR-19] ID card generation blocked for lapsed/suspended members', () =
 
   test('[BR-19] returns 200 when member status is active', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1', status: 'active' }),
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1', personId: 'person-1', organizationId: 'tenant-1',
+        status: 'active',
+        duesExpiryDate: FUTURE_EXPIRY,
+        suspendedAt: null, removedAt: null, dateOfDeath: null,
+        expelledAt: null, resignedAt: null, isPendingPayment: false, gracePeriodDays: 30,
+      }),
     });
     const tmplMocks = stubRepo(CredentialTemplateRepository, {
       findOneById: async () => ({ id: 'tmpl-1', validityPeriod: 365 }),
@@ -217,12 +245,18 @@ describe('[BR-19] ID card generation blocked for lapsed/suspended members', () =
 
 describe('[BR-20] Certificate blocked before activity end date and for cancelled activities', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
   test('[BR-20] returns error when activity has not ended yet', async () => {
+    // markComplete checks officer access via OfficerTermRepository.findActiveByPersonAndOrg
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({
         id: 'train-1',
@@ -244,6 +278,9 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
   });
 
   test('[BR-20] returns error when activity is cancelled', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
     mocks = stubRepo(TrainingRepository, {
       getByOrg: async () => ({
         id: 'train-1',
@@ -265,6 +302,9 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
   });
 
   test('[BR-20] returns 201 when activity has ended and is not cancelled', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
     const enrollment = fakeEnrollment({
       id: 'enr-1',
       trainingId: 'train-1',

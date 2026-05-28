@@ -4,6 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { ReinstateMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
+import { withComputedStatus, persistWithComputedStatus } from './utils/membership-status-middleware';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -24,20 +25,23 @@ export async function reinstateMembership(
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+  const enriched = withComputedStatus(membership);
 
   const reinstatableStatuses = ['removed', 'suspended'];
-  if (!reinstatableStatuses.includes(membership.status)) {
+  if (!reinstatableStatuses.includes(enriched.status)) {
     throw new BusinessLogicError(
-      `Cannot reinstate a membership with status '${membership.status}'. Must be removed or suspended.`,
+      `Cannot reinstate a membership with status '${enriched.status}'. Must be removed or suspended.`,
       'MEMBERSHIP_NOT_REINSTATABLE',
     );
   }
 
-  const updated = await repo.updateOneById(membershipId, {
-    status: 'active',
+  const updated = await persistWithComputedStatus(db, membershipId, membership, {
+    suspendedAt: null,
     removedAt: null,
-    removalReason: null,
-  } as Partial<Membership>);
+  });
+
+  // Clear removalReason (non-status field — separate update)
+  await repo.updateOneById(membershipId, { removalReason: null } as Partial<Membership>);
 
   await auditAction(ctx, {
     action: 'reinstate',

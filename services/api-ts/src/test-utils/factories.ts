@@ -229,6 +229,15 @@ export function fakeMembership(overrides: Record<string, any> = {}) {
     tier: 'regular',
     joinedAt: new Date('2025-01-01T00:00:00Z'),
     expiresAt: new Date('2026-12-31T00:00:00Z'),
+    // BR-01 flag fields required by withComputedStatus / persistWithComputedStatus
+    duesExpiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now → active
+    suspendedAt: null,
+    removedAt: null,
+    dateOfDeath: null,
+    expelledAt: null,
+    resignedAt: null,
+    isPendingPayment: false,
+    gracePeriodDays: 30,
     ...overrides,
   };
 }

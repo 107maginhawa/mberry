@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { stubRepo, restoreRepo, makeMockDb } from '@/test-utils/make-ctx';
 import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { settlePayment } from './settle-payment';
 import { DuesRepository } from '../repos/dues-payments.repo';
@@ -7,13 +7,15 @@ import { MembershipRepository } from '../repos/membership.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
+const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
+
 const baseMembership = createFakeMembership({
   id: 'mem-1',
   organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
   startDate: '2024-01-01',
-  duesExpiryDate: '2025-06-30',
+  duesExpiryDate: FUTURE_EXPIRY,
   gracePeriodDays: 30,
   status: 'active',
   joinedAt: new Date().toISOString(),
@@ -21,10 +23,25 @@ const baseMembership = createFakeMembership({
   removedAt: null,
 });
 
-/** Fake DB that passes `tx` through to the callback (simulates transaction) */
-const fakeDb = {
-  transaction: async (fn: (tx: any) => Promise<any>) => fn(fakeDb),
-} as any;
+/** Fake DB supporting persistWithComputedStatus (db.update chain) + transactions */
+const fakeDb = makeMockDb() as any;
+
+/**
+ * Capturing DB: intercepts db.update().set().where().returning() calls.
+ * persistWithComputedStatus uses db.update() directly — NOT repo.updateOneById.
+ */
+function makeCapturingDb(onSet: (data: any) => void): any {
+  const db: any = {
+    transaction: async (fn: (tx: any) => Promise<any>) => fn(makeCapturingDb(onSet)),
+    update: (_table: any) => ({
+      set: (data: any) => {
+        onSet(data);
+        return { where: (_c: any) => ({ returning: async () => [data] }) };
+      },
+    }),
+  };
+  return db;
+}
 
 const baseInput = {
   db: fakeDb,
@@ -48,124 +65,122 @@ describe('[BR-03] settlePayment — status-aware reactivation', () => {
   });
 
   test('suspended member — payment extends expiry but does NOT reactivate', async () => {
-    let updatedStatus: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
 
     stubRepo(DuesRepository, {
       listFunds: async () => [],
       getConfig: async () => undefined,
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'suspended', suspendedAt: new Date() }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'suspended', suspendedAt: new Date(), removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
-    // Expiry should still be extended (payment is valid), but status must NOT change
-    expect(updatedStatus).not.toBe('active');
+    // persistWithComputedStatus writes status via db.update (not repo.updateOneById)
+    // Expiry extended (payment valid), but suspended flag keeps status = suspended
+    expect(capturedSetData?.status).not.toBe('active');
   });
 
   test('removed member — payment extends expiry but does NOT reactivate', async () => {
-    let updatedStatus: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
 
     stubRepo(DuesRepository, {
       listFunds: async () => [],
       getConfig: async () => undefined,
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'removed', removedAt: new Date() }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'removed', removedAt: new Date(), suspendedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
-    expect(updatedStatus).not.toBe('active');
+    expect(capturedSetData?.status).not.toBe('active');
   });
 
   test('lapsed member — payment SHOULD reactivate (valid BR-03 transition)', async () => {
-    let updatedStatus: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
 
     stubRepo(DuesRepository, {
       listFunds: async () => [],
       getConfig: async () => undefined,
     });
+    // duesExpiryDate: '2024-01-01' (past); settlePayment extends it → future → reactivates
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'lapsed', duesExpiryDate: '2024-01-01' }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'lapsed', duesExpiryDate: '2024-01-01', suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
-    expect(updatedStatus).toBe('active');
+    expect(capturedSetData?.status).toBe('active');
   });
 
   test('gracePeriod member — payment SHOULD reactivate', async () => {
-    let updatedStatus: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
+    const YESTERDAY = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
 
     stubRepo(DuesRepository, {
       listFunds: async () => [],
       getConfig: async () => undefined,
     });
+    // duesExpiryDate: yesterday (within grace) → payment extends to future → active
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'gracePeriod', duesExpiryDate: '2025-06-01' }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'gracePeriod', duesExpiryDate: YESTERDAY, suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
-    expect(updatedStatus).toBe('active');
+    expect(capturedSetData?.status).toBe('active');
   });
 
-  test('pendingPayment member — payment SHOULD activate', async () => {
-    let updatedStatus: string | undefined;
+  test('pendingPayment member — settlePayment extends expiry but isPendingPayment flag stays (cleared by caller)', async () => {
+    // settlePayment passes { duesExpiryDate } to persistWithComputedStatus.
+    // computeMembershipStatus: isPendingPayment=true wins over expiry check → stays 'pendingPayment'.
+    // The caller (recordDuesPayment / markDuesInvoicePaid) is responsible for clearing isPendingPayment.
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
 
     stubRepo(DuesRepository, {
       listFunds: async () => [],
       getConfig: async () => undefined,
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'pendingPayment', duesExpiryDate: null }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'pendingPayment', duesExpiryDate: null, suspendedAt: null, removedAt: null, isPendingPayment: true }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
-    expect(updatedStatus).toBe('active');
+    // duesExpiryDate extended (payment processed), but isPendingPayment not cleared by settlePayment
+    expect(capturedSetData?.duesExpiryDate).toBeDefined();
+    // Status stays pendingPayment — caller must clear isPendingPayment to activate
+    expect(capturedSetData?.status).toBe('pendingPayment');
   });
 
   test('active member — payment extends expiry, keeps active', async () => {
-    let updatedStatus: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
 
     stubRepo(DuesRepository, {
       listFunds: async () => [],
       getConfig: async () => undefined,
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'active' }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'active', suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
-    expect(updatedStatus).toBe('active');
+    expect(capturedSetData?.status).toBe('active');
   });
 });
 
@@ -181,8 +196,8 @@ describe('[Phase 15] settlePayment — billing frequency support', () => {
   });
 
   test('quarterly billing — extends by 3 months', async () => {
-    let capturedExpiry: string | undefined;
-    // Use a future expiry so computeNewExpiry uses standard extension (not severely-lapsed reset)
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
     const futureExpiry = '2027-01-15';
 
     stubRepo(DuesRepository, {
@@ -190,21 +205,19 @@ describe('[Phase 15] settlePayment — billing frequency support', () => {
       getConfig: async () => ({ billingFrequency: 'quarterly' }),
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'active', duesExpiryDate: futureExpiry }],
-      updateOneById: async (_id: string, updates: any) => {
-        capturedExpiry = updates.duesExpiryDate;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'active', duesExpiryDate: futureExpiry, suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
     // 2027-01-15 + 3 months = 2027-04-15
-    expect(capturedExpiry).toBe('2027-04-15');
+    expect(capturedSetData?.duesExpiryDate).toBe('2027-04-15');
   });
 
   test('semi-annual billing — extends by 6 months', async () => {
-    let capturedExpiry: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
     const futureExpiry = '2027-01-15';
 
     stubRepo(DuesRepository, {
@@ -212,21 +225,19 @@ describe('[Phase 15] settlePayment — billing frequency support', () => {
       getConfig: async () => ({ billingFrequency: 'semi-annual' }),
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'active', duesExpiryDate: futureExpiry }],
-      updateOneById: async (_id: string, updates: any) => {
-        capturedExpiry = updates.duesExpiryDate;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'active', duesExpiryDate: futureExpiry, suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
     // 2027-01-15 + 6 months = 2027-07-15
-    expect(capturedExpiry).toBe('2027-07-15');
+    expect(capturedSetData?.duesExpiryDate).toBe('2027-07-15');
   });
 
   test('annual billing — extends by 12 months (existing behavior)', async () => {
-    let capturedExpiry: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
     const futureExpiry = '2027-01-15';
 
     stubRepo(DuesRepository, {
@@ -234,21 +245,19 @@ describe('[Phase 15] settlePayment — billing frequency support', () => {
       getConfig: async () => ({ billingFrequency: 'annual' }),
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'active', duesExpiryDate: futureExpiry }],
-      updateOneById: async (_id: string, updates: any) => {
-        capturedExpiry = updates.duesExpiryDate;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'active', duesExpiryDate: futureExpiry, suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
     // 2027-01-15 + 12 months = 2028-01-15
-    expect(capturedExpiry).toBe('2028-01-15');
+    expect(capturedSetData?.duesExpiryDate).toBe('2028-01-15');
   });
 
   test('missing config — defaults to annual (12 months)', async () => {
-    let capturedExpiry: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((d) => { capturedSetData = d; });
     const futureExpiry = '2027-01-15';
 
     stubRepo(DuesRepository, {
@@ -256,17 +265,14 @@ describe('[Phase 15] settlePayment — billing frequency support', () => {
       getConfig: async () => undefined,
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'active', duesExpiryDate: futureExpiry }],
-      updateOneById: async (_id: string, updates: any) => {
-        capturedExpiry = updates.duesExpiryDate;
-        return baseMembership;
-      },
+      findMany: async () => [{ ...baseMembership, status: 'active', duesExpiryDate: futureExpiry, suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
-    await settlePayment(baseInput);
+    await settlePayment({ ...baseInput, db: capturingDb });
 
     // Missing config → default annual → 2027-01-15 + 12 months = 2028-01-15
-    expect(capturedExpiry).toBe('2028-01-15');
+    expect(capturedSetData?.duesExpiryDate).toBe('2028-01-15');
   });
 });
 
@@ -284,11 +290,14 @@ describe('[Wave 1.2] settlePayment — transactional boundary', () => {
   test('wraps fund allocation + membership update in db.transaction()', async () => {
     let transactionCalled = false;
 
-    const txDb = {
+    const txDb: any = {
       transaction: async (fn: (tx: any) => Promise<any>) => {
         transactionCalled = true;
         return fn(txDb);
       },
+      update: (_table: any) => ({
+        set: (data: any) => ({ where: (_c: any) => ({ returning: async () => [data] }) }),
+      }),
     };
 
     stubRepo(DuesRepository, {
@@ -299,7 +308,7 @@ describe('[Wave 1.2] settlePayment — transactional boundary', () => {
       createFundAllocations: async () => [],
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'active' }],
+      findMany: async () => [{ ...baseMembership, status: 'active', suspendedAt: null, removedAt: null }],
       updateOneById: async () => baseMembership,
     });
 
@@ -312,12 +321,19 @@ describe('[Wave 1.2] settlePayment — transactional boundary', () => {
     let fundsAllocated = false;
     let transactionCalled = false;
 
-    const txDb = {
+    // DB that fails during update (after fund allocation succeeds)
+    const txDb: any = {
       transaction: async (fn: (tx: any) => Promise<any>) => {
         transactionCalled = true;
-        // DB would auto-rollback on throw — just verify the error propagates
         return fn(txDb);
       },
+      update: (_table: any) => ({
+        set: (_data: any) => ({
+          where: (_c: any) => ({
+            returning: async () => { throw new Error('DB write failed'); },
+          }),
+        }),
+      }),
     };
 
     stubRepo(DuesRepository, {
@@ -328,8 +344,8 @@ describe('[Wave 1.2] settlePayment — transactional boundary', () => {
       createFundAllocations: async () => { fundsAllocated = true; return []; },
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'active' }],
-      updateOneById: async () => { throw new Error('DB write failed'); },
+      findMany: async () => [{ ...baseMembership, status: 'active', suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
     // Error must propagate out of transaction (triggering DB rollback)
@@ -341,11 +357,17 @@ describe('[Wave 1.2] settlePayment — transactional boundary', () => {
     let membershipUpdated = false;
     let transactionCalled = false;
 
-    const txDb = {
+    const txDb: any = {
       transaction: async (fn: (tx: any) => Promise<any>) => {
         transactionCalled = true;
         return fn(txDb);
       },
+      update: (_table: any) => ({
+        set: (data: any) => {
+          membershipUpdated = true;
+          return { where: (_c: any) => ({ returning: async () => [data] }) };
+        },
+      }),
     };
 
     stubRepo(DuesRepository, {
@@ -356,13 +378,13 @@ describe('[Wave 1.2] settlePayment — transactional boundary', () => {
       createFundAllocations: async () => { throw new Error('Fund allocation failed'); },
     });
     stubRepo(MembershipRepository, {
-      findMany: async () => [{ ...baseMembership, status: 'active' }],
-      updateOneById: async () => { membershipUpdated = true; return baseMembership; },
+      findMany: async () => [{ ...baseMembership, status: 'active', suspendedAt: null, removedAt: null }],
+      updateOneById: async () => baseMembership,
     });
 
     await expect(settlePayment({ ...baseInput, db: txDb as any })).rejects.toThrow('Fund allocation failed');
     expect(transactionCalled).toBe(true);
-    // Membership update should NOT have been reached since fund allocation failed first
+    // Fund allocation failed BEFORE membership update — membership should NOT be updated
     expect(membershipUpdated).toBe(false);
   });
 });

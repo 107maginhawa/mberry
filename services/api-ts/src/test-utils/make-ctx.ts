@@ -38,6 +38,36 @@ export function makeMember(overrides: Partial<TestUser> = {}): TestUser {
   return makeUser({ id: 'member-1', name: 'Member User', email: 'member@example.com', role: 'member', ...overrides });
 }
 
+// ─── Mock DB Factory ─────────────────────────────────────
+
+/**
+ * Creates a mock database that supports the Drizzle ORM update chain:
+ *   db.update(table).set(data).where(condition).returning()
+ *
+ * Used by persistWithComputedStatus (BR-01) and any handler that writes
+ * directly to the DB.
+ *
+ * The update chain captures the data passed to .set() and returns it as
+ * the first element of .returning(), so handlers that read the returned
+ * row (e.g. persistWithComputedStatus) get back the data they wrote.
+ *
+ * Pass `extraFields` to merge additional fields into the returned row
+ * (e.g. base membership fields the handler expects to be present).
+ */
+export function makeMockDb(extraFields: Record<string, any> = {}) {
+  function makeUpdateChain(setData: Record<string, any> = {}) {
+    return {
+      set: (data: any) => makeUpdateChain({ ...extraFields, ...data }),
+      where: (_cond: any) => makeUpdateChain(setData),
+      returning: async () => [setData],
+    };
+  }
+  return {
+    transaction: async (fn: any) => fn(makeMockDb(extraFields)),
+    update: (_table: any) => makeUpdateChain(extraFields),
+  };
+}
+
 // ─── Context Factory ─────────────────────────────────────
 
 export function makeCtx(overrides: Record<string, any> = {}) {
@@ -46,7 +76,7 @@ export function makeCtx(overrides: Record<string, any> = {}) {
     user,
     session: user ? { id: 'session-1', userId: user.id, user } : null,
     organizationId: 'tenant-1',
-    database: { transaction: async (fn: any) => fn({}) },
+    database: makeMockDb(),
     logger: null,
     audit: null,
     ...overrides,

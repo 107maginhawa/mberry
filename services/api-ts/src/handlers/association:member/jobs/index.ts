@@ -9,6 +9,9 @@ import { processDuesReminders } from './reminderProcessor';
 import { processWebhookRetry } from './webhookRetryProcessor';
 import { processCreditIssue } from './creditIssue';
 import { processComplianceThreshold } from './complianceThreshold';
+import { registerStatusRecomputeJob } from './statusRecomputeCron';
+
+export { registerStatusRecomputeJob };
 
 /**
  * Register all dues module jobs with the scheduler

@@ -210,7 +210,8 @@ describe('[034] Paid training — status guards', () => {
       getByOrg: async () => freeTraining,
     });
     stubRepo(MembershipRepository, {
-      findByPersonAndOrg: async () => ({ ...activeMembership, status: 'lapsed' }),
+      // lapsed: duesExpiryDate in past (well beyond grace period)
+      findByPersonAndOrg: async () => ({ ...activeMembership, status: 'lapsed', duesExpiryDate: '2020-01-01', suspendedAt: null, removedAt: null }),
     });
     const { enroll } = await import('./enroll');
     const ctx = makeCtx({

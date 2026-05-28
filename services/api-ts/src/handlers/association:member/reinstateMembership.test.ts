@@ -6,9 +6,10 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 
 // ─── Fixtures ───────────────────────────────────────────
 
+const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
 const removedMembership = {
   id: 'mem-1',
-  organizationId: 'tenant-1',
   organizationId: 'org-1',
   personId: 'person-1',
   tierId: 'tier-1',
@@ -16,7 +17,12 @@ const removedMembership = {
   removedAt: new Date('2025-06-01'),
   removalReason: 'Non-payment',
   startDate: '2025-01-01',
-  duesExpiryDate: '2026-01-01',
+  duesExpiryDate: FUTURE_EXPIRY,
+  suspendedAt: null,
+  dateOfDeath: null,
+  expelledAt: null,
+  resignedAt: null,
+  gracePeriodDays: 30,
 };
 
 const suspendedMembership = {
@@ -24,6 +30,11 @@ const suspendedMembership = {
   status: 'suspended',
   removedAt: null,
   removalReason: null,
+  suspendedAt: new Date('2025-05-01'),
+  dateOfDeath: null,
+  expelledAt: null,
+  resignedAt: null,
+  gracePeriodDays: 30,
 };
 
 // ─── Tests ──────────────────────────────────────────────
@@ -92,7 +103,7 @@ describe('reinstateMembership', () => {
   });
 
   test('throws BusinessLogicError when membership is already active', async () => {
-    const activeMembership = { ...removedMembership, status: 'active', removedAt: null, removalReason: null };
+    const activeMembership = { ...removedMembership, status: 'active', removedAt: null, removalReason: null, suspendedAt: null };
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => activeMembership,
     });
@@ -105,8 +116,10 @@ describe('reinstateMembership', () => {
   });
 
   test('throws BusinessLogicError when membership is in grace status', async () => {
+    // gracePeriod: expiry in recent past (within 30-day grace window), no flags set
+    const yesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => ({ ...removedMembership, status: 'grace' }),
+      findOneById: async () => ({ ...removedMembership, removedAt: null, duesExpiryDate: yesterday }),
     });
 
     const ctx = makeCtx({
@@ -118,7 +131,7 @@ describe('reinstateMembership', () => {
 
   test('throws BusinessLogicError when membership is lapsed', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => ({ ...removedMembership, status: 'lapsed' }),
+      findOneById: async () => ({ ...removedMembership, removedAt: null, duesExpiryDate: '2020-01-01' }),
     });
 
     const ctx = makeCtx({
@@ -129,20 +142,25 @@ describe('reinstateMembership', () => {
   });
 
   test('clears removedAt and removalReason on reinstatement', async () => {
-    let capturedUpdate: any = null;
+    let capturedRemovalReason: any = 'NOT_CALLED';
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => removedMembership,
-      updateOneById: async (_id: string, data: any) => { capturedUpdate = data; return { ...removedMembership, ...data }; },
+      updateOneById: async (_id: string, data: any) => {
+        // Handler calls updateOneById to clear removalReason after persistWithComputedStatus
+        capturedRemovalReason = data.removalReason;
+        return { ...removedMembership, ...data };
+      },
     });
 
     const ctx = makeCtx({
       _params: { membershipId: 'mem-1' },
     });
 
-    await reinstateMembership(ctx);
-    expect(capturedUpdate.removedAt).toBeNull();
-    expect(capturedUpdate.removalReason).toBeNull();
-    expect(capturedUpdate.status).toBe('active');
+    const response = await reinstateMembership(ctx);
+    // persistWithComputedStatus sets suspendedAt/removedAt to null + status=active in DB
+    expect(response.body.status).toBe('active');
+    // updateOneById also called to clear removalReason
+    expect(capturedRemovalReason).toBeNull();
   });
 
   test('scopes findOneById call to membershipId from route param', async () => {
@@ -163,18 +181,18 @@ describe('reinstateMembership', () => {
   // ─── [BR] Valid reinstatement paths ───────────────────
 
   describe('valid reinstatement statuses', () => {
-    const reinstatableStatuses = ['removed', 'suspended'];
+    // Flag-field overrides that produce each reinstatable computed status
+    const reinstatableFixtures: Array<[string, Record<string, any>]> = [
+      ['removed', { removedAt: new Date('2025-06-01'), suspendedAt: null }],
+      ['suspended', { suspendedAt: new Date('2025-05-01'), removedAt: null }],
+    ];
 
-    for (const status of reinstatableStatuses) {
+    for (const [status, flags] of reinstatableFixtures) {
       test(`${status} → active succeeds`, async () => {
-        const memberWithStatus = { ...removedMembership, status };
-        let capturedStatus: string | null = null;
+        const memberWithStatus = { ...removedMembership, ...flags };
         mocks = stubRepo(MembershipRepository, {
           findOneById: async () => memberWithStatus,
-          updateOneById: async (_id: string, data: any) => {
-            capturedStatus = data.status;
-            return { ...memberWithStatus, ...data };
-          },
+          updateOneById: async (_id: string, data: any) => ({ ...memberWithStatus, ...data }),
         });
 
         const ctx = makeCtx({
@@ -183,7 +201,8 @@ describe('reinstateMembership', () => {
 
         const response = await reinstateMembership(ctx);
         expect(response.status).toBe(200);
-        expect(capturedStatus).toBe('active');
+        // persistWithComputedStatus writes status to DB directly; verify via response body
+        expect(response.body.status).toBe('active');
       });
     }
   });
@@ -191,12 +210,20 @@ describe('reinstateMembership', () => {
   // ─── [BR] Invalid reinstatement statuses ─────────────
 
   describe('invalid reinstatement statuses', () => {
-    const nonReinstatableStatuses = ['active', 'pending', 'grace', 'lapsed', 'pendingPayment'];
+    const yesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    // Flag-field overrides that produce each non-reinstatable computed status
+    const nonReinstatableFixtures: Array<[string, Record<string, any>]> = [
+      ['active', { removedAt: null, suspendedAt: null, duesExpiryDate: '2099-01-01' }],
+      ['pending', { removedAt: null, suspendedAt: null, isPendingPayment: true, duesExpiryDate: null }],
+      ['grace', { removedAt: null, suspendedAt: null, duesExpiryDate: yesterday }],
+      ['lapsed', { removedAt: null, suspendedAt: null, duesExpiryDate: '2020-01-01' }],
+      ['pendingPayment', { removedAt: null, suspendedAt: null, isPendingPayment: true, duesExpiryDate: null }],
+    ];
 
-    for (const status of nonReinstatableStatuses) {
+    for (const [status, flags] of nonReinstatableFixtures) {
       test(`throws BusinessLogicError for status '${status}'`, async () => {
         mocks = stubRepo(MembershipRepository, {
-          findOneById: async () => ({ ...removedMembership, status }),
+          findOneById: async () => ({ ...removedMembership, ...flags }),
         });
 
         const ctx = makeCtx({

@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
+import { withComputedStatus } from '../association:member/utils/membership-status-middleware';
 import type { Session } from '@/types/auth';
 
 export async function enroll(ctx: Context): Promise<Response> {
@@ -35,7 +36,8 @@ export async function enroll(ctx: Context): Promise<Response> {
   // [BR-02] Only active members can enroll in training
   const membershipRepo = new MembershipRepository(db, ctx.get('logger'));
   const membership = await membershipRepo.findByPersonAndOrg(session.user.id, training.organizationId);
-  if (!membership || membership.status !== 'active') {
+  const enrichedMembership = membership ? withComputedStatus(membership) : null;
+  if (!enrichedMembership || enrichedMembership.status !== 'active') {
     throw new BusinessLogicError('Active membership required to enroll in training');
   }
 

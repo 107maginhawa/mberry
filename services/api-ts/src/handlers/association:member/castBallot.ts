@@ -4,6 +4,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { CastBallotBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { MembershipRepository } from './repos/membership.repo';
+import { withComputedStatus } from './utils/membership-status-middleware';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -39,7 +40,8 @@ export async function castBallot(
   // BR-33: Voter must be an active member of this organization
   const membershipRepo = new MembershipRepository(db);
   const membership = await membershipRepo.findByPersonAndOrg(voterId, election.organizationId);
-  if (!membership || membership.status !== 'active') {
+  const enrichedMembership = membership ? withComputedStatus(membership) : null;
+  if (!enrichedMembership || enrichedMembership.status !== 'active') {
     throw new BusinessLogicError(
       'Only active members are eligible to vote',
       'VOTER_NOT_ELIGIBLE',

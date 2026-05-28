@@ -1,5 +1,5 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
-import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { makeCtx, makeMockDb, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDuesInvoice as createFakeDuesInvoice, fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { markDuesInvoicePaid } from './markDuesInvoicePaid';
 import { DuesInvoiceRepository } from './repos/dues.repo';
@@ -29,10 +29,29 @@ const fakeMembership = createFakeMembership({
   duesExpiryDate: '2025-06-30',
 });
 
-/** Fake DB that passes tx through to callback (simulates transaction) */
-const txDb = {
-  transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
-};
+/** Fake DB that supports transactions AND the Drizzle update chain (BR-01) */
+const txDb = makeMockDb();
+
+/**
+ * Create a capturing DB mock that records what was passed to db.update().set()
+ * while also supporting transactions. Used to verify persistWithComputedStatus calls.
+ */
+function makeCapturingDb(onSet: (data: Record<string, any>) => void) {
+  const db: any = {
+    transaction: async (fn: (tx: any) => Promise<any>) => fn(db),
+    update: (_table: any) => ({
+      set: (data: any) => {
+        onSet(data);
+        return {
+          where: (_c: any) => ({
+            returning: async () => [{ ...fakeMembership, ...data }],
+          }),
+        };
+      },
+    }),
+  };
+  return db;
+}
 
 // ─── Tests ──────────────────────────────────────────────
 
@@ -54,7 +73,7 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
   });
 
   test('uses computeNewExpiry — extends annual by 12 months from current expiry', async () => {
-    let updatedExpiry: string | undefined;
+    let dbSetData: Record<string, any> | undefined;
 
     stubRepo(DuesInvoiceRepository, {
       findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
@@ -63,27 +82,24 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
       findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2025-12-31' }),
-      updateOneById: async (_id: string, updates: any) => {
-        updatedExpiry = updates.duesExpiryDate;
-        return fakeMembership;
-      },
     });
 
+    const db = makeCapturingDb((data) => { dbSetData = data; });
     const ctx = makeCtx({
-      database: txDb,
+      database: db,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
 
     const response = await markDuesInvoicePaid(ctx);
     expect(response.status).toBe(200);
-    expect(updatedExpiry).toBeDefined();
+    expect(dbSetData?.duesExpiryDate).toBeDefined();
     // From 2025-12-31 + 12 months = 2026-12-31
-    expect(updatedExpiry!.startsWith('2026-12')).toBe(true);
+    expect(dbSetData!.duesExpiryDate.startsWith('2026-12')).toBe(true);
   });
 
   test('handles severely lapsed member — resets from today', async () => {
-    let updatedExpiry: string | undefined;
+    let dbSetData: Record<string, any> | undefined;
     const today = new Date();
 
     stubRepo(DuesInvoiceRepository, {
@@ -93,30 +109,27 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
       // Expiry > 1 year in past = severely lapsed
-      findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2023-01-01' }),
-      updateOneById: async (_id: string, updates: any) => {
-        updatedExpiry = updates.duesExpiryDate;
-        return fakeMembership;
-      },
+      findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2023-01-01', suspendedAt: null, removedAt: null }),
     });
 
+    const db = makeCapturingDb((data) => { dbSetData = data; });
     const ctx = makeCtx({
-      database: txDb,
+      database: db,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
 
     await markDuesInvoicePaid(ctx);
-    expect(updatedExpiry).toBeDefined();
+    expect(dbSetData?.duesExpiryDate).toBeDefined();
     // Should reset from today, not from 2023-01-01
-    const expiryDate = new Date(updatedExpiry!);
+    const expiryDate = new Date(dbSetData!.duesExpiryDate);
     const expectedYear = today.getFullYear() + 1;
     // Expiry should be roughly today + 12 months (annual default)
     expect(expiryDate.getFullYear()).toBeGreaterThanOrEqual(expectedYear);
   });
 
   test('handles first-time payment — no existing expiry', async () => {
-    let updatedExpiry: string | undefined;
+    let dbSetData: Record<string, any> | undefined;
     const today = new Date();
 
     stubRepo(DuesInvoiceRepository, {
@@ -125,29 +138,26 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
     });
     stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
-      findOneById: async () => ({ ...fakeMembership, duesExpiryDate: null }),
-      updateOneById: async (_id: string, updates: any) => {
-        updatedExpiry = updates.duesExpiryDate;
-        return fakeMembership;
-      },
+      findOneById: async () => ({ ...fakeMembership, duesExpiryDate: null, suspendedAt: null, removedAt: null }),
     });
 
+    const db = makeCapturingDb((data) => { dbSetData = data; });
     const ctx = makeCtx({
-      database: txDb,
+      database: db,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
 
     await markDuesInvoicePaid(ctx);
-    expect(updatedExpiry).toBeDefined();
+    expect(dbSetData?.duesExpiryDate).toBeDefined();
     // Should be today + 12 months
-    const expiryDate = new Date(updatedExpiry!);
+    const expiryDate = new Date(dbSetData!.duesExpiryDate);
     const expectedYear = today.getFullYear() + 1;
     expect(expiryDate.getFullYear()).toBeGreaterThanOrEqual(expectedYear);
   });
 
   test('suspended member — extends expiry but does NOT reactivate [BR-03]', async () => {
-    let updatedStatus: string | undefined;
+    let dbSetData: Record<string, any> | undefined;
 
     stubRepo(DuesInvoiceRepository, {
       findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
@@ -160,27 +170,29 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
         status: 'suspended',
         suspendedAt: new Date(),
         duesExpiryDate: '2025-12-31',
+        removedAt: null,
+        dateOfDeath: null,
+        expelledAt: null,
+        resignedAt: null,
+        gracePeriodDays: 30,
       }),
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return fakeMembership;
-      },
     });
 
+    const db = makeCapturingDb((data) => { dbSetData = data; });
     const ctx = makeCtx({
-      database: txDb,
+      database: db,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
 
     const response = await markDuesInvoicePaid(ctx);
     expect(response.status).toBe(200);
-    // Must NOT blindly set status to 'active' — suspended requires officer action
-    expect(updatedStatus).not.toBe('active');
+    // persistWithComputedStatus computes status from flags — suspended stays suspended
+    expect(dbSetData?.status).not.toBe('active');
   });
 
   test('removed member — extends expiry but does NOT reactivate [BR-03]', async () => {
-    let updatedStatus: string | undefined;
+    let dbSetData: Record<string, any> | undefined;
 
     stubRepo(DuesInvoiceRepository, {
       findOneById: async () => ({ ...fakeInvoice, status: 'sent' }),
@@ -193,26 +205,29 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
         status: 'removed',
         removedAt: new Date(),
         duesExpiryDate: '2025-12-31',
+        suspendedAt: null,
+        dateOfDeath: null,
+        expelledAt: null,
+        resignedAt: null,
+        gracePeriodDays: 30,
       }),
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return fakeMembership;
-      },
     });
 
+    const db = makeCapturingDb((data) => { dbSetData = data; });
     const ctx = makeCtx({
-      database: txDb,
+      database: db,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
 
     const response = await markDuesInvoicePaid(ctx);
     expect(response.status).toBe(200);
-    expect(updatedStatus).not.toBe('active');
+    // persistWithComputedStatus computes status from flags — removed stays removed
+    expect(dbSetData?.status).not.toBe('active');
   });
 
   test('lapsed member — payment SHOULD reactivate [BR-03]', async () => {
-    let updatedStatus: string | undefined;
+    let dbSetData: Record<string, any> | undefined;
 
     stubRepo(DuesInvoiceRepository, {
       findOneById: async () => ({ ...fakeInvoice, status: 'overdue' }),
@@ -224,21 +239,25 @@ describe('[BR-07] markDuesInvoicePaid expiry extension', () => {
         ...fakeMembership,
         status: 'lapsed',
         duesExpiryDate: '2023-01-01',
+        suspendedAt: null,
+        removedAt: null,
+        dateOfDeath: null,
+        expelledAt: null,
+        resignedAt: null,
+        gracePeriodDays: 30,
       }),
-      updateOneById: async (_id: string, updates: any) => {
-        updatedStatus = updates.status;
-        return fakeMembership;
-      },
     });
 
+    const db = makeCapturingDb((data) => { dbSetData = data; });
     const ctx = makeCtx({
-      database: txDb,
+      database: db,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
 
     await markDuesInvoicePaid(ctx);
-    expect(updatedStatus).toBe('active');
+    // After payment, expiry extended to future → computed status becomes 'active'
+    expect(dbSetData?.status).toBe('active');
   });
 
   test('skips extension when membership not found', async () => {
@@ -429,10 +448,12 @@ describe('[Wave 1.2] markDuesInvoicePaid — transactional boundary', () => {
   test('wraps invoice mark-paid + membership update in db.transaction()', async () => {
     let transactionCalled = false;
 
-    const txDb = {
+    // Use makeMockDb but wrap transaction to track calls
+    const txDbLocal = {
+      ...makeMockDb(),
       transaction: async (fn: (tx: any) => Promise<any>) => {
         transactionCalled = true;
-        return fn(txDb);
+        return fn(txDbLocal);
       },
     };
 
@@ -443,11 +464,10 @@ describe('[Wave 1.2] markDuesInvoicePaid — transactional boundary', () => {
     stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
       findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2025-12-31' }),
-      updateOneById: async () => fakeMembership,
     });
 
     const ctx = makeCtx({
-      database: txDb,
+      database: txDbLocal,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });
@@ -459,11 +479,19 @@ describe('[Wave 1.2] markDuesInvoicePaid — transactional boundary', () => {
   test('rolls back invoice mark-paid when membership update fails', async () => {
     let transactionCalled = false;
 
-    const txDb = {
+    // DB that tracks transaction calls but throws on persistWithComputedStatus
+    const failingDb: any = {
       transaction: async (fn: (tx: any) => Promise<any>) => {
         transactionCalled = true;
-        return fn(txDb);
+        return fn(failingDb);
       },
+      update: (_table: any) => ({
+        set: (_data: any) => ({
+          where: (_c: any) => ({
+            returning: async () => { throw new Error('Membership update failed'); },
+          }),
+        }),
+      }),
     };
 
     stubRepo(DuesInvoiceRepository, {
@@ -473,11 +501,10 @@ describe('[Wave 1.2] markDuesInvoicePaid — transactional boundary', () => {
     stubRepo(DuesRepository, { getConfig: async () => undefined });
     stubRepo(MembershipRepository, {
       findOneById: async () => ({ ...fakeMembership, duesExpiryDate: '2025-12-31' }),
-      updateOneById: async () => { throw new Error('Membership update failed'); },
     });
 
     const ctx = makeCtx({
-      database: txDb,
+      database: failingDb,
       _params: { invoiceId: 'inv-1' },
       _body: { paymentId: 'pay-1', paidAt: new Date().toISOString() },
     });

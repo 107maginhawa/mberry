@@ -1,6 +1,6 @@
 // Business Rules: [BR-06]
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
-import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { makeCtx, makeMockDb, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDuesPayment as createFakeDuesPayment, fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { recordDuesPayment } from './recordDuesPayment';
 import { DuesRepository } from './repos/dues-payments.repo';
@@ -28,16 +28,34 @@ const fakeFunds = [
   { id: 'fund-3', organizationId: 'org-1', name: 'Welfare Fund', percentage: '15', sortOrder: 3, active: true },
 ];
 
+const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
+
 const fakeMembership = createFakeMembership({
   id: 'mem-1',
   personId: 'person-1',
-  duesExpiryDate: '2025-06-30',
+  duesExpiryDate: FUTURE_EXPIRY,
 });
 
-/** Fake DB that passes tx through to callback (simulates transaction) */
-const txDb = {
-  transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
-};
+/** Fake DB supporting persistWithComputedStatus (db.update chain) + transactions */
+const txDb = makeMockDb();
+
+/**
+ * Capturing DB mock: intercepts db.update().set().where().returning() calls
+ * so tests can verify what was written (status, duesExpiryDate) by persistWithComputedStatus.
+ */
+function makeCapturingDb(onSet: (data: any) => void) {
+  const base = makeMockDb();
+  return {
+    ...base,
+    transaction: async (fn: any) => fn(makeCapturingDb(onSet)),
+    update: (_table: any) => ({
+      set: (data: any) => {
+        onSet(data);
+        return { where: (_c: any) => ({ returning: async () => [data] }) };
+      },
+    }),
+  };
+}
 
 // ─── Helpers ────────────────────────────────────────────
 
@@ -196,7 +214,9 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
   });
 
   test('extends annual member by 12 months from current expiry', async () => {
-    let updatedExpiry: string | undefined;
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((data) => { capturedSetData = data; });
+
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
@@ -207,14 +227,11 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     });
     stubRepo(MembershipRepository, {
       findMany: async () => [{ ...fakeMembership, duesExpiryDate: '2025-12-31' }],
-      updateOneById: async (_id: string, updates: any) => {
-        updatedExpiry = updates.duesExpiryDate;
-        return fakeMembership;
-      },
+      updateOneById: async () => fakeMembership,
     });
 
     const ctx = makeCtx({
-      database: txDb,
+      database: capturingDb,
       _body: {
         organizationId: 'org-1',
         personId: 'person-1',
@@ -225,9 +242,10 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     });
 
     await recordDuesPayment(ctx);
-    // Should extend from 2025-12-31 by 12 months → 2026-12-31
-    expect(updatedExpiry).toBeDefined();
-    expect(updatedExpiry!.startsWith('2026-12')).toBe(true);
+    // persistWithComputedStatus writes duesExpiryDate via db.update (not repo.updateOneById)
+    // Extended from 2025-12-31 by 12 months → 2026-12-31
+    expect(capturedSetData).toBeDefined();
+    expect(capturedSetData.duesExpiryDate.startsWith('2026-12')).toBe(true);
   });
 
   test('skips extension when no membership found', async () => {
@@ -403,15 +421,23 @@ describe('recordDuesPayment transaction atomicity', () => {
      */
     const callOrder: string[] = [];
 
-    const rawDb = {
+    const rawDb: any = {
       transaction: async (fn: (tx: any) => Promise<any>) => {
         callOrder.push('transaction');
-        const txObj = { transaction: async (innerFn: (t: any) => Promise<any>) => {
-          callOrder.push('nested-transaction');
-          return innerFn(txObj);
-        }};
+        const txObj: any = {
+          transaction: async (innerFn: (t: any) => Promise<any>) => {
+            callOrder.push('nested-transaction');
+            return innerFn(txObj);
+          },
+          update: (_table: any) => ({
+            set: (data: any) => ({ where: (_c: any) => ({ returning: async () => [data] }) }),
+          }),
+        };
         return fn(txObj);
       },
+      update: (_table: any) => ({
+        set: (data: any) => ({ where: (_c: any) => ({ returning: async () => [data] }) }),
+      }),
     };
 
     stubRepo(DuesRepository, {
@@ -452,13 +478,20 @@ describe('recordDuesPayment transaction atomicity', () => {
   test('happy path: payment + settlement wrapped in single outer transaction', async () => {
     let outerTxCallCount = 0;
 
-    const singleTxDb = {
+    const singleTxDb: any = {
       transaction: async (fn: (tx: any) => Promise<any>) => {
         outerTxCallCount++;
-        // Nested transactions just pass through (simulates savepoints)
-        const txObj = { transaction: async (innerFn: (t: any) => Promise<any>) => innerFn(txObj) };
+        const txObj: any = {
+          transaction: async (innerFn: (t: any) => Promise<any>) => innerFn(txObj),
+          update: (_table: any) => ({
+            set: (data: any) => ({ where: (_c: any) => ({ returning: async () => [data] }) }),
+          }),
+        };
         return fn(txObj);
       },
+      update: (_table: any) => ({
+        set: (data: any) => ({ where: (_c: any) => ({ returning: async () => [data] }) }),
+      }),
     };
 
     stubRepo(DuesRepository, {
