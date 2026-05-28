@@ -22,20 +22,44 @@
 
 ---
 
+## Active Work
+
+### Phase 47a: Institutional Memberships
+
+**Goal:** Implement multi-seat institutional (corporate/org) memberships — DB schema, repositories, all 8 CRUD + seat-allocation handlers, tests. Wire `requiredCredits` from CPD config API to member-table frontend component.
+
+**Scope:**
+- 2 new DB tables: `institutional_memberships`, `seat_allocations`
+- 8 handler implementations (replace DeferredScopeError stubs)
+- Repository layer + unit tests
+- Frontend: wire `requiredCredits` prop from org CPD config API
+
+### Phase 47b: National Dashboard Frontend + Booking Cleanup
+
+**Goal:** Build national dashboard frontend page for cross-chapter aggregate views (BR-36). Resolve 2 remaining booking job stubs.
+
+**Scope:**
+- Frontend page + route for national dashboard (backend already exists)
+- Auth gate for national admin role
+- Booking: fix `triggerSlotGeneration` (ownerId → eventId lookup)
+- Booking: TypeSpec route for manual job trigger endpoint
+
+---
+
 ## Planned Work — API Scaffolds
 
 TypeSpec-defined endpoints with generated routes, returning HTTP 501 via `DeferredScopeError`. Frontend does not call any of these. They are scaffolding for future features.
 
 | Handler | Module | Target | Description |
 |---------|--------|--------|-------------|
-| `listInstitutionalMemberships` | association:member | Wave 2 | List corporate/org memberships |
-| `getInstitutionalMembership` | association:member | Wave 2 | Get single institutional membership |
-| `createInstitutionalMembership` | association:member | Wave 2 | Create multi-seat org membership |
-| `updateInstitutionalMembership` | association:member | Wave 2 | Update institutional membership |
-| `deleteInstitutionalMembership` | association:member | Wave 2 | Delete institutional membership |
-| `allocateSeat` | association:member | Wave 2 | Allocate seat in institutional membership |
-| `revokeSeat` | association:member | Wave 2 | Revoke allocated seat |
-| `listSeatAllocations` | association:member | Wave 2 | List seat allocations |
+| `listInstitutionalMemberships` | association:member | Phase 47a | List corporate/org memberships |
+| `getInstitutionalMembership` | association:member | Phase 47a | Get single institutional membership |
+| `createInstitutionalMembership` | association:member | Phase 47a | Create multi-seat org membership |
+| `updateInstitutionalMembership` | association:member | Phase 47a | Update institutional membership |
+| `deleteInstitutionalMembership` | association:member | Phase 47a | Delete institutional membership |
+| `allocateSeat` | association:member | Phase 47a | Allocate seat in institutional membership |
+| `revokeSeat` | association:member | Phase 47a | Revoke allocated seat |
+| `listSeatAllocations` | association:member | Phase 47a | List seat allocations |
 
 > When implementing: replace `DeferredScopeError` throw with real logic, add tests, remove from this table.
 
@@ -47,10 +71,10 @@ Internal job scheduler stubs. These are NOT HTTP endpoints — they throw inside
 
 | Location | Description | Target |
 |----------|-------------|--------|
-| `booking/jobs/index.ts:61` | Slot regeneration with ownerId (needs API redesign) | Wave 2 |
-| `booking/jobs/index.ts:64` | Manual job trigger endpoint | Wave 2 |
-| `dues/jobs/index.ts:36` | Payment processor webhook settlement | Wave 2 |
-| `association:member/jobs/index.ts:32` | Payment processor integration | Wave 2 |
+| `booking/jobs/index.ts:61` | Slot regeneration with ownerId (needs API redesign) | Phase 47b |
+| `booking/jobs/index.ts:64` | Manual job trigger endpoint | Phase 47b |
+| ~~`dues/jobs/index.ts:36`~~ | ~~Payment processor webhook settlement~~ | ✅ Resolved (Phase 46) |
+| ~~`association:member/jobs/index.ts:32`~~ | ~~Payment processor integration~~ | ✅ Resolved (Phase 46) |
 
 ---
 
@@ -75,7 +99,7 @@ Dynamic configuration per association/tier. Currently hardcoded values.
 
 | Item | Location | Current | Target |
 |------|----------|---------|--------|
-| `requiredCredits` | `apps/memberry/src/features/membership/components/member-table.tsx:20` | Hardcoded to 40 | Dynamic from association config API per membership tier |
+| `requiredCredits` | `apps/memberry/src/features/membership/components/member-table.tsx:20` | Hardcoded default=60 (API wired in Phase 46) | Phase 47a — wire prop from parent component |
 
 > Prerequisite: Build association config endpoint that exposes CPD/CE credit requirements.
 
