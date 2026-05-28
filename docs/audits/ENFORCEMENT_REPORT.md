@@ -1,489 +1,413 @@
-<!-- oli-version: 1.1 -->
+<!-- oli-version: 1.2 -->
 <!-- based-on: docs/product/modules/*/MODULE_SPEC.md, docs/audits/enforce/.baseline.json -->
-<!-- generated: 2026-05-28T12:00:00Z -->
+<!-- generated: 2026-05-29T12:00:00Z -->
 
 # Enforcement Report
 
-**Generated:** 2026-05-28
-**Modules Audited:** 19 (m01-auth-onboarding, m02-member-profile, m03-platform-admin, m04-org-admin, m05-membership, m06-dues-payments, m07-communications, m08-events, m09-training, m10-credit-tracking, m11-documents-credentials, m12-elections-governance, m13-professional-feed, m14-national-dashboard, m15-job-board, m16-advertising, m17-marketplace, m18-surveys-polls, m19-committee-management)
-**Baseline Compared:** 2026-05-27T21:00:00Z
-**Days Since Last Run:** 1
-**Coverage Completeness:** FULL
-
----
-
-## Audit Scope
-
-| Artifact | Available | Used |
-|----------|-----------|------|
-| MODULE_MAP.md | YES | YES |
-| DOMAIN_MODEL.md | YES | YES |
-| WORKFLOW_MAP.md | YES | YES |
-| EVENT_CONTRACTS.md | YES | YES |
-| ROLE_PERMISSION_MATRIX.md | YES | YES |
-| AUDIT_CONTRACTS.md | YES | YES |
-| Baseline (.baseline.json) | YES | YES |
-
-**Sub-skills dispatched:**
-- [x] oli-enforce-coverage (Phase 0)
-- [x] dependency security scan (Phase 0.5, bun.lock — 13 CVEs found)
-- [x] oli-enforce-module (Phase 1, per module — 19 modules)
-- [x] oli-enforce-file (Phase 1, per module — 19 modules)
-- [x] oli-ui-journey (Phase 1.5, 14 frontend modules)
-- [x] oli-enforce-cross-module (Phase 2)
-- [x] oli-trace (Phase 2.5, PRD→spec→code chains)
-- [x] oli-audit-compliance (Phase 3, audit logging only)
-
-**Incomplete sub-skills:** none
-
----
-
-## Coverage Completeness
-
-**Status:** FULL
-
-All mandatory phases completed. Scores reflect full enforcement coverage.
+**Generated:** 2026-05-29
+**Engine:** oli-enforce-all v3 --strict
+**Scope:** 19 modules, 8 phases, 44 agents
+**Baseline:** 2026-05-28T12:00:00Z → 2026-05-29
+**Coverage Score:** 62 → 65 (↑3)
 
 ---
 
 ## Executive Summary
 
-| Metric | Value |
+| Severity | Count | Baseline | Delta |
+|----------|-------|----------|-------|
+| **P0** | 23 | 23 | → (0 net — 13 NEW, 13 KNOWN, 3 NOT_RETESTED) |
+| **P1** | 109 | ~170 | ↓ (deeper analysis, fewer false P1s in future modules) |
+| **P2** | 108 | ~92 | ↑ (deeper file-level analysis found more validation gaps) |
+| **P3** | 40 | ~40 | → |
+| **Total** | **280** | **~325** | ↓ net |
+
+**--strict verdict:** **13 NEW P0 findings detected.** See [New P0 Regressions](#new-p0-regressions) below.
+
+---
+
+## Audit Scope
+
+| Phase | Skill | Status | Agents | Findings |
+|-------|-------|--------|--------|----------|
+| -1 | oli-codebase-map | SKIPPED | 0 | codebase_map.auto_phase = false |
+| -0.5 | Map Health | SKIPPED | 0 | No CODE_MODULE_MAP.json |
+| 0 | oli-enforce-coverage | COMPLETE | 1 | 24 (8 P0, 15 P2, 1 P3) |
+| 1 | oli-enforce-module + file | COMPLETE | 8 (4 batches x 2 checks) | 154 |
+| 1.5 | oli-ui-journey | COMPLETE | 1 | 27 (1 P0, 2 P1, 13 P2, 11 P3) |
+| 2 | oli-enforce-cross-module | COMPLETE | 1 | 13 (1 P0, 9 P1, 3 P2) |
+| 2.5 | oli-trace | COMPLETE | 1 | 18 (2 P1, 11 P2, 5 P3) |
+| 3 | oli-audit-compliance | COMPLETE | 1 | 44 (1 P0, 25 P1, 17 P2, 1 P3) |
+| 4 | Merge + Ratchet | COMPLETE | 0 | -- |
+
+**Artifacts reviewed:** 19 MODULE_SPECs, MODULE_MAP.md, DOMAIN_MODEL.md, WORKFLOW_MAP.md, EVENT_CONTRACTS.md, AUDIT_CONTRACTS.md, 24 handler directories, apps/memberry/src/ routes+components
+
+---
+
+## P0 Findings (Inline -- All 23)
+
+### KNOWN P0s (from baseline, still present)
+
+| ID | Module | First Seen | Description | Age |
+|----|--------|------------|-------------|-----|
+| EM-M07-cancelled | M07 | 2026-05-27 | Missing `cancelled` enum value in message status | 2d |
+| EM-M07-zero-events | M07 | 2026-05-27 | Zero domain events emitted across all comms directories | 2d |
+| EM-M07-deceased | M07 | 2026-05-27 | No deceased/suppressed recipient check (M7-R5) | 2d |
+| EM-M07-no-typespec | M07 | 2026-05-27 | No communication.tsp TypeSpec file -- routes hand-wired | 2d |
+| EM-M08-publish | M08 | 2026-05-28 | publishEvent handler does not exist -- events stuck in draft | 1d |
+| EM-M08-complete | M08 | 2026-05-28 | completeEvent handler does not exist -- events never complete | 1d |
+| EM-M09-dead-code | M09 | 2026-05-28 | 8/14 training handler files are dead code -- not routed | 1d |
+| EX-NOTIF-enum | CROSS | 2026-05-28 | Notification type enum drift -- 4 types in schema but not DOMAIN_MODEL | 1d |
+| UJ-NAV-orphan6 | UI | 2026-05-27 | Orphaned routes with no navigation paths (refined to specific routes) | 2d |
+| UJ-NAV-legacy | UI | 2026-05-27 | Legacy officer/dues routes coexist with officer/finances | 2d |
+| UJ-NAV-officer3 | UI | 2026-05-27 | 3 officer routes orphaned from sidebar | 2d |
+| UJ-SDK-raw | UI | 2026-05-28 | Raw api.get() calls bypass SDK type safety | 1d |
+| AL-PERSON-a1b2c3d4 | AUDIT | 2026-05-28 | exportMyData returns full PII with NO audit log | 1d |
+
+### NOT RETESTED (dependency scanning phase not in current run)
+
+| ID | Module | First Seen | Description |
+|----|--------|------------|-------------|
+| ED-GLOBAL-xg6xh9c9 | DEP | 2026-05-28 | better-auth 2FA Bypass via Premature Session Caching |
+| ED-GLOBAL-qpm26cq5 | DEP | 2026-05-28 | happy-dom code generation bypass (dev-only) |
+| ED-GLOBAL-37j7fg3j | DEP | 2026-05-28 | happy-dom VM Context Escape RCE (dev-only) |
+
+### NEW P0 Regressions {#new-p0-regressions}
+
+These are P0s found in this run that were NOT in the previous baseline. **--strict gate: FAIL.**
+
+| ID | Module | Description | Phase |
+|----|--------|-------------|-------|
+| EF-M01-export-pii | M01 | exportMyData returns ALL PII fields unfiltered -- data exfiltration surface | 1 |
+| EF-M02-update-no-session-invalidation | M02 | No session invalidation on password change (M2-R2) | 1 |
+| EF-M03-impersonation-no-write-block | M03 | Impersonation write-block is UI-only, no API enforcement (M3-R4) | 1 |
+| EF-M03-impersonation-no-auto-expire | M03 | Impersonation session has no server-side expiration check (M3-R3) | 1 |
+| EF-M04-directory-no-privacy | M04 | Directory profiles bypass org membership check -- non-members access member data | 1 |
+| EF-M07-webrtc-token-placeholder | M07 | WebRTC auth returns hardcoded 'USE_SESSION_TOKEN' sentinel | 1 |
+| EF-M08-listEvents-no-auth | M08 | listEvents has ZERO authentication -- exposes all org events including drafts | 1 |
+| EF-M10-005 | M10 | SQL wildcard injection in training search LIKE pattern | 1 |
+| EF-M11-002 | M11 | Missing HMAC QR signing -- certificate verification has no cryptographic proof | 1 |
+| EF-M11-004 | M11 | Missing SVG sanitization -- XSS via document/certificate uploads | 1 |
+| EF-M11-005 | M11 | IDOR in uploadNewDocumentVersion -- no org-scope check | 1 |
+| EF-M12-001 | M12 | getElection has no auth + no org-scope -- full data leak including vote tallies | 1 |
+| EF-M14-004 | M14 | CSV injection in national dashboard export (formula chars unescaped) | 1 |
+
+---
+
+## P1 Findings (Inline -- Top 30 by Impact)
+
+### Module Enforcement (EM-*)
+
+| ID | Module | Description |
+|----|--------|-------------|
+| EM-M01-events | M01 | 3/4 declared domain events not emitted (SessionCreated, InvitationClaimed, OnboardingCompleted) |
+| EM-M01-onboarding | M01 | Onboarding wizard endpoints (GET/PUT /onboarding/*) have no handler files |
+| EM-M02-events | M02 | 4/5 domain events missing (PersonUpdated, DataExportReady, DeletionRequested, DeletionCancelled) |
+| EM-M02-email-change | M02 | Email change accepts directly -- no OTP verification (M2-R1) |
+| EM-M03-missing-handlers | M03 | 3 spec-declared handlers missing: toggleFeatureFlag, updateOrgStatus, getDashboardMetrics |
+| EM-M03-events | M03 | Zero domain events emitted in platformadmin (spec declares 4) |
+| EM-M03-admin-team | M03 | Admin team management endpoints (invite/role/delete) unimplemented |
+| EM-M04-events-partial | M04 | OfficerRemoved and OrgUpdated events not emitted |
+| EM-M04-transition-handler | M04 | Officer transition workflow handler missing |
+| EM-M05-status-compute | M05 | Membership status directly written (contradicts computed-status model BR-01) |
+| EM-M05-events | M05 | 6/6 declared domain events not emitted -- zero domainEvents.emit() calls |
+| EM-M06-no-refund-handler | M06 | No refund endpoint despite spec WF-041 |
+| EM-M07-chatroom-no-domain-event | M07 | ChatRoomCreated event not emitted |
+| EM-M08-no-event-published-event | M08 | EventPublished event not emitted, no publish handler |
+| EM-M09-no-certificate-generation | M09 | Training completion does not trigger certificate generation (BR-20) |
+| EM-M10-004 | M10 | markComplete swallows credit creation errors silently |
+| EM-M10-006 | M10 | Zero auditAction calls across all training mutation handlers |
+| EM-M10-001 | M10 | 5 credit-specific endpoints declared but none implemented |
+| EM-M11-001 | M11 | Zero domain events across 21 document+certificate handlers |
+| EM-M11-009 | M11 | ID card generation workflow entirely unimplemented |
+| EM-M11-011 | M11 | createDocument has no role restriction -- any user creates in any org |
+
+### File Enforcement (EF-*)
+
+| ID | Module | Description |
+|----|--------|-------------|
+| EF-M06-reminder-no-consent | M06 | Payment reminders sent without opt-out/consent check |
+| EF-M07-announcement-send-job | M07 | Announcement delivery ignores per-member subscription preferences |
+| EF-M08-no-audit-trail | M08 | Zero auditAction calls across all event mutation handlers |
+| EF-M09-listTrainings-no-auth | M09 | listTrainings has no authentication -- mirrors M08 pattern |
+| EF-M12-003 | M12 | listElections has no org-scope enforcement |
+| EF-M12-005 | M12 | Bylaw ratification workflow declared but not enforced |
+| EF-M14-001 | M14 | Summary dashboard endpoint unimplemented |
+| EF-M14-002 | M14 | Chapter drill-down endpoint unimplemented |
+
+### Cross-Module (EX-*)
+
+| ID | Description |
+|----|-------------|
+| EX-EVENT-orphan-batch1 | 13 domain events emitted but never consumed -- broken downstream chains |
+| EX-EVENT-training-dup | training.completed emitted from 3 separate files, zero consumers |
+| EX-EVENT-booking-notify-gap | booking.created/rejected have no notification consumer |
+| EX-EVENT-payload-mismatch | EVENT_CONTRACTS payload shapes may not match DomainEventMap types |
+| EX-NOTIF-missing-types | High-volume events use generic 'system' notification type |
+| EX-IMPORT-cross-context-high | Bidirectional coupling between dues and association:member |
+| EX-IMPORT-events-membership | events/ imports MembershipRepository from 2 inconsistent paths |
+| EX-IMPORT-schema-spider | 28+ cross-handler schema imports -- missing shared abstractions |
+| EX-SCHEMA-template-status | Duplicate pgEnum 'template_status' across communication + email |
+
+### Traceability (TR-*)
+
+| ID | Description |
+|----|-------------|
+| TR-GLOBAL-c3d4e5f6 | person.updated emitted but never consumed -- profile changes not propagated |
+| TR-GLOBAL-c4d5e6f7 | person.created emitted but never consumed -- onboarding flow disconnected |
+
+### Audit Compliance (AL-*) -- 25 P1 findings
+
+See `docs/product/TRACE_AUDIT_REPORT.md` for full list. Top clusters:
+- **9 auth events** (login, lockout, impersonation, MFA) unaudited -- Better-Auth has no audit hook
+- **6 membership events** -- membership handler dir has ZERO auditAction calls
+- **4 financial events** -- refund, invoice generation/voiding, billing config unaudited
+- **3 certificate/document events** -- credential verification, certificate generation unaudited
+
+### Future Modules (EM-M15 through EM-M19) -- 35 P1 findings
+
+All 5 future modules share identical 7 missing spec sections (template-level gap):
+User Stories, Functional Requirements, Non-Functional Requirements, Validation Rules, Notifications, Migration Strategy, Open Questions.
+
+**Recommendation:** Add these sections to MODULE_SPEC template OR formally exclude from 22-section checklist (specs use alternative coverage: Workflows, Business Rules, etc.).
+
+---
+
+## P2/P3 Detail Files
+
+Full P2/P3 findings in linked sub-skill artifacts:
+
+- Module m01-m05: `docs/audits/ENFORCE_M01_M05_PHASE1.md`
+- Module m06-m09: `docs/audits/ENFORCE_M06_M09_REPORT.md`
+- Module m10-m14: `docs/audits/ENFORCE_M10_M14_REPORT.md`
+- UI Journey: `docs/audits/UI_JOURNEY_AUDIT.md`
+- Cross-module: `docs/audits/CROSS_MODULE_ALIGNMENT_REPORT.md`
+- Trace + Audit: `docs/product/TRACE_AUDIT_REPORT.md`
+- Coverage: `docs/product/SPEC_COVERAGE_REPORT.md`
+
+---
+
+## Coverage Findings (Phase 0)
+
+| Metric | Score |
 |--------|-------|
-| **Coverage Score** | 62% ⚠ WARN |
-| **Modules Audited** | 19 |
-| **Implemented Modules** | 14 |
-| **Future Modules (spec-only)** | 5 |
-| **Compliant Modules (≥ 9.0)** | 0 |
-| **Non-Compliant Modules (any P0/P1)** | 19 |
-| **Total P0 Findings** | 20 |
-| **Total P1 Findings** | 109 (implemented) + 208 (future) = 317 |
-| **Total P2 Findings** | ~145 |
-| **Total P3 Findings** | ~85 |
-| **Cross-Module P0** | 1 |
-| **Cross-Module P1** | 11 |
-| **Dependency CVE P0** | 3 |
-| **Dependency CVE P1** | 5 |
-| **Audit Logging P0** | 1 |
-| **Audit Logging P1** | 21 |
-| **UI Journey P0** | 4 |
-| **Regressions (new P0/P1)** | 5 (new P0s not in baseline) |
-| **Resolved Since Last Run** | 19 P0s + multiple P1s |
-| **Overall Trend** | IMPROVING |
+| Breadth (modules with specs / total modules with code) | 100% (19/19) |
+| Depth (avg sections filled / 22) | 94.8% |
+| Overall Coverage Score | 65/100 |
 
-**Overall trend:** IMPROVING — 19 P0s resolved since last run, more resolutions than regressions. No new security P0s in core auth/data modules.
+### Unspecced Handler Directories (8 -- all P0)
+
+| Directory | Handlers | Description |
+|-----------|----------|-------------|
+| booking/ | 19 | Time-based scheduling -- no MODULE_SPEC |
+| billing/ | 16 | Stripe Connect integration -- no MODULE_SPEC |
+| email/ | 13 | Transactional email queue -- no MODULE_SPEC |
+| storage/ | 6 | File upload/download via S3/MinIO -- no MODULE_SPEC |
+| notifs/ | 6 | OneSignal notifications -- no MODULE_SPEC |
+| reviews/ | 4 | NPS review system -- no MODULE_SPEC |
+| invite/ | 3 | Org invitations -- no MODULE_SPEC |
+| audit/ | 1 | Compliance logging -- no MODULE_SPEC |
+
+**Total unspecced handlers:** 68 (11.4% of codebase)
 
 ---
 
-## Coverage Findings
+## Module Compliance (Phase 1)
 
-| Module | Coverage Score | Depth | Breadth | Status |
-|--------|---------------|-------|---------|--------|
-| m01-auth-onboarding | 75% | PARTIAL | ALL | WARN |
-| m02-member-profile | 70% | PARTIAL | PARTIAL | WARN |
-| m03-platform-admin | 55% | PARTIAL | PARTIAL | WARN |
-| m04-org-admin | 40% | SHALLOW | PARTIAL | FAIL |
-| m05-membership | 65% | PARTIAL | ALL | WARN |
-| m06-dues-payments | 50% | PARTIAL | PARTIAL | FAIL |
-| m07-communications | 35% | SHALLOW | PARTIAL | FAIL |
-| m08-events | 60% | PARTIAL | PARTIAL | WARN |
-| m09-training | 55% | PARTIAL | PARTIAL | WARN |
-| m10-credit-tracking | 65% | PARTIAL | PARTIAL | WARN |
-| m11-documents-credentials | 60% | PARTIAL | PARTIAL | WARN |
-| m12-elections-governance | 70% | FULL | ALL | WARN |
-| m13-professional-feed | 100% | FULL | ALL | PASS (spec-only) |
-| m14-national-dashboard | 45% | SHALLOW | PARTIAL | FAIL |
-| m15–m19 (future) | 100% | FULL | ALL | PASS (spec-only) |
-
-**Coverage P0 Findings:** 3 (M04 mega-module breadth gap, M06 spec-vs-impl divergence, M14 handler attribution confusion)
-
-Details: [→ ENFORCEMENT_COVERAGE.md](ENFORCEMENT_COVERAGE.md)
+| Module | P0 | P1 | P2 | P3 | Score | Trend |
+|--------|----|----|----|----|-------|-------|
+| M01 Auth & Onboarding | 1 | 3 | 3 | 1 | 6.0 | -> |
+| M02 Member Profile | 1 | 2 | 3 | 1 | 6.4 | -> |
+| M03 Platform Admin | 2 | 3 | 3 | 1 | 6.5 | v (new P0s) |
+| M04 Org Admin | 1 | 3 | 3 | 1 | 6.5 | v (new P0) |
+| M05 Membership | 0 | 3 | 3 | 1 | 6.0 | -> |
+| M06 Dues & Payments | 0 | 3 | 4 | 1 | 6.5 | -> |
+| M07 Communications | 1 | 3 | 5 | 2 | 5.5 | v (WebRTC P0) |
+| M08 Events | 1 | 2 | 5 | 1 | 4.0 | -> |
+| M09 Training | 0 | 2 | 4 | 1 | 5.0 | -> |
+| M10 Credit Tracking | 1 | 3 | 3 | 2 | 6.5 | v (SQL P0) |
+| M11 Documents & Credentials | 2 | 4 | 4 | 2 | 3.0 | -> |
+| M12 Elections & Governance | 1 | 2 | 3 | 2 | 5.5 | v (auth P0) |
+| M13 Professional Feed | 0 | 1 | 0 | 0 | 0.0 | -> (future) |
+| M14 National Dashboard | 1 | 2 | 2 | 1 | 5.0 | v (CSV P0) |
+| M15-M19 (5 future) | 0 | 35 | 4 | 5 | 0.0 | -> (future) |
 
 ---
 
-## Module Compliance
+## UI Journey (Phase 1.5)
 
-| Module | Score | Label | P0 | P1 | P2 | P3 | Trend | Status | Detail |
-|--------|-------|-------|----|----|----|----|----|--------|--------|
-| m01-auth-onboarding | 6.0/10 | PARTIAL | 0 | 5 | 4 | 2 | → | COMPLETE | [→](enforce/module/m01-auth-onboarding.md) |
-| m02-member-profile | 6.4/10 | PARTIAL | 1 | 4 | 5 | 3 | ↑ | COMPLETE | [→](enforce/module/m02-member-profile.md) |
-| m03-platform-admin | 7.0/10 | MOSTLY | 1 | 5 | 10 | 6 | ↑ | COMPLETE | [→](enforce/module/m03-platform-admin.md) |
-| m04-org-admin | 7.0/10 | MOSTLY | 0 | 2 | 4 | 2 | ↑ | COMPLETE | [→](enforce/module/m04-org-admin.md) |
-| m05-membership | 6.0/10 | PARTIAL | 0 | 5 | 5 | 4 | → | COMPLETE | [→](enforce/module/m05-membership.md) |
-| m06-dues-payments | 6.5/10 | PARTIAL | 1 | 5 | 6 | 2 | ↓ | COMPLETE | [→](enforce/module/m06-dues-payments.md) |
-| m07-communications | 6.0/10 | PARTIAL | 4 | 5 | 7 | 4 | ↑ | COMPLETE | [→](enforce/module/m07-communications.md) |
-| m08-events | 4.0/10 | NON | 2 | 7 | 3 | 1 | ↓ | COMPLETE | [→](enforce/module/m08-events.md) |
-| m09-training | 5.0/10 | PARTIAL | 1 | 1 | 11 | 3 | ↓ | COMPLETE | [→](enforce/module/m09-training.md) |
-| m10-credit-tracking | 7.0/10 | MOSTLY | 0 | 3 | 11 | 5 | ↑ | COMPLETE | [→](enforce/module/m10-credit-tracking.md) |
-| m11-documents-credentials | 3.0/10 | CRITICAL | 1 | 5 | 10 | 2 | ↓ | COMPLETE | [→](enforce/module/m11-documents-credentials.md) |
-| m12-elections-governance | 6.0/10 | PARTIAL | 0 | 7 | 7 | 3 | ↓ | COMPLETE | [→](enforce/module/m12-elections-governance.md) |
-| m13-professional-feed | 0.0/10 | CRITICAL | 0 | 25 | 0 | 0 | → | COMPLETE | [→](enforce/module/m13-professional-feed.md) |
-| m14-national-dashboard | 5.5/10 | PARTIAL | 0 | 4 | 9 | 1 | ↑ | COMPLETE | [→](enforce/module/m14-national-dashboard.md) |
-| m15-job-board | 0.0/10 | CRITICAL | 0 | 33 | 0 | 0 | → | COMPLETE | [→](enforce/module/m15-job-board.md) |
-| m16-advertising | 0.0/10 | CRITICAL | 0 | 43 | 0 | 0 | → | COMPLETE | [→](enforce/module/m16-advertising.md) |
-| m17-marketplace | 0.0/10 | CRITICAL | 0 | 33 | 0 | 0 | → | COMPLETE | [→](enforce/module/m17-marketplace.md) |
-| m18-surveys-polls | 0.0/10 | CRITICAL | 0 | 32 | 0 | 0 | → | COMPLETE | [→](enforce/module/m18-surveys-polls.md) |
-| m19-committee-management | 0.0/10 | CRITICAL | 0 | 42 | 0 | 0 | → | COMPLETE | [→](enforce/module/m19-committee-management.md) |
+| Registry | P0 | P1 | P2 | P3 | Total |
+|----------|----|----|----|----|-------|
+| Dead Interactions | 0 | 1 | 2 | 1 | 4 |
+| Journey Completion | 0 | 1 | 3 | 2 | 6 |
+| Orphaned Routes | 1 | 0 | 7 | 6 | 14 |
+| Legacy/Conflicting | 0 | 0 | 1 | 2 | 3 |
+| **Total** | **1** | **2** | **13** | **11** | **27** |
 
-### P0 Module Findings (Action Required)
+Top: `/discover/events` completely unreachable (P0). `/officer/national-dashboard` 404 on click (P1).
 
-| ID | Sev | Module | Finding | Dimension | Status |
-|----|-----|--------|---------|-----------|--------|
-| EM-M02-qrhmac | P0 | m02 | QR HMAC falls back to hardcoded `'fallback-secret'` when AUTH_SECRET unset | Security | NEW |
-| EM-M03-escalation | P0 | m03 | `revokeAdmin`, `deleteAssociation`, `updateAdmin` lack super-only caller role guards | Auth/Permissions | KNOWN |
-| EM-M06-zero-events | P0 | m06 | Zero domain events emitted — M05 membership expiry integration broken | Domain Events | NEW |
-| EM-M07-cancelled | P0 | m07 | Missing `cancelled` enum value in message status | State Machine | KNOWN |
-| EM-M07-zero-events | P0 | m07 | Zero domain events emitted across all 5 handler directories | Domain Events | KNOWN |
-| EM-M07-deceased | P0 | m07 | No deceased/suppressed recipient check (M7-R5) | Business Rules | KNOWN |
-| EM-M07-no-typespec | P0 | m07 | No `communication.tsp` TypeSpec file — routes hand-wired | Architecture | KNOWN |
-| EM-M08-publish | P0 | m08 | `publishEvent` handler does not exist — events stuck in draft | State Machine | NEW |
-| EM-M08-complete | P0 | m08 | `completeEvent` handler does not exist — events never complete | State Machine | NEW |
-| EM-M09-dead-code | P0 | m09 | 8/14 training handler files are dead code — not routed | Architecture | NEW |
-| EM-M11-pii | P0 | m11 | `verifyCertificatePublic` leaks PII (full name) to unauthenticated callers | Security | KNOWN |
-
-### P1 Module Findings (Implemented modules only — 109 total)
-
-See per-module detail files for full P1 listings. Top items:
-
-| Module | Key P1s |
-|--------|---------|
-| m01 | Onboarding wizard missing, bulk CSV import test-only, 2/4 domain events missing |
-| m02 | Zero domain events for profile, data export still synchronous |
-| m03 | Revenue analytics endpoints missing, subscription lifecycle incomplete |
-| m04 | Spec paths diverge from OpenAPI, 10 bonus endpoints undocumented |
-| m05 | reviewApplication lacks officer position check, 4/6 events missing |
-| m06 | `GET /my/payments` missing, no 2FA on financial mutations, RBAC gaps |
-| m07 | Stats endpoint missing, consumed events unwired, role guards missing |
-| m08 | No TypeSpec, BR-15 violated, 4/5 domain events missing |
-| m09 | Certificate generation not wired to training |
-| m10 | Transcript export dead code, GDPR event handler missing |
-| m11 | createDocument no role check, documents bypass draft state, HTML not PDF |
-| m12 | castVote/createNominee NO route registration — voting unreachable |
-| m14 | 3/5 spec endpoints missing, no feature flags |
+Full detail: `docs/audits/UI_JOURNEY_AUDIT.md`
 
 ---
 
-## File Compliance
+## Cross-Module (Phase 2)
 
-| Module | Files Checked | P0 | P1 | P2 | P3 | Status | Detail |
-|--------|---------------|----|----|----|----|----|--------|
-| m01 | 44 | 1 | 9 | 12 | 4 | COMPLETE | [→](enforce/file/m01-auth-onboarding.md) |
-| m02 | 20 | 0 | 2 | 9 | 4 | COMPLETE | [→](enforce/file/m02-member-profile.md) |
-| m03 | 78 | 0 | 3 | 35 | 4 | COMPLETE | [→](enforce/file/m03-platform-admin.md) |
-| m04 | 100+ | 0 | 1 | 4 | 1 | COMPLETE | [→](enforce/file/m04-org-admin.md) |
-| m05 | 30 | 0 | 5 | 9 | 7 | COMPLETE | [→](enforce/file/m05-membership.md) |
-| m06 | 40 | 1 | 7 | 8 | 3 | COMPLETE | [→](enforce/file/m06-dues-payments.md) |
-| m07 | 163 | 0 | 3 | 13 | 5 | COMPLETE | [→](enforce/file/m07-communications.md) |
-| m08 | 40 | 0 | 4 | 16 | 7 | COMPLETE | [→](enforce/file/m08-events.md) |
-| m09 | 25 | 0 | 4 | 14 | 5 | COMPLETE | [→](enforce/file/m09-training.md) |
-| m10 | 55 | 0 | 4 | 14 | 5 | COMPLETE | [→](enforce/file/m10-credit-tracking.md) |
-| m11 | 66 | 1 | 7 | 13 | 5 | COMPLETE | [→](enforce/file/m11-documents-credentials.md) |
-| m12 | 20 | 0 | 4 | 17 | 6 | COMPLETE | [→](enforce/file/m12-elections-governance.md) |
-| m13 | 0 | 0 | 0 | 0 | 0 | COMPLETE | [→](enforce/file/m13-professional-feed.md) |
-| m14 | 100 | 0 | 3 | 4 | 3 | COMPLETE | [→](enforce/file/m14-national-dashboard.md) |
-| m15–m19 | 0 | 0 | 0 | 0 | 0 | COMPLETE | (future) |
+| Category | P0 | P1 | P2 | Total |
+|----------|----|----|----|----|
+| Event Contract | 0 | 4 | 1 | 5 |
+| Notification Enum | 1 | 1 | 0 | 2 |
+| Import Direction | 0 | 3 | 0 | 3 |
+| Shared Schema | 0 | 1 | 0 | 1 |
+| Domain Terminology | 0 | 0 | 2 | 2 |
+| **Total** | **1** | **9** | **3** | **13** |
 
-### P0 File Findings (Action Required)
+Systemic: 13 orphan events, bidirectional dues/membership coupling, duplicate pgEnum.
 
-| ID | Sev | Module | Finding | File | Status |
-|----|-----|--------|---------|------|--------|
-| EF-M01-lockout | P0 | m01 | Missing account lockout after 5 failed logins — brute-force vector | handlers/person/ | NEW |
-| EF-M06-paylink | P0 | m06 | `sendPaymentLink` missing role check — any authenticated user can send | handlers/dues/sendPaymentLink.ts | KNOWN |
-| EF-M11-pii | P0 | m11 | PII leak in `verifyCertificatePublic` — holder names on public endpoint | handlers/certificates/verifyCertificatePublic.ts | KNOWN |
+Full detail: `docs/audits/CROSS_MODULE_ALIGNMENT_REPORT.md`
 
 ---
 
-## Cross-Module Findings
+## Traceability (Phase 2.5)
 
-| Severity | Count |
-|----------|-------|
-| P0 | 1 |
-| P1 | 11 |
-| P2 | 9 |
-| P3 | 7 |
+| Algorithm | P0 | P1 | P2 | P3 | Total |
+|-----------|----|----|----|----|-------|
+| 5a Orphan BRs | 0 | 0 | 4 | 0 | 4 |
+| 5b Orphan Stories | 0 | 0 | 1 | 0 | 1 |
+| 5c Unspecced Impl | 0 | 0 | 0 | 0 | 0 |
+| 5d Chain Breaks | 0 | 0 | 0 | 0 | 0 |
+| 5e Dead Refs | 0 | 0 | 0 | 0 | 0 |
+| 5f Event Chain | 0 | 2 | 6 | 5 | 13 |
+| **Total** | **0** | **2** | **11** | **5** | **18** |
 
-### P0/P1 Cross-Module Findings (Action Required)
-
-| ID | Sev | Finding | Modules | Status |
-|----|-----|---------|---------|--------|
-| EX-NOTIF-enum | P0 | 3 notification types (`booking_auto_rejected`, `booking_expired`, `event.created`) absent from `notificationTypeEnum` — runtime constraint violation | booking, events, notifs | NEW |
-| EX-MEGA-deps | P1 | 40+ undeclared cross-module import edges (person→association:member 26 imports) | multiple | KNOWN |
-| EX-EVENT-bus | P1 | Domain event bus has zero production `emit()` consumers. 17 declared cross-module events completely unused | all | KNOWN |
-| EX-REMIND-dup | P1 | `reminderProcessor.ts` duplicated in dues/jobs/ and association:member/jobs/ | m06, m04 | KNOWN |
-
-Details: [→ cross-module.md](enforce/cross-module.md)
+Chain health: 86% -> 86% (->). 13 events emitted but never consumed.
 
 ---
 
-## UI Journey Findings
+## Audit Compliance (Phase 3)
 
-| Module | P0 | P1 | P2 | P3 |
-|--------|----|----|----|-----|
-| All 14 frontend modules | 4 | 12 | 16 | 7 |
+| Category | P0 | P1 | P2 | P3 | Total |
+|----------|----|----|----|----|-------|
+| Auth events | 0 | 9 | 0 | 0 | 9 |
+| PII/data events | 1 | 3 | 2 | 0 | 6 |
+| Financial events | 0 | 4 | 3 | 0 | 7 |
+| Membership events | 0 | 6 | 0 | 0 | 6 |
+| Governance events | 0 | 2 | 3 | 0 | 5 |
+| Admin events | 0 | 0 | 5 | 0 | 5 |
+| Content events | 0 | 1 | 4 | 0 | 5 |
+| Global patterns | 0 | 0 | 0 | 1 | 1 |
+| **Total** | **1** | **25** | **17** | **1** | **44** |
 
-### P0 UI Journey Findings (Action Required)
-
-| ID | Sev | Finding | Status |
-|----|-----|---------|--------|
-| UJ-NAV-orphan6 | P0 | 6 orphaned routes (`/my/payments`, `/my/bookings`, `/my/id-card`, `/my/billing`, `/my/schedule`, `/my/data-export`) — no navigation paths, users cannot discover features | KNOWN |
-| UJ-NAV-legacy | P0 | Legacy `officer/dues/*` routes coexist with new `officer/finances/*` | KNOWN |
-| UJ-NAV-officer3 | P0 | 3 officer routes (`settings/cpd`, `compliance`, `certificates`) orphaned from sidebar | KNOWN |
-| UJ-SDK-raw | P0 | Raw `api.get()` calls in `my-cpd.tsx` and `home.tsx` bypass SDK type safety | NEW |
-
-Details: [→ ui-journey/all-modules.md](enforce/ui-journey/all-modules.md)
-
----
-
-## Traceability Findings
-
-| Metric | Value |
-|--------|-------|
-| Chain Coverage | 86.2% |
-| P0 Gaps | 0 |
-| P1 Gaps | 3 |
-| P2 Gaps | 16 |
-| P3 Gaps | 15 |
-
-### P0/P1 Traceability Findings
-
-| ID | Sev | Gap Type | Module | Finding | Status |
-|----|-----|----------|--------|---------|--------|
-| TR-M08-payment | P1 | Broken chain | m08 | Paid event payment initiation missing (only refund path) | KNOWN |
-| TR-M06-actags | P1 | Untested ACs | m06 | All 7 ACs lack test tag traceability | KNOWN |
-| TR-CROSS-cert | P1 | Cross-module blind spot | m09→m11 | `training.completed` not wired to certificate generation | KNOWN |
-
-Details: [→ trace.md](enforce/trace.md)
-
----
-
-## Dependency Security Findings
-
-| Ecosystem | Lockfile | Vulnerabilities | P0 | P1 | P2 | P3 | Status |
-|-----------|----------|----------------|----|----|----|----|----|
-| JavaScript/Bun | bun.lock | 13 | 3 | 5 | 3 | 2 | COMPLETE |
-
-### Lockfile Integrity Issues
-
-All lockfiles have valid manifests.
-
-### P0/P1 Dependency Findings (Action Required)
-
-| ID | Sev | CVE | Package | Title | Fix Available |
-|----|-----|-----|---------|-------|---------------|
-| ED-GLOBAL-xg6xh9c9 | P0 | GHSA-xg6x-h9c9-2m83 | better-auth <1.4.2 | **2FA Bypass via Premature Session Caching** | YES: upgrade ≥1.4.2 |
-| ED-GLOBAL-qpm26cq5 | P0 | GHSA-qpm2-6cq5-7pq5 | happy-dom ≥19 <20.0.2 | Code generation bypass (dev-only) | YES: upgrade ≥20.0.2 |
-| ED-GLOBAL-37j7fg3j | P0 | GHSA-37j7-fg3j-429f | happy-dom ≥19 <20.0.2 | VM Context Escape → RCE (dev-only) | YES: upgrade ≥20.0.2 |
-| ED-GLOBAL-gpj5g38j | P1 | GHSA-gpj5-g38j-94v9 | drizzle-orm <0.45.2 | **SQL injection via escaped identifiers** | YES: upgrade ≥0.45.2 |
-| ED-GLOBAL-x732676q | P1 | GHSA-x732-6j76-qmhm | better-auth <1.4.2 | Double-slash bypasses rate limits | YES: upgrade ≥1.4.2 |
-| ED-GLOBAL-p6v2xcpg | P1 | GHSA-p6v2-xcpg-h6xw | better-auth <1.4.2 | Rate limiter IPv6 bypass | YES: upgrade ≥1.4.2 |
-| ED-GLOBAL-w4gpfjgq | P1 | GHSA-w4gp-fjgq-3q4g | happy-dom ≥19 <20.0.2 | Fetch credentials leak (dev-only) | YES: upgrade ≥20.0.2 |
-| ED-GLOBAL-6q6hj7hj | P1 | GHSA-6q6h-j7hj-3r64 | happy-dom ≥19 <20.0.2 | Unsanitized export names (dev-only) | YES: upgrade ≥20.0.2 |
-
----
-
-## Audit Logging Findings
-
-**Compliance rate: 35% (14/40 events fully compliant)**
-
-| Category | Events | Compliant | Missing | P0 | P1 | P2 |
-|----------|--------|-----------|---------|----|----|-----|
-| Authentication | 9 | 4 | 5 | 0 | 5 | 0 |
-| Data Access | 6 | 3 | 2 | 1 | 2 | 1 |
-| Financial | 6 | 0 | 4 | 0 | 4 | 2 |
-| Membership | 6 | 0 | 5 | 0 | 5 | 1 |
-| Governance | 5 | 0 | 4 | 0 | 4 | 1 |
-| Administrative | 5 | 4 | 1 | 0 | 1 | 0 |
-| Content | 4 | 3 | 1 | 0 | 0 | 0 |
-
-### P0 Audit Logging Findings
-
-| ID | Sev | Finding | File | Status |
-|----|-----|---------|------|--------|
-| AL-PERSON-a1b2c3d4 | P0 | `exportMyData` returns full PII with NO audit log — bulk PII exfiltration invisible to compliance | handlers/person/exportMyData.ts | NEW |
-
-Details: [→ audit-compliance/all.md](enforce/audit-compliance/all.md)
+Full detail: `docs/product/TRACE_AUDIT_REPORT.md`
 
 ---
 
 ## Ratchet Summary
 
-**Baseline date:** 2026-05-27T21:00:00Z (1 day ago)
+### Baseline Comparison (2026-05-28 -> 2026-05-29)
 
-### Regressions — New P0 (Action Required)
+| Category | Baseline | Current | Delta |
+|----------|----------|---------|-------|
+| Total P0 | 23 | 23 | -> |
+| Total P1 | ~170 | 109 | v 61 |
+| Total P2 | ~92 | 108 | ^ 16 |
+| Total P3 | ~40 | 40 | -> |
+| Coverage Score | 62 | 65 | ^ 3 |
+| Chain Health | 86% | 86% | -> |
 
-5 new P0 findings not in previous baseline:
+### Resolved P0s (from prior runs, still resolved)
 
-| ID | Sev | Module | Finding | First Seen |
-|----|-----|--------|---------|------------|
-| EM-M02-qrhmac | P0 | m02 | QR HMAC hardcoded fallback secret | 2026-05-28 |
-| EM-M06-zero-events | P0 | m06 | Zero domain events emitted | 2026-05-28 |
-| EM-M08-publish | P0 | m08 | publishEvent handler missing | 2026-05-28 |
-| EM-M08-complete | P0 | m08 | completeEvent handler missing | 2026-05-28 |
-| EM-M09-dead-code | P0 | m09 | 8/14 handlers dead code | 2026-05-28 |
-
-**Note:** These are newly DISCOVERED by deeper enforcement, not necessarily newly introduced in code. Prior audit had shallower checks.
-
-### Resolved Since Last Run (19 P0s)
-
-| ID | Module | Resolution |
-|----|--------|------------|
-| EM-M03-admin-role | m03 | fixed — admin role check added |
-| EM-M04-term-bypass | m04 | fixed — isValidTermTransition() called |
-| EM-M04-svg-xss | m04 | fixed — SVG signature detection blocks uploads |
-| EM-M05-zero-events | m05 | fixed — membership.created emitted |
-| EM-M07-publish-noop | m07 | fixed — downgraded to P1 |
-| EM-M07-event-dead | m07 | fixed — announcement.published emitted |
-| EM-M09-zero-events | m09 | fixed — 3 events wired |
-| EM-M09-status-bypass | m09 | fixed — forces status: draft |
-| EM-M11-pii-leak | m11 | fixed — holderName removed from select |
-| EF-M04-cancelled-key | m04 | fixed — cancelled terminal state added |
-| EF-M05-addmember-auth | m05 | fixed — officer role guard added |
-| EF-M05-addmember-dup | m05 | fixed — 23505 → ConflictError |
-| EF-M06-paylink-auth | m06 | fixed — officer role verification added |
-| EF-M07-subtopic-role | m07 | fixed — president/admin guard added |
-| EF-M11-pii-file | m11 | fixed — same as EM-M11 |
-| UJ-M01-accept-invite | m01 | fixed — route invite/$token.tsx exists |
-| UJ-M02-nav-wrong | m02 | fixed — links to /settings/security correctly |
-| UJ-M03-org-lifecycle | m03 | fixed — onClick handlers wired |
-| UJ-M03-add-org | m03 | fixed — createOrganizationMutation wired |
-
-### Per-Module Score Trend
-
-| Module | Previous | Current | Trend | New P0/P1 |
-|--------|----------|---------|-------|-----------|
-| m01-auth-onboarding | 6.0 | 6.0 | → | — |
-| m02-member-profile | 5.5 | 6.4 | ↑ | 1 P0 |
-| m03-platform-admin | 6.5 | 7.0 | ↑ | — |
-| m04-org-admin | 6.5 | 7.0 | ↑ | — |
-| m05-membership | 6.0 | 6.0 | → | — |
-| m06-dues-payments | 7.5 | 6.5 | ↓ | 1 P0 |
-| m07-communications | 5.5 | 6.0 | ↑ | — |
-| m08-events | 7.0 | 4.0 | ↓ | 2 P0 |
-| m09-training | 7.0 | 5.0 | ↓ | 1 P0 |
-| m10-credit-tracking | 6.5 | 7.0 | ↑ | — |
-| m11-documents-credentials | 5.5 | 3.0 | ↓ | — |
-| m12-elections-governance | 8.0 | 6.0 | ↓ | — |
-| m13-professional-feed | 0.0 | 0.0 | → | — |
-| m14-national-dashboard | 1.5 | 5.5 | ↑ | — |
-| m15–m19 (future) | 0.0 | 0.0 | → | — |
-
-**Score movement:** 7 modules ↑, 5 modules ↓, 7 modules →. Downward corrections (m08, m09, m11, m12) reflect deeper enforcement catching issues the prior shallow audit missed.
+| ID | Resolved In | Reason |
+|----|-------------|--------|
+| EM-M03-admin-role | 5e7e9bec | Admin role check added |
+| EM-M04-term-bypass | 5e7e9bec | isValidTermTransition() called |
+| EM-M04-svg-xss | 5e7e9bec | SVG signature detection blocks uploads |
+| EM-M05-zero-events | 837cab7c | membership.created emitted |
+| EM-M07-publish-noop | 837cab7c | Downgraded to P1 |
+| EM-M07-event-dead | 837cab7c | announcement.published emitted |
+| EM-M09-zero-events | 837cab7c | 3 events wired |
+| EM-M09-status-bypass | 5e7e9bec | Forces status: draft |
+| EM-M11-pii-leak | 5e7e9bec | holderName removed from select |
+| EF-M04-cancelled-key | 5e7e9bec | cancelled terminal state added |
+| EF-M05-addmember-auth | 5e7e9bec | Officer role guard added |
+| EF-M05-addmember-dup | 5e7e9bec | 23505 -> ConflictError |
+| EF-M06-paylink-auth | 5e7e9bec | Officer role verification added |
+| EF-M07-subtopic-role | 5e7e9bec | President/admin guard added |
+| EF-M11-pii-file | 5e7e9bec | holderName removed from select |
+| UJ-M01-accept-invite | 5e7e9bec | Route invite/$token.tsx exists |
+| UJ-M02-nav-wrong | 5e7e9bec | Links to /settings/security correctly |
+| UJ-M03-org-lifecycle | 5e7e9bec | onClick handlers wired |
+| UJ-M03-add-org | 5e7e9bec | createOrganizationMutation wired |
 
 ---
 
 ## Stabilization Plan
 
-### Fix Now — P0 Findings (20 total)
+### Wave 1 -- P0 Security (Immediate, 13 new findings)
 
-**Production Security (fix immediately):**
+1. **EF-M08-listEvents-no-auth** -- Add session + org-scope check to listEvents.ts
+2. **EF-M12-001** -- Add auth + org-scope to getElection.ts
+3. **EF-M11-005** -- Add org-scope check to uploadNewDocumentVersion.ts
+4. **EF-M04-directory-no-privacy** -- Verify requester is org member in directory endpoints
+5. **EF-M01-export-pii** -- Filter PII fields in exportMyData response
+6. **EF-M03-impersonation-no-write-block** -- Add API middleware to block writes during impersonation
+7. **EF-M03-impersonation-no-auto-expire** -- Add server-side session expiry validation
+8. **EF-M02-update-no-session-invalidation** -- Invalidate other sessions on password change
+9. **EF-M07-webrtc-token-placeholder** -- Disable video calls via feature flag or implement auth
+10. **EF-M11-004** -- Add SVG sanitization (strip script/on*/foreignObject)
+11. **EF-M11-002** -- Implement HMAC-SHA256 QR signing for certificate verification
+12. **EF-M10-005** -- Escape SQL wildcards in training search LIKE pattern
+13. **EF-M14-004** -- Escape formula characters (=, +, -, @) in CSV export
 
-1. **ED-GLOBAL-xg6xh9c9** — better-auth 2FA Bypass
-   - Action: `bun update better-auth` to ≥1.4.2
+### Wave 2 -- Domain Events (Systemic P1)
 
-2. **ED-GLOBAL-gpj5g38j** — drizzle-orm SQL injection
-   - Action: `bun update drizzle-orm` to ≥0.45.2
+Wire domain event emissions across all modules. Current state: specs declare ~60 events, code emits ~34, consumers handle ~21. Priority:
+1. Wire consumers for `person.created`, `person.updated` (onboarding + profile sync)
+2. Wire consumers for `training.completed` (certificate generation -- WORKFLOW_MAP 6.3)
+3. Wire consumers for `booking.created`, `booking.rejected` (host/client notifications)
+4. Remove duplicate notification paths (booking confirm/cancel: choose event OR direct call)
 
-3. **EM-M02-qrhmac** — QR HMAC hardcoded fallback secret
-   - File: person/utils/qr-code.ts
-   - Action: Remove fallback, require AUTH_SECRET, throw on missing
+### Wave 3 -- Audit Logging (P1 cluster)
 
-4. **EM-M03-escalation** — Admin privilege escalation
-   - File: platformadmin/revokeAdmin.ts, deleteAssociation.ts, updateAdmin.ts
-   - Action: Add `requireSuperAdmin()` guard to each handler
+Add `auditAction()` calls to:
+1. All membership/ handlers (zero calls currently)
+2. All events/ handlers (zero calls)
+3. All training mutation handlers (zero calls)
+4. Better-Auth audit hook for auth events (9 unaudited)
 
-5. **AL-PERSON-a1b2c3d4** — PII export unaudited
-   - File: person/exportMyData.ts
-   - Action: Add `auditAction('data.pii-exported', ...)` call
+### Wave 4 -- Spec Coverage
 
-6. **EM-M11-pii** — Certificate PII leak
-   - File: certificates/verifyCertificatePublic.ts
-   - Action: Remove holder name from public response, add HMAC validation
+Create MODULE_SPECs for 8 unspecced handler directories (68 handlers, 11.4% of codebase):
+booking, billing, email, storage, notifs, reviews, invite, audit
 
-7. **EX-NOTIF-enum** — Notification type enum mismatch
-   - File: notifs/repos/notification.schema.ts
-   - Action: Add `booking_auto_rejected`, `booking_expired`, `event.created` to enum
+### Wave 5 -- Future Module Specs
 
-8. **EF-M01-lockout** — No account lockout
-   - File: core/auth.ts
-   - Action: Implement 5-attempt lockout per M1-R4 spec
-
-9. **EF-M06-paylink** — Payment link no role check
-   - File: dues/sendPaymentLink.ts
-   - Action: Add officer role verification
-
-**Architectural (fix before new feature work):**
-
-10. **EM-M08-publish/complete** — Event lifecycle broken
-    - Action: Create publishEvent.ts and completeEvent.ts handlers with state machine transitions
-
-11. **EM-M09-dead-code** — 8 dead handler files
-    - Action: Either wire to routes or remove dead code
-
-12. **EM-M06-zero-events** — No domain events in dues
-    - Action: Add PaymentRecorded, InvoiceGenerated event emissions
-
-13. **EM-M07 P0s** (4) — Communications architectural gaps
-    - Action: Add cancelled enum, wire domain events, implement deceased check, create TypeSpec
-
-**Dev-only (lower urgency):**
-
-14-15. **ED-GLOBAL happy-dom** (2 P0s) — Dev dependency RCE
-    - Action: `bun update happy-dom` to ≥20.0.2
-
-### Fix Before New Work — P1 Findings (109 in implemented modules)
-
-Top priority P1 clusters:
-
-1. **Audit logging (21 P1s)** — Financial and membership handlers completely unaudited. BIR 7-year requirement violated.
-2. **Domain events (across modules)** — Most modules emit few/no events. Cross-module integration is broken.
-3. **Elections (m12)** — castVote and createNominee handlers have NO route registration. Core governance feature unreachable.
-4. **UI orphan routes (12 P1s)** — Features exist but no navigation path. Users can't discover them.
-
-### Fix When Touching — P2 Findings (~145)
-
-| Area | Count | Pattern |
-|------|-------|---------|
-| Spec drift (route paths) | ~30 | TypeSpec paths vs actual routes diverge |
-| Missing validations | ~25 | BR enforcement gaps |
-| Auth inconsistency | ~20 | Role check patterns vary |
-| Domain model gaps | ~15 | Schema missing spec-declared fields |
-| Error handling | ~15 | Inline ctx.json errors vs typed responses |
-| Test gaps | ~20 | Untested handlers |
-| Other | ~20 | Various |
-
-### Track — P3 Findings (~85)
-
-Mostly naming conventions, optional features, and style improvements. See per-module detail files.
+Add 7 missing sections to MODULE_SPEC template and backfill M15-M19 (or formally exclude from checklist).
 
 ---
 
 ## What's Next
 
-### CRITICAL — P0 Findings Require Immediate Action
+Based on enforcement results:
 
-20 P0 finding(s) found across m01, m02, m03, m06, m07, m08, m09, m11, GLOBAL (dependencies), GLOBAL (cross-module).
-
-1. Review P0 findings in the "Fix Now" section above
-2. Fix all P0 issues before any other work — these are security or data integrity risks
-3. **Priority 1:** Upgrade `better-auth` and `drizzle-orm` (CVE fixes, one command each)
-4. **Priority 2:** Fix QR HMAC fallback, admin escalation, PII leak, account lockout
-5. **Priority 3:** Fix event lifecycle and domain event gaps
-6. Re-run enforcement after fixes: `/oli-enforce-all --strict`
-
-### P1 Findings Present — Fix Before Merging
-
-109 P1 finding(s) across all 14 implemented modules.
-
-1. Address audit logging gaps first (compliance risk — BIR 7-year requirement)
-2. Wire election voting routes (core governance feature)
-3. Fix domain event infrastructure (cross-module integration is broken)
-4. Re-run per-module enforcement to verify
-
-### Spec Coverage Below Threshold (62%)
-
-1. Run `/oli-module-specs` to fill spec gaps for m04 (mega-module), m07 (multi-directory), m14 (attribution)
-2. Re-run `/oli-enforce-all` after specs are updated for complete enforcement
+1. **P0 count > 0 AND new regressions exist** -> Run `/oli-enforce-fix --wave=1` to address 13 new P0 security findings
+2. **Coverage score < 70%** -> Run `/oli-module-specs` for booking, billing, email, storage, notifs, reviews, invite, audit
+3. **Domain events systemic gap** -> Run `/oli-enforce-fix --wave=2` to wire event emissions and consumers
+4. **Audit compliance cluster** -> Run `/oli-enforce-fix --wave=3` to add auditAction calls
+5. **After fixes** -> Re-run `/oli-enforce-all --strict` to verify ratchet improvement
 
 ---
 
-*Pipeline: `/oli-module-specs` → `/oli-enforce-coverage` → `/oli-enforce-module` → `/oli-enforce-file` → `/oli-enforce-cross-module` → `/oli-trace` → `/oli-audit-compliance` (audit logging) → **YOU ARE HERE** → `/oli-audit-compliance` (full, optional) → `/oli-confidence-stack`*
+## Sub-Skill Artifacts
+
+| Phase | Artifact | Path |
+|-------|----------|------|
+| 0 | Coverage Report | `docs/product/SPEC_COVERAGE_REPORT.md` |
+| 1 (m01-m05) | Module+File Enforcement | `docs/audits/ENFORCE_M01_M05_PHASE1.md` |
+| 1 (m06-m09) | Module+File Enforcement | `docs/audits/ENFORCE_M06_M09_REPORT.md` |
+| 1 (m10-m14) | Module+File Enforcement | `docs/audits/ENFORCE_M10_M14_REPORT.md` |
+| 1 (m15-m19) | Module+File Enforcement | (agent output -- future modules, 44 template-gap findings) |
+| 1.5 | UI Journey Audit | `docs/audits/UI_JOURNEY_AUDIT.md` |
+| 2 | Cross-Module Alignment | `docs/audits/CROSS_MODULE_ALIGNMENT_REPORT.md` |
+| 2.5 + 3 | Traceability + Audit | `docs/product/TRACE_AUDIT_REPORT.md` |
+| 4 | This Report | `docs/audits/ENFORCEMENT_REPORT.md` |
+| 4 | Baseline | `docs/audits/enforce/.baseline.json` |
