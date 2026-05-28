@@ -64,6 +64,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
         { to: `${base}/roster`, label: "Roster", icon: Users },
         { to: `${base}/applications`, label: "Applications", icon: Inbox },
         { to: `${base}/roster/import`, label: "Import", icon: Upload },
+        { to: `${base}/institutional-memberships`, label: "Institutions", icon: Building2 },
       ],
     },
     {
