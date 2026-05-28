@@ -120,7 +120,7 @@ export const MARKETPLACE_LISTING_VALID_TRANSITIONS: Record<string, string[]> = {
 };
 
 export const MARKETPLACE_ORDER_VALID_TRANSITIONS: Record<string, string[]> = {
-  pending: ['confirmed', 'cancelled'],
+  pending: ['confirmed', 'fulfilled', 'cancelled'],
   confirmed: ['fulfilled', 'cancelled'],
   fulfilled: ['refunded'],
   cancelled: [],  // terminal

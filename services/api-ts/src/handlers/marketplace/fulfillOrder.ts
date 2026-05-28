@@ -10,8 +10,9 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { User } from '@/types/auth';
-import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { ValidationError, NotFoundError } from '@/core/errors';
 import { OrderRepository } from './repos/order.repo';
+import { assertValidTransition, MARKETPLACE_ORDER_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 export async function fulfillOrder(ctx: ValidatedContext<never, never, any>): Promise<Response> {
   const user = ctx.get('user') as User;
@@ -26,9 +27,7 @@ export async function fulfillOrder(ctx: ValidatedContext<never, never, any>): Pr
   const order = await repo.findOneById(orderId);
   if (!order) throw new NotFoundError('Order not found');
 
-  if (order.status !== 'pending' && order.status !== 'confirmed') {
-    throw new BusinessLogicError(`Cannot fulfill order with status: ${order.status}`);
-  }
+  assertValidTransition(MARKETPLACE_ORDER_VALID_TRANSITIONS, order.status, 'fulfilled', 'marketplace order');
 
   const fulfilled = await repo.fulfillOrder(orderId, user.id);
 

@@ -344,6 +344,7 @@ describe('MARKETPLACE_LISTING_VALID_TRANSITIONS', () => {
 describe('MARKETPLACE_ORDER_VALID_TRANSITIONS', () => {
   it('follows order lifecycle', () => {
     expect(isValidTransition(MARKETPLACE_ORDER_VALID_TRANSITIONS, 'pending', 'confirmed')).toBe(true);
+    expect(isValidTransition(MARKETPLACE_ORDER_VALID_TRANSITIONS, 'pending', 'fulfilled')).toBe(true);
     expect(isValidTransition(MARKETPLACE_ORDER_VALID_TRANSITIONS, 'confirmed', 'fulfilled')).toBe(true);
   });
 

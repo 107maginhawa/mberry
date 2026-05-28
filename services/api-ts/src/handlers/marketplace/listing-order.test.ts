@@ -12,7 +12,7 @@ import { fulfillOrder } from './fulfillOrder';
 import { VendorRepository } from './repos/vendor.repo';
 import { ListingRepository } from './repos/listing.repo';
 import { OrderRepository } from './repos/order.repo';
-import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { ValidationError, NotFoundError, BusinessLogicError, ConflictError } from '@/core/errors';
 import type { Vendor, MarketplaceListing, MarketplaceOrder } from './repos/marketplace.schema';
 
 // Mock-Classification: APPROPRIATE — marketplace with payment + inventory boundary
@@ -238,15 +238,15 @@ describe('fulfillOrder', () => {
     await expect(fulfillOrder(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  test('throws BusinessLogicError when order already fulfilled', async () => {
+  test('throws ConflictError when order already fulfilled', async () => {
     OrderRepository.prototype.findOneById = mock(async () => makeOrder({ status: 'fulfilled' })) as any;
     const ctx = makeCtx({ params: { orderId: 'order-1' } });
-    await expect(fulfillOrder(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+    await expect(fulfillOrder(ctx)).rejects.toBeInstanceOf(ConflictError);
   });
 
-  test('throws BusinessLogicError when order is cancelled', async () => {
+  test('throws ConflictError when order is cancelled', async () => {
     OrderRepository.prototype.findOneById = mock(async () => makeOrder({ status: 'cancelled' })) as any;
     const ctx = makeCtx({ params: { orderId: 'order-1' } });
-    await expect(fulfillOrder(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+    await expect(fulfillOrder(ctx)).rejects.toBeInstanceOf(ConflictError);
   });
 });
