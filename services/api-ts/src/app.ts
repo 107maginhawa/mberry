@@ -586,7 +586,7 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerNotifsJobs(jobs, app.notifs);
   registerAuditJobs(jobs);
   registerBookingJobs(jobs, app.notifs);
-  registerDuesJobs(jobs);
+  registerDuesJobs(jobs, app.billing);
   registerStatusRecomputeJob(jobs);
   registerPersonJobs(jobs);
   registerMembershipJobs(jobs, app.notifs);
