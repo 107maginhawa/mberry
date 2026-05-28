@@ -96,6 +96,7 @@ export class InviteRepository {
     return this.db
       .select()
       .from(invitationTokens)
-      .where(and(...conditions));
+      .where(and(...conditions))
+      .limit(100);
   }
 }

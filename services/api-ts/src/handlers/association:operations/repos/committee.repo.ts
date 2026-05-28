@@ -19,7 +19,8 @@ export class CommitteeRepository {
       .select()
       .from(committees)
       .where(eq(committees.organizationId, orgId))
-      .orderBy(desc(committees.createdAt));
+      .orderBy(desc(committees.createdAt))
+      .limit(100);
   }
 
   async get(id: string): Promise<Committee | undefined> {
@@ -70,7 +71,8 @@ export class CommitteeRepository {
         eq(committeeMembers.committeeId, committeeId),
         eq(committeeMembers.active, true),
       ))
-      .orderBy(committeeMembers.assignedAt);
+      .orderBy(committeeMembers.assignedAt)
+      .limit(500);
   }
 
   async addMember(data: NewCommitteeMember): Promise<CommitteeMember> {

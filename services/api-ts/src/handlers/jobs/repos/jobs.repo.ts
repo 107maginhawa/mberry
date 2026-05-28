@@ -103,7 +103,8 @@ export class JobPostingRepository {
           eq(jobPostings.status, 'active'),
           lte(jobPostings.expiresAt, now),
         ),
-      );
+      )
+      .limit(200);
   }
 
   async extendPosting(id: string, days: number = DEFAULT_EXPIRY_DAYS): Promise<JobPosting> {

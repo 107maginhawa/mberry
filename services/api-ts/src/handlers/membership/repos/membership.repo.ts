@@ -228,7 +228,8 @@ export class MembershipRepository {
     return this.db
       .select()
       .from(membershipCategories)
-      .where(eq(membershipCategories.organizationId, organizationId));
+      .where(eq(membershipCategories.organizationId, organizationId))
+      .limit(100);
   }
 
   async upsertCategory(data: NewMembershipCategory): Promise<MembershipCategory> {

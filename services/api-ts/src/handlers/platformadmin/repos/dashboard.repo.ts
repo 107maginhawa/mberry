@@ -53,7 +53,8 @@ export class DashboardRepository {
           eq(chapterSnapshots.associationId, associationId),
           eq(chapterSnapshots.snapshotMonth, snapshotMonth),
         ),
-      );
+      )
+      .limit(200);
   }
 
   async createChapterSnapshot(data: NewChapterSnapshot): Promise<ChapterSnapshot> {

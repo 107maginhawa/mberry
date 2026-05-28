@@ -22,7 +22,7 @@ export class CertificatesRepository {
 
   async getMany(ids: string[]): Promise<Certificate[]> {
     if (ids.length === 0) return [];
-    return this.db.select().from(certificates).where(inArray(certificates.id, ids));
+    return this.db.select().from(certificates).where(inArray(certificates.id, ids)).limit(200);
   }
 
   async create(data: NewCertificate): Promise<Certificate> {

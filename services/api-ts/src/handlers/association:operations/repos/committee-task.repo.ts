@@ -14,7 +14,8 @@ export class CommitteeTaskRepository {
       .select()
       .from(committeeTasks)
       .where(eq(committeeTasks.committeeId, committeeId))
-      .orderBy(desc(committeeTasks.createdAt));
+      .orderBy(desc(committeeTasks.createdAt))
+      .limit(100);
   }
 
   async get(id: string): Promise<CommitteeTask | undefined> {
@@ -81,7 +82,8 @@ export class CommitteeTaskRepository {
         eq(committeeTasks.status, 'pending'),
         lte(committeeTasks.dueDate, new Date()),
       ))
-      .orderBy(committeeTasks.dueDate);
+      .orderBy(committeeTasks.dueDate)
+      .limit(200);
   }
 
   async listByAssignee(assigneeId: string): Promise<CommitteeTask[]> {
@@ -92,6 +94,7 @@ export class CommitteeTaskRepository {
         eq(committeeTasks.assigneeId, assigneeId),
         eq(committeeTasks.status, 'pending'),
       ))
-      .orderBy(committeeTasks.dueDate);
+      .orderBy(committeeTasks.dueDate)
+      .limit(100);
   }
 }

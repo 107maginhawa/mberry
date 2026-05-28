@@ -193,7 +193,8 @@ export class MembershipRepository extends DatabaseRepository<
     const records = await this.db
       .select()
       .from(memberships)
-      .where(eq(memberships.personId, personId));
+      .where(eq(memberships.personId, personId))
+      .limit(100);
 
     return records as Membership[];
   }

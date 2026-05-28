@@ -96,7 +96,8 @@ export class ChatRoomMemberRepository {
       .select()
       .from(chatRoomMembers)
       .where(eq(chatRoomMembers.chatRoomId, chatRoomId))
-      .orderBy(chatRoomMembers.joinedAt);
+      .orderBy(chatRoomMembers.joinedAt)
+      .limit(500);
   }
 
   /**
@@ -173,7 +174,8 @@ export class ChatRoomMemberRepository {
     const memberships = await this.db
       .select()
       .from(chatRoomMembers)
-      .where(eq(chatRoomMembers.personId, personId));
+      .where(eq(chatRoomMembers.personId, personId))
+      .limit(200);
 
     const results = await Promise.all(
       memberships.map(async (m) => ({

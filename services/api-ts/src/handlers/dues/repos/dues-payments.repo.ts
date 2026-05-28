@@ -74,7 +74,8 @@ export class DuesRepository {
       .select()
       .from(duesFunds)
       .where(and(eq(duesFunds.organizationId, organizationId), eq(duesFunds.active, true)))
-      .orderBy(duesFunds.sortOrder);
+      .orderBy(duesFunds.sortOrder)
+      .limit(100);
   }
 
   async replaceFunds(organizationId: string, funds: { name: string; percentage: string; sortOrder: number }[]) {
@@ -434,7 +435,8 @@ export class DuesRepository {
       .select()
       .from(duesReminderSchedules)
       .where(eq(duesReminderSchedules.duesConfigId, duesConfigId))
-      .orderBy(duesReminderSchedules.daysOffset);
+      .orderBy(duesReminderSchedules.daysOffset)
+      .limit(100);
   }
 
   async replaceReminderSchedules(duesConfigId: string, schedules: Omit<DuesReminderSchedule, 'id' | 'createdAt' | 'updatedAt' | 'version' | 'createdBy' | 'updatedBy' | 'duesConfigId' | 'organizationId'>[], organizationId: string) {

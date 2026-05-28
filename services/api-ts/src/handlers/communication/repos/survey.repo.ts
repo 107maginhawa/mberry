@@ -151,7 +151,8 @@ export class SurveyRepository {
       .select()
       .from(surveyResponses)
       .where(eq(surveyResponses.surveyId, surveyId))
-      .orderBy(surveyResponses.submittedAt);
+      .orderBy(surveyResponses.submittedAt)
+      .limit(500);
   }
 
   async getResponseCount(surveyId: string): Promise<number> {

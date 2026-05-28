@@ -114,7 +114,8 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
           notInArray(duesInvoices.status, ['paid', 'cancelled', 'writtenOff']),
           lt(duesInvoices.periodEnd, now)
         )
-      );
+      )
+      .limit(500);
 
     this.logger?.debug(
       { organizationId, count: records.length },

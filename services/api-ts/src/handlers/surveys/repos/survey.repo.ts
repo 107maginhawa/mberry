@@ -233,7 +233,8 @@ export class SurveyResponseRepository {
           eq(surveyResponses.surveyId, surveyId),
           eq(surveyResponses.status, 'completed')
         )
-      );
+      )
+      .limit(500);
   }
 
   async submitResponse(data: NewSurveyResponse): Promise<SurveyResponseRecord> {
