@@ -180,6 +180,39 @@ describe('MemberTable', () => {
     expect(searchInput).toBeInTheDocument()
   })
 
+  test('uses requiredCredits=60 as default (matches org_cpd_config DB default)', async () => {
+    const membersWithCredits = [{
+      ...MOCK_MEMBERS[0],
+      creditsEarned: 30,
+    }]
+    setupDefaultMocks(membersWithCredits)
+
+    renderWithProviders(<MemberTable orgId="org-1" />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Dr. Maria Santos')).toBeInTheDocument()
+    })
+
+    // Default requiredCredits is 60 — credit badge shows earned/required
+    expect(screen.getByText('30/60')).toBeInTheDocument()
+  })
+
+  test('renders custom requiredCredits prop value', async () => {
+    const membersWithCredits = [{
+      ...MOCK_MEMBERS[0],
+      creditsEarned: 30,
+    }]
+    setupDefaultMocks(membersWithCredits)
+
+    renderWithProviders(<MemberTable orgId="org-1" requiredCredits={100} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Dr. Maria Santos')).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('30/100')).toBeInTheDocument()
+  })
+
   test('shows bulk selection bar when checkbox is clicked', async () => {
     setupDefaultMocks()
     const user = userEvent.setup()
