@@ -92,6 +92,9 @@ import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 
 // Saved Segments — hand-wired CRUD (Wave 4β Lane C)
 import { createSavedSegment, listSavedSegments, deleteSavedSegment } from '@/handlers/communication/savedSegments';
+// Communications: schedule + stats (hand-wired, Cycle 8)
+import { scheduleAnnouncement } from '@/handlers/communication/scheduleAnnouncement';
+import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementStats';
 
 // Survey extras — hand-wired (export returns CSV, clone is convenience endpoint)
 import { exportSurveyResponses } from '@/handlers/surveys/exportSurveyResponses';
@@ -452,6 +455,10 @@ export function createApp(config: Config): App {
   app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
   app.get('/communications/segments', authMiddleware(), listSavedSegments as any);
   app.delete('/communications/segments/:id', authMiddleware(), deleteSavedSegment as any);
+
+  // Communications: schedule announcement + get stats (Cycle 8)
+  app.post('/communications/announcements/:id/schedule', authMiddleware(), scheduleAnnouncement as any);
+  app.get('/communications/announcements/:id/stats', authMiddleware(), getAnnouncementStats as any);
 
   // Events: cancel registration (DELETE /org/:orgId/events/:eventId/register/:registrationId)
   // Hand-wired — org-scoped path per API_CONTRACTS spec. Allows registrant or officer to cancel.
