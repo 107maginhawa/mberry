@@ -357,8 +357,7 @@ export function createApp(config: Config): App {
   app.use('/invite/claim/*', authMiddleware());
   // /invite/validate/* intentionally has no auth — public endpoint
 
-  // Accredited Providers — auth middleware applied here BEFORE generated routes
-  // (generated routes omit authMiddleware due to codegen gap)
+  // Accredited Providers — defense-in-depth wildcard (generated routes now have per-route auth)
   app.use('/accredited-providers/*', authMiddleware());
 
   // Register API routes
@@ -373,10 +372,12 @@ export function createApp(config: Config): App {
   //   /certificates/verify/:num, /pay/:token/* (2),
   //   /email/unsubscribe (GET+POST), /email/suppressions
   //
-  // PRE-MIGRATION (24) — should be TypeSpec, migrate when touching module:
-  //   /admin/* (3), /org/:id/payments/send-link, /accredited-providers/* (4),
-  //   /cpd-config/* (2), /credits/manual, /compliance/* (2), /persons/me/credits,
+  // PRE-MIGRATION (14) — should be TypeSpec, migrate when touching module:
+  //   /admin/* (3), /org/:id/payments/send-link,
   //   /certificates/bulk-issue, /special-assessments/* (6), /segments/* (3)
+  //
+  // MIGRATED TO GENERATED (Cycle 8): accredited-providers (4), cpd-config (2),
+  //   credits/manual, compliance (2), persons/me/credits — 10 routes removed
   //
   // HANDLER CONSOLIDATION STATUS (Wave 4):
   //   m05 membership/: query-rich repo (JOINs, search) — complementary to
@@ -395,11 +396,9 @@ export function createApp(config: Config): App {
   // One-tap payment send-link — officer generates payment link (auth required)
   app.post('/org/:organizationId/payments/send-link', authMiddleware(), orgContextMiddleware(), sendPaymentLink as any);
 
-  // PRC Accredited Providers — hand-wired, org-scoped (no /api prefix per CLAUDE.md)
-  app.get('/accredited-providers/:organizationId', authMiddleware(), listAccreditedProviders);
-  app.post('/accredited-providers/:organizationId', authMiddleware(), createAccreditedProvider);
-  app.patch('/accredited-providers/:organizationId/:providerId', authMiddleware(), updateAccreditedProvider);
-  app.delete('/accredited-providers/:organizationId/:providerId', authMiddleware(), deleteAccreditedProvider);
+  // PRC Accredited Providers — MIGRATED: now in generated routes.ts with authMiddleware.
+  // Wildcard app.use('/accredited-providers/*', authMiddleware()) at line 362 provides
+  // defense-in-depth. Hand-wired duplicates removed (Cycle 8 auth guard fix).
 
   // Training entity lifecycle — transition training status (not enrollment)
   app.post('/organizations/:organizationId/training/:id/complete', authMiddleware(), completeTraining as any);
@@ -408,13 +407,10 @@ export function createApp(config: Config): App {
   // Elections: nominee status update (accept/decline nomination)
   app.patch('/association/member/elections/:electionId/nominees/:nomineeId', authMiddleware(), updateNomineeStatus as any);
 
-  // Wave 2b: CPD config, manual credit, compliance, bulk certificates
-  app.get('/association/member/cpd-config/:organizationId', authMiddleware(), getCpdConfig as any);
-  app.patch('/association/member/cpd-config/:organizationId', authMiddleware(), updateCpdConfig as any);
-  app.post('/association/member/credits/manual', authMiddleware(), orgContextMiddleware(), awardManualCredit as any);
-  app.get('/association/member/compliance/:organizationId', authMiddleware(), getComplianceReport as any);
-  app.post('/association/member/compliance/:organizationId/refresh', authMiddleware(), refreshCompliance as any);
-  app.get('/persons/me/credits', authMiddleware(), orgContextOptionalMiddleware(), getMyCredits as any);
+  // Wave 2b: CPD config, manual credit, compliance, my-credits — MIGRATED to generated routes.ts
+  // All now have authMiddleware in generated output. /association/* wildcard provides defense-in-depth.
+  // /persons/me/credits now has per-route auth in generated routes (was the one truly unguarded route).
+  // Hand-wired duplicates removed (Cycle 8 auth guard fix).
   app.get('/persons/me/id-card/:orgId', authMiddleware(), getMyIdCard as any);
   app.get('/persons/me/id-card/:orgId/pdf', authMiddleware(), getMyIdCardPdf as any);
   app.post('/certificates/bulk-issue', authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
@@ -431,7 +427,8 @@ export function createApp(config: Config): App {
   app.post('/association/member/org/:organizationId/officers/:termId/transition', authMiddleware(), orgContextMiddleware(), transitionOfficerTerm as any);
 
   // Org-wide dashboard — M4-DASHBOARD AC-M04-005
-  app.get('/association/member/org/:organizationId/dashboard', getOrgDashboard as any);
+  // Defense-in-depth: explicit auth (also covered by /association/* wildcard)
+  app.get('/association/member/org/:organizationId/dashboard', authMiddleware(), getOrgDashboard as any);
 
   // Subscription system (UJ-M03) — admin pricing tier management (under /admin/* auth middleware)
   app.get('/admin/pricing', listPricingTiers as any);
