@@ -53,16 +53,22 @@ export function validationErrorHandler(result: any, c: Context): Response | unde
     const timestamp = new Date().toISOString();
     const requestId = c.get('requestId' as never) || c.req.header('X-Request-ID') || crypto.randomUUID();
 
+    // Strip `value` from fieldErrors in production to prevent PII leakage
+    const isProduction = process.env.NODE_ENV === 'production';
+    const safeFieldErrors = isProduction
+      ? fieldErrors.map(({ value: _v, ...rest }) => rest)
+      : fieldErrors;
+
     // Return ValidationError matching TypeSpec model
     return c.json({
       message: userMessage,
       code: 'VALIDATION_ERROR',
       requestId,
       timestamp,
-      path: c.req.path,
-      method: c.req.method,
+      path: isProduction ? undefined : c.req.path,
+      method: isProduction ? undefined : c.req.method,
       statusCode: 400,
-      fieldErrors: fieldErrors.length > 0 ? fieldErrors : undefined,
+      fieldErrors: safeFieldErrors.length > 0 ? safeFieldErrors : undefined,
       globalErrors: globalErrors.length > 0 ? globalErrors : undefined,
     }, 400);
   }

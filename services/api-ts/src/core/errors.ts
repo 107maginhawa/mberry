@@ -121,19 +121,30 @@ export class InternalError extends AppError {
 function applySecurity(obj: Record<string, any>, config?: Config): Record<string, any> {
   const isProduction = process.env.NODE_ENV === 'production';
   const isDebugMode = config?.logging?.level === 'debug';
-  
+
   if (!isProduction || isDebugMode) {
     return obj; // No filtering in development or debug mode
   }
-  
+
   // Filter out potentially sensitive fields in production
   const filtered = { ...obj };
-  
+
   // Remove internal implementation details
   delete filtered['trackingId'];
   delete filtered['context'];
   delete filtered['value']; // Field values from validation errors
-  
+
+  // Strip `value` from nested fieldErrors to prevent PII leakage
+  // (e.g., user-submitted emails/phone numbers echoed in error responses)
+  if (Array.isArray(filtered['fieldErrors'])) {
+    filtered['fieldErrors'] = filtered['fieldErrors'].map(
+      (fe: Record<string, unknown>) => {
+        const { value: _value, ...rest } = fe;
+        return rest;
+      }
+    );
+  }
+
   // Keep essential fields for client handling
   return filtered;
 }

@@ -394,6 +394,28 @@ describe('createErrorHandler', () => {
     expect(body.globalErrors[0]).toContain('Global constraint violated');
   });
 
+  test('ZodError in production strips value from fieldErrors (PII protection)', async () => {
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      const schema = z.object({ email: z.string().email() });
+      let zodErr!: ZodError;
+      try { schema.parse({ email: 'not-an-email' }); } catch (e) { zodErr = e as ZodError; }
+
+      const handler = createErrorHandler(prodConfig);
+      const ctx = await makeContext();
+      const resp = handler(zodErr, ctx);
+      const body = await resp.json() as any;
+      expect(body.fieldErrors).toBeDefined();
+      // value field must be stripped in production to prevent PII leakage
+      for (const fe of body.fieldErrors) {
+        expect(fe.value).toBeUndefined();
+      }
+    } finally {
+      process.env.NODE_ENV = prevEnv;
+    }
+  });
+
   // ---- HTTPException → forwarded status/message ----
 
   test('HTTPException → status forwarded, JSON body', async () => {
