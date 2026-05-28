@@ -95,8 +95,7 @@ import { deleteElection } from '@/handlers/elections/deleteElection';
 import { unsubscribeEmail } from '@/handlers/email/unsubscribeEmail';
 import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 
-// Saved Segments — hand-wired CRUD (Wave 4β Lane C)
-import { createSavedSegment, listSavedSegments, deleteSavedSegment } from '@/handlers/communication/savedSegments';
+// Saved Segments — now in generated routes (Phase 35)
 // Communications: schedule + stats (hand-wired, Cycle 8)
 import { scheduleAnnouncement } from '@/handlers/communication/scheduleAnnouncement';
 import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementStats';
@@ -510,14 +509,7 @@ export function createApp(config: Config): App {
   app.post('/association/member/org/:organizationId/subscription/upgrade', orgIdParam, subscriptionBody, upgradeSubscription as unknown as Handler);
   app.post('/association/member/org/:organizationId/subscription/checkout', orgIdParam, subscriptionBody, createSubscriptionCheckout as unknown as Handler);
 
-  // @hand-wired reason="saved segment CRUD, not in TypeSpec" wave="Wave-4b"
-  const segmentBody = zValidator('json', z.object({
-    name: z.string().min(1).max(255),
-    filters: z.record(z.string(), z.unknown()).optional(),
-  }).passthrough(), validationErrorHandler);
-  app.post('/communications/segments', authMiddleware(), segmentBody, createSavedSegment as unknown as Handler);
-  app.get('/communications/segments', authMiddleware(), listSavedSegments as unknown as Handler);
-  app.delete('/communications/segments/:id', uuidIdParam, authMiddleware(), deleteSavedSegment as unknown as Handler);
+  // savedSegments CRUD — migrated to generated routes (Phase 35)
 
   // @hand-wired reason="announcement scheduling + stats, not in TypeSpec" wave="Cycle-8"
   const scheduleBody = zValidator('json', z.object({
