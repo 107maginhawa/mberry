@@ -24,7 +24,7 @@ describe('createMessage', () => {
   test('returns 201 on happy path', async () => {
     const message = { id: 'msg-1', organizationId: 'tenant-1', channel: 'email', status: 'draft' };
     stubRepo(MessageRepository, {
-      findDuplicateSentToday: async () => null,
+      findDuplicatesSentToday: async () => [],
       create: async () => message,
     });
     const ctx = makeCtx({

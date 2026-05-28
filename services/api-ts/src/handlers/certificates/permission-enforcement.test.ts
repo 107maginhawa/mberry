@@ -173,7 +173,7 @@ describe('batchGenerateCertificates — authentication', () => {
   test('cross-org certificate is reported as error in batch results', async () => {
     stubOfficer(true);
     stubRepo(CertificatesRepository, {
-      get: async () => crossOrgCert,
+      getMany: async () => [crossOrgCert],
     });
 
     const ctx = makeCtx({
@@ -198,7 +198,7 @@ describe('batchGenerateCertificates — authentication', () => {
   test('same-org certificate succeeds in batch', async () => {
     stubOfficer(true);
     stubRepo(CertificatesRepository, {
-      get: async () => ownedCert,
+      getMany: async () => [ownedCert],
     });
 
     const ctx = makeCtx({

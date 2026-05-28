@@ -70,11 +70,15 @@ export async function batchGenerateCertificates(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new CertificatesRepository(db);
 
+  // Batch fetch all certificates in one query (fixes N+1)
+  const allCerts = await repo.getMany(body.certificateIds);
+  const certMap = new Map(allCerts.map(c => [c.id, c]));
+
   const results: BatchResultItem[] = [];
 
   for (const certId of body.certificateIds) {
     try {
-      const cert = await repo.get(certId);
+      const cert = certMap.get(certId);
       if (!cert) {
         results.push({ certificateId: certId, certificateNumber: '', status: 'error', error: 'Certificate not found' });
         continue;

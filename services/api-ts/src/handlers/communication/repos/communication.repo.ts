@@ -125,6 +125,41 @@ export class MessageRepository {
     );
   }
 
+  /**
+   * Batch dedup check: returns person IDs from the given list who already
+   * received a message on this channel today. Single query replaces N+1.
+   */
+  async findDuplicatesSentToday(organizationId: string, channel: string, personIds: string[]): Promise<string[]> {
+    if (personIds.length === 0) return [];
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const rows = await this.db.select().from(messages)
+      .where(and(
+        eq(messages.organizationId, organizationId),
+        eq(messages.channel, channel as Message['channel']),
+        eq(messages.status, 'sent'),
+        gte(messages.sentAt, startOfDay),
+      ))
+      .limit(500);
+
+    const personIdSet = new Set(personIds);
+    const duplicates = new Set<string>();
+
+    for (const m of rows) {
+      if (Array.isArray(m.recipients)) {
+        for (const r of m.recipients as any[]) {
+          if (r.personId && personIdSet.has(r.personId)) {
+            duplicates.add(r.personId);
+          }
+        }
+      }
+    }
+
+    return [...duplicates];
+  }
+
   async update(id: string, data: Partial<Message>): Promise<Message | undefined> {
     const [row] = await this.db.update(messages).set({ ...data, updatedAt: new Date() }).where(eq(messages.id, id)).returning();
     return row;
@@ -198,6 +233,17 @@ export class PersonSubscriptionRepository {
       return row!;
     }
     return this.create(data);
+  }
+
+  async bulkUpsert(items: NewPersonSubscription[]): Promise<PersonSubscription[]> {
+    if (items.length === 0) return [];
+    return this.db.insert(personSubscriptions)
+      .values(items)
+      .onConflictDoUpdate({
+        target: [personSubscriptions.personId, personSubscriptions.topicId],
+        set: { enabled: sql`excluded.enabled`, updatedAt: new Date() },
+      })
+      .returning();
   }
 
   async update(id: string, data: Partial<PersonSubscription>): Promise<PersonSubscription | undefined> {

@@ -23,7 +23,7 @@ describe('bulkUpdatePersonSubscriptions', () => {
 
   test('returns 200 on happy path', async () => {
     stubRepo(PersonSubscriptionRepository, {
-      upsert: async () => ({ id: 'ps-1', topicId: 'tp-1', enabled: true }),
+      bulkUpsert: async () => [{ id: 'ps-1', topicId: 'tp-1', enabled: true }],
     });
     const ctx = makeCtx({ _body: { updates: [{ topicId: 'tp-1', enabled: true }] } });
     const res = await bulkUpdatePersonSubscriptions(ctx);

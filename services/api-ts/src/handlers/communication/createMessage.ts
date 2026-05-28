@@ -29,10 +29,13 @@ export async function createMessage(
   const repo = new MessageRepository(db, logger);
 
   // BR-28: deduplicate recipients who already received same channel today
+  // Batch: fetch all today's sent messages for this org+channel once, then filter in-memory
+  const todayDups = await repo.findDuplicatesSentToday(orgId, body.channel, body.recipientPersonIds);
+  const dupPersonIds = new Set(todayDups);
+
   const dedupedRecipients: MessageRecipient[] = [];
   for (const personId of body.recipientPersonIds) {
-    const dup = await repo.findDuplicateSentToday(orgId, body.channel, personId);
-    if (dup) {
+    if (dupPersonIds.has(personId)) {
       logger?.info({ personId, channel: body.channel }, 'BR-28: skipping duplicate recipient');
       continue;
     }

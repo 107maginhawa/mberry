@@ -26,17 +26,15 @@ export async function bulkUpdatePersonSubscriptions(
   const logger = ctx.get('logger');
   const repo = new PersonSubscriptionRepository(db, logger);
 
-  const results = [];
-  for (const item of body.updates) {
-    const subscription = await repo.upsert({
+  const results = await repo.bulkUpsert(
+    body.updates.map((item: { topicId: string; enabled: boolean }) => ({
       organizationId: orgId,
       personId: user.id,
       topicId: item.topicId,
       enabled: item.enabled,
       createdBy: user.id,
-    });
-    results.push(subscription);
-  }
+    }))
+  );
 
   await auditAction(ctx, {
     action: 'update',

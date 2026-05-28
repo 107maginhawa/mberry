@@ -93,11 +93,10 @@ describe('[042] batchGenerateCertificates', () => {
 
   test('generates HTML for all valid certificates', async () => {
     stubRepo(CertificatesRepository, {
-      get: async (id: string) => {
-        if (id === 'cert-1') return makeCert('cert-1', 'org-1', 'person-1');
-        if (id === 'cert-2') return makeCert('cert-2', 'org-1', 'person-2');
-        return undefined;
-      },
+      getMany: async () => [
+        makeCert('cert-1', 'org-1', 'person-1'),
+        makeCert('cert-2', 'org-1', 'person-2'),
+      ],
     });
 
     const ctx = makeCtx({ organizationId: 'org-1', _body: validBody });
@@ -115,10 +114,10 @@ describe('[042] batchGenerateCertificates', () => {
 
   test('handles partial failure — some certs not found', async () => {
     stubRepo(CertificatesRepository, {
-      get: async (id: string) => {
-        if (id === 'cert-1') return makeCert('cert-1', 'org-1', 'person-1');
-        return undefined; // cert-2 not found
-      },
+      getMany: async () => [
+        makeCert('cert-1', 'org-1', 'person-1'),
+        // cert-2 not found — absent from results
+      ],
     });
 
     const ctx = makeCtx({ organizationId: 'org-1', _body: validBody });
@@ -135,11 +134,10 @@ describe('[042] batchGenerateCertificates', () => {
 
   test('rejects certificates from different organization', async () => {
     stubRepo(CertificatesRepository, {
-      get: async (id: string) => {
-        if (id === 'cert-1') return makeCert('cert-1', 'org-1', 'person-1');
-        if (id === 'cert-2') return makeCert('cert-2', 'other-org', 'person-2'); // wrong org
-        return undefined;
-      },
+      getMany: async () => [
+        makeCert('cert-1', 'org-1', 'person-1'),
+        makeCert('cert-2', 'other-org', 'person-2'), // wrong org
+      ],
     });
 
     const ctx = makeCtx({ organizationId: 'org-1', _body: validBody });
@@ -152,7 +150,7 @@ describe('[042] batchGenerateCertificates', () => {
 
   test('uses default recipientName when not in recipientNames map', async () => {
     stubRepo(CertificatesRepository, {
-      get: async () => makeCert('cert-1', 'org-1', 'unknown-person'),
+      getMany: async () => [makeCert('cert-1', 'org-1', 'unknown-person')],
     });
 
     const ctx = makeCtx({
@@ -171,7 +169,7 @@ describe('[042] batchGenerateCertificates', () => {
 
   test('applies branding to all certificates', async () => {
     stubRepo(CertificatesRepository, {
-      get: async () => makeCert('cert-1', 'org-1'),
+      getMany: async () => [makeCert('cert-1', 'org-1')],
     });
 
     const ctx = makeCtx({
