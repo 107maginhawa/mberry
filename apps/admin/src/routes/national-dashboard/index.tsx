@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { BarChart3, ChevronDown } from 'lucide-react'
+import { BarChart3, RefreshCw, Download } from 'lucide-react'
 import { useState } from 'react'
 import {
   Button,
@@ -81,6 +81,39 @@ function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value)
 }
 
+function exportChaptersCSV(chapters: ChapterEntry[], snapshotMonth: string) {
+  const headers = [
+    'Chapter',
+    'Total Members',
+    'Active',
+    'Lapsed',
+    'Collection Rate',
+    'Total Collected',
+    'CPD Compliance',
+    'Activity (90d)',
+  ]
+  const rows = chapters.map((ch) =>
+    [
+      ch.chapterName ?? ch.orgId,
+      ch.totalMembers,
+      ch.activeMembers,
+      ch.lapsedMembers,
+      ch.collectionRate,
+      ch.totalCollected,
+      ch.cpdComplianceRate,
+      ch.activityCount90d,
+    ].join(',')
+  )
+  const csv = [headers.join(','), ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `national-dashboard-${snapshotMonth}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function NationalDashboardPage() {
   const [selectedAssociation, setSelectedAssociation] = useState<string>('')
   const [snapshotMonth, setSnapshotMonth] = useState(getCurrentMonth)
@@ -94,6 +127,7 @@ function NationalDashboardPage() {
     data: dashboardData,
     isLoading: dashLoading,
     error: dashError,
+    refetch,
   } = useQuery<NationalDashboardResponse>({
     queryKey: ['national-dashboard', selectedAssociation, snapshotMonth],
     queryFn: async () => {
@@ -119,14 +153,25 @@ function NationalDashboardPage() {
 
   return (
     <div className="p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <BarChart3 className="w-6 h-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-h1 text-foreground">National Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Cross-chapter comparison metrics for national associations
-          </p>
+      <div className="flex items-center justify-between gap-3 mb-8">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="w-6 h-6 text-muted-foreground" />
+          <div>
+            <h1 className="text-h1 text-foreground">National Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Cross-chapter comparison metrics for national associations
+            </p>
+          </div>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => exportChaptersCSV(chapters, snapshotMonth)}
+          disabled={chapters.length === 0}
+        >
+          <Download size={14} className="mr-1.5" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Filters */}
@@ -159,6 +204,14 @@ function NationalDashboardPage() {
             </SelectContent>
           </Select>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refetch()}
+          disabled={dashLoading || !selectedAssociation}
+        >
+          <RefreshCw size={14} className={dashLoading ? 'animate-spin' : ''} />
+        </Button>
       </div>
 
       {/* No association selected */}
@@ -169,17 +222,41 @@ function NationalDashboardPage() {
         </div>
       )}
 
-      {/* Loading */}
+      {/* Loading — skeleton cards + skeleton table */}
       {selectedAssociation && dashLoading && (
-        <div className="rounded-lg border bg-card p-12 text-center text-muted-foreground">
-          <p className="text-sm animate-pulse">Loading dashboard data...</p>
-        </div>
+        <>
+          <div className="grid grid-cols-5 gap-4 mb-8">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-muted rounded h-20" />
+            ))}
+          </div>
+          <div className="rounded-lg border bg-card overflow-hidden">
+            <div className="p-4 border-b">
+              <div className="animate-pulse bg-muted rounded h-4 w-48" />
+            </div>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex gap-4 p-4 border-b last:border-0">
+                <div className="animate-pulse bg-muted rounded h-4 w-32" />
+                <div className="animate-pulse bg-muted rounded h-4 w-12 ml-auto" />
+                <div className="animate-pulse bg-muted rounded h-4 w-12" />
+                <div className="animate-pulse bg-muted rounded h-4 w-12" />
+                <div className="animate-pulse bg-muted rounded h-4 w-16" />
+                <div className="animate-pulse bg-muted rounded h-4 w-20" />
+                <div className="animate-pulse bg-muted rounded h-4 w-16" />
+                <div className="animate-pulse bg-muted rounded h-4 w-10" />
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Error */}
       {dashError && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {dashError instanceof Error ? dashError.message : 'Failed to load dashboard'}
+        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm flex items-center justify-between">
+          <span>{dashError instanceof Error ? dashError.message : 'Failed to load dashboard'}</span>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Retry
+          </Button>
         </div>
       )}
 
