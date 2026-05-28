@@ -67,6 +67,7 @@ export const invitationTokens = pgTable('invitation_token', {
   index('idx_invite_organization_id').on(table.organizationId),
   index('idx_invite_email').on(table.email),
   index('idx_invite_status').on(table.status),
+  index('idx_invite_person_id').on(table.personId),
 ]);
 
 export interface InviteMetadata {
