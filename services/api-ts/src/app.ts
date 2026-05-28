@@ -102,7 +102,8 @@ import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementSt
 
 // Dues: receipt download (hand-wired, Cycle 8)
 import { downloadReceipt } from '@/handlers/dues/downloadReceipt';
-// National dashboard export (hand-wired, Cycle 8)
+// Stripe webhook endpoint (hand-wired, must precede auth middleware)
+import { stripeWebhookHandler } from '@/handlers/dues/stripeWebhook';// National dashboard export (hand-wired, Cycle 8)
 import { exportNationalDashboard } from '@/handlers/association:operations/exportNationalDashboard';
 
 // Survey extras — hand-wired (export returns CSV, clone is convenience endpoint)
@@ -343,6 +344,8 @@ export function createApp(config: Config): App {
   app.get('/pay/:token/validate', paymentTokenParam, validatePaymentToken as unknown as Handler);
   app.post('/pay/:token/checkout', paymentTokenParam, checkoutPaymentToken as unknown as Handler);
 
+  // @hand-wired reason="Stripe webhook, must precede auth middleware" wave="by-design"
+  app.post('/webhooks/stripe', stripeWebhookHandler as unknown as Handler);
   // @hand-wired reason="RFC 8058 unsubscribe, must precede /email/* auth" wave="by-design"
   const unsubQuery = zValidator('query', z.object({
     token: z.string().min(1).max(512),
